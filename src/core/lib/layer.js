@@ -431,13 +431,7 @@ export default class Layer {
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
 
-    const updateParams = {
-      props: this.props,
-      oldProps: this.oldProps,
-      context: this.context,
-      oldContext: this.oldContext,
-      changeFlags: this.internalState.changeFlags
-    };
+    const updateParams = this._getUpdateParams();
 
     if (stateNeedsUpdate) {
       this._updateState(updateParams);
@@ -449,6 +443,8 @@ export default class Layer {
     }
 
     this.clearChangeFlags();
+    // Release old props for GC once update is complete
+    this.oldProps = EMPTY_PROPS;
   }
   /* eslint-enable max-statements */
 
