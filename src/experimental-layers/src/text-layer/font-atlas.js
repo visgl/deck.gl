@@ -40,7 +40,7 @@ export function makeFontAtlas(gl, fontFamily) {
       height: fontSize,
       mask: true
     };
-    x += width;
+    x += width + padding;
   });
 
   canvas.width = MAX_CANVAS_WIDTH;
