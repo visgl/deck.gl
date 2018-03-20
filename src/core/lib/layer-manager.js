@@ -75,7 +75,6 @@ export default class LayerManager {
     // If it's the same across two React render calls, the diffing logic
     // will be skipped.
     this.lastRenderedLayers = [];
-    this.prevLayers = [];
     this.layers = [];
 
     this.oldContext = {};
@@ -288,10 +287,8 @@ export default class LayerManager {
       layer.context = this.context;
     }
 
-    this.prevLayers = this.layers;
-
     const {error, generatedLayers} = this._updateLayers({
-      oldLayers: this.prevLayers,
+      oldLayers: this.layers,
       newLayers
     });
 
@@ -583,8 +580,7 @@ export default class LayerManager {
           this._initializeLayer(newLayer);
           initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
-          this._transferLayerState(oldLayer, newLayer);
-          this._updateLayer(newLayer);
+          this._updateLayer(newLayer, {transferStateFromLayer: oldLayer});
           updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
@@ -664,19 +660,22 @@ export default class LayerManager {
     } else {
       log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`)();
       newLayer.lifecycle = LIFECYCLE.MATCHED;
-      newLayer.oldProps = newLayer.props;
     }
   }
 
   // Updates a single layer, cleaning all flags
-  _updateLayer(layer) {
+  _updateLayer(layer, {transferStateFromLayer} = {}) {
+    if (transferStateFromLayer) {
+      this._transferLayerState(transferStateFromLayer, layer);
+    }
+
     log.log(
       LOG_PRIORITY_LIFECYCLE_MINOR,
       `updating ${layer} because: ${layer.printChangeFlags()}`
     )();
     let error = null;
     try {
-      layer._update();
+      layer._update({oldProps: transferStateFromLayer && transferStateFromLayer.props});
     } catch (err) {
       log.warn(`error during update of ${layerName(layer)}`, err)();
       // Save first error

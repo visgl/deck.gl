@@ -80,7 +80,6 @@ export default class Layer {
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
-    this.oldProps = EMPTY_PROPS; // Props from last render used for change detection
     this.count = counter++; // Keep track of how many layer instances you are generating
     this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
     this.parentLayer = null; // reference to the composite layer parent that rendered this layer
@@ -131,13 +130,6 @@ export default class Layer {
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
     return this._getNeedsRedraw(clearRedrawFlags);
-  }
-
-  // Checks if layer attributes needs updating
-  needsUpdate() {
-    // Call subclass lifecycle method
-    return this.shouldUpdateState(this._getUpdateParams());
-    // End lifecycle method
   }
 
   // Returns true if the layer is pickable and visible.
@@ -392,7 +384,6 @@ export default class Layer {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   _initialize() {
-    assert(arguments.length === 0);
     assert(this.context.gl);
 
     this._initState();
@@ -408,7 +399,7 @@ export default class Layer {
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
 
-    this._updateState(this._getUpdateParams());
+    this._updateState(this._getUpdateParams({oldProps: EMPTY_PROPS}));
 
     const model = this.getSingleModel();
     if (model) {
@@ -428,14 +419,11 @@ export default class Layer {
 
   // Called by layer manager
   // if this layer is new (not matched with an existing layer) oldProps will be empty object
-  _update() {
-    assert(arguments.length === 0);
-
+  _update({oldProps = this.props}) {
+    const updateParams = this._getUpdateParams({oldProps});
     // Call subclass lifecycle method
-    const stateNeedsUpdate = this.needsUpdate();
+    const stateNeedsUpdate = this.shouldUpdateState(updateParams);
     // End lifecycle method
-
-    const updateParams = this._getUpdateParams();
 
     if (stateNeedsUpdate) {
       this._updateState(updateParams);
@@ -447,8 +435,6 @@ export default class Layer {
     }
 
     this.clearChangeFlags();
-    // Release old props for GC once update is complete
-    this.oldProps = EMPTY_PROPS;
   }
   /* eslint-enable max-statements */
 
@@ -472,7 +458,7 @@ export default class Layer {
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
     assert(this.internalState && this.state);
-    assert(arguments.length === 0);
+
     // Call subclass lifecycle method
     this.finalizeState(this.context);
     // End lifecycle method
@@ -590,7 +576,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // and extracts change flags that describe what has change so that state
   // can be update correctly with minimal effort
   // TODO - arguments for testing only
-  diffProps(newProps = this.props, oldProps = this.oldProps) {
+  diffProps(newProps, oldProps) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
@@ -607,10 +593,10 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   // PRIVATE METHODS
 
-  _getUpdateParams() {
+  _getUpdateParams({oldProps}) {
     return {
       props: this.props,
-      oldProps: this.oldProps,
+      oldProps,
       context: this.context,
       oldContext: this.oldContext || {},
       changeFlags: this.internalState.changeFlags
@@ -685,15 +671,12 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // Note: We keep the state ref on old layers to support async actions
     // oldLayer.state = null;
 
-    // Keep a temporary ref to the old props, for prop comparison
-    this.oldProps = props;
-
     // Update model layer reference
     for (const model of this.getModels()) {
       model.userData.layer = this;
     }
 
-    this.diffProps();
+    this.diffProps(this.props, props);
   }
 
   // Operate on each changed triggers, will be called when an updateTrigger changes
