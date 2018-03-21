@@ -24,6 +24,7 @@ export default `\
 attribute vec3 positions;
 attribute vec3 instanceSourcePositions;
 attribute vec3 instanceTargetPositions;
+attribute vec4 instanceSourceTargetPositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -48,10 +49,8 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
 
 void main(void) {
   // Position
-  vec3 sourcePos = project_position(instanceSourcePositions);
-  vec3 targetPos = project_position(instanceTargetPositions);
-  vec4 source = project_to_clipspace(vec4(sourcePos, 1.0));
-  vec4 target = project_to_clipspace(vec4(targetPos, 1.0));
+  vec4 source = project_position_to_clipspace(instanceSourcePositions, instanceSourceTargetPositions64xyLow.xy, vec3(0.));
+  vec4 target = project_position_to_clipspace(instanceTargetPositions, instanceSourceTargetPositions64xyLow.zw, vec3(0.));
 
   // linear interpolation of source & target to pick right coord
   float segmentIndex = positions.x;

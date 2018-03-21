@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer, experimental} from '../../core';
+import {Layer, experimental} from '../../core';
 const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, CubeGeometry} from 'luma.gl';
 
 import vs from './grid-cell-layer-vertex.glsl';
-import vs64 from './grid-cell-layer-vertex-64.glsl';
 import fs from './grid-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
@@ -57,10 +56,8 @@ export default class GridCellLayer extends Layer {
    */
 
   getShaders() {
-    const {shaderCache} = this.context;
-    return enable64bitSupport(this.props)
-      ? {vs: vs64, fs, modules: ['project64', 'lighting', 'picking'], shaderCache}
-      : {vs, fs, modules: ['lighting', 'picking'], shaderCache}; // 'project' module added by default.
+    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
   }
 
   initializeState() {
@@ -73,6 +70,11 @@ export default class GridCellLayer extends Layer {
         accessor: ['getPosition', 'getElevation'],
         update: this.calculateInstancePositions
       },
+      instancePositions64xyLow: {
+        size: 2,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions64xyLow
+      },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
@@ -84,33 +86,14 @@ export default class GridCellLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.addInstanced({
-          instancePositions64xyLow: {
-            size: 2,
-            accessor: 'getPosition',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove(['instancePositions64xyLow']);
-      }
-    }
-  }
-
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     // Re-generate model if geometry changed
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
       this.setState({model: this._getModel(gl)});
+      this.state.attributeManager.invalidateAll();
     }
-    this.updateAttribute({props, oldProps, changeFlags});
     this.updateUniforms();
   }
 
@@ -177,6 +160,14 @@ export default class GridCellLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
