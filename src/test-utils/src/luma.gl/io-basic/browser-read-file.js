@@ -1,6 +1,6 @@
 // A browser implementation of the Node.js `fs.readFile` method
 
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const window = require('global/window');
 const File = window.File;

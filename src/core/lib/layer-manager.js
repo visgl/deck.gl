@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import assert from 'assert';
+import assert from '../utils/assert';
 import {Framebuffer, ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';

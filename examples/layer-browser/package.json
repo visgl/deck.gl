@@ -7,10 +7,10 @@
   "dependencies": {
     "colorbrewer": "^1.0.0",
     "d3-scale": "^1.0.6",
-    "deck.gl": "^5.0.0",
+    "deck.gl": ">=5.2.0-alpha.3",
     "deck.gl-layers": ">=0.0.2",
     "extrude-polyline": "^1.0.6",
-    "luma.gl": "^5.0.0",
+    "luma.gl": "5.2.0-alpha.6",
     "react": "^16.2.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.2.0",

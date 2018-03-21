@@ -2,7 +2,7 @@
 
 import vec4_multiply from 'gl-vec4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 export function transformVector(matrix, vector) {
   // Handle non-invertible matrix

@@ -21,7 +21,7 @@
 /* global window */
 import {GL, withParameters, setParameters} from 'luma.gl';
 import log from '../utils/log';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const LOG_PRIORITY_DRAW = 2;
 

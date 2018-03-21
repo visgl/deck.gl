@@ -27,7 +27,7 @@ import {EventManager} from 'mjolnir.js';
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
 
-import assert from 'assert';
+import assert from '../utils/assert';
 /* global document */
 
 function noop() {}

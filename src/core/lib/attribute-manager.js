@@ -21,7 +21,7 @@
 /* eslint-disable guard-for-in */
 import log from '../utils/log';
 import {GL, Buffer} from 'luma.gl';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 

@@ -143,10 +143,11 @@ function getFirstKey(object) {
 }
 
 // Bundles a test app for size analysis
-function getBundleConfig(env) {
+function getBundleSizeTestAppConfig(env) {
   const app = getFirstKey(env);
 
   const config = Object.assign({}, env.es6 ? SIZE_ES6_CONFIG : SIZE_ESM_CONFIG, {
+
     // Replace the entry point for webpack-dev-server
     entry: {
       'test-browser': resolve(__dirname, './size', `${app}.js`)
@@ -169,7 +170,7 @@ function getBundleConfig(env) {
 
 // Bundles a test app for size analysis and starts the webpack bundle analyzer
 function getBundleSizeAnalyzerConfig(env) {
-  const config = getBundleConfig(env);
+  const config = getBundleSizeTestAppConfig(env);
   config.plugins.push(new BundleAnalyzerPlugin());
   return config;
 }
@@ -196,7 +197,7 @@ function getConfig(env) {
 
   if (env.bundle) {
     // not used
-    return getBundleConfig(env);
+    return getBundleSizeTestAppConfig(env);
   }
 
   return getBundleSizeAnalyzerConfig(env);

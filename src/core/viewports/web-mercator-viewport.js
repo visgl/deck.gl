@@ -39,7 +39,7 @@ import {
 import vec2_add from 'gl-vec2/add';
 import vec2_negate from 'gl-vec2/negate';
 
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const ERR_ARGUMENT = 'Illegal argument to WebMercatorViewport';
 

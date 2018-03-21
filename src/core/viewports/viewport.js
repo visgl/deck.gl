@@ -38,7 +38,7 @@ import {
   pixelsToWorld
 } from 'viewport-mercator-project';
 
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const IDENTITY = createMat4();
 

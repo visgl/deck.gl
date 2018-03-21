@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const TYPE_DEFINITIONS = {
   boolean: {

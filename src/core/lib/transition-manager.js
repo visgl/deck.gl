@@ -1,7 +1,7 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {extractViewState} from '../transitions/transition-utils';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const noop = () => {};
 

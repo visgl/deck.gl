@@ -10,10 +10,7 @@
     },
     "esm": {
       "presets": [
-        ["es2015", {modules: false}],
-        [ "minify", {
-          "mangle": false
-        }]
+        ["es2015", {modules: false}]
       ]
     },
     "es6": {
@@ -29,9 +26,6 @@
           },
           "modules": false,
           "debug": true
-        }],
-        [ "minify", {
-          "mangle": false
         }]
       ]
     },

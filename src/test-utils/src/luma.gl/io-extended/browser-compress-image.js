@@ -2,7 +2,7 @@
 /* global document, HTMLCanvasElement, Image */
 
 /* global process, Buffer */
-import assert from 'assert';
+import assert from '../utils/assert';
 import through from 'through'; // Note: through adds stream support
 
 /*

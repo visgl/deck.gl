@@ -1,7 +1,7 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition} from '../utils/positions';
 import {deepEqual} from '../utils/deep-equal';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 export default class View {
   constructor(props = {}) {

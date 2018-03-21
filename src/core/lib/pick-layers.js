@@ -20,7 +20,7 @@
 
 import {drawPickingBuffer, getPixelRatio} from './draw-layers';
 import log from '../utils/log';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const NO_PICKED_OBJECT = {
   pickedColor: null,

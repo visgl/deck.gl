@@ -1,5 +1,5 @@
 /* eslint-disable guard-for-in, complexity, no-try-catch */
-import assert from 'assert';
+import assert from '../utils/assert';
 import {loadFile} from './browser-load-file';
 import {loadImage} from './browser-load-image';
 
