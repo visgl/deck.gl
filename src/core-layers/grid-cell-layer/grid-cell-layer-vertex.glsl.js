@@ -57,8 +57,9 @@ void main(void) {
       ELEVATION_SCALE * elevationScale;
   }
 
-  // cube gemoetry vertics are between -1 to 1, scale and transform it to between 0, 1
+  // cube geometry vertics are between -1 to 1, scale and transform it to between 0, 1
   vec3 extrudedPosition = vec3(instancePositions.xy, elevation);
+  vec2 extrudedPosition64xyLow = instancePositions64xyLow;
   vec3 offset = vec3(
     (positions.x * coverage + 1.0) / 2.0 * finalCellSize,
     (positions.y * coverage - 1.0) / 2.0 * finalCellSize,
@@ -66,7 +67,7 @@ void main(void) {
 
   // extrude positions
   vec4 position_worldspace;
-  gl_Position = project_position_to_clipspace(extrudedPosition, instancePositions64xyLow, offset, position_worldspace);
+  gl_Position = project_position_to_clipspace(extrudedPosition, extrudedPosition64xyLow, offset, position_worldspace);
 
   float lightWeight = 1.0;
 
