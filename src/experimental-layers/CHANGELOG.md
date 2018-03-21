@@ -1,3 +1,5 @@
+0.0.25
+- Fix for text scale
 0.0.24
 - Fix for experimental-layer arrows with offset coordinates
 0.0.23
