@@ -121,7 +121,8 @@ export default class TextLayer extends CompositeLayer {
       getTextAnchor,
       getAlignmentBaseline,
       getPixelOffset,
-      fp64
+      fp64,
+      sizeScale
     } = this.props;
 
     return [
@@ -142,6 +143,7 @@ export default class TextLayer extends CompositeLayer {
           getAnchorY: d => this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline(d)),
           getPixelOffset,
           fp64,
+          sizeScale,
           updateTriggers: {
             getAngle,
             getColor,
