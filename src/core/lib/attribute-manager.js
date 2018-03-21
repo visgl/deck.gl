@@ -520,7 +520,7 @@ export default class AttributeManager {
   // Update attribute buffers from any attributes in props
   // Detach any previously set buffers, marking all
   // Attributes for auto allocation
-  /* eslint-disable max-statements, no-continue */
+  /* eslint-disable max-statements, max-depth */
   _setExternalBuffers(bufferMap) {
     const {attributes, numInstances} = this;
 
@@ -529,34 +529,33 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
       const buffer = bufferMap[attributeName];
 
-      if (!buffer) {
-        attribute.isExternalBuffer = false;
-        continue;
-      }
+      if (buffer) {
+        attribute.isExternalBuffer = true;
+        attribute.needsUpdate = false;
 
-      attribute.isExternalBuffer = true;
-      attribute.needsUpdate = false;
+        if (buffer instanceof Buffer) {
+          attribute.value = null;
+          if (attribute.buffer !== buffer) {
+            attribute.buffer = buffer;
+            attribute.changed = true;
+          }
+        } else {
+          const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
+          if (!(buffer instanceof ArrayType)) {
+            throw new Error(`Attribute ${attributeName} must be of type ${ArrayType.name}`);
+          }
+          if (attribute.auto && buffer.length <= numInstances * attribute.size) {
+            throw new Error('Attribute prop array must match length and size');
+          }
 
-      if (buffer instanceof Buffer) {
-        attribute.value = null;
-        if (attribute.buffer !== buffer) {
-          attribute.buffer = buffer;
-          attribute.changed = true;
+          attribute.buffer = null;
+          if (attribute.value !== buffer) {
+            attribute.value = buffer;
+            attribute.changed = true;
+          }
         }
       } else {
-        const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
-        if (!(buffer instanceof ArrayType)) {
-          throw new Error(`Attribute ${attributeName} must be of type ${ArrayType.name}`);
-        }
-        if (attribute.auto && buffer.length <= numInstances * attribute.size) {
-          throw new Error('Attribute prop array must match length and size');
-        }
-
-        attribute.buffer = null;
-        if (attribute.value !== buffer) {
-          attribute.value = buffer;
-          attribute.changed = true;
-        }
+        attribute.isExternalBuffer = false;
       }
 
       this.needsRedraw |= attribute.changed;
