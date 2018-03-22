@@ -174,6 +174,18 @@ const TextLayerExample = {
   }
 };
 
+const TextLayer100KExample = {
+  layer: TextLayer,
+  getData: dataSamples.getPoints100K,
+  props: {
+    id: 'text-layer-100k',
+    getText: x => 'X',
+    getPosition: x => x,
+    getColor: x => [0, 0, 200],
+    sizeScale: 1
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
@@ -183,6 +195,7 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'New SolidPolygonLayer': SolidPolygonLayerExample,
-    TextLayer: TextLayerExample
+    TextLayer: TextLayerExample,
+    'TextLayer (100K)': TextLayer100KExample
   }
 };
