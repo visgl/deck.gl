@@ -130,6 +130,9 @@ export default class SolidPolygonLayer extends Layer {
 
     if (regenerateModel) {
       const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
+      }
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});

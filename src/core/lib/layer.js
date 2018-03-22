@@ -259,7 +259,11 @@ export default class Layer {
 
   // Called once when layer is no longer matched and state will be discarded
   // App can destroy WebGL resources here
-  finalizeState() {}
+  finalizeState() {
+    for (const model of this.getModels()) {
+      model.delete();
+    }
+  }
 
   // Update attribute transition
   updateTransition() {
