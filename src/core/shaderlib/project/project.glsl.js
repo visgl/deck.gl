@@ -34,6 +34,7 @@ uniform vec3 project_uPixelsPerUnit2;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
+uniform mat4 project_uPixelProjectionMatrix;
 uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
@@ -143,4 +144,10 @@ vec4 project_pixel_to_clipspace(vec2 pixels) {
   vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio;
   return vec4(offset * project_uFocalDistance, 0.0, 0.0);
 }
-`;
+
+vec2 project_to_pixel(vec2 pixels) {
+  vec4 pixPosition = vec4(pixels, 0., 1.);
+  vec4 result =  project_uPixelProjectionMatrix * pixPosition;
+  return result.xy/result.w;
+}
+ `;

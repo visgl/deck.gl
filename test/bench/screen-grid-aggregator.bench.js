@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -19,28 +19,20 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-console, no-invalid-this */
-import {Bench} from 'probe.gl/bench';
+import ScreenGridAggregator from 'deck.gl/core/experimental/utils/screen-grid-aggregator';
+import {gl} from '@deck.gl/test-utils';
+import {ScreenGridAggregatorData} from 'deck.gl/test/data';
 
-import layerBench from './layer.bench';
-import coreLayersBench from './core-layers.bench';
-import viewportBench from './viewport.bench';
-import colorBench from './color.bench';
-import pickLayersBench from './pick-layers.bench';
-import utilsBench from './utils.bench';
-import tesselationBench from './tesselation.bench';
-import screenGridAggregatorBench from './screen-grid-aggregator.bench';
+const {fixture2} = ScreenGridAggregatorData;
+const sa = new ScreenGridAggregator(gl);
 
-const suite = new Bench();
-
-// add tests
-layerBench(suite);
-coreLayersBench(suite);
-viewportBench(suite);
-colorBench(suite);
-utilsBench(suite);
-pickLayersBench(suite);
-tesselationBench(suite);
-screenGridAggregatorBench(suite);
-
-// Run the suite
-suite.run();
+export default function screenGridAggregatorBench(suite) {
+  return suite
+    .group('AGGREGATION')
+    .add('AGGREGATION#CPU', () => {
+      return sa.run(Object.assign({}, fixture2, {useGPU: false}));
+    })
+    .add('AGGREGATION#GPU', () => {
+      return sa.run(Object.assign({}, fixture2, {useGPU: true, readData: true}));
+    });
+}
