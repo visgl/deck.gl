@@ -110,6 +110,9 @@ export default class HexagonCellLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
+      }
       this.setState({model: this._getModel(gl)});
       this.state.attributeManager.invalidateAll();
     }

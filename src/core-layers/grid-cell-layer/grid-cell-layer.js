@@ -91,6 +91,9 @@ export default class GridCellLayer extends Layer {
     // Re-generate model if geometry changed
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
+      }
       this.setState({model: this._getModel(gl)});
       this.state.attributeManager.invalidateAll();
     }

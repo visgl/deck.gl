@@ -106,6 +106,9 @@ export default class PathLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
+      }
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
