@@ -20,7 +20,7 @@
 
 /* eslint-disable guard-for-in */
 import log from '../utils/log';
-import {GL} from 'luma.gl';
+import {GL, Buffer} from 'luma.gl';
 import assert from 'assert';
 
 import AttributeTransitionManager from './attribute-transition-manager';
@@ -314,7 +314,13 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes() {
-    return this.attributes;
+    const attributes = {};
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+      attributes[attributeName] = attribute.buffer || attribute;
+    }
+
+    return attributes;
   }
 
   /**
@@ -337,7 +343,7 @@ export default class AttributeManager {
 
         // Only return non-transition attributes
         if (!attributeTransitionManger.hasAttribute(attributeName)) {
-          changedAttributes[attributeName] = attribute;
+          changedAttributes[attributeName] = attribute.buffer || attribute;
         }
       }
     }
@@ -420,6 +426,7 @@ export default class AttributeManager {
         {
           // Ensure that fields are present before Object.seal()
           target: undefined,
+          buffer: null,
           userData: {} // Reserved for application
         },
         // Metadata
@@ -516,7 +523,7 @@ export default class AttributeManager {
   // Update attribute buffers from any attributes in props
   // Detach any previously set buffers, marking all
   // Attributes for auto allocation
-  /* eslint-disable max-statements */
+  /* eslint-disable max-statements, max-depth */
   _setExternalBuffers(bufferMap) {
     const {attributes, numInstances} = this;
 
@@ -524,24 +531,37 @@ export default class AttributeManager {
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       const buffer = bufferMap[attributeName];
-      attribute.isExternalBuffer = false;
-      if (buffer) {
-        const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
-        if (!(buffer instanceof ArrayType)) {
-          throw new Error(`Attribute ${attributeName} must be of type ${ArrayType.name}`);
-        }
-        if (attribute.auto && buffer.length <= numInstances * attribute.size) {
-          throw new Error('Attribute prop array must match length and size');
-        }
 
+      if (buffer) {
         attribute.isExternalBuffer = true;
         attribute.needsUpdate = false;
-        if (attribute.value !== buffer) {
-          attribute.value = buffer;
-          attribute.changed = true;
-          this.needsRedraw = true;
+
+        if (buffer instanceof Buffer) {
+          attribute.value = null;
+          if (attribute.buffer !== buffer) {
+            attribute.buffer = buffer;
+            attribute.changed = true;
+          }
+        } else {
+          const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
+          if (!(buffer instanceof ArrayType)) {
+            throw new Error(`Attribute ${attributeName} must be of type ${ArrayType.name}`);
+          }
+          if (attribute.auto && buffer.length <= numInstances * attribute.size) {
+            throw new Error('Attribute prop array must match length and size');
+          }
+
+          attribute.buffer = null;
+          if (attribute.value !== buffer) {
+            attribute.value = buffer;
+            attribute.changed = true;
+          }
         }
+      } else {
+        attribute.isExternalBuffer = false;
       }
+
+      this.needsRedraw |= attribute.changed;
     }
   }
   /* eslint-enable max-statements */
