@@ -2,9 +2,9 @@
 
 Release date: TBD, target Q1-Q2, 2018
 
-### ScreenGridLayer
+### New coloring props for ScreenGridLayer **Experimental**
 
-ScreenGridLayer is enhanced by adding `colorRange` and `colorDomain` props. These props provide more fine tune control over how grid cells are colored. At the same time `minColor` and `maxColor` props are deprecated and will be removed in 6.0 version. These changes align ScreenGridLayer  with other aggregation layers (Hexagon and Grid).
+New experimental props `colorRange` and `colorDomain` are added to ScreenGridLayer. These props provide more fine tune control over how grid cells are colored. Existing `minColor` and `maxColor` props takes precedence over these new props when they are supplied. Adding these experimental features is an attempt to bring ScreenGridLayer functionality with other aggregation layers (Hexagon and Grid).
 
 
 ### Test Utilities
