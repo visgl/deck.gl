@@ -580,6 +580,7 @@ export default class LayerManager {
           this._initializeLayer(newLayer);
           initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
+          this._markLayerMatched(oldLayer, newLayer);
           this._updateLayer(newLayer, {transferStateFromLayer: oldLayer});
           updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
@@ -645,7 +646,8 @@ export default class LayerManager {
     return error;
   }
 
-  _transferLayerState(oldLayer, newLayer) {
+  _markLayerMatched(oldLayer, newLayer) {
+    newLayer.lifecycle = LIFECYCLE.MATCHED;
     if (newLayer !== oldLayer) {
       log.log(
         LOG_PRIORITY_LIFECYCLE_MINOR,
@@ -654,19 +656,16 @@ export default class LayerManager {
         '->',
         newLayer
       )();
-      newLayer.lifecycle = LIFECYCLE.MATCHED;
       oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
-      newLayer._transferState(oldLayer);
     } else {
       log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`)();
-      newLayer.lifecycle = LIFECYCLE.MATCHED;
     }
   }
 
   // Updates a single layer, cleaning all flags
   _updateLayer(layer, {transferStateFromLayer} = {}) {
     if (transferStateFromLayer) {
-      this._transferLayerState(transferStateFromLayer, layer);
+      layer._transferState(transferStateFromLayer);
     }
 
     log.log(

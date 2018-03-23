@@ -409,11 +409,6 @@ export default class Layer {
       model.setAttributes(this.getAttributeManager().getAttributes());
     }
 
-    // Last but not least, update any sublayers
-    if (this.isComposite) {
-      this._renderLayers();
-    }
-
     this.clearChangeFlags();
   }
 
@@ -429,11 +424,6 @@ export default class Layer {
       this._updateState(updateParams);
     }
 
-    // Render or update previously rendered sublayers
-    if (this.isComposite) {
-      this._renderLayers(stateNeedsUpdate);
-    }
-
     this.clearChangeFlags();
   }
   /* eslint-enable max-statements */
@@ -442,6 +432,11 @@ export default class Layer {
     // Call subclass lifecycle methods
     this.updateState(updateParams);
     // End subclass lifecycle methods
+
+    // Render or update previously rendered sublayers
+    if (this.isComposite) {
+      this._renderLayers(true);
+    }
 
     // Add any subclass attributes
     this.updateAttributes(this.props);
@@ -661,6 +656,10 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   // Called by layer manager to transfer state from an old layer
   _transferState(oldLayer) {
+    if (this === oldLayer) {
+      return;
+    }
+
     const {state, internalState, props} = oldLayer;
     assert(state && internalState);
 
