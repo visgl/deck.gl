@@ -66,17 +66,21 @@ function getTextureFromData(gl, data, opts) {
   return new Texture2D(gl, Object.assign({data}, opts));
 }
 
+function validateGeometryAttributes(attributes) {
+  assert(attributes.positions && attributes.normals && attributes.texCoords);
+}
+
 /*
  * Convert mesh data into geometry
  * @returns {Geometry} geometry
  */
 function getGeometry(data) {
   if (data instanceof Geometry) {
-    assert(data.attributes.positions);
+    validateGeometryAttributes(data.attributes);
     return data;
   } else if (data.positions) {
+    validateGeometryAttributes(data);
     return new Geometry({
-      drawMode: GL.TRIANGLES,
       attributes: data
     });
   }
@@ -127,6 +131,8 @@ export default class MeshLayer extends Layer {
     });
 
     this.setState({
+      // Avoid luma.gl's missing uniform warning
+      // TODO - add feature to luma.gl to specify ignored uniforms?
       emptyTexture: new Texture2D(this.context.gl, {
         data: new Uint8Array(4),
         width: 1,

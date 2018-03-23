@@ -14,8 +14,6 @@ varying vec4 vColor;
 varying float vLightWeight;
 
 void main(void) {
-  // TODO - restore color rendering
-
   vec4 color = hasTexture ? texture2D(sampler, vTexCoord) : vColor / 255.;
   gl_FragColor = vec4(color.rgb * vLightWeight, color.a);
 
