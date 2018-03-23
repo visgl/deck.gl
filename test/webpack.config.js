@@ -29,18 +29,7 @@ const LIBRARY_BUNDLE_CONFIG = {
   externals: [/^[a-z\.\-0-9]+$/],
 
   module: {
-    rules: [
-      {
-        // Inline shaders
-        test: /\.glsl$/,
-        exclude: /node_modules/,
-        loader(content) {
-          this.cacheable && this.cacheable(); // eslint-disable-line
-          this.value = content;
-          return 'module.exports = ' + JSON.stringify(content); // eslint-disable-line
-        }
-      }
-    ]
+    rules: []
   },
 
   node: {
@@ -153,27 +142,35 @@ function getFirstKey(object) {
   return null;
 }
 
-// Generate a webpack config for a bundle size test app
-function getBundleSizeTestAppConfig(env) {
+// Bundles a test app for size analysis
+function getBundleConfig(env) {
   const app = getFirstKey(env);
 
-  return Object.assign({}, env.es6 ? SIZE_ES6_CONFIG : SIZE_ESM_CONFIG, {
+  const config = Object.assign({}, env.es6 ? SIZE_ES6_CONFIG : SIZE_ESM_CONFIG, {
     // Replace the entry point for webpack-dev-server
     entry: {
       'test-browser': resolve(__dirname, './size', `${app}.js`)
     },
     output: {
-      path: resolve('./dist'),
-      filename: '[name]-bundle.js'
+      path: resolve('/tmp'),
+      filename: 'bundle.js'
     },
     plugins: [
       // leave minification to app
       // new webpack.optimize.UglifyJsPlugin({comments: false})
       new webpack.DefinePlugin({NODE_ENV: JSON.stringify('production')}),
-      new UglifyJsPlugin(),
-      new BundleAnalyzerPlugin()
+      new UglifyJsPlugin()
     ]
   });
+
+  delete config.devtool;
+  return config;
+}
+
+// Bundles a test app for size analysis and starts the webpack bundle analyzer
+function getBundleSizeAnalyzerConfig(env) {
+  const config = getBundleConfig(env);
+  config.plugins.push(new BundleAnalyzerPlugin());
 }
 
 // Pick a webpack config based on --env.*** argument to webpack
@@ -196,7 +193,12 @@ function getConfig(env) {
     return LIBRARY_BUNDLE_CONFIG;
   }
 
-  return getBundleSizeTestAppConfig(env);
+  if (env.bundle) {
+    // not used
+    return getBundleConfig(env);
+  }
+
+  return getBundleSizeAnalyzerConfig(env);
 }
 
 module.exports = env => {

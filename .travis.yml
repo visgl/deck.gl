@@ -18,6 +18,8 @@ addons:
     - libglapi-mesa
     - libosmesa6
     - libxi-dev
+install:
+  - yarn --ignore-engines
 node_js:
   - 8.9.4
 before_script:
