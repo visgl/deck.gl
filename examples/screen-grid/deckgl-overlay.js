@@ -24,6 +24,7 @@ export default class DeckGLOverlay extends Component {
     const layer = new ScreenGridLayer({
       id: 'grid',
       data,
+      minColor: [0, 0, 0, 0],
       getPosition: d => d,
       cellSizePixels: cellSize
     });

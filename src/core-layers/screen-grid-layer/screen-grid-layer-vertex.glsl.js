@@ -26,10 +26,7 @@ attribute vec3 instancePositions;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
-uniform float maxCount;
 uniform float opacity;
-uniform vec4 minColor;
-uniform vec4 maxColor;
 uniform vec3 cellScale;
 
 varying vec4 vColor;

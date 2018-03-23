@@ -66,23 +66,6 @@ test('ScreenGridLayer#constructor', t => {
             layer.state.cellScale === layer.state.model.uniforms.cellScale,
             'should update uniform cellScale'
           );
-          t.ok(
-            layer.state.maxCount === layer.state.model.uniforms.maxCount,
-            'should update uniform maxCount'
-          );
-        }
-      },
-      {
-        updateProps: {
-          minColor: [0, 0, 0, 255]
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.deepEqual(
-            layer.state.model.uniforms.minColor,
-            [0, 0, 0, 255],
-            'should update minColor'
-          );
         }
       }
     ]

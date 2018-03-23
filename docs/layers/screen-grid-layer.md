@@ -45,19 +45,19 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Unit width/height of the bins.
 
-##### `minColor` (Number[4], optional) **DEPRECATED**
+##### `minColor` (Number[4], optional)
 
 - Default: `[0, 0, 0, 255]`
 
 Expressed as an rgba array, minimal color that could be rendered by a tile. This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `maxColor` (Number[4], optional) **DEPRECATED**
+##### `maxColor` (Number[4], optional)
 
 - Default: `[0, 255, 0, 255]`
 
 Expressed as an rgba array, maximal color that could be rendered by a tile.  This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `colorDomain` (Array, optional)
+##### `colorDomain` (Array, optional) **EXPERIMENTAL**
 
 - Default: `[1, max(weight)]`
 
@@ -65,12 +65,14 @@ Color scale input domain. The color scale maps continues numeric domain into
 discrete color range. If not provided, the layer will set `colorDomain` to [1, max-of-all-cell-weights], You can control how the color of cells mapped
 to value of its weight by passing in an arbitrary color domain. This property is extremely handy when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Array, optional)
+##### `colorRange` (Array, optional) **EXPERIMENTAL**
 
 - Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
 Specified as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
+
+NOTE: `minColor` and `maxColor` take precedence over `colorDomain` and `colorRange`, to use `colorDomain` and `colorRange` do not provide `minColor` and `maxColor`.
 
 
 ### Data Accessors

@@ -27,6 +27,8 @@ import log from './../../core/utils/log';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+const DEFAULT_MINCOLOR = [0, 0, 0, 255];
+const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 
 const defaultProps = {
   cellSizePixels: 100,
@@ -35,11 +37,7 @@ const defaultProps = {
   colorRange: defaultColorRange,
 
   getPosition: d => d.position,
-  getWeight: d => 1,
-
-  // deprecated
-  minColor: null,
-  maxColor: null
+  getWeight: d => 1
 };
 
 export default class ScreenGridLayer extends Layer {
@@ -84,9 +82,9 @@ export default class ScreenGridLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {minColor, maxColor, parameters = {}} = this.props;
-    const {model, cellScale, maxCount} = this.state;
-    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale, maxCount});
+    const {parameters = {}} = this.props;
+    const {model, cellScale} = this.state;
+    uniforms = Object.assign({}, uniforms, {cellScale});
     model.draw({
       uniforms,
       parameters: Object.assign(
@@ -193,10 +191,10 @@ export default class ScreenGridLayer extends Layer {
   _getColor(weight, maxCount) {
     let color;
     const {minColor, maxColor, colorRange} = this.props;
-    if (minColor || maxColor) {
+    if (this._shouldUseMinMax()) {
       const step = weight / maxCount;
       // We are supporting optional props as deprecated, set default value if not provided
-      color = lerp(minColor || [0, 0, 0, 255], maxColor || [0, 255, 0, 255], step);
+      color = lerp(minColor || DEFAULT_MINCOLOR, maxColor || DEFAULT_MAXCOLOR, step);
       return color;
     }
     // if colorDomain not set , use default domain [1, maxCount]
@@ -209,6 +207,20 @@ export default class ScreenGridLayer extends Layer {
     // add alpha to color if not defined in colorRange
     color[3] = Number.isFinite(color[3]) ? color[3] : 255;
     return color;
+  }
+
+  _shouldUseMinMax() {
+    const {minColor, maxColor, colorDomain, colorRange} = this.props;
+    if (minColor || maxColor) {
+      return true;
+    }
+    // minColor and maxColor not supplied, check if colorRange or colorDomain supplied.
+    // NOTE: colorDomain and colorRange are experimental features, use them only when supplied.
+    if (colorDomain || colorRange) {
+      return false;
+    }
+    // None specified, use default minColor and maxColor
+    return true;
   }
 }
 
