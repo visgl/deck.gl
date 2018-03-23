@@ -2951,9 +2951,9 @@ lru-cache@^4.0.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^5.1.3:
-  version "5.1.3"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.3.tgz#065906d8a66b1821c4129ea536431b6121678399"
+luma.gl@^5.1.4:
+  version "5.1.4"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.1.4.tgz#3d4129b16a05860cbed42c89db999f279e8e35b5"
   dependencies:
     math.gl "^1.0.0"
     seer "^0.2.4"

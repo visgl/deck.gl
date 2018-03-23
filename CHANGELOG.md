@@ -17,6 +17,9 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## Official Releases
 
+### deck.gl v5.1.4 March 23, 2018
+- fix memory leak by deleting unused models (#1561)
+
 ### deck.gl v5.1.3 March 19, 2018
 - fix memory leak via oldProps (#1549)
 
