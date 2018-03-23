@@ -53,6 +53,7 @@ function calculateMatrixAndOffset({
   let {viewMatrix} = viewport;
   const {projectionMatrix} = viewport;
   let {viewProjectionMatrix} = viewport;
+  const {pixelProjectionMatrix} = viewport;
 
   let projectionCenter;
 
@@ -94,6 +95,7 @@ function calculateMatrixAndOffset({
   return {
     viewMatrix,
     viewProjectionMatrix,
+    pixelProjectionMatrix,
     projectionCenter,
     cameraPos: viewport.cameraPosition
   };
@@ -145,7 +147,12 @@ function calculateViewportUniforms({
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
-  const {projectionCenter, viewProjectionMatrix, cameraPos} = calculateMatrixAndOffset({
+  const {
+    projectionCenter,
+    viewProjectionMatrix,
+    pixelProjectionMatrix,
+    cameraPos
+  } = calculateMatrixAndOffset({
     coordinateSystem,
     coordinateOrigin,
     coordinateZoom,
@@ -177,6 +184,7 @@ function calculateViewportUniforms({
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
     project_uViewProjectionMatrix: viewProjectionMatrix,
+    project_uPixelProjectionMatrix: pixelProjectionMatrix,
 
     // This is for lighting calculations
     project_uCameraPosition: cameraPos
