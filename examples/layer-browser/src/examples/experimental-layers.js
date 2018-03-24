@@ -3,12 +3,11 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   SolidPolygonLayer,
-  Arrow2DGeometry,
   TextLayer
 } from 'deck.gl-layers';
 
 import {COORDINATE_SYSTEM} from 'deck.gl';
-import {GL} from 'luma.gl';
+import {GL, CylinderGeometry} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
 
 const LIGHT_SETTINGS = {
@@ -20,18 +19,26 @@ const LIGHT_SETTINGS = {
   numberOfLights: 2
 };
 
-const arrowDataLngLat = [
-  {position: [-122.4111557006836, 37.774879455566406], angle: 0},
-  {position: [-122.41878509521484, 37.75032043457031], angle: 70},
-  {position: [-122.43194580078125, 37.75153732299805], angle: 212}
-];
-
 const MeshLayerExample = {
   layer: MeshLayer,
   props: {
-    data: arrowDataLngLat,
-    mesh: new Arrow2DGeometry(),
-    sizeScale: 200
+    id: 'mesh-layer',
+    data: dataSamples.points,
+    texture: 'data/texture.png',
+    mesh: new CylinderGeometry({
+      radius: 1,
+      topRadius: 1,
+      bottomRadius: 1,
+      topCap: true,
+      bottomCap: true,
+      height: 5,
+      nradial: 20,
+      nvertical: 1
+    }),
+    sizeScale: 10,
+    getPosition: d => d.COORDINATES,
+    getAngleDegreesCW: d => Math.random() * 360,
+    getColor: d => [0, d.RACKS * 50, d.SPACES * 20]
   }
 };
 
