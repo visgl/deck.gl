@@ -23,7 +23,6 @@ const {defaultColorRange, quantizeScale} = experimental;
 
 import {GL, Model, Geometry} from 'luma.gl';
 import {lerp} from './../../core/utils/math-utils';
-import log from './../../core/utils/log';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -49,9 +48,6 @@ export default class ScreenGridLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     const {gl} = this.context;
 
-    if (this.props.minColor || this.props.maxColor) {
-      log.deprecated('minColor and maxColor', 'colorRange, colorDomain')();
-    }
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
