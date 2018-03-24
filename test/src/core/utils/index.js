@@ -18,6 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import './color.spec';
+import './get.spec';
+import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';
 import './scale-utils.spec';
+// import './compare-objects.spec';
