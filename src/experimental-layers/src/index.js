@@ -10,6 +10,7 @@ export {default as SolidPolygonLayer} from './solid-polygon-layer/solid-polygon-
 
 export {default as Arrow2DGeometry} from './path-marker-layer/arrow-2d-geometry';
 export {default as TextLayer} from './text-layer/text-layer';
+export {default as AdvancedTextLayer} from './advanced-text-layer/advanced-text-layer';
 
 export {default as outline} from './shaderlib/outline/outline';
 
