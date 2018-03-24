@@ -18,12 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '../../core';
+import {Layer, experimental} from '../../../core';
 const {defaultColorRange, quantizeScale} = experimental;
 
 import {GL, Model, Geometry} from 'luma.gl';
-import {lerp} from './../../core/utils/math-utils';
-import log from './../../core/utils/log';
+import {lerp} from './../../../core/utils/math-utils';
+import log from './../../../core/utils/log';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
