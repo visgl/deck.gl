@@ -29,7 +29,8 @@ void main(void) {
   vec3 pos = positions;
   pos = project_scale(pos * sizeScale);
   pos = vec3(rotationMatrix * pos.xy, pos.z);
-  gl_Position = project_to_clipspace(vec4(instancePos + pos, 1.0));
+  vec4 worldPosition = vec4(instancePos + pos, 1.0);
+  gl_Position = project_to_clipspace(worldPosition);
 
   // TODO - transform normals
 
@@ -37,6 +38,6 @@ void main(void) {
 
   vTexCoord = texCoords;
   vColor = instanceColors;
-  vLightWeight = getLightWeight(pos, normals);
+  vLightWeight = lighting_getLightWeight(worldPosition.xyz, project_normal(normals));
 }
 `;

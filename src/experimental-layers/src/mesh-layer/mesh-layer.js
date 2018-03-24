@@ -66,6 +66,27 @@ function getTextureFromData(gl, data, opts) {
   return new Texture2D(gl, Object.assign({data}, opts));
 }
 
+function validateGeometryAttributes(attributes) {
+  assert(attributes.positions && attributes.normals && attributes.texCoords);
+}
+
+/*
+ * Convert mesh data into geometry
+ * @returns {Geometry} geometry
+ */
+function getGeometry(data) {
+  if (data instanceof Geometry) {
+    validateGeometryAttributes(data.attributes);
+    return data;
+  } else if (data.positions) {
+    validateGeometryAttributes(data);
+    return new Geometry({
+      attributes: data
+    });
+  }
+  throw Error('Invalid mesh');
+}
+
 const defaultProps = {
   mesh: null,
   texture: null,
@@ -108,6 +129,16 @@ export default class MeshLayer extends Layer {
       },
       instanceColors: {size: 4, accessor: 'getColor', update: this.calculateInstanceColors}
     });
+
+    this.setState({
+      // Avoid luma.gl's missing uniform warning
+      // TODO - add feature to luma.gl to specify ignored uniforms?
+      emptyTexture: new Texture2D(this.context.gl, {
+        data: new Uint8Array(4),
+        width: 1,
+        height: 1
+      })
+    });
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -127,11 +158,7 @@ export default class MeshLayer extends Layer {
       }
 
       if (props.texture !== oldProps.texture) {
-        if (props.texture) {
-          this.loadTexture(props.texture);
-        } else {
-          // TODO - reset
-        }
+        this.setTexture(props.texture);
       }
     }
   }
@@ -143,6 +170,7 @@ export default class MeshLayer extends Layer {
       this.state.model.setUniforms({
         sizeScale: props.sizeScale
       });
+      this.setTexture(this.state.texture);
 
       const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
@@ -166,26 +194,30 @@ export default class MeshLayer extends Layer {
   }
 
   getModel(gl) {
-    const isValidMesh = this.props.mesh instanceof Geometry && this.props.mesh.attributes.positions;
-    assert(isValidMesh);
-
     return new Model(
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: this.props.mesh,
+        geometry: getGeometry(this.props.mesh),
         isInstanced: true
       })
     );
   }
 
-  loadTexture(src) {
+  setTexture(src) {
     const {gl} = this.context;
-    const {model} = this.state;
-    getTexture(gl, src).then(texture => {
-      model.setUniforms({sampler1: texture});
-      this.setNeedsRedraw();
-    });
+    const {model, emptyTexture} = this.state;
+
+    if (src) {
+      getTexture(gl, src).then(texture => {
+        model.setUniforms({sampler: texture, hasTexture: 1});
+        this.setState({texture});
+      });
+    } else {
+      // reset
+      this.state.model.setUniforms({sampler: emptyTexture, hasTexture: 0});
+      this.setState({texture: null});
+    }
   }
 
   calculateInstancePositions(attribute) {
