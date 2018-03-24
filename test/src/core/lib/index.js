@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import './transitions';
-import './attribute.spec';
 import './attribute-manager.spec';
 import './layer.spec';
 import './composite-layer.spec';
