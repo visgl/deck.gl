@@ -38,7 +38,7 @@
     "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
     "test": "npm run lint && npm run test-node && npm run build && npm run collect-metrics && npm run test-render-react && npm run test-browser",
     "test-fast": "npm run test-node",
-    "test-ci": "node test/node-ci.js && npm run build && npm run collect-metrics",
+    "test-ci": "node test/start.js node-ci && npm run build && npm run collect-metrics",
     "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
     "test-node": "node test/start.js test",
     "test-dist": "node test/start.js test-dist",
