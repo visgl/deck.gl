@@ -104,7 +104,7 @@ export default class Attribute {
 
     if (!attribute.isExternalBuffer) {
       // Do we need to reallocate the attribute's typed array?
-      const instanceCount = this.getInstanceCount()
+      const instanceCount = this.getInstanceCount();
       const needsAlloc = instanceCount === 0 || instanceCount < numInstances;
       if (needsAlloc && (attribute.update || attribute.accessor)) {
         attribute.needsAlloc = true;
