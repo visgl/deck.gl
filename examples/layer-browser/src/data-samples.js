@@ -93,7 +93,22 @@ export const zigzag = [
   }
 ];
 
-export const polygons = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
+export const polygons = choropleths.features.map(choropleth =>
+  choropleth.geometry.coordinates
+);
+
+function getRandomArbitrary(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
+// Extract simple/complex polygons arrays from geojson
+export const floatingPolygons = choropleths.features.map(choropleth =>
+  choropleth.geometry.coordinates.map(coordinates =>
+    coordinates.map(coords =>
+      [...coords, getRandomArbitrary(1000, 5000), getRandomArbitrary(8000, 10000)]
+    )
+  )
+);
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
