@@ -65,7 +65,7 @@ export class PolygonTesselatorExtruded {
         polygon.map(coord => {
           // check for undefined explicitly since 0 is a valid value.
           const height = coord[2] !== undefined ? coord[2] : commonHeight;
-          return [coord[0], coord[1], height]
+          return [coord[0], coord[1], height];
         })
       );
     });
