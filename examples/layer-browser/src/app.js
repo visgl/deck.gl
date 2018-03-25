@@ -69,7 +69,7 @@ export default class App extends PureComponent {
         maxDistance: 20
       },
       activeExamples: {
-        FloatingPolygonLayer: true
+        PolygonLayer: true
       },
       settings: {
         infovis: false,
@@ -168,7 +168,7 @@ export default class App extends PureComponent {
     Object.assign(layerProps, {
       modelMatrix: this._getModelMatrix(index, layerProps.coordinateSystem)
     });
-
+    console.log(Layer, layerProps);
     return new Layer(layerProps);
   }
 
@@ -288,7 +288,7 @@ export default class App extends PureComponent {
             onLayerHover={this._onHover}
             onLayerClick={this._onClick}
             useDevicePixels={useDevicePixels}
-            debug={false}
+            debug={true}
             drawPickingColors={drawPickingColors}
           >
             <StaticMap

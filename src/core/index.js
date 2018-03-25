@@ -80,6 +80,9 @@ import {TRANSITION_EVENTS} from './lib/transition-manager';
 import {default as LinearInterpolator} from './transitions/linear-interpolator';
 import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
+// Experimental Lifecycle
+import { compareProps } from './lifecycle/props';
+
 // INTERNAL EXPORTS
 
 import TransitionManager from './lib/transition-manager';
@@ -143,6 +146,9 @@ export const experimental = {
 
   // TODO make this an internal export to set it apart from experimental
   // export const internal = {
+
+  // Lifecycle
+  compareProps,
 
   // For layers
   BinSorter,

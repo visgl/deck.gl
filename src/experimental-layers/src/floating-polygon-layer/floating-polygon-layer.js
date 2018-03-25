@@ -57,31 +57,31 @@ const defaultProps = {
 };
 
 export default class PolygonLayer extends CompositeLayer {
-  initializeState() {
-    this.state = {
-      // paths: []
-    };
-  }
+  // initializeState() {
+  //   this.state = {
+  //     // paths: []
+  //   };
+  // }
 
-  updateState({oldProps, props, changeFlags}) {
-    // const geometryChanged =
-    //   changeFlags.dataChanged ||
-    //   (changeFlags.updateTriggersChanged &&
-    //     (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
-    // if (geometryChanged) {
-    //   const {data, getPolygon} = this.props;
-    //   this.state.paths = [];
-    //   data.forEach(object => {
-    //     const complexPolygon = Polygon.normalize(getPolygon(object));
-    //     complexPolygon.forEach(polygon =>
-    //       this.state.paths.push({
-    //         path: polygon,
-    //         object
-    //       })
-    //     );
-    //   });
-    // }
-  }
+  // updateState({oldProps, props, changeFlags}) {
+  //   // const geometryChanged =
+  //   //   changeFlags.dataChanged ||
+  //   //   (changeFlags.updateTriggersChanged &&
+  //   //     (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
+  //   // if (geometryChanged) {
+  //   //   const {data, getPolygon} = this.props;
+  //   //   this.state.paths = [];
+  //   //   data.forEach(object => {
+  //   //     const complexPolygon = Polygon.normalize(getPolygon(object));
+  //   //     complexPolygon.forEach(polygon =>
+  //   //       this.state.paths.push({
+  //   //         path: polygon,
+  //   //         object
+  //   //       })
+  //   //     );
+  //   //   });
+  //   // }
+  // }
 
   getPickingInfo({info}) {
     return Object.assign(info, {

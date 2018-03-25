@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer, COORDINATE_SYSTEM, experimental} from 'deck.gl';
-const {enable64bitSupport, get} = experimental;
+const {enable64bitSupport, get, compareProps} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
-import {compareProps} from '../../core/lifecycle/props';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselatorExtruded} from './floating-polygon-tesselator-extruded';

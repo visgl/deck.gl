@@ -3,6 +3,7 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   SolidPolygonLayer,
+  FloatingPolygonLayer,
   TextLayer
 } from 'deck.gl-layers';
 
@@ -164,6 +165,24 @@ const SolidPolygonLayerExample = {
   }
 };
 
+const FloatingPolygonLayerExample = {
+  layer: FloatingPolygonLayer,
+  getData: () => dataSamples.floatingPolygons,
+  props: {
+    getPolygon: f => f,
+    getFillColor: f => [200 + Math.random() * 55, 0, 0],
+    getLineColor: f => [0, 0, 0, 255],
+    getWidth: f => 20,
+    getFloor: f => Math.random() * 5000,
+    getCeiling: f => Math.random() * 10000,
+    opacity: 0.8,
+    pickable: true,
+    lineDashJustified: true,
+    lightSettings: LIGHT_SETTINGS,
+    elevationScale: 1.0
+  }
+};
+
 const TextLayerExample = {
   layer: TextLayer,
   getData: () => dataSamples.points.slice(0, 50),
@@ -202,6 +221,7 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'New SolidPolygonLayer': SolidPolygonLayerExample,
+    // FloatingPolygonLayer: FloatingPolygonLayerExample,
     TextLayer: TextLayerExample,
     'TextLayer (100K)': TextLayer100KExample
   }

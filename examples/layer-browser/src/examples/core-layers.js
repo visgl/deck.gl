@@ -12,7 +12,6 @@ import {
   HexagonLayer,
   GeoJsonLayer,
   PolygonLayer,
-  FloatingPolygonLayer,
   PathLayer
 } from 'deck.gl';
 
@@ -132,24 +131,6 @@ const PolygonLayerExample = {
     lineDashJustified: true,
     lightSettings: LIGHT_SETTINGS,
     elevationScale: 0.6
-  }
-};
-
-const FloatingPolygonLayerExample = {
-  layer: FloatingPolygonLayer,
-  getData: () => dataSamples.floatingPolygons,
-  props: {
-    getPolygon: f => f,
-    getFillColor: f => [200 + Math.random() * 55, 0, 0],
-    getLineColor: f => [0, 0, 0, 255],
-    getWidth: f => 20,
-    getFloor: f => Math.random() * 5000,
-    getCeiling: f => Math.random() * 10000,
-    opacity: 0.8,
-    pickable: true,
-    lineDashJustified: true,
-    lightSettings: LIGHT_SETTINGS,
-    elevationScale: 1.0
   }
 };
 
@@ -441,7 +422,6 @@ export default {
     GeoJsonLayer: GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
-    FloatingPolygonLayer: FloatingPolygonLayerExample,
     PathLayer: PathLayerExample,
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
