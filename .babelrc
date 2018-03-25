@@ -1,16 +1,40 @@
 {
-  "presets": [
-    [
-      "es2015",
-      {
-        "modules": false
-      }
-    ]
-  ],
   "plugins": [
     "version-inline"
   ],
   "env": {
+    "es5": {
+      "presets": [
+        ["es2015", {modules: 'commonjs'}]
+      ]
+    },
+    "esm": {
+      "presets": [
+        ["es2015", {modules: false}],
+        [ "minify", {
+          "mangle": false
+        }]
+      ]
+    },
+    "es6": {
+      "presets": [
+        [ "env", {
+          "targets": {
+            "chrome": "60",
+            "edge": "15",
+            "firefox": "53",
+            "ios": "10.3",
+            "safari": "10.1",
+            "node": "8"
+          },
+          "modules": false,
+          "debug": true
+        }],
+        [ "minify", {
+          "mangle": false
+        }]
+      ]
+    },
     "test": {
       "plugins": [
         "istanbul"
