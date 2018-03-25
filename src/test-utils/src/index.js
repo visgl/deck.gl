@@ -13,6 +13,3 @@ export {default as SceneRenderer} from './scene-renderer';
 
 // A utility that renders a list of scenes and compares against golden images
 export {default as RenderTest} from './render-test';
-
-// Node.js test drivers
-export {default as RenderTestDriver} from './drivers/render-test-driver';

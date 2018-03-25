@@ -255,6 +255,10 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/using-standalone.md')
       },
       {
+        name: 'Testing',
+        content: getDocUrl('advanced/testing.md')
+      },
+      {
         name: 'Tips and Tricks',
         content: getDocUrl('advanced/tips-and-tricks.md')
       }
@@ -444,10 +448,6 @@ export const docPages = generatePath([
       {
         name: 'TestRenderer',
         content: getDocUrl('api-reference/test-utils/test-renderer.md')
-      },
-      {
-        name: 'RenderTestDriver',
-        content: getDocUrl('api-reference/test-utils/render-test-driver.md')
       }
     ]
   }
