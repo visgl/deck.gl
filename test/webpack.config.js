@@ -171,6 +171,7 @@ function getBundleConfig(env) {
 function getBundleSizeAnalyzerConfig(env) {
   const config = getBundleConfig(env);
   config.plugins.push(new BundleAnalyzerPlugin());
+  return config;
 }
 
 // Pick a webpack config based on --env.*** argument to webpack
