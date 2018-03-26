@@ -69,7 +69,7 @@ export default class App extends PureComponent {
         maxDistance: 20
       },
       activeExamples: {
-        PolygonLayer: true
+        ScatterplotLayer: true
       },
       settings: {
         infovis: false,
