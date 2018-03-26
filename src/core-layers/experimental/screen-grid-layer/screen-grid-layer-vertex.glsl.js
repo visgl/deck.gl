@@ -23,17 +23,20 @@ export default `\
 
 attribute vec3 vertices;
 attribute vec3 instancePositions;
-attribute vec4 instanceColors;
+attribute vec4 instanceCounts;
 attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform vec3 cellScale;
+uniform vec4 minColor;
+uniform vec4 maxColor;
+uniform float maxCount;
 
 varying vec4 vColor;
 
 void main(void) {
-  vec4 color = instanceColors / 255.;
-
+  float step = instanceCounts.g / maxCount;
+  vec4 color = mix(minColor, maxColor, step) / 255.;
   vColor = vec4(color.rgb, color.a * opacity);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

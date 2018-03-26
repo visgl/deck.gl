@@ -2,7 +2,7 @@ import dataSamples from '../../examples/layer-browser/src/immutable-data-samples
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {GL} from 'luma.gl';
 import {experimental} from 'deck.gl';
-const {OrbitView, OrthographicView} = experimental;
+const {OrbitView, OrthographicView, GPUScreenGridLayer} = experimental;
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
@@ -957,6 +957,28 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/text-layer.png'
+  },
+  {
+    name: 'gpu-screengrid-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new GPUScreenGridLayer({
+        id: 'gpu-screengrid-lnglat',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        cellSizePixels: 40,
+        minColor: [0, 0, 80, 0],
+        maxColor: [100, 255, 0, 128],
+        pickable: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
   },
   {
     name: 'text-layer-64',
