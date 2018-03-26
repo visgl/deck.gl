@@ -62,7 +62,6 @@ export default class GridCellLayer extends Layer {
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
-    /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {
         size: 4,
@@ -80,10 +79,9 @@ export default class GridCellLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: DEFAULT_COLOR
       }
     });
-    /* eslint-enable max-len */
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -158,6 +156,7 @@ export default class GridCellLayer extends Layer {
     }
   }
 
+  /*
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
     const {value, size} = attribute;
@@ -171,6 +170,7 @@ export default class GridCellLayer extends Layer {
       i += size;
     }
   }
+  */
 }
 
 GridCellLayer.layerName = 'GridCellLayer';

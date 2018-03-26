@@ -50,8 +50,7 @@ export default class PointCloudLayer extends Layer {
       instancePositions: {
         size: 3,
         transition: true,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions
+        accessor: 'getPosition'
       },
       instancePositions64xyLow: {
         size: 2,
@@ -62,15 +61,14 @@ export default class PointCloudLayer extends Layer {
         size: 3,
         transition: true,
         accessor: 'getNormal',
-        defaultValue: 1,
-        update: this.calculateInstanceNormals
+        defaultValue: 1
       },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: [0, 0, 0, 255]
       }
     });
     /* eslint-enable max-len */
@@ -121,18 +119,6 @@ export default class PointCloudLayer extends Layer {
     );
   }
 
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
-    }
-  }
-
   calculateInstancePositions64xyLow(attribute) {
     const isFP64 = enable64bitSupport(this.props);
     attribute.isGeneric = !isFP64;
@@ -149,6 +135,19 @@ export default class PointCloudLayer extends Layer {
       const position = getPosition(point);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
+    }
+  }
+
+  /*
+  calculateInstancePositions(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = position[0];
+      value[i++] = position[1];
+      value[i++] = position[2] || 0;
     }
   }
 
@@ -176,6 +175,7 @@ export default class PointCloudLayer extends Layer {
       value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
+  */
 }
 
 PointCloudLayer.layerName = 'PointCloudLayer';
