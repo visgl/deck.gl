@@ -18,8 +18,10 @@ addons:
     - libglapi-mesa
     - libosmesa6
     - libxi-dev
+install:
+  - yarn --ignore-engines
 node_js:
-  - 6.9.1
+  - 8.9.4
 before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
   - ulimit -c unlimited -S       # enable core dumps
