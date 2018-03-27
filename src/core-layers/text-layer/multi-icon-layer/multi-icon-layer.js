@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {IconLayer} from 'deck.gl';
+import IconLayer from '../../icon-layer/icon-layer';
 
 import vs from './multi-icon-layer-vertex.glsl';
 
