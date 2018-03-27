@@ -75,7 +75,6 @@ export default class LayerManager {
     // If it's the same across two React render calls, the diffing logic
     // will be skipped.
     this.lastRenderedLayers = [];
-    this.prevLayers = [];
     this.layers = [];
 
     this.oldContext = {};
@@ -288,10 +287,8 @@ export default class LayerManager {
       layer.context = this.context;
     }
 
-    this.prevLayers = this.layers;
-
     const {error, generatedLayers} = this._updateLayers({
-      oldLayers: this.prevLayers,
+      oldLayers: this.layers,
       newLayers
     });
 
@@ -650,6 +647,9 @@ export default class LayerManager {
   }
 
   _transferLayerState(oldLayer, newLayer) {
+    newLayer._transferState(oldLayer);
+    newLayer.lifecycle = LIFECYCLE.MATCHED;
+
     if (newLayer !== oldLayer) {
       log.log(
         LOG_PRIORITY_LIFECYCLE_MINOR,
@@ -658,13 +658,9 @@ export default class LayerManager {
         '->',
         newLayer
       )();
-      newLayer.lifecycle = LIFECYCLE.MATCHED;
       oldLayer.lifecycle = LIFECYCLE.AWAITING_GC;
-      newLayer._transferState(oldLayer);
     } else {
       log.log(LOG_PRIORITY_LIFECYCLE_MINOR, `Matching layer is unchanged ${newLayer.id}`)();
-      newLayer.lifecycle = LIFECYCLE.MATCHED;
-      newLayer.oldProps = newLayer.props;
     }
   }
 
