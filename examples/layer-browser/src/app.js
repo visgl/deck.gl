@@ -168,7 +168,7 @@ export default class App extends PureComponent {
     Object.assign(layerProps, {
       modelMatrix: this._getModelMatrix(index, layerProps.coordinateSystem)
     });
-    console.log(Layer, layerProps);
+
     return new Layer(layerProps);
   }
 
@@ -288,7 +288,7 @@ export default class App extends PureComponent {
             onLayerHover={this._onHover}
             onLayerClick={this._onClick}
             useDevicePixels={useDevicePixels}
-            debug={true}
+            debug={false}
             drawPickingColors={drawPickingColors}
           >
             <StaticMap

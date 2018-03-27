@@ -81,7 +81,7 @@ import {default as LinearInterpolator} from './transitions/linear-interpolator';
 import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 // Experimental Lifecycle
-import { compareProps } from './lifecycle/props';
+import {compareProps} from './lifecycle/props';
 
 // INTERNAL EXPORTS
 

@@ -237,7 +237,7 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'New SolidPolygonLayer': SolidPolygonLayerExample,
-    // FloatingPolygonLayer: FloatingPolygonLayerExample,
+    FloatingPolygonLayer: FloatingPolygonLayerExample,
     TextLayer: TextLayerExample,
     'TextLayer (100K)': TextLayer100KExample,
     GPUScreenGridLayer: GPUScreenGridLayerExample

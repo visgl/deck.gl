@@ -93,9 +93,7 @@ export const zigzag = [
   }
 ];
 
-export const polygons = choropleths.features.map(choropleth =>
-  choropleth.geometry.coordinates
-);
+export const polygons = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
 
 function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
