@@ -3813,12 +3813,11 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=5.2.0-alpha.4:
-  version "5.2.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.2.0-alpha.7.tgz#bb6582a8b85d42a61c9b0d8165ebaa35a5bed858"
+luma.gl@5.2.0-alpha.3:
+  version "5.2.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.2.0-alpha.3.tgz#0777ed5baa753fb3eea58aa253d08efd335c243e"
   dependencies:
-    math.gl ">=1.1.0-alpha.1"
-    probe.gl ">=1.0.0-alpha.10"
+    math.gl "^1.0.0"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
 
@@ -3854,6 +3853,16 @@ math.gl@>=1.1.0-alpha.1:
   dependencies:
     babel-plugin-version-inline "^1.0.0"
     gl-mat3 "^1.0.0"
+    gl-mat4 "^1.1.4"
+    gl-quat "^1.0.0"
+    gl-vec2 "^1.0.0"
+    gl-vec3 "^1.0.3"
+    gl-vec4 "^1.0.1"
+
+math.gl@^1.0.0:
+  version "1.0.5"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.5.tgz#9c135cb49e4c34f3f63ca338a2260996a35efe7e"
+  dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
     gl-vec2 "^1.0.0"
@@ -4729,7 +4738,7 @@ private@^0.1.6, private@^0.1.7:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@>=1.0.0-alpha.10, probe.gl@>=1.0.0-alpha.11:
+probe.gl@>=1.0.0-alpha.11:
   version "1.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0-alpha.11.tgz#50e00a77fc770acb32430aca88a9d12ba113a5a7"
   dependencies:
