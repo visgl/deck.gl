@@ -416,6 +416,10 @@ export default class Layer {
       model.geometry.id = `${this.props.id}-geometry`;
       model.setAttributes(this.getAttributeManager().getAttributes());
     }
+
+    // Clear temporary states
+    this.clearChangeFlags();
+    this.internalState.oldProps = null;
   }
 
   // Called by layer manager
@@ -428,6 +432,10 @@ export default class Layer {
     if (stateNeedsUpdate) {
       this._updateState();
     }
+
+    // Clear temporary states
+    this.clearChangeFlags();
+    this.internalState.oldProps = null;
   }
   /* eslint-enable max-statements */
 
@@ -451,10 +459,6 @@ export default class Layer {
     if (this.state.model) {
       this.state.model.setInstanceCount(this.getNumInstances());
     }
-
-    // Clear temporary states after update
-    this.internalState.oldProps = null;
-    this.clearChangeFlags();
   }
 
   // Called by manager when layer is about to be disposed
