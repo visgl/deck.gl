@@ -230,15 +230,15 @@ export const docPages = generatePath([
         children: [
           {
             name: 'Overview',
-            content: getDocUrl('user-guide/test-utils/README.md')
+            content: getDocUrl('user-guide/testing/README.md')
           },
           {
             name: 'Testing',
-            content: getDocUrl('user-guide/test-utils/testing.md')
+            content: getDocUrl('user-guide/testing/testing.md')
           },
           {
             name: 'Using with Unit Test Frameworks',
-            content: getDocUrl('user-guide/test-utils/using-with-unit-test-frameworks.md')
+            content: getDocUrl('user-guide/testing/using-with-unit-test-frameworks.md')
           }
         ]
       },
@@ -447,10 +447,6 @@ export const docPages = generatePath([
   {
     name: 'deck.gl-test-utils API',
     children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/test-utils/README.md')
-      },
       {
         name: 'testLayer',
         content: getDocUrl('api-reference/test-utils/test-layer.md')
