@@ -1,8 +1,8 @@
 function getDocUrl(filename) {
-  return `https://raw.githubusercontent.com/uber/deck.gl/5.1-release/docs/${filename}`;
+  return `https://raw.githubusercontent.com/uber/deck.gl/master/docs/${filename}`;
 }
 function getCodeUrl(pathname) {
-  return `https://github.com/uber/deck.gl/tree/5.1-release/${pathname}`;
+  return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
 }
 
 // mapping from file path in source to generated page url
@@ -169,6 +169,10 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/getting-started.md')
       },
       {
+        name: 'Using Standalone',
+        content: getDocUrl('advanced/using-standalone.md')
+      },
+      {
         name: 'Using With React',
         content: getDocUrl('get-started/using-with-react.md')
       },
@@ -177,95 +181,108 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/using-with-mapbox-gl.md')
       },
       {
+        name: 'Vis Academy',
+        content: getDocUrl('get-started/vis-academy.md')
+      }
+    ]
+  },
+  {
+    name: 'Developer Guide',
+    children: [
+      {
         name: 'Using Layers',
         content: getDocUrl('get-started/using-layers.md')
       },
       {
         name: 'Adding Interactivity',
         content: getDocUrl('get-started/interactivity.md')
-      }
-    ]
-  },
-  {
-    name: 'Custom Layers',
-    children: [
-      {
-        name: 'Writing Your Own Layer',
-        content: getDocUrl('advanced/custom-layers.md')
       },
       {
-        name: 'Layer Lifecycle',
-        content: getDocUrl('advanced/layer-lifecycle.md')
+        name: 'Using Views',
+        content: getDocUrl('advanced/views.md')
       },
-      {
-        name: 'Picking',
-        content: getDocUrl('advanced/picking.md')
-      },
-      {
-        name: 'Composite Layers',
-        content: getDocUrl('advanced/composite-layers.md')
-      },
-      {
-        name: 'Subclassed Layers',
-        content: getDocUrl('advanced/subclassed-layers.md')
-      },
-      {
-        name: 'Primitive Layers',
-        content: getDocUrl('advanced/primitive-layers.md')
-      },
-      {
-        name: 'Attribute Management',
-        content: getDocUrl('advanced/attribute-management.md')
-      },
-      {
-        name: 'Writing Shaders',
-        content: getDocUrl('advanced/writing-shaders.md')
-      }
-    ]
-  },
-  {
-    name: 'Advanced Topics',
-    children: [
       {
         name: 'Coordinate Systems',
         content: getDocUrl('advanced/coordinate-systems.md')
       },
       {
-        name: 'Views',
-        content: getDocUrl('advanced/views.md')
-      },
-      {
-        name: 'Viewports',
+        name: 'Viewports and Projections',
         content: getDocUrl('advanced/viewports.md')
       },
       {
-        name: 'Updates',
+        name: 'Optimizing Updates',
         content: getDocUrl('advanced/updates.md')
       },
       {
-        name: 'Performance',
+        name: 'Performance Notes',
         content: getDocUrl('advanced/performance.md')
       },
       {
-        name: '64 bit Layers',
+        name: 'About 64 bit Layers',
         content: getDocUrl('advanced/64-bits.md')
-      },
-      {
-        name: 'Using Standalone',
-        content: getDocUrl('advanced/using-standalone.md')
-      },
-      {
-        name: 'Testing',
-        content: getDocUrl('advanced/testing.md')
       },
       {
         name: 'Tips and Tricks',
         content: getDocUrl('advanced/tips-and-tricks.md')
+      },
+      {
+        name: 'Testing',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('user-guide/test-utils/README.md')
+          },
+          {
+            name: 'Testing',
+            content: getDocUrl('user-guide/test-utils/testing.md')
+          },
+          {
+            name: 'Using with Unit Test Frameworks',
+            content: getDocUrl('user-guide/test-utils/using-with-unit-test-frameworks.md')
+          }
+        ]
+      },
+      {
+        name: 'Writing Custom Layers',
+        children: [
+          {
+            name: 'Writing Your Own Layer',
+            content: getDocUrl('advanced/custom-layers.md')
+          },
+          {
+            name: 'Layer Lifecycle',
+            content: getDocUrl('advanced/layer-lifecycle.md')
+          },
+          {
+            name: 'Picking',
+            content: getDocUrl('advanced/picking.md')
+          },
+          {
+            name: 'Composite Layers',
+            content: getDocUrl('advanced/composite-layers.md')
+          },
+          {
+            name: 'Subclassed Layers',
+            content: getDocUrl('advanced/subclassed-layers.md')
+          },
+          {
+            name: 'Primitive Layers',
+            content: getDocUrl('advanced/primitive-layers.md')
+          },
+          {
+            name: 'Attribute Management',
+            content: getDocUrl('advanced/attribute-management.md')
+          },
+          {
+            name: 'Writing Shaders',
+            content: getDocUrl('advanced/writing-shaders.md')
+          }
+        ]
       }
     ]
   },
   {
-    name: 'API Reference',
+    name: 'deck.gl API',
     children: [
       {
         name: 'AttributeManager',
@@ -275,11 +292,6 @@ export const docPages = generatePath([
       {
         name: 'Deck',
         content: getDocUrl('api-reference/deck.md')
-      },
-      {
-        name: 'LayerManager',
-        tag: 'advanced',
-        content: getDocUrl('api-reference/layer-manager.md')
       },
       {
         name: 'Layers',
@@ -375,11 +387,12 @@ export const docPages = generatePath([
             name: 'Viewport',
             content: getDocUrl('api-reference/viewport.md')
           },
-          {
-            name: 'FirstPersonViewport',
-            tag: 'experimental',
-            content: getDocUrl('api-reference/first-person-viewport.md')
-          },
+          // Custom viewports will be deprecated and this was never documented before, so skip
+          // {
+          //   name: 'FirstPersonViewport',
+          //   tag: 'experimental',
+          //   content: getDocUrl('api-reference/first-person-viewport.md')
+          // },
           {
             name: 'OrthographicViewport',
             content: getDocUrl('api-reference/orthographic-viewport.md')
@@ -388,11 +401,12 @@ export const docPages = generatePath([
             name: 'PerspectiveViewport',
             content: getDocUrl('api-reference/perspective-viewport.md')
           },
-          {
-            name: 'ThirdPersonViewport',
-            tag: 'experimental',
-            content: getDocUrl('api-reference/third-person-viewport.md')
-          },
+          // Custom viewports will be deprecated and this was never documented before, so skip
+          // {
+          //   name: 'ThirdPersonViewport',
+          //   tag: 'experimental',
+          //   content: getDocUrl('api-reference/third-person-viewport.md')
+          // },
           {
             name: 'WebMercatorViewport',
             content: getDocUrl('api-reference/web-mercator-viewport.md')
@@ -431,7 +445,7 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'Test Utils',
+    name: 'deck.gl-test-utils API',
     children: [
       {
         name: 'Overview',
