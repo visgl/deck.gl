@@ -132,6 +132,13 @@ export default class Layer {
     return this._getNeedsRedraw(clearRedrawFlags);
   }
 
+  // Checks if layer attributes needs updating
+  needsUpdate() {
+    // Call subclass lifecycle method
+    return this.shouldUpdateState(this._getUpdateParams());
+    // End lifecycle method
+  }
+
   // Returns true if the layer is pickable and visible.
   isPickable() {
     return this.props.pickable && this.props.visible;
@@ -399,7 +406,8 @@ export default class Layer {
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
 
-    this._updateState(this._getUpdateParams({oldProps: EMPTY_PROPS}));
+    this.internalState.oldProps = EMPTY_PROPS;
+    this._updateState();
 
     const model = this.getSingleModel();
     if (model) {
@@ -408,34 +416,30 @@ export default class Layer {
       model.geometry.id = `${this.props.id}-geometry`;
       model.setAttributes(this.getAttributeManager().getAttributes());
     }
-
-    this.clearChangeFlags();
   }
 
   // Called by layer manager
   // if this layer is new (not matched with an existing layer) oldProps will be empty object
-  _update({oldProps = this.props}) {
-    const updateParams = this._getUpdateParams({oldProps});
+  _update() {
     // Call subclass lifecycle method
-    const stateNeedsUpdate = this.shouldUpdateState(updateParams);
+    const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
 
     if (stateNeedsUpdate) {
-      this._updateState(updateParams);
+      this._updateState();
     }
-
-    this.clearChangeFlags();
   }
   /* eslint-enable max-statements */
 
-  _updateState(updateParams) {
+  _updateState() {
+    const updateParams = this._getUpdateParams();
     // Call subclass lifecycle methods
     this.updateState(updateParams);
     // End subclass lifecycle methods
 
     // Render or update previously rendered sublayers
     if (this.isComposite) {
-      this._renderLayers(true);
+      this._renderLayers();
     }
 
     // Add any subclass attributes
@@ -447,6 +451,10 @@ export default class Layer {
     if (this.state.model) {
       this.state.model.setInstanceCount(this.getNumInstances());
     }
+
+    // Clear temporary states after update
+    this.internalState.oldProps = null;
+    this.clearChangeFlags();
   }
 
   // Called by manager when layer is about to be disposed
@@ -588,10 +596,10 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   // PRIVATE METHODS
 
-  _getUpdateParams({oldProps}) {
+  _getUpdateParams() {
     return {
       props: this.props,
-      oldProps,
+      oldProps: this.internalState.oldProps || this.props,
       context: this.context,
       oldContext: this.oldContext || {},
       changeFlags: this.internalState.changeFlags
@@ -656,12 +664,14 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   // Called by layer manager to transfer state from an old layer
   _transferState(oldLayer) {
+    const {state, internalState, props} = oldLayer;
+    assert(state && internalState);
+
+    internalState.oldProps = props;
+
     if (this === oldLayer) {
       return;
     }
-
-    const {state, internalState, props} = oldLayer;
-    assert(state && internalState);
 
     // Move state
     state.layer = this;

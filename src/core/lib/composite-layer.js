@@ -96,9 +96,9 @@ export default class CompositeLayer extends Layer {
   }
 
   // Called by layer manager to render subLayers
-  _renderLayers(needsUpdate) {
+  _renderLayers() {
     let {subLayers} = this.internalState;
-    if (subLayers && !needsUpdate) {
+    if (subLayers && !this.needsUpdate()) {
       log.log(3, `Composite layer reused subLayers ${this}`, this.internalState.subLayers)();
     } else {
       subLayers = this.renderLayers();

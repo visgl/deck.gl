@@ -580,8 +580,8 @@ export default class LayerManager {
           this._initializeLayer(newLayer);
           initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
-          this._markLayerMatched(oldLayer, newLayer);
-          this._updateLayer(newLayer, {transferStateFromLayer: oldLayer});
+          this._transferLayerState(oldLayer, newLayer);
+          this._updateLayer(newLayer);
           updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
@@ -646,8 +646,10 @@ export default class LayerManager {
     return error;
   }
 
-  _markLayerMatched(oldLayer, newLayer) {
+  _transferLayerState(oldLayer, newLayer) {
+    newLayer._transferState(oldLayer);
     newLayer.lifecycle = LIFECYCLE.MATCHED;
+
     if (newLayer !== oldLayer) {
       log.log(
         LOG_PRIORITY_LIFECYCLE_MINOR,
@@ -663,18 +665,14 @@ export default class LayerManager {
   }
 
   // Updates a single layer, cleaning all flags
-  _updateLayer(layer, {transferStateFromLayer} = {}) {
-    if (transferStateFromLayer) {
-      layer._transferState(transferStateFromLayer);
-    }
-
+  _updateLayer(layer) {
     log.log(
       LOG_PRIORITY_LIFECYCLE_MINOR,
       `updating ${layer} because: ${layer.printChangeFlags()}`
     )();
     let error = null;
     try {
-      layer._update({oldProps: transferStateFromLayer && transferStateFromLayer.props});
+      layer._update();
     } catch (err) {
       log.warn(`error during update of ${layerName(layer)}`, err)();
       // Save first error
