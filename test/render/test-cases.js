@@ -247,7 +247,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-lnglat-64.png'
+    referenceImageUrl: './test/render/golden-images/path-lnglat.png'
   },
   {
     name: 'scatterplot-lnglat',
