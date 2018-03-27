@@ -183,11 +183,9 @@ Object.assign(experimental, {
 //
 
 import {default as ReflectionEffect} from './core/experimental/reflection-effect/reflection-effect';
-import {default as GPUScreenGridLayer} from './core-layers/experimental/screen-grid-layer/screen-grid-layer';
 
 Object.assign(experimental, {
-  ReflectionEffect,
-  GPUScreenGridLayer
+  ReflectionEffect
 });
 
 //

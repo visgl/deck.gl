@@ -80,7 +80,6 @@ import {TRANSITION_EVENTS} from './lib/transition-manager';
 import {default as LinearInterpolator} from './transitions/linear-interpolator';
 import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
-import {default as GPUGridAggregator} from './experimental/utils/gpu-grid-aggregator';
 // INTERNAL EXPORTS
 
 import TransitionManager from './lib/transition-manager';
@@ -153,7 +152,6 @@ export const experimental = {
   getQuantizeScale,
   clamp,
   defaultColorRange,
-  GPUGridAggregator,
 
   log,
 

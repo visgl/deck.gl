@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '../../../core';
-const {defaultColorRange, quantizeScale, GPUGridAggregator} = experimental;
+import {Layer, experimental} from 'deck.gl';
+import GPUGridAggregator from '../utils/gpu-grid-aggregator';
+const {defaultColorRange} = experimental;
 
 import {GL, Model, Geometry, Buffer} from 'luma.gl';
-import {lerp} from './../../../core/utils/math-utils';
 
-import vs from './screen-grid-layer-vertex.glsl';
-import fs from './screen-grid-layer-fragment.glsl';
+import vs from './gpu-screen-grid-layer-vertex.glsl';
+import fs from './gpu-screen-grid-layer-fragment.glsl';
 const DEFAULT_MINCOLOR = [0, 0, 0, 255];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const defaultProps = {
@@ -35,10 +35,13 @@ const defaultProps = {
   colorRange: defaultColorRange,
 
   getPosition: d => d.position,
-  getWeight: d => 1
+  getWeight: d => 1,
+
+  minColor: DEFAULT_MINCOLOR,
+  maxColor: DEFAULT_MAXCOLOR
 };
 
-export default class ScreenGridLayer extends Layer {
+export default class GPUScreenGridLayer extends Layer {
   getShaders() {
     return {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }
@@ -144,7 +147,7 @@ export default class ScreenGridLayer extends Layer {
       instanced: 1
     });
 
-    const aggregateData = this.state.gpuGridAggregator.run({
+    const aggregatedData = this.state.gpuGridAggregator.run({
       positions,
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
@@ -153,7 +156,7 @@ export default class ScreenGridLayer extends Layer {
       useGPU: false // TODO: this shouldn't be an option, remove
     });
 
-    const {maxCount} = aggregateData;
+    const {maxCount} = aggregatedData;
 
     this.setState({
       cellScale,
@@ -201,6 +204,7 @@ export default class ScreenGridLayer extends Layer {
 
   // HELPER Methods
 
+  // Process 'data' and build positions and weights Arrays.
   _processData() {
     const {data, getPosition, getWeight} = this.props;
     const positions = [];
@@ -214,27 +218,6 @@ export default class ScreenGridLayer extends Layer {
     }
 
     this.setState({positions, weights});
-  }
-
-  _getColor(weight, maxCount) {
-    let color;
-    const {minColor, maxColor, colorRange} = this.props;
-    if (this._shouldUseMinMax()) {
-      const step = weight / maxCount;
-      // We are supporting optional props as deprecated, set default value if not provided
-      color = lerp(minColor || DEFAULT_MINCOLOR, maxColor || DEFAULT_MAXCOLOR, step);
-      return color;
-    }
-    // if colorDomain not set , use default domain [1, maxCount]
-    const colorDomain = this.props.colorDomain || [1, maxCount];
-    if (weight < colorDomain[0] || weight > colorDomain[1]) {
-      // wight outside the domain, set color alpha to 0.
-      return [0, 0, 0, 0];
-    }
-    color = quantizeScale(colorDomain, colorRange, weight);
-    // add alpha to color if not defined in colorRange
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-    return color;
   }
 
   _shouldUseMinMax() {
@@ -252,5 +235,5 @@ export default class ScreenGridLayer extends Layer {
   }
 }
 
-ScreenGridLayer.layerName = 'ScreenGridLayer';
-ScreenGridLayer.defaultProps = defaultProps;
+GPUScreenGridLayer.layerName = 'GPUScreenGridLayer';
+GPUScreenGridLayer.defaultProps = defaultProps;

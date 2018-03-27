@@ -1,8 +1,10 @@
 import dataSamples from '../../examples/layer-browser/src/immutable-data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
+// TODO: remove hard path once deck.gl-layers published with GPUScreenGridLayer
+import GPUScreenGridLayer from '../../src/experimental-layers/src/gpu-screen-grid-layer/gpu-screen-grid-layer';
 import {GL} from 'luma.gl';
 import {experimental} from 'deck.gl';
-const {OrbitView, OrthographicView, GPUScreenGridLayer} = experimental;
+const {OrbitView, OrthographicView} = experimental;
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
