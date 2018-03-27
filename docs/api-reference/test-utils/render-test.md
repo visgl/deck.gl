@@ -1,4 +1,4 @@
-# TestRenderer (Test Automation Class)
+# RenderTest (Test Automation Class)
 
 Uses a [`SceneRenderer`](./docs/api-reference/test-utils/scene-renderer.md) to render a series of layer views in succession, comparing the output of each against a "golden image".
 
