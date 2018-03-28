@@ -143,7 +143,7 @@ function getFirstKey(object) {
 }
 
 // Bundles a test app for size analysis
-function getBundleSizeTestAppConfig(env) {
+function getBundleConfig(env) {
   const app = getFirstKey(env);
 
   const config = Object.assign({}, env.es6 ? SIZE_ES6_CONFIG : SIZE_ESM_CONFIG, {
@@ -169,7 +169,7 @@ function getBundleSizeTestAppConfig(env) {
 
 // Bundles a test app for size analysis and starts the webpack bundle analyzer
 function getBundleSizeAnalyzerConfig(env) {
-  const config = getBundleSizeTestAppConfig(env);
+  const config = getBundleConfig(env);
   config.plugins.push(new BundleAnalyzerPlugin());
   return config;
 }
@@ -196,7 +196,7 @@ function getConfig(env) {
 
   if (env.bundle) {
     // not used
-    return getBundleSizeTestAppConfig(env);
+    return getBundleConfig(env);
   }
 
   return getBundleSizeAnalyzerConfig(env);
