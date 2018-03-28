@@ -38,7 +38,7 @@ Geospatial Anchor Options (Optional)
   * `latitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `37`.
   * `longitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `-122`.
   * `zoom` (Number, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) of the viewport. Default to `11`.
-  * `focalDistance` (Number, optional) - modifier of viewport scale if `zoom` is not supplied. Default to `1`.
+  * `focalDistance` (Number, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
 
 ## Methods
 
