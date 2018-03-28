@@ -88,6 +88,8 @@ export default class Viewport {
       latitude = null,
       zoom = null,
 
+      focalDistance = 1,
+
       // Anchor position offset (in meters for geospatial viewports)
       position = null,
       // A model matrix to be applied to position, to match the layer props API
@@ -109,7 +111,9 @@ export default class Viewport {
 
     this.zoom = zoom;
     if (!Number.isFinite(this.zoom)) {
-      this.zoom = this.isGeospatial ? getMeterZoom({latitude}) : DEFAULT_ZOOM;
+      this.zoom = this.isGeospatial
+        ? getMeterZoom({latitude}) + Math.log2(focalDistance)
+        : DEFAULT_ZOOM;
     }
     this.scale = Math.pow(2, this.zoom);
 
@@ -118,7 +122,7 @@ export default class Viewport {
       ? getDistanceScales({latitude, longitude, scale: this.scale})
       : distanceScales || DEFAULT_DISTANCE_SCALES;
 
-    this.focalDistance = opts.focalDistance || 1;
+    this.focalDistance = focalDistance;
 
     this.distanceScales.metersPerPixel = new Vector3(this.distanceScales.metersPerPixel);
     this.distanceScales.pixelsPerMeter = new Vector3(this.distanceScales.pixelsPerMeter);
