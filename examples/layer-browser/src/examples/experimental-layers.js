@@ -7,6 +7,9 @@ import {
   AdvancedTextLayer
 } from 'deck.gl-layers';
 
+// TODO: remove hard path once deck.gl-layers published with GPUScreenGridLayer
+import GPUScreenGridLayer from '../../../../src/experimental-layers/src/gpu-screen-grid-layer/gpu-screen-grid-layer';
+
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL, CylinderGeometry} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
@@ -213,6 +216,19 @@ const TextLayer100KExample = {
   }
 };
 
+const GPUScreenGridLayerExample = {
+  layer: GPUScreenGridLayer,
+  getData: () => dataSamples.points,
+  props: {
+    id: 'screenGridLayer',
+    getPosition: d => d.COORDINATES,
+    cellSizePixels: 40,
+    minColor: [0, 0, 80, 0],
+    maxColor: [100, 255, 0, 128],
+    pickable: false
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
@@ -224,6 +240,7 @@ export default {
     'New SolidPolygonLayer': SolidPolygonLayerExample,
     TextLayer: TextLayerExample,
     AdvancedTextLayer: AdvancedTextLayerExample,
-    'TextLayer (100K)': TextLayer100KExample
+    'TextLayer (100K)': TextLayer100KExample,
+    GPUScreenGridLayer: GPUScreenGridLayerExample
   }
 };

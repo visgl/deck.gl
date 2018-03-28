@@ -80,7 +80,6 @@ export default class Layer {
 
     // Define all members before layer is sealed
     this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
-    this.oldProps = EMPTY_PROPS; // Props from last render used for change detection
     this.count = counter++; // Keep track of how many layer instances you are generating
     this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
     this.parentLayer = null; // reference to the composite layer parent that rendered this layer
@@ -392,7 +391,6 @@ export default class Layer {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   _initialize() {
-    assert(arguments.length === 0);
     assert(this.context.gl);
 
     this._initState();
@@ -408,7 +406,8 @@ export default class Layer {
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
 
-    this._updateState(this._getUpdateParams());
+    this.internalState.oldProps = EMPTY_PROPS;
+    this._updateState();
 
     const model = this.getSingleModel();
     if (model) {
@@ -418,44 +417,38 @@ export default class Layer {
       model.setAttributes(this.getAttributeManager().getAttributes());
     }
 
-    // Last but not least, update any sublayers
-    if (this.isComposite) {
-      this._renderLayers();
-    }
-
+    // Clear temporary states
     this.clearChangeFlags();
+    this.internalState.oldProps = null;
   }
 
   // Called by layer manager
   // if this layer is new (not matched with an existing layer) oldProps will be empty object
   _update() {
-    assert(arguments.length === 0);
-
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
 
-    const updateParams = this._getUpdateParams();
-
     if (stateNeedsUpdate) {
-      this._updateState(updateParams);
+      this._updateState();
     }
 
-    // Render or update previously rendered sublayers
-    if (this.isComposite) {
-      this._renderLayers(stateNeedsUpdate);
-    }
-
+    // Clear temporary states
     this.clearChangeFlags();
-    // Release old props for GC once update is complete
-    this.oldProps = EMPTY_PROPS;
+    this.internalState.oldProps = null;
   }
   /* eslint-enable max-statements */
 
-  _updateState(updateParams) {
+  _updateState() {
+    const updateParams = this._getUpdateParams();
     // Call subclass lifecycle methods
     this.updateState(updateParams);
     // End subclass lifecycle methods
+
+    // Render or update previously rendered sublayers
+    if (this.isComposite) {
+      this._renderLayers();
+    }
 
     // Add any subclass attributes
     this.updateAttributes(this.props);
@@ -472,7 +465,7 @@ export default class Layer {
   // Note: not guaranteed to be called on application shutdown
   _finalize() {
     assert(this.internalState && this.state);
-    assert(arguments.length === 0);
+
     // Call subclass lifecycle method
     this.finalizeState(this.context);
     // End lifecycle method
@@ -590,7 +583,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // and extracts change flags that describe what has change so that state
   // can be update correctly with minimal effort
   // TODO - arguments for testing only
-  diffProps(newProps = this.props, oldProps = this.oldProps) {
+  diffProps(newProps, oldProps) {
     const changeFlags = diffProps(newProps, oldProps);
 
     // iterate over changedTriggers
@@ -610,7 +603,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _getUpdateParams() {
     return {
       props: this.props,
-      oldProps: this.oldProps,
+      oldProps: this.internalState.oldProps || this.props,
       context: this.context,
       oldContext: this.oldContext || {},
       changeFlags: this.internalState.changeFlags
@@ -678,6 +671,12 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     const {state, internalState, props} = oldLayer;
     assert(state && internalState);
 
+    internalState.oldProps = props;
+
+    if (this === oldLayer) {
+      return;
+    }
+
     // Move state
     state.layer = this;
     this.state = state;
@@ -685,15 +684,12 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // Note: We keep the state ref on old layers to support async actions
     // oldLayer.state = null;
 
-    // Keep a temporary ref to the old props, for prop comparison
-    this.oldProps = props;
-
     // Update model layer reference
     for (const model of this.getModels()) {
       model.userData.layer = this;
     }
 
-    this.diffProps();
+    this.diffProps(this.props, props);
   }
 
   // Operate on each changed triggers, will be called when an updateTrigger changes
