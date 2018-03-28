@@ -142,6 +142,12 @@ export function getPoints1M() {
   return _points1M;
 }
 
+let _points5M = null;
+export function getPoints5M() {
+  _points5M = _points5M || pointGrid(5 * 1e6, [-122.6, 37.6, -122.2, 37.9]);
+  return _points5M;
+}
+
 let _points10M = null;
 export function getPoints10M() {
   _points10M = _points10M || pointGrid(1e7, [-122.6, 37.6, -122.2, 37.9]);

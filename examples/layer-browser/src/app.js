@@ -69,7 +69,7 @@ export default class App extends PureComponent {
         maxDistance: 20
       },
       activeExamples: {
-        ScatterplotLayer: true
+        GPUScreenGridLayer: true
       },
       settings: {
         infovis: false,

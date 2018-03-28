@@ -40,7 +40,9 @@ const defaultProps = {
   getWeight: d => 1,
 
   minColor: DEFAULT_MINCOLOR,
-  maxColor: DEFAULT_MAXCOLOR
+  maxColor: DEFAULT_MAXCOLOR,
+
+  gpuAggregation: false
 };
 
 export default class GPUScreenGridLayer extends Layer {
@@ -84,17 +86,30 @@ export default class GPUScreenGridLayer extends Layer {
     return changeFlags.somethingChanged;
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
+  updateState(opts) {
+    super.updateState(opts);
 
-    if (changeFlags.dataChanged) {
+    if (opts.changeFlags.dataChanged) {
       this._processData();
     }
 
-    const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
-    if (cellSizeChanged || changeFlags.viewportChanged) {
-      this.updateAggregation();
+    const changeFlags = this._getAggregationChagneFlags(opts);
+
+    if (changeFlags) {
+      this.updateAggregation(changeFlags);
     }
+  }
+
+  _getAggregationChagneFlags({oldProps, props, changeFlags}) {
+    const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
+    const dataChanged = changeFlags.dataChanged;
+    const viewportChanged = changeFlags.viewportChanged;
+
+    if (cellSizeChanged || dataChanged || viewportChanged) {
+      return {cellSizeChanged, dataChanged, viewportChanged};
+    }
+
+    return null;
   }
 
   draw({uniforms}) {
@@ -114,12 +129,12 @@ export default class GPUScreenGridLayer extends Layer {
         parameters
       )
     });
-    maxCountBuffer.unbind();
+    maxCountBuffer.unbind({index: AGGREGATION_DATA_UBO_INDEX});
   }
 
-  updateAggregation() {
+  _updateGridParams() {
     const {width, height} = this.context.viewport;
-    const {cellSizePixels, data} = this.props;
+    const {cellSizePixels} = this.props;
     const {gl} = this.context;
 
     const MARGIN = 2;
@@ -132,7 +147,6 @@ export default class GPUScreenGridLayer extends Layer {
     const numRow = Math.ceil(height / cellSizePixels);
     const numInstances = numCol * numRow;
     const dataBytes = numInstances * 4 * 4;
-    const {positions, weights, maxCountBuffer} = this.state;
     let countsBuffer = this.state.countsBuffer;
     if (countsBuffer) {
       countsBuffer.delete();
@@ -145,6 +159,24 @@ export default class GPUScreenGridLayer extends Layer {
       instanced: 1
     });
 
+    this.setState({
+      cellScale,
+      numCol,
+      numRow,
+      numInstances,
+      countsBuffer
+    });
+  }
+
+  updateAggregation(changeFlags) {
+    if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
+      this._updateGridParams();
+    }
+
+    const {data, cellSizePixels, gpuAggregation} = this.props;
+
+    const {positions, weights, maxCountBuffer, countsBuffer, numInstances} = this.state;
+
     const aggregatedData = this.state.gpuGridAggregator.run({
       positions,
       weights,
@@ -152,14 +184,8 @@ export default class GPUScreenGridLayer extends Layer {
       viewport: this.context.viewport,
       countsBuffer,
       maxCountBuffer,
-      useGPU: false // TODO: this shouldn't be an option, remove
-    });
-
-    this.setState({
-      cellScale,
-      numCol,
-      numRow,
-      numInstances
+      changeFlags,
+      useGPU: gpuAggregation
     });
 
     const attributeManager = this.getAttributeManager();

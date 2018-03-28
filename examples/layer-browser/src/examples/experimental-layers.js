@@ -160,7 +160,7 @@ const GPUScreenGridLayerExample = {
   layer: GPUScreenGridLayer,
   getData: () => dataSamples.points,
   props: {
-    id: 'screenGridLayer',
+    id: 'gpuScreenGridLayer',
     getPosition: d => d.COORDINATES,
     cellSizePixels: 40,
     minColor: [0, 0, 80, 0],
@@ -168,6 +168,19 @@ const GPUScreenGridLayerExample = {
     pickable: false
   }
 };
+
+const GPUScreenGridLayerPerfExample = (id, getData) => ({
+  layer: GPUScreenGridLayer,
+  getData,
+  props: {
+    id: `gpuScreenGridLayerPerf-${id}`,
+    getPosition: d => d,
+    cellSizePixels: 40,
+    minColor: [0, 0, 80, 0],
+    maxColor: [100, 255, 0, 128],
+    pickable: false
+  }
+});
 
 /* eslint-disable quote-props */
 export default {
@@ -178,6 +191,10 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     AdvancedTextLayer: AdvancedTextLayerExample,
-    GPUScreenGridLayer: GPUScreenGridLayerExample
+    'TextLayer (100K)': TextLayer100KExample,
+    GPUScreenGridLayer: GPUScreenGridLayerExample,
+    'GPUScreenGridLayer (1M)': GPUScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
+    'GPUScreenGridLayer (5M)': GPUScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
+    'ScreenGridLayer (10M)': GPUScreenGridLayerPerfExample('10M', dataSamples.getPoints10M)
   }
 };
