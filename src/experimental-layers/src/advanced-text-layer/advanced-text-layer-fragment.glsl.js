@@ -38,12 +38,6 @@ void main(void) {
   float alpha = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
   gl_FragColor = vec4(vColor.rgb, vColor.a * alpha * opacity);
 
-  // float outlineFactor = smoothstep(0.5 - smoothing, 0.5 + smoothing, distance);
-  // vec3 color = mix(vec3(0.0,0.0,1.0), vColor.rgb, outlineFactor);
-  // float outlineDistance = 0.2;
-  // float alpha = smoothstep(outlineDistance - smoothing, outlineDistance + smoothing, distance);
-  // gl_FragColor = vec4(color, alpha);
-
   // use highlight color if this fragment belongs to the selected object.
   gl_FragColor = picking_filterHighlightColor(gl_FragColor);
 

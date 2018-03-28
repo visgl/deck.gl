@@ -3,7 +3,6 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   SolidPolygonLayer,
-  Arrow2DGeometry,
   TextLayer,
   AdvancedTextLayer
 } from 'deck.gl-layers';
@@ -196,8 +195,8 @@ const AdvancedTextLayerExample = {
     sizeScale: 1,
     getTextAnchor: x => 'start',
     getAlignmentBaseline: x => 'center',
-    fontTexture: 'http://localhost:8000/ibm2.png',
-    fontInfo: 'http://localhost:8000/ibm2.json',
+    fontTexture: 'http://localhost:8000/font.png',
+    fontInfo: 'http://localhost:8000/font.json',
     fontSmoothing: 0.2
   }
 };

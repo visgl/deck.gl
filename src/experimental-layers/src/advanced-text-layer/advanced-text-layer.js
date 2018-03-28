@@ -20,18 +20,20 @@
 
 import {CompositeLayer} from 'deck.gl';
 import TextMultiIconLayer from './text-multi-icon-layer';
+import {fetch} from 'global/window';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
-const TEXT_ANCHOR = {
-  start: 1,
-  middle: 0,
-  end: -1
-};
-const ALIGNMENT_BASELINE = {
-  top: 1,
-  center: 0,
-  bottom: -1
-};
+// TODO: support these options...
+// const TEXT_ANCHOR = {
+//   start: 1,
+//   middle: 0,
+//   end: -1
+// };
+// const ALIGNMENT_BASELINE = {
+//   top: 1,
+//   center: 0,
+//   bottom: -1
+// };
 
 const defaultProps = {
   getText: x => x.text,
@@ -42,29 +44,41 @@ const defaultProps = {
   getTextAnchor: x => x.textAnchor || 'middle',
   getAlignmentBaseline: x => x.alignmentBaseline || 'center',
   getPixelOffset: x => x.pixelOffset || [0, 0],
-  fp64: false
+  fp64: false,
+  fontTexture: null,
+  fontInfo: null,
+  fontSmoothing: 0.2
 };
 
 export default class AdvancedTextLayer extends CompositeLayer {
   initializeState() {
-    const {gl} = this.context;
     this.state = {
       iconAtlas: this.props.fontTexture,
       iconMapping: null
     };
 
+    // TODO: fetch again if props change
     fetch(this.props.fontInfo).then(response => {
-      response.json().then(json => {
-        const iconMapping = {};
-        json.forEach(fontChar => {
-          const {charid, x, y, width, height, xadvance, xoffset, yoffset} = fontChar;
-          iconMapping[String.fromCharCode(charid)] = {
-            x, y, width, height, mask:true, xadvance, xoffset, yoffset
-          };
-        });
-        this.setState({iconMapping});
-      });
+      response.json().then(json => this.parseFontInfo(json));
     });
+  }
+
+  parseFontInfo(json) {
+    const iconMapping = {};
+    json.forEach(fontChar => {
+      const {charid, x, y, width, height, xadvance, xoffset, yoffset} = fontChar;
+      iconMapping[String.fromCharCode(charid)] = {
+        x,
+        y,
+        width,
+        height,
+        mask: true,
+        xadvance,
+        xoffset,
+        yoffset
+      };
+    });
+    this.setState({iconMapping});
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -81,10 +95,11 @@ export default class AdvancedTextLayer extends CompositeLayer {
 
   transformStringToLetters() {
     const {data, getText, getPosition} = this.props;
-    if (!data || data.length === 0) {
+    if (data.length === 0) {
       return;
     }
 
+    // TODO: auto-refresh when iconMapping is available
     const {iconMapping} = this.state;
     if (!iconMapping) {
       return;
@@ -100,36 +115,18 @@ export default class AdvancedTextLayer extends CompositeLayer {
         const position = getPosition(val);
         let xpos = 0;
         return Array.from(text).map((letter, index) => {
-          const {xadvance,xoffset,yoffset,width,height} = this.state.iconMapping[letter];
-          // TODO: read from json file
-          const base=103;
+          const {xadvance, xoffset, yoffset, width, height} = this.state.iconMapping[letter];
 
           const x = xpos + (width / 2.0 - xoffset);
-          const y = (height - base) / 2.0 + yoffset;
+          const y = height / 2.0 + yoffset;
           xpos += xadvance;
-          // console.log(letter, {xoffset, yoffset, width, height, base});
 
-          return ({icon: letter, position, x, y});
-        }
-        );
+          return {icon: letter, position, x, y};
+        });
       })
       .reduce((prev, curr) => [...prev, ...curr]);
 
     this.setState({data: transformedData});
-  }
-
-  getAnchorXFromTextAnchor(textAnchor) {
-    if (!TEXT_ANCHOR.hasOwnProperty(textAnchor)) {
-      throw new Error(`Invalid text anchor parameter: ${textAnchor}`);
-    }
-    return TEXT_ANCHOR[textAnchor];
-  }
-
-  getAnchorYFromAlignmentBaseline(alignmentBaseline) {
-    if (!ALIGNMENT_BASELINE.hasOwnProperty(alignmentBaseline)) {
-      throw new Error(`Invalid alignment baseline parameter: ${alignmentBaseline}`);
-    }
-    return ALIGNMENT_BASELINE[alignmentBaseline];
   }
 
   renderLayers() {
@@ -143,8 +140,6 @@ export default class AdvancedTextLayer extends CompositeLayer {
       getColor,
       getSize,
       getAngle,
-      getTextAnchor,
-      getAlignmentBaseline,
       getPixelOffset,
       fontSmoothing,
       fp64,
@@ -161,8 +156,6 @@ export default class AdvancedTextLayer extends CompositeLayer {
           getColor,
           getSize,
           getAngle,
-          getAnchorX: d => this.getAnchorXFromTextAnchor(getTextAnchor(d)),
-          getAnchorY: d => this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline(d)),
           getPixelOffset,
           fontSmoothing,
           fp64,

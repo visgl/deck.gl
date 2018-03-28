@@ -22,6 +22,8 @@ import {IconLayer} from 'deck.gl';
 import vs from './advanced-text-layer-vertex.glsl';
 import fs from './advanced-text-layer-fragment.glsl';
 
+// TODO: provide more props
+const defaultProps = IconLayer.defaultProps;
 
 export default class TextMultiIconLayer extends IconLayer {
   getShaders() {
@@ -31,10 +33,12 @@ export default class TextMultiIconLayer extends IconLayer {
   draw({uniforms}) {
     const {fontSmoothing, sizeScale} = this.props;
 
-    super.draw({uniforms: Object.assign({}, uniforms, {
-      // TODO: handle for individual sizes using this.props.getSize()
-      smoothing: sizeScale > 0 ? fontSmoothing / sizeScale : 0
-    })});
+    super.draw({
+      uniforms: Object.assign({}, uniforms, {
+        // TODO: handle for individual sizes using this.props.getSize()
+        smoothing: sizeScale > 0 ? fontSmoothing / sizeScale : 0
+      })
+    });
   }
 
   calculateInstanceOffsets(attribute) {
@@ -47,3 +51,6 @@ export default class TextMultiIconLayer extends IconLayer {
     }
   }
 }
+
+TextMultiIconLayer.layerName = 'TextMultiIconLayer';
+TextMultiIconLayer.defaultProps = defaultProps;

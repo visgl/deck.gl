@@ -1,16 +1,16 @@
-
-# Text Layer
+# Advanced Text Layer
 
 ### About
 
-The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
+The advanced text layer renders text labels on the map using distance field fonts. This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
+This layer will (eventually) replace the text layer.
 
 ### Example
 
 ```js
 
 import DeckGL from 'deck.gl';
-import TextLayer from './text-layer';
+import AdvancedTextLayer from './text-layer';
 
 const App = ({data, viewport}) => {
 
@@ -23,7 +23,7 @@ const App = ({data, viewport}) => {
    */
 
   const layers = [
-    new TextLayer({
+    new AdvancedTextLayer({
       id: 'text-layer',
       data
     })
@@ -80,6 +80,7 @@ Text size multiplier.
 Whether the layer should be rendered in high-precision 64-bit mode.
 
 ### Text Alignment Options
+Not supported right now.
 
 ##### `getTextAnchor` (Function, optional)
 
@@ -100,4 +101,5 @@ Method called to specify the alignment baseline. Available options include `'top
 Method called to specify screen space offset relative to the `coordinates` in pixel unit. This function is rarely used in common cases.
 
 ### Font Style and Character Set Support
-Currently, the layer uses a monospaced font style called [Lucida Console](https://en.wikipedia.org/wiki/Lucida#Lucida_Console) and only supports the ASCII character set. If the text label happens to contain unicode characters, the layer replaces them with a single space and renders the text label without throwing an error.
+You need to provide a png and a json.
+
