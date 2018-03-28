@@ -31,6 +31,8 @@ import vs64 from './mesh-layer-vertex-64.glsl';
 import fs from './mesh-layer-fragment.glsl';
 import project64utils from '../shaderlib/project64utils/project64utils';
 
+import assert from 'assert';
+
 function degreeToRadian(degree) {
   return degree * Math.PI / 180;
 }
