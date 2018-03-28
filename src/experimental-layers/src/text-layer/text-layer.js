@@ -45,7 +45,8 @@ const defaultProps = {
   getTextAnchor: x => x.textAnchor || 'middle',
   getAlignmentBaseline: x => x.alignmentBaseline || 'center',
   getPixelOffset: x => x.pixelOffset || [0, 0],
-  fp64: false
+  fp64: false,
+  sizeScale: 1
 };
 
 export default class TextLayer extends CompositeLayer {
@@ -125,7 +126,8 @@ export default class TextLayer extends CompositeLayer {
       getAlignmentBaseline,
       getPixelOffset,
       fp64,
-      sizeScale
+      sizeScale,
+      updateTriggers
     } = this.props;
 
     return [
@@ -148,9 +150,13 @@ export default class TextLayer extends CompositeLayer {
           fp64,
           sizeScale,
           updateTriggers: {
-            getAngle,
-            getColor,
-            getSize
+            getPosition: updateTriggers.getPosition,
+            getAngle: updateTriggers.getAngle,
+            getColor: updateTriggers.getColor,
+            getSize: updateTriggers.getSize,
+            getPixelOffset: updateTriggers.getPixelOffset,
+            getAnchorX: updateTriggers.getTextAnchor,
+            getAnchorY: updateTriggers.getAlignmentBaseline
           }
         })
       )
