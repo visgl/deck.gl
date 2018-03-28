@@ -7,6 +7,8 @@ const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPl
 const ALIASES = require('../aliases');
 
 const LIBRARY_BUNDLE_CONFIG = {
+  mode: 'development',
+
   // Bundle the source code
   entry: {
     lib: resolve('./src/index.js')
@@ -117,23 +119,6 @@ const BENCH_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
   }
 });
 
-const SIZE_ES6_CONFIG = Object.assign({}, TEST_BROWSER_CONFIG, {
-  resolve: {
-    mainFields: ['esnext', 'browser', 'module', 'main'],
-    alias: Object.assign({}, ALIASES, {
-      'deck.gl': resolve(__dirname, '../dist/es6')
-    })
-  }
-});
-
-const SIZE_ESM_CONFIG = Object.assign({}, TEST_BROWSER_CONFIG, {
-  resolve: {
-    alias: Object.assign({}, ALIASES, {
-      'deck.gl': resolve(__dirname, '../dist/esm')
-    })
-  }
-});
-
 // Get first key in an object
 function getFirstKey(object) {
   for (const key in object) {
@@ -142,11 +127,23 @@ function getFirstKey(object) {
   return null;
 }
 
+function getDist(env) {
+  if (env.es5) {
+    return 'es5';
+  }
+  if (env.esm) {
+    return 'esm';
+  }
+  return 'es6';
+}
+
 // Bundles a test app for size analysis
 function getBundleConfig(env) {
   const app = getFirstKey(env);
+  const dist = getDist(env);
 
-  const config = Object.assign({}, env.es6 ? SIZE_ES6_CONFIG : SIZE_ESM_CONFIG, {
+  const config = Object.assign(TEST_BROWSER_CONFIG, {
+    mode: 'production',
     // Replace the entry point for webpack-dev-server
     entry: {
       'test-browser': resolve(__dirname, './size', `${app}.js`)
@@ -155,11 +152,15 @@ function getBundleConfig(env) {
       path: resolve('/tmp'),
       filename: 'bundle.js'
     },
+    resolve: {
+      mainFields: env.es6 ? ['esnext', 'browser', 'module', 'main'] : ['browser', 'module', 'main'],
+      alias: Object.assign({}, ALIASES, {
+        'deck.gl': resolve(__dirname, `../dist/${dist}`)
+      })
+    },
     plugins: [
       // leave minification to app
-      // new webpack.optimize.UglifyJsPlugin({comments: false})
       new webpack.DefinePlugin({NODE_ENV: JSON.stringify('production')}),
-      new UglifyJsPlugin()
     ]
   });
 
@@ -195,7 +196,6 @@ function getConfig(env) {
   }
 
   if (env.bundle) {
-    // not used
     return getBundleConfig(env);
   }
 
