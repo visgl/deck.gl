@@ -1,7 +1,7 @@
 import ViewState from './view-state';
 
 import {Vector3} from 'math.gl';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const MOVEMENT_SPEED = 1; // 1 meter per keyboard click
 const ROTATION_STEP_DEGREES = 2;

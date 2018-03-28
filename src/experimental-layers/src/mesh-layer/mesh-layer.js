@@ -25,7 +25,6 @@
 import {Layer, COORDINATE_SYSTEM, experimental} from 'deck.gl';
 const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
-import assert from 'assert';
 
 import vs from './mesh-layer-vertex.glsl';
 import vs64 from './mesh-layer-vertex-64.glsl';

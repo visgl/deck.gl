@@ -28,7 +28,7 @@ import {diffProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import {GL, withParameters} from 'luma.gl';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 import LayerState from './layer-state';
 

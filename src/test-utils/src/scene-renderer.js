@@ -19,8 +19,6 @@
 // THE SOFTWARE.
 
 /* global setTimeout */
-import assert from 'assert';
-
 import {experimental} from 'deck.gl';
 const {Deck, DeckGLJS, MapView} = experimental;
 
@@ -42,8 +40,6 @@ function makePromise() {
 
 export default class SceneRenderer {
   constructor({scenes, width = 800, height = 450, onSceneRendered, onComplete = noop} = {}) {
-    assert(scenes);
-
     this.width = width;
     this.height = height;
     this.scenes = scenes;

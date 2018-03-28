@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from '../utils/assert';
 
 // Returns an object with "change flags", either false or strings indicating reason for change
 export function diffProps(props, oldProps) {

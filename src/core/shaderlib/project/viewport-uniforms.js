@@ -21,10 +21,11 @@
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
-import log from '../../utils/log';
-import assert from 'assert';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
+
 import memoize from '../../utils/memoize';
+import log from '../../utils/log';
+import assert from '../../utils/assert';
 
 import {lngLatToWorld} from 'viewport-mercator-project';
 

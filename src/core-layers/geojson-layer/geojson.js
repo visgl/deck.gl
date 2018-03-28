@@ -18,7 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import assert from 'assert';
+// Replacement for the external assert method to reduce bundle size
+// Since GeoJSON format issues are common to users we do show messages in
+// this case
+export default function assert(condition, message) {
+  if (!condition) {
+    throw new Error(`deck.gl: ${message}`);
+  }
+}
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features

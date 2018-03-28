@@ -1,7 +1,7 @@
 import TransitionInterpolator from './transition-interpolator';
 import {isValid, getEndValueByShortestPath} from './transition-utils';
 import {lerp} from './../utils/math-utils';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 

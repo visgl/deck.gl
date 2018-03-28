@@ -1,5 +1,5 @@
 import OrbitViewport from '../viewports/orbit-viewport';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const defaultState = {
   lookAt: [0, 0, 0],

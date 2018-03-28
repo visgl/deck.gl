@@ -1,7 +1,7 @@
 // Image loading/saving for browser
 /* global document, HTMLCanvasElement, Image */
 /* global Buffer */
-import assert from 'assert';
+import assert from '../utils/assert';
 
 /*
  * Returns data bytes representing a compressed image in PNG or JPG format,

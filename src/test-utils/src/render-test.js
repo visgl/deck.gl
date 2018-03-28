@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {window, document} from 'global';
-import assert from 'assert';
 
 import SceneRenderer from './scene-renderer';
 
@@ -39,8 +38,6 @@ export default class RenderTest {
     reportResult = reportResultInBrowser,
     reportFinalResult = reportFinalResultInBrowser
   } = {}) {
-    assert(testCases);
-
     this.sceneRenderer = new SceneRenderer({
       width,
       height,

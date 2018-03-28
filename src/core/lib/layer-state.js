@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from '../utils/assert';
 
 export default class LayerState {
   constructor({attributeManager}) {

@@ -3,7 +3,7 @@ import {isValid, getEndValueByShortestPath} from './transition-utils';
 import {lerp} from './../utils/math-utils';
 
 import {flyToViewport} from 'viewport-mercator-project';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
 const REQUIRED_PROPS = ['latitude', 'longitude', 'zoom', 'width', 'height'];

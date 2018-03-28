@@ -21,7 +21,7 @@
 import MapState from './map-state';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from '../lib/transition-manager';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0

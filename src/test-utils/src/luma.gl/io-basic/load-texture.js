@@ -1,6 +1,6 @@
 import {loadFiles, loadImages} from './load-files';
 import {Program, Texture2D} from '../webgl';
-import assert from 'assert';
+import assert from '../utils/assert';
 
 function noop() {}
 

@@ -21,7 +21,7 @@
 // TODO / DEPRECATED - remove once probe.gl log integration is proving
 /* eslint-disable no-console */
 /* global console */
-import assert from 'assert';
+import assert from '../utils/assert';
 
 const cache = {};
 
