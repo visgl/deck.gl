@@ -52,3 +52,4 @@ print_size ESM
 build_bundle es5
 print_size ES5
 
+echo "\033[0m"
