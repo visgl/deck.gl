@@ -147,7 +147,6 @@ function getBundleSizeTestAppConfig(env) {
   const app = getFirstKey(env);
 
   const config = Object.assign({}, env.es6 ? SIZE_ES6_CONFIG : SIZE_ESM_CONFIG, {
-
     // Replace the entry point for webpack-dev-server
     entry: {
       'test-browser': resolve(__dirname, './size', `${app}.js`)
