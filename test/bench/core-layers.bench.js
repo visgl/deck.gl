@@ -27,6 +27,7 @@ import {testInitializeLayer} from '@deck.gl/test-utils';
 
 import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
 import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-layers/src';
+import {TextLayer} from 'deck.gl/experimental-layers/src';
 
 // add tests
 export default function coreLayersBench(suite) {
@@ -148,6 +149,14 @@ export default function coreLayersBench(suite) {
         extruded: true,
         wireframe: true,
         fp64: true
+      });
+      testInitializeLayer({layer});
+    })
+    .add('TextLayer#initialize', () => {
+      const layer = new TextLayer({
+        data: data.points,
+        getPosition: d => d.COORDINATES,
+        getText: d => d.LOCATION_NAME
       });
       testInitializeLayer({layer});
     });

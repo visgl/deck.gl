@@ -62,33 +62,35 @@ export default class TextLayer extends CompositeLayer {
     if (
       changeFlags.dataChanged ||
       (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all ||
-          changeFlags.updateTriggersChanged.getText ||
-          changeFlags.updateTriggersChanged.getPosition))
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText))
     ) {
       this.transformStringToLetters();
     }
   }
 
+  getPickingInfo({info}) {
+    return Object.assign(info, {
+      // override object with original data
+      object: info.object && info.object.object
+    });
+  }
+
   transformStringToLetters() {
-    const {data, getText, getPosition} = this.props;
+    const {data, getText} = this.props;
     if (!data || data.length === 0) {
       return;
     }
-
-    const transformedData = data
-      .map(val => {
-        const text = getText(val);
+    const transformedData = [];
+    data.forEach(val => {
+      const text = getText(val);
+      if (text) {
         const letters = Array.from(text);
-        const position = getPosition(val);
-        if (!text) {
-          return [];
-        }
-        return letters.map((letter, i) =>
-          Object.assign({}, val, {text: letter, position, index: i, len: text.length})
-        );
-      })
-      .reduce((prev, curr) => [...prev, ...curr]);
+        letters.forEach((letter, i) => {
+          const datum = {text: letter, index: i, len: text.length, object: val};
+          transformedData.push(datum);
+        });
+      }
+    });
 
     this.setState({data: transformedData});
   }
@@ -115,6 +117,7 @@ export default class TextLayer extends CompositeLayer {
     }
 
     const {
+      getPosition,
       getColor,
       getSize,
       getAngle,
@@ -133,15 +136,15 @@ export default class TextLayer extends CompositeLayer {
           iconAtlas,
           iconMapping,
           getIcon: d => d.text,
-          getPosition: d => d.position,
           getIndexOfIcon: d => d.index,
           getNumOfIcon: d => d.len,
-          getColor,
-          getSize,
-          getAngle,
-          getAnchorX: d => this.getAnchorXFromTextAnchor(getTextAnchor(d)),
-          getAnchorY: d => this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline(d)),
-          getPixelOffset,
+          getPosition: d => getPosition(d.object),
+          getColor: d => getColor(d.object),
+          getSize: d => getSize(d.object),
+          getAngle: d => getAngle(d.object),
+          getAnchorX: d => this.getAnchorXFromTextAnchor(getTextAnchor(d.object)),
+          getAnchorY: d => this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline(d.object)),
+          getPixelOffset: d => getPixelOffset(d.object),
           fp64,
           sizeScale,
           updateTriggers: {
