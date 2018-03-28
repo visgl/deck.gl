@@ -27,9 +27,7 @@ const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 
 import vs from './mesh-layer-vertex.glsl';
-import vs64 from './mesh-layer-vertex-64.glsl';
 import fs from './mesh-layer-fragment.glsl';
-import project64utils from '../shaderlib/project64utils/project64utils';
 
 import assert from 'assert';
 
@@ -108,11 +106,9 @@ const defaultProps = {
 };
 
 export default class MeshLayer extends Layer {
-  getShaders(id) {
-    const {shaderCache} = this.context;
-    return enable64bitSupport(this.props)
-      ? {vs: vs64, fs, modules: [project64utils, 'picking', 'lighting'], shaderCache}
-      : {vs, fs, modules: ['picking', 'lighting'], shaderCache}; // 'project' module added by default.
+  getShaders() {
+    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
   }
 
   initializeState() {
@@ -122,6 +118,11 @@ export default class MeshLayer extends Layer {
         size: 3,
         accessor: 'getPosition',
         update: this.calculateInstancePositions
+      },
+      instancePositions64xy: {
+        size: 2,
+        accessor: 'getPosition',
+        update: this.calculateInstancePositions64xyLow
       },
       instanceAngles: {
         size: 1,
@@ -150,48 +151,36 @@ export default class MeshLayer extends Layer {
       attributeManager.invalidateAll();
     }
 
-    if (changeFlags.propsChanged) {
-      this._updateFP64(props, oldProps);
+    this._updateFP64(props, oldProps);
 
-      if (props.sizeScale !== oldProps.sizeScale) {
-        const {sizeScale} = props;
-        this.state.model.setUniforms({sizeScale});
-      }
-
-      if (props.texture !== oldProps.texture) {
-        this.setTexture(props.texture);
-      }
+    if (props.texture !== oldProps.texture) {
+      this.setTexture(props.texture);
     }
   }
 
   _updateFP64(props, oldProps) {
     if (props.fp64 !== oldProps.fp64) {
+      if (this.state.model) {
+        this.state.model.delete();
+      }
+
       this.setState({model: this.getModel(this.context.gl)});
 
-      this.state.model.setUniforms({
-        sizeScale: props.sizeScale
-      });
       this.setTexture(this.state.texture);
 
       const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
-
-      if (enable64bitSupport(this.props)) {
-        attributeManager.addInstanced({
-          instancePositions64xy: {
-            size: 2,
-            accessor: 'getPosition',
-            update: this.calculateInstancePositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove(['instancePositions64xy']);
-      }
     }
   }
 
   draw({uniforms}) {
-    this.state.model.render(uniforms);
+    const {sizeScale} = this.props;
+
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        sizeScale
+      })
+    );
   }
 
   getModel(gl) {
@@ -200,7 +189,8 @@ export default class MeshLayer extends Layer {
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         geometry: getGeometry(this.props.mesh),
-        isInstanced: true
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
       })
     );
   }
@@ -235,6 +225,14 @@ export default class MeshLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;

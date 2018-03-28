@@ -11,6 +11,7 @@ attribute vec2 texCoords;
 
 // Instance attributes
 attribute vec3 instancePositions;
+attribute vec2 instancePositions64xy;
 attribute float instanceAngles;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -29,8 +30,8 @@ void main(void) {
   vec3 pos = positions;
   pos = project_scale(pos * sizeScale);
   pos = vec3(rotationMatrix * pos.xy, pos.z);
-  vec4 worldPosition = vec4(instancePos + pos, 1.0);
-  gl_Position = project_to_clipspace(worldPosition);
+  vec4 worldPosition;
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
 
   // TODO - transform normals
 
