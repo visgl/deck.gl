@@ -21,13 +21,12 @@
 /* eslint-disable no-console, no-invalid-this */
 import * as data from 'deck.gl/test/data';
 
-import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer} from 'deck.gl';
+import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer, TextLayer} from 'deck.gl';
 
 import {testInitializeLayer} from 'deck.gl-test-utils';
 
 import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
 import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-layers/src';
-import {TextLayer} from 'deck.gl/experimental-layers/src';
 
 // add tests
 export default function coreLayersBench(suite) {
