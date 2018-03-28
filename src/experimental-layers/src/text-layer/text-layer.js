@@ -68,6 +68,13 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
+  getPickingInfo({info}) {
+    return Object.assign(info, {
+      // override object with original data
+      object: info.object && info.object.object
+    });
+  }
+
   transformStringToLetters() {
     const {data, getText} = this.props;
     if (!data || data.length === 0) {
