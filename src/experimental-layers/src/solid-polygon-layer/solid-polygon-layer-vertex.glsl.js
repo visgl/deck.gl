@@ -23,7 +23,9 @@ export default `\
 
 attribute vec2 vertexPositions;
 attribute vec3 positions;
+attribute vec2 positions64xyLow;
 attribute vec3 nextPositions;
+attribute vec2 nextPositions64xyLow;
 attribute float elevations;
 attribute vec4 colors;
 attribute vec3 pickingColors;
@@ -38,22 +40,23 @@ varying vec4 vColor;
 void main(void) {
 
   vec3 pos;
+  vec2 pos64xyLow;
   vec3 normal;
 
   if (isSideVertex > 0.5) {
     pos = mix(positions, nextPositions, vertexPositions.x);
+    pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
   } else {
     pos = positions;
+    pos64xyLow = positions64xyLow;
   }
   if (extruded > 0.5) {
     pos.z += elevations * vertexPositions.y;
   }
+  pos.z *= elevationScale;
 
-  vec4 position_worldspace = vec4(project_position(
-    vec3(pos.xy, pos.z * elevationScale)),
-    1.0
-  );
-  gl_Position = project_to_clipspace(position_worldspace);
+  vec4 position_worldspace;
+  gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_worldspace);
 
   float lightWeight = 1.0;
   

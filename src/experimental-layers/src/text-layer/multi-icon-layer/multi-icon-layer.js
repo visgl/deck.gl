@@ -18,11 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {IconLayer, experimental} from 'deck.gl';
-const {enable64bitSupport} = experimental;
+import {IconLayer} from 'deck.gl';
 
 import vs from './multi-icon-layer-vertex.glsl';
-import vs64 from './multi-icon-layer-vertex-64.glsl';
 
 const defaultProps = {
   getIndexOfIcon: x => x.index || 0,
@@ -36,9 +34,8 @@ const defaultProps = {
 
 export default class MultiIconLayer extends IconLayer {
   getShaders() {
-    const multiIconVs = enable64bitSupport(this.props) ? vs64 : vs;
     return Object.assign({}, super.getShaders(), {
-      vs: multiIconVs
+      vs
     });
   }
 
