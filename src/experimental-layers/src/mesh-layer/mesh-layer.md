@@ -74,11 +74,27 @@ Multiplier to scale each geometry by.
 This accessor returns the center position corresponding to an object in the `data` stream.
 
 
-##### `getAngleDegreesCW` (Function, optional)
+##### `getYaw` (Function, optional)
 
-- Default: `object => object.angle || 0`
+- Default: `object => object.yaw || object.angle || 0`
 
-The orientation (heading) in degrees of each object.
+The yaw (heading) in degrees of each object.
+
+
+##### `getPitch` (Function, optional)
+
+- Default: `object => object.pitch || 0`
+
+The pitch (elevation) in degrees of each object.
+
+
+##### `getRoll` (Function, optional)
+
+- Default: `object => object.roll || 0`
+
+The roll (bank) in degrees of each object.
+
+See [Euler angles](https://en.wikipedia.org/wiki/Euler_angles).
 
 
 ##### `getColor` (Function, optional)

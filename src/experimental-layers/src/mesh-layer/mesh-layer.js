@@ -31,9 +31,7 @@ import fs from './mesh-layer-fragment.glsl';
 
 import assert from 'assert';
 
-function degreeToRadian(degree) {
-  return degree * Math.PI / 180;
-}
+const RADIAN_PER_DEGREE = Math.PI / 180;
 
 /*
  * Load image data into luma.gl Texture2D objects
@@ -86,6 +84,7 @@ function getGeometry(data) {
   throw Error('Invalid mesh');
 }
 
+const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   mesh: null,
   texture: null,
@@ -101,8 +100,13 @@ const defaultProps = {
   lightSettings: {},
 
   getPosition: x => x.position,
-  getAngleDegreesCW: x => x.angle || 0,
-  getColor: x => x.color || [0, 0, 0, 255]
+  getColor: x => x.color || DEFAULT_COLOR,
+
+  // yaw, pitch and roll are in degrees
+  // https://en.wikipedia.org/wiki/Euler_angles
+  getYaw: x => x.yaw || x.angle || 0,
+  getPitch: x => x.pitch || 0,
+  getRoll: x => x.roll || 0
 };
 
 export default class MeshLayer extends Layer {
@@ -124,10 +128,10 @@ export default class MeshLayer extends Layer {
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
       },
-      instanceAngles: {
-        size: 1,
-        accessor: 'getAngleDegreesCW',
-        update: this.calculateInstanceAngles
+      instanceRotations: {
+        size: 3,
+        accessor: ['getYaw', 'getPitch', 'getRoll'],
+        update: this.calculateInstanceRotations
       },
       instanceColors: {size: 4, accessor: 'getColor', update: this.calculateInstanceColors}
     });
@@ -243,14 +247,15 @@ export default class MeshLayer extends Layer {
     }
   }
 
-  calculateInstanceAngles(attribute) {
-    const {data, getAngleDegreesCW} = this.props;
+  // yaw(z), pitch(y) and roll(x) in radians
+  calculateInstanceRotations(attribute) {
+    const {data, getYaw, getPitch, getRoll} = this.props;
     const {value, size} = attribute;
     let i = 0;
     for (const point of data) {
-      const angle = getAngleDegreesCW(point);
-      value[i] = -degreeToRadian(angle);
-      i += size;
+      value[i++] = getRoll(point) * RADIAN_PER_DEGREE;
+      value[i++] = getPitch(point) * RADIAN_PER_DEGREE;
+      value[i++] = getYaw(point) * RADIAN_PER_DEGREE;
     }
   }
 
