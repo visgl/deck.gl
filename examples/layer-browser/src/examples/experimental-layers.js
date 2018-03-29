@@ -2,7 +2,6 @@ import {
   MeshLayer,
   PathOutlineLayer,
   PathMarkerLayer,
-  SolidPolygonLayer,
   TextLayer,
   AdvancedTextLayer
 } from 'deck.gl-layers';
@@ -13,15 +12,6 @@ import GPUScreenGridLayer from '../../../../src/experimental-layers/src/gpu-scre
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL, CylinderGeometry} from 'luma.gl';
 import dataSamples from '../immutable-data-samples';
-
-const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
-  ambientRatio: 0.3,
-  diffuseRatio: 0.6,
-  specularRatio: 0.4,
-  lightsStrength: [1, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
 
 const MeshLayerExample = {
   layer: MeshLayer,
@@ -153,21 +143,6 @@ const PathMarkerExampleMeter = {
   }
 };
 
-const SolidPolygonLayerExample = {
-  layer: SolidPolygonLayer,
-  getData: () => dataSamples.polygons,
-  props: {
-    getPolygon: f => f,
-    getFillColor: f => [200 + Math.random() * 55, 0, 0],
-    getLineColor: f => [0, 0, 0],
-    getElevation: f => Math.random() * 1000,
-    opacity: 0.8,
-    pickable: true,
-    lightSettings: LIGHT_SETTINGS,
-    elevationScale: 0.6
-  }
-};
-
 const TextLayerExample = {
   layer: TextLayer,
   getData: () => dataSamples.points.slice(0, 50),
@@ -237,7 +212,6 @@ export default {
     PathMarkerLayer: PathMarkerExample,
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
-    'New SolidPolygonLayer': SolidPolygonLayerExample,
     TextLayer: TextLayerExample,
     AdvancedTextLayer: AdvancedTextLayerExample,
     'TextLayer (100K)': TextLayer100KExample,

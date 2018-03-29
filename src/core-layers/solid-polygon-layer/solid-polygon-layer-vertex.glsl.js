@@ -67,7 +67,7 @@ void main(void) {
       normal = vec3(0.0, 0.0, 1.0);
     }
 
-    lightWeight = getLightWeight(position_worldspace.xyz, normal);
+    lightWeight = lighting_getLightWeight(position_worldspace.xyz, normal);
   }
 
   vec3 lightWeightedColor = lightWeight * colors.rgb;

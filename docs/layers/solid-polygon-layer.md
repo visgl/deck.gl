@@ -34,6 +34,13 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
+##### `filled` (Boolean, optional)
+
+- Default: `true`
+
+Whether to fill the polygons (based on the color provided by the
+`getFillColor` accessor.
+
 ##### `extruded` (Boolean, optional)
 
 - Default: `false`
@@ -81,7 +88,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getPolygon` (Function, optional)
 
-- default: object => object
+- Default: `object => object.polygon || object.geometry.coordinates`
 
 Like any deck.gl layer, the polygon accepts a data prop which is expected to
 be an iterable container of objects, and an accessor
@@ -89,9 +96,17 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-##### `getColor` (Function, optional)
+##### `getFillColor` (Function, optional)
+
+- Default: `object => object.fillColor || object.properties.color || [0, 0, 0, 255]`
 
 The fill color for the polygon
+
+##### `getLineColor` (Function, optional)
+
+- Default: `object => object.lineColor || object.properties.color || [0, 0, 0, 255]`
+
+The line color for the polygon
 
 ##### `getElevation` (Function, optional)
 

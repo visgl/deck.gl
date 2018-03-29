@@ -109,6 +109,7 @@ test('PolygonTesselator#methods', t => {
     const tesselator = new PolygonTesselator({polygons: testData.polygons});
 
     t.ok(ArrayBuffer.isView(tesselator.indices()), 'PolygonTesselator.indices');
+    t.ok(ArrayBuffer.isView(tesselator.elevations()), 'PolygonTesselator.elevations');
     t.ok(ArrayBuffer.isView(tesselator.colors()), 'PolygonTesselator.colors');
     t.ok(ArrayBuffer.isView(tesselator.pickingColors()), 'PolygonTesselator.pickingColors');
   });

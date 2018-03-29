@@ -26,7 +26,6 @@ import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer} from 'deck.gl';
 import {testInitializeLayer} from 'deck.gl-test-utils';
 
 import SolidPolygonLayer from 'deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
-import {SolidPolygonLayer as SolidPolygonLayer2} from 'deck.gl/experimental-layers/src';
 import {TextLayer} from 'deck.gl/experimental-layers/src';
 
 // add tests
@@ -105,46 +104,6 @@ export default function coreLayersBench(suite) {
     })
     .add('SolidPolygonLayer#initialize (wireframe,fp64)', () => {
       const layer = new SolidPolygonLayer({
-        data: data.choropleths.features,
-        extruded: true,
-        wireframe: true,
-        fp64: true
-      });
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer2#initialize (flat)', () => {
-      const layer = new SolidPolygonLayer2({data: data.choropleths.features});
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer2#initialize (extruded)', () => {
-      const layer = new SolidPolygonLayer2({
-        data: data.choropleths.features,
-        extruded: true
-      });
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer2#initialize (wireframe)', () => {
-      const layer = new SolidPolygonLayer2({
-        data: data.choropleths.features,
-        extruded: true,
-        wireframe: true
-      });
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer2#initialize (flat,fp64)', () => {
-      const layer = new SolidPolygonLayer2({data: data.choropleths.features, fp64: true});
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer2#initialize (extruded,fp64)', () => {
-      const layer = new SolidPolygonLayer2({
-        data: data.choropleths.features,
-        extruded: true,
-        fp64: true
-      });
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer2#initialize (wireframe,fp64)', () => {
-      const layer = new SolidPolygonLayer2({
         data: data.choropleths.features,
         extruded: true,
         wireframe: true,
