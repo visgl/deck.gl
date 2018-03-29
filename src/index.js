@@ -205,7 +205,8 @@ export {
   HexagonCellLayer,
   PathLayer,
   PolygonLayer,
-  GeoJsonLayer
+  GeoJsonLayer,
+  TextLayer
 } from './core-layers';
 
 //

@@ -3,7 +3,6 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   SolidPolygonLayer,
-  TextLayer,
   AdvancedTextLayer
 } from 'deck.gl-layers';
 
@@ -168,23 +167,6 @@ const SolidPolygonLayerExample = {
   }
 };
 
-const TextLayerExample = {
-  layer: TextLayer,
-  getData: () => dataSamples.points.slice(0, 50),
-  props: {
-    id: 'text-layer',
-    getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
-    getPosition: x => x.COORDINATES,
-    getColor: x => [153, 0, 0],
-    getSize: x => 32,
-    getAngle: x => 0,
-    sizeScale: 1,
-    getTextAnchor: x => 'start',
-    getAlignmentBaseline: x => 'center',
-    getPixelOffset: x => [10, 0]
-  }
-};
-
 const AdvancedTextLayerExample = {
   layer: AdvancedTextLayer,
   getData: () => dataSamples.points.slice(0, 50),
@@ -201,18 +183,6 @@ const AdvancedTextLayerExample = {
     fontTexture: 'http://localhost:8000/font.png',
     fontInfo: 'http://localhost:8000/font.json',
     fontSmoothing: 0.2
-  }
-};
-
-const TextLayer100KExample = {
-  layer: TextLayer,
-  getData: dataSamples.getPoints100K,
-  props: {
-    id: 'text-layer-100k',
-    getText: x => 'X',
-    getPosition: x => x,
-    getColor: x => [0, 0, 200],
-    sizeScale: 1
   }
 };
 
@@ -238,9 +208,7 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     'New SolidPolygonLayer': SolidPolygonLayerExample,
-    TextLayer: TextLayerExample,
     AdvancedTextLayer: AdvancedTextLayerExample,
-    'TextLayer (100K)': TextLayer100KExample,
     GPUScreenGridLayer: GPUScreenGridLayerExample
   }
 };

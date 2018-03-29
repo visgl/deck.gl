@@ -89,6 +89,13 @@ export const examplePages = generatePath([
           demo: 'ScatterplotDemo',
           code: getCodeUrl('examples/scatterplot')
         }
+      },
+      {
+        name: 'TextLayer',
+        content: {
+          demo: 'TextDemo',
+          code: getCodeUrl('examples/text-layer')
+        }
       }
     ]
   },
