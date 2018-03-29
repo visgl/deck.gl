@@ -38,3 +38,5 @@ test('Top-level imports', t => {
   t.ok(BezierCurveLayer, 'BezierCurveLayer symbol imported');
   t.end();
 });
+
+import './gpu-grid-aggregator.spec';
