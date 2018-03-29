@@ -105,10 +105,19 @@ export default class GPUGridAggregator {
 
   // PRIVATE
 
-  _runAggregationOnGPU(opts) {
-    this._updateModels(opts);
-    this._runGridAggregation(opts);
-    return this._getAggregateData(opts);
+  _getAggregateData(opts) {
+    let {countsBuffer, maxCountBuffer} = opts;
+    countsBuffer = this.gridAggregationFramebuffer.readPixelsToBuffer({
+      buffer: countsBuffer,
+      type: GL.FLOAT
+    });
+    maxCountBuffer = this.allAggregrationFramebuffer.readPixelsToBuffer({
+      width: 1,
+      height: 1,
+      type: GL.FLOAT,
+      buffer: maxCountBuffer
+    });
+    return {countsBuffer, maxCountBuffer};
   }
 
   _projectPositions(opts) {
@@ -121,15 +130,6 @@ export default class GPUGridAggregator {
       }
       this._setState({projectedPositions});
     }
-  }
-
-  _updateGridSize(opts) {
-    const {viewport, cellSize} = opts;
-    const width = opts.width || viewport.width;
-    const height = opts.height || viewport.height;
-    const numCol = Math.ceil(width / cellSize[0]);
-    const numRow = Math.ceil(height / cellSize[1]);
-    this._setState({numCol, numRow, windowSize: [width, height]});
   }
 
   /* eslint-disable max-statements */
@@ -181,6 +181,12 @@ export default class GPUGridAggregator {
       maxCountBuffer = new Buffer(this.gl, {data: maxCountBufferData});
     }
     return {countsBuffer, maxCountBuffer};
+  }
+
+  _runAggregationOnGPU(opts) {
+    this._updateModels(opts);
+    this._runGridAggregation(opts);
+    return this._getAggregateData(opts);
   }
 
   // Update priveate state
@@ -324,19 +330,13 @@ export default class GPUGridAggregator {
     allAggregrationFramebuffer.unbind();
   }
 
-  _getAggregateData(opts) {
-    let {countsBuffer, maxCountBuffer} = opts;
-    countsBuffer = this.gridAggregationFramebuffer.readPixelsToBuffer({
-      buffer: countsBuffer,
-      type: GL.FLOAT
-    });
-    maxCountBuffer = this.allAggregrationFramebuffer.readPixelsToBuffer({
-      width: 1,
-      height: 1,
-      type: GL.FLOAT,
-      buffer: maxCountBuffer
-    });
-    return {countsBuffer, maxCountBuffer};
+  _updateGridSize(opts) {
+    const {viewport, cellSize} = opts;
+    const width = opts.width || viewport.width;
+    const height = opts.height || viewport.height;
+    const numCol = Math.ceil(width / cellSize[0]);
+    const numRow = Math.ceil(height / cellSize[1]);
+    this._setState({numCol, numRow, windowSize: [width, height]});
   }
 }
 
