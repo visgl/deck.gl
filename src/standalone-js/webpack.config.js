@@ -2,22 +2,16 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-const PACKAGE_ROOT = resolve(__dirname, '..');
+const PACKAGE_ROOT = resolve(__dirname, '.');
 const ROOT = resolve(PACKAGE_ROOT, '../..');
 
-module.exports = {
-  entry: resolve(PACKAGE_ROOT, 'test/index.js'),
+const version = require(resolve(ROOT, 'package.json')).version;
 
-  mode: 'development',
-
-  devServer: {
-    contentBase: resolve(PACKAGE_ROOT, 'test')
-  },
-
+const config = {
   resolve: {
     alias: {
       'deck.gl': resolve(ROOT, 'src'),
-      'mapbox-gl': resolve(PACKAGE_ROOT, 'webpack/mapbox-gl'),
+      'mapbox-gl': resolve(PACKAGE_ROOT, 'utils/mapbox-gl'),
       './mapbox': resolve(PACKAGE_ROOT, 'node_modules/react-map-gl/src/mapbox/mapbox.js')
     }
   },
@@ -34,6 +28,18 @@ module.exports = {
         }
       }
     ]
+  }
+};
+
+const devConfig = {
+  ...config,
+
+  entry: resolve(PACKAGE_ROOT, 'test/index.js'),
+
+  mode: 'development',
+
+  devServer: {
+    contentBase: resolve(PACKAGE_ROOT, 'test')
   },
 
   plugins: [
@@ -42,3 +48,21 @@ module.exports = {
     })
   ]
 };
+
+const prodConfig = {
+  ...config,
+
+  entry: resolve(PACKAGE_ROOT, 'src/index.js'),
+
+  mode: 'production',
+
+  // Generate a bundle in dist folder
+  output: {
+    path: resolve(PACKAGE_ROOT, 'dist'),
+    filename: `deckgl-${version}.min.js`
+  },
+
+  devtool: ''
+};
+
+module.exports = env => (env ? devConfig : prodConfig);

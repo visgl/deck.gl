@@ -1,5 +1,5 @@
 #!/bin/sh
-# Script to collect build size information
+# Script to build this module
 
 set -e
 
@@ -11,7 +11,7 @@ rm -rf dist
 mkdir dist
 
 # build CDN version
-webpack --config webpack/build.config.js
+webpack --config webpack.config.js
 
 # build npm version
 cp node_modules/react-map-gl/src/mapbox/mapbox.js src

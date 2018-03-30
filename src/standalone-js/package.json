@@ -15,7 +15,7 @@
   "module": "esm/index.js",
   "esnext": "es6/index.js",
   "scripts": {
-    "start": "webpack-dev-server --config webpack/dev.config.js --progress --open",
+    "start": "webpack-dev-server --env.dev --progress --open",
     "build": "scripts/build.sh",
     "publish-prod": "npm run build && (cd dist && npm publish --access=public)",
     "publish-beta": "npm run build && (cd dist && npm publish --access=public --tag beta)"
