@@ -36,3 +36,5 @@ export {default as HexagonCellLayer} from './hexagon-cell-layer/hexagon-cell-lay
 export {default as PathLayer} from './path-layer/path-layer';
 export {default as PolygonLayer} from './polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './geojson-layer/geojson-layer';
+
+export {default as TextLayer} from './text-layer/text-layer';

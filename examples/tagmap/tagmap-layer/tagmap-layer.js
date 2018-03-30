@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import {CompositeLayer, WebMercatorViewport} from 'deck.gl';
-import {TextLayer} from 'deck.gl-layers';
+import {TextLayer} from 'deck.gl';
 import TagMapWrapper from './tagmap-wrapper';
 import colorbrewer from 'colorbrewer';
 

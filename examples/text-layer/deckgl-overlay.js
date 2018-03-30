@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import {setParameters} from 'luma.gl';
-import DeckGL from 'deck.gl';
-import {TextLayer} from 'deck.gl-layers';
+import DeckGL, {TextLayer} from 'deck.gl';
 
 export default class DeckGLOverlay extends Component {
   static get defaultViewport() {

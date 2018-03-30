@@ -28,7 +28,8 @@ import {
   LineLayer,
   ScreenGridLayer,
   PointCloudLayer,
-  PathLayer
+  PathLayer,
+  TextLayer
 } from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl/test/data';
@@ -323,6 +324,52 @@ test('PathLayer#constructor', t => {
         //     t.ok(layer.getAttributeManager().attributes.instanceStartEndPositions64xyLow,
         //       'should add instancePositions64xyLow');
         //   }
+      }
+    ]
+  });
+
+  t.end();
+});
+
+test('Text#constructor', t => {
+  const data = [
+    {
+      text: 'north',
+      coordinates: [0, 100]
+    },
+    {
+      text: 'south',
+      coordinates: [0, -100]
+    },
+    {
+      text: 'east',
+      coordinates: [100, 0]
+    },
+    {
+      text: 'west',
+      coordinates: [-100, 0]
+    }
+  ];
+
+  testLayer({
+    Layer: TextLayer,
+    testCases: [
+      {props: []},
+      {props: null},
+      {
+        props: {
+          data,
+          getText: d => d.text,
+          getPosition: d => d.coordinates
+        }
+      },
+      {
+        updateProps: {
+          data: data.slice(0, 2)
+        },
+        assert({layer, oldState}) {
+          t.ok(layer.state.data.length !== oldState.data.length, 'should update state.data');
+        }
       }
     ]
   });

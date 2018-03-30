@@ -8,14 +8,7 @@ const {OrbitView, OrthographicView} = experimental;
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
-import {
-  BezierCurveLayer,
-  MeshLayer,
-  PathOutlineLayer,
-  // PathMarkerLayer,
-  TextLayer,
-  Arrow2DGeometry
-} from 'deck.gl-layers';
+import {BezierCurveLayer, MeshLayer, PathOutlineLayer, Arrow2DGeometry} from 'deck.gl-layers';
 
 import {
   COORDINATE_SYSTEM,
@@ -31,7 +24,8 @@ import {
   ScreenGridLayer,
   HexagonCellLayer,
   HexagonLayer,
-  PointCloudLayer
+  PointCloudLayer,
+  TextLayer
 } from 'deck.gl';
 
 const LIGHT_SETTINGS = {

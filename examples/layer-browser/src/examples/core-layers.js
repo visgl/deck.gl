@@ -12,7 +12,8 @@ import {
   HexagonLayer,
   GeoJsonLayer,
   PolygonLayer,
-  PathLayer
+  PathLayer,
+  TextLayer
 } from 'deck.gl';
 
 // Demonstrate immutable support
@@ -283,6 +284,35 @@ const HexagonLayerExample = {
   }
 };
 
+const TextLayerExample = {
+  layer: TextLayer,
+  getData: () => dataSamples.points.slice(0, 50),
+  props: {
+    id: 'text-layer',
+    getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+    getPosition: x => x.COORDINATES,
+    getColor: x => [153, 0, 0],
+    getSize: x => 32,
+    getAngle: x => 0,
+    sizeScale: 1,
+    getTextAnchor: x => 'start',
+    getAlignmentBaseline: x => 'center',
+    getPixelOffset: x => [10, 0]
+  }
+};
+
+const TextLayer100KExample = {
+  layer: TextLayer,
+  getData: dataSamples.getPoints100K,
+  props: {
+    id: 'text-layer-100k',
+    getText: x => 'X',
+    getPosition: x => x,
+    getColor: x => [0, 0, 200],
+    sizeScale: 1
+  }
+};
+
 // METER MODE EXAMPLES
 
 const PointCloudLayerExample = {
@@ -431,7 +461,9 @@ export default {
     GridLayer: GridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonCellLayer: HexagonCellLayerExample,
-    HexagonLayer: HexagonLayerExample
+    HexagonLayer: HexagonLayerExample,
+    TextLayer: TextLayerExample,
+    'TextLayer (100K)': TextLayer100KExample
   },
 
   'Core Layers - Meter Offsets': {
