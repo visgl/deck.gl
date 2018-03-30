@@ -77,6 +77,12 @@ void main(void) {
 }
 `;
 
+const DEFAULT_CHANGE_FLAGS = {
+  dataChanged: true,
+  viewportChanged: true,
+  cellSizeChanged: true
+};
+
 export default class GPUGridAggregator {
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
@@ -97,15 +103,36 @@ export default class GPUGridAggregator {
   }
 
   // Perform aggregation and retun the results
-  run(opts) {
-    this._updateGridSize(opts);
-    if (this._hasGPUSupport && opts.useGPU) {
-      return this._runAggregationOnGPU(opts);
+  run({
+    positions,
+    weights,
+    changeFlags = DEFAULT_CHANGE_FLAGS,
+    cellSize,
+    viewport,
+    countsBuffer = null,
+    maxCountBuffer = null,
+    width,
+    height,
+    useGPU = true
+  } = {}) {
+    const aggregationParams = {
+      positions,
+      weights,
+      changeFlags,
+      cellSize,
+      viewport,
+      countsBuffer,
+      maxCountBuffer
+    };
+
+    this._updateGridSize({viewport, cellSize, width, height});
+    if (this._hasGPUSupport && useGPU) {
+      return this._runAggregationOnGPU(aggregationParams);
     }
-    if (opts.useGPU) {
-      log.warn('ScreenGridAggregator: WebGL2 not supported, falling back to CPU');
+    if (useGPU) {
+      log.warn('ScreenGridAggregator: GPU Aggregation not supported, falling back to CPU');
     }
-    return this._runAggregationOnCPU(opts);
+    return this._runAggregationOnCPU(aggregationParams);
   }
 
   // PRIVATE
@@ -231,12 +258,12 @@ export default class GPUGridAggregator {
   /* eslint-disable max-statements */
   _updateModels(opts) {
     const {gl} = this;
-    const {positions, weights} = opts;
+    const {positions, weights, changeFlags} = opts;
     const {numCol, numRow} = this.state;
 
     let {positionsBuffer, weightsBuffer, gridPixelBuffer, gridTexCoordsBuffer} = this.state;
 
-    if (opts.changeFlags.dataChanged || !positionsBuffer) {
+    if (changeFlags.dataChanged || !positionsBuffer) {
       // TODO: add support for weights
       if (positionsBuffer) {
         positionsBuffer.delete();
@@ -254,7 +281,7 @@ export default class GPUGridAggregator {
       this._setState({positionsBuffer, weightsBuffer});
     }
 
-    if (opts.changeFlags.cellSizeChanged || !gridPixelBuffer) {
+    if (changeFlags.cellSizeChanged || !gridPixelBuffer) {
       if (gridPixelBuffer) {
         gridPixelBuffer.delete();
       }
@@ -297,7 +324,7 @@ export default class GPUGridAggregator {
       allAggregationModel
     } = this;
 
-    const {pixelProjectionMatrix} = opts.viewport;
+    const {pixelProjectionMatrix} = viewport;
     const gridSize = [numCol, numRow];
 
     gridAggregationFramebuffer.bind();
