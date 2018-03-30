@@ -2,9 +2,9 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
-
 import {json as requestJson} from 'd3-request';
+import _ from 'lodash';
+import DeckGLOverlay from './deckgl-overlay.js';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
