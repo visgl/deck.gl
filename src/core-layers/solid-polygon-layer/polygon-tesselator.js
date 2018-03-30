@@ -24,17 +24,13 @@
 // - 3D surfaces (top and sides only)
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
-import earcut from 'earcut';
 import {experimental} from '../../core';
-const {fp64LowPart, flattenVertices, fillArray} = experimental;
+const {fillArray, fp64LowPart} = experimental;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {
-  return [
-    (index + 1) % 256,
-    Math.floor((index + 1) / 256) % 256,
-    Math.floor((index + 1) / 256 / 256) % 256
-  ];
+  index++;
+  return [index & 255, (index >> 8) & 255, (index >> 16) & 255];
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
@@ -42,43 +38,80 @@ const DEFAULT_COLOR = [0, 0, 0, 255]; // Black
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export class PolygonTesselator {
-  constructor({polygons, fp64 = false}) {
+  constructor({polygons, IndexType}) {
     // Normalize all polygons
-    this.polygons = polygons.map(polygon => Polygon.normalize(polygon));
+    polygons = polygons.map(polygon => Polygon.normalize(polygon));
+
     // Count all polygon vertices
-    this.pointCount = getPointCount(this.polygons);
-    this.fp64 = fp64;
+    const pointCount = getPointCount(polygons);
+
+    this.polygons = polygons;
+    this.pointCount = pointCount;
+    this.IndexType = IndexType;
+
+    // TODO: dynamically decide IndexType in tesselator?
+    // Check if the vertex count excedes index type limit
+    if (IndexType === Uint16Array && pointCount > 65535) {
+      throw new Error("Vertex count exceeds browser's limit");
+    }
+
+    this.attributes = {
+      pickingColors: calculatePickingColors({polygons, pointCount})
+    };
+  }
+
+  updatePositions({fp64, extruded}) {
+    const {attributes, polygons, pointCount} = this;
+
+    attributes.positions = attributes.positions || new Float32Array(pointCount * 3);
+    attributes.nextPositions = attributes.nextPositions || new Float32Array(pointCount * 3);
+
+    if (fp64) {
+      // We only need x, y component
+      attributes.positions64xyLow = attributes.positions64xyLow || new Float32Array(pointCount * 2);
+      attributes.nextPositions64xyLow =
+        attributes.nextPositions64xyLow || new Float32Array(pointCount * 2);
+    }
+
+    updatePositions({cache: attributes, polygons, extruded, fp64});
   }
 
   indices() {
-    const {polygons, indexCount} = this;
-    return calculateIndices({polygons, indexCount});
+    const {polygons, IndexType} = this;
+    return calculateIndices({polygons, IndexType});
   }
 
   positions() {
-    const {polygons, pointCount} = this;
-    return calculatePositions({polygons, pointCount, fp64: this.fp64});
+    return this.attributes.positions;
+  }
+  positions64xyLow() {
+    return this.attributes.positions64xyLow;
   }
 
-  normals() {
-    const {polygons, pointCount} = this;
-    return calculateNormals({polygons, pointCount});
+  nextPositions() {
+    return this.attributes.nextPositions;
+  }
+  nextPositions64xyLow() {
+    return this.attributes.nextPositions64xyLow;
   }
 
-  colors({getColor = x => DEFAULT_COLOR} = {}) {
-    const {polygons, pointCount} = this;
-    return calculateColors({polygons, pointCount, getColor});
+  elevations({key = 'elevations', getElevation = x => 100} = {}) {
+    const {attributes, polygons, pointCount} = this;
+    const values = updateElevations({cache: attributes[key], polygons, pointCount, getElevation});
+    attributes[key] = values;
+    return values;
+  }
+
+  colors({key = 'colors', getColor = x => DEFAULT_COLOR} = {}) {
+    const {attributes, polygons, pointCount} = this;
+    const values = updateColors({cache: attributes[key], polygons, pointCount, getColor});
+    attributes[key] = values;
+    return values;
   }
 
   pickingColors() {
-    const {polygons, pointCount} = this;
-    return calculatePickingColors({polygons, pointCount});
+    return this.attributes.pickingColors;
   }
-
-  // getAttribute({size, accessor}) {
-  //   const {polygons, pointCount} = this;
-  //   return calculateAttribute({polygons, pointCount, size, accessor});
-  // }
 }
 
 // Count number of points in a list of complex polygons
@@ -103,39 +136,19 @@ function getPolygonOffsets(polygons) {
   return offsets;
 }
 
-// Returns the offset of each hole polygon in the flattened array for that polygon
-function getHoleIndices(complexPolygon) {
-  let holeIndices = null;
-  if (complexPolygon.length > 1) {
-    let polygonStartIndex = 0;
-    holeIndices = [];
-    complexPolygon.forEach(polygon => {
-      polygonStartIndex += polygon.length;
-      holeIndices.push(polygonStartIndex);
-    });
-    // Last element points to end of the flat array, remove it
-    holeIndices.pop();
-  }
-  return holeIndices;
-}
-
 function calculateIndices({polygons, IndexType = Uint32Array}) {
   // Calculate length of index array (3 * number of triangles)
   const indexCount = 3 * getTriangleCount(polygons);
   const offsets = getPolygonOffsets(polygons);
 
   // Allocate the attribute
-  // TODO it's not the index count but the vertex count that must be checked
-  if (IndexType === Uint16Array && indexCount > 65535) {
-    throw new Error("Vertex count exceeds browser's limit");
-  }
   const attribute = new IndexType(indexCount);
 
   // 1. get triangulated indices for the internal areas
   // 2. offset them by the number of indices in previous polygons
   let i = 0;
   polygons.forEach((polygon, polygonIndex) => {
-    for (const index of calculateSurfaceIndices(polygon)) {
+    for (const index of Polygon.getSurfaceIndices(polygon)) {
       attribute[i++] = index + offsets[polygonIndex];
     }
   });
@@ -143,70 +156,106 @@ function calculateIndices({polygons, IndexType = Uint32Array}) {
   return attribute;
 }
 
-/*
- * Get vertex indices for drawing complexPolygon mesh
- * @private
- * @param {[Number,Number,Number][][]} complexPolygon
- * @returns {[Number]} indices
- */
-function calculateSurfaceIndices(complexPolygon) {
-  // Prepare an array of hole indices as expected by earcut
-  const holeIndices = getHoleIndices(complexPolygon);
-  // Flatten the polygon as expected by earcut
-  const verts = flattenVertices(complexPolygon);
-  // Let earcut triangulate the polygon
-  return earcut(verts, holeIndices, 3);
-}
-
-function calculatePositions({polygons, pointCount, fp64}) {
+function updatePositions({
+  cache: {positions, positions64xyLow, nextPositions, nextPositions64xyLow},
+  polygons,
+  extruded,
+  fp64
+}) {
   // Flatten out all the vertices of all the sub subPolygons
-  const attribute = new Float32Array(pointCount * 3);
-  let attributeLow;
-  if (fp64) {
-    // We only need x, y component
-    attributeLow = new Float32Array(pointCount * 2);
-  }
   let i = 0;
-  let j = 0;
-  for (const polygon of polygons) {
-    // eslint-disable-next-line
-    Polygon.forEachVertex(polygon, vertex => {
+  let nextI = 0;
+  let startVertex = null;
+
+  const pushStartVertex = (x, y, z, xLow, yLow) => {
+    if (extruded) {
+      // Save first vertex for setting nextPositions at the end of the loop
+      startVertex = {x, y, z, xLow, yLow};
+    }
+  };
+
+  const popStartVertex = () => {
+    if (startVertex) {
+      nextPositions[nextI * 3] = startVertex.x;
+      nextPositions[nextI * 3 + 1] = startVertex.y;
+      nextPositions[nextI * 3 + 2] = startVertex.z;
+      if (fp64) {
+        nextPositions64xyLow[nextI * 2] = startVertex.xLow;
+        nextPositions64xyLow[nextI * 2 + 1] = startVertex.yLow;
+      }
+      nextI++;
+    }
+    startVertex = null;
+  };
+
+  polygons.forEach((polygon, polygonIndex) => {
+    Polygon.forEachVertex(polygon, (vertex, vertexIndex) => {
+      // eslint-disable-line
       const x = vertex[0];
       const y = vertex[1];
       const z = vertex[2] || 0;
-      attribute[i++] = x;
-      attribute[i++] = y;
-      attribute[i++] = z;
+      let xLow;
+      let yLow;
+
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
       if (fp64) {
-        attributeLow[j++] = fp64LowPart(x);
-        attributeLow[j++] = fp64LowPart(y);
+        xLow = fp64LowPart(x);
+        yLow = fp64LowPart(y);
+        positions64xyLow[i * 2] = xLow;
+        positions64xyLow[i * 2 + 1] = yLow;
+      }
+      i++;
+
+      if (extruded && vertexIndex > 0) {
+        nextPositions[nextI * 3] = x;
+        nextPositions[nextI * 3 + 1] = y;
+        nextPositions[nextI * 3 + 2] = z;
+        if (fp64) {
+          nextPositions64xyLow[nextI * 2] = xLow;
+          nextPositions64xyLow[nextI * 2 + 1] = yLow;
+        }
+        nextI++;
+      }
+      if (vertexIndex === 0) {
+        popStartVertex();
+        pushStartVertex(x, y, z, xLow, yLow);
       }
     });
-  }
-  return {positions: attribute, positions64xyLow: attributeLow};
+  });
+  popStartVertex();
 }
 
-function calculateNormals({polygons, pointCount}) {
-  // TODO - use generic vertex attribute?
-  const attribute = new Float32Array(pointCount * 3);
-  // normals is not used in flat polygon shader
-  // fillArray({target: attribute, source: [0, 0, 1], start: 0, count: pointCount});
-  return attribute;
+function updateElevations({cache, polygons, pointCount, getElevation}) {
+  const elevations = cache || new Float32Array(pointCount);
+  let i = 0;
+  polygons.forEach((complexPolygon, polygonIndex) => {
+    // Calculate polygon color
+    const height = getElevation(polygonIndex);
+
+    const vertexCount = Polygon.getVertexCount(complexPolygon);
+    fillArray({target: elevations, source: [height], start: i, count: vertexCount});
+    i += vertexCount;
+  });
+  return elevations;
 }
 
-function calculateColors({polygons, pointCount, getColor}) {
-  const attribute = new Uint8ClampedArray(pointCount * 4);
+function updateColors({cache, polygons, pointCount, getColor}) {
+  const colors = cache || new Uint8ClampedArray(pointCount * 4);
   let i = 0;
   polygons.forEach((complexPolygon, polygonIndex) => {
     // Calculate polygon color
     const color = getColor(polygonIndex);
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
+    if (isNaN(color[3])) {
+      color[3] = 255;
+    }
 
     const vertexCount = Polygon.getVertexCount(complexPolygon);
-    fillArray({target: attribute, source: color, start: i, count: vertexCount});
+    fillArray({target: colors, source: color, start: i, count: vertexCount});
     i += color.length * vertexCount;
   });
-  return attribute;
+  return colors;
 }
 
 function calculatePickingColors({polygons, pointCount}) {
