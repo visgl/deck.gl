@@ -57,7 +57,7 @@
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6",
     "lodash.flattendeep": "^4.4.0",
-    "luma.gl": ">=5.2.0-alpha.9",
+    "luma.gl": ">=5.2.0-alpha.10",
     "math.gl": ">=1.1.0-alpha.1",
     "mjolnir.js": "^1.0.0",
     "probe.gl": ">=1.0.0-alpha.11",
