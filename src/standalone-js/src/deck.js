@@ -2,6 +2,9 @@
 /* eslint-disable max-statements */
 import Mapbox from './mapbox';
 
+import {experimental} from 'deck.gl/core';
+const {Deck: DeckJS, OrbitView, MapControllerJS, OrbitControllerJS} = experimental;
+
 const CANVAS_STYLE = {
   position: 'absolute',
   left: 0,
@@ -10,41 +13,65 @@ const CANVAS_STYLE = {
   height: '100%'
 };
 
+// Add missing props for compatibility
+function normalizeProps(props) {
+  // Support old "geospatial view state as separate props" style
+  if (!props.viewState) {
+    const {longitude, latitude, zoom, pitch = 0, bearing = 0} = props;
+    props.viewState = {longitude, latitude, zoom, pitch, bearing};
+  }
+}
+
+// Create canvas elements for map and deck
+function createCanvas(props) {
+  let {container = document.body} = props;
+
+  if (typeof container === 'string') {
+    container = document.getElementById(container);
+  }
+
+  if (!container) {
+    throw Error('Deck: container not found');
+  }
+
+  // Add DOM elements
+  const containerStyle = window.getComputedStyle(container);
+  if (containerStyle.position === 'static') {
+    container.style.position = 'relative';
+  }
+
+  const mapCanvas = document.createElement('div');
+  container.appendChild(mapCanvas);
+  Object.assign(mapCanvas.style, CANVAS_STYLE);
+
+  const deckCanvas = document.createElement('canvas');
+  container.appendChild(deckCanvas);
+  Object.assign(deckCanvas.style, CANVAS_STYLE);
+
+  return {container, mapCanvas, deckCanvas};
+}
+
 /**
  * @params container (Element) - DOM element to add deck.gl canvas to
  * @params map (Object) - map API. Set to falsy to disable
  * @params controller (Object) - Controller class. Leave empty for auto detection
  */
-class DeckGL {
+export default class Deck extends DeckJS {
   constructor(props = {}) {
     if (typeof document === 'undefined') {
       // Not browser
-      return;
+      throw Error('Deck can only be used in the browser');
     }
 
-    const {container = document.body} = props;
+    const {container, mapCanvas, deckCanvas} = createCanvas(props);
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Add DOM elements
-    const containerStyle = window.getComputedStyle(container);
-    if (containerStyle.position === 'static') {
-      container.style.position = 'relative';
-    }
-
-    const mapCanvas = document.createElement('div');
-    container.appendChild(mapCanvas);
-    Object.assign(mapCanvas.style, CANVAS_STYLE);
-
-    const deckCanvas = document.createElement('canvas');
-    container.appendChild(deckCanvas);
-    Object.assign(deckCanvas.style, CANVAS_STYLE);
-
     const {map, controller} = props;
 
-    this._getViewState(props);
+    normalizeProps(props);
     const isMap = Number.isFinite(props.viewState.latitude);
-    const isOrbit = Number.isFinite(props.viewState.distance);
+    const isOrbit = props.views && props.views[0] instanceof OrbitView;
 
     // Update viewport dimensions
     Object.assign(props, {
@@ -52,7 +79,7 @@ class DeckGL {
       height
     });
 
-    this._deck = new DeckGL.experimental.DeckGLJS(
+    super(
       Object.assign({}, props, {
         canvas: deckCanvas
       })
@@ -62,9 +89,9 @@ class DeckGL {
       // Deduce controller class from viewport type
       let Controller;
       if (isMap) {
-        Controller = DeckGL.experimental.MapControllerJS;
+        Controller = MapControllerJS;
       } else if (isOrbit) {
-        Controller = DeckGL.experimental.OrbitControllerJS;
+        Controller = OrbitControllerJS;
       }
 
       this._controller =
@@ -75,7 +102,7 @@ class DeckGL {
             onViewportChange: this._onViewportChange
           })
         );
-    } else {
+    } else if (controller) {
       this._controller = controller;
       controller.setProps({
         onViewportChange: this._onViewportChange
@@ -83,14 +110,13 @@ class DeckGL {
     }
 
     if (map === undefined) {
-      // Create mapbox map
+      // Default create mapbox map
       this._map =
         isMap && window.mapboxgl && new Mapbox(Object.assign({}, props, {container: mapCanvas}));
-    } else {
+    } else if (map) {
       this._map = map;
     }
 
-    this.props = props;
     this._container = container;
     this._onViewportChange = this._onViewportChange.bind(this);
     this._resize = this._resize.bind(this);
@@ -100,22 +126,12 @@ class DeckGL {
   }
 
   getMapboxMap() {
-    return this._map && this._map._mapbox;
-  }
-
-  pickObject(opts) {
-    return this._deck.pickObject(opts);
-  }
-
-  pickObjects(opts) {
-    return this._deck.pickObjects(opts);
+    return this._map && this._map.getMap();
   }
 
   finalize() {
     window.removeEventListener('resize', this._resize);
-    if (this._deck) {
-      this._deck.finalize();
-    }
+
     if (this._controller) {
       this._controller.finalize();
     }
@@ -124,13 +140,10 @@ class DeckGL {
     }
 
     this._container = null;
-    this.props = null;
+    super.finalize();
   }
 
   setProps(props) {
-    if (this._deck) {
-      this._deck.setProps(props);
-    }
     if (this._controller) {
       this._controller.setProps(
         Object.assign({}, props.viewState, props, {
@@ -142,17 +155,7 @@ class DeckGL {
       this._map.setProps(props.viewState);
     }
 
-    Object.assign(this.props, props);
-  }
-
-  _getViewState(props) {
-    // Support old `viewports` prop
-    props.views = props.views || props.viewports || (props.viewport && [props.viewport]);
-
-    // Support old "geospatial view state as separate props" style
-    if (!props.viewState) {
-      props.viewState = Object.assign({}, (props.views && props.views[0]) || props);
-    }
+    super.setProps(props);
   }
 
   _onViewportChange(viewport) {
@@ -174,5 +177,3 @@ class DeckGL {
     });
   }
 }
-
-export default DeckGL;

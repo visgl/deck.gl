@@ -2,14 +2,26 @@
 Scripting version of deck.gl
 
 ## Usage
+
+Include the library:
+```html
+<script src='<cdn_url>/deck.gl-5.2.0.min.js'></script>
+```
+
+To use with Mapbox:
+```html
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+```
+
 ```js
-new DeckGL({
+new deck.DeckGL({
+  mapboxAccessToken: '<your_token_here>',
   longitude: -122.45,
   latitude: 37.8,
   zoom: 12,
-  map: true,
   layers: [
-    new DeckGL.ScatterplotLayer({
+    new deck.ScatterplotLayer({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
       ]

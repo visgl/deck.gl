@@ -1,15 +1,13 @@
 /* global window */
-import * as LumaGL from 'luma.gl';
-import * as deckglCore from 'deck.gl/core';
-import * as deckglLayers from 'deck.gl/core-layers';
+import * as lumaGL from 'luma.gl';
+import * as deckGLCore from 'deck.gl/core';
+import * as deckGLLayers from 'deck.gl/core-layers';
 
-import DeckGL from './deckgl';
-
-Object.assign(DeckGL, deckglCore, deckglLayers);
+import Deck from './deck';
 
 if (typeof window !== 'undefined') {
-  window.DeckGL = DeckGL;
-  window.LumaGL = LumaGL;
+  window.deck = Object.assign({}, window.deck, deckGLCore, deckGLLayers, {Deck});
+  window.luma = Object.assign({}, window.luma, lumaGL);
 }
 
-export default DeckGL;
+export default Deck;
