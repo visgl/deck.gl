@@ -4,10 +4,13 @@ import log from 'deck.gl';
 import assert from 'assert';
 const AGGREGATE_TO_GRID_VS = `\
 attribute vec2 positions;
+attribute float weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
 uniform mat4 uProjectionMatrix;
+
+varying float vWeights;
 
 vec2 project_to_pixel(vec2 pixels) {
   vec4 pixPosition = vec4(pixels, 0., 1.);
@@ -17,6 +20,7 @@ vec2 project_to_pixel(vec2 pixels) {
 
 void main(void) {
 
+  vWeights = weights;
   vec2 windowPos = project_position(positions);
   windowPos = project_to_pixel(windowPos);
 
@@ -39,9 +43,10 @@ const AGGREGATE_TO_GRID_FS = `\
 precision highp float;
 #endif
 
+varying float vWeights;
+
 void main(void) {
-  // TODO: green channel should be weight
-  gl_FragColor = vec4(1., 1., 0, 0.0);
+  gl_FragColor = vec4(1., vWeights, 0, 0.0);
 }
 `;
 
@@ -67,8 +72,8 @@ uniform sampler2D uSampler;
 
 void main(void) {
   vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-  // Aggregate total count Red channel, max count in alpha channel.
-  gl_FragColor = vec4(textureColor.r, 0., 0., textureColor.r);
+  // Red: total count, Green: total weight, Alpha: maximum wieght
+  gl_FragColor = vec4(textureColor.r, textureColor.g, 0., textureColor.g);
 }
 `;
 
@@ -144,8 +149,9 @@ export default class GPUGridAggregator {
     this._projectPositions(opts);
 
     counts.fill(0);
-    let maxCount = 0;
+    let maxWeight = 0;
     let totalCount = 0;
+    let totalWeight = 0;
     const {projectedPositions} = this.state;
     for (let index = 0; index < projectedPositions.length; index++) {
       const {x, y} = projectedPositions[index];
@@ -158,16 +164,19 @@ export default class GPUGridAggregator {
         counts[i]++;
         counts[i + 1] += weight;
         totalCount += 1;
-        if (counts[i] > maxCount) {
-          maxCount = counts[i];
+        totalWeight += weight;
+        if (counts[i + 1] > maxWeight) {
+          maxWeight = counts[i + 1];
         }
       }
     }
     const maxCountBufferData = new Float32Array(ELEMENTCOUNT);
-    // Store totalCount valuein Red/X channel
+    // Store total count value in Red/X channel
     maxCountBufferData[0] = totalCount;
-    // Store maxCount value in alpha/W channel.
-    maxCountBufferData[3] = maxCount;
+    // Store total weight value in Green/Y channel
+    maxCountBufferData[1] = totalWeight;
+    // Store max weight value in alpha/W channel.
+    maxCountBufferData[3] = maxWeight;
 
     // Load data to WebGL buffer.
     if (countsBuffer) {
@@ -222,22 +231,27 @@ export default class GPUGridAggregator {
   /* eslint-disable max-statements */
   _updateModels(opts) {
     const {gl} = this;
-    const {positions} = opts;
+    const {positions, weights} = opts;
     const {numCol, numRow} = this.state;
 
-    let {positionsBuffer, gridPixelBuffer, gridTexCoordsBuffer} = this.state;
+    let {positionsBuffer, weightsBuffer, gridPixelBuffer, gridTexCoordsBuffer} = this.state;
 
     if (opts.changeFlags.dataChanged || !positionsBuffer) {
       // TODO: add support for weights
       if (positionsBuffer) {
         positionsBuffer.delete();
       }
+      if (weightsBuffer) {
+        weightsBuffer.delete();
+      }
       positionsBuffer = new Buffer(gl, {size: 2, data: new Float32Array(positions)});
+      weightsBuffer = new Buffer(gl, {size: 1, data: new Float32Array(weights)});
       this.gridAggregationModel.setAttributes({
-        positions: positionsBuffer
+        positions: positionsBuffer,
+        weights: weightsBuffer
       });
       this.gridAggregationModel.setVertexCount(positions.length / 2);
-      this._setState({positionsBuffer});
+      this._setState({positionsBuffer, weightsBuffer});
     }
 
     if (opts.changeFlags.cellSizeChanged || !gridPixelBuffer) {

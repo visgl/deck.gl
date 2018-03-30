@@ -27,6 +27,17 @@ const fixture = {
     -122.4193,
     10
   ],
+  weights: [
+    // Inside the current viewport bounds
+    1,
+
+    // Merged to same grid
+    1,
+    3,
+
+    // Outside the current viewport bounds
+    10
+  ],
   windowSize: [500, 500],
   cellSize: [25, 25],
   gridSize: [20, 20],
@@ -52,12 +63,13 @@ function generateRandomGridPoints(pointCount) {
     height: bottomRight.lat - topLeft.lat,
     count: pointCount
   };
-  const points = new Array(opts.count * 2);
+  const positions = new Array(opts.count * 2);
+  const weights = new Array(opts.count).fill(2);
   for (let i = 0; i < opts.count; i++) {
-    points[i * 2] = Math.floor(Math.random() * opts.width) + opts.x;
-    points[i * 2 + 1] = Math.floor(Math.random() * opts.height) + opts.y;
+    positions[i * 2] = Math.floor(Math.random() * opts.width) + opts.x;
+    positions[i * 2 + 1] = Math.floor(Math.random() * opts.height) + opts.y;
   }
-  return points;
+  return {positions, weights};
 }
 
 export const GridAggregationData = {

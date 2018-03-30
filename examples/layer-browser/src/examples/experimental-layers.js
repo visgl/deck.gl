@@ -195,6 +195,6 @@ export default {
     GPUScreenGridLayer: GPUScreenGridLayerExample,
     'GPUScreenGridLayer (1M)': GPUScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUScreenGridLayer (5M)': GPUScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    'ScreenGridLayer (10M)': GPUScreenGridLayerPerfExample('10M', dataSamples.getPoints10M)
+    'GPUScreenGridLayer (10M)': GPUScreenGridLayerPerfExample('10M', dataSamples.getPoints10M)
   }
 };

@@ -10,8 +10,9 @@ test('GPUGridAggregator#GPU', t => {
 
   const result = sa.run(Object.assign({}, fixture, {useGPU: true}));
   const maxCountBufferData = result.maxCountBuffer.getData();
-  t.equal(maxCountBufferData[3], 2, 'maxCount should match');
-  t.equal(maxCountBufferData[0], 3, 'totalCount should match');
+  t.equal(maxCountBufferData[0], 3, 'total count should match');
+  t.equal(maxCountBufferData[1], 5, 'total weight should match');
+  t.equal(maxCountBufferData[3], 4, 'max weight should match');
   t.end();
 });
 
@@ -21,22 +22,21 @@ test('GPUGridAggregator#CPU', t => {
   const result = sa.run(Object.assign({}, fixture, {useGPU: false}));
 
   const maxCountBufferData = result.maxCountBuffer.getData();
-  t.equal(maxCountBufferData[3], 2, 'maxCount should match');
-  t.equal(maxCountBufferData[0], 3, 'totalCount should match');
-  // t.equal(result.maxCount, 2, 'maxCount should match');
-  // t.equal(result.totalCount, 3, 'totalCount should match');
+  t.equal(maxCountBufferData[0], 3, 'total count should match');
+  t.equal(maxCountBufferData[1], 5, 'total weight should match');
+  t.equal(maxCountBufferData[3], 4, 'max weight should match');
   t.end();
 });
 
 test('GPUGridAggregator#CompareCPUandGPU', t => {
   const sa = new GPUGridAggregator(gl);
-  const positions = generateRandomGridPoints(5000);
-  let result = sa.run(Object.assign({}, fixture, {useGPU: false, positions}));
+  const pointsData = generateRandomGridPoints(5000);
+  let result = sa.run(Object.assign({}, fixture, {useGPU: false}, pointsData));
   const cpuResults = {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
   };
-  result = sa.run(Object.assign({}, fixture, {useGPU: true, positions}));
+  result = sa.run(Object.assign({}, fixture, {useGPU: true}, pointsData));
   const gpuResults = {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
