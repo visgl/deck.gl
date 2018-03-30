@@ -50,7 +50,7 @@ const COMMON_CONFIG = {
       // For importing modules that are not exported at root
       'deck.gl/dist': libSources,
       'deck.gl': libSources,
-      'luma.gl': resolve('.', './node_modules/luma.gl'),
+      'luma.gl': resolve('.', '../node_modules/luma.gl'),
       react: resolve('.', './node_modules/react'),
       // // used by Mapbox
       // webworkify: 'webworkify-webpack-dropin',
