@@ -1,0 +1,42 @@
+{
+  "name": "@deck.gl/js",
+  "description": "Scripting with deck.gl",
+  "license": "MIT",
+  "version": "5.1.0-alpha.1",
+  "keywords": [
+    "webgl",
+    "visualization"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/deck.gl.git"
+  },
+  "main": "es5/index.js",
+  "module": "esm/index.js",
+  "esnext": "es6/index.js",
+  "scripts": {
+    "start": "webpack-dev-server --config webpack/dev.config.js --progress --open",
+    "build": "scripts/build.sh",
+    "publish-prod": "npm run build && (cd dist && npm publish --access=public)",
+    "publish-beta": "npm run build && (cd dist && npm publish --access=public --tag beta)"
+  },
+  "dependencies": {
+    "prop-types": "^15.6.1"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.22.2",
+    "babel-core": "^6.22.1",
+    "babel-loader": "^6.2.10",
+    "babel-polyfill": "^6.20.0",
+    "babel-preset-es2015": "^6.4.3",
+    "babel-preset-stage-0": "^6.24.1",
+    "babel-preset-stage-2": "^6.22.0",
+    "react-map-gl": "^3.2.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
+  },
+  "peerDependencies": {
+    "deck.gl": "^5.1.0"
+  }
+}
