@@ -38,8 +38,25 @@ class Root extends Component {
     });
 
     requestJson(DATA_URL.TRIPS, (error, response) => {
+			const trips = response.map(({segments}) => {
+				const result = [];
+				for (let index = 0; index < segments.length; index += 1) {
+					if (segments[index + 1]) {
+						const source = segments[index];
+						const target = segments[index + 1];
+						result.push({
+							sourcePosition: [source[0], source[1]],
+							targetPosition: [target[0], target[1]],
+							time: target[2],
+							color: [253, 128, 93, 255],
+						})
+					}
+				}
+
+				return result;
+			})
       if (!error) {
-        this.setState({trips: response});
+		this.setState({trips: _.flattenDeep(trips)});
       }
     });
   }

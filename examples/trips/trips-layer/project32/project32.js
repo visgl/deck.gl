@@ -18,20 +18,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
-#define SHADER_NAME trips-layer-fragment-shader
+import {project} from 'deck.gl';
 
-#ifdef GL_ES
-precision highp float;
-#endif
+const vs = `
+vec4 project_position_to_clipspace(
+  vec3 position, vec2 position64xyLow, vec3 offset, out vec4 worldPosition
+) {
+  vec3 projectedPosition = project_position(position);
+  worldPosition = vec4(projectedPosition + offset, 1.0);
+  return project_to_clipspace(worldPosition);
+}
 
-varying float vTime;
-varying vec4 vColor;
-
-void main(void) {
-  if (vTime > 1.0 || vTime < 0.0) {
-    discard;
-  }
-  gl_FragColor = vec4(vColor.rgb, vColor.a * vTime);
+vec4 project_position_to_clipspace(
+  vec3 position, vec2 position64xyLow, vec3 offset
+) {
+  vec4 worldPosition;
+  return project_position_to_clipspace(position, position64xyLow, offset, worldPosition);
 }
 `;
+
+export default {
+  name: 'project32',
+  dependencies: [project],
+  vs
+};

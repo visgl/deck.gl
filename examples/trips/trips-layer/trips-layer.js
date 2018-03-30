@@ -1,149 +1,182 @@
-import {Layer} from 'deck.gl';
+import {Layer, experimental} from 'deck.gl';
+import {GL, Model, Geometry, registerShaderModules} from 'luma.gl';
+import project32 from './project32/project32';
 
-import {Model, Geometry} from 'luma.gl';
+const {fp64LowPart, enable64bitSupport} = experimental;
+registerShaderModules([project32]);
 
 import tripsVertex from './trips-layer-vertex.glsl';
 import tripsFragment from './trips-layer-fragment.glsl';
 
+const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   trailLength: 120,
   currentTime: 0,
-  getPath: d => d.path,
-  getColor: d => d.color
+  strokeWidth: 1,
+  fp64: false,
+
+  getSourcePosition: x => x.sourcePosition,
+  getTargetPosition: x => x.targetPosition,
+  getTime: x => x.time,
+  getColor: x => x.color || DEFAULT_COLOR
 };
 
 export default class TripsLayer extends Layer {
+  getShaders() {
+    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    return {vs: tripsVertex, fs: tripsFragment, modules: [projectModule, 'picking']};
+  }
+    
   initializeState() {
-    const {gl} = this.context;
     const attributeManager = this.getAttributeManager();
-
-    const model = this.getModel(gl);
-
-    attributeManager.add({
-      indices: {size: 1, update: this.calculateIndices, isIndexed: true},
-      positions: {size: 3, update: this.calculatePositions},
-      colors: {size: 3, update: this.calculateColors}
+    attributeManager.addInstanced({
+      instanceSourcePositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getSourcePosition',
+        update: this.calculateInstanceSourcePositions
+      },
+      instanceTargetPositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getTargetPosition',
+        update: this.calculateInstanceTargetPositions
+      },
+      instanceSourceTargetPositions64xyLow: {
+        size: 4,
+        accessor: ['getSourcePosition', 'getTargetPosition'],
+        update: this.calculateInstanceSourceTargetPositions64xyLow
+      },
+      instanceColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getColor',
+        update: this.calculateInstanceColors
+      },
+      instanceTime: {
+        size: 1,
+        transition: true,
+        accessor: 'getTime',
+				update: this.calculateInstanceTime,
+			},
     });
 
-    gl.getExtension('OES_element_index_uint');
-    this.setState({model});
+    const {gl} = this.context;
+    this.setState({model: this._getModel(gl)});
   }
 
-  updateState({props, changeFlags: {dataChanged}}) {
-    if (dataChanged) {
-      this.countVertices(props.data);
+  updateState({props, oldProps, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
+
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      this.setState({model: this._getModel(gl)});
       this.state.attributeManager.invalidateAll();
     }
   }
 
-  getModel(gl) {
-    return new Model(gl, {
-      id: this.props.id,
-      vs: tripsVertex,
-      fs: tripsFragment,
-      geometry: new Geometry({
-        id: this.props.id,
-        drawMode: 'LINES'
-      }),
-      vertexCount: 0,
-      isIndexed: true,
-      // TODO-state-management: onBeforeRender can go to settings, onAfterRender, we should
-      // move this settings of corresponding draw.
-      onBeforeRender: () => {
-        gl.enable(gl.BLEND);
-        gl.enable(gl.POLYGON_OFFSET_FILL);
-        gl.polygonOffset(2.0, 1.0);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-        gl.blendEquation(gl.FUNC_ADD);
-      },
-      onAfterRender: () => {
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.disable(gl.POLYGON_OFFSET_FILL);
-      }
-    });
-  }
-
-  countVertices(data) {
-    if (!data) {
-      return;
-    }
-
-    const {getPath} = this.props;
-    let vertexCount = 0;
-    const pathLengths = data.reduce((acc, d) => {
-      const l = getPath(d).length;
-      vertexCount += l;
-      return [...acc, l];
-    }, []);
-    this.setState({pathLengths, vertexCount});
-  }
-
   draw({uniforms}) {
-    const {trailLength, currentTime} = this.props;
+    const {trailLength, currentTime, strokeWidth} = this.props;
     this.state.model.render(
       Object.assign({}, uniforms, {
         trailLength,
-        currentTime
+        currentTime,
+        strokeWidth
       })
     );
   }
 
-  calculateIndices(attribute) {
-    const {pathLengths, vertexCount} = this.state;
-
-    const indicesCount = (vertexCount - pathLengths.length) * 2;
-    const indices = new Uint32Array(indicesCount);
-
-    let offset = 0;
-    let index = 0;
-    for (let i = 0; i < pathLengths.length; i++) {
-      const l = pathLengths[i];
-      indices[index++] = offset;
-      for (let j = 1; j < l - 1; j++) {
-        indices[index++] = j + offset;
-        indices[index++] = j + offset;
-      }
-      indices[index++] = offset + l - 1;
-      offset += l;
-    }
-    attribute.value = indices;
-    this.state.model.setVertexCount(indicesCount);
+  _getModel(gl) {
+	const positions = [0, -1, 0, 0, 1, 0, 1, -1, 0, 1, 1, 0];
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_STRIP,
+          attributes: {
+            positions: new Float32Array(positions)
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache,
+      })
+    );
   }
 
-  calculatePositions(attribute) {
-    const {data, getPath} = this.props;
-    const {vertexCount} = this.state;
-    const positions = new Float32Array(vertexCount * 3);
-
-    let index = 0;
-    for (let i = 0; i < data.length; i++) {
-      const path = getPath(data[i]);
-      for (let j = 0; j < path.length; j++) {
-        const pt = path[j];
-        positions[index++] = pt[0];
-        positions[index++] = pt[1];
-        positions[index++] = pt[2];
-      }
-    }
-    attribute.value = positions;
+  calculateInstanceSourcePositions(attribute) {
+    const {data, getSourcePosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    data.forEach(object => {
+      const sourcePosition = getSourcePosition(object);
+      value[i + 0] = sourcePosition[0];
+      value[i + 1] = sourcePosition[1];
+      value[i + 2] = isNaN(sourcePosition[2]) ? 0.0 : sourcePosition[2];
+      i += size;
+    })
   }
 
-  calculateColors(attribute) {
+  calculateInstanceTargetPositions(attribute) {
+    const {data, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    data.forEach(object => {
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = targetPosition[0];
+      value[i + 1] = targetPosition[1];
+      value[i + 2] = isNaN(targetPosition[2]) ? 0.0 : targetPosition[2];
+      i += size;
+    })
+  }
+
+  calculateInstanceSourceTargetPositions64xyLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(4);
+      return;
+    }
+
+    const {data, getSourcePosition, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    data.forEach(object => {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = fp64LowPart(sourcePosition[0]);
+      value[i + 1] = fp64LowPart(sourcePosition[1]);
+      value[i + 2] = fp64LowPart(targetPosition[0]);
+      value[i + 3] = fp64LowPart(targetPosition[1]);
+      i += size;
+    })
+  }
+
+  calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
-    const {pathLengths, vertexCount} = this.state;
-    const colors = new Float32Array(vertexCount * 3);
+    const {value, size} = attribute;
+    let i = 0;
+    data.forEach(object => {
+      const color = getColor(object);
+      value[i + 0] = color[0];
+      value[i + 1] = color[1];
+      value[i + 2] = color[2];
+      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
+      i += size;
+    })
+  }
 
-    let index = 0;
-    for (let i = 0; i < data.length; i++) {
-      const color = getColor(data[i]);
-      const l = pathLengths[i];
-      for (let j = 0; j < l; j++) {
-        colors[index++] = color[0];
-        colors[index++] = color[1];
-        colors[index++] = color[2];
-      }
-    }
-    attribute.value = colors;
+  calculateInstanceTime(attribute) {
+    const {data, getTime} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    data.forEach(object => {
+      const time = getTime(object);
+      value[i] = time;
+      i += size;
+    })
   }
 }
 

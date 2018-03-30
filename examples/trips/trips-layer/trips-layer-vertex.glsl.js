@@ -22,23 +22,49 @@ export default `\
 #define SHADER_NAME trips-layer-vertex-shader
 
 attribute vec3 positions;
-attribute vec3 colors;
+attribute vec3 instanceSourcePositions;
+attribute vec3 instanceTargetPositions;
+attribute vec4 instanceSourceTargetPositions64xyLow;
+attribute vec4 instanceColors;
+attribute float instanceTime;
 
 uniform float opacity;
 uniform float currentTime;
 uniform float trailLength;
+uniform float strokeWidth;
 
 varying float vTime;
 varying vec4 vColor;
 
+// offset vector by strokeWidth pixels
+// offset_direction is -1 (left) or 1 (right)
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+  // normalized direction of the line
+  vec2 dir_screenspace = normalize(line_clipspace * project_uViewportSize);
+  // rotate by 90 degrees
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
+
+  return offset_clipspace;
+}
+
 void main(void) {
-  vec2 p = project_position(positions.xy);
-  // the magic de-flickering factor
-  vec4 shift = vec4(0., 0., mod(positions.z, trailLength) * 1e-4, 0.);
+	// Position
+  vec4 source = project_position_to_clipspace(instanceSourcePositions, instanceSourceTargetPositions64xyLow.xy, vec3(0.));
+  vec4 target = project_position_to_clipspace(instanceTargetPositions, instanceSourceTargetPositions64xyLow.zw, vec3(0.));
 
-  gl_Position = project_to_clipspace(vec4(p, 1., 1.)) + shift;
+  // linear interpolation of source & target to pick right coord
+  float segmentIndex = positions.x;
+  vec4 p = mix(source, target, segmentIndex);
 
-  vColor = vec4(colors / 255.0, opacity);
-  vTime = 1.0 - (currentTime - positions.z) / trailLength;
+  // extrude
+	vec2 offset = getExtrusionOffset(target.xy - source.xy, positions.y);
+	vec4 shift = vec4(0., 0., mod(instanceTime, trailLength) * 1e-4, 0.);
+  gl_Position = p + vec4(offset, 0.0, 0.0) + shift;
+
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vTime = 1.0 - (currentTime - instanceTime) / trailLength;
 }
 `;
