@@ -28,8 +28,8 @@ import {
   LineLayer,
   ScreenGridLayer,
   PointCloudLayer,
-  PathLayer,
-  TextLayer
+  PathLayer
+  // TextLayer
 } from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl/test/data';
