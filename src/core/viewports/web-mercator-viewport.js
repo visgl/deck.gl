@@ -26,13 +26,10 @@ import {
   lngLatToWorld,
   worldToLngLat,
   pixelsToWorld,
-  getProjectionMatrix,
   getViewMatrix,
+  getProjectionParameters,
   fitBounds
 } from 'viewport-mercator-project';
-
-// TODO - import from viewport-mercator-project
-// import {fitBounds} from '../viewport-mercator-project/fit-bounds';
 
 // TODO - import from math.gl
 /* eslint-disable camelcase */
@@ -58,7 +55,8 @@ export default class WebMercatorViewport extends Viewport {
       zoom = 11,
       pitch = 0,
       bearing = 0,
-      farZMultiplier = 10
+      farZMultiplier = 10,
+      orthographic = false
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -71,7 +69,7 @@ export default class WebMercatorViewport extends Viewport {
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
 
-    const projectionMatrix = getProjectionMatrix({
+    const {fov, aspect, focalDistance, near, far} = getProjectionParameters({
       width,
       height,
       pitch,
@@ -90,21 +88,31 @@ export default class WebMercatorViewport extends Viewport {
       altitude
     });
 
-    super(
-      Object.assign({}, opts, {
-        // x, y, position, ...
-        // TODO / hack - prevent vertical offsets if not FirstPersonViewport
-        position: opts.position && [opts.position[0], opts.position[1], 0],
-        width,
-        height,
-        viewMatrix: viewMatrixUncentered,
-        longitude,
-        latitude,
-        zoom,
-        projectionMatrix,
-        focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
-      })
-    );
+    // TODO / hack - prevent vertical offsets if not FirstPersonViewport
+    const position = opts.position && [opts.position[0], opts.position[1], 0];
+
+    const viewportOpts = Object.assign({}, opts, {
+      // x, y,
+      width,
+      height,
+
+      // view matrix
+      viewMatrix: viewMatrixUncentered,
+      longitude,
+      latitude,
+      zoom,
+      position,
+
+      // projection matrix parameters
+      orthographic,
+      fovyRadians: fov,
+      aspect,
+      focalDistance, // TODO Viewport is already carefully set up to "focus" on ground
+      near,
+      far
+    });
+
+    super(viewportOpts);
 
     // Save parameters
     this.latitude = latitude;
@@ -114,6 +122,8 @@ export default class WebMercatorViewport extends Viewport {
     this.bearing = bearing;
     this.altitude = altitude;
 
+    this.orthographic = orthographic;
+
     // Bind methods
     this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
     this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
@@ -122,33 +132,6 @@ export default class WebMercatorViewport extends Viewport {
     Object.freeze(this);
   }
   /* eslint-enable complexity, max-statements */
-
-  /**
-   * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
-   * Performs the nonlinear part of the web mercator projection.
-   * Remaining projection is done with 4x4 matrices which also handles
-   * perspective.
-   *
-   * @param {Array} lngLat - [lng, lat] coordinates
-   *   Specifies a point on the sphere to project onto the map.
-   * @return {Array} [x,y] coordinates.
-   */
-  _projectFlat(lngLat, scale = this.scale) {
-    return lngLatToWorld(lngLat, scale);
-  }
-
-  /**
-   * Unproject world point [x,y] on map onto {lat, lon} on sphere
-   *
-   * @param {object|Vector} xy - object with {x,y} members
-   *  representing point on projected map plane
-   * @return {GeoCoordinates} - object with {lat,lon} of point on sphere.
-   *   Has toArray method if you need a GeoJSON Array.
-   *   Per cartographic tradition, lat and lon are specified as degrees.
-   */
-  _unprojectFlat(xy, scale = this.scale) {
-    return worldToLngLat(xy, scale);
-  }
 
   /**
    * Converts a meter offset to a lnglat offset
@@ -258,6 +241,18 @@ export default class WebMercatorViewport extends Viewport {
     const {pitch, zoom} = this;
 
     return pitch <= MAPBOX_LIMITS.pitch + EPSILON && zoom <= MAPBOX_LIMITS.zoom + EPSILON;
+  }
+
+  // INTERNAL METHODS
+
+  // Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
+  _projectFlat(lngLat, scale = this.scale) {
+    return lngLatToWorld(lngLat, scale);
+  }
+
+  // Unproject world point [x,y] on map onto {lat, lon} on sphere
+  _unprojectFlat(xy, scale = this.scale) {
+    return worldToLngLat(xy, scale);
   }
 }
 
