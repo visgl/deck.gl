@@ -28,6 +28,8 @@ import vs from './gpu-screen-grid-layer-vertex.glsl';
 import fs from './gpu-screen-grid-layer-fragment.glsl';
 const DEFAULT_MINCOLOR = [0, 0, 0, 255];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
+const AGGREGATION_DATA_UBO_INDEX = 0;
+
 const defaultProps = {
   cellSizePixels: 100,
 
@@ -43,7 +45,9 @@ const defaultProps = {
 
 export default class GPUScreenGridLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    // TODO: enable picking (https://github.com/uber/deck.gl/issues/1592)
+    // return {vs, fs, modules: ['picking']};
+    return {vs, fs};
   }
 
   initializeState() {
@@ -69,8 +73,11 @@ export default class GPUScreenGridLayer extends Layer {
     };
     this.setState({
       model: this._getModel(gl),
-      gpuGridAggregator: new GPUGridAggregator(gl, options)
+      gpuGridAggregator: new GPUGridAggregator(gl, options),
+      maxCountBuffer: this._getMaxCountBuffer(gl)
     });
+
+    this._setupUniformBuffer();
   }
 
   shouldUpdateState({changeFlags}) {
@@ -92,8 +99,11 @@ export default class GPUScreenGridLayer extends Layer {
 
   draw({uniforms}) {
     const {minColor, maxColor, parameters = {}} = this.props;
-    const {model, maxCount, cellScale} = this.state;
-    uniforms = Object.assign({}, uniforms, {minColor, maxColor, maxCount, cellScale});
+    const {model, maxCountBuffer, cellScale} = this.state;
+    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale});
+
+    // TODO: remove index specification (https://github.com/uber/luma.gl/pull/473)
+    maxCountBuffer.bind({index: AGGREGATION_DATA_UBO_INDEX});
     model.draw({
       uniforms,
       parameters: Object.assign(
@@ -104,23 +114,7 @@ export default class GPUScreenGridLayer extends Layer {
         parameters
       )
     });
-  }
-
-  _getModel(gl) {
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
-          attributes: {
-            vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
-          }
-        }),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
-      })
-    );
+    maxCountBuffer.unbind();
   }
 
   updateAggregation() {
@@ -138,9 +132,13 @@ export default class GPUScreenGridLayer extends Layer {
     const numRow = Math.ceil(height / cellSizePixels);
     const numInstances = numCol * numRow;
     const dataBytes = numInstances * 4 * 4;
-    const {positions, weights} = this.state;
+    const {positions, weights, maxCountBuffer} = this.state;
+    let countsBuffer = this.state.countsBuffer;
+    if (countsBuffer) {
+      countsBuffer.delete();
+    }
 
-    const countsBuffer = new Buffer(gl, {
+    countsBuffer = new Buffer(gl, {
       size: 4,
       bytes: dataBytes,
       type: GL.FLOAT,
@@ -153,17 +151,15 @@ export default class GPUScreenGridLayer extends Layer {
       cellSize: [cellSizePixels, cellSizePixels],
       viewport: this.context.viewport,
       countsBuffer,
+      maxCountBuffer,
       useGPU: false // TODO: this shouldn't be an option, remove
     });
-
-    const {maxCount} = aggregatedData;
 
     this.setState({
       cellScale,
       numCol,
       numRow,
-      numInstances,
-      maxCount
+      numInstances
     });
 
     const attributeManager = this.getAttributeManager();
@@ -174,7 +170,7 @@ export default class GPUScreenGridLayer extends Layer {
       data,
       numInstances,
       buffers: {
-        instanceCounts: countsBuffer
+        instanceCounts: aggregatedData.countsBuffer
       },
       context: this,
       ignoreUnknownAttributes: true
@@ -204,6 +200,33 @@ export default class GPUScreenGridLayer extends Layer {
 
   // HELPER Methods
 
+  _getModel(gl) {
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          attributes: {
+            vertices: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
+  }
+
+  // Creates and returns a Uniform Buffer object to hold maxCount value.
+  _getMaxCountBuffer(gl) {
+    return new Buffer(gl, {
+      target: GL.UNIFORM_BUFFER,
+      bytes: 4 * 4, // Four floats
+      size: 4,
+      index: AGGREGATION_DATA_UBO_INDEX
+    });
+  }
+
   // Process 'data' and build positions and weights Arrays.
   _processData() {
     const {data, getPosition, getWeight} = this.props;
@@ -218,6 +241,16 @@ export default class GPUScreenGridLayer extends Layer {
     }
 
     this.setState({positions, weights});
+  }
+
+  // Set a binding point for the aggregation uniform block index
+  _setupUniformBuffer() {
+    const gl = this.context.gl;
+    const programHandle = this.state.model.program.handle;
+
+    // TODO: Replace with luma.gl api when ready.
+    const uniformBlockIndex = gl.getUniformBlockIndex(programHandle, 'AggregationData');
+    gl.uniformBlockBinding(programHandle, uniformBlockIndex, AGGREGATION_DATA_UBO_INDEX);
   }
 
   _shouldUseMinMax() {

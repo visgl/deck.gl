@@ -15,9 +15,10 @@ export default class GPUGridAggregator {
   }
 
   // PRIVATE
+  /* eslint-disable max-statements */
   _runAggregationOnCPU(opts) {
     const ELEMENTCOUNT = 4;
-    const {positions, weights, viewport, cellSize, countsBuffer} = opts;
+    const {positions, weights, viewport, cellSize, countsBuffer, maxCountBuffer} = opts;
     const width = opts.width || viewport.width;
     const height = opts.height || viewport.height;
     const numCol = Math.ceil(width / cellSize[0]);
@@ -27,7 +28,7 @@ export default class GPUGridAggregator {
     counts.fill(0);
     let maxCount = 0;
     let totalCount = 0;
-    for (let index = 0; index < counts.length; index++) {
+    for (let index = 0; index < weights.length; index++) {
       const [x, y] = viewport.project([positions[index * 2], positions[index * 2 + 1]]);
       const weight = weights ? weights[index] : 1;
       assert(Number.isFinite(weight));
@@ -43,8 +44,16 @@ export default class GPUGridAggregator {
         }
       }
     }
+    const maxCountBufferData = new Float32Array(ELEMENTCOUNT);
+    // Store totalCount valuein Red/X channel
+    maxCountBufferData[0] = totalCount;
+    // Store maxCount value in alpha/W channel.
+    maxCountBufferData[3] = maxCount;
+
     // Load data to WebGL buffer.
     countsBuffer.subData({data: counts});
-    return {countsBuffer, totalCount, maxCount};
+    maxCountBuffer.subData({data: maxCountBufferData});
+    return {countsBuffer, maxCountBuffer};
   }
+  /* eslint-enable max-statements */
 }

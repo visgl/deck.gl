@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME screen-grid-layer-vertex-shader
 
 attribute vec3 vertices;
@@ -26,21 +27,25 @@ attribute vec3 instancePositions;
 attribute vec4 instanceCounts;
 attribute vec3 instancePickingColors;
 
+layout(std140) uniform;
 uniform float opacity;
 uniform vec3 cellScale;
 uniform vec4 minColor;
 uniform vec4 maxColor;
-uniform float maxCount;
+uniform AggregationData
+{
+  vec4 maxCount;
+} aggregationData;
 
 varying vec4 vColor;
 
 void main(void) {
-  float step = instanceCounts.g / maxCount;
+  float step = instanceCounts.g / aggregationData.maxCount.w;
   vec4 color = mix(minColor, maxColor, step) / 255.;
   vColor = vec4(color.rgb, color.a * opacity);
 
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
+  // // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  // picking_setPickingColor(instancePickingColors);
 
   gl_Position = vec4(instancePositions + vertices * cellScale, 1.);
 }
