@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {ScatterplotLayer, OrthographicViewport, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
 
 const DEGREE_TO_RADIAN = Math.PI / 180;
 const NUM_POINTS = 2000;
@@ -129,7 +129,7 @@ class Root extends PureComponent {
     const {width, height, viewMode} = this.state;
     const left = -Math.min(width, height) / 2;
     const top = -Math.min(width, height) / 2;
-    const glViewport = new OrthographicViewport({width, height, left, top});
+    const view = new OrthographicView({width, height, left, top});
 
     return (
       width &&
@@ -142,7 +142,7 @@ class Root extends PureComponent {
             <DeckGL
               width={width}
               height={height}
-              viewport={glViewport}
+              views={view}
               style={{position: 'absolute', top: '0px', left: '0px'}}
               layers={[this._renderScatterplotLayer()]}
             />

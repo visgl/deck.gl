@@ -1,14 +1,12 @@
 import React, {Component} from 'react';
-import DeckGL, {COORDINATE_SYSTEM, OrthographicViewport, ScatterplotLayer} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
 import {BezierCurveLayer} from 'deck.gl-layers';
 
 export default class DeckGLOverlay extends Component {
   render() {
     const {width, height, data} = this.props;
 
-    const viewport = new OrthographicViewport({
-      width,
-      height,
+    const view = new OrthographicView({
       left: -width / 2,
       top: -height / 2,
       right: width / 2,
@@ -48,7 +46,7 @@ export default class DeckGLOverlay extends Component {
 
     return (
       <div style={{pointerEvents: 'all'}}>
-        <DeckGL width={width} height={height} viewport={viewport} layers={layers} />
+        <DeckGL width={width} height={height} views={view} layers={layers} />
       </div>
     );
   }

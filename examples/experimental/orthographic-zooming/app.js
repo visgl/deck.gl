@@ -1,12 +1,7 @@
 /* global window, document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  LineLayer,
-  ScatterplotLayer,
-  OrthographicViewport
-} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, LineLayer, ScatterplotLayer, OrthographicView} from 'deck.gl';
 
 class Root extends Component {
   constructor(props) {
@@ -105,7 +100,7 @@ class Root extends Component {
       return null;
     }
 
-    const viewport = new OrthographicViewport({
+    const view = new OrthographicView({
       width,
       height,
       // the size of canvas and viewport are no longer the same as we scale w/ an ortho-viewport
@@ -121,7 +116,7 @@ class Root extends Component {
         <DeckGL
           width={width}
           height={height}
-          viewport={viewport}
+          views={view}
           layers={[this._renderBBox(), this._renderPoints()]}
         />
       </div>
