@@ -191,7 +191,6 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     AdvancedTextLayer: AdvancedTextLayerExample,
-    'TextLayer (100K)': TextLayer100KExample,
     GPUScreenGridLayer: GPUScreenGridLayerExample,
     'GPUScreenGridLayer (1M)': GPUScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUScreenGridLayer (5M)': GPUScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
