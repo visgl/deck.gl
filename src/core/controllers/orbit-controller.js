@@ -64,7 +64,7 @@ const defaultProps = {
 /*
  * Maps mouse interaction to a deck.gl Viewport
  */
-export default class OrbitControllerJS {
+export default class OrbitController {
   // Returns a deck.gl Viewport instance, to be used with the DeckGL component
   static getViewport(viewport) {
     return new OrbitViewport(viewport);
@@ -115,6 +115,6 @@ export default class OrbitControllerJS {
   }
 }
 
-OrbitControllerJS.displayName = 'OrbitController';
-OrbitControllerJS.defaultProps = defaultProps;
-OrbitControllerJS.getPropTypes = getPropTypes;
+OrbitController.displayName = 'OrbitController';
+OrbitController.defaultProps = defaultProps;
+OrbitController.getPropTypes = getPropTypes;
