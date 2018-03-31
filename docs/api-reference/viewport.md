@@ -1,6 +1,6 @@
 # Viewport Class
 
-> The `Viewport` class is normally not instantiated directly. Firstly, the `View` class is more commonly used by apps, and even when a Viewport is needed, one of its subclasses is typicall used. However, in cases where the application wants to use "externally" generated view or projection matrices (e.g. when using the WebVR API), the `Viewport` class can be used directly.
+> The `Viewport` class is normally not instantiated directly. Firstly, the `View` class is more commonly used by apps, and even when a `Viewport` is needed, one of its subclasses is typically used. However, in cases where the application wants to use "externally" generated view or projection matrices (e.g. when using the WebVR API), the `Viewport` class can be useful.
 
 A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines a number of responsibilities:
 * It enables projection and unprojection of coordinates (between world and viewport), both in JavaScript and in GLSL.
@@ -8,7 +8,10 @@ A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines 
 * The viewport class provides both direct `project`/`unproject` function members as well as projection matrices including `view` and `projection` matrices, and can generate their inverses as well to facilitate e.g. lighting calculations in WebGL shaders.
 * In geospatial setups, Viewports can contain geospatial anchors.
 
-For more information consult the [Viewports](/docs/advanced/viewports.md) article.
+For more information:
+* See the deck.gl [Viewports](/docs/advanced/viewports.md) article.
+* See the math.gl article on [View and Projection Matrices](https://uber-web.github.io/math.gl/#/documentation/articles/view-and-projection-matrices)
+
 
 ## Usage
 
@@ -16,31 +19,43 @@ For more information consult the [Viewports](/docs/advanced/viewports.md) articl
 const viewport = new Viewport({width: 500, height: 500, ...});
 ```
 
-## Constructor
+## Methods
 
-Parameters:
+### Constructor
 
-- `props` (Object) - Viewport properties
-  * `props.width` (Number) - Width of "viewport" or window. Default to `1`.
-  * `props.height` (Number) - Height of "viewport" or window. Default to `1`.
-  * `props.viewMatrix` (Array[16], optional) - View matrix. Default to identity matrix.
+`new Viewport({width: 500, height: 500, viewMatrix, projectionMatrix, ...});`
 
-Projection Matrix Options
-  - Option 1: Specify arguments for a a perspective projection matrix
-      * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-      * `aspect` (Number, optional) - Aspect ratio. Defaults to the viewport's `width/height`.
-      * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-      * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  - Option 2: Supply a **custom** `projectionMatrix`
-      * `props.projectionMatrix` (Array[16], optional) - Projection matrix. Defaults to identity matrix. Can be used to
+View Parameters
+* `x`=`0`
+* `y`=`0`
+* `width`=`1` (`Number`) - Width of "viewport" or window.
+* `height`=`1` (`Number`) - Height of "viewport" or window.
+* `viewMatrix`= (`Array[16]`, optional) - View matrix. Defaults to identity matrix.
+* `projectionMatrix` (`Array[16]`, optional) - Projection matrix.
+
+Position parameters
+* `position`
+* `modelMatrix`
 
 Geospatial Anchor Options (Optional)
-  * `latitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `37`.
-  * `longitude` (Number, optional) - Center of viewport on map (alternative to center). Default to `-122`.
-  * `zoom` (Number, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) of the viewport. Default to `11`.
-  * `focalDistance` (Number, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
+* `latitude`=`37` (`Number`, optional) - Center of viewport on map (alternative to center).
+* `longitude`=`-122` (`Number`, optional) - Center of viewport on map (alternative to center).
+* `zoom`=`11` (`Number`, optional)  - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) .
+* `focalDistance` (Number, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
 
-## Methods
+Projection Matrix Parameters (Optional).
+* `orthographic`=`false` - whether to create an orthographic or perspective projection matrix.
+* `fov`=`75` (`Number`) - Field of view covered by camera, in the perspective case.
+* `focalDistance`=`1` - (orthographic projections only). The distance at which the field-of-view frustum is sampled to extract the extents of the view box.
+* `aspect`=`1` (`Number`) - Aspect ratio. Defaults to the viewport's `width/height`.
+* `near`=`0.1` (`Number`) - Distance of near clipping plane.
+* `far`=`500` (`Number`) - Distance of far clipping plane..
+- Option 3: Specify parameters for an orthographic projection matrix. Same parameters
+
+
+Remarks:
+* If the `projectionMatrix` parameter is not supplied, `Viewport` will try to create a projection matrix from the project matrix parameters.
+
 
 ### equals
 
@@ -51,6 +66,7 @@ Parameters:
 Returns:
 
 - `true` if the given viewport is identical to the current one.
+
 
 ### project
 
@@ -69,6 +85,7 @@ Returns: `[x, y]` or `[x, y, z]` in pixels coordinates. `z` is pixel depth.
 
 Note: By default, returns top-left coordinates for canvas/SVG type render
 
+
 ### unproject
 
 Unproject pixel coordinates on screen onto [lng, lat, altitude] on map.
@@ -86,6 +103,7 @@ Returns: `[lng, lat]` or `[longitude, lat, Z]` in map coordinates. `Z` is elevat
 - If input is `[x, y, z]`: returns `[lng, lat, Z]`.
 
 Note: By default, takes top-left coordinates from JavaScript mouse events.
+
 
 ## Remarks
 

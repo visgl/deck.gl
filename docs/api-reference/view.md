@@ -1,8 +1,6 @@
 # View Class
 
-The `View` class is used to specify how one view of your deck.gl layers should be rendered. Ap[plications typically want at least one `View` subclass to make sure that something is rendered on the screencombines a number of responsibilities:
-
-> The `View` class is normally not instantiated directly but rather one of its subclasses is used. However, in cases where the application needs to use "externally" generated view or projection matrices (such as WebVR), the `View` class can be used directly.
+The `View` class and it subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantitate at least one `View` subclass.
 
 For more information, consult the [Views](/docs/advanced/views.md) article.
 
@@ -13,24 +11,41 @@ For more information, consult the [Views](/docs/advanced/views.md) article.
 const view = new View({});
 ```
 
+## Types
+
+| `PROJECTION`      | Description |
+| ---               | ---         |
+| `PERSPECTIVE`     | Builds perspective projection from `fovy`, `near` and `far` parameters. `aspect` is extracted from the view state. |
+| `ORTHOGRAPHIC_3D` | Builds orthographic projection from `fovy`, `near` and `far` parameters. `aspect` and `distance` are extracted from the view state. |
+| `ORTHOGRAPHIC_2D` | Builds orthographic projection from `left`, `right`, `top`, `bottom`, `near` and `far` parameters. |
+
+
 ## Methods
 
 ### constructor
 
-`View({id, ...})`
+`View({id, x, y, width, height, })`
+
 * `id` (String)
+
 * `x`=`0` (String|Number) - A relative or absolute position
 * `y`=`0` (String|Number) - A relative or absolute position
 * `width`=`'100%'` (String|Number) - A relative or absolute extent
 * `height`=`'100%'` (String|Number) - A relative or absolute extent
 
 * `type`=`Viewport` (`Viewport`) -
-* `viewMatrix` (Array[16], optional) - View matrix. Default to identity matrix.
-* `props.projectionMatrix` (Array[16], optional) - Projection matrix. Defaults is to create from `fov`, `near`, `far` opts (aspect is calculated).
+
+Projection Matrix Parameters
+* `projectionMode`=`PROJECTION.PERSPECTIVE` (Enum) - the kind of projection matrix
 * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-* `aspect` (Number, optional) - Aspect ratio. Defaults to the view's `width/height`.
 * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
 * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
+
+* `left`
+* `right`
+
+Advanced usage
+* `getProjectionMatrix` (Array[16], optional) - Function that returns a projection matrix.
 
 
 ### equals
@@ -54,6 +69,9 @@ Builds a viewport using the viewport type and props in the `View` and provided `
 ### getMatrix
 
 `View.getMatrix({width, height})`
+
+* `viewMatrix` (Array[16], optional) - View matrix. Default to identity matrix.
+Defaults is to create from `fov`, `near`, `far` opts (aspect is calculated).
 
 A projection matrix depends on the aspect ratio and needs to be recalculated whenever width and height changes.
 

@@ -19,12 +19,15 @@ Inherits all [View methods](/docs/api-reference/viewport.md#methods).
 
 ### Constructor
 
-Parameters:
-  projection matrix arguments:
-  * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-  * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-  * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  * `aspect` (Number, optional) - Aspect ratio. Default to the viewport's `width/height`.
+Projection matrix arguments:
+* `orthographic`=`false` (`Boolean`) -
+* `fov`=`75` (`Number`, optional) - Field of view covered by camera.
+* `near`=`0.5` (`Number`, optional) - Distance of near clipping plane.
+* `far`=`100` (`Number`, optional) - Distance of far clipping plane.
+* `aspect`= (`Number`, optional) - Aspect ratio. If not provided the `width/height` ratio will be used when creating `Viewport`s.
+* `distance`= (`Number`, optional) - 
+
+
 
 See [View constructor](/docs/api-reference/viewport.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
 

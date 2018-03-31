@@ -2,46 +2,93 @@
 
 It is helpful to begin by thinking of a `View` essentially as a way to specify a "camera" to view your data.
 
-## What is in a View
 
-A view contains an `id`, a set of usually relative extents, .
+## What is in a View?
+
+A view specifies
+* an `id`
+* relative extents (x, y, width, height)
+* projection mode and parameters (e.g. perspective vs. orthographic)
 
 
 ## Choosing a View
 
-deck.gl offers a set of `View` classes that lets you specify how deck.gl should render your data. Using `View` classes you can visualize your data from different perspectives (top down map view, first person view, etc) and in a specific area of the "screen" (e.g. the left half of the deck.gl canvas).
+> Normally the application works with subclasses of `View`. However, in cases where the application needs to use "externally" generated view or projection matrices (such as WebVR), the `View` class can be used directly.
 
-| View Class                                   | Description |
-| ---                                          | ---         |
-| [`View`](/docs/api-reference/view.md)        | The base view has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the `WebVR` API. |
-| [`MapView`](/docs/api-reference/map-view.md) | While all `View` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
-| [`FirstPersonView`](/docs/api-reference/first-person-view.md) | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
+deck.gl offers a set of `View` classes that lets you specify how deck.gl should render your data. Using `View` classes you can visualize your data from different perspectives (top down map view, first person view, etc).
 
-Remarks:
-* The base `View` class is normally only used directly if you need and are able to calculate your own projection matrices. it is often preferable to use a `View` subclass like `MapView` or `FirstPersonView`
+| View Class                                                     | View State  | Description |
+| ---                                                            | ---         | ---         |
+| [`View`](/docs/api-reference/view.md)                          |             | The base view has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the `WebVR` API. |
+| [`MapView`](/docs/api-reference/map-view.md)                   | geoposition | While all `View` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
+| [`FirstPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera is positioned in the view state position and looks in the direction provided. Allows the application to precisely control camera position. |
+| [`ThirdPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera looks at the "view state" position from the direction provided. |
 
-It helps render data provided in different coordinate systems. Integration with Controllers work together with various event controllers enabling the user to control the viewpoint within your visualization.
-
-
-## About Viewports
-
-Note: in addition to `View` classes, deck.gl also has a hierarchy of `Viewport` classes. The main difference is that `Viewport` classes are focused on mathematical operations such as coordinate projection/unproject and calculation of projection matrices and GLSL uniforms.
-
-Unless an application needs to project or unproject coordinates in JavaScript, they typically do not directly create `Viewport` classes. Instead `Viewport` classes are created automatically, "under the hood" based on the `View` classes supplied by the application.
+| [`OrthographicView`](/docs/api-reference/orthographic-view.md) | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
+| [`PerspectiveView`](/docs/api-reference/perspective-view.md)   | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
+| [`OrbitView`](/docs/api-reference/perspective-view.md)         | "Orbit"     |  The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
 
 
-## View Positioning
+## Choosing a Projection Mode
 
-Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). Viewport positions are specified in CSS coordinates (top left, non-retina, these coordinates are different from WebGL coordinates, see remarks below). It is expected that CSS coordinates are most natural to work with, as the rest of the UI layout with other HTML components is done in the CSS coordinate system.
+The `View` class allows the application full control of what projection to use through the `projection` prop. It is designed to accept a function that can directly call matrix creation methods from math libraries like math.gl or gl-matrix. Examples of functions that can be use
 
-* **x,y coordinates** - Views allow specification of x,y coordinates in the viewport in additin to width and height. These are only used for positioning (and not for calculation of intrinsic viewport parameters).
+| Projection                      | Needs View Parameters | Description    |
+| ---                             | ---                   | ---            |
+| `Matrix4.perspective` (Default) | `fovy`, `near`, `far` | A standard perspective projection. Extracts `aspect` from the current viewport extents. |
+| `Matrix4.orthographic`          | `fovy`, `near`, `far` | An orthographic projection based on same parameters as `perspective`. Uses `distance` in the view state. |
+| `Matrix4.ortho`                 | `top`, `bottom`, `left`, `rignt`, `near`, `far` | Traditional, explicit ortographic projection parameters. Needs the additional parameters to be specified on the `View`. |
+
+While the projections suggested in the table leverage the , custom projection functions are fully supported. The `projection` prop accepts any function that returns a 4x4 projection matrix. The function will be called with the `View`s props merged with `aspect` and `distance`, The perspective mode can be implemented as follows:
+
+```js
+import {View} from 'deck.gl';
+import {Matrix4} from 'math.gl';
+// Views with matching perspective and orthographic projections
+new View({projection: props => Matrix4.perspective(props), fovy, near, far, ...});
+new View({projection: props => Matrix4.orthographic(props), fovy, near, far, ...});
+// View with traditional orthographic projection, perhaps for 2D rendering
+new View({projection: props => Matrix4.ortho(props), left, right, top, bottom, ...});
+```
+
+## Positioning a View on the Screen
+
+Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). `View`s are typically specified using relative coordinates and dimensions.
+
+* **x,y coordinates** - `x`, `y` top left coordinates on the canvas, typically given as relative percentages or zero.
+* **width and height** - `width`, `height` dimensions the viewport, typically as relative percentages.
+
+```js
+import {View} from 'deck.gl';
+new View({y: '50%', height: '50%'})
+```
+
+## Controlling What Each View Displays
+
+When it comes time to actually render something, each `View` needs to be associated with a compatible "view state". The association is temporary in that a `View` can be associated with a different "view state" each render.
+
+There is not a single set of view state parameters, but rather each controller and view can define its own view state parameters. You need to check which controllers and views can be used together.
+
+| View States    | View State                      | Optional |
+| ---            | ---                             | ---      |
+| Geospatial     | `longitude`, `latitude`, `zoom` |          |
+| Positional     | `position`, `direction`         |          |
+| Geo-positional | `position`, `direction`         | `longitude`, `latitude`, `zoom` | Optionally geospatially anchored
+| Orbit          | `rotationX`, `rotationY`, ...   | A custom set of view state parameters for non-geospatial purposes |
+
+> Currently the `Deck` component only accepts a single view state that is fed to all `View`s. In the future, it will be possible to key view states on view ids.
 
 
-## Multiple Views
+## Projecting Coordinates Using Views
 
-The main deck.gl component (i.e. `Deck`, or `DeckGL` in React) accepts a list of `View` class instances.
+While a `View` by itself does not contain enough information to support projection and unprojection of coordinates, calling `view.getViewport({viewState, width, height})` with a "view state" and `width` and `height` values for the WebGL canvas, creates a [`Viewport`](/docs/api-reference/viewport.md) that in turn can be used to efficiently project and unproject coordinates.
 
-It is common in 3D applications to render a 3D scene multiple times, with different cameras:
+
+## Using Multiple Views
+
+The main deck.gl component (i.e. `Deck`, or `DeckGL` if using React) takes a `view` prop that accepts a list of `View` instances.
+
+Common examples in 3D applications that render a 3D scene multiple times with different "cameras":
 * To show views from multiple viewpoints (cameras), e.g. in a split screen setup.
 * To show a detail view (e.g, first person), and an overlaid, smaller "map" view (e.g. third person or top down, zoomed out to show where the primary viewpoint is).
 * To support stereoscopic rendering, where left and right views are needed, providing the necessary parallax between left and right eye.
@@ -52,26 +99,26 @@ Views can be side-by-side (top and bottom in this first example). Note how the a
 ```js
   <DeckGL views=[
     new FirstPersonView({..., height: '50%'}),
-    new WebMercatorView({...viewprops, y: '50%', height: '50%'}),
+    new WebMercatorView({..., y: '50%', height: '50%'}),
     ...
   ]/>
 ```
 
-Side-by-side is of course essential for stereoscopic rendering (and conveniently, the base deck.gl viewport can directly accept view and projection matrices from the WebVR API):
+Side-by-side views are used for basic stereoscopic rendering. In addition, the `View` class can directly accept view and projection matrices from the WebVR API):
 ```js
   <DeckGL views=[
     new View({
       id: 'left-eye',
       width: '50%',
       viewMatrix: leftViewMatrix,
-      projectionMatrix: leftProjectionMatrix
+      projection: () => leftProjectionMatrix
     }),
     new View({
       id: 'right-eye',
       x: '50%',
       width: '50%',
       viewMatrix: rightViewMatrix,
-      projectionMatrix: rightProjectionMatrix
+      projection: () => rightProjectionMatrix
     }),
     ...
   ]/>
@@ -80,17 +127,8 @@ Side-by-side is of course essential for stereoscopic rendering (and conveniently
 Views can also overlap, (e.g. having a small "mini" map in the bottom middle of the screen overlaid over the main view)
 ```js
   <DeckGL views=[
-    new FirstPersonView({
-      id: 'first-person',
-      ...
-    }),
-    new MapView({
-      id: 'mini-map'
-      x: '70%',
-      y: '70%',
-      height: '15%',
-      width: '15%',
-    })
+    new FirstPersonView({id: 'first-person', ...}),
+    new MapView({id: 'mini-map', x: '70%', y: '70%', height: '15%', width: '15%'})
   ]/>
 ```
 
@@ -108,7 +146,7 @@ Note that the `pickInfo` object does not contain a viewport reference, so you wi
 
 One of the core features of deck.gl is enabling perfectly synchronized visualization overlays on top other React components and DOM elements. When using a single `View` this is quite easy (just make `DeckGL` canvas a child of the base component and make sure they have the same size). But when using multiple viewports, correctly positioning base components gets trickier, so deck.gl provides some assistance.
 
-In this example the `StaticMap` component gets automatically position under the `WebMercatorViewport`:
+In this example the `StaticMap` component gets automatically positioned under the `WebMercatorViewport`:
 ```js
   const views = [
     new FirstPersonView({...}),
@@ -132,13 +170,6 @@ In this example the `StaticMap` component gets automatically position under the 
   }
 ```
 
-### Performance Note
-
-When viewports change, layers can get a chance to update their state: the `updateState({changeFlags: viewportChanged})` function will be called.
-
-When rendering with many viewports there can be a concern that `updateState` gets called too many times per frame (potentially recalculating other things that have nothing to do with viewport updates, in less strictly coded layers). However, since most layers do not need to update state when viewport changes, the `updateState` function is not automatically called on viewport change. To make sure it is called, the layer needs to override `shouldUpdateState`.
-
-
 ### Controller Support for Multiple Viewports
 
 TBA - This is a planned feature:
@@ -158,5 +189,6 @@ Contrast this to deck.gl v4.1, where the idea was that each the of Viewport was 
 
 ## Remarks
 
-* At first blush the way deck.gl multi viewport support is designed, especially in relation to base components, might seem a little surprising. It can be helpful to consider that deck.gl is limited to rendering into a single canvas, due to the one-to-one relation between a canvas and a `WebGLRenderingContext`.
-* The coordinate system of `View` extents is defined in the "CSS" or window coordinate system of the containing HTML component and will be translated to device coordinates before `gl.viewport` is called.
+* CSS Coordinates - If using absolute coordinates, the coordinate system of `View` extents is defined in the "CSS" or window coordinate system of the containing HTML component and will be translated to device coordinates before `gl.viewport` is called.
+* `Viewport`s - in addition to `View` classes, deck.gl also has a hierarchy of `Viewport` classes. `Viewport` classes are focused on mathematical operations such as coordinate projection/unproject and calculation of projection matrices and GLSL uniforms. Unless an application needs to project or unproject coordinates in JavaScript, they typically do not directly create `Viewport` classes. Instead `Viewport` classes are created automatically, "under the hood" based on the `View` classes supplied by the application.
+* Performance - When viewports change, layers can get a chance to update their state: the `updateState({changeFlags: viewportChanged})` function will be called. When rendering with many viewports there can be a concern that `updateState` gets called too many times per frame (potentially recalculating other things that have nothing to do with viewport updates, in less strictly coded layers). However, since most layers do not need to update state when viewport changes, the `updateState` function is not automatically called on viewport change. To make sure it is called, the layer needs to override `shouldUpdateState`.
