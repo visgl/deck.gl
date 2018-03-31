@@ -44,6 +44,7 @@ void main(void) {
   vec4 color = mix(minColor, maxColor, step) / 255.;
   vColor = vec4(color.rgb, color.a * opacity);
 
+  // TODO: Enable picking (https://github.com/uber/deck.gl/issues/1592)
   // // Set color to be rendered to picking fbo (also used to check for selection highlight).
   // picking_setPickingColor(instancePickingColors);
 
