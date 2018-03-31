@@ -33,10 +33,8 @@ out vec4 fragColor;
 void main(void) {
   fragColor = vColor;
 
-  // use highlight color if this fragment belongs to the selected object.
+  // TODO: Enable picking (https://github.com/uber/deck.gl/issues/1592)
   // fragColor = picking_filterHighlightColor(fragColor);
-
-  // use picking color if rendering to picking FBO.
   // fragColor = picking_filterPickingColor(fragColor);
 }
 `;
