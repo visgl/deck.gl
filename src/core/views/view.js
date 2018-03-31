@@ -1,51 +1,52 @@
 import Viewport from '../viewports/viewport';
 import {parsePosition, getPosition} from '../utils/positions';
-import {Matrix4} from 'math.gl';
 import {deepEqual} from '../utils/deep-equal';
 import assert from '../utils/assert';
-
-const PERSPECTIVE_PROJECTION = props => new Matrix4().perspective(props);
 
 export default class View {
   constructor(props = {}) {
     const {
       id = null,
-      type = Viewport, // Viewport Type
 
-      // View extents (relative or absolute)
+      // Window width/height in pixels (for pixel projection)
       x = 0,
       y = 0,
       width = '100%',
       height = '100%',
 
-      // Projection parameters,
-      projection = PERSPECTIVE_PROJECTION, // Projection matrix generator
-      fovy = 75,
+      // Viewport Type
+      type = Viewport, // TODO - default to WebMercator?
+
+      // Viewport Options
+      projectionMatrix = null, // Projection matrix
+      fovy = 75, // Perspective projection parameters, used if projectionMatrix not supplied
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
+      modelMatrix = null, // A model matrix to be applied to position, to match the layer props API
 
-      // DEPRECATED: A View can be a wrapper for a viewport instance
+      // A View can be a wrapper for a viewport instance
       viewportInstance = null
     } = props;
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
+    this.viewportInstance = viewportInstance;
 
     // Id
     this.id = id || this.constructor.displayName || 'view';
-    this.viewportInstance = viewportInstance;
     this.type = type;
-    this.projection = projection;
 
     this.props = Object.assign({}, props, {
+      projectionMatrix,
       fovy,
       near,
-      far
+      far,
+      modelMatrix
     });
 
-    // Parse extent strings
+    // Extents
     this._parseDimensions({x, y, width, height});
 
-    // Bind methods
+    // Bind methods for easy access
     this.equals = this.equals.bind(this);
 
     Object.seal(this);
@@ -91,18 +92,11 @@ export default class View {
     };
   }
 
-  // INTERNAL METHODS
-
   // Overridable method
   _getViewport(props) {
     // Get the type of the viewport
     const {type: ViewportType} = this;
     return new ViewportType(props);
-  }
-
-  _getProjectionMatrix({width, height, distance}) {
-    const props = Object.assign({}, this.props, {width, height, aspect: width / height, distance});
-    return this.projection(props);
   }
 
   // Parse relative viewport dimension descriptors (e.g {y: '50%', height: '50%'})

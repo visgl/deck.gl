@@ -1,6 +1,7 @@
 import OrbitViewport from '../viewports/orbit-viewport';
 import OrbitState from '../controllers/orbit-state';
 import ViewportControls from '../controllers/viewport-controls';
+import assert from '../utils/assert';
 import {EventManager} from 'mjolnir.js';
 
 const PREFIX = '-webkit-';
@@ -71,6 +72,8 @@ export default class OrbitController {
   }
 
   constructor(props) {
+    assert(!props.children, 'OrbitController is no longer a React component');
+
     props = Object.assign({}, defaultProps, props);
 
     this.props = props;
@@ -98,7 +101,6 @@ export default class OrbitController {
   setProps(props) {
     props = Object.assign({}, this.props, props);
     this.props = props;
-
     this._controls.setOptions(props);
   }
 

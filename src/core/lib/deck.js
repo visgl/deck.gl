@@ -33,15 +33,21 @@ import assert from '../utils/assert';
 function noop() {}
 
 function getPropTypes(PropTypes) {
+  // Note: Arrays (layers, views, ) can contain falsy values
   return {
     id: PropTypes.string,
     width: PropTypes.number.isRequired,
     height: PropTypes.number.isRequired,
-    layers: PropTypes.array, // Array can contain falsy values
-    views: PropTypes.array, // Array can contain falsy values
+
+    // layer/view/controller settings
+    layers:PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    layerFilter: PropTypes.func,
+    views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
-    layerFilter: PropTypes.func,
+    controller: PropTypes.object,
+
+    // GL settings
     glOptions: PropTypes.object,
     gl: PropTypes.object,
     pickingRadius: PropTypes.number,
@@ -67,6 +73,7 @@ const defaultProps = {
   layers: [],
   effects: [],
   views: null,
+  controller: null, // Rely on external controller, e.g. react-map-gl
 
   onWebGLInitialized: noop,
   onBeforeRender: noop,
@@ -87,6 +94,7 @@ export default class Deck {
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
+    this.controller = null;
     this.stats = new Stats({id: 'deck.gl'});
 
     // Bind methods
@@ -94,11 +102,27 @@ export default class Deck {
     this._onRenderFrame = this._onRenderFrame.bind(this);
 
     this.canvas = this._createCanvas(props);
+    this.controller = this._createController(props);
     this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
 
     this.animationLoop.start();
+  }
+
+  finalize() {
+    this.animationLoop.stop();
+    this.animationLoop = null;
+
+    if (this.layerManager) {
+      this.layerManager.finalize();
+      this.layerManager = null;
+    }
+
+    if (this.controller) {
+      this.controller.finalize();
+      this.controller = null;
+    }
   }
 
   setProps(props) {
@@ -112,15 +136,9 @@ export default class Deck {
     const {useDevicePixels, autoResizeDrawingBuffer} = props;
     this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
     this.stats.timeEnd('deck.setProps');
-  }
 
-  finalize() {
-    this.animationLoop.stop();
-    this.animationLoop = null;
-
-    if (this.layerManager) {
-      this.layerManager.finalize();
-      this.layerManager = null;
+    if (this.controller) {
+      this.controller.setProps(props);
     }
   }
 
@@ -170,6 +188,20 @@ export default class Deck {
     }
 
     return canvas;
+  }
+
+  // Note: props.controller must be a class, not an already created instance
+  _createController(props) {
+    const Controller = props.controller;
+    assert(!Controller || typeof Controller === 'function');
+    return (
+      Controller &&
+      new Controller(
+        Object.assign({}, props.viewState, props, {
+          canvas: this.canvas
+        })
+      )
+    );
   }
 
   _createAnimationLoop(props) {
