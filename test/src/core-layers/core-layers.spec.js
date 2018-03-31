@@ -28,8 +28,8 @@ import {
   LineLayer,
   ScreenGridLayer,
   PointCloudLayer,
-  PathLayer,
-  TextLayer
+  PathLayer
+  // TextLayer
 } from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl/test/data';
@@ -331,6 +331,7 @@ test('PathLayer#constructor', t => {
   t.end();
 });
 
+/* TextLayer tests don't work under Node due to fontAtlas needing canvas
 test('Text#constructor', t => {
   const data = [
     {
@@ -376,3 +377,4 @@ test('Text#constructor', t => {
 
   t.end();
 });
+*/

@@ -68,6 +68,11 @@ export default class Attribute {
     // TODO call buffer.finalize();
   }
 
+  // HACK to fix plot layer (temporary)
+  get value() {
+    return this.state.value;
+  }
+
   needsUpdate() {
     return this.state.needsUpdate;
   }
