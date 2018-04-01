@@ -97,11 +97,21 @@ export default class OrbitViewport extends Viewport {
     return transformVector(this.pixelUnprojectionMatrix, [x, y2, z, 1]);
   }
 
-  /** Move camera to make a model bounding box centered at lookat position fit in the viewport.
+  /** Get camera `distance` to make view fit a box centered at lookat position in the viewport.
    * @param {Array} sizes - [sizeX, sizeY, sizeZ]], define the dimensions of bounding box
+   * @returns {Nunber} the new distance parameter
+   */
+  getDistance({boundingBox, fov}) {
+    const halfMaxSide = Math.max(boundingBox[0], boundingBox[1], boundingBox[2]) / 2;
+    const distance = halfMaxSide / Math.tan(fov / 180 * Math.PI / 2);
+    return distance;
+  }
+
+  /** Move camera to make a model bounding box centered at lookat position fit in the viewport.
+   * @param {Array} boundingBox - [sizeX, sizeY, sizeZ]], define the dimensions of bounding box
    * @returns a new OrbitViewport object
    */
-  fitBounds(sizes) {
+  fitBounds(boundingBox) {
     const {
       width,
       height,
@@ -115,8 +125,6 @@ export default class OrbitViewport extends Viewport {
       far,
       zoom
     } = this;
-    const size = Math.max(sizes[0], sizes[1], sizes[2]) / 2;
-    const newDistance = size / Math.tan(fov / 180 * Math.PI / 2);
 
     return new OrbitViewport({
       width,
@@ -130,7 +138,7 @@ export default class OrbitViewport extends Viewport {
       far,
       zoom,
       lookAt,
-      distance: newDistance
+      distance: this.getDistance({boundingBox, fov})
     });
   }
 }
