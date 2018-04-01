@@ -10,3 +10,11 @@ The exact properties in the view state can depend on the controller or view bein
 ## About Geospatial Positioning
 
 A special property of a deck.gl view state is that it can optionally be equipped with a lng/lat "anchor" and a meter offset. See the article about coordinate systems for more information about this setup.
+
+| View States    | Props                           | Optional | Description |
+| ---            | ---                             | ---      | ---         |
+| Geospatial     | `longitude`, `latitude`, `zoom` |          | |
+| Positional     | `position`, `direction`         |          | |
+| Geo-positional | `position`, `direction`         | `longitude`, `latitude`, `zoom` | Optionally geospatially |anchored. |
+| Orbit          | `rotationX`, `rotationY`, ...   | - | A custom set of view state parameters for the `OrbitController`. |
+

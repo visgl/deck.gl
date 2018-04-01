@@ -5,11 +5,10 @@
 
 ## Viewports
 
-In addition to the `View` classes, deck.gl also provides a hierarchy of `Viewport` classes. Unless an application needs to project or unproject coordinates in JavaScript, they typically do not directly create `Viewport` classes. Instead, `Viewport` classes are created under the hood based on the `View` class descriptors.
+deck.gl provides a hierarchy of `Viewport` classes. Unless an application needs to project or unproject coordinates in JavaScript, they typically do not directly create `Viewport` classes. Instead, `Viewport` classes are created under the hood based on the `View` class descriptors.
 
-The main difference is that `Viewport` classes are focused on mathematical operations such as coordinate projection/unproject and calculation of projection matrices and GLSL uniforms.
+`Viewport` classes are focused on mathematical operations such as coordinate projection/unprojection and calculation of projection matrices and GLSL uniforms.
 
-The different [Viewport](/docs/api-reference/viewport.md) classes provide the ability to render
 As mentioned, the basic `Viewport` class is a generic geospatially enabled version of the typical 3D "camera" class you would find in most 3D/WebGL/OpenGL library, holding `view` and `projection` matrices and other uniforms needed by the WebGL vertex shaders.
 
 While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices. it is often preferable to use a `Viewport` subclass that takes higher level parameters, such as camera position and viewing direction, or map coordinates, rather than working directly with matrices.
