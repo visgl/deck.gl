@@ -25,7 +25,7 @@ const MeshLayerExample = {
     }),
     sizeScale: 10,
     getPosition: d => d.COORDINATES,
-    getAngleDegreesCW: d => Math.random() * 360,
+    getYaw: d => Math.random() * 360,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20]
   }
 };
