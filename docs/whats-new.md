@@ -1,16 +1,6 @@
-# deck.gl v5.2
+# deck.gl vNext
 
-Release date: TBD, target Q1-Q2, 2018
-
-### ScreenGridLayer **Experimental**
-
-New experimental props `colorRange` and `colorDomain` are added to ScreenGridLayer. These props provide more fine tune control over how grid cells are colored. Existing `minColor` and `maxColor` props takes precedence over these new props when they are supplied. Adding these experimental features is an attempt to bring ScreenGridLayer functionality with other aggregation layers (Hexagon and Grid).
-
-
-### Test Utilities
-
-deck.gl now provides a suite of test utilities that make it easy to unit test layers and to automate browser runs of "differential" render tests. The test utilities are of course perfect for creating unit tests for new layers but can also be used by applications. Note that the test utilities are published as a separate npm module [deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils).
-
+Release date: TBD, target Q2, 2018
 
 ### Prop Types
 
@@ -19,11 +9,64 @@ deck.gl layers can now specify additional type information about properties. Whe
 > For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
 
-### Unified 32-bit and 64-bit projection glsl functions
 
-A new common API for 32 and 64 bit projection. This interface is implemented in both the `project64` shader module and a new `project32` shader module. As a result, the same vertex shader can be used for both 32-bit and 64-bit projection depending on which module it includes as dependency.
+# deck.gl v5.2
 
-For all deck.gl users, this means reduced bundle size. For layer writers, this means greatly simplified fp64 handling and easier-to-maintain shader code. See [docs](docs/shader-modules/project32.md) for more details.
+Release date: TBD, target April, 2018
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <p><i>New TextLayer</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
+        <p><i>JSX Layers</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+## Multi-Viewport Support
+
+deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the `views` property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
+
+### View Classes
+
+A new hierarchy of `View` classes let apps provide multiple views of their data.
+
+
+## Layers
+
+### TextLayer (New)
+
+A new [TextLayer]() has been added to the core layers catalog.
+
+
+### ScreenGridLayer
+
+**Color Scale Support** (Experimental) - New experimental props `colorRange` and `colorDomain` are added to ScreenGridLayer. These props provide more fine tune control over how grid cells are colored, and brings the ScreenGridLayer into parity with other aggregation layers (i.e. HexagonLayer and GridLayer).
+
+
+## Test Utilities
+
+deck.gl now provides a suite of test utilities that make it easy to unit test layers and to automate browser runs of "differential" render tests. The test utilities are of course perfect for creating unit tests for new layers but can also be used by applications. Note that the test utilities are published as a separate npm module [deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils).
+
+
+## Dist Size Reduction
+
+Bundle sizes for a minimal deck.gl app with webpack 2.
+
+
+## Shader Modules
+
+### project64 and project32 modules
+
+**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](docs/shader-modules/project32.md) for more details.
+
 
 
 # deck.gl v5.1
