@@ -25,6 +25,10 @@ Release date: TBD, target April, 2018
         <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
         <p><i>JSX Layers</i></p>
       </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
+        <p><i>ScreenGrid Color Scale</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -65,7 +69,7 @@ Bundle sizes for a minimal deck.gl app with webpack 2.
 
 ### project64 and project32 modules
 
-**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](docs/shader-modules/project32.md) for more details.
+**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](/docs/shader-modules/project32.md) for more details.
 
 
 
