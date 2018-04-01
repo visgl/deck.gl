@@ -233,8 +233,8 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/tips-and-tricks.md')
       },
       {
-        name: 'Bulding Apps',
-        content: getDocUrl('developer-guide/building.md')
+        name: 'Building Apps',
+        content: getDocUrl('developer-guide/building-apps.md')
       },
       {
         name: 'Testing',
