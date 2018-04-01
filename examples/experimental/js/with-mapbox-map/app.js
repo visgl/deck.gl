@@ -1,6 +1,6 @@
 /* global window, fetch */
-import {experimental, GeoJsonLayer} from 'deck.gl';
-const {Deck, MapControllerJS} = experimental;
+import {Deck, GeoJsonLayer, experimental} from 'deck.gl';
+const {MapControllerJS} = experimental;
 import MapBox from './mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz

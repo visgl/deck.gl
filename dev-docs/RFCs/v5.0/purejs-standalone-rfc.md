@@ -30,7 +30,7 @@ const deckgl = new DeckGL(props);
 
 ### Properties
 
-All properties of `DeckGLJS`, except `canvas`, `width` and `height` (controlled by the `container` prop).
+All properties of `Deck`, except `canvas`, `width` and `height` (controlled by the `container` prop).
 
 All properties of the viewport controller (see the `controller` prop).
 
@@ -81,11 +81,11 @@ Set `controller` to `null` to disable interaction.
 
 ##### `pickObject`
 
-Same as `DeckGLJS.pickObject`.
+Same as `Deck.pickObject`.
 
 ##### `pickObjects`
 
-Same as `DeckGLJS.pickObjects`.
+Same as `Deck.pickObjects`.
 
 ##### `setProps`
 

@@ -22,8 +22,8 @@ import React, {createElement, cloneElement} from 'react';
 import PropTypes from 'prop-types';
 import autobind from './utils/autobind';
 import {inheritsFrom} from './utils/inherits-from';
-import {Layer, experimental} from '../../core';
-const {Deck, log} = experimental;
+import {Deck, Layer, experimental} from '../../core';
+const {log} = experimental;
 
 const propTypes = Object.assign({}, Deck.getPropTypes(PropTypes), {
   viewports: PropTypes.array, // Deprecated

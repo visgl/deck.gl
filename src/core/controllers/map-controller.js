@@ -67,7 +67,7 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
   getCursor: getDefaultCursor
 });
 
-export default class MapControllerJS {
+export default class MapController {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
 
@@ -113,6 +113,6 @@ export default class MapControllerJS {
   }
 }
 
-MapControllerJS.displayName = 'MapController';
-MapControllerJS.defaultProps = defaultProps;
-MapControllerJS.getPropTypes = getPropTypes;
+MapController.displayName = 'MapController';
+MapController.defaultProps = defaultProps;
+MapController.getPropTypes = getPropTypes;

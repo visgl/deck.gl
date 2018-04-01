@@ -1,6 +1,6 @@
 /* global window, fetch */
-import {GeoJsonLayer, experimental} from 'deck.gl';
-const {Deck, MapControllerJS} = experimental;
+import {Deck, GeoJsonLayer, experimental} from 'deck.gl';
+const {MapControllerJS} = experimental;
 import TimeSlicedScatterplotLayer from './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
 
 import {parseTile, lngLatToTile, getTileUrl} from './utils/carto-torque-utils';

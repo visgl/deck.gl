@@ -26,27 +26,14 @@ const experimental = {};
 //
 
 export {
-  // LIB
+  // CONSTANTS
   COORDINATE_SYSTEM,
-  LayerManager,
-  AttributeManager,
+  // Main class
+  Deck,
+  // Base Layers
   Layer,
   CompositeLayer,
-  // Viewports
-  Viewport,
-  WebMercatorViewport,
-  PerspectiveViewport,
-  OrthographicViewport,
-  // Shader modules
-  project,
-  project64,
-  lighting
-} from './core';
-
-// EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
-import {experimental as CoreExperimental} from './core';
-
-const {
+  // Views
   View,
   MapView,
   FirstPersonView,
@@ -54,7 +41,25 @@ const {
   OrbitView,
   PerspectiveView,
   OrthographicView,
+  // Viewports
+  Viewport,
+  WebMercatorViewport,
+  PerspectiveViewport,
+  OrthographicViewport,
+  // For custom layers
+  AttributeManager,
+  // Shader modules
+  project,
+  project64,
+  lighting,
+  // Internal classes
+  LayerManager
+} from './core';
 
+// EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
+import {experimental as CoreExperimental} from './core';
+
+const {
   // View States
   ViewState,
   FirstPersonState,
@@ -62,7 +67,7 @@ const {
   MapState,
 
   // Controllers
-  Controller,
+  ViewportControls,
   FirstPersonController,
 
   // Viewports
@@ -75,21 +80,17 @@ const {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  Deck,
-  MapControllerJS,
+  MapController: MapControllerJS,
+  OrbitController: OrbitControllerJS,
 
   EffectManager,
   Effect
 } = CoreExperimental;
 
 Object.assign(experimental, {
-  View,
-  MapView,
-  FirstPersonView,
-  ThirdPersonView,
-  OrbitView,
-  PerspectiveView,
-  OrthographicView,
+  // Experimental controllers
+  MapControllerJS,
+  OrbitControllerJS,
 
   // Unfinished controller/viewport classes
   ViewState,
@@ -97,9 +98,12 @@ Object.assign(experimental, {
   OrbitState,
   MapState,
 
-  Controller,
+  // Controller helper classes
+  ViewportControls,
+  Controller: ViewportControls,
   FirstPersonController,
 
+  // Experimental viewports
   FirstPersonViewport,
   OrbitViewport,
   ThirdPersonViewport,
@@ -108,10 +112,6 @@ Object.assign(experimental, {
   TRANSITION_EVENTS,
   LinearInterpolator,
   ViewportFlyToInterpolator,
-
-  // Pure JS (non-React) API
-  Deck,
-  MapControllerJS,
 
   // Effects base classes
   EffectManager,
