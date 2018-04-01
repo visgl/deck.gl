@@ -30,6 +30,15 @@ Release date: TBD, target April, 2018
 </table>
 
 
+## Multi-Viewport Support
+
+deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the `views` property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
+
+### View Classes
+
+A new hierarchy of `View` classes let apps provide multiple views of their data.
+
+
 ## Layers
 
 ### TextLayer (New)
