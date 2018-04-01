@@ -233,19 +233,23 @@ export const docPages = generatePath([
         content: getDocUrl('advanced/tips-and-tricks.md')
       },
       {
+        name: 'Bulding Apps',
+        content: getDocUrl('developer-guide/building.md')
+      },
+      {
         name: 'Testing',
         children: [
           {
             name: 'Overview',
-            content: getDocUrl('user-guide/testing/README.md')
+            content: getDocUrl('developer-guide/testing/README.md')
           },
           {
             name: 'Testing',
-            content: getDocUrl('user-guide/testing/testing.md')
+            content: getDocUrl('developer-guide/testing/testing.md')
           },
           {
             name: 'Using with Unit Test Frameworks',
-            content: getDocUrl('user-guide/testing/using-with-unit-test-frameworks.md')
+            content: getDocUrl('developer-guide/testing/using-with-unit-test-frameworks.md')
           }
         ]
       },

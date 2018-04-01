@@ -51,12 +51,6 @@ deck.gl now provides a suite of test utilities that make it easy to unit test la
 
 Bundle sizes for a minimal deck.gl app with webpack 2.
 
-| Dist | 5.1.4 Bundle (Compressed) | 5.2.0 Bundle (Compressed) | Comments |
-| ---  | ---                       | ---                       | --- |
-| ES6  | N/A                       | 560 KB (160 KB)           | New dist in 5.2.0                |
-| ESM  | 320 KB (80 KB)            | 712 KB (176 KB)           | Transpiled, tree-shaking enabled |
-| ES5  | 388 KB (88 KB)            |                           | 100% Transipled to ES5           |
-
 
 ## Shader Modules
 
