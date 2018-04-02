@@ -115,6 +115,10 @@ export default class GPUGridAggregator {
     height,
     useGPU = true
   } = {}) {
+    if (this.state.useGPU !== useGPU) {
+      changeFlags = DEFAULT_CHANGE_FLAGS;
+    }
+    this._setState({useGPU});
     const aggregationParams = {
       positions,
       weights,
@@ -153,9 +157,10 @@ export default class GPUGridAggregator {
   }
 
   _projectPositions(opts) {
-    if (opts.changeFlags.dataChanged || opts.changeFlags.viewportChanged) {
+    let {projectedPositions} = this.state;
+    if (!projectedPositions || opts.changeFlags.dataChanged || opts.changeFlags.viewportChanged) {
       const {positions, viewport} = opts;
-      const projectedPositions = [];
+      projectedPositions = [];
       for (let index = 0; index < positions.length; index += 2) {
         const [x, y] = viewport.project([positions[index], positions[index + 1]]);
         projectedPositions.push({x, y});
