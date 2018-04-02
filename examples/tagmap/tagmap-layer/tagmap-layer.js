@@ -78,16 +78,17 @@ export default class TagmapLayer extends CompositeLayer {
     }
 
     const {viewport} = this.context;
-    const z = Math.floor(viewport.zoom);
+    const discreteZoomLevel = Math.floor(viewport.zoom);
 
-    let tags = tagsCache[z];
+    let tags = tagsCache[discreteZoomLevel];
 
     if (!tags) {
       const {minFontSize, maxFontSize, weightThreshold} = this.props;
-      const transform = new WebMercatorViewport(Object.assign({}, viewport, {zoom: z}));
-      tagMap.setVisParam({minFontSize, maxFontSize, weightThreshold});
-      tags = tagMap.getTags({transform, viewport});
-      tagsCache[z] = tags;
+      const transform = new WebMercatorViewport(
+        Object.assign({}, viewport, {zoom: discreteZoomLevel})
+      );
+      tags = tagMap.getTags({transform, minFontSize, maxFontSize, weightThreshold});
+      tagsCache[discreteZoomLevel] = tags;
     }
 
     this.setState({tags});

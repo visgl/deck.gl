@@ -11,7 +11,6 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^3.2.0",
-    "stats.js": "^0.17.0",
     "tagmap.js": "^1.1.0"
   },
   "devDependencies": {

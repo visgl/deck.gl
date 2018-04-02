@@ -4,14 +4,12 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {fromJS} from 'immutable';
 import {json as requestJson} from 'd3-request';
-import Stats from 'stats.js';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // mapbox style file path
-const MAPBOX_STYLE_FILE =
+const MAPBOX_STYLE =
   'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 // sample data
 const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/text-layer/hashtagsOneDayWithTime.json';
@@ -30,54 +28,25 @@ class Root extends Component {
         height: 500
       }
     };
-    this._loadMapStyle();
+    this._loadData();
   }
 
-  componentWillMount() {
+  componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
-  }
-  componentDidMount() {
+
     this._loadData();
-
-    // performace monitoring panel
-    this._stats = new Stats();
-    this._stats.showPanel(0);
-    this.fps.appendChild(this._stats.dom);
-
-    const calcFPS = () => {
-      this._stats.begin();
-      this._stats.end();
-      this._animateRef = window.requestAnimationFrame(calcFPS);
-    };
-    window.requestAnimationFrame(calcFPS);
-
-    window.requestAnimationFrame(this._animateData.bind(this));
   }
 
   componentWillUnmount() {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-    if (this._animateRef) {
-      window.cancelAnimationFrame(this._animateRef);
-    }
   }
 
   _onViewportChange(viewport) {
     this.setState({
       viewport: {...this.state.viewport, ...viewport}
-    });
-  }
-
-  _loadMapStyle() {
-    requestJson(MAPBOX_STYLE_FILE, (error, response) => {
-      if (!error) {
-        const mapStyle = fromJS(response);
-        this.setState({mapStyle});
-      } else {
-        throw new Error(error.toString());
-      }
     });
   }
 
@@ -91,6 +60,7 @@ class Root extends Component {
           data[second].push(val);
         });
         this.setState({data});
+        window.requestAnimationFrame(this._animateData.bind(this));
       } else {
         throw new Error(error.toString());
       }
@@ -134,21 +104,18 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, mapStyle, dataSlice} = this.state;
+    const {viewport, dataSlice} = this.state;
 
     return (
-      <div>
-        <MapGL
-          {...viewport}
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        >
-          <DeckGLOverlay viewport={viewport} data={dataSlice} />
-        </MapGL>
-        <div ref={c => (this.fps = c)} className="fps" />
-      </div>
+      <MapGL
+        {...viewport}
+        mapStyle={MAPBOX_STYLE}
+        preventStyleDiffing={true}
+        onViewportChange={this._onViewportChange.bind(this)}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay viewport={viewport} data={dataSlice} />
+      </MapGL>
     );
   }
 }

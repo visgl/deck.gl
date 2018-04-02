@@ -17,7 +17,6 @@ function getDrawingContext() {
 export default class TagMapWrapper {
   constructor() {
     this.tagMap = null;
-    this.visParam = null;
     this.ctx = getDrawingContext();
     this.measureText = this.measureText.bind(this);
   }
@@ -27,16 +26,11 @@ export default class TagMapWrapper {
     this.tagMap.buildHierarchy(data, {getLabel, getPosition, getWeight});
   }
 
-  setVisParam({minFontSize, maxFontSize, weightThreshold}) {
-    this.visParam = {minFontSize, maxFontSize, weightThreshold};
-  }
-
-  getTags({transform, viewport}) {
-    if (!this.tagMap || !this.visParam) {
+  getTags({transform, minFontSize, maxFontSize, weightThreshold}) {
+    if (!this.tagMap) {
       throw new Error('TagMapWrapper not initialized');
     }
 
-    const {minFontSize, maxFontSize, weightThreshold} = this.visParam;
     const {project, unproject} = transform;
 
     this.tagMap.extractCluster({project, weightThreshold});

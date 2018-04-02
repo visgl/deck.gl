@@ -4,8 +4,6 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {fromJS} from 'immutable';
-import Stats from 'stats.js';
 import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
@@ -13,7 +11,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
 const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
 // mapbox style file path
-const MAPBOX_STYLE_FILE =
+const MAPBOX_STYLE =
   'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 
 class Root extends Component {
@@ -26,36 +24,13 @@ class Root extends Component {
         height: 500
       }
     };
-    this._loadMapStyle();
-  }
-
-  // use this instead of componentDidMount to avoid pickingFBO incorrect size issue
-  componentWillMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
+    // set data in component state
+    this._loadData();
   }
 
   componentDidMount() {
-    // set data in component state
-    this._loadData();
-
-    this._stats = new Stats();
-    this._stats.showPanel(0);
-    this.fps.appendChild(this._stats.dom);
-
-    const calcFPS = () => {
-      this._stats.begin();
-      this._stats.end();
-      this._animateRef = window.requestAnimationFrame(calcFPS);
-    };
-
-    this._animateRef = window.requestAnimationFrame(calcFPS);
-  }
-
-  componentWillUnmount() {
-    if (this._animateRef) {
-      window.cancelAnimationFrame(this._animateRef);
-    }
+    window.addEventListener('resize', this._resize.bind(this));
+    this._resize();
   }
 
   _resize() {
@@ -74,23 +49,11 @@ class Root extends Component {
   _loadData() {
     // remove high-frequency terms
     const excludeList = new Set(['#hiring', '#job', '#jobs', '#careerarc', '#career', '#photo']);
-    const weightThreshold = 1;
 
     requestJson(FILE_PATH, (error, response) => {
       if (!error) {
         const data = response.filter(x => !excludeList.has(x.label));
-        this.setState({data, weightThreshold});
-      } else {
-        throw new Error(error.toString());
-      }
-    });
-  }
-
-  _loadMapStyle() {
-    requestJson(MAPBOX_STYLE_FILE, (error, response) => {
-      if (!error) {
-        const mapStyle = fromJS(response);
-        this.setState({mapStyle});
+        this.setState({data});
       } else {
         throw new Error(error.toString());
       }
@@ -98,21 +61,18 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, mapStyle, data, weightThreshold} = this.state;
+    const {viewport, data} = this.state;
 
     return (
-      <div>
-        <MapGL
-          {...viewport}
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        >
-          <DeckGLOverlay viewport={viewport} data={data} weightThreshold={weightThreshold} />
-        </MapGL>
-        <div ref={c => (this.fps = c)} className="fps" />
-      </div>
+      <MapGL
+        {...viewport}
+        mapStyle={MAPBOX_STYLE}
+        preventStyleDiffing={true}
+        onViewportChange={this._onViewportChange.bind(this)}
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      >
+        <DeckGLOverlay viewport={viewport} data={data} />
+      </MapGL>
     );
   }
 }
