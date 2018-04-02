@@ -6,13 +6,10 @@
   },
   "dependencies": {
     "d3-request": "^1.0.5",
-    "deck.gl": "^5.0.0",
-    "deck.gl-layers": "^0.0.15",
-    "loglevel": "^1.4.1",
+    "deck.gl": "^5.2.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-map-gl": "^3.2.0",
-    "stats.js": "^0.17.0"
+    "react-map-gl": "^3.2.0"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

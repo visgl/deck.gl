@@ -1,14 +1,21 @@
 /* eslint-disable max-len */
-import {CompositeLayer, WebMercatorViewport} from 'deck.gl';
-import {TextLayer} from 'deck.gl';
+import {CompositeLayer, WebMercatorViewport, TextLayer} from 'deck.gl';
+import {scaleQuantile} from 'd3-scale';
 import TagMapWrapper from './tagmap-wrapper';
-import colorbrewer from 'colorbrewer';
+
+const DEFAULT_COLOR_SCHEME = [
+  [29, 145, 192],
+  [65, 182, 196],
+  [127, 205, 187],
+  [199, 233, 180],
+  [237, 248, 177]
+];
 
 const defaultProps = {
   getLabel: x => x.label,
   getWeight: x => x.weight,
   getPosition: x => x.coordinates,
-  colorScheme: colorbrewer.YlGnBu[9].slice(1, 6).reverse(),
+  colorScheme: DEFAULT_COLOR_SCHEME,
   minFontSize: 14,
   maxFontSize: 32,
   weightThreshold: 1
@@ -17,6 +24,8 @@ const defaultProps = {
 export default class TagmapLayer extends CompositeLayer {
   initializeState() {
     this.state = {
+      // Cached tags per zoom level
+      tagsCache: {},
       tags: []
     };
   }
@@ -28,16 +37,30 @@ export default class TagmapLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
+    let needsUpdate = changeFlags.viewportChanged;
+
     if (changeFlags.dataChanged) {
       this.updateTagMapData();
-      this.updateTagMapVis();
+      needsUpdate = true;
     } else if (
-      changeFlags.viewportChanged ||
       props.minFontSize !== oldProps.minFontSize ||
       props.maxFontSize !== oldProps.maxFontSize ||
       props.weightThreshold !== oldProps.weightThreshold
     ) {
+      this.setState({tagsCache: {}});
+      needsUpdate = true;
+    }
+
+    if (needsUpdate) {
       this.updateTagMapVis();
+    }
+
+    if (props.colorScheme !== oldProps.colorScheme) {
+      // set color scheme
+      const colorScale = scaleQuantile()
+        .domain([props.minFontSize, props.maxFontSize])
+        .range(props.colorScheme);
+      this.setState({colorScale});
     }
   }
 
@@ -45,26 +68,34 @@ export default class TagmapLayer extends CompositeLayer {
     const {data, getLabel, getPosition, getWeight} = this.props;
     const tagMap = new TagMapWrapper();
     tagMap.setData(data, {getLabel, getPosition, getWeight});
-    this.setState({tagMap});
+    this.setState({tagMap, tagsCache: {}});
   }
 
   updateTagMapVis() {
-    const {tagMap} = this.state;
+    const {tagMap, tagsCache} = this.state;
     if (!tagMap) {
       return;
     }
 
     const {viewport} = this.context;
-    const {minFontSize, maxFontSize, weightThreshold, colorScheme} = this.props;
-    const transform = new WebMercatorViewport(Object.assign({}, viewport));
+    const discreteZoomLevel = Math.floor(viewport.zoom);
 
-    tagMap.setVisParam({minFontSize, maxFontSize, weightThreshold, colorScheme});
-    const tags = tagMap.getTags({transform, viewport});
+    let tags = tagsCache[discreteZoomLevel];
+
+    if (!tags) {
+      const {minFontSize, maxFontSize, weightThreshold} = this.props;
+      const transform = new WebMercatorViewport(
+        Object.assign({}, viewport, {zoom: discreteZoomLevel})
+      );
+      tags = tagMap.getTags({transform, minFontSize, maxFontSize, weightThreshold});
+      tagsCache[discreteZoomLevel] = tags;
+    }
+
     this.setState({tags});
   }
 
   renderLayers() {
-    const {tags} = this.state;
+    const {tags, colorScale} = this.state;
 
     return [
       new TextLayer({
@@ -72,8 +103,8 @@ export default class TagmapLayer extends CompositeLayer {
         data: tags,
         getText: d => d.label,
         getPosition: d => d.position,
-        getColor: d => d.color,
-        getSize: d => d.size
+        getColor: d => colorScale(d.height),
+        getSize: d => d.height
       })
     ];
   }
