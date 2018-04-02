@@ -9,4 +9,5 @@ export {default as PlotDemo} from './plot-demo';
 export {default as HeatmapDemo} from './heatmap-demo';
 export {default as LineDemo} from './line-demo';
 export {default as IconDemo} from './icon-demo';
+export {default as TextDemo} from './text-demo';
 export * from './layer-demos';
