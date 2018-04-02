@@ -5,12 +5,9 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "colorbrewer": "^1.0.0",
-    "d3-color": "^1.0.3",
     "d3-request": "^1.0.5",
     "d3-scale": "^1.0.6",
-    "deck.gl": "^5.0.0",
-    "deck.gl-layers": "^0.0.15",
+    "deck.gl": "^5.2.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^3.2.0",

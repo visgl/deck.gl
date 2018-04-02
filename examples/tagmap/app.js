@@ -78,7 +78,7 @@ class Root extends Component {
 
     requestJson(FILE_PATH, (error, response) => {
       if (!error) {
-        const data = response.filter(x => !excludeList.has(x.label)).slice(0, 1000);
+        const data = response.filter(x => !excludeList.has(x.label));
         this.setState({data, weightThreshold});
       } else {
         throw new Error(error.toString());
