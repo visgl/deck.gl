@@ -78,6 +78,7 @@ export default class TagmapLayer extends CompositeLayer {
     }
 
     const {viewport} = this.context;
+<<<<<<< HEAD
     const discreteZoomLevel = Math.floor(viewport.zoom);
 
     let tags = tagsCache[discreteZoomLevel];
@@ -89,6 +90,18 @@ export default class TagmapLayer extends CompositeLayer {
       );
       tags = tagMap.getTags({transform, minFontSize, maxFontSize, weightThreshold});
       tagsCache[discreteZoomLevel] = tags;
+=======
+    const z = Math.floor(viewport.zoom);
+
+    let tags = tagsCache[z];
+
+    if (!tags) {
+      const {minFontSize, maxFontSize, weightThreshold} = this.props;
+      const transform = new WebMercatorViewport(Object.assign({}, viewport, {zoom: z}));
+      tagMap.setVisParam({minFontSize, maxFontSize, weightThreshold});
+      tags = tagMap.getTags({transform, viewport});
+      tagsCache[z] = tags;
+>>>>>>> improve tagmap layer example perf
     }
 
     this.setState({tags});
