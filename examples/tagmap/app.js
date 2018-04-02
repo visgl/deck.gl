@@ -71,7 +71,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGLOverlay viewport={viewport} data={data} />
+        <DeckGLOverlay viewport={viewport} data={data} fontSize={32} cluster={true} />
       </MapGL>
     );
   }

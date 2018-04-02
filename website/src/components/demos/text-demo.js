@@ -11,15 +11,15 @@ export default class TextDemo extends Component {
 
   static get data() {
     return {
-      url: 'hashtags10k.txt',
-      // url: `${DATA_URI}/meteorites.txt`,
+      url: `${DATA_URI}/hashtags10k.txt`,
       worker: 'workers/hashtags-decoder.js'
     };
   }
 
   static get parameters() {
     return {
-      maxFontSize: {displayName: 'Max Font Size',
+      cluster: {displayName: 'Cluster', type: 'checkbox', value: true},
+      fontSize: {displayName: 'Max Font Size',
         type: 'range', value: 32, step: 1, min: 20, max: 80}
     };
   }
@@ -60,7 +60,8 @@ export default class TextDemo extends Component {
       <div className="text-demo">
         <TagmapOverlay viewport={viewport}
           data={data}
-          maxFontSize={params.maxFontSize.value} />
+          cluster={params.cluster.value}
+          fontSize={params.fontSize.value} />
       </div>
     );
   }
