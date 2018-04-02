@@ -1,9 +1,9 @@
 /* global window */
 
 // deck.gl ES6 components
-import {COORDINATE_SYSTEM, experimental} from 'deck.gl';
+import {COORDINATE_SYSTEM, MapView, FirstPersonView, OrbitView, experimental} from 'deck.gl';
 
-const {MapState, OrbitState, MapView, FirstPersonView, OrbitView, ReflectionEffect} = experimental;
+const {MapState, OrbitState, ReflectionEffect} = experimental;
 
 // deck.gl react components
 import DeckGL from 'deck.gl';

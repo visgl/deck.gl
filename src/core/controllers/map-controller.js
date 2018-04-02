@@ -1,5 +1,6 @@
 import MapControls from '../controllers/map-controls';
 import {MAPBOX_LIMITS} from '../controllers/map-state';
+import assert from '../utils/assert';
 import {EventManager} from 'mjolnir.js';
 
 const PREFIX = '-webkit-';
@@ -69,6 +70,8 @@ const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
 
 export default class MapController {
   constructor(props) {
+    assert(!props.children, 'MapController is no longer a React component');
+
     props = Object.assign({}, defaultProps, props);
 
     this.props = props;

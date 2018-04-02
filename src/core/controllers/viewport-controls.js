@@ -126,6 +126,7 @@ export default class ViewportControls {
   setOptions(options) {
     const {
       onViewportChange,
+      onViewStateChange,
       onStateChange = this.onStateChange,
       eventManager = this.eventManager,
       scrollZoom = true,
@@ -138,8 +139,11 @@ export default class ViewportControls {
     } = options;
 
     this.onViewportChange = onViewportChange;
+    this.onViewStateChange = onViewStateChange;
     this.onStateChange = onStateChange;
-    this.viewportStateProps = options;
+    this.viewportStateProps = options.viewState
+      ? Object.assign({}, options, options.viewState)
+      : options;
 
     if (this.eventManager !== eventManager) {
       // EventManager has changed
@@ -183,29 +187,34 @@ export default class ViewportControls {
 
   // Private Methods
 
-  setState(newState) {
-    Object.assign(this._state, newState);
+  /* Callback util */
+  // formats map state and invokes callback function
+  updateViewport(newViewportState, extraProps = {}, interactionState = {}) {
+    const viewState = Object.assign({}, newViewportState.getViewportProps(), extraProps);
+
+    // TODO - to restore diffing, we need to include interactionState
+    const changed = true;
+    // const oldViewState = this.viewportState.getViewportProps();
+    // const changed = Object.keys(viewState).some(key => oldViewState[key] !== viewState[key]);
+
+    if (changed) {
+      if (this.onViewportChange) {
+        const viewport = this.viewportState.getViewport ? this.viewportState.getViewport() : null;
+        this.onViewportChange(viewState, interactionState, viewport);
+      }
+      if (this.onViewStateChange) {
+        this.onViewStateChange({viewState, interactionState});
+      }
+    }
+
+    Object.assign(
+      this._state,
+      Object.assign({}, newViewportState.getInteractiveState(), interactionState)
+    );
     if (this.onStateChange) {
       this.onStateChange(this._state);
     }
-  }
-
-  /* Callback util */
-  // formats map state and invokes callback function
-  updateViewport(newViewportState, extraProps = {}, extraState = {}) {
-    const oldViewport = this.viewportState.getViewportProps();
-    const newViewport = Object.assign({}, newViewportState.getViewportProps(), extraProps);
-
-    if (
-      this.onViewportChange &&
-      Object.keys(newViewport).some(key => oldViewport[key] !== newViewport[key])
-    ) {
-      // Viewport has changed
-      const viewport = this.viewportState.getViewport ? this.viewportState.getViewport() : null;
-      this.onViewportChange(newViewport, viewport);
-    }
-
-    this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
+    // this.setState(Object.assign({}, newViewportState.getInteractiveState(), extraState));
   }
 
   /* Event handlers */
