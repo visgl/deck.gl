@@ -15,12 +15,13 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, data} = this.props;
+    const {viewport, data, maxFontSize} = this.props;
 
     const layers = [
       new TagmapLayer({
         id: 'Twitter-topics',
-        data
+        data,
+        maxFontSize
       })
     ];
 
