@@ -22,26 +22,16 @@ import {CompositeLayer} from '../../core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import {makeFontAtlas} from './font-atlas';
 
-export const TEXT_ANCHOR = {
-  START: 'start',
-  MIDDLE: 'middle',
-  END: 'end'
-};
-export const ALIGNMENT_BASELINE = {
-  TOP: 'top',
-  CENTER: 'center',
-  BOTTOM: 'bottom'
+const TEXT_ANCHOR = {
+  start: 1,
+  middle: 0,
+  end: -1
 };
 
-const TEXT_ANCHOR_MAP = {
-  [TEXT_ANCHOR.START]: 1,
-  [TEXT_ANCHOR.MIDDLE]: 0,
-  [TEXT_ANCHOR.END]: -1
-};
-const ALIGNMENT_BASELINE_MAP = {
-  [ALIGNMENT_BASELINE.TOP]: 1,
-  [ALIGNMENT_BASELINE.CENTER]: 0,
-  [ALIGNMENT_BASELINE.BOTTOM]: -1
+const ALIGNMENT_BASELINE = {
+  top: 1,
+  center: 0,
+  bottom: -1
 };
 
 const DEFAULT_FONT_FAMILY = '"Lucida Console", Monaco, monospace';
@@ -57,8 +47,8 @@ const defaultProps = {
   getColor: x => x.color || DEFAULT_COLOR,
   getSize: x => x.size || 32,
   getAngle: x => x.angle || 0,
-  getTextAnchor: x => x.textAnchor || TEXT_ANCHOR.MIDDLE,
-  getAlignmentBaseline: x => x.alignmentBaseline || ALIGNMENT_BASELINE.CENTER,
+  getTextAnchor: x => x.textAnchor || 'middle',
+  getAlignmentBaseline: x => x.alignmentBaseline || 'center',
   getPixelOffset: x => x.offset || x.pixelOffset || [0, 0]
 };
 
@@ -111,17 +101,17 @@ export default class TextLayer extends CompositeLayer {
   }
 
   getAnchorXFromTextAnchor(textAnchor) {
-    if (!TEXT_ANCHOR_MAP.hasOwnProperty(textAnchor)) {
+    if (!TEXT_ANCHOR.hasOwnProperty(textAnchor)) {
       throw new Error(`Invalid text anchor parameter: ${textAnchor}`);
     }
-    return TEXT_ANCHOR_MAP[textAnchor];
+    return TEXT_ANCHOR[textAnchor];
   }
 
   getAnchorYFromAlignmentBaseline(alignmentBaseline) {
-    if (!ALIGNMENT_BASELINE_MAP.hasOwnProperty(alignmentBaseline)) {
+    if (!ALIGNMENT_BASELINE.hasOwnProperty(alignmentBaseline)) {
       throw new Error(`Invalid alignment baseline parameter: ${alignmentBaseline}`);
     }
-    return ALIGNMENT_BASELINE_MAP[alignmentBaseline];
+    return ALIGNMENT_BASELINE[alignmentBaseline];
   }
 
   renderLayers() {
