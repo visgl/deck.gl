@@ -15,6 +15,7 @@ export default class Attribute {
     instanced = 0,
 
     // deck.gl fields
+    transition = false,
     noAlloc = false,
     updater = null,
     accessor = null
@@ -31,6 +32,7 @@ export default class Attribute {
         userData: {}
       },
       {
+        transition,
         noAlloc,
         updater,
         accessor

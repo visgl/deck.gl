@@ -46,7 +46,7 @@ export default class AttributeTransitionManager {
     const changedTransitions = {};
 
     for (const attributeName in attributes) {
-      const transition = this._updateAttribute(attributeName, attributes[attributeName]);
+      const transition = this._updateAttribute(attributeName, attributes[attributeName].state);
 
       if (transition) {
         if (!attributeTransitions[attributeName]) {
@@ -61,7 +61,7 @@ export default class AttributeTransitionManager {
     for (const attributeName in attributeTransitions) {
       const attribute = attributes[attributeName];
 
-      if (!attribute || !attribute.transition) {
+      if (!attribute || !attribute.state.transition) {
         // Animated attribute has been removed
         delete attributeTransitions[attributeName];
         needsNewModel = true;
@@ -154,7 +154,7 @@ export default class AttributeTransitionManager {
       let hasChanged;
       let transition = this.attributeTransitions[attributeName];
       if (transition) {
-        hasChanged = attribute.changed;
+        hasChanged = attribute.needsRedraw;
       } else {
         // New animated attributes have been added
         transition = {name: attributeName, attribute};
