@@ -11,14 +11,14 @@ export default class TextDemo extends Component {
 
   static get data() {
     return {
-      url: `${DATA_URI}/hashtags10k.txt`,
+      url: `${DATA_URI}/hashtags100k.txt`,
       worker: 'workers/hashtags-decoder.js'
     };
   }
 
   static get parameters() {
     return {
-      cluster: {displayName: 'Cluster', type: 'checkbox', value: true},
+      cluster: {displayName: 'Dynamic Cluster', type: 'checkbox', value: true},
       fontSize: {displayName: 'Max Font Size',
         type: 'range', value: 32, step: 1, min: 20, max: 80}
     };
