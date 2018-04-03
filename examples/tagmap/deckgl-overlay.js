@@ -23,14 +23,19 @@ export default class DeckGLOverlay extends Component {
       ? new TagmapLayer({
           id: 'twitter-topics-tagmap',
           data,
-          maxFontSize: fontSize
+          getLabel: x => x.label,
+          getPosition: x => x.coordinates,
+          minFontSize: 14,
+          maxFontSize: fontSize * 2 - 14
         })
       : new TextLayer({
           id: 'twitter-topics-raw',
           data,
           getText: d => d.label,
+          getPosition: x => x.coordinates,
           getColor: d => DEFAULT_COLOR,
-          sizeScale: fontSize / 64
+          getSize: d => 20,
+          sizeScale: fontSize / 20
         });
 
     return <DeckGL {...viewport} layers={[layer]} />;

@@ -19,7 +19,7 @@ export default class TextDemo extends Component {
   static get parameters() {
     return {
       cluster: {displayName: 'Dynamic Cluster', type: 'checkbox', value: true},
-      fontSize: {displayName: 'Max Font Size',
+      fontSize: {displayName: 'Font Size',
         type: 'range', value: 32, step: 1, min: 20, max: 80}
     };
   }
