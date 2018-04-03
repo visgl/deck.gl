@@ -22,37 +22,51 @@ import {CompositeLayer} from '../../core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import {makeFontAtlas} from './font-atlas';
 
+export const TEXT_ANCHOR = {
+  START: 'start',
+  MIDDLE: 'middle',
+  END: 'end'
+};
+export const ALIGNMENT_BASELINE = {
+  TOP: 'top',
+  CENTER: 'center',
+  BOTTOM: 'bottom'
+};
+
+const TEXT_ANCHOR_MAP = {
+  [TEXT_ANCHOR.START]: 1,
+  [TEXT_ANCHOR.MIDDLE]: 0,
+  [TEXT_ANCHOR.END]: -1
+};
+const ALIGNMENT_BASELINE_MAP = {
+  [ALIGNMENT_BASELINE.TOP]: 1,
+  [ALIGNMENT_BASELINE.CENTER]: 0,
+  [ALIGNMENT_BASELINE.BOTTOM]: -1
+};
+
+const DEFAULT_FONT_FAMILY = '"Lucida Console", Monaco, monospace';
 const DEFAULT_COLOR = [0, 0, 0, 255];
-const TEXT_ANCHOR = {
-  start: 1,
-  middle: 0,
-  end: -1
-};
-const ALIGNMENT_BASELINE = {
-  top: 1,
-  center: 0,
-  bottom: -1
-};
-// currently the font family is invisible to the user
-const FONT_FAMILY = '"Lucida Console", Monaco, monospace';
 
 const defaultProps = {
+  fp64: false,
+  sizeScale: 1,
+  fontFamily: DEFAULT_FONT_FAMILY,
+
   getText: x => x.text,
-  getPosition: x => x.coordinates,
+  getPosition: x => x.position || x.coordinates,
   getColor: x => x.color || DEFAULT_COLOR,
   getSize: x => x.size || 32,
   getAngle: x => x.angle || 0,
-  getTextAnchor: x => x.textAnchor || 'middle',
-  getAlignmentBaseline: x => x.alignmentBaseline || 'center',
-  getPixelOffset: x => x.pixelOffset || [0, 0],
-  fp64: false,
-  sizeScale: 1
+  getTextAnchor: x => x.textAnchor || TEXT_ANCHOR.MIDDLE,
+  getAlignmentBaseline: x => x.alignmentBaseline || ALIGNMENT_BASELINE.CENTER,
+  getPixelOffset: x => x.offset || x.pixelOffset || [0, 0]
 };
 
 export default class TextLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
-    const {mapping, texture} = makeFontAtlas(gl, FONT_FAMILY);
+    const {fontFamily} = this.props;
+    const {mapping, texture} = makeFontAtlas(gl, fontFamily);
     this.state = {
       iconAtlas: texture,
       iconMapping: mapping
@@ -97,17 +111,17 @@ export default class TextLayer extends CompositeLayer {
   }
 
   getAnchorXFromTextAnchor(textAnchor) {
-    if (!TEXT_ANCHOR.hasOwnProperty(textAnchor)) {
+    if (!TEXT_ANCHOR_MAP.hasOwnProperty(textAnchor)) {
       throw new Error(`Invalid text anchor parameter: ${textAnchor}`);
     }
-    return TEXT_ANCHOR[textAnchor];
+    return TEXT_ANCHOR_MAP[textAnchor];
   }
 
   getAnchorYFromAlignmentBaseline(alignmentBaseline) {
-    if (!ALIGNMENT_BASELINE.hasOwnProperty(alignmentBaseline)) {
+    if (!ALIGNMENT_BASELINE_MAP.hasOwnProperty(alignmentBaseline)) {
       throw new Error(`Invalid alignment baseline parameter: ${alignmentBaseline}`);
     }
-    return ALIGNMENT_BASELINE[alignmentBaseline];
+    return ALIGNMENT_BASELINE_MAP[alignmentBaseline];
   }
 
   renderLayers() {

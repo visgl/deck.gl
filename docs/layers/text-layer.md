@@ -43,7 +43,7 @@ Method called to retrieve the content of each text label.
 
 ##### `getPosition` (Function, optional)
 
-- Default: `x => x.coordinates`
+- Default: `x => x.position || x.coordinates
 
 Method called to retrieve the location of each text label.
 
@@ -78,6 +78,12 @@ Text size multiplier.
 - Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode.
+
+##### `fontFamily` (String, optional)
+
+- Default: `'"Lucida Console", Monaco, monospace'`
+
+Specifies a prioritized list of one or more font family names and/or generic family names.
 
 ### Text Alignment Options
 
