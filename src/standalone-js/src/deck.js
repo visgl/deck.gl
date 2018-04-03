@@ -2,8 +2,8 @@
 /* eslint-disable max-statements */
 import Mapbox from './mapbox';
 
-import {experimental} from 'deck.gl/core';
-const {Deck: DeckJS, OrbitView, MapControllerJS, OrbitControllerJS} = experimental;
+import {Deck, OrbitView, experimental} from 'deck.gl/core';
+const {MapController, OrbitController} = experimental;
 
 const CANVAS_STYLE = {
   position: 'absolute',
@@ -56,7 +56,7 @@ function createCanvas(props) {
  * @params map (Object) - map API. Set to falsy to disable
  * @params controller (Object) - Controller class. Leave empty for auto detection
  */
-export default class Deck extends DeckJS {
+export default class DeckJS extends Deck {
   constructor(props = {}) {
     if (typeof document === 'undefined') {
       // Not browser
@@ -64,51 +64,27 @@ export default class Deck extends DeckJS {
     }
 
     const {container, mapCanvas, deckCanvas} = createCanvas(props);
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-
-    const {map, controller} = props;
 
     normalizeProps(props);
     const isMap = Number.isFinite(props.viewState.latitude);
     const isOrbit = props.views && props.views[0] instanceof OrbitView;
-
-    // Update viewport dimensions
-    Object.assign(props, {
-      width,
-      height
-    });
+    let Controller;
+    if (isMap) {
+      Controller = MapController;
+    } else if (isOrbit) {
+      Controller = OrbitController;
+    }
 
     super(
       Object.assign({}, props, {
-        canvas: deckCanvas
+        width: container.clientWidth,
+        height: container.clientHeight,
+        canvas: deckCanvas,
+        controller: props.controller || Controller
       })
     );
 
-    if (controller === undefined) {
-      // Deduce controller class from viewport type
-      let Controller;
-      if (isMap) {
-        Controller = MapControllerJS;
-      } else if (isOrbit) {
-        Controller = OrbitControllerJS;
-      }
-
-      this._controller =
-        Controller &&
-        new Controller(
-          Object.assign({}, props.viewState, props, {
-            canvas: deckCanvas,
-            onViewportChange: this._onViewportChange
-          })
-        );
-    } else if (controller) {
-      this._controller = controller;
-      controller.setProps({
-        onViewportChange: this._onViewportChange
-      });
-    }
-
+    const {map} = props;
     if (map === undefined) {
       // Default create mapbox map
       this._map =
@@ -132,25 +108,21 @@ export default class Deck extends DeckJS {
   finalize() {
     window.removeEventListener('resize', this._resize);
 
-    if (this._controller) {
-      this._controller.finalize();
-    }
     if (this._map) {
       this._map.finalize();
     }
 
-    this._container = null;
     super.finalize();
   }
 
   setProps(props) {
-    if (this._controller) {
-      this._controller.setProps(
-        Object.assign({}, props.viewState, props, {
-          onViewportChange: this._onViewportChange
-        })
-      );
+    if (props.onViewportChange !== this._onViewportChange) {
+      if (props.hasOwnProperty('onViewportChange')) {
+        this.onViewportChange = props.onViewportChange;
+      }
+      props.onViewportChange = this._onViewportChange;
     }
+
     if (this._map) {
       this._map.setProps(props.viewState);
     }
@@ -159,14 +131,14 @@ export default class Deck extends DeckJS {
   }
 
   _onViewportChange(viewport) {
-    const {viewState, onViewportChange} = this.props;
+    const {viewState} = this.props;
 
     this.setProps({
       viewState: Object.assign(viewState, viewport)
     });
 
-    if (onViewportChange) {
-      onViewportChange(viewport);
+    if (this.onViewportChange) {
+      this.onViewportChange(viewport);
     }
   }
 

@@ -40,7 +40,7 @@ const geoExample = new deck.Deck({
 const nonGeoExample = new deck.Deck({
   container: document.getElementById('non-geo'),
   mapbox: false /* disable map */,
-  views: [new deck.experimental.OrbitView({width: '100%', height: '100%'})],
+  views: [new deck.OrbitView()],
   viewState: {distance: 1, rotationX: 45, rotationOrbit: 30, zoom: 0.05},
   layers: [
     new deck.PointCloudLayer({

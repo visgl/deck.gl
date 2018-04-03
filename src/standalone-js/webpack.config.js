@@ -24,7 +24,7 @@ const config = {
         loader: 'babel-loader',
         include: ['src', 'node_modules/react-map-gl'],
         options: {
-          presets: ['es2015']
+          presets: ['stage-2', 'es2015']
         }
       }
     ]
