@@ -80,8 +80,8 @@ const {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  MapController: MapControllerJS,
-  OrbitController: OrbitControllerJS,
+  MapController,
+  OrbitController,
 
   EffectManager,
   Effect
@@ -89,8 +89,8 @@ const {
 
 Object.assign(experimental, {
   // Experimental controllers
-  MapControllerJS,
-  OrbitControllerJS,
+  MapController,
+  OrbitController,
 
   // Unfinished controller/viewport classes
   ViewState,
@@ -217,14 +217,14 @@ export {default, DeckGL} from './react';
 
 // TODO - do we need to expose these?
 import {
-  MapController,
-  OrbitController,
+  MapController as ReactMapController,
+  OrbitController as ReactOrbitController,
   ViewportController // TODO - merge with deck.gl?
 } from './react';
 
 Object.assign(experimental, {
-  MapController,
-  OrbitController,
+  ReactMapController,
+  ReactOrbitController,
   ViewportController
 });
 
