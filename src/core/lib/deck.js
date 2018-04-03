@@ -36,8 +36,8 @@ function getPropTypes(PropTypes) {
   // Note: Arrays (layers, views, ) can contain falsy values
   return {
     id: PropTypes.string,
-    width: PropTypes.number,
-    height: PropTypes.number,
+    width: PropTypes.number.isRequired,
+    height: PropTypes.number.isRequired,
 
     // layer/view/controller settings
     layers: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
@@ -102,7 +102,6 @@ export default class Deck {
     this._onRenderFrame = this._onRenderFrame.bind(this);
 
     this.canvas = this._createCanvas(props);
-    this._updateCanvas(props);
     this.controller = this._createController(props);
     this.animationLoop = this._createAnimationLoop(props);
 
@@ -130,8 +129,6 @@ export default class Deck {
     this.stats.timeStart('deck.setProps');
     props = Object.assign({}, this.props, props);
     this.props = props;
-
-    this._updateCanvas(props);
 
     this._setLayerManagerProps(props);
 
@@ -179,22 +176,18 @@ export default class Deck {
     }
 
     if (!canvas) {
+      const {id, width, height, style} = props;
       canvas = document.createElement('canvas');
+      canvas.id = id;
+      canvas.width = width;
+      canvas.height = height;
+      Object.assign(canvas.style, style);
+
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
 
     return canvas;
-  }
-
-  _updateCanvas(props) {
-    const {id, width, height, style, controlCanvas} = props;
-    // if (controlCanvas) {
-      this.canvas.id = id;
-      this.canvas.width = width;
-      this.canvas.height = height;
-      Object.assign(this.canvas.style, style);
-    // }
   }
 
   // Note: props.controller must be a class, not an already created instance
@@ -234,6 +227,8 @@ export default class Deck {
     }
 
     const {
+      width,
+      height,
       views,
       viewState,
       layers,
@@ -246,8 +241,9 @@ export default class Deck {
     } = props;
 
     // If more parameters need to be updated on layerManager add them to this method.
-    this.layerManager.setParameters(props);
     this.layerManager.setParameters({
+      width,
+      height,
       views,
       viewState,
       layers,

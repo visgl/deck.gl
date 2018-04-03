@@ -49,21 +49,26 @@ const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
-
   gl: null,
+
+  // Settings
+  useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
+
+  // General resources
+  stats: null, // for tracking lifecycle performance
+  viewport: null, // Current viewport, exposed to layers for project* function
+
+  // GL Resources
   shaderCache: null,
-  stats: null,
+  pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
-  viewport: null, // Exposed to layers for project* function
-  pickingFBO: null, // Big buffer that layers can reuse
-  useDevicePixels: true,
+  // State
+  lastPickedInfo: { // For callback tracking and autohighlight
+    index: -1,
+    layerId: null
+  },
 
-  // lastPickedInfo: {
-  //   index: -1,
-  //   layerId: null
-  // },
-
-  userData: {}
+  userData: {} // Place for any custom app `context`
 });
 
 const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null' : 'invalid');
