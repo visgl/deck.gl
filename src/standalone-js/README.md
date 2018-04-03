@@ -31,4 +31,4 @@ new deck.Deck({
 ```
 
 ## Demo
-[Codepen](https://codepen.io/Pessimistress/pen/jGXVBK)
+[Codepen](https://codepen.io/vis-gl/)

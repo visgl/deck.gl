@@ -22,9 +22,9 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: ['src', 'node_modules/react-map-gl'],
+        include: ['src', 'utils', 'node_modules/react-map-gl'],
         options: {
-          presets: ['stage-2', 'es2015']
+          presets: ['es2015']
         }
       }
     ]
