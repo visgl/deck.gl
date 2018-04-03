@@ -41,7 +41,12 @@ export default class DeckGL extends React.Component {
   }
 
   componentDidMount() {
-    this.deck = new Deck(Object.assign({}, this.props, {canvas: this.overlay}));
+    this.deck = new Deck(
+      Object.assign({}, this.props, {
+        canvas: this.deckCanvas,
+        onResize: size => this.forceUpdate()
+      })
+    );
     this._updateFromProps(this.props);
   }
 
@@ -193,15 +198,21 @@ export default class DeckGL extends React.Component {
     // using the view descriptors
     const children = this._renderChildrenUnderViews(this.children);
 
-    // Render deck.gl as last child
-    const {id, width, height, style} = this.props;
-    const deck = createElement('canvas', {
-      ref: c => (this.overlay = c),
-      key: 'overlay',
+    // Note that width and height are handled by deck.gl
+    const {id} = this.props;
+    // TODO - this styling is enforced for correct positioning with children
+    // It can override the styling set by `Deck`, this should be consolidated.
+    const style = Object.assign({}, {position: 'absolute', left: 0, top: 0}, this.props.style);
+
+    const canvas = createElement('canvas', {
+      ref: c => (this.deckCanvas = c),
+      key: 'deck-canvas',
       id,
-      style: Object.assign({}, {position: 'absolute', left: 0, top: 0, width, height}, style)
+      style
     });
-    children.push(deck);
+
+    // Render deck.gl as last child
+    children.push(canvas);
 
     return createElement('div', {id: 'deckgl-wrapper'}, children);
   }

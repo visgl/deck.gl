@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
 export default class DeckGLOverlay extends Component {
@@ -17,10 +16,6 @@ export default class DeckGLOverlay extends Component {
   render() {
     const {viewport, maleColor, femaleColor, data, radius} = this.props;
 
-    if (!data) {
-      return null;
-    }
-
     const layer = new ScatterplotLayer({
       id: 'scatter-plot',
       data,
@@ -34,6 +29,6 @@ export default class DeckGLOverlay extends Component {
       }
     });
 
-    return <DeckGL {...viewport} layers={[layer]} />;
+    return <DeckGL width="100%" height="100%" {...viewport} layers={[layer]} />;
   }
 }

@@ -253,9 +253,10 @@ export default class LayerManager {
   setSize(width, height) {
     assert(Number.isFinite(width) && Number.isFinite(height));
     if (width !== this.width || height !== this.height) {
-      this.viewsChanged = true;
       this.width = width;
       this.height = height;
+      this.viewsChanged = true;
+      this.setNeedsRedraw('Size changed');
     }
   }
 
