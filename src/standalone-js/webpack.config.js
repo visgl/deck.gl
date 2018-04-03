@@ -31,8 +31,7 @@ const config = {
   }
 };
 
-const devConfig = {
-  ...config,
+const devConfig = Object.assign({}, config, {
 
   entry: resolve(PACKAGE_ROOT, 'test/index.js'),
 
@@ -47,10 +46,9 @@ const devConfig = {
       __MAPBOX_TOKEN__: JSON.stringify(process.env.MapboxAccessToken) // eslint-disable-line
     })
   ]
-};
+});
 
-const prodConfig = {
-  ...config,
+const prodConfig = Object.assign({}, config, {
 
   entry: resolve(PACKAGE_ROOT, 'src/index.js'),
 
@@ -63,6 +61,6 @@ const prodConfig = {
   },
 
   devtool: ''
-};
+});
 
 module.exports = env => (env ? devConfig : prodConfig);
