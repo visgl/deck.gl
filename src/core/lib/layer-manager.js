@@ -228,15 +228,15 @@ export default class LayerManager {
     }
 
     if ('layerFilter' in parameters) {
-      if (this.context.layerFilter !== parameters.layerFilter) {
-        this.context.layerFilter = parameters.layerFilter;
+      if (this.layerFilter !== parameters.layerFilter) {
+        this.layerFilter = parameters.layerFilter;
         this.setNeedsRedraw('layerFilter changed');
       }
     }
 
     if ('drawPickingColors' in parameters) {
-      if (parameters.drawPickingColors !== this.context.drawPickingColors) {
-        this.context.drawPickingColors = parameters.drawPickingColors;
+      if (parameters.drawPickingColors !== this.drawPickingColors) {
+        this.drawPickingColors = parameters.drawPickingColors;
         this.setNeedsRedraw('drawPickingColors changed');
       }
     }
@@ -338,7 +338,8 @@ export default class LayerManager {
 
   // Draw all layers in all views
   drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
-    const {gl, useDevicePixels, drawPickingColors} = this.context;
+    const {drawPickingColors} = this.context;
+    const {gl, useDevicePixels} = this.context;
 
     // render this viewport
     drawLayers(gl, {
