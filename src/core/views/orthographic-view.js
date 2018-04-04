@@ -27,7 +27,7 @@ export default class OrthographicView extends View {
     let {
       right = null, // Right bound of the frustum
       bottom = null // Bottom bound of the frustum
-    } = this.prop;
+    } = this.props;
 
 
     right = Number.isFinite(right) ? right : left + width;
