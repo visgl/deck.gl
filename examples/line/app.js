@@ -1,10 +1,9 @@
 /* global window,document */
+import {fetch} from 'global/window';
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-
-import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -30,15 +29,16 @@ class Root extends Component {
       airports: null
     };
 
-    requestJson(DATA_URL.FLIGHT_PATHS, (error, response) => {
-      if (!error) {
-        this.setState({flightPaths: response});
-      }
+    fetch(DATA_URL.FLIGHT_PATHS).then(response => {
+      response.json().then(data => {
+        this.setState({flightPaths: data});
+      });
     });
-    requestJson(DATA_URL.AIRPORTS, (error, response) => {
-      if (!error) {
-        this.setState({airports: response});
-      }
+
+    fetch(DATA_URL.AIRPORTS).then(response => {
+      response.json().then(data => {
+        this.setState({airports: data});
+      });
     });
   }
 

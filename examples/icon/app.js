@@ -1,10 +1,9 @@
 /* global window,document */
+import {fetch} from 'global/window';
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-
-import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -26,15 +25,15 @@ class Root extends Component {
       iconMapping: null
     };
 
-    requestJson(DATA_URL, (error, response) => {
-      if (!error) {
-        this.setState({data: response});
-      }
+    fetch(DATA_URL).then(response => {
+      response.json().then(data => {
+        this.setState({data});
+      });
     });
-    requestJson('./data/location-icon-mapping.json', (error, response) => {
-      if (!error) {
-        this.setState({iconMapping: response});
-      }
+    fetch('./data/location-icon-mapping.json').then(response => {
+      response.json().then(data => {
+        this.setState({iconMapping: data});
+      });
     });
   }
 
