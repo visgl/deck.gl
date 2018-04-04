@@ -40,7 +40,7 @@ function getPropTypes(PropTypes) {
     height: PropTypes.number.isRequired,
 
     // layer/view/controller settings
-    layers:PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
+    layers: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     layerFilter: PropTypes.func,
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
