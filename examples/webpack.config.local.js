@@ -15,6 +15,8 @@ const SRC_DIR = resolve(LIB_DIR, './src');
 // Support for hot reloading changes to the deck.gl library:
 function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
   return {
+    // mode: 'development',
+
     // suppress warnings about bundle size
     devServer: {
       stats: {
