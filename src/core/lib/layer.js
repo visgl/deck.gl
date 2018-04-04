@@ -245,13 +245,13 @@ export default class Layer {
   }
 
   // Let's layer control if updateState should be called
-  shouldUpdateState({oldProps, props, oldContext, context, changeFlags}) {
+  shouldUpdateState({oldProps, props, context, changeFlags}) {
     return changeFlags.propsOrDataChanged;
   }
 
   // Default implementation, all attributes will be invalidated and updated
   // when data changes
-  updateState({oldProps, props, oldContext, context, changeFlags}) {
+  updateState({oldProps, props, context, changeFlags}) {
     const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged && attributeManager) {
       attributeManager.invalidateAll();
@@ -605,7 +605,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       props: this.props,
       oldProps: this.internalState.oldProps || this.props,
       context: this.context,
-      oldContext: this.oldContext || {},
       changeFlags: this.internalState.changeFlags
     };
   }

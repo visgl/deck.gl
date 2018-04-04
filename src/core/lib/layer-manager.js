@@ -46,19 +46,31 @@ const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 
 const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 
-const initialContext = {
-  uniforms: {},
-  viewports: [],
-  viewport: null,
-  layerFilter: null,
-  viewportChanged: true,
-  pickingFBO: null,
-  useDevicePixels: true,
+// CONTEXT IS EXPOSED TO LAYERS
+const INITIAL_CONTEXT = Object.seal({
+  layerManager: null,
+  gl: null,
+
+  // Settings
+  useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
+
+  // General resources
+  stats: null, // for tracking lifecycle performance
+  viewport: null, // Current viewport, exposed to layers for project* function
+
+  // GL Resources
+  shaderCache: null,
+  pickingFBO: null, // Screen-size framebuffer that layers can reuse
+
+  // State
   lastPickedInfo: {
+    // For callback tracking and autohighlight
     index: -1,
     layerId: null
-  }
-};
+  },
+
+  userData: {} // Place for any custom app `context`
+});
 
 const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null' : 'invalid');
 
@@ -77,12 +89,12 @@ export default class LayerManager {
     this.lastRenderedLayers = [];
     this.layers = [];
 
-    this.oldContext = {};
-    this.context = Object.assign({}, initialContext, {
+    this.context = Object.assign({}, INITIAL_CONTEXT, {
+      layerManager: this,
+
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderCache: new ShaderCache({gl, _cachePrograms: true}),
-      layerManager: this,
       stats: stats || new Stats({id: 'deck.gl'})
     });
 
@@ -93,6 +105,10 @@ export default class LayerManager {
     this.viewState = INITIAL_VIEW_STATE;
     this.viewsChanged = true;
     this.viewports = []; // Generated viewports
+
+    this.layerFilter = null;
+    this.drawPickingColors = false;
+
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
 
@@ -214,19 +230,23 @@ export default class LayerManager {
     }
 
     if ('layerFilter' in parameters) {
-      this.context.layerFilter = parameters.layerFilter;
-      if (this.context.layerFilter !== parameters.layerFilter) {
+      if (this.layerFilter !== parameters.layerFilter) {
+        this.layerFilter = parameters.layerFilter;
         this.setNeedsRedraw('layerFilter changed');
       }
     }
 
     if ('drawPickingColors' in parameters) {
-      if (this.context.drawPickingColors !== parameters.drawPickingColors) {
+      if (parameters.drawPickingColors !== this.drawPickingColors) {
+        this.drawPickingColors = parameters.drawPickingColors;
         this.setNeedsRedraw('drawPickingColors changed');
       }
     }
 
-    Object.assign(this.context, parameters);
+    // A way for apps to add data to context that can be accessed in layers
+    if ('userData' in parameters) {
+      this.context.userData = parameters.userData;
+    }
   }
   /* eslint-enable complexity */
 
@@ -320,7 +340,8 @@ export default class LayerManager {
 
   // Draw all layers in all views
   drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
-    const {gl, useDevicePixels, drawPickingColors} = this.context;
+    const {drawPickingColors} = this;
+    const {gl, useDevicePixels} = this.context;
 
     // render this viewport
     drawLayers(gl, {
@@ -330,7 +351,7 @@ export default class LayerManager {
       useDevicePixels,
       drawPickingColors,
       pass,
-      layerFilter: this.context.layerFilter,
+      layerFilter: this.layerFilter,
       redrawReason
     });
   }
@@ -491,21 +512,15 @@ export default class LayerManager {
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
-      Object.assign(this.oldContext, this.context);
-      this.context.viewport = viewport;
-      this.context.viewportChanged = true;
-      this.context.uniforms = {};
       log.log(4, 'Viewport', viewport)();
+
+      this.context.viewport = viewport;
 
       // Update layers states
       // Let screen space layers update their state based on viewport
-      // TODO - reimplement viewport change detection (single viewport optimization)
-      // TODO - don't set viewportChanged during setViews?
-      if (this.context.viewportChanged) {
-        for (const layer of this.layers) {
-          layer.setChangeFlags({viewportChanged: 'Viewport changed'});
-          this._updateLayer(layer);
-        }
+      for (const layer of this.layers) {
+        layer.setChangeFlags({viewportChanged: 'Viewport changed'});
+        this._updateLayer(layer);
       }
     }
 
