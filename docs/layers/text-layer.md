@@ -1,4 +1,3 @@
-
 # Text Layer
 
 ### About
@@ -8,12 +7,10 @@ The text layer renders text labels on the map using texture mapping. This Layer 
 ### Example
 
 ```js
-
 import DeckGL from 'deck.gl';
 import TextLayer from './text-layer';
 
 const App = ({data, viewport}) => {
-
   /**
    * Data format:
    * [
@@ -29,7 +26,7 @@ const App = ({data, viewport}) => {
     })
   ];
 
-  return (<DeckGL {...viewport} layers={[layer]} />);
+  return <DeckGL {...viewport} layers={[layer]} />;
 };
 ```
 
@@ -37,13 +34,13 @@ const App = ({data, viewport}) => {
 
 ##### `getText` (Function, optional)
 
-- Default: `x => x.text`
+* Default: `x => x.text`
 
 Method called to retrieve the content of each text label.
 
 ##### `getPosition` (Function, optional)
 
-- Default: `x => x.position || x.coordinates
+* Default: `x => x.position || x.coordinates`
 
 Method called to retrieve the location of each text label.
 
@@ -51,37 +48,37 @@ Method called to retrieve the location of each text label.
 
 ##### `getSize` (Function, optional)
 
-- Default: `x => x.size || 32`
+* Default: `x => x.size || 32`
 
 Method called to retrieve the size of each text label. Default value is 32 in pixel.
 
 ##### `getColor` (Function, optional)
 
-- Default: `x => x.color || [0, 0, 0, 255]`
+* Default: `x => x.color || [0, 0, 0, 255]`
 
 Method called to retrieve the color of each text label. Default value is black.
 
 ##### `getAngle` (Function, optional)
 
-- Default: `x => x.angle || 0`
+* Default: `x => x.angle || 0`
 
 Method called to retrieve the angle to rotate (CCW) of each text label. Default value is 0.
 
 ##### `sizeScale` (Number, optional)
 
-- Default: 1
+* Default: 1
 
 Text size multiplier.
 
 ##### `fp64` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode.
 
 ##### `fontFamily` (String, optional)
 
-- Default: `'"Lucida Console", Monaco, monospace'`
+* Default: `'"Lucida Console", Monaco, monospace'`
 
 Specifies a prioritized list of one or more font family names and/or generic family names.
 
@@ -89,21 +86,22 @@ Specifies a prioritized list of one or more font family names and/or generic fam
 
 ##### `getTextAnchor` (Function, optional)
 
-- Default: `x => x.textAnchor || 'middle'`
+* Default: `x => x.textAnchor || 'middle'`
 
 Method called to specify the text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 
 ##### `getAlignmentBaseline` (Function, optional)
 
-- Default: `x => x.alignmentBaseline || 'center'`
+* Default: `x => x.alignmentBaseline || 'center'`
 
 Method called to specify the alignment baseline. Available options include `'top'`, `'center'` and `'bottom'`.
 
 ##### `getPixelOffset` (Function, optional)
 
-- Default: `x.pixelOffset || [0, 0]`
+* Default: `x.pixelOffset || [0, 0]`
 
 Method called to specify screen space offset relative to the `coordinates` in pixel unit. This function is rarely used in common cases.
 
 ### Font Style and Character Set Support
+
 Currently, the layer uses a monospaced font style called [Lucida Console](https://en.wikipedia.org/wiki/Lucida#Lucida_Console) and only supports the ASCII character set. If the text label happens to contain unicode characters, the layer replaces them with a single space and renders the text label without throwing an error.
