@@ -56,7 +56,7 @@ function createCanvas(props) {
  * @params map (Object) - map API. Set to falsy to disable
  * @params controller (Object) - Controller class. Leave empty for auto detection
  */
-export default class DeckJS extends Deck {
+export default class DeckGL extends Deck {
   constructor(props = {}) {
     if (typeof document === 'undefined') {
       // Not browser

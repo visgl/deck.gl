@@ -5,7 +5,9 @@ const webpack = require('webpack');
 const PACKAGE_ROOT = resolve(__dirname, '.');
 const ROOT = resolve(PACKAGE_ROOT, '../..');
 
-const version = require(resolve(ROOT, 'package.json')).version;
+let version = require('./package.json').version;
+// Only update every minor version
+version = version.match(/^(\d+)\.(\d+)/)[0];
 
 const config = {
   resolve: {
@@ -32,7 +34,6 @@ const config = {
 };
 
 const devConfig = Object.assign({}, config, {
-
   entry: resolve(PACKAGE_ROOT, 'test/index.js'),
 
   mode: 'development',
@@ -49,7 +50,6 @@ const devConfig = Object.assign({}, config, {
 });
 
 const prodConfig = Object.assign({}, config, {
-
   entry: resolve(PACKAGE_ROOT, 'src/index.js'),
 
   mode: 'production',
@@ -57,7 +57,7 @@ const prodConfig = Object.assign({}, config, {
   // Generate a bundle in dist folder
   output: {
     path: resolve(PACKAGE_ROOT, 'dist'),
-    filename: `deckgl-${version}.min.js`
+    filename: `deckgl-${version}.js`
   },
 
   devtool: ''

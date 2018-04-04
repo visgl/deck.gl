@@ -3,11 +3,12 @@ import * as lumaGL from 'luma.gl';
 import * as deckGLCore from 'deck.gl/core';
 import * as deckGLLayers from 'deck.gl/core-layers';
 
-import Deck from './deck';
+import DeckGL from './deckgl';
 
 if (typeof window !== 'undefined') {
-  window.deck = Object.assign({}, window.deck, deckGLCore, deckGLLayers, {Deck});
+  window.deck = Object.assign({}, window.deck, deckGLCore, deckGLLayers, {DeckGL});
   window.luma = Object.assign({}, window.luma, lumaGL);
 }
 
-export default Deck;
+export default DeckGL;
+export {default as Mapbox} from './mapbox';
