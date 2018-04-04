@@ -4,7 +4,7 @@ import PlotLayer from '../../../plot/plot-layer';
 // TODO - add point cloud layer for COORDINATE_SYSTEM.IDENTITY
 
 // import {PointCloudLayer} from 'deck.gl';
-// import dataSamples from '../immutable-data-samples';
+// import * as dataSamples from '../data-samples';
 // import {scaleLinear} from 'd3-scale';
 
 // const LIGHT_SETTINGS = {

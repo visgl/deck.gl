@@ -19,7 +19,7 @@ import {
 // Demonstrate immutable support
 import {experimental} from 'deck.gl';
 const {get} = experimental;
-import dataSamples from '../immutable-data-samples';
+import * as dataSamples from '../data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
 const LIGHT_SETTINGS = {
