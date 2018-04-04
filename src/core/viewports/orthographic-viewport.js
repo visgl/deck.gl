@@ -41,7 +41,7 @@ export default class OrthographicViewport extends Viewport {
     right = null, // Right bound of the frustum
     bottom = null // Bottom bound of the frustum
   }) {
-    log.deprecated('OrthographicViewport', 'OrthographicView')();
+    log.deprecated('OrthgraphicViewport', 'OrthgraphicView')();
 
     right = Number.isFinite(right) ? right : left + width;
     bottom = Number.isFinite(bottom) ? bottom : top + height;

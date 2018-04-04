@@ -78,18 +78,17 @@ export default class Viewport {
       // Projection matrix
       projectionMatrix = null,
 
-      // Projection matrix parameters, used if projectionMatrix not supplied
-      orthographic = false,
-      fovyRadians = 75,
-      fovy,
+      // Perspective projection matrix parameters, used if projectionMatrix not supplied
+      fovy = 75,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
-      focalDistance = 1, // Only needed for orthographic views
 
       // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
       longitude = null,
       latitude = null,
       zoom = null,
+
+      focalDistance = 1,
 
       // Anchor position offset (in meters for geospatial viewports)
       position = null,
@@ -163,20 +162,19 @@ export default class Viewport {
       this.viewMatrix = viewMatrix;
     }
 
-    const DEGREES_TO_RADIANS = Math.PI / 180;
+    // Create a projection matrix if not supplied
+    if (projectionMatrix) {
+      this.projectionMatrix = projectionMatrix;
+    } else {
+      assert(Number.isFinite(fovy));
+      const DEGREES_TO_RADIANS = Math.PI / 180;
+      const fovyRadians = fovy * DEGREES_TO_RADIANS;
+      const aspect = this.width / this.height;
+      this.projectionMatrix = mat4_perspective([], fovyRadians, aspect, near, far);
+    }
 
-    this.projectionMatrix =
-      projectionMatrix ||
-      this._createProjectionMatrix({
-        orthographic,
-        fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
-        aspect: this.width / this.height,
-        focalDistance,
-        near,
-        far
-      });
-
-    this._initPixelMatrices();
+    // Init pixel matrices
+    this._initMatrices();
 
     // Bind methods for easy access
     this.equals = this.equals.bind(this);
@@ -359,8 +357,6 @@ export default class Viewport {
     return this.cameraUp;
   }
 
-  // INTERNAL METHODS
-
   // TODO - these are duplicating WebMercator methods
   _addMetersToLngLat(lngLatZ, xyz) {
     const [lng, lat, Z = 0] = lngLatZ;
@@ -379,14 +375,9 @@ export default class Viewport {
     return xyz.length === 2 ? [deltaLng, deltaLat] : [deltaLng, deltaLat, z];
   }
 
-  _createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
-    assert(Number.isFinite(fovyRadians));
-    return orthographic
-      ? Matrix4.orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
-      : mat4_perspective([], fovyRadians, aspect, near, far);
-  }
+  // INTERNAL METHODS
 
-  _initPixelMatrices() {
+  _initMatrices() {
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
     const vpm = createMat4();
