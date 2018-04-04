@@ -3,31 +3,31 @@
 
 export PATH=$PATH:node_modules/.bin
 
-# Get version from packag.json and remove quotes
-version=$(jq '.version' ./package.json | awk '{ gsub(/"/,"",$1); print }')
 # Get name from package.json
 module=$(jq '.name' ./package.json)
+# Get version from packag.json and remove quotes
+version=$(jq '.version' ./package.json | awk '{ gsub(/"/,"",$1); printf "%-14s", $1 }')
 
 # Helper functions
 
 print_size_header() {
-  echo "| Version       | Dist | Bundle | Compressed |"
-  echo "| ---           | ---  | ---    | ---        |"
+  echo "| Version        | Dist | Bundle Size        | Compressed     |"
+  echo "| ---            | ---  | ---                | ---            |"
 }
 
 print_size() {
   DIST=$1
   # Size it
-  size=$(du -k /tmp/bundle.js | awk '{ print $1 }')
+  size=$(wc -c /tmp/bundle.js | awk '{ print int($1 / 1024) "KB (" $1 ")" }')
   # Zip it
   gzip -9f /tmp/bundle.js
   # Size it again
-  zipsize=$(du -k /tmp/bundle.js.gz | awk '{ print $1 }')
+  zipsize=$(wc -c /tmp/bundle.js.gz | awk '{ print int($1 / 1024) "KB (" $1 ")" }')  # Size it
   # Remove our copy
   rm /tmp/bundle.js.gz
   # Print version, size, compressed size with markdown
 
-  echo "| $version | $DIST  | $size KB | $zipsize KB     |"
+  echo "| $version | $DIST  | $size KB  | $zipsize KB     |"
 }
 
 build_bundle() {
@@ -52,4 +52,5 @@ print_size ESM
 build_bundle es5
 print_size ES5
 
+# Disable bold terminal font
 echo "\033[0m"

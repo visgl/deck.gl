@@ -51,7 +51,7 @@
     "test-size-esm": "npm run build-esm && NODE_ENV=production webpack --config test/webpack.config.js --env.import-nothing",
     "bench": "node test/start.js bench",
     "bench-browser": "webpack-dev-server --env.bench --progress --hot --open",
-    "collect-metrics": "./test/scripts/collect-metrics.sh"
+    "collect-metrics": "./scripts/collect-metrics.sh"
   },
   "dependencies": {
     "d3-hexbin": "^0.2.1",
@@ -84,6 +84,7 @@
     "eslint-plugin-react": "^7.5.1",
     "gl": "^4.0.3",
     "html-webpack-plugin": "^3.1.0",
+    "immutable": "^3.8.2",
     "jsdom": "^9.11.0",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
