@@ -5,7 +5,7 @@ Scripting version of deck.gl
 
 Include the library:
 ```html
-<script src='<cdn_url>/deck.gl-5.2.0.min.js'></script>
+<script src='https://uber.github.io/deck.gl/deckgl-5.2.js'></script>
 ```
 
 To use with Mapbox:
@@ -15,7 +15,7 @@ To use with Mapbox:
 ```
 
 ```js
-new deck.Deck({
+new deck.DeckGL({
   mapboxAccessToken: '<your_token_here>',
   longitude: -122.45,
   latitude: 37.8,
