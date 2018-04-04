@@ -43,7 +43,7 @@ switch (mode) {
   case 'test-browser':
     new BrowserTestDriver().run({
       process: 'webpack-dev-server',
-      parameters: ['--env.test-browser'],
+      parameters: ['--config', 'test/webpack.config.js', '--env.testBrowser'],
       exposeFunction: 'testDone'
     });
     break;
@@ -52,7 +52,7 @@ switch (mode) {
   case 'render':
     new BrowserTestDriver().run({
       process: 'webpack-dev-server',
-      parameters: ['--env.render'],
+      parameters: ['--config', 'test/webpack.config.js', '--env.render'],
       exposeFunction: 'testDone'
     });
     break;
@@ -60,7 +60,7 @@ switch (mode) {
   case 'render-react':
     new BrowserTestDriver().run({
       process: 'webpack-dev-server',
-      parameters: ['--env.render-react'],
+      parameters: ['--config', 'test/webpack.config.js', '--env.renderReact'],
       exposeFunction: 'testDone'
     });
     break;
