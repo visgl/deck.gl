@@ -128,7 +128,7 @@ const BENCH_BROWSER_CONFIG = Object.assign({}, BROWSER_CONFIG, {
 
 module.exports = env => {
   env = env || {};
-  if (env.test || env['test-browser']) {
+  if (env.test || env.test_browser) {
     return TEST_BROWSER_CONFIG;
   }
   if (env.render) {

@@ -43,7 +43,7 @@ switch (mode) {
   case 'test-browser':
     new BrowserTestDriver().run({
       process: 'webpack-dev-server',
-      parameters: ['--env.test-browser'],
+      parameters: ['--env.test_browser'],
       exposeFunction: 'testDone'
     });
     break;

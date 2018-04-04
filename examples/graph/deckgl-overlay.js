@@ -37,8 +37,6 @@ export default class DeckGLOverlay extends Component {
     const top = -height / 2;
     const view = new OrthographicView({width, height, left, top});
 
-    return (
-      <DeckGL ref={deckGLRef} width={width} height={height} views={view} layers={[layer]} />
-    );
+    return <DeckGL ref={deckGLRef} width={width} height={height} views={view} layers={[layer]} />;
   }
 }
