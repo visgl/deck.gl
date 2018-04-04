@@ -1,2 +1,3 @@
 dist/** -diff
 dist-demo/** -diff
+yarn.lock -diff

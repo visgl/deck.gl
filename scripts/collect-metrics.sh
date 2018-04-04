@@ -54,3 +54,8 @@ print_size ES5
 
 # Disable bold terminal font
 echo "\033[0m"
+
+    (echo \"source size\" ; find src/ -name '*.js' | xargs cat | wc -c)
+    (echo \"dist esm size\" ; find dist/esm -name '*.js' | xargs cat | wc -c)
+    (echo \"dist/es6 size\" ; find dist/es6 -name '*.js' | xargs cat | wc -c)
+    
