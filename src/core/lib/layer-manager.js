@@ -63,7 +63,8 @@ const INITIAL_CONTEXT = Object.seal({
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
   // State
-  lastPickedInfo: { // For callback tracking and autohighlight
+  lastPickedInfo: {
+    // For callback tracking and autohighlight
     index: -1,
     layerId: null
   },
@@ -104,11 +105,12 @@ export default class LayerManager {
     this.viewState = INITIAL_VIEW_STATE;
     this.viewsChanged = true;
     this.viewports = []; // Generated viewports
-    this._needsRedraw = 'Initial render';
-    this._needsUpdate = false;
-
 
     this.layerFilter = null;
+    this.drawPickingColors = false;
+
+    this._needsRedraw = 'Initial render';
+    this._needsUpdate = false;
 
     // Event handling
     this._pickingRadius = 0;
@@ -338,7 +340,7 @@ export default class LayerManager {
 
   // Draw all layers in all views
   drawLayers({pass = 'render to screen', redrawReason = 'unknown reason'} = {}) {
-    const {drawPickingColors} = this.context;
+    const {drawPickingColors} = this;
     const {gl, useDevicePixels} = this.context;
 
     // render this viewport
