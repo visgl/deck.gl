@@ -1,4 +1,4 @@
-/* global window,document */
+/* global document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
@@ -22,7 +22,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, hoverInfo} = this.state;
+    const {hoverInfo} = this.state;
 
     return (
       <div>

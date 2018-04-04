@@ -3,8 +3,7 @@ import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/col
 // TODO: remove hard path once deck.gl-layers published with GPUScreenGridLayer
 import GPUScreenGridLayer from '../../src/experimental-layers/src/gpu-screen-grid-layer/gpu-screen-grid-layer';
 import {GL} from 'luma.gl';
-import {experimental} from 'deck.gl';
-const {OrbitView, OrthographicView} = experimental;
+import {OrthographicView, OrbitView} from 'deck.gl';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 

@@ -1,3 +1,4 @@
+/* global window */
 import React, {Component} from 'react';
 
 import PlotLayer from './plot-layer';
