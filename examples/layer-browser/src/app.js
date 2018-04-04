@@ -21,7 +21,6 @@ import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';
 
 import LAYER_CATEGORIES from './examples';
-import {setImmutableDataSamples} from './immutable-data-samples';
 
 /* eslint-disable no-process-env */
 const MapboxAccessToken =
@@ -138,7 +137,6 @@ export default class App extends PureComponent {
 
   _onUpdateContainerSettings(settings) {
     this.setState({settings});
-    setImmutableDataSamples(settings.immutable);
   }
 
   _onHover(info) {

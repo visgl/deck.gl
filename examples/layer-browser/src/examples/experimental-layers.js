@@ -5,7 +5,7 @@ import GPUScreenGridLayer from '../../../../src/experimental-layers/src/gpu-scre
 
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL, CylinderGeometry} from 'luma.gl';
-import dataSamples from '../immutable-data-samples';
+import * as dataSamples from '../data-samples';
 
 const MeshLayerExample = {
   layer: MeshLayer,

@@ -1,4 +1,4 @@
-import dataSamples from '../../examples/layer-browser/src/immutable-data-samples';
+import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 // TODO: remove hard path once deck.gl-layers published with GPUScreenGridLayer
 import GPUScreenGridLayer from '../../src/experimental-layers/src/gpu-screen-grid-layer/gpu-screen-grid-layer';
