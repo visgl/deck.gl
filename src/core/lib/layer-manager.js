@@ -243,9 +243,9 @@ export default class LayerManager {
       }
     }
 
-    // A way for apps to add data to context to access in layers
-    if ('context' in parameters) {
-      Object.assign(this.context.userData, parameters.context);
+    // A way for apps to add data to context that can be accessed in layers
+    if ('userData' in parameters) {
+      this.context.userData = parameters.userData;
     }
   }
   /* eslint-enable complexity */
@@ -515,17 +515,12 @@ export default class LayerManager {
       log.log(4, 'Viewport', viewport)();
 
       this.context.viewport = viewport;
-      this.context.viewportChanged = true;
 
       // Update layers states
       // Let screen space layers update their state based on viewport
-      // TODO - reimplement viewport change detection (single viewport optimization)
-      // TODO - don't set viewportChanged during setViews?
-      if (viewportChanged) {
-        for (const layer of this.layers) {
-          layer.setChangeFlags({viewportChanged: 'Viewport changed'});
-          this._updateLayer(layer);
-        }
+      for (const layer of this.layers) {
+        layer.setChangeFlags({viewportChanged: 'Viewport changed'});
+        this._updateLayer(layer);
       }
     }
 
