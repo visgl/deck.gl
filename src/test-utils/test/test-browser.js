@@ -19,6 +19,5 @@
 // THE SOFTWARE.
 
 require('tap-browser-color')();
-require('babel-polyfill');
 
 require('./index');
