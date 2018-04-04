@@ -26,10 +26,13 @@ import {
   lngLatToWorld,
   worldToLngLat,
   pixelsToWorld,
+  getProjectionMatrix,
   getViewMatrix,
-  getProjectionParameters,
   fitBounds
 } from 'viewport-mercator-project';
+
+// TODO - import from viewport-mercator-project
+// import {fitBounds} from '../viewport-mercator-project/fit-bounds';
 
 // TODO - import from math.gl
 /* eslint-disable camelcase */
@@ -55,8 +58,7 @@ export default class WebMercatorViewport extends Viewport {
       zoom = 11,
       pitch = 0,
       bearing = 0,
-      farZMultiplier = 10,
-      orthographic = false
+      farZMultiplier = 10
     } = opts;
 
     let {width, height, altitude = 1.5} = opts;
@@ -69,7 +71,7 @@ export default class WebMercatorViewport extends Viewport {
     // TODO - just throw an Error instead?
     altitude = Math.max(0.75, altitude);
 
-    const {fov, aspect, focalDistance, near, far} = getProjectionParameters({
+    const projectionMatrix = getProjectionMatrix({
       width,
       height,
       pitch,
@@ -88,31 +90,21 @@ export default class WebMercatorViewport extends Viewport {
       altitude
     });
 
-    // TODO / hack - prevent vertical offsets if not FirstPersonViewport
-    const position = opts.position && [opts.position[0], opts.position[1], 0];
-
-    const viewportOpts = Object.assign({}, opts, {
-      // x, y,
-      width,
-      height,
-
-      // view matrix
-      viewMatrix: viewMatrixUncentered,
-      longitude,
-      latitude,
-      zoom,
-      position,
-
-      // projection matrix parameters
-      orthographic,
-      fovyRadians: fov,
-      aspect,
-      focalDistance, // TODO Viewport is already carefully set up to "focus" on ground
-      near,
-      far
-    });
-
-    super(viewportOpts);
+    super(
+      Object.assign({}, opts, {
+        // x, y, position, ...
+        // TODO / hack - prevent vertical offsets if not FirstPersonViewport
+        position: opts.position && [opts.position[0], opts.position[1], 0],
+        width,
+        height,
+        viewMatrix: viewMatrixUncentered,
+        longitude,
+        latitude,
+        zoom,
+        projectionMatrix,
+        focalDistance: 1 // Viewport is already carefully set up to "focus" on ground
+      })
+    );
 
     // Save parameters
     this.latitude = latitude;
@@ -121,8 +113,6 @@ export default class WebMercatorViewport extends Viewport {
     this.pitch = pitch;
     this.bearing = bearing;
     this.altitude = altitude;
-
-    this.orthographic = orthographic;
 
     // Bind methods
     this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
