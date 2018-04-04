@@ -45,7 +45,7 @@ function getPropTypes(PropTypes) {
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
-    controller: PropTypes.object,
+    controller: PropTypes.func,
 
     // GL settings
     glOptions: PropTypes.object,

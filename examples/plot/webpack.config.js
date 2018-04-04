@@ -3,9 +3,11 @@
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
-// const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CONFIG = {
+  mode: 'development',
+
   entry: {
     app: resolve('./app.js')
   },
@@ -25,7 +27,9 @@ const CONFIG = {
         }
       }
     ]
-  }
+  },
+
+  plugins: [new HtmlWebpackPlugin()]
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module

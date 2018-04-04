@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import DeckGL, {OrthographicViewport} from 'deck.gl';
+import DeckGL, {OrthographicView} from 'deck.gl';
 import GraphLayoutLayer from './graph-layer/graph-layout-layer';
 
 export default class DeckGLOverlay extends Component {
@@ -35,17 +35,10 @@ export default class DeckGLOverlay extends Component {
     // recalculate viewport on container size change.
     const left = -width / 2;
     const top = -height / 2;
-    const glViewport = new OrthographicViewport({width, height, left, top});
+    const view = new OrthographicView({width, height, left, top});
 
-    // TODO: clean up viewport / glViewport
     return (
-      <DeckGL
-        ref={deckGLRef}
-        width={width}
-        height={height}
-        viewport={glViewport}
-        layers={[layer]}
-      />
+      <DeckGL ref={deckGLRef} width={width} height={height} views={view} layers={[layer]} />
     );
   }
 }

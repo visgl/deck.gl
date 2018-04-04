@@ -2,15 +2,25 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, experimental} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, experimental} from 'deck.gl';
 const {OrbitController} = experimental;
 
 import {setParameters} from 'luma.gl';
-
 import {loadLazFile, parseLazData} from './utils/laslaz-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
 const FILE_PATH = 'examples/point-cloud-laz/indoor.laz';
+
+const INITIAL_VIEW_STATE = {
+  lookAt: [0, 0, 0],
+  distance: 1,
+  rotationX: 0,
+  rotationOrbit: 0,
+  orbitAxis: 'Y',
+  fov: 30,
+  minDistance: 0.5,
+  maxDistance: 3
+};
 
 function normalize(points) {
   let xMin = Infinity;
@@ -45,28 +55,19 @@ class Example extends PureComponent {
   constructor(props) {
     super(props);
 
-    this._onViewportChange = this._onViewportChange.bind(this);
-    this._onInitialized = this._onInitialized.bind(this);
-    this._onResize = this._onResize.bind(this);
-    this._onUpdate = this._onUpdate.bind(this);
-
     this.state = {
       width: 0,
       height: 0,
       points: [],
       progress: 0,
       rotating: true,
-      viewport: {
-        lookAt: [0, 0, 0],
-        distance: 1,
-        rotationX: 0,
-        rotationOrbit: 0,
-        orbitAxis: 'Y',
-        fov: 30,
-        minDistance: 0.5,
-        maxDistance: 3
-      }
+      viewState: INITIAL_VIEW_STATE
     };
+
+    this._onInitialize = this._onInitialize.bind(this);
+    this._onResize = this._onResize.bind(this);
+    this._onViewportChange = this._onViewportChange.bind(this);
+    this._onUpdate = this._onUpdate.bind(this);
   }
 
   componentWillMount() {
@@ -100,46 +101,44 @@ class Example extends PureComponent {
     window.removeEventListener('resize', this._onResize);
   }
 
-  _onResize() {
-    const size = {width: window.innerWidth, height: window.innerHeight};
-    this.setState(size);
-    const newViewport = OrbitController.getViewport(
-      Object.assign(this.state.viewport, size)
-    ).fitBounds([1, 1, 1]);
-    this._onViewportChange(newViewport);
-  }
-
-  _onInitialized(gl) {
+  _onInitialize(gl) {
     setParameters(gl, {
       clearColor: [0.07, 0.14, 0.19, 1],
       blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
     });
   }
 
-  _onViewportChange(viewport) {
+  _onResize() {
+    this.setState({width: window.innerWidth, height: window.innerHeight});
+
+    const newViewState = Object.assign({}, this.viewState, {
+      distance: OrbitView.getDistance({
+        boundingBox: [1, 1, 1],
+        fov: this.state.viewState.fov
+      })
+    });
+    this._onViewportChange(newViewState, {});
+  }
+
+  _onViewportChange(viewState, interactiveState) {
     this.setState({
-      rotating: !viewport.isDragging,
-      viewport: {...this.state.viewport, ...viewport}
+      rotating: !interactiveState.isDragging,
+      viewState: {...this.state.viewState, ...viewState}
     });
   }
 
   _onUpdate() {
-    const {rotating, viewport, progress} = this.state;
+    const {rotating, viewState, progress} = this.state;
 
-    // note: when finished dragging, _onUpdate will not resume by default
-    // to resume rotating, explicitly call _onUpdate or requestAnimationFrame
-    if (!rotating) {
-      return;
-    }
-
-    if (progress >= 1.0) {
+    if (rotating && progress >= 1.0) {
       this.setState({
-        viewport: {
-          ...viewport,
-          rotationOrbit: viewport.rotationOrbit + 1
+        viewState: {
+          ...viewState,
+          rotationOrbit: viewState.rotationOrbit + 1
         }
       });
     }
+
     window.requestAnimationFrame(this._onUpdate);
   }
 
@@ -161,26 +160,20 @@ class Example extends PureComponent {
   }
 
   _renderDeckGLCanvas() {
-    const {width, height, viewport} = this.state;
-    const canvasProps = {width, height, ...viewport};
-    const glViewport = OrbitController.getViewport(canvasProps);
+    const {width, height, viewState} = this.state;
+    const view = new OrbitView();
 
     return (
-      <OrbitController
-        {...canvasProps}
-        ref={canvas => {
-          this._canvas = canvas;
-        }}
+      <DeckGL
+        width={width}
+        height={height}
+        views={view}
+        viewState={viewState}
+        controller={OrbitController}
+        layers={[this._renderLazPointCloudLayer()]}
+        onWebGLInitialized={this._onInitialize}
         onViewportChange={this._onViewportChange}
-      >
-        <DeckGL
-          width={width}
-          height={height}
-          viewport={glViewport}
-          layers={[this._renderLazPointCloudLayer()]}
-          onWebGLInitialized={this._onInitialized}
-        />
-      </OrbitController>
+      />
     );
   }
 

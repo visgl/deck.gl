@@ -13,15 +13,16 @@
     "d3-request": "^1.0.5",
     "d3-scale": "^1.0.5",
     "deck.gl": "^5.0.0",
-    "immutable": "^3.8.1",
     "luma.gl": "^5.0.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.0",
-    "exports-loader": "^0.6.4",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "exports-loader": "^0.7.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }
