@@ -1,7 +1,7 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
 
-import {Matrix4} from 'math.gl'
+import {Matrix4} from 'math.gl';
 
 export default class OrthographicView extends View {
   _getViewport({x, y, width, height, viewState}) {
@@ -10,7 +10,7 @@ export default class OrthographicView extends View {
       // view matrix arguments
       eye = [0, 0, 1], // Defines eye position
       lookAt = [0, 0, 0], // Which point is camera looking at, default origin
-      up = [0, 1, 0], // Defines up direction, default positive y axis
+      up = [0, 1, 0] // Defines up direction, default positive y axis
     } = viewState;
 
     // Get projection matrix parameters from the view itself
@@ -28,7 +28,6 @@ export default class OrthographicView extends View {
       right = null, // Right bound of the frustum
       bottom = null // Bottom bound of the frustum
     } = this.props;
-
 
     right = Number.isFinite(right) ? right : left + width;
     bottom = Number.isFinite(bottom) ? bottom : top + height;
