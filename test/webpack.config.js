@@ -121,7 +121,6 @@ const CONFIGS = {
 
   bundle: env => {
     const app = getApp(env);
-    const dist = getDist(env);
 
     const config = CONFIGS.size(env);
 
