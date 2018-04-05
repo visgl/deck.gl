@@ -22,7 +22,9 @@
     "src"
   ],
   "dependencies": {
-    "deck.gl": "^5.2.0-alpha.3"
+    "deck.gl": "^5.2.0-alpha.3",
+    "pixelmatch": "^4.0.2",
+    "probe.gl": ">=1.0.0-alpha.11"
   },
   "scripts": {
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",

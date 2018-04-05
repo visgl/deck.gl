@@ -16,6 +16,8 @@ fi
 
 case $MODE in
   "beta")
+    # npm-tag argument: npm publish --tag <beta>
+    # cd-version argument: increase <prerelease> version
     lerna publish --npm-tag beta --cd-version prerelease
     break;;
 
