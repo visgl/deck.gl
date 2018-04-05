@@ -18,8 +18,7 @@ for D in *; do (
   # TODO - remove when fixed
   mkdir -p node_modules
   ln -sf $ROOT_MODULES/.bin ./node_modules
-
-  # build the module
-  npm run prepublish
-
 ); done
+
+# build the module
+npm run build
