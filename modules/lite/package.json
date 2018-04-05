@@ -20,7 +20,6 @@
   "scripts": {
     "start": "webpack-dev-server --env.dev --progress --open",
     "build": "scripts/build.sh",
-    "prepublish": "npm run build",
     "test": "echo \"PACKAGE HAS NO TEST\""
   },
   "dependencies": {
