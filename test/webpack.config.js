@@ -3,7 +3,7 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
 
-const ALIASES = require('../aliases');
+const ALIASES = require('../aliases')('src');
 
 const TEST_CONFIG = {
   mode: 'development',
@@ -22,12 +22,7 @@ const TEST_CONFIG = {
   },
 
   resolve: {
-    alias: Object.assign({}, ALIASES, {
-      // Aliases needed to defeat root scripts from getting duplicate dependencies
-      // from sub module node_modules
-      'luma.gl': resolve('./node_modules/luma.gl'),
-      'probe.gl': resolve('./node_modules/probe.gl')
-    })
+    alias: ALIASES
   },
 
   devtool: '#inline-source-maps',
@@ -115,9 +110,7 @@ const CONFIGS = {
 
     const config = Object.assign({}, TEST_CONFIG, {
       resolve: {
-        alias: Object.assign({}, ALIASES, {
-          'luma.gl': resolve(__dirname, `../dist/${dist}`)
-        })
+        alias: ALIASES
       }
     });
     if (dist === 'es6') {
@@ -147,9 +140,7 @@ const CONFIGS = {
         mainFields: env.es6
           ? ['esnext', 'browser', 'module', 'main']
           : ['browser', 'module', 'main'],
-        alias: Object.assign({}, ALIASES, {
-          'deck.gl': resolve(__dirname, `../dist/${dist}`)
-        })
+        alias: ALIASES
       },
       plugins: [
         // leave minification to app

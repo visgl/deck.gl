@@ -21,20 +21,37 @@
 // Enables ES2015 import/export in Node.js
 
 // Registers an alias for this module
-const path = require('path');
+const {resolve} = require('path');
+const fs = require('fs');
 
-const ALIASES = {
-  'deck.gl/test': path.resolve(__dirname, './test'),
-  'deck.gl': path.resolve(__dirname, './src'),
-  'deck.gl-layers': path.resolve(__dirname, './src/experimental-layers/src'),
-  'deck.gl-test-utils': path.resolve(__dirname, './src/test-utils/src')
-};
+const MODULE_PATH = resolve(__dirname, './modules');
 
-if (module.require) {
-  module.require('reify');
+// Get all module info
+const MODULES = {};
+fs.readdirSync(MODULE_PATH)
+  .forEach(item => {
+    const itemPath = resolve(MODULE_PATH, item);
+    if (fs.lstatSync(itemPath).isDirectory()) {
+      const packageInfo = require(resolve(itemPath, 'package.json'));
+      MODULES[packageInfo.name] = packageInfo;
+    }
+  });
 
-  const moduleAlias = module.require('module-alias');
-  moduleAlias.addAliases(ALIASES);
+function getAliases(mode = 'src') {
+  const aliases = {};
+
+  for (const moduleName in MODULES) {
+    const subPath = mode === 'src' ? 'src' : MODULES[moduleName].main.replace('/index.js', '');
+    aliases[moduleName] = resolve(__dirname, 'node_modules', moduleName, subPath);
+  }
+
+  return Object.assign({
+    // TODO - remove when core and core-layers are separated
+    'deck.gl/core': resolve(aliases['@deck.gl/core'], 'core'),
+    'deck.gl/core-layers': resolve(aliases['@deck.gl/core'], 'core-layers'),
+    'deck.gl/test': resolve(__dirname, './test')
+  }, aliases);
 }
 
-module.exports = ALIASES;
+module.exports = getAliases;
+

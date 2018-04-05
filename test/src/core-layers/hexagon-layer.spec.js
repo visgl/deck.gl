@@ -22,7 +22,7 @@ import test from 'tape-catch';
 import {makeSpy} from 'probe.gl/test-utils';
 
 import * as data from 'deck.gl/test/data';
-import {testLayer, testInitializeLayer} from 'deck.gl-test-utils';
+import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
 import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
 

@@ -10,7 +10,9 @@ const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const LIB_DIR = resolve(__dirname, '..');
-const SRC_DIR = resolve(LIB_DIR, './src');
+const SRC_DIR = resolve(LIB_DIR, './modules');
+
+const ALIASES = require('../aliases')('src');
 
 // Support for hot reloading changes to the deck.gl library:
 function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
@@ -28,13 +30,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
     devtool: 'source-map',
 
     resolve: {
-      alias: {
-        // For importing modules that are not exported at root
-        'deck.gl/dist': SRC_DIR,
-        // Imports the deck.gl library from the src directory in this repo
-        'deck.gl': SRC_DIR,
-        // Imports the deck.gl library from the src directory in this repo
-        'deck.gl-layers': resolve(SRC_DIR, './experimental-layers/src'),
+      alias: Object.assign({}, ALIASES, {
         // Use luma.gl specified by root package.json
         'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
         // Important: ensure shared dependencies come from the main node_modules dir
@@ -43,7 +39,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
         'viewport-mercator-project': resolve(LIB_DIR, './node_modules/viewport-mercator-project'),
         seer: resolve(LIB_DIR, './node_modules/seer'),
         react: resolve(LIB_DIR, './node_modules/react')
-      }
+      })
     },
     module: {
       rules: [
