@@ -1,4 +1,4 @@
-import {PathLayer} from 'deck.gl';
+import {PathLayer} from '@deck.gl/core';
 import {GL, Framebuffer, Texture2D, registerShaderModules} from 'luma.gl';
 import outline from '../shaderlib/outline/outline';
 

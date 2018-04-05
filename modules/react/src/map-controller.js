@@ -1,6 +1,8 @@
 import {PureComponent, createElement} from 'react';
-import MapControllerJS from '../../core/controllers/map-controller';
+import {experimental} from '@deck.gl/core';
 import PropTypes from 'prop-types';
+
+const {MapController: MapControllerJS} = experimental;
 
 export default class MapController extends PureComponent {
   constructor(props) {

@@ -34,7 +34,7 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 };
 
-const DEFAULT_FONT_FAMILY = 'Monaco, monospace';
+const DEFAULT_FONT_FAMILY = '"Lucida Console", Monaco, monospace';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {

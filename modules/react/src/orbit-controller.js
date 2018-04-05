@@ -1,7 +1,8 @@
 import {PureComponent, createElement} from 'react';
-import OrbitControllerJS from '../../core/controllers/orbit-controller';
-import OrbitViewport from '../../core/viewports/orbit-viewport';
+import {experimental} from '@deck.gl/core';
 import PropTypes from 'prop-types';
+
+const {OrbitController: OrbitControllerJS, OrbitViewport} = experimental;
 
 export default class OrbitController extends PureComponent {
   // Returns a deck.gl Viewport instance, to be used with the DeckGL component

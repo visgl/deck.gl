@@ -2,7 +2,7 @@
 /* eslint-disable max-statements */
 import Mapbox from './mapbox';
 
-import {Deck, OrbitView, experimental} from 'deck.gl/core';
+import {Deck, OrbitView, experimental} from '@deck.gl/core';
 const {MapController, OrbitController} = experimental;
 
 const CANVAS_STYLE = {

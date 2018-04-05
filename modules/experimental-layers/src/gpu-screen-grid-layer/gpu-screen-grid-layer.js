@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from 'deck.gl';
+import {Layer, experimental} from '@deck.gl/core';
 import GPUGridAggregator from '../utils/gpu-grid-aggregator';
 const {defaultColorRange} = experimental;
 

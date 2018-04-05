@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from 'deck.gl';
+import {Layer, experimental} from '@deck.gl/core';
 const {fp64LowPart} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 

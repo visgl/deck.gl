@@ -1,8 +1,6 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-const ALIASES = require('../../aliases');
-
 const LIBRARY_BUNDLE_CONFIG = {
   // Bundle the source code
   entry: {
@@ -24,10 +22,6 @@ const LIBRARY_BUNDLE_CONFIG = {
 
   // Exclude any non-relative imports from resulting bundle
   externals: [/^[a-z\.\-0-9]+$/],
-
-  resolve: {
-    alias: ALIASES
-  },
 
   module: {
     rules: [
@@ -69,10 +63,6 @@ const BROWSER_CONFIG = {
   output: {
     path: resolve('./dist'),
     filename: '[name]-bundle.js'
-  },
-
-  resolve: {
-    alias: ALIASES
   },
 
   devtool: '#inline-source-maps',
