@@ -23,7 +23,10 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.2 Pre Releases
 
-#### [5.2.0-alpha.4] - April 5
+#### [5.2.0-alpha.8] - April 5
+Bump examples to 5.2 alpha versions (#1649)
+Bump example package.json to make it clear these are for future release (#1648)
+fix bench browser test (#1647)
 fix text layer issue on windows (#1645)
 Fix without-map (#1642)
 Initial commit of standalone js module (#1605)
@@ -76,6 +79,10 @@ Test directory cleanup (#1577)
 Add esnext dist and test-size script (#1559)
 Remove invalid deprecation warning (#1575)
 Fix MeshLayer texture rendering (#1570)
+
+#### [5.2.0-alpha.7] - Mar 23
+#### [5.2.0-alpha.6] - Mar 23
+#### [5.2.0-alpha.4] - Mar 23
 Make new colorRange and colorDomain props experimental (#1569)
 bump probe.gl to 1.0.0-alpha.11
 fix memory leak by deleting unused models (#1561)
