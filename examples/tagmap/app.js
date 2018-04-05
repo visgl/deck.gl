@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
-/* global window,document */
-import {fetch} from 'global/window';
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -50,11 +49,9 @@ class Root extends Component {
     // remove high-frequency terms
     const excludeList = new Set(['#hiring', '#job', '#jobs', '#careerarc', '#career', '#photo']);
 
-    fetch(DATA_URL).then(response => {
-      response.json().then(data => {
-        this.setState({data: data.filter(d => !excludeList.has(d.label))});
-      });
-    });
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(data => this.setState({data: data.filter(d => !excludeList.has(d.label))}));
   }
 
   render() {

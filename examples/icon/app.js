@@ -1,5 +1,4 @@
-/* global window,document */
-import {fetch} from 'global/window';
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -25,16 +24,13 @@ class Root extends Component {
       iconMapping: null
     };
 
-    fetch(DATA_URL).then(response => {
-      response.json().then(data => {
-        this.setState({data});
-      });
-    });
-    fetch('./data/location-icon-mapping.json').then(response => {
-      response.json().then(data => {
-        this.setState({iconMapping: data});
-      });
-    });
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(data => this.setState({data}));
+
+    fetch('./data/location-icon-mapping.json')
+      .then(resp => resp.json())
+      .then(data => this.setState({iconMapping: data}));
   }
 
   componentDidMount() {

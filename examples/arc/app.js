@@ -1,6 +1,5 @@
-/* global window,document */
+/* global document, fetch, window */
 import React, {Component} from 'react';
-import {fetch} from 'global/window';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
@@ -25,14 +24,14 @@ class Root extends Component {
       selectedCounty: null
     };
 
-    fetch(DATA_URL).then(response => {
-      response.json().then(({features}) => {
+    fetch(DATA_URL)
+      .then(response => response.json())
+      .then(({features}) => {
         this.setState({
           data: features,
           selectedCounty: features.find(f => f.properties.name === 'Los Angeles, CA')
         });
       });
-    });
   }
 
   componentDidMount() {

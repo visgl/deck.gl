@@ -1,5 +1,4 @@
-/* global window,document */
-import {fetch} from 'global/window';
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -29,17 +28,13 @@ class Root extends Component {
       airports: null
     };
 
-    fetch(DATA_URL.FLIGHT_PATHS).then(response => {
-      response.json().then(data => {
-        this.setState({flightPaths: data});
-      });
-    });
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(data => this.setState({flightPaths: data}));
 
-    fetch(DATA_URL.AIRPORTS).then(response => {
-      response.json().then(data => {
-        this.setState({airports: data});
-      });
-    });
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(data => this.setState({airports: data}));
   }
 
   componentDidMount() {

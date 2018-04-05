@@ -1,5 +1,4 @@
-/* global window,document */
-import {fetch} from 'global/window';
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -35,11 +34,9 @@ class Root extends Component {
       mousePosition: [0, 0]
     };
 
-    fetch(DATA_URL).then(response => {
-      response.json().then(({features}) => {
-        this.setState({data: features});
-      });
-    });
+    fetch(DATA_URL)
+      .then(response => response.json())
+      .then(({features}) => this.setState({data: features}));
   }
 
   componentDidMount() {

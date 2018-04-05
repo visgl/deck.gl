@@ -4,7 +4,6 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "d3-scale": "^1.0.5",
     "deck.gl": ">=5.2.0-alpha.7",
     "deck.gl-layers": "0.1.0-beta.2",
     "luma.gl": ">=5.2.0-alpha.11",

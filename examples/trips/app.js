@@ -1,5 +1,4 @@
-/* global window,document */
-import {fetch} from 'global/window';
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -30,17 +29,13 @@ class Root extends Component {
       time: 0
     };
 
-    fetch(DATA_URL.BUILDINGS).then(response => {
-      response.json().then(data => {
-        this.setState({buildings: data});
-      });
-    });
+    fetch(DATA_URL.BUILDINGS)
+      .then(resp => resp.json())
+      .then(data => this.setState({buildings: data}));
 
-    fetch(DATA_URL.TRIPS).then(response => {
-      response.json().then(data => {
-        this.setState({trips: data});
-      });
-    });
+    fetch(DATA_URL.TRIPS)
+      .then(resp => resp.json())
+      .then(data => this.setState({trips: data}));
   }
 
   componentDidMount() {

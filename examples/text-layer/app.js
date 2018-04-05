@@ -1,6 +1,5 @@
-/* global window,document */
 /* eslint-disable max-len */
-import {fetch} from 'global/window';
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -51,8 +50,9 @@ class Root extends Component {
   }
 
   _loadData() {
-    fetch(DATA_URL).then(response => {
-      response.json().then(resp => {
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(resp => {
         // each entry in the data object contains all tweets posted at that second
         const data = Array.from({length: SECONDS_PER_DAY}, () => []);
         resp.forEach(val => {
@@ -62,7 +62,6 @@ class Root extends Component {
         this.setState({data});
         window.requestAnimationFrame(this._animateData.bind(this));
       });
-    });
   }
 
   _animateData() {
