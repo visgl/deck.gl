@@ -47,29 +47,23 @@ class Root extends Component {
     const {viewport, width, height, data} = this.state;
 
     return (
-      <MapController
+      <DeckGL
         {...viewport}
         width={width}
         height={height}
+        controller={MapController}
         onViewportChange={v => this.setState({viewport: v})}
-      >
-        <DeckGL
-          {...viewport}
-          width={width}
-          height={height}
-          debug
-          layers={[
-            new GeoJsonLayer({
-              data,
-              stroked: true,
-              filled: true,
-              lineWidthMinPixels: 2,
-              getLineColor: () => [255, 255, 255],
-              getFillColor: () => [200, 200, 200]
-            })
-          ]}
-        />
-      </MapController>
+        layers={[
+          new GeoJsonLayer({
+            data,
+            stroked: true,
+            filled: true,
+            lineWidthMinPixels: 2,
+            getLineColor: () => [255, 255, 255],
+            getFillColor: () => [200, 200, 200]
+          })
+        ]}
+      />
     );
   }
 }
