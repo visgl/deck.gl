@@ -1,8 +1,6 @@
 import {PathLayer} from '@deck.gl/core';
-import {GL, Framebuffer, Texture2D, registerShaderModules} from 'luma.gl';
+import {GL, Framebuffer, Texture2D} from 'luma.gl';
 import outline from '../shaderlib/outline/outline';
-
-registerShaderModules([outline]);
 
 // TODO - this should be built into assembleShaders
 function injectShaderCode({source, declarations = '', code = ''}) {
@@ -42,7 +40,7 @@ export default class PathOutlineLayer extends PathLayer {
   getShaders() {
     const shaders = super.getShaders();
     return Object.assign({}, shaders, {
-      modules: shaders.modules.concat(['outline']),
+      modules: shaders.modules.concat([outline]),
       vs: injectShaderCode({source: shaders.vs, declarations: VS_DECLARATIONS, code: VS_CODE}),
       fs: injectShaderCode({source: shaders.fs, code: FS_CODE})
     });

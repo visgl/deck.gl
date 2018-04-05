@@ -24,32 +24,39 @@
 const {resolve} = require('path');
 const fs = require('fs');
 
-const MODULE_PATH = resolve(__dirname, './modules');
+// Get information of all submodules
+function getSubmodules() {
+  const parentPath = resolve(__dirname, './modules');
 
-// Get all module info
-const MODULES = {};
-fs.readdirSync(MODULE_PATH)
+  const submodules = {};
+  fs.readdirSync(parentPath)
   .forEach(item => {
-    const itemPath = resolve(MODULE_PATH, item);
+    const itemPath = resolve(parentPath, item);
     if (fs.lstatSync(itemPath).isDirectory()) {
       const packageInfo = require(resolve(itemPath, 'package.json'));
-      MODULES[packageInfo.name] = packageInfo;
+      submodules[packageInfo.name] = packageInfo;
     }
   });
 
+  return submodules;
+}
+
 function getAliases(mode = 'src') {
   const aliases = {};
+  const submodules = getSubmodules();
 
-  for (const moduleName in MODULES) {
-    const subPath = mode === 'src' ? 'src' : MODULES[moduleName].main.replace('/index.js', '');
+  for (const moduleName in submodules) {
+    const subPath = mode === 'src' ? 'src' : submodules[moduleName].main.replace('/index.js', '');
     aliases[moduleName] = resolve(__dirname, 'node_modules', moduleName, subPath);
   }
 
   return Object.assign({
+    // Important - these must be defined before the alias of `deck.gl`
+    // to be resolved correctly
+    'deck.gl/test': resolve(__dirname, './test'),
     // TODO - remove when core and core-layers are separated
     'deck.gl/core': resolve(aliases['@deck.gl/core'], 'core'),
-    'deck.gl/core-layers': resolve(aliases['@deck.gl/core'], 'core-layers'),
-    'deck.gl/test': resolve(__dirname, './test')
+    'deck.gl/core-layers': resolve(aliases['@deck.gl/core'], 'core-layers')
   }, aliases);
 }
 
