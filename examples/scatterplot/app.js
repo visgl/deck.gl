@@ -20,10 +20,10 @@ class Root extends Component {
     super(props);
     this.state = {
       viewport: {
-        ...DeckGLOverlay.defaultViewport
+        ...DeckGLOverlay.defaultViewport,
+        width: 0,
+        height: 0
       },
-      width: 0,
-      height: 0,
       data: null
     };
 
