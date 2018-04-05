@@ -21,8 +21,8 @@ class Root extends Component {
     this.state = {
       viewport: {
         ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500
+        width: 0,
+        height: 0
       },
       data: null
     };

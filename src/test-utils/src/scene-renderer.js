@@ -57,7 +57,6 @@ export default class SceneRenderer {
       width: this.width,
       height: this.height,
       debug: true,
-      autoResizeDrawingBuffer: false,
       useDevicePixels: false
     });
 

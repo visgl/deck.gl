@@ -36,8 +36,8 @@ function getPropTypes(PropTypes) {
   // Note: Arrays (layers, views, ) can contain falsy values
   return {
     id: PropTypes.string,
-    width: PropTypes.number.isRequired,
-    height: PropTypes.number.isRequired,
+    width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
+    height: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
 
     // layer/view/controller settings
     layers: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
@@ -51,7 +51,9 @@ function getPropTypes(PropTypes) {
     glOptions: PropTypes.object,
     gl: PropTypes.object,
     pickingRadius: PropTypes.number,
+
     onWebGLInitialized: PropTypes.func,
+    onResize: PropTypes.func,
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLayerClick: PropTypes.func,
@@ -76,6 +78,7 @@ const defaultProps = {
   controller: null, // Rely on external controller, e.g. react-map-gl
 
   onWebGLInitialized: noop,
+  // onResize: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLayerClick: null,
@@ -90,7 +93,8 @@ export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
 
-    this.state = {};
+    this.width = 0; // "read-only", auto-updated from canvas
+    this.height = 0; // "read-only", auto-updated from canvas
     this.needsRedraw = true;
     this.layerManager = null;
     this.effectManager = null;
@@ -129,6 +133,8 @@ export default class Deck {
     this.stats.timeStart('deck.setProps');
     props = Object.assign({}, this.props, props);
     this.props = props;
+
+    this._setCanvasSize(props);
 
     this._setLayerManagerProps(props);
 
@@ -176,21 +182,45 @@ export default class Deck {
     }
 
     if (!canvas) {
-      const {id, width, height, style} = props;
       canvas = document.createElement('canvas');
-      canvas.id = id;
-      canvas.width = width;
-      canvas.height = height;
-      Object.assign(canvas.style, style);
-
       const parent = props.parent || document.body;
       parent.appendChild(canvas);
     }
 
+    const {id, style} = props;
+    canvas.id = id;
+    Object.assign(canvas.style, style);
+
     return canvas;
   }
 
-  // Note: props.controller must be a class, not an already created instance
+  // Updates canvas width and/or height, if provided as props
+  _setCanvasSize(props) {
+    const {canvas} = this;
+    let {width, height} = props;
+    // Set size ONLY if props are being provided, otherwise let canvas be layouted freely
+    if (width || width === 0) {
+      width = Number.isFinite(width) ? `${width}px` : width;
+      canvas.style.width = width;
+    }
+    if (height || height === 0) {
+      height = Number.isFinite(height) ? `${height}px` : height;
+      canvas.style.height = height;
+    }
+  }
+
+  // If canvas size has changed, reads out the new size and returns true
+  _checkForCanvasSizeChange() {
+    const {canvas} = this;
+    if (canvas && (this.width !== canvas.clientWidth || this.height !== canvas.clientHeight)) {
+      this.width = canvas.clientWidth;
+      this.height = canvas.clientHeight;
+      return true;
+    }
+    return false;
+  }
+
+  // Note: props.controller must be a class constructor, not an already created instance
   _createController(props) {
     const Controller = props.controller;
     assert(!Controller || typeof Controller === 'function');
@@ -227,8 +257,6 @@ export default class Deck {
     }
 
     const {
-      width,
-      height,
       views,
       viewState,
       layers,
@@ -242,8 +270,6 @@ export default class Deck {
 
     // If more parameters need to be updated on layerManager add them to this method.
     this.layerManager.setParameters({
-      width,
-      height,
       views,
       viewState,
       layers,
@@ -289,6 +315,14 @@ export default class Deck {
       const table = this.stats.getStatsTable();
       this.stats.reset();
       log.table(1, table)();
+    }
+
+    if (this._checkForCanvasSizeChange()) {
+      const {width, height} = this;
+      this.layerManager.setParameters({width, height});
+      if (this.props.onResize) {
+        this.props.onResize({width: this.width, height: this.height});
+      }
     }
 
     // Update layers if needed (e.g. some async prop has loaded)
