@@ -112,35 +112,35 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png'
   },
-  // {
-  //   name: 'pointcloud-identity',
-  //   views: [
-  //     new OrbitView({
-  //       fov: 30,
-  //       near: 0.001,
-  //       far: 100
-  //     })
-  //   ],
-  //   viewState: {
-  //     lookAt: [0, 0, 0],
-  //     distance: 1,
-  //     rotationX: 15,
-  //     rotationOrbit: 30,
-  //     orbitAxis: 'Y'
-  //   },
-  //   layers: [
-  //     new PointCloudLayer({
-  //       id: 'pointcloud-identity',
-  //       data: [{position: [0, 0.2, 0]}, {position: [-0.2, -0.2, 0]}, {position: [0.2, -0.2, 0]}],
-  //       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-  //       getPosition: d => d.position,
-  //       getNormal: d => [0, 0.5, 0.2],
-  //       getColor: d => [255, 255, 0, 128],
-  //       radiusPixels: 100
-  //     })
-  //   ],
-  //   referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
-  // },
+  {
+    name: 'pointcloud-identity',
+    views: [
+      new OrbitView({
+        fov: 30,
+        near: 0.001,
+        far: 100
+      })
+    ],
+    viewState: {
+      lookAt: [0, 0, 0],
+      distance: 1,
+      rotationX: 15,
+      rotationOrbit: 30,
+      orbitAxis: 'Y'
+    },
+    layers: [
+      new PointCloudLayer({
+        id: 'pointcloud-identity',
+        data: [{position: [0, 0.2, 0]}, {position: [-0.2, -0.2, 0]}, {position: [0.2, -0.2, 0]}],
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        getPosition: d => d.position,
+        getNormal: d => [0, 0.5, 0.2],
+        getColor: d => [255, 255, 0, 128],
+        radiusPixels: 100
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
+  },
 
   // GEOSPATIAL
 
