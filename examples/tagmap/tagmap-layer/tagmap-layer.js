@@ -15,7 +15,7 @@ const DEFAULT_COLOR_SCHEME = [
 const defaultProps = {
   getLabel: x => x.label,
   getWeight: x => x.weight || 1,
-  getPosition: x => x.coordinates,
+  getPosition: x => x.position,
   colorScheme: DEFAULT_COLOR_SCHEME,
   minFontSize: 14,
   maxFontSize: 32,
