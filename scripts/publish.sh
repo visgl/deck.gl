@@ -1,0 +1,27 @@
+#!/bin/sh
+# Script to publish modules
+
+set -e
+
+# beta or prod
+MODE=$1
+
+Check permission
+ACCOUNT=`npm whoami`
+
+if [[ $ACCOUNT != 'deck.gl' ]]; then
+  echo "Must sign in to deck.gl account to publish"
+  exit 1
+fi
+
+case $MODE in
+  "beta")
+    lerna publish --npm-tag beta --cd-version prerelease
+    break;;
+
+  "prod")
+    lerna publish --cd-version minor
+    break;;
+
+  *) ;;
+esac
