@@ -86,7 +86,7 @@ const CONFIGS = {
   bench: env =>
     Object.assign({}, TEST_CONFIG, {
       entry: {
-        'test-browser': resolve(__dirname, './test/bench/browser.js')
+        'test-browser': resolve('./test/bench/browser.js')
       },
 
       plugins: [new HtmlWebpackPlugin()]
