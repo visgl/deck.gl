@@ -11,7 +11,7 @@
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-map-gl": "^3.2.0",
-    "tagmap.js": "^1.1.0"
+    "tagmap.js": "^1.1.1"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

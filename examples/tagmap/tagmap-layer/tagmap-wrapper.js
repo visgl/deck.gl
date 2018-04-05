@@ -1,7 +1,7 @@
 /* create a tagmap instance, set colorscheme, sizeMeasurer */
 /* eslint-disable max-len */
 /* global document */
-import TagMap from '../tagmap.js';
+import TagMap from 'tagmap.js';
 import rbush from 'rbush';
 import {lngLatToWorld, worldToLngLat} from 'viewport-mercator-project';
 
@@ -62,6 +62,7 @@ export default class TagMapWrapper {
       tagList,
       minFontSize,
       maxFontSize,
+      maxNumOfTags: 150,
       sizeMeasurer: this.measureText
     });
 
