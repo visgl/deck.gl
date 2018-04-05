@@ -21,7 +21,7 @@ switch (mode) {
 
   case 'test-dist':
     // Load deck.gl itself from the dist folder
-    moduleAlias.addAlias('deck.gl', path.resolve('./dist'));
+    moduleAlias.addAlias('deck.gl', path.resolve('./dist/es6'));
     require('./src/index'); // Run the tests
     break;
 
