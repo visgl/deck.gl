@@ -65,6 +65,14 @@ switch (mode) {
     });
     break;
 
+  case 'bench-browser':
+    new BrowserTestDriver().run({
+      process: 'webpack-dev-server',
+      parameters: ['--config', 'test/webpack.config.js', '--env.bench'],
+      exposeFunction: 'testDone'
+    });
+    break;
+
   case 'bench':
     require('./bench/index'); // Run the benchmarks
     break;
