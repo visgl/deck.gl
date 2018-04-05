@@ -82,8 +82,7 @@ export default class TagMapWrapper {
 
     const scale = Math.pow(2, zoom);
 
-    const cluster = this.clusterCache[zoom] ||
-      this.extractCluster({scale, weightThreshold});
+    const cluster = this.clusterCache[zoom] || this.extractCluster({scale, weightThreshold});
     this.clusterCache[zoom] = cluster;
 
     let tagList;

@@ -1,6 +1,5 @@
-/* global window */
 /* eslint-disable max-len */
-import {CompositeLayer, WebMercatorViewport, TextLayer} from 'deck.gl';
+import {CompositeLayer, TextLayer} from 'deck.gl';
 import {scaleQuantile} from 'd3-scale';
 import TagMapWrapper from './tagmap-wrapper';
 
@@ -110,8 +109,12 @@ export default class TagmapLayer extends CompositeLayer {
     }
 
     tags = tagMap.getTags({
-      bbox, minFontSize, maxFontSize, weightThreshold,
-      zoom: discreteZoomLevel});
+      bbox,
+      minFontSize,
+      maxFontSize,
+      weightThreshold,
+      zoom: discreteZoomLevel
+    });
 
     if (discreteZoomLevel <= MAX_CACHED_ZOOM_LEVEL) {
       tagsCache[discreteZoomLevel] = tags;
