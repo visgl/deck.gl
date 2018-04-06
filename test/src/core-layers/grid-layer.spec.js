@@ -22,7 +22,7 @@ import {makeSpy} from 'probe.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl/test/data';
 
-import {testLayer, testInitializeLayer} from 'deck.gl-test-utils';
+import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
 import {GridLayer, GridCellLayer} from 'deck.gl';
 

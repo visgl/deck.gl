@@ -1,6 +1,6 @@
 import {WebMercatorViewport} from 'deck.gl';
 import test from 'tape-catch';
-import {toLowPrecision} from 'deck.gl-test-utils';
+import {toLowPrecision} from '@deck.gl/test-utils';
 
 const viewportProps = {
   latitude: 37.75,

@@ -1,0 +1,39 @@
+{
+  "name": "@deck.gl/react",
+  "description": "React Components for deck.gl",
+  "license": "MIT",
+  "version": "5.2.0-alpha.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "overlay",
+    "layer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/deck.gl.git"
+  },
+  "main": "dist/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "dependencies": {
+    "@deck.gl/core": "^5.2.0-alpha.1",
+    "prop-types": "^15.6.0"
+  },
+  "scripts": {
+    "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
+    "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --source-maps inline",
+    "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=transform-es2015-modules-commonjs --source-maps inline",
+    "build": "npm run build-clean && npm run build-es5",
+    "test": "echo \"PACKAGE HAS NO TEST\""
+  },
+  "peerDependencies": {
+    "react": "0.14.x - 16.x",
+    "react-dom": "0.14.x - 16.x"
+  }
+}

@@ -1,6 +1,6 @@
 import test from 'tape-catch';
-import GPUGridAggregator from '../../../src/experimental-layers/src/utils/gpu-grid-aggregator';
-import {gl} from 'deck.gl-test-utils';
+import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
+import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl/test/data';
 
 const {fixture, generateRandomGridPoints} = GridAggregationData;

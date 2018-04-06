@@ -1,0 +1,45 @@
+{
+  "name": "@deck.gl/core",
+  "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
+  "license": "MIT",
+  "version": "5.2.0-alpha.1",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "overlay",
+    "layer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/deck.gl.git"
+  },
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "esnext": "dist/es6/index.js",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "clean": "rm -fr dist dist-es6 && mkdir -p dist/es5 dist/esm dist/es6",
+    "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
+    "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
+    "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
+    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5",
+    "test": "echo \"PACKAGE HAS NO TEST\""
+  },
+  "dependencies": {
+    "d3-hexbin": "^0.2.1",
+    "earcut": "^2.0.6",
+    "lodash.flattendeep": "^4.4.0",
+    "luma.gl": ">=5.2.0-alpha.10",
+    "math.gl": ">=1.1.0-alpha.1",
+    "mjolnir.js": "^1.0.0",
+    "probe.gl": ">=1.0.0-alpha.11",
+    "seer": "^0.2.4",
+    "viewport-mercator-project": ">=5.1.0-alpha.2"
+  }
+}

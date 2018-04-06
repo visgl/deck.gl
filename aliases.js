@@ -21,20 +21,44 @@
 // Enables ES2015 import/export in Node.js
 
 // Registers an alias for this module
-const path = require('path');
+const {resolve} = require('path');
+const fs = require('fs');
 
-const ALIASES = {
-  'deck.gl/test': path.resolve(__dirname, './test'),
-  'deck.gl': path.resolve(__dirname, './src'),
-  'deck.gl-layers': path.resolve(__dirname, './src/experimental-layers/src'),
-  'deck.gl-test-utils': path.resolve(__dirname, './src/test-utils/src')
-};
+// Get information of all submodules
+function getSubmodules() {
+  const parentPath = resolve(__dirname, './modules');
 
-if (module.require) {
-  module.require('reify');
+  const submodules = {};
+  fs.readdirSync(parentPath)
+  .forEach(item => {
+    const itemPath = resolve(parentPath, item);
+    if (fs.lstatSync(itemPath).isDirectory()) {
+      const packageInfo = require(resolve(itemPath, 'package.json'));
+      submodules[packageInfo.name] = packageInfo;
+    }
+  });
 
-  const moduleAlias = module.require('module-alias');
-  moduleAlias.addAliases(ALIASES);
+  return submodules;
 }
 
-module.exports = ALIASES;
+function getAliases(mode = 'src') {
+  const aliases = {};
+  const submodules = getSubmodules();
+
+  for (const moduleName in submodules) {
+    const subPath = mode === 'src' ? 'src' : submodules[moduleName].main.replace('/index.js', '');
+    aliases[moduleName] = resolve(__dirname, 'node_modules', moduleName, subPath);
+  }
+
+  return Object.assign({
+    // Important - these must be defined before the alias of `deck.gl`
+    // to be resolved correctly
+    'deck.gl/test': resolve(__dirname, './test'),
+    // TODO - remove when core and core-layers are separated
+    'deck.gl/core': resolve(aliases['@deck.gl/core'], 'core'),
+    'deck.gl/core-layers': resolve(aliases['@deck.gl/core'], 'core-layers')
+  }, aliases);
+}
+
+module.exports = getAliases;
+
