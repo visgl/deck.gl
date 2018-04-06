@@ -220,6 +220,24 @@ export default class Deck {
     }
   }
 
+  // If canvas size has changed, updates
+  _updateCanvasSize() {
+    if (this._checkForCanvasSizeChange()) {
+      const {width, height} = this;
+      this.layerManager.setParameters({width, height});
+      if (this.controller) {
+        this.controller.setProps({
+          viewState: this._getViewState(this.props),
+          width: this.width,
+          height: this.height
+        });
+      }
+      if (this.props.onResize) {
+        this.props.onResize({width: this.width, height: this.height});
+      }
+    }
+  }
+
   // If canvas size has changed, reads out the new size and returns true
   _checkForCanvasSizeChange() {
     const {canvas} = this;
@@ -295,6 +313,8 @@ export default class Deck {
     }
 
     this.setProps(this.props);
+
+    this._updateCanvasSize();
   }
 
   _onRenderFrame({gl}) {
@@ -304,19 +324,7 @@ export default class Deck {
       log.table(1, table)();
     }
 
-    if (this._checkForCanvasSizeChange()) {
-      const {width, height} = this;
-      this.layerManager.setParameters({width, height});
-      if (this.controller) {
-        this.controller.setProps({viewState: this._getViewState()});
-      }
-      if (this.props.onResize) {
-        this.props.onResize({width: this.width, height: this.height});
-      }
-      if (this.controller) {
-        this.controller.setProps({width: this.width, height: this.height});
-      }
-    }
+    this._updateCanvasSize();
 
     // Update layers if needed (e.g. some async prop has loaded)
     this.layerManager.updateLayers();
