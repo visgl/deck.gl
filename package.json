@@ -18,7 +18,6 @@
     "modules/*"
   ],
   "scripts": {
-    "start": "(cd examples/layer-browser && (path-exists node_modules || npm i) && npm run start-local)",
     "bootstrap": "scripts/bootstrap.sh",
     "build": "lerna run build",
     "clean": "rm -rf node_modules && lerna clean --yes",
