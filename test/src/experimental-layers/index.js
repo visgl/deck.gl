@@ -27,7 +27,7 @@ import {
   PathMarkerLayer,
   PathOutlineLayer,
   outline
-} from 'deck.gl-layers';
+} from '@deck.gl/experimental-layers';
 
 test('Top-level imports', t => {
   t.ok(MeshLayer, 'MeshLayer symbol imported');
