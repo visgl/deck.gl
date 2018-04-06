@@ -1,4 +1,4 @@
-# Building deck.gl
+# Building Apps
 
 This article contains additional information on options for how to build deck.gl.
 
@@ -43,18 +43,23 @@ So, what bundle size impact should you expect? When do you know if you have set 
 
 > TBA - Table needs updating
 
-
 | Dist | 5.1.4 Bundle (Compressed) | 5.2.0 Bundle (Compressed) | Comments |
 | ---  | ---                       | ---                       | --- |
-| ES6  | N/A                       | 560 KB (156 KB)           | New dist in 5.2.0                  |
-| ESM  | 708 KB (169 KB)           | 724 KB (172 KB)           | Transpiled, tree-shaking enabled   |
-| ES5  | 754 KB (176 KB)           | 760 KB (176 KB)           | Transpiled to ES5, no tree-shaking |
+| ES6  | N/A                       | 527 KB (141 KB)           | New ES6 dist in v5.2 (minimally transpiled) |
+| ESM  | 708 KB (169 KB)           | 715 KB (159 KB)           | Transpiled, tree-shaking enabled   |
+| ES5  | 754 KB (176 KB)           | 748 KB (166 KB)           | Transpiled to ES5, no tree-shaking |
 
-Number are for minified bundle size, with compressed bundle size in parenthesis. Compressed bundle sizes are calculated using `gzip -9`. `brotli` compression typically provides an additional 20% reduction.
+Notes:
+* Numbers represent the minified bundle size of a minimal application, bundled with Webpack 4, which means that the results benefit from some tree shaking.
+* The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your compressed bundle to get.
 
-Note that these numbers are not the final word on deck.gl bundle size. There is more work that is being done to reduce the size of deck.gl and we are confident that even as fture releases will have more functionality, we will be able to keep the library code from growing and, more importantly, make deck.gl even more "tree shakeable", with the intention that apps should only "pay for what they use".
+
+### Future Work
+
+This is not the final word on deck.gl bundle size. More work is being done to reduce the size of deck.gl and we are confident that even as fture releases will have more functionality, we will be able to keep the library code from growing and, more importantly, make deck.gl even more "tree shakeable", with the intention that apps should only "pay for what they use".
 
 
 ## Remarks
 
-* **Optmizing for minified code** - Due to inclusion of sourcemaps etc, the bundle size impact of deck.gl tends to look more significant in development builds than in the final production builds. While reducing the size of the development libraries is also desirable, the current goal is to ensure the impact of adding deck.gl on the final, minified/uglified application bundle is as small as possible.
+* **Optimizing for minified code** - Due to inclusion of sourcemaps etc, the bundle size impact of deck.gl tends to look more significant in development builds than in the final production builds. While reducing the size of the development libraries is also desirable, the current goal is to ensure the impact of adding deck.gl on the final, minified/uglified application bundle is as small as possible.
+* Compressed bundle sizes are calculated using `gzip -9`. Consider using slower `brotli` compression for static assests, it typically provides an additional 20% reduction.
