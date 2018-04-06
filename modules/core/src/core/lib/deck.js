@@ -144,22 +144,13 @@ export default class Deck {
       height: this.height
     });
 
-    const {
-      views, viewState,
-      layers, layerFilter,
-      useDevicePixels, pickingRadius, drawPickingColors,
-      onLayerClick, onLayerHover
-    } = props;
-
     // Update layer manager props (but not size)
     if (this.layerManager) {
       this.layerManager.setParameters(newProps);
     }
 
     // Update animation loop TODO - unify setParameters/setOptions/setProps etc naming.
-    const {autoResizeDrawingBuffer} = props;
-    this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
-    // this.animationLoop.setProps({useDevicePixels, autoResizeDrawingBuffer});
+    this.animationLoop.setProps(newProps);
 
     // Update controller props
     if (this.controller) {
