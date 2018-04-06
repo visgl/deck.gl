@@ -30,7 +30,7 @@
     "publish-beta": "npm run build && npm run test && npm run test-dist && scripts/publish.sh beta",
     "test": "npm run lint && npm run test-node && npm run test-browser && npm run test-render",
     "test-fast": "npm run test-node",
-    "test-ci": "node test/start.js test-ci && npm run build && npm run collect-metrics",
+    "test-ci": "npm run lint && node test/start.js test-ci && npm run build && npm run collect-metrics",
     "test-cover": "NODE_ENV=test tape -r babel-register test/node.js && nyc report",
     "test-node": "node test/start.js test",
     "test-dist": "node test/start.js test-dist",
