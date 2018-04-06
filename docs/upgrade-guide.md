@@ -1,5 +1,27 @@
 # Upgrade Guide
 
+
+## Upgrading from deck.gl v5.1 to v5.2
+
+### DeckGL component
+
+* `DeckGL.viewports` and `DeckGL.viewport` are deprecated and should be replaced with `DeckGL.views`.
+
+### Viewport classes
+
+* A number of `Viewport` subclasses have been deprecated. They should be replaced with their `View` counterparts.
+
+### Experimental Features
+
+Some experimental exports have been removed:
+* The experimental React controller components (`MapController` and `OrbitController`) have been removed. These are now replaced with JavaScript classes that can be used with the `Deck.controller` / `DeckGL.controller` property.
+
+
+## Upgrading from deck.gl v5 to v5.1
+
+N/A
+
+
 ## Upgrading from deck.gl v4.1 to v5
 
 ### Dependencies
