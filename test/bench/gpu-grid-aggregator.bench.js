@@ -19,9 +19,9 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-console, no-invalid-this */
-// TODO: remove hard path once deck.gl-layers published with GPUScreenGridLayer
-import GPUGridAggregator from '../../src/experimental-layers/src/utils/gpu-grid-aggregator';
-import {gl} from 'deck.gl-test-utils';
+// TODO: remove hard path once @deck.gl/experimental-layers published with GPUScreenGridLayer
+import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
+import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl/test/data';
 
 const {fixture, generateRandomGridPoints} = GridAggregationData;

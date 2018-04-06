@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testLayer} from 'deck.gl-test-utils';
+import {testLayer} from '@deck.gl/test-utils';
 
 import {PolygonLayer} from 'deck.gl';
 

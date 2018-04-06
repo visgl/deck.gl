@@ -12,3 +12,5 @@ export {default as AdvancedTextLayer} from './advanced-text-layer/advanced-text-
 export {default as outline} from './shaderlib/outline/outline';
 
 export {default as BezierCurveLayer} from './bezier-curve-layer/bezier-curve-layer';
+
+export {default as GPUScreenGridLayer} from './gpu-screen-grid-layer/gpu-screen-grid-layer';

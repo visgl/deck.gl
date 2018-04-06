@@ -3,11 +3,11 @@
 // Enables ES2015 import/export in Node.js
 require('reify');
 
-require('../aliases');
-
 /* global process */
-const path = require('path');
 const moduleAlias = require('module-alias');
+
+const getAliases = require('../aliases');
+moduleAlias.addAliases(getAliases('src'));
 
 const {BrowserTestDriver} = require('probe.gl/test-utils');
 
@@ -21,7 +21,7 @@ switch (mode) {
 
   case 'test-dist':
     // Load deck.gl itself from the dist folder
-    moduleAlias.addAlias('deck.gl', path.resolve('./dist'));
+    moduleAlias.addAliases(getAliases('dist'));
     require('./src/index'); // Run the tests
     break;
 

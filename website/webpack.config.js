@@ -2,7 +2,7 @@ const {resolve, join} = require('path');
 const webpack = require('webpack');
 
 const rootDir = join(__dirname, '..');
-const libSources = join(rootDir, 'src');
+const libSources = join(rootDir, 'modules');
 
 // Otherwise modules imported from outside this directory does not compile
 // Seems to be a Babel bug
@@ -48,8 +48,7 @@ const COMMON_CONFIG = {
   resolve: {
     alias: {
       // For importing modules that are not exported at root
-      'deck.gl/dist': libSources,
-      'deck.gl': libSources,
+      'deck.gl': resolve('.', '../node_modules/deck.gl'),
       'luma.gl': resolve('.', '../node_modules/luma.gl'),
       react: resolve('.', './node_modules/react'),
       // // used by Mapbox

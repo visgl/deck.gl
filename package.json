@@ -3,6 +3,7 @@
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
   "version": "5.2.0-alpha.4",
+  "private": "true",
   "keywords": [
     "webgl",
     "visualization",
@@ -13,28 +14,20 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "esnext": "dist/es6/index.js",
-  "files": [
-    "dist",
-    "src"
+  "workspaces": [
+    "modules/*"
   ],
   "scripts": {
     "start": "(cd examples/layer-browser && (path-exists node_modules || npm i) && npm run start-local)",
-    "bootstrap": "yarn && (cd src/experimental-layers && yarn) && (cd src/test-utils && yarn)",
-    "clean-modules": "for D in src/*; do ([ -d $D ] && cd $D && rm -rf node_modules && rm -f yarn.lock && rm -fr dist dist-es6 && mkdir -p dist dist-es6 ); done",
-    "clean": "rm -fr dist dist-es6 && mkdir -p dist/es5 dist/esm dist/es6",
-    "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
-    "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
-    "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
-    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5 && npm run collect-metrics",
+    "bootstrap": "scripts/bootstrap.sh",
+    "build": "lerna run build",
+    "clean": "rm -rf node_modules && lerna clean --yes",
     "cover": "NODE_ENV=test nyc --reporter html --reporter cobertura --reporter=lcov npm run test-cover",
-    "pretty": "prettier --write \"{src,examples,test}/**/*.js\" --loglevel warn",
-    "lint": "prettier-check \"{src,examples,test}/**/*.js\" && eslint src test examples && npm run lint-yarn",
+    "pretty": "prettier --write \"{modules,examples,test}/**/*.js\" --loglevel warn",
+    "lint": "prettier-check \"{modules,examples,test}/**/*.js\" && eslint modules test examples && npm run lint-yarn",
     "lint-yarn": "!(grep -q unpm.u yarn.lock) && echo 'Lockfile valid.' || (echo 'Please rebuild yarn file using public npmrc' && false)",
-    "publish-prod": "npm run build && npm run test && npm run test-dist && npm publish",
-    "publish-beta": "npm run build && npm run test && npm run test-dist && npm publish --tag beta",
+    "publish-prod": "npm run build && npm run test && npm run test-dist && scripts/publish.sh prod",
+    "publish-beta": "npm run build && npm run test && npm run test-dist && scripts/publish.sh beta",
     "test": "npm run lint && npm run test-node && npm run test-browser && npm run test-render-react",
     "test-fast": "npm run test-node",
     "test-ci": "node test/start.js test-ci && npm run build && npm run collect-metrics",
@@ -52,18 +45,6 @@
     "bench-browser": "node test/start.js bench-browser",
     "bench-browser-local": "webpack-dev-server --config test/webpack.config.js --env.bench --progress --hot --open",
     "collect-metrics": "./scripts/collect-metrics.sh"
-  },
-  "dependencies": {
-    "d3-hexbin": "^0.2.1",
-    "earcut": "^2.0.6",
-    "lodash.flattendeep": "^4.4.0",
-    "luma.gl": ">=5.2.0-alpha.10",
-    "math.gl": ">=1.1.0-alpha.1",
-    "mjolnir.js": "^1.0.0",
-    "probe.gl": ">=1.0.0-alpha.11",
-    "prop-types": "^15.6.0",
-    "seer": "^0.2.4",
-    "viewport-mercator-project": ">=5.1.0-alpha.2"
   },
   "devDependencies": {
     "@babel/cli": "7.0.0-beta.44",
@@ -83,9 +64,9 @@
     "gl": "^4.0.3",
     "html-webpack-plugin": "^3.1.0",
     "jsdom": "^9.11.0",
+    "lerna": "^2.9.1",
     "module-alias": "^2.0.0",
     "nyc": "^10.2.0",
-    "pixelmatch": "^4.0.2",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
     "prettier": "^1.9.2",
@@ -104,19 +85,15 @@
     "webpack-cli": "^2.0.13",
     "webpack-dev-server": "^3.1.1"
   },
-  "peerDependencies": {
-    "react": "0.14.x - 16.x",
-    "react-dom": "0.14.x - 16.x"
-  },
   "nyc": {
     "sourceMap": false,
     "instrument": false,
     "include": [
-      "src/**/*.js"
+      "modules/**/*.js"
     ],
     "exclude": [
       "test/**/*.js",
-      "src/layers/deprecated"
+      "**/deprecated"
     ]
   }
 }
