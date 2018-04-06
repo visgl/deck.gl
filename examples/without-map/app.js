@@ -38,7 +38,9 @@ class Root extends Component {
         height="100%"
         controller={MapController}
         viewState={viewport}
-        onViewportChange={v => this.setState({viewport: v})}
+        onViewportChange={v => {
+          this.setState({viewport: v});
+        }}
         layers={[
           new GeoJsonLayer({
             data,
