@@ -134,18 +134,38 @@ export default class Deck {
     props = Object.assign({}, this.props, props);
     this.props = props;
 
+    // Update CSS size of canvas
     this._setCanvasSize(props);
 
-    this._setLayerManagerProps(props);
+    // We need to overwrite width and height with actual, numeric values
+    const newProps = Object.assign({}, props, {
+      viewState: this._getViewState(),
+      width: this.width,
+      height: this.height
+    });
 
-    // TODO - unify setParameters/setOptions/setProps etc naming.
-    const {useDevicePixels, autoResizeDrawingBuffer} = props;
-    this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
-    this.stats.timeEnd('deck.setProps');
+    const {
+      views, viewState,
+      layers, layerFilter,
+      useDevicePixels, pickingRadius, drawPickingColors,
+      onLayerClick, onLayerHover
+    } = props;
 
-    if (this.controller) {
-      this.controller.setProps(props);
+    // Update layer manager props (but not size)
+    if (this.layerManager) {
+      this.layerManager.setParameters(newProps);
     }
+
+    // Update animation loop TODO - unify setParameters/setOptions/setProps etc naming.
+    const {autoResizeDrawingBuffer} = props;
+    this.animationLoop.setViewParameters({useDevicePixels, autoResizeDrawingBuffer});
+    // this.animationLoop.setProps({useDevicePixels, autoResizeDrawingBuffer});
+
+    // Update controller props
+    if (this.controller) {
+      this.controller.setProps(newProps);
+    }
+    this.stats.timeEnd('deck.setProps');
   }
 
   // Public API
@@ -251,34 +271,10 @@ export default class Deck {
     });
   }
 
-  _setLayerManagerProps(props) {
-    if (!this.layerManager) {
-      return;
-    }
-
-    const {
-      views,
-      viewState,
-      layers,
-      pickingRadius,
-      onLayerClick,
-      onLayerHover,
-      useDevicePixels,
-      drawPickingColors,
-      layerFilter
-    } = props;
-
-    // If more parameters need to be updated on layerManager add them to this method.
-    this.layerManager.setParameters({
-      views,
-      viewState,
-      layers,
-      useDevicePixels,
-      drawPickingColors,
-      layerFilter,
-      pickingRadius,
-      onLayerClick,
-      onLayerHover
+  _getViewState() {
+    return Object.assign({}, this.props.viewState || {}, {
+      width: this.width,
+      height: this.height
     });
   }
 
@@ -320,6 +316,9 @@ export default class Deck {
     if (this._checkForCanvasSizeChange()) {
       const {width, height} = this;
       this.layerManager.setParameters({width, height});
+      if (this.controller) {
+        this.controller.setProps({viewState: this._getViewState()});
+      }
       if (this.props.onResize) {
         this.props.onResize({width: this.width, height: this.height});
       }
