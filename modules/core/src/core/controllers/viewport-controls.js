@@ -62,6 +62,8 @@ export default class ViewportControls {
       isDragging: false
     };
     this.events = [];
+    this.onViewportChange = null;
+    this.onViewStateChange = null;
 
     this.handleEvent = this.handleEvent.bind(this);
 
