@@ -205,6 +205,10 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/interactivity.md')
       },
       {
+        name: 'About View States',
+        content: getDocUrl('advanced/view-state.md')
+      },
+      {
         name: 'Using Views',
         content: getDocUrl('advanced/views.md')
       },

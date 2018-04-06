@@ -1,6 +1,8 @@
 # Views
 
-It is helpful to begin by thinking of a `View` essentially as a way to specify a "camera" to view your data.
+It can helpful to begin by thinking of a `View` essentially as a way to specify a rectangle on the screen specifying where your data should be displayed, together with certain "camera parameters" specifying how your data should be "projected".
+
+Note that if no `View` is specified, deck.gl will automatically create a `MapView` that fills the whole canvas, so basic geospatial applications often do not have to specify any `View`s.
 
 
 ## What is in a View?
@@ -31,7 +33,7 @@ deck.gl offers a set of `View` classes that lets you specify how deck.gl should 
 
 ## Choosing a Projection Mode
 
-The `View` class allows the application full control of what projection to use through the `projection` prop. It is designed to accept a function that can directly call matrix creation methods from math libraries like math.gl or gl-matrix. Examples of functions that can be use
+The `View` class allows the application full control of what projection to use through the `projection` prop. It is designed to accept a function that can directly call matrix creation methods from math libraries like math.gl or gl-matrix. Examples of functions that can be used are:
 
 | Projection                      | Needs View Parameters | Description    |
 | ---                             | ---                   | ---            |
@@ -39,8 +41,9 @@ The `View` class allows the application full control of what projection to use t
 | `Matrix4.orthographic`          | `fovy`, `near`, `far` | An orthographic projection based on same parameters as `perspective`. Uses `distance` in the view state. |
 | `Matrix4.ortho`                 | `top`, `bottom`, `left`, `rignt`, `near`, `far` | Traditional, explicit ortographic projection parameters. Needs the additional parameters to be specified on the `View`. |
 
-While the projections suggested in the table leverage the , custom projection functions are fully supported. The `projection` prop accepts any function that returns a 4x4 projection matrix. The function will be called with the `View`s props merged with `aspect` and `distance`, The perspective mode can be implemented as follows:
+While the projections suggested in the table leverage stock methods in the math.gl library, custom projection functions can be provided. The `View.projection` prop accepts any function that returns a 4x4 projection matrix. The function will be called with the `View`s props, merged with `width`, `height`, `aspect` and `distance`.
 
+A perspective / orthographic mode switch could be implemented as follows:
 ```js
 import {View} from 'deck.gl';
 import {Matrix4} from 'math.gl';
@@ -53,7 +56,7 @@ new View({projection: props => Matrix4.ortho(props), left, right, top, bottom, .
 
 ## Positioning a View on the Screen
 
-Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). `View`s are typically specified using relative coordinates and dimensions.
+Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). `View`s are typically specified using relative coordinates and dimensions via "CSS style" percentage strings.
 
 * **x,y coordinates** - `x`, `y` top left coordinates on the canvas, typically given as relative percentages or zero.
 * **width and height** - `width`, `height` dimensions the viewport, typically as relative percentages.
@@ -65,18 +68,11 @@ new View({y: '50%', height: '50%'})
 
 ## Controlling What Each View Displays
 
-When it comes time to actually render something, each `View` needs to be associated with a compatible "view state". The association is temporary in that a `View` can be associated with a different "view state" each render.
+When it comes time to actually render something, each `View` needs to be know from what position and direction to view your data. The application needs to specify a compatible view state. To learn more, see [view states](/docs/developer-guide/view-state.md).
 
-There is not a single set of view state parameters, but rather each controller and view can define its own view state parameters. You need to check which controllers and views can be used together.
+Note that your `View` instance can be associated with a different "view state" each render.
 
-| View States    | View State                      | Optional |
-| ---            | ---                             | ---      |
-| Geospatial     | `longitude`, `latitude`, `zoom` |          |
-| Positional     | `position`, `direction`         |          |
-| Geo-positional | `position`, `direction`         | `longitude`, `latitude`, `zoom` | Optionally geospatially anchored
-| Orbit          | `rotationX`, `rotationY`, ...   | A custom set of view state parameters for non-geospatial purposes |
-
-> Currently the `Deck` component only accepts a single view state that is fed to all `View`s. In the future, it will be possible to key view states on view ids.
+> Limitation: Currently the `Deck` component only accepts a single `Deck.viewState` prop that is used by all `View` instances. In future releases, it will be possible to specify different view states for different view ids.
 
 
 ## Projecting Coordinates Using Views
@@ -135,12 +131,12 @@ Views can also overlap, (e.g. having a small "mini" map in the bottom middle of 
 
 ### Picking in Multiple Views
 
-deck.gl's built in picking support extends naturally to multiple viewports. The picking process renders all viewports.
+deck.gl's built-in picking support extends naturally to multiple viewports. The picking process renders all viewports.
 
 Note that the `pickInfo` object does not contain a viewport reference, so you will not be able to tell which viewport was used to pick an object.
 
 
-### Positioning React/HTML Components Behind Views
+### Auto-Positioning React/HTML Components Behind Views
 
 > This feature is currently only implemented in the React version of deck.gl.
 
@@ -169,22 +165,6 @@ In this example the `StaticMap` component gets automatically positioned under th
     );
   }
 ```
-
-### Controller Support for Multiple Viewports
-
-TBA - This is a planned feature:
-
-**Restrict Event Handling to match Viewport Size** - Controllers need to be able to be restricted to a certain area (in terms of event handling). Some controllers are completely general (just general drag up/down):
-* When working with a map controller, especially panning and zooming, the point under the mouse represents a grab point or a reference for the operation and mapping event coordinates correctly is imporant for the experience.
-* Controllers might not be designed to receive coordinates from outside their viewports.
-* Basically, if the map backing one WebMercator viewport doesn't fill the entire canvas, and the application wants to use a MapControls
-
-Controllers will also benefit from be able to feed multiple viewports of different types. There are limits to this of course, in particular it would be nice if for instance a geospatially neabled FirstPerson controller can feed both a `FirstPersonViewport` and a `WebMercatorViewport`. Various different viewports must be created from one set of parameters.
-
-Contrast this to deck.gl v4.1, where the idea was that each the of Viewport was associated with a specific controller (WebMercatorViewport has a MapController, etc).
-
-* **Using Multiple Controllers** An application having multiple viewports might want to use different interaction in each viewport - this has multiple complications...
-* **Switching Controllers** - An application that wants to switch between Viewports might want to switch between controllers, ideally this should not require too much coding effort.
 
 
 ## Remarks
