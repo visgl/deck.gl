@@ -44,6 +44,8 @@ export default class DeckGL extends React.Component {
     this.deck = new Deck(
       Object.assign({}, this.props, {
         canvas: this.deckCanvas,
+        viewState: this._getViewState(this.props),
+        // Note: If Deck event handling change size or view state, it calls onResize to update
         onResize: size => this.forceUpdate()
       })
     );
@@ -84,31 +86,14 @@ export default class DeckGL extends React.Component {
   // 2. Handle any backwards compatiblity props for React layer
   // Needs to be called both from initial mount, and when new props arrive
   _updateFromProps(nextProps) {
-    // Support old "geospatial view state as separate props" style (React only!)
-    let {viewState} = nextProps;
-    if (!viewState) {
-      const {latitude, longitude, zoom, pitch, bearing} = nextProps;
-      viewState = nextProps.viewState || {latitude, longitude, zoom, pitch, bearing};
-    }
-
-    // Support old `viewports` prop (React only!)
-    const views =
-      nextProps.views || nextProps.viewports || (nextProps.viewport && [nextProps.viewport]);
-    if (nextProps.viewports) {
-      log.deprecated('DeckGL.viewports', 'DeckGL.views')();
-    }
-    if (nextProps.viewport) {
-      log.deprecated('DeckGL.viewport', 'DeckGL.views')();
-    }
-
     // extract any deck.gl layers masquerading as react elements from props.children
     const {layers, children} = this._extractJSXLayers(nextProps.children);
 
     if (this.deck) {
       this.deck.setProps(
         Object.assign({}, nextProps, {
-          views,
-          viewState,
+          views: this._getViews(nextProps),
+          viewState: this._getViewState(nextProps),
           // Avoid modifying layers array if no JSX layers were found
           layers: layers ? [...layers, ...nextProps.layers] : nextProps.layers
         })
@@ -116,6 +101,29 @@ export default class DeckGL extends React.Component {
     }
 
     this.children = children;
+  }
+
+  // Support old `viewports` prop (React only!)
+  _getViews(props) {
+    if (props.viewports) {
+      log.deprecated('DeckGL.viewports', 'DeckGL.views')();
+    }
+    if (props.viewport) {
+      log.deprecated('DeckGL.viewport', 'DeckGL.views')();
+    }
+    return props.views || props.viewports || (props.viewport && [props.viewport]);
+  }
+
+  // Supports old "geospatial view state as separate props" style (React only!)
+  _getViewState(props) {
+    let {viewState} = props;
+
+    if (!viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
+      const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
+      viewState = props.viewState || {latitude, longitude, zoom, pitch, bearing};
+    }
+
+    return viewState;
   }
 
   // extracts any deck.gl layers masquerading as react elements from props.children

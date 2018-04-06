@@ -45,6 +45,7 @@ function getPropTypes(PropTypes) {
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
     controller: PropTypes.func,
+    onViewStateChange: PropTypes.func,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
 
     // GL settings
@@ -103,10 +104,14 @@ export default class Deck {
     this.controller = null;
     this.stats = new Stats({id: 'deck.gl'});
 
+    this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
+
     // Bind methods
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
 
+    // Note: LayerManager creation deferred until gl context available
     this.canvas = this._createCanvas(props);
     this.controller = this._createController(props);
     this.animationLoop = this._createAnimationLoop(props);
@@ -139,7 +144,7 @@ export default class Deck {
     // Update CSS size of canvas
     this._setCanvasSize(props);
 
-    // We need to overwrite width and height with actual, numeric values
+    // We need to overwrite CSS style width and height with actual, numeric values
     const newProps = Object.assign({}, props, {
       viewState: this._getViewState(props),
       width: this.width,
@@ -218,6 +223,8 @@ export default class Deck {
     }
     if (height || height === 0) {
       height = Number.isFinite(height) ? `${height}px` : height;
+      // Note: position==='absolute' required for height 100% to work
+      canvas.style.position = 'absolute';
       canvas.style.height = height;
     }
   }
@@ -256,8 +263,11 @@ export default class Deck {
     const Controller = props.controller;
     if (Controller) {
       return new Controller(
-        Object.assign({}, this._getViewState(props), props, {
-          canvas: this.canvas
+        Object.assign({}, props, {
+          canvas: this.canvas,
+          viewState: this._getViewState(props),
+          // Set an internal callback that calls the prop callback if provided
+          onViewStateChange: this._onViewStateChange
         })
       );
     }
@@ -281,14 +291,33 @@ export default class Deck {
     });
   }
 
+  // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
+  // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
   _getViewState(props) {
-    return Object.assign({}, props.viewState || {}, {
+    return Object.assign({}, props.viewState || this.viewState || {}, {
       width: this.width,
       height: this.height
     });
   }
 
   // Callbacks
+
+  _onViewStateChange({viewState}, ...args) {
+    // If initialViewState was set on creation, auto track position
+    if (this.viewState) {
+      this.viewState = viewState;
+      this.layerManager.setParameters({viewState});
+      this.controller.setProps({viewState});
+    }
+    // Let app know that view state has changed
+    if (this.props.onViewStateChange) {
+      this.props.onViewStateChange({viewState}, ...args);
+    }
+    // "HACK": Calling onResize to inform React component that it needs to update
+    if (this.props.onResize) {
+      this.props.onResize({width: this.width, height: this.height});
+    }
+  }
 
   _onRendererInitialized({gl, canvas}) {
     setParameters(gl, {
