@@ -66,6 +66,7 @@ export default class TextLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
     if (
       changeFlags.dataChanged ||
+      oldProps.fontFamily !== props.fontFamily ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText))
     ) {
