@@ -17,6 +17,7 @@ for D in *; do (
   # this is a bug of yarn: https://github.com/yarnpkg/yarn/issues/4964
   # TODO - remove when fixed
   mkdir -p node_modules
+  rm -rf ./node_modules/.bin
   ln -sf $ROOT_NODE_MODULES_DIR/.bin ./node_modules
 ); done
 
