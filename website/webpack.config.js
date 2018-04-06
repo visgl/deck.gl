@@ -46,17 +46,14 @@ const COMMON_CONFIG = {
   },
 
   resolve: {
+    // Prefer root dependencies (dev) over local (prod)
+    modules: [resolve('../node_modules'), resolve('./node_modules')],
     alias: {
-      // For importing modules that are not exported at root
-      'deck.gl': resolve('.', '../node_modules/deck.gl'),
-      'luma.gl': resolve('.', '../node_modules/luma.gl'),
+      // Website is using React 15
       react: resolve('.', './node_modules/react'),
-      // // used by Mapbox
-      // webworkify: 'webworkify-webpack-dropin',
+      'react-dom': resolve('.', './node_modules/react-dom'),
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js'),
-      'd3-scale': resolve('.', './node_modules/d3-scale'),
-      rbush: resolve('.', './node_modules/rbush')
+      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }
   },
 
