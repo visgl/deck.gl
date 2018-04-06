@@ -24,7 +24,7 @@ const App = ({data, viewport}) => {
   const layer = new ArcLayer({
     id: 'arc-layer',
     data,
-    strokeWdith: 2
+    strokeWidth: 2
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
