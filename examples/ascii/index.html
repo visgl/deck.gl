@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>deck.gl example</title>
+    <style>
+  body {
+    font-family: Monaco, monospace;
+    font-size: 12px;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background: #111;
+    color: #fff;
+  }
+  #source-video {
+    position: absolute;
+    visibility: hidden;
+  }
+  #canvas-wrapper {
+    background: #fff;
+    position: absolute;
+  }
+  .warning {
+    background: red;
+  }
+  .control-panel {
+    position: fixed;
+    z-index: 9;
+    background: rgba(16,16,16,0.95);
+    padding: 20px;
+    bottom: 0;
+    margin: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  #app-container:hover .control-panel {
+    opacity: 1;
+  }
+  .control-panel >div {
+    margin-bottom: 4px;
+  }
+  a {color: #08f;}
+  i {font-size: smaller;}
+  label {
+    display: inline-block;
+    width: 100px;
+    text-align: right;
+    margin-right: 12px;
+  }
+  input, select {
+    width: 160px;
+  }
+  .button {
+    display: inline-block;;
+    border: 0;
+    background: transparent;
+    box-sizing: border-box;
+    width: 0;
+    height: 40px;
+    border-color: transparent transparent transparent #fff;
+    cursor: pointer;
+  }
+  .button.play {
+    border-style: solid;
+    border-width: 20px 0 20px 30px;
+  }
+  .button.pause {
+    border-style: double;
+    border-width: 0px 0 0px 30px;
+  }
+    </style>
+  </head>
+  <body>
+    <script src='bundle.js'></script>
+  </body>
+</html>

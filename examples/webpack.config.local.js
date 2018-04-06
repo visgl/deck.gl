@@ -7,7 +7,6 @@
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
-const webpack = require('webpack');
 
 const LIB_DIR = resolve(__dirname, '..');
 const SRC_DIR = resolve(LIB_DIR, './modules');
@@ -50,9 +49,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
           enforce: 'pre'
         }
       ]
-    },
-    // Optional: Enables reading mapbox token from environment variable
-    plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
+    }
   };
 }
 
