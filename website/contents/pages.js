@@ -205,6 +205,10 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/interactivity.md')
       },
       {
+        name: 'About View States',
+        content: getDocUrl('advanced/view-state.md')
+      },
+      {
         name: 'Using Views',
         content: getDocUrl('advanced/views.md')
       },
@@ -450,6 +454,15 @@ export const docPages = generatePath([
           {
             name: 'PerspectiveView',
             content: getDocUrl('api-reference/perspective-view.md')
+          }
+        ]
+      },
+      {
+        name: 'Controllers',
+        children: [
+          {
+            name: 'MapController',
+            content: getDocUrl('api-reference/map-controller.md')
           }
         ]
       }
