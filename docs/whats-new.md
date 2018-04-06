@@ -1,6 +1,11 @@
-# deck.gl vNext
+# What's New
 
-Release date: TBD, target Q2, 2018
+This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/@vis.gl) for news about new releases and features in deck.gl.
+
+
+# deck.gl v6.0
+
+Release date: TBD, target late Q2, 2018
 
 ### Prop Types
 
@@ -22,21 +27,79 @@ Release date: TBD, target April, 2018
         <p><i>New TextLayer</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
-        <p><i>JSX Layers</i></p>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
+        <p><i>ScreenGridLayer Color Scale</i></p>
+      </td>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/test-utils.gif" />
+        <p><i>Automated Render Tests @deck.gl/test-utils</i></p>
       </td>
     </tr>
   </tbody>
 </table>
 
 
+## Use deck.gl without React
+
+deck.gl can now be used in non-React applications. A new top-level JavaScript class (`Deck`) is provided as an alternative to the traditional top-level `DeckGL` React component. This allows deck.gl to be used in any JavaScript application or framework. The new API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" recommended for "early adopters".
+
+TBA
+- link to `Deck` class?
+- link to blog post?
+
+
+## Scripting Support
+
+deck.gl now publishes a bundle that can be imported using a simple `<script>` statement in HTML to give access to the deck.gl API. This makes deck.gl easy to use in e.g. "codepens" and for casual programming and visualizations.
+
+TBA
+- link to get started doc?
+- link to code pen?
+- link to blog post?
+
+
+## Multiple Modules
+
+deck.gl is now published as multiple npm modules allowing applications to choose which features to import. The basic modules are:
+* [`@deck.gl/core`](https://www.npmjs.com/package/@deck.gl/core) - the core deck.gl API (JavaScript classes, including the `Deck` top-level class).
+* [`@deck.gl/react`](https://www.npmjs.com/package/@deck.gl/react) - React bindings for deck.gl (i.e. the top-level `DeckGL` React class).
+* [`deck.gl`](https://www.npmjs.com/package/deck.gl) - The classic module is still supported for backwards compatibility with React applications.
+
+
 ## Multi-Viewport Support
 
 deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the `views` property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
 
+TBA
+- links to developer guide
+- links to example
+- add a GIF of a multi-view example?
+
+
 ### View Classes
 
 A new hierarchy of `View` classes let apps provide multiple views of their data.
+
+TBA
+- Add developer's guide link
+- Add doc link
+
+
+## MapController
+
+It is now possible to specify a `MapController` as a `controller` for the `Deck` or `DeckGL` classes, instead of relying on e.g. `react-map-gl` or experimental classes to drive event handling.
+
+TBA
+- Add example code
+- Add doc link
+
+
+## Automatic Resize Handling
+
+It is no longer necessary for applications to specify the exact `width` and `height` of the `Deck` or `DeckGL` components. Size can now either specified using CSS descriptors (e.g. `width = 100%`), or be left out and controlled by external components (such as HTML flex boxes).
+
+TBA
+- Add example code
 
 
 ## Layers
@@ -45,29 +108,35 @@ A new hierarchy of `View` classes let apps provide multiple views of their data.
 
 A new [TextLayer]() has been added to the core layers catalog.
 
+TBA
+- better description
+- link to example?
+- Add GIF for example?
+
 
 ### ScreenGridLayer
 
 **Color Scale Support** (Experimental) - New experimental props `colorRange` and `colorDomain` are added to ScreenGridLayer. These props provide more fine tune control over how grid cells are colored, and brings the ScreenGridLayer into parity with other aggregation layers (i.e. HexagonLayer and GridLayer).
 
 
+### Experimental Layers
+
+A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](./docs/roadmap) for more information.
+
+
 ## Test Utilities
 
-> TBA - update the link to the test-utils
-
-deck.gl now provides a suite of utilities ([deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils)) that make it easy to unit test layers and applications. Both standard unit testing as well as visual regression testing against "golden" images is supported, and tools are provided to automate browser runs of such render tests.
-
-These test utilities can be used both to create unit tests for new layers as well as by applications that want to verify that certain scenes with given data render correctly.
+deck.gl now provides a suite of [test utilities](./docs/developer-guide/testing) that make it easy to test both layers and applications. The utilities support visual regression testing against "golden" images, as well as utilities for traditional unit testing of layers. The utilities come pre-integrated with tools that help automate the running of browser based render tests from the console. To start using the utilities, install the new ([@deck.gl/test-utils](https://www.npmjs.com/package/@deck.gl/test-utils)) module.
 
 
 ## Dist Size Reduction
 
-Work on bundle size reduction continues and in the 5.2 release, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](./docs/developer-guide/building-apps) has been added to the docs.
+Work on bundle size reduction continues and among other things, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](./docs/developer-guide/building-apps) has been added to the docs.
 
 
 ## Shader Modules
 
-### project64 and project32 modules
+### project32 (New)
 
 **Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](docs/shader-modules/project32.md) for more details.
 
