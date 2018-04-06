@@ -323,6 +323,9 @@ export default class Deck {
       if (this.props.onResize) {
         this.props.onResize({width: this.width, height: this.height});
       }
+      if (this.controller) {
+        this.controller.setProps({width: this.width, height: this.height});
+      }
     }
 
     // Update layers if needed (e.g. some async prop has loaded)

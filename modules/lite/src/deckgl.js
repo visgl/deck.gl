@@ -63,7 +63,7 @@ export default class DeckGL extends Deck {
       throw Error('Deck can only be used in the browser');
     }
 
-    const {container, mapCanvas, deckCanvas} = createCanvas(props);
+    const {mapCanvas, deckCanvas} = createCanvas(props);
 
     normalizeProps(props);
     const isMap = Number.isFinite(props.viewState.latitude);
@@ -77,8 +77,8 @@ export default class DeckGL extends Deck {
 
     super(
       Object.assign({}, props, {
-        width: container.clientWidth,
-        height: container.clientHeight,
+        width: '100%',
+        height: '100%',
         canvas: deckCanvas,
         controller: props.controller || Controller
       })
@@ -93,12 +93,8 @@ export default class DeckGL extends Deck {
       this._map = map;
     }
 
-    this._container = container;
     this._onViewportChange = this._onViewportChange.bind(this);
-    this._resize = this._resize.bind(this);
-
-    window.addEventListener('resize', this._resize);
-    this._resize();
+    this._initialized = true;
   }
 
   getMapboxMap() {
@@ -106,8 +102,6 @@ export default class DeckGL extends Deck {
   }
 
   finalize() {
-    window.removeEventListener('resize', this._resize);
-
     if (this._map) {
       this._map.finalize();
     }
@@ -116,7 +110,7 @@ export default class DeckGL extends Deck {
   }
 
   setProps(props) {
-    if (props.onViewportChange !== this._onViewportChange) {
+    if (this._initialized && props.onViewportChange !== this._onViewportChange) {
       if (props.hasOwnProperty('onViewportChange')) {
         this.onViewportChange = props.onViewportChange;
       }
@@ -140,12 +134,5 @@ export default class DeckGL extends Deck {
     if (this.onViewportChange) {
       this.onViewportChange(viewport);
     }
-  }
-
-  _resize() {
-    this.setProps({
-      width: this._container.clientWidth,
-      height: this._container.clientHeight
-    });
   }
 }

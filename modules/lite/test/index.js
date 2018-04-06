@@ -17,7 +17,7 @@ for (let x = 0; x < SAMPLE_SIZE; x++) {
   }
 }
 
-const geoExample = new deck.Deck({
+const geoExample = new deck.DeckGL({
   mapboxApiAccessToken: __MAPBOX_TOKEN__, // eslint-disable-line
   container: document.getElementById('geo'),
   longitude: -122.45,
@@ -37,7 +37,7 @@ const geoExample = new deck.Deck({
   ]
 });
 
-const nonGeoExample = new deck.Deck({
+const nonGeoExample = new deck.DeckGL({
   container: document.getElementById('non-geo'),
   mapbox: false /* disable map */,
   views: [new deck.OrbitView()],
