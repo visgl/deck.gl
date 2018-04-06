@@ -1,5 +1,6 @@
 import {Buffer, Model, GL, Framebuffer, Texture2D, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
-import log from 'deck.gl';
+import {experimental} from '@deck.gl/core';
+const {log} = experimental;
 // import log from '../../utils/log';
 import assert from 'assert';
 const AGGREGATE_TO_GRID_VS = `\

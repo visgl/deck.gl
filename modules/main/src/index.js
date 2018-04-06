@@ -54,10 +54,10 @@ export {
   lighting,
   // Internal classes
   LayerManager
-} from './core';
+} from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
-import {experimental as CoreExperimental} from './core';
+import {experimental as CoreExperimental} from '@deck.gl/core';
 
 const {
   // View States
@@ -146,7 +146,9 @@ const {
 
   enable64bitSupport,
   fp64ify,
-  fp64LowPart
+  fp64LowPart,
+
+  ReflectionEffect
 } = CoreExperimental;
 
 Object.assign(experimental, {
@@ -175,16 +177,8 @@ Object.assign(experimental, {
 
   enable64bitSupport,
   fp64ify,
-  fp64LowPart
-});
+  fp64LowPart,
 
-//
-// EFFECTS PACKAGE
-//
-
-import {default as ReflectionEffect} from './core/experimental/reflection-effect/reflection-effect';
-
-Object.assign(experimental, {
   ReflectionEffect
 });
 
@@ -207,20 +201,20 @@ export {
   PolygonLayer,
   GeoJsonLayer,
   TextLayer
-} from './core-layers';
+} from '@deck.gl/core';
 
 //
 // REACT BINDINGS PACKAGE
 //
 
-export {default, DeckGL} from './react';
+export {default, DeckGL} from '@deck.gl/react';
 
 // TODO - do we need to expose these?
 import {
   MapController as ReactMapController,
   OrbitController as ReactOrbitController,
   ViewportController // TODO - merge with deck.gl?
-} from './react';
+} from '@deck.gl/react';
 
 Object.assign(experimental, {
   ReactMapController,

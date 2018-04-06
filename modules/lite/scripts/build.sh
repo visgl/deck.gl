@@ -14,7 +14,7 @@ mkdir dist
 webpack --config webpack.config.js
 
 # build npm version
-cp node_modules/react-map-gl/src/mapbox/mapbox.js src
+cp ../../node_modules/react-map-gl/src/mapbox/mapbox.js src
 
 BABEL_ENV=es5 babel src --out-dir dist/es5
 BABEL_ENV=es6 babel src --out-dir dist/es6

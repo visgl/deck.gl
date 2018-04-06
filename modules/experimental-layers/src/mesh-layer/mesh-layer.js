@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, COORDINATE_SYSTEM, experimental} from 'deck.gl';
+import {Layer, COORDINATE_SYSTEM, experimental} from '@deck.gl/core';
 const {fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 

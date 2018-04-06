@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from 'deck.gl';
+import {CompositeLayer} from '@deck.gl/core';
 import TextMultiIconLayer from './text-multi-icon-layer';
 import {fetch} from 'global/window';
 

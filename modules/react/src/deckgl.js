@@ -22,7 +22,7 @@ import React, {createElement, cloneElement} from 'react';
 import PropTypes from 'prop-types';
 import autobind from './utils/autobind';
 import {inheritsFrom} from './utils/inherits-from';
-import {Deck, Layer, experimental} from '../../core';
+import {Deck, Layer, experimental} from '@deck.gl/core';
 const {log} = experimental;
 
 const propTypes = Object.assign({}, Deck.getPropTypes(PropTypes), {

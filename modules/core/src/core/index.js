@@ -102,6 +102,8 @@ import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatte
 import {enable64bitSupport} from './utils/fp64';
 import {fp64ify, fp64LowPart} from './utils/fp64';
 
+import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
+
 export const experimental = {
   ViewportControls,
   MapControls,
@@ -154,5 +156,7 @@ export const experimental = {
 
   enable64bitSupport,
   fp64ify,
-  fp64LowPart
+  fp64LowPart,
+
+  ReflectionEffect
 };

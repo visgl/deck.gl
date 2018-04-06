@@ -12,9 +12,8 @@ version = version.match(/^(\d+)\.(\d+)/)[0];
 const config = {
   resolve: {
     alias: {
-      'deck.gl': resolve(ROOT, 'src'),
       'mapbox-gl': resolve(PACKAGE_ROOT, 'utils/mapbox-gl'),
-      './mapbox': resolve(PACKAGE_ROOT, 'node_modules/react-map-gl/src/mapbox/mapbox.js')
+      './mapbox': resolve(ROOT, 'node_modules/react-map-gl/src/mapbox/mapbox.js')
     }
   },
 
