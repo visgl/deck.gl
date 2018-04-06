@@ -123,10 +123,9 @@ export default class ViewportControls {
   /**
    * Extract interactivity options
    */
+  /* eslint-disable complexity */
   setOptions(options) {
     const {
-      onViewportChange,
-      onViewStateChange,
       onStateChange = this.onStateChange,
       eventManager = this.eventManager,
       scrollZoom = true,
@@ -138,8 +137,12 @@ export default class ViewportControls {
       keyboard = true
     } = options;
 
-    this.onViewportChange = onViewportChange;
-    this.onViewStateChange = onViewStateChange;
+    if ('onViewportChange' in options) {
+      this.onViewportChange = options.onViewportChange;
+    }
+    if ('onViewStateChange' in options) {
+      this.onViewStateChange = options.onViewStateChange;
+    }
     this.onStateChange = onStateChange;
     this.viewportStateProps = options.viewState
       ? Object.assign({}, options, options.viewState)
@@ -153,7 +156,7 @@ export default class ViewportControls {
     }
 
     // Register/unregister events
-    const isInteractive = Boolean(this.onViewportChange);
+    const isInteractive = Boolean(this.onViewportChange || this.onViewStateChange);
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
@@ -169,6 +172,7 @@ export default class ViewportControls {
     this.touchRotate = touchRotate;
     this.keyboard = keyboard;
   }
+  /* eslint-enable complexity */
 
   toggleEvents(eventNames, enabled) {
     if (this.eventManager) {

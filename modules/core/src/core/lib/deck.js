@@ -44,8 +44,8 @@ function getPropTypes(PropTypes) {
     layerFilter: PropTypes.func,
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
-    effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     controller: PropTypes.func,
+    effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
 
     // GL settings
     glOptions: PropTypes.object,
@@ -78,7 +78,6 @@ const defaultProps = {
   controller: null, // Rely on external controller, e.g. react-map-gl
 
   onWebGLInitialized: noop,
-  // onResize: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLayerClick: null,
@@ -139,7 +138,7 @@ export default class Deck {
 
     // We need to overwrite width and height with actual, numeric values
     const newProps = Object.assign({}, props, {
-      viewState: this._getViewState(),
+      viewState: this._getViewState(props),
       width: this.width,
       height: this.height
     });
@@ -252,15 +251,14 @@ export default class Deck {
   // Note: props.controller must be a class constructor, not an already created instance
   _createController(props) {
     const Controller = props.controller;
-    assert(!Controller || typeof Controller === 'function');
-    return (
-      Controller &&
-      new Controller(
-        Object.assign({}, props.viewState, props, {
+    if (Controller) {
+      return new Controller(
+        Object.assign({}, this._getViewState(props), props, {
           canvas: this.canvas
         })
-      )
-    );
+      );
+    }
+    return null;
   }
 
   _createAnimationLoop(props) {
@@ -280,8 +278,8 @@ export default class Deck {
     });
   }
 
-  _getViewState() {
-    return Object.assign({}, this.props.viewState || {}, {
+  _getViewState(props) {
+    return Object.assign({}, props.viewState || {}, {
       width: this.width,
       height: this.height
     });
