@@ -1,6 +1,8 @@
 import React, {Component} from 'react';
-import DeckGL from 'deck.gl';
+import DeckGL, {TextLayer} from 'deck.gl';
 import TagmapLayer from './tagmap-layer';
+
+const DEFAULT_COLOR = [29, 145, 192];
 
 export default class DeckGLOverlay extends Component {
   static get defaultViewport() {
@@ -15,15 +17,27 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, data} = this.props;
+    const {viewport, data, cluster, fontSize} = this.props;
 
-    const layers = [
-      new TagmapLayer({
-        id: 'Twitter-topics',
-        data
-      })
-    ];
+    const layer = cluster
+      ? new TagmapLayer({
+          id: 'twitter-topics-tagmap',
+          data,
+          getLabel: x => x.label,
+          getPosition: x => x.coordinates,
+          minFontSize: 14,
+          maxFontSize: fontSize * 2 - 14
+        })
+      : new TextLayer({
+          id: 'twitter-topics-raw',
+          data,
+          getText: d => d.label,
+          getPosition: x => x.coordinates,
+          getColor: d => DEFAULT_COLOR,
+          getSize: d => 20,
+          sizeScale: fontSize / 20
+        });
 
-    return <DeckGL {...viewport} layers={layers} />;
+    return <DeckGL {...viewport} layers={[layer]} />;
   }
 }

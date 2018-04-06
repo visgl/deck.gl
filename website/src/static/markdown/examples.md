@@ -50,6 +50,13 @@
       </a>
     </div>
   </div>
+  <div class="thumb">
+    <div class="bg-black" data-title="Twitter Tag Cloud" data-name="TextLayer">
+      <a href="#/examples/core-layers/text-layer">
+        <img src="images/demo-thumb-text.jpg" />
+      </a>
+    </div>
+  </div>
 </div>
 
 ### Custom Layers

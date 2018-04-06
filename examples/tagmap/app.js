@@ -9,7 +9,7 @@ import {json as requestJson} from 'd3-request';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // sample data
-const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags10k.json';
+const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/tagmap/hashtags100k.json';
 // mapbox style file path
 const MAPBOX_STYLE =
   'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
@@ -71,7 +71,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGLOverlay viewport={viewport} data={data} />
+        <DeckGLOverlay viewport={viewport} data={data} fontSize={32} cluster={true} />
       </MapGL>
     );
   }

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import {CompositeLayer, WebMercatorViewport, TextLayer} from 'deck.gl';
+import {CompositeLayer, TextLayer} from 'deck.gl';
 import {scaleQuantile} from 'd3-scale';
 import TagMapWrapper from './tagmap-wrapper';
 
@@ -13,13 +13,15 @@ const DEFAULT_COLOR_SCHEME = [
 
 const defaultProps = {
   getLabel: x => x.label,
-  getWeight: x => x.weight,
-  getPosition: x => x.coordinates,
+  getWeight: x => x.weight || 1,
+  getPosition: x => x.position,
   colorScheme: DEFAULT_COLOR_SCHEME,
   minFontSize: 14,
   maxFontSize: 32,
   weightThreshold: 1
 };
+
+const MAX_CACHED_ZOOM_LEVEL = 5;
 
 export default class TagmapLayer extends CompositeLayer {
   initializeState() {
@@ -79,15 +81,42 @@ export default class TagmapLayer extends CompositeLayer {
 
     const {viewport} = this.context;
     const discreteZoomLevel = Math.floor(viewport.zoom);
-
     let tags = tagsCache[discreteZoomLevel];
+    if (tags) {
+      this.setState({tags});
+      return;
+    }
 
-    if (!tags) {
-      const {minFontSize, maxFontSize, weightThreshold} = this.props;
-      const transform = new WebMercatorViewport(
-        Object.assign({}, viewport, {zoom: discreteZoomLevel})
-      );
-      tags = tagMap.getTags({transform, minFontSize, maxFontSize, weightThreshold});
+    const {minFontSize, maxFontSize, weightThreshold} = this.props;
+
+    let bbox = null;
+
+    if (discreteZoomLevel > MAX_CACHED_ZOOM_LEVEL) {
+      const {unproject, width, height} = viewport;
+      const corners = [
+        unproject([0, 0]),
+        unproject([width, 0]),
+        unproject([0, height]),
+        unproject([width, height])
+      ];
+
+      bbox = {
+        minX: Math.min.apply(null, corners.map(p => p[0])),
+        minY: Math.min.apply(null, corners.map(p => p[1])),
+        maxX: Math.max.apply(null, corners.map(p => p[0])),
+        maxY: Math.max.apply(null, corners.map(p => p[1]))
+      };
+    }
+
+    tags = tagMap.getTags({
+      bbox,
+      minFontSize,
+      maxFontSize,
+      weightThreshold,
+      zoom: discreteZoomLevel
+    });
+
+    if (discreteZoomLevel <= MAX_CACHED_ZOOM_LEVEL) {
       tagsCache[discreteZoomLevel] = tags;
     }
 
