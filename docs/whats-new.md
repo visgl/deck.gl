@@ -25,10 +25,6 @@ Release date: TBD, target April, 2018
         <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
         <p><i>JSX Layers</i></p>
       </td>
-      <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
-        <p><i>ScreenGrid Color Scale</i></p>
-      </td>
     </tr>
   </tbody>
 </table>
@@ -57,19 +53,23 @@ A new [TextLayer]() has been added to the core layers catalog.
 
 ## Test Utilities
 
-deck.gl now provides a suite of test utilities that make it easy to unit test layers and to automate browser runs of "differential" render tests. The test utilities are of course perfect for creating unit tests for new layers but can also be used by applications. Note that the test utilities are published as a separate npm module [deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils).
+> TBA - update the link to the test-utils
+
+deck.gl now provides a suite of utilities ([deck.gl-test-utils](https://www.npmjs.com/package/deck.gl-test-utils)) that make it easy to unit test layers and applications. Both standard unit testing as well as visual regression testing against "golden" images is supported, and tools are provided to automate browser runs of such render tests.
+
+These test utilities can be used both to create unit tests for new layers as well as by applications that want to verify that certain scenes with given data render correctly.
 
 
 ## Dist Size Reduction
 
-Bundle sizes for a minimal deck.gl app with webpack 2.
+Work on bundle size reduction continues and in the 5.2 release, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](./docs/developer-guide/building-apps) has been added to the docs.
 
 
 ## Shader Modules
 
 ### project64 and project32 modules
 
-**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](/docs/shader-modules/project32.md) for more details.
+**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](docs/shader-modules/project32.md) for more details.
 
 
 
