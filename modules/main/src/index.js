@@ -46,6 +46,8 @@ export {
   WebMercatorViewport,
   PerspectiveViewport,
   OrthographicViewport,
+  // Controllers
+  MapController,
   // For custom layers
   AttributeManager,
   // Shader modules
@@ -60,15 +62,16 @@ export {
 import {experimental as CoreExperimental} from '@deck.gl/core';
 
 const {
+  // Controllers
+  OrbitController,
+  FirstPersonController,
+  ViewportControls,
+
   // View States
   ViewState,
   FirstPersonState,
   OrbitState,
   MapState,
-
-  // Controllers
-  ViewportControls,
-  FirstPersonController,
 
   // Viewports
   FirstPersonViewport,
@@ -80,28 +83,22 @@ const {
   LinearInterpolator,
   ViewportFlyToInterpolator,
 
-  MapController,
-  OrbitController,
-
   EffectManager,
   Effect
 } = CoreExperimental;
 
 Object.assign(experimental, {
-  // Experimental controllers
-  MapController,
+  // Controller helper classes
   OrbitController,
+  FirstPersonController,
+  ViewportControls,
+  Controller: ViewportControls,
 
   // Unfinished controller/viewport classes
   ViewState,
   FirstPersonState,
   OrbitState,
   MapState,
-
-  // Controller helper classes
-  ViewportControls,
-  Controller: ViewportControls,
-  FirstPersonController,
 
   // Experimental viewports
   FirstPersonViewport,
@@ -209,16 +206,11 @@ export {
 
 export {default, DeckGL} from '@deck.gl/react';
 
-// TODO - do we need to expose these?
 import {
-  MapController as ReactMapController,
-  OrbitController as ReactOrbitController,
   ViewportController // TODO - merge with deck.gl?
 } from '@deck.gl/react';
 
 Object.assign(experimental, {
-  ReactMapController,
-  ReactOrbitController,
   ViewportController
 });
 

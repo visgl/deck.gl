@@ -452,6 +452,15 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/perspective-view.md')
           }
         ]
+      },
+      {
+        name: 'Controllers',
+        children: [
+          {
+            name: 'MapController',
+            content: getDocUrl('api-reference/map-controller.md')
+          }
+        ]
       }
     ]
   },

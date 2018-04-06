@@ -1,9 +1,7 @@
-/* global window,document,fetch */
+/* global document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {GeoJsonLayer, experimental} from 'deck.gl';
-
-const {MapController} = experimental;
+import DeckGL, {GeoJsonLayer, MapController} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz
@@ -19,10 +17,10 @@ class Root extends Component {
         longitude: -100,
         zoom: 3,
         bearing: 0,
-        pitch: 60
+        pitch: 60,
+        width: 0,
+        height: 0
       },
-      width: 500,
-      height: 500,
       data: null
     };
 
@@ -31,27 +29,15 @@ class Root extends Component {
       .then(data => this.setState({data}));
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
   render() {
-    const {viewport, width, height, data} = this.state;
+    const {viewport, data} = this.state;
 
     return (
       <DeckGL
-        {...viewport}
-        width={width}
-        height={height}
+        width="100%"
+        height="100%"
         controller={MapController}
+        viewState={viewport}
         onViewportChange={v => this.setState({viewport: v})}
         layers={[
           new GeoJsonLayer({
