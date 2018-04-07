@@ -54,8 +54,8 @@ const defaultProps = {
 
 export default class TextLayer extends CompositeLayer {
   initializeState() {
-    const {fontFamily} = this.props;
-    this.updateFontAtlas(fontFamily);
+    this.state = {};
+    this.updateFontAtlas(this.props.fontFamily);
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -76,10 +76,10 @@ export default class TextLayer extends CompositeLayer {
   updateFontAtlas(fontFamily) {
     const {gl} = this.context;
     const {mapping, texture} = makeFontAtlas(gl, fontFamily);
-    this.state = {
+    this.setState({
       iconAtlas: texture,
       iconMapping: mapping
-    };
+    });
   }
 
   getPickingInfo({info}) {
