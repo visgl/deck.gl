@@ -55,13 +55,11 @@ const defaultProps = {
 export default class TextLayer extends CompositeLayer {
   initializeState() {
     this.state = {};
-    this.updateFontAtlas(this.props.fontFamily);
   }
 
   updateState({props, oldProps, changeFlags}) {
     if (
       changeFlags.dataChanged ||
-      oldProps.fontFamily !== props.fontFamily ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText))
     ) {
@@ -166,6 +164,7 @@ export default class TextLayer extends CompositeLayer {
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
             getColor: updateTriggers.getColor,
+            getIcon: [iconAtlas, iconMapping],
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getAnchorX: updateTriggers.getTextAnchor,
