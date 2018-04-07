@@ -1,13 +1,12 @@
-/* global window */
+/* global window, global */
 import * as lumaGL from 'luma.gl';
 import * as deckGLCore from '@deck.gl/core';
 
 import DeckGL from './deckgl';
 
-if (typeof window !== 'undefined') {
-  window.deck = Object.assign({}, window.deck, deckGLCore, {DeckGL});
-  window.luma = Object.assign({}, window.luma, lumaGL);
-}
+const _global = typeof window === 'undefined' ? global : window;
 
-export default DeckGL;
-export {default as Mapbox} from './mapbox';
+_global.deck = Object.assign({}, _global.deck, deckGLCore, {DeckGL});
+_global.luma = Object.assign({}, _global.luma, lumaGL);
+
+export default _global.deck;

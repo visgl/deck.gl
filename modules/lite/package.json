@@ -15,12 +15,10 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "esnext": "dist/es6/index.js",
+  "main": "dist/deckgl.min.js",
   "scripts": {
     "start": "webpack-dev-server --env.dev --progress --open",
-    "build": "scripts/build.sh",
+    "build": "webpack --config webpack.config.js",
     "test": "echo \"PACKAGE HAS NO TEST\""
   },
   "dependencies": {

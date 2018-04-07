@@ -1,9 +1,9 @@
 /* global window, document */
 /* eslint-disable max-statements */
-import Mapbox from './mapbox';
+import Mapbox from 'react-map-gl/src/mapbox/mapbox';
 
-import {Deck, OrbitView, experimental} from '@deck.gl/core';
-const {MapController, OrbitController} = experimental;
+import {Deck, OrbitView, MapController, experimental} from '@deck.gl/core';
+const {OrbitController} = experimental;
 
 const CANVAS_STYLE = {
   position: 'absolute',
