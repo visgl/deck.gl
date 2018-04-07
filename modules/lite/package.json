@@ -3,6 +3,7 @@
   "description": "Scripting with deck.gl",
   "license": "MIT",
   "version": "5.2.0-alpha.1",
+  "private": "true",
   "publishConfig": {
     "access": "public"
   },
