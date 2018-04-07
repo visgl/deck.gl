@@ -58,13 +58,15 @@ export {default as OrbitView} from './views/orbit-view';
 export {default as PerspectiveView} from './views/perspective-view';
 export {default as OrthographicView} from './views/orthographic-view';
 
+// Controllers
+export {default as MapController} from './controllers/map-controller';
+
+// Experimental Controllers
+import {default as OrbitController} from './controllers/orbit-controller';
+
 import {default as FirstPersonState} from './controllers/first-person-state';
 import {default as OrbitState} from './controllers/orbit-state';
 import {default as MapState} from './controllers/map-state';
-
-// Experimental Controllers
-import {default as MapController} from './controllers/map-controller';
-import {default as OrbitController} from './controllers/orbit-controller';
 
 import {default as ViewportControls} from './controllers/viewport-controls';
 import {default as MapControls} from './controllers/map-controls';
@@ -105,16 +107,14 @@ import {fp64ify, fp64LowPart} from './utils/fp64';
 import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
 
 export const experimental = {
+  OrbitController,
+
   ViewportControls,
   MapControls,
 
   FirstPersonState,
   OrbitState,
   MapState,
-
-  MapController,
-  OrbitController,
-  // FirstPersonController,
 
   FirstPersonViewport,
   ThirdPersonViewport,

@@ -13,6 +13,10 @@ export default class OrthographicView extends View {
       up = [0, 1, 0] // Defines up direction, default positive y axis
     } = viewState;
 
+    // Make sure Matrix4.ortho doesn't crash on 0 width/height
+    width = width || 1;
+    height = height || 1;
+
     // Get projection matrix parameters from the view itself
     // NOTE: automatically calculated from width and height if not provided
     const {

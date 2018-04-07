@@ -1,6 +1,5 @@
 /* global window, fetch */
-import {Deck, GeoJsonLayer, experimental} from 'deck.gl';
-const {MapControllerJS} = experimental;
+import {Deck, GeoJsonLayer, MapController} from 'deck.gl';
 import TimeSlicedScatterplotLayer from './time-sliced-scatterplot-layer/time-sliced-scatterplot-layer.js';
 
 import {parseTile, lngLatToTile, getTileUrl} from './utils/carto-torque-utils';
@@ -145,15 +144,9 @@ class App {
       width,
       height,
       debug: true,
+      controller: MapController,
+      onViewportChange: this.onViewportChange.bind(this),
       layers: []
-    });
-
-    this.controller = new MapControllerJS({
-      canvas: this.deckgl.canvas,
-      ...viewport,
-      width,
-      height,
-      onViewportChange: this.onViewportChange.bind(this)
     });
 
     this.onAnimate();

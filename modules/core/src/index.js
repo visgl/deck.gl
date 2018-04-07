@@ -19,6 +19,7 @@ export {
   OrbitView,
   PerspectiveView,
   OrthographicView,
+  MapController,
   experimental
 } from './core';
 

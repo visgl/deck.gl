@@ -1,6 +1,5 @@
 /* global window, fetch */
-import {Deck, GeoJsonLayer, experimental} from 'deck.gl';
-const {MapControllerJS} = experimental;
+import {Deck, GeoJsonLayer, MapController} from 'deck.gl';
 import MapBox from './mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -85,18 +84,12 @@ class App {
       // TODO EventManager should accept element id
       /* global document */
       canvas: document.getElementById('deck'),
+      controller: MapController,
+      onViewportChange: this.onViewportChange.bind(this),
       viewState,
       width,
       height,
       debug: true
-    });
-
-    this.controller = new MapControllerJS({
-      canvas: this.deckgl.canvas,
-      ...viewState,
-      width,
-      height,
-      onViewportChange: this.onViewportChange.bind(this)
     });
 
     this.onResize();

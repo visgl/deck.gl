@@ -37,6 +37,7 @@ function getPropTypes(PropTypes) {
      * such as `longitude`, `latitude`, `zoom` etc.
      */
     onViewportChange: PropTypes.func,
+    onViewStateChange: PropTypes.func,
 
     /** Enables control event handling */
     scrollZoom: PropTypes.bool, // Scroll to zoom
@@ -59,7 +60,6 @@ function getPropTypes(PropTypes) {
 }
 
 const defaultProps = Object.assign({}, MAPBOX_LIMITS, {
-  onViewportChange: null,
   scrollZoom: true,
   dragPan: true,
   dragRotate: true,
