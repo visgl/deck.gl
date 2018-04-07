@@ -43,7 +43,7 @@ const defaultProps = {
   fontFamily: DEFAULT_FONT_FAMILY,
 
   getText: x => x.text,
-  getPosition: x => x.position || x.coordinates,
+  getPosition: x => x.position,
   getColor: x => x.color || DEFAULT_COLOR,
   getSize: x => x.size || 32,
   getAngle: x => x.angle || 0,
@@ -54,13 +54,8 @@ const defaultProps = {
 
 export default class TextLayer extends CompositeLayer {
   initializeState() {
-    const {gl} = this.context;
     const {fontFamily} = this.props;
-    const {mapping, texture} = makeFontAtlas(gl, fontFamily);
-    this.state = {
-      iconAtlas: texture,
-      iconMapping: mapping
-    };
+    this.updateFontAtlas(fontFamily);
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -72,6 +67,19 @@ export default class TextLayer extends CompositeLayer {
     ) {
       this.transformStringToLetters();
     }
+
+    if (oldProps.fontFamily !== props.fontFamily) {
+      this.updateFontAtlas(props.fontFamily);
+    }
+  }
+
+  updateFontAtlas(fontFamily) {
+    const {gl} = this.context;
+    const {mapping, texture} = makeFontAtlas(gl, fontFamily);
+    this.state = {
+      iconAtlas: texture,
+      iconMapping: mapping
+    };
   }
 
   getPickingInfo({info}) {
