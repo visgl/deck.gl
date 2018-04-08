@@ -78,9 +78,9 @@ Whether the layer should be rendered in high-precision 64-bit mode.
 
 ##### `fontFamily` (String, optional)
 
-* Default: `'"Lucida Console", Monaco, monospace'`
+* Default: `'Monaco, monospace'`
 
-Specifies a prioritized list of one or more font family names and/or generic family names.
+Specifies a prioritized list of one or more font family names and/or generic family names. Only monospaced fonts are supported now.
 
 ### Text Alignment Options
 

@@ -129,12 +129,37 @@ export default class LayerControls extends PureComponent {
     );
   }
 
+  _renderSelect(settingName, value, propType) {
+    const {value: options} = propType;
+    if (!options || !options.length) {
+      return null;
+    }
+    return (
+      <div key={settingName}>
+        <div className="input-group">
+          <label className="label" htmlFor={settingName}>
+            {settingName}
+          </label>
+          <select value={value} onChange={e => this._onValueChange(settingName, e.target.value)}>
+            {options.map((val, idx) => (
+              <option key={idx} value={val}>
+                {val}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+    );
+  }
+
   _renderSetting(settingName, value, propType) {
     // first test if proptype is already defined
     if (propType && propType.type) {
       switch (propType.type) {
         case 'number':
           return this._renderSlider(settingName, value, propType);
+        case 'category':
+          return this._renderSelect(settingName, value, propType);
         case 'compound':
           const {settings, propTypes = {}} = this.props;
           return propType.elements.map(name =>
