@@ -47,13 +47,13 @@ class App {
 
     this.deckgl = new Deck({
       viewState: INITIAL_VIEW_STATE,
-      width : '100%',
+      width: '100%',
       height: '100%',
       layers: [],
       controller: MapController,
       onViewStateChange: this.onViewStateChange.bind(this),
       onResize: this.onResize.bind(this),
-      debug: true,
+      debug: true
     });
 
     this.fetchCartoTiles();
