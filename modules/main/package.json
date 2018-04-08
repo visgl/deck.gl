@@ -22,7 +22,7 @@
     "src"
   ],
   "scripts": {
-    "build": "build.sh",
+    "build": "./build.sh",
     "test": "echo \"PACKAGE HAS NO TEST\""
   },
   "dependencies": {
