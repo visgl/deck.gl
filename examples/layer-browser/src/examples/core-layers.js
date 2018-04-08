@@ -286,12 +286,12 @@ const HexagonLayerExample = {
 
 const TextLayerExample = {
   layer: TextLayer,
-  getData: () => dataSamples.points.slice(0, 50),
+  getData: () => dataSamples.texts.slice(0, 50),
   propTypes: {
     fontFamily: {
       name: 'fontFamily',
       type: 'category',
-      value: ['Monaco', 'Helvetica', 'monospace']
+      value: ['Monaco', 'Helvetica', 'monospace', 'Courier', 'Courier New']
     }
   },
   props: {
@@ -301,7 +301,6 @@ const TextLayerExample = {
     getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
-    getSize: x => 32,
     getAngle: x => 30,
     getTextAnchor: x => 'start',
     getAlignmentBaseline: x => 'center',

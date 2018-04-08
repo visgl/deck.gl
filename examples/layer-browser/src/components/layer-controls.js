@@ -141,7 +141,11 @@ export default class LayerControls extends PureComponent {
             {settingName}
           </label>
           <select value={value} onChange={e => this._onValueChange(settingName, e.target.value)}>
-            {options.map(val => <option value={val}>{val}</option>)}
+            {options.map((val, idx) => (
+              <option key={idx} value={val}>
+                {val}
+              </option>
+            ))}
           </select>
         </div>
       </div>

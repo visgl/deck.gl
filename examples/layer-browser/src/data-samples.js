@@ -66,6 +66,11 @@ for (let i = 0; i < path.length - 1; ++i) {
 
 export const points = allPoints;
 
+// texts of random size in [24, 48]
+export const texts = allPoints.map(p =>
+  Object.assign({}, p, {size: Math.floor(Math.random() * 24) + 24})
+);
+
 export const worldGrid = pointsToWorldGrid(points, 500);
 
 export const zigzag = [
