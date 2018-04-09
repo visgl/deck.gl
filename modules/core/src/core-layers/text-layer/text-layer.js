@@ -110,7 +110,7 @@ export default class TextLayer extends CompositeLayer {
     this.setState({data: transformedData});
   }
 
-  getIconOffset(datum) {
+  getLetterOffset(datum) {
     return datum.offsets[datum.index];
   }
 
@@ -161,7 +161,7 @@ export default class TextLayer extends CompositeLayer {
           iconMapping,
           getIcon: d => d.text,
           getPosition: d => getPosition(d.object),
-          getShiftInQueue: d => this.getIconOffset(d),
+          getShiftInQueue: d => this.getLetterOffset(d),
           getLengthOfQueue: d => this.getTextLength(d),
           getColor: d => getColor(d.object),
           getSize: d => getSize(d.object),
