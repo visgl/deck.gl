@@ -97,7 +97,6 @@ export default class GridCellLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.state.attributeManager.invalidateAll();
     }
-    this.updateUniforms();
   }
 
   _getModel(gl) {
@@ -112,39 +111,17 @@ export default class GridCellLayer extends Layer {
     );
   }
 
-  updateUniforms() {
-    const {opacity, extruded, elevationScale, coverage, lightSettings} = this.props;
-    const {model} = this.state;
-
-    model.setUniforms(
-      Object.assign(
-        {},
-        {
-          extruded,
-          elevationScale,
-          opacity,
-          coverage
-        },
-        lightSettings
-      )
-    );
-  }
-
   draw({uniforms}) {
-    const {viewport} = this.context;
-    // TODO - this should be a standard uniform in project package
-    const {pixelsPerMeter} = viewport.getDistanceScales();
+    const {cellSize, extruded, elevationScale, coverage} = this.props;
 
-    // cellSize needs to be updated on every draw call
-    // because it is based on viewport
-    super.draw({
-      uniforms: Object.assign(
-        {
-          cellSize: this.props.cellSize * pixelsPerMeter[0]
-        },
-        uniforms
-      )
-    });
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        cellSize,
+        extruded,
+        elevationScale,
+        coverage
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {

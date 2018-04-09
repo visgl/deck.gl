@@ -45,7 +45,7 @@ void main(void) {
   gl_Position += project_pixel_to_clipspace(positions.xy * radiusPixels);
 
   // Apply lighting
-  float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
+  float lightWeight = lighting_getLightWeight(position_worldspace.xyz, // the w component is always 1.0
     project_normal(instanceNormals));
 
   // Apply opacity to instance color, or return instance picking color

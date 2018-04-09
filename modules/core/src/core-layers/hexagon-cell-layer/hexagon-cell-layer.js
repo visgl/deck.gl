@@ -117,12 +117,17 @@ export default class HexagonCellLayer extends Layer {
       this.state.attributeManager.invalidateAll();
     }
 
-    this.updateUniforms();
+    if (
+      props.hexagonVertices !== oldProps.hexagonVertices ||
+      props.radius !== oldProps.radius ||
+      props.angle !== oldProps.angle
+    ) {
+      this.updateRadiusAngle();
+    }
   }
 
   updateRadiusAngle() {
-    let angle;
-    let radius;
+    let {angle, radius} = this.props;
     const {hexagonVertices} = this.props;
 
     if (Array.isArray(hexagonVertices) && hexagonVertices.length >= 6) {
@@ -133,6 +138,8 @@ export default class HexagonCellLayer extends Layer {
       const vertex3 = vertices[3];
 
       // transform to space coordinates
+      const {viewport} = this.context;
+      const {pixelsPerMeter} = viewport.getDistanceScales();
       const spaceCoord0 = this.projectFlat(vertex0);
       const spaceCoord3 = this.projectFlat(vertex3);
 
@@ -143,18 +150,10 @@ export default class HexagonCellLayer extends Layer {
 
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
       angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
-      radius = dxy / 2;
-    } else if (this.props.radius && Number.isFinite(this.props.angle)) {
-      // if no hexagonVertices provided, try use radius & angle
-      const {viewport} = this.context;
-      // TODO - this should be a standard uniform in project package
-      const {pixelsPerMeter} = viewport.getDistanceScales();
-
-      angle = this.props.angle;
-      radius = this.props.radius * pixelsPerMeter[0];
+      radius = dxy / 2 / pixelsPerMeter[0];
     }
 
-    return {angle, radius};
+    this.setState({angle, radius});
   }
 
   getCylinderGeometry(radius) {
@@ -167,18 +166,6 @@ export default class HexagonCellLayer extends Layer {
       height: 1,
       nradial: 6,
       nvertical: 1
-    });
-  }
-
-  updateUniforms() {
-    const {opacity, elevationScale, extruded, coverage} = this.props;
-    const {model} = this.state;
-
-    model.setUniforms({
-      extruded,
-      opacity,
-      coverage,
-      elevationScale
     });
   }
 
@@ -195,7 +182,18 @@ export default class HexagonCellLayer extends Layer {
   }
 
   draw({uniforms}) {
-    super.draw({uniforms: Object.assign(this.updateRadiusAngle(), uniforms)});
+    const {elevationScale, extruded, coverage} = this.props;
+    const {radius, angle} = this.state;
+
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        radius,
+        angle,
+        extruded,
+        coverage,
+        elevationScale
+      })
+    );
   }
 
   calculateInstancePositions(attribute) {

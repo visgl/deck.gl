@@ -66,7 +66,7 @@ void main(void) {
 
   // if ahpha == 0.0 or z < 0.0, do not render element
   float noRender = float(instanceColors.a == 0.0 || instancePositions.z < 0.0);
-  float dotRadius = radius * mix(coverage, 0.0, noRender);
+  float dotRadius = project_scale(radius) * mix(coverage, 0.0, noRender);
 
   // project center of hexagon
   vec3 centroidPosition = vec3(instancePositions.xy, elevation);
@@ -84,7 +84,7 @@ void main(void) {
   float lightWeight = 1.0;
 
   if (extruded > 0.5) {
-    lightWeight = getLightWeight(
+    lightWeight = lighting_getLightWeight(
       position_worldspace.xyz, // the w component is always 1.0
       normals_worldspace
     );
