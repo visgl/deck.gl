@@ -1,10 +1,8 @@
-/* global window,document */
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-
-import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -26,14 +24,14 @@ class Root extends Component {
       selectedCounty: null
     };
 
-    requestJson(DATA_URL, (error, response) => {
-      if (!error) {
+    fetch(DATA_URL)
+      .then(response => response.json())
+      .then(({features}) => {
         this.setState({
-          data: response.features,
-          selectedCounty: response.features.find(f => f.properties.name === 'Los Angeles, CA')
+          data: features,
+          selectedCounty: features.find(f => f.properties.name === 'Los Angeles, CA')
         });
-      }
-    });
+      });
   }
 
   componentDidMount() {

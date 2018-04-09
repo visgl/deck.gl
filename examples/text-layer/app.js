@@ -1,10 +1,9 @@
-/* global window,document */
 /* eslint-disable max-len */
+/* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
 import DeckGLOverlay from './deckgl-overlay.js';
-import {json as requestJson} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -12,7 +11,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MAPBOX_STYLE =
   'https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json';
 // sample data
-const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/text-layer/hashtagsOneDayWithTime.json';
+const DATA_URL = 'https://rivulet-zhang.github.io/dataRepo/text-layer/hashtagsOneDayWithTime.json';
 const SECONDS_PER_DAY = 24 * 60 * 60;
 // visualize data within in the time window of [current - TIME_WINDOW, current + TIME_WINDOW]
 const TIME_WINDOW = 2;
@@ -51,20 +50,18 @@ class Root extends Component {
   }
 
   _loadData() {
-    requestJson(FILE_PATH, (error, response) => {
-      if (!error) {
+    fetch(DATA_URL)
+      .then(resp => resp.json())
+      .then(resp => {
         // each entry in the data object contains all tweets posted at that second
         const data = Array.from({length: SECONDS_PER_DAY}, () => []);
-        response.forEach(val => {
+        resp.forEach(val => {
           const second = parseInt(val.time, 10) % SECONDS_PER_DAY;
           data[second].push(val);
         });
         this.setState({data});
         window.requestAnimationFrame(this._animateData.bind(this));
-      } else {
-        throw new Error(error.toString());
-      }
-    });
+      });
   }
 
   _animateData() {

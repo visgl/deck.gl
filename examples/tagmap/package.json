@@ -5,7 +5,6 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "d3-request": "^1.0.5",
     "d3-scale": "^1.0.6",
     "deck.gl": "^5.1.0",
     "react": "^16.2.0",
