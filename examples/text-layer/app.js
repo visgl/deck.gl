@@ -16,7 +16,7 @@ const FILE_PATH = 'https://rivulet-zhang.github.io/dataRepo/text-layer/hashtagsO
 const SECONDS_PER_DAY = 24 * 60 * 60;
 // visualize data within in the time window of [current - TIME_WINDOW, current + TIME_WINDOW]
 const TIME_WINDOW = 2;
-const TEXT_COLOR = [12, 123, 234];
+const TEXT_COLOR = [255, 200, 0];
 
 class Root extends Component {
   constructor(props) {

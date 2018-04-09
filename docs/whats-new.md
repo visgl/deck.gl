@@ -23,7 +23,7 @@ Release date: TBD, target April, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/text-layer.gif" />
         <p><i>New TextLayer</i></p>
       </td>
       <td>
