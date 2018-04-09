@@ -53,21 +53,18 @@ const defaultProps = {
 };
 
 export default class TextLayer extends CompositeLayer {
-  initializeState() {
-    this.state = {};
-  }
-
   updateState({props, oldProps, changeFlags}) {
+    if (oldProps.fontFamily !== props.fontFamily) {
+      this.updateFontAtlas(props.fontFamily);
+    }
+
     if (
       changeFlags.dataChanged ||
+      oldProps.fontFamily !== props.fontFamily ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText))
     ) {
       this.transformStringToLetters();
-    }
-
-    if (oldProps.fontFamily !== props.fontFamily) {
-      this.updateFontAtlas(props.fontFamily);
     }
   }
 
@@ -89,6 +86,7 @@ export default class TextLayer extends CompositeLayer {
 
   transformStringToLetters() {
     const {data, getText} = this.props;
+    const {iconMapping} = this.state;
     if (!data || data.length === 0) {
       return;
     }
@@ -97,14 +95,27 @@ export default class TextLayer extends CompositeLayer {
       const text = getText(val);
       if (text) {
         const letters = Array.from(text);
+        const offsets = [0];
+        let offsetLeft = 0;
+
         letters.forEach((letter, i) => {
-          const datum = {text: letter, index: i, len: text.length, object: val};
+          const datum = {text: letter, index: i, offsets, len: text.length, object: val};
+          offsetLeft += iconMapping[letter].width;
+          offsets.push(offsetLeft);
           transformedData.push(datum);
         });
       }
     });
 
     this.setState({data: transformedData});
+  }
+
+  getIconOffset(datum) {
+    return datum.offsets[datum.index];
+  }
+
+  getTextLength(datum) {
+    return datum.offsets[datum.offsets.length - 1];
   }
 
   getAnchorXFromTextAnchor(textAnchor) {
@@ -149,9 +160,9 @@ export default class TextLayer extends CompositeLayer {
           iconAtlas,
           iconMapping,
           getIcon: d => d.text,
-          getIndexOfIcon: d => d.index,
-          getNumOfIcon: d => d.len,
           getPosition: d => getPosition(d.object),
+          getShiftInQueue: d => this.getIconOffset(d),
+          getLengthOfQueue: d => this.getTextLength(d),
           getColor: d => getColor(d.object),
           getSize: d => getSize(d.object),
           getAngle: d => getAngle(d.object),
@@ -164,7 +175,6 @@ export default class TextLayer extends CompositeLayer {
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
             getColor: updateTriggers.getColor,
-            getIcon: [iconAtlas, iconMapping],
             getSize: updateTriggers.getSize,
             getPixelOffset: updateTriggers.getPixelOffset,
             getAnchorX: updateTriggers.getTextAnchor,
