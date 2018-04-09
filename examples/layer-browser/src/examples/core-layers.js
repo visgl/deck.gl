@@ -291,7 +291,7 @@ const TextLayerExample = {
     fontFamily: {
       name: 'fontFamily',
       type: 'category',
-      value: ['Monaco', 'Helvetica', 'monospace', 'Courier', 'Courier New']
+      value: ['Monaco', 'Helvetica', 'Garamond', 'Palatino', 'Courier', 'Courier New']
     }
   },
   props: {
