@@ -90,7 +90,8 @@ test('HexagonCellLayer#updates', t => {
           angle: 10
         },
         assert({layer}) {
-          const {angle} = layer.updateRadiusAngle();
+          layer.updateRadiusAngle();
+          const {angle} = layer.state;
           t.equal(
             toLowPrecision(angle, 5),
             1.8543,

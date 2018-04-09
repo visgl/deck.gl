@@ -48,7 +48,7 @@ void main(void) {
 
   // if ahpha == 0.0 or z < 0.0, do not render element
   float noRender = float(instanceColors.a == 0.0 || instancePositions.w < 0.0);
-  float finalCellSize = cellSize * mix(1.0, 0.0, noRender);
+  float finalCellSize = project_scale(cellSize) * mix(1.0, 0.0, noRender);
 
   float elevation = 0.0;
 
@@ -72,9 +72,9 @@ void main(void) {
   float lightWeight = 1.0;
 
   if (extruded > 0.5) {
-    lightWeight = getLightWeight(
+    lightWeight = lighting_getLightWeight(
       position_worldspace.xyz, // the w component is always 1.0
-      normals
+      project_normal(normals)
     );
   }
 
