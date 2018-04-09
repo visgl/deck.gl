@@ -5,16 +5,11 @@ const webpack = require('webpack');
 const PACKAGE_ROOT = resolve(__dirname, '.');
 const ROOT = resolve(PACKAGE_ROOT, '../..');
 
-let version = require('./package.json').version;
-// Only update every minor version
-version = version.match(/^(\d+)\.(\d+)/)[0];
-
 const config = {
   resolve: {
     alias: {
       '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
-      'mapbox-gl': resolve(PACKAGE_ROOT, 'utils/mapbox-gl'),
-      './mapbox': resolve(ROOT, 'node_modules/react-map-gl/src/mapbox/mapbox.js')
+      'mapbox-gl': resolve(PACKAGE_ROOT, 'src/mapbox-gl')
     }
   },
 
@@ -54,10 +49,9 @@ const prodConfig = Object.assign({}, config, {
 
   mode: 'production',
 
-  // Generate a bundle in dist folder
   output: {
     path: resolve(PACKAGE_ROOT, 'dist'),
-    filename: `deckgl-${version}.js`
+    filename: 'deckgl.min.js'
   },
 
   devtool: ''

@@ -18,16 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
-import './core-layers';
+import test from 'tape-catch';
+import deckgl from '@deck.gl/lite';
 
-// TODO - React test cases currently only work in browser
-// import './react';
+test('standalone#imports', t => {
+  t.ok(deckgl.version, 'version is exported');
+  t.ok(deckgl.DeckGL, 'DeckGL class is exported');
+  t.ok(deckgl.WebMercatorViewport, 'WebMercatorViewport class is exported');
+  t.ok(deckgl.Layer, 'Layer class is exported');
+  t.ok(deckgl.ScatterplotLayer, 'ScatterplotLayer class is exported');
 
-// @deck.gl/experimental-layers
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./experimental-layers');
-  require('./lite');
-}
+  t.end();
+});
+
+test('standalone#DeckGL', t => {
+  const deck = new deckgl.DeckGL({
+    longitude: -122.45,
+    latitude: 37.8,
+    zoom: 12,
+    layers: [
+      new deckgl.ScatterplotLayer({
+        data: [{position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}]
+      })
+    ]
+  });
+
+  t.ok(deck, 'DeckGL constructor does not throw error');
+  t.ok(deck.controller instanceof deckgl.MapController, 'component has controller');
+
+  deck.finalize();
+  t.notOk(deck.controller, 'component is finalized');
+
+  t.end();
+});
