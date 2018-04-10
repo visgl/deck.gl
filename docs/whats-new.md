@@ -74,7 +74,8 @@ It is now possible to specify a `MapController` as a `controller` for the `Deck`
 ## Automatic Resize Handling
 
 It is no longer necessary for applications to specify the exact `width` and `height` of the `Deck` or `DeckGL` components. Size can now either specified using CSS descriptors (e.g. `width = 100%`), or be left out and controlled by external components (such as HTML flex boxes).
-```<DeckGL views=[
+```
+   <DeckGL views=[
     new MapView({id: 'map', x: '70%', y: '70%', height: '15%', width: '15%'})
    ]/>
 ```
@@ -94,7 +95,7 @@ New [TextLayer](/docs/layers/text-layer.md) has been added to the core layers ca
 
 ### Experimental Layers
 
-A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](/docs/roadmap) for more information.
+A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](/docs/roadmap.md) for more information.
 
 
 ## Test Utilities
@@ -104,7 +105,7 @@ deck.gl now provides a suite of [test utilities](/docs/developer-guide/testing) 
 
 ## Dist Size Reduction
 
-Work on bundle size reduction continues and among other things, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](/docs/developer-guide/building-apps) has been added to the docs.
+Work on bundle size reduction continues and among other things, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](/docs/developer-guide/building-apps.md) has been added to the docs.
 
 
 ## Shader Modules
