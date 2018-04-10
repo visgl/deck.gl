@@ -40,8 +40,7 @@ using both [webpack2](./examples/hello-world-webpack2) and
 so you can choose which setup you prefer or are more familiar with.
 
 ```javascript
-import DeckGL from 'deck.gl';
-import {ArcLayer} from 'deck.gl';
+import DeckGL, {ArcLayer} from 'deck.gl';
 
 const flights = new ArcLayer({
   id: 'flights',
@@ -58,30 +57,17 @@ or browse directly the [docs folder](./docs).
 
 The **master** branch is the active development branch.
 
-    npm install # or yarn
+    npm run bootstrap
     npm test
     npm start  # See note below
 
-Note that you will also need to do an npm install in the main example (`examples/layer-browser`)
-since the npm start command tries to build and run that example.
-
-    cd examples/layer-browser
-    npm install # or yarn
-    cd ../..
-
-Note that `npm start` in the main directory actually runs `examples/main`.
-You will need to install dependencies in that example first:
-
-    cd examples/main
-    npm install # or yarn
-    cd ../..
-    npm start
+Note that `npm start` in the main directory actually runs `examples/layer-browser`.
 
 
 #### Node Version Requirement
 
-Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `v4` or higher.
-Building deck.gl from source has a dependency on Node `v6.4` or higher.
+Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `4.x` or higher.
+Building deck.gl from source has a dependency on Node `8.x` or higher.
 Either upgrade to a supported version, or install something like
 [nvm](https://github.com/creationix/nvm) to manage Node versions.
 

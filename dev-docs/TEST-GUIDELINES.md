@@ -23,17 +23,16 @@ For pre-commit, CI, publish, we want to run everything we got: the linter, run a
 That said, for quick iteration of tests during development, it will be frustrating if too many tests are run each time. Since making sure that e.g. CI etc use all tests typically requires adding all the tests to the main package.json "test" script, in many modules we add a separate test-fast script that just runs one copy of the tests:
 
 ```
-   "scripts": {
-      "test"; "npm run lint && node test/node.js && node test/node-dist.js && .... "
-      "test-fast" "node test/node.js",
-      ...
-   }
-
-   ```
+npm run test fast
+```
 PS - We could possibly relax the pre-commit testing just a little if found too time consuming, but there is no reason to reduce the CI or prepublish testing.
 
 
-## npm run test-browser
+## Browser based tests
+
+```
+npm run test browser
+```
 
 It's the same test suite, but run in the browser.
 
