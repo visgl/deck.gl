@@ -29,7 +29,7 @@ const COLOR_MAP = [
   [0, 255, 255]
 ];
 
-const INITIAL_VIEWPORT = {
+const INITIAL_VIEW_STATE = {
   latitude: 40,
   longitude: -100,
   zoom: 2,
@@ -40,14 +40,43 @@ const INITIAL_VIEWPORT = {
 class App {
   constructor(props) {
     this.state = {
-      viewport: INITIAL_VIEWPORT,
-      width: 500,
-      height: 500,
       data: null,
       points: [{position: [-100, 40], value: 1}],
       currentTime: 0
     };
 
+    this.deckgl = new Deck({
+      viewState: INITIAL_VIEW_STATE,
+      width: '100%',
+      height: '100%',
+      layers: [],
+      controller: MapController,
+      onViewStateChange: this.onViewStateChange.bind(this),
+      onResize: this.onResize.bind(this),
+      debug: true
+    });
+
+    this.fetchCartoTiles();
+
+    fetch(GEOJSON)
+      .then(resp => resp.json())
+      .then(data => this.setState({data}));
+
+    this.onAnimate();
+  }
+
+  setState(state) {
+    Object.assign(this.state, state);
+    this.updateLayers();
+  }
+
+  setProps(props) {
+    this.setState(props);
+    this.deckgl.setProps(props);
+    // this.map.setProps(props);
+  }
+
+  fetchCartoTiles() {
     const startTile = lngLatToTile(TILE_PARAMS);
     TILE_PARAMS.xTileNoStart = startTile[0];
     TILE_PARAMS.yTileNoStart = startTile[1];
@@ -69,59 +98,45 @@ class App {
           });
       }
     }
-
-    fetch(GEOJSON)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
-
-    window.addEventListener('load', this.onLoad.bind(this));
-    window.addEventListener('resize', this.onResize.bind(this));
-  }
-
-  setState(state) {
-    Object.assign(this.state, state);
-    this.updateLayers();
   }
 
   updateLayers() {
-    if (this.deckgl) {
-      this.deckgl.setProps({
-        layers: [
-          new GeoJsonLayer({
-            data: this.state.data,
-            stroked: true,
-            filled: true,
-            lineWidthMinPixels: 2,
-            getLineColor: () => [255, 255, 255],
-            getFillColor: () => [200, 200, 200]
-          }),
-          new TimeSlicedScatterplotLayer({
-            data: this.state.points,
-            fp64: true,
-            radiusMinPixels: 2,
-            currentTime: this.state.currentTime,
-            fadeFactor: 0.1,
-            getColor: x => COLOR_MAP[x.value] || [0, 255, 255],
-            getRadius: x => 3,
-            getTime: x => x.time * 10
-          })
-        ]
-      });
-      // console.log(this.state.currentTime);
-    }
-  }
-
-  onResize() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
+    // console.log(this.state.currentTime);
+    this.deckgl.setProps({
+      layers: [
+        new GeoJsonLayer({
+          data: this.state.data,
+          stroked: true,
+          filled: true,
+          lineWidthMinPixels: 2,
+          getLineColor: () => [255, 255, 255],
+          getFillColor: () => [200, 200, 200]
+        }),
+        new TimeSlicedScatterplotLayer({
+          data: this.state.points,
+          fp64: true,
+          radiusMinPixels: 2,
+          currentTime: this.state.currentTime,
+          fadeFactor: 0.1,
+          getColor: x => COLOR_MAP[x.value] || [0, 255, 255],
+          getRadius: x => 3,
+          getTime: x => x.time * 10
+        })
+      ]
     });
   }
 
+  onViewStateChange({viewState}) {
+    this.setState({viewState});
+    this.deckgl.setProps(viewState);
+  }
+
+  onResize({width, height}) {
+    this.setProps({width, height});
+  }
+
   onViewportChange(viewport) {
-    this.setState({viewport});
-    this.deckgl.setProps(viewport);
-    this.controller.setProps(viewport);
+    this.setProps(Object.assign({}, viewport, {viewState: viewport}));
   }
 
   onAnimate() {
@@ -133,24 +148,6 @@ class App {
       this._animationFrame = window.setTimeout(this.onAnimate.bind(this), 100);
     }
   }
-
-  onLoad() {
-    this.onResize();
-
-    const {viewport, width, height} = this.state;
-
-    this.deckgl = new Deck({
-      ...viewport,
-      width,
-      height,
-      debug: true,
-      controller: MapController,
-      onViewportChange: this.onViewportChange.bind(this),
-      layers: []
-    });
-
-    this.onAnimate();
-  }
 }
 
-new App(); // eslint-disable-line
+window.addEventListener('load', () => new App());
