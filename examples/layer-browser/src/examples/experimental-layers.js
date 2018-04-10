@@ -1,8 +1,10 @@
-import {MeshLayer, PathOutlineLayer, PathMarkerLayer, AdvancedTextLayer} from 'deck.gl-layers';
-
-// TODO: remove hard path once deck.gl-layers published with GPUScreenGridLayer
+import {
+  MeshLayer,
+  PathOutlineLayer,
+  PathMarkerLayer,
+  AdvancedTextLayer
+} from '@deck.gl/experimental-layers';
 import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
-
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL, CylinderGeometry} from 'luma.gl';
 import * as dataSamples from '../data-samples';
