@@ -41,21 +41,12 @@ Release date: TBD, target April, 2018
 
 ## Use deck.gl without React
 
-deck.gl can now be used in non-React applications. A new top-level JavaScript class (`Deck`) is provided as an alternative to the traditional top-level `DeckGL` React component. This allows deck.gl to be used in any JavaScript application or framework. The new API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" recommended for "early adopters".
-
-TBA
-- link to `Deck` class?
-- link to blog post?
+deck.gl can now be used in non-React applications. A new top-level JavaScript class [`Deck`](docs/api-reference/deck.md) is provided as an alternative to the traditional top-level `DeckGL` React component. This allows deck.gl to be used in any JavaScript application or framework. The new API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" recommended for "early adopters".
 
 
 ## Scripting Support
 
 deck.gl now publishes a bundle that can be imported using a simple `<script>` statement in HTML to give access to the deck.gl API. This makes deck.gl easy to use in e.g. "codepens" and for casual programming and visualizations.
-
-TBA
-- link to get started doc?
-- link to code pen?
-- link to blog post?
 
 
 ## Multiple Modules
@@ -68,50 +59,32 @@ deck.gl is now published as multiple npm modules allowing applications to choose
 
 ## Multi-Viewport Support
 
-deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the `views` property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
-
-TBA
-- links to developer guide
-- links to example
-- add a GIF of a multi-view example?
+deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the [`views`](docs/advanced/views.md) property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
 
 
 ### View Classes
 
-A new hierarchy of `View` classes let apps provide multiple views of their data.
-
-TBA
-- Add developer's guide link
-- Add doc link
+A new hierarchy of [`View`](docs/advanced/views.md) classes let apps provide multiple views of their data.
 
 
 ## MapController
 
 It is now possible to specify a `MapController` as a `controller` for the `Deck` or `DeckGL` classes, instead of relying on e.g. `react-map-gl` or experimental classes to drive event handling.
 
-TBA
-- Add example code
-- Add doc link
-
-
 ## Automatic Resize Handling
 
 It is no longer necessary for applications to specify the exact `width` and `height` of the `Deck` or `DeckGL` components. Size can now either specified using CSS descriptors (e.g. `width = 100%`), or be left out and controlled by external components (such as HTML flex boxes).
-
-TBA
-- Add example code
+```<DeckGL views=[
+    new MapView({id: 'map', x: '70%', y: '70%', height: '15%', width: '15%'})
+   ]/>
+```
 
 
 ## Layers
 
 ### TextLayer (New)
 
-A new [TextLayer]() has been added to the core layers catalog.
-
-TBA
-- better description
-- link to example?
-- Add GIF for example?
+New [TextLayer](docs/layers/text-layer.md) has been added to the core layers catalog for rendering labels with WebGL.
 
 
 ### ScreenGridLayer
