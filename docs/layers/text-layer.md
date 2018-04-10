@@ -80,7 +80,7 @@ Whether the layer should be rendered in high-precision 64-bit mode.
 
 * Default: `'Monaco, monospace'`
 
-Specifies a prioritized list of one or more font family names and/or generic family names. Only monospaced fonts are supported now.
+Specifies a prioritized list of one or more font family names and/or generic family names. Follow the specs for CSS [font-family](https://developer.mozilla.org/en-US/docs/Web/CSS/font-family).
 
 ### Text Alignment Options
 

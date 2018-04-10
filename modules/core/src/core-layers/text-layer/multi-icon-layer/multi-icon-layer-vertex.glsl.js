@@ -34,8 +34,6 @@ attribute float instanceColorModes;
 attribute vec2 instanceOffsets;
 
 // the following three attributes are for the multi-icon layer
-attribute float instanceIndexOfIcon;
-attribute float instanceNumOfIcon;
 attribute vec2 instancePixelOffset;
 
 uniform float sizeScale;
@@ -53,21 +51,13 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
   return rotationMatrix * vertex;
 }
 
-vec2 getShift(float instanceIndexOfIcon, float instanceNumOfIcon) {
-  // calculate the middle index of the string
-  float midIndex = (instanceNumOfIcon - 1.0) / 2.0;
-  // calculate horizontal shift of each letter
-  return vec2(instanceIndexOfIcon - midIndex, 0.0);
-}
-
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
-  vec2 shift = getShift(instanceIndexOfIcon, instanceNumOfIcon);
-  vec2 pixelOffset = (positions / 2.0 + shift) * iconSize + instanceOffsets;
+  vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
 
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * sizeScale * instanceScale;
   pixelOffset += instancePixelOffset;

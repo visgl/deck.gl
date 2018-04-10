@@ -23,8 +23,8 @@ import IconLayer from '../../icon-layer/icon-layer';
 import vs from './multi-icon-layer-vertex.glsl';
 
 const defaultProps = {
-  getIndexOfIcon: x => x.index || 0,
-  getNumOfIcon: x => x.len || 1,
+  getShiftInQueue: x => x.shift || 0,
+  getLengthOfQueue: x => x.len || 1,
   // 1: left, 0: middle, -1: right
   getAnchorX: x => x.anchorX || 0,
   // 1: top, 0: center, -1: bottom
@@ -44,16 +44,6 @@ export default class MultiIconLayer extends IconLayer {
 
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
-      instanceIndexOfIcon: {
-        size: 1,
-        accessor: 'getIndexOfIcon',
-        update: this.calculateInstanceIndexOfIcon
-      },
-      instanceNumOfIcon: {
-        size: 1,
-        accessor: 'getNumOfIcon',
-        update: this.calculateInstanceNumOfIcon
-      },
       instancePixelOffset: {
         size: 2,
         accessor: 'getPixelOffset',
@@ -62,32 +52,37 @@ export default class MultiIconLayer extends IconLayer {
     });
   }
 
-  calculateInstanceIndexOfIcon(attribute) {
-    const {data, getIndexOfIcon} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      value[i++] = getIndexOfIcon(object);
-    }
-  }
+  updateState(updateParams) {
+    super.updateState(updateParams);
+    const {changeFlags} = updateParams;
 
-  calculateInstanceNumOfIcon(attribute) {
-    const {data, getNumOfIcon} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      value[i++] = getNumOfIcon(object);
+    if (
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.getAnchorX || changeFlags.updateTriggersChanged.getAnchorY)
+    ) {
+      this.getAttributeManager().invalidate('instanceOffsets');
     }
   }
 
   calculateInstanceOffsets(attribute) {
-    const {data, iconMapping, getIcon, getAnchorX, getAnchorY, getNumOfIcon} = this.props;
+    const {
+      data,
+      iconMapping,
+      getIcon,
+      getAnchorX,
+      getAnchorY,
+      getLengthOfQueue,
+      getShiftInQueue
+    } = this.props;
     const {value} = attribute;
     let i = 0;
     for (const object of data) {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
-      value[i++] = rect.width / 2 * getAnchorX(object) * getNumOfIcon(object) || 0;
+      const len = getLengthOfQueue(object);
+      const shiftX = getShiftInQueue(object);
+
+      value[i++] = (getAnchorX(object) - 1) * len / 2 + rect.width / 2 + shiftX || 0;
       value[i++] = rect.height / 2 * getAnchorY(object) || 0;
     }
   }
