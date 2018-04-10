@@ -9,7 +9,7 @@ Release date: TBD, target late Q2, 2018
 
 ### Prop Types
 
-deck.gl layers can now specify additional type information about properties. When provided, these [prop types](docs/advanced/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
+deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/advanced/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
 
 > For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
@@ -41,21 +41,12 @@ Release date: TBD, target April, 2018
 
 ## Use deck.gl without React
 
-deck.gl can now be used in non-React applications. A new top-level JavaScript class (`Deck`) is provided as an alternative to the traditional top-level `DeckGL` React component. This allows deck.gl to be used in any JavaScript application or framework. The new API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" recommended for "early adopters".
-
-TBA
-- link to `Deck` class?
-- link to blog post?
+deck.gl can now be used in non-React applications. A new top-level JavaScript class [`Deck`](/docs/api-reference/deck.md) is provided as an alternative to the traditional top-level `DeckGL` React component. This allows deck.gl to be used in any JavaScript application or framework. The new API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" recommended for "early adopters".
 
 
 ## Scripting Support
 
 deck.gl now publishes a bundle that can be imported using a simple `<script>` statement in HTML to give access to the deck.gl API. This makes deck.gl easy to use in e.g. "codepens" and for casual programming and visualizations.
-
-TBA
-- link to get started doc?
-- link to code pen?
-- link to blog post?
 
 
 ## Multiple Modules
@@ -68,50 +59,33 @@ deck.gl is now published as multiple npm modules allowing applications to choose
 
 ## Multi-Viewport Support
 
-deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the `views` property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
-
-TBA
-- links to developer guide
-- links to example
-- add a GIF of a multi-view example?
+deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the [`views`](/docs/advanced/views.md) property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
 
 
 ### View Classes
 
-A new hierarchy of `View` classes let apps provide multiple views of their data.
-
-TBA
-- Add developer's guide link
-- Add doc link
+A new hierarchy of [`View`](/docs/advanced/views.md) classes let apps provide multiple views of their data.
 
 
 ## MapController
 
 It is now possible to specify a `MapController` as a `controller` for the `Deck` or `DeckGL` classes, instead of relying on e.g. `react-map-gl` or experimental classes to drive event handling.
 
-TBA
-- Add example code
-- Add doc link
-
-
 ## Automatic Resize Handling
 
 It is no longer necessary for applications to specify the exact `width` and `height` of the `Deck` or `DeckGL` components. Size can now either specified using CSS descriptors (e.g. `width = 100%`), or be left out and controlled by external components (such as HTML flex boxes).
-
-TBA
-- Add example code
+```
+   <DeckGL views=[
+    new MapView({id: 'map', x: '70%', y: '70%', height: '15%', width: '15%'})
+   ]/>
+```
 
 
 ## Layers
 
 ### TextLayer (New)
 
-A new [TextLayer]() has been added to the core layers catalog.
-
-TBA
-- better description
-- link to example?
-- Add GIF for example?
+New [TextLayer](/docs/layers/text-layer.md) has been added to the core layers catalog for rendering labels with WebGL.
 
 
 ### ScreenGridLayer
@@ -121,24 +95,24 @@ TBA
 
 ### Experimental Layers
 
-A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](./docs/roadmap) for more information.
+A number of experimental deck.gl layers are published in a new module [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers). Be aware that use of these layers come with caveats and are mainly intended for early adopters. Please refer to [roadmap](/docs/roadmap.md) for more information.
 
 
 ## Test Utilities
 
-deck.gl now provides a suite of [test utilities](./docs/developer-guide/testing) that make it easy to test both layers and applications. The utilities support visual regression testing against "golden" images, as well as utilities for traditional unit testing of layers. The utilities come pre-integrated with tools that help automate the running of browser based render tests from the console. To start using the utilities, install the new ([@deck.gl/test-utils](https://www.npmjs.com/package/@deck.gl/test-utils)) module.
+deck.gl now provides a suite of [test utilities](/docs/developer-guide/testing) that make it easy to test both layers and applications. The utilities support visual regression testing against "golden" images, as well as utilities for traditional unit testing of layers. The utilities come pre-integrated with tools that help automate the running of browser based render tests from the console. To start using the utilities, install the new ([@deck.gl/test-utils](https://www.npmjs.com/package/@deck.gl/test-utils)) module.
 
 
 ## Dist Size Reduction
 
-Work on bundle size reduction continues and among other things, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](./docs/developer-guide/building-apps) has been added to the docs.
+Work on bundle size reduction continues and among other things, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](/docs/developer-guide/building-apps.md) has been added to the docs.
 
 
 ## Shader Modules
 
 ### project32 (New)
 
-**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](docs/shader-modules/project32.md) for more details.
+**Unified 32/64-bit projection** - A new common API for projection is implemented in both the `project64` shader module and a new `project32` shader module allowing the same vertex shader can be used for both 32-bit and 64-bit projection. This simplifies adding fp64 support to layers and reduces bundle size. See [docs](/docs/shader-modules/project32.md) for more details.
 
 
 
