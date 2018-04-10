@@ -26,6 +26,6 @@ before_script:
   - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
   - ulimit -c unlimited -S       # enable core dumps
 script:
-  - npm run test-ci
+  - npm run test ci
 after_success:
   - cat coverage/lcov.info | coveralls
