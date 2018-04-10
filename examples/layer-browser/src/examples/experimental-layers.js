@@ -4,9 +4,7 @@ import {
   PathMarkerLayer,
   AdvancedTextLayer
 } from '@deck.gl/experimental-layers';
-
 import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
-
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL, CylinderGeometry} from 'luma.gl';
 import * as dataSamples from '../data-samples';
