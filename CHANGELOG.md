@@ -23,6 +23,31 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.2 Pre Releases
 
+#### [5.2.0-beta.1] - April 11
+-  format changelog
+-  Move "fragile" carto pure JS example to wip folder (#1674)
+-  update whats new (#1682)
+-  Clean up npm scripts (#1657)
+-  replace deck.gl-layers with @deck.gl/experimental-layers (#1681)
+-  Support non-monospace fonts in TextLayer (#1680)
+-  use fetch instead of d3-request/json in examples (#1639)
+-  add text-layer screenshot to what's new (#1678)
+-  Publish standalone bundle with the main package (#1671)
+-  Clean up cell layers code (#1675)
+-  regenerate font atlas when fontFamily changed (#1669)
+-  Expose MapController class and enable it to be used with `Deck.controller` prop (#1666)
+-  ignore standalone module for now (#1670)
+-  Fix auto resize and controller (#1656)
+-  What's new update (#1667)
+-  fix website dependencies (#1665)
+-  fix example tests (#1644)
+-  add linter to ci test (#1664)
+-  fix bootstrap (#1663)
+-  fix(docs): wdith to width typo (#1658)
+-  Add TextLayer demo (#1646)
+-  Module split PR1 (#1651)
+-  Deck Component: auto resize handling (#1389)
+
 #### [5.2.0-alpha.8] - April 5
 - Bump examples to 5.2 alpha versions (#1649)
 - Bump example package.json to make it clear these are for future release (#1648)
