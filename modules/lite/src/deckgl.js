@@ -84,12 +84,18 @@ export default class DeckGL extends Deck {
       })
     );
 
-    const {map} = props;
-    if (map === undefined) {
+    const {map = window.mapboxgl} = props;
+    if (map && map.Map) {
       // Default create mapbox map
       this._map =
-        isMap && window.mapboxgl && new Mapbox(Object.assign({}, props, {container: mapCanvas}));
-    } else if (map) {
+        isMap &&
+        new Mapbox(
+          Object.assign({}, props, {
+            container: mapCanvas,
+            mapboxgl: map
+          })
+        );
+    } else {
       this._map = map;
     }
 
@@ -118,7 +124,7 @@ export default class DeckGL extends Deck {
     }
 
     if (this._map) {
-      this._map.setProps(props.viewState);
+      this._map.setProps(props);
     }
 
     super.setProps(props);
@@ -128,7 +134,7 @@ export default class DeckGL extends Deck {
     const {viewState} = this.props;
 
     this.setProps({
-      viewState: Object.assign(viewState, viewport)
+      viewState: Object.assign({}, viewState, viewport)
     });
 
     if (this.onViewportChange) {

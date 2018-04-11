@@ -8,8 +8,7 @@ const ROOT = resolve(PACKAGE_ROOT, '../..');
 const config = {
   resolve: {
     alias: {
-      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
-      'mapbox-gl': resolve(PACKAGE_ROOT, 'src/mapbox-gl')
+      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src')
     }
   },
 
@@ -50,6 +49,8 @@ const prodConfig = Object.assign({}, config, {
   mode: 'production',
 
   output: {
+    library: 'deck',
+    libraryTarget: 'umd',
     path: resolve(PACKAGE_ROOT, 'dist'),
     filename: 'deckgl.min.js'
   },
