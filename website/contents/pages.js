@@ -91,6 +91,10 @@ export const examplePages = generatePath([
         }
       },
       {
+        name: '3D Indoor Scan',
+        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
+      },
+      {
         name: 'TextLayer',
         content: {
           demo: 'TextDemo',
@@ -118,31 +122,29 @@ export const examplePages = generatePath([
         }
       },
       {
-        name: 'Wind Map',
-        external: 'http://uber.github.io/deck.gl/examples/wind'
-      }
-    ]
-  },
-  {
-    name: 'Beyond Maps',
-    expanded: true,
-    children: [
-      {
         name: '3D Surface Explorer',
         content: {
           demo: 'PlotDemo',
           code: getCodeUrl('examples/plot')
         }
-      },
-      {
-        name: '3D Indoor Scan',
-        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
-      },
-      {
-        name: '3D Model (Point Cloud)',
-        external: 'http://uber.github.io/deck.gl/examples/point-cloud-ply'
       }
     ]
+  }
+]);
+
+
+export const showcasePages = generatePath([
+  {
+    name: 'Overview',
+    content: 'markdown/showcase.md'
+  },
+  {
+    name: 'Wind Map',
+    external: 'http://uber.github.io/deck.gl/examples/wind'
+  },
+  {
+    name: 'Ascii Filter',
+    external: 'http://pessimistress.github.io/ascii/'
   }
 ]);
 
