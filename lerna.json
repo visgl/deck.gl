@@ -9,10 +9,11 @@
         "*.md"
       ]
     },
-    "bootstrap": {
-    }
+    "bootstrap": {}
   },
   "npmClient": "yarn",
   "useWorkspaces": true,
-  "packages": ["modules/*"]
+  "packages": [
+    "modules/*"
+  ]
 }
