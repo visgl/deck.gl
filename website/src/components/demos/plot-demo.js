@@ -38,28 +38,9 @@ export default class PlotDemo extends Component {
     super(props);
 
     this.state = {
-      viewport: {
-        lookAt: [0, 0, 0],
-        distance: 3,
-        rotationX: -30,
-        rotationOrbit: 30,
-        orbitAxis: 'Y',
-        fov: 50,
-        minDistance: 1,
-        maxDistance: 20
-      },
       equation: {},
       hoverInfo: null
     };
-  }
-
-  componentDidMount() {
-    const {viewport: {width, height}} = this.props;
-    const {viewport} = this.state;
-
-    const canvasProps = {...viewport, width, height};
-    this._onViewportChange(OrbitController.getViewport(canvasProps)
-      .fitBounds([3, 3, 3]));
   }
 
   componentWillReceiveProps(nextProps) {
@@ -90,32 +71,18 @@ export default class PlotDemo extends Component {
     }
   }
 
-  @autobind _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
-    });
-  }
-
   render() {
     const {
       viewport: {width, height},
       params: {resolution, showAxis}
     } = this.props;
-    const {viewport, equation, hoverInfo} = this.state;
-
-    const canvasProps = {
-      ...viewport,
-      width,
-      height
-    };
-    const orbitViewport = OrbitController.getViewport(canvasProps);
+    const {equation, hoverInfo} = this.state;
 
     return (
-      <OrbitController
-        {...canvasProps}
-        onViewportChange={this._onViewportChange} >
+      <div>
         {resolution && <PlotOverlay
-          viewport={orbitViewport}
+          width={width}
+          height={height}
           equation={equation.valid ? equation.func : null}
           resolution={resolution.value}
           showAxis={showAxis.value}
@@ -125,7 +92,7 @@ export default class PlotDemo extends Component {
           { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
           </div>}
 
-      </OrbitController>
+      </div>
     );
   }
 }
