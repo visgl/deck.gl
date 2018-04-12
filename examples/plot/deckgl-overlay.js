@@ -29,9 +29,7 @@ export default class DeckGLOverlay extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
-      width: 0,
-      height: 0
+      viewState: INITIAL_VIEW_STATE
     };
 
     this._onResize = this._onResize.bind(this);
@@ -43,12 +41,11 @@ export default class DeckGLOverlay extends Component {
     this._onResize();
   }
 
-  _onResize() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
+  componentWillUnmount() {
+    window.removeEventListener('resize', this._onResize);
+  }
 
+  _onResize() {
     const {fov} = this.state.viewState;
     const newViewState = Object.assign({}, this.viewState, {
       distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov})
@@ -62,8 +59,8 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {resolution, showAxis, equation} = this.props;
-    const {width, height, viewState} = this.state;
+    const {width = '100%', height = '100%', resolution, showAxis, equation} = this.props;
+    const {viewState} = this.state;
 
     const layers = [
       equation &&
@@ -93,9 +90,9 @@ export default class DeckGLOverlay extends Component {
 
     return (
       <DeckGL
+        layers={layers}
         width={width}
         height={height}
-        layers={layers}
         views={new OrbitView()}
         viewState={viewState}
         controller={OrbitController}
