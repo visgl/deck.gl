@@ -68,6 +68,9 @@ function getPropTypes(PropTypes) {
 
 const defaultProps = {
   id: 'deckgl-overlay',
+  width: '100%',
+  height: '100%',
+
   pickingRadius: 0,
   layerFilter: null,
   glOptions: {},
