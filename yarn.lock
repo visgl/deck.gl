@@ -1157,6 +1157,14 @@ babel-helpers@^6.24.1:
     babel-runtime "^6.22.0"
     babel-template "^6.24.1"
 
+babel-loader@^7.1.4:
+  version "7.1.4"
+  resolved "https://registry.yarnpkg.com/babel-loader/-/babel-loader-7.1.4.tgz#e3463938bd4e6d55d1c174c5485d406a188ed015"
+  dependencies:
+    find-cache-dir "^1.0.0"
+    loader-utils "^1.0.2"
+    mkdirp "^0.5.1"
+
 babel-messages@^6.23.0:
   version "6.23.0"
   resolved "https://registry.yarnpkg.com/babel-messages/-/babel-messages-6.23.0.tgz#f3cdf4703858035b2a2951c6ec5edf6c62f2630e"
@@ -5496,7 +5504,7 @@ loader-utils@^0.2.16, loader-utils@~0.2.2:
     json5 "^0.5.0"
     object-assign "^4.0.1"
 
-loader-utils@^1.1.0:
+loader-utils@^1.0.2, loader-utils@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/loader-utils/-/loader-utils-1.1.0.tgz#c98aef488bcceda2ffb5e2de646d6a754429f5cd"
   dependencies:
@@ -5698,22 +5706,12 @@ mapbox-gl@0.44:
     vt-pbf "^3.0.1"
     webworkify "^1.5.0"
 
-math.gl@>=1.1.0-alpha.1:
+math.gl@>=1.1.0-alpha.1, math.gl@>=1.1.0-alpha.2:
   version "1.1.0-alpha.2"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.1.0-alpha.2.tgz#42451d1b14597ac2de022c31134f679a32a774bd"
   dependencies:
     babel-plugin-version-inline "^1.0.0"
     gl-mat3 "^1.0.0"
-    gl-mat4 "^1.1.4"
-    gl-quat "^1.0.0"
-    gl-vec2 "^1.0.0"
-    gl-vec3 "^1.0.3"
-    gl-vec4 "^1.0.1"
-
-math.gl@^1.0.0, math.gl@^1.0.5:
-  version "1.0.5"
-  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.0.5.tgz#9c135cb49e4c34f3f63ca338a2260996a35efe7e"
-  dependencies:
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
     gl-vec2 "^1.0.0"
@@ -7052,18 +7050,18 @@ react-dom@^16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react-map-gl@^3.2.5:
-  version "3.2.5"
-  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-3.2.5.tgz#4d9b274775f64163e898bdc63a45d7861e13d379"
+react-map-gl@^3.3.0-alpha.2:
+  version "3.3.0-alpha.2"
+  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-3.3.0-alpha.2.tgz#c86488569cdb3c9a595f5acb95e895a9f0cfdd0b"
   dependencies:
     babel-runtime "^6.23.0"
     bowser "^1.2.0"
     immutable "^3.8.2"
     mapbox-gl "0.44"
-    math.gl "^1.0.0"
+    math.gl ">=1.1.0-alpha.2"
     mjolnir.js "^1.0.0"
     prop-types "^15.5.7"
-    viewport-mercator-project "^5.0.0"
+    viewport-mercator-project ">=5.1.0-alpha.1"
 
 react@^16.2.0:
   version "16.3.1"
@@ -8825,17 +8823,11 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-viewport-mercator-project@>=5.1.0-alpha.2:
+viewport-mercator-project@>=5.1.0-alpha.1, viewport-mercator-project@>=5.1.0-alpha.2:
   version "5.1.0-alpha.2"
   resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.1.0-alpha.2.tgz#797eaed537553d8ced70ede5bf2522ceb01e7f10"
   dependencies:
     math.gl ">=1.1.0-alpha.1"
-
-viewport-mercator-project@^5.0.0:
-  version "5.0.2"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.0.2.tgz#de363316586ac6fa8de62217d13443917ec70c56"
-  dependencies:
-    math.gl "^1.0.5"
 
 vinyl-file@^2.0.0:
   version "2.0.0"

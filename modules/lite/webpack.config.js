@@ -8,8 +8,7 @@ const ROOT = resolve(PACKAGE_ROOT, '../..');
 const config = {
   resolve: {
     alias: {
-      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
-      'mapbox-gl': resolve(PACKAGE_ROOT, 'src/mapbox-gl')
+      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src')
     }
   },
 
@@ -19,10 +18,7 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: ['src', 'utils', 'node_modules/react-map-gl'],
-        options: {
-          presets: ['es2015']
-        }
+        include: /src/
       }
     ]
   }
@@ -50,6 +46,7 @@ const prodConfig = Object.assign({}, config, {
   mode: 'production',
 
   output: {
+    libraryTarget: 'umd',
     path: resolve(PACKAGE_ROOT, 'dist'),
     filename: 'deckgl.min.js'
   },

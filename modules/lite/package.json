@@ -25,6 +25,6 @@
     "@deck.gl/core": "^5.2.0-alpha.1"
   },
   "devDependencies": {
-    "react-map-gl": "^3.2.5"
+    "react-map-gl": "^3.3.0-alpha.2"
   }
 }
