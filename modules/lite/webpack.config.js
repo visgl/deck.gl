@@ -18,10 +18,7 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: ['src', 'utils', 'node_modules/react-map-gl'],
-        options: {
-          presets: ['es2015']
-        }
+        include: /src/
       }
     ]
   }
@@ -49,7 +46,6 @@ const prodConfig = Object.assign({}, config, {
   mode: 'production',
 
   output: {
-    library: 'deck',
     libraryTarget: 'umd',
     path: resolve(PACKAGE_ROOT, 'dist'),
     filename: 'deckgl.min.js'

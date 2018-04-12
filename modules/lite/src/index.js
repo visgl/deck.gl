@@ -1,12 +1,17 @@
-/* global window, global */
-import * as lumaGL from 'luma.gl';
-import * as deckGLCore from '@deck.gl/core';
+// We use `module.exports` instead of `export default` in this file so that using
+// require() to access the bundle will return one object instead of {default: ...}.
+// `export` must be paired with `import` and `module.exports` must be paired with `require`
+// https://github.com/webpack/webpack/issues/4039
 
-import DeckGL from './deckgl';
+/* global window, global */
+const lumaGL = require('luma.gl');
+const deckGLCore = require('@deck.gl/core');
+
+const DeckGL = require('./deckgl').default;
 
 const _global = typeof window === 'undefined' ? global : window;
 
 _global.deck = Object.assign({}, _global.deck, deckGLCore, {DeckGL});
 _global.luma = Object.assign({}, _global.luma, lumaGL);
 
-export default _global.deck;
+module.exports = _global.deck;
