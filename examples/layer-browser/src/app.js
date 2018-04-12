@@ -275,8 +275,6 @@ export default class App extends PureComponent {
           <DeckGL
             ref="deckgl"
             id="default-deckgl-overlay"
-            width="100%"
-            height="100%"
             views={views}
             viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
             layers={this._renderExamples()}
