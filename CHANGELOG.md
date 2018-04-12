@@ -23,6 +23,11 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.2 Pre Releases
 
+#### [5.2.0-beta.2] - April 11
+-  Support Observable (#1690)
+-  default width and height props (#1688)
+-  fix plot example in website (#1685)
+
 #### [5.2.0-beta.1] - April 11
 -  format changelog
 -  Move "fragile" carto pure JS example to wip folder (#1674)
