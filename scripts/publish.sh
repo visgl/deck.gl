@@ -6,7 +6,7 @@ set -e
 # beta or prod
 MODE=$1
 
-Check permission
+# Check permission
 ACCOUNT=`npm whoami`
 
 if [[ $ACCOUNT != 'deck.gl' ]]; then
