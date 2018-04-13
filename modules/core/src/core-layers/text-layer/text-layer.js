@@ -18,9 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '../../core';
+import {CompositeLayer, experimental} from '../../core';
+const {log} = experimental;
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
-import {makeFontAtlas} from './font-atlas';
+import {makeFontAtlas, DEFAULT_CHAR_SET} from './font-atlas';
 
 const TEXT_ANCHOR = {
   start: 1,
@@ -37,10 +38,13 @@ const ALIGNMENT_BASELINE = {
 const DEFAULT_FONT_FAMILY = 'Monaco, monospace';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
+const MISSING_CHAR_WIDTH = 32;
+
 const defaultProps = {
   fp64: false,
   sizeScale: 1,
   fontFamily: DEFAULT_FONT_FAMILY,
+  characterSet: DEFAULT_CHAR_SET,
 
   getText: x => x.text,
   getPosition: x => x.position,
@@ -54,13 +58,16 @@ const defaultProps = {
 
 export default class TextLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
-    if (oldProps.fontFamily !== props.fontFamily) {
-      this.updateFontAtlas(props.fontFamily);
+    const fontChanged =
+      oldProps.fontFamily !== props.fontFamily || oldProps.characterSet !== props.characterSet;
+
+    if (fontChanged) {
+      this.updateFontAtlas(props.fontFamily, props.characterSet);
     }
 
     if (
       changeFlags.dataChanged ||
-      oldProps.fontFamily !== props.fontFamily ||
+      fontChanged ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText))
     ) {
@@ -68,9 +75,9 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
-  updateFontAtlas(fontFamily) {
+  updateFontAtlas(fontFamily, characterSet) {
     const {gl} = this.context;
-    const {mapping, texture} = makeFontAtlas(gl, fontFamily);
+    const {mapping, texture} = makeFontAtlas(gl, {fontFamily, characterSet});
     this.setState({
       iconAtlas: texture,
       iconMapping: mapping
@@ -100,7 +107,13 @@ export default class TextLayer extends CompositeLayer {
 
         letters.forEach((letter, i) => {
           const datum = {text: letter, index: i, offsets, len: text.length, object: val};
-          offsetLeft += iconMapping[letter].width;
+          const frame = iconMapping[letter];
+          if (frame) {
+            offsetLeft += frame.width;
+          } else {
+            log.warn(`Missing character: ${letter}`)();
+            offsetLeft += MISSING_CHAR_WIDTH;
+          }
           offsets.push(offsetLeft);
           transformedData.push(datum);
         });

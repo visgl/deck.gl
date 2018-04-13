@@ -5,30 +5,37 @@ const GL_TEXTURE_WRAP_S = 0x2802;
 const GL_TEXTURE_WRAP_T = 0x2803;
 const GL_CLAMP_TO_EDGE = 0x812f;
 const MAX_CANVAS_WIDTH = 1024;
-const fontSize = 64;
-const padding = 4;
+const DEFAULT_FONT_SIZE = 64;
+const DEFAULT_PADDING = 4;
 
-const charList = [];
+export const DEFAULT_CHAR_SET = [];
 for (let i = 32; i < 128; i++) {
-  charList.push(String.fromCharCode(i));
+  DEFAULT_CHAR_SET.push(String.fromCharCode(i));
 }
 
-function setTextStyle(ctx, fontFamily) {
+function setTextStyle(ctx, fontFamily, fontSize) {
   ctx.font = `${fontSize}px ${fontFamily}`;
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'hanging';
   ctx.textAlign = 'left';
 }
 
-export function makeFontAtlas(gl, fontFamily) {
+export function makeFontAtlas(
+  gl,
+  {fontFamily, charList = DEFAULT_CHAR_SET, fontSize = DEFAULT_FONT_SIZE, padding = DEFAULT_PADDING}
+) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  setTextStyle(ctx, fontFamily);
+  setTextStyle(ctx, fontFamily, fontSize);
 
   // measure texts
   let row = 0;
   let x = 0;
   const mapping = {};
+
+  if (typeof charList === 'string') {
+    charList = charList.split('');
+  }
 
   charList.forEach(char => {
     const {width} = ctx.measureText(char);
@@ -49,7 +56,7 @@ export function makeFontAtlas(gl, fontFamily) {
   canvas.width = MAX_CANVAS_WIDTH;
   canvas.height = (row + 1) * (fontSize + padding);
 
-  setTextStyle(ctx, fontFamily);
+  setTextStyle(ctx, fontFamily, fontSize);
   for (const char in mapping) {
     ctx.fillText(char, mapping[char].x, mapping[char].y);
   }

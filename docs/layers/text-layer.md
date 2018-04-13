@@ -82,6 +82,10 @@ Whether the layer should be rendered in high-precision 64-bit mode.
 
 Specifies a prioritized list of one or more font family names and/or generic family names. Follow the specs for CSS [font-family](https://developer.mozilla.org/en-US/docs/Web/CSS/font-family).
 
+##### `characterSet` (Array | String, optional)
+
+Specifies a list of characters to include in the font. By default, only characters in the Ascii code range 32-128 are included. Use this prop if you need to display special characters.
+
 ### Text Alignment Options
 
 ##### `getTextAnchor` (Function, optional)
