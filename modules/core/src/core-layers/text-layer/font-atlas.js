@@ -22,7 +22,12 @@ function setTextStyle(ctx, fontFamily, fontSize) {
 
 export function makeFontAtlas(
   gl,
-  {fontFamily, charList = DEFAULT_CHAR_SET, fontSize = DEFAULT_FONT_SIZE, padding = DEFAULT_PADDING}
+  {
+    fontFamily,
+    characterSet = DEFAULT_CHAR_SET,
+    fontSize = DEFAULT_FONT_SIZE,
+    padding = DEFAULT_PADDING
+  }
 ) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -33,11 +38,7 @@ export function makeFontAtlas(
   let x = 0;
   const mapping = {};
 
-  if (typeof charList === 'string') {
-    charList = charList.split('');
-  }
-
-  charList.forEach(char => {
+  Array.from(characterSet).forEach(char => {
     const {width} = ctx.measureText(char);
     if (x + width > MAX_CANVAS_WIDTH) {
       x = 0;
