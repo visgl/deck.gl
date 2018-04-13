@@ -1,4 +1,4 @@
-import {document} from 'global';
+/* global document */
 import {Texture2D} from 'luma.gl';
 
 const GL_TEXTURE_WRAP_S = 0x2802;
