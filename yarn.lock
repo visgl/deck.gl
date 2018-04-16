@@ -5718,6 +5718,17 @@ math.gl@>=1.1.0-alpha.1, math.gl@>=1.1.0-alpha.2:
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
 
+math.gl@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-1.1.0.tgz#2cd4758051441151eefa2c8664f16c189d9b6747"
+  dependencies:
+    gl-mat3 "^1.0.0"
+    gl-mat4 "^1.1.4"
+    gl-quat "^1.0.0"
+    gl-vec2 "^1.0.0"
+    gl-vec3 "^1.0.3"
+    gl-vec4 "^1.0.1"
+
 md5-hex@^1.2.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/md5-hex/-/md5-hex-1.3.0.tgz#d2c4afe983c4370662179b8cad145219135046c4"
@@ -6822,6 +6833,12 @@ private@^0.1.6, private@^0.1.7, private@~0.1.5:
 probe.gl@>=1.0.0-alpha.11:
   version "1.0.0-alpha.11"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0-alpha.11.tgz#50e00a77fc770acb32430aca88a9d12ba113a5a7"
+  dependencies:
+    babel-runtime "^6.11.6"
+
+probe.gl@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0.tgz#b4dea632ffc8393d633e0980cb5026b5b7821400"
   dependencies:
     babel-runtime "^6.11.6"
 
@@ -8823,11 +8840,17 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-viewport-mercator-project@>=5.1.0-alpha.1, viewport-mercator-project@>=5.1.0-alpha.2:
+viewport-mercator-project@>=5.1.0-alpha.1:
   version "5.1.0-alpha.2"
   resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.1.0-alpha.2.tgz#797eaed537553d8ced70ede5bf2522ceb01e7f10"
   dependencies:
     math.gl ">=1.1.0-alpha.1"
+
+viewport-mercator-project@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.1.0.tgz#68bc5586988c2808d1456e1eff950d424eccec16"
+  dependencies:
+    math.gl "^1.1.0"
 
 vinyl-file@^2.0.0:
   version "2.0.0"
