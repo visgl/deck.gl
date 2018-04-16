@@ -46,7 +46,7 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
   await page.waitFor(waitingTime);
   await page.screenshot({path: 'new.png'});
 
-  const goldImageData = fs.readFileSync(`../test/golden-images/${folder}.png`);
+  const goldImageData = fs.readFileSync(`../../test/render/golden-images/examples/${folder}.png`);
   const goldImage = PNG.sync.read(goldImageData);
   const newImageData = fs.readFileSync('new.png');
   const newImage = PNG.sync.read(newImageData);
