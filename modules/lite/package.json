@@ -18,8 +18,7 @@
   "main": "dist/deckgl.min.js",
   "scripts": {
     "start": "webpack-dev-server --env.dev --progress --open",
-    "build": "webpack --config webpack.config.js",
-    "test": "echo \"PACKAGE HAS NO TEST\""
+    "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
     "@deck.gl/core": "^5.2.0-alpha.1"
