@@ -77,8 +77,9 @@ export default class TextLayer extends CompositeLayer {
 
   updateFontAtlas(fontFamily, characterSet) {
     const {gl} = this.context;
-    const {mapping, texture} = makeFontAtlas(gl, {fontFamily, characterSet});
+    const {scale, mapping, texture} = makeFontAtlas(gl, {fontFamily, characterSet});
     this.setState({
+      scale,
       iconAtlas: texture,
       iconMapping: mapping
     });
@@ -146,7 +147,7 @@ export default class TextLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, iconAtlas, iconMapping} = this.state;
+    const {data, scale, iconAtlas, iconMapping} = this.state;
 
     if (!iconMapping || !iconAtlas || !data) {
       return null;
@@ -183,7 +184,7 @@ export default class TextLayer extends CompositeLayer {
           getAnchorY: d => this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline(d.object)),
           getPixelOffset: d => getPixelOffset(d.object),
           fp64,
-          sizeScale,
+          sizeScale: sizeScale * scale,
           updateTriggers: {
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,
