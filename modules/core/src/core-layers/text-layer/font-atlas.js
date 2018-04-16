@@ -36,12 +36,16 @@ export function makeFontAtlas(
   // measure texts
   let row = 0;
   let x = 0;
-  let fontHeight = 0;
+  let fontHeight = null;
   const mapping = {};
 
   Array.from(characterSet).forEach(char => {
     const {width, fontBoundingBoxDescent} = ctx.measureText(char);
+    // check if fontHeight has been captured (same for all characters in the font)
     if (!fontHeight) {
+      // Advanced text metrics are only implemented in Chrome:
+      // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
+      // Fallback to height=fontSize
       fontHeight = fontBoundingBoxDescent || fontSize;
     }
 
