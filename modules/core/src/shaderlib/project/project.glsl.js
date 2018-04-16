@@ -140,7 +140,7 @@ vec4 project_to_clipspace(vec4 position) {
 
 // Returns a clip space offset that corresponds to a given number of **non-device** pixels
 vec4 project_pixel_to_clipspace(vec2 pixels) {
-  vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio;
+  vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio * 2.0;
   return vec4(offset * project_uFocalDistance, 0.0, 0.0);
 }
 `;
