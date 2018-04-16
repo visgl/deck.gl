@@ -40,6 +40,6 @@
     "mjolnir.js": "^1.0.0",
     "probe.gl": "^1.0.0",
     "seer": "^0.2.4",
-    "viewport-mercator-project": "^5.2.0"
+    "viewport-mercator-project": "^5.1.0"
   }
 }
