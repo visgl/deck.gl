@@ -10,10 +10,7 @@
     },
     "esm": {
       "presets": [
-        ["@babel/es2015", {modules: false}],
-        [ "minify", {
-          "mangle": false
-        }]
+        ["@babel/es2015", {modules: false}]
       ]
     },
     "es6": {
@@ -28,9 +25,6 @@
             "node": "8"
           },
           "modules": false
-        }],
-        [ "minify", {
-          "mangle": false
         }]
       ]
     },
