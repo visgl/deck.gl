@@ -16,7 +16,7 @@ for (let i = 32; i < 128; i++) {
 function setTextStyle(ctx, fontFamily, fontSize) {
   ctx.font = `${fontSize}px ${fontFamily}`;
   ctx.fillStyle = '#000';
-  ctx.textBaseline = 'hanging';
+  ctx.textBaseline = 'top';
   ctx.textAlign = 'left';
 }
 
@@ -36,26 +36,35 @@ export function makeFontAtlas(
   // measure texts
   let row = 0;
   let x = 0;
+  let fontHeight = null;
   const mapping = {};
 
   Array.from(characterSet).forEach(char => {
-    const {width} = ctx.measureText(char);
+    const {width, fontBoundingBoxDescent} = ctx.measureText(char);
+    // check if fontHeight has been captured (same for all characters in the font)
+    if (!fontHeight) {
+      // Advanced text metrics are only implemented in Chrome:
+      // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
+      // Fallback to height=fontSize
+      fontHeight = fontBoundingBoxDescent || fontSize;
+    }
+
     if (x + width > MAX_CANVAS_WIDTH) {
       x = 0;
       row++;
     }
     mapping[char] = {
       x,
-      y: row * (fontSize + padding),
+      y: row * (fontHeight + padding),
       width,
-      height: fontSize,
+      height: fontHeight,
       mask: true
     };
     x += width + padding;
   });
 
   canvas.width = MAX_CANVAS_WIDTH;
-  canvas.height = (row + 1) * (fontSize + padding);
+  canvas.height = (row + 1) * (fontHeight + padding);
 
   setTextStyle(ctx, fontFamily, fontSize);
   for (const char in mapping) {
@@ -63,6 +72,7 @@ export function makeFontAtlas(
   }
 
   return {
+    scale: fontHeight / fontSize,
     mapping,
     texture: new Texture2D(gl, {
       pixels: canvas,
