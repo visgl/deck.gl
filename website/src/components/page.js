@@ -44,12 +44,13 @@ class Page extends Component {
   }
 
   @autobind _resizeMap() {
-    const w = window.innerWidth;
-    const h = window.innerHeight;
-    this.props.updateMap({
-      width: w <= 768 ? w : w - 240,
-      height: h - 64
-    });
+    const page = document.querySelector('.page');
+    if (page) {
+      this.props.updateMap({
+        width: page.clientWidth,
+        height: page.clientHeight
+      });
+    }
   }
 
   @autobind _renderDemo(name, sourceLink) {

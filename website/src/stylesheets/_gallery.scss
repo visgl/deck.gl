@@ -241,11 +241,12 @@ code {
   .toc {
     position: absolute;
     width: 100vw;
+    max-width: initial;
     height: 0;
     z-index: 9;
 
     >div {
-      padding-top: 128px;
+      padding-top: 200px;
     }
   }
   .toc.open {

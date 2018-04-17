@@ -336,12 +336,18 @@ hr.short {
     }
   }
   header.open {
-    max-height: 192px;
+    max-height: 320px;
     .bg {
       opacity: 1 !important;
     }
     .links {
       display: block;
+      padding-top: $topbar-height / 8;
+      padding-bottom: $topbar-height / 4;
+
+      a {
+        line-height: $topbar-height * 3 / 4;
+      }
     }
   }
 
