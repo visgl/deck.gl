@@ -68,9 +68,7 @@ export default class WindDemo extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    const {
-      settings: {showParticles}
-    } = nextProps;
+    const {settings: {showParticles}} = nextProps;
     if (this.props.settings.showParticles !== showParticles) {
       if (showParticles) {
         this._particleAnimation.start();
