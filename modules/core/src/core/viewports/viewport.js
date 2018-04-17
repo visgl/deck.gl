@@ -26,9 +26,6 @@ import mat4_scale from 'gl-mat4/scale';
 import mat4_translate from 'gl-mat4/translate';
 import mat4_multiply from 'gl-mat4/multiply';
 import mat4_invert from 'gl-mat4/invert';
-import mat4_perspective from 'gl-mat4/perspective';
-
-const ZERO_VECTOR = [0, 0, 0];
 
 import {
   getDistanceScales,
@@ -40,7 +37,11 @@ import {
 
 import assert from '../utils/assert';
 
+const DEGREES_TO_RADIANS = Math.PI / 180;
+
 const IDENTITY = createMat4();
+
+const ZERO_VECTOR = [0, 0, 0];
 
 const DEFAULT_DISTANCE_SCALES = {
   pixelsPerMeter: [1, 1, 1],
@@ -80,7 +81,7 @@ export default class Viewport {
 
       // Projection matrix parameters, used if projectionMatrix not supplied
       orthographic = false,
-      fovyRadians = 75,
+      fovyRadians = 75 * DEGREES_TO_RADIANS,
       fovy,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
@@ -162,8 +163,6 @@ export default class Viewport {
       this.center = position;
       this.viewMatrix = viewMatrix;
     }
-
-    const DEGREES_TO_RADIANS = Math.PI / 180;
 
     this.projectionMatrix =
       projectionMatrix ||
@@ -382,8 +381,8 @@ export default class Viewport {
   _createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
     assert(Number.isFinite(fovyRadians));
     return orthographic
-      ? Matrix4.orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
-      : mat4_perspective([], fovyRadians, aspect, near, far);
+      ? new Matrix4().orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
+      : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
   }
 
   _initPixelMatrices() {
