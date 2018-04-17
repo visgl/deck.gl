@@ -250,7 +250,7 @@ export default class App extends PureComponent {
         }),
       new MapView({
         id: 'basemap',
-        y: multiview ? '50%' : 0,
+        y: multiview ? '50%' : '0%',
         height: multiview ? '50%' : '100%'
       })
     ];

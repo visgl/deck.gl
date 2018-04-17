@@ -1,11 +1,12 @@
 # View States
 
-A "view state" is a small object with a couple of properties (such as `position` and `direction`, or `longitude` and `latitude` etc) that describe a view point onto your data.
+A "view state" contains a position and direction. It is a small javascript object containing a couple of fields that specify a world position.
 
-For comparison:
-* a `View` instance contains information about how to visualize a "view state", i.e. where and how to draw.
-* The view state is typically initialized by the app on startup.
-* view states are usually updated automatically by controllers in response to user events (e.g. mouse click and move events etc) or transition events.
+View states are typically initialized by the application on startup to some initial position, and then normally updated automatically in response to user events (e.g. mouse click and move events etc) by deck.gl `Controller`s.
+
+## Using View States
+
+View States are used by [`View`](/docs/advanced/view.md) classes. The application's `View` instances contain information about how to visualize a "view state". The Views can be thought of as cameras positioned using your view states.
 
 
 ## View State Properties
@@ -20,6 +21,8 @@ There is not a single set of pre-defined view state parameters, but rather each 
 | Positional     | `position`, `direction`         |          |             |
 | Geo-positional | `position`, `direction`         | `longitude`, `latitude`, `zoom` | Optionally geospatially |anchored. |
 | Orbit          | `rotationX`, `rotationY`, ...   | -        | A custom set of view state parameters for the `OrbitController`. |
+
+Note that "projection related" parameters, such as field of view, near and far planes etc must be specified using `View` classes.
 
 
 ## About Geospatial Positioning
