@@ -145,6 +145,10 @@ export const showcasePages = generatePath([
   {
     name: 'Ascii Filter',
     external: 'http://pessimistress.github.io/ascii/'
+  },
+  {
+    name: 'Kepler.gl',
+    external: 'https://uber.github.io/kepler.gl/'
   }
 ]);
 
