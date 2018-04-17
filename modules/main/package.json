@@ -23,7 +23,7 @@
   ],
   "scripts": {
     "build": "./build.sh",
-    "test": "echo \"PACKAGE HAS NO TEST\""
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "@deck.gl/core": "^5.2.0-alpha.1",
