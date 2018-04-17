@@ -23,6 +23,22 @@ For Earlier Beta Releases see below
 
 ### deck.gl v5.2 Pre Releases
 
+#### [5.2.0-rc.1] - April 11
+- Bump math.gl (#1708)
+- format code style
+- Fix inverted FirstPersonView (#1707)
+- fix version embedding (#1703)
+- Prettier
+
+#### [5.2.0-beta.3] - April 11
+- Fixes: disable babel-minify, check if stats object is provided (#1701)
+- Fix font bounding box (#1698)
+- remove missing import global (#1697)
+- fix publish script typo (#1692)
+- Support characterSet prop in TextLayer (#1693)
+- update dependency versions
+- update change log
+
 #### [5.2.0-beta.2] - April 11
 -  Support Observable (#1690)
 -  default width and height props (#1688)
