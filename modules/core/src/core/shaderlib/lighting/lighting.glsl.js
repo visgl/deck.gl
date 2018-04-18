@@ -21,7 +21,7 @@
 // lighting
 
 export default `\
-#define NUM_OF_LIGHTS 2
+#define MAX_NUM_OF_LIGHTS 16
 
 // TODO these should be using lighting_ prefix
 uniform vec3 lighting_lightPositions[16];
@@ -29,6 +29,7 @@ uniform vec2 lighting_lightStrengths[16];
 uniform float lighting_ambientRatio;
 uniform float lighting_diffuseRatio;
 uniform float lighting_specularRatio;
+uniform int lighting_numberOfLights;
 
 float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worldspace) {
   float lightWeight = 0.0;
@@ -38,7 +39,10 @@ float lighting_getLightWeight(vec3 position_worldspace_vec3, vec3 normals_worlds
   vec3 camera_pos_worldspace = project_uCameraPosition;
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
 
-  for (int i = 0; i < NUM_OF_LIGHTS; i++) {
+  for (int i = 0; i < MAX_NUM_OF_LIGHTS; i++) {
+    if (i >= lighting_numberOfLights) {
+      break;
+    }
     vec3 light_position_worldspace = lighting_lightPositions[i];
     vec3 light_direction = normalize(light_position_worldspace - position_worldspace_vec3);
 

@@ -38,7 +38,7 @@ The `lighting` module extracts uniforms from the `lightSettings` prop on layers 
 - `coordinateSystem` (Number) - The coordinate system in which the light positions are specified. Default `COORDINATE_SYSTEM.LNGLAT`.
 - `coordinateOrigin` (Number) - The coordinate origin to which the light positions are specified. Default `[0, 0, 0]`.
 - `modelMatrix` (Number) - The transform matrix of the light positions. Default `null`.
-- `ambientRatio` (Number) - The ambient ratio of the lights. Default `0.05`.
+- `ambientRatio` (Number) - The ambient ratio of the lights. Default `0.4`.
 - `diffuseRatio` (Number) - The diffuse ratio of the lights. Default `0.6`.
 - `specularRatio` (Number) - The specular ratio of the lights. Default `0.8`.
 
