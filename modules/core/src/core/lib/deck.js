@@ -304,7 +304,8 @@ export default class Deck {
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
       eventManager: new EventManager(canvas),
-      stats: this.stats
+      stats: this.stats,
+      useDevicePixels: this.props.useDevicePixels
     });
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
