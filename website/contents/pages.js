@@ -16,7 +16,7 @@ function generatePath(tree, parentPath = '', depth = 0) {
 
   tree.depth = depth;
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z'0-9]+|\d+)/g)
+    tree.path = tree.name.match(/(GeoJson|3D|API|[A-Z]?[a-z'0-9\.]+|\d+)/g)
       .join('-').toLowerCase().replace(/[^\w-]/g, '');
   }
   if (tree.children) {
@@ -303,7 +303,7 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'deck.gl API',
+    name: 'deck.gl API Reference',
     children: [
       {
         name: 'AttributeManager',
@@ -475,7 +475,7 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'deck.gl-test-utils API',
+    name: 'test-utils API Reference',
     children: [
       {
         name: 'testLayer',
