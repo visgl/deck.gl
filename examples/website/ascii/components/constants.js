@@ -1,5 +1,7 @@
 import React from 'react';
 
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/ascii';
+
 /* global window */
 function getWebcamStream(callback) {
   window.navigator.mediaDevices
@@ -13,8 +15,7 @@ export const MAX_SIZE_SCALE = 4;
 
 export const VIDEOS = [
   {
-    source:
-      'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/ascii/Sintel_Opening.mp4',
+    source: `${DATA_URL}/Sintel_Opening.mp4`,
     name: 'Sintel',
     description: (
       <span>
@@ -24,8 +25,7 @@ export const VIDEOS = [
     )
   },
   {
-    source:
-      'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/ascii/Felix_BoldKingCole.mp4',
+    source: `${DATA_URL}/Felix_BoldKingCole.mp4`,
     name: 'Felix the Cat in Bold King Cole',
     description: (
       <span>

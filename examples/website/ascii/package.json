@@ -5,9 +5,8 @@
     "build": "webpack --env.local -p --output-filename bundle.js"
   },
   "dependencies": {
-    "deck.gl": ">=5.2.0-alpha.7",
-    "deck.gl-layers": "^0.0.23",
-    "luma.gl": ">=5.2.0-alpha.11",
+    "deck.gl": ">=5.2.0-beta.1",
+    "luma.gl": ">=5.2.0-beta.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
