@@ -234,7 +234,7 @@ code {
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .flexbox--row {
     display: block;
   }
@@ -246,7 +246,7 @@ code {
     z-index: 9;
 
     >div {
-      padding-top: 200px;
+      padding-top: 220px;
     }
   }
   .toc.open {

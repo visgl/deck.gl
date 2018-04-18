@@ -139,16 +139,20 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'Kepler.gl',
+    external: 'https://uber.github.io/kepler.gl/'
+  },
+  {
     name: 'Wind Map',
     external: 'http://uber.github.io/deck.gl/examples/wind'
   },
   {
-    name: 'Ascii Filter',
+    name: 'Ascii Video Player',
     external: 'http://pessimistress.github.io/ascii/'
   },
   {
-    name: 'Kepler.gl',
-    external: 'https://uber.github.io/kepler.gl/'
+    name: 'Minecraft Chunk Viewer',
+    external: 'http://pessimistress.github.io/minecraft/'
   }
 ]);
 
