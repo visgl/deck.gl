@@ -21,10 +21,18 @@ const CONFIG = {
         include: [resolve('.')],
         exclude: [/node_modules/],
         options: {
-          objectAssign: 'Object.assign'
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
         }
       }
     ]
+  },
+
+  node: {
+    __dirname: true
   },
 
   resolve: {
@@ -38,5 +46,6 @@ const CONFIG = {
   plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
-// This line enables bundling against src in this repo rather than installed deck.gl module
+// DELETE THIS LINE WHEN COPYING THIS EXAMPLE FOLDER OUTSIDE OF DECK.GL
+// It enables bundling against src in this repo rather than installed deck.gl module
 module.exports = env => (env ? require('../../webpack.config.local')(CONFIG)(env) : CONFIG);

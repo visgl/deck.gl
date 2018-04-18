@@ -26,8 +26,12 @@ const console = require('console');
 const process = require('process');
 
 const fs = require('fs');
+const path = require('path');
 const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
+
+const LIB_DIR = path.resolve(__dirname, '..');
+const EXAMPLES_DIR = path.resolve(LIB_DIR, 'examples/website');
 
 function printResult(diffRatio, threshold) {
   return diffRatio <= threshold
@@ -46,7 +50,9 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
   await page.waitFor(waitingTime);
   await page.screenshot({path: 'new.png'});
 
-  const goldImageData = fs.readFileSync(`../../test/render/golden-images/examples/${folder}.png`);
+  const goldImageData = fs.readFileSync(
+    path.resolve(LIB_DIR, 'test/render/golden-images/examples/', `${folder}.png`)
+  );
   const goldImage = PNG.sync.read(goldImageData);
   const newImageData = fs.readFileSync('new.png');
   const newImage = PNG.sync.read(newImageData);
@@ -107,14 +113,13 @@ function checkMapboxToken() {
 function changeFolder(folder) {
   console.log('--------------------------');
   console.log(`Begin to test ${folder}`);
-  process.chdir(`./${folder}`);
+  process.chdir(path.resolve(EXAMPLES_DIR, folder));
 }
 
 async function runTestExample(folder) {
   changeFolder(folder);
   const child = await yarnAndLaunchWebpack();
   const valid = await validateWithWaitingTime(child, folder, 5000, 0.01);
-  process.chdir('../');
   if (!valid) {
     process.exit(1); //eslint-disable-line
   }
@@ -122,7 +127,6 @@ async function runTestExample(folder) {
 
 (async () => {
   checkMapboxToken();
-  process.chdir('./examples');
 
   await runTestExample('3d-heatmap');
   await runTestExample('arc');
@@ -136,5 +140,5 @@ async function runTestExample(folder) {
   await runTestExample('scatterplot');
   await runTestExample('screen-grid');
   await runTestExample('tagmap');
-  await runTestExample('without-map');
+  // await runTestExample('without-map');
 })();
