@@ -1,6 +1,6 @@
 # RenderTest (Test Automation Class)
 
-Uses a [`SceneRenderer`](./docs/api-reference/test-utils/scene-renderer.md) to render a series of layer views in succession, comparing the output of each against a "golden image".
+Uses a [`SceneRenderer`](/docs/api-reference/test-utils/scene-renderer.md) to render a series of layer views in succession, comparing the output of each against a "golden image".
 
 
 ## Usage
@@ -89,6 +89,6 @@ Test cases are an array of objects describing each scene to be rendered. The fol
 * `layers`
 * `referenceImage`
 
-For more information see the scene format description in [`SceneRenderer`](./docs/api-reference/test-utils/node-test-driver.md).
+For more information see the scene format description in [`SceneRenderer`](/docs/api-reference/test-utils/scene-renderer.md).
 
 
