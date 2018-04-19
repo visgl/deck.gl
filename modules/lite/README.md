@@ -16,7 +16,7 @@ To use with Mapbox:
 
 ```js
 new deck.DeckGL({
-  mapboxAccessToken: '<your_token_here>',
+  mapboxApiAccessToken: '<your_token_here>',
   longitude: -122.45,
   latitude: 37.8,
   zoom: 12,
