@@ -21,11 +21,11 @@
 // lighting
 
 export default `\
-#define MAX_NUM_OF_LIGHTS 16
+#define MAX_NUM_OF_LIGHTS 5
 
 // TODO these should be using lighting_ prefix
-uniform vec3 lighting_lightPositions[16];
-uniform vec2 lighting_lightStrengths[16];
+uniform vec3 lighting_lightPositions[MAX_NUM_OF_LIGHTS];
+uniform vec2 lighting_lightStrengths[MAX_NUM_OF_LIGHTS];
 uniform float lighting_ambientRatio;
 uniform float lighting_diffuseRatio;
 uniform float lighting_specularRatio;

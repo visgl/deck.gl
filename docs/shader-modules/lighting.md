@@ -32,7 +32,7 @@ The `lighting` module extracts uniforms from the `lightSettings` prop on layers 
 
 `lightSettings` fields:
 
-- `numberOfLights` (Number) - The number of lights, default `1`. Max number of lights is `16`.
+- `numberOfLights` (Number) - The number of lights, default `1`. Max number of lights is `5`.
 - `lightsPosition` (Array) - The positions of lights specified as `[x, y, z]`, in a flattened array. The length should be `3 x numberOfLights`.
 - `lightsStrength` (Array) - The strength of lights specified as `[x, y]`, in a flattened array. The length should be `2 x numberOfLights`.
 - `coordinateSystem` (Number) - The coordinate system in which the light positions are specified. Default `COORDINATE_SYSTEM.LNGLAT`.
