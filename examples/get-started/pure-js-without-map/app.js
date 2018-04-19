@@ -1,5 +1,5 @@
 /* global fetch */
-import {Deck, GeoJsonLayer, MapController} from 'deck.gl';
+import {Deck, GeoJsonLayer, MapController} from '@deck.gl/core';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const GEOJSON =
