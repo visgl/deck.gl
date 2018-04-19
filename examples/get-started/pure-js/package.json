@@ -5,9 +5,8 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "d3-request": "^1.0.5",
-    "deck.gl": ">=5.2.0-alpha.7",
-    "mapbox-gl": "0.38.0",
+    "deck.gl": ">=5.2.0-rc.1",
+    "mapbox-gl": "~0.44.2",
     "stats.js": "^0.17.0"
   },
   "devDependencies": {
