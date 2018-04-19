@@ -1,13 +1,12 @@
 {
   "scripts": {
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "d3-request": "^1.0.5",
-    "deck.gl": ">=5.2.0-alpha.7",
-    "mapbox-gl": "0.38.0",
+    "@deck.gl/core": "^5.2.0-rc.1",
+    "mapbox-gl": "~0.44.2",
     "stats.js": "^0.17.0"
   },
   "devDependencies": {
