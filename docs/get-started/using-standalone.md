@@ -1,110 +1,79 @@
-# Using deck.gl without React (Experimental)
+# Using deck.gl without React
 
 The deck.gl core library and layers have no dependencies on React or Mapbox GL and can be used by any JavaScript application.
 
-It is possible to use deck.gl without react-map-gl. In this case the application will have to implement its own event handling (to zoom and pan the viewport, and forward hover and click events to deck.gl. Note that all deck.gl examples currently rely on react-map-gl's event handling.
+Our [examples](https://github.com/uber/deck.gl/tree/5.2-release/examples/get-started) contains a few "pure JS" templates that serve as a starting point for your application.
 
 
-## Example Code
+## Using @deck.gl/core
 
-The deck.gl [Deck](/docs/api-reference/layer-manager.md) class is handles updates, drawing and picking for a set of layers.
+`@deck.gl/core` is a submodule of deck.gl that contains no React dependency.
+
+The [Deck](/docs/api-reference/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
 ```
-npm install deck.gl-core
+npm install @deck.gl/core
 ```
 
 ```js
-/* global window, fetch */
-import {experimental, GeoJsonLayer} from 'deck.gl';
-const {Deck, MapControllerJS} = experimental;
+import {Deck, ScatterplotLayer, MapController} from '@deck.gl/core';
 
-// source: Natural Earth http://www.naturalearthdata.com/
-// via geojson.xyz
-const GEOJSON =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
-
-const INITIAL_VIEWPORT = {
-  latitude: 40,
-  longitude: -100,
-  zoom: 3,
-  bearing: 0,
-  pitch: 60
+const INITIAL_VIEW_STATE = {
+  latitude: 37.78,
+  longitude: -122.45,
+  zoom: 3
 };
 
-class App {
-  constructor(props) {
-    this.state = {
-      viewport: INITIAL_VIEWPORT,
-      width: 500,
-      height: 500,
-      data: null
-    };
+const deckgl = new Deck({
+  canvas: 'my-deck-canvas',
+  viewState: INITIAL_VIEW_STATE,
+  controller: MapController,
+  onViewportChange,
+  layers: [
+    new ScatterplotLayer({
+      data: [
+        {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
+      ]
+    })
+  ]
+});
 
-    fetch(GEOJSON)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
-
-    window.addEventListener('load', this.onLoad.bind(this));
-    window.addEventListener('resize', this.onResize.bind(this));
-  }
-
-  setState(state) {
-    Object.assign(this.state, state);
-    this.updateLayers();
-  }
-
-  updateLayers() {
-    if (this.deckgl) {
-      this.deckgl.setProps({
-        layers: [
-          new GeoJsonLayer({
-            data: this.state.data,
-            stroked: true,
-            filled: true,
-            lineWidthMinPixels: 2,
-            getLineColor: () => [255, 255, 255],
-            getFillColor: () => [200, 200, 200]
-          })
-        ]
-      });
-    }
-  }
-
-  onResize() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  onViewportChange(viewport) {
-    this.setState({viewport});
-    this.deckgl.setProps(viewport);
-    this.controller.setProps(viewport);
-  }
-
-  onLoad() {
-    this.onResize();
-
-    const {viewport, width, height} = this.state;
-
-    this.deckgl = new Deck({
-      ...viewport,
-      width,
-      height,
-      debug: true,
-      layers: []
-    });
-
-    this.controller = new MapControllerJS({
-      canvas: this.deckgl.canvas,
-      ...viewport,
-      width,
-      height,
-      onViewportChange: this.onViewportChange.bind(this)
-    });
-  }
+function onViewportChange(viewport) {
+  deckgl.setProps({viewState: viewport});
 }
-
-new App(); // eslint-disable-line
 ```
+
+## Using the Scripting API
+
+deck.gl also offers a standalone bundled version of the library - a native JavaScript scripting interface like that of d3.js. You can now use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://www.obervablehq.com). This effort aims to make it easier for designers, creative coders and data scientists everywhere to leverage WebGL for interactive visualizations.
+
+To use deck.gl in a scripting environment, include the standalone version in a `script` tag:
+```html
+<script src="https://unpkg.com/deck.gl@latest/deckgl.min.js"></script>
+<!-- optional if mapbox base map is needed -->
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+````
+
+It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
+
+The scripting API's [DeckGL](docs/api-reference/standalone/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
+
+```js
+new deck.DeckGL({
+  mapboxApiAccessToken: '<your_token_here>',
+  mapStyle: 'mapbox://styles/mapbox/light-v9',
+  longitude: -122.45,
+  latitude: 37.8,
+  zoom: 12,
+  layers: [
+    new deck.ScatterplotLayer({
+      data: [
+        {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
+      ]
+    })
+  ]
+});
+```
+
+Check our codepen [showcase](https://codepen.io/vis-gl) and [observable profile](https://beta.observablehq.com/@pessimistress) for examples.

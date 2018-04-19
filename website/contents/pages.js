@@ -177,7 +177,7 @@ export const docPages = generatePath([
       },
       {
         name: 'Using Standalone',
-        content: getDocUrl('advanced/using-standalone.md')
+        content: getDocUrl('get-started/using-standalone.md')
       },
       {
         name: 'Using With React',
