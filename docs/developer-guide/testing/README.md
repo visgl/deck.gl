@@ -17,7 +17,7 @@ or
 yarn add -D @deck.gl/test-utils
 ```
 
-You typically want the major and minor version of `@deck.gl/test-utils` to match the version of `deck.gl` that you are using. i.e. you want to use `5.2.x` and `5.2.y` together. Check and if necessary edit your `package.json` to make sure things align.
+You typically want the major and minor version of ` @deck.gl/test-utils` to match the version of `deck.gl` that you are using. i.e. you want to use `5.2.x` and `5.2.y` together. Check and if necessary edit your `package.json` to make sure things align.
 
 
 ## Layer Update Tests
