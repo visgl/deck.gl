@@ -1,10 +1,11 @@
 {
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "deck.gl": "^5.2.0-rc.1"
+    "@deck.gl/core": "^5.2.0-rc.1"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

@@ -18,12 +18,8 @@ const deckgl = new Deck({
   height: '100%',
   viewState: INITIAL_VIEW_STATE,
   controller: MapController,
-  onViewportChange
+  onViewportChange: viewState => deckgl.setProps({viewState})
 });
-
-function onViewportChange(viewport) {
-  deckgl.setProps({viewState: viewport});
-}
 
 fetch(GEOJSON)
   .then(resp => resp.json())

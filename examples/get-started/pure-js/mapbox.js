@@ -1,7 +1,7 @@
 import mapboxgl from 'mapbox-gl';
 
 /**
- * A simple mapbox-gl wrapper that offers a deck-like interface
+ * A simple mapbox-gl wrapper that works with deck props
  */
 export default class MapboxMap {
   constructor(props) {
