@@ -234,18 +234,19 @@ code {
   }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .flexbox--row {
     display: block;
   }
   .toc {
     position: absolute;
     width: 100vw;
+    max-width: initial;
     height: 0;
     z-index: 9;
 
     >div {
-      padding-top: 128px;
+      padding-top: 220px;
     }
   }
   .toc.open {

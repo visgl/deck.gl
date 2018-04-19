@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import GeoJsonOverlay from '../../../../examples/geojson/deckgl-overlay';
+import GeoJsonOverlay from 'website-examples/geojson/deckgl-overlay';
 
 const COLOR_SCALE = [
   // negative

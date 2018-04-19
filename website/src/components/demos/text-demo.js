@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import TagmapOverlay from '../../../../examples/tagmap/deckgl-overlay';
+import TagmapOverlay from 'website-examples/tagmap/deckgl-overlay';
 
 function stopPropagation(evt) {
   evt.stopPropagation();

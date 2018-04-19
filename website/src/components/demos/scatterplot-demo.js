@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ScatterplotOverlay from '../../../../examples/scatterplot/deckgl-overlay';
+import ScatterplotOverlay from 'website-examples/scatterplot/deckgl-overlay';
 
 export default class ScatterPlotDemo extends Component {
 

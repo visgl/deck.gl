@@ -49,6 +49,7 @@ const COMMON_CONFIG = {
     // Prefer root dependencies (dev) over local (prod)
     modules: [resolve('../node_modules'), resolve('./node_modules')],
     alias: {
+      'website-examples': resolve('../examples/website'),
       // Website is using React 15
       react: resolve('.', './node_modules/react'),
       'react-dom': resolve('.', './node_modules/react-dom'),

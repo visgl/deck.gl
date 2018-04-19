@@ -1,7 +1,9 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import IconOverlay from '../../../../examples/icon/deckgl-overlay';
+import IconOverlay from 'website-examples/icon/deckgl-overlay';
+
+import autobind from 'autobind-decorator';
 
 function stopPropagation(evt) {
   evt.stopPropagation();
@@ -66,7 +68,12 @@ export default class IconDemo extends Component {
     };
   }
 
+  @autobind
   _onHover({x, y, object}) {
+    if (this.state.expanded) {
+      return;
+    }
+
     const {viewport, params} = this.props;
     const z = Math.floor(viewport.zoom);
     const showCluster = params.cluster.value;
@@ -84,8 +91,22 @@ export default class IconDemo extends Component {
     this.setState({x, y, hoveredItems, expanded: false});
   }
 
+  @autobind
   _onClick() {
     this.setState({expanded: true});
+  }
+
+  @autobind
+  _onPopupLoad(ref) {
+    if (ref) {
+      // React events are triggered after native events
+      ref.addEventListener('wheel', stopPropagation);
+    }
+  }
+
+  @autobind
+  _onClosePopup() {
+    this.setState({expanded: false, hoveredItems: null});
   }
 
   _renderhoveredItems() {
@@ -99,7 +120,8 @@ export default class IconDemo extends Component {
       return (
         <div className="tooltip interactive"
              style={{left: x, top: y}}
-             onWheel={stopPropagation}
+             ref={this._onPopupLoad}
+             onMouseLeave={this._onClosePopup}
              onMouseDown={stopPropagation}>
           {
             hoveredItems.map(({name, year, mass, class: meteorClass}) => {
@@ -140,8 +162,8 @@ export default class IconDemo extends Component {
           iconAtlas="images/location-icon-atlas.png"
           iconMapping={data[1]}
           showCluster={params.cluster.value}
-          onHover={this._onHover.bind(this)}
-          onClick={this._onClick.bind(this)} />
+          onHover={this._onHover}
+          onClick={this._onClick} />
 
         { this._renderhoveredItems() }
       </div>

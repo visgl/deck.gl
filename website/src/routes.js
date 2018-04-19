@@ -8,7 +8,7 @@ import Home from './components/home';
 import Gallery from './components/gallery';
 import Page from './components/page';
 
-import {examplePages, docPages} from '../contents/pages';
+import {examplePages, showcasePages, docPages} from '../contents/pages';
 
 const appHistory = useRouterHistory(createHashHistory)({queryKey: false});
 
@@ -54,6 +54,7 @@ export default () => (
     <Route path="/" component={App}>
       <IndexRoute component={Home} />
       {renderRouteGroup('examples', examplePages)}
+      {renderRouteGroup('showcases', showcasePages)}
       {renderRouteGroup('documentation', docPages)}
       <Redirect from="*" to="/" />
     </Route>

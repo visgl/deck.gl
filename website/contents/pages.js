@@ -16,7 +16,7 @@ function generatePath(tree, parentPath = '', depth = 0) {
 
   tree.depth = depth;
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|API|([A-Z]|^)[a-z'0-9]+|\d+)/g)
+    tree.path = tree.name.match(/(GeoJson|3D|API|[A-Z]?[a-z'0-9\.]+|\d+)/g)
       .join('-').toLowerCase().replace(/[^\w-]/g, '');
   }
   if (tree.children) {
@@ -45,56 +45,60 @@ export const examplePages = generatePath([
         name: 'LineLayer',
         content: {
           demo: 'LineDemo',
-          code: getCodeUrl('examples/line')
+          code: getCodeUrl('examples/website/line')
         }
       },
       {
         name: 'HexagonLayer',
         content: {
           demo: 'HeatmapDemo',
-          code: getCodeUrl('examples/3d-heatmap')
+          code: getCodeUrl('examples/website/3d-heatmap')
         }
       },
       {
         name: 'IconLayer',
         content: {
           demo: 'IconDemo',
-          code: getCodeUrl('examples/icon')
+          code: getCodeUrl('examples/website/icon')
         }
       },
       {
         name: 'GeoJsonLayer',
         content: {
           demo: 'GeoJsonDemo',
-          code: getCodeUrl('examples/geojson')
+          code: getCodeUrl('examples/website/geojson')
         }
       },
       {
         name: 'ScreenGridLayer',
         content: {
           demo: 'ScreenGridDemo',
-          code: getCodeUrl('examples/screen-grid')
+          code: getCodeUrl('examples/website/screen-grid')
         }
       },
       {
         name: 'ArcLayer',
         content: {
           demo: 'ArcDemo',
-          code: getCodeUrl('examples/arc')
+          code: getCodeUrl('examples/website/arc')
         }
       },
       {
         name: 'ScatterplotLayer',
         content: {
           demo: 'ScatterplotDemo',
-          code: getCodeUrl('examples/scatterplot')
+          code: getCodeUrl('examples/website/scatterplot')
         }
+      },
+      {
+        name: '3D Indoor Scan',
+        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
       },
       {
         name: 'TextLayer',
         content: {
           demo: 'TextDemo',
-          code: getCodeUrl('examples/text-layer')
+          code: getCodeUrl('examples/website/text-layer')
         }
       }
     ]
@@ -107,42 +111,48 @@ export const examplePages = generatePath([
         name: 'Brushing Layer',
         content: {
           demo: 'BrushingDemo',
-          code: getCodeUrl('examples/brushing')
+          code: getCodeUrl('examples/website/brushing')
         }
       },
       {
         name: 'Trip Routes',
         content: {
           demo: 'TripsDemo',
-          code: getCodeUrl('examples/trips')
+          code: getCodeUrl('examples/website/trips')
         }
       },
-      {
-        name: 'Wind Map',
-        external: 'http://uber.github.io/deck.gl/examples/wind'
-      }
-    ]
-  },
-  {
-    name: 'Beyond Maps',
-    expanded: true,
-    children: [
       {
         name: '3D Surface Explorer',
         content: {
           demo: 'PlotDemo',
-          code: getCodeUrl('examples/plot')
+          code: getCodeUrl('examples/website/plot')
         }
-      },
-      {
-        name: '3D Indoor Scan',
-        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
-      },
-      {
-        name: '3D Model (Point Cloud)',
-        external: 'http://uber.github.io/deck.gl/examples/point-cloud-ply'
       }
     ]
+  }
+]);
+
+
+export const showcasePages = generatePath([
+  {
+    name: 'Overview',
+    content: 'markdown/showcase.md'
+  },
+  {
+    name: 'Kepler.gl',
+    external: 'https://uber.github.io/kepler.gl/'
+  },
+  {
+    name: 'Wind Map',
+    external: 'http://uber.github.io/deck.gl/examples/wind'
+  },
+  {
+    name: 'Ascii Video Player',
+    external: 'http://pessimistress.github.io/ascii/'
+  },
+  {
+    name: 'Minecraft Chunk Viewer',
+    external: 'http://pessimistress.github.io/minecraft/'
   }
 ]);
 
@@ -297,7 +307,7 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'deck.gl API',
+    name: 'deck.gl API Reference',
     children: [
       {
         name: 'AttributeManager',
@@ -469,7 +479,7 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'deck.gl-test-utils API',
+    name: 'test-utils API Reference',
     children: [
       {
         name: 'testLayer',
