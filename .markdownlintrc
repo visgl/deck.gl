@@ -1,0 +1,9 @@
+{
+  "default": true,
+  "colors": true,
+  "line-length": false,
+  "ul-style": { "style": "consistent" },
+  "no-inline-html": false,
+  "no-hard-tabs": false,
+  "whitespace": false
+}
