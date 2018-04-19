@@ -7,7 +7,7 @@ Uses a [`SceneRenderer`](./docs/api-reference/test-utils/scene-renderer.md) to r
 
 In the test script that is to run in the browser: set up and run a render test
 ```js
-import {RenderTest} from 'deck.gl-test-utils';
+import {RenderTest} from '@deck.gl/test-utils';
 import {TEST_CASES} from './test-cases';
 
 const renderTest = new RenderTest({
@@ -57,7 +57,7 @@ export default [{
 ### constructor
 
 ```js
-import {RenderTest} from 'deck.gl-test-utils';
+import {RenderTest} from '@deck.gl/test-utils';
 const renderTest = new RenderTest({
   testCases, width, height, colorDeltaThreshold, testPassThreshold,
 });

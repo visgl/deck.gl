@@ -7,7 +7,7 @@ Example of layer unit tests using `tape`. Any unit test framework can be used.
 ```js
 import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl/test/data/geojson-data';
-import {testLayer} from 'deck.gl-test-utils';
+import {testLayer} from '@deck.gl/test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 

@@ -9,7 +9,7 @@ The lifecycle test drivers simplify testing of successive updates of a layer. Th
 ```js
 import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl/test/data/geojson-data';
-import {testLayer} from 'deck.gl-test-utils';
+import {testLayer} from '@deck.gl/test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 
