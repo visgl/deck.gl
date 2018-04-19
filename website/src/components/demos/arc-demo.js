@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ArcOverlay, {inFlowColors, outFlowColors} from '../../../../examples/arc/deckgl-overlay';
+import ArcOverlay, {inFlowColors, outFlowColors} from 'website-examples/arc/deckgl-overlay';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);

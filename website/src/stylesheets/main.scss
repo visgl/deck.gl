@@ -14,6 +14,7 @@ $topbar-height: 64px;
 
 @import 'home';
 @import 'gallery';
+@import 'showcase';
 
 body {
   font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important;
@@ -233,60 +234,6 @@ hr.short {
   background: $black;
   color: $white;
 }
-.thumb {
-  cursor: pointer;
-  position: relative;
-  width: 32%;
-  display: inline-block;
-  line-height: 0;
-
-  img {
-    transition: opacity 0.4s;
-  }
-  >div:before, >div:after {
-    display: block;
-    z-index: 1;
-    position: absolute;
-    transition: opacity 0.4s;
-    opacity: 0;
-    text-align: center;
-    pointer-events: none;
-    box-sizing: border-box;
-    line-height: 1.5;
-  }
-  >div:before {
-    content: attr(data-title);
-    font-size: 1.4em;
-    font-weight: 100;
-    width: 100%;
-    padding: 12%;
-    left: 0;
-    top: 50%;
-    transform: translateY(-50%);
-  }
-  >div:after {
-    font-size: 0.833em;
-    content: attr(data-name);
-    padding: 5%;
-    left: 0;
-    width: 80%;
-    height: 80%;
-    margin: 10%;
-    top: 0;
-    left: 0;
-    border: solid 2px;
-    @include linearGradientV(border-image, $primary, $secondary);
-    border-image-slice: 2;
-    box-sizing: border-box;
-  }
-  >div:hover img {
-    opacity: 0.2;
-  }
-  >div:hover:before, >div:hover:after {
-    opacity: 1;
-  }
-
-}
 
 .mapbox-tip {
   position: absolute;
@@ -305,17 +252,7 @@ hr.short {
   cursor: crosshair;
 }
 
-@media screen and (max-width: 1200px) {
-  .thumb {
-    width: 49%;
-  }
-}
-@media screen and (max-width: 800px) {
-  .thumb {
-    width: 100%;
-  }
-}
-@media screen and (max-width: 576px) {
+@media screen and (max-width: 768px) {
   .container {
     padding: 0 12px;
   }
@@ -336,12 +273,18 @@ hr.short {
     }
   }
   header.open {
-    max-height: 192px;
+    max-height: 320px;
     .bg {
       opacity: 1 !important;
     }
     .links {
       display: block;
+      padding-top: $topbar-height / 8;
+      padding-bottom: $topbar-height / 4;
+
+      a {
+        line-height: $topbar-height * 3 / 4;
+      }
     }
   }
 

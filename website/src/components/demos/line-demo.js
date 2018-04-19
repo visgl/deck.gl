@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import LineOverlay from '../../../../examples/line/deckgl-overlay';
+import LineOverlay from 'website-examples/line/deckgl-overlay';
 
 export default class LineDemo extends Component {
 

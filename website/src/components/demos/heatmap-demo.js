@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import HeatmapOverlay from '../../../../examples/3d-heatmap/deckgl-overlay';
+import HeatmapOverlay from 'website-examples/3d-heatmap/deckgl-overlay';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 
