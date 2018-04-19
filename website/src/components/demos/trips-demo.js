@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
-import TripsOverlay from '../../../../examples/trips/deckgl-overlay';
+import TripsOverlay from 'website-examples/trips/deckgl-overlay';
 
 export default class TripsDemo extends Component {
 

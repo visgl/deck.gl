@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import IconOverlay from '../../../../examples/icon/deckgl-overlay';
+import IconOverlay from 'website-examples/icon/deckgl-overlay';
 
 import autobind from 'autobind-decorator';
 

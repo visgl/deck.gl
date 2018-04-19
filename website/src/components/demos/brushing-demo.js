@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import BrushingOverlay, {inFlowColors, outFlowColors}
-  from '../../../../examples/brushing/deckgl-overlay';
+  from 'website-examples/brushing/deckgl-overlay';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);

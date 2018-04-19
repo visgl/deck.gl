@@ -45,49 +45,49 @@ export const examplePages = generatePath([
         name: 'LineLayer',
         content: {
           demo: 'LineDemo',
-          code: getCodeUrl('examples/line')
+          code: getCodeUrl('examples/website/line')
         }
       },
       {
         name: 'HexagonLayer',
         content: {
           demo: 'HeatmapDemo',
-          code: getCodeUrl('examples/3d-heatmap')
+          code: getCodeUrl('examples/website/3d-heatmap')
         }
       },
       {
         name: 'IconLayer',
         content: {
           demo: 'IconDemo',
-          code: getCodeUrl('examples/icon')
+          code: getCodeUrl('examples/website/icon')
         }
       },
       {
         name: 'GeoJsonLayer',
         content: {
           demo: 'GeoJsonDemo',
-          code: getCodeUrl('examples/geojson')
+          code: getCodeUrl('examples/website/geojson')
         }
       },
       {
         name: 'ScreenGridLayer',
         content: {
           demo: 'ScreenGridDemo',
-          code: getCodeUrl('examples/screen-grid')
+          code: getCodeUrl('examples/website/screen-grid')
         }
       },
       {
         name: 'ArcLayer',
         content: {
           demo: 'ArcDemo',
-          code: getCodeUrl('examples/arc')
+          code: getCodeUrl('examples/website/arc')
         }
       },
       {
         name: 'ScatterplotLayer',
         content: {
           demo: 'ScatterplotDemo',
-          code: getCodeUrl('examples/scatterplot')
+          code: getCodeUrl('examples/website/scatterplot')
         }
       },
       {
@@ -98,7 +98,7 @@ export const examplePages = generatePath([
         name: 'TextLayer',
         content: {
           demo: 'TextDemo',
-          code: getCodeUrl('examples/text-layer')
+          code: getCodeUrl('examples/website/text-layer')
         }
       }
     ]
@@ -111,21 +111,21 @@ export const examplePages = generatePath([
         name: 'Brushing Layer',
         content: {
           demo: 'BrushingDemo',
-          code: getCodeUrl('examples/brushing')
+          code: getCodeUrl('examples/website/brushing')
         }
       },
       {
         name: 'Trip Routes',
         content: {
           demo: 'TripsDemo',
-          code: getCodeUrl('examples/trips')
+          code: getCodeUrl('examples/website/trips')
         }
       },
       {
         name: '3D Surface Explorer',
         content: {
           demo: 'PlotDemo',
-          code: getCodeUrl('examples/plot')
+          code: getCodeUrl('examples/website/plot')
         }
       }
     ]

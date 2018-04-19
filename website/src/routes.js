@@ -54,7 +54,7 @@ export default () => (
     <Route path="/" component={App}>
       <IndexRoute component={Home} />
       {renderRouteGroup('examples', examplePages)}
-      {renderRouteGroup('showcase', showcasePages)}
+      {renderRouteGroup('showcases', showcasePages)}
       {renderRouteGroup('documentation', docPages)}
       <Redirect from="*" to="/" />
     </Route>
