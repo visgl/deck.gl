@@ -356,7 +356,9 @@ export default class AxesLayer extends Layer {
   }
 
   calculateInstanceNormals(attribute) {
-    const {ticks: [xTicks, zTicks, yTicks]} = this.state;
+    const {
+      ticks: [xTicks, zTicks, yTicks]
+    } = this.state;
 
     const normals = [
       xTicks.map(t => [1, 0, 0]),

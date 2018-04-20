@@ -201,7 +201,9 @@ class Root extends Component {
   }
 
   _updateDraggedElement(point, node) {
-    const {viewport: {width, height}} = this.state;
+    const {
+      viewport: {width, height}
+    } = this.state;
     const x = point[0] - width / 2;
     const y = point[1] - height / 2;
     this.setState({
