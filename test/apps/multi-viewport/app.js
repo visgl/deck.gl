@@ -6,8 +6,11 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from 'deck.gl';
 import {
   COORDINATE_SYSTEM,
-  PolygonLayer, PointCloudLayer,
-  MapView, FirstPersonView, ThirdPersonView,
+  PolygonLayer,
+  PointCloudLayer,
+  MapView,
+  FirstPersonView,
+  ThirdPersonView,
   experimental
 } from 'deck.gl';
 // deck.gl React components
@@ -19,7 +22,6 @@ const {
 } = experimental;
 
 import TripsLayer from '../../../examples/website/trips/trips-layer';
-
 
 // Source data CSV
 const DATA_URL = {
