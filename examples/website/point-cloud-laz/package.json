@@ -18,8 +18,10 @@
     "react-dom": "^16.2.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.1",
-    "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }
