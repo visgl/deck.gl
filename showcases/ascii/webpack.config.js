@@ -10,17 +10,12 @@ const CONFIG = {
   },
 
   devtool: 'source-map',
-  output: {
-    path: resolve('./dist'),
-    filename: 'bundle.js'
-  },
 
   module: {
     rules: [
       {
         // Compile ES2015 using buble
         test: /\.js$/,
-        // test: /^((?!graph-layer).)*\.js$/,
         loader: 'buble-loader',
         include: [resolve('.')],
         exclude: [/node_modules/],
@@ -33,4 +28,4 @@ const CONFIG = {
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
-module.exports = env => (env ? require('../../webpack.config.local')(CONFIG)(env) : CONFIG);
+module.exports = env => (env ? require('../../examples/webpack.config.local')(CONFIG)(env) : CONFIG);
