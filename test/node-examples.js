@@ -130,10 +130,8 @@ async function runTestExample(folder) {
 
   await runTestExample('3d-heatmap');
   await runTestExample('arc');
-  await runTestExample('bezier');
   await runTestExample('brushing');
   await runTestExample('geojson');
-  await runTestExample('graph');
   await runTestExample('icon');
   await runTestExample('line');
   await runTestExample('plot');
