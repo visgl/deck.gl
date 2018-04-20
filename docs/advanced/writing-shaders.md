@@ -60,11 +60,11 @@ Creating an animated layer can be as easy as having the application supply start
 
 ### Layer prop uniforms
 
-#### `float layerIndex`
+##### `float layerIndex`
 
 The layerIndex is a small integer that starts at zero and is incremented for each layer that is rendered. It can be used to add small offsets to the z coordinate of layers to resolve z-fighting between overlapping layers.
 
-#### `float opacity`
+##### `float opacity`
 
 In the fragment shader, multiply the fragment color with the opacity uniform.
 
