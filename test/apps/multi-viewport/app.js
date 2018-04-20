@@ -1,20 +1,25 @@
 /* global window, document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import {COORDINATE_SYSTEM, DeckGL, PolygonLayer, PointCloudLayer, experimental} from 'deck.gl';
-import TripsLayer from '../../trips/trips-layer';
 import {StaticMap} from 'react-map-gl';
 
+import DeckGL from 'deck.gl';
+import {
+  COORDINATE_SYSTEM,
+  PolygonLayer, PointCloudLayer,
+  MapView, FirstPersonView, ThirdPersonView,
+  experimental
+} from 'deck.gl';
 // deck.gl React components
 const {
   // Unified controller, together with state that determines interaction model
   FirstPersonState,
-  MapView,
-  FirstPersonView,
-  ThirdPersonView,
   ViewportController,
   LinearInterpolator
 } = experimental;
+
+import TripsLayer from '../../../examples/website/trips/trips-layer';
+
 
 // Source data CSV
 const DATA_URL = {
