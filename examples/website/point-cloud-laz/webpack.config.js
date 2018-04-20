@@ -1,7 +1,7 @@
 const {resolve} = require('path');
-const webpack = require('webpack');
 
 const CONFIG = {
+  mode: 'production',
   entry: {
     app: resolve('./app.js')
   },
@@ -22,8 +22,7 @@ const CONFIG = {
         }
       }
     ]
-  },
-  plugins: [new webpack.HotModuleReplacementPlugin()]
+  }
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
