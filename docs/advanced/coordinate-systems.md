@@ -31,6 +31,7 @@ The meter offset system on the other hand is very performant, but uses a lineari
 The choice of coordinate system can be specified per layer, meaning that different layers can have data with positions specified in "different" coordinate systems. If some care is taken, they can all be rendered and drawn at the same time, and correctly overlaid.
 
 An example of a use case where different coordinate systems are combined:
+
 * Render a layer showing 3D buildings could have vertices specified in longitudes and latitudes (simply because available building data sources tend to be encoded this way)
 * Render layer showing cars or pedestrians moving between the buildings with all positions specified using meter offsets from an anchor point somewhere in the city), because meter offsets are more natural encoding for this data.
 
@@ -55,7 +56,7 @@ Note: deck.gl always calculates a "meters per pixel" scale, allowing the applica
 
 ### The modelMatrix
 
-Note that deck.gl only supports **meter** offsets, with y axis aligned with map north. If you like to work in other units (feet, miles etc) or other orientations (y axis pointing south, or at an angle) you should define a `modelMatrix` and build a 4x4 transformation matrix (e.g. using the [math.gl]() library).
+Note that deck.gl only supports **meter** offsets, with y axis aligned with map north. If you like to work in other units (feet, miles etc) or other orientations (y axis pointing south, or at an angle) you should define a `modelMatrix` and build a 4x4 transformation matrix (e.g. using the [math.gl](https://uber-web.github.io/math.gl/#/documentation/overview) library).
 
 The `modelMatrix` is particularly potent when used with meter offset coordinates (and non-geospatial coordinates, of course) and is usually the right solution for pre-processing (flipping, rotating, scaling etc) your data, since these operations will be done essentially for free in the GPU, rather than having to lock up your main thread for seconds after each load to transform your "big data" using JavaScript on the CPU.
 

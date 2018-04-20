@@ -9,6 +9,7 @@ A composite layer is a special kind of layer that creates other layers. It enabl
 Sometimes an existing layer renders the right thing, but it would be desirable that it accepts another data format, had another interface (different accessors), or performed aggregation on its data.
 
 Examples could be:
+
 * Creating a `LASPointCloudLayer` that accepts `data` as an ArrayBuffer object that is loaded directly from a [LAS](https://www.asprs.org/committee-general/laser-las-file-format-exchange-activities.html)
   file, and convert it to the format that `PointCloudLayer` consumes.
 * Creating an `S2Layer` with an accessor that takes [S2](https://code.google.com/archive/p/s2-geometry-library/) tokens, uses the S2 library to calculates the polygons corresponding to that cell, and renders it using e.g. the PolygonLayer.
@@ -27,7 +28,7 @@ A common use case of composite layers is to augment the interface of existing la
 
 A composite layer can be created by extending the `CompositeLayer` class:
 
-```
+```js
 import {Layer, ScatterplotLayer} from 'deck.gl';
 
 class NiceScatterplotLayer extends CompositeLayer {
@@ -40,7 +41,7 @@ NiceScatterplotLayer.layerName = 'NiceScatterplotLayer';
 
 We will need to define the layer-specific properties of the new layer. In this example, the new layer's interface is almost identical to that of the ScatterplotLayer, except instead of one `getColor` accessor, you need two accessors `getStrokeColor` and `getFillColor`:
 
-```
+```js
 NiceScatterplotLayer.defaultProps = {
   ...ScatterplotLayer.defaultProps,
   getFillColor: d => [255, 255, 0],
@@ -56,7 +57,7 @@ By convention, the `id` of sublayers should be the `id` of the composite layer p
 
 In this example, the idea is to draw two ScatterplotLayers, one for fill and one on top for the outline:
 
-```
+```js
 class NiceScatterplotLayer extends CompositeLayer {
   renderLayers() {
     return [
@@ -83,7 +84,7 @@ We then want to map the user defined `getFillColor` and `getStrokeColor` accesso
 
 Finally, to make [`updateTrigger`](/docs/api-reference/layer.md#-updatetriggers-object-optional-) work when colors need to be recalculated, we will map respective accessor names to `getColor`.
 
-```
+```js
 class NiceScatterplotLayer extends CompositeLayer {
 
   renderLayers() {
@@ -124,7 +125,7 @@ By default, the composite layer passes the picking info from its sublayers as-is
 
 In this case, The composite layer may intercept the event info and modify it by implementing the `getPickingInfo()` method:
 
-```
+```js
 class AwesomeCompositeLayer extends CompositeLayer {
 
   ...
@@ -136,4 +137,5 @@ class AwesomeCompositeLayer extends CompositeLayer {
 
 }
 ```
+
 For more details, read about [how picking works](/docs/advanced/picking.md).

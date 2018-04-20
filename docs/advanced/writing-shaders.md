@@ -35,7 +35,7 @@ for more information.
 
 ### picking
 
-Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.1-release/src/shadertools/modules/picking).
+Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.2-release/src/shadertools/modules/picking).
 
 
 ## Shader Techniques and Ideas
@@ -71,9 +71,6 @@ In the fragment shader, multiply the fragment color with the opacity uniform.
 ### Shader Module Uniforms
 
 The luma.gl/deck.gl shader modules provide javascript functions to set their uniforms but the actual GLSL uniforms are typically considered implementation dependent. The intention is that you should use the public functions exposed by each shader module. That said, some uniforms from the [`project`](/docs/shader-modules/project.md) module are considered special and are documented.
-
-
-```
 
 ## Remarks
 

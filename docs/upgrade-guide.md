@@ -14,6 +14,7 @@
 ### Experimental Features
 
 Some experimental exports have been removed:
+
 * The experimental React controller components (`MapController` and `OrbitController`) have been removed. These are now replaced with JavaScript classes that can be used with the `Deck.controller` / `DeckGL.controller` property.
 
 
@@ -98,11 +99,13 @@ Be aware that deck.gl 4.1 bumps the luma.gl peer dependency from 3.0 to 4.0. The
 ### Layer Life Cycle Optimization
 
 * **shouldUpdateState** - deck.gl v4.1 contains additional optimizations of the layer lifecycle and layer diffing algorithms. Most of these changes are completely under the hood but one  visible change is that the default implementation of `Layer.shouldUpdate` no longer returns true if only the viewport has changed. This means that layers that need to update state in response to changes in screen space (viewport) will need to redefine `shouldUpdate`:
+
 ```js
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged; // default is now changeFlags.propsOrDataChanged;
   }
 ```
+
 Note that this change has already been done in all the provided deck.gl layers that are screen space based, including the `ScreenGridLayer` and the `HexagonLayer`.
 
 ### luma.gl `Model` class API change
@@ -123,7 +126,7 @@ new Model({gl, ...opts});
 
 Custom layers are **no longer expected** to call `assembleShaders` directly. Instead, the new `Model` class from luma.gl v4 will take shaders and the modules they are using as parameters and assemble shaders automatically.
 
-```
+```js
 // luma.gl v4
 const model = new Model(gl, {
   vs: VERTEX_SHADER,
@@ -166,12 +169,14 @@ These set of layers were deprecated in deck.gl v4, and are now removed in v5. Yo
 ### Changed Import: The `DeckGL` React component
 
 A small but breaking change that will affect all applications is that the 'deck.gl/react' import is no longer available. As of v4.0, the app is required to import deck.gl as follows:
-```
+
+```js
 // V4
 import DeckGL from 'deck.gl';
 // V3
 import DeckGL from 'deck.gl/react';
 ```
+
 While it would have been preferable to avoid this change, a significant modernization of the deck.gl build process and preparations for "tree-shaking" support combined to make it impractical to keep supporting the old import style.
 
 

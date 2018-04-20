@@ -3,24 +3,26 @@
 ## Constructor
 
 Viewport arguments
+
 * `width` - Width of viewport
 * `height` - Height of viewport
 
 Position and orientation
-* `position` - typically in meters from anchor point
-* `direction`,
 
+* `position` - typically in meters from anchor point
+* `direction`
 * `bearing` - Rotation around y axis
 * `pitch` - Rotation around x axis
 
 Geospatial "anchor"
+
 * `longitude`
 * `latitude`
 * `zoom`
-
 * `syncBearing` = true, // Whether to lock bearing to direction
 
 Constraints - simple movement limit
+
 * `bounds` - Bounding box of the world, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
 
 Internal Interaction states, required to calculate change during transform
@@ -35,19 +37,21 @@ Internal Interaction states, required to calculate change during transform
 * `startZoom` - Model state when the zoom operation first started
 
 
+## Methods
+
 Implements a viewState:
 
-##### getViewportProps()
+##### `getViewportProps()`
 
-##### getInteractiveState()
+##### `getInteractiveState()`
 
-##### panStart({pos})
+##### `panStart({pos})`
 
 Start panning
 
 `pos` (`[Number, Number]`) - position on screen where the pointer grabs
 
-##### pan({pos, startPos})
+##### `pan({pos, startPos})`
 
 Pan
 
@@ -57,19 +61,19 @@ Pan
 
   the start of the operation. Must be supplied of `panStart()` was not called
 
-##### panEnd()
+##### `panEnd()`
 
 End panning
 
 Must call if `panStart()` was called
 
-##### rotateStart({pos})
+##### `rotateStart({pos})`
 
 Start rotating
 
 `pos` (`[Number, Number]`) - position on screen where the center is
 
-##### rotate({deltaScaleX, deltaScaleY})
+##### `rotate({deltaScaleX, deltaScaleY})`
 
 Rotate
 
@@ -82,19 +86,19 @@ Rotate
   change to pitch. -1 sets to minPitch and 1 sets to maxPitch.
 
 
-##### rotateEnd()
+##### `rotateEnd()`
 
 End rotating
 
 Must call if `rotateStart()` was called
 
-##### zoomStart({pos})
+##### `zoomStart({pos})`
 
 Start zooming
 
 @param {[Number, Number]} pos - position on screen where the center is
 
-##### zoom({pos, startPos, scale})
+##### `zoom({pos, startPos, scale})`
 
 Zoom
 
@@ -109,20 +113,20 @@ Zoom
   relative scale.
     assert(scale > 0, '`scale` must be a positive number')
 
-##### zoomEnd()
+##### `zoomEnd()`
 
 End zooming
 
 Must call if `zoomStart()` was called
 
-##### moveLeft()
+##### `moveLeft()`
 
-##### moveRight()
+##### `moveRight()`
 
-##### moveForward()
+##### `moveForward()`
 
-##### moveBackward()
+##### `moveBackward()`
 
-##### zoomIn()
+##### `zoomIn()`
 
-##### zoomOut()
+##### `zoomOut()`

@@ -8,6 +8,7 @@ Note that if no `View` is specified, deck.gl will automatically create a `MapVie
 ## What is in a View?
 
 A view specifies
+
 * an `id`
 * relative extents (x, y, width, height)
 * projection mode and parameters (e.g. perspective vs. orthographic)
@@ -44,6 +45,7 @@ The `View` class allows the application full control of what projection to use t
 While the projections suggested in the table leverage stock methods in the math.gl library, custom projection functions can be provided. The `View.projection` prop accepts any function that returns a 4x4 projection matrix. The function will be called with the `View`s props, merged with `width`, `height`, `aspect` and `distance`.
 
 A perspective / orthographic mode switch could be implemented as follows:
+
 ```js
 import {View} from 'deck.gl';
 import {Matrix4} from 'math.gl';
@@ -85,6 +87,7 @@ While a `View` by itself does not contain enough information to support projecti
 The main deck.gl component (i.e. `Deck`, or `DeckGL` if using React) takes a `view` prop that accepts a list of `View` instances.
 
 Common examples in 3D applications that render a 3D scene multiple times with different "cameras":
+
 * To show views from multiple viewpoints (cameras), e.g. in a split screen setup.
 * To show a detail view (e.g, first person), and an overlaid, smaller "map" view (e.g. third person or top down, zoomed out to show where the primary viewpoint is).
 * To support stereoscopic rendering, where left and right views are needed, providing the necessary parallax between left and right eye.
@@ -92,6 +95,7 @@ Common examples in 3D applications that render a 3D scene multiple times with di
 
 
 Views can be side-by-side (top and bottom in this first example). Note how the application controls both the height and the y position of the two views.
+
 ```js
   <DeckGL views=[
     new FirstPersonView({..., height: '50%'}),
@@ -101,6 +105,7 @@ Views can be side-by-side (top and bottom in this first example). Note how the a
 ```
 
 Side-by-side views are used for basic stereoscopic rendering. In addition, the `View` class can directly accept view and projection matrices from the WebVR API):
+
 ```js
   <DeckGL views=[
     new View({
@@ -121,6 +126,7 @@ Side-by-side views are used for basic stereoscopic rendering. In addition, the `
 ```
 
 Views can also overlap, (e.g. having a small "mini" map in the bottom middle of the screen overlaid over the main view)
+
 ```js
   <DeckGL views=[
     new FirstPersonView({id: 'first-person', ...}),
@@ -143,6 +149,7 @@ Note that the `pickInfo` object does not contain a viewport reference, so you wi
 One of the core features of deck.gl is enabling perfectly synchronized visualization overlays on top other React components and DOM elements. When using a single `View` this is quite easy (just make `DeckGL` canvas a child of the base component and make sure they have the same size). But when using multiple viewports, correctly positioning base components gets trickier, so deck.gl provides some assistance.
 
 In this example the `StaticMap` component gets automatically positioned under the `WebMercatorViewport`:
+
 ```js
   const views = [
     new FirstPersonView({...}),

@@ -61,7 +61,8 @@ For applications that have basic event handling needs, deck.gl has built-in supp
 
 There are two ways to subscribe to the built-in picking event handling:
 
-- Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/layer.md#-onclick-function-optional-) props:
+* Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/layer.md#-onclick-function-optional-) props:
+
 ```js
 const layer = new ScatterplotLayer({
     ...
@@ -70,7 +71,9 @@ const layer = new ScatterplotLayer({
     onClick: info => console.log('Clicked:', info)
 });
 ```
-- Set callback for all pickable layers by setting [`onLayerHover`](/docs/api-reference/deckgl.md#-onlayerhover-function-optional-) and [`onLayerClick`](/docs/api-reference/deckgl.md#-onlayerclick-function-optional-) props of the `DeckGL` canvas:
+
+* Set callback for all pickable layers by setting [`onLayerHover`](/docs/api-reference/deckgl.md#-onlayerhover-function-optional-) and [`onLayerClick`](/docs/api-reference/deckgl.md#-onlayerclick-function-optional-) props of the `DeckGL` canvas:
+
 ```js
 <DeckGL
     ...
@@ -84,8 +87,9 @@ The callbacks for `hover` and `click` events are called with a single parameter 
 ### Behavior of Built-in Event Handling
 
 Picking events are triggered based on *pickable objects*:
-- A `click` event is triggered every time the pointer clicked on an object in a pickable layer.
-- A `hover` event is triggered every time the hovered object of a pickable layer changes.
+
+* A `click` event is triggered every time the pointer clicked on an object in a pickable layer.
+* A `hover` event is triggered every time the hovered object of a pickable layer changes.
 
 When an event is fired, the `onHover` or `onClick` callback of the affected layer is called first. If the callback returns a truthy value, the event is marked as handled. Otherwise, the event will bubble up to the `DeckGL` canvas and be visible to its `onLayerHover` and `onLayerClick` callbacks.
 

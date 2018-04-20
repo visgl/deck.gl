@@ -108,20 +108,20 @@ you understand property change management and how to use the
 Still, there are a couple of notable differences between the lifecycle
 methods provided by the two frameworks:
 
-- deck.gl performs preliminary analysis on certain props and context and
+* deck.gl performs preliminary analysis on certain props and context and
   provides a `changeFlags` object to your `shouldUpdateState` and
   `updateState`.
 
-- deck.gl's `updateState` method is called both on layer initialization and
+* deck.gl's `updateState` method is called both on layer initialization and
   on when props or context is updated. This is different from React's
   `willReceiveProps` that is not called when the component is initially created,
   The deck.gl model avoids requiring the same property checks to be performed
   twice in both the constructor and `willReceiveProps`.
 
-- deck.gl separates rendering into the `draw` and `renderLayers` methods,
+* deck.gl separates rendering into the `draw` and `renderLayers` methods,
   where React just needs `render`.
 
-- deck.gl's `pick` and `pickInfo` methods have no correspondence in
+* deck.gl's `pick` and `pickInfo` methods have no correspondence in
   React's lifecycle.
 
 **Note**: deck.gl uses a simpler component model than React.

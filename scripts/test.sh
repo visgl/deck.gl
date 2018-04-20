@@ -6,6 +6,7 @@ set -e
 MODE=$1
 
 npm run lint
+markdownlint docs
 
 case $MODE in
   "fast")

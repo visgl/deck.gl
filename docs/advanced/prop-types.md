@@ -6,6 +6,7 @@
 This article documents the system that deck.gl offers to provide extra type annotations for layer properties.
 
 For a number of reasons it is useful to have access to descriptions of the types of the various properties in a layer.
+
 * Enable specification of advanced (e.g. async) properties
 * Transitions and Animation
 * Type Checking (during development)
@@ -32,5 +33,6 @@ const defaultProps = {
 ```
 
 Tips:
+
 * **Open Ranges** - It's unnecessary use `Math.MAX_` constants for open numeric ranges, just leave the max or min out to specify an open range.
-```
+

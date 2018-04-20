@@ -54,7 +54,8 @@ be instanced, or use dynamic geometry:
   the same geometry many times. Usually the simplest way to go
   when creating layers that renders a lot of similar objects (think
   ScatterplotLayer, ArcLayers etc).
-  ```
+
+```js
   /// examples/sample-layers/mesh-layer/mesh-layer.js
   import {GL, Model, Geometry} from 'luma.gl';
 
@@ -72,12 +73,14 @@ be instanced, or use dynamic geometry:
       isInstanced: true
     }));
   }
-  ```
+```
+
 * **Dynamic geometry layer** - This is needed when
   dealing with data that needs to be rendered using multiple similar but unique
   geometries, such as polygons (i.e. the geometries are not copies of each
   othat that only differ in terms of.
-  ```
+
+```js
   /// examples/trips/trips-layer/trips-layer.js
   import {GL, Model, Geometry} from 'luma.gl';
 
@@ -92,13 +95,13 @@ be instanced, or use dynamic geometry:
       isIndexed: true
     });
   }
-  ```
+```
 
 It sometimes desirable to have a single layer render using multiple geometry primitives
 (e.g both circles and lines, or triangles and textured meshes etc),
 rather than creating separate layers.
 The custom
-[AxesLayer example](https://github.com/uber/deck.gl/tree/5.1-release/examples/plot/plot-layer/axes-layer.js)
+[AxesLayer example](https://github.com/uber/deck.gl/tree/5.2-release/examples/plot/plot-layer/axes-layer.js)
 uses this technique to share attributes between grids and labels.
 
 #### Defining Attributes
@@ -110,7 +113,7 @@ A layer should also define its attributes during initialization. This allows the
 Define attributes by
 calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#-add-):
 
-```
+```js
 initializeState() {
   const {gl} = this.context;
   this.setState({
@@ -194,12 +197,12 @@ that support all three deck.gl projection modes: latlon (default), meters and ne
 By always using the following shader functions for handling projections and scaling,
 a single layer class can support all projection modes for free:
 
-- All positions must be passed through the `project_position` function
+* All positions must be passed through the `project_position` function
   (available both in JavaScript and GLSL) to convert non-linear web-mercator
   coordinates to linear mercator "world" or "pixel" coordinates,
   that can be passed to the projection matrix.
 
-- All offsets must be passed through the `project_scale` function
+* All offsets must be passed through the `project_scale` function
   (available both in JavaScript and GLSL) to convert distances
   to world coordinates (note that that distance scales are latitude dependent
   under web mercator projection

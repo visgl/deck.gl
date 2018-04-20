@@ -13,23 +13,28 @@ const viewport = new FirstPersonView({
 });
 ```
 
+
+## Constructor
+
+```js
+new FirstPersonView({fov: 45, width: 500, height: 500});
+```
+
+Projection matrix arguments:
+
+* `orthographic` (Boolean) - Default `false`.
+* `fov` (Number, optional) - Field of view covered by camera. Default `75`.
+* `near` (Number, optional) - Distance of near clipping plane. Default `0.1`.
+* `far` (Number, optional) - Distance of far clipping plane. Default `1000`.
+* `aspect` (Number, optional) - Aspect ratio. If not provided the `width/height` ratio will be used when creating `Viewport`s.
+* `distance` (Number, optional) - 
+
+See [View constructor](/docs/api-reference/viewport.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
+
 ## Methods
 
 Inherits all [View methods](/docs/api-reference/viewport.md#methods).
 
-### Constructor
-
-Projection matrix arguments:
-* `orthographic`=`false` (`Boolean`) -
-* `fov`=`75` (`Number`, optional) - Field of view covered by camera.
-* `near`=`0.5` (`Number`, optional) - Distance of near clipping plane.
-* `far`=`100` (`Number`, optional) - Distance of far clipping plane.
-* `aspect`= (`Number`, optional) - Aspect ratio. If not provided the `width/height` ratio will be used when creating `Viewport`s.
-* `distance`= (`Number`, optional) - 
-
-
-
-See [View constructor](/docs/api-reference/viewport.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
 
 ## Remarks
 
@@ -37,4 +42,4 @@ See [View constructor](/docs/api-reference/viewport.md#constructor) for addition
 
 ## Source
 
-[src/core/views/perspective-view.js](https://github.com/uber/deck.gl/blob/5.1-release/src/core/views/perspective-view.js)
+[modules/core/src/core/views/perspective-view.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/views/perspective-view.js)

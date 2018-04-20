@@ -4,6 +4,7 @@
 ## Usage
 
 Example of layer unit tests using `tape`. Any unit test framework can be used.
+
 ```js
 import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl/test/data/geojson-data';
@@ -51,30 +52,28 @@ Initialize a layer, test layer update on a series of newProps, assert on the res
 
 Initialize a parent layer and its subLayer, update the parent layer a series of newProps, assert on the updated subLayer.
 
-`testLayer({Layer, spies, testCases})`
+```js
+testLayer({Layer, spies, testCases});
+```
 
 * `Layer` (`Object`) - The layer component class
 * `spies` (`Array`) - Array of Layer class methods to spy on.
-* `testCases` (`Array`) - A list of testCases
+* `testCases` (`Array`) - A list of testCases. Each test cases is an object with the following fields:
+  + `title` (`String`) - title of the test case
+  + `props` (`Object`) - Specifies a complete new set of props
+  + `updateProps` (`Object`) - Specifies an incremental prop change (overrides props from previous test case)
+  + `spies` (`Array`) - The list of updates to update
+  + `assert` (`Function`) - callbacks with updated layer, and oldState
 
 Notes:
-* Updates are called sequentially. updateProps will be merged
-with previous props
 
-
-## Test Cases
-
-Test cases are an array of objects with the following fields:
-* `title` (`String`) - title of the test case
-* `props` (`Object`) - Specifies a complete new set of props
-* `updateProps` (`Object`) - Specifies an incremental prop change (overrides props from previous test case)
-* `spies` (`Array`) - The list of updates to update
-* `assert` (`Function`) - callbacks with updated layer, and oldState
+* Updates are called sequentially. updateProps will be merged with previous props
 
 
 ## Writing assert Functions
 
 Assert functions are called with the following properties:
+
 * `layer`
 * `oldState`
 * `subLayers`
