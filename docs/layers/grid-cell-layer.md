@@ -43,20 +43,20 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ##### `cellSize` (Number, optional)
 
-- Default: `1000`
+* Default: `1000`
 
 Size of each grid cell in meters
 
 ##### `coverage` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 Cell size scale factor. The size of cell is calculated by
 `cellSize * coverage`.
 
 ##### `elevationScale` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 Elevation multiplier. The elevation of cell is calculated by
 `elevationScale * getElevation(d)`. `elevationScale` is a handy property
@@ -64,13 +64,13 @@ to scale all cell elevations without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
-- Default: `true`
+* Default: `true`
 
 Whether to enable grid elevation. If se to false, all grid will be flat.
 
 ##### `fp64` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
@@ -83,26 +83,26 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getPosition` (Function, optional)
 
-- Default: `cell => cell.position`
+* Default: `cell => cell.position`
 
 Method called to retrieve the top left corner of each cell.
 Expecting [lon, lat].
 
 ##### `getElevation` (Function, optional)
 
-- Default: `cell => cell.elevation`
+* Default: `cell => cell.elevation`
 
 Method called to retrieve the elevation of each cell.
 Expecting a number, 1 unit approximate to 100 meter
 
 ##### `getColor` (Function, optional)
 
-- Default: `cell => cell.color`
+* Default: `cell => cell.color`
 
 Method called to retrieve the rgba color of each cell. Expecting [r, g, b, a].
 If the alpha is not provided, it will be set to `255`.
 
 ## Source
 
-[/src/core-layers/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/grid-cell-layer)
+[modules/core/src/core-layers/grid-cell-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/grid-cell-layer)
 

@@ -6,11 +6,13 @@ The `MapController` class can be passed to the `Deck.controller` or `DeckGL.cont
 ## Usage
 
 ```js
-  <DeckGL
-    controller={MapController} // NOTE: Constructor is passed. Do not call 'new MapController()'
-    viewState={viewState}
-    onViewportChange={v => this.setState({viewport: v})}
-    />
+import DeckGL, {MapController} from 'deck.gl';
+
+<DeckGL
+controller={MapController} // NOTE: Constructor is passed. Do not call 'new MapController()'
+viewState={viewState}
+onViewportChange={v => this.setState({viewport: v})}
+/>
 ```
 
 ## Methods

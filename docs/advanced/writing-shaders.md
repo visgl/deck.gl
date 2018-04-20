@@ -35,7 +35,7 @@ for more information.
 
 ### picking
 
-Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.1-release/src/shadertools/modules/picking).
+Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.2-release/src/shadertools/modules/picking).
 
 
 ## Shader Techniques and Ideas
@@ -60,20 +60,17 @@ Creating an animated layer can be as easy as having the application supply start
 
 ### Layer prop uniforms
 
-##### `float layerIndex`
+#### `float layerIndex`
 
 The layerIndex is a small integer that starts at zero and is incremented for each layer that is rendered. It can be used to add small offsets to the z coordinate of layers to resolve z-fighting between overlapping layers.
 
-##### `float opacity`
+#### `float opacity`
 
 In the fragment shader, multiply the fragment color with the opacity uniform.
 
 ### Shader Module Uniforms
 
 The luma.gl/deck.gl shader modules provide javascript functions to set their uniforms but the actual GLSL uniforms are typically considered implementation dependent. The intention is that you should use the public functions exposed by each shader module. That said, some uniforms from the [`project`](/docs/shader-modules/project.md) module are considered special and are documented.
-
-
-```
 
 ## Remarks
 

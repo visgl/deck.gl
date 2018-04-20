@@ -28,10 +28,12 @@ void main(void) {
 The JavaScript uniforms are extracted mainly from the viewport with a few additional parameters (which deck.gl supplies from `LayerManager` state or `Layer` props of course).
 
 Provided by `LayerManager`:
+
 * `viewport`
 * `devicePixelRatio`
 
 Provided by `Layer` props:
+
 * `coordinateSystem`
 * `coordinateOrigin`
 * `modelMatrix`
@@ -99,8 +101,7 @@ Converts the given number of pixels to a clipspace offset that can be added to a
 
 `vec4 project_pixels_to_clipspace(vec2 pixels)`
 
-* `pixels` (`vec2`) - adjustment in logical pixels
-Returns values in clip space offsets that can be added directly to `gl_Position`
+* `pixels` (`vec2`) - adjustment in logical pixels. Returns values in clip space offsets that can be added directly to `gl_Position`
 
 
 ## Remarks

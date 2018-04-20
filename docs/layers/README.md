@@ -23,6 +23,6 @@ These are layers from an older releases that now have better counterparts. They 
 
 ## Sample Layers
 
-deck.gl provides a number of sample layers in the [examples folders](https://github.com/uber/deck.gl/tree/5.1-release/examples/sample-layers) intended to illustrate various ideas and approaches to how layers can be designed. These layers sometimes have documentation in the example code, but they are not listed here in the official documentation.
+deck.gl provides a number of sample layers in the [examples folders](https://github.com/uber/deck.gl/tree/5.2-release/examples/sample-layers) intended to illustrate various ideas and approaches to how layers can be designed. These layers sometimes have documentation in the example code, but they are not listed here in the official documentation.
 
 To use one of the sample layers an application simply needs to copy it into its own source tree. This is necessary because these layers are not included in the deck.gl distribution (i.e. they are not `export`ed by deck.gl).

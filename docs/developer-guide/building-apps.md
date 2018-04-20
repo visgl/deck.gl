@@ -21,9 +21,11 @@ When installed from npm, deck.gl and related libraries come with three separate 
 | `dist/es6` | `esnext`    | This distribution uses `babel-preset-env` and with very few exceptions essentially untranspiled ES6/ES2015 code. This is the smallest distribution, that will three-shake best, and is intended to be the best choice if you are only targeting "evergreen" browsers. |
 
 You will have to check the documentation of your particular bundler to see what configuration options are available:
+
 * Webpack 4 allows you to choose the `esnext` distribution by specifying a `resolve.mainFields` array.
-* Webpack 2 and later will pick `module` main field over `main` if it is available
-For other bundlers, please refer to the respective documentation
+* Webpack 2 and later will pick `module` main field over `main` if it is available.
+
+For other bundlers, please refer to the respective documentation.
 
 
 ### About Tree-Shaking
@@ -31,6 +33,7 @@ For other bundlers, please refer to the respective documentation
 deck.gl was designed from the start to leverage tree-shaking. This technique has been talked about for quite some time but has been slow in actually providing the expected benefits. With the combination of webpack 4 and babel 7 we are finally starting to see significant results, so you may want to experiment with upgrading your bundler if you are not getting results.
 
 Note that tree-shaking still has limitations:
+
 * At least in webpack, tree shaking is done by the uglifierm, which is typically only run on production builds, so it is typically not possible to assess the benefits of tree shaking during development. In addition, this makes it even harder to make statements about bundle size impact from looking at bundle sizes in development builds. The recommendation is to always measure impact on your final production builds.
 * Static dependency analyzers err on the side of safety and will still include any symbol it is not sure will never be used.
 * This is compounded by the fact that there are side effects in various language feature that complicate or defeat current static dependency analysis techniques, causing "dead code" to still be bundled. The good news is that the analyzers are getting better.
@@ -50,6 +53,7 @@ So, what bundle size impact should you expect? When do you know if you have set 
 | ES5  | 754 KB (176 KB)           | 748 KB (166 KB)           | Transpiled to ES5, no tree-shaking |
 
 Notes:
+
 * Numbers represent the minified bundle size of a minimal application, bundled with Webpack 4, which means that the results benefit from some tree shaking.
 * The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your compressed bundle to get.
 

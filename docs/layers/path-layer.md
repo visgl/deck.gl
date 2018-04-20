@@ -43,44 +43,44 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ##### `widthScale` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 The path width multiplier that multiplied to all paths.
 
 ##### `widthMinPixels` (Number, optional)
 
-- Default: `0`
+* Default: `0`
 
 The minimum path width in pixels.
 
 ##### `widthMaxPixels` (Number, optional)
 
-- Default: Number.MAX_SAFE_INTEGER
+* Default: Number.MAX_SAFE_INTEGER
 
 The maximum path width in pixels.
 
 ##### `rounded` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
 ##### `miterLimit` (Number, optional)
 
-- Default: `4`
+* Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `rounded` is `false`.
 
 ##### `fp64` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
 ##### `dashJustified` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Only effective if `getDashArray` is specified. If `true`, adjust gaps for the dashes to align at both ends.
 
@@ -88,7 +88,7 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 ##### `getPath` (Function, optional)
 
-- Default: `(object, index) => object.paths`
+* Default: `(object, index) => object.paths`
 
 Returns the specified path for the object.
 
@@ -98,7 +98,7 @@ A path is an array of coordinates.
 
 Returns an array of color
 
-- Default `(object, index) => object.color || [0, 0, 0, 255]`
+* Default `(object, index) => object.color || [0, 0, 0, 255]`
 
 Method called to determine the rgba color of the source.
 
@@ -107,14 +107,14 @@ If the color alpha (the fourth component) is not provided,
 
 ##### `getWidth` (Function, optional)
 
-- Default: `(object, index) => object.width || 1`
+* Default: `(object, index) => object.width || 1`
 
 Method called to determine the width to draw each path with.
 Unit is meters.
 
 ##### `getDashArray` (Function, optional)
 
-- Default: `null`
+* Default: `null`
 
 Method called to get the dash array to draw each path with.
 Returns an array of two numbers: `[dashSize, gapSize]` relative to the width of the path. Returns `[0, 0]` to draw the path in solid line.
@@ -123,4 +123,4 @@ If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Source
 
-[src/core-layers/path-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/path-layer)
+[modules/core/src/core-layers/path-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/path-layer)

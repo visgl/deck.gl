@@ -4,7 +4,7 @@ The `lighting` module provides a way to light a vertex using world positions and
 
 ## Usage
 
-```
+```glsl
 // geometry
 attribute vec3 positions;
 attribute vec3 normals;

@@ -6,6 +6,7 @@ Make sure to read the [Using deck.gl Scripting API](/docs/get-started/using-stan
 
 
 ## Usage
+
 ```js
 new deck.DeckGL({
   mapboxApiAccessToken: '<your_token_here>',
@@ -38,6 +39,7 @@ The container in which deck.gl should append its canvas. Can be either a HTMLDiv
 Default: `window.mapboxgl`
 
 The scripting API offers out-of-the-box integration with Mapbox. To add a base map to your visualization, you need to include the Mapbox library and stylesheet:
+
 ```html
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
@@ -50,7 +52,9 @@ To disable the base map, simply exclude the mapbox script or set `map` to false.
 ```js
 mapboxgl = require('mapbox-gl@~0.44.1/dist/mapbox-gl.js');
 ```
+
 And
+
 ```js
 new deck.DeckGL({
   ...

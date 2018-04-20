@@ -18,6 +18,7 @@ For details on how the automation works, see the [probe.gl](https://uber-web.git
 ## Usage
 
 In your node.js start script:
+
 ```js
 // This is the script that runs in Node.js and starts the browser
 const {BrowserTestDriver} = require('probe.gl/test');
@@ -36,6 +37,7 @@ Create a `BrowserTestDriver` instance.
 `renderTestDriver.run()`
 
 Runs the tests:
+
 * starts a Chrome browser instance,
 * starts a server (typically a webpack-dev-server) that bundles a test script.
 * the test script renders a set of tests (described below), compares the output against golden images

@@ -7,51 +7,74 @@ The `LayerManager` class handles updates, drawing and picking for a set of layer
 For more information consult the [Using Standalone](/docs/advanced/using-standalone.md) article.
 
 
-## Methods
-
-##### constructor
+## Constructor
 
 Creates a new `LayerManager` instance.
 
-`const layerManager = new LayerManager(gl, {eventManager: ...}})`
+```js
+new LayerManager(gl, {eventManager: ...}})`
+```
+
+Parameters:
 
 * `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext))
 
 
-##### needsRedraw
+## Methods
+
+##### `needsRedraw`
 
 Checks if layers need to be redrawn.
 
-`layerManager.needsRedraw({clearRedrawFlags = false})`
+```js
+layerManager.needsRedraw({clearRedrawFlags = false});
+```
 
+Parameters:
 
-##### getLayers
+* `clearRedrawFlags` (Bool) - Reset the needs redraw status
+
+Returns:
+
+* `true` if redraw is needed.
+
+##### `getLayers`
 
 Returns an list of layers, optionally be filtered by a list of layer ids.
 
-`const layers = layerManager.getLayers({layerIds=[]})`
+```js
+const layers = layerManager.getLayers({layerIds=[]});
+```
+
+Parameters:
 
 * `layerIds` (String[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
 
-Returns (`Layer[]`) - array of layer instances.
+Returns: 
+
+* `Layer[]` - array of layer instances.
 
 Notes:
+
 * The returned list of layers is "expanded" in the sense that composite layers will have been recursively rendered and the list will thus only contain primitive layers.
 * When supplying the layer id of a composite layer, all the sub layers rendered by that layer will be included.
 * layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
 
 
-##### setParameters
+##### `setParameters`
 
-Updates parameters
+Updates parameters.
 
-`layerManager.setParameters({
+```js
+layerManager.setParameters({
 	useDevicePixels,
     pickingRadius,
     onLayerClick,
     onLayerHover
-})
-`
+});
+```
+
+Parameters:
 
 * `useDevicePixels` (`Boolean`, optional) - Whether to use retina/HD display or not.
 * `eventManager` - A source of DOM input events
@@ -60,62 +83,82 @@ Updates parameters
 * `onLayerHover` (`Function`, optional) - A handler to be called when any layer is hovered over.
 
 Notes:
+
 * The event "source" is expected to provide `on()`/`off()` methods for registration, and to call registered handlers with an "Event" object of the following shape:
- * `offsetCenter` (Object: {x, y}) - center of the event
- * `srcEvent` (Object) - native JS Event object
+  + `offsetCenter` (Object: {x, y}) - center of the event
+  + `srcEvent` (Object) - native JS Event object
 
 
-##### setViews
+##### `setViews`
 
 Updates the current views.
 
-`layerManager.setViews(views)`
+```js
+layerManager.setViews(views);
+```
+
+Parameters:
 
 * `views` (`View[]`) - The new [View](/docs/api-reference/view.md) instances.
 
 
-##### setLayers
+##### `setLayers`
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
 
-`layerManager.updateLayers({newLayers})`
+```js
+layerManager.updateLayers({newLayers});
+```
 
 * `newLayers` (Layer[]) - Array of layers
 
 
-##### updateLayers
+##### `updateLayers`
 
 Updates the current list of layers.
 
 
-##### drawLayers
+##### `drawLayers`
 
-Draw all layers
+Draw all layers.
 
-`layerManager.drawLayers({pass})`
+```js
+layerManager.drawLayers({pass});
+```
+
+Parameters:
 
 * `pass` (String) - The render pass identifier, for debugging purpose
 
 
-##### pickObject
+##### `pickObject`
 
-Pick the closest info at given coordinate
+Pick the closest info at given coordinate.
 
-`layerManager.pickLayer({x, y, mode, radius = 0, layerIds})`
+```js
+layerManager.pickLayer({x, y, mode, radius = 0, layerIds})
+```
+
+Parameters:
 
 * `x` (Number) - The x position of the pointer
 * `y` (Number) - The y position of the pointer
 * `mode` (String) - One of `hover` or `click`
 
-##### pickObjects
+##### `pickObjects`
 
-Get all unique infos within a bounding box
+Get all unique infos within a bounding box.
 
-`layerManager.queryLayer({x, y, width, height, layerIds})`
+```js
+layerManager.queryLayer({x, y, width, height, layerIds});
+```
+
+Parameters:
 
 * `x` (Number) - The x position of the pointer
 * `y` (Number) - The y position of the pointer
 
 
 ## Source
+
 [src/core/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/5.0-release/src/core/lib/layer-manager.js)

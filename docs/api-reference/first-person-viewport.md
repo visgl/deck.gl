@@ -25,30 +25,39 @@ const viewport = new FirstPersonViewport({
 });
 ```
 
+
+## Constructor
+
+```js
+new FirstPersonViewport({fov: 45, width: 500, height: 500});
+```
+
+Parameters:
+
+* `opts` (Object) - viewport options
+  + `width` (Number) - Width of "viewport" or window. Default to `1`.
+  + `height` (Number) - Height of "viewport" or window. Default to `1`.
+
+  view matrix arguments:
+
+  + `eye` (`Vector3`, optional) - Defines eye position, default unit distance along z axis.
+    Default to `[0, 0, 1.5]` (eye 1.5 meters above the "ground" to emulate a human perspective).
+  + `lookAt` (`Vector3`, optional) - Which point is camera looking at. Default to origin `[0, 0, 0]`.
+  + `up` (`Vector3`, optional) - Defines up direction. Default to positive y axis `[0, 1, 0]`.
+
+  projection matrix arguments:
+
+  + `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
+  + `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
+  + `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
+  + `aspect` (Number, optional) - Aspect ratio. Default to the viewport's `width/height`.
+
+See [Viewport constructor](/docs/api-reference/viewport.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
+
 ## Methods
 
 Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
-### Constructor
-
-Parameters:
-- `opts` (Object) - viewport options
-  * `width` (Number) - Width of "viewport" or window. Default to `1`.
-  * `height` (Number) - Height of "viewport" or window. Default to `1`.
-
-  view matrix arguments:
-  * `eye` (`Vector3`, optional) - Defines eye position, default unit distance along z axis.
-    Default to `[0, 0, 1.5]` (eye 1.5 meters above the "ground" to emulate a human perspective).
-  * `lookAt` (`Vector3`, optional) - Which point is camera looking at. Default to origin `[0, 0, 0]`.
-  * `up` (`Vector3`, optional) - Defines up direction. Default to positive y axis `[0, 1, 0]`.
-
-  projection matrix arguments:
-  * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-  * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-  * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  * `aspect` (Number, optional) - Aspect ratio. Default to the viewport's `width/height`.
-
-See [Viewport constructor](/docs/api-reference/viewport.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
 
 ## Remarks
 
@@ -56,4 +65,4 @@ See [Viewport constructor](/docs/api-reference/viewport.md#constructor) for addi
 
 ## Source
 
-[src/core/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.1-release/src/core/viewports/perspective-viewport.js)
+[modules/core/src/core/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/viewports/perspective-viewport.js)

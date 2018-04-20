@@ -6,6 +6,7 @@ Lifecycle test functions are designed to allow for intregration with different u
 ## Example
 
 The lifecycle test drivers simplify testing of successive updates of a layer. This example uses `tape`.
+
 ```js
 import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl/test/data/geojson-data';

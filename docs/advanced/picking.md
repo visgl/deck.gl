@@ -12,8 +12,9 @@ After the picking buffer is rendered, deck.gl looks at the color of the pixel un
 [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-) to determine which object of the layer has been picked.
 
 A `hover` event is triggered on a layer if:
-- The layer is picked, and the picked object is different from the last frame
-- The layer is not picked, but it was in the last frame
+
+* The layer is picked, and the picked object is different from the last frame
+* The layer is not picked, but it was in the last frame
 
 A `click` event is triggered on a layer only if it's picked.
 
@@ -38,6 +39,7 @@ system, which most layers use.
 To take full control of picking, a layer need to take the following steps:
 
 1. Add a picking color attribute during initialization:
+
 ```js
 initializeState() {
     ...
@@ -46,8 +48,9 @@ initializeState() {
     });
 }
 ```
-- Calculate the attribute by providing a different picking color for every object that
-you need to differentiate, such as:
+
+* Calculate the attribute by providing a different picking color for every object that you need to differentiate, such as:
+
 ```js
 calculatePickingColors(attribute) {
     const {data} = this.props;
@@ -63,20 +66,19 @@ calculatePickingColors(attribute) {
 }
 ```
 
-- The default implementation of [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-) and
-[`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-) is likely sufficient, but you may need to implement your own pair.
-- By default, the `object` field of the picking `info` object is indexed from the layer's `data` prop. Custom layers often need to define on their own terms what  constitutes meaningful information to the user's callbacks. A layer can achieve this  by overriding [`layer.getPickingInfo()`](/docs/api-reference/layer.md#-getpickinginfo-) to add or modify fields to the `info` object.
+* The default implementation of [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-) and [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-) is likely sufficient, but you may need to implement your own pair.
+* By default, the `object` field of the picking `info` object is indexed from the layer's `data` prop. Custom layers often need to define on their own terms what  constitutes meaningful information to the user's callbacks. A layer can achieve this  by overriding [`layer.getPickingInfo()`](/docs/api-reference/layer.md#-getpickinginfo-) to add or modify fields to the `info` object.
 
 
 ## Implementing Picking in Custom Shaders
 
 All core layers (including composite layers) support picking using luma.gl's `picking module`. If you are using custom shaders with any of the core layers or building custom layers with your own shaders following steps are needed to achieve `Picking`.
 
-### Model object creation.
+### Model object creation
 
 When creating `Model` object, add picking module to `modules` array.
 
-```
+```js
 new Model(gl, {
   ...
   vs: CUSTOM_VS,
@@ -89,7 +91,7 @@ new Model(gl, {
 
 Vertex shader should set current picking color using `picking_setPickingColor` method provided by picking shader module.
 
-```
+```glsl
 attribute vec3 instancePickingColors;
 
 void main(void) {
@@ -105,7 +107,7 @@ void main(void) {
 
 Fragment shader should use `picking_filterPickingColor` to update `gl_FragColor`, which outputs picking color if it is the picking pass.
 
-```
+```glsl
 attribute vec3 instancePickingColors;
 
 void main(void) {

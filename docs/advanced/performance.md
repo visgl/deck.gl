@@ -33,6 +33,7 @@ frequently, buffer generation can cause "stutter" in e.g. animations,
 even for layers with just a few thousand items. While it is usually possible to
 overcome these issues using special techniques, but it can require extra work.
 Before optimizing data updates, make sure that:
+
 * you are not modifying the data prop when it hasn't changed. The layer will
    do a shallow equal to determine if it needs to regenerate buffers. So if
    nothing has changed, make sure you supply the **same** data object (typically
@@ -65,6 +66,7 @@ It is good to be aware that excessive overdraw (drawing many objects/pixels on t
 deck.gl performs picking by drawing the layer into an off screen picking buffer. This essentially means that every layer that supports picking will be drawn off screen when panning and hovering. The picking is performed using the same GPU code that does the visual rendering, so the performance should be easy to predict.
 
 Picking limitations:
+
 * The picking system can only distinguish between 16M items per layer.
 * The picking system can only handle 256 layers with the pickable flag set to true.
 
@@ -77,15 +79,17 @@ The layer count of an advanced deck.gl application tends to gradually increase, 
 ## Profiling Ideas
 
 Some profiling techniques:
+
 * Using the `seer` chrome extension you can also get GPU timings for your layers.
 * The `layer-browser` example (in the `examples` folder has a couple of performance tests that you can use to get FPS readings on your hardware for Scatterplot layers with 1M and 10M points.
 
 ## Common Issues
 
 A couple of particular things to watch out for that tend to have a big impact on performance:
-* If not needed disable Retina/High DPI rendering. It generetes 4x the number of pixels (fragments) and can have a big performance impact that depends on which computer or monitor is being used. This feature can be controlled using `useDevicePixels` prop of `DeckGL` component and it is on by default.
 
+* If not needed disable Retina/High DPI rendering. It generetes 4x the number of pixels (fragments) and can have a big performance impact that depends on which computer or monitor is being used. This feature can be controlled using `useDevicePixels` prop of `DeckGL` component and it is on by default.
 * Avoid using luma.gl debug mode in production. It queries the GPU error status after each operation which has a big impact on performance.
 
 Smaller considerations:
+
 * Enabling picking can have a small performance penalty so make sure the `pickable` property is `false` in layers that do not need picking (this is the default value).

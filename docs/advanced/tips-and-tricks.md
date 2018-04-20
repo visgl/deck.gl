@@ -58,7 +58,7 @@ support.
 
 * In the browser console, setting `luma.log.priority` to various values will
   enable increasing levels of debugging.
-    - **Level 3** will display all uniforms and attributes before each draw
+  + **Level 3** will display all uniforms and attributes before each draw
       call, allowing you to be confident in what values your shaders are
       actually working on.
-    - **Level 4** will trace every single gl call.
+  + **Level 4** will trace every single gl call.

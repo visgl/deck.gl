@@ -5,73 +5,153 @@
 
 ## Usage
 
+```js
+import DeckGL, {ViewportController, ScatterplotLayer} from 'deck.gl';
+
+class App extends Component {
+
+  render() {
+    return (
+      <ViewportController
+        {...this.state.viewState}
+        onViewportChange={viewState => this.setState({viewState})} >
+        <DeckGL
+          {...this.state.viewState}
+          layers={[new ScatterplotLayer({data})]} />
+      </ViewportController>
+    );
+  }
+};
+```
 
 ## Properties
 
-##### viewportState (Class Constructor)
+### ViewState Properties
 
-#####  state: PropTypes.object (instance)
+##### `width` (Number, required)
 
-##### onViewportChange: PropTypes.func,
+Width of the canvas.
+
+##### `height` (Number, required)
+
+Height of the canvas.
+
+##### `latitude` (Number, optional)
+
+Current latitude - used to define a mercator projection if `viewState` is not supplied.
+
+##### `longitude` (Number, optional)
+
+Current longitude - used to define a mercator projection if `viewState` is not supplied.
+
+##### `zoom` (Number, optional)
+
+Current zoom - used to define a mercator projection if `viewState` is not supplied.
+
+##### `bearing` (Number, optional)
+
+Current bearing - used to define a mercator projection if `viewState` is not supplied.
+
+##### `pitch` (Number, optional)
+
+Current pitch - used to define a mercator projection if `viewState` is not supplied.
+
+
+### Configuration Properties
+
+##### `controls` (Object)
+
+A map control instance to replace the default map controls
+
+The object must expose these methods:
+
+* `setProps` - Update the props of the control.
+* `finalize` - Called when the control is being removed.
+
+
+### Event Callbacks
+
+##### `onViewportChange` (Function)
 
 `onViewportChange` callback is fired when the user interacted with the
 map. The object passed to the callback contains viewport properties
 such as `longitude`, `latitude`, `zoom` etc.
 
-##### getCursor: PropTypes.func,
+##### `getCursor` (Function, optional)
 
-Accessor that returns a cursor style to show interactive state
-
-
-##### controls: PropTypes.shape
-
-A map control instance to replace the default map controls
-
-The object must expose one property: `events` as an array of subscribed
-
-event names; and two methods: `setState(state)` and `handle(event)`
+Accessor that returns a cursor style to show interactive state.
 
 
-### Event Handling Controls
+### Event Handling Options
 
-##### scrollZoom: PropTypes.bool,
+##### `scrollZoom` (Boolean, optional)
 
-Scroll to zoom
+* Default: `true`
 
-##### dragPan: PropTypes.bool,
+Enable scroll to zoom.
 
-Drag to pan
+##### `dragPan` (Boolean, optional)
 
-##### dragRotate: PropTypes.bool,
+* Default: `true`
 
-Drag to rotate
+Enable drag to pan.
 
-##### doubleClickZoom: PropTypes.bool,
+##### `dragRotate` (Boolean, optional)
 
-Double click to zoom
+* Default: `true`
 
-##### touchZoomRotate: PropTypes.bool,
+Enable drag to rotate.
 
-Pinch to zoom / rotate
+##### `doubleClickZoom` (Boolean, optional)
+
+* Default: `true`
+
+Enable double click to zoom.
+
+##### `touchZoom` (Boolean, optional)
+
+* Default: `true`
+
+Enable pinch to zoom (touch).
+
+##### `touchRotate` (Boolean, optional)
+
+* Default: `false`
+
+Enable pinch to rotate.
+
+##### `keyboard` (Boolean, optional)
+
+* Default: `true`
+
+Enable keyboard navigation.
 
 
-### Viewport constraints
+### Viewport Constraints
 
-##### maxZoom: PropTypes.number,
+##### `maxZoom` (Number, optional)
 
-Max zoom level
+* Default: `20`
 
-##### minZoom: PropTypes.number,
+Max zoom level.
 
-Min zoom level
+##### `minZoom` (Number, optional)
 
-##### maxPitch: PropTypes.number,
+* Default: `0`
 
-Max pitch in degrees
+Min zoom level.
 
-##### minPitch: PropTypes.number,
+##### `maxPitch` (Number, optional)
 
-Min pitch in degrees
+* Default: `60`
+
+Max pitch in degrees.
+
+##### `minPitch` (Number, optional)
+
+* Default: `0`
+
+Min pitch in degrees.
 
 
 ## Source
