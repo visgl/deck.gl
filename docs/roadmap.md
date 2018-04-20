@@ -3,6 +3,7 @@
 Interested in what is coming down the road? We are trying to make the deck.gl roadmap as public as possible.
 
 We are currently using the following ways to share information about the direction of deck.gl.
+
 * **Roadmap Document** - (this document) A high-level summary of our current direction for future releases.
 * **Blog** - We use the [vis.gl blog](https://medium.com/@vis.gl) blog to share information about what we are doing.
 * **RFCs** - A wealth of technical detail around planned features is available in our RFCs (Requests For Comments). RFCs are technical writeups that describe a proposed feature. RFCs are available [here](https://github.com/uber/deck.gl/tree/master/dev-docs/RFCs).
@@ -16,6 +17,7 @@ We are currently using the following ways to share information about the directi
 The [@deck.gl/experimental-layers](https://www.npmjs.com/package/@deck.gl/experimental-layers) is available as of deck.gl v5.2 and contains early versions of future layers.
 
 There are a number of interesting layers in this module, however there are caveats:
+
 * We do not provide website documentation for these layers, so if you want to use these layers you may need to refer directly to the deck.gl source code.
 * While we make reasonable attempts to not break things, we do not guarantee that they will be stable between releases.
 * To prevent surprises, you may want to pin the version of the `@deck.gl/experimental-layers` module in your `package.json`.
@@ -50,6 +52,7 @@ These are some of things we tackled in our most recent release
 TBA - This is a planned feature for a future release
 
 **Restrict Event Handling to match Viewport Size** - Controllers need to be able to be restricted to a certain area (in terms of event handling). Some controllers are completely general (just general drag up/down):
+
 * When working with a map controller, especially panning and zooming, the point under the mouse represents a grab point or a reference for the operation and mapping event coordinates correctly is imporant for the experience.
 * Controllers might not be designed to receive coordinates from outside their viewports.
 * Basically, if the map backing one WebMercator viewport doesn't fill the entire canvas, and the application wants to use a MapControls

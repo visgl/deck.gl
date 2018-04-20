@@ -9,6 +9,8 @@ For more information consult the [Views](/docs/advanced/views.md) article.
 ## Usage
 
 ```js
+import {ThirdPersonView} from 'deck.gl';
+
 const view = new ThirdPersonView({
   cameraDistance: 2, // Camera distance from object
   cameraDirection: 2, // Camera distance from object
@@ -18,20 +20,29 @@ const view = new ThirdPersonView({
 });
 ```
 
+
+## Constructor
+
+```js
+new ThirdPersonView({fov: 45, width: 500, height: 500, ...});
+```
+
+Parameters:
+
+* `opts` (Object) - Third person view options
+
+  projection matrix arguments:
+
+  + `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
+  + `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
+  + `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
+  + `aspect` (Number, optional) - Aspect ratio. Default to the view's `width/height`.
+
+See [View constructor](/docs/api-reference/view.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
+
 ## Methods
 
 Inherits all [View methods](/docs/api-reference/view.md#methods).
-
-### Constructor
-
-Parameters:
-  projection matrix arguments:
-  * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-  * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-  * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  * `aspect` (Number, optional) - Aspect ratio. Default to the view's `width/height`.
-
-See [View constructor](/docs/api-reference/view.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
 
 ## Remarks
 
@@ -39,4 +50,4 @@ See [View constructor](/docs/api-reference/view.md#constructor) for additional p
 
 ## Source
 
-[src/core/views/perspective-view.js](https://github.com/uber/deck.gl/blob/5.1-release/src/core/views/perspective-view.js)
+[modules/core/src/core/views/perspective-view.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/views/perspective-view.js)

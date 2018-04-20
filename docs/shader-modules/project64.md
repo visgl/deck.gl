@@ -29,10 +29,11 @@ Uniform names are not considered part of the official API of shader modules and 
 `vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset, out vec4 worldPosition)`
 
 Parameters:
-- `position` - vertex position in the layer's coordinate system.
-- `position64xyLow` - low part of the vertex position's xy
-- `offset` - meter offset from the coordinate
-- `worldPosition` - projected position in the world space
+
+* `position` - vertex position in the layer's coordinate system.
+* `position64xyLow` - low part of the vertex position's xy
+* `offset` - meter offset from the coordinate
+* `worldPosition` - projected position in the world space
 
 Returns:
 Projected position in the clipspace.

@@ -6,6 +6,7 @@ Uses a [`SceneRenderer`](/docs/api-reference/test-utils/scene-renderer.md) to re
 ## Usage
 
 In the test script that is to run in the browser: set up and run a render test
+
 ```js
 import {RenderTest} from '@deck.gl/test-utils';
 import {TEST_CASES} from './test-cases';
@@ -24,6 +25,7 @@ renderTest.run();
 ```
 
 In `test-cases.js`:
+
 ```js
 import {PathLayer} from 'deck.gl';
 
@@ -52,9 +54,7 @@ export default [{
 }];
 ```
 
-## Methods
-
-### constructor
+## Constructor
 
 ```js
 import {RenderTest} from '@deck.gl/test-utils';
@@ -63,32 +63,25 @@ const renderTest = new RenderTest({
 });
 ```
 
-* `testCases` (`Array`) - array of objects describing test cases, see format description below.
+* `testCases` (`Array`) - an array of objects describing each scene to be rendered. The following fields are available to define test cases:
+  + `name`
+  + `views` (defaults to `[new MapView()]`)
+  + `viewState`
+  + `layers`
+  + `referenceImage`
+  For more information see the scene format description in [`SceneRenderer`](/docs/api-reference/test-utils/scene-renderer.md).
 * `width` - Width to render, must match the size of your golden image
 * `height` - Height to render, must match the size of your golden image
 * `colorDeltaThreshold` - Max color delta in the YIQ difference metric for two pixels to be considered the same |
 * `testPassThreshold` - Percentage of pixels that must be the same for the test to pass
 
 
-### run
+## Methods
+
+##### `run`
 
 Run the render tests
 
-`renderTest.run()`
-
-
-## Data Types
-
-
-### Test Case Format
-
-Test cases are an array of objects describing each scene to be rendered. The following fields are available to define test cases
-* `name`
-* `views` (defaults to `[new MapView()]`)
-* `viewState`
-* `layers`
-* `referenceImage`
-
-For more information see the scene format description in [`SceneRenderer`](/docs/api-reference/test-utils/scene-renderer.md).
-
-
+```js
+renderTest.run();
+```

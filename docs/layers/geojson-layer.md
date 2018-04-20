@@ -44,7 +44,7 @@ pure GeoJson "payloads".
 
 ##### `filled` (Boolean, optional)
 
-- Default: `true`
+* Default: `true`
 
 Whether to draw filled polygons (solid fill). Note that for each polygon,
 only the area between the outer polygon and any holes will be filled. This
@@ -52,7 +52,7 @@ prop is effective only when the polygon is NOT extruded.
 
 ##### `stroked` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether to draw an outline around polygons (solid fill). Note that
 for complex polygons, both the outer polygon as well the outlines of
@@ -63,17 +63,18 @@ any holes will be drawn.
 Extrude Polygon and MultiPolygon features along the z-axis if set to
 true. The height of the drawn features is obtained using the `getElevation` accessor.
 
-- Default: `false`
+* Default: `false`
 
 ##### `wireframe` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether to generate a line wireframe of the hexagon. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
 Remarks:
+
 * These lines are rendered with `GL.LINE` and will thus always be 1 pixel wide.
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
@@ -81,7 +82,7 @@ Remarks:
 
 ##### `lineWidthScale` (Boolean, optional)
 
-- Default: `1`
+* Default: `1`
 
 The line width multiplier that multiplied to all lines, including the `LineString`
 and `MultiLineString` features and also the outline for `Polygon` and `MultiPolygon`
@@ -89,32 +90,32 @@ features if the `stroked` attribute is true.
 
 ##### `lineWidthMinPixels` (Number, optional)
 
-- Default: `0`
+* Default: `0`
 
 The minimum line width in pixels.
 
 ##### `lineWidthMaxPixels` (Number, optional)
 
-- Default: Number.MAX_SAFE_INTEGER
+* Default: Number.MAX_SAFE_INTEGER
 
 The maximum line width in pixels.
 
 ##### `lineJointRounded` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
 ##### `lineMiterLimit` (Number, optional)
 
-- Default: `4`
+* Default: `4`
 
 The maximum extent of a joint in ratio to the stroke width.
 Only works if `lineJointRounded` is `false`.
 
 ##### `elevationScale` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 Elevation multiplier. The final elevation is calculated by
   `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
@@ -122,25 +123,25 @@ all polygon elevation without updating the data.
 
 ##### `pointRadiusScale` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 A global radius multiplier for all points.
 
 ##### `pointRadiusMinPixels` (Number, optional)
 
-- Default: `0`
+* Default: `0`
 
 The minimum radius in pixels.
 
 ##### `pointRadiusMaxPixels` (Number, optional)
 
-- Default: `Number.MAX_SAFE_INTEGER`
+* Default: `Number.MAX_SAFE_INTEGER`
 
 The maximum radius in pixels.
 
 ##### `fp64` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
@@ -154,14 +155,14 @@ deck.gl.
 
 ##### `getLineColor`
 
-- Default: `f => f.properties.lineColor || [0, 0, 0, 255]`
+* Default: `f => f.properties.lineColor || [0, 0, 0, 255]`
 
 Called to retrieve the color of line and/or the outline of polygon color for a GeoJson feature, depending
 on its type. Color supports `[R, G, B]` and `[R, G, B, A]`, where `A` has a value between `0` and `255`.
 
 ##### `getFillColor` (Function, optional)
 
-- Default: `f => f.properties.fillColor || [0, 0, 0, 255]`
+* Default: `f => f.properties.fillColor || [0, 0, 0, 255]`
 
 Called to retrieve the solid color of the polygon and point features of a GeoJson. Color supports `[R, G, B]` and `[R, G, B, A]`, where `A` has a value between `0` and `255`.
 
@@ -169,13 +170,13 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` 
 
 ##### `getRadius`
 
-- Default: `f => f.properties.radius || f => f.properties.size || 1`
+* Default: `f => f.properties.radius || f => f.properties.size || 1`
 
 Called to retrieve the radius of `Point` and `MultiPoint` feature.
 
 ##### `getLineWidth`
 
-- Default: `f => f.properties.lineWidth || 1`
+* Default: `f => f.properties.lineWidth || 1`
 
 Called to retrieve the line width in meters for a GeoJson feature.
 
@@ -185,7 +186,7 @@ features. It is called for `Polygon` and `MultiPolygon` features if the
 
 ##### `getElevation` (Function, optional)
 
-- Default: `f => f.properties.elevation || 1000`
+* Default: `f => f.properties.elevation || 1000`
 
 Called to retrieve the elevation of a polygon feature (when `extruded` is true).
 
@@ -194,7 +195,7 @@ otherwise will be in unit coordinates.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
-### Remarks
+## Remarks
 
 * By supplying a GeoJson `FeatureCollection` you can render multiple polygons,
   lines and points.
@@ -204,5 +205,6 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
   the color of that `Feature`.
 
 ## Source
-[src/core-layers/geojson-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/geojson-layer)
+
+[modules/core/src/core-layers/geojson-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/geojson-layer)
 

@@ -90,6 +90,7 @@ render(<App />, document.body.appendChild(document.createElement('div')));
 ## Using JSX with deck.gl Layers
 
 It is possible to use JSX syntax to create deck.gl layers as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `layers` prop. There are no performance advantages to this syntax but it can allow for a more consistent, React-like coding style.
+
 ```jsx
   render() {
     return (

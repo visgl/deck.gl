@@ -64,14 +64,14 @@ they will be used to calculate primitive hexagon instead of `hexagonVertices`
 
 ##### `coverage` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by
 `coverage * radius`
 
 ##### `elevationScale` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 Hexagon elevation multiplier. The elevation of hexagon is calculated by
 `elevationScale * getElevation(d)`. `elevationScale` is a handy property
@@ -79,13 +79,13 @@ to scale all hexagon elevations without updating the data.
 
 ##### `extruded` (Boolean, optional)
 
-- Default: `true`
+* Default: `true`
 
 Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
 ##### `fp64` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
@@ -98,25 +98,25 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getCentroid` (Function, optional)
 
-- Default: `object => object.centroid`
+* Default: `object => object.centroid`
 
 Method called to retrieve the centroid of each hexagon. Centorid should be
 set to [lon, lat]
 
 ##### `getColor` (Function, optional)
 
-- Default: `object => object.color`
+* Default: `object => object.color`
 
 Method called to retrieve the color of each object. Color should be set to
 [r, g, b, a] with each number between 0-255.
 
 ##### `getElevation` (Function, optional)
 
-- Default: `object => object.elevation`
+* Default: `object => object.elevation`
 
 Method called to retrieve the elevation of each object. 1 unit approximate to 100 meters.
 
 ## Source
 
-[src/core-layers/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/hexagon-cell-layer)
+[modules/core/src/core-layers/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/hexagon-cell-layer)
 

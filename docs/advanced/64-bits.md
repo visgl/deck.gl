@@ -29,15 +29,16 @@ float point numbers. This transfers to ~ `1x10^-15` relative error within
 
 The error bound as tested on 2015 MacBook Pro with AMD Radeon R9 M370X GPU:
 
-```
-Addition and subtraction: < 1 ulp
-Multiplication: ~1.5 ulps
-Division: ~2 ulps
-Square root: ~2.6 ulps
-Exponential: ~2.6 ulps
-Logarithm: ~11.6 ulps
-Trigonometry: ~5 ulps
-```
+| Operation | Error |
+| ---- | ---- |
+| Addition and subtraction | < 1 ulp |
+| Multiplication | ~1.5 ulps |
+| Division | ~2 ulps |
+| Square root | ~2.6 ulps |
+| Exponential | ~2.6 ulps |
+| Logarithm | ~11.6 ulps |
+| Trigonometry | ~5 ulps |
+
 Note: `ulp` = [unit of least precision](https://en.wikipedia.org/wiki/Unit_in_the_last_place)
 
 ## Performance Implications
@@ -58,5 +59,5 @@ performance benchmark layers in the layer-browser example in deck.gl repo.
 
 ## References
 
-- http://crd-legacy.lbl.gov/~dhbailey/mpdist
-- https://gmplib.org
+* [http://crd-legacy.lbl.gov/~dhbailey/mpdist](http://crd-legacy.lbl.gov/~dhbailey/mpdist)
+* [https://gmplib.org](https://gmplib.org)

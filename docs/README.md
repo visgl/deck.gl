@@ -1,6 +1,6 @@
 <p align="center">
   These docs are for
-  <a href="https://github.com/uber/deck.gl/blob/5.1-release/docs/README.md">
+  <a href="https://github.com/uber/deck.gl/blob/5.2-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v5.1-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
@@ -27,6 +27,7 @@ deck.gl is designed to make visualization of large data sets simple. It enables 
 The basic idea of using deck.gl is to render a stack of visual overlays, usually (but not always) over maps.
 
 To make this simple concept work, deck.gl handles a number of challenges:
+
 * Handling of large data sets and performant updates
 * Interactive event handling such as picking
 * Cartographic projections and integration with underlying map

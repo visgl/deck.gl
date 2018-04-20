@@ -1,10 +1,6 @@
 # Text Layer
 
-### About
-
 The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
-
-### Example
 
 ```js
 import DeckGL from 'deck.gl';
@@ -29,6 +25,8 @@ const App = ({data, viewport}) => {
   return <DeckGL {...viewport} layers={[layer]} />;
 };
 ```
+
+## Properties
 
 ### Data Accessors
 
@@ -106,6 +104,9 @@ Method called to specify the alignment baseline. Available options include `'top
 
 Method called to specify screen space offset relative to the `coordinates` in pixel unit. This function is rarely used in common cases.
 
-### Font Style and Character Set Support
 
-Currently, the layer uses a monospaced font style called [Lucida Console](https://en.wikipedia.org/wiki/Lucida#Lucida_Console) and only supports the ASCII character set. If the text label happens to contain unicode characters, the layer replaces them with a single space and renders the text label without throwing an error.
+## Source
+
+[modules/core/src/core-layers/text-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/text-layer)
+
+

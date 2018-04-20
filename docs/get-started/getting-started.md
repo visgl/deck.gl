@@ -3,10 +3,13 @@
 ## Installation
 
 First, you need to install the deck.gl (and luma.gl) frameworks
+
 ```bash
 npm install --save deck.gl
 ```
+
 or
+
 ```bash
 yarn add deck.gl
 ```
@@ -15,45 +18,54 @@ yarn add deck.gl
 
 ## Running the Examples
 
-The deck.gl repository contains an [examples folder](https://github.com/uber/deck.gl/tree/5.1-release/examples) with a selection of small, standalone examples that could be good starting points for your application.
+The deck.gl repository contains an [examples folder](https://github.com/uber/deck.gl/tree/5.2-release/examples) with a selection of small, standalone examples that could be good starting points for your application.
 
 You should be able to copy these folders to your preferred locations, and get them running simply as follows:
 
 Clone the deck.gl repo, if you haven't already
+
 ```bash
 git clone git@github.com:uber/deck.gl.git
 ```
 
-For most consistent results, it is recommended that you check out the latest release branch (e.g. `git checkout 5.1-release`) instead of `master` when running examples.
+For most consistent results, it is recommended that you check out the latest release branch (e.g. `git checkout 5.2-release`) instead of `master` when running examples.
+
 ```bash
-git checkout 5.1-release
+git checkout 5.2-release
 ```
 
 Change directory to the example you are interested in
+
 ```bash
 cd deck.gl/examples/...
 ```
 
 Then install dependencies using the installer of your choice:
+
 ```bash
 npm install
 ```
+
 or
+
 ```bash
 yarn
 ```
 
 and then running using:
+
 ```bash
 npm start
 ```
 
 If the example uses a mapbox base map you need a [Mapbox access token](/docs/get-started/using-with-mapbox-gl.md)
+
 ```bash
 export MapboxAccessToken={Your Token Here} && npm start
 ```
 
 If you want to build the example against the latest deck.gl source code in the cloned repo (rather than the published version of deck.gl listed in the examples `package.json`)
+
 ```bash
 npm run start-local
 ```

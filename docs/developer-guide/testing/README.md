@@ -1,6 +1,7 @@
 # @deck.gl/test-utils
 
 A set of utilities to facilitate testing deck.gl layers. Tests can be run:
+
 * completely in Node.js (lifecycle tests only).
 * completely in the Browser (lifecycle and rendering tests).
 * from Node in a controlled Browser instance (`TestDriver` classes).
@@ -9,11 +10,14 @@ A set of utilities to facilitate testing deck.gl layers. Tests can be run:
 ## Installing
 
 The deck.gl test utilities are published as a separate npm module that is only intended to be used during development. Install it as as a "dev dependency" as follows:
-```
+
+```bash
 npm install --save-dev @deck.gl/test-utils
 ```
+
 or
-```
+
+```bash
 yarn add -D @deck.gl/test-utils
 ```
 

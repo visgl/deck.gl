@@ -60,9 +60,10 @@ export default MultiColorPathLayer extends PathLayer {
 You can replace the shaders used in a layer by overriding the `getShaders()`
 method. Every core layer calls this method during initialization. It
 returns the shaders and modules used by the layer in an object:
-- `vs`: string, GLSL source of the vertex shader
-- `fs`: string, GLSL source of the fragment shader
-- `modules`: Array, list of shader modules to be used
+
+* `vs`: string, GLSL source of the vertex shader
+* `fs`: string, GLSL source of the fragment shader
+* `modules`: Array, list of shader modules to be used
 
 Read about [writing your own shaders](/docs/advanced/writing-shaders.md).
 

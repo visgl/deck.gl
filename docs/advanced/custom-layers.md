@@ -12,17 +12,21 @@ There are a couple of ways to build a layer in deck.gl, and it is helpful to con
 
 
 ## Creating The Layer class
+
 Your layer class must be a subclass of [Layer](/docs/api-reference/layer.md).
+
 ```js
 import {Layer} from 'deck.gl';
 
 class AwesomeLayer extends Layer {...}
 ```
+
 It can be a direct subclass of `Layer`, or extend another layer.
 
 ### Naming Your Layer
 
 Store the layer name in the `layerName` static property on your `Layer` subclass:
+
 ```js
 AwesomeLayer.layerName = 'AwesomeLayer';
 ```

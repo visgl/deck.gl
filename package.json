@@ -22,7 +22,7 @@
     "clean": "rm -rf node_modules && lerna clean --yes",
     "cover": "NODE_ENV=test nyc --reporter html --reporter cobertura --reporter=lcov npm run test cover",
     "lint": "scripts/lint.sh",
-    "lint-markdown": "scripts/lint-markdown.sh",
+    "lint-docs": "scripts/lint-markdown.sh",
     "publish-prod": "npm run build && npm run test && npm run test dist && scripts/publish.sh prod",
     "publish-beta": "npm run build && npm run test && npm run test dist && scripts/publish.sh beta",
     "start": "(cd examples/layer-browser && (path-exists node_modules || npm i) && npm run start-local)",

@@ -7,10 +7,10 @@ One of the keys to getting good performance and desired behavior from deck.gl is
 
 Before jumping into the details, it might be helpful review the reactive programming paradigm that the deck.gl is architecture is based on:
 
-- In a reactive application, a complete UI description is "re-rendered" every time something in the application state changes (in the case of a deck.gl application, a new list of layers is created whenever something changes).
-- The UI framework (in this case, deck.gl) makes the choices about what to update, by comparing (or "diffing") the newly rendered UI description with the last rendered UI description.
-- The framework then the makes minimal necessary changes to account for the differences, and then redraws.
-- The required changes are made to "WebGL state" in case of deck.gl, and to the Browser's DOM (HTML element tree) in case of React.
+* In a reactive application, a complete UI description is "re-rendered" every time something in the application state changes (in the case of a deck.gl application, a new list of layers is created whenever something changes).
+* The UI framework (in this case, deck.gl) makes the choices about what to update, by comparing (or "diffing") the newly rendered UI description with the last rendered UI description.
+* The framework then the makes minimal necessary changes to account for the differences, and then redraws.
+* The required changes are made to "WebGL state" in case of deck.gl, and to the Browser's DOM (HTML element tree) in case of React.
 
 
 ## Creating New Layers on Every Render?
@@ -46,6 +46,7 @@ Once a `data` change has been confirmed by deck.gl it will invalidate all attrib
 Accessors. Note that changing the value of an accessor (i.e. supplying a different function to the accessor prop) will not in itself trigger an attribute update. This is because the function identity is a poor indicator of whether an update is needed, and the convenience of using local functions as prop values.
 
 Thus, the code below will not trigger expensive attribute updates, which is what most applications would expect
+
 ```js
 new Layer({
   getColor: x => x.color, // this creates a new function every render
@@ -54,6 +55,7 @@ new Layer({
 ```
 
 However, neither will this code
+
 ```js
 new Layer({
   getColor: pill === 'red' ? this._getRedPill() : this._getBluePill(), // Does not trigger an attribute update!!!
@@ -79,6 +81,7 @@ new Layer({
   }
 })
 ```
+
 In the above code, deck.gl compares the value of the `getColor` update trigger with its previous value on every render, and whenever it changes, it will regenerate the colors attribute using the function supplied to `getColor` at that time.
 
 

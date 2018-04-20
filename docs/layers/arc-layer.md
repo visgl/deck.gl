@@ -39,13 +39,13 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ##### `strokeWidth` (Number, optional)
 
-- Default: `1`
+* Default: `1`
 
 The stroke width used to draw each arc. Unit is pixels.
 
 ##### `fp64` (Boolean, optional)
 
-- Default: `false`
+* Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
@@ -53,19 +53,19 @@ Whether the layer should be rendered in high-precision 64-bit mode
 
 ##### `getSourcePosition` (Function, optional)
 
-- Default: `object => object.sourcePosition`
+* Default: `object => object.sourcePosition`
 
 Method called to retrieve the source position of each object.
 
 ##### `getTargetPosition` (Function, optional)
 
-- Default: `object => object.targetPosition`
+* Default: `object => object.targetPosition`
 
 Method called to retrieve the target position of each object.
 
 ##### `getSourceColor` (Function, optional)
 
-- Default: `object => object.color`
+* Default: `object => object.color`
 
 Method called to determine the rgba color of the source. If the alpha parameter
 is not provided, it will be set to `255`.
@@ -74,15 +74,17 @@ If the method does not return a value for the given object, fallback to `[0, 0, 
 
 ##### `getTargetColor` (Function, optional)
 
-- Default `object => object.color`
+* Default `object => object.color`
 
 Method called to determine the rgba color of the source.
+
 * If the alpha parameter is not provided, it will be set to `255`.
 * If the method does not return a value for the given object, fallback to `[0, 0, 255, 255]`.
 
 ## Source
-[src/core-layers/arc-layer](https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/arc-layer)
 
-<a href="https://github.com/uber/deck.gl/tree/5.1-release/src/core-layers/arc-layer">
+[modules/core/src/core-layers/arc-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/arc-layer)
+
+<a href="https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/arc-layer">
 </a>
 
