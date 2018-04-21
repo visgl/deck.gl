@@ -154,6 +154,13 @@ export default class App extends PureComponent {
     this.setState({queriedItems: infos});
   }
 
+  _onMultiDepthPick() {
+    const {width, height} = this.state;
+    const infos = this.refs.deckgl.pickMultipleObjects({x: width / 2, y: height / 2});
+    console.log(infos); // eslint-disable-line
+    this.setState({queriedItems: infos});
+  }
+
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
 
@@ -317,6 +324,9 @@ export default class App extends PureComponent {
           <div style={{textAlign: 'center', padding: '5px 0 5px'}}>
             <button onClick={this._onPickObjects}>
               <b>Pick Objects</b>
+            </button>
+            <button onClick={this._onMultiDepthPick}>
+              <b>Multi Depth Pick</b>
             </button>
           </div>
           <LayerControls

@@ -64,6 +64,10 @@ export default class DeckGL extends React.Component {
     return this.deck.pickObject({x, y, radius, layerIds});
   }
 
+  pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
+    return this.deck.pickMultipleObjects({x, y, radius, layerIds, depth});
+  }
+
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
     return this.deck.pickObjects({x, y, width, height, layerIds});
   }

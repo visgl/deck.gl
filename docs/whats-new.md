@@ -14,6 +14,15 @@ deck.gl layers can now specify additional type information about properties. Whe
 > For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
 
+## deck.gl v5.3
+
+Release date: TBD, target May, 2018
+
+
+### Deep Picking
+
+deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` method, which returns a list of all objects under the mouse.
+
 
 ## deck.gl v5.2
 

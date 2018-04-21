@@ -39,6 +39,7 @@ export function pickObject(
     y,
     radius,
     layerFilter,
+    depth = 1,
     mode,
     onViewportActive,
     pickingFBO,
@@ -61,43 +62,69 @@ export function pickObject(
     deviceHeight: pickingFBO.height
   });
 
-  const pickedColors =
-    deviceRect &&
-    drawAndSamplePickingBuffer(gl, {
+  // reset buffers
+  layers.forEach(l => l.updateInstancePickingColors([]));
+
+  const result = [];
+  const exclude = {};
+
+  for (let i = 0; i < depth; i++) {
+    const pickedColors =
+      deviceRect &&
+      drawAndSamplePickingBuffer(gl, {
+        layers,
+        viewports,
+        onViewportActive,
+        useDevicePixels,
+        pickingFBO,
+        deviceRect,
+        layerFilter,
+        redrawReason: mode
+      });
+
+    const pickInfo =
+      (pickedColors &&
+        getClosestFromPickingBuffer(gl, {
+          pickedColors,
+          layers,
+          deviceX,
+          deviceY,
+          deviceRadius,
+          deviceRect
+        })) ||
+      NO_PICKED_OBJECT;
+
+    if (!pickInfo.pickedColor) {
+      break;
+    }
+
+    const layerId = pickInfo.pickedColor[3] - 1;
+    if (exclude[layerId]) {
+      exclude[layerId].push(pickInfo.pickedColor);
+    } else {
+      exclude[layerId] = [pickInfo.pickedColor];
+    }
+    layers[layerId].updateInstancePickingColors(exclude[layerId]);
+
+    const pPickInfos = processPickInfo({
+      pickInfo,
+      lastPickedInfo,
+      mode,
       layers,
       viewports,
-      onViewportActive,
-      useDevicePixels,
-      pickingFBO,
-      deviceRect,
-      layerFilter,
-      redrawReason: mode
+      x,
+      y,
+      deviceX,
+      deviceY,
+      pixelRatio
     });
 
-  const pickInfo =
-    (pickedColors &&
-      getClosestFromPickingBuffer(gl, {
-        pickedColors,
-        layers,
-        deviceX,
-        deviceY,
-        deviceRadius,
-        deviceRect
-      })) ||
-    NO_PICKED_OBJECT;
+    if (pPickInfos) {
+      pPickInfos.forEach(info => result.push(info));
+    }
+  }
 
-  return processPickInfo({
-    pickInfo,
-    lastPickedInfo,
-    mode,
-    layers,
-    viewports,
-    x,
-    y,
-    deviceX,
-    deviceY,
-    pixelRatio
-  });
+  return result;
 }
 
 // Pick all objects within the given bounding box

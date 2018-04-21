@@ -165,9 +165,30 @@ export default class Deck {
 
   pickObject({x, y, radius = 0, layerIds = null}) {
     this.stats.timeStart('deck.pickObject');
-    const selectedInfos = this.layerManager.pickObject({x, y, radius, layerIds, mode: 'query'});
+    const selectedInfos = this.layerManager.pickObject({
+      x,
+      y,
+      radius,
+      layerIds,
+      mode: 'query',
+      depth: 1
+    });
     this.stats.timeEnd('deck.pickObject');
     return selectedInfos.length ? selectedInfos[0] : null;
+  }
+
+  pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
+    this.stats.timeStart('deck.pickMultipleObjects');
+    const selectedInfos = this.layerManager.pickObject({
+      x,
+      y,
+      radius,
+      layerIds,
+      mode: 'query',
+      depth
+    });
+    this.stats.timeEnd('deck.pickMultipleObjects');
+    return selectedInfos;
   }
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {

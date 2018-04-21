@@ -224,9 +224,7 @@ Returns:
 
 Notes:
 
-* The query methods are designed to quickly find objects by utilizing the picking buffer.
-* The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
-* Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
+* This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
 
 
 ## Remarks
