@@ -65,7 +65,7 @@ deck.gl allows you to divide your screen into multiple viewports and render laye
 
 #### View Classes
 
-A new hierarchy of [`View`](/docs/advanced/views.md) classes let apps provide multiple views of their data.
+A new hierarchy of [`View`](/docs/advanced/views.md) classes, such as `MapView` and `FirstPersonView` make it easy to split the screen into viewports and provide multiple views of data.
 
 
 ### MapController

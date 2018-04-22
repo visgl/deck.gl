@@ -14,9 +14,6 @@ export default class View {
       width = '100%',
       height = '100%',
 
-      // Viewport Type
-      type = Viewport, // TODO - default to WebMercator?
-
       // Viewport Options
       projectionMatrix = null, // Projection matrix
       fovy = 75, // Perspective projection parameters, used if projectionMatrix not supplied
@@ -25,7 +22,10 @@ export default class View {
       modelMatrix = null, // A model matrix to be applied to position, to match the layer props API
 
       // A View can be a wrapper for a viewport instance
-      viewportInstance = null
+      viewportInstance = null,
+
+      // Internal: Viewport Type
+      type = Viewport // TODO - default to WebMercator?
     } = props;
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
