@@ -7,7 +7,7 @@ Our [examples](https://github.com/uber/deck.gl/tree/5.2-release/examples/get-sta
 
 ## Using @deck.gl/core
 
-`@deck.gl/core` is a submodule of deck.gl that contains no React dependency.
+` @deck.gl/core` is a submodule of deck.gl that contains no React dependency.
 
 The [Deck](/docs/api-reference/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 

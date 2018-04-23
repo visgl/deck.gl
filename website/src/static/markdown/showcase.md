@@ -24,7 +24,7 @@
   <div class="thumb-desc">
     <div>
       <a href="https://pessimistress.github.io/ascii/"><h2>Ascii Video Player</h2></a>
-      <p>Video processing on the fly.</p>
+      <p>Uses the TextLayer API to convert pixels into characters on the fly. WebGL2 compatible browser is required.</p>
       <p class="credit"><a href="https://github.com/pessimistress/deck.gl/tree/master/examples/ascii">Source code</a></p>
     </div>
   </div>
