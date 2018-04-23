@@ -129,4 +129,4 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
   unnecessary calculations using React and deck.gl lifecycle functions.
 
 
-See [full API doc](/docs/api-reference/deckgl.md) for the `DeckGL` component.
+See [full API doc](/docs/api-reference/react/deckgl.md) for the `DeckGL` component.

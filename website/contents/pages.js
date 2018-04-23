@@ -372,6 +372,10 @@ export const docPages = generatePath([
           {
             name: 'ScreenGridLayer',
             content: getDocUrl('layers/screen-grid-layer.md')
+          },
+          {
+            name: 'TextLayer',
+            content: getDocUrl('layers/text-layer.md')
           }
         ]
       },

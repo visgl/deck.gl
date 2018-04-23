@@ -6,7 +6,7 @@ View states are typically initialized by the application on startup to some init
 
 ## Using View States
 
-View States are used by [`View`](/docs/advanced/view.md) classes. The application's `View` instances contain information about how to visualize a "view state". The Views can be thought of as cameras positioned using your view states.
+View States are used by [`View`](/docs/api-reference/view.md) classes. The application's `View` instances contain information about how to visualize a "view state". The Views can be thought of as cameras positioned using your view states.
 
 
 ## View State Properties
