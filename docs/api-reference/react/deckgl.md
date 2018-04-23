@@ -266,4 +266,4 @@ Remarks:
 
 ## Source
 
-[src/react/deckgl.js](https://github.com/uber/deck.gl/blob/5.1-release/src/react/deckgl.js)
+[modules/react/src/deckgl.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/react/src/deckgl.js)
