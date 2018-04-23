@@ -79,3 +79,7 @@ All [Deck](/docs/api-reference/deck.md) class methods, with these additional met
 
 Returns the mapbox-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instance if a base map is present.
 
+
+## Source
+
+[modules/lite/src/deckgl.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/lite/src/deckgl.js)

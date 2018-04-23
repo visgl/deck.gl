@@ -161,4 +161,4 @@ Parameters:
 
 ## Source
 
-[src/core/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/5.0-release/src/core/lib/layer-manager.js)
+[modules/core/src/core/lib/layer-manager.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/lib/layer-manager.js)

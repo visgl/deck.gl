@@ -85,3 +85,8 @@ Run the render tests
 ```js
 renderTest.run();
 ```
+
+
+## Source
+
+[modules/test-utils/src/render-test.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/test-utils/src/render-test.js)
