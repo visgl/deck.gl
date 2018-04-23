@@ -2,22 +2,27 @@
 
 The `View` class and it subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantitate at least one `View` subclass.
 
+Views allow you to specify:
+
+* Relative dimensions of viewports
+* Projection Matrix
+
 For more information, consult the [Views](/docs/advanced/views.md) article.
 
 
 ## Usage
 
+Create a new `View` (note: normally apps use a `View` subclass)
+
 ```js
 const view = new View({});
 ```
 
-## Types
+Get the dimensions of a `View`
 
-| `PROJECTION`      | Description |
-| ---               | ---         |
-| `PERSPECTIVE`     | Builds perspective projection from `fovy`, `near` and `far` parameters. `aspect` is extracted from the view state. |
-| `ORTHOGRAPHIC_3D` | Builds orthographic projection from `fovy`, `near` and `far` parameters. `aspect` and `distance` are extracted from the view state. |
-| `ORTHOGRAPHIC_2D` | Builds orthographic projection from `left`, `right`, `top`, `bottom`, `near` and `far` parameters. |
+```js
+const {x, y, width, height} = view.getDimensions({width: 1024, height: 768});
+```
 
 
 ## Constructor
@@ -35,7 +40,6 @@ Parameters:
   + `y` (String|Number) - A relative or absolute position. Default `0`.
   + `width` (String|Number) - A relative or absolute extent. Default `'100%'`.
   + `height` (String|Number) - A relative or absolute extent. Default `'100%'`.
-  + `type` (`Viewport`) - The constructor of the viewport. Default `Viewport`.
 
   Projection Matrix Parameters
 
@@ -50,11 +54,12 @@ Parameters:
 
   + `getProjectionMatrix` (Array[16], optional) - Function that returns a projection matrix.
 
+
 ## Methods
 
 ##### `equals`
 
-Returns `true` if the supplied `View` instance is identical (equivalent) with this view. A value of `false` does not guarantee that the views are not equivalent.
+Returns `true` if deck.gl can determine that the supplied `View` instance is identical (equivalent) with this view.
 
 `View.equals(view)`
 
@@ -62,16 +67,39 @@ Returns `true` if the supplied `View` instance is identical (equivalent) with th
 
 Returns:
 
-* `true` if the given view is identical to the current one.
+* `true` - the given view is identical to the current one.
+
+Note: For speed, deck.gl uses shallow equality. This means that a value of `false` does not guarantee that the views are not equivalent.
 
 
-##### `getViewport`
+##### `makeViewport`
 
 ```js
-View.getViewport({width, height, viewState})
+View.makeViewport({width, height, viewState})
 ```
 
-Builds a viewport using the viewport type and props in the `View` and provided `width`, `height` and `view state`.
+Builds a viewport using the viewport type and props in the `View`and provided `width`, `height` and `viewState`. The contents of `viewState` needs to be compatible with the particular `View` sublass in use.
+
+
+##### `getDimensions`
+
+Returns the actual pixel position and size that this `View` will occupy in a given "canvas" size.
+
+```js
+const {x, y, width, height} = view.getDimensions({width: ..., height: ...});
+```
+
+Parameters:
+
+* `width` (`Number`) - Dimension in CSS pixels of the deck.gl "canvas".
+* `height` (`Number`) - Dimension in CSS pixels of the deck.gl "canvas".
+
+Returns:
+
+* `x` (`Number`) - x position in CSS pixels
+* `y` (`Number`) - y position in CSS pixels
+* `width` (`Number`) - width in CSS pixels
+* `height` (`Number`) - height in CSS pixels
 
 
 ##### `getMatrix`

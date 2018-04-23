@@ -1,17 +1,46 @@
 # Views
 
-It can helpful to begin by thinking of a `View` essentially as a way to specify a rectangle on the screen specifying where your data should be displayed, together with certain "camera parameters" specifying how your data should be "projected".
+> View classes are a recent addition to deck.gl. We are still refining the documentation.
 
-Note that if no `View` is specified, deck.gl will automatically create a `MapView` that fills the whole canvas, so basic geospatial applications often do not have to specify any `View`s.
+View classes can be thought of as "descriptors" that specify **where** and **how** deck.gl should draw.
+
+However, the view does not specify **what** should be drawn, e.g. the "position" that should be displayed. This information needs to be provided separately to deck.gl in the form of one or more "view state" objects. Also a `View` has no knowledge of the actual size of the deck.gl "canvas". Instead, it contains relative sizes that adapt to the current size of the canvas.
+
+The particular `View` subclass chosen defines how deck.gl layers will be rendered. The set of view state parameters that will be used varies between Views.
+
+> Note that if no `View` is specified, deck.gl will automatically create a `MapView` that fills the whole canvas, so basic geospatial applications often do not have to specify any `View`s.
+
+To summarize:
+
+A `View` instance defines
+
+* How deck.gl layers will be rendered (`MapView`, `FirstPersonView`) etc.
+* Which `viewState` parameters will be used.
+
+A `View` instance contains
+
+* a (relative) rectangle on the screen specifying where your data should be displayed, together with
+* certain "camera parameters" specifying how your data should be "projected".
+
+A `View` instance does not contain
+
+* the current size of the deck.gl canvas (screen)
+* the actual `viewState`, i.e. the "world" position that should be displayed in the view.
+
+The `viewState` prop is typically provided to the main `Deck` or `DeckGL` classes. These classes automatically combine `viewState` with `View` instances when required.
+
+deck.gl allows multiple views to be specified, allowing the application to divide the screen into multiple similar or diffenrent views. These views can be synchronized or separately controlled by the user or the application.
+
+Finally, the React version of deck.gl can automatically position other components, such as base maps and labels, relative to `View` instances.
 
 
 ## What is in a View?
 
 A view specifies
 
-* an `id`
-* relative extents (x, y, width, height)
-* projection mode and parameters (e.g. perspective vs. orthographic)
+* An `id`, which is used not only for debugging but to e.g. position base components relative to views.
+* Relative extents (`x`, `y`, `width`, `height`). These are typically specified in "CSS-like" percentage strings, e.g. `width: '50%'`.
+* Projection mode parameters (e.g. perspective vs. orthographic)
 
 
 ## Choosing a View
