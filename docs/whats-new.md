@@ -3,18 +3,6 @@
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/@vis.gl) for news about new releases and features in deck.gl.
 
 
-## deck.gl v6.0
-
-Release date: TBD, target late Q2, 2018
-
-### Prop Types
-
-deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/advanced/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
-
-> For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
-
-
-
 ## deck.gl v5.2
 
 Release date: TBD, target April, 2018
