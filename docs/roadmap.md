@@ -20,7 +20,7 @@ There are a number of interesting layers in this module, however there are cavea
 
 * We do not provide website documentation for these layers, so if you want to use these layers you may need to refer directly to the deck.gl source code.
 * While we make reasonable attempts to not break things, we do not guarantee that they will be stable between releases.
-* To prevent surprises, you may want to pin the version of the `@deck.gl/experimental-layers` module in your `package.json`.
+* To prevent surprises, you may want to pin the version of the ` @deck.gl/experimental-layers` module in your `package.json`.
 * Worst case, if you have to upgrade and some unexpected change happens, you can copy the source code of the affected layer(s) to your app.
 
 
