@@ -3,15 +3,14 @@
 While not directly based on React, deck.gl is designed from ground up to work with [React](https://facebook.github.io/react/)-based applications. deck.gl layers fit naturally into React's component render flow and flux/redux based appications. deck.gl layers will be performantly rerendered whenever you rerender your normal JSX or React components.
 
 
-## The `DeckGL` React Component
+## The DeckGL React Component
 
 To use deck.gl with React, simply import the `DeckGL` React component and render it as a child of another component, passing in your list of deck.gl layers as a property.
 
 ```jsx
 /// app.js
-import DeckGL, {LineLayer} from 'deck.gl';
-import {render} from 'react-dom';
 import React, {Component} from 'react';
+import DeckGL, {LineLayer} from 'deck.gl';
 
 // Viewport settings
 const viewport = {
@@ -28,7 +27,7 @@ const viewport = {
 const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
 // DeckGL react component
-export default class App extends Component {
+class App extends Component {
   render() {
     return (
       <DeckGL {...viewport} layers={[
@@ -38,9 +37,6 @@ export default class App extends Component {
   }
 }
 
-// Add DeckGL react component to DOM
-render(<App />, document.body.appendChild(document.createElement('div')));
-
 ```
 
 ## Adding a Base Map
@@ -49,10 +45,9 @@ An important companion to deck.gl is `react-map-gl`. It can provide both a base 
 
 ```jsx
 /// app.js
+import React, {Component} from 'react';
 import DeckGL, {LineLayer} from 'deck.gl';
 import MapGL from 'react-map-gl';
-import {render} from 'react-dom';
-import React, {Component} from 'react';
 
 // Set your mapbox access token here
 const MAPBOX_ACCESS_TOKEN = 'MAPBOX_ACCESS_TOKEN';
@@ -71,7 +66,7 @@ const viewport = {
 // Data to be used by the LineLayer
 const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
-export default class App extends Component {
+class App extends Component {
   render() {
     return (
       <MapGL {...viewport} mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}>
@@ -82,8 +77,6 @@ export default class App extends Component {
     );
   }
 }
-
-render(<App />, document.body.appendChild(document.createElement('div')));
 
 ```
 

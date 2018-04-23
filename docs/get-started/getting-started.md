@@ -5,7 +5,7 @@
 First, you need to install the deck.gl (and luma.gl) frameworks
 
 ```bash
-npm install --save deck.gl
+npm install deck.gl --save
 ```
 
 or
@@ -70,7 +70,7 @@ If you want to build the example against the latest deck.gl source code in the c
 npm run start-local
 ```
 
-> The examples on the `master` branch are occasionally updated to use features from the latest, unreleased version of deck.gl. If some example doesn't work using `npm start` it can be worth trying `npm run start-local`.
+> The examples on the `master` branch are updated to use features from the latest, unreleased version of deck.gl. If some example doesn't work using `npm start` it can be worth trying `npm run start-local`.
 
 > While all examples support `npm run start-local`, there are some caveats when running against local source. Most importantly, you must make sure to run `npm install` or `yarn` in the deck.gl root folder before running `npm run start-local` in an example folder.
 
