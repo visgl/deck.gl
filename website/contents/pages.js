@@ -98,7 +98,7 @@ export const examplePages = generatePath([
         name: 'TextLayer',
         content: {
           demo: 'TextDemo',
-          code: getCodeUrl('examples/website/text-layer')
+          code: getCodeUrl('examples/website/tagmap')
         }
       }
     ]
