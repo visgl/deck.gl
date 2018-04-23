@@ -25,6 +25,7 @@ new PerspectiveView({..., fov: 45});
 
 
 Projection matrix arguments:
+
 * `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
 * `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
 * `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
