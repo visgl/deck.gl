@@ -22,20 +22,17 @@ export default class PerspectiveView extends View {
       // view matrix arguments
       eye, // Defines eye position
       lookAt = [0, 0, 0], // Which point is camera looking at, default origin
-      up = [0, 1, 0], // Defines up direction, default positive y axis
-      // projection matrix arguments
-      fovy = 75, // Field of view covered by camera
-      near = 1, // Distance of near clipping plane
-      far = 100 // Distance of far clipping plane
+      up = [0, 1, 0] // Defines up direction, default positive y axis
     } = viewState;
 
-    let {
-      // automatically calculated
-      aspect = null // Aspect ratio (set to viewport widht/height)
-    } = viewState;
+    // Projection matrix arguments
+    // TODO - Extracting from viewState is deprecated
+    const fovy = props.fovy || viewState.fovy || 75; // Field of view covered by camera
+    const near = props.near || viewState.near || 1; // Distance of near clipping plane
+    const far = props.far || viewState.far || 100; // Distance of far clipping plane
+    const aspect = Number.isFinite(viewState.aspect) ? viewState.aspect : width / height;
 
     const fovyRadians = fovy * DEGREES_TO_RADIANS;
-    aspect = Number.isFinite(aspect) ? aspect : width / height;
     return new Viewport({
       x,
       y,

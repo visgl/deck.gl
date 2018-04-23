@@ -58,24 +58,31 @@ testLayer({Layer, spies, testCases});
 
 * `Layer` (`Object`) - The layer component class
 * `spies` (`Array`) - Array of Layer class methods to spy on.
-* `testCases` (`Array`) - A list of testCases. Each test cases is an object with the following fields:
-  + `title` (`String`) - title of the test case
-  + `props` (`Object`) - Specifies a complete new set of props
-  + `updateProps` (`Object`) - Specifies an incremental prop change (overrides props from previous test case)
-  + `spies` (`Array`) - The list of updates to update
-  + `assert` (`Function`) - callbacks with updated layer, and oldState
+* `testCases` (`Array`) - A list of test cases, as described below.
 
-Notes:
 
-* Updates are called sequentially. updateProps will be merged with previous props
+## Test Cases
+
+Test cases specified as objects and are run sequentially. Each test case provided to `testLayer` specifies what properties are going to be updated.
+
+A test case is an object with the following fields:
+
+* `title` (`String`) - title of the test case
+* `props` (`Object`) - Specifies a complete new set of props
+* `updateProps` (`Object`) - Specifies an incremental prop change (overrides props from previous test case)
+* `spies`=`[]` (`Array`) - The list of updates to update
+* `assert`=`null` (`Function`) - Callback, see below
 
 
 ## Writing assert Functions
 
-Assert functions are called with the following properties:
+Each test case provided to `testLayer` specifies what properties are going to be updated. However it is also possible to specify an `assert` function that gets called after those properties have been updated.
+
+The `assert` function in the test case allows the test suite to verify that the layer's state has been correctly updated, or that certain functions (spies) have been called etc.
+
+Assert functions, when supplied, are called with the following properties:
 
 * `layer`
 * `oldState`
 * `subLayers`
 * `spies`
-

@@ -1,15 +1,32 @@
+<p class="badges">
+  <img src="https://img.shields.io/badge/geopspatial-yes-lightgrey.svg?style=flat-square" alt="geospatial" />
+</p>
+
 # MapView Class (Experimental)
 
-The [`MapView`] class is a subclass of [View](/docs/api-reference/view.md). This viewport creates a "camera" that looks at an exact position, position using the direction, distance and orientation specified by the application.
+The [`MapView`] class is a subclass of [View](/docs/api-reference/view.md). This viewport creates a geospatial "camera" that looks at a position on a map from a certain direction.
 
-This is in contrast with e.g. [FirstPersonView](/docs/api-reference/first-person-view.md) where the camera will be position exactly at the specified position.
+To render, `MapView` requires the application to use a `viewState` that contains at least `longitude`, `latitude` and `zoom` parameters. `MapView` will also consider the `pitch` and `bearing` parameters.
 
-For more information consult the [Views](/docs/advanced/views.md) article.
+For more information on using `View` classes, consult the [Views](/docs/advanced/views.md) article.
+
 
 ## Usage
 
 ```js
-const viewport = new MapView({
-  id: 'primary-map'
-});
+const viewport = new MapView({id: 'primary-map'});
 ```
+
+
+## Constructor
+
+Creates a new `MapView` instance.
+
+`new MapView({id, ...});`
+
+`MapView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
+
+
+## Remarks
+
+* In the React library, `MapView` support automatic synchronization with base maps components. See [DeckGL](/docs/api-reference/react/deckgl.md)
