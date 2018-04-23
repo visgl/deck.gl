@@ -49,7 +49,7 @@ The `id` property works similarly (but not identically) to the `key` property on
 
 ## Available Layers
 
-All deck.gl layers inherit from either the [`Layer`](/docs/api-reference/base-layer.md) or the [`CompositeLayer`](/docs/api-reference/composite-layer.md) base classes and the props of those layers are available to all layers unless otherwise documented.
+All deck.gl layers inherit from either the [`Layer`](/docs/api-reference/layer.md) or the [`CompositeLayer`](/docs/api-reference/composite-layer.md) base classes and the props of those layers are available to all layers unless otherwise documented.
 
 ### Core Layers
 

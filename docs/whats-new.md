@@ -473,7 +473,7 @@ The various Choropleth layers have been deprecated since deck.gl has new and bet
 A careful API audit has also been done to align property names between old and
 new layers. While this will makes the layers more consistent and the combined API easier to learn and work with, it does mean that some properties have been renamed, with the old name being deprecated, and in some very few cases, default values have changed.
 
-For more information on deprecations and how to update your code in response to these changes, please consult the deck.gl [Upgrade Guide](/docs/get-started/upgrade-guide.md).
+For more information on deprecations and how to update your code in response to these changes, please consult the deck.gl [Upgrade Guide](/docs/upgrade-guide.md).
 
 ## deck.gl v3.0
 

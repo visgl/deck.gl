@@ -105,7 +105,7 @@ Whether the layer responds to mouse pointer picking events.
 
 This callback will be called when the mouse enters/leaves an object of this deck.gl layer with a single parameter [`info`](/docs/get-started/interactivity.md#the-picking-info-object).
 
-If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onLayerHover`](/docs/api-reference/deckgl.md#-onlayerhover-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onLayerHover`](/docs/api-reference/react/deckgl.md#-onlayerhover-function-optional-) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
@@ -113,7 +113,7 @@ Requires `pickable` to be true.
 
 This callback will be called when the mouse clicks over an object of this deck.gl layer with a single parameter [`info`](/docs/get-started/interactivity.md#the-picking-info-object).
 
-If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onLayerClick`](/docs/api-reference/deckgl.md#-onlayerclick-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onLayerClick`](/docs/api-reference/react/deckgl.md#-onlayerclick-function-optional-) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 
