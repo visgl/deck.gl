@@ -41,7 +41,9 @@ Release date: TBD, target April, 2018
 
 ### Use deck.gl without React
 
-deck.gl can now be used in non-React applications. A new top-level JavaScript class [`Deck`](/docs/api-reference/deck.md) is provided as an alternative to the traditional top-level `DeckGL` React component. This allows deck.gl to be used in any JavaScript application or framework. The new API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" recommended for "early adopters".
+deck.gl can now be used in non-React applications. A new top-level JavaScript class [`Deck`](/docs/api-reference/deck.md) is provided as an alternative to the traditional top-level `DeckGL` React component, and the core deck.gl npm module no longer has any React dependencies. This allows deck.gl to be used in any JavaScript application or framework.
+
+The new non-React API is officially supported, however since it is not yet extensively battle-tested in applications there may be some rough corners, so to help developers set expectations we are labeling this as a "pre release" intended for early adopters.
 
 
 ### Scripting Support
@@ -60,26 +62,31 @@ deck.gl is now published as multiple npm modules allowing applications to choose
 
 ### Multi-Viewport Support
 
-deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives, using the [`views`](/docs/advanced/views.md) property. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
+deck.gl allows you to divide your screen into multiple viewports and render layers from different perspectives. It is e.g. possible to render a top-down map view next to a first person view and allow your users to "walk around" in the city onto which your data is overlaid.
 
+The [`Deck.views`](/docs/advanced/views.md) property accepts instances of [`View`](/docs/api-reference/view.md) classes, such as [`MapView`](/docs/api-reference/view.md) and [`FirstPersonView`](/docs/api-reference/first-person-view.md):
 
-#### View Classes
-
-A new hierarchy of [`View`](/docs/advanced/views.md) classes, such as `MapView` and `FirstPersonView` make it easy to split the screen into viewports and provide multiple views of data.
+```jsx
+<DeckGL
+  views=[
+    new MapView({id: 'map', width: '50%'}),
+    new FirstPersonView({x: '50%', width: '50%'})
+  ]
+/>
+```
 
 
 ### MapController
 
 It is now possible to specify a `MapController` as a `controller` for the `Deck` or `DeckGL` classes, instead of relying on e.g. `react-map-gl` or experimental classes to drive event handling.
 
+
 ### Automatic Resize Handling
 
-It is no longer necessary for applications to specify the exact `width` and `height` of the `Deck` or `DeckGL` components. Size can now either specified using CSS descriptors (e.g. `width = 100%`), or be left out and controlled by external components (such as HTML flex boxes).
+It is no longer necessary for deck.gl applications to track screen size and manage the exact `width` and `height` of the `Deck` or `DeckGL` components. `width` and `height` can now be specified using CSS descriptors (e.g. `width = 100%`):
 
 ```jsx
-   <DeckGL views=[
-    new MapView({id: 'map', x: '70%', y: '70%', height: '15%', width: '15%'})
-   ]/>
+<DeckGL width='100%' height='100%'/>
 ```
 
 
@@ -87,7 +94,7 @@ It is no longer necessary for applications to specify the exact `width` and `hei
 
 #### TextLayer (New)
 
-New [TextLayer](/docs/layers/text-layer.md) has been added to the core layers catalog for rendering labels with WebGL.
+A [TextLayer](/docs/layers/text-layer.md) has been added to the core layer catalog for rendering labels with WebGL.
 
 
 #### ScreenGridLayer
@@ -107,7 +114,7 @@ deck.gl now provides a suite of [test utilities](/docs/developer-guide/testing) 
 
 ### Dist Size Reduction
 
-Work on bundle size reduction continues and among other things, the combination of Babel 7 and Webpack 4 integrations are providing significant benefits for bundling of deck.gl apps. A new article about [Application Bundling and Tree Shaking](/docs/developer-guide/building-apps.md) has been added to the docs.
+Work on bundle size reduction continues. In this release, the focus has been on leveraging the tree-shaking abilities of the Babel 7 and Webpack 4 combination. In addition, new article about [Application Bundling and Tree Shaking](/docs/developer-guide/building-apps.md) has been added to the docs.
 
 
 ### Shader Modules
