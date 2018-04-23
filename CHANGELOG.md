@@ -21,6 +21,11 @@ For Earlier Beta Releases see below
 
 ## Beta Releases
 
+### deck.gl v5.3 Pre Releases
+
+#### [5.3.0-alpha.1] - April 23
+- Bump luma.gl to 5.3.0-alpha.1
+
 ### deck.gl v5.2 Pre Releases
 
 #### [5.2.0-alpha.8] - April 5
