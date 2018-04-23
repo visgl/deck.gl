@@ -86,3 +86,8 @@ Assert functions, when supplied, are called with the following properties:
 * `oldState`
 * `subLayers`
 * `spies`
+
+
+## Source
+
+[modules/test-utils/src/lifecycle-test.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/test-utils/src/lifecycle-test.js)
