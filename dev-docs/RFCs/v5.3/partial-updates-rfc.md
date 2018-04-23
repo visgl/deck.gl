@@ -1,8 +1,12 @@
 # RFC: Partial Data Updates in deck.gl
 
-* **Author**: Ib Green
-* **Status**: Implementation not planned
-* **Comment**: This RFC was drafted to support a map editor use case, however it turned out that existing "monolithic" layer update performance was good enough.
+* **Author**: Ib Green and Georgios Karnas
+* **Status**: For Review
+
+
+## Summary
+
+This RFC proposes a system where if only a single or a few data items have changed, deck.gl can do partial updates of one or more vertex attributes, avoiding iterating over potentially hundreds of thousands of JavaScript elements and updating multiple megabytes of vertex attribute data. The pilot use case is to allow "visual dragging" of a few items in a 100K segment layer to happen at 60PFS.
 
 
 ## Problem/Opportunity
