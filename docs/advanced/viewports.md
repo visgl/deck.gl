@@ -22,8 +22,6 @@ In addition to generating WebGL uniforms, the `Viewport` class also offers JavaS
 | ---                   | ---         |
 | [`Viewport`](/docs/api-reference/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
 | [`WebMercatorViewport`](/docs/api-reference/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
-| [`FirstPersonViewport`](/docs/api-reference/first-person-viewport.md) | Allows the application to precisely control position and direct a `Viewport`. |
-| [`ThirdPersonViewport`](/docs/api-reference/third-person-viewport.md)       | This is a "third person" `Viewport`, that looks at something from a distance and a direction. |
 
 
 ## About Geospatial Positioning

@@ -25,7 +25,11 @@ const urlRewrites = [
     rewrite: match => {
       const filepath = match[1];
       const hash = match[2] ? match[2].slice(1) : '';
-      return `#/documentation${markdownFiles[filepath]}${hash ? '?section=' : ''}${hash}`;
+      const route = markdownFiles[filepath];
+      if (!route) {
+        console.warn('Cannot find linked doc: ', filepath);
+      }
+      return `#/documentation${route}${hash ? '?section=' : ''}${hash}`;
     }
   }
 ];
