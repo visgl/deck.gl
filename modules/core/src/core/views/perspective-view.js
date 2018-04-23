@@ -22,7 +22,7 @@ export default class PerspectiveView extends View {
       // view matrix arguments
       eye, // Defines eye position
       lookAt = [0, 0, 0], // Which point is camera looking at, default origin
-      up = [0, 1, 0], // Defines up direction, default positive y axis
+      up = [0, 1, 0] // Defines up direction, default positive y axis
     } = viewState;
 
     // Projection matrix arguments

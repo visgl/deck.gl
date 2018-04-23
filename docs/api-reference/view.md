@@ -2,7 +2,8 @@
 
 The `View` class and it subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantitate at least one `View` subclass.
 
-Views allow you to specify
+Views allow you to specify:
+
 * Relative dimensions of viewports
 * Projection Matrix
 
@@ -89,10 +90,12 @@ const {x, y, width, height} = view.getDimensions({width: ..., height: ...});
 ```
 
 Parameters:
+
 * `width` (`Number`) - Dimension in CSS pixels of the deck.gl "canvas".
 * `height` (`Number`) - Dimension in CSS pixels of the deck.gl "canvas".
 
 Returns:
+
 * `x` (`Number`) - x position in CSS pixels
 * `y` (`Number`) - y position in CSS pixels
 * `width` (`Number`) - width in CSS pixels
