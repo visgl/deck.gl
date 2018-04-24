@@ -9,6 +9,7 @@ import {
   PathLayer,
   IconLayer,
   ScreenGridLayer,
+  TextLayer,
   GridLayer,
   HexagonLayer,
   PolygonLayer,
@@ -191,5 +192,18 @@ export const PointCloudLayerDemo = createLayerDemoClass({
     getNormal: d => d.normal,
     getColor: d => d.color,
     lightSettings: {}
+  }
+});
+
+export const TextLayerDemo = createLayerDemoClass({
+  Layer: TextLayer,
+  dataUrl: `${DATA_URI}/bart-stations.json`,
+  formatTooltip: d => `${d.name}\n${d.address}`,
+  props: {
+    pickable: true,
+    sizeScale: 32,
+    getPosition: d => d.coordinates,
+    getText: d => d.name,
+    getSize: d => 1
   }
 });

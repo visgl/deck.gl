@@ -38,7 +38,7 @@ export const readableInteger = x => {
 };
 
 export function rgbToHex(rgb) {
-  return rgb.reduce(
+  return rgb.slice(0, 3).reduce(
     (acc, v) => `${acc}${v < 16 ? '0' : ''}${v.toString(16)}`,
     '#'
   );
@@ -46,8 +46,8 @@ export function rgbToHex(rgb) {
 
 export function colorToRGBArray(color) {
   if (Array.isArray(color)) {
-    return color.slice(0, 3);
+    return color.slice(0, 4);
   }
   const c = rgb(color);
-  return [c.r, c.g, c.b];
+  return [c.r, c.g, c.b, 255];
 }
