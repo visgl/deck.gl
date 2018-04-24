@@ -556,6 +556,20 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
+"@deck.gl/core@^5.2.0-alpha.1":
+  version "5.2.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-5.2.0-beta.1.tgz#cca09f01da34104106c11e960e396af707a55c15"
+  dependencies:
+    d3-hexbin "^0.2.1"
+    earcut "^2.0.6"
+    lodash.flattendeep "^4.4.0"
+    luma.gl ">=5.2.0-beta.1"
+    math.gl ">=1.1.0-alpha.1"
+    mjolnir.js "^1.0.0"
+    probe.gl ">=1.0.0-alpha.11"
+    seer "^0.2.4"
+    viewport-mercator-project ">=5.1.0-alpha.2"
+
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-area/-/geojson-area-0.2.2.tgz#18d7814aa36bf23fbbcc379f8e26a22927debf10"
@@ -5654,6 +5668,15 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
+luma.gl@>=5.2.0-beta.1:
+  version "5.2.0-beta.2"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.2.0-beta.2.tgz#d04d121c00490db3e5fb7f1d619b1accc0ac1a5b"
+  dependencies:
+    math.gl "^1.1.0"
+    probe.gl "^1.0.0"
+    seer "^0.2.4"
+    webgl-debug "^2.0.0"
+
 luma.gl@>=5.3.0-alpha.1:
   version "5.3.0-alpha.1"
   resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.3.0-alpha.1.tgz#d2c35d7e720fb27bb8ca2583b71d1bcac1dea09c"
@@ -6908,6 +6931,12 @@ pretty-error@^2.0.2:
 private@^0.1.6, private@^0.1.7, private@~0.1.5:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
+
+probe.gl@>=1.0.0-alpha.11:
+  version "1.0.0-alpha.11"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.0.0-alpha.11.tgz#50e00a77fc770acb32430aca88a9d12ba113a5a7"
+  dependencies:
+    babel-runtime "^6.11.6"
 
 probe.gl@^1.0.0:
   version "1.0.0"
@@ -8932,7 +8961,7 @@ viewport-mercator-project@>=5.1.0-alpha.1:
   dependencies:
     math.gl ">=1.1.0-alpha.1"
 
-viewport-mercator-project@^5.1.0:
+viewport-mercator-project@>=5.1.0-alpha.2, viewport-mercator-project@^5.1.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.1.0.tgz#68bc5586988c2808d1456e1eff950d424eccec16"
   dependencies:

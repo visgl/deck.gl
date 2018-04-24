@@ -21,7 +21,7 @@ In your node.js start script:
 
 ```js
 // This is the script that runs in Node.js and starts the browser
-const {BrowserTestDriver} = require('probe.gl/test');
+const {BrowserTestDriver} = require('probe.gl/test-utils');
 new BrowserTestDriver().run({
   process: 'webpack-dev-server',
   parameters: ['--env.render']

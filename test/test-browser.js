@@ -27,7 +27,7 @@ test.onFinish(() => callExposedFunction('testDone', {success: true}));
 test.onFailure(() => callExposedFunction('testDone', {success: false}));
 
 test('deck.gl', t => {
-  require('./src/index');
-  require('./src/react');
+  require('./modules/index');
+  require('./modules/react');
   t.end();
 });

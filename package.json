@@ -19,7 +19,7 @@
   "scripts": {
     "bootstrap": "scripts/bootstrap.sh",
     "build": "lerna run build",
-    "clean": "rm -rf node_modules && lerna clean --yes",
+    "clean": "lerna clean --yes && rm -rf node_modules",
     "cover": "NODE_ENV=test nyc --reporter html --reporter cobertura --reporter=lcov npm run test cover",
     "lint": "scripts/lint.sh",
     "lint-docs": "scripts/lint-markdown.sh",
