@@ -8,7 +8,7 @@ deck.gl supports several models of event handling and viewport controls
 
 ## React Integration
 
-Use the [`ViewportController`](docs/api-reference/react/viewport-controller.md) component.
+Use the [`ViewportController`](/docs/api-reference/react/viewport-controller.md) component.
 
 
 ## States

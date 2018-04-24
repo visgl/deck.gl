@@ -1,6 +1,6 @@
 # Adding Interactivity
 
-> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](docs/advanced/controllers.md).
+> This article discusses interacting with data (i.e. selecting, or picking objects). Viewport controls (panning, zooming etc) are discussed in [Controllers](/docs/api-reference/map-controller.md).
 
 ## Overview
 

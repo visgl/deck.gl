@@ -389,6 +389,15 @@ export const docPages = generatePath([
         ]
       },
       {
+        name: 'Standalone',
+        children: [
+          {
+            name: 'DeckGL',
+            content: getDocUrl('api-reference/standalone/deckgl.md')
+          }
+        ]
+      },
+      {
         name: 'Shader Modules',
         children: [
           {

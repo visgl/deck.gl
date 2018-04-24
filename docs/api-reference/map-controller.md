@@ -5,7 +5,7 @@ The `MapController` class can be passed to the `Deck.controller` or `DeckGL.cont
 
 ## Usage
 
-```js
+```jsx
 import DeckGL, {MapController} from 'deck.gl';
 
 <DeckGL
