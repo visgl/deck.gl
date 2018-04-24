@@ -16,24 +16,24 @@ console.log(`Running ${mode} tests...`); // eslint-disable-line
 
 switch (mode) {
   case 'test':
-    require('./src/index'); // Run the tests
+    require('./modules/index'); // Run the tests
     break;
 
   case 'test-dist':
     // Load deck.gl itself from the dist folder
     moduleAlias.addAliases(getAliases('dist'));
-    require('./src/index'); // Run the tests
+    require('./modules/index'); // Run the tests
     break;
 
   case 'test-ci':
     // Run a smaller selection of the tests (avoid overwhelming Travis CI)
-    require('./src/imports-spec');
-    require('./src/core');
+    require('./modules/imports-spec');
+    require('./modules/core');
     // require('./src/core-layers');
-    require('./src/core-layers/polygon-tesselation.spec');
+    require('./modules/core-layers/polygon-tesselation.spec');
     // require('./core-layers.spec');
     // require('./polygon-layer.spec');
-    require('./src/core-layers/geojson.spec');
+    require('./modules/core-layers/geojson.spec');
     // require('./geojson-layer.spec');
     // require('./hexagon-cell-layer.spec');
     // require('./grid-layer.spec');

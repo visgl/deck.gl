@@ -20,7 +20,7 @@
 
 import {LayerManager, MapView} from 'deck.gl';
 
-import {makeSpy} from 'probe.gl/test';
+import {makeSpy} from 'probe.gl/test-utils';
 import gl from './utils/setup-gl';
 
 function checkDoesNotThrow(func, comment, userData) {
