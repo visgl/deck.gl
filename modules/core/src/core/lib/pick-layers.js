@@ -133,6 +133,8 @@ export function pickVisibleObjects(
     height: deviceBottom - deviceTop
   };
 
+  console.error(pickingFBO.width, pickingFBO.height, pixelRatio, deviceRect);
+
   const pickedColors = drawAndSamplePickingBuffer(gl, {
     layers,
     viewports,

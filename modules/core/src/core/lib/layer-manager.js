@@ -534,16 +534,25 @@ export default class LayerManager {
     return this;
   }
 
+  // Create a frame buffer if not already available
   _getPickingBuffer() {
     const {gl} = this.context;
-    // Create a frame buffer if not already available
     this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl);
     // Resize it to current canvas size (this is a noop if size hasn't changed)
-    const width = gl.drawingBufferWidth;
-    const height = gl.drawingBufferHeight;
+    const pixelRatio = this._getPixelRatio();
+    const width = this.width * pixelRatio;
+    const height = this.height * pixelRatio;
+    console.error(width, height);
     this.context.pickingFBO.resize({width, height});
     return this.context.pickingFBO;
   }
+
+  // Get the pixel ratio
+  _getPixelRatio() {
+    /* global window */
+    return this.useDevicePixels && typeof window !== 'undefined' ? (window.devicePixelRatio || 1) : 1;
+  };
+
 
   // Match all layers, checking for caught errors
   // To avoid having an exception in one layer disrupt other layers
