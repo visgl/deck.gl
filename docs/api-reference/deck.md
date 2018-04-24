@@ -2,7 +2,7 @@
 
 `Deck` is a class that takes deck.gl layer instances and viewport parameters, renders those layers as a transparent overlay, and handles events.
 
-If you are using React, you should not use this component directly. Instead you should be rendering the [`DeckGL` React Component](docs/api-reference/react/deckgl.md).
+If you are using React, you should not use this component directly. Instead you should be rendering the [`DeckGL` React Component](/docs/api-reference/react/deckgl.md).
 
 
 ## Usage
