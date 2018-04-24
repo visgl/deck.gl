@@ -16,31 +16,31 @@
 
   <div class="thumb">
     <div data-title="Ascii Video Player">
-      <a href="https://pessimistress.github.io/ascii/">
+      <a href="https://uber.github.io/deck.gl/showcases/ascii">
         <img src="images/showcase-ascii.jpg" />
       </a>
     </div>
   </div>
   <div class="thumb-desc">
     <div>
-      <a href="https://pessimistress.github.io/ascii/"><h2>Ascii Video Player</h2></a>
+      <a href="https://uber.github.io/deck.gl/showcases/ascii"><h2>Ascii Video Player</h2></a>
       <p>Uses the TextLayer API to convert pixels into characters on the fly. WebGL2 compatible browser is required.</p>
-      <p class="credit"><a href="https://github.com/pessimistress/deck.gl/tree/master/examples/ascii">Source code</a></p>
+      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/5.2-release/showcases/ascii">Source code</a></p>
     </div>
   </div>
 
   <div class="thumb">
     <div class="bg-black" data-title="Wind Map">
-      <a href="https://uber.github.io/deck.gl/showcase/wind">
+      <a href="https://uber.github.io/deck.gl/showcases/wind">
         <img src="images/showcase-wind.jpg" />
       </a>
     </div>
   </div>
   <div class="thumb-desc">
     <div>
-      <a href="https://uber.github.io/deck.gl/showcase/wind"><h2>Wind Map</h2></a>
+      <a href="https://uber.github.io/deck.gl/showcases/wind"><h2>Wind Map</h2></a>
       <p>GPU-based data interpolation and partical effects.</p>
-      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/5.2-release/examples/wind">Source code</a> | <a href="https://medium.com/vis-gl/wind-map-a58575f87fe3">Blog post</a></p>
+      <p class="credit"><a href="https://github.com/uber/deck.gl/tree/5.2-release/showcases/wind">Source code</a> | <a href="https://medium.com/vis-gl/wind-map-a58575f87fe3">Blog post</a></p>
     </div>
   </div>
 
