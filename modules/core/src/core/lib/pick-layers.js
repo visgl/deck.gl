@@ -122,9 +122,9 @@ export function pickVisibleObjects(
   const pixelRatio = getPixelRatio({useDevicePixels});
 
   const deviceLeft = Math.round(x * pixelRatio);
-  const deviceBottom = Math.round(gl.canvas.height - y * pixelRatio);
+  const deviceBottom = Math.round(pickingFBO.height - y * pixelRatio);
   const deviceRight = Math.round((x + width) * pixelRatio);
-  const deviceTop = Math.round(gl.canvas.height - (y + height) * pixelRatio);
+  const deviceTop = Math.round(pickingFBO.height - (y + height) * pixelRatio);
 
   const deviceRect = {
     x: deviceLeft,

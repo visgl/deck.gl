@@ -539,7 +539,9 @@ export default class LayerManager {
     // Create a frame buffer if not already available
     this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl);
     // Resize it to current canvas size (this is a noop if size hasn't changed)
-    this.context.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
+    const width = gl.drawingBufferWidth;
+    const height = gl.drawingBufferHeight;
+    this.context.pickingFBO.resize({width, height});
     return this.context.pickingFBO;
   }
 
