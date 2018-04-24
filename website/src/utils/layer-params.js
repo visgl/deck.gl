@@ -63,12 +63,12 @@ export function getLayerParams(layer) {
   const paramsMap = {};
   const paramsArray = [];
 
-  Object.keys(layer.props).forEach(key => {
+  for (const key in layer.props) {
     const param = propToParam(key, layer.props[key]);
     if (param) {
       paramsArray.push(param);
     }
-  });
+  }
 
   paramsArray.sort((p1, p2) => p1.type.localeCompare(p2.type));
 

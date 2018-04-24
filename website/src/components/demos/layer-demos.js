@@ -201,14 +201,9 @@ export const TextLayerDemo = createLayerDemoClass({
   formatTooltip: d => `${d.name}\n${d.address}`,
   props: {
     pickable: true,
-    opacity: 1,
-    fontFamily: 'Monaco, monospace',
     sizeScale: 32,
     getPosition: d => d.coordinates,
     getText: d => d.name,
-    getTextAnchor: d => 'middle',
-    getAlignmentBaseline: d => 'center',
-    getSize: d => 1,
-    getColor: d => [0, 0, 0]
+    getSize: d => 1
   }
 });
