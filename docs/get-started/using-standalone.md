@@ -58,7 +58,7 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
 
-The scripting API's [DeckGL](docs/api-reference/standalone/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
+The scripting API's [DeckGL](/docs/api-reference/standalone/deckgl.md) class extends the core `Deck` class with some additional features such as Mapbox integration.
 
 ```js
 new deck.DeckGL({
