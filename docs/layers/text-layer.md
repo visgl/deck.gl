@@ -1,3 +1,9 @@
+<!-- INJECT:"TextLayerDemo" -->
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # Text Layer
 
 The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
