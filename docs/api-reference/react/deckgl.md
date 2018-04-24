@@ -49,7 +49,7 @@ render() {
 
 ## Properties
 
-All [Deck](/docs/api-reference/deck.md) class properties, with these additional semantics:
+`DeckGL` accepts all [Deck](/docs/api-reference/deck.md#properties) properties, with these additional semantics:
 
 
 ##### `views` (`View[]`, optional)
@@ -123,6 +123,11 @@ Additional Notes:
 * Child repositioning is done with CSS styling on a wrapper div, resizing is done through width and height properties.
 * Hiding of children is performed by removing the elements from the child list
 * Children without the `viewId` property are rendered as is.
+
+
+## Methods
+
+All [Deck](/docs/api-reference/deck.md#methods) methods are available on the `DeckGL` component.
 
 
 ## Source
