@@ -5,7 +5,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v5.2
 
-Release date: TBD, target April, 2018
+Release date: April 24, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
