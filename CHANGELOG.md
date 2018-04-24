@@ -14,10 +14,39 @@ Each version should:
   Security to invite users to upgrade in case of vulnerabilities.
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
+## Official Releases
 
-## Latest Beta Releases
-
-For Earlier Beta Releases see below
+#### [5.2.0] - April 24
+-  Embedded layer demo fixes (#1741)
+-  Update showcases links (#1738)
+-  Make DeckGL doc refer to Deck docs (#1737)
+-  More website link fixes (#1736)
+-  Fix outdated source links (#1735)
+-  remove v6.0 section from whats new document point to 5.2-release docs
+-  Fix bad links on website (#1734)
+-  View documentation updates.  (#1731)
+-  Website fixes and optimizations (#1732)
+-  Update RFC master page
+-  Update RFC catalog (#1721)
+-  fix example test (#1727)
+-  run lint to format code
+-  fix vis academy page on website (#1726)
+-  Upgrade point cloud LAZ to webpack 4 (#1725)
+-  Move wind and graph examples to showcases (#1724)
+-  fix bad yarn lock to handle test regression
+-  Fix multi viewport example (#1723)
+-  Documentation Formats (#1722)
+-  Add AsciiLayer demo (#1715)
+-  Add lint for docs (#1719)
+-  more doc fix for test-utils (#1720)
+-  Update scripting API docs (#1717)
+-  Update test-utils website pages (#1718)
+-  Clean up js examples (#1716)
+-  v5.2 website changes (#1710)
+-  Lighting module fixes (#1714)
+-  Reorganize examples (#1700)
+-  handle review feedback for useDevicePixels (#1713)
+-  fix useDevicePixels bug (#1712)
 
 ## Beta Releases
 
