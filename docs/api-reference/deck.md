@@ -105,9 +105,14 @@ Flag to enable debug mode.
 
 Default value is `false`.
 
-Note:
+Notes:
 
-* debug mode is somewhat slower as it will use synchronous operations to keep track of GPU state.
+* debug mode is slower as it will use synchronous operations to keep track of GPU state.
+* Enabling debug mode requires an extra luma.gl import:
+
+```js
+import 'luma.gl/debug'
+````
 
 ### Event Callbacks
 
@@ -125,10 +130,8 @@ Callback - called when the object under the pointer changes.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
-object for the topmost picked layer at the coordinate, null when no object is picked.
-* `pickedInfos` - an array of info objects for all pickable layers that
-are affected.
+* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
+* `pickedInfos` - an array of info objects for all pickable layers that are affected.
 * `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
 ##### `onLayerClick` (Function, optional)
@@ -137,8 +140,7 @@ Callback - called when clicking on the layer.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
-object for the topmost picked layer at the coordinate, null when no object is picked.
+* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
 * `pickedInfos` - an array of info objects for all pickable layers that are affected.
 * `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
@@ -161,7 +163,7 @@ deck.setProps({...});
 
 ##### `pickObject`
 
-Get the closest pickable and visible object at screen coordinate.
+Get the closest pickable and visible object at the given screen coordinate.
 
 ```js
 deck.pickObject({x, y, radius, layerIds})
@@ -175,6 +177,29 @@ deck.pickObject({x, y, radius, layerIds})
 Returns:
 
 * a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
+
+
+##### `pickMultipleObjects`
+
+Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
+
+```js
+deck.pickObject({x, y, radius, layerIds, depth})
+```
+
+* `x` (Number) - x position in pixels
+* `y` (Number) - y position in pixels
+* `radius`=`0` (Number, optional) - radius of tolerance in pixels.
+* `layerIds`=`null` (Array, optional) - a list of layer ids to query from. If not specified, then all pickable and visible layers are queried.
+* `depth`=`10` - Specifies the max
+
+Returns:
+
+* An array of [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects. The array will be empty if no object was picked.
+
+Notes:
+
+* Deep picking is implemented as a sequence of simpler picking operations and can have a performance impact. Should this become a concern, you can use the `depth` parameter to limit the number of matches that can be returned, and thus the maximum number of picking operations.
 
 
 ##### `pickObjects`
@@ -197,12 +222,11 @@ Returns:
 
 * an array of unique [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects
 
-Remarks:
+Notes:
 
-* This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
-* Note there is a limitation in the query methods:
-
-* occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
+* The query methods are designed to quickly find objects by utilizing the picking buffer.
+* The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
+* Note there is a limitation in the query methods: occluded objects are not returned. To improve the results, you may try setting the `layerIds` parameter to limit the query to fewer layers.
 
 
 ## Remarks
@@ -211,4 +235,5 @@ Remarks:
 
 
 ## Source
+
 [modules/core/src/core/lib/deck.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/lib/deck.js)
