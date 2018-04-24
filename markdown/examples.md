@@ -50,6 +50,20 @@
       </a>
     </div>
   </div>
+  <div class="thumb">
+    <div data-title="3D Indoor Scan" data-name="PointCloudLayer">
+      <a href="https://gnavvy.github.io/point-cloud-example/" target="_blank">
+        <img src="images/demo-thumb-point-cloud.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb">
+    <div class="bg-black" data-title="Twitter Tag Cloud" data-name="TextLayer">
+      <a href="#/examples/core-layers/text-layer">
+        <img src="images/demo-thumb-text.jpg" />
+      </a>
+    </div>
+  </div>
 </div>
 
 ### Custom Layers
@@ -70,29 +84,10 @@
       </div>
   </div>
   <div class="thumb">
-    <div class="bg-black" data-title="Wind Map" data-name="WebGL2">
-      <a href="http://uber.github.io/deck.gl/examples/wind">
-        <img src="images/demo-thumb-wind.jpg" />
-      </a>
-      </div>
-  </div>
-</div>
-
-### Beyond Maps
-
-<div>
-  <div class="thumb">
     <div data-title="3D Surface Explorer" data-name="PlotLayer">
-      <a href="#/examples/beyond-maps/3d-surface-explorer">
+      <a href="#/examples/custom-layers/3d-surface-explorer">
         <img src="images/demo-thumb-plot.jpg" />
       </a>
       </div>
-  </div>
-  <div class="thumb">
-    <div data-title="3D Indoor Scan" data-name="PointCloudLayer">
-      <a href="https://gnavvy.github.io/point-cloud-example/" target="_blank">
-        <img src="images/demo-thumb-point-cloud.jpg" />
-      </a>
-    </div>
   </div>
 </div>
