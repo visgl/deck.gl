@@ -234,8 +234,8 @@ export default class ViewportControls {
   // Default handler for the `panmove` event.
   _onPan(event) {
     return this.isFunctionKeyPressed(event) || event.rightButton
-      ? this._onPanRotate(event)
-      : this._onPanMove(event);
+      ? this._onPanMove(event)
+      : this._onPanRotate(event);
   }
 
   // Default handler for the `panend` event.
