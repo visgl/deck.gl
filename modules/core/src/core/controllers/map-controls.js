@@ -32,6 +32,8 @@ export default class MapControls extends ViewportControls {
 
   // Default handler for the `panmove` event.
   _onPan(event) {
-    return this.isFunctionKeyPressed(event) ? this._onPanRotate(event) : this._onPanMove(event);
+    return this.isFunctionKeyPressed(event) || event.rightButton
+      ? this._onPanRotate(event)
+      : this._onPanMove(event);
   }
 }
