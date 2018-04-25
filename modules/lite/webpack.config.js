@@ -54,7 +54,7 @@ const prodConfig = Object.assign({}, config, {
 
   plugins: [
     new webpack.DefinePlugin({
-      __VERSION__: JSON.stringify(CORE_VERSION) // eslint-disable-line
+      __VERSION__: JSON.stringify(CORE_VERSION)
     })
   ],
 
