@@ -4,6 +4,7 @@ const webpack = require('webpack');
 
 const PACKAGE_ROOT = resolve(__dirname, '.');
 const ROOT = resolve(PACKAGE_ROOT, '../..');
+const CORE_VERSION = require(resolve(ROOT, 'node_modules/@deck.gl/core/package.json')).version;
 
 const config = {
   resolve: {
@@ -50,6 +51,12 @@ const prodConfig = Object.assign({}, config, {
     path: resolve(PACKAGE_ROOT, 'dist'),
     filename: 'deckgl.min.js'
   },
+
+  plugins: [
+    new webpack.DefinePlugin({
+      __VERSION__: JSON.stringify(CORE_VERSION) // eslint-disable-line
+    })
+  ],
 
   devtool: ''
 });

@@ -1,7 +1,4 @@
 {
-  "plugins": [
-    "version-inline"
-  ],
   "env": {
     "es5": {
       "presets": [
