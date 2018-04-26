@@ -224,7 +224,8 @@ Returns:
 
 Notes:
 
-* This query methods are designed to quickly find objects by utilizing the picking buffer. They offer more flexibility for developers to handle events in addition to the built-in hover and click callbacks.
+* The query methods are designed to quickly find objects by utilizing the picking buffer.
+* The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
 
 
 ## Remarks

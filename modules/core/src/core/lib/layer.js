@@ -381,7 +381,10 @@ export default class Layer {
     }
 
     // TODO: Optimize this to use sub-buffer update!
-    this.getSingleModel().setAttributes({instancePickingColors: attribute});
+    const model = this.getSingleModel();
+    if (model) {
+      model.setAttributes({instancePickingColors: attribute});
+    }
   }
 
   // Deduces numer of instances. Intention is to support:

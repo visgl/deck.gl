@@ -62,9 +62,6 @@ export function pickObject(
     deviceHeight: pickingFBO.height
   });
 
-  // reset buffers
-  layers.forEach(l => l.updateInstancePickingColors([]));
-
   const result = [];
   const exclude = {};
 
@@ -98,13 +95,16 @@ export function pickObject(
       break;
     }
 
-    const layerId = pickInfo.pickedColor[3] - 1;
-    if (exclude[layerId]) {
-      exclude[layerId].push(pickInfo.pickedColor);
-    } else {
-      exclude[layerId] = [pickInfo.pickedColor];
+    // only exclude if we need to run picking again
+    if (i + 1 < depth) {
+      const layerId = pickInfo.pickedColor[3] - 1;
+      if (exclude[layerId]) {
+        exclude[layerId].push(pickInfo.pickedColor);
+      } else {
+        exclude[layerId] = [pickInfo.pickedColor];
+      }
+      layers[layerId].updateInstancePickingColors(exclude[layerId]);
     }
-    layers[layerId].updateInstancePickingColors(exclude[layerId]);
 
     const pPickInfos = processPickInfo({
       pickInfo,
@@ -123,6 +123,9 @@ export function pickObject(
       pPickInfos.forEach(info => result.push(info));
     }
   }
+
+  // reset only affected buffers
+  Object.keys(exclude).forEach(layerId => layers[layerId].updateInstancePickingColors([]));
 
   return result;
 }
