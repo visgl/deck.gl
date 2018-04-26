@@ -103,7 +103,7 @@ export function pickObject(
       } else {
         exclude[layerId] = [pickInfo.pickedColor];
       }
-      layers[layerId].updateInstancePickingColors(exclude[layerId]);
+      layers[layerId].updatePickingColors(exclude[layerId]);
     }
 
     const processedPickInfos = processPickInfo({
@@ -125,7 +125,7 @@ export function pickObject(
   }
 
   // reset only affected buffers
-  Object.keys(exclude).forEach(layerId => layers[layerId].updateInstancePickingColors([]));
+  Object.keys(exclude).forEach(layerId => layers[layerId].updatePickingColors([]));
 
   return result;
 }

@@ -362,8 +362,8 @@ export default class Layer {
     }
   }
 
-  // this method overwrittes the current buffer and is used for multi-picking
-  updateInstancePickingColors(excludeColors) {
+  // This method overwrittes the current buffer and is used for multi-picking
+  _updateInstancePickingColors(excludeColors) {
     const excludeIds = excludeColors.map(this.decodePickingColor);
 
     const {instancePickingColors} = this.getAttributeManager().attributes;
@@ -381,9 +381,44 @@ export default class Layer {
     }
 
     // TODO: Optimize this to use sub-buffer update!
-    const model = this.getSingleModel();
-    if (model) {
-      model.setAttributes({instancePickingColors: attribute});
+    const models = this.getModels();
+    if (models) {
+      models.forEach(model => model.setAttributes({instancePickingColors: attribute}));
+    }
+  }
+
+  // This method overwrittes the current buffer and is used for multi-picking
+  _updateRegularPickingColors(excludeColors) {
+    const {pickingColors} = this.getAttributeManager().attributes;
+    const attribute = pickingColors.state;
+    attribute.update.call(this, attribute);
+    const {value} = attribute;
+
+    // TODO: Optimize this to be faster
+    excludeColors.forEach(color => {
+      for (let i = 0; i < value.length; i += 3) {
+        if (value[i] === color[0] && value[i + 1] === color[1] && value[i + 2] === color[2]) {
+          value[i] = 0;
+          value[i + 1] = 0;
+          value[i + 2] = 0;
+        }
+      }
+    });
+
+    // TODO: Optimize this to use sub-buffer update!
+    const models = this.getModels();
+    if (models) {
+      models.forEach(model => model.setAttributes({pickingColors: attribute}));
+    }
+  }
+
+  // This method figures out if we use instance colors or not
+  // and calls _updateInstancePickingColors or _updateRegularPickingColors
+  updatePickingColors(excludeColors) {
+    if (this.getAttributeManager().attributes.pickingColors) {
+      this._updateRegularPickingColors(excludeColors);
+    } else {
+      this._updateInstancePickingColors(excludeColors);
     }
   }
 

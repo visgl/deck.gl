@@ -146,7 +146,7 @@ export default class App extends PureComponent {
   }
 
   _onClick(info) {
-    if (this.state.enableDepthPickOnClick) {
+    if (this.state.enableDepthPickOnClick && info) {
       this._multiDepthPick(info.x, info.y);
     } else {
       this.setState({clickedItem: info});
