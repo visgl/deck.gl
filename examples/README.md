@@ -38,15 +38,15 @@ These are stand-alone versions of the "showcase" examples in the deck.gl
 website, with smaller uncompressed data sets to make it easy to understand
 how they work.
 
-* [3d-heatmap](./3d-heatmap/README.md)
-* [arc](./arc/README.md)
-* [geojson](./geojson/README.md)
-* [icon](./icon/README.md)
-* [line](./line/README.md)
-* [plot](./plot/README.md)
-* [scatterplot](./scatterplot/README.md)
-* [screen-grid](./screen-grid/README.md)
-* [trips](./trips/README.md)
+* [3d-heatmap](./website/3d-heatmap/README.md)
+* [arc](./website/arc/README.md)
+* [geojson](./website/geojson/README.md)
+* [icon](./website/icon/README.md)
+* [line](./website/line/README.md)
+* [plot](./website/plot/README.md)
+* [scatterplot](./website/scatterplot/README.md)
+* [screen-grid](./website/screen-grid/README.md)
+* [trips](./website/trips/README.md)
 
 Remarks:
 * Since these examples are set up so they can be run both stand-alone and
