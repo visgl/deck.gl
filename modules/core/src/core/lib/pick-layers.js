@@ -106,7 +106,7 @@ export function pickObject(
       layers[layerId].updateInstancePickingColors(exclude[layerId]);
     }
 
-    const pPickInfos = processPickInfo({
+    const processedPickInfos = processPickInfo({
       pickInfo,
       lastPickedInfo,
       mode,
@@ -119,8 +119,8 @@ export function pickObject(
       pixelRatio
     });
 
-    if (pPickInfos) {
-      pPickInfos.forEach(info => result.push(info));
+    if (processedPickInfos) {
+      processedPickInfos.forEach(info => result.push(info));
     }
   }
 
