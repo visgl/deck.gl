@@ -4,6 +4,10 @@ const webpack = require('webpack');
 
 const PACKAGE_ROOT = resolve(__dirname, '.');
 const ROOT = resolve(PACKAGE_ROOT, '../..');
+// This is used to define the __VERSION__ constant in core/lib/init.js
+// babel-plugin-version-inline uses the package version from the working directory
+// Therefore we need to manually import the correct version from the core
+// This is called in prepublishOnly, after lerna bumps the package versions
 const CORE_VERSION = require(resolve(ROOT, 'node_modules/@deck.gl/core/package.json')).version;
 
 const config = {

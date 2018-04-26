@@ -3,11 +3,17 @@
     "es5": {
       "presets": [
         ["@babel/es2015", {modules: 'commonjs'}]
+      ],
+      "plugins": [
+        "version-inline"
       ]
     },
     "esm": {
       "presets": [
         ["@babel/es2015", {modules: false}]
+      ],
+      "plugins": [
+        "version-inline"
       ]
     },
     "es6": {
@@ -23,6 +29,9 @@
           },
           "modules": false
         }]
+      ],
+      "plugins": [
+        "version-inline"
       ]
     },
     "test": {
