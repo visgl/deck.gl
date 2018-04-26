@@ -2,6 +2,7 @@
   "name": "@deck.gl/lite",
   "description": "Scripting with deck.gl",
   "license": "MIT",
+  "version": "0.0.1",
   "private": "true",
   "publishConfig": {
     "access": "public"
