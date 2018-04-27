@@ -411,15 +411,20 @@ export default class Layer {
     }
   }
 
-  resetPickingColors() {
-    // TODO: find proper implementation for this
-    if (this.getAttributeManager().attributes.pickingColors) {
-      // this does not work :-(
-      this.invalidateAttribute();
-      this.updateAttributes(this.props);
-    } else {
-      //
-    }
+  copyPickingColors() {
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+
+    return new Uint8ClampedArray(colors.value);
+  }
+
+  restorePickingColors(value) {
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+
+    colors.value.set(value);
+    colors.setNeedsUpdate();
+    this.updateAttributes(this.props);
   }
 
   // Deduces numer of instances. Intention is to support:

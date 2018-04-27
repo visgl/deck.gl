@@ -98,7 +98,10 @@ export function pickObject(
     // only exclude if we need to run picking again
     if (i + 1 < depth) {
       const layerId = pickInfo.pickedColor[3] - 1;
-      affectedLayers[layerId] = true;
+      if (!affectedLayers[layerId]) {
+        // backup original colors
+        affectedLayers[layerId] = layers[layerId].copyPickingColors();
+      }
       layers[layerId].clearPickingColor(pickInfo.pickedColor);
     }
 
@@ -121,7 +124,9 @@ export function pickObject(
   }
 
   // reset only affected buffers
-  Object.keys(affectedLayers).forEach(layerId => layers[layerId].resetPickingColors());
+  Object.keys(affectedLayers).forEach(layerId =>
+    layers[layerId].restorePickingColors(affectedLayers[layerId])
+  );
 
   return result;
 }
