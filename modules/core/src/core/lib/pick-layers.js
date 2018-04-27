@@ -63,7 +63,7 @@ export function pickObject(
   });
 
   const result = [];
-  const exclude = {};
+  const affectedLayers = {};
 
   for (let i = 0; i < depth; i++) {
     const pickedColors =
@@ -98,12 +98,8 @@ export function pickObject(
     // only exclude if we need to run picking again
     if (i + 1 < depth) {
       const layerId = pickInfo.pickedColor[3] - 1;
-      if (exclude[layerId]) {
-        exclude[layerId].push(pickInfo.pickedColor);
-      } else {
-        exclude[layerId] = [pickInfo.pickedColor];
-      }
-      layers[layerId].updatePickingColors(exclude[layerId]);
+      affectedLayers[layerId] = true;
+      layers[layerId].clearPickingColor(pickInfo.pickedColor);
     }
 
     const processedPickInfos = processPickInfo({
@@ -125,7 +121,7 @@ export function pickObject(
   }
 
   // reset only affected buffers
-  Object.keys(exclude).forEach(layerId => layers[layerId].updatePickingColors([]));
+  Object.keys(affectedLayers).forEach(layerId => layers[layerId].resetPickingColors());
 
   return result;
 }

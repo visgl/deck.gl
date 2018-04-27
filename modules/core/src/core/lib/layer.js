@@ -362,23 +362,16 @@ export default class Layer {
     }
   }
 
-  // This method overwrittes the current buffer and is used for multi-picking
-  _updateInstancePickingColors(excludeColors) {
-    const excludeIds = excludeColors.map(this.decodePickingColor);
-
+  // This method overwrites the current buffer and is used for multi-picking
+  _clearInstancePickingColor(color) {
     const {instancePickingColors} = this.getAttributeManager().attributes;
-    const {state: attribute, allocedInstances: numInstances} = instancePickingColors;
-
+    const {state: attribute} = instancePickingColors;
     const {value, size} = attribute;
-    // add 1 to index to seperate from no selection
-    for (let i = 0; i < numInstances; i++) {
-      const pickingColor = excludeIds.includes(i)
-        ? this.nullPickingColor()
-        : this.encodePickingColor(i);
-      value[i * size + 0] = pickingColor[0];
-      value[i * size + 1] = pickingColor[1];
-      value[i * size + 2] = pickingColor[2];
-    }
+
+    const i = this.decodePickingColor(color);
+    value[i * size + 0] = 0;
+    value[i * size + 1] = 0;
+    value[i * size + 2] = 0;
 
     // TODO: Optimize this to use sub-buffer update!
     const models = this.getModels();
@@ -387,23 +380,19 @@ export default class Layer {
     }
   }
 
-  // This method overwrittes the current buffer and is used for multi-picking
-  _updateRegularPickingColors(excludeColors) {
+  // This method overwrites the current buffer and is used for multi-picking
+  _clearPickingColor(color) {
     const {pickingColors} = this.getAttributeManager().attributes;
     const attribute = pickingColors.state;
-    attribute.update.call(this, attribute);
     const {value} = attribute;
 
-    // TODO: Optimize this to be faster
-    excludeColors.forEach(color => {
-      for (let i = 0; i < value.length; i += 3) {
-        if (value[i] === color[0] && value[i + 1] === color[1] && value[i + 2] === color[2]) {
-          value[i] = 0;
-          value[i + 1] = 0;
-          value[i + 2] = 0;
-        }
+    for (let i = 0; i < value.length; i += 3) {
+      if (value[i + 0] === color[0] && value[i + 1] === color[1] && value[i + 2] === color[2]) {
+        value[i + 0] = 0;
+        value[i + 1] = 0;
+        value[i + 2] = 0;
       }
-    });
+    }
 
     // TODO: Optimize this to use sub-buffer update!
     const models = this.getModels();
@@ -413,12 +402,23 @@ export default class Layer {
   }
 
   // This method figures out if we use instance colors or not
-  // and calls _updateInstancePickingColors or _updateRegularPickingColors
-  updatePickingColors(excludeColors) {
+  // and calls _clearInstancePickingColor or _clearPickingColor
+  clearPickingColor(color) {
     if (this.getAttributeManager().attributes.pickingColors) {
-      this._updateRegularPickingColors(excludeColors);
+      this._clearPickingColor(color);
     } else {
-      this._updateInstancePickingColors(excludeColors);
+      this._clearInstancePickingColor(color);
+    }
+  }
+
+  resetPickingColors() {
+    // TODO: find proper implementation for this
+    if (this.getAttributeManager().attributes.pickingColors) {
+      // this does not work :-(
+      this.invalidateAttribute();
+      this.updateAttributes(this.props);
+    } else {
+      //
     }
   }
 
