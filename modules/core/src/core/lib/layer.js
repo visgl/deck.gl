@@ -362,7 +362,7 @@ export default class Layer {
     }
   }
 
-  // This method overwrites the current buffer and is used for multi-picking
+  // Sets the specified instanced picking color to null picking color. Used for multi picking.
   _clearInstancePickingColor(color) {
     const {instancePickingColors} = this.getAttributeManager().attributes;
     const {state: attribute} = instancePickingColors;
@@ -380,7 +380,7 @@ export default class Layer {
     }
   }
 
-  // This method overwrites the current buffer and is used for multi-picking
+  // Sets all occurrences of the specified picking color to null picking color. Used for multi picking.
   _clearPickingColor(color) {
     const {pickingColors} = this.getAttributeManager().attributes;
     const attribute = pickingColors.state;
