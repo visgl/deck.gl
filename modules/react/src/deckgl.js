@@ -45,7 +45,7 @@ export default class DeckGL extends React.Component {
       Object.assign({}, this.props, {
         canvas: this.deckCanvas,
         viewState: this._getViewState(this.props),
-        // Note: If Deck event handling change size or view state, it calls onResize to update
+        // Note: If Deck event handling changes size, it calls onResize to update
         onResize: size => this.forceUpdate()
       })
     );
