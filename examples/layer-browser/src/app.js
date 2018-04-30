@@ -88,7 +88,9 @@ export default class App extends PureComponent {
       },
       hoveredItem: null,
       clickedItem: null,
-      queriedItems: null
+      queriedItems: null,
+
+      enableDepthPickOnClick: false
     };
 
     this._effects = [new ReflectionEffect()];
@@ -144,12 +146,22 @@ export default class App extends PureComponent {
   }
 
   _onClick(info) {
-    this.setState({clickedItem: info});
+    if (this.state.enableDepthPickOnClick && info) {
+      this._multiDepthPick(info.x, info.y);
+    } else {
+      this.setState({clickedItem: info});
+    }
   }
 
   _onPickObjects() {
     const {width, height} = this.state;
     const infos = this.refs.deckgl.pickObjects({x: 0, y: 0, width, height});
+    console.log(infos); // eslint-disable-line
+    this.setState({queriedItems: infos});
+  }
+
+  _multiDepthPick(x, y) {
+    const infos = this.refs.deckgl.pickMultipleObjects({x, y});
     console.log(infos); // eslint-disable-line
     this.setState({queriedItems: infos});
   }
@@ -317,6 +329,13 @@ export default class App extends PureComponent {
           <div style={{textAlign: 'center', padding: '5px 0 5px'}}>
             <button onClick={this._onPickObjects}>
               <b>Pick Objects</b>
+            </button>
+            <button
+              onClick={() =>
+                this.setState({enableDepthPickOnClick: !this.state.enableDepthPickOnClick})
+              }
+            >
+              <b>Multi Depth Pick ({this.state.enableDepthPickOnClick ? 'ON' : 'OFF'})</b>
             </button>
           </div>
           <LayerControls

@@ -362,7 +362,7 @@ export default class LayerManager {
   }
 
   // Pick the closest info at given coordinate
-  pickObject({x, y, mode, radius = 0, layerIds, layerFilter}) {
+  pickObject({x, y, mode, radius = 0, layerIds, layerFilter, depth = 1}) {
     const {gl, useDevicePixels} = this.context;
 
     const layers = this.getLayers({layerIds});
@@ -375,6 +375,7 @@ export default class LayerManager {
       layers,
       mode,
       layerFilter,
+      depth,
       // Injected params
       viewports: this.getViewports(),
       onViewportActive: this._activateViewport.bind(this),

@@ -33,8 +33,8 @@ export default class LayerInfo extends PureComponent {
         )}
         {queried && (
           <div>
-            <h4>Query Visible Objects</h4>
-            <span>{queried.length} visible objects found (see console)</span>
+            <h4>Pick Result</h4>
+            <span>{queried.length} objects found (see console)</span>
           </div>
         )}
       </div>

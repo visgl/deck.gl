@@ -39,6 +39,7 @@ export function pickObject(
     y,
     radius,
     layerFilter,
+    depth = 1,
     mode,
     onViewportActive,
     pickingFBO,
@@ -61,43 +62,73 @@ export function pickObject(
     deviceHeight: pickingFBO.height
   });
 
-  const pickedColors =
-    deviceRect &&
-    drawAndSamplePickingBuffer(gl, {
+  const result = [];
+  const affectedLayers = {};
+
+  for (let i = 0; i < depth; i++) {
+    const pickedColors =
+      deviceRect &&
+      drawAndSamplePickingBuffer(gl, {
+        layers,
+        viewports,
+        onViewportActive,
+        useDevicePixels,
+        pickingFBO,
+        deviceRect,
+        layerFilter,
+        redrawReason: mode
+      });
+
+    const pickInfo =
+      (pickedColors &&
+        getClosestFromPickingBuffer(gl, {
+          pickedColors,
+          layers,
+          deviceX,
+          deviceY,
+          deviceRadius,
+          deviceRect
+        })) ||
+      NO_PICKED_OBJECT;
+
+    if (!pickInfo.pickedColor) {
+      break;
+    }
+
+    // only exclude if we need to run picking again
+    if (i + 1 < depth) {
+      const layerId = pickInfo.pickedColor[3] - 1;
+      if (!affectedLayers[layerId]) {
+        // backup original colors
+        affectedLayers[layerId] = layers[layerId].copyPickingColors();
+      }
+      layers[layerId].clearPickingColor(pickInfo.pickedColor);
+    }
+
+    const processedPickInfos = processPickInfo({
+      pickInfo,
+      lastPickedInfo,
+      mode,
       layers,
       viewports,
-      onViewportActive,
-      useDevicePixels,
-      pickingFBO,
-      deviceRect,
-      layerFilter,
-      redrawReason: mode
+      x,
+      y,
+      deviceX,
+      deviceY,
+      pixelRatio
     });
 
-  const pickInfo =
-    (pickedColors &&
-      getClosestFromPickingBuffer(gl, {
-        pickedColors,
-        layers,
-        deviceX,
-        deviceY,
-        deviceRadius,
-        deviceRect
-      })) ||
-    NO_PICKED_OBJECT;
+    if (processedPickInfos) {
+      processedPickInfos.forEach(info => result.push(info));
+    }
+  }
 
-  return processPickInfo({
-    pickInfo,
-    lastPickedInfo,
-    mode,
-    layers,
-    viewports,
-    x,
-    y,
-    deviceX,
-    deviceY,
-    pixelRatio
-  });
+  // reset only affected buffers
+  Object.keys(affectedLayers).forEach(layerId =>
+    layers[layerId].restorePickingColors(affectedLayers[layerId])
+  );
+
+  return result;
 }
 
 // Pick all objects within the given bounding box

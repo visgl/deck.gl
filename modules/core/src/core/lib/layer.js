@@ -362,6 +362,71 @@ export default class Layer {
     }
   }
 
+  // Sets the specified instanced picking color to null picking color. Used for multi picking.
+  _clearInstancePickingColor(color) {
+    const {instancePickingColors} = this.getAttributeManager().attributes;
+    const {state: attribute} = instancePickingColors;
+    const {value, size} = attribute;
+
+    const i = this.decodePickingColor(color);
+    value[i * size + 0] = 0;
+    value[i * size + 1] = 0;
+    value[i * size + 2] = 0;
+
+    // TODO: Optimize this to use sub-buffer update!
+    const models = this.getModels();
+    if (models) {
+      models.forEach(model => model.setAttributes({instancePickingColors: attribute}));
+    }
+  }
+
+  // Sets all occurrences of the specified picking color to null picking color. Used for multi picking.
+  _clearPickingColor(color) {
+    const {pickingColors} = this.getAttributeManager().attributes;
+    const attribute = pickingColors.state;
+    const {value} = attribute;
+
+    for (let i = 0; i < value.length; i += 3) {
+      if (value[i + 0] === color[0] && value[i + 1] === color[1] && value[i + 2] === color[2]) {
+        value[i + 0] = 0;
+        value[i + 1] = 0;
+        value[i + 2] = 0;
+      }
+    }
+
+    // TODO: Optimize this to use sub-buffer update!
+    const models = this.getModels();
+    if (models) {
+      models.forEach(model => model.setAttributes({pickingColors: attribute}));
+    }
+  }
+
+  // This method figures out if we use instance colors or not
+  // and calls _clearInstancePickingColor or _clearPickingColor
+  clearPickingColor(color) {
+    if (this.getAttributeManager().attributes.pickingColors) {
+      this._clearPickingColor(color);
+    } else {
+      this._clearInstancePickingColor(color);
+    }
+  }
+
+  copyPickingColors() {
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+
+    return new Uint8ClampedArray(colors.value);
+  }
+
+  restorePickingColors(value) {
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
+
+    colors.value.set(value);
+    colors.setNeedsUpdate();
+    this.updateAttributes(this.props);
+  }
+
   // Deduces numer of instances. Intention is to support:
   // - Explicit setting of numInstances
   // - Auto-deduction for ES6 containers that define a size member
