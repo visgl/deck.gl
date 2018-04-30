@@ -46,7 +46,8 @@ export default class DeckGL extends React.Component {
         canvas: this.deckCanvas,
         viewState: this._getViewState(this.props),
         // Note: If Deck event handling change size or view state, it calls onResize to update
-        onResize: size => this.forceUpdate()
+        onViewStateChange: this._onViewStateChange,
+        onResize: this._onResize
       })
     );
     this._updateFromProps(this.props);
@@ -82,6 +83,24 @@ export default class DeckGL extends React.Component {
   queryVisibleObjects(opts) {
     log.deprecated('queryVisibleObjects', 'pickObjects')();
     return this.pickObjects(opts);
+  }
+
+  // Callbacks
+
+  // Forward callback and then call forceUpdate to guarantee that sub components update
+  _onResize(...args) {
+    if (this.props.onResize) {
+      this.props.onResize(...args);
+    }
+    this.forceUpdate();
+  }
+
+  // Forward callback and then call forceUpdate to guarantee that sub components update
+  _onViewStateChange(...args) {
+    if (this.props.onViewStateChange) {
+      this.props.onViewStateChange(...args);
+    }
+    this.forceUpdate();
   }
 
   // Private Helpers

@@ -135,6 +135,18 @@ Callback arguments:
 
 * `gl` - the WebGL context.
 
+##### `onViewStateChange` (Function)
+
+The `onViewStateChange` callback is fired when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
+
+`onViewStateChanged({viewState})`
+
+* `viewState` - An updated [view state](/docs/advanced/view-state.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
+
+Returns:
+
+* The application can return an updated view state. If a view state is returned, it will be used instead of the passed in `viewState` to update the application's internal view state (see `initialViewState`).
+
 ##### `onLayerHover` (Function, optional)
 
 Callback - called when the object under the pointer changes.

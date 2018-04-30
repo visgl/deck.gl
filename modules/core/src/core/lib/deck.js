@@ -161,7 +161,11 @@ export default class Deck {
 
     // Update controller props
     if (this.controller) {
-      this.controller.setProps(newProps);
+      this.controller.setProps(
+        Object.assign(newProps, {
+          onViewStateChange: this._onViewStateChange
+        })
+      );
     }
     this.stats.timeEnd('deck.setProps');
   }
@@ -324,19 +328,16 @@ export default class Deck {
   // Callbacks
 
   _onViewStateChange({viewState}, ...args) {
+    // Let app know that view state is changing, and give it a chance to change it
+    if (this.props.onViewStateChange) {
+      viewState = this.props.onViewStateChange({viewState}, ...args) || viewState;
+    }
+
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
       this.viewState = viewState;
       this.layerManager.setParameters({viewState});
       this.controller.setProps({viewState});
-    }
-    // Let app know that view state has changed
-    if (this.props.onViewStateChange) {
-      this.props.onViewStateChange({viewState}, ...args);
-    }
-    // "HACK": Calling onResize to inform React component that it needs to update
-    if (this.props.onResize) {
-      this.props.onResize({width: this.width, height: this.height});
     }
   }
 
