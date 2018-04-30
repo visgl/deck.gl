@@ -13,10 +13,10 @@ for (let i = 32; i < 128; i++) {
   DEFAULT_CHAR_SET.push(String.fromCharCode(i));
 }
 
-function setTextStyle(ctx, fontFamily, fontSize) {
+function setTextStyle(ctx, fontFamily, fontSize, useAdvancedMetrics) {
   ctx.font = `${fontSize}px ${fontFamily}`;
   ctx.fillStyle = '#000';
-  ctx.textBaseline = 'top';
+  ctx.textBaseline = useAdvancedMetrics ? 'top' : 'hanging';
   ctx.textAlign = 'left';
 }
 
@@ -31,9 +31,10 @@ export function makeFontAtlas(
 ) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  setTextStyle(ctx, fontFamily, fontSize);
+  setTextStyle(ctx, fontFamily, fontSize, true);
 
   // measure texts
+  let useAdvancedMetrics;
   let row = 0;
   let x = 0;
   let fontHeight = null;
@@ -42,11 +43,17 @@ export function makeFontAtlas(
   Array.from(characterSet).forEach(char => {
     const {width, fontBoundingBoxDescent} = ctx.measureText(char);
     // check if fontHeight has been captured (same for all characters in the font)
-    if (!fontHeight) {
-      // Advanced text metrics are only implemented in Chrome:
-      // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-      // Fallback to height=fontSize
-      fontHeight = fontBoundingBoxDescent || fontSize;
+    if (fontHeight === null) {
+      if (fontBoundingBoxDescent) {
+        // Advanced text metrics are only implemented in Chrome:
+        // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
+        fontHeight = fontBoundingBoxDescent;
+        useAdvancedMetrics = true;
+      } else {
+        // Fallback to height=fontSize
+        fontHeight = fontSize;
+        useAdvancedMetrics = false;
+      }
     }
 
     if (x + width > MAX_CANVAS_WIDTH) {
@@ -66,7 +73,7 @@ export function makeFontAtlas(
   canvas.width = MAX_CANVAS_WIDTH;
   canvas.height = (row + 1) * (fontHeight + padding);
 
-  setTextStyle(ctx, fontFamily, fontSize);
+  setTextStyle(ctx, fontFamily, fontSize, useAdvancedMetrics);
   for (const char in mapping) {
     ctx.fillText(char, mapping[char].x, mapping[char].y);
   }
