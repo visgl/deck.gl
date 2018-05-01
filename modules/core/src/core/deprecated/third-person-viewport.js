@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Viewport from './viewport';
+import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {Vector3, Matrix4, experimental} from 'math.gl';
 const {SphericalCoordinates} = experimental;

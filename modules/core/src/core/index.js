@@ -39,16 +39,11 @@ export {default as CompositeLayer} from './lib/composite-layer';
 // Viewports
 export {default as Viewport} from './viewports/viewport';
 export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
-export {default as PerspectiveViewport} from './viewports/perspective-viewport';
-export {default as OrthographicViewport} from './viewports/orthographic-viewport';
 
 // Shader modules
 export {default as project} from './shaderlib/project/project';
 export {default as project64} from './shaderlib/project64/project64';
 export {default as lighting} from './shaderlib/lighting/lighting';
-
-// EXPERIMENTAL EXPORTS
-// Experimental Features (May change in minor version bumps, use at your own risk)
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';
@@ -61,6 +56,9 @@ export {default as OrthographicView} from './views/orthographic-view';
 // Controllers
 export {default as MapController} from './controllers/map-controller';
 
+// EXPERIMENTAL EXPORTS
+// Experimental Features (May change in minor version bumps, use at your own risk)
+
 // Experimental Controllers
 import {default as OrbitController} from './controllers/orbit-controller';
 
@@ -71,9 +69,6 @@ import {default as MapState} from './controllers/map-state';
 import {default as ViewportControls} from './controllers/viewport-controls';
 import {default as MapControls} from './controllers/map-controls';
 
-import {default as FirstPersonViewport} from './viewports/first-person-viewport';
-import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
-
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
@@ -83,28 +78,33 @@ import {TRANSITION_EVENTS} from './lib/transition-manager';
 import {default as LinearInterpolator} from './transitions/linear-interpolator';
 import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
+import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
+
 // INTERNAL EXPORTS
 
 import TransitionManager from './lib/transition-manager';
 import {extractViewState} from './transitions/transition-utils';
 
 // Layer utilities
-import {default as log} from './utils/log';
-import {get} from './utils/get';
-import {count} from './utils/count';
+import {default as log} from './utils/log'; // Export?
+import {get} from './utils/get'; // Remove?
+import {count} from './utils/count'; // Remove?
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {defaultColorRange} from './utils/color-utils';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
-import {clamp} from './utils/scale-utils';
+import {clamp} from './utils/scale-utils'; // from math.gl?
 
-import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten';
-// TODO - just expose as layer methods instead?
-import {enable64bitSupport} from './utils/fp64';
-import {fp64ify, fp64LowPart} from './utils/fp64';
+// Export? luma.gl?
+import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten'; // luma.gl?
+import {enable64bitSupport} from './utils/fp64'; // Layer method?
+import {fp64ify, fp64LowPart} from './utils/fp64'; // fp64 module utils (luma.gl)?
 
-import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
-
+// DEPRECATED EXPORTS
+export {default as PerspectiveViewport} from './deprecated/perspective-viewport';
+export {default as OrthographicViewport} from './deprecated/orthographic-viewport';
+import {default as FirstPersonViewport} from './deprecated/first-person-viewport';
+import {default as ThirdPersonViewport} from './deprecated/third-person-viewport';
 import {default as OrbitViewport} from './deprecated/orbit-viewport';
 
 export const experimental = {
