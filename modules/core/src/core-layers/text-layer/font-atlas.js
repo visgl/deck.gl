@@ -34,27 +34,19 @@ export function makeFontAtlas(
   setTextStyle(ctx, fontFamily, fontSize, true);
 
   // measure texts
-  let useAdvancedMetrics;
   let row = 0;
   let x = 0;
-  let fontHeight = null;
+  // Get a sample of text metrics
+  // Advanced text metrics are only implemented in Chrome:
+  // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
+  const {fontBoundingBoxDescent} = ctx.measureText(characterSet[0]);
+  // Fallback to height=fontSize
+  const fontHeight = fontBoundingBoxDescent || fontSize;
+  const useAdvancedMetrics = Boolean(fontBoundingBoxDescent);
   const mapping = {};
 
   Array.from(characterSet).forEach(char => {
-    const {width, fontBoundingBoxDescent} = ctx.measureText(char);
-    // check if fontHeight has been captured (same for all characters in the font)
-    if (fontHeight === null) {
-      if (fontBoundingBoxDescent) {
-        // Advanced text metrics are only implemented in Chrome:
-        // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-        fontHeight = fontBoundingBoxDescent;
-        useAdvancedMetrics = true;
-      } else {
-        // Fallback to height=fontSize
-        fontHeight = fontSize;
-        useAdvancedMetrics = false;
-      }
-    }
+    const {width} = ctx.measureText(char);
 
     if (x + width > MAX_CANVAS_WIDTH) {
       x = 0;
