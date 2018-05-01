@@ -16,6 +16,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 ## Official Releases
 
+#### [5.2.0] - April 30
+-  use baseline:hanging if advanced text metrics is not supported (#1753)
+-  Update example links in README.md (#1744)
+-  Fix standalone bundle inline version (#1746)
+-  handle right button pan in MapControls (#1745)
+-  update dependency
+-  Update release date in what's new
+-  update lock file
 #### [5.2.0] - April 24
 -  Embedded layer demo fixes (#1741)
 -  Update showcases links (#1738)
