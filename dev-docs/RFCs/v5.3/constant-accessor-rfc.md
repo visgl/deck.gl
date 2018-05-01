@@ -1,4 +1,12 @@
-# Generic Accessors Micro-RFC
+# Constant Accessors Micro-RFC
+
+* **Authors**: Xiaoji Chen
+* **Date**: Apr 2018
+* **Status**: Initial draft, issues need decision
+
+Overview:
+* Allow users to supply constant attributes directly instead of using an accessor.
+
 
 ## Background
 
@@ -19,9 +27,7 @@ The curent implementation to handle this use case has several problems:
 * Update triggers are required to change these constants, which has been a pain point for beginners.
 
 
-## Proposal
-
-### Option 1: New Uniform Props
+## Proposal: New Constant Props
 
 * Add a new value prop for every accessor prop, e.g.
   + `position` (Number[3]) - corresponds to `getPosition`
@@ -46,7 +52,7 @@ Core changes:
 - Some composite layers need to update prop forwarding to include the new props.
 
 
-### Option 2: Overloaded Accessors
+## Alternative: Overloaded Accessors
 
 * Allow values be provided to accessor props, e.g.
   + `getPosition` (Function | Number[3])
