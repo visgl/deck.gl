@@ -24,7 +24,7 @@ const App = (viewState, data) => (
 
 Creates a new Deck instance.
 
-````js
+```js
 const deck = new Deck(props);
 ```
 
