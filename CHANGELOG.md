@@ -22,6 +22,21 @@ For Earlier Beta Releases see below
 ## Beta Releases
 
 ### deck.gl v5.3 Pre Releases
+#### [5.3.0-alpha.2] - April 30
+-  use baseline:hanging if advanced text metrics is not supported (#1753)
+-  Smaller viewState related fixes (#1750)
+-  Picking overlapping objects RFC implementation (#1730)
+-  Update example links in README.md (#1744)
+-  Update picking RFC (#1747)
+-  Fix standalone bundle inline version (#1746)
+-  handle right button pan in MapControls (#1745)
+-  update lite module dependency
+-  Embedded layer demo fixes (#1741)
+-  Test cleanup (#1739)
+-  Update showcases links (#1738)
+-  Make DeckGL doc refer to Deck docs (#1737)
+-  More website link fixes (#1736)
+-  Fix outdated source links (#1735)
 
 #### [5.3.0-alpha.1] - April 23
 - Bump luma.gl to 5.3.0-alpha.1
