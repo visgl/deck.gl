@@ -71,6 +71,17 @@ A geospatial `viewState` would typically contain the following fields:
 * `pitch` (Number, optional) - Current pitch - used to define a mercator projection if `viewport` is not supplied.
 
 
+#### `initialViewState` (Object)
+
+If `initialViewState` is provided, the `Deck` component will track view state changes from any attached `controller` using internal state, with `initialViewState` as its initial view state.
+
+Notes:
+* The `props.onViewStateChange` callback will still be called, if provided.
+* If `props.viewState` is supplied by the application, the supplied `viewState` will always be used, "shadowing" the `Deck` component's internal `viewState`.
+* In simple applications, use of the `initialViewState` prop can avoid the need track the view state in the application .
+* One drawback of using `initialViewState` for reactive/functional applications is that the `Deck` component becomes more stateful.
+
+
 ### Configuration Properties
 
 ##### `id` (String, optional)
@@ -123,6 +134,18 @@ Callback, called once the WebGL context has been initiated
 Callback arguments:
 
 * `gl` - the WebGL context.
+
+##### `onViewStateChange` (Function)
+
+The `onViewStateChange` callback is fired when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
+
+`onViewStateChanged({viewState})`
+
+* `viewState` - An updated [view state](/docs/advanced/view-state.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
+
+Returns:
+
+* The application can return an updated view state. If a view state is returned, it will be used instead of the passed in `viewState` to update the application's internal view state (see `initialViewState`).
 
 ##### `onLayerHover` (Function, optional)
 
