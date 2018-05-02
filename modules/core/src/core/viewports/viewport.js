@@ -62,119 +62,26 @@ export default class Viewport {
    * Note: The Viewport is immutable in the sense that it only has accessors.
    * A new viewport instance should be created if any parameters have changed.
    */
-  /* eslint-disable complexity, max-statements */
   constructor(opts = {}) {
     const {
       id = null,
-
       // Window width/height in pixels (for pixel projection)
       x = 0,
       y = 0,
       width = 1,
-      height = 1,
-
-      // view matrix
-      viewMatrix = IDENTITY,
-
-      // Projection matrix
-      projectionMatrix = null,
-
-      // Projection matrix parameters, used if projectionMatrix not supplied
-      orthographic = false,
-      fovyRadians = 75 * DEGREES_TO_RADIANS,
-      fovy,
-      near = 0.1, // Distance of near clipping plane
-      far = 1000, // Distance of far clipping plane
-      focalDistance = 1, // Only needed for orthographic views
-
-      // Anchor: lng lat zoom will make this viewport work with geospatial coordinate systems
-      longitude = null,
-      latitude = null,
-      zoom = null,
-
-      // Anchor position offset (in meters for geospatial viewports)
-      position = null,
-      // A model matrix to be applied to position, to match the layer props API
-      modelMatrix = null,
-
-      distanceScales = null
+      height = 1
     } = opts;
 
     this.id = id || this.constructor.displayName || 'viewport';
 
-    // Check if we have a geospatial anchor
-    this.isGeospatial = Number.isFinite(latitude) && Number.isFinite(longitude);
-
-    // Silently allow apps to send in w,h = 0,0
     this.x = x;
     this.y = y;
+    // Silently allow apps to send in w,h = 0,0
     this.width = width || 1;
     this.height = height || 1;
 
-    this.zoom = zoom;
-    if (!Number.isFinite(this.zoom)) {
-      this.zoom = this.isGeospatial
-        ? getMeterZoom({latitude}) + Math.log2(focalDistance)
-        : DEFAULT_ZOOM;
-    }
-    this.scale = Math.pow(2, this.zoom);
-
-    // Calculate distance scales if lng/lat/zoom are provided
-    this.distanceScales = this.isGeospatial
-      ? getDistanceScales({latitude, longitude, scale: this.scale})
-      : distanceScales || DEFAULT_DISTANCE_SCALES;
-
-    this.focalDistance = focalDistance;
-
-    this.distanceScales.metersPerPixel = new Vector3(this.distanceScales.metersPerPixel);
-    this.distanceScales.pixelsPerMeter = new Vector3(this.distanceScales.pixelsPerMeter);
-
-    this.position = ZERO_VECTOR;
-    this.meterOffset = ZERO_VECTOR;
-    if (position) {
-      // Apply model matrix if supplied
-      this.position = position;
-      this.modelMatrix = modelMatrix;
-      this.meterOffset = modelMatrix ? modelMatrix.transformVector(position) : position;
-    }
-
-    this.viewMatrixUncentered = viewMatrix;
-
-    if (this.isGeospatial) {
-      // Determine camera center
-      this.center = getWorldPosition({
-        longitude,
-        latitude,
-        scale: this.scale,
-        distanceScales: this.distanceScales,
-        meterOffset: this.meterOffset
-      });
-
-      // Make a centered version of the matrix for projection modes without an offset
-      this.viewMatrix = new Matrix4()
-        // Apply the uncentered view matrix
-        .multiplyRight(this.viewMatrixUncentered)
-        // The Mercator world coordinate system is upper left,
-        // but GL expects lower left, so we flip it around the center after all transforms are done
-        .scale([1, -1, 1])
-        // And center it
-        .translate(new Vector3(this.center || ZERO_VECTOR).negate());
-    } else {
-      this.center = position;
-      this.viewMatrix = viewMatrix;
-    }
-
-    this.projectionMatrix =
-      projectionMatrix ||
-      this._createProjectionMatrix({
-        orthographic,
-        fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
-        aspect: this.width / this.height,
-        focalDistance,
-        near,
-        far
-      });
-
+    this._initViewMatrix(opts);
+    this._initProjectionMatrix(opts);
     this._initPixelMatrices();
 
     // Bind methods for easy access
@@ -185,7 +92,6 @@ export default class Viewport {
     this.unprojectFlat = this.unprojectFlat.bind(this);
     this.getMatrices = this.getMatrices.bind(this);
   }
-  /* eslint-enable complexity, max-statements */
 
   // Two viewports are equal if width and height are identical, and if
   // their view and projection matrices are (approximately) equal.
@@ -383,6 +289,107 @@ export default class Viewport {
     return orthographic
       ? new Matrix4().orthographic({fovy: fovyRadians, aspect, focalDistance, near, far})
       : new Matrix4().perspective({fovy: fovyRadians, aspect, near, far});
+  }
+
+  /* eslint-disable complexity, max-statements */
+  _initViewMatrix(opts) {
+    const {
+      // view matrix
+      viewMatrix = IDENTITY,
+
+      longitude = null, // Anchor: lng lat zoom makes viewport work w/ geospatial coordinate systems
+      latitude = null,
+      zoom = null,
+
+      position = null, // Anchor position offset (in meters for geospatial viewports)
+      modelMatrix = null, // A model matrix to be applied to position, to match the layer props API
+      focalDistance = 1, // Only needed for orthographic views
+
+      distanceScales = null
+    } = opts;
+
+    // Check if we have a geospatial anchor
+    this.isGeospatial = Number.isFinite(latitude) && Number.isFinite(longitude);
+
+    this.zoom = zoom;
+    if (!Number.isFinite(this.zoom)) {
+      this.zoom = this.isGeospatial
+        ? getMeterZoom({latitude}) + Math.log2(focalDistance)
+        : DEFAULT_ZOOM;
+    }
+    this.scale = Math.pow(2, this.zoom);
+
+    // Calculate distance scales if lng/lat/zoom are provided
+    this.distanceScales = this.isGeospatial
+      ? getDistanceScales({latitude, longitude, scale: this.scale})
+      : distanceScales || DEFAULT_DISTANCE_SCALES;
+
+    this.focalDistance = focalDistance;
+
+    this.distanceScales.metersPerPixel = new Vector3(this.distanceScales.metersPerPixel);
+    this.distanceScales.pixelsPerMeter = new Vector3(this.distanceScales.pixelsPerMeter);
+
+    this.position = ZERO_VECTOR;
+    this.meterOffset = ZERO_VECTOR;
+    if (position) {
+      // Apply model matrix if supplied
+      this.position = position;
+      this.modelMatrix = modelMatrix;
+      this.meterOffset = modelMatrix ? modelMatrix.transformVector(position) : position;
+    }
+
+    this.viewMatrixUncentered = viewMatrix;
+
+    if (this.isGeospatial) {
+      // Determine camera center
+      this.center = getWorldPosition({
+        longitude,
+        latitude,
+        scale: this.scale,
+        distanceScales: this.distanceScales,
+        meterOffset: this.meterOffset
+      });
+
+      // Make a centered version of the matrix for projection modes without an offset
+      this.viewMatrix = new Matrix4()
+        // Apply the uncentered view matrix
+        .multiplyRight(this.viewMatrixUncentered)
+        // The Mercator world coordinate system is upper left,
+        // but GL expects lower left, so we flip it around the center after all transforms are done
+        .scale([1, -1, 1])
+        // And center it
+        .translate(new Vector3(this.center || ZERO_VECTOR).negate());
+    } else {
+      this.center = position;
+      this.viewMatrix = viewMatrix;
+    }
+  }
+  /* eslint-enable complexity, max-statements */
+
+  _initProjectionMatrix(opts) {
+    const {
+      // Projection matrix
+      projectionMatrix = null,
+
+      // Projection matrix parameters, used if projectionMatrix not supplied
+      orthographic = false,
+      fovyRadians = 75 * DEGREES_TO_RADIANS,
+      fovy,
+      near = 0.1, // Distance of near clipping plane
+      far = 1000, // Distance of far clipping plane
+      focalDistance = 1 // Only needed for orthographic views
+    } = opts;
+
+    this.projectionMatrix =
+      projectionMatrix ||
+      this._createProjectionMatrix({
+        orthographic,
+        fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
+        aspect: this.width / this.height,
+        focalDistance,
+        near,
+        far
+      });
   }
 
   _initPixelMatrices() {
