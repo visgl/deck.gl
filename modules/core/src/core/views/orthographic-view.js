@@ -37,6 +37,7 @@ export default class OrthographicView extends View {
     bottom = Number.isFinite(bottom) ? bottom : top + height;
 
     return new Viewport({
+      id: this.id,
       x,
       y,
       width,

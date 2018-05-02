@@ -34,6 +34,7 @@ export default class PerspectiveView extends View {
 
     const fovyRadians = fovy * DEGREES_TO_RADIANS;
     return new Viewport({
+      id: this.id,
       x,
       y,
       width,
