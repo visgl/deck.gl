@@ -379,10 +379,10 @@ export default class Viewport {
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
       focalDistance = 1, // Only needed for orthographic views
-      orthographicFocalDistance,
+      orthographicFocalDistance
     } = opts;
 
-    const radians = fovyRadians || ((fovyDegrees || fovy) * DEGREES_TO_RADIANS);
+    const radians = fovyRadians || (fovyDegrees || fovy) * DEGREES_TO_RADIANS;
 
     this.projectionMatrix =
       projectionMatrix ||
@@ -443,7 +443,6 @@ export default class Viewport {
       // throw new Error('Pixel project matrix not invertible');
     }
   }
-
 }
 
 Viewport.displayName = 'Viewport';
