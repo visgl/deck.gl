@@ -1,11 +1,6 @@
 # Viewport Class
 
-A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines a number of responsibilities:
-
-* It enables projection and unprojection of coordinates (between world and viewport), both in JavaScript and in GLSL.
-* It also contains the size and position of the target rectangle on screen where the camera will render.
-* The viewport class provides both direct `project`/`unproject` function members as well as projection matrices including `view` and `projection` matrices, and can generate their inverses as well to facilitate e.g. lighting calculations in WebGL shaders.
-* In geospatial setups, Viewports can contain geospatial anchors.
+A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines a number of responsibilities, which can project and unproject 3D coordinates to the screen.
 
 For more information:
 
@@ -15,7 +10,9 @@ For more information:
 
 ## Usage
 
-The `Viewport` class is normally not instantiated directly. Firstly, the `View` class is more commonly used by apps, and even when a `Viewport` is needed, one of its subclasses is typically used. However, in cases where the application wants to use "externally" generated view or projection matrices (e.g. when using the WebVR API), the `Viewport` class can be useful.
+The `Viewport` class is normally not instantiated directly. The [`View`](/docs/api-reference/view.md) class is more commonly used by applications. Instead, internally deck.gl automatically creates `Viewport`s from `View`s when needed.
+
+However, in cases where the application wants to use "externally" generated view or projection matrices (e.g. when using the WebVR API), the `Viewport` class can be useful.
 
 
 ## Constructor
@@ -24,42 +21,42 @@ The `Viewport` class is normally not instantiated directly. Firstly, the `View` 
 new Viewport({width: 500, height: 500, viewMatrix, projectionMatrix, ...});
 ```
 
-Parameters
+General Parameters
 
-* `opts` (Object) - Viewport options
+* `x`=`0` (`Number`) - x position of viewport top-left corner
+* `y`=`0` (`Number`) - y position of viewport top-left corner
+* `width`=`1` (`Number`) - Width of viewport
+* `height`=`1` (`Number`) - Height of viewport
+* `focalDistance`=`1` - Distance at which pixel sized geometry is one pixel
 
-  + `x` (Number) - Default `0`
-  + `y` (Number) - Default `0`
-  + `width` (Number) - Width of "viewport" or window. Default `1`.
-  + `height` (Number) - Height of "viewport" or window. Default `1`.
-  + `viewMatrix` (Array[16], optional) - View matrix. Defaults to identity matrix.
-  + `projectionMatrix` (Array[16], optional) - Projection matrix.
+View Matrix Parameters
 
-  Position parameters
+* `viewMatrix`= (`Array[16]`, optional) - View matrix. Defaults to the identity matrix.
 
-  + `position`
-  + `modelMatrix`
+Position and Geospatial Anchor Options (Optional)
 
-  Geospatial Anchor Options (Optional)
+* `latitude` (`Number`, optional) - Center of viewport on map (alternative to center).
+* `longitude` (`Number`, optional) - Center of viewport on map (alternative to center).
+* `zoom` (`Number`, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) .
+* `focalDistance` (`Number`, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
 
-  + `latitude` (Number, optional) - Center of viewport on map (alternative to center).
-  + `longitude` (Number, optional) - Center of viewport on map (alternative to center).
-  + `zoom` (Number, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) .
-  + `focalDistance` (Number, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
+* `position` - Position of viewport camera
+* `modelMatrix` - Optional model matrix applied to position
 
-  Projection Matrix Parameters (Optional).
+Projection Matrix Parameters.
 
-  + `orthographic` (Boolean) - whether to create an orthographic or perspective projection matrix. Default `false`.
-  + `fov` (Number) - Field of view covered by camera, in the perspective case. Default `75`.
-  + `focalDistance` (Number) - (orthographic projections only) The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Default `1`.
-  + `aspect` (Number) - Aspect ratio. Defaults to the viewport's `width/height`.
-  + `near` (Number) - Distance of near clipping plane. Default `0.1`.
-  + `far` (Number) - Distance of far clipping plane. Default `1000`.
+* `projectionMatrix`= (`Array[16]`, optional) - Projection matrix.
 
+If `projectionMatrix` is not supplied, an attempt is made to build from the remaining parameters. Otherwise the remaining parameters will be ignored.
 
-Remarks:
+* `fovyDegrees`=`75` (`Number`) - Field of view covered by camera, in the perspective case.
+* `aspect`= (`Number`) - Aspect ratio. Defaults to the Viewport's `width/height` ratio.
+* `near`=`0.1` (`Number`) - Distance of near clipping plane.
+* `far`=`1000` (`Number`) - Distance of far clipping plane.
+* `orthographic`=`false` (`Boolean`) - whether to create an orthographic or perspective projection matrix. Default is perspective projection.
+* `focalDistance`=`1` (`Number`) - (orthographic projections only) The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Note: lso used for pixel scale identity distance above.
+* `orthographicFocalDistance` (`Number`) - (orthographic projections only) Can be used to specify different values for pixel scale focal distance and orthographic focal distance.
 
-* If the `projectionMatrix` parameter is not supplied, `Viewport` will try to create a projection matrix from the project matrix parameters.
 
 ## Methods
 
@@ -118,14 +115,14 @@ Note:
 
 * By default, takes top-left coordinates from JavaScript mouse events.
 
-
 ## Remarks
 
 * The `Viewport` class and its subclasses are perhaps best thought of as geospatially enabled counterparts of the typical `Camera` classes found in most 3D libraries.
-* One addition is that to support pixel project/unproject functions (in addition to the clipspace projection that Camera classes typically manage), the `Viewport` is also aware of the viewport extents.
-* Also, it can generate WebGL compatible projection matrices (column-major) - Note that these still need to be converted to typed arrays.
-* The `Viewport` is used to generate uniforms for the shader `project` module and tries to provide similar projection functions to JavaScript code so that layers can do projection calculations wherever it is most suitable (i.e. in GLSL or JavaScript) in each specific case.
-
+* The `Viewport` class works together with the `project` shader module and generates the uniforms that module needs to project correctly in GLSL code.
+* Accordingly, a main function of viewports is to generate WebGL compatible view and projection matrices (column-major format).
+* Functions (including projection and unprojection of coordinates) are available both in JavaScript and in GLSL, so that layers can do consistent projection calculations in both GLSL and JavaScript.
+* To support pixel project/unproject functions (in addition to the clipspace projection that Camera classes typically manage), the `Viewport` is also aware of the viewport extents.
+* In geospatial setups, Viewports can contain geospatial anchors.
 
 ## Source
 

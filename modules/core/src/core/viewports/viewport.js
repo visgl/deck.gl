@@ -374,19 +374,23 @@ export default class Viewport {
       // Projection matrix parameters, used if projectionMatrix not supplied
       orthographic = false,
       fovyRadians = 75 * DEGREES_TO_RADIANS,
+      fovyDegrees,
       fovy,
       near = 0.1, // Distance of near clipping plane
       far = 1000, // Distance of far clipping plane
-      focalDistance = 1 // Only needed for orthographic views
+      focalDistance = 1, // Only needed for orthographic views
+      orthographicFocalDistance,
     } = opts;
+
+    const radians = fovyRadians || ((fovyDegrees || fovy) * DEGREES_TO_RADIANS);
 
     this.projectionMatrix =
       projectionMatrix ||
       this._createProjectionMatrix({
         orthographic,
-        fovyRadians: fovyRadians || fovy * DEGREES_TO_RADIANS,
+        fovyRadians: radians,
         aspect: this.width / this.height,
-        focalDistance,
+        focalDistance: orthographicFocalDistance || focalDistance,
         near,
         far
       });
@@ -439,6 +443,7 @@ export default class Viewport {
       // throw new Error('Pixel project matrix not invertible');
     }
   }
+
 }
 
 Viewport.displayName = 'Viewport';
