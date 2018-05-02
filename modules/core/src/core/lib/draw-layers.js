@@ -237,7 +237,7 @@ function drawLayerInViewport({
   glViewport,
   parameters
 }) {
-  const moduleParameters = Object.assign({}, layer.props, {
+  const moduleParameters = Object.assign(Object.create(layer.props), {
     viewport: layer.context.viewport,
     pickingActive: drawPickingColors ? 1 : 0,
     devicePixelRatio: pixelRatio
