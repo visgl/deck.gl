@@ -28,8 +28,8 @@
   },
   "scripts": {
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
-    "build-es6": "rm -fr dist-es6 && babel src --out-dir dist-es6 --source-maps inline",
-    "build-es5": "rm -fr dist && babel src --out-dir dist --plugins=transform-es2015-modules-commonjs --source-maps inline",
+    "build-es6": "rm -fr dist-es6 && BABEL_ENV=es6 babel src --out-dir dist-es6 --source-maps inline",
+    "build-es5": "rm -fr dist && BABEL_ENV=es5 babel src --out-dir dist --plugins=transform-es2015-modules-commonjs --source-maps inline",
     "build": "npm run build-clean && npm run build-es5",
     "test": "npm run test-node && npm run build",
     "test-node": "node test/start.js test",
