@@ -48,7 +48,7 @@ export default class OrbitView extends View {
     // Get view matrix parameters from view state
     // Projection matrix arguments
     // TODO - Extracting from viewState is deprecated
-    const fovy = props.fovy || viewState.fovy || 75; // Field of view covered by camera
+    const fovy = props.fov || props.fovy || viewState.fovy || 75; // Field of view covered by camera
     const near = props.near || viewState.near || 1; // Distance of near clipping plane
     const far = props.far || viewState.far || 100; // Distance of far clipping plane
     const aspect = Number.isFinite(viewState.aspect) ? viewState.aspect : width / height;
