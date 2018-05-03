@@ -16,7 +16,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 ## Official Releases
 
-#### [5.2.0] - April 30
+#### [ 5.2.3] - May 3
+- Update deck.gl package.json files with missing BABEL_ENV (#1768)
+
+#### [ 5.2.2] - May 2
+- Fix using default prop in module settings (#1754)
+- 5.2-release Deck doc fix (#1762)
+
+#### [5.2.1] - April 30
 -  use baseline:hanging if advanced text metrics is not supported (#1753)
 -  Update example links in README.md (#1744)
 -  Fix standalone bundle inline version (#1746)
@@ -24,6 +31,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -  update dependency
 -  Update release date in what's new
 -  update lock file
+
 #### [5.2.0] - April 24
 -  Embedded layer demo fixes (#1741)
 -  Update showcases links (#1738)
