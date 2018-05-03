@@ -78,8 +78,7 @@ export default class ViewportControls {
     }
   }
 
-  finalize() {
-  }
+  finalize() {}
 
   /**
    * Callback for events
