@@ -55,7 +55,7 @@ export {default as OrthographicView} from './views/orthographic-view';
 
 // Controllers
 export {default as MapController} from './controllers/map-state';
-export {default as FirstPersonController} from './controllers/first-person-state';
+import {default as FirstPersonController} from './controllers/first-person-state';
 import {default as OrbitController} from './controllers/orbit-state';
 
 // EXPERIMENTAL EXPORTS
@@ -105,6 +105,7 @@ import {default as OrbitViewport} from './deprecated/orbit-viewport';
 // DEPRECATED
 
 export const experimental = {
+  FirstPersonController,
   OrbitController,
 
   ViewportControls,
