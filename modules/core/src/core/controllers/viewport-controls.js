@@ -53,6 +53,8 @@ export default class ViewportControls {
    */
   constructor(ViewportState, options = {}) {
     assert(ViewportState);
+    this.invertPan = options.invertPan;
+
     this.ViewportState = ViewportState;
     this.viewportState = null;
     this.viewportStateProps = null;
@@ -129,10 +131,32 @@ export default class ViewportControls {
    * Extract interactivity options
    */
   /* eslint-disable complexity, max-statements */
-  setOptions(options) {
+  setProps(props) {
+    if ('onViewportChange' in props) {
+      this.onViewportChange = props.onViewportChange;
+    }
+    if ('onViewStateChange' in props) {
+      this.onViewStateChange = props.onViewStateChange;
+    }
+    if ('onStateChange' in props) {
+      this.onStateChange = props.onStateChange;
+    }
+    if ('viewState' in props) {
+      this.viewportStateProps = Object.assign({}, props, props.viewState);
+    } else {
+      // TODO - deprecated, props on top level
+      this.viewportStateProps = props;
+    }
+
+    if ('eventManager' in props && this.eventManager !== props.eventManager) {
+      // EventManager has changed
+      this.eventManager = props.eventManager;
+      this._events = {};
+      this.toggleEvents(this.events, true);
+    }
+
+    // TODO - make sure these are not reset on every setProps
     const {
-      onStateChange = this.onStateChange,
-      eventManager = this.eventManager,
       scrollZoom = true,
       dragPan = true,
       dragRotate = true,
@@ -140,30 +164,7 @@ export default class ViewportControls {
       touchZoom = true,
       touchRotate = false,
       keyboard = true
-    } = options;
-
-    if ('onViewportChange' in options) {
-      this.onViewportChange = options.onViewportChange;
-    }
-    if ('onViewStateChange' in options) {
-      this.onViewStateChange = options.onViewStateChange;
-    }
-    if ('onStateChange' in options) {
-      this.onStateChange = onStateChange;
-    }
-    if ('viewState' in options) {
-      this.viewportStateProps = Object.assign({}, options, options.viewState);
-    } else {
-      // TODO - deprecated, props on top level
-      this.viewportStateProps = options;
-    }
-
-    if (this.eventManager !== eventManager) {
-      // EventManager has changed
-      this.eventManager = eventManager;
-      this._events = {};
-      this.toggleEvents(this.events, true);
-    }
+    } = props;
 
     // Register/unregister events
     const isInteractive = Boolean(this.onViewportChange || this.onViewStateChange);
@@ -197,6 +198,12 @@ export default class ViewportControls {
         }
       });
     }
+  }
+
+  // DEPRECATED
+
+  setOptions(props) {
+    return this.setProps(props);
   }
 
   // Private Methods
@@ -241,10 +248,13 @@ export default class ViewportControls {
 
   // Default handler for the `panmove` event.
   _onPan(event) {
-    return this.isFunctionKeyPressed(event) || event.rightButton
-      ? this._onPanMove(event)
-      : this._onPanRotate(event);
+    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
+    alternateMode = this.invertPan ? !alternateMode : alternateMode;
+    return alternateMode
+      ? this._onPanRotate(event)
+      : this._onPanMove(event);
   }
+
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {

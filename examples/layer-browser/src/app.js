@@ -1,9 +1,10 @@
 /* global window */
 
 // deck.gl ES6 components
-import {COORDINATE_SYSTEM, MapView, FirstPersonView, OrbitView, experimental} from 'deck.gl';
+import {COORDINATE_SYSTEM, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
 
-const {MapState, OrbitState, ReflectionEffect} = experimental;
+import {experimental} from 'deck.gl';
+const {OrbitController, ReflectionEffect} = experimental;
 
 // deck.gl react components
 import DeckGL from 'deck.gl';
@@ -115,11 +116,11 @@ export default class App extends PureComponent {
     this.setState({width: window.innerWidth, height: window.innerHeight});
   }
 
-  _onViewportChange(mapViewState) {
-    if (mapViewState.pitch > 60) {
-      mapViewState.pitch = 60;
+  _onViewStateChange({viewState}) {
+    if (viewState.pitch > 60) {
+      viewState.pitch = 60;
     }
-    this.setState({mapViewState});
+    this.setState({mapViewState: viewState});
   }
 
   _onToggleLayer(exampleName, example) {
@@ -276,51 +277,44 @@ export default class App extends PureComponent {
   }
 
   _renderMap() {
-    const {width, height, orbitViewState, mapViewState, settings} = this.state;
+    const {orbitViewState, mapViewState, settings} = this.state;
     const {infovis, effects, pickingRadius, drawPickingColors, useDevicePixels} = settings;
 
     const views = this._getViews();
 
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
-        <ViewportController
-          viewportState={infovis ? OrbitState : MapState}
-          {...(infovis ? orbitViewState : mapViewState)}
-          width={width}
-          height={height}
-          onViewportChange={this._onViewportChange}
+        <DeckGL
+          ref="deckgl"
+          id="default-deckgl-overlay"
+          layers={this._renderExamples()}
+          layerFilter={this._layerFilter}
+          views={views}
+          viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
+          controller={infovis ? OrbitController : MapController}
+          onViewStateChange={this._onViewStateChange}
+          effects={effects ? this._effects : []}
+          pickingRadius={pickingRadius}
+          onLayerHover={this._onHover}
+          onLayerClick={this._onClick}
+          useDevicePixels={useDevicePixels}
+          debug={false}
+          drawPickingColors={drawPickingColors}
         >
-          <DeckGL
-            ref="deckgl"
-            id="default-deckgl-overlay"
-            views={views}
-            viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
-            layers={this._renderExamples()}
-            layerFilter={this._layerFilter}
-            effects={effects ? this._effects : []}
-            pickingRadius={pickingRadius}
-            onLayerHover={this._onHover}
-            onLayerClick={this._onClick}
-            useDevicePixels={useDevicePixels}
-            debug={false}
-            drawPickingColors={drawPickingColors}
-          >
-            <StaticMap
-              viewId="basemap"
-              {...mapViewState}
-              mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
-              onViewportChange={this._onViewportChange}
-            />
+          <StaticMap
+            viewId="basemap"
+            {...mapViewState}
+            mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
+          />
 
-            <ViewportLabel viewId="first-person">First Person View</ViewportLabel>
+          <ViewportLabel viewId="first-person">First Person View</ViewportLabel>
 
-            <ViewportLabel viewId="basemap">Map View</ViewportLabel>
+          <ViewportLabel viewId="basemap">Map View</ViewportLabel>
 
-            <ViewportLabel viewId="infovis">
-              Orbit View (PlotLayer only, No Navigation)
-            </ViewportLabel>
-          </DeckGL>
-        </ViewportController>
+          <ViewportLabel viewId="infovis">
+            Orbit View (PlotLayer only, No Navigation)
+          </ViewportLabel>
+        </DeckGL>
       </div>
     );
   }
