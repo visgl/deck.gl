@@ -104,16 +104,10 @@ import {default as OrbitViewport} from './deprecated/orbit-viewport';
 
 // DEPRECATED
 
-import {default as MapControllerOld} from './controllers/map-controller';
-import {default as OrbitControllerOld} from './controllers/orbit-controller';
-
 export const experimental = {
   OrbitController,
 
   ViewportControls,
-
-  MapControllerOld,
-  OrbitControllerOld,
 
   FirstPersonViewport,
   ThirdPersonViewport,

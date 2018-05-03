@@ -26,12 +26,10 @@ import log from '../utils/log';
 import ViewportControls from '../controllers/viewport-controls';
 import {EventManager} from 'mjolnir.js';
 
-import MapState from '../controllers/map-state';
 import {MAPBOX_LIMITS} from '../controllers/map-state';
 
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
-
 
 import assert from '../utils/assert';
 /* global document */
@@ -189,12 +187,14 @@ export default class Deck {
       this.layerManager.setParameters(newProps);
     }
 
-    // Update animation loop TODO - unify setParameters/setOptions/setProps etc naming.
-    this.animationLoop.setProps(newProps);
+    // Update animation loop
+    if (this.animtionLoop) {
+      this.animationLoop.setProps(newProps);
+    }
 
     // Update controller props
     if (this.controller) {
-      this.controller.setOptions(
+      this.controller.setProps(
         Object.assign(newProps, {
           onViewStateChange: this._onViewStateChange
         })
@@ -322,7 +322,7 @@ export default class Deck {
 
     if (props.controller) {
       controller = new ViewportControls(props.controller, {invertPan: true});
-      controller.setOptions(
+      controller.setProps(
         Object.assign({}, this.props, defaultControllerProps, {
           eventManager: this.eventManager,
           viewState: this._getViewState(props),
@@ -400,7 +400,7 @@ export default class Deck {
 
     this.eventManager = new EventManager(canvas);
     if (this.controller) {
-      this.controller.setOptions({eventManager: this.eventManager});
+      this.controller.setProps({eventManager: this.eventManager});
     }
 
     // Note: avoid React setState due GL animation loop / setState timing issue

@@ -3,12 +3,11 @@
 // deck.gl ES6 components
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
 
-import {experimental} from 'deck.gl';
+import {experimental} from '@deck.gl/core';
 const {OrbitController, ReflectionEffect} = experimental;
 
 // deck.gl react components
-import DeckGL from 'deck.gl';
-const {ViewportController} = experimental;
+import DeckGL from '@deck.gl/react';
 
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
@@ -311,9 +310,7 @@ export default class App extends PureComponent {
 
           <ViewportLabel viewId="basemap">Map View</ViewportLabel>
 
-          <ViewportLabel viewId="infovis">
-            Orbit View (PlotLayer only, No Navigation)
-          </ViewportLabel>
+          <ViewportLabel viewId="infovis">Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
         </DeckGL>
       </div>
     );

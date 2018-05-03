@@ -26,6 +26,7 @@ import assert from '../utils/assert';
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
 };
+
 const LINEAR_TRANSITION_PROPS = {
   transitionDuration: 300,
   transitionEasing: t => t,
@@ -75,6 +76,9 @@ export default class ViewportControls {
     if (this.constructor === ViewportControls) {
       Object.seal(this);
     }
+  }
+
+  finalize() {
   }
 
   /**
@@ -250,11 +254,8 @@ export default class ViewportControls {
   _onPan(event) {
     let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
     alternateMode = this.invertPan ? !alternateMode : alternateMode;
-    return alternateMode
-      ? this._onPanRotate(event)
-      : this._onPanMove(event);
+    return alternateMode ? this._onPanRotate(event) : this._onPanMove(event);
   }
-
 
   // Default handler for the `panend` event.
   _onPanEnd(event) {
