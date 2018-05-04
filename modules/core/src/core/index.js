@@ -73,7 +73,6 @@ import {default as MapControls} from './controllers/map-controls';
 
 import {default as FirstPersonViewport} from './viewports/first-person-viewport';
 import {default as ThirdPersonViewport} from './viewports/third-person-viewport';
-import {default as OrbitViewport} from './viewports/orbit-viewport';
 
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
@@ -105,6 +104,8 @@ import {enable64bitSupport} from './utils/fp64';
 import {fp64ify, fp64LowPart} from './utils/fp64';
 
 import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
+
+import {default as OrbitViewport} from './deprecated/orbit-viewport';
 
 export const experimental = {
   OrbitController,

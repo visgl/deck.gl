@@ -29,6 +29,7 @@ export default class ThirdPersonView extends View {
 
     return new Viewport(
       Object.assign({}, props, {
+        id: this.id,
         zoom: null, // triggers meter level zoom
         viewMatrix
       })

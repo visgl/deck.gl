@@ -1,4 +1,4 @@
-import Viewport from './viewport';
+import Viewport from '../viewports/viewport';
 // import log from '../utils/log';
 
 import {createMat4, transformVector} from '../utils/math-utils';

@@ -1,4 +1,4 @@
-import OrbitViewport from '../viewports/orbit-viewport';
+import OrbitViewport from '../deprecated/orbit-viewport';
 import OrbitState from '../controllers/orbit-state';
 import ViewportControls from '../controllers/viewport-controls';
 import {EventManager} from 'mjolnir.js';
