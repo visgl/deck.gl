@@ -63,7 +63,12 @@ deck.gl offers a set of `View` classes that lets you specify how deck.gl should 
 
 ## Choosing a Projection Mode
 
-The `View` class allows the application full control of what projection to use through the `projection` prop. It is designed to accept a function that can directly call matrix creation methods from math libraries like math.gl or gl-matrix. Examples of functions that can be used are:
+The `View` class allows the application full control of what projection to use through the `projection` prop, which expects a function that can transform view properties into a projection matrix:
+
+* The `projection` function will be called with the `View`s props, merged with `width`, `height`, `aspect` and `distance`.
+* The `projection` function must return a 4x4 matrix (a 16 element array in column-major order).
+
+Applications would typically use matrix creation methods from math libraries like [math.gl](https://uber-web.github.io/math.gl/#/documentation/overview) or [gl-matrix](http://glmatrix.net/). Examples of math.gl functions that can be used are:
 
 | Projection                      | Needs View Parameters | Description    |
 | ---                             | ---                   | ---            |
@@ -71,9 +76,9 @@ The `View` class allows the application full control of what projection to use t
 | `Matrix4.orthographic`          | `fovy`, `near`, `far` | An orthographic projection based on same parameters as `perspective`. Uses `distance` in the view state. |
 | `Matrix4.ortho`                 | `top`, `bottom`, `left`, `rignt`, `near`, `far` | Traditional, explicit ortographic projection parameters. Needs the additional parameters to be specified on the `View`. |
 
-While the projections suggested in the table leverage stock methods in the math.gl library, custom projection functions can be provided. The `View.projection` prop accepts any function that returns a 4x4 projection matrix. The function will be called with the `View`s props, merged with `width`, `height`, `aspect` and `distance`.
+While the projections suggested in the table leverage stock methods in the math.gl library, custom projection matrices can be returned.
 
-A perspective / orthographic mode switch could be implemented as follows:
+As an example, a perspective / orthographic mode switch could be implemented as follows:
 
 ```js
 import {View} from 'deck.gl';
