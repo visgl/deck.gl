@@ -110,7 +110,9 @@ export default class ViewportControls {
   /* Event utils */
   // Event object: http://hammerjs.github.io/api/#event-object
   getCenter(event) {
-    const {offsetCenter: {x, y}} = event;
+    const {
+      offsetCenter: {x, y}
+    } = event;
     return [x, y];
   }
 

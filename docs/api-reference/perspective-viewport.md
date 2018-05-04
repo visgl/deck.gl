@@ -1,6 +1,6 @@
-# PerspectiveViewport Class
+# PerspectiveViewport Class (Deprecated)
 
-> The `PerspectiveViewport` class is deprecated. Use `FirstPersonViewport` instead and specify the `fov` parameter to generate perspective projection matrix.
+> `PerspectiveViewport` is deprecated. Use [PerspectiveView](/docs/api-reference/perspective-view.md) instead.
 
 The [`PerspectiveViewport`] class is a subclass of [Viewport](/docs/api-reference/viewport.md) that creates a perspective view.
 

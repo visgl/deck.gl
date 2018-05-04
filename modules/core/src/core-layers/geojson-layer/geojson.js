@@ -75,7 +75,10 @@ export function separateGeojsonFeatures(features) {
   features.forEach(feature => {
     assert(feature && feature.geometry, 'GeoJSON does not have geometry');
 
-    const {geometry: {type, coordinates}, properties} = feature;
+    const {
+      geometry: {type, coordinates},
+      properties
+    } = feature;
     checkCoordinates(type, coordinates);
 
     switch (type) {
