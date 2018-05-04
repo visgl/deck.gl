@@ -373,7 +373,7 @@ export default class Viewport {
 
       // Projection matrix parameters, used if projectionMatrix not supplied
       orthographic = false,
-      fovyRadians = 75 * DEGREES_TO_RADIANS,
+      fovyRadians,
       fovyDegrees,
       fovy,
       near = 0.1, // Distance of near clipping plane
@@ -382,7 +382,7 @@ export default class Viewport {
       orthographicFocalDistance
     } = opts;
 
-    const radians = fovyRadians || (fovyDegrees || fovy) * DEGREES_TO_RADIANS;
+    const radians = fovyRadians || (fovyDegrees || fovy || 75) * DEGREES_TO_RADIANS;
 
     this.projectionMatrix =
       projectionMatrix ||
