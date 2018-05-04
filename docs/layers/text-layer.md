@@ -16,7 +16,7 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {text: '#San Francisco', coordinates: [-122.425586, 37.775049]},
+   *   {text: '#San Francisco', position: [-122.425586, 37.775049]},
    *   ...
    * ]
    */
