@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Layer, AttributeManager} from 'deck.gl';
+import {Layer, AttributeManager} from '@deck.gl/core';
 import {testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from 'probe.gl/test-utils';
 

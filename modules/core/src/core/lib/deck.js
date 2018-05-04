@@ -153,11 +153,14 @@ export default class Deck {
 
     // Update layer manager props (but not size)
     if (this.layerManager) {
+      // TODO - unify setParameters/setOptions/setProps etc naming across classes
       this.layerManager.setParameters(newProps);
     }
 
-    // Update animation loop TODO - unify setParameters/setOptions/setProps etc naming.
-    this.animationLoop.setProps(newProps);
+    // Update animation loop
+    if (this.animationLoop) {
+      this.animationLoop.setProps(newProps);
+    }
 
     // Update controller props
     if (this.controller) {
@@ -215,6 +218,10 @@ export default class Deck {
 
   // canvas, either string, canvas or `null`
   _createCanvas(props) {
+    if (!document) {
+      return null;
+    }
+
     let canvas = props.canvas;
 
     // TODO EventManager should accept element id
@@ -239,6 +246,10 @@ export default class Deck {
 
   // Updates canvas width and/or height, if provided as props
   _setCanvasSize(props) {
+    if (!document) {
+      return;
+    }
+
     const {canvas} = this;
     let {width, height} = props;
     // Set size ONLY if props are being provided, otherwise let canvas be layouted freely
@@ -274,6 +285,10 @@ export default class Deck {
 
   // If canvas size has changed, reads out the new size and returns true
   _checkForCanvasSizeChange() {
+    if (!document) {
+      return false;
+    }
+
     const {canvas} = this;
     if (canvas && (this.width !== canvas.clientWidth || this.height !== canvas.clientHeight)) {
       this.width = canvas.clientWidth;

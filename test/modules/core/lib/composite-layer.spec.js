@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {CompositeLayer, Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 
 const BASE_LAYER_PROPS = {
   opacity: 0.2,
