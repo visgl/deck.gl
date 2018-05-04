@@ -76,6 +76,7 @@ A geospatial `viewState` would typically contain the following fields:
 If `initialViewState` is provided, the `Deck` component will track view state changes from any attached `controller` using internal state, with `initialViewState` as its initial view state.
 
 Notes:
+
 * The `props.onViewStateChange` callback will still be called, if provided.
 * If `props.viewState` is supplied by the application, the supplied `viewState` will always be used, "shadowing" the `Deck` component's internal `viewState`.
 * In simple applications, use of the `initialViewState` prop can avoid the need track the view state in the application .

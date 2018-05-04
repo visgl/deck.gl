@@ -1,4 +1,6 @@
-# OrthographicViewport Class
+# OrthographicViewport Class (Deprecated)
+
+> `OrthographicViewport` is deprecated. Use [OrthographicView](/docs/api-reference/orthographic-view.md) instead.
 
 The `OrthographicViewport` class is a subclass of the [Viewport](/docs/api-reference/viewport.md) that creates an orthogonal view.
 

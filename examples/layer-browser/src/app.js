@@ -218,13 +218,17 @@ export default class App extends PureComponent {
   /* eslint-enable max-depth */
 
   _getModelMatrix(index, coordinateSystem) {
-    const {settings: {separation}} = this.state;
+    const {
+      settings: {separation}
+    } = this.state;
     const modelMatrix = new Matrix4().translate([0, 0, 1000 * index * separation]);
 
     switch (coordinateSystem) {
       case COORDINATE_SYSTEM.METER_OFFSETS:
       case COORDINATE_SYSTEM.IDENTITY:
-        const {settings: {rotationZ, rotationX}} = this.state;
+        const {
+          settings: {rotationZ, rotationX}
+        } = this.state;
         modelMatrix.rotateZ(index * rotationZ * Math.PI);
         modelMatrix.rotateX(index * rotationX * Math.PI);
         break;
@@ -238,7 +242,9 @@ export default class App extends PureComponent {
   }
 
   _getViews() {
-    const {settings: {infovis, multiview}} = this.state;
+    const {
+      settings: {infovis, multiview}
+    } = this.state;
 
     if (infovis) {
       return [

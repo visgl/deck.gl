@@ -1,4 +1,6 @@
-# ThirdPersonViewport Class (Experimental)
+# ThirdPersonViewport Class (Deprecated)
+
+> ThirdPersonViewport is deprecated. Use [ThirdPersonView](/docs/api-reference/third-person-view.md) instead.
 
 The [`ThirdPersonViewport`] class is a subclass of [Viewport](/docs/api-reference/viewport.md). This viewport creates a "camera" that looks at an exact position, position using the direction, distance and orientation specified by the application.
 

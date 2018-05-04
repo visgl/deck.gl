@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import Viewport from './viewport';
+import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import mat4_lookAt from 'gl-mat4/lookAt';
 import mat4_ortho from 'gl-mat4/ortho';

@@ -36256,7 +36256,9 @@ var Browser = {
         ? MozBlobBuilder
         : typeof WebKitBlobBuilder != 'undefined'
           ? WebKitBlobBuilder
-          : !Browser.hasBlobConstructor ? console.log('warning: no BlobBuilder') : null;
+          : !Browser.hasBlobConstructor
+            ? console.log('warning: no BlobBuilder')
+            : null;
     Browser.URLObject =
       typeof window != 'undefined' ? (window.URL ? window.URL : window.webkitURL) : undefined;
     if (!Module.noImageDecoding && typeof Browser.URLObject === 'undefined') {
@@ -47929,7 +47931,9 @@ var asm = (function(global, env, buffer) {
         j = (b + 1) | 0;
       } else j = b;
       if (
-        (((e - j) | 0) > 1 ? (a[j >> 0] | 0) == 48 : 0)
+        (((e - j) | 0) > 1
+        ? (a[j >> 0] | 0) == 48
+        : 0)
           ? ((q = (j + 1) | 0),
             (v = a[q >> 0] | 0),
             ((v << 24) >> 24 == 88) | ((v << 24) >> 24 == 120))
@@ -48547,7 +48551,9 @@ var asm = (function(global, env, buffer) {
     n = e;
     a: do
       if (
-        (((n - t) | 0) > 1 ? (a[t >> 0] | 0) == 48 : 0)
+        (((n - t) | 0) > 1
+        ? (a[t >> 0] | 0) == 48
+        : 0)
           ? ((p = (t + 1) | 0),
             (y = a[p >> 0] | 0),
             ((y << 24) >> 24 == 88) | ((y << 24) >> 24 == 120))
@@ -49109,7 +49115,9 @@ var asm = (function(global, env, buffer) {
         j = (b + 1) | 0;
       } else j = b;
       if (
-        (((e - j) | 0) > 1 ? (a[j >> 0] | 0) == 48 : 0)
+        (((e - j) | 0) > 1
+        ? (a[j >> 0] | 0) == 48
+        : 0)
           ? ((q = (j + 1) | 0),
             (v = a[q >> 0] | 0),
             ((v << 24) >> 24 == 88) | ((v << 24) >> 24 == 120))
@@ -49674,7 +49682,9 @@ var asm = (function(global, env, buffer) {
     j = e;
     a: do
       if (
-        (((j - t) | 0) > 1 ? (a[t >> 0] | 0) == 48 : 0)
+        (((j - t) | 0) > 1
+        ? (a[t >> 0] | 0) == 48
+        : 0)
           ? ((p = (t + 1) | 0),
             (y = a[p >> 0] | 0),
             ((y << 24) >> 24 == 88) | ((y << 24) >> 24 == 120))
@@ -56171,7 +56181,9 @@ var asm = (function(global, env, buffer) {
         kd[c[((c[j >> 2] | 0) + 16) >> 2] & 63](j, (e + k) | 0);
         k = ((md[c[((c[j >> 2] | 0) + 8) >> 2] & 127](j) | 0) + k) | 0;
         if (
-          (!h ? ((j = (l + 4) | 0), (n = c[j >> 2] | 0), (c[j >> 2] = n + -1), (n | 0) == 0) : 0)
+          (!h
+          ? ((j = (l + 4) | 0), (n = c[j >> 2] | 0), (c[j >> 2] = n + -1), (n | 0) == 0)
+          : 0)
             ? (jd[c[((c[l >> 2] | 0) + 8) >> 2] & 255](l),
               (j = (l + 8) | 0),
               (n = c[j >> 2] | 0),
@@ -73023,7 +73035,9 @@ var asm = (function(global, env, buffer) {
     if (yb(27096, 2) | 0) Xp(27104, b);
     b = qc(c[6772] | 0) | 0;
     if (
-      ((b | 0) != 0 ? ((a = c[b >> 2] | 0), (a | 0) != 0) : 0)
+      ((b | 0) != 0
+      ? ((a = c[b >> 2] | 0), (a | 0) != 0)
+      : 0)
         ? ((b = (a + 48) | 0),
           ((c[b >> 2] & -256) | 0) == 1126902528 ? (c[(b + 4) >> 2] | 0) == 1129074247 : 0)
         : 0
@@ -73433,7 +73447,9 @@ var asm = (function(global, env, buffer) {
     c[d >> 2] = c[c[d >> 2] >> 2];
     if (!(((a | 0) == (b | 0)) | ((b | 0) == 28240)))
       if (
-        ((b | 0) != 0 ? ((k = Hq(b, 28040) | 0), (k | 0) != 0) : 0)
+        ((b | 0) != 0
+        ? ((k = Hq(b, 28040) | 0), (k | 0) != 0)
+        : 0)
           ? ((c[(k + 8) >> 2] & ~c[(a + 8) >> 2]) | 0) == 0
           : 0
       ) {
@@ -73441,7 +73457,9 @@ var asm = (function(global, env, buffer) {
         k = (k + 12) | 0;
         if (!((b | 0) == 28224 ? 1 : (b | 0) == (c[k >> 2] | 0)))
           if (
-            (((b | 0) != 0 ? ((g = Hq(b, 27928) | 0), (g | 0) != 0) : 0)
+            (((b | 0) != 0
+            ? ((g = Hq(b, 27928) | 0), (g | 0) != 0)
+            : 0)
             ? ((j = c[k >> 2] | 0), (j | 0) != 0)
             : 0)
               ? ((f = Hq(j, 27928) | 0), (f | 0) != 0)
@@ -74848,7 +74866,9 @@ var asm = (function(global, env, buffer) {
       }
     while (0);
     if (
-      (((o | 0) == 199 ? v >>> 0 < 2147483647 : 0)
+      (((o | 0) == 199
+      ? v >>> 0 < 2147483647
+      : 0)
       ? ((t = Na(v | 0) | 0),
         (s = Na(0) | 0),
         ((s | 0) != (-1 | 0)) & ((t | 0) != (-1 | 0)) & (t >>> 0 < s >>> 0))
@@ -74881,7 +74901,9 @@ var asm = (function(global, env, buffer) {
             else v = w;
           }
           if (
-            ((o | 0) == 214 ? ((c[(v + 12) >> 2] & 8) | 0) == 0 : 0)
+            ((o | 0) == 214
+            ? ((c[(v + 12) >> 2] & 8) | 0) == 0
+            : 0)
               ? (r >>> 0 >= t >>> 0) & (r >>> 0 < p >>> 0)
               : 0
           ) {
@@ -77937,7 +77959,9 @@ var asm = (function(global, env, buffer) {
       }
     while (0);
     if (
-      ((s | 0) == 23 ? (c[q >> 2] | 0) != 0 : 0)
+      ((s | 0) == 23
+      ? (c[q >> 2] | 0) != 0
+      : 0)
         ? ((o = ((c[p >> 2] | 0) + -1) | 0), (c[p >> 2] = o), !((u >>> 0 < 4) | ((f | 0) == 0)))
         : 0
     ) {
