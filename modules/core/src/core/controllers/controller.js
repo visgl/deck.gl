@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import MapState from './map-state';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from '../lib/transition-manager';
 import assert from '../utils/assert';
@@ -26,6 +25,7 @@ import assert from '../utils/assert';
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
 };
+
 const LINEAR_TRANSITION_PROPS = {
   transitionDuration: 300,
   transitionEasing: t => t,
@@ -46,11 +46,7 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown']
 };
 
-export default class ViewportControls {
-  /**
-   * @classdesc
-   * A class that handles events and updates mercator style viewport parameters
-   */
+export default class Controller {
   constructor(ViewportState, options = {}) {
     assert(ViewportState);
     this.ViewportState = ViewportState;
@@ -65,15 +61,14 @@ export default class ViewportControls {
     this.onViewportChange = null;
     this.onViewStateChange = null;
     this.onStateChange = null;
+    this.invertPan = false;
 
     this.handleEvent = this.handleEvent.bind(this);
 
     this.setOptions(options);
-
-    if (this.constructor === ViewportControls) {
-      Object.seal(this);
-    }
   }
+
+  finalize() {}
 
   /**
    * Callback for events
@@ -129,10 +124,32 @@ export default class ViewportControls {
    * Extract interactivity options
    */
   /* eslint-disable complexity, max-statements */
-  setOptions(options) {
+  setProps(props) {
+    if ('onViewportChange' in props) {
+      this.onViewportChange = props.onViewportChange;
+    }
+    if ('onViewStateChange' in props) {
+      this.onViewStateChange = props.onViewStateChange;
+    }
+    if ('onStateChange' in props) {
+      this.onStateChange = props.onStateChange;
+    }
+    if ('viewState' in props) {
+      this.viewportStateProps = Object.assign({}, props, props.viewState);
+    } else {
+      // TODO - deprecated, props on top level
+      this.viewportStateProps = props;
+    }
+
+    if ('eventManager' in props && this.eventManager !== props.eventManager) {
+      // EventManager has changed
+      this.eventManager = props.eventManager;
+      this._events = {};
+      this.toggleEvents(this.events, true);
+    }
+
+    // TODO - make sure these are not reset on every setProps
     const {
-      onStateChange = this.onStateChange,
-      eventManager = this.eventManager,
       scrollZoom = true,
       dragPan = true,
       dragRotate = true,
@@ -140,30 +157,7 @@ export default class ViewportControls {
       touchZoom = true,
       touchRotate = false,
       keyboard = true
-    } = options;
-
-    if ('onViewportChange' in options) {
-      this.onViewportChange = options.onViewportChange;
-    }
-    if ('onViewStateChange' in options) {
-      this.onViewStateChange = options.onViewStateChange;
-    }
-    if ('onStateChange' in options) {
-      this.onStateChange = onStateChange;
-    }
-    if ('viewState' in options) {
-      this.viewportStateProps = Object.assign({}, options, options.viewState);
-    } else {
-      // TODO - deprecated, props on top level
-      this.viewportStateProps = options;
-    }
-
-    if (this.eventManager !== eventManager) {
-      // EventManager has changed
-      this.eventManager = eventManager;
-      this._events = {};
-      this.toggleEvents(this.events, true);
-    }
+    } = props;
 
     // Register/unregister events
     const isInteractive = Boolean(this.onViewportChange || this.onViewStateChange);
@@ -197,6 +191,12 @@ export default class ViewportControls {
         }
       });
     }
+  }
+
+  // DEPRECATED
+
+  setOptions(props) {
+    return this.setProps(props);
   }
 
   // Private Methods
@@ -241,9 +241,9 @@ export default class ViewportControls {
 
   // Default handler for the `panmove` event.
   _onPan(event) {
-    return this.isFunctionKeyPressed(event) || event.rightButton
-      ? this._onPanMove(event)
-      : this._onPanRotate(event);
+    let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
+    alternateMode = this.invertPan ? !alternateMode : alternateMode;
+    return alternateMode ? this._onPanRotate(event) : this._onPanMove(event);
   }
 
   // Default handler for the `panend` event.
@@ -270,9 +270,7 @@ export default class ViewportControls {
       return false;
     }
 
-    return this.viewportState instanceof MapState
-      ? this._onPanRotateMap(event)
-      : this._onPanRotateStandard(event);
+    return this.invertPan ? this._onPanRotateMap(event) : this._onPanRotateStandard(event);
   }
 
   // Normal pan to rotate

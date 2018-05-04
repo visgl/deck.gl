@@ -24,6 +24,9 @@ import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
 import {EventManager} from 'mjolnir.js';
+
+import {MAPBOX_LIMITS} from '../controllers/map-controller';
+
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
 
@@ -92,6 +95,26 @@ const defaultProps = {
   drawPickingColors: false
 };
 
+const PREFIX = '-webkit-';
+
+const CURSOR = {
+  GRABBING: `${PREFIX}grabbing`,
+  GRAB: `${PREFIX}grab`,
+  POINTER: 'pointer'
+};
+
+const getCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
+
+// TODO - move into Controller classes
+const defaultControllerProps = Object.assign({}, MAPBOX_LIMITS, {
+  scrollZoom: true,
+  dragPan: true,
+  dragRotate: true,
+  doubleClickZoom: true,
+  touchZoomRotate: true,
+  getCursor
+});
+
 export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
@@ -105,11 +128,15 @@ export default class Deck {
     this.stats = new Stats({id: 'deck.gl'});
 
     this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
+    this.interactiveState = {
+      isDragging: false // Whether the cursor is down
+    };
 
     // Bind methods
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
+    this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
 
     // Note: LayerManager creation deferred until gl context available
     this.canvas = this._createCanvas(props);
@@ -134,6 +161,10 @@ export default class Deck {
       this.controller.finalize();
       this.controller = null;
     }
+
+    if (this.eventManager) {
+      this.eventManager.destroy();
+    }
   }
 
   setProps(props) {
@@ -156,8 +187,10 @@ export default class Deck {
       this.layerManager.setParameters(newProps);
     }
 
-    // Update animation loop TODO - unify setParameters/setOptions/setProps etc naming.
-    this.animationLoop.setProps(newProps);
+    // Update animation loop
+    if (this.animtionLoop) {
+      this.animationLoop.setProps(newProps);
+    }
 
     // Update controller props
     if (this.controller) {
@@ -285,18 +318,23 @@ export default class Deck {
 
   // Note: props.controller must be a class constructor, not an already created instance
   _createController(props) {
-    const Controller = props.controller;
-    if (Controller) {
-      return new Controller(
-        Object.assign({}, props, {
-          canvas: this.canvas,
+    let controller = null;
+
+    if (props.controller) {
+      const Controller = props.controller;
+      controller = new Controller(props);
+      controller.setProps(
+        Object.assign({}, this.props, defaultControllerProps, {
+          eventManager: this.eventManager,
           viewState: this._getViewState(props),
           // Set an internal callback that calls the prop callback if provided
-          onViewStateChange: this._onViewStateChange
+          onViewStateChange: this._onViewStateChange,
+          onStateChange: this._onInteractiveStateChange
         })
       );
     }
-    return null;
+
+    return controller;
   }
 
   _createAnimationLoop(props) {
@@ -341,6 +379,15 @@ export default class Deck {
     }
   }
 
+  _onInteractiveStateChange({isDragging = false}) {
+    if (isDragging !== this.interactiveState.isDragging) {
+      this.interactiveState.isDragging = isDragging;
+      if (this.props.getCursor) {
+        this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+      }
+    }
+  }
+
   _onRendererInitialized({gl, canvas}) {
     setParameters(gl, {
       blend: true,
@@ -352,9 +399,14 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
+    this.eventManager = new EventManager(canvas);
+    if (this.controller) {
+      this.controller.setProps({eventManager: this.eventManager});
+    }
+
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
-      eventManager: new EventManager(canvas),
+      eventManager: this.eventManager,
       stats: this.stats
     });
 

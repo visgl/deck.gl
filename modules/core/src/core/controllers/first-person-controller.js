@@ -1,3 +1,4 @@
+import Controller from './controller';
 import ViewState from './view-state';
 
 import {Vector3} from 'math.gl';
@@ -17,7 +18,7 @@ function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;
 }
 
-export default class FirstPersonState extends ViewState {
+class FirstPersonState extends ViewState {
   constructor({
     /* Viewport arguments */
     width, // Width of viewport
@@ -286,5 +287,11 @@ export default class FirstPersonState extends ViewState {
     return new FirstPersonState(
       Object.assign({}, this._viewportProps, this._interactiveState, newProps)
     );
+  }
+}
+
+export default class FirstPersonController extends Controller {
+  constructor(props) {
+    super(FirstPersonState, props);
   }
 }

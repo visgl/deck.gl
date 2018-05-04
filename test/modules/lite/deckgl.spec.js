@@ -44,7 +44,7 @@ test('standalone#DeckGL', t => {
   });
 
   t.ok(deck, 'DeckGL constructor does not throw error');
-  t.ok(deck.controller instanceof deckgl.MapController, 'component has controller');
+  t.ok(deck.controller, 'component has controller');
 
   deck.finalize();
   t.notOk(deck.controller, 'component is finalized');
