@@ -54,15 +54,13 @@ export {default as PerspectiveView} from './views/perspective-view';
 export {default as OrthographicView} from './views/orthographic-view';
 
 // Controllers
-export {default as MapController} from './controllers/map-state';
-import {default as FirstPersonController} from './controllers/first-person-state';
-import {default as OrbitController} from './controllers/orbit-state';
+export {default as Controller} from './controllers/controller';
+export {default as MapController} from './controllers/map-controller';
+// Experimental Controllers
+import {default as FirstPersonController} from './controllers/first-person-controller';
+import {default as OrbitController} from './controllers/orbit-controller';
 
 // EXPERIMENTAL EXPORTS
-// Experimental Features (May change in minor version bumps, use at your own risk)
-
-// Experimental Controllers
-import {default as ViewportControls} from './controllers/viewport-controls';
 
 // Experimental Effects (non-React) bindings
 import {default as EffectManager} from './experimental/lib/effect-manager';
@@ -104,11 +102,10 @@ import {default as OrbitViewport} from './deprecated/orbit-viewport';
 
 // DEPRECATED
 
+// Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
   FirstPersonController,
   OrbitController,
-
-  ViewportControls,
 
   FirstPersonViewport,
   ThirdPersonViewport,

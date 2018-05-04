@@ -1,3 +1,4 @@
+import Controller from './controller';
 import OrbitViewport from '../deprecated/orbit-viewport';
 import assert from '../utils/assert';
 
@@ -29,7 +30,7 @@ function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;
 }
 
-export default class OrbitState {
+class OrbitState {
   constructor({
     /* Viewport arguments */
     width, // Width of viewport
@@ -289,5 +290,11 @@ export default class OrbitState {
     props.zoom = zoom < minZoom ? minZoom : zoom;
 
     return props;
+  }
+}
+
+export default class OrbitController extends Controller {
+  constructor(props) {
+    super(OrbitState, props);
   }
 }

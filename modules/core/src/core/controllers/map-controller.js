@@ -1,3 +1,4 @@
+import Controller from './controller';
 import ViewState from './view-state';
 import WebMercatorViewport, {normalizeViewportProps} from 'viewport-mercator-project';
 import assert from '../utils/assert';
@@ -21,7 +22,7 @@ function clamp(value, min, max) {
   return value < min ? min : value > max ? max : value;
 }
 
-export default class MapState extends ViewState {
+class MapState extends ViewState {
   constructor({
     /** Mapbox viewport properties */
     /** The width of the viewport */
@@ -383,5 +384,12 @@ export default class MapState extends ViewState {
       pitch,
       bearing
     };
+  }
+}
+
+export default class MapController extends Controller {
+  constructor(props) {
+    super(MapState, props);
+    this.invertPan = true;
   }
 }

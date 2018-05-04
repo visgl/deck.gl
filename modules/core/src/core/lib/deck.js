@@ -23,10 +23,9 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
-import ViewportControls from '../controllers/viewport-controls';
 import {EventManager} from 'mjolnir.js';
 
-import {MAPBOX_LIMITS} from '../controllers/map-state';
+import {MAPBOX_LIMITS} from '../controllers/map-controller';
 
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
@@ -106,6 +105,7 @@ const CURSOR = {
 
 const getCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
 
+// TODO - move into Controller classes
 const defaultControllerProps = Object.assign({}, MAPBOX_LIMITS, {
   scrollZoom: true,
   dragPan: true,
@@ -321,7 +321,8 @@ export default class Deck {
     let controller = null;
 
     if (props.controller) {
-      controller = new ViewportControls(props.controller, {invertPan: true});
+      const Controller = props.controller;
+      controller = new Controller(props);
       controller.setProps(
         Object.assign({}, this.props, defaultControllerProps, {
           eventManager: this.eventManager,

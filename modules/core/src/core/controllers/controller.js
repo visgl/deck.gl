@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import MapState from './map-state';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from '../lib/transition-manager';
 import assert from '../utils/assert';
@@ -47,15 +46,9 @@ const EVENT_TYPES = {
   KEYBOARD: ['keydown']
 };
 
-export default class ViewportControls {
-  /**
-   * @classdesc
-   * A class that handles events and updates mercator style viewport parameters
-   */
+export default class Controller {
   constructor(ViewportState, options = {}) {
     assert(ViewportState);
-    this.invertPan = options.invertPan;
-
     this.ViewportState = ViewportState;
     this.viewportState = null;
     this.viewportStateProps = null;
@@ -68,14 +61,11 @@ export default class ViewportControls {
     this.onViewportChange = null;
     this.onViewStateChange = null;
     this.onStateChange = null;
+    this.invertPan = false;
 
     this.handleEvent = this.handleEvent.bind(this);
 
     this.setOptions(options);
-
-    if (this.constructor === ViewportControls) {
-      Object.seal(this);
-    }
   }
 
   finalize() {}
@@ -280,9 +270,7 @@ export default class ViewportControls {
       return false;
     }
 
-    return this.viewportState instanceof MapState
-      ? this._onPanRotateMap(event)
-      : this._onPanRotateStandard(event);
+    return this.invertPan ? this._onPanRotateMap(event) : this._onPanRotateStandard(event);
   }
 
   // Normal pan to rotate
