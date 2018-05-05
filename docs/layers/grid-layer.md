@@ -28,7 +28,12 @@ const App = ({data, viewport}) => {
   const layer = new GridLayer({
     id: 'grid-layer',
     data,
-    cellSize: 500
+    pickable: true,
+    extruded: true,
+    cellSize: 200,
+    elevationScale: 4,
+    getPosition: d => d.COORDINATES,
+    onHover: ({object}) => setTooltip(`${object.position.join(', ')}\nCount: ${object.count}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

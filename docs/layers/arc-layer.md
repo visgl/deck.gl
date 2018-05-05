@@ -24,7 +24,13 @@ const App = ({data, viewport}) => {
   const layer = new ArcLayer({
     id: 'arc-layer',
     data,
-    strokeWidth: 2
+    pickable: true,
+    strokeWidth: 12,
+    getSourcePosition: d => d.from.coordinates,
+    getTargetPosition: d => d.to.coordinates,
+    getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
+    getTargetColor: d => [Math.sqrt(d.outbound), 140, 0],
+    onHover: ({object}) => setTooltip(`${object.from.name} to ${object.to.name}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

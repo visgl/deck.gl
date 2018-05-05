@@ -24,7 +24,12 @@ const App = ({data, viewport}) => {
   const layer = new LineLayer({
     id: 'line-layer',
     data,
-    strokeWidth: 2
+    pickable: true,
+    strokeWidth: 12,
+    getSourcePosition: d => d.from.coordinates,
+    getTargetPosition: d => d.to.coordinates,
+    getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0],
+    onHover: ({object}) => setTooltip(`${object.from.name} to ${object.to.name}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

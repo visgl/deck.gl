@@ -21,7 +21,14 @@ const App = ({data, viewport}) => {
   const layer = new ScreenGridLayer({
     id: 'screen-grid-layer',
     data,
-    cellSizePixels: 40
+    pickable: false,
+    opacity: 0.8,
+    cellSizePixels: 50,
+    minColor: [0, 0, 0, 0],
+    maxColor: [0, 180, 0, 255],
+    getPosition: d => d.COORDINATES,
+    getWeight: d => d.SPACES,
+    onHover: ({object}) => setTooltip('aggregated cell')
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

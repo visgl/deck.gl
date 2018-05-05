@@ -24,8 +24,15 @@ const App = ({data, viewport}) => {
   const layer = new ScatterplotLayer({
     id: 'scatterplot-layer',
     data,
-    radiusScale: 100,
-    outline: false
+    pickable: true,
+    opacity: 0.8,
+    radiusScale: 6,
+    radiusMinPixels: 1,
+    radiusMaxPixels: 100,
+    getPosition: d => d.coordinates,
+    getRadius: d => Math.sqrt(d.exits),
+    getColor: d => [255, 140, 0],
+    onHover: ({object}) => setTooltip(`${object.name}\n${object.address}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

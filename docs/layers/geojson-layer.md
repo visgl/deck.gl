@@ -23,9 +23,18 @@ const App = ({data, viewport}) => {
   const layer = new GeoJsonLayer({
     id: 'geojson-layer',
     data,
-    filled: true,
+    pickable: true,
     stroked: false,
-    extruded: true
+    filled: true,
+    extruded: true,
+    lineWidthScale: 20,
+    lineWidthMinPixels: 2,
+    getFillColor: d => [160, 160, 180, 200],
+    getLineColor: d => colorToRGBArray(d.properties.color),
+    getRadius: d => 100,
+    getLineWidth: d => 1,
+    getElevation: d => 30,
+    onHover: ({object}) => setTooltip(object.properties.name || object.properties.station)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

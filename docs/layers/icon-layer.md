@@ -27,8 +27,24 @@ const App = ({data, viewport}) => {
   const layer = new IconLayer({
     id: 'icon-layer',
     data,
-    iconAtlas: '/path/to/image.png',
-    iconMapping: ICON_MAPPING
+    pickable: true,
+    iconAtlas: 'images/icon-atlas.png',
+    iconMapping: {
+      marker: {
+        x: 0,
+        y: 0,
+        width: 128,
+        height: 128,
+        anchorY: 128,
+        mask: true
+      }
+    },
+    sizeScale: 15,
+    getPosition: d => d.coordinates,
+    getIcon: d => 'marker',
+    getSize: d => 5,
+    getColor: d => [Math.sqrt(d.exits), 140, 0],
+    onHover: ({object}) => setTooltip(`${object.name}\n${object.address}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

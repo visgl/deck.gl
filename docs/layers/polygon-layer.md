@@ -38,9 +38,17 @@ const App = ({data, viewport}) => {
   const layer = new PolygonLayer({
     id: 'polygon-layer',
     data,
+    pickable: true,
+    stroked: true,
     filled: true,
-    stroked: false,
-    extruded: true
+    wireframe: true,
+    lineWidthMinPixels: 1,
+    getPolygon: d => d.contour,
+    getElevation: d => d.population / d.area / 10,
+    getFillColor: d => [d.population / d.area / 60, 140, 0],
+    getLineColor: d => [80, 80, 80],
+    getLineWidth: d => 1,
+    onHover: ({object}) => setTooltip(`${object.zipcode}\nPopulation: ${object.population}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

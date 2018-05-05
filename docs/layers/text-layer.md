@@ -24,7 +24,13 @@ const App = ({data, viewport}) => {
   const layers = [
     new TextLayer({
       id: 'text-layer',
-      data
+      data,
+      pickable: true,
+      sizeScale: 32,
+      getPosition: d => d.coordinates,
+      getText: d => d.name,
+      getSize: d => 1,
+      onHover: ({object}) => setTooltip(`${object.name}\n${object.address}`)
     })
   ];
 
