@@ -76,7 +76,9 @@ export default class Controller {
    */
   handleEvent(event) {
     const {ControllerState} = this;
-    this.controllerState = new ControllerState(Object.assign({}, this.controllerStateProps, this._state));
+    this.controllerState = new ControllerState(
+      Object.assign({}, this.controllerStateProps, this._state)
+    );
 
     switch (event.type) {
       case 'panstart':
@@ -213,7 +215,9 @@ export default class Controller {
 
     if (changed) {
       if (this.onViewportChange) {
-        const viewport = this.controllerState.getViewport ? this.controllerState.getViewport() : null;
+        const viewport = this.controllerState.getViewport
+          ? this.controllerState.getViewport()
+          : null;
         this.onViewportChange(viewState, interactionState, viewport);
       }
       if (this.onViewStateChange) {
@@ -393,7 +397,9 @@ export default class Controller {
 
     switch (event.srcEvent.keyCode) {
       case 189: // -
-        newControllerState = funcKey ? controllerState.zoomOut().zoomOut() : controllerState.zoomOut();
+        newControllerState = funcKey
+          ? controllerState.zoomOut().zoomOut()
+          : controllerState.zoomOut();
         break;
       case 187: // +
         newControllerState = funcKey ? controllerState.zoomIn().zoomIn() : controllerState.zoomIn();

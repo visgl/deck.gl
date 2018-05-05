@@ -23,11 +23,9 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
-import ControllerManager from '../controllers/controller-manager';
-import {EventManager} from 'mjolnir.js';
-
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
+import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 /* global document */
