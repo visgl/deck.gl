@@ -23,15 +23,15 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
-import {EventManager} from 'mjolnir.js';
-
-import {MAPBOX_LIMITS} from '../controllers/map-controller';
-
 import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
+import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 /* global document */
+
+// TODO - move into Controller classes
+import {MAPBOX_LIMITS} from '../controllers/map-controller';
 
 function noop() {}
 
