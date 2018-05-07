@@ -27,6 +27,7 @@
     "publish-beta": "npm run build && npm run test && npm run test dist && scripts/publish.sh beta",
     "start": "open http://uber.github.io/deck.gl/#/documentation/getting-started/installation?section=running-the-examples",
     "test": "scripts/test.sh",
+    "test-fast": "scripts/test.sh fast",
     "test-browser": "webpack-dev-server --config test/webpack.config.js --env.test_browser --progress --hot --open",
     "test-render": "webpack-dev-server --config test/webpack.config.js --env.render --progress --hot --open",
     "bench": "scripts/test.sh bench",
@@ -58,6 +59,7 @@
     "nyc": "^10.2.0",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
+    "pre-push": "^0.1.1",
     "prettier": "^1.9.2",
     "prettier-check": "^2.0.0",
     "puppeteer": "^1.0.0",
@@ -84,5 +86,8 @@
       "test/**/*.js",
       "**/deprecated"
     ]
-  }
+  },
+  "pre-commit": [
+    "test-fast"
+  ]
 }
