@@ -58,6 +58,7 @@
     "nyc": "^10.2.0",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
+    "pre-push": "^0.1.1",
     "prettier": "^1.9.2",
     "prettier-check": "^2.0.0",
     "puppeteer": "^1.0.0",
@@ -84,5 +85,8 @@
       "test/**/*.js",
       "**/deprecated"
     ]
-  }
+  },
+  "pre-push": [
+    "scripts/test.sh examples"
+  ]
 }

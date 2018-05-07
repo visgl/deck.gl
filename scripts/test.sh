@@ -13,8 +13,6 @@ run_lint() {
 run_full_test() {
   run_lint
   node test/start.js test
-  node test/start.js test-browser
-  node test/start.js render
 }
 
 
