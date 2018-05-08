@@ -21,7 +21,12 @@ Release date: TBD, target May, 2018
 
 ### Deep Picking
 
-deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` method, which returns a list of all objects under the mouse.
+deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` method, which returns a list of all objects under the mouse, instead of just the top-most object.
+
+
+### Switching between Perspective and Orthographic mode
+
+The [`View`](/docs/api-reference/view.md) class can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode. This makes switching between different projection modes easier than ever (just set the new `orthographic` property to `true`).
 
 
 ## deck.gl v5.2
@@ -41,7 +46,7 @@ Release date: TBD, target April, 2018
       </td>
       <td>
         <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/test-utils.gif" />
-        <p><i>Automated Render Tests @deck.gl/test-utils</i></p>
+        <p><i>Automated Render Tests</i></p>
       </td>
     </tr>
   </tbody>
@@ -58,6 +63,8 @@ The new non-React API is officially supported, however since it is not yet exten
 ### Scripting Support
 
 deck.gl now publishes a bundle that can be imported using a simple `<script>` statement in HTML to give access to the deck.gl API. This makes deck.gl easy to use in e.g. "codepens" and for casual programming and visualizations.
+
+See our [scripting blog post](https://medium.com/vis-gl/start-scripting-with-deck-gl-c9036d7a6011).
 
 
 ### Multiple Modules
@@ -213,19 +220,14 @@ As always, for information on deprecations and how to update your code in respon
 
 The new `useDevicePixels` prop on the `DeckGL` React component can be used to disable usage of full resolution on retina/HD displays. Disabling deck.gl's default behavior of always rendering at maximum device resolution can reduce the render buffer size with a factor of 4x on retina devices and lead to significant performance improvements on typical fragment shader bound rendering. This option can be especially interesting on "retina" type mobile phone displays where pixels are so small that the visual quality loss may be largely imperceptible.
 
-
 #### DeckGL: Layer Filtering
 
 A new `DeckGL` prop `layerFilter` gives the application an opportunity to filter out layers from the layer list during rendering and/or picking. Filtering can be done per layer or per viewport (experimental) or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering, or rendering different additional information in different viewports (experimental).
 
-
-#### DeckGL: Picking methods renamed
-
-To reduce confusion, `DeckGL.queryObject` has been renamed to `DeckGL.pickObject` and `DeckGL.queryVisibleObjects` has been renamed to `DeckGL.pickObjects`. Old functions are still supported with deprecated warning, but will be removed in the next major version.
-
 #### DeckGL: Allow overriding canvas component style
 
 Users can now override the canvas size, position and offset via the style prop passed to the DeckGL component.
+
 
 ### Layer Improvements
 
@@ -233,6 +235,7 @@ Users can now override the canvas size, position and offset via the style prop p
 
 Three new `Layer` props (`autoHighlight`, `highlightColor` and `highlightedObjectIndex`) have been added to enable simple and efficient highlighting of a single object in a layer. Highlighting is either automatic on hover, or programmatically controlled through specifying the index of the selected object. The actual highlighting is done on the GPU and this feature is thus very performant, in particular as it lets applications avoid cumbersome techniques like modifying data or using a secondary layer for highlighting.
 
+See our [blog post](https://medium.com/vis-gl/automatic-gpu-based-object-highlighting-in-deck-gl-layers-7fe3def44c89)
 
 #### CompositeLayer: Property Forwarding Support
 
