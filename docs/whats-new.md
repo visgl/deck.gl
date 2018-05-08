@@ -1,6 +1,6 @@
 # What's New
 
-This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/@vis.gl) for news about new releases and features in deck.gl.
+This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
 
 ## deck.gl v5.2

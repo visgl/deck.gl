@@ -42,7 +42,7 @@ export default class Header extends Component {
             <Link activeClassName="active" to="examples">Examples</Link>
             <Link activeClassName="active" to="showcases">Showcases</Link>
             <Link activeClassName="active" to="documentation">Documentation</Link>
-            <a href="https://medium.com/@vis.gl">Blog</a>
+            <a href="https://medium.com/vis-gl">Blog</a>
             <Link activeClassName="active" href={FRAMEWORK_GITHUB_URL}>
               Github<i className="icon icon-github" />
             </Link>

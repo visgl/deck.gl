@@ -5,7 +5,7 @@ Interested in what is coming down the road? We are trying to make the deck.gl ro
 We are currently using the following ways to share information about the direction of deck.gl.
 
 * **Roadmap Document** - (this document) A high-level summary of our current direction for future releases.
-* **Blog** - We use the [vis.gl blog](https://medium.com/@vis.gl) blog to share information about what we are doing.
+* **Blog** - We use the [vis.gl blog](https://medium.com/vis-gl) blog to share information about what we are doing.
 * **RFCs** - A wealth of technical detail around planned features is available in our RFCs (Requests For Comments). RFCs are technical writeups that describe a proposed feature. RFCs are available [here](https://github.com/uber/deck.gl/tree/master/dev-docs/RFCs).
 * **Experimental exports** - We are making unfinished features available as experimental exports. This gives users a clear indication about what is coming and even allow early adopters a chance to play with and provide comments on these features.
 * **Experimental Layers** - We are publishing a number of work-in-progress layers to make it easy to experiment with them in applications, see below.
