@@ -147,18 +147,22 @@ Callback Arguments:
 
 ## Methods
 
-##### `delete`
+##### `finalize`
 
-Frees resources associated with this object immediately.
+Frees resources associated with this object immediately (rather than waiting for garbage collection).
+
+`deck.finalize()`
 
 
 ##### `setProps`
 
-Updates properties
+Updates properties.
 
 ```js
 deck.setProps({...});
 ```
+
+See the Properties section on this page for more detail on which props can be set.
 
 
 ##### `pickObject`
