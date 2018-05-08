@@ -71,8 +71,9 @@ export default class App extends PureComponent {
         ScatterplotLayer: true
       },
       settings: {
-        infovis: false,
+        orthographic: false,
         multiview: false,
+        infovis: false,
         useDevicePixels: true,
         pickingRadius: 0,
         drawPickingColors: false,
@@ -243,29 +244,20 @@ export default class App extends PureComponent {
 
   _getViews() {
     const {
-      settings: {infovis, multiview}
+      settings: {infovis, multiview, orthographic}
     } = this.state;
 
     if (infovis) {
-      return [
-        new OrbitView({
-          id: 'infovis'
-        })
-      ];
+      return new OrbitView({id: 'infovis'});
     }
 
-    return [
-      multiview &&
-        new FirstPersonView({
-          id: 'first-person',
-          height: '50%'
-        }),
-      new MapView({
-        id: 'basemap',
-        y: multiview ? '50%' : '0%',
-        height: multiview ? '50%' : '100%'
-      })
-    ];
+    if (multiview) {
+      return [
+        new FirstPersonView({id: 'first-person', height: '50%'}),
+        new MapView({id: 'basemap', y: '50%', height: '50%', orthographic})
+      ];
+    }
+    return new MapView({id: 'basemap', orthographic});
   }
 
   // Only show infovis layers in infovis mode and vice versa
