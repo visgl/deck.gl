@@ -611,7 +611,8 @@ export const TEST_CASES = [
       longitude: -122.42694203247012,
       zoom: 11.5,
       pitch: 0,
-      bearing: 0
+      bearing: 0,
+      orthographic: true
     },
     layers: [
       new HexagonCellLayer({
@@ -653,7 +654,7 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat-64.png'
   },
   {
     name: 'hexagon-lnglat',
