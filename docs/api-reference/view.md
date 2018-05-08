@@ -33,26 +33,25 @@ const view = View({id, x, y, width, height, ...});
 
 Parameters:
 
-* `opts` (Object) - View options
+* `id` (String)
+* `x` (String|Number) - A relative or absolute position. Default `0`.
+* `y` (String|Number) - A relative or absolute position. Default `0`.
+* `width` (String|Number) - A relative or absolute extent. Default `'100%'`.
+* `height` (String|Number) - A relative or absolute extent. Default `'100%'`.
 
-  + `id` (String)
-  + `x` (String|Number) - A relative or absolute position. Default `0`.
-  + `y` (String|Number) - A relative or absolute position. Default `0`.
-  + `width` (String|Number) - A relative or absolute extent. Default `'100%'`.
-  + `height` (String|Number) - A relative or absolute extent. Default `'100%'`.
+Projection Matrix Parameters
 
-  Projection Matrix Parameters
+* `projectionMatrix`= (`Array[16]`, optional) - Projection matrix.
 
-  + `projectionMode` (Enum) - the kind of projection matrix. Default `PROJECTION.PERSPECTIVE`.
-  + `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-  + `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-  + `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  + `left`
-  + `right`
+If `projectionMatrix` is not supplied, `Viewport` will build a matrix from the following parameters:
 
-  Advanced usage
-
-  + `getProjectionMatrix` (Array[16], optional) - Function that returns a projection matrix.
+* `fovyDegrees`=`75` (`Number`) - Field of view covered by camera, in the perspective case.
+* `aspect`= (`Number`) - Aspect ratio. Defaults to the Viewport's `width/height` ratio.
+* `near`=`0.1` (`Number`) - Distance of near clipping plane.
+* `far`=`1000` (`Number`) - Distance of far clipping plane.
+* `orthographic`=`false` (`Boolean`) - whether to create an orthographic or perspective projection matrix. Default is perspective projection.
+* `focalDistance`=`1` (`Number`) - (orthographic projections only) The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Note: lso used for pixel scale identity distance above.
+* `orthographicFocalDistance` (`Number`) - (orthographic projections only) Can be used to specify different values for pixel scale focal distance and orthographic focal distance.
 
 
 ## Methods
