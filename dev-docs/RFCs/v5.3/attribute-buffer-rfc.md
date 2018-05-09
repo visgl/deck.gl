@@ -20,13 +20,17 @@ The current approach places some limitations on applications:
 - **Multi-model**: For layers that reuse attributes cross models, a new buffer is constructed for each attribute and each model.
 - **Resource management**: `model.delete()` does not remove existing buffers as they might be in use by other models. Therefore adding/removing layers leave behind orphan buffers which are no longer used and whose resources are never released.
 
+## Proposal: extend luma.gl's Buffer class
+
+- Add `buffer.clone()` method to support two Buffers instances sharing the same GPU buffer but using different data layouts. (Multi-model use case)
 
 ## Proposal: modify the Attribute class behavior
 
-- In `getBuffer()`, if an attribute is not generic and does not contain a buffer object already, create a new buffer from attribute descriptors.
-- In `finalize()`, destroy any buffer object created by itself.
+- In `attribute.getBuffer()`, if an attribute is not generic and does not contain a buffer object already, create a new buffer from attribute descriptors.
+- In `attribute.finalize()`, destroy any buffer object created by itself.
 
 ## Proposal: create and update buffers in AttributeManager
 
 - Call `attribute.finalize` in `attributeManager.remove`.
 - Add `attributeManager.finalize` method, in which delete all Buffer objects in attributes. Call `attributeManager.finalize` in `layer._finalize`.
+- Add `attributeManager.setBuffers` method, for layers to set attribute buffers internally (GPGPU use case).
