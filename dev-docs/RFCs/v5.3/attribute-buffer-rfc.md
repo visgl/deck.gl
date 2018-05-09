@@ -4,6 +4,10 @@
 * **Date**: Mar 21, 2018
 * **Status**: **Pending Review**
 
+## OverView
+
+This RFC proposes to move Buffer creation from luma.gl into AttributeManager.
+
 Related discussions:
 [#1527](https://github.com/uber/deck.gl/pull/1527)
 
@@ -20,14 +24,35 @@ The current approach places some limitations on applications:
 - **Multi-model**: For layers that reuse attributes cross models, a new buffer is constructed for each attribute and each model.
 - **Resource management**: `model.delete()` does not remove existing buffers as they might be in use by other models. Therefore adding/removing layers leave behind orphan buffers which are no longer used and whose resources are never released.
 
-## Proposal: extend luma.gl's Buffer class
+## Proposal: add Attribute class to luma.gl
 
-- Add `buffer.clone()` method to support two Buffers instances sharing the same GPU buffer but using different data layouts. (Multi-model use case)
+Selectively port the existing `Attribute` class in deck.gl to luma.gl.
 
-## Proposal: modify the Attribute class behavior
+Props:
 
-- In `attribute.getBuffer()`, if an attribute is not generic and does not contain a buffer object already, create a new buffer from attribute descriptors.
-- In `attribute.finalize()`, destroy any buffer object created by itself.
+* `id` (String)
+* `type` (Enum)
+* `size` (Number)
+* `value` (TypedArray)
+* `offset` (Number, optional)
+* `stride` (Number, optional)
+* `normalized` (Bool, optional)
+* `integer` (Bool, optional)
+* `isGeneric` (Bool, optional)
+* `isIndexed` (Bool, optional)
+* `instanced` (Bool, optional)
+
+Methods:
+
+- `getBuffer()` - if an attribute is not generic and does not contain a buffer object already, create a new buffer from attribute descriptors.
+- `finalize()` - destroy any buffer object created by itself.
+
+
+## Proposal: modify deck.gl's Attribute class
+
+- Extend luma.gl's `Attribute` class with deck.gl specific props/methods.
+- Rename to `LayerAttribute`
+
 
 ## Proposal: create and update buffers in AttributeManager
 
