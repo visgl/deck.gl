@@ -25,11 +25,8 @@ import Layer from './layer';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from '../lifecycle/constants';
-import {deepEqual} from '../utils/deep-equal';
 import ViewManager from '../views/view-manager';
-import View from '../views/view';
 import MapView from '../views/map-view';
-import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
@@ -44,8 +41,6 @@ import {
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
-
-const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
@@ -140,11 +135,8 @@ export default class LayerManager {
     this.setViews();
   }
 
-  /**
-   * Method to call when the layer manager is not needed anymore.
-   *
-   * Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
-   */
+  // Method to call when the layer manager is not needed anymore.
+  // Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
   finalize() {
     seer.removeListener(this._initSeer);
     seer.removeListener(this._editSeer);
@@ -185,7 +177,6 @@ export default class LayerManager {
   }
 
   // Get a set of viewports for a given width and height
-  // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
   getViewports() {
     const viewports = this.viewManager.getViewports();
     this.context.viewport = viewports[0];
@@ -193,72 +184,64 @@ export default class LayerManager {
   }
 
   /**
-   * Set parameters needed for layer rendering and picking.
+   * Set props needed for layer rendering and picking.
    * Parameters are to be passed as a single object, with the following values:
    * @param {Boolean} useDevicePixels
    */
-  /* eslint-disable complexity */
-  setParameters(parameters) {
-    if ('eventManager' in parameters) {
-      this._initEventHandling(parameters.eventManager);
+  /* eslint-disable complexity, max-statements */
+  setProps(props) {
+    if ('eventManager' in props) {
+      this._initEventHandling(props.eventManager);
     }
 
-    if (
-      'pickingRadius' in parameters ||
-      'onLayerClick' in parameters ||
-      'onLayerHover' in parameters
-    ) {
-      this._setEventHandlingParameters(parameters);
+    if ('pickingRadius' in props || 'onLayerClick' in props || 'onLayerHover' in props) {
+      this._setEventHandlingParameters(props);
     }
 
-    if ('width' in parameters || 'height' in parameters) {
-      this.setSize(parameters.width, parameters.height);
+    if ('width' in props || 'height' in props) {
+      this.viewManager.setSize(props.width, props.height);
+      this.width = props.width;
+      this.height = props.height;
     }
 
-    if ('views' in parameters) {
-      this.setViews(parameters.views);
+    if ('views' in props) {
+      this.setViews(props.views);
     }
 
     // TODO - support multiple view states
-    if ('viewState' in parameters) {
-      this.setViewState(parameters.viewState);
+    if ('viewState' in props) {
+      this.viewManager.setViewState(props.viewState);
     }
 
-    // TODO - For now we set layers before viewports to preservenchangeFlags
-    if ('layers' in parameters) {
-      this.setLayers(parameters.layers);
+    // TODO - For now we set layers before viewports to preserve changeFlags
+    if ('layers' in props) {
+      this.setLayers(props.layers);
     }
 
-    if ('layerFilter' in parameters) {
-      if (this.layerFilter !== parameters.layerFilter) {
-        this.layerFilter = parameters.layerFilter;
+    if ('layerFilter' in props) {
+      if (this.layerFilter !== props.layerFilter) {
+        this.layerFilter = props.layerFilter;
         this.setNeedsRedraw('layerFilter changed');
       }
     }
 
-    if ('drawPickingColors' in parameters) {
-      if (parameters.drawPickingColors !== this.drawPickingColors) {
-        this.drawPickingColors = parameters.drawPickingColors;
+    if ('drawPickingColors' in props) {
+      if (props.drawPickingColors !== this.drawPickingColors) {
+        this.drawPickingColors = props.drawPickingColors;
         this.setNeedsRedraw('drawPickingColors changed');
       }
     }
 
     // A way for apps to add data to context that can be accessed in layers
-    if ('userData' in parameters) {
-      this.context.userData = parameters.userData;
+    if ('userData' in props) {
+      this.context.userData = props.userData;
     }
 
-    if ('useDevicePixels' in parameters) {
-      this.context.useDevicePixels = parameters.useDevicePixels;
+    if ('useDevicePixels' in props) {
+      this.context.useDevicePixels = props.useDevicePixels;
     }
   }
-  /* eslint-enable complexity */
-
-  setSize(width, height) {
-    this.viewManager.setSize(width, height);
-    this.width = width;
-    this.height = height;
-  }
+  /* eslint-enable complexity, max-statements */
 
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
@@ -269,11 +252,7 @@ export default class LayerManager {
       views = [new MapView({id: 'default-view'})];
     }
 
-    this.viewManager.setViews(views)
-  }
-
-  setViewState(viewState) {
-    this.viewManager.setViewState(viewState)
+    this.viewManager.setViews(views);
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
@@ -386,6 +365,22 @@ export default class LayerManager {
       pickingFBO: this._getPickingBuffer(),
       useDevicePixels
     });
+  }
+
+  //
+  // DEPRECATED METHODS in V5.3
+  //
+
+  setParameters(parameters) {
+    return this.setProps(parameters);
+  }
+
+  setSize(width, height) {
+    this.setProps({width, height});
+  }
+
+  setViewState(viewState) {
+    this.setProps({viewState});
   }
 
   //

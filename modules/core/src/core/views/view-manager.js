@@ -161,9 +161,9 @@ export default class ViewManager {
       view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
     );
 
-    const changeReason = this._diffViews(views, this.views);
-    if (changeReason) {
-      this.setNeedsUpdate(changeReason);
+    const viewsChanged = this._diffViews(views, this.views);
+    if (viewsChanged) {
+      this.setNeedsUpdate('views changed');
     }
 
     this.views = views;
