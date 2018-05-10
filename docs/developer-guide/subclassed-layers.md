@@ -65,7 +65,7 @@ returns the shaders and modules used by the layer in an object:
 * `fs`: string, GLSL source of the fragment shader
 * `modules`: Array, list of shader modules to be used
 
-Read about [writing your own shaders](/docs/advanced/writing-shaders.md).
+Read about [writing your own shaders](/docs/developer-guide/writing-shaders.md).
 
 When you are implementing your own custom layers, and want to change the shaders
 it is encouraged that you also define a `getShaders()` function and selectively
@@ -146,7 +146,7 @@ void main(void) {
 ## Defining Additional Attributes
 
 During initialization, you may define additional attributes by accessing the
-layer's [attribute manager](/docs/advanced/attribute-management.md):
+layer's [attribute manager](/docs/developer-guide/attribute-management.md):
 
 ```js
 // my-point-cloud-layer.js

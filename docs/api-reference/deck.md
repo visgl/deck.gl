@@ -142,7 +142,7 @@ The `onViewStateChange` callback is fired when the user has interacted with the 
 
 `onViewStateChanged({viewState})`
 
-* `viewState` - An updated [view state](/docs/advanced/view-state.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
+* `viewState` - An updated [view state](/docs/developer-guide/view-state.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
 
 Returns:
 

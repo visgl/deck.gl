@@ -71,4 +71,4 @@ The application does not have to be aware about this, as long as it keeps render
 
 The constant creation and disposal of layer instances may seem wasteful, however the creation and recycling of JavaScript objects is quite efficient in modern JavaScript environments, and this is very similar to how React works where every render cycle generates a new tree of ReactElement instances, so the model is proven.
 
-For more details, read about [Layer Lifecycle](/docs/advanced/layer-lifecycle.md).
+For more details, read about [Layer Lifecycle](/docs/developer-guide/layer-lifecycle.md).

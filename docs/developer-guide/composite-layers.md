@@ -138,4 +138,4 @@ class AwesomeCompositeLayer extends CompositeLayer {
 }
 ```
 
-For more details, read about [how picking works](/docs/advanced/picking.md).
+For more details, read about [how picking works](/docs/developer-guide/picking.md).

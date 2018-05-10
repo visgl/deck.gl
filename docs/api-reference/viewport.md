@@ -4,7 +4,7 @@ A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines 
 
 For more information:
 
-* See the deck.gl [Viewports](/docs/advanced/viewports.md) article.
+* See the deck.gl [Viewports](/docs/developer-guide/viewports.md) article.
 * See the math.gl article on [View and Projection Matrices](https://uber-web.github.io/math.gl/#/documentation/articles/view-and-projection-matrices)
 
 

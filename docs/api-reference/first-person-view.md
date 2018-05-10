@@ -20,7 +20,7 @@ A `FirstPersonView` will work with geospatial coordinate systems if a geospatial
 
 The `position` vector will then be interpreted as meter offsets from this anchor point.
 
-For more information on using `View` classes, consult the [Views](/docs/advanced/views.md) article.
+For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
 
 ## Usage

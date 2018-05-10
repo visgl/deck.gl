@@ -307,7 +307,7 @@ Used to update the layers [`state`](/docs/api-reference/layer.md#-state-object-)
 
 ### Layer Lifecycle Methods
 
-For more information about when these methods are called, see [layer lifecycle](/docs/advanced/layer-lifecycle.md).
+For more information about when these methods are called, see [layer lifecycle](/docs/developer-guide/layer-lifecycle.md).
 
 ##### `initializeState`
 
@@ -379,7 +379,7 @@ Parameters:
 
 * `uniforms`:
 
-* an object that contains all the [default unforms](/docs/advanced/writing-shaders.md#uniforms) to be passed to the shaders.
+* an object that contains all the [default unforms](/docs/developer-guide/writing-shaders.md#uniforms) to be passed to the shaders.
 * `context` - The layer context is supplied as a parameter
   + `context.gl` (`WebGLRenderingContext`) - gl context
   + ...
@@ -489,7 +489,7 @@ Retures:
 
 ### Layer Picking Methods
 
-For the usage of these methods, see [how picking works](/docs/advanced/picking.md).
+For the usage of these methods, see [how picking works](/docs/developer-guide/picking.md).
 
 ##### `decodePickingColor`
 

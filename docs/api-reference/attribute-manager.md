@@ -11,7 +11,7 @@ Summary:
 * auto updates attributes with registered updater functions
 * allows overriding with application supplied buffers
 
-For more information consult the [Attribute Management](/docs/advanced/attribute-management.md) article.
+For more information consult the [Attribute Management](/docs/developer-guide/attribute-management.md) article.
 
 
 ## Static Methods

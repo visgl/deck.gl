@@ -1,10 +1,10 @@
 # CompositeLayer Class
 
-The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/layer.md), that customizes various [layer lifecycle methods](/docs/advanced/layer-lifecycle.md) to help create sublayers and handle events from those layers.
+The `CompositeLayer` class is a subclass of the [Layer Class](/docs/api-reference/layer.md), that customizes various [layer lifecycle methods](/docs/developer-guide/layer-lifecycle.md) to help create sublayers and handle events from those layers.
 
 If you intend to implement a layer that generates other layers, you should extend this class.
 
-For more information consult the [Composite Layers](/docs/advanced/composite-layers.md) article.
+For more information consult the [Composite Layers](/docs/developer-guide/composite-layers.md) article.
 
 
 ## Usage

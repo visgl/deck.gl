@@ -12,7 +12,7 @@ To render, `PerspectiveView` needs to be used together with a `viewState` with t
 * `lookAt` (`Number[3]`) - The position being looked at.
 * `up` (`Number[3]`) - The up direction.
 
-For more information on using `View` classes, consult the [Views](/docs/advanced/views.md) article.
+For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
 
 ## Constructor
