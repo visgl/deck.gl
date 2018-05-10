@@ -26,6 +26,7 @@ import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from '../lifecycle/constants';
 import {deepEqual} from '../utils/deep-equal';
+import ViewManager from '../views/view-manager';
 import View from '../views/view';
 import MapView from '../views/map-view';
 import Viewport from '../viewports/viewport';
@@ -98,13 +99,8 @@ export default class LayerManager {
       stats: stats || new Stats({id: 'deck.gl'})
     });
 
-    // List of view descriptors, gets re-evaluated when width/height changes
-    this.width = 100;
-    this.height = 100;
-    this.views = [];
-    this.viewState = INITIAL_VIEW_STATE;
-    this.viewsChanged = true;
-    this.viewports = []; // Generated viewports
+    // Maps view descriptors to vieports, rebuilds when width/height/viewState/views change
+    this.viewManager = new ViewManager();
 
     this.layerFilter = null;
     this.drawPickingColors = false;
@@ -126,6 +122,10 @@ export default class LayerManager {
     // Seer integration
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
+
+    // DEPRECATED
+    this.width = 100;
+    this.height = 100;
 
     Object.seal(this);
 
@@ -181,15 +181,15 @@ export default class LayerManager {
   }
 
   getViews() {
-    return this.views;
+    return this.viewManager.views;
   }
 
   // Get a set of viewports for a given width and height
   // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
   getViewports() {
-    this._rebuildViewportsFromViews();
-    this.context.viewport = this.viewports[0];
-    return this.viewports;
+    const viewports = this.viewManager.getViewports();
+    this.context.viewport = viewports[0];
+    return viewports;
   }
 
   /**
@@ -255,13 +255,9 @@ export default class LayerManager {
   /* eslint-enable complexity */
 
   setSize(width, height) {
-    assert(Number.isFinite(width) && Number.isFinite(height));
-    if (width !== this.width || height !== this.height) {
-      this.width = width;
-      this.height = height;
-      this.viewsChanged = true;
-      this.setNeedsRedraw('Size changed');
-    }
+    this.viewManager.setSize(width, height);
+    this.width = width;
+    this.height = height;
   }
 
   // Update the view descriptor list and set change flag if needed
@@ -273,28 +269,11 @@ export default class LayerManager {
       views = [new MapView({id: 'default-view'})];
     }
 
-    // Ensure any "naked" Viewports are wrapped in View instances
-    views = flatten(views, {filter: Boolean}).map(
-      view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
-    );
-
-    const viewsChanged = this._diffViews(views, this.views);
-
-    this.views = views;
-    this.viewsChanged = this.viewsChanged || viewsChanged;
+    this.viewManager.setViews(views)
   }
 
   setViewState(viewState) {
-    if (viewState) {
-      const viewStateChanged = deepEqual(viewState, this.viewState);
-      this.viewState = viewState;
-      this.viewsChanged = this.viewsChanged || viewStateChanged;
-      if (viewStateChanged) {
-        this.setNeedsRedraw('viewState changed');
-      }
-    } else {
-      log.warn('viewState is not valid')();
-    }
+    this.viewManager.setViewState(viewState)
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
@@ -439,9 +418,7 @@ export default class LayerManager {
       this._needsRedraw = false;
     }
 
-    if (this.viewsChanged) {
-      return 'Views changed';
-    }
+    redraw = redraw || this.viewManager.needsRedraw();
 
     // This layers list doesn't include sublayers, relying on composite layers
     for (const layer of this.layers) {
@@ -451,41 +428,6 @@ export default class LayerManager {
     }
 
     return redraw;
-  }
-
-  // Rebuilds viewports from descriptors towards a certain window size
-  _rebuildViewportsFromViews() {
-    if (this.viewsChanged) {
-      const {width, height, views, viewState} = this;
-      const newViewports = views.map(view => view.makeViewport({width, height, viewState}));
-
-      this.setNeedsRedraw('Viewport(s) changed');
-
-      // Ensure one viewport is activated, layers may expect it
-      // TODO - handle empty viewport list (using dummy viewport), or assert
-      // const oldViewports = this.context.viewports;
-
-      const viewport = newViewports[0];
-      assert(viewport instanceof Viewport, 'Invalid viewport');
-
-      this.context.viewports = newViewports;
-      this._activateViewport(viewport);
-      // }
-
-      // We've just rebuilt the viewports to match the descriptors, so clear the flag
-      this.viewports = newViewports;
-      this.viewsChanged = false;
-    }
-  }
-
-  // Check if viewport array has changed, returns true if any change
-  // Note that descriptors can be the same
-  _diffViews(newViews, oldViews) {
-    if (newViews.length !== oldViews.length) {
-      return true;
-    }
-
-    return newViews.some((_, i) => !newViews[i].equals(oldViews[i]));
   }
 
   /**

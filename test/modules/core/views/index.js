@@ -19,3 +19,4 @@
 // THE SOFTWARE.
 
 import './view.spec';
+import './view-manager.spec';
