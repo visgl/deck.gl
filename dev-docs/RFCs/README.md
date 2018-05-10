@@ -54,7 +54,6 @@ Early directions for v6.0. Also see luma.gl RFCs
 | [**Partial Updates**](v6.0/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | **[Effects Manager](v6.0/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 | **[GPU Aggregations](v6.0/gpu-screengrid-aggregation-rfc.md)** | @1chandu | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
-| **[TransitionInterpolator class](v6.0/transition-interpolator-class-rfc.md)** | @pessimistress | **Implemented** | Already implemented in earlier release? |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
@@ -91,6 +90,7 @@ These RFCs were implemented in v5.1.
 | --- | --- | --- | --- |
 | **Animation** | | | |
 | [**Attribute Animation**](v5.1/attribute-animation-rfc.md) | @pessimistress | **Implemented** | Automatically interpolate between two copies of a vertex attributes |
+| **[TransitionInterpolator class](v5.1/transition-interpolator-class-rfc.md)** | @pessimistress | **Implemented** | Make it easier to customize interpolation |
 
 
 ## v5.0 RFCs
