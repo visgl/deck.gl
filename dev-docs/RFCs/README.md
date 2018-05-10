@@ -72,6 +72,7 @@ These RFCs are under consideration for v5.3.
 | [**Picking Occluded Ojects**](v5.3/picking-overlapping-objects-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Partial Updates**](v5.3/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Constant Accessor**](v5.3/constant-accessor-rfc.md) | @pessimistress | **draft** | Allow users to supply constant attributes directly instead of using an accessor. |
+| [**Attribute Buffer**](v5.3/attribute-buffer-rfc.md) | @pessimistress | **draft** | Move buffer management from Model class to AttributeManager. |
 
 
 
