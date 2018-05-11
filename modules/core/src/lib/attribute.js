@@ -1,120 +1,75 @@
 /* eslint-disable complexity */
 import assert from '../utils/assert';
-import {GL, Buffer} from 'luma.gl';
+import {GL, Buffer, Attribute} from 'luma.gl';
 
-export default class Attribute {
-  constructor({
-    id = 'unnamed-attribute',
-    attribute,
+export default class LayerAttribute extends Attribute {
+  constructor(gl, opts = {}) {
+    super(gl, opts);
 
-    // luma.gl fields
-    size,
-    value,
-    isGeneric = false,
-    isIndexed = false,
-    instanced = 0,
+    const {
+      // deck.gl fields
+      transition = false,
+      noAlloc = false,
+      update = null,
+      accessor = null
+    } =
+      opts.userData || opts;
 
-    // deck.gl fields
-    transition = false,
-    noAlloc = false,
-    updater = null,
-    accessor = null
-  } = {}) {
-    this.id = id;
-    this.userData = {}; // Reserved for application
+    Object.assign(this.userData, opts, {
+      transition,
+      noAlloc,
+      update,
+      accessor,
 
-    // Initialize the attribute descriptor, with WebGL and metadata fields
-    this.state = Object.assign(
-      {
-        // Ensure that fields are present before Object.seal()
-        target: undefined,
-        buffer: null,
-        userData: {}
-      },
-      {
-        transition,
-        noAlloc,
-        updater,
-        accessor
-      },
-      // Metadata
-      attribute,
-      {
-        // State
-        isExternalBuffer: false,
-        needsAlloc: false,
-        needsUpdate: false,
-        needsRedraw: false,
+      // State
+      isExternalBuffer: false,
+      needsAlloc: false,
+      needsUpdate: false,
+      needsRedraw: false,
 
-        // Luma fields
-        isGeneric,
-        isIndexed,
-        instanced,
-        size,
-        value
-      }
-    );
+      allocedInstances: -1
+    });
 
-    this.allocedInstances = -1;
-
-    // Sanity - no app fields on our attributes. Use userData instead.
-    Object.seal(this);
-    Object.seal(this.state);
+    Object.seal(this.userData);
 
     // Check all fields and generate helpful error messages
-    this._validateAttributeDefinition();
     this._validateAttributeUpdaters();
   }
 
-  finalize() {
-    // TODO call buffer.finalize();
-  }
-
-  // HACK to fix plot layer (temporary)
-  get value() {
-    return this.state.value;
-  }
-
   needsUpdate() {
-    return this.state.needsUpdate;
+    return this.userData.needsUpdate;
   }
 
   needsRedraw({clearChangedFlags = false} = {}) {
-    const needsRedraw = this.state.needsRedraw;
-    this.state.needsRedraw = this.state.needsRedraw && !clearChangedFlags;
+    const needsRedraw = this.userData.needsRedraw;
+    this.userData.needsRedraw = this.userData.needsRedraw && !clearChangedFlags;
     return needsRedraw;
   }
 
   getInstanceCount() {
-    const attribute = this.state;
-    return attribute.value !== null ? attribute.value.length / attribute.size : 0;
-  }
-
-  getBuffer() {
-    const attribute = this.state;
-    return attribute.buffer || attribute;
+    return this.value !== null ? this.value.length / this.size : 0;
   }
 
   // Checks that typed arrays for attributes are big enough
   // sets alloc flag if not
   // @return {Boolean} whether any updates are needed
   setNeedsUpdate(reason = this.id) {
-    this.state.needsUpdate = this.state.needsUpdate || reason;
+    this.userData.needsUpdate = this.userData.needsUpdate || reason;
   }
 
   setNeedsRedraw(reason = this.id) {
-    this.state.needsRedraw = this.state.needsRedraw || reason;
+    this.userData.needsRedraw = this.userData.needsRedraw || reason;
   }
 
   setNumInstances(numInstances) {
-    const attribute = this.state;
+    const state = this.userData;
 
-    if (!attribute.isExternalBuffer) {
+    if (!state.isExternalBuffer) {
       // Do we need to reallocate the attribute's typed array?
       const instanceCount = this.getInstanceCount();
       const needsAlloc = instanceCount === 0 || instanceCount < numInstances;
-      if (needsAlloc && (attribute.update || attribute.accessor)) {
-        attribute.needsAlloc = true;
+      if (needsAlloc && (state.update || state.accessor)) {
+        state.needsAlloc = true;
         this.setNeedsUpdate(this.id);
       }
     }
@@ -123,38 +78,42 @@ export default class Attribute {
   allocate(numInstances) {
     this.setNumInstances(numInstances);
 
-    const attribute = this.state;
+    const state = this.userData;
 
     // Allocate a new typed array if needed
-    if (attribute.needsAlloc) {
+    if (state.needsAlloc) {
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
-      const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
+      const ArrayType = glArrayFromType(this.type || GL.FLOAT);
 
-      attribute.value = new ArrayType(attribute.size * allocCount);
-      attribute.needsAlloc = false;
-      attribute.needsUpdate = true;
+      this.value = new ArrayType(this.size * allocCount);
+      state.needsAlloc = false;
+      state.needsUpdate = true;
 
-      this.allocedInstances = allocCount;
+      state.allocedInstances = allocCount;
       return true;
     }
 
     return false;
   }
 
-  update({numInstances, data, props, context}) {
+  updateBuffer({numInstances, data, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
 
-    const attribute = this.state;
+    const state = this.userData;
 
-    const {update, accessor} = attribute;
+    const {update, accessor} = state;
 
     let updated = true;
     if (update) {
       // Custom updater - typically for non-instanced layers
-      update.call(context, attribute, {data, props, numInstances});
+      update.call(context, this, {data, props, numInstances});
+      this.update({
+        value: this.value,
+        isGeneric: this.isGeneric
+      });
       this._checkAttributeArray();
     } else if (accessor) {
       // Standard updater
@@ -164,56 +123,50 @@ export default class Attribute {
       updated = false;
     }
 
-    attribute.needsUpdate = false;
-    attribute.needsRedraw = true;
+    state.needsUpdate = false;
+    state.needsRedraw = true;
 
     return updated;
   }
 
   setExternalBuffer(buffer, numInstances) {
-    const attribute = this.state;
+    const state = this.userData;
 
     if (buffer) {
-      attribute.isExternalBuffer = true;
-      attribute.needsUpdate = false;
+      state.isExternalBuffer = true;
+      state.needsUpdate = false;
 
-      if (buffer instanceof Buffer) {
-        attribute.value = null;
-        if (attribute.buffer !== buffer) {
-          attribute.buffer = buffer;
-          attribute.needsRedraw = true;
-        }
-      } else {
-        const ArrayType = glArrayFromType(attribute.type || GL.FLOAT);
+      if (!(buffer instanceof Buffer)) {
+        const ArrayType = glArrayFromType(this.type || GL.FLOAT);
         if (!(buffer instanceof ArrayType)) {
           throw new Error(`Attribute ${this.id} must be of type ${ArrayType.name}`);
         }
-        if (attribute.auto && buffer.length <= numInstances * attribute.size) {
+        if (state.auto && buffer.length <= numInstances * this.size) {
           throw new Error('Attribute prop array must match length and size');
         }
+      }
 
-        attribute.buffer = null;
-        if (attribute.value !== buffer) {
-          attribute.value = buffer;
-          attribute.needsRedraw = true;
-        }
+      if (this.externalBuffer !== buffer) {
+        this.update({externalBuffer: buffer});
+        state.needsRedraw = true;
       }
     } else {
-      attribute.isExternalBuffer = false;
+      state.isExternalBuffer = false;
     }
   }
 
   // PRIVATE HELPER METHODS
 
   _updateBufferViaStandardAccessor(data, props) {
-    const attribute = this.state;
+    const state = this.userData;
 
-    const {accessor, value, size} = attribute;
+    const {accessor} = state;
+    const {value, size} = this;
     const accessorFunc = props[accessor];
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let {defaultValue = [0, 0, 0, 0]} = attribute;
+    let {defaultValue = [0, 0, 0, 0]} = state;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
     let i = 0;
     for (const object of data) {
@@ -232,36 +185,23 @@ export default class Attribute {
       }
       i += size;
     }
-  }
-
-  // Validate luma.gl level fields
-  _validateAttributeDefinition() {
-    const attribute = this.state;
-
-    assert(
-      attribute.size >= 1 && attribute.size <= 4,
-      `Attribute definition for ${this.id} invalid size`
-    );
+    this.update({value});
   }
 
   // Validate deck.gl level fields
   _validateAttributeUpdaters() {
-    const attribute = this.state;
+    const state = this.userData;
 
     // Check that either 'accessor' or 'update' is a valid function
     const hasUpdater =
-      attribute.noAlloc ||
-      typeof attribute.update === 'function' ||
-      typeof attribute.accessor === 'string';
+      state.noAlloc || typeof state.update === 'function' || typeof state.accessor === 'string';
     if (!hasUpdater) {
       throw new Error(`Attribute ${this.id} missing update or accessor`);
     }
   }
 
   _checkAttributeArray() {
-    const attribute = this.state;
-
-    const {value} = attribute;
+    const {value} = this;
     if (value && value.length >= 4) {
       const valid =
         Number.isFinite(value[0]) &&

@@ -30,6 +30,12 @@ export default class AttributeTransitionManager {
     }
   }
 
+  finalize() {
+    if (this.transform) {
+      this.transform.delete();
+    }
+  }
+
   /* Public methods */
 
   // Called when attribute manager updates
@@ -46,7 +52,7 @@ export default class AttributeTransitionManager {
     const changedTransitions = {};
 
     for (const attributeName in attributes) {
-      const transition = this._updateAttribute(attributeName, attributes[attributeName].state);
+      const transition = this._updateAttribute(attributeName, attributes[attributeName]);
 
       if (transition) {
         if (!attributeTransitions[attributeName]) {
@@ -61,7 +67,7 @@ export default class AttributeTransitionManager {
     for (const attributeName in attributeTransitions) {
       const attribute = attributes[attributeName];
 
-      if (!attribute || !attribute.state.transition) {
+      if (!attribute || !attribute.userData.transition) {
         // Animated attribute has been removed
         delete attributeTransitions[attributeName];
         needsNewModel = true;
@@ -154,7 +160,7 @@ export default class AttributeTransitionManager {
       let hasChanged;
       let transition = this.attributeTransitions[attributeName];
       if (transition) {
-        hasChanged = attribute.needsRedraw;
+        hasChanged = attribute.needsRedraw();
       } else {
         // New animated attributes have been added
         transition = {name: attributeName, attribute};
@@ -186,29 +192,50 @@ export default class AttributeTransitionManager {
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getCurrentAttributeState(transition) {
-    const {attribute, buffer} = transition;
-    const {value, type, size} = attribute;
+  _getNextTransitionStates(transition) {
+    const {attribute} = transition;
+    const {value, size} = attribute;
 
-    if (buffer) {
-      // If new buffer is bigger than old buffer, back fill with destination values
-      let oldBufferData = new Float32Array(value);
-      buffer.getData({dstData: oldBufferData});
-      // Hack/Xiaoji: WebGL2 throws error if TransformFeedback does not render to
-      // a buffer of type Float32Array.
-      // Therefore we need to read data as a Float32Array then re-cast to attribute type
-      if (!(value instanceof Float32Array)) {
-        oldBufferData = new value.constructor(oldBufferData);
-      }
-      return {size, type, value: oldBufferData};
+    // TODO - support attribute in Transform class
+    const toState = attribute.getBuffer();
+    toState.setDataLayout({size});
+    const fromState = transition.buffer || toState;
+
+    // Alternate between two buffers when new transitions start.
+    // Last destination buffer is used as an attribute (from state),
+    // And the other buffer is now the destination buffer.
+    let buffer = transition._swapBuffer;
+    transition._swapBuffer = transition.buffer;
+
+    if (!buffer) {
+      buffer = new Buffer(this.gl, {
+        size,
+        data: new Float32Array(value.length),
+        usage: GL.DYNAMIC_COPY
+      });
     }
-    return {size, type, value};
+
+    // Pad buffers to be the same length
+    if (buffer.data.length < value.length) {
+      buffer.setData({
+        data: new Float32Array(value.length)
+      });
+    }
+    if (fromState.data.length < value.length) {
+      const data = new Float32Array(value.length);
+      data.set(fromState.getData({}));
+      data.set(value.subarray(fromState.data.length), fromState.data.length);
+
+      fromState.setData({data});
+    }
+
+    return {fromState, toState, buffer};
   }
 
   // Returns transition settings object if transition is enabled, otherwise `null`
   _getTransitionSettings(attribute) {
     const {opts} = this;
-    const {transition, accessor} = attribute;
+    const {transition, accessor} = attribute.userData;
 
     if (!transition) {
       return null;
@@ -241,51 +268,11 @@ export default class AttributeTransitionManager {
   _triggerTransition(transition, settings) {
     this.needsRedraw = true;
 
-    const {attribute, buffer} = transition;
-    const {value, size} = attribute;
-
     const transitionSettings = this._normalizeTransitionSettings(settings);
-
-    const needsNewBuffer = !buffer || transition.bufferSize < value.length;
 
     // Attribute descriptor to transition from
     // _getCurrentAttributeState must be called before the current buffer is deleted
-    const fromState = this._getCurrentAttributeState(transition);
-
-    // Attribute descriptor to transition to
-    // Pre-converting to buffer to reuse in the case where no transition is needed
-    const toState = new Buffer(this.gl, {size, data: value});
-
-    if (needsNewBuffer) {
-      if (buffer) {
-        buffer.delete();
-      }
-
-      transition.buffer = new Buffer(this.gl, {
-        size,
-        instanced: attribute.instanced,
-        // WebGL2 throws error if `value` is not cast to Float32Array:
-        // `transformfeedback buffers : buffer or buffer range not large enough`
-        data: new Float32Array(value.length),
-        usage: GL.DYNAMIC_COPY
-      });
-      transition.bufferSize = value.length;
-    }
-
-    Object.assign(transition, transitionSettings);
-    if (transition.fromState) {
-      transition.fromState.delete();
-    }
-    transition.fromState = new Buffer(
-      this.gl,
-      Object.assign({}, fromState, {
-        data: fromState.value
-      })
-    );
-    if (transition.toState) {
-      transition.toState.delete();
-    }
-    transition.toState = toState;
+    Object.assign(transition, this._getNextTransitionStates(transition), transitionSettings);
 
     // Reset transition state
     if (transition.state === TRANSITION_STATE.STARTED) {

@@ -135,7 +135,10 @@ export default class AttributeManager {
   }
 
   finalize() {
-    // TODO - call attribute.finalize()
+    for (const attributeName in this.attributes) {
+      this.attributes[attributeName].delete();
+    }
+    this.attributeTransitionManager.finalize();
   }
 
   // Returns the redraw flag, optionally clearing it.
@@ -182,6 +185,7 @@ export default class AttributeManager {
     for (let i = 0; i < attributeNameArray.length; i++) {
       const name = attributeNameArray[i];
       if (this.attributes[name] !== undefined) {
+        this.attributes[name].finalize();
         delete this.attributes[name];
       }
     }
@@ -254,12 +258,7 @@ export default class AttributeManager {
    * @return {Object} attributes - descriptors
    */
   getAttributes() {
-    const attributes = {};
-    for (const attributeName in this.attributes) {
-      const attribute = this.attributes[attributeName];
-      attributes[attributeName] = attribute.getBuffer();
-    }
-    return attributes;
+    return this.attributes;
   }
 
   /**
@@ -280,7 +279,7 @@ export default class AttributeManager {
       if (attribute.needsRedraw({clearChangedFlags: true})) {
         // Only return non-transition attributes
         if (!attributeTransitionManager.hasAttribute(attributeName)) {
-          changedAttributes[attributeName] = attribute.getBuffer();
+          changedAttributes[attributeName] = attribute;
         }
       }
     }
@@ -309,17 +308,18 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      newAttributes[attributeName] = new Attribute({
-        id: attributeName,
-        // Metadata
-        attribute,
-        // Luma fields
-        isGeneric: attribute.isGeneric || false,
-        isIndexed: attribute.isIndexed || attribute.elements,
-        size: (attribute.elements && 1) || attribute.size,
-        value: attribute.value || null,
-        instanced: attribute.instanced || extraProps.instanced
-      });
+      newAttributes[attributeName] = new Attribute(
+        this.gl,
+        Object.assign({}, attribute, {
+          id: attributeName,
+          // Luma fields
+          isGeneric: attribute.isGeneric || false,
+          isIndexed: attribute.isIndexed || attribute.elements,
+          size: (attribute.elements && 1) || attribute.size,
+          value: attribute.value || null,
+          instanced: attribute.instanced || extraProps.instanced
+        })
+      );
     }
 
     Object.assign(this.attributes, newAttributes);
@@ -334,7 +334,7 @@ export default class AttributeManager {
 
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
-      let {accessor} = attribute.state;
+      let {accessor} = attribute.userData;
 
       // Backards compatibility: allow attribute name to be used as update trigger key
       triggers[attributeName] = [attributeName];
@@ -453,7 +453,7 @@ export default class AttributeManager {
       // Call updater function if needed
       const timeStart = Date.now();
 
-      const updated = attribute.update({numInstances, data, props, context});
+      const updated = attribute.updateBuffer({numInstances, data, props, context});
       if (updated) {
         this.needsRedraw = true;
 

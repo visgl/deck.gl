@@ -264,6 +264,7 @@ export default class Layer {
     for (const model of this.getModels()) {
       model.delete();
     }
+    this.getAttributeManager().finalize();
   }
 
   // If state has a model, draw it with supplied uniforms
