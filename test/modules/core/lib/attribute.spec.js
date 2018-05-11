@@ -22,6 +22,9 @@
 import Attribute from '@deck.gl/core/lib/attribute';
 import {GL, Buffer} from 'luma.gl';
 import test from 'tape-catch';
+import global from 'global';
+
+const gl = global.glContext;
 
 test('Attribute imports', t => {
   t.equals(typeof Attribute, 'function', 'Attribute import successful');
@@ -29,10 +32,10 @@ test('Attribute imports', t => {
 });
 
 test('Attribute constructor', t => {
-  const attribute = new Attribute({size: 1, accessor: 'a'});
+  const attribute = new Attribute(gl, {size: 1, accessor: 'a'});
 
   t.ok(attribute, 'Attribute construction successful');
-  t.ok(attribute.getBuffer(), 'Attribute.getBuffer function available');
+  t.is(typeof attribute.getBuffer, 'function', 'Attribute.getBuffer function available');
   t.ok(attribute.allocate, 'Attribute.allocate function available');
   t.ok(attribute.update, 'Attribute._updateBuffer function available');
   t.ok(attribute.setExternalBuffer, 'Attribute._setExternalBuffer function available');

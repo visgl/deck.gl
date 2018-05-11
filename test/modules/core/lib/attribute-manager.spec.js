@@ -22,6 +22,9 @@
 import AttributeManager from '@deck.gl/core/lib/attribute-manager';
 import {GL} from 'luma.gl';
 import test from 'tape-catch';
+import global from 'global';
+
+const gl = global.glContext;
 
 function update(attribute, {data}) {
   const {value, size} = attribute;
@@ -48,14 +51,14 @@ test('AttributeManager imports', t => {
 });
 
 test('AttributeManager constructor', t => {
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
 
   t.ok(attributeManager, 'AttributeManager construction successful');
   t.end();
 });
 
 test('AttributeManager.add', t => {
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
 
   t.throws(
     () => attributeManager.add({positions: {update}}),
@@ -81,7 +84,7 @@ test('AttributeManager.add', t => {
 });
 
 test('AttributeManager.update', t => {
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
   attributeManager.add({positions: {size: 2, update}});
 
   let attribute;
@@ -123,7 +126,7 @@ test('AttributeManager.update', t => {
 });
 
 test('AttributeManager.update - 0 numInstances', t => {
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
   attributeManager.add({positions: {size: 2, update}});
 
   // First update, should autoalloc and update the value array
@@ -139,7 +142,7 @@ test('AttributeManager.update - 0 numInstances', t => {
 });
 
 test('AttributeManager.update - external buffers', t => {
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
 
   const dummyUpdate = () => t.fail('updater should not be called when external buffer is present');
 
@@ -179,7 +182,7 @@ test('AttributeManager.update - external buffers', t => {
 });
 
 test('AttributeManager.invalidate', t => {
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
   attributeManager.add({positions: {size: 2, update}});
   attributeManager.add({colors: {size: 2, accessor: 'getColor', update}});
   attributeManager.update({
@@ -214,7 +217,7 @@ test('AttributeManager.setDefaultLogFunctions', t => {
     }
   });
 
-  const attributeManager = new AttributeManager();
+  const attributeManager = new AttributeManager(gl);
   attributeManager.add({positions: {size: 2, update}});
 
   // First update, should autoalloc and update the value array

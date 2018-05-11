@@ -136,7 +136,12 @@ export default class LayerAttribute extends Attribute {
       state.isExternalBuffer = true;
       state.needsUpdate = false;
 
-      if (!(buffer instanceof Buffer)) {
+      if (buffer instanceof Buffer) {
+        if (this.externalBuffer !== buffer) {
+          this.update({externalBuffer: buffer});
+          state.needsRedraw = true;
+        }
+      } else {
         const ArrayType = glArrayFromType(this.type || GL.FLOAT);
         if (!(buffer instanceof ArrayType)) {
           throw new Error(`Attribute ${this.id} must be of type ${ArrayType.name}`);
@@ -144,11 +149,10 @@ export default class LayerAttribute extends Attribute {
         if (state.auto && buffer.length <= numInstances * this.size) {
           throw new Error('Attribute prop array must match length and size');
         }
-      }
-
-      if (this.externalBuffer !== buffer) {
-        this.update({externalBuffer: buffer});
-        state.needsRedraw = true;
+        if (this.value !== buffer) {
+          this.update({value: buffer});
+          state.needsRedraw = true;
+        }
       }
     } else {
       state.isExternalBuffer = false;
