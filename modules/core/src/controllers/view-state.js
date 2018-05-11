@@ -59,6 +59,10 @@ export default class ViewState {
     return direction;
   }
 
+  shortestPathFrom(viewState) {
+    return this._viewportProps;
+  }
+
   // Redefined by subclass
   // Apply any constraints (mathematical or defined by _viewportProps) to map state
   _applyConstraints(props) {

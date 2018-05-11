@@ -1,12 +1,8 @@
 import TransitionInterpolator from './transition-interpolator';
-import {isValid, getEndValueByShortestPath} from './transition-utils';
 import {lerp} from './../utils/math-utils';
 
 import {flyToViewport} from 'viewport-mercator-project';
-import assert from '../utils/assert';
 
-const VIEWPORT_TRANSITION_PROPS = ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'];
-const REQUIRED_PROPS = ['latitude', 'longitude', 'zoom', 'width', 'height'];
 const LINEARLY_INTERPOLATED_PROPS = ['bearing', 'pitch'];
 
 /**
@@ -18,34 +14,11 @@ const LINEARLY_INTERPOLATED_PROPS = ['bearing', 'pitch'];
  */
 export default class ViewportFlyToInterpolator extends TransitionInterpolator {
   constructor() {
-    super();
-    this.propNames = VIEWPORT_TRANSITION_PROPS;
-  }
-
-  initializeProps(startProps, endProps) {
-    const startViewportProps = {};
-    const endViewportProps = {};
-
-    // Check minimum required props
-    for (const key of REQUIRED_PROPS) {
-      const startValue = startProps[key];
-      const endValue = endProps[key];
-      assert(isValid(startValue) && isValid(endValue), `${key} must be supplied for transition`);
-      startViewportProps[key] = startValue;
-      endViewportProps[key] = getEndValueByShortestPath(key, startValue, endValue);
-    }
-
-    for (const key of LINEARLY_INTERPOLATED_PROPS) {
-      const startValue = startProps[key] || 0;
-      const endValue = endProps[key] || 0;
-      startViewportProps[key] = startValue;
-      endViewportProps[key] = getEndValueByShortestPath(key, startValue, endValue);
-    }
-
-    return {
-      start: startViewportProps,
-      end: endViewportProps
-    };
+    super({
+      compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
+      extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch'],
+      required: ['width', 'height', 'latitude', 'longitude', 'zoom']
+    });
   }
 
   interpolateProps(startProps, endProps, t) {
@@ -53,7 +26,7 @@ export default class ViewportFlyToInterpolator extends TransitionInterpolator {
 
     // Linearly interpolate 'bearing' and 'pitch' if exist.
     for (const key of LINEARLY_INTERPOLATED_PROPS) {
-      viewport[key] = lerp(startProps[key], endProps[key], t);
+      viewport[key] = lerp(startProps[key] || 0, endProps[key] || 0, t);
     }
 
     return viewport;

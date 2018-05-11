@@ -3,13 +3,35 @@ import assert from '../utils/assert';
 
 export default class TransitionInterpolator {
   /**
+   * @param opts {array|object}
+   * @param opts.compare {array} - prop names used in equality check
+   * @param opts.extract {array} - prop names needed for interpolation
+   * @param opts.required {array} - prop names that must be supplied
+   * alternatively, supply one list of prop names as `opts` if all of the above are the same.
+   */
+  constructor(opts = {}) {
+    if (Array.isArray(opts)) {
+      opts = {
+        compare: opts,
+        extract: opts,
+        required: opts
+      };
+    }
+    const {compare, extract, required} = opts;
+
+    this._propsToCompare = compare;
+    this._propsToExtract = extract;
+    this._requiredProps = required;
+  }
+
+  /**
    * Checks if two sets of props need transition in between
    * @param currentProps {object} - a list of viewport props
    * @param nextProps {object} - a list of viewport props
    * @returns {bool} - true if two props are equivalent
    */
   arePropsEqual(currentProps, nextProps) {
-    for (const key of this.propNames || []) {
+    for (const key of this._propsToCompare || Object.keys(nextProps)) {
       if (!equals(currentProps[key], nextProps[key])) {
         return false;
       }
@@ -25,7 +47,25 @@ export default class TransitionInterpolator {
    *   to `interpolateProps`
    */
   initializeProps(startProps, endProps) {
-    return {start: startProps, end: endProps};
+    let result;
+
+    if (this._propsToExtract) {
+      const startViewStateProps = {};
+      const endViewStateProps = {};
+
+      for (const key of this._propsToExtract) {
+        startViewStateProps[key] = startProps[key];
+        endViewStateProps[key] = endProps[key];
+      }
+      result = {start: startViewStateProps, end: endViewStateProps};
+    } else {
+      result = {start: startProps, end: endProps};
+    }
+
+    this._checkRequiredProps(result.start);
+    this._checkRequiredProps(result.end);
+
+    return result;
   }
 
   /**
@@ -37,5 +77,16 @@ export default class TransitionInterpolator {
    */
   interpolateProps(startProps, endProps, t) {
     assert(false, 'interpolateProps is not implemented');
+  }
+
+  _checkRequiredProps(props) {
+    if (!this._requiredProps) {
+      return;
+    }
+
+    this._requiredProps.forEach(propName => {
+      const value = props[propName];
+      assert(Number.isFinite(value) || Array.isArray(value), `${propName} is required for transition`);
+    });
   }
 }

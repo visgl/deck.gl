@@ -22,19 +22,6 @@ const TEST_CASES = [
     shouldThrow: true
   },
   {
-    title: 'find shortest path',
-    transitionProps: ['longitude', 'latitude'],
-    startProps: {longitude: -122.45, latitude: 37.78},
-    endProps: {longitude: 179, latitude: 40.7},
-    expect: {
-      start: {longitude: -122.45, latitude: 37.78},
-      end: {longitude: -181, latitude: 40.7}
-    },
-    transition: {
-      0.5: {longitude: -151.725, latitude: 39.24}
-    }
-  },
-  {
     title: 'array prop',
     transitionProps: ['position'],
     startProps: {position: [0, 0, 0]},
@@ -52,7 +39,9 @@ const TEST_CASES = [
 test('LinearInterpolator#constructor', t => {
   const interpolator = new LinearInterpolator(['width', 'height']);
   t.ok(interpolator, 'constructor does not throw error');
-  t.deepEqual(interpolator.propNames, ['width', 'height'], 'propNames is set');
+  t.deepEqual(interpolator._propsToCompare, ['width', 'height'], '_propsToCompare is set');
+  t.deepEqual(interpolator._propsToExtract, ['width', 'height'], '_propsToExtract is set');
+  t.deepEqual(interpolator._requiredProps, ['width', 'height'], '_requiredProps is set');
 
   t.end();
 });

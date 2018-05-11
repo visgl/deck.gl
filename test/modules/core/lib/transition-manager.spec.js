@@ -1,5 +1,6 @@
 import test from 'tape-catch';
-import TransitionManager from '@deck.gl/core/lib/transition-manager';
+import TransitionManager from '@deck.gl/core/controllers/transition-manager';
+import {MapState} from '@deck.gl/core/controllers/map-controller';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -103,7 +104,7 @@ const TEST_CASES = [
 ];
 
 test('TransitionManager#constructor', t => {
-  const transitionManager = new TransitionManager({});
+  const transitionManager = new TransitionManager(MapState, {});
   t.ok(transitionManager, 'TransitionManager constructor does not throw errors');
   t.ok(transitionManager.props, 'TransitionManager has props');
   t.ok(transitionManager.state, 'TransitionManager has state');
@@ -114,7 +115,7 @@ test('TransitionManager#processViewportChange', t => {
   const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, props);
 
   TEST_CASES.forEach(testCase => {
-    const transitionManager = new TransitionManager(mergeProps(testCase.initialProps));
+    const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
 
     testCase.input.forEach((props, i) => {
       t.is(
@@ -164,7 +165,7 @@ test('TransitionManager#callbacks', t => {
 
   const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, callbacks, props);
 
-  const transitionManager = new TransitionManager(mergeProps(testCase.initialProps));
+  const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
 
   testCase.input.forEach((props, i) => {
     transitionProps = mergeProps(props);

@@ -67,16 +67,11 @@ import {default as EffectManager} from './experimental/lib/effect-manager';
 import {default as Effect} from './experimental/lib/effect';
 
 // Eperimental Transitions
-import {TRANSITION_EVENTS} from './lib/transition-manager';
+import {TRANSITION_EVENTS} from './controllers/transition-manager';
 import {default as LinearInterpolator} from './transitions/linear-interpolator';
 import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
-
-// INTERNAL EXPORTS
-
-import TransitionManager from './lib/transition-manager';
-import {extractViewState} from './transitions/transition-utils';
 
 // Layer utilities
 import {default as log} from './utils/log'; // Export?
@@ -119,10 +114,6 @@ export const experimental = {
   TRANSITION_EVENTS,
   LinearInterpolator,
   ViewportFlyToInterpolator,
-
-  // For react module
-  TransitionManager,
-  extractViewState,
 
   // TODO make this an internal export to set it apart from experimental
   // export const internal

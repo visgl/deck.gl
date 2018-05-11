@@ -104,10 +104,6 @@ Object.assign(experimental, {
 // Experimental Data Accessor Helpers
 // INTERNAL - TODO remove from experimental exports
 const {
-  // For react module
-  TransitionManager,
-  extractViewState,
-
   // For layers
   BinSorter,
   linearScale,
@@ -136,9 +132,6 @@ const {
 } = CoreExperimental;
 
 Object.assign(experimental, {
-  // For react module
-  TransitionManager,
-  extractViewState,
 
   // For layers
   BinSorter,
