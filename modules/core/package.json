@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "5.2.2",
+  "version": "5.2.4",
   "publishConfig": {
     "access": "public"
   },

@@ -16,10 +16,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 -->
 ## Official Releases
 
-#### [ 5.2.3] - May 3
+#### [5.2.4] - May 10
+- Fix "Vertex count exceeds browser's limit" error under WebGL2
+
+#### [5.2.3] - May 3
 - Update deck.gl package.json files with missing BABEL_ENV (#1768)
 
-#### [ 5.2.2] - May 2
+#### [5.2.2] - May 2
 - Fix using default prop in module settings (#1754)
 - 5.2-release Deck doc fix (#1762)
 
