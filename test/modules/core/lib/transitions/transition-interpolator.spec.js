@@ -49,11 +49,17 @@ const TEST_CASES = [
   },
   {
     title: 'extract selected props',
-    opts: {compare: ['longitude', 'latitude'], extract: ['width', 'height', 'zoom', 'longitude', 'latitude']},
+    opts: {
+      compare: ['longitude', 'latitude'],
+      extract: ['width', 'height', 'zoom', 'longitude', 'latitude']
+    },
     props: {width: 100, height: 100, longitude: -122, latitude: 38},
     nextProps: {width: 200, height: 200, longitude: -122, latitude: 37},
     equals: false,
-    initializeProps: {start: {width: 100, height: 100, zoom: undefined, longitude: -122, latitude: 38}, end: {width: 200, height: 200, zoom: undefined, longitude: -122, latitude: 37}}
+    initializeProps: {
+      start: {width: 100, height: 100, zoom: undefined, longitude: -122, latitude: 38},
+      end: {width: 200, height: 200, zoom: undefined, longitude: -122, latitude: 37}
+    }
   }
 ];
 

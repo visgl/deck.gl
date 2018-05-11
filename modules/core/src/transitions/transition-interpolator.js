@@ -86,7 +86,10 @@ export default class TransitionInterpolator {
 
     this._requiredProps.forEach(propName => {
       const value = props[propName];
-      assert(Number.isFinite(value) || Array.isArray(value), `${propName} is required for transition`);
+      assert(
+        Number.isFinite(value) || Array.isArray(value),
+        `${propName} is required for transition`
+      );
     });
   }
 }

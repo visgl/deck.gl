@@ -132,7 +132,6 @@ const {
 } = CoreExperimental;
 
 Object.assign(experimental, {
-
   // For layers
   BinSorter,
   linearScale,

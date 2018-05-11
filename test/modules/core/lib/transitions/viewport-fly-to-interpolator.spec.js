@@ -12,8 +12,24 @@ const TEST_CASES = [
   },
   {
     title: 'transition',
-    startProps: {width: 800, height: 600, longitude: -122.45, latitude: 37.78, pitch: 0, bearing: 0, zoom: 12},
-    endProps: {width: 800, height: 600, longitude: -74, latitude: 40.7, pitch: 20, bearing: 0, zoom: 11},
+    startProps: {
+      width: 800,
+      height: 600,
+      longitude: -122.45,
+      latitude: 37.78,
+      pitch: 0,
+      bearing: 0,
+      zoom: 12
+    },
+    endProps: {
+      width: 800,
+      height: 600,
+      longitude: -74,
+      latitude: 40.7,
+      pitch: 20,
+      bearing: 0,
+      zoom: 11
+    },
     expect: {
       start: {
         width: 800,
@@ -24,7 +40,15 @@ const TEST_CASES = [
         pitch: 0,
         bearing: 0
       },
-      end: {width: 800, height: 600, longitude: -74, latitude: 40.7, zoom: 11, pitch: 20, bearing: 0}
+      end: {
+        width: 800,
+        height: 600,
+        longitude: -74,
+        latitude: 40.7,
+        zoom: 11,
+        pitch: 20,
+        bearing: 0
+      }
     },
     transition: {
       0.25: {bearing: 0, pitch: 5, longitude: -122.4017, latitude: 37.78297, zoom: 7.518116},
