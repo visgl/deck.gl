@@ -47,6 +47,7 @@ export {
   PerspectiveViewport,
   OrthographicViewport,
   // Controllers
+  Controller,
   MapController,
   // For custom layers
   AttributeManager,
@@ -65,13 +66,6 @@ const {
   // Controllers
   OrbitController,
   FirstPersonController,
-  ViewportControls,
-
-  // View States
-  ViewState,
-  FirstPersonState,
-  OrbitState,
-  MapState,
 
   // Viewports
   FirstPersonViewport,
@@ -91,14 +85,6 @@ Object.assign(experimental, {
   // Controller helper classes
   OrbitController,
   FirstPersonController,
-  ViewportControls,
-  Controller: ViewportControls,
-
-  // Unfinished controller/viewport classes
-  ViewState,
-  FirstPersonState,
-  OrbitState,
-  MapState,
 
   // Experimental viewports
   FirstPersonViewport,
@@ -129,6 +115,7 @@ const {
   quantizeScale,
   getQuantizeScale,
   clamp,
+  lerp,
   defaultColorRange,
 
   log,
@@ -160,6 +147,7 @@ Object.assign(experimental, {
   quantizeScale,
   getQuantizeScale,
   clamp,
+  lerp,
   defaultColorRange,
 
   log,
@@ -198,7 +186,7 @@ export {
   PolygonLayer,
   GeoJsonLayer,
   TextLayer
-} from '@deck.gl/core';
+} from '@deck.gl/core-layers';
 
 //
 // REACT BINDINGS PACKAGE

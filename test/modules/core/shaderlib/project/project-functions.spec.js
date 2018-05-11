@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import {projectPosition} from 'deck.gl/core/shaderlib/project/project-functions';
+import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
 import {equals} from 'math.gl';
 
 const TEST_VIEWPORT = new WebMercatorViewport({

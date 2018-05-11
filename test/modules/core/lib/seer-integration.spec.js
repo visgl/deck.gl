@@ -1,7 +1,7 @@
 import test from 'tape-catch';
 
-import {window, isBrowser} from 'deck.gl/core/utils/globals';
-import {setPropOverrides, applyPropOverrides} from 'deck.gl/core/lib/seer-integration';
+import {window, isBrowser} from '@deck.gl/core/utils/globals';
+import {setPropOverrides, applyPropOverrides} from '@deck.gl/core/lib/seer-integration';
 
 test('Seer overrides', t => {
   const props = {

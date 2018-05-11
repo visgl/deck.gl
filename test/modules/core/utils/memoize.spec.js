@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import memoize from 'deck.gl/core/utils/memoize';
+import memoize from '@deck.gl/core/utils/memoize';
 import {makeSpy} from 'probe.gl/test-utils';
 
 const sampleCompute = ({vector, object, number}) => {

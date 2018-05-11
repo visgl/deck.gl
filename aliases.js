@@ -53,10 +53,7 @@ function getAliases(mode = 'src') {
   return Object.assign({
     // Important - these must be defined before the alias of `deck.gl`
     // to be resolved correctly
-    'deck.gl/test': resolve(__dirname, './test'),
-    // TODO - remove when core and core-layers are separated
-    'deck.gl/core': resolve(aliases['@deck.gl/core'], 'core'),
-    'deck.gl/core-layers': resolve(aliases['@deck.gl/core'], 'core-layers')
+    'deck.gl/test': resolve(__dirname, './test')
   }, aliases);
 }
 

@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 
-import {parsePropTypes} from 'deck.gl/core/lifecycle/prop-types';
+import {parsePropTypes} from '@deck.gl/core/lifecycle/prop-types';
 
 const ARRAY = [1, 2, 3];
 const TYPED_ARRAY = new Float32Array(3);

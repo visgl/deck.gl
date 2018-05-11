@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {flatten, flattenVertices, fillArray} from 'deck.gl/core/utils/flatten';
+import {flatten, flattenVertices, fillArray} from '@deck.gl/core/utils/flatten';
 
 const FLATTEN_TEST_CASES = [
   {

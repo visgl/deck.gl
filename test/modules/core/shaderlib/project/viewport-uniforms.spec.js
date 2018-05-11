@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
-import {project, project64} from 'deck.gl/core/shaderlib';
+import {project, project64} from '@deck.gl/core/shaderlib';
 
 const TEST_DATA = {
   mapState: {

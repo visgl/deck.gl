@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import TransitionManager from 'deck.gl/core/lib/transition-manager';
+import TransitionManager from '@deck.gl/core/lib/transition-manager';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
