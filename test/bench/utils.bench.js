@@ -21,7 +21,7 @@
 /* eslint-disable no-console, no-invalid-this */
 
 import {Layer, ScatterplotLayer, LineLayer, experimental} from 'deck.gl';
-import {inheritsFrom} from 'deck.gl/core/utils/inherits-from';
+import {inheritsFrom} from '@deck.gl/core/utils/inherits-from';
 
 const {get, fp64ify, fp64LowPart} = experimental;
 

@@ -1,5 +1,5 @@
-import {Layer} from 'deck.gl/core';
-import {getClosestFromPickingBuffer} from 'deck.gl/core/lib/pick-layers';
+import {Layer} from '@deck.gl/core';
+import {getClosestFromPickingBuffer} from '@deck.gl/core/lib/pick-layers';
 
 const SAMPLE_LAYERS = [new Layer()];
 const OBJECT_COLOR = [0, 10, 20, 1];

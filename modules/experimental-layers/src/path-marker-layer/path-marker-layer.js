@@ -1,4 +1,5 @@
-import {CompositeLayer, ScatterplotLayer, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {CompositeLayer, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/core-layers';
 import PathOutlineLayer from '../path-outline-layer/path-outline-layer';
 import MeshLayer from '../mesh-layer/mesh-layer';
 import Arrow2DGeometry from './arrow-2d-geometry';

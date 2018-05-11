@@ -1,4 +1,4 @@
-import color from 'deck.gl/core/utils/color';
+import color from '@deck.gl/core/utils/color';
 const {parseColor} = color;
 
 const COLOR_STRING = '#FFEEBB';

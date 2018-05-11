@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {parsePosition, getPosition} from 'deck.gl/core/utils/positions';
+import {parsePosition, getPosition} from '@deck.gl/core/utils/positions';
 
 const PARSE_TEST_CASES = [
   {

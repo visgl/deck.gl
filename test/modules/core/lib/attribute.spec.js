@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
-import Attribute from 'deck.gl/core/lib/attribute';
+import Attribute from '@deck.gl/core/lib/attribute';
 import {GL, Buffer} from 'luma.gl';
 import test from 'tape-catch';
 

@@ -26,7 +26,7 @@ import {
   isKeyedContainer,
   keys,
   entries
-} from 'deck.gl/core/experimental/utils/container';
+} from '@deck.gl/core/experimental/utils/container';
 
 const ITERATOR_TEST_CASES = [
   {

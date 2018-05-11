@@ -1,41 +1,155 @@
-export {
-  COORDINATE_SYSTEM,
-  Deck,
-  LayerManager,
-  AttributeManager,
-  Layer,
-  CompositeLayer,
-  Viewport,
-  WebMercatorViewport,
-  PerspectiveViewport,
-  OrthographicViewport,
-  project,
-  project64,
-  lighting,
-  View,
-  MapView,
-  FirstPersonView,
-  ThirdPersonView,
-  OrbitView,
-  PerspectiveView,
-  OrthographicView,
-  MapController,
-  experimental
-} from './core';
+// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+/* eslint-disable max-len */
 
-export {
-  ArcLayer,
-  IconLayer,
-  LineLayer,
-  PointCloudLayer,
-  ScatterplotLayer,
-  ScreenGridLayer,
-  GridLayer,
-  GridCellLayer,
-  HexagonLayer,
-  HexagonCellLayer,
-  PathLayer,
-  PolygonLayer,
-  GeoJsonLayer,
-  TextLayer
-} from './core-layers';
+// Intialize globals, check version
+import './lib/init';
+
+// Import shaderlib to make sure shader modules are initialized
+import './shaderlib';
+
+// Core Library
+export {COORDINATE_SYSTEM} from './lib/constants';
+
+// Experimental Pure JS (non-React) bindings
+export {default as Deck} from './lib/deck';
+
+export {default as LayerManager} from './lib/layer-manager';
+export {default as AttributeManager} from './lib/attribute-manager';
+export {default as Layer} from './lib/layer';
+export {default as CompositeLayer} from './lib/composite-layer';
+
+// Viewports
+export {default as Viewport} from './viewports/viewport';
+export {default as WebMercatorViewport} from './viewports/web-mercator-viewport';
+
+// Shader modules
+export {default as project} from './shaderlib/project/project';
+export {default as project64} from './shaderlib/project64/project64';
+export {default as lighting} from './shaderlib/lighting/lighting';
+
+export {default as View} from './views/view';
+export {default as MapView} from './views/map-view';
+export {default as FirstPersonView} from './views/first-person-view';
+export {default as ThirdPersonView} from './views/third-person-view';
+export {default as OrbitView} from './views/orbit-view';
+export {default as PerspectiveView} from './views/perspective-view';
+export {default as OrthographicView} from './views/orthographic-view';
+
+// Controllers
+export {default as Controller} from './controllers/controller';
+export {default as MapController} from './controllers/map-controller';
+// Experimental Controllers
+import {default as FirstPersonController} from './controllers/first-person-controller';
+import {default as OrbitController} from './controllers/orbit-controller';
+
+// EXPERIMENTAL EXPORTS
+
+// Experimental Effects (non-React) bindings
+import {default as EffectManager} from './experimental/lib/effect-manager';
+import {default as Effect} from './experimental/lib/effect';
+
+// Eperimental Transitions
+import {TRANSITION_EVENTS} from './lib/transition-manager';
+import {default as LinearInterpolator} from './transitions/linear-interpolator';
+import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
+
+import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
+
+// INTERNAL EXPORTS
+
+import TransitionManager from './lib/transition-manager';
+import {extractViewState} from './transitions/transition-utils';
+
+// Layer utilities
+import {default as log} from './utils/log'; // Export?
+import {get} from './utils/get'; // Remove?
+import {count} from './utils/count'; // Remove?
+
+import {default as BinSorter} from './utils/bin-sorter';
+import {defaultColorRange} from './utils/color-utils';
+import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
+import {lerp} from './utils/math-utils'; // from math.gl?
+import {clamp} from './utils/scale-utils'; // from math.gl?
+
+// Export? luma.gl?
+import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten'; // luma.gl?
+import {enable64bitSupport} from './utils/fp64'; // Layer method?
+import {fp64ify, fp64LowPart} from './utils/fp64'; // fp64 module utils (luma.gl)?
+
+// DEPRECATED EXPORTS
+export {default as PerspectiveViewport} from './deprecated/perspective-viewport';
+export {default as OrthographicViewport} from './deprecated/orthographic-viewport';
+import {default as FirstPersonViewport} from './deprecated/first-person-viewport';
+import {default as ThirdPersonViewport} from './deprecated/third-person-viewport';
+import {default as OrbitViewport} from './deprecated/orbit-viewport';
+
+// DEPRECATED
+
+// Experimental Features may change in minor version bumps, use at your own risk)
+export const experimental = {
+  FirstPersonController,
+  OrbitController,
+
+  FirstPersonViewport,
+  ThirdPersonViewport,
+  OrbitViewport,
+
+  EffectManager,
+  Effect,
+
+  // Transitions
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  ViewportFlyToInterpolator,
+
+  // For react module
+  TransitionManager,
+  extractViewState,
+
+  // TODO make this an internal export to set it apart from experimental
+  // export const internal
+
+  // For layers
+  BinSorter,
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+  clamp,
+  lerp,
+  defaultColorRange,
+
+  log,
+
+  get,
+  count,
+
+  flatten,
+  countVertices,
+  flattenVertices,
+  fillArray,
+
+  enable64bitSupport,
+  fp64ify,
+  fp64LowPart,
+
+  ReflectionEffect
+};

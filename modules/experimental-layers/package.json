@@ -32,6 +32,7 @@
     "test-node": "node test/node.js"
   },
   "dependencies": {
-    "@deck.gl/core": "^5.3.0-alpha.2"
+    "@deck.gl/core": "^5.3.0-alpha.2",
+    "@deck.gl/core-layers": "^5.3.0-alpha.2"
   }
 }

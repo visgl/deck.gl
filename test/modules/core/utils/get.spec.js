@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {get} from 'deck.gl/core/utils/get';
+import {get} from '@deck.gl/core/utils/get';
 
 const GET_TEST_CASES = [
   {

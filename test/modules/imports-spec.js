@@ -22,25 +22,38 @@ import test from 'tape-catch';
 import 'luma.gl';
 
 import DeckGL from 'deck.gl';
-import {Layer, COORDINATE_SYSTEM} from 'deck.gl';
-import {ScatterplotLayer, ScreenGridLayer, ArcLayer, LineLayer} from 'deck.gl';
+import * as deck from 'deck.gl';
 
-test('Top-level imports', t0 => {
+test.only('Top-level imports', t0 => {
+  const hasEmptyExports = obj => {
+    for (const key in obj) {
+      if (!obj[key]) {
+        return key;
+      }
+    }
+    return false;
+  };
+
   t0.test('import "deck.gl"', t => {
-    t.ok(Layer, 'Layer symbol imported');
-    t.ok(Layer, 'Layer symbol imported');
-    t.ok(ScatterplotLayer, 'ScatterplotLayer symbol imported');
-    t.ok(ScreenGridLayer, 'ScreenGridLayer symbol imported');
-    t.ok(ArcLayer, 'ArcLayer symbol imported');
-    t.ok(LineLayer, 'LineLayer symbol imported');
-
-    t.ok(Number.isFinite(COORDINATE_SYSTEM.LNGLAT), 'COORDINATE_SYSTEM.LNGLAT imported');
-    t.ok(Number.isFinite(COORDINATE_SYSTEM.METERS), 'COORDINATE_SYSTEM.METERS imported');
-    t.ok(Number.isFinite(COORDINATE_SYSTEM.IDENTITY), 'COORDINATE_SYSTEM.IDENTITY imported');
+    t.notOk(hasEmptyExports(deck), 'No empty top-level export');
+    t.notOk(hasEmptyExports(deck.experimental), 'No empty experimental export');
     t.end();
   });
 
-  t0.test('import "deck.gl/react"', t => {
+  t0.test('selected imports', t => {
+    t.ok(deck.Layer, 'Layer symbol imported');
+    t.ok(deck.ScatterplotLayer, 'ScatterplotLayer symbol imported');
+    t.ok(deck.ScreenGridLayer, 'ScreenGridLayer symbol imported');
+    t.ok(deck.ArcLayer, 'ArcLayer symbol imported');
+    t.ok(deck.LineLayer, 'LineLayer symbol imported');
+
+    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.LNGLAT), 'COORDINATE_SYSTEM.LNGLAT imported');
+    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.METERS), 'COORDINATE_SYSTEM.METERS imported');
+    t.ok(Number.isFinite(deck.COORDINATE_SYSTEM.IDENTITY), 'COORDINATE_SYSTEM.IDENTITY imported');
+    t.end();
+  });
+
+  t0.test('deck.gl default import', t => {
     t.ok(DeckGL, 'DeckGL symbol imported from /react');
     t.end();
   });
