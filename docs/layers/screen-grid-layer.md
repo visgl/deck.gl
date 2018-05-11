@@ -14,7 +14,7 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7]},
+   *   {SPACES: 4, COORDINATES: [-122.42177834, 37.78346622]},
    *   ...
    * ]
    */

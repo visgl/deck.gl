@@ -16,7 +16,7 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {text: '#San Francisco', position: [-122.425586, 37.775049]},
+   *   {name: 'Colma (COLM)', address: '365 D Street, Colma CA 94014', coordinates: [-122.466233, 37.684638]},
    *   ...
    * ]
    */

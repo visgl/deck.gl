@@ -18,7 +18,7 @@ const App = ({data, viewport}) => {
    * [
    *   {
    *     path: [[-122.4, 37.7], [-122.5, 37.8], [-122.6, 37.85]],
-   *     width: 1,
+   *     name: 'Richmond - Millbrae',
    *     color: [255, 0, 0]
    *   },
    *   ...

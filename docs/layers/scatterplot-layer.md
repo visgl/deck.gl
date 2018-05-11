@@ -17,7 +17,7 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7], radius: 5, color: [255, 0, 0]},
+   *   {name: 'Colma (COLM)', code:'CM', address: '365 D Street, Colma CA 94014', exits: 4214, coordinates: [-122.466233, 37.684638]},
    *   ...
    * ]
    */
