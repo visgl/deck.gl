@@ -1,5 +1,5 @@
 /* eslint-disable complexity */
-import assert from 'assert';
+import assert from '../utils/assert';
 import {GL, Buffer} from 'luma.gl';
 
 export default class Attribute {
