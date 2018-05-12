@@ -19,9 +19,13 @@ const CONFIG = {
         test: /\.js$/,
         loader: 'buble-loader',
         include: [resolve('.')],
-        exclude: [/node_modules/],
+        exclude: [/node_modules\/(?!@deck.gl)/],
         options: {
-          objectAssign: 'Object.assign'
+          objectAssign: 'Object.assign',
+          transforms: {
+            dangerousForOf: true,
+            modules: false
+          }
         }
       }
     ]
