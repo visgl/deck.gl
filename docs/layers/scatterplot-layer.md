@@ -17,15 +17,22 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7], radius: 5, color: [255, 0, 0]},
+   *   {name: 'Colma (COLM)', code:'CM', address: '365 D Street, Colma CA 94014', exits: 4214, coordinates: [-122.466233, 37.684638]},
    *   ...
    * ]
    */
   const layer = new ScatterplotLayer({
     id: 'scatterplot-layer',
     data,
-    radiusScale: 100,
-    outline: false
+    pickable: true,
+    opacity: 0.8,
+    radiusScale: 6,
+    radiusMinPixels: 1,
+    radiusMaxPixels: 100,
+    getPosition: d => d.coordinates,
+    getRadius: d => Math.sqrt(d.exits),
+    getColor: d => [255, 140, 0],
+    onHover: ({object}) => setTooltip(`${object.name}\n${object.address}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

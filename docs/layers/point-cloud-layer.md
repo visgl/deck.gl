@@ -24,7 +24,15 @@ const App = ({data, viewport}) => {
   const layer = new PointCloudLayer({
     id: 'point-cloud-layer',
     data,
-    radiusPixels: 20
+    pickable: false,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: [-122.4, 37.74],
+    radiusPixels: 4,
+    getPosition: d => d.position,
+    getNormal: d => d.normal,
+    getColor: d => d.color,
+    lightSettings: {},
+    onHover: ({object}) => setTooltip(object.position.join(', '))
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

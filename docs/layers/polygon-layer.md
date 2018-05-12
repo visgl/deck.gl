@@ -19,18 +19,20 @@ const App = ({data, viewport}) => {
    * [
    *   {
    *     // Simple polygon (array of coords)
-   *     polygon: [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
-   *     fillColor: [128, 128, 140],
-   *     elevation: 100
+   *     contour: [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
+   *     zipcode: 94107,
+   *     population: 26599,
+   *     area: 6.11
    *   },
    *   {
    *     // Complex polygon with holes (array of coords)
-   *     polygon: [
+   *     contour: [
    *       [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
    *       [[-122.45, 37.73], [-122.47, 37.76], [-122.47, 37.71], [-122.45, 37.73]]
    *     ],
-   *     fillColor: [128, 128, 140],
-   *     elevation: 250
+   *     zipcode: 94107,
+   *     population: 26599,
+   *     area: 6.11
    *   },
    *   ...
    * ]
@@ -38,9 +40,17 @@ const App = ({data, viewport}) => {
   const layer = new PolygonLayer({
     id: 'polygon-layer',
     data,
+    pickable: true,
+    stroked: true,
     filled: true,
-    stroked: false,
-    extruded: true
+    wireframe: true,
+    lineWidthMinPixels: 1,
+    getPolygon: d => d.contour,
+    getElevation: d => d.population / d.area / 10,
+    getFillColor: d => [d.population / d.area / 60, 140, 0],
+    getLineColor: d => [80, 80, 80],
+    getLineWidth: d => 1,
+    onHover: ({object}) => setTooltip(`${object.zipcode}\nPopulation: ${object.population}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
