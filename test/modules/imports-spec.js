@@ -24,7 +24,7 @@ import 'luma.gl';
 import DeckGL from 'deck.gl';
 import * as deck from 'deck.gl';
 
-test.only('Top-level imports', t0 => {
+test('Top-level imports', t0 => {
   const hasEmptyExports = obj => {
     for (const key in obj) {
       if (!obj[key]) {

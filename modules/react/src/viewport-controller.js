@@ -2,8 +2,8 @@ import {Component, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {experimental} from '@deck.gl/core';
-const {ViewportControls, TransitionManager} = experimental;
+import {MapController as ViewportControls, experimental} from '@deck.gl/core';
+const {TransitionManager} = experimental;
 
 import CURSOR from './utils/cursors';
 
