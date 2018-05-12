@@ -21,14 +21,19 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7]},
+   *   {COORDINATES: [-122.42177834, 37.78346622]},
    *   ...
    * ]
    */
   const layer = new HexagonLayer({
     id: 'hexagon-layer',
     data,
-    radius: 1000
+    pickable: true,
+    extruded: true,
+    radius: 200,
+    elevationScale: 4,
+    getPosition: d => d.COORDINATES,
+    onHover: ({object}) => setTooltip(`${object.centroid.join(', ')}\nCount: ${object.points.length}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

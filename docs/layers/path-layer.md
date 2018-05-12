@@ -18,7 +18,7 @@ const App = ({data, viewport}) => {
    * [
    *   {
    *     path: [[-122.4, 37.7], [-122.5, 37.8], [-122.6, 37.85]],
-   *     width: 1,
+   *     name: 'Richmond - Millbrae',
    *     color: [255, 0, 0]
    *   },
    *   ...
@@ -27,8 +27,13 @@ const App = ({data, viewport}) => {
   const layer = new PathLayer({
     id: 'path-layer',
     data,
-    rounded: true,
-    widthScale: 100
+    pickable: true,
+    widthScale: 20,
+    widthMinPixels: 2,
+    getPath: d => d.path,
+    getColor: d => colorToRGBArray(d.color),
+    getWidth: d => 5,
+    onHover: ({object}) => setTooltip(object.name)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

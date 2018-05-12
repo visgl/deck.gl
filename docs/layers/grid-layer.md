@@ -21,14 +21,19 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7]},
+   *   {COORDINATES: [-122.42177834, 37.78346622]},
    *   ...
    * ]
    */
   const layer = new GridLayer({
     id: 'grid-layer',
     data,
-    cellSize: 500
+    pickable: true,
+    extruded: true,
+    cellSize: 200,
+    elevationScale: 4,
+    getPosition: d => d.COORDINATES,
+    onHover: ({object}) => setTooltip(`${object.position.join(', ')}\nCount: ${object.count}`)
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

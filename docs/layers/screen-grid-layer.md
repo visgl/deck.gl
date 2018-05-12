@@ -14,14 +14,21 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7]},
+   *   {SPACES: 4, COORDINATES: [-122.42177834, 37.78346622]},
    *   ...
    * ]
    */
   const layer = new ScreenGridLayer({
     id: 'screen-grid-layer',
     data,
-    cellSizePixels: 40
+    pickable: false,
+    opacity: 0.8,
+    cellSizePixels: 50,
+    minColor: [0, 0, 0, 0],
+    maxColor: [0, 180, 0, 255],
+    getPosition: d => d.COORDINATES,
+    getWeight: d => d.SPACES,
+    onHover: ({object}) => setTooltip('aggregated cell')
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
