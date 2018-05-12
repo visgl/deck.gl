@@ -55,7 +55,6 @@ deck.gl offers a set of `View` classes that lets you specify how deck.gl should 
 | [`MapView`](/docs/api-reference/map-view.md)                   | geoposition | While all `View` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
 | [`FirstPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera is positioned in the view state position and looks in the direction provided. Allows the application to precisely control camera position. |
 | [`ThirdPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera looks at the "view state" position from the direction provided. |
-
 | [`OrthographicView`](/docs/api-reference/orthographic-view.md) | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
 | [`PerspectiveView`](/docs/api-reference/perspective-view.md)   | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
 | [`OrbitView`](/docs/api-reference/perspective-view.md)         | "Orbit"     |  The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
