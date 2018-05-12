@@ -11,7 +11,7 @@
     "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
   "dependencies": {
-    "deck.gl": ">=5.2.0-alpha.7",
+    "deck.gl": "^5.2.0",
     "gl-matrix": "^2.3.2",
     "is-little-endian": "0.0.0",
     "react": "^16.2.0",

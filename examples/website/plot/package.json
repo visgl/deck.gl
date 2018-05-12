@@ -6,8 +6,8 @@
   },
   "dependencies": {
     "d3-scale": "^1.0.6",
-    "deck.gl": ">=5.2.0-alpha.7",
-    "luma.gl": ">=5.2.0-alpha.11",
+    "deck.gl": "^5.2.0",
+    "luma.gl": "^5.2.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
