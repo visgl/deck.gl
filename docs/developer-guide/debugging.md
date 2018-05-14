@@ -13,7 +13,7 @@ deck.gl (and luma.gl) are based on the probe.gl debugging library, providing use
 
 In your browser console, select the priority you would like:
 
-```
+```js
 deck.log.enable()
 deck.log.priority = 2
 ```
@@ -37,7 +37,7 @@ Since luma.gl v4 also has a Seer integration, it is possible to follow links fro
 
 For lower level debugging, including debugging of layer rendering and picking, deck.gl is built on luma.gl which has extensive debugging and instrumentation support for WebGL level code and GPU input values (shader uniforms and attributes). To enable debug logging simply issue the following commands in your browser console:
 
-```
+```js
 luma.log.enable()
 luma.log.priority = 2
 ```
