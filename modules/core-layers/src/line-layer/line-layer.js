@@ -50,14 +50,12 @@ export default class LineLayer extends Layer {
       instanceSourcePositions: {
         size: 3,
         transition: true,
-        accessor: 'getSourcePosition',
-        update: this.calculateInstanceSourcePositions
+        accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
         transition: true,
-        accessor: 'getTargetPosition',
-        update: this.calculateInstanceTargetPositions
+        accessor: 'getTargetPosition'
       },
       instanceSourceTargetPositions64xyLow: {
         size: 4,
@@ -69,7 +67,7 @@ export default class LineLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: [0, 0, 0, 255]
       }
     });
     /* eslint-enable max-len */
@@ -124,6 +122,30 @@ export default class LineLayer extends Layer {
     );
   }
 
+  calculateInstanceSourceTargetPositions64xyLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(4);
+      return;
+    }
+
+    const {data, getSourcePosition, getTargetPosition} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const object of data) {
+      const sourcePosition = getSourcePosition(object);
+      const targetPosition = getTargetPosition(object);
+      value[i + 0] = fp64LowPart(sourcePosition[0]);
+      value[i + 1] = fp64LowPart(sourcePosition[1]);
+      value[i + 2] = fp64LowPart(targetPosition[0]);
+      value[i + 3] = fp64LowPart(targetPosition[1]);
+      i += size;
+    }
+  }
+
+  /*
   calculateInstanceSourcePositions(attribute) {
     const {data, getSourcePosition} = this.props;
     const {value, size} = attribute;
@@ -150,29 +172,6 @@ export default class LineLayer extends Layer {
     }
   }
 
-  calculateInstanceSourceTargetPositions64xyLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
-    attribute.isGeneric = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(4);
-      return;
-    }
-
-    const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = fp64LowPart(sourcePosition[0]);
-      value[i + 1] = fp64LowPart(sourcePosition[1]);
-      value[i + 2] = fp64LowPart(targetPosition[0]);
-      value[i + 3] = fp64LowPart(targetPosition[1]);
-      i += size;
-    }
-  }
-
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
     const {value, size} = attribute;
@@ -186,6 +185,7 @@ export default class LineLayer extends Layer {
       i += size;
     }
   }
+  */
 }
 
 LineLayer.layerName = 'LineLayer';

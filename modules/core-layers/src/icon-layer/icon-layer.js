@@ -79,8 +79,7 @@ export default class IconLayer extends Layer {
       instancePositions: {
         size: 3,
         transition: true,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions
+        accessor: 'getPosition'
       },
       instancePositions64xyLow: {
         size: 2,
@@ -91,7 +90,7 @@ export default class IconLayer extends Layer {
         size: 1,
         transition: true,
         accessor: 'getSize',
-        update: this.calculateInstanceSizes
+        defaultValue: 1
       },
       instanceOffsets: {size: 2, accessor: 'getIcon', update: this.calculateInstanceOffsets},
       instanceIconFrames: {size: 4, accessor: 'getIcon', update: this.calculateInstanceIconFrames},
@@ -106,13 +105,13 @@ export default class IconLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: DEFAULT_COLOR
       },
       instanceAngles: {
         size: 1,
         transition: true,
         accessor: 'getAngle',
-        update: this.calculateInstanceAngles
+        defaultValue: 0
       }
     });
     /* eslint-enable max-len */
@@ -194,6 +193,7 @@ export default class IconLayer extends Layer {
     );
   }
 
+  /*
   calculateInstancePositions(attribute) {
     const {data, getPosition} = this.props;
     const {value} = attribute;
@@ -203,25 +203,6 @@ export default class IconLayer extends Layer {
       value[i++] = position[0];
       value[i++] = position[1];
       value[i++] = position[2] || 0;
-    }
-  }
-
-  calculateInstancePositions64xyLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
-    attribute.isGeneric = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = fp64LowPart(position[0]);
-      value[i++] = fp64LowPart(position[1]);
     }
   }
 
@@ -254,6 +235,26 @@ export default class IconLayer extends Layer {
       value[i++] = color[1];
       value[i++] = color[2];
       value[i++] = isNaN(color[3]) ? 255 : color[3];
+    }
+  }
+  */
+
+  calculateInstancePositions64xyLow(attribute) {
+    const isFP64 = enable64bitSupport(this.props);
+    attribute.isGeneric = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = fp64LowPart(position[0]);
+      value[i++] = fp64LowPart(position[1]);
     }
   }
 

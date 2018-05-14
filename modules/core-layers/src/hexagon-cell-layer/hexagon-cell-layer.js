@@ -100,7 +100,7 @@ export default class HexagonCellLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: DEFAULT_COLOR
       }
     });
     /* eslint-enable max-len */
@@ -229,6 +229,7 @@ export default class HexagonCellLayer extends Layer {
     }
   }
 
+  /*
   calculateInstanceColors(attribute) {
     const {data, getColor} = this.props;
     const {value, size} = attribute;
@@ -243,6 +244,7 @@ export default class HexagonCellLayer extends Layer {
       i += size;
     }
   }
+  */
 }
 
 HexagonCellLayer.layerName = 'HexagonCellLayer';

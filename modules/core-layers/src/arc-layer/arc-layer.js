@@ -62,14 +62,14 @@ export default class ArcLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getSourceColor',
-        update: this.calculateInstanceSourceColors
+        defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getTargetColor',
-        update: this.calculateInstanceTargetColors
+        defaultValue: DEFAULT_COLOR
       }
     });
     /* eslint-enable max-len */
@@ -181,6 +181,7 @@ export default class ArcLayer extends Layer {
     }
   }
 
+  /*
   calculateInstanceSourceColors(attribute) {
     const {data, getSourceColor} = this.props;
     const {value, size} = attribute;
@@ -208,6 +209,7 @@ export default class ArcLayer extends Layer {
       i += size;
     }
   }
+  */
 }
 
 ArcLayer.layerName = 'ArcLayer';

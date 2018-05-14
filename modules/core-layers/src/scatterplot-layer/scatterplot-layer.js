@@ -47,13 +47,11 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    /* eslint-disable max-len */
     this.state.attributeManager.addInstanced({
       instancePositions: {
         size: 3,
         transition: true,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions
+        accessor: 'getPosition'
       },
       instancePositions64xyLow: {
         size: 2,
@@ -64,18 +62,16 @@ export default class ScatterplotLayer extends Layer {
         size: 1,
         transition: true,
         accessor: 'getRadius',
-        defaultValue: 1,
-        update: this.calculateInstanceRadius
+        defaultValue: 1
       },
       instanceColors: {
         size: 4,
         transition: true,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: [0, 0, 0, 255]
       }
     });
-    /* eslint-enable max-len */
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -123,18 +119,6 @@ export default class ScatterplotLayer extends Layer {
     );
   }
 
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
-    }
-  }
-
   calculateInstancePositions64xyLow(attribute) {
     const isFP64 = enable64bitSupport(this.props);
     attribute.isGeneric = !isFP64;
@@ -151,6 +135,19 @@ export default class ScatterplotLayer extends Layer {
       const position = getPosition(point);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
+    }
+  }
+
+  /*
+  calculateInstancePositions(attribute) {
+    const {data, getPosition} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const position = getPosition(point);
+      value[i++] = position[0];
+      value[i++] = position[1];
+      value[i++] = position[2] || 0;
     }
   }
 
@@ -176,6 +173,7 @@ export default class ScatterplotLayer extends Layer {
       value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
+  */
 }
 
 ScatterplotLayer.layerName = 'ScatterplotLayer';
