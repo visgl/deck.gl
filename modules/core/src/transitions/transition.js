@@ -32,7 +32,7 @@ export default class Transition {
 
   get inProgress() {
     return this._state === TRANSITION_STATE.PENDING ||
-      this._state ===TRANSITION_STATE.IN_PROGRESS;
+      this._state === TRANSITION_STATE.IN_PROGRESS;
   }
 
   start(props) {

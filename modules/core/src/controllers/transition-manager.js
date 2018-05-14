@@ -103,6 +103,8 @@ export default class TransitionManager {
   _triggerTransition(startProps, endProps) {
     assert(this._isTransitionEnabled(endProps), 'Transition is not enabled');
 
+    cancelAnimationFrame(this.animation);
+
     const startViewstate = new this.ControllerState(startProps);
     const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
 
