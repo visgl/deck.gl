@@ -29,9 +29,9 @@ attribute vec4 instancePositions;
 attribute vec4 instancePositions64Low;
 
 attribute vec3 instancePickingColors;
+attribute float instanceWidths;
 
 uniform float numSegments;
-uniform float strokeWidth;
 uniform float opacity;
 
 varying vec4 vColor;
@@ -56,7 +56,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
-  vec2 offset_screenspace = dir_screenspace * offset_direction * strokeWidth / 2.0;
+  vec2 offset_screenspace = dir_screenspace * offset_direction * instanceWidths / 2.0;
   vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
 
   return offset_clipspace;

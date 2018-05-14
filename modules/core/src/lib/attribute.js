@@ -98,6 +98,7 @@ export default class LayerAttribute extends Attribute {
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
 
+      this.isGeneric = false;
       this.value = new ArrayType(this.size * allocCount);
       state.needsAlloc = false;
       state.needsUpdate = true;
@@ -139,6 +140,26 @@ export default class LayerAttribute extends Attribute {
     state.needsRedraw = true;
 
     return updated;
+  }
+
+  setGenericValue({props}) {
+    const state = this.userData;
+    let value = props[state.accessor];
+
+    if (value === undefined || typeof value === 'function') {
+      // ignore if this attribute has no accessor
+      // ignore if accessor is function, will be used in updateBuffer
+      return;
+    }
+    const {size} = this;
+    if (Number.isFinite(value)) {
+      value = [value];
+    }
+    assert(value.length === size, `${this.name} value must have length of ${size}`);
+
+    this.update({isGeneric: true, value});
+    state.isExternalBuffer = true;
+    state.needsUpdate = false;
   }
 
   setExternalBuffer(buffer, numInstances) {
