@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {TRANSITION_EVENTS} from '../lib/transition-manager';
+import TransitionManager, {TRANSITION_EVENTS} from './transition-manager';
 import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
@@ -53,6 +53,7 @@ export default class Controller {
     this.controllerState = null;
     this.controllerStateProps = null;
     this.eventManager = null;
+    this.transitionManager = new TransitionManager(ControllerState, options);
     this._events = null;
     this._state = {
       isDragging: false
@@ -149,6 +150,8 @@ export default class Controller {
       this._events = {};
       this.toggleEvents(this.events, true);
     }
+
+    this.transitionManager.processViewStateChange(props);
 
     // TODO - make sure these are not reset on every setProps
     const {

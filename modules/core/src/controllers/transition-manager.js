@@ -1,6 +1,5 @@
 /* global requestAnimationFrame, cancelAnimationFrame */
 import LinearInterpolator from '../transitions/linear-interpolator';
-import {extractViewState} from '../transitions/transition-utils';
 import assert from '../utils/assert';
 
 const noop = () => {};
@@ -29,8 +28,10 @@ const DEFAULT_STATE = {
 };
 
 export default class TransitionManager {
-  constructor(props) {
-    this.props = props;
+  constructor(ControllerState, props = {}) {
+    assert(ControllerState);
+    this.ControllerState = ControllerState;
+    this.props = Object.assign({}, DEFAULT_PROPS, props);
     this.state = DEFAULT_STATE;
 
     this._onTransitionFrame = this._onTransitionFrame.bind(this);
@@ -43,10 +44,11 @@ export default class TransitionManager {
 
   // Process the vewiport change, either ignore or trigger a new transiton.
   // Return true if a new transition is triggered, false otherwise.
-  processViewportChange(nextProps) {
+  processViewStateChange(nextProps) {
     let transitionTriggered = false;
     const currentProps = this.props;
     // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
+    nextProps = Object.assign({}, this.props, nextProps);
     this.props = nextProps;
 
     // NOTE: Be cautious re-ordering statements in this function.
@@ -118,7 +120,13 @@ export default class TransitionManager {
 
     cancelAnimationFrame(this.state.animation);
 
-    const initialProps = endProps.transitionInterpolator.initializeProps(startProps, endProps);
+    const startViewstate = new this.ControllerState(startProps);
+    const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
+
+    const initialProps = endProps.transitionInterpolator.initializeProps(
+      startProps,
+      endViewStateProps
+    );
 
     this.state = {
       // Save current transition props
@@ -163,9 +171,11 @@ export default class TransitionManager {
 
     const viewport = interpolator.interpolateProps(startProps, endProps, t);
 
-    // This extractViewState gurantees angle props (bearing, longitude) are normalized
+    // This gurantees all props (e.g. bearing, longitude) are normalized
     // So when viewports are compared they are in same range.
-    this.state.propsInTransition = extractViewState(Object.assign({}, this.props, viewport));
+    this.state.propsInTransition = new this.ControllerState(
+      Object.assign({}, this.props, viewport)
+    ).getViewportProps();
 
     if (this.props.onViewportChange) {
       this.props.onViewportChange(this.state.propsInTransition, {inTransition: true});

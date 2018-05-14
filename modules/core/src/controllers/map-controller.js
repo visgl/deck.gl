@@ -306,6 +306,21 @@ class MapState extends ViewState {
     });
   }
 
+  shortestPathFrom(viewState) {
+    // const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
+    const fromProps = viewState.getViewportProps();
+    const props = Object.assign({}, this._viewportProps);
+    const {bearing, longitude} = props;
+
+    if (Math.abs(bearing - fromProps.bearing) > 180) {
+      props.bearing = bearing < 0 ? bearing + 360 : bearing - 360;
+    }
+    if (Math.abs(longitude - fromProps.longitude) > 180) {
+      props.longitude = longitude < 0 ? longitude + 360 : longitude - 360;
+    }
+    return props;
+  }
+
   /* Private methods */
 
   _zoomFromCenter(scale) {
@@ -393,3 +408,5 @@ export default class MapController extends Controller {
     this.invertPan = true;
   }
 }
+
+export const testExports = {MapState};

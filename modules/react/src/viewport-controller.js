@@ -2,8 +2,7 @@ import {Component, createElement} from 'react';
 import PropTypes from 'prop-types';
 
 import {EventManager} from 'mjolnir.js';
-import {MapController as ViewportControls, experimental} from '@deck.gl/core';
-const {TransitionManager} = experimental;
+import {MapController as ViewportControls} from '@deck.gl/core';
 
 import CURSOR from './utils/cursors';
 
@@ -89,7 +88,7 @@ const propTypes = {
 
 const getDefaultCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
 
-const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
+const defaultProps = {
   onViewportChange: null,
 
   scrollZoom: true,
@@ -99,7 +98,7 @@ const defaultProps = Object.assign({}, TransitionManager.defaultProps, {
   touchZoomRotate: true,
 
   getCursor: getDefaultCursor
-});
+};
 
 export default class ViewportController extends Component {
   constructor(props) {
@@ -123,17 +122,6 @@ export default class ViewportController extends Component {
         eventManager: this._eventManager
       })
     );
-
-    this._transitionManger = new TransitionManager(this.props);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    if (this._transitionManger) {
-      const transitionTriggered = this._transitionManger.processViewportChange(nextProps);
-      // Skip this render to avoid jump during viewport transitions.
-      return !transitionTriggered;
-    }
-    return true;
   }
 
   componentWillUpdate(nextProps) {
