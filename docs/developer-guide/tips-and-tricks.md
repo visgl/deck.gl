@@ -3,7 +3,7 @@
 
 ## Rendering Tips
 
-## Per Layer Controlling WebGL parameters
+## Per Layer Control of WebGL parameters
 
 The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering rendering.
 
