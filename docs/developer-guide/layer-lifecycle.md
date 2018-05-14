@@ -84,7 +84,7 @@ When a layer is picked,
 is called to generate the `info` object of information about what has been picked.
 This object is then passed to the `onHover` or `onClick` callbacks of the layer.
 
-Read more about [how picking works](/docs/advanced/picking.md).
+Read more about [how picking works](/docs/developer-guide/picking.md).
 
 ### Finalization
 

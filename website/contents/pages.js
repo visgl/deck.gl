@@ -216,35 +216,35 @@ export const docPages = generatePath([
       },
       {
         name: 'About View States',
-        content: getDocUrl('advanced/view-state.md')
+        content: getDocUrl('developer-guide/view-state.md')
       },
       {
         name: 'Using Views',
-        content: getDocUrl('advanced/views.md')
+        content: getDocUrl('developer-guide/views.md')
       },
       {
         name: 'Coordinate Systems',
-        content: getDocUrl('advanced/coordinate-systems.md')
+        content: getDocUrl('developer-guide/coordinate-systems.md')
       },
       {
         name: 'Viewports and Projections',
-        content: getDocUrl('advanced/viewports.md')
+        content: getDocUrl('developer-guide/viewports.md')
       },
       {
         name: 'Optimizing Updates',
-        content: getDocUrl('advanced/updates.md')
+        content: getDocUrl('developer-guide/updates.md')
       },
       {
         name: 'Performance Notes',
-        content: getDocUrl('advanced/performance.md')
+        content: getDocUrl('developer-guide/performance.md')
       },
       {
         name: 'About 64 bit Layers',
-        content: getDocUrl('advanced/64-bits.md')
+        content: getDocUrl('developer-guide/64-bits.md')
       },
       {
         name: 'Tips and Tricks',
-        content: getDocUrl('advanced/tips-and-tricks.md')
+        content: getDocUrl('developer-guide/tips-and-tricks.md')
       },
       {
         name: 'Building Apps',
@@ -272,35 +272,35 @@ export const docPages = generatePath([
         children: [
           {
             name: 'Writing Your Own Layer',
-            content: getDocUrl('advanced/custom-layers.md')
+            content: getDocUrl('developer-guide/custom-layers.md')
           },
           {
             name: 'Layer Lifecycle',
-            content: getDocUrl('advanced/layer-lifecycle.md')
+            content: getDocUrl('developer-guide/layer-lifecycle.md')
           },
           {
             name: 'Picking',
-            content: getDocUrl('advanced/picking.md')
+            content: getDocUrl('developer-guide/picking.md')
           },
           {
             name: 'Composite Layers',
-            content: getDocUrl('advanced/composite-layers.md')
+            content: getDocUrl('developer-guide/composite-layers.md')
           },
           {
             name: 'Subclassed Layers',
-            content: getDocUrl('advanced/subclassed-layers.md')
+            content: getDocUrl('developer-guide/subclassed-layers.md')
           },
           {
             name: 'Primitive Layers',
-            content: getDocUrl('advanced/primitive-layers.md')
+            content: getDocUrl('developer-guide/primitive-layers.md')
           },
           {
             name: 'Attribute Management',
-            content: getDocUrl('advanced/attribute-management.md')
+            content: getDocUrl('developer-guide/attribute-management.md')
           },
           {
             name: 'Writing Shaders',
-            content: getDocUrl('advanced/writing-shaders.md')
+            content: getDocUrl('developer-guide/writing-shaders.md')
           }
         ]
       }

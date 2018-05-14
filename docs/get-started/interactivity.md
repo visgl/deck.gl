@@ -99,4 +99,4 @@ When an event is fired, the `onHover` or `onClick` callback of the affected laye
 If you are using the core layers, all has been taken care of.
 
 If you are implementing a custom layer, read more about
-[how picking is implemented](/docs/advanced/picking.md).
+[how picking is implemented](/docs/developer-guide/picking.md).

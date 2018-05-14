@@ -8,7 +8,7 @@ The [`MapView`] class is a subclass of [View](/docs/api-reference/view.md). This
 
 To render, `MapView` requires the application to use a `viewState` that contains at least `longitude`, `latitude` and `zoom` parameters. `MapView` will also consider the `pitch` and `bearing` parameters.
 
-For more information on using `View` classes, consult the [Views](/docs/advanced/views.md) article.
+For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
 
 ## Usage

@@ -7,7 +7,7 @@ Views allow you to specify:
 * Relative dimensions of viewports
 * Projection Matrix
 
-For more information, consult the [Views](/docs/advanced/views.md) article.
+For more information, consult the [Views](/docs/developer-guide/views.md) article.
 
 
 ## Usage

@@ -103,7 +103,7 @@ new View({y: '50%', height: '50%'})
 
 ## Controlling What Each View Displays
 
-When it comes time to actually render something, each `View` needs to be know from what position and direction to view your data. The application needs to specify a compatible view state. To learn more, see [view states](/docs/advanced/view-state.md).
+When it comes time to actually render something, each `View` needs to be know from what position and direction to view your data. The application needs to specify a compatible view state. To learn more, see [view states](/docs/developer-guide/view-state.md).
 
 Note that your `View` instance can be associated with a different "view state" each render.
 

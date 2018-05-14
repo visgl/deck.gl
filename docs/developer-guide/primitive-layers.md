@@ -7,7 +7,7 @@ WebGL, you may consider implementing a new layer by directly extending the
 ## Implementing the Layer Lifecycle Functions
 
 To describe how a layer's properties relate to WebGL attributes and uniforms
-you need to implement the layer's [lifecycle functions](/docs/advanced/layer-lifecycle.md).
+you need to implement the layer's [lifecycle functions](/docs/developer-guide/layer-lifecycle.md).
 
 ### Initializing Layer
 
@@ -108,7 +108,7 @@ uses this technique to share attributes between grids and labels.
 
 A layer should also define its attributes during initialization. This allows the
 [`attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for
-[Attribute Management](/docs/advanced/attribute-management.md).
+[Attribute Management](/docs/developer-guide/attribute-management.md).
 
 Define attributes by
 calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#-add-):
@@ -191,7 +191,7 @@ coordinates, as well as with positions specified in meters.
 
 By supplying the `modules: ['project']` parameter when you create your layer's luma.gl `Model`
 you get access to deck.gl's
-[family of GLSL projection methods](/docs/advanced/writing-shaders.md#projection-vertex-shader-)
+[family of GLSL projection methods](/docs/developer-guide/writing-shaders.md#projection-vertex-shader-)
 that support all three deck.gl projection modes: latlon (default), meters and neutral.
 
 By always using the following shader functions for handling projections and scaling,
@@ -220,4 +220,4 @@ By default, each layer creates an `instancePickingColors` attribute and automati
 calculates it using the length of the `data` array.
 
 For custom picking, read about
-[Implementing Custom Picking](/docs/advanced/picking.md#implementing-custom-picking).
+[Implementing Custom Picking](/docs/developer-guide/picking.md#implementing-custom-picking).

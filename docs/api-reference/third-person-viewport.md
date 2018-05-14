@@ -6,7 +6,7 @@ The [`ThirdPersonViewport`] class is a subclass of [Viewport](/docs/api-referenc
 
 This is in contrast with e.g. [FirstPersonViewport](/docs/api-reference/viewport.md) where the camera will be position exactly at the specified position.
 
-For more information consult the [Viewports](/docs/advanced/viewports.md) article.
+For more information consult the [Viewports](/docs/developer-guide/viewports.md) article.
 
 ## Usage
 

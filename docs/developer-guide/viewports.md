@@ -1,6 +1,6 @@
 # Viewports
 
-> If you are new to deck.gl's `View` and `Viewport` classes it is suggested that you start by reading up on [`Views`](/docs/advanced/views.md) before learning about `Viewports`. Most applications start by using `View` classes.
+> If you are new to deck.gl's `View` and `Viewport` classes it is suggested that you start by reading up on [`Views`](/docs/developer-guide/views.md) before learning about `Viewports`. Most applications start by using `View` classes.
 
 
 ## Viewports

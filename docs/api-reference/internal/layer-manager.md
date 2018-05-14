@@ -4,7 +4,7 @@
 
 The `LayerManager` class handles updates, drawing and picking for a set of layers.
 
-For more information consult the [Using Standalone](/docs/advanced/using-standalone.md) article.
+For more information consult the [Using Standalone](/docs/developer-guide/using-standalone.md) article.
 
 
 ## Constructor

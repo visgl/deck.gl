@@ -31,15 +31,15 @@ These are early ideas not yet associated with any release.
 | [**Composite Layer Customization**](vNext/composite-layer-customization-rfc.md) | @ibgreen | **Draft** | Improvements to customizing composite layers |
 | **[Render Layer to Texture](vNext/render-layer-to-texture-rfc.md)** | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
 | | | | |
+| **Ongoing Efforts** | | | |
+| [**Reduce Distribution Size**](vNext/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
+| [**Reduce Repository Size**](vNext/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | Reduce size of deck.gl github repository |
+| | | | |
 | **Reviewed/Deferred** | | | |
 | [**Off-thread attribute generation**](vNext/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** has been broken out. |
 | [**Expose Layer AttributeManager**](vNext/expose-attribute-manager.md) | @ibgreen | **Deferred** | simplifies pregenerating attributes in apps for fast animation. |
 | [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
-| [**New Layers](vNext/new-layers-rfc.md) | @shaojingli | **Deferred** | Ideas for new layers |
-| **Ongoing Efforts** | | | |
-| | | | |
-| [**Reduce Distribution Size**](vNext/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
-| [**Reduce Repository Size**](vNext/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | Reduce size of deck.gl github repository |
+| [**New Layers**](vNext/new-layers-rfc.md) | @shaojingli | **Deferred** | Ideas for new layers |
 
 
 ## v6.0 RFCs
@@ -80,7 +80,7 @@ These RFCs were implemented in v5.2.
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | [**New View Classes**](v5.2/view-class-rfc.md) | @ibgreen @pessimistress | **Implemented** | Official API for multi-view support, replacing the v5.0 experimental API |
-| [**Unified 32 and 64 bit Projection API**](v5.2/unified-32-and-64-bit-project-api-rfc.md) | @ibgreen | **Implemented** | |
+| [**Unified 32/64-bit Projection**](v5.2/unified-32-and-64-bit-project-api-rfc.md) | @ibgreen | **Implemented** | |
 
 
 ## v5.1 RFCs
@@ -90,8 +90,8 @@ These RFCs were implemented in v5.1.
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
 | **Animation** | | | |
-| [**Attribute Animation**](v5.1/attribute-animation-rfc.md) | @pessimistress | **Implemented** | Automatically interpolate between two copies of a vertex attributes |
-| **[TransitionInterpolator class](v5.1/transition-interpolator-class-rfc.md)** | @pessimistress | **Implemented** | Make it easier to customize interpolation |
+| [**Attribute Transitions**](v5.1/attribute-transition-rfc.md) | @pessimistress | **Implemented** | Automatically interpolate between two copies of a vertex attributes |
+| **[TransitionInterpolator](v5.1/transition-interpolator-class-rfc.md)** | @pessimistress | **Implemented** | New class to make it easier to customize interpolation |
 
 
 ## v5.0 RFCs
@@ -104,12 +104,12 @@ These RFCs were implemented in v5.0. Also see luma.gl RFCs.
 | [**Auto Highlighting**](v5.0/auto-highlighting-rfc.md) | @ibgreen @1chandu | **Implemented** | Auto highlight hovered object via `picking` module |
 | | | | |
 | **Viewports and Controllers** | | | |
-| [**First Person Geospatial Viewport**](v5.0/first-person-mercator-viewport-rfc.md) | @ibgreen | **Experimental** | Geospatially enable all viewports, add FirstPersonViewport for hybrid apps. |
+| [**First Person Geospatial Viewport**](v5.0/first-person-geospatial-viewport-rfc.md) | @ibgreen | **Experimental** | Geospatially enable all viewports, add FirstPersonViewport for hybrid apps. |
 | [**Multiple Viewports**](v5.0/multi-viewport-rfc.md) | @ibgreen | **Experimental** | Support for multiple viewports |
-| [**Viewport Transitions**](v5.0/viewport-animation-rfc.md) | @1chandu | **Experimental** | Animate Viewport changes ("fly to" effect) through interpolation of Viewport props. (Also used in react-map-gl v3.2). |
+| [**Viewport Transitions**](v5.0/viewport-transitions-rfc.md) | @1chandu | **Experimental** | Animate Viewport changes ("fly to" effect) through interpolation of Viewport props. (Also used in react-map-gl v3.2). |
 | [**Break out EventManager**](v5.0/break-out-event-manager-rfc.md) | @ibgreen | **Implemented** | Break out event manager module (mjolnir.js) |
 | | | | |
-| **luma.gl RFCs** | | | |
+| **[luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs)** | | | |
 | **Break out Math Module** | @ibgreen | **Implemented** | Break out luma.gl math module (math.gl) |
 
 
