@@ -251,6 +251,10 @@ export const docPages = generatePath([
         content: getDocUrl('developer-guide/building-apps.md')
       },
       {
+        name: 'Debugging',
+        content: getDocUrl('developer-guide/debugging.md')
+      },
+      {
         name: 'Testing',
         children: [
           {
