@@ -25,10 +25,8 @@ import Layer from './layer';
 import {drawLayers} from './draw-layers';
 import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from '../lifecycle/constants';
-import {deepEqual} from '../utils/deep-equal';
-import View from '../views/view';
+import ViewManager from '../views/view-manager';
 import MapView from '../views/map-view';
-import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
@@ -43,8 +41,6 @@ import {
 
 const LOG_PRIORITY_LIFECYCLE = 2;
 const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
-
-const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
 
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
@@ -98,13 +94,8 @@ export default class LayerManager {
       stats: stats || new Stats({id: 'deck.gl'})
     });
 
-    // List of view descriptors, gets re-evaluated when width/height changes
-    this.width = 100;
-    this.height = 100;
-    this.views = [];
-    this.viewState = INITIAL_VIEW_STATE;
-    this.viewsChanged = true;
-    this.viewports = []; // Generated viewports
+    // Maps view descriptors to vieports, rebuilds when width/height/viewState/views change
+    this.viewManager = new ViewManager();
 
     this.layerFilter = null;
     this.drawPickingColors = false;
@@ -127,6 +118,10 @@ export default class LayerManager {
     this._initSeer = this._initSeer.bind(this);
     this._editSeer = this._editSeer.bind(this);
 
+    // DEPRECATED
+    this.width = 100;
+    this.height = 100;
+
     Object.seal(this);
 
     seerInitListener(this._initSeer);
@@ -140,11 +135,8 @@ export default class LayerManager {
     this.setViews();
   }
 
-  /**
-   * Method to call when the layer manager is not needed anymore.
-   *
-   * Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
-   */
+  // Method to call when the layer manager is not needed anymore.
+  // Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
   finalize() {
     seer.removeListener(this._initSeer);
     seer.removeListener(this._editSeer);
@@ -181,88 +173,75 @@ export default class LayerManager {
   }
 
   getViews() {
-    return this.views;
+    return this.viewManager.views;
   }
 
   // Get a set of viewports for a given width and height
-  // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
   getViewports() {
-    this._rebuildViewportsFromViews();
-    this.context.viewport = this.viewports[0];
-    return this.viewports;
+    const viewports = this.viewManager.getViewports();
+    this.context.viewport = viewports[0];
+    return viewports;
   }
 
   /**
-   * Set parameters needed for layer rendering and picking.
+   * Set props needed for layer rendering and picking.
    * Parameters are to be passed as a single object, with the following values:
    * @param {Boolean} useDevicePixels
    */
-  /* eslint-disable complexity */
-  setParameters(parameters) {
-    if ('eventManager' in parameters) {
-      this._initEventHandling(parameters.eventManager);
+  /* eslint-disable complexity, max-statements */
+  setProps(props) {
+    if ('eventManager' in props) {
+      this._initEventHandling(props.eventManager);
     }
 
-    if (
-      'pickingRadius' in parameters ||
-      'onLayerClick' in parameters ||
-      'onLayerHover' in parameters
-    ) {
-      this._setEventHandlingParameters(parameters);
+    if ('pickingRadius' in props || 'onLayerClick' in props || 'onLayerHover' in props) {
+      this._setEventHandlingParameters(props);
     }
 
-    if ('width' in parameters || 'height' in parameters) {
-      this.setSize(parameters.width, parameters.height);
+    if ('width' in props || 'height' in props) {
+      this.viewManager.setSize(props.width, props.height);
+      this.width = props.width;
+      this.height = props.height;
     }
 
-    if ('views' in parameters) {
-      this.setViews(parameters.views);
+    if ('views' in props) {
+      this.setViews(props.views);
     }
 
     // TODO - support multiple view states
-    if ('viewState' in parameters) {
-      this.setViewState(parameters.viewState);
+    if ('viewState' in props) {
+      this.viewManager.setViewState(props.viewState);
     }
 
-    // TODO - For now we set layers before viewports to preservenchangeFlags
-    if ('layers' in parameters) {
-      this.setLayers(parameters.layers);
+    // TODO - For now we set layers before viewports to preserve changeFlags
+    if ('layers' in props) {
+      this.setLayers(props.layers);
     }
 
-    if ('layerFilter' in parameters) {
-      if (this.layerFilter !== parameters.layerFilter) {
-        this.layerFilter = parameters.layerFilter;
+    if ('layerFilter' in props) {
+      if (this.layerFilter !== props.layerFilter) {
+        this.layerFilter = props.layerFilter;
         this.setNeedsRedraw('layerFilter changed');
       }
     }
 
-    if ('drawPickingColors' in parameters) {
-      if (parameters.drawPickingColors !== this.drawPickingColors) {
-        this.drawPickingColors = parameters.drawPickingColors;
+    if ('drawPickingColors' in props) {
+      if (props.drawPickingColors !== this.drawPickingColors) {
+        this.drawPickingColors = props.drawPickingColors;
         this.setNeedsRedraw('drawPickingColors changed');
       }
     }
 
     // A way for apps to add data to context that can be accessed in layers
-    if ('userData' in parameters) {
-      this.context.userData = parameters.userData;
+    if ('userData' in props) {
+      this.context.userData = props.userData;
     }
 
-    if ('useDevicePixels' in parameters) {
-      this.context.useDevicePixels = parameters.useDevicePixels;
+    if ('useDevicePixels' in props) {
+      this.context.useDevicePixels = props.useDevicePixels;
     }
   }
-  /* eslint-enable complexity */
-
-  setSize(width, height) {
-    assert(Number.isFinite(width) && Number.isFinite(height));
-    if (width !== this.width || height !== this.height) {
-      this.width = width;
-      this.height = height;
-      this.viewsChanged = true;
-      this.setNeedsRedraw('Size changed');
-    }
-  }
+  /* eslint-enable complexity, max-statements */
 
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
@@ -273,28 +252,7 @@ export default class LayerManager {
       views = [new MapView({id: 'default-view'})];
     }
 
-    // Ensure any "naked" Viewports are wrapped in View instances
-    views = flatten(views, {filter: Boolean}).map(
-      view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
-    );
-
-    const viewsChanged = this._diffViews(views, this.views);
-
-    this.views = views;
-    this.viewsChanged = this.viewsChanged || viewsChanged;
-  }
-
-  setViewState(viewState) {
-    if (viewState) {
-      const viewStateChanged = deepEqual(viewState, this.viewState);
-      this.viewState = viewState;
-      this.viewsChanged = this.viewsChanged || viewStateChanged;
-      if (viewStateChanged) {
-        this.setNeedsRedraw('viewState changed');
-      }
-    } else {
-      log.warn('viewState is not valid')();
-    }
+    this.viewManager.setViews(views);
   }
 
   // Supply a new layer list, initiating sublayer generation and layer matching
@@ -410,6 +368,22 @@ export default class LayerManager {
   }
 
   //
+  // DEPRECATED METHODS in V5.3
+  //
+
+  setParameters(parameters) {
+    return this.setProps(parameters);
+  }
+
+  setSize(width, height) {
+    this.setProps({width, height});
+  }
+
+  setViewState(viewState) {
+    this.setProps({viewState});
+  }
+
+  //
   // DEPRECATED METHODS in V5.1
   //
 
@@ -439,9 +413,7 @@ export default class LayerManager {
       this._needsRedraw = false;
     }
 
-    if (this.viewsChanged) {
-      return 'Views changed';
-    }
+    redraw = redraw || this.viewManager.needsRedraw();
 
     // This layers list doesn't include sublayers, relying on composite layers
     for (const layer of this.layers) {
@@ -451,41 +423,6 @@ export default class LayerManager {
     }
 
     return redraw;
-  }
-
-  // Rebuilds viewports from descriptors towards a certain window size
-  _rebuildViewportsFromViews() {
-    if (this.viewsChanged) {
-      const {width, height, views, viewState} = this;
-      const newViewports = views.map(view => view.makeViewport({width, height, viewState}));
-
-      this.setNeedsRedraw('Viewport(s) changed');
-
-      // Ensure one viewport is activated, layers may expect it
-      // TODO - handle empty viewport list (using dummy viewport), or assert
-      // const oldViewports = this.context.viewports;
-
-      const viewport = newViewports[0];
-      assert(viewport instanceof Viewport, 'Invalid viewport');
-
-      this.context.viewports = newViewports;
-      this._activateViewport(viewport);
-      // }
-
-      // We've just rebuilt the viewports to match the descriptors, so clear the flag
-      this.viewports = newViewports;
-      this.viewsChanged = false;
-    }
-  }
-
-  // Check if viewport array has changed, returns true if any change
-  // Note that descriptors can be the same
-  _diffViews(newViews, oldViews) {
-    if (newViews.length !== oldViews.length) {
-      return true;
-    }
-
-    return newViews.some((_, i) => !newViews[i].equals(oldViews[i]));
   }
 
   /**
