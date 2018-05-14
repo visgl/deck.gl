@@ -16,22 +16,40 @@ deck.gl layers can now specify additional type information about properties. Whe
 
 ## deck.gl v5.3
 
-Release date: TBD, target May, 2018
+Release date: TBD, target May 25, 2018
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/orthographic.gif" />
+        <p><i>Orthographic Mode</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 
-### Deep Picking
+### Deck/DeckGL classes
+
+#### Deep Picking
 
 deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` method, which returns a list of all objects under the mouse, instead of just the top-most object.
 
 
+### Automatic Interactivity
+
+A new `Deck.initialViewState` property allows the application to enable map or view interactivity simply by supplying an initial view state, e.g. `{longitude, latitude, zoom}`. deck.gl will automatically initialize a Controller class and listen to view state changes, without the application having to track the view state.
+
+
 ### Switching between Perspective and Orthographic mode
 
-The [`View`](/docs/api-reference/view.md) class can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode. This makes switching between different projection modes easier than ever (just set the new `orthographic` property to `true`).
+The [`View`](/docs/api-reference/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orhtographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
 
 ## deck.gl v5.2
 
-Release date: TBD, target April, 2018
+Release date: April 24, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
