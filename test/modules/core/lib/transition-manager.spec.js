@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
-import {MapState} from '@deck.gl/core/controllers/map-controller';
+import {testExports} from '@deck.gl/core/controllers/map-controller';
+const {MapState} = testExports;
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -111,7 +112,7 @@ test('TransitionManager#constructor', t => {
   t.end();
 });
 
-test('TransitionManager#processViewportChange', t => {
+test('TransitionManager#processViewStateChange', t => {
   const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, props);
 
   TEST_CASES.forEach(testCase => {
@@ -119,7 +120,7 @@ test('TransitionManager#processViewportChange', t => {
 
     testCase.input.forEach((props, i) => {
       t.is(
-        transitionManager.processViewportChange(mergeProps(props)),
+        transitionManager.processViewStateChange(mergeProps(props)),
         testCase.expect[i],
         testCase.title
       );
@@ -158,7 +159,7 @@ test('TransitionManager#callbacks', t => {
       t.ok(!transitionInterpolator.arePropsEqual(viewport, newViewport), 'viewport has changed');
       viewport = newViewport;
       // update props in transition, should not trigger interruption
-      transitionManager.processViewportChange(Object.assign({}, transitionProps, viewport));
+      transitionManager.processViewStateChange(Object.assign({}, transitionProps, viewport));
       updateCount++;
     }
   };
@@ -169,7 +170,7 @@ test('TransitionManager#callbacks', t => {
 
   testCase.input.forEach((props, i) => {
     transitionProps = mergeProps(props);
-    transitionManager.processViewportChange(transitionProps);
+    transitionManager.processViewStateChange(transitionProps);
   });
 
   setTimeout(() => {

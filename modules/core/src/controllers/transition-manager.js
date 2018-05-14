@@ -44,7 +44,7 @@ export default class TransitionManager {
 
   // Process the vewiport change, either ignore or trigger a new transiton.
   // Return true if a new transition is triggered, false otherwise.
-  processViewportChange(nextProps) {
+  processViewStateChange(nextProps) {
     let transitionTriggered = false;
     const currentProps = this.props;
     // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.

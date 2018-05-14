@@ -22,7 +22,7 @@ function clamp(value, min, max) {
   return value < min ? min : value > max ? max : value;
 }
 
-export class MapState extends ViewState {
+class MapState extends ViewState {
   constructor({
     /** Mapbox viewport properties */
     /** The width of the viewport */
@@ -408,3 +408,5 @@ export default class MapController extends Controller {
     this.invertPan = true;
   }
 }
+
+export const testExports = {MapState};

@@ -151,7 +151,7 @@ export default class Controller {
       this.toggleEvents(this.events, true);
     }
 
-    this.transitionManager.processViewportChange(props);
+    this.transitionManager.processViewStateChange(props);
 
     // TODO - make sure these are not reset on every setProps
     const {

@@ -24,7 +24,11 @@ export default class ViewportFlyToInterpolator extends TransitionInterpolator {
   interpolateProps(startProps, endProps, t) {
     const viewport = flyToViewport(startProps, endProps, t);
 
-    // Linearly interpolate 'bearing' and 'pitch' if exist.
+    // Linearly interpolate 'bearing' and 'pitch'.
+    // If pitch/bearing are not supplied, they are interpreted as zeros in viewport calculation
+    // (fallback defined in WebMercatorViewport)
+    // Because there is no guarantee that the current controller's ViewState normalizes
+    // these props, safe guard is needed to avoid generating NaNs
     for (const key of LINEARLY_INTERPOLATED_PROPS) {
       viewport[key] = lerp(startProps[key] || 0, endProps[key] || 0, t);
     }
