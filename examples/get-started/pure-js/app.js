@@ -1,5 +1,6 @@
 /* global fetch */
-import {Deck, GeoJsonLayer, MapController} from '@deck.gl/core';
+import {Deck, MapController} from '@deck.gl/core';
+import {GeoJsonLayer} from '@deck.gl/core-layers';
 import Map from './mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
