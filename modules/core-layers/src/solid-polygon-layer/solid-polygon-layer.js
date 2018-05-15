@@ -20,7 +20,7 @@
 
 import {Layer, experimental} from '@deck.gl/core';
 const {enable64bitSupport, get} = experimental;
-import {GL, Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
+import {GL, Model, Geometry, Attribute, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -86,7 +86,7 @@ const SIDE_WIRE_POSITIONS = new Float32Array([
 
 // Model types
 const ATTRIBUTE_OVERRIDES = {
-  TOP: {instanced: 0},
+  TOP: null,
   SIDE: {instanced: 1},
   WIRE: {instanced: 1}
 };
@@ -285,6 +285,7 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   _updateAttributes(attributes) {
+    const {gl} = this.context;
     const {modelsByName} = this.state;
 
     for (const modelName in modelsByName) {
@@ -303,7 +304,11 @@ export default class SolidPolygonLayer extends Layer {
         const attribute = attributes[attributeMap[attributeName]];
 
         if (attribute) {
-          newAttributes[attributeName] = attribute.clone(attributeOverride);
+          newAttributes[attributeName] = attributeOverride ? new Attribute(gl, Object.assign({},
+            attribute,
+            attributeOverride,
+            {buffer: attribute.getBuffer()}
+          )) : attribute;
         }
       }
       model.setAttributes(newAttributes);
