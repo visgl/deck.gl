@@ -65,6 +65,7 @@ export default class ViewManager {
   // Potentially regenerating attributes and sub layers
   setNeedsUpdate(reason) {
     this._needsUpdate = this._needsUpdate || reason;
+    this._needsRedraw = this._needsRedraw || reason;
   }
 
   // Get a set of viewports for a given width and height
@@ -198,7 +199,6 @@ export default class ViewManager {
       // We've just rebuilt the Viewports to match the View descriptors,
       // so clear the update flag and set the render flag
       this._needsUpdate = false;
-      this.setNeedsRedraw(updateReason);
     }
   }
 
