@@ -113,7 +113,7 @@ export default class CompositeLayer extends Layer {
     // populate reference to parent layer (this layer)
     // NOTE: needs to be done even when reusing layers as the parent may have changed
     for (const layer of subLayers) {
-      layer.parentLayer = this;
+      layer.parent = this;
     }
   }
 }

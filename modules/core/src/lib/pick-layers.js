@@ -517,7 +517,7 @@ function getLayerPickingInfo({layer, info, mode}) {
     // object to funtion properly. So the layer refereced here
     // must be the "current" layer, not an "out-dated" / "invalidated" layer
     info = layer.pickLayer({info, mode, sourceLayer});
-    layer = layer.parentLayer;
+    layer = layer.parent;
   }
   return info;
 }

@@ -18,7 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './props.spec';
-import './prop-types.spec';
-import './component.spec';
-import './component-state.spec';
+const EMPTY_PROPS = Object.freeze({});
+
+export default class ComponentState {
+  constructor(component = null) {
+    this.component = component;
+    this.oldProps = EMPTY_PROPS; // Last props before update
+  }
+
+  getOldProps() {
+    return this.oldProps;
+  }
+
+  resetOldProps() {
+    this.oldProps = this.component.props;
+  }
+}
