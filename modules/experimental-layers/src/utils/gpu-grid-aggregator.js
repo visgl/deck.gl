@@ -54,10 +54,19 @@ void main(void) {
 const AGGREGATE_ALL_VS = `\
 attribute vec2 positions;
 attribute vec2 texCoords;
+
+uniform vec2 gridSize;
+
 varying vec2 vTextureCoord;
 void main(void) {
   // Map each position to single pixel
-   gl_Position = vec4(-1.0, -1.0, 0.0, 1.0);
+  vec2 pos = vec2(-1.0, -1.0);
+
+  // Move to pixel center, pixel-size in screen sapce (2/gridSize) * 0.5 => 1/gridSize
+  vec2 offset = 1.0 / gridSize;
+  pos = pos + offset;
+
+  gl_Position = vec4(pos, 0.0, 1.0);
 
   vTextureCoord = texCoords;
 }
@@ -368,10 +377,10 @@ export default class GPUGridAggregator {
         depthTest: false,
         blendEquation: [GL.FUNC_ADD, GL.MAX],
         blendFunc: [GL.ONE, GL.ONE]
-        // viewport: [0, 0, 1, 1] : TODO: do we need this?
       },
       uniforms: {
-        uSampler: gridAggregationFramebuffer.texture
+        uSampler: gridAggregationFramebuffer.texture,
+        gridSize
       }
     });
     allAggregrationFramebuffer.unbind();
