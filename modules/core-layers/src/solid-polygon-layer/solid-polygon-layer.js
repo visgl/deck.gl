@@ -303,11 +303,9 @@ export default class SolidPolygonLayer extends Layer {
         const attribute = attributes[attributeMap[attributeName]];
 
         if (attribute) {
-          newAttributes[attributeName] = attributeOverride ? Object.assign({},
-            attribute,
-            attributeOverride,
-            {buffer: attribute.getBuffer()}
-          ) : attribute;
+          newAttributes[attributeName] = attributeOverride
+            ? Object.assign({}, attribute, attributeOverride, {buffer: attribute.getBuffer()})
+            : attribute;
         }
       }
       model.setAttributes(newAttributes);
