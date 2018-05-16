@@ -41,7 +41,7 @@ const nonGeoExample = new deck.DeckGL({
   container: document.getElementById('non-geo'),
   mapbox: false /* disable map */,
   views: [new deck.OrbitView()],
-  viewState: {distance: 1, rotationX: 45, rotationOrbit: 30, zoom: 0.05},
+  viewState: {distance: 1, fov: 50, rotationX: 45, rotationOrbit: 30, zoom: 0.05},
   layers: [
     new deck.PointCloudLayer({
       id: 'pointCloud',

@@ -16,9 +16,9 @@ const CANVAS_STYLE = {
 // Add missing props for compatibility
 function normalizeProps(props) {
   // Support old "geospatial view state as separate props" style
-  if (!props.viewState) {
+  if (!props.initialViewState) {
     const {longitude, latitude, zoom, pitch = 0, bearing = 0} = props;
-    props.viewState = {longitude, latitude, zoom, pitch, bearing};
+    props.initialViewState = props.viewState || {longitude, latitude, zoom, pitch, bearing};
   }
 }
 
@@ -66,7 +66,7 @@ export default class DeckGL extends Deck {
     const {mapCanvas, deckCanvas} = createCanvas(props);
 
     normalizeProps(props);
-    const isMap = Number.isFinite(props.viewState.latitude);
+    const isMap = Number.isFinite(props.initialViewState.latitude);
     const isOrbit = props.views && props.views[0] instanceof OrbitView;
     let Controller;
     if (isMap) {
@@ -80,7 +80,9 @@ export default class DeckGL extends Deck {
         width: '100%',
         height: '100%',
         canvas: deckCanvas,
-        controller: props.controller || Controller
+        controller: props.controller || Controller,
+        onViewStateChange: ({viewState}) =>
+          this._map && this._map.setProps({viewState}) && viewState
       })
     );
 
@@ -98,9 +100,6 @@ export default class DeckGL extends Deck {
     } else {
       this._map = map;
     }
-
-    this._onViewportChange = this._onViewportChange.bind(this);
-    this._initialized = true;
   }
 
   getMapboxMap() {
@@ -116,29 +115,10 @@ export default class DeckGL extends Deck {
   }
 
   setProps(props) {
-    if (this._initialized && props.onViewportChange !== this._onViewportChange) {
-      if (props.hasOwnProperty('onViewportChange')) {
-        this.onViewportChange = props.onViewportChange;
-      }
-      props.onViewportChange = this._onViewportChange;
-    }
-
     if (this._map) {
       this._map.setProps(props);
     }
 
     super.setProps(props);
-  }
-
-  _onViewportChange(viewport) {
-    const {viewState} = this.props;
-
-    this.setProps({
-      viewState: Object.assign({}, viewState, viewport)
-    });
-
-    if (this.onViewportChange) {
-      this.onViewportChange(viewport);
-    }
   }
 }
