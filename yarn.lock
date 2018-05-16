@@ -5903,9 +5903,9 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=5.3.0-alpha.1:
-  version "5.3.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-5.3.0-alpha.1.tgz#d2c35d7e720fb27bb8ca2583b71d1bcac1dea09c"
+luma.gl@>=5.3.0-alpha.3:
+  version "5.3.0-alpha.3"
+  resolved "https://unpm.uberinternal.com/luma.gl/-/luma.gl-5.3.0-alpha.3.tgz#6b94c90f7b4888fea757e5009cc04a8a0aad8c76"
   dependencies:
     math.gl "^1.1.0"
     probe.gl "^1.0.0"

@@ -1,6 +1,7 @@
 /* eslint-disable complexity */
 import assert from '../utils/assert';
-import {GL, Buffer, Attribute} from 'luma.gl';
+import {GL, Buffer, experimental} from 'luma.gl';
+const {Attribute} = experimental;
 
 export default class LayerAttribute extends Attribute {
   constructor(gl, opts = {}) {

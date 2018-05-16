@@ -20,7 +20,7 @@
 
 import {Layer, experimental} from '@deck.gl/core';
 const {enable64bitSupport, get} = experimental;
-import {GL, Model, Geometry, Attribute, hasFeature, FEATURES} from 'luma.gl';
+import {GL, Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -285,7 +285,6 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   _updateAttributes(attributes) {
-    const {gl} = this.context;
     const {modelsByName} = this.state;
 
     for (const modelName in modelsByName) {
@@ -304,11 +303,11 @@ export default class SolidPolygonLayer extends Layer {
         const attribute = attributes[attributeMap[attributeName]];
 
         if (attribute) {
-          newAttributes[attributeName] = attributeOverride ? new Attribute(gl, Object.assign({},
+          newAttributes[attributeName] = attributeOverride ? Object.assign({},
             attribute,
             attributeOverride,
             {buffer: attribute.getBuffer()}
-          )) : attribute;
+          ) : attribute;
         }
       }
       model.setAttributes(newAttributes);

@@ -22,9 +22,7 @@
 import Attribute from '@deck.gl/core/lib/attribute';
 import {GL, Buffer} from 'luma.gl';
 import test from 'tape-catch';
-import global from 'global';
-
-const gl = global.glContext;
+import {gl} from '@deck.gl/test-utils';
 
 test('Attribute imports', t => {
   t.equals(typeof Attribute, 'function', 'Attribute import successful');
