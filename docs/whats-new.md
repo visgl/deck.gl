@@ -48,7 +48,7 @@ The [`View`](/docs/api-reference/view.md) classes can now build an orthographic 
 
 ### Constant Accessors
 
-Most layers' accessor props now support constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. Constant values of accessors can be updated with very low performance cost and therefore do not require an `updateTrigger`.
+Many layers' accessor props now accept constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. Constant values of accessors can be updated with very low performance cost and therefore do not require an `updateTrigger`. Consult each layer's updated documentation to see which accessors are supported.
 
 ## deck.gl v5.2
 
