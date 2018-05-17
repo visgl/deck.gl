@@ -35,7 +35,7 @@ const App = ({data, viewport}) => {
     id: 'arc-layer',
     data,
     pickable: true,
-    strokeWidth: 12,
+    getStrokeWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -52,12 +52,6 @@ const App = ({data, viewport}) => {
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
-
-##### `strokeWidth` (Number, optional)
-
-* Default: `1`
-
-The stroke width used to draw each arc. Unit is pixels.
 
 ##### `fp64` (Boolean, optional)
 
@@ -79,23 +73,32 @@ Method called to retrieve the source position of each object.
 
 Method called to retrieve the target position of each object.
 
-##### `getSourceColor` (Function, optional)
+##### `getSourceColor` (Function|Array, optional)
 
-* Default: `object => object.color`
+* Default: `object => object.color || [0, 0, 0, 255]`
 
-Method called to determine the rgba color of the source. If the alpha parameter
-is not provided, it will be set to `255`.
+The rgba color at the source, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-If the method does not return a value for the given object, fallback to `[0, 0, 0, 255]`.
+* If an array is provided, it is used as the source color for all objects.
+* If a function is provided, it is called on each object to retrieve its source color.
 
-##### `getTargetColor` (Function, optional)
+##### `getTargetColor` (Function|Array, optional)
 
-* Default `object => object.color`
+* Default `object => object.color || [0, 0, 0, 255]`
 
-Method called to determine the rgba color of the source.
+The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-* If the alpha parameter is not provided, it will be set to `255`.
-* If the method does not return a value for the given object, fallback to `[0, 0, 255, 255]`.
+* If an array is provided, it is used as the target color for all objects.
+* If a function is provided, it is called on each object to retrieve its target color.
+
+##### `getStrokeWidth` (Function|Number, optional)
+
+* Default: `1`
+
+The stroke width of each object, in pixels.
+
+* If a number is provided, it is used as the stroke width for all objects.
+* If a function is provided, it is called on each object to retrieve its stroke width.
 
 ## Source
 

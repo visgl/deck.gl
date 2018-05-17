@@ -21,13 +21,6 @@ function numberToHex(x, len = 0) {
  * @returns {string} hex color string
  */
 export function getColorHex(value) {
-  if (typeof value === 'function') {
-    try {
-      value = value();
-    } catch (err) {
-      // is data dependent
-    }
-  }
   if (typeof value === 'string') {
     return value;
   }

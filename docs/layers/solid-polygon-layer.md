@@ -94,26 +94,35 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-##### `getFillColor` (Function, optional)
+##### `getFillColor` (Function|Array, optional)
 
 * Default: `object => object.fillColor || object.properties.color || [0, 0, 0, 255]`
 
-The fill color for the polygon
+The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-##### `getLineColor` (Function, optional)
+* If an array is provided, it is used as the fill color for all polygons.
+* If a function is provided, it is called on each polygon to retrieve its fill color.
+
+##### `getLineColor` (Function|Array, optional)
 
 * Default: `object => object.lineColor || object.properties.color || [0, 0, 0, 255]`
 
-The line color for the polygon
+The rgba stroke color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-##### `getElevation` (Function, optional)
+* If an array is provided, it is used as the stroke color for all polygons.
+* If a function is provided, it is called on each object to retrieve its stroke color.
+
+##### `getElevation` (Function|Number, optional)
 
 * Default: `object => object.elevation`
 
-Method called to retrieve the elevation of each object's polygon.
+The elevation of each object's polygon.
 
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
+
+* If a number is provided, it is used as the elevation for all polygons.
+* If a function is provided, it is called on each object to retrieve its elevation.
 
 ## Remarks
 

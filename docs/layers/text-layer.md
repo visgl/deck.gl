@@ -26,10 +26,12 @@ const App = ({data, viewport}) => {
       id: 'text-layer',
       data,
       pickable: true,
-      sizeScale: 32,
       getPosition: d => d.coordinates,
       getText: d => d.name,
-      getSize: d => 1,
+      getSize: 32,
+      getAngle: 0,
+      getTextAnchor: 'middle',
+      getAlignmentBaseline: 'center',
       onHover: ({object}) => setTooltip(`${object.name}\n${object.address}`)
     })
   ];
@@ -56,23 +58,35 @@ Method called to retrieve the location of each text label.
 
 ### Rendering Options
 
-##### `getSize` (Function, optional)
+##### `getSize` (Function|Number, optional)
 
-* Default: `x => x.size || 32`
+* Default: `d => d.size || 32`
 
-Method called to retrieve the size of each text label. Default value is 32 in pixel.
+The font size of each text label, in pixels.
 
-##### `getColor` (Function, optional)
+* If a number is provided, it is used as the size for all objects.
+* If a function is provided, it is called on each object to retrieve its size.
 
-* Default: `x => x.color || [0, 0, 0, 255]`
 
-Method called to retrieve the color of each text label. Default value is black.
+##### `getColor` (Function|Array, optional)
 
-##### `getAngle` (Function, optional)
+* Default: `d => d.color || [0, 0, 0, 255]`
 
-* Default: `x => x.angle || 0`
+The rgba color of each text label, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-Method called to retrieve the angle to rotate (CCW) of each text label. Default value is 0.
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
+
+
+##### `getAngle` (Function|Number, optional)
+
+* Default: `d => d.angle || 0`
+
+The rotating angle of each text label, in degrees.
+
+* If a number is provided, it is used as the angle for all objects.
+* If a function is provided, it is called on each object to retrieve its angle.
+
 
 ##### `sizeScale` (Number, optional)
 
@@ -98,23 +112,34 @@ Specifies a list of characters to include in the font. By default, only characte
 
 ### Text Alignment Options
 
-##### `getTextAnchor` (Function, optional)
+##### `getTextAnchor` (Function|String, optional)
 
 * Default: `x => x.textAnchor || 'middle'`
 
-Method called to specify the text anchor. Available options include `'start'`, `'middle'` and `'end'`.
+The text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 
-##### `getAlignmentBaseline` (Function, optional)
+* If a string is provided, it is used as the text anchor for all objects.
+* If a function is provided, it is called on each object to retrieve its text anchor.
+
+
+##### `getAlignmentBaseline` (Function|String, optional)
 
 * Default: `x => x.alignmentBaseline || 'center'`
 
-Method called to specify the alignment baseline. Available options include `'top'`, `'center'` and `'bottom'`.
+The alignment baseline. Available options include `'top'`, `'center'` and `'bottom'`.
 
-##### `getPixelOffset` (Function, optional)
+* If a string is provided, it is used as the alignment baseline for all objects.
+* If a function is provided, it is called on each object to retrieve its alignment baseline.
+
+
+##### `getPixelOffset` (Function|Array, optional)
 
 * Default: `x.pixelOffset || [0, 0]`
 
-Method called to specify screen space offset relative to the `coordinates` in pixel unit. This function is rarely used in common cases.
+Screen space offset relative to the `coordinates` in pixel unit.
+
+* If an array is provided, it is used as the offset for all objects.
+* If a function is provided, it is called on each object to retrieve its offset.
 
 
 ## Source

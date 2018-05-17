@@ -164,6 +164,7 @@ export default class SolidPolygonLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
+        defaultValue: defaultFillColor,
         noAlloc
       },
       lineColors: {
@@ -172,6 +173,7 @@ export default class SolidPolygonLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
+        defaultValue: defaultLineColor,
         noAlloc
       },
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
@@ -425,14 +427,16 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateElevations(attribute) {
-    if (this.props.extruded) {
+    const {extruded, getElevation} = this.props;
+    if (extruded && typeof getElevation === 'function') {
       attribute.isGeneric = false;
       attribute.value = this.state.polygonTesselator.elevations({
-        getElevation: polygonIndex => this.props.getElevation(this.props.data[polygonIndex])
+        getElevation: polygonIndex => getElevation(this.props.data[polygonIndex])
       });
     } else {
+      const elevation = extruded ? getElevation : 0;
       attribute.isGeneric = true;
-      attribute.value = new Float32Array(1);
+      attribute.value = new Float32Array([elevation]);
     }
   }
 

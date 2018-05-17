@@ -70,20 +70,24 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 Method called to retrieve the position of each object.
 
-##### `getNormal` (Function, optional)
+##### `getNormal` (Function|Array, optional)
 
 * Default: `object => object.normal`
 
-Method called to retrieve the normal of each object.
+The normal of each object, in `[nx, ny, nz]`.
 
-##### `getColor` (Function, optional)
+* If an array is provided, it is used as the normal for all objects.
+* If a function is provided, it is called on each object to retrieve its normal.
 
-* Default: `object => object.color`
 
-Method called to retrieve the rgba color of each object.
+##### `getColor` (Function|Array, optional)
 
-* If the alpha parameter is not provided, it will be set to `255`.
-* If the method does not return a value for the given object, fallback to `[0, 0, 0, 255]`.
+* Default: `object => object.color || [0, 0, 0, 255]`
+
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
 
 ## Source
 

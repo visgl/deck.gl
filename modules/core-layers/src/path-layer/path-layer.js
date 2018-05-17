@@ -68,13 +68,19 @@ export default class PathLayer extends Layer {
       instanceEndPositions: {size: 3, update: this.calculateEndPositions},
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
-      instanceStrokeWidths: {size: 1, accessor: 'getWidth', update: this.calculateStrokeWidths},
+      instanceStrokeWidths: {
+        size: 1,
+        accessor: 'getWidth',
+        update: this.calculateStrokeWidths,
+        defaultValue: 1
+      },
       instanceDashArrays: {size: 2, accessor: 'getDashArray', update: this.calculateDashArrays},
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
-        update: this.calculateColors
+        update: this.calculateColors,
+        defaultValue: DEFAULT_COLOR
       },
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });

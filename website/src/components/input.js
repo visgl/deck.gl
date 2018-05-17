@@ -9,7 +9,7 @@ export default class GenericInput extends PureComponent {
     if (type === 'checkbox') {
       newValue = evt.target.checked;
     }
-    if (type === 'number') {
+    if (type === 'range') {
       newValue = Number(value);
       if (this.props.min !== undefined) {
         newValue = Math.max(this.props.min, newValue);

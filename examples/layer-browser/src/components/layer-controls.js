@@ -153,6 +153,14 @@ export default class LayerControls extends PureComponent {
   }
 
   _renderSetting(settingName, value, propType) {
+    if (typeof value === 'function') {
+      try {
+        value = value();
+      } catch (err) {
+        // is data dependent
+      }
+    }
+
     // first test if proptype is already defined
     if (propType && propType.type) {
       switch (propType.type) {

@@ -29,11 +29,11 @@ const App = ({data, viewport}) => {
     extruded: true,
     lineWidthScale: 20,
     lineWidthMinPixels: 2,
-    getFillColor: d => [160, 160, 180, 200],
+    getFillColor: [160, 160, 180, 200],
     getLineColor: d => colorToRGBArray(d.properties.color),
-    getRadius: d => 100,
-    getLineWidth: d => 1,
-    getElevation: d => 30,
+    getRadius: 100,
+    getLineWidth: 1,
+    getElevation: 30,
     onHover: ({object}) => setTooltip(object.properties.name || object.properties.station)
   });
 
@@ -162,45 +162,61 @@ deck.gl.
 
 ### Data Accessors
 
-##### `getLineColor`
+##### `getLineColor` (Function|Array, optional)
 
 * Default: `f => f.properties.lineColor || [0, 0, 0, 255]`
 
-Called to retrieve the color of line and/or the outline of polygon color for a GeoJson feature, depending
-on its type. Color supports `[R, G, B]` and `[R, G, B, A]`, where `A` has a value between `0` and `255`.
+The rgba color of line string and/or the outline of polygon for a GeoJson feature, depending on its type.
+Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 
-##### `getFillColor` (Function, optional)
+* If an array is provided, it is used as the line color for all features.
+* If a function is provided, it is called on each feature to retrieve its line color.
+
+##### `getFillColor` (Function|Array, optional)
 
 * Default: `f => f.properties.fillColor || [0, 0, 0, 255]`
 
-Called to retrieve the solid color of the polygon and point features of a GeoJson. Color supports `[R, G, B]` and `[R, G, B, A]`, where `A` has a value between `0` and `255`.
+The solid color of the polygon and point features of a GeoJson. 
+Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the fill color for all features.
+* If a function is provided, it is called on each feature to retrieve its fill color.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` features.
 
-##### `getRadius`
+##### `getRadius` (Function|Number, optional)
 
 * Default: `f => f.properties.radius || f => f.properties.size || 1`
 
-Called to retrieve the radius of `Point` and `MultiPoint` feature.
+The radius of `Point` and `MultiPoint` feature, in meters.
 
-##### `getLineWidth`
+* If a number is provided, it is used as the radius for all point features.
+* If a function is provided, it is called on each point feature to retrieve its radius.
+
+##### `getLineWidth` (Function|Number, optional)
 
 * Default: `f => f.properties.lineWidth || 1`
 
-Called to retrieve the line width in meters for a GeoJson feature.
+The width of line string and/or the outline of polygon for a GeoJson feature, depending on its type. Unit is meters.
+
+* If a number is provided, it is used as the line width for all features.
+* If a function is provided, it is called on each feature to retrieve its line width.
 
 Note: This accessor is called for `LineString` and `MultiLineString`
 features. It is called for `Polygon` and `MultiPolygon` features if the
 `stroked` attribute is true.
 
-##### `getElevation` (Function, optional)
+##### `getElevation` (Function|Number, optional)
 
 * Default: `f => f.properties.elevation || 1000`
 
-Called to retrieve the elevation of a polygon feature (when `extruded` is true).
+The elevation of a polygon feature (when `extruded` is true).
 
 If a cartographic projection mode is used, height will be interpreted as meters,
 otherwise will be in unit coordinates.
+
+* If a number is provided, it is used as the elevation for all polygon features.
+* If a function is provided, it is called on each polygon feature to retrieve its elevation.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 

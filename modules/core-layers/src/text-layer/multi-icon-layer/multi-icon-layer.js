@@ -87,16 +87,16 @@ export default class MultiIconLayer extends IconLayer {
     }
   }
 
-  calculatePixelOffset(attribute) {
-    const {data, getPixelOffset} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const pixelOffset = getPixelOffset(object);
-      value[i++] = pixelOffset[0] || 0;
-      value[i++] = pixelOffset[1] || 0;
-    }
-  }
+  // calculatePixelOffset(attribute) {
+  //   const {data, getPixelOffset} = this.props;
+  //   const {value} = attribute;
+  //   let i = 0;
+  //   for (const object of data) {
+  //     const pixelOffset = getPixelOffset(object);
+  //     value[i++] = pixelOffset[0] || 0;
+  //     value[i++] = pixelOffset[1] || 0;
+  //   }
+  // }
 }
 
 MultiIconLayer.layerName = 'MultiIconLayer';

@@ -103,12 +103,14 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 Method called to retrieve the centroid of each hexagon. Centorid should be
 set to [lon, lat]
 
-##### `getColor` (Function, optional)
+##### `getColor` (Function|Array, optional)
 
 * Default: `object => object.color`
 
-Method called to retrieve the color of each object. Color should be set to
-[r, g, b, a] with each number between 0-255.
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
 
 ##### `getElevation` (Function, optional)
 

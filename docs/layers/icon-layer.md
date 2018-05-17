@@ -102,24 +102,35 @@ Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
 Method called to retrieve the icon name of each object, returns string.
 
-##### `getSize` (Function, optional)
+##### `getSize` (Function|Number, optional)
 
 * Default: `d => d.size || 1`
 
-Method called to retrieve the height of each icon, returns a number. Unit is pixels.
+The height of each object, in pixels.
 
-##### `getColor` (Function, optional)
+* If a number is provided, it is used as the size for all objects.
+* If a function is provided, it is called on each object to retrieve its size.
+
+
+##### `getColor` (Function|Array, optional)
 
 * Default: `d => d.color || [0, 0, 0, 255]`
 
-Method called to retrieve the color of each object, returns `[r, g, b, a]`.
-If the alpha component is not supplied, it is set to `255`.
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-##### `getAngle` (Function, optional)
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
+
+
+##### `getAngle` (Function|Number, optional)
 
 * Default: `d => d.angle || 0`
 
-Method called to retrieve the rotating angle (in degree) of each object, returns a number.
+The rotating angle  of each object, in degrees.
+
+* If a number is provided, it is used as the angle for all objects.
+* If a function is provided, it is called on each object to retrieve its angle.
+
 
 ## Source
 
