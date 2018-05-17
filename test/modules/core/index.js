@@ -24,4 +24,5 @@ import './views';
 import './lifecycle';
 import './lib';
 import './shaderlib';
+import './transitions';
 import './experimental';

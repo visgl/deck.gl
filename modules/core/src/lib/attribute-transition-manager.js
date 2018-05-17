@@ -1,16 +1,10 @@
 import {GL, Buffer, experimental} from 'luma.gl';
 import {getShaders, getBuffers} from './attribute-transition-utils';
+import Transition from '../transitions/transition';
 import log from '../utils/log';
 import assert from '../utils/assert';
 
 const {Transform} = experimental;
-
-const TRANSITION_STATE = {
-  NONE: 0,
-  PENDING: 1,
-  STARTED: 2,
-  ENDED: 3
-};
 
 const noop = () => {};
 
@@ -34,6 +28,9 @@ export default class AttributeTransitionManager {
     if (this.transform) {
       this.transform.delete();
     }
+    for (const attributeName in this.attributeTransitions) {
+      this._removeTransition(attributeName);
+    }
   }
 
   /* Public methods */
@@ -47,20 +44,14 @@ export default class AttributeTransitionManager {
       return;
     }
 
-    let needsNewModel = false;
     const {attributeTransitions} = this;
     const changedTransitions = {};
 
     for (const attributeName in attributes) {
-      const transition = this._updateAttribute(attributeName, attributes[attributeName]);
+      const hasChanged = this._updateAttribute(attributeName, attributes[attributeName]);
 
-      if (transition) {
-        if (!attributeTransitions[attributeName]) {
-          // New animated attribute is added
-          attributeTransitions[attributeName] = transition;
-          needsNewModel = true;
-        }
-        changedTransitions[attributeName] = transition;
+      if (hasChanged) {
+        changedTransitions[attributeName] = attributeTransitions[attributeName];
       }
     }
 
@@ -69,12 +60,11 @@ export default class AttributeTransitionManager {
 
       if (!attribute || !attribute.userData.transition) {
         // Animated attribute has been removed
-        delete attributeTransitions[attributeName];
-        needsNewModel = true;
+        this._removeTransition(attributeName);
       }
     }
 
-    if (needsNewModel) {
+    if (!this.transform) {
       this._createModel();
     } else if (this.transform) {
       const {sourceBuffers, destinationBuffers, elementCount} = getBuffers(changedTransitions);
@@ -121,24 +111,11 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in this.attributeTransitions) {
       const transition = this.attributeTransitions[attributeName];
-
-      let time = 1;
-      if (transition.state === TRANSITION_STATE.PENDING) {
-        transition.startTime = currentTime;
-        transition.state = TRANSITION_STATE.STARTED;
-        transition.onStart(transition);
-      }
-
-      if (transition.state === TRANSITION_STATE.STARTED) {
-        time = (currentTime - transition.startTime) / transition.duration;
-        if (time >= 1) {
-          time = 1;
-          transition.state = TRANSITION_STATE.ENDED;
-          transition.onEnd(transition);
-        }
+      const updated = transition.update(currentTime);
+      if (updated) {
+        uniforms[`${attributeName}Time`] = transition.time;
         needsRedraw = true;
       }
-      uniforms[`${transition.name}Time`] = transition.easing(time);
     }
 
     if (needsRedraw) {
@@ -150,6 +127,30 @@ export default class AttributeTransitionManager {
   /* eslint-enable max-statements */
 
   /* Private methods */
+  _createTransition(attributeName, attribute) {
+    let transition = this.attributeTransitions[attributeName];
+    if (!transition) {
+      transition = new Transition({name: attributeName, attribute});
+      this.attributeTransitions[attributeName] = transition;
+      this._invalidateModel();
+      return transition;
+    }
+    return null;
+  }
+
+  _removeTransition(attributeName) {
+    const transition = this.attributeTransitions[attributeName];
+    if (transition) {
+      if (transition.buffer) {
+        transition.buffer.delete();
+      }
+      if (transition._swapBuffer) {
+        transition._swapBuffer.delete();
+      }
+      delete this.attributeTransitions[attributeName];
+      this._invalidateModel();
+    }
+  }
 
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
@@ -163,23 +164,31 @@ export default class AttributeTransitionManager {
         hasChanged = attribute.needsRedraw();
       } else {
         // New animated attributes have been added
-        transition = {name: attributeName, attribute};
+        transition = this._createTransition(attributeName, attribute);
         hasChanged = true;
       }
 
       if (hasChanged) {
         this._triggerTransition(transition, settings);
-        return transition;
+        return true;
       }
     }
 
-    return null;
+    return false;
+  }
+
+  // Invalidates the current model
+  _invalidateModel() {
+    if (this.transform) {
+      this.transform.delete();
+    }
   }
 
   // Create a model for the transform feedback
   _createModel() {
-    if (this.transform) {
-      this.transform.delete();
+    if (Object.keys(this.attributeTransitions).length === 0) {
+      // no transitions
+      return;
     }
     this.transform = new Transform(
       this.gl,
@@ -271,13 +280,8 @@ export default class AttributeTransitionManager {
     const transitionSettings = this._normalizeTransitionSettings(settings);
 
     // Attribute descriptor to transition from
-    // _getCurrentAttributeState must be called before the current buffer is deleted
-    Object.assign(transition, this._getNextTransitionStates(transition), transitionSettings);
-
-    // Reset transition state
-    if (transition.state === TRANSITION_STATE.STARTED) {
-      transition.onInterrupt(transition);
-    }
-    transition.state = TRANSITION_STATE.PENDING;
+    transition.start(
+      Object.assign({}, this._getNextTransitionStates(transition), transitionSettings)
+    );
   }
 }

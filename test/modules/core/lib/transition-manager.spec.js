@@ -108,7 +108,7 @@ test('TransitionManager#constructor', t => {
   const transitionManager = new TransitionManager(MapState, {});
   t.ok(transitionManager, 'TransitionManager constructor does not throw errors');
   t.ok(transitionManager.props, 'TransitionManager has props');
-  t.ok(transitionManager.state, 'TransitionManager has state');
+  t.ok(transitionManager.transition, 'TransitionManager has transition');
   t.end();
 });
 
