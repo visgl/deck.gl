@@ -29,6 +29,8 @@ export default class ComponentState {
   constructor(component = null) {
     this.component = component;
     this.oldProps = EMPTY_PROPS; // Last props before update
+    this.asyncProps = {};
+    this.onAsyncPropUpdated = () => {};
   }
 
   getOldProps() {

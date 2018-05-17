@@ -109,10 +109,7 @@ function createPropsPrototype(props, parentProps, propTypes, componentClass) {
 
   // Add getters/setters for async prop properties
   Object.defineProperties(defaultProps, {
-<<<<<<< HEAD
-=======
     // `id` is treated specially because layer might need to override it
->>>>>>> ComponentState class Async prop resolver methods
     id: {
       configurable: false,
       writable: true,
