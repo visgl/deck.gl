@@ -22,7 +22,7 @@ test('Transition#start', t => {
   });
   t.is(transition.state, TRANSITION_STATE.NONE, 'Transition has initial state');
   t.notOk(transition.inProgress, 'inProgress returns correct result');
-  
+
   transition.start({customAttribute: 'custom value'});
   t.is(transition.state, TRANSITION_STATE.PENDING, 'Transition has started');
   t.ok(transition.inProgress, 'inProgress returns correct result');
@@ -50,7 +50,7 @@ test('Transition#update', t => {
 
   transition.start({
     duration: 1,
-    easing: t => t * t
+    easing: time => time * time
   });
 
   transition.update(0);

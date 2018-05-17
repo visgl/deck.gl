@@ -1,4 +1,3 @@
-
 export const TRANSITION_STATE = {
   NONE: 'none',
   PENDING: 'pending',
@@ -9,7 +8,6 @@ export const TRANSITION_STATE = {
 function noop() {}
 
 export default class Transition {
-
   /**
    * @params props {object} - properties of the transition.
    *
@@ -43,8 +41,7 @@ export default class Transition {
   }
 
   get inProgress() {
-    return this._state === TRANSITION_STATE.PENDING ||
-      this._state === TRANSITION_STATE.IN_PROGRESS;
+    return this._state === TRANSITION_STATE.PENDING || this._state === TRANSITION_STATE.IN_PROGRESS;
   }
 
   /**
@@ -107,13 +104,13 @@ export default class Transition {
     this._state = newState;
 
     switch (newState) {
-    case TRANSITION_STATE.PENDING:
-      this.onStart(this);
-      break;
-    case TRANSITION_STATE.ENDED:
-      this.onEnd(this);
-      break;
-    default:
+      case TRANSITION_STATE.PENDING:
+        this.onStart(this);
+        break;
+      case TRANSITION_STATE.ENDED:
+        this.onEnd(this);
+        break;
+      default:
     }
   }
 }
