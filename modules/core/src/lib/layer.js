@@ -704,12 +704,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     const {state, internalState} = oldLayer;
     assert(state && internalState);
 
-    // Keep a temporary ref to the old props, for prop comparison
-<<<<<<< HEAD
-=======
-    internalState.oldProps = props;
-
->>>>>>> Async props preparations. Start introducing component.
     if (this === oldLayer) {
       return;
     }
