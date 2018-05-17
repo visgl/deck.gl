@@ -250,7 +250,7 @@ export default class Controller {
   _onPan(event) {
     let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
     alternateMode = this.invertPan ? !alternateMode : alternateMode;
-    return alternateMode ? this._onPanRotate(event) : this._onPanMove(event);
+    return alternateMode ? this._onPanMove(event) : this._onPanRotate(event);
   }
 
   // Default handler for the `panend` event.
