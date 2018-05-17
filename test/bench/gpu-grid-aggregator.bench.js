@@ -27,30 +27,30 @@ import {GridAggregationData} from 'deck.gl/test/data';
 const {fixture, generateRandomGridPoints} = GridAggregationData;
 const aggregator = new GPUGridAggregator(gl);
 const changeFlags = {dataChanged: true};
-const positions1K = generateRandomGridPoints(1000);
-const positions100K = generateRandomGridPoints(100000);
-const positions1M = generateRandomGridPoints(1000000);
+const points1K = generateRandomGridPoints(1000);
+const points100K = generateRandomGridPoints(100000);
+const points1M = generateRandomGridPoints(1000000);
 
 export default function gridAggregatorBench(suite) {
   return suite
     .group('GRID AGGREGATION')
     .add('CPU 1K', () => {
-      runAggregation({useGPU: false, positions: positions1K});
+      runAggregation(Object.assign({}, {useGPU: false}, points1K));
     })
     .add('GPU 1K', () => {
-      runAggregation({useGPU: true, positions: positions1K});
+      runAggregation(Object.assign({}, {useGPU: true}, points1K));
     })
     .add('CPU 100K', () => {
-      runAggregation({useGPU: false, positions: positions100K});
+      runAggregation(Object.assign({}, {useGPU: false}, points100K));
     })
     .add('GPU 100K', () => {
-      runAggregation({useGPU: true, positions: positions100K});
+      runAggregation(Object.assign({}, {useGPU: true}, points100K));
     })
     .add('CPU 1M', () => {
-      runAggregation({useGPU: false, positions: positions1M});
+      runAggregation(Object.assign({}, {useGPU: false}, points1M));
     })
     .add('GPU 1M', () => {
-      runAggregation({useGPU: true, positions: positions1M});
+      runAggregation(Object.assign({}, {useGPU: true}, points1M));
     });
 }
 
