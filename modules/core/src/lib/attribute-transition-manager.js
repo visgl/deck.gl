@@ -1,16 +1,10 @@
 import {GL, Buffer, experimental} from 'luma.gl';
 import {getShaders, getBuffers} from './attribute-transition-utils';
+import Transition from '../transitions/transition';
 import log from '../utils/log';
 import assert from '../utils/assert';
 
 const {Transform} = experimental;
-
-const TRANSITION_STATE = {
-  NONE: 0,
-  PENDING: 1,
-  STARTED: 2,
-  ENDED: 3
-};
 
 const noop = () => {};
 
@@ -115,24 +109,11 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in this.attributeTransitions) {
       const transition = this.attributeTransitions[attributeName];
-
-      let time = 1;
-      if (transition.state === TRANSITION_STATE.PENDING) {
-        transition.startTime = currentTime;
-        transition.state = TRANSITION_STATE.STARTED;
-        transition.onStart(transition);
-      }
-
-      if (transition.state === TRANSITION_STATE.STARTED) {
-        time = (currentTime - transition.startTime) / transition.duration;
-        if (time >= 1) {
-          time = 1;
-          transition.state = TRANSITION_STATE.ENDED;
-          transition.onEnd(transition);
-        }
+      const updated = transition.update(currentTime);
+      if (updated) {
+        uniforms[`${attributeName}Time`] = transition.time;
         needsRedraw = true;
       }
-      uniforms[`${transition.name}Time`] = transition.easing(time);
     }
 
     if (needsRedraw) {
@@ -157,7 +138,7 @@ export default class AttributeTransitionManager {
         hasChanged = attribute.needsRedraw;
       } else {
         // New animated attributes have been added
-        transition = {name: attributeName, attribute};
+        transition = new Transition({name: attributeName, attribute});
         hasChanged = true;
       }
 
@@ -244,6 +225,7 @@ export default class AttributeTransitionManager {
     const {attribute, buffer} = transition;
     const {value, size} = attribute;
 
+    const transitionProps = {};
     const transitionSettings = this._normalizeTransitionSettings(settings);
 
     const needsNewBuffer = !buffer || transition.bufferSize < value.length;
@@ -261,7 +243,7 @@ export default class AttributeTransitionManager {
         buffer.delete();
       }
 
-      transition.buffer = new Buffer(this.gl, {
+      transitionProps.buffer = new Buffer(this.gl, {
         size,
         instanced: attribute.instanced,
         // WebGL2 throws error if `value` is not cast to Float32Array:
@@ -269,14 +251,14 @@ export default class AttributeTransitionManager {
         data: new Float32Array(value.length),
         usage: GL.DYNAMIC_COPY
       });
-      transition.bufferSize = value.length;
+      transitionProps.bufferSize = value.length;
     }
 
     Object.assign(transition, transitionSettings);
     if (transition.fromState) {
       transition.fromState.delete();
     }
-    transition.fromState = new Buffer(
+    transitionProps.fromState = new Buffer(
       this.gl,
       Object.assign({}, fromState, {
         data: fromState.value
@@ -285,12 +267,7 @@ export default class AttributeTransitionManager {
     if (transition.toState) {
       transition.toState.delete();
     }
-    transition.toState = toState;
-
-    // Reset transition state
-    if (transition.state === TRANSITION_STATE.STARTED) {
-      transition.onInterrupt(transition);
-    }
-    transition.state = TRANSITION_STATE.PENDING;
+    transitionProps.toState = toState;
+    transition.start(transitionProps);
   }
 }
