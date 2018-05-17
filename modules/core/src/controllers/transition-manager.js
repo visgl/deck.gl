@@ -30,7 +30,7 @@ export default class TransitionManager {
     this.propsInTransition = null;
     this.transition = new Transition();
 
-    this._onAnimationFrame = this._onAnimationFrame.bind(this);
+    this._onTransitionFrame = this._onTransitionFrame.bind(this);
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
 
@@ -129,12 +129,12 @@ export default class TransitionManager {
       onEnd: this._onTransitionEnd(endProps.onTransitionEnd)
     });
 
-    this._onAnimationFrame();
+    this._onTransitionFrame();
   }
 
-  _onAnimationFrame() {
+  _onTransitionFrame() {
     // _updateViewport() may cancel the animation
-    this.animation = requestAnimationFrame(this._onAnimationFrame);
+    this.animation = requestAnimationFrame(this._onTransitionFrame);
     this.transition.update(Date.now());
   }
 

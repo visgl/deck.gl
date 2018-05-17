@@ -10,6 +10,18 @@ function noop() {}
 
 export default class Transition {
 
+  /**
+   * @params props {object} - properties of the transition.
+   *
+   * @params props.duration {number} - total time to complete the transition
+   * @params props.easing {func} - easing function
+   * @params props.onStart {func} - callback when transition starts
+   * @params props.onUpdate {func} - callback when transition updates
+   * @params props.onInterrupt {func} - callback when transition is interrupted
+   * @params props.onEnd {func} - callback when transition ends
+   *
+   * Any additional properties are also saved on the instance but have no effect.
+   */
   constructor(props) {
     this._startTime = null;
     this._state = TRANSITION_STATE.NONE;
@@ -35,6 +47,10 @@ export default class Transition {
       this._state === TRANSITION_STATE.IN_PROGRESS;
   }
 
+  /**
+   * (re)start this transition.
+   * @params props {object} - optional overriding props. see constructor
+   */
   start(props) {
     if (this.inProgress) {
       this.onInterrupt(this);
@@ -43,6 +59,9 @@ export default class Transition {
     this._setState(TRANSITION_STATE.PENDING);
   }
 
+  /**
+   * cancel this transition if it is in progress.
+   */
   cancel() {
     if (this.inProgress) {
       this.onInterrupt(this);
@@ -50,6 +69,10 @@ export default class Transition {
     }
   }
 
+  /**
+   * update this transition.
+   * @params currentTime {number} - timestamp of the update. should be in the same unit as `duration`.
+   */
   update(currentTime) {
     if (this.state === TRANSITION_STATE.PENDING) {
       this._startTime = currentTime;
