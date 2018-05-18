@@ -151,5 +151,4 @@ async function runTestExample(folder) {
   await runTestExample('scatterplot');
   await runTestExample('screen-grid');
   await runTestExample('tagmap');
-  // await runTestExample('without-map');
 })();

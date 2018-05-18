@@ -1,6 +1,7 @@
 {
   "name": "pure-js",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
@@ -12,6 +13,8 @@
     "stats.js": "^0.17.0"
   },
   "devDependencies": {
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
     "webpack": "^4.3.0",
     "webpack-cli": "^2.0.13",
     "webpack-dev-server": "^3.1.1"

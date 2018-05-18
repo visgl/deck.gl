@@ -12,7 +12,21 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
-  // Optional: Enables reading mapbox token from environment variable
+  module: {
+    rules: [
+      {
+        // Compile ES2015 using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [resolve('.')],
+        exclude: [/node_modules/],
+        options: {
+          objectAssign: 'Object.assign'
+        }
+      }
+    ]
+  },
+
   plugins: [new HtmlWebpackPlugin({title: 'deck.gl example'})]
 };
 

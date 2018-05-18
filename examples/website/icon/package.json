@@ -1,6 +1,7 @@
 {
   "name": "icon",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "start": "webpack-dev-server --progress --hot --open"

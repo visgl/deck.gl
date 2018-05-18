@@ -1,6 +1,7 @@
 {
   "name": "react-browserify",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "start": "budo ./app.js --open -- -t babelify -t envify",
     "build": "browserify ./app.js -o dist-bundle.js -t babelify"

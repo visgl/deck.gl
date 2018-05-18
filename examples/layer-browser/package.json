@@ -1,6 +1,7 @@
 {
   "name": "layer-browser",
   "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.es6 --progress --hot --open",
