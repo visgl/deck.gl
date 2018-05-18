@@ -1,5 +1,25 @@
 import test from 'tape-catch';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
+import Component from '@deck.gl/core/lifecycle/component';
+
+/* global fetch */
+const EMPTY_ARRAY = Object.freeze([]);
+
+const defaultProps = {
+  // data: Special handling for null, see below
+  data: {type: 'data', value: EMPTY_ARRAY, async: true},
+  dataComparator: null,
+  dataTransform: data => data,
+  fetch: url => fetch(url).then(response => response.json())
+};
+
+class TestComponent extends Component {
+  constructor(...props) {
+    super(...props);
+  }
+}
+
+TestComponent.defaultProps = defaultProps;
 
 function makePromise() {
   const resolvers = {};
@@ -16,7 +36,9 @@ test('ComponentState#imports', t => {
 });
 
 test('ComponentState#synchronous async props', t => {
-  const state = new ComponentState();
+  const component = new Component();
+  component._initState();
+  const state = component.internalState;
   t.ok(state, 'ComponentState construction ok');
 
   t.equals(state.hasAsyncProp('data'), false, 'ComponentState.hasAsyncProp returned correct value');

@@ -159,6 +159,7 @@ function addAsyncPropsToPropPrototype(defaultProps, propTypes) {
 function getDescriptorForAsyncProp(name) {
   return {
     configurable: false,
+    enumerable: true,
     // Save the provided value for async props in a special map
     set(newValue) {
       if (typeof newValue === 'string' || newValue instanceof Promise) {
@@ -173,15 +174,22 @@ function getDescriptorForAsyncProp(name) {
         // Prop value isn't async, so just return it
         if (name in this._asyncPropResolvedValues) {
           const value = this._asyncPropResolvedValues[name];
-          // TODO - data expects null to be replaced with `[]`
-          return value ? value : this._asyncPropDefaultValues[name];
+
+          // Special handling - components expect null `data` prop expects to be replaced with `[]`
+          if (name === 'data') {
+            return value || this._asyncPropDefaultValues[name];
+          }
+
+          return value;
         }
+
         // It's an async prop value: look into component state
         const state = this._component && this._component.internalState;
         if (state && state.hasAsyncProp(name)) {
           return state.getAsyncProp(name);
         }
       }
+
       // component not yet initialized/matched, return the component's default value for the prop
       return this._asyncPropDefaultValues[name];
     }
