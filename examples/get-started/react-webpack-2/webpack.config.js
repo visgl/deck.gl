@@ -6,11 +6,11 @@ const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const CONFIG = {
+  mode: 'development',
+
   entry: {
     app: resolve('./app.js')
   },
-
-  devtool: 'source-map',
 
   module: {
     rules: [

@@ -1,4 +1,6 @@
 {
+  "name": "pure-js",
+  "version": "0.0.0",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
@@ -10,8 +12,8 @@
     "stats.js": "^0.17.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.0",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }

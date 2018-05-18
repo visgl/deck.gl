@@ -1,4 +1,6 @@
 {
+  "name": "bezier",
+  "version": "0.0.0",
   "scripts": {
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "start": "webpack-dev-server --progress --hot --open"
@@ -6,13 +8,14 @@
   "dependencies": {
     "deck.gl": "^5.2.0",
     "@deck.gl/experimental-layers": "^5.2.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
-    "react-map-gl": "^3.2.0"
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.0",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }

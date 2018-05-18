@@ -1,16 +1,22 @@
 {
+  "name": "react-without-map",
+  "version": "0.0.0",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^5.2.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "deck.gl": ">=5.3.0-alpha.2",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^3.2.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.0",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "html-webpack-plugin": "^3.0.7",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }
