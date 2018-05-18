@@ -18,27 +18,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* eslint-disable react/no-direct-mutation-state */
+/* global fetch */
 /* global window */
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
-import {LIFECYCLE} from '../lifecycle/constants';
-import {createProps} from '../lifecycle/create-props';
 import {diffProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import {GL, withParameters} from 'luma.gl';
 import assert from '../utils/assert';
 
+import Component from '../lifecycle/component';
 import LayerState from './layer-state';
 
 const LOG_PRIORITY_UPDATE = 1;
-const EMPTY_PROPS = Object.freeze({});
+
+const EMPTY_ARRAY = Object.freeze([]);
 const noop = () => {};
 
 const defaultProps = {
   // data: Special handling for null, see below
+  data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
+  dataTransform: data => data,
+  fetch: url => fetch(url).then(response => response.json()),
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
   numInstances: undefined,
 
@@ -69,40 +74,10 @@ const defaultProps = {
   highlightColor: [0, 0, 128, 128]
 };
 
-let counter = 0;
-
-export default class Layer {
-  constructor(/* ...propObjects */) {
-    // Merge supplied props with default props and freeze them.
-    /* eslint-disable prefer-spread */
-    this.props = createProps.apply(this, arguments);
-    /* eslint-enable prefer-spread */
-
-    // Define all members before layer is sealed
-    this.id = this.props.id; // The layer's id, used for matching with layers from last render cycle
-    this.count = counter++; // Keep track of how many layer instances you are generating
-    this.lifecycle = LIFECYCLE.NO_STATE; // Helps track and debug the life cycle of the layers
-    this.parentLayer = null; // reference to the composite layer parent that rendered this layer
-    this.context = null; // Will reference layer manager's context, contains state shared by layers
-    this.state = null; // Will be set to the shared layer state object during layer matching
-    this.internalState = null;
-
-    // Seal the layer
-    Object.seal(this);
-  }
-
-  // clone this layer with modified props
-  clone(newProps) {
-    return new this.constructor(Object.assign({}, this.props, newProps));
-  }
-
+export default class Layer extends Component {
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return `${className}({id: '${this.props.id}'})`;
-  }
-
-  get stats() {
-    return this.internalState.stats;
   }
 
   // Public API
@@ -123,9 +98,9 @@ export default class Layer {
   // This layer needs a deep update
   // TODO - Need to align with existing needsUpdate before uncommenting
   // For now async props will call layerManager directly
-  // setNeedsUpdate() {
-  //   this.context.layerManager.setNeedsUpdate(String(this));
-  // }
+  setLayerNeedsUpdate() {
+    this.context.layerManager.setNeedsUpdate(String(this));
+  }
 
   // Checks state of attributes and model
   getNeedsRedraw({clearRedrawFlags = false} = {}) {
@@ -472,7 +447,6 @@ export default class Layer {
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
 
-    this.internalState.oldProps = EMPTY_PROPS;
     this._updateState();
 
     const model = this.getSingleModel();
@@ -482,10 +456,6 @@ export default class Layer {
       model.geometry.id = `${this.props.id}-geometry`;
       model.setAttributes(this.getAttributeManager().getAttributes());
     }
-
-    // Clear temporary states
-    this.clearChangeFlags();
-    this.internalState.oldProps = null;
   }
 
   // Called by layer manager
@@ -498,23 +468,21 @@ export default class Layer {
     if (stateNeedsUpdate) {
       this._updateState();
     }
-
-    // Clear temporary states
-    this.clearChangeFlags();
-    this.internalState.oldProps = null;
   }
   /* eslint-enable max-statements */
 
+  // Common code for _initialize and _update
   _updateState() {
     const updateParams = this._getUpdateParams();
+
     // Call subclass lifecycle methods
     this.updateState(updateParams);
-    // End subclass lifecycle methods
 
     // Render or update previously rendered sublayers
     if (this.isComposite) {
-      this._renderLayers();
+      this._renderLayers(updateParams);
     }
+    // End subclass lifecycle methods
 
     // Add any subclass attributes
     this.updateAttributes(this.props);
@@ -525,6 +493,9 @@ export default class Layer {
     if (this.state.model) {
       this.state.model.setInstanceCount(this.getNumInstances());
     }
+
+    this.clearChangeFlags();
+    this.internalState.resetOldProps();
   }
 
   // Called by manager when layer is about to be disposed
@@ -648,7 +619,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // Compares the layers props with old props from a matched older layer
   // and extracts change flags that describe what has change so that state
   // can be update correctly with minimal effort
-  // TODO - arguments for testing only
   diffProps(newProps, oldProps) {
     const changeFlags = diffProps(newProps, oldProps);
 
@@ -669,7 +639,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _getUpdateParams() {
     return {
       props: this.props,
-      oldProps: this.internalState.oldProps || this.props,
+      oldProps: this.internalState.getOldProps(),
       context: this.context,
       changeFlags: this.internalState.changeFlags
     };
@@ -724,37 +694,47 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     });
 
     this.internalState = new LayerState({
-      attributeManager
+      attributeManager,
+      layer: this
     });
+
     this.state = {};
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = this.getAttributeManager();
+
+    // Ensure any async props are updated
+    this.internalState.setAsyncProps(this.props);
   }
 
   // Called by layer manager to transfer state from an old layer
   _transferState(oldLayer) {
-    const {state, internalState, props} = oldLayer;
+    const {state, internalState} = oldLayer;
     assert(state && internalState);
-
-    internalState.oldProps = props;
 
     if (this === oldLayer) {
       return;
     }
 
-    // Move state
-    state.layer = this;
-    this.state = state;
+    // Move internalState
     this.internalState = internalState;
-    // Note: We keep the state ref on old layers to support async actions
+    this.internalState.component = this;
+
+    // Move state
+    this.state = state;
+    // Deprecated: layer references on `state`
+    state.layer = this;
+    // We keep the state ref on old layers to support async actions
     // oldLayer.state = null;
+
+    // Ensure any async props are updated
+    this.internalState.setAsyncProps(this.props);
 
     // Update model layer reference
     for (const model of this.getModels()) {
       model.userData.layer = this;
     }
 
-    this.diffProps(this.props, props);
+    this.diffProps(this.props, this.internalState.getOldProps());
   }
 
   // Operate on each changed triggers, will be called when an updateTrigger changes

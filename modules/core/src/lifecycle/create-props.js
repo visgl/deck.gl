@@ -2,22 +2,29 @@ import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
 import {parsePropTypes} from './prop-types';
 
-export const EMPTY_ARRAY = Object.freeze([]);
-
 // Create a property object
 export function createProps() {
-  const layer = this; // eslint-disable-line
+  const component = this; // eslint-disable-line
 
   // Get default prop object (a prototype chain for now)
-  const {defaultProps} = getPropDefs(layer.constructor);
+  const propsPrototype = getPropsPrototypeAndTypes(component.constructor).defaultProps;
 
-  // Create a new prop object with  default props object in prototype chain
-  const newProps = Object.create(defaultProps, {
-    _layer: {
+  // Create a new prop object with default props object in prototype chain
+  const propsInstance = Object.create(propsPrototype, {
+    // Props need a back pointer to the owning component
+    _component: {
       enumerable: false,
-      value: layer
+      value: component
     },
-    _asyncProps: {
+    // The supplied (original) values for those async props that are set to url strings or Promises.
+    // In this case, the actual (i.e. resolved) values are looked up from component.internalState
+    _asyncPropOriginalValues: {
+      enumerable: false,
+      value: {}
+    },
+    // Note: the actual (resolved) values for props that are NOT set to urls or Promises.
+    // in this case the values are served directly from this map
+    _asyncPropResolvedValues: {
       enumerable: false,
       value: {}
     }
@@ -25,98 +32,84 @@ export function createProps() {
 
   // "Copy" all sync props
   for (let i = 0; i < arguments.length; ++i) {
-    Object.assign(newProps, arguments[i]);
+    Object.assign(propsInstance, arguments[i]);
   }
-  newProps.data = newProps.data || EMPTY_ARRAY;
 
   // SEER: Apply any overrides from the seer debug extension if it is active
-  applyPropOverrides(newProps);
+  applyPropOverrides(propsInstance);
 
   // Props must be immutable
-  Object.freeze(newProps);
+  Object.freeze(propsInstance);
 
-  return newProps;
-}
-
-// Helper methods
-
-// Constructors have their super class constructors as prototypes
-function getOwnProperty(object, prop) {
-  return Object.prototype.hasOwnProperty.call(object, prop) && object[prop];
-}
-
-function getLayerName(layerClass) {
-  const layerName = getOwnProperty(layerClass, 'layerName');
-  if (!layerName) {
-    log.once(0, `${layerClass.name}.layerName not specified`);
-  }
-  return layerName || layerClass.name;
+  return propsInstance;
 }
 
 // Return precalculated defaultProps and propType objects if available
 // build them if needed
-function getPropDefs(layerClass) {
-  const props = getOwnProperty(layerClass, '_mergedDefaultProps');
+function getPropsPrototypeAndTypes(componentClass) {
+  const props = getOwnProperty(componentClass, '_mergedDefaultProps');
   if (props) {
     return {
       defaultProps: props,
-      propTypes: getOwnProperty(layerClass, '_propTypes')
+      propTypes: getOwnProperty(componentClass, '_propTypes')
     };
   }
 
-  return buildPropDefs(layerClass);
+  return createPropsPrototypeAndTypes(componentClass);
 }
 
-// Build defaultProps and propType objects by walking layer prototype chain
-function buildPropDefs(layerClass) {
-  const parent = layerClass.prototype;
+// Build defaultProps and propType objects by walking component prototype chain
+function createPropsPrototypeAndTypes(componentClass) {
+  const parent = componentClass.prototype;
   if (!parent) {
     return {
       defaultProps: {}
     };
   }
 
-  const parentClass = Object.getPrototypeOf(layerClass);
-  const parentPropDefs = (parent && getPropDefs(parentClass)) || null;
+  const parentClass = Object.getPrototypeOf(componentClass);
+  const parentPropDefs = (parent && getPropsPrototypeAndTypes(parentClass)) || null;
 
-  // Parse propTypes from Layer.defaultProps
-  const layerDefaultProps = getOwnProperty(layerClass, 'defaultProps') || {};
-  const layerPropDefs = parsePropTypes(layerDefaultProps);
+  // Parse propTypes from Component.defaultProps
+  const componentDefaultProps = getOwnProperty(componentClass, 'defaultProps') || {};
+  const componentPropDefs = parsePropTypes(componentDefaultProps);
 
   // Create a merged type object
   const propTypes = Object.assign(
     {},
     parentPropDefs && parentPropDefs.propTypes,
-    layerPropDefs.propTypes
+    componentPropDefs.propTypes
   );
 
   // Create any necessary property descriptors and create the default prop object
   // Assign merged default props
-  const defaultProps = buildDefaultProps(
-    layerPropDefs.defaultProps,
+  const defaultProps = createPropsPrototype(
+    componentPropDefs.defaultProps,
     parentPropDefs && parentPropDefs.defaultProps,
     propTypes,
-    layerClass
+    componentClass
   );
 
   // Store the precalculated props
-  layerClass._mergedDefaultProps = defaultProps;
-  layerClass._propTypes = propTypes;
+  componentClass._mergedDefaultProps = defaultProps;
+  componentClass._propTypes = propTypes;
 
   return {propTypes, defaultProps};
 }
 
-function buildDefaultProps(props, parentProps, propTypes, layerClass) {
+// Builds a pre-merged default props object that component props can inherit from
+function createPropsPrototype(props, parentProps, propTypes, componentClass) {
   const defaultProps = Object.create(null);
 
   Object.assign(defaultProps, parentProps, props);
 
-  const descriptors = {};
-
-  const id = getLayerName(layerClass);
+  // Avoid freezing `id` prop
+  const id = getComponentName(componentClass);
   delete props.id;
 
-  Object.assign(descriptors, {
+  // Add getters/setters for async prop properties
+  Object.defineProperties(defaultProps, {
+    // `id` is treated specially because layer might need to override it
     id: {
       configurable: false,
       writable: true,
@@ -124,7 +117,89 @@ function buildDefaultProps(props, parentProps, propTypes, layerClass) {
     }
   });
 
-  Object.defineProperties(defaultProps, descriptors);
+  // Add getters/setters for async prop properties
+  addAsyncPropsToPropPrototype(defaultProps, propTypes);
 
   return defaultProps;
+}
+
+// Create descriptors for overridable props
+function addAsyncPropsToPropPrototype(defaultProps, propTypes) {
+  const defaultValues = {};
+
+  const descriptors = {
+    // Default "resolved" values for async props, returned if value not yet resolved/set.
+    _asyncPropDefaultValues: {
+      enumerable: false,
+      value: defaultValues
+    },
+    // Shadowed object, just to make sure "early indexing" into the instance does not fail
+    _asyncPropOriginalValues: {
+      enumerable: false,
+      value: {}
+    }
+  };
+
+  // Move async props into shadow values
+  for (const propName in propTypes) {
+    const propType = propTypes[propName];
+    const {name, value} = propType;
+
+    // Note: async is ES7 keyword, can't destructure
+    if (propType.async) {
+      defaultValues[name] = value;
+      descriptors[name] = getDescriptorForAsyncProp(name, value);
+    }
+  }
+
+  Object.defineProperties(defaultProps, descriptors);
+}
+
+// Helper: Configures getter and setter for one async prop
+function getDescriptorForAsyncProp(name) {
+  return {
+    configurable: false,
+    // Save the provided value for async props in a special map
+    set(newValue) {
+      if (typeof newValue === 'string' || newValue instanceof Promise) {
+        this._asyncPropOriginalValues[name] = newValue;
+      } else {
+        this._asyncPropResolvedValues[name] = newValue;
+      }
+    },
+    // Only the component's state knows the true value of async prop
+    get() {
+      if (this._asyncPropResolvedValues) {
+        // Prop value isn't async, so just return it
+        if (name in this._asyncPropResolvedValues) {
+          const value = this._asyncPropResolvedValues[name];
+          // TODO - data expects null to be replaced with `[]`
+          return value ? value : this._asyncPropDefaultValues[name];
+        }
+        // It's an async prop value: look into component state
+        const state = this._component && this._component.internalState;
+        if (state && state.hasAsyncProp(name)) {
+          return state.getAsyncProp(name);
+        }
+      }
+      // component not yet initialized/matched, return the component's default value for the prop
+      return this._asyncPropDefaultValues[name];
+    }
+  };
+}
+
+// HELPER METHODS
+
+// Constructors have their super class constructors as prototypes
+function getOwnProperty(object, prop) {
+  return Object.prototype.hasOwnProperty.call(object, prop) && object[prop];
+}
+
+function getComponentName(componentClass) {
+  const componentName =
+    getOwnProperty(componentClass, 'layerName') || getOwnProperty(componentClass, 'componentName');
+  if (!componentName) {
+    log.once(0, `${componentClass.name}.componentName not specified`);
+  }
+  return componentName || componentClass.name;
 }

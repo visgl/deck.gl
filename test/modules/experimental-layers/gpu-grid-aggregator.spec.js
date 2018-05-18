@@ -16,10 +16,9 @@ test('GPUGridAggregator#GPU', t => {
   t.end();
 });
 
-/* These test cases fail on intel GPUs
-
-const {fixture, generateRandomGridPoints} = GridAggregationData;
-
+/*
+NOTE:  Disabling these tests as they fail on Chromium browser, works fine on Chrome (test-browser)
+const {generateRandomGridPoints} = GridAggregationData;
 test('GPUGridAggregator#CPU', t => {
   const sa = new GPUGridAggregator(gl);
 

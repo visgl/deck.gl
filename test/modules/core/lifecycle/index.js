@@ -20,3 +20,5 @@
 
 import './props.spec';
 import './prop-types.spec';
+import './component.spec';
+import './component-state.spec';
