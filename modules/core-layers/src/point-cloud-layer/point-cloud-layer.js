@@ -61,7 +61,7 @@ export default class PointCloudLayer extends Layer {
         size: 3,
         transition: true,
         accessor: 'getNormal',
-        defaultValue: 1
+        defaultValue: [0, 0, 1]
       },
       instanceColors: {
         size: 4,

@@ -46,6 +46,9 @@ A new `Deck.initialViewState` property allows the application to enable map or v
 
 The [`View`](/docs/api-reference/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orhtographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
+### Constant Accessors
+
+Many layers' accessor props now accept constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. Constant values of accessors can be updated with very low performance cost and therefore do not require an `updateTrigger`. Consult each layer's updated documentation to see which accessors are supported.
 
 ## deck.gl v5.2
 

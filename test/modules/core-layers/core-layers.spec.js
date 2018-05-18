@@ -143,15 +143,6 @@ test('ArcLayer#constructor', t => {
           getSourcePosition: d => d.START,
           getTargetPosition: d => d.END
         }
-      },
-      {
-        updateProps: {
-          strokeWidth: 10
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
-        }
       }
     ]
   });
@@ -212,15 +203,6 @@ test('LineLayer#constructor', t => {
           data,
           getSourcePosition: d => d.START,
           getTargetPosition: d => d.END
-        }
-      },
-      {
-        updateProps: {
-          strokeWidth: 10
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.model.uniforms.strokeWidth === 10, 'should update strokeWidth');
         }
       },
       {

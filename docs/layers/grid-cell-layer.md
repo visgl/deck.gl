@@ -95,12 +95,14 @@ Expecting [lon, lat].
 Method called to retrieve the elevation of each cell.
 Expecting a number, 1 unit approximate to 100 meter
 
-##### `getColor` (Function, optional)
+##### `getColor` (Function|Array, optional)
 
 * Default: `cell => cell.color`
 
-Method called to retrieve the rgba color of each cell. Expecting [r, g, b, a].
-If the alpha is not provided, it will be set to `255`.
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
 
 ## Source
 

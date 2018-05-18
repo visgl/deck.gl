@@ -93,6 +93,13 @@ export default class PolygonLayer extends CompositeLayer {
     });
   }
 
+  _getAccessor(accessor) {
+    if (typeof accessor === 'function') {
+      return x => accessor(x.object);
+    }
+    return accessor;
+  }
+
   /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
@@ -181,9 +188,9 @@ export default class PolygonLayer extends CompositeLayer {
           dashJustified: lineDashJustified,
 
           getPath: x => x.path,
-          getColor: x => getLineColor(x.object),
-          getWidth: x => getLineWidth(x.object),
-          getDashArray: getLineDashArray && (x => getLineDashArray(x.object))
+          getColor: this._getAccessor(getLineColor),
+          getWidth: this._getAccessor(getLineWidth),
+          getDashArray: this._getAccessor(getLineDashArray)
         }
       );
 

@@ -132,18 +132,35 @@ export default class TextLayer extends CompositeLayer {
     return datum.offsets[datum.offsets.length - 1];
   }
 
-  getAnchorXFromTextAnchor(textAnchor) {
-    if (!TEXT_ANCHOR.hasOwnProperty(textAnchor)) {
-      throw new Error(`Invalid text anchor parameter: ${textAnchor}`);
+  _getAccessor(accessor) {
+    if (typeof accessor === 'function') {
+      return x => accessor(x.object);
     }
-    return TEXT_ANCHOR[textAnchor];
+    return accessor;
   }
 
-  getAnchorYFromAlignmentBaseline(alignmentBaseline) {
-    if (!ALIGNMENT_BASELINE.hasOwnProperty(alignmentBaseline)) {
-      throw new Error(`Invalid alignment baseline parameter: ${alignmentBaseline}`);
-    }
-    return ALIGNMENT_BASELINE[alignmentBaseline];
+  getAnchorXFromTextAnchor(getTextAnchor) {
+    return x => {
+      const textAnchor =
+        typeof getTextAnchor === 'function' ? getTextAnchor(x.object) : getTextAnchor;
+      if (!TEXT_ANCHOR.hasOwnProperty(textAnchor)) {
+        throw new Error(`Invalid text anchor parameter: ${textAnchor}`);
+      }
+      return TEXT_ANCHOR[textAnchor];
+    };
+  }
+
+  getAnchorYFromAlignmentBaseline(getAlignmentBaseline) {
+    return x => {
+      const alignmentBaseline =
+        typeof getAlignmentBaseline === 'function'
+          ? getAlignmentBaseline(x.object)
+          : getAlignmentBaseline;
+      if (!ALIGNMENT_BASELINE.hasOwnProperty(alignmentBaseline)) {
+        throw new Error(`Invalid alignment baseline parameter: ${alignmentBaseline}`);
+      }
+      return ALIGNMENT_BASELINE[alignmentBaseline];
+    };
   }
 
   renderLayers() {
@@ -177,12 +194,12 @@ export default class TextLayer extends CompositeLayer {
           getPosition: d => getPosition(d.object),
           getShiftInQueue: d => this.getLetterOffset(d),
           getLengthOfQueue: d => this.getTextLength(d),
-          getColor: d => getColor(d.object),
-          getSize: d => getSize(d.object),
-          getAngle: d => getAngle(d.object),
-          getAnchorX: d => this.getAnchorXFromTextAnchor(getTextAnchor(d.object)),
-          getAnchorY: d => this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline(d.object)),
-          getPixelOffset: d => getPixelOffset(d.object),
+          getColor: this._getAccessor(getColor),
+          getSize: this._getAccessor(getSize),
+          getAngle: this._getAccessor(getAngle),
+          getAnchorX: this.getAnchorXFromTextAnchor(getTextAnchor),
+          getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
+          getPixelOffset: this._getAccessor(getPixelOffset),
           fp64,
           sizeScale: sizeScale * scale,
           updateTriggers: {

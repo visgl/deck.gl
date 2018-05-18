@@ -226,6 +226,9 @@ export default class AttributeManager {
     this._checkExternalBuffers({buffers, ignoreUnknownAttributes});
     this._setExternalBuffers(buffers);
 
+    // Apply constant accessors
+    this._setGenericAttributes({data, props, context});
+
     // Only initiate alloc/update (and logging) if actually needed
     if (this._checkIfBuffersNeedUpdating({numInstances})) {
       logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
@@ -409,6 +412,15 @@ export default class AttributeManager {
     }
 
     return needsUpdate;
+  }
+
+  _setGenericAttributes({data, props, context}) {
+    const {attributes} = this;
+
+    for (const attributeName in attributes) {
+      const attribute = attributes[attributeName];
+      attribute.setGenericValue({props});
+    }
   }
 
   // Calls update on any buffers that need update

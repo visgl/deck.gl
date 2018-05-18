@@ -99,32 +99,33 @@ Returns the specified path for the object.
 
 A path is an array of coordinates.
 
-##### `getColor` (Function, optional)
-
-Returns an array of color
+##### `getColor` (Function|Array, optional)
 
 * Default `(object, index) => object.color || [0, 0, 0, 255]`
 
-Method called to determine the rgba color of the source.
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-If the color alpha (the fourth component) is not provided,
-`alpha` will be set to `255`.
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
 
-##### `getWidth` (Function, optional)
+##### `getWidth` (Function|Number, optional)
 
 * Default: `(object, index) => object.width || 1`
 
-Method called to determine the width to draw each path with.
-Unit is meters.
+The width of each path, in meters.
 
-##### `getDashArray` (Function, optional)
+* If a number is provided, it is used as the width for all paths.
+* If a function is provided, it is called on each path to retrieve its width.
+
+##### `getDashArray` (Function|Array, optional)
 
 * Default: `null`
 
-Method called to get the dash array to draw each path with.
-Returns an array of two numbers: `[dashSize, gapSize]` relative to the width of the path. Returns `[0, 0]` to draw the path in solid line.
+The dash array to draw each path with: `[dashSize, gapSize]` relative to the width of the path.
 
-If this accessor is not specified, all paths are drawn as solid lines.
+* If an array is provided, it is used as the dash array for all paths.
+* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
+* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Source
 

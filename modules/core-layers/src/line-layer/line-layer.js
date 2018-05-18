@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer, experimental} from '@deck.gl/core';
-const {fp64LowPart, enable64bitSupport} = experimental;
+const {log, fp64LowPart, enable64bitSupport} = experimental;
 import {GL, Model, Geometry} from 'luma.gl';
 
 import vs from './line-layer-vertex.glsl';
@@ -28,15 +28,23 @@ import fs from './line-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  strokeWidth: 1,
   fp64: false,
 
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
-  getColor: x => x.color || DEFAULT_COLOR
+  getColor: x => x.color || DEFAULT_COLOR,
+  getStrokeWidth: 1
 };
 
 export default class LineLayer extends Layer {
+  constructor(props) {
+    if (Number.isFinite(props.strokeWidth)) {
+      log.deprecated('LineLayer: `strokeWidth`', '`getStrokeWidth`');
+      props.getStrokeWidth = props.strokeWidth;
+    }
+    super(props);
+  }
+
   getShaders() {
     const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
@@ -68,6 +76,12 @@ export default class LineLayer extends Layer {
         transition: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
+      },
+      instanceWidths: {
+        size: 1,
+        transition: true,
+        accessor: 'getStrokeWidth',
+        defaultValue: 1
       }
     });
     /* eslint-enable max-len */
@@ -84,16 +98,6 @@ export default class LineLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.state.attributeManager.invalidateAll();
     }
-  }
-
-  draw({uniforms}) {
-    const {strokeWidth} = this.props;
-
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        strokeWidth
-      })
-    );
   }
 
   _getModel(gl) {

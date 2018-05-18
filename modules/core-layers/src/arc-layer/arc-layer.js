@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer, experimental} from '@deck.gl/core';
-const {fp64LowPart, enable64bitSupport} = experimental;
+const {log, fp64LowPart, enable64bitSupport} = experimental;
 
 import {GL, Model, Geometry} from 'luma.gl';
 
@@ -30,16 +30,24 @@ import fs from './arc-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  strokeWidth: 1,
   fp64: false,
 
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
   getSourceColor: x => x.color || DEFAULT_COLOR,
-  getTargetColor: x => x.color || DEFAULT_COLOR
+  getTargetColor: x => x.color || DEFAULT_COLOR,
+  getStrokeWidth: 1
 };
 
 export default class ArcLayer extends Layer {
+  constructor(props) {
+    if (Number.isFinite(props.strokeWidth)) {
+      log.deprecated('ArcLayer: `strokeWidth`', '`getStrokeWidth`');
+      props.getStrokeWidth = props.strokeWidth;
+    }
+    super(props);
+  }
+
   getShaders() {
     return enable64bitSupport(this.props)
       ? {vs: vs64, fs, modules: ['project64', 'picking']}
@@ -70,6 +78,12 @@ export default class ArcLayer extends Layer {
         transition: true,
         accessor: 'getTargetColor',
         defaultValue: DEFAULT_COLOR
+      },
+      instanceWidths: {
+        size: 1,
+        transition: true,
+        accessor: 'getStrokeWidth',
+        defaultValue: 1
       }
     });
     /* eslint-enable max-len */
@@ -105,16 +119,6 @@ export default class ArcLayer extends Layer {
       this.setState({model: this._getModel(gl)});
     }
     this.updateAttribute({props, oldProps, changeFlags});
-  }
-
-  draw({uniforms}) {
-    const {strokeWidth} = this.props;
-
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        strokeWidth
-      })
-    );
   }
 
   _getModel(gl) {

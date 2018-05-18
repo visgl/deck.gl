@@ -48,8 +48,8 @@ const App = ({data, viewport}) => {
     getPolygon: d => d.contour,
     getElevation: d => d.population / d.area / 10,
     getFillColor: d => [d.population / d.area / 60, 140, 0],
-    getLineColor: d => [80, 80, 80],
-    getLineWidth: d => 1,
+    getLineColor: [80, 80, 80],
+    getLineWidth: 1,
     onHover: ({object}) => setTooltip(`${object.zipcode}\nPopulation: ${object.population}`)
   });
 
@@ -173,33 +173,52 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-##### `getFillColor` (Function, optional)
+##### `getFillColor` (Function|Array, optional)
 
 * Default: `object => object.fillColor || [0, 0, 0, 255]`
 
-The fill color for the polygon
+The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-##### `getColor` (Function, optional)
+* If an array is provided, it is used as the fill color for all polygons.
+* If a function is provided, it is called on each polygon to retrieve its fill color.
+
+##### `getLineColor` (Function|Array, optional)
 
 * Default: `object => object.color || object => object.strokeColor || [0, 0, 0, 255]`
 
-The outline color for the polygon, if drawn in the outline mode
+The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-##### `getWidth` (Function, optional)
+* If an array is provided, it is used as the outline color for all polygons.
+* If a function is provided, it is called on each polygon to retrieve its outline color.
+
+
+##### `getLineWidth` (Function|Number, optional)
 
 * Default: `object => object.strokeWidth || 1`
 
-The width of the outline of the polygon, in meters
+The width of the outline of the polygon, in meters. Only applies if `extruded: false`.
 
-##### `getElevation` (Function, optional)
+* If a number is provided, it is used as the outline width for all polygons.
+* If a function is provided, it is called on each polygon to retrieve its outline width.
+
+##### `getElevation` (Function|Number, optional)
 
 * Default: `object => object.elevation || 1000`
 
-##### `getLineDashArray` (Function, optional)
+The elevation to extrude each polygon with, in meters. Only applies if `extruded: true`.
+
+* If a number is provided, it is used as the elevation for all polygons.
+* If a function is provided, it is called on each polygon to retrieve its elevation.
+
+##### `getLineDashArray` (Function|Array, optional)
 
 * Default: `null`
 
-Method called to get the dash array to draw each outline with. (See Path Layer)
+The dash array to draw each outline path with: `[dashSize, gapSize]` relative to the width of the line. (See PathLayer)
+
+* If an array is provided, it is used as the dash array for all paths.
+* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
+* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Remarks
 

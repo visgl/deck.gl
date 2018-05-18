@@ -89,20 +89,23 @@ Whether the layer should be rendered in high-precision 64-bit mode.
 
 Method called to retrieve the position of each object.
 
-##### `getRadius` (Function, optional)
+##### `getRadius` (Function|Number, optional)
 
-* Default: `object => object.radius`
+* Default: `object => object.radius || 1`
 
-Method called to retrieve the radius of each object.
+The radius of each object, in meters.
 
-##### `getColor` (Function, optional)
+* If a number is provided, it is used as the radius for all objects.
+* If a function is provided, it is called on each object to retrieve its radius.
 
-* Default: `object => object.color`
+##### `getColor` (Function|Array, optional)
 
-Method called to retrieve the rgba color of each object.
+* Default: `object => object.color || [0, 0, 0, 255]`
 
-* If the alpha parameter is not provided, it will be set to `255`.
-* If the method does not return a value for the given object, fallback to `[0, 0, 0, 255]`.
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
 
 ## Source
 

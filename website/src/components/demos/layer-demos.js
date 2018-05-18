@@ -31,7 +31,7 @@ export const ScatterplotLayerDemo = createLayerDemoClass({
     radiusMaxPixels: 100,
     getPosition: d => d.coordinates,
     getRadius: d => Math.sqrt(d.exits),
-    getColor: d => [255, 140, 0]
+    getColor: [255, 140, 0]
   }
 });
 
@@ -41,7 +41,7 @@ export const ArcLayerDemo = createLayerDemoClass({
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     pickable: true,
-    strokeWidth: 12,
+    getStrokeWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -55,7 +55,7 @@ export const LineLayerDemo = createLayerDemoClass({
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     pickable: true,
-    strokeWidth: 12,
+    getStrokeWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0]
@@ -155,7 +155,7 @@ export const PolygonLayerDemo = createLayerDemoClass({
     getPolygon: d => d.contour,
     getElevation: d => d.population / d.area / 10,
     getFillColor: d => [d.population / d.area / 60, 140, 0],
-    getLineColor: d => [80, 80, 80],
+    getLineColor: [80, 80, 80],
     getLineWidth: d => 1
   }
 });
@@ -171,11 +171,11 @@ export const GeoJsonLayerDemo = createLayerDemoClass({
     extruded: true,
     lineWidthScale: 20,
     lineWidthMinPixels: 2,
-    getFillColor: d => [160, 160, 180, 200],
+    getFillColor: [160, 160, 180, 200],
     getLineColor: d => colorToRGBArray(d.properties.color),
-    getRadius: d => 100,
-    getLineWidth: d => 1,
-    getElevation: d => 30
+    getRadius: 100,
+    getLineWidth: 1,
+    getElevation: 30
   }
 });
 
@@ -201,9 +201,12 @@ export const TextLayerDemo = createLayerDemoClass({
   formatTooltip: d => `${d.name}\n${d.address}`,
   props: {
     pickable: true,
-    sizeScale: 32,
+    sizeScale: 1,
     getPosition: d => d.coordinates,
     getText: d => d.name,
-    getSize: d => 1
+    getSize: 32,
+    getAngle: 0,
+    getTextAnchor: 'middle',
+    getAlignmentBaseline: 'center'
   }
 });

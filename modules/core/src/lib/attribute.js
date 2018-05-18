@@ -13,14 +13,17 @@ export default class LayerAttribute extends Attribute {
       noAlloc = false,
       update = null,
       accessor = null
-    } =
-      opts.userData || opts;
+    } = opts;
+
+    let {defaultValue = [0, 0, 0, 0]} = opts;
+    defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
     Object.assign(this.userData, opts, {
       transition,
       noAlloc,
       update,
       accessor,
+      defaultValue,
 
       // State
       isExternalBuffer: false,
@@ -98,6 +101,7 @@ export default class LayerAttribute extends Attribute {
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
 
+      this.isGeneric = false;
       this.value = new ArrayType(this.size * allocCount);
       state.needsAlloc = false;
       state.needsUpdate = true;
@@ -141,6 +145,27 @@ export default class LayerAttribute extends Attribute {
     return updated;
   }
 
+  setGenericValue({props}) {
+    const state = this.userData;
+    let value = props[state.accessor];
+
+    if (value === undefined || typeof value === 'function') {
+      // ignore if this attribute has no accessor
+      // ignore if accessor is function, will be used in updateBuffer
+      return;
+    }
+
+    value = this._normalizeValue(value);
+    const hasChanged = !this.isGeneric || !this._areValuesEqual(value, this.value);
+
+    if (hasChanged) {
+      this.update({isGeneric: true, value});
+    }
+    state.needsRedraw = state.needsUpdate || hasChanged;
+    state.needsUpdate = false;
+    state.isExternalBuffer = true;
+  }
+
   setExternalBuffer(buffer, numInstances) {
     const state = this.userData;
 
@@ -173,33 +198,52 @@ export default class LayerAttribute extends Attribute {
 
   // PRIVATE HELPER METHODS
 
+  /* check user supplied values and apply fallback */
+  _normalizeValue(value, size = this.size, defaultValue = this.userData.defaultValue) {
+    if (!Array.isArray(value) && !ArrayBuffer.isView(value)) {
+      value = [value];
+    }
+
+    /* eslint-disable no-fallthrough, default-case */
+    switch (size) {
+      case 4:
+        value[3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
+      case 3:
+        value[2] = Number.isFinite(value[2]) ? value[2] : defaultValue[2];
+      case 2:
+        value[1] = Number.isFinite(value[1]) ? value[1] : defaultValue[1];
+      case 1:
+        value[0] = Number.isFinite(value[0]) ? value[0] : defaultValue[0];
+    }
+
+    return value;
+  }
+
+  _areValuesEqual(value1, value2, size = this.size) {
+    for (let i = 0; i < size; i++) {
+      if (value1[i] !== value2[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   _updateBufferViaStandardAccessor(data, props) {
     const state = this.userData;
 
-    const {accessor} = state;
+    const {accessor, defaultValue} = state;
     const {value, size} = this;
     const accessorFunc = props[accessor];
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let {defaultValue = [0, 0, 0, 0]} = state;
-    defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
     let i = 0;
     for (const object of data) {
       let objectValue = accessorFunc(object);
-      objectValue = Array.isArray(objectValue) ? objectValue : [objectValue];
-      /* eslint-disable no-fallthrough, default-case */
-      switch (size) {
-        case 4:
-          value[i + 3] = Number.isFinite(objectValue[3]) ? objectValue[3] : defaultValue[3];
-        case 3:
-          value[i + 2] = Number.isFinite(objectValue[2]) ? objectValue[2] : defaultValue[2];
-        case 2:
-          value[i + 1] = Number.isFinite(objectValue[1]) ? objectValue[1] : defaultValue[1];
-        case 1:
-          value[i + 0] = Number.isFinite(objectValue[0]) ? objectValue[0] : defaultValue[0];
+      objectValue = this._normalizeValue(objectValue, size, defaultValue);
+      for (let j = 0; j < size; j++) {
+        value[i++] = objectValue[j];
       }
-      i += size;
     }
     this.update({value});
   }
