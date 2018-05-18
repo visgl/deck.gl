@@ -66,11 +66,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGLOverlay
-          viewport={viewport}
-          trailLength={180}
-          time={time}
-        />
+        <DeckGLOverlay viewport={viewport} trailLength={180} time={time} />
       </MapGL>
     );
   }

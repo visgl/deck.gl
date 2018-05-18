@@ -1,4 +1,4 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -48,10 +48,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGLOverlay
-          viewport={viewport}
-          strokeWidth={3}
-        />
+        <DeckGLOverlay viewport={viewport} strokeWidth={3} />
       </MapGL>
     );
   }
