@@ -31,7 +31,10 @@ const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
 
 const LIB_DIR = path.resolve(__dirname, '..');
-const EXAMPLES_DIR = path.resolve(LIB_DIR, 'examples/website');
+const EXAMPLES_WEBSITE_DIR = path.resolve(LIB_DIR, 'examples/website');
+const EXAMPLES_EXPERIMENTAL_DIR = path.resolve(LIB_DIR, 'examples/experimental');
+const EXAMPLES_GET_STARTED_DIR = path.resolve(LIB_DIR, 'examples/get-started');
+let exampleDir;
 
 function printResult(diffRatio, threshold) {
   return diffRatio <= threshold
@@ -113,7 +116,7 @@ function checkMapboxToken() {
 function changeFolder(folder) {
   console.log('--------------------------');
   console.log(`Begin to test ${folder}`);
-  process.chdir(path.resolve(EXAMPLES_DIR, folder));
+  process.chdir(path.resolve(exampleDir, folder));
 }
 
 async function runTestExample(folder) {
@@ -128,6 +131,16 @@ async function runTestExample(folder) {
 (async () => {
   checkMapboxToken();
 
+  exampleDir = EXAMPLES_EXPERIMENTAL_DIR;
+  await runTestExample('bezier');
+
+  exampleDir = EXAMPLES_GET_STARTED_DIR;
+  await runTestExample('pure-js');
+  await runTestExample('pure-js-without-map');
+  // await runTestExample('react-webpack');
+  await runTestExample('react-without-map');
+
+  exampleDir = EXAMPLES_WEBSITE_DIR;
   await runTestExample('3d-heatmap');
   await runTestExample('arc');
   await runTestExample('brushing');
