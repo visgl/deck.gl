@@ -2,6 +2,14 @@ import React, {Component} from 'react';
 import {setParameters} from 'luma.gl';
 import DeckGL, {LineLayer, ScatterplotLayer} from 'deck.gl';
 
+// Source data CSV
+const DATA_URL = {
+  AIRPORTS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json', // eslint-disable-line
+  FLIGHT_PATHS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
+};
+
 function getColor(d) {
   const z = d.start[2];
   const r = z / 10000;
@@ -39,16 +47,12 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, flightPaths, airports, strokeWidth} = this.props;
-
-    if (!flightPaths || !airports) {
-      return null;
-    }
+    const {viewport, strokeWidth} = this.props;
 
     const layers = [
       new ScatterplotLayer({
         id: 'airports',
-        data: airports,
+        data: DATA_URL.AIRPORTS,
         radiusScale: 20,
         getPosition: d => d.coordinates,
         getColor: d => [255, 140, 0],
@@ -58,7 +62,7 @@ export default class DeckGLOverlay extends Component {
       }),
       new LineLayer({
         id: 'flight-paths',
-        data: flightPaths,
+        data: DATA_URL.FLIGHT_PATHS,
         strokeWidth,
         fp64: false,
         getSourcePosition: d => d.start,

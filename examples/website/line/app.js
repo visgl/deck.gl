@@ -8,13 +8,6 @@ import DeckGLOverlay from './deckgl-overlay.js';
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
-const DATA_URL = {
-  AIRPORTS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json', // eslint-disable-line
-  FLIGHT_PATHS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
-};
-
 class Root extends Component {
   constructor(props) {
     super(props);
@@ -23,18 +16,8 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
         height: 500
-      },
-      flightPaths: null,
-      airports: null
+      }
     };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({flightPaths: data}));
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({airports: data}));
   }
 
   componentDidMount() {
@@ -56,7 +39,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, flightPaths, airports} = this.state;
+    const {viewport} = this.state;
 
     return (
       <MapGL
@@ -68,8 +51,6 @@ class Root extends Component {
         <DeckGLOverlay
           viewport={viewport}
           strokeWidth={3}
-          flightPaths={flightPaths}
-          airports={airports}
         />
       </MapGL>
     );

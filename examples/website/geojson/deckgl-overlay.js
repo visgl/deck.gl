@@ -1,6 +1,10 @@
 import React, {Component} from 'react';
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
+// Source data GeoJSON
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
+
 const LIGHT_SETTINGS = {
   lightsPosition: [-125, 50.5, 5000, -122.8, 48.5, 8000],
   ambientRatio: 0.2,
@@ -23,15 +27,11 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, data, colorScale} = this.props;
-
-    if (!data) {
-      return null;
-    }
+    const {viewport, colorScale} = this.props;
 
     const layer = new GeoJsonLayer({
       id: 'geojson',
-      data,
+      data: DATA_URL,
       opacity: 0.8,
       stroked: false,
       filled: true,
