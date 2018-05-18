@@ -30,6 +30,14 @@ function makePromise() {
   return Object.assign(promise, resolvers);
 }
 
+// const setAsyncProps = ComponentState.prototype.setAsyncProps;
+// ComponentState.prototype.setAsyncProps = function setAsyncPropsTest(props) {
+//   props._asyncPropResolvedValues = props._asyncPropResolvedValues || {};
+//   props._asyncPropOriginalValues = props._asyncPropOriginalValues || props;
+//   props._asyncPropDefaultlValues = props._asyncPropDefaultValues || {data: []};
+//   setAsyncProps.call(this, props);
+// }
+
 test('ComponentState#imports', t => {
   t.ok(ComponentState, 'ComponentState import ok');
   t.end();
