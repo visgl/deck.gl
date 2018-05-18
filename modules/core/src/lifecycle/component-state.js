@@ -18,6 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import log from '../utils/log';
+
 // TODO - hack for initial PR, remove
 const ASYNC_PROPS = {
   data: null
@@ -83,48 +85,25 @@ export default class ComponentState {
     // Makes sure a record exists for this prop
     this._getAsyncPropData(propName);
 
-    if (value instanceof Promise) {
-      this._loadPromiseProp(propName, value);
+    if (!this._didAsyncInputValueChange(propName, value)) {
       return;
     }
 
+    // interpret value string as url and start a new load tracked by a promise
     if (typeof value === 'string') {
-      this._loadUrlProp(propName, value);
+      const {fetch} = this.layer.props;
+      const url = value;
+      value = fetch(url);
+    }
+
+    // interprets promise and track the "loading"
+    if (value instanceof Promise) {
+      this._watchPromise(propName, value);
       return;
     }
 
     // else, normal, non-async value. Just store value for now
     this._setPropValue(propName, value);
-  }
-
-  // interpret value string as promise and track the "loading"
-  _loadPromiseProp(propName, promise) {
-    if (!this._didAsyncInputValueChange(propName, promise)) {
-      return;
-    }
-
-    this._watchPromise(propName, promise);
-  }
-
-  // interpret value string as url, start and track a new load
-  _loadUrlProp(propName, url) {
-    if (!this._didAsyncInputValueChange(propName, url)) {
-      return;
-    }
-
-    // interpret value string as url and start a new load
-    const {fetch} = this.layer.props;
-    const promise = fetch(url);
-
-    this._watchPromise(propName, promise);
-  }
-
-  // Tracks a promise, sets the prop when loaded, handles load count
-  _watchPromise(propName, promise) {
-    const asyncProp = this.asyncProps[propName];
-    asyncProp.pendingLoadCount++;
-    const loadCount = asyncProp.pendingLoadCount;
-    promise.then(data => this._setAsyncPropValue(propName, data, loadCount));
   }
 
   // Checks if an input value actually changed (to avoid reloading/rewatching promises/urls)
@@ -139,10 +118,6 @@ export default class ComponentState {
 
   // Set normal, non-async value
   _setPropValue(propName, value) {
-    if (!this._didAsyncInputValueChange(propName, value)) {
-      return;
-    }
-
     const asyncProp = this.asyncProps[propName];
     asyncProp.value = value;
     asyncProp.resolvedValue = value;
@@ -163,6 +138,16 @@ export default class ComponentState {
       // Call callback to inform listener
       this.onAsyncPropUpdated(propName, value);
     }
+  }
+
+  // Tracks a promise, sets the prop when loaded, handles load count
+  _watchPromise(propName, promise) {
+    const asyncProp = this.asyncProps[propName];
+    asyncProp.pendingLoadCount++;
+    const loadCount = asyncProp.pendingLoadCount;
+    promise
+      .then(data => this._setAsyncPropValue(propName, data, loadCount))
+      .catch(error => log.error(error));
   }
 
   // Give the app a chance to post process the loaded data
