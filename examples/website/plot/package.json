@@ -1,4 +1,7 @@
 {
+  "name": "plot",
+  "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
@@ -8,8 +11,8 @@
     "d3-scale": "^1.0.6",
     "deck.gl": "^5.2.0",
     "luma.gl": "^5.2.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
     "buble": "^0.19.3",

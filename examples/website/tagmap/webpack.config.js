@@ -6,11 +6,11 @@ const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const CONFIG = {
+  mode: 'development',
+
   entry: {
     app: resolve('./app.js')
   },
-
-  devtool: 'source-map',
 
   module: {
     rules: [
@@ -31,10 +31,6 @@ const CONFIG = {
     ]
   },
 
-  node: {
-    __dirname: true
-  },
-
   resolve: {
     alias: {
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
@@ -43,7 +39,11 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])],
+
+  node: {
+    __dirname: true
+  }
 };
 
 // DELETE THIS LINE WHEN COPYING THIS EXAMPLE FOLDER OUTSIDE OF DECK.GL

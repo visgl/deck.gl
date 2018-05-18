@@ -1,4 +1,7 @@
 {
+  "name": "react-browserify",
+  "version": "0.0.0",
+  "license": "MIT",
   "scripts": {
     "start": "budo ./app.js --open -- -t babelify -t envify",
     "build": "browserify ./app.js -o dist-bundle.js -t babelify"
@@ -6,8 +9,8 @@
   "dependencies": {
     "babel-polyfill": "^6.16.0",
     "deck.gl": "^5.2.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
     "react-map-gl": "^3.2.0"
   },
   "devDependencies": {

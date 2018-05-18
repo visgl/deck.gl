@@ -46,7 +46,7 @@ export default class DeckGLOverlay extends Component {
 
     return (
       <div style={{pointerEvents: 'all'}}>
-        <DeckGL width={width} height={height} views={view} layers={layers} />
+        <DeckGL width="100%" height="100%" views={view} layers={layers} />
       </div>
     );
   }

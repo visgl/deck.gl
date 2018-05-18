@@ -30,3 +30,7 @@ export const deck = new Deck({
     })
   ]
 });
+
+// For automated test cases
+/* global document */
+document.body.style.margin = '0px';

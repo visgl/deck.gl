@@ -6,12 +6,14 @@ const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const CONFIG = {
+  mode: 'development',
+
+  devtool: 'source-map',
+
   // bundle app.js and everything it imports, recursively.
   entry: {
     app: resolve('./src')
   },
-
-  devtool: 'source-map',
 
   resolve: {
     // Make src files outside of this dir resolve modules in our node_modules folder
@@ -37,13 +39,14 @@ const CONFIG = {
             dangerousForOf: true // Use for/of in spite of buble's limitations
           }
         }
-      },
-      {
-        // The example has some JSON data
-        test: /\.json$/,
-        loader: 'json-loader',
-        exclude: [/node_modules/]
       }
+      // ,
+      // {
+      //   // The example has some JSON data
+      //   test: /\.json$/,
+      //   loader: 'json-loader',
+      //   exclude: [/node_modules/]
+      // }
     ]
   },
 

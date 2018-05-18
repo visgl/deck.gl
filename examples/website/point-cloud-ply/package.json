@@ -14,12 +14,14 @@
     "deck.gl": "^5.2.0",
     "gl-matrix": "^2.3.2",
     "is-little-endian": "0.0.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.1",
-    "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }

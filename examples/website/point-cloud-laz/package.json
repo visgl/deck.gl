@@ -1,6 +1,6 @@
 {
   "name": "point-cloud-laz",
-  "version": "0.0.1",
+  "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "deck.gl": "^5.2.0",
-    "react": "^16.2.0",
-    "react-dom": "^16.2.0"
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
     "buble": "^0.19.3",
