@@ -959,6 +959,7 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/text-layer.png'
   },
+  /*
   {
     name: 'gpu-screengrid-lnglat',
     viewState: {
@@ -981,6 +982,7 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
   },
+  */
   {
     name: 'text-layer-64',
     viewState: {
