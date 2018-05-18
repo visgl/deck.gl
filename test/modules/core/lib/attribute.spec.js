@@ -47,10 +47,23 @@ test('Attribute#getUpdateTriggers', t => {
   t.deepEqual(attribute.getUpdateTriggers(), ['indices'], 'returns correct update triggers');
 
   attribute = new Attribute(gl, {id: 'instanceSizes', size: 1, accessor: 'getSize', update});
-  t.deepEqual(attribute.getUpdateTriggers(), ['instanceSizes', 'getSize'], 'returns correct update triggers');
+  t.deepEqual(
+    attribute.getUpdateTriggers(),
+    ['instanceSizes', 'getSize'],
+    'returns correct update triggers'
+  );
 
-  attribute = new Attribute(gl, {id: 'instancePositions', size: 1, accessor: ['getPosition', 'getElevation'], update});
-  t.deepEqual(attribute.getUpdateTriggers(), ['instancePositions', 'getPosition', 'getElevation'], 'returns correct update triggers');
+  attribute = new Attribute(gl, {
+    id: 'instancePositions',
+    size: 1,
+    accessor: ['getPosition', 'getElevation'],
+    update
+  });
+  t.deepEqual(
+    attribute.getUpdateTriggers(),
+    ['instancePositions', 'getPosition', 'getElevation'],
+    'returns correct update triggers'
+  );
 
   t.end();
 });
