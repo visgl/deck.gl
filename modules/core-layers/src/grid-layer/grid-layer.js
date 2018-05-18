@@ -71,12 +71,13 @@ export default class GridLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const dimensionChanges = this.getDimensionChanges(oldProps, props);
+    const reprojectNeeded = this.needsReProjectPoints(oldProps, props);
 
-    if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
+    if (changeFlags.dataChanged || reprojectNeeded) {
       // project data into hexagons, and get sortedBins
       this.getLayerData();
-    } else if (dimensionChanges) {
+    } else {
+      const dimensionChanges = this.getDimensionChanges(oldProps, props) || [];
       dimensionChanges.forEach(f => typeof f === 'function' && f.apply(this));
     }
   }

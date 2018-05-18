@@ -193,7 +193,7 @@ function layerConstructionBench(suite) {
     .add('ScatterplotLayer#construct(separate prop objects)', () => {
       return new ScatterplotLayer(PROPS1, PROPS2, PROPS3);
     })
-    .add('ScatterplotLayer#construct(precomposed prop objects)', () => {
+    .add('ScatterplotLayer#construct(composed prop objects)', () => {
       return new ScatterplotLayer(Object.assign({}, PROPS1, PROPS2, PROPS3));
     });
 }

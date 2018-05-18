@@ -90,7 +90,7 @@ export const initLayerInSeer = layer => {
     badges,
     // TODO: Seer currently only handles single model layers
     links: layer.state && layer.state.model ? [`luma.gl:${layer.state.model.id}`] : undefined,
-    parent: layer.parentLayer ? layer.parentLayer.id : undefined
+    parent: layer.parent ? layer.parent.id : undefined
   });
 };
 

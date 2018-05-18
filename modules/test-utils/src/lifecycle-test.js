@@ -99,7 +99,7 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
 
   // Run successive update tests
   for (let i = 0; i < testCases.length; i++) {
-    const {props, updateProps, assert} = testCases[i];
+    const {props, updateProps, assertBefore, assert} = testCases[i];
 
     spies = testCases[i].spies || spies;
 
@@ -122,6 +122,10 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
 
     // copy old state before update
     const oldState = Object.assign({}, layer.state);
+
+    if (assertBefore) {
+      assertBefore({layer, oldState, spies: spyMap, userData});
+    }
 
     layer = layer.clone(combinedProps);
     doesNotThrow(
