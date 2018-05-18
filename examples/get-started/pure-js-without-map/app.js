@@ -1,4 +1,3 @@
-/* global fetch */
 import {Deck, MapController} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/core-layers';
 
@@ -14,28 +13,20 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const deckgl = new Deck({
+export const deck = new Deck({
   width: '100%',
   height: '100%',
-  viewState: INITIAL_VIEW_STATE,
+  initialViewState: INITIAL_VIEW_STATE,
   controller: MapController,
-  onViewportChange: viewState => deckgl.setProps({viewState})
+  layers: [
+    new GeoJsonLayer({
+      data: GEOJSON,
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 2,
+      opacity: 0.4,
+      getLineColor: () => [255, 100, 100],
+      getFillColor: () => [200, 160, 0, 180]
+    })
+  ]
 });
-
-fetch(GEOJSON)
-  .then(resp => resp.json())
-  .then(data => {
-    deckgl.setProps({
-      layers: [
-        new GeoJsonLayer({
-          data,
-          stroked: true,
-          filled: true,
-          lineWidthMinPixels: 2,
-          opacity: 0.4,
-          getLineColor: () => [255, 100, 100],
-          getFillColor: () => [200, 160, 0, 180]
-        })
-      ]
-    });
-  });

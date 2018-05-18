@@ -702,6 +702,8 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = this.getAttributeManager();
 
+    this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
+
     // Ensure any async props are updated
     this.internalState.setAsyncProps(this.props);
   }
@@ -734,7 +736,15 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       model.userData.layer = this;
     }
 
+    // Ensure any async props are updated
+    this.internalState.setAsyncProps(this.props);
+
     this.diffProps(this.props, this.internalState.getOldProps());
+  }
+
+  _onAsyncPropUpdated() {
+    this.diffProps(this.props, this.internalState.getOldProps());
+    this.setLayerNeedsUpdate();
   }
 
   // Operate on each changed triggers, will be called when an updateTrigger changes

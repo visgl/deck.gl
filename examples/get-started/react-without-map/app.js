@@ -1,4 +1,3 @@
-/* global document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {GeoJsonLayer, MapController} from 'deck.gl';
@@ -17,20 +16,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 class Root extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      data: null
-    };
-
-    fetch(GEOJSON)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
-  }
-
   render() {
-    const {data} = this.state;
-
     return (
       <DeckGL
         width="100%"
@@ -39,7 +25,7 @@ class Root extends Component {
         initialViewState={INITIAL_VIEW_STATE}
         layers={[
           new GeoJsonLayer({
-            data,
+            data: GEOJSON,
             stroked: true,
             filled: true,
             lineWidthMinPixels: 2,
@@ -52,4 +38,5 @@ class Root extends Component {
   }
 }
 
+/* global document */
 render(<Root />, document.body.appendChild(document.createElement('div')));
