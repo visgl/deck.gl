@@ -189,7 +189,7 @@ export default class ComponentState {
   _createAsyncPropData(propName, value, defaultValue) {
     const asyncProp = this.asyncProps[propName];
     if (!asyncProp) {
-      // assert(defaultValue !== undefined);
+      assert(defaultValue !== undefined);
       this.asyncProps[propName] = {
         lastValue: null, // Supplied prop value (can be url/promise, not visible to layer)
         resolvedValue: defaultValue, // Resolved prop value (valid data, can be "shown" to layer)
