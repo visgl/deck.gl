@@ -1,7 +1,7 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 // TODO: remove hard path once @deck.gl/experimental-layers published with GPUScreenGridLayer
-import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
+// import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
 import {GL} from 'luma.gl';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
@@ -959,6 +959,7 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/text-layer.png'
   },
+  /*
   {
     name: 'gpu-screengrid-lnglat',
     viewState: {
@@ -981,6 +982,7 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
   },
+  */
   {
     name: 'text-layer-64',
     viewState: {
