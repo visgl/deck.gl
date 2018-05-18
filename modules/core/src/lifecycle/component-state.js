@@ -50,6 +50,7 @@ export default class ComponentState {
       this.oldProps = this.oldProps || this.component.props;
 
       // Deep copy props (Object.assign only handles shallow props)
+      // TODO - Alternatively, just reconfigure the async prop descriptors to fixed values?
       this.oldAsyncProps = {};
       for (const propName in this.oldProps) {
         this.oldAsyncProps[propName] = this.oldProps[propName];
