@@ -91,20 +91,20 @@ export default class ComponentState {
     // TODO - use async props from the layer's prop types
     for (const propName in resolvedValues) {
       const value = resolvedValues[propName];
-      this._updateAsyncProp(propName, value, defaultValues[propName]);
+      this._createAsyncPropData(propName, value, defaultValues[propName]);
+      this._updateAsyncProp(propName, value);
     }
 
     for (const propName in originalValues) {
       const value = originalValues[propName];
-      this._updateAsyncProp(propName, value, defaultValues[propName]);
+      // Makes sure a record exists for this prop
+      this._createAsyncPropData(propName, value, defaultValues[propName]);
+      this._updateAsyncProp(propName, value);
     }
   }
 
   // Intercept strings (URLs) and Promises and activates loading and prop rewriting
   _updateAsyncProp(propName, value) {
-    // Makes sure a record exists for this prop
-    this._getAsyncPropData(propName);
-
     if (!this._didAsyncInputValueChange(propName, value)) {
       return;
     }
@@ -184,11 +184,11 @@ export default class ComponentState {
     return value;
   }
 
-  // Return a asyncProp, creating it if needed
-  _getAsyncPropData(propName, value, defaultValue) {
+  // Creating an asyncProp record if needed
+  _createAsyncPropData(propName, value, defaultValue) {
     const asyncProp = this.asyncProps[propName];
     if (!asyncProp) {
-      // assert(defaultValue !== undefined);
+      assert(defaultValue !== undefined);
       this.asyncProps[propName] = {
         lastValue: null, // Supplied prop value (can be url/promise, not visible to layer)
         resolvedValue: defaultValue, // Resolved prop value (valid data, can be "shown" to layer)
@@ -196,6 +196,5 @@ export default class ComponentState {
         resolvedLoadCount: 0 // Latest resolved load, (earlier loads will be ignored)
       };
     }
-    return this.asyncProps[propName];
   }
 }
