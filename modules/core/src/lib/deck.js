@@ -188,7 +188,7 @@ export default class Deck {
     }
 
     // Update animation loop
-    if (this.animtionLoop) {
+    if (this.animationLoop) {
       this.animationLoop.setProps(newProps);
     }
 
