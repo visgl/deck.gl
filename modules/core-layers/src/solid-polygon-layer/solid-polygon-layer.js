@@ -85,32 +85,38 @@ const SIDE_WIRE_POSITIONS = new Float32Array([
 ]);
 
 // Model types
+const ATTRIBUTE_OVERRIDES = {
+  TOP: null,
+  SIDE: {instanced: 1},
+  WIRE: {instanced: 1}
+};
+
 const ATTRIBUTE_MAPS = {
   TOP: {
-    indices: {instanced: 0},
-    positions: {instanced: 0},
-    positions64xyLow: {instanced: 0},
-    elevations: {instanced: 0},
-    fillColors: {name: 'colors', instanced: 0},
-    pickingColors: {instanced: 0}
+    indices: 'indices',
+    positions: 'positions',
+    positions64xyLow: 'positions64xyLow',
+    elevations: 'elevations',
+    colors: 'fillColors',
+    pickingColors: 'pickingColors'
   },
   SIDE: {
-    positions: {instanced: 1},
-    positions64xyLow: {instanced: 1},
-    nextPositions: {instanced: 1},
-    nextPositions64xyLow: {instanced: 1},
-    elevations: {instanced: 1},
-    fillColors: {name: 'colors', instanced: 1},
-    pickingColors: {instanced: 1}
+    positions: 'positions',
+    positions64xyLow: 'positions64xyLow',
+    nextPositions: 'nextPositions',
+    nextPositions64xyLow: 'nextPositions64xyLow',
+    elevations: 'elevations',
+    colors: 'fillColors',
+    pickingColors: 'pickingColors'
   },
   WIRE: {
-    positions: {instanced: 1},
-    positions64xyLow: {instanced: 1},
-    nextPositions: {instanced: 1},
-    nextPositions64xyLow: {instanced: 1},
-    elevations: {instanced: 1},
-    lineColors: {name: 'colors', instanced: 1},
-    pickingColors: {instanced: 1}
+    positions: 'positions',
+    positions64xyLow: 'positions64xyLow',
+    nextPositions: 'nextPositions',
+    nextPositions64xyLow: 'nextPositions64xyLow',
+    elevations: 'elevations',
+    colors: 'lineColors',
+    pickingColors: 'pickingColors'
   }
 };
 
@@ -291,14 +297,15 @@ export default class SolidPolygonLayer extends Layer {
       }
 
       const attributeMap = ATTRIBUTE_MAPS[modelName];
+      const attributeOverride = ATTRIBUTE_OVERRIDES[modelName];
       const newAttributes = {};
-      for (const attributeName in attributes) {
-        const attribute = attributes[attributeName];
-        const attributeOverride = attributeMap[attributeName];
+      for (const attributeName in attributeMap) {
+        const attribute = attributes[attributeMap[attributeName]];
 
-        if (attributeOverride) {
-          attribute.instanced = attributeOverride.instanced;
-          newAttributes[attributeOverride.name || attributeName] = attribute;
+        if (attribute) {
+          newAttributes[attributeName] = attributeOverride
+            ? Object.assign({}, attribute, attributeOverride, {buffer: attribute.getBuffer()})
+            : attribute;
         }
       }
       model.setAttributes(newAttributes);
@@ -381,7 +388,6 @@ export default class SolidPolygonLayer extends Layer {
 
   calculateIndices(attribute) {
     attribute.value = this.state.polygonTesselator.indices();
-    attribute.target = GL.ELEMENT_ARRAY_BUFFER;
     const numVertex = attribute.value.length / attribute.size;
     this.setState({numVertex});
   }
