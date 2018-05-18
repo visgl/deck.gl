@@ -24,12 +24,12 @@ import {GL, Buffer} from 'luma.gl';
 import test from 'tape-catch';
 import {gl} from '@deck.gl/test-utils';
 
-test('Attribute imports', t => {
+test('Attribute#imports', t => {
   t.equals(typeof Attribute, 'function', 'Attribute import successful');
   t.end();
 });
 
-test('Attribute constructor', t => {
+test('Attribute#constructor', t => {
   const attribute = new Attribute(gl, {size: 1, accessor: 'a'});
 
   t.ok(attribute, 'Attribute construction successful');
@@ -37,6 +37,21 @@ test('Attribute constructor', t => {
   t.ok(attribute.allocate, 'Attribute.allocate function available');
   t.ok(attribute.update, 'Attribute._updateBuffer function available');
   t.ok(attribute.setExternalBuffer, 'Attribute._setExternalBuffer function available');
+  t.end();
+});
+
+test('Attribute#getUpdateTriggers', t => {
+  const update = () => {};
+
+  let attribute = new Attribute(gl, {id: 'indices', isIndexed: true, size: 1, update});
+  t.deepEqual(attribute.getUpdateTriggers(), ['indices'], 'returns correct update triggers');
+
+  attribute = new Attribute(gl, {id: 'instanceSizes', size: 1, accessor: 'getSize', update});
+  t.deepEqual(attribute.getUpdateTriggers(), ['instanceSizes', 'getSize'], 'returns correct update triggers');
+
+  attribute = new Attribute(gl, {id: 'instancePositions', size: 1, accessor: ['getPosition', 'getElevation'], update});
+  t.deepEqual(attribute.getUpdateTriggers(), ['instancePositions', 'getPosition', 'getElevation'], 'returns correct update triggers');
+
   t.end();
 });
 

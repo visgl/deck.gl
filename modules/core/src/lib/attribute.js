@@ -51,6 +51,17 @@ export default class LayerAttribute extends Attribute {
     return this.value !== null ? this.value.length / this.size : 0;
   }
 
+  getUpdateTriggers() {
+    const {accessor} = this.userData;
+
+    // Backards compatibility: allow attribute name to be used as update trigger key
+    return [this.id].concat(accessor || []);
+  }
+
+  supportsTransition() {
+    return this.userData.transition;
+  }
+
   // Checks that typed arrays for attributes are big enough
   // sets alloc flag if not
   // @return {Boolean} whether any updates are needed

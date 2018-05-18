@@ -185,7 +185,7 @@ export default class AttributeManager {
     for (let i = 0; i < attributeNameArray.length; i++) {
       const name = attributeNameArray[i];
       if (this.attributes[name] !== undefined) {
-        this.attributes[name].finalize();
+        this.attributes[name].delete();
         delete this.attributes[name];
       }
     }
@@ -334,23 +334,12 @@ export default class AttributeManager {
 
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
-      let {accessor} = attribute.userData;
-
-      // Backards compatibility: allow attribute name to be used as update trigger key
-      triggers[attributeName] = [attributeName];
-
-      // use accessor name as update trigger key
-      if (typeof accessor === 'string') {
-        accessor = [accessor];
-      }
-      if (Array.isArray(accessor)) {
-        accessor.forEach(accessorName => {
-          if (!triggers[accessorName]) {
-            triggers[accessorName] = [];
-          }
-          triggers[accessorName].push(attributeName);
-        });
-      }
+      attribute.getUpdateTriggers().forEach(triggerName => {
+        if (!triggers[triggerName]) {
+          triggers[triggerName] = [];
+        }
+        triggers[triggerName].push(attributeName);
+      });
     }
 
     this.updateTriggers = triggers;
