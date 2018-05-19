@@ -1,4 +1,4 @@
-/* global document */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
@@ -43,4 +43,6 @@ class Root extends Component {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+if (!window.demoLauncherActive) {
+  render(<Root />, document.body.appendChild(document.createElement('div')));
+}

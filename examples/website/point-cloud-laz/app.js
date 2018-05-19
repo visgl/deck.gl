@@ -217,7 +217,6 @@ class Example extends PureComponent {
   }
 }
 
-const root = document.createElement('div');
-document.body.appendChild(root);
-
-render(<Example />, root);
+if (!window.demoLauncherActive) {
+  render(<Example />, document.body.appendChild(document.createElement('div')));
+}

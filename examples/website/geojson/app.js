@@ -32,8 +32,10 @@ const INITIAL_VIEW_STATE = {
 const DEFAULT_COLOR_SCALE = r => [r * 255, 140, 200 * (1 - r)];
 
 export class App extends Component {
-  static get defaultViewport() {
-    return null;
+  static get DEMO_SETTINGS() {
+    return {
+      INITIAL_VIEW_STATE
+    };
   }
 
   constructor(props) {
@@ -42,7 +44,14 @@ export class App extends Component {
   }
 
   render() {
-    const {data = DATA_URL, colorScale = DEFAULT_COLOR_SCALE} = this.props;
+    const {
+      data = DATA_URL,
+      colorScale = DEFAULT_COLOR_SCALE,
+      onViewStateChange = ({viewState}) => this.setState({viewState}),
+      viewState = this.state.viewState,
+      mapToken = MAPBOX_TOKEN,
+      mapStyle = null
+    } = this.props;
 
     const layer = new GeoJsonLayer({
       id: 'geojson',
@@ -63,23 +72,25 @@ export class App extends Component {
 
     return (
       <DeckGL
-        views={new MapView({id: 'map'})}
-        viewState={this.state.viewState}
-        controller={MapController}
-        onViewStateChange={({viewState}) => this.setState({viewState})}
         layers={[layer]}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
         <StaticMap
           viewId="map"
+          {...viewState}
           reuseMap
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-          {...this.state.viewState}
+          mapboxApiAccessToken={mapToken}
+          mapboxStyle={mapStyle}
+          preventStyleDiffing={true}
         />
       </DeckGL>
     );
   }
 }
 
-if (!window.website) {
+if (!window.demoLauncherActive) {
   render(<App />, document.body.appendChild(document.createElement('div')));
 }

@@ -62,4 +62,6 @@ class Root extends Component {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+if (!window.demoLauncherActive) {
+  render(<Root />, document.body.appendChild(document.createElement('div')));
+}

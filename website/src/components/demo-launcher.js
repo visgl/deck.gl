@@ -37,7 +37,7 @@ class DemoLauncher extends Component {
       this.props.useParams(DemoComponent.parameters);
       let demoViewport = DemoComponent.viewport;
 
-      if (!demoViewport || DemoComponent.noMap) {
+      if (!demoViewport) {
         // do not show map
         this.props.updateMap({
           mapStyle: null
@@ -82,6 +82,36 @@ class DemoLauncher extends Component {
     this.setState({mouseEntered: false});
   }
 
+  @autobind
+  _updateMapViewState({viewState}) {
+    this.props.updateMap(viewState);
+  }
+
+  // Conditional add map wrapper, if example hasn't yet been updated to render its own map
+  renderMap(noMap, component) {
+    const {viewport, isInteractive} = this.props;
+
+    if (noMap) {
+      return component;
+    }
+
+    return (
+      <MapGL
+        mapboxApiAccessToken={MapboxAccessToken}
+        preventStyleDiffing={true}
+        mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
+
+        {...viewport}
+        onViewportChange={isInteractive ? this.props.updateMap : undefined}>
+
+        {component}
+
+        {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
+
+      </MapGL>
+    );
+  }
+
   render() {
     const {viewport, demo, params, owner, data, isInteractive} = this.props;
     const DemoComponent = Demos[demo];
@@ -95,24 +125,26 @@ class DemoLauncher extends Component {
         onMouseMove={this.state.trackMouseMove ? this._onMouseMove : null}
         onMouseEnter={this.state.trackMouseMove ? this._onMouseEnter : null}
         onMouseLeave={this.state.trackMouseMove ? this._onMouseLeave : null}>
-        <MapGL
-          mapboxApiAccessToken={MapboxAccessToken}
-          preventStyleDiffing={true}
 
-          {...viewport}
-          mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-          onViewportChange={isInteractive ? this.props.updateMap : undefined}>
+        {this.renderMap(DemoComponent.noMap,
+          <DemoComponent
+            ref="demo"
+            mapToken={MapboxAccessToken}
+            mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
 
-          <DemoComponent ref="demo" viewport={viewport} params={params}
+            viewState={viewport}
+            onViewStateChange={isInteractive ? this._updateMapViewState : undefined}
+
+            viewport={viewport}
+            onViewportChange={isInteractive ? this.props.updateMap : undefined}
+
+            params={params}
             onStateChange={this.props.updateMeta}
             mousePosition={this.state.mousePosition}
             mouseEntered={this.state.mouseEntered}
             data={owner === demo ? data : null} />
+        )}
 
-          {isInteractive &&
-            <div className="mapbox-tip">Hold down shift to rotate</div>}
-
-        </MapGL>
       </div>
     );
   }

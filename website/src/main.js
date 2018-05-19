@@ -7,8 +7,8 @@ import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 
 /* global window */
-window.website = true;
-// Use require to ensure `window.website` flag is set before demos are imported.
+window.demoLauncherActive = true;
+// Use require to ensure `window.demoLauncherActive` flag is set before demos are imported.
 const AppState = require('./reducers').default;
 const Routes = require('./routes').default;
 

@@ -45,7 +45,7 @@ export default class GeoJsonDemo extends Component {
 
   static get viewport() {
     return {
-      ...App.defaultViewport,
+      ...(App.DEMO_SETTINGS.INITIAL_VIEW_STATE),
       mapStyle: MAPBOX_STYLES.LIGHT
     };
   }
@@ -122,14 +122,10 @@ export default class GeoJsonDemo extends Component {
   render() {
     const {viewport, data} = this.props;
 
-    if (!data) {
-      return null;
-    }
-
     return (
       <div>
         <App
-          viewport={viewport}
+          {...this.props}
           data={data}
           colorScale={colorScale}
           onHover={this._onHover.bind(this)} />
