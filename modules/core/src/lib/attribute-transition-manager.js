@@ -181,6 +181,7 @@ export default class AttributeTransitionManager {
   _invalidateModel() {
     if (this.transform) {
       this.transform.delete();
+      this.transform = null;
     }
   }
 
