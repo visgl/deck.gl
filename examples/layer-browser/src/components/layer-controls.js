@@ -2,6 +2,7 @@ import React, {PureComponent} from 'react';
 import ColorPicker from './color-picker';
 import ColorPalettePicker from './color-palette-picker';
 import PropTypes from 'prop-types';
+import autobind from 'react-autobind';
 
 const PROP_TYPES = {
   title: PropTypes.string,
@@ -15,7 +16,37 @@ const defaultProps = {
   propTypes: {}
 };
 
+const PROP_BLACK_LIST = new Set([
+  'coordinateSystem',
+  'coordinateOrigin',
+  'fetch',
+  'dataTransform',
+  'dataComparator',
+  'updateTriggers',
+  'onHover',
+  'onClick',
+  'highlightedObjectIndex',
+  'parameters',
+  'uniforms'
+]);
+
+function isAccessor(settingName) {
+  return settingName.indexOf('get') === 0;
+}
+
 export default class LayerControls extends PureComponent {
+  constructor(props) {
+    super(props);
+    autobind(this);
+
+    this.renderers = {
+      number: this._renderSlider,
+      boolean: this._renderCheckbox,
+      category: this._renderSelect,
+      color: this._renderColorPicker
+    };
+  }
+
   _getPropTypes() {
     const {layer, propTypes} = this.props;
     return Object.assign({}, layer && layer._propTypes, propTypes);
@@ -25,9 +56,30 @@ export default class LayerControls extends PureComponent {
   _getAllPropKeys(object) {
     const keys = [];
     for (const key in object) {
-      keys.push(key);
+      if (!PROP_BLACK_LIST.has(key)) {
+        keys.push(key);
+      }
     }
-    return keys;
+    return keys.sort();
+  }
+
+  _onToggleTransition(settingName, transitioned) {
+    const {settings} = this.props;
+    const newSettings = {
+      ...settings,
+      transitions: {
+        ...settings.transitions
+      }
+    };
+    newSettings.transitions[settingName] = transitioned ? 600 : 0;
+    this.props.onChange(newSettings);
+  }
+
+  _onToggleConstant(settingName, value, useConstant) {
+    const {settings} = this.props;
+    const newSettings = {...settings};
+    newSettings[settingName] = useConstant ? value : d => value;
+    this.props.onChange(newSettings);
   }
 
   _onValueChange(settingName, newValue) {
@@ -37,18 +89,19 @@ export default class LayerControls extends PureComponent {
     // Only update if we have a confirmed change
     if (settings[settingName] !== newValue) {
       // Create a new object so that shallow-equal detects a change
-      const newSettings = {...this.props.settings};
+      const newSettings = {...settings};
 
       if (propTypes[settingName] && propTypes[settingName].onUpdate) {
         propTypes[settingName].onUpdate(newValue, newSettings, (name, value) =>
           this._onValueChange(name, value)
         );
         return;
-      } else if (settingName.indexOf('get') === 0) {
-        newSettings[settingName] = d => newValue;
+      } else if (isAccessor(settingName)) {
+        const useConstant = typeof newSettings[settingName] !== 'function';
+        newSettings[settingName] = useConstant ? newValue : d => newValue;
         newSettings.updateTriggers = {
           ...newSettings.updateTriggers,
-          [settingName]: {value: newValue.toString()}
+          [settingName]: Date.now()
         };
       } else {
         newSettings[settingName] = newValue;
@@ -58,138 +111,149 @@ export default class LayerControls extends PureComponent {
     }
   }
 
-  _renderColorPicker(settingName, value) {
+  _renderTransitionSelector({settingName, transition}) {
+    if (isAccessor(settingName)) {
+      const active = Boolean(transition);
+      return (
+        <div
+          className={`addon ${active ? 'on' : ''}`}
+          onClick={() => this._onToggleTransition(settingName, !active)}
+        >
+          T
+        </div>
+      );
+    }
+    return <div />;
+  }
+
+  _renderConstantSelector({settingName, value, originalValue}) {
+    if (isAccessor(settingName)) {
+      const active = typeof originalValue !== 'function';
+      return (
+        <div
+          className={`addon ${active ? 'on' : ''}`}
+          onClick={() => this._onToggleConstant(settingName, value, !active)}
+        >
+          C
+        </div>
+      );
+    }
+    return <div />;
+  }
+
+  _renderColorPicker({settingName, value, propType}) {
     const onChange = this._onValueChange.bind(this, settingName);
 
-    return (
-      <div key={settingName}>
-        <div className="input-group">
-          <label>{settingName}</label>
-          {settingName === 'colorRange' ? (
-            <ColorPalettePicker value={value} onChange={onChange} />
-          ) : (
-            <ColorPicker value={value} onChange={onChange} />
-          )}
-        </div>
-      </div>
+    return settingName === 'colorRange' ? (
+      <ColorPalettePicker value={value} onChange={onChange} />
+    ) : (
+      <ColorPicker value={value} onChange={onChange} />
     );
   }
 
-  _renderSlider(settingName, value, propType) {
+  _renderSlider({settingName, value, propType}) {
     let max;
 
     if (propType && Number.isFinite(propType.max)) {
-      max = propType.max;
-    } else if (
-      /radius|scale|width|height|pixel|size|miter/i.test(settingName) &&
-      /^((?!scale).)*$/.test(settingName)
-    ) {
-      max = 100;
+      max = Math.min(propType.max, 100);
+    } else if (/angle/i.test(settingName)) {
+      max = 360;
     } else {
-      max = 1;
+      max = 100;
     }
 
     return (
-      <div key={settingName}>
-        <div className="input-group">
-          <label className="label" htmlFor={settingName}>
-            {settingName}
-          </label>
-          <div>
-            <input
-              type="range"
-              id={settingName}
-              min={0}
-              max={max}
-              step={max / 100}
-              value={value}
-              onChange={e => this._onValueChange(settingName, Number(e.target.value))}
-            />
-          </div>
-        </div>
-      </div>
+      <input
+        type="range"
+        id={settingName}
+        min={0}
+        max={max}
+        step={max / 100}
+        value={value}
+        onChange={e => this._onValueChange(settingName, Number(e.target.value))}
+      />
     );
   }
 
-  _renderCheckbox(settingName, value) {
+  _renderCheckbox({settingName, value}) {
     return (
-      <div key={settingName}>
-        <div className="input-group">
-          <label htmlFor={settingName}>
-            <span>{settingName}</span>
-          </label>
-          <input
-            type="checkbox"
-            id={settingName}
-            checked={value}
-            onChange={e => this._onValueChange(settingName, e.target.checked)}
-          />
-        </div>
-      </div>
+      <input
+        type="checkbox"
+        id={settingName}
+        checked={value}
+        onChange={e => this._onValueChange(settingName, e.target.checked)}
+      />
     );
   }
 
-  _renderSelect(settingName, value, propType) {
+  _renderSelect({settingName, value, propType}) {
     const {value: options} = propType;
     if (!options || !options.length) {
       return null;
     }
     return (
-      <div key={settingName}>
-        <div className="input-group">
-          <label className="label" htmlFor={settingName}>
-            {settingName}
-          </label>
-          <select value={value} onChange={e => this._onValueChange(settingName, e.target.value)}>
-            {options.map((val, idx) => (
-              <option key={idx} value={val}>
-                {val}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
+      <select value={value} onChange={e => this._onValueChange(settingName, e.target.value)}>
+        {options.map((val, idx) => (
+          <option key={idx} value={val}>
+            {val}
+          </option>
+        ))}
+      </select>
     );
   }
 
-  _renderSetting(settingName, value, propType) {
-    if (typeof value === 'function') {
+  /* eslint-disable complexity */
+  _renderSetting({settingName, value, propType, data, transitions}) {
+    const originalValue = value;
+
+    if (typeof value === 'function' && isAccessor(settingName)) {
       try {
-        value = value();
+        // infer type by executing an accessor
+        value = value(data && data[0]);
       } catch (err) {
-        // is data dependent
+        // ignore
       }
     }
 
-    // first test if proptype is already defined
-    if (propType && propType.type) {
-      switch (propType.type) {
-        case 'number':
-          return this._renderSlider(settingName, value, propType);
-        case 'category':
-          return this._renderSelect(settingName, value, propType);
-        case 'compound':
-          const {settings, propTypes = {}} = this.props;
-          return propType.elements.map(name =>
-            this._renderSetting(name, settings[name], propTypes[name])
-          );
-        default:
-          break;
-      }
-    }
+    const type = propType && propType.type;
 
-    switch (typeof value) {
-      case 'boolean':
-        return this._renderCheckbox(settingName, value, propType);
-      case 'number':
-        return this._renderSlider(settingName, value, propType);
+    switch (propType && propType.type) {
+      case 'compound':
+        const {settings, propTypes = {}} = this.props;
+        return propType.elements.map(name =>
+          this._renderSetting({
+            settingName: name,
+            value: settings[name],
+            propType: propTypes[name],
+            data
+          })
+        );
       default:
-        if (/color/i.test(settingName)) {
-          return this._renderColorPicker(settingName, value, propType);
-        }
+        break;
     }
-    return null;
+
+    const renderer =
+      this.renderers[type] ||
+      (/color/i.test(settingName) && Array.isArray(value) && this.renderers.color) ||
+      this.renderers[typeof value];
+
+    return (
+      renderer && (
+        <div key={settingName}>
+          <div className="input-group">
+            <label>{settingName}</label>
+            <div className="input">{renderer({settingName, value, propType, originalValue})}</div>
+            {this._renderTransitionSelector({
+              settingName,
+              transition: transitions && transitions[settingName]
+            })}
+            {this._renderConstantSelector({settingName, value, originalValue})}
+          </div>
+        </div>
+      )
+    );
   }
+  /* eslint-enable complexity */
 
   render() {
     const {title, settings} = this.props;
@@ -199,7 +263,13 @@ export default class LayerControls extends PureComponent {
       <div className="layer-controls">
         {title && <h4>{title}</h4>}
         {this._getAllPropKeys(settings).map(key =>
-          this._renderSetting(key, settings[key], propTypes[key])
+          this._renderSetting({
+            settingName: key,
+            value: settings[key],
+            propType: propTypes[key],
+            data: settings.data,
+            transitions: settings.transitions
+          })
         )}
       </div>
     );

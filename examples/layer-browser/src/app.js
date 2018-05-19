@@ -294,6 +294,7 @@ export default class App extends PureComponent {
         >
           <StaticMap
             viewId="basemap"
+            mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
             {...mapViewState}
             mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
           />

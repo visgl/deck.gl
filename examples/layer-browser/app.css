@@ -42,8 +42,8 @@ h4 {
   overflow-x: hidden;
   overflow-y: auto;
   height: 100%;
-  width: 280px;
-  background: rgba(255, 255, 255, 0.5);
+  width: 400px;
+  background: rgba(255, 255, 255, 0.8);
 }
 
 #control-panel > div{
@@ -61,15 +61,31 @@ h4 {
 .input-group {
   color: #333;
   line-height: 28px;
-  display: table;
+  display: flex;
   width: 100%;
+  align-items: center;
 }
 .input-group > * {
-  display: table-cell;
-  width: 50%;
-  vertical-align: middle;
+  min-width: 24px;
 }
-.input-group input[type=range] {
+.input-group > label {
+  width: 140px;
+}
+.input-group .addon {
+  cursor: pointer;
+  color: #ccc;
+  text-align: right;
+}
+.input-group .addon:hover {
+  color: #000;
+}
+.input-group .addon.on {
+  color: #048 !important;
+}
+.input-group .input {
+  flex-grow: 1;
+}
+.input-group .input input {
   width: 100%;
   vertical-align: middle;
 }
