@@ -1,8 +1,8 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {GeoJsonLayer, MapView, MapController} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -11,56 +11,75 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
 
-const colorScale = r => [r * 255, 140, 200 * (1 - r)];
+const LIGHT_SETTINGS = {
+  lightsPosition: [-125, 50.5, 5000, -122.8, 48.5, 8000],
+  ambientRatio: 0.2,
+  diffuseRatio: 0.5,
+  specularRatio: 0.3,
+  lightsStrength: [1.0, 0.0, 2.0, 0.0],
+  numberOfLights: 2
+};
 
-class Root extends Component {
+const INITIAL_VIEW_STATE = {
+  latitude: 49.254,
+  longitude: -123.13,
+  zoom: 11,
+  maxZoom: 16,
+  pitch: 45,
+  bearing: 0
+};
+
+const DEFAULT_COLOR_SCALE = r => [r * 255, 140, 200 * (1 - r)];
+
+export class App extends Component {
+  static get defaultViewport() {
+    return null;
+  }
+
   constructor(props) {
     super(props);
-    this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500
-      },
-      data: null
-    };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
-    });
+    this.state = {viewState: INITIAL_VIEW_STATE};
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {data = DATA_URL, colorScale = DEFAULT_COLOR_SCALE} = this.props;
+
+    const layer = new GeoJsonLayer({
+      id: 'geojson',
+      data,
+      opacity: 0.8,
+      stroked: false,
+      filled: true,
+      extruded: true,
+      wireframe: true,
+      fp64: true,
+      getElevation: f => Math.sqrt(f.properties.valuePerSqm) * 10,
+      getFillColor: f => colorScale(f.properties.growth),
+      getLineColor: f => [255, 255, 255],
+      lightSettings: LIGHT_SETTINGS,
+      pickable: Boolean(this.props.onHover),
+      onHover: this.props.onHover
+    });
 
     return (
-      <MapGL
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+      <DeckGL
+        views={new MapView({id: 'map'})}
+        viewState={this.state.viewState}
+        controller={MapController}
+        onViewStateChange={({viewState}) => this.setState({viewState})}
+        layers={[layer]}
       >
-        <DeckGLOverlay viewport={viewport} data={data} colorScale={colorScale} />
-      </MapGL>
+        <StaticMap
+          viewId="map"
+          reuseMap
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+          {...this.state.viewState}
+        />
+      </DeckGL>
     );
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+if (!window.website) {
+  render(<App />, document.body.appendChild(document.createElement('div')));
+}

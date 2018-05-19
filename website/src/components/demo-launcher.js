@@ -9,7 +9,7 @@ import {updateMap, updateMeta, loadData, useParams} from '../actions/app-actions
 import ViewportAnimation from '../utils/map-utils';
 import {MAPBOX_STYLES} from '../constants/defaults';
 
-class Map extends Component {
+class DemoLauncher extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -37,7 +37,7 @@ class Map extends Component {
       this.props.useParams(DemoComponent.parameters);
       let demoViewport = DemoComponent.viewport;
 
-      if (!demoViewport) {
+      if (!demoViewport || DemoComponent.noMap) {
         // do not show map
         this.props.updateMap({
           mapStyle: null
@@ -124,11 +124,11 @@ const mapStateToProps = state => ({
   ...state.vis
 });
 
-Map.defaultProps = {
+DemoLauncher.defaultProps = {
   isInteractive: true
 };
 
 export default connect(
   mapStateToProps,
   {updateMap, updateMeta, loadData, useParams}
-)(Map);
+)(DemoLauncher);

@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
-import Map from './map';
+import DemoLauncher from './demo-launcher';
 import InfoPanel from './info-panel';
 import MarkdownPage from './markdown-page';
 import {loadContent, updateMap} from '../actions/app-actions';
@@ -56,7 +56,7 @@ class Page extends Component {
   @autobind _renderDemo(name, sourceLink) {
     return (
       <div className="demo">
-        <Map demo={name} />
+        <DemoLauncher demo={name} />
         <InfoPanel demo={name} >
 
           {sourceLink && (<div className="source-link">

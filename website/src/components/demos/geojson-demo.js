@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import GeoJsonOverlay from 'website-examples/geojson/deckgl-overlay';
+import {App} from 'website-examples/geojson/app';
 
 const COLOR_SCALE = [
   // negative
@@ -45,9 +45,13 @@ export default class GeoJsonDemo extends Component {
 
   static get viewport() {
     return {
-      ...GeoJsonOverlay.defaultViewport,
+      ...App.defaultViewport,
       mapStyle: MAPBOX_STYLES.LIGHT
     };
+  }
+
+  static noMap() {
+    return true;
   }
 
   static renderInfo(meta) {
@@ -124,7 +128,8 @@ export default class GeoJsonDemo extends Component {
 
     return (
       <div>
-        <GeoJsonOverlay viewport={viewport}
+        <App
+          viewport={viewport}
           data={data}
           colorScale={colorScale}
           onHover={this._onHover.bind(this)} />
