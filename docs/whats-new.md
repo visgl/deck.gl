@@ -66,6 +66,11 @@ Many layer accessor props now accept constant values. For example, when construc
 Core layers are broken out from ` @deck.gl/core` to a new submodule ` @deck.gl/layers`. Users of `deck.gl` are not affected by this change.
 
 
+#### Set initial WebGL parameters using a prop
+
+It is now possible to set the initial WebGL parameters on the `Deck` WebGL context by supplying a `parameters` prop object, avoiding the need to define an `onWebGLInitialized` callback: `new Deck({..., parameters: {depthTest: false}});`
+
+
 ## deck.gl v5.2
 
 Release date: April 24, 2018

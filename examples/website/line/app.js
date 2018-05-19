@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {MapView, MapController, LineLayer, ScatterplotLayer} from 'deck.gl';
-import {setParameters} from 'luma.gl';
+import {GL} from 'luma.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -24,6 +24,11 @@ const INITIAL_VIEW_STATE = {
   maxZoom: 16,
   pitch: 50,
   bearing: 0
+};
+
+const WEBGL_PARAMETERS = {
+  blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
+  blendEquation: GL.FUNC_ADD
 };
 
 function getColor(d) {
@@ -47,13 +52,6 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {viewState: INITIAL_VIEW_STATE};
-  }
-
-  _initialize(gl) {
-    setParameters(gl, {
-      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
-      blendEquation: gl.FUNC_ADD
-    });
   }
 
   render() {
@@ -100,7 +98,7 @@ class App extends Component {
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
-        onWebGLInitialized={this._initialize}
+        parameters={WEBGL_PARAMETERS}
       >
         <StaticMap
           viewId="map"

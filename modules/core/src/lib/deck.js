@@ -51,8 +51,9 @@ function getPropTypes(PropTypes) {
     controller: PropTypes.func,
 
     // GL settings
-    glOptions: PropTypes.object,
     gl: PropTypes.object,
+    glOptions: PropTypes.object,
+    parameters: PropTypes.object,
     pickingRadius: PropTypes.number,
     useDevicePixels: PropTypes.bool,
 
@@ -396,6 +397,9 @@ export default class Deck {
       depthFunc: GL.LEQUAL
     });
 
+    if (this.props.parameters) {
+      setParameters(gl, this.props.parameters);
+    }
     this.props.onWebGLInitialized(gl);
 
     this.eventManager = new EventManager(canvas);

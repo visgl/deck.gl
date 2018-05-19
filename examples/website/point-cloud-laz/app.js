@@ -5,7 +5,7 @@ import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, experimental} from 'deck.gl';
 const {OrbitController} = experimental;
 
-import {setParameters} from 'luma.gl';
+import {GL} from 'luma.gl';
 import {loadLazFile, parseLazData} from './utils/laslaz-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
@@ -20,6 +20,11 @@ const INITIAL_VIEW_STATE = {
   fov: 30,
   minDistance: 0.5,
   maxDistance: 3
+};
+
+const WEBGL_PARAMETERS = {
+  clearColor: [0.07, 0.14, 0.19, 1],
+  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA]
 };
 
 function normalize(points) {
@@ -64,7 +69,6 @@ class Example extends PureComponent {
       viewState: INITIAL_VIEW_STATE
     };
 
-    this._onInitialize = this._onInitialize.bind(this);
     this._onResize = this._onResize.bind(this);
     this._onViewportChange = this._onViewportChange.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
@@ -97,13 +101,6 @@ class Example extends PureComponent {
 
   componentWillUnmount() {
     window.removeEventListener('resize', this._onResize);
-  }
-
-  _onInitialize(gl) {
-    setParameters(gl, {
-      clearColor: [0.07, 0.14, 0.19, 1],
-      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA]
-    });
   }
 
   _onResize() {
@@ -169,7 +166,7 @@ class Example extends PureComponent {
         viewState={viewState}
         controller={OrbitController}
         layers={[this._renderLazPointCloudLayer()]}
-        onWebGLInitialized={this._onInitialize}
+        parameters={WEBGL_PARAMETERS}
         onViewportChange={this._onViewportChange}
       />
     );
