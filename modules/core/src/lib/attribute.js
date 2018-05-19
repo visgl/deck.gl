@@ -2,6 +2,13 @@
 import assert from '../utils/assert';
 import {GL, Buffer, experimental} from 'luma.gl';
 const {Attribute} = experimental;
+const DEFAULT_STATE = {
+  isExternalBuffer: false,
+  needsAlloc: false,
+  needsUpdate: false,
+  needsRedraw: false,
+  allocedInstances: -1
+};
 
 export default class LayerAttribute extends Attribute {
   constructor(gl, opts = {}) {
@@ -18,20 +25,12 @@ export default class LayerAttribute extends Attribute {
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
-    Object.assign(this.userData, opts, {
+    Object.assign(this.userData, DEFAULT_STATE, opts, {
       transition,
       noAlloc,
       update,
       accessor,
-      defaultValue,
-
-      // State
-      isExternalBuffer: false,
-      needsAlloc: false,
-      needsUpdate: false,
-      needsRedraw: false,
-
-      allocedInstances: -1
+      defaultValue
     });
 
     Object.seal(this.userData);
@@ -79,14 +78,16 @@ export default class LayerAttribute extends Attribute {
   setNumInstances(numInstances) {
     const state = this.userData;
 
-    if (!state.isExternalBuffer) {
-      // Do we need to reallocate the attribute's typed array?
-      const instanceCount = this.getInstanceCount();
-      const needsAlloc = instanceCount === 0 || instanceCount < numInstances;
-      if (needsAlloc && (state.update || state.accessor)) {
-        state.needsAlloc = true;
-        this.setNeedsUpdate(this.id);
-      }
+    if (state.isExternalBuffer || state.noAlloc) {
+      // Data is provided through a Buffer object.
+      return;
+    }
+    // Do we need to reallocate the attribute's typed array?
+    const instanceCount = this.getInstanceCount();
+    const needsAlloc = instanceCount === 0 || instanceCount < numInstances;
+    if (needsAlloc && (state.update || state.accessor)) {
+      state.needsAlloc = true;
+      this.setNeedsUpdate(this.id);
     }
   }
 
@@ -175,7 +176,7 @@ export default class LayerAttribute extends Attribute {
 
       if (buffer instanceof Buffer) {
         if (this.externalBuffer !== buffer) {
-          this.update({externalBuffer: buffer});
+          this.update({isGeneric: false, buffer});
           state.needsRedraw = true;
         }
       } else {
