@@ -2,6 +2,13 @@
 import assert from '../utils/assert';
 import {GL, Buffer, experimental} from 'luma.gl';
 const {Attribute} = experimental;
+const DEFAULT_STATE = {
+  isExternalBuffer: false,
+  needsAlloc: false,
+  needsUpdate: false,
+  needsRedraw: false,
+  allocedInstances: -1
+};
 
 export default class LayerAttribute extends Attribute {
   constructor(gl, opts = {}) {
@@ -18,20 +25,12 @@ export default class LayerAttribute extends Attribute {
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
-    Object.assign(this.userData, opts, {
+    Object.assign(this.userData, DEFAULT_STATE, opts, {
       transition,
       noAlloc,
       update,
       accessor,
       defaultValue,
-
-      // State
-      isExternalBuffer: false,
-      needsAlloc: false,
-      needsUpdate: false,
-      needsRedraw: false,
-
-      allocedInstances: -1
     });
 
     Object.seal(this.userData);
@@ -175,7 +174,7 @@ export default class LayerAttribute extends Attribute {
 
       if (buffer instanceof Buffer) {
         if (this.externalBuffer !== buffer) {
-          this.update({externalBuffer: buffer});
+          this.update({buffer});
           state.needsRedraw = true;
         }
       } else {
@@ -191,8 +190,6 @@ export default class LayerAttribute extends Attribute {
           state.needsRedraw = true;
         }
       }
-    } else {
-      state.isExternalBuffer = false;
     }
   }
 
