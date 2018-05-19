@@ -38,11 +38,14 @@ const defaultProps = {
 
 export default class LineLayer extends Layer {
   constructor(props) {
+    let overrideProps = null;
     if (Number.isFinite(props.strokeWidth)) {
       log.deprecated('LineLayer: `strokeWidth`', '`getStrokeWidth`');
-      props.getStrokeWidth = props.strokeWidth;
+      overrideProps = {
+        getStrokeWidth: props.strokeWidth
+      };
     }
-    super(props);
+    super(props, overrideProps);
   }
 
   getShaders() {
