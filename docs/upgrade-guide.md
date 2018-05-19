@@ -1,5 +1,23 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v5.2 to v5.3
+
+### Viewport classes
+
+Continuing the changes that started in 5.2: while the base `Viewport` class will remain supported, the various `Viewport` subclasses are now deprecated. For now, if for projection purposes you need to create a `Viewport` instance matching one of your `View` instances you can use `View.makeViewport`:
+
+```js
+new MapView().makeViewport({width, height, viewState: {longitude, latitude, zoom}});
+```
+
+
+### Layer properties
+
+| Layer            | Removed Prop       | New Prop             | Comment |
+| ---              | --- | --- | --- |
+| `ArcLayer`       | `strokeWidth`       | `getStrokeWidth` | Can be set to constant value |
+| `LineLayer`      | `strokeWidth`       | `getStrokeWidth` | Can be set to constant value |
+
 
 ## Upgrading from deck.gl v5.1 to v5.2
 
