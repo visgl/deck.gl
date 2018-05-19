@@ -1,4 +1,4 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -9,10 +9,6 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MALE_COLOR = [0, 128, 255];
 const FEMALE_COLOR = [255, 0, 128];
 
-// Source data CSV
-const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
-
 class Root extends Component {
   constructor(props) {
     super(props);
@@ -21,13 +17,8 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 0,
         height: 0
-      },
-      data: null
+      }
     };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
   }
 
   componentDidMount() {
@@ -49,7 +40,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {viewport} = this.state;
 
     return (
       <MapGL
@@ -59,7 +50,6 @@ class Root extends Component {
       >
         <DeckGLOverlay
           viewport={viewport}
-          data={data}
           maleColor={MALE_COLOR}
           femaleColor={FEMALE_COLOR}
           radius={30}

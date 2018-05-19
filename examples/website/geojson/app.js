@@ -1,4 +1,4 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -6,10 +6,6 @@ import DeckGLOverlay from './deckgl-overlay.js';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
-// Source data GeoJSON
-const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
 
 const colorScale = r => [r * 255, 140, 200 * (1 - r)];
 
@@ -21,13 +17,8 @@ class Root extends Component {
         ...DeckGLOverlay.defaultViewport,
         width: 500,
         height: 500
-      },
-      data: null
+      }
     };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
   }
 
   componentDidMount() {

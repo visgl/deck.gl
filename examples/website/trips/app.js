@@ -1,4 +1,4 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
@@ -6,14 +6,6 @@ import DeckGLOverlay from './deckgl-overlay.js';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
-// Source data CSV
-const DATA_URL = {
-  BUILDINGS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
-  TRIPS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
-};
 
 class Root extends Component {
   constructor(props) {
@@ -24,18 +16,8 @@ class Root extends Component {
         width: 500,
         height: 500
       },
-      buildings: null,
-      trips: null,
       time: 0
     };
-
-    fetch(DATA_URL.BUILDINGS)
-      .then(resp => resp.json())
-      .then(data => this.setState({buildings: data}));
-
-    fetch(DATA_URL.TRIPS)
-      .then(resp => resp.json())
-      .then(data => this.setState({trips: data}));
   }
 
   componentDidMount() {
@@ -75,7 +57,7 @@ class Root extends Component {
   }
 
   render() {
-    const {viewport, buildings, trips, time} = this.state;
+    const {viewport, time} = this.state;
 
     return (
       <MapGL
@@ -84,13 +66,7 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGLOverlay
-          viewport={viewport}
-          buildings={buildings}
-          trips={trips}
-          trailLength={180}
-          time={time}
-        />
+        <DeckGLOverlay viewport={viewport} trailLength={180} time={time} />
       </MapGL>
     );
   }

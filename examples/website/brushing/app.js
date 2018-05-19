@@ -90,6 +90,7 @@ class Root extends Component {
       </div>
     );
   }
+
   render() {
     const {viewport, data, mousePosition, mouseEntered} = this.state;
 

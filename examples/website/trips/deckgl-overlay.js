@@ -2,6 +2,14 @@ import React, {Component} from 'react';
 import DeckGL, {PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
+// Source data
+const DATA_URL = {
+  BUILDINGS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
+  TRIPS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
+};
+
 const LIGHT_SETTINGS = {
   lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
   ambientRatio: 0.05,
@@ -24,16 +32,12 @@ export default class DeckGLOverlay extends Component {
   }
 
   render() {
-    const {viewport, buildings, trips, trailLength, time} = this.props;
-
-    if (!buildings || !trips) {
-      return null;
-    }
+    const {viewport, trailLength, time} = this.props;
 
     const layers = [
       new TripsLayer({
         id: 'trips',
-        data: trips,
+        data: DATA_URL.TRIPS,
         getPath: d => d.segments,
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
@@ -43,7 +47,7 @@ export default class DeckGLOverlay extends Component {
       }),
       new PolygonLayer({
         id: 'buildings',
-        data: buildings,
+        data: DATA_URL.BUILDINGS,
         extruded: true,
         wireframe: false,
         fp64: true,
