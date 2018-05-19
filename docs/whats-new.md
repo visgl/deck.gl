@@ -30,33 +30,30 @@ Release date: TBD, target May 25, 2018
 </table>
 
 
-### Deck/DeckGL classes
-
-#### Deep Picking
-
-deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` method, which returns a list of all objects under the mouse, instead of just the top-most object.
-
 #### Automatic Interactivity
 
 A new `Deck.initialViewState` property allows the application to enable map or view interactivity simply by supplying an initial view state, e.g. `{longitude, latitude, zoom}`. deck.gl will automatically initialize a Controller class and listen to view state changes, without the application having to implement callbacks to track the view state.
 
-
-### Layer classes
 
 #### Automatic Data Loading
 
 The `Layer.data` prop now accepts URLs (i.e. strings). deck.gl will automatically start loading such URLs, parse them as JSON and once loaded, use the resulting data to render the layer. This can e.g. remove the need for applications to set up callbacks to handle load completion.
 
 
-### View classes
+#### Deep Picking
 
-### Switching between Perspective and Orthographic mode
+deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` method, which returns a list of all objects under the mouse, instead of just the top-most object.
+
+
+#### Switch between Perspective and Orthographic mode
 
 The [`View`](/docs/api-reference/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orhtographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
-### Constant Accessors
 
-Many layers' accessor props now accept constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. Constant values of accessors can be updated with very low performance cost and therefore do not require an `updateTrigger`. Consult each layer's updated documentation to see which accessors are supported.
+#### Constant Accessors
+
+Many layer accessor props now accept constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. This is not only a convenience: constant values of accessors don't use GPU memory and can be updated very quickly and thus do not require an `updateTrigger`. Consult the documentation for each layer to see which accessors are supported.
+
 
 ## deck.gl v5.2
 
