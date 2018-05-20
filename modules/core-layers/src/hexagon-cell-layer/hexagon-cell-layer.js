@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
-const {log, fp64LowPart, enable64bitSupport} = experimental;
-import {GL, Model, CylinderGeometry} from 'luma.gl';
+import {Layer, log} from '@deck.gl/core';
+import {GL, Model, CylinderGeometry, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './hexagon-cell-layer-vertex.glsl';
 import fs from './hexagon-cell-layer-fragment.glsl';
@@ -72,7 +72,7 @@ export default class HexagonCellLayer extends Layer {
   }
 
   getShaders() {
-    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    const projectModule = this.is64bitEnabled() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
   }
 
@@ -211,7 +211,7 @@ export default class HexagonCellLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
+    const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {

@@ -74,20 +74,14 @@ import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-t
 import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
 
 // Layer utilities
-import {default as log} from './utils/log'; // Export?
-import {get} from './utils/get'; // Remove?
-import {count} from './utils/count'; // Remove?
+export {default as log} from './utils/log'; // Export?
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {defaultColorRange} from './utils/color-utils';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
-import {lerp} from './utils/math-utils'; // from math.gl?
-import {clamp} from './utils/scale-utils'; // from math.gl?
 
 // Export? luma.gl?
-import {flatten, countVertices, flattenVertices, fillArray} from './utils/flatten'; // luma.gl?
-import {enable64bitSupport} from './utils/fp64'; // Layer method?
-import {fp64ify, fp64LowPart} from './utils/fp64'; // fp64 module utils (luma.gl)?
+import {flattenVertices, fillArray} from './utils/flatten'; // luma.gl?
 
 // DEPRECATED EXPORTS
 export {default as PerspectiveViewport} from './deprecated/perspective-viewport';
@@ -124,23 +118,9 @@ export const experimental = {
   getLinearScale,
   quantizeScale,
   getQuantizeScale,
-  clamp,
-  lerp,
   defaultColorRange,
-
-  log,
-
-  get,
-  count,
-
-  flatten,
-  countVertices,
   flattenVertices,
   fillArray,
-
-  enable64bitSupport,
-  fp64ify,
-  fp64LowPart,
 
   ReflectionEffect
 };

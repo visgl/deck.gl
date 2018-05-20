@@ -56,7 +56,9 @@ export {
   project64,
   lighting,
   // Internal classes
-  LayerManager
+  LayerManager,
+  // Logging
+  log
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
@@ -110,23 +112,9 @@ const {
   getLinearScale,
   quantizeScale,
   getQuantizeScale,
-  clamp,
-  lerp,
   defaultColorRange,
-
-  log,
-
-  get,
-  count,
-
-  flatten,
-  countVertices,
   flattenVertices,
   fillArray,
-
-  enable64bitSupport,
-  fp64ify,
-  fp64LowPart,
 
   ReflectionEffect
 } = CoreExperimental;
@@ -138,23 +126,9 @@ Object.assign(experimental, {
   getLinearScale,
   quantizeScale,
   getQuantizeScale,
-  clamp,
-  lerp,
   defaultColorRange,
-
-  log,
-
-  get,
-  count,
-
-  flatten,
-  countVertices,
   flattenVertices,
   fillArray,
-
-  enable64bitSupport,
-  fp64ify,
-  fp64LowPart,
 
   ReflectionEffect
 });

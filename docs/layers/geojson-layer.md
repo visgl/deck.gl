@@ -186,7 +186,7 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` 
 
 ##### `getRadius` (Function|Number, optional)
 
-* Default: `f => f.properties.radius || f => f.properties.size || 1`
+* Default: `f => f.properties.radius || f.properties.size || 1`
 
 The radius of `Point` and `MultiPoint` feature, in meters.
 

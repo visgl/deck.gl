@@ -17,9 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, experimental} from '@deck.gl/core';
-const {fp64LowPart, enable64bitSupport} = experimental;
-import {GL, Model, Geometry, Texture2D, loadTextures} from 'luma.gl';
+import {Layer} from '@deck.gl/core';
+import {GL, Model, Geometry, Texture2D, loadTextures, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -67,7 +67,7 @@ const defaultProps = {
 
 export default class IconLayer extends Layer {
   getShaders() {
-    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    const projectModule = this.is64bitEnabled() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
   }
 
@@ -240,7 +240,7 @@ export default class IconLayer extends Layer {
   */
 
   calculateInstancePositions64xyLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
+    const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {

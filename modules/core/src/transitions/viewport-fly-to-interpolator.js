@@ -1,5 +1,5 @@
 import TransitionInterpolator from './transition-interpolator';
-import {lerp} from './../utils/math-utils';
+import {lerp} from 'math.gl';
 
 import {flyToViewport} from 'viewport-mercator-project';
 

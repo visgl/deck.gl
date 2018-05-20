@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
-const {enable64bitSupport, get} = experimental;
+import {Layer} from '@deck.gl/core';
 import {GL, Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
@@ -43,12 +42,12 @@ const defaultProps = {
   elevationScale: 1,
 
   // Accessor for polygon geometry
-  getPolygon: f => get(f, 'polygon') || get(f, 'geometry.coordinates'),
+  getPolygon: f => f.polygon,
   // Accessor for extrusion height
-  getElevation: f => get(f, 'elevation') || get(f, 'properties.height') || 0,
+  getElevation: f => f.elevation || 0,
   // Accessor for colors
-  getFillColor: f => get(f, 'fillColor') || get(f, 'properties.color') || defaultFillColor,
-  getLineColor: f => get(f, 'lineColor') || get(f, 'properties.color') || defaultLineColor,
+  getFillColor: f => f.fillColor || defaultFillColor,
+  getLineColor: f => f.lineColor || defaultLineColor,
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}
@@ -122,7 +121,7 @@ const ATTRIBUTE_MAPS = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
-    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    const projectModule = this.is64bitEnabled() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
   }
 
@@ -400,7 +399,7 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({numInstances});
   }
   calculatePositionsLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
+    const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {
@@ -415,7 +414,7 @@ export default class SolidPolygonLayer extends Layer {
     attribute.value = this.state.polygonTesselator.nextPositions();
   }
   calculateNextPositionsLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
+    const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {

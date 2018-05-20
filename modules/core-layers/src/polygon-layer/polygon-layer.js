@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, experimental} from '@deck.gl/core';
-const {get} = experimental;
+import {CompositeLayer} from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
@@ -42,17 +41,17 @@ const defaultProps = {
   lineDashJustified: false,
   fp64: false,
 
-  getPolygon: f => get(f, 'polygon'),
+  getPolygon: f => f.polygon,
   // Polygon fill color
-  getFillColor: f => get(f, 'fillColor') || defaultFillColor,
+  getFillColor: f => f.fillColor || defaultFillColor,
   // Point, line and polygon outline color
-  getLineColor: f => get(f, 'lineColor') || defaultLineColor,
+  getLineColor: f => f.lineColor || defaultLineColor,
   // Line and polygon outline accessors
-  getLineWidth: f => get(f, 'lineWidth') || 1,
+  getLineWidth: f => f.lineWidth || 1,
   // Line dash array accessor
   getLineDashArray: null,
   // Polygon extrusion accessor
-  getElevation: f => get(f, 'elevation') || 1000,
+  getElevation: f => f.elevation || 1000,
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}

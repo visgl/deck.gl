@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
-const {fp64LowPart, enable64bitSupport} = experimental;
-import {GL, Model, CubeGeometry} from 'luma.gl';
+import {Layer} from '@deck.gl/core';
+import {GL, Model, CubeGeometry, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './grid-cell-layer-vertex.glsl';
 import fs from './grid-cell-layer-fragment.glsl';
@@ -56,7 +56,7 @@ export default class GridCellLayer extends Layer {
    */
 
   getShaders() {
-    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    const projectModule = this.is64bitEnabled() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
   }
 
@@ -138,7 +138,7 @@ export default class GridCellLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
+    const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {

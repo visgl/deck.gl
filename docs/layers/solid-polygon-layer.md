@@ -86,7 +86,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getPolygon` (Function, optional)
 
-* Default: `object => object.polygon || object.geometry.coordinates`
+* Default: `object => object.polygon`
 
 Like any deck.gl layer, the polygon accepts a data prop which is expected to
 be an iterable container of objects, and an accessor
@@ -96,7 +96,7 @@ This accessor returns the polygon corresponding to an object in the `data` strea
 
 ##### `getFillColor` (Function|Array, optional)
 
-* Default: `object => object.fillColor || object.properties.color || [0, 0, 0, 255]`
+* Default: `object => object.fillColor || [0, 0, 0, 255]`
 
 The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -105,7 +105,7 @@ The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component 
 
 ##### `getLineColor` (Function|Array, optional)
 
-* Default: `object => object.lineColor || object.properties.color || [0, 0, 0, 255]`
+* Default: `object => object.lineColor || [0, 0, 0, 255]`
 
 The rgba stroke color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 

@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, experimental} from '@deck.gl/core';
-const {get} = experimental;
+import {CompositeLayer} from '@deck.gl/core';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
@@ -51,15 +50,15 @@ const defaultProps = {
   fp64: false,
 
   // Line and polygon outline color
-  getLineColor: f => get(f, 'properties.lineColor') || defaultLineColor,
+  getLineColor: f => (f.properties && f.properties.lineColor) || defaultLineColor,
   // Point and polygon fill color
-  getFillColor: f => get(f, 'properties.fillColor') || defaultFillColor,
+  getFillColor: f => (f.properties && f.properties.fillColor) || defaultFillColor,
   // Point radius
-  getRadius: f => get(f, 'properties.radius') || get(f, 'properties.size') || 1,
+  getRadius: f => (f.properties && (f.properties.radius || f.properties.size)) || 1,
   // Line and polygon outline accessors
-  getLineWidth: f => get(f, 'properties.lineWidth') || 1,
+  getLineWidth: f => (f.properties && f.properties.lineWidth) || 1,
   // Polygon extrusion accessor
-  getElevation: f => get(f, 'properties.elevation') || 1000,
+  getElevation: f => (f.properties && f.properties.elevation) || 1000,
 
   subLayers: {
     PointLayer: ScatterplotLayer,

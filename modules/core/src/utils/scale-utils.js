@@ -49,7 +49,3 @@ export function getQuantizeScale(domain, range) {
 export function getLinearScale(domain, range) {
   return value => (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
 }
-
-export function clamp([min, max], value) {
-  return Math.min(max, Math.max(min, value));
-}

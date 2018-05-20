@@ -178,6 +178,21 @@ export default class Layer extends Component {
     return viewport.unprojectFlat(xy);
   }
 
+  is64bitEnabled() {
+    if (this.props.fp64) {
+      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+        return true;
+      }
+      log.once(
+        0,
+        `64-bit mode only works with coordinateSystem set to
+        COORDINATE_SYSTEM.LNGLAT. Rendering in 32-bit mode instead`
+      );
+    }
+
+    return false;
+  }
+
   // TODO - needs to refer to context for devicePixels setting
   screenToDevicePixels(screenPixels) {
     log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion')();

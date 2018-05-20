@@ -1,3 +1,4 @@
+import {clamp} from 'math.gl';
 import Controller from './controller';
 import OrbitViewport from '../deprecated/orbit-viewport';
 import assert from '../utils/assert';
@@ -20,11 +21,6 @@ const defaultConstraints = {
 };
 
 /* Helpers */
-
-// Constrain number between bounds
-function clamp(x, min, max) {
-  return x < min ? min : x > max ? max : x;
-}
 
 function ensureFinite(value, fallbackValue) {
   return Number.isFinite(value) ? value : fallbackValue;
