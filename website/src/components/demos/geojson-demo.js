@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App} from 'website-examples/geojson/app';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/geojson/app';
 
 const COLOR_SCALE = [
   // negative
@@ -45,13 +45,9 @@ export default class GeoJsonDemo extends Component {
 
   static get viewport() {
     return {
-      ...(App.DEMO_SETTINGS.INITIAL_VIEW_STATE),
+      ...INITIAL_VIEW_STATE,
       mapStyle: MAPBOX_STYLES.LIGHT
     };
-  }
-
-  static noMap() {
-    return true;
   }
 
   static renderInfo(meta) {
@@ -120,17 +116,15 @@ export default class GeoJsonDemo extends Component {
   }
 
   render() {
-    const {viewport, data} = this.props;
-
     return (
       <div>
         <App
           {...this.props}
-          data={data}
           colorScale={colorScale}
           onHover={this._onHover.bind(this)} />
 
         {this._renderTooltip()}
+
       </div>
     );
   }

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import ScreenGridOverlay from 'website-examples/screen-grid/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/screen-grid/app';
 
 export default class ScreenGridDemo extends Component {
 
@@ -20,7 +20,7 @@ export default class ScreenGridDemo extends Component {
 
   static get viewport() {
     return {
-      ...ScreenGridOverlay.defaultViewport,
+      ...INITIAL_VIEW_STATE,
       dragToRotate: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
@@ -40,14 +40,11 @@ export default class ScreenGridDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
-
-    if (!data) {
-      return null;
-    }
+    const {params, data} = this.props;
+    const cellSize = params.cellSize.value;
 
     return (
-      <ScreenGridOverlay viewport={viewport} data={data} cellSize={params.cellSize.value} />
+      <App {...this.props} data={data} cellSize={cellSize} />
     );
   }
 }

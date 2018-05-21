@@ -3,7 +3,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
+import DeckGL, {TextLayer} from 'deck.gl';
+import {setParameters} from 'luma.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -17,23 +18,30 @@ const SECONDS_PER_DAY = 24 * 60 * 60;
 const TIME_WINDOW = 2;
 const TEXT_COLOR = [255, 200, 0];
 
-class Root extends Component {
+const INITIAL_VIEW_STATE = {
+  latitude: 39.1,
+  longitude: -94.57,
+  zoom: 3.8,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0
+};
+
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500
-      }
+      viewState: INITIAL_VIEW_STATE
     };
-    this._loadData();
+
+    if (!window.demoLauncherActive) {
+      this._loadData();
+    }
   }
 
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
-
     this._loadData();
   }
 
@@ -100,8 +108,26 @@ class Root extends Component {
     });
   }
 
+  _initialize(gl) {
+    setParameters(gl, {
+      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
+      blendEquation: gl.FUNC_ADD
+    });
+  }
+
   render() {
     const {viewport, dataSlice} = this.state;
+    const {data} = this.props;
+
+    const layers = [
+      new TextLayer({
+        id: 'hashtag-layer',
+        data,
+        sizeScale: 8,
+        getColor: d => d.color,
+        getSize: d => d.size
+      })
+    ];
 
     return (
       <MapGL
@@ -111,12 +137,15 @@ class Root extends Component {
         onViewportChange={this._onViewportChange.bind(this)}
         mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        <DeckGLOverlay viewport={viewport} data={dataSlice} />
+        return <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />;
       </MapGL>
     );
   }
 }
 
+// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
+export {App, INITIAL_VIEW_STATE};
+
 if (!window.demoLauncherActive) {
-  render(<Root />, document.body.appendChild(document.createElement('div')));
+  render(<App />, document.body.appendChild(document.createElement('div')));
 }

@@ -1,8 +1,17 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
+import DeckGL, {MapView, ScreenGridLayer} from 'deck.gl';
+
+const INITIAL_VIEW_STATE = {
+  longitude: -119.3,
+  latitude: 35.6,
+  zoom: 6,
+  maxZoom: 20,
+  pitch: 0,
+  bearing: 0
+};
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -11,21 +20,12 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json'; // eslint-disable-line
 
-class Root extends Component {
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500
-      },
-      data: null
+      viewState: INITIAL_VIEW_STATE
     };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
   }
 
   componentDidMount() {
@@ -34,34 +34,63 @@ class Root extends Component {
   }
 
   _resize() {
-    this._onViewportChange({
+    const viewState = Object.assign(this.state.viewState, {
       width: window.innerWidth,
       height: window.innerHeight
     });
+    this._onViewStateChange({viewState});
   }
 
-  _onViewportChange(viewport) {
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
     });
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {
+      data = DATA_URL,
+      cellSize = 20,
+
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState,
+
+      mapboxApiAccessToken = MAPBOX_TOKEN,
+      mapStyle = "mapbox://styles/mapbox/dark-v9"
+    } = this.props;
+
+    const layer = new ScreenGridLayer({
+      id: 'grid',
+      data,
+      minColor: [0, 0, 0, 0],
+      getPosition: d => d,
+      cellSizePixels: cellSize
+    });
 
     return (
       <MapGL
-        {...viewport}
-        mapStyle="mapbox://styles/mapbox/dark-v9"
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+        {...viewState}
+        reuseMap
+        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+        mapboxApiAccessToken={mapboxApiAccessToken}
+        mapStyle={mapStyle}
+        preventStyleDiffing={true}
       >
-        <DeckGLOverlay viewport={viewport} data={data} cellSize={20} />
+
+        <DeckGL
+          layers={[layer]}
+          views={new MapView({id: 'map'})}
+          viewState={viewState}
+          />;
+
       </MapGL>
     );
   }
 }
 
+// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
+export {App, INITIAL_VIEW_STATE};
+
 if (!window.demoLauncherActive) {
-  render(<Root />, document.body.appendChild(document.createElement('div')));
+  render(<App />, document.body.appendChild(document.createElement('div')));
 }

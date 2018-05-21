@@ -1,8 +1,10 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
+
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, LineLayer, ScatterplotLayer} from 'deck.gl';
+import {setParameters} from 'luma.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -15,67 +17,109 @@ const DATA_URL = {
     'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
 };
 
-class Root extends Component {
+const INITIAL_VIEW_STATE = {
+  latitude: 47.65,
+  longitude: 7,
+  zoom: 4.5,
+  maxZoom: 16,
+  pitch: 50,
+  bearing: 0
+};
+
+function getColor(d) {
+  const z = d.start[2];
+  const r = z / 10000;
+
+  return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
+}
+
+function getSize(type) {
+  if (type.search('major') >= 0) {
+    return 100;
+  }
+  if (type.search('small') >= 0) {
+    return 30;
+  }
+  return 60;
+}
+
+class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500
-      },
-      flightPaths: null,
-      airports: null
-    };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({flightPaths: data}));
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({airports: data}));
+    this.state = {viewState: INITIAL_VIEW_STATE};
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+  _initialize(gl) {
+    setParameters(gl, {
+      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
+      blendEquation: gl.FUNC_ADD
     });
   }
 
   render() {
-    const {viewport, flightPaths, airports} = this.state;
+    const {
+      airports = DATA_URL.AIRPORTS,
+      flightPaths = DATA_URL.FLIGHT_PATHS,
+      strokeWidth = 3,
+
+      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      viewState = this.state.viewState,
+
+      mapboxApiAccessToken = MAPBOX_TOKEN,
+      mapStyle = "mapbox://styles/mapbox/dark-v9"
+    } = this.props;
+
+    const layers = [
+      new ScatterplotLayer({
+        id: 'airports',
+        data: airports,
+        radiusScale: 20,
+        getPosition: d => d.coordinates,
+        getColor: d => [255, 140, 0],
+        getRadius: d => getSize(d.type),
+        pickable: Boolean(this.props.onHover),
+        onHover: this.props.onHover
+      }),
+      new LineLayer({
+        id: 'flight-paths',
+        data: flightPaths,
+        strokeWidth,
+        fp64: false,
+        getSourcePosition: d => d.start,
+        getTargetPosition: d => d.end,
+        getColor,
+        pickable: Boolean(this.props.onHover),
+        onHover: this.props.onHover
+      })
+    ];
 
     return (
-      <MapGL
-        {...viewport}
-        mapStyle="mapbox://styles/mapbox/dark-v9"
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
+        onWebGLInitialized={this._initialize}
       >
-        <DeckGLOverlay
-          viewport={viewport}
-          strokeWidth={3}
-          flightPaths={flightPaths}
-          airports={airports}
+
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMap
+          mapboxApiAccessToken={mapboxApiAccessToken}
+          mapboxStyle={mapStyle}
+          preventStyleDiffing={true}
         />
-      </MapGL>
+
+      </DeckGL>
     );
   }
 }
 
+// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
+export {App, INITIAL_VIEW_STATE};
+
 if (!window.demoLauncherActive) {
-  render(<Root />, document.body.appendChild(document.createElement('div')));
+  render(<App />, document.body.appendChild(document.createElement('div')));
 }

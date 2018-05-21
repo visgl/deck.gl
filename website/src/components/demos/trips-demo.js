@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
 import ViewportAnimation from '../../utils/map-utils';
-import TripsOverlay from 'website-examples/trips/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/trips/app';
 
 export default class TripsDemo extends Component {
 
@@ -28,9 +28,13 @@ export default class TripsDemo extends Component {
 
   static get viewport() {
     return {
-      ...TripsOverlay.defaultViewport,
+      ...INITIAL_VIEW_STATE,
       mapStyle: MAPBOX_STYLES.DARK
     };
+  }
+
+  static get addMap() {
+    return true;
   }
 
   static renderInfo(meta) {
@@ -93,7 +97,9 @@ export default class TripsDemo extends Component {
     }
 
     return (
-      <TripsOverlay viewport={viewport}
+      <App
+        {...this.props}
+        viewport={viewport}
         trips={data[0]}
         buildings={data[1]}
         trailLength={params.trail.value}

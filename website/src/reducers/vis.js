@@ -6,6 +6,7 @@ import {normalizeParam} from '../utils/format-utils';
 export default handleActions({
 
   LOAD_DATA_START: (state, action) => ({...state, owner: action.owner, meta: {}, data: null}),
+
   LOAD_DATA_SUCCESS: (state, action) => {
     if (action.payload.owner !== state.owner) {
       return state;
@@ -14,6 +15,7 @@ export default handleActions({
   },
 
   UPDATE_META: (state, action) => ({...state, meta: {...state.meta, ...action.meta}}),
+
   USE_PARAMS: (state, action) => {
 
     const params = Object.keys(action.params)
@@ -24,6 +26,11 @@ export default handleActions({
 
     return {...state, params};
   },
+
+  RESET_PARAMS: (state, action) => {
+    return {...state};
+  },
+
   UPDATE_PARAM: (state, action) => {
     const {name, value} = action.payload;
     const newParams = {};

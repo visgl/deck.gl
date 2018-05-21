@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import IconOverlay from 'website-examples/icon/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/icon/app';
 
 import autobind from 'autobind-decorator';
 
@@ -31,7 +31,7 @@ export default class IconDemo extends Component {
 
   static get viewport() {
     return {
-      ...IconOverlay.defaultViewport,
+      ...INITIAL_VIEW_STATE,
       dragToRotate: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
@@ -148,7 +148,7 @@ export default class IconDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
+    const {params, data} = this.props;
     const {hoveredItems} = this.state;
 
     if (!data) {
@@ -157,7 +157,8 @@ export default class IconDemo extends Component {
 
     return (
       <div className={`icon-demo ${hoveredItems ? 'clickable' : ''}`}>
-        <IconOverlay viewport={viewport}
+        <App
+          {...this.props}
           data={data[0]}
           iconAtlas="images/location-icon-atlas.png"
           iconMapping={data[1]}

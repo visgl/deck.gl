@@ -69,7 +69,7 @@ class Home extends Component {
 
         <section ref="banner" id="banner">
           <div className="hero">
-            <DemoLauncher demo="HomeDemo" isInteractive={false} />
+            <DemoLauncher key="home-demo" demo="HomeDemo" isInteractive={false} />
           </div>
           <div className="container soft-left">
             <h1>deck.gl</h1>

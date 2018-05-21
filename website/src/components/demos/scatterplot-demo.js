@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ScatterplotOverlay from 'website-examples/scatterplot/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/scatterplot/app';
 
 export default class ScatterPlotDemo extends Component {
 
@@ -22,7 +22,7 @@ export default class ScatterPlotDemo extends Component {
 
   static get viewport() {
     return {
-      ...ScatterplotOverlay.defaultViewport,
+      ...INITIAL_VIEW_STATE,
       mapStyle: MAPBOX_STYLES.LIGHT
     };
   }
@@ -41,14 +41,11 @@ export default class ScatterPlotDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
-
-    if (!data) {
-      return null;
-    }
+    const {params, data} = this.props;
 
     return (
-      <ScatterplotOverlay viewport={viewport}
+      <App
+        {...this.props}
         data={data}
         maleColor={params.colorM.value}
         femaleColor={params.colorF.value}

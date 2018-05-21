@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import TagmapOverlay from 'website-examples/tagmap/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/tagmap/app';
 
 function stopPropagation(evt) {
   evt.stopPropagation();
@@ -26,7 +26,7 @@ export default class TextDemo extends Component {
 
   static get viewport() {
     return {
-      ...TagmapOverlay.defaultViewport,
+      ...INITIAL_VIEW_STATE,
       dragToRotate: false,
       mapStyle: MAPBOX_STYLES.DARK
     };
@@ -50,15 +50,12 @@ export default class TextDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
-
-    if (!data) {
-      return null;
-    }
+    const {params, data} = this.props;
 
     return (
       <div className="text-demo">
-        <TagmapOverlay viewport={viewport}
+        <App
+          {...this.props}
           data={data}
           cluster={params.cluster.value}
           fontSize={params.fontSize.value} />

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import LineOverlay from 'website-examples/line/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/line/app';
 
 export default class LineDemo extends Component {
 
@@ -26,7 +26,7 @@ export default class LineDemo extends Component {
 
   static get viewport() {
     return {
-      ...LineOverlay.defaultViewport,
+      ...INITIAL_VIEW_STATE,
       mapStyle: MAPBOX_STYLES.DARK
     };
   }
@@ -76,17 +76,14 @@ export default class LineDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
-
-    if (!data) {
-      return null;
-    }
+    const {params, data} = this.props;
 
     return (
       <div>
-        <LineOverlay viewport={viewport}
-          flightPaths={data[0]}
-          airports={data[1]}
+        <App
+          {...this.props}
+          flightPaths={data && data[0]}
+          airports={data && data[1]}
           onHover={this._onHover.bind(this)}
           strokeWidth={params.strokeWidth.value} />
 

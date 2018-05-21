@@ -56,7 +56,7 @@ class Page extends Component {
   @autobind _renderDemo(name, sourceLink) {
     return (
       <div className="demo">
-        <DemoLauncher demo={name} />
+        <DemoLauncher key={name} demo={name} />
         <InfoPanel demo={name} >
 
           {sourceLink && (<div className="source-link">
