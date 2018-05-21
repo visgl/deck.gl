@@ -17,8 +17,6 @@ import {
 } from 'deck.gl';
 
 // Demonstrate immutable support
-import {experimental} from 'deck.gl';
-const {get} = experimental;
 import * as dataSamples from '../data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
@@ -59,8 +57,8 @@ const IconLayerExample = {
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
-    getIcon: d => (get(d, 'PLACEMENT') === 'SW' ? 'marker' : 'marker-warning'),
-    getSize: d => (get(d, 'RACKS') > 2 ? 2 : 1),
+    getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+    getSize: d => (d.RACKS > 2 ? 2 : 1),
     opacity: 0.8,
     pickable: true
   }
@@ -97,8 +95,8 @@ const GeoJsonLayerExtrudedExample = {
   getData: () => dataSamples.choropleths,
   props: {
     id: 'geojsonLayer-extruded',
-    getElevation: f => ((get(f, 'properties.ZIP_CODE') * 10) % 127) * 10,
-    getFillColor: f => [0, 100, (get(f, 'properties.ZIP_CODE') * 55) % 255],
+    getElevation: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
+    getFillColor: f => [0, 100, (f.properties.ZIP_CODE * 55) % 255],
     getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
@@ -141,7 +139,7 @@ const PathLayerExample = {
   props: {
     id: 'pathLayer',
     opacity: 0.6,
-    getPath: f => get(f, 'path'),
+    getPath: f => f.path,
     getColor: f => [128, 0, 0],
     getWidth: f => 10,
     widthMinPixels: 1,
@@ -154,7 +152,7 @@ const ScreenGridLayerExample = {
   getData: () => dataSamples.points,
   props: {
     id: 'screenGridLayer',
-    getPosition: d => get(d, 'COORDINATES'),
+    getPosition: d => d.COORDINATES,
     cellSizePixels: 40,
     minColor: [0, 0, 80, 0],
     maxColor: [100, 255, 0, 128],
@@ -167,9 +165,9 @@ const LineLayerExample = {
   getData: () => dataSamples.routes,
   props: {
     id: 'lineLayer',
-    getSourcePosition: d => get(d, 'START'),
-    getTargetPosition: d => get(d, 'END'),
-    getColor: d => (get(d, 'SERVICE') === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
     pickable: true
   }
 };
@@ -179,9 +177,9 @@ const ScatterplotLayerExample = {
   getData: () => dataSamples.points,
   props: {
     id: 'scatterplotLayer',
-    getPosition: d => get(d, 'COORDINATES'),
+    getPosition: d => d.COORDINATES,
     getColor: d => [255, 128, 0],
-    getRadius: d => get(d, 'SPACES'),
+    getRadius: d => d.SPACES,
     opacity: 1,
     pickable: true,
     radiusScale: 30,
@@ -199,8 +197,8 @@ const GridCellLayerExample = {
     extruded: true,
     pickable: true,
     opacity: 1,
-    getColor: g => [245, 166, get(g, 'value') * 255, 255],
-    getElevation: h => get(h, 'value') * 5000,
+    getColor: d => [245, 166, d.value * 255, 255],
+    getElevation: d => d.value * 5000,
     lightSettings: LIGHT_SETTINGS
   }
 };
@@ -242,7 +240,7 @@ const GridLayerExample = {
     opacity: 1,
     extruded: true,
     pickable: true,
-    getPosition: d => get(d, 'COORDINATES'),
+    getPosition: d => d.COORDINATES,
     getColorValue,
     getElevationValue,
     lightSettings: LIGHT_SETTINGS
@@ -259,8 +257,8 @@ const HexagonCellLayerExample = {
     extruded: true,
     pickable: true,
     opacity: 1,
-    getColor: h => [48, 128, get(h, 'value') * 255, 255],
-    getElevation: h => get(h, 'value') * 5000,
+    getColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value * 5000,
     lightSettings: LIGHT_SETTINGS
   }
 };
@@ -277,7 +275,7 @@ const HexagonLayerExample = {
     elevationScale: 1,
     elevationRange: [0, 3000],
     coverage: 1,
-    getPosition: d => get(d, 'COORDINATES'),
+    getPosition: d => d.COORDINATES,
     getColorValue,
     getElevationValue,
     lightSettings: LIGHT_SETTINGS
