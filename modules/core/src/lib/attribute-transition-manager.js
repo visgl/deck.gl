@@ -1,5 +1,5 @@
 import {GL, Buffer, experimental} from 'luma.gl';
-import {getShaders, getBuffers} from './attribute-transition-utils';
+import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
 import Transition from '../transitions/transition';
 import log from '../utils/log';
 import assert from '../utils/assert';
@@ -70,7 +70,7 @@ export default class AttributeTransitionManager {
       this._createModel();
     } else if (this.transform) {
       const {sourceBuffers, destinationBuffers, elementCount} = getBuffers(changedTransitions);
-      this.transform.elementCount = Math.min(this.transform.elementCount, elementCount);
+      this.transform.elementCount = this.numInstances;
       this.transform.update({
         sourceBuffers,
         destinationBuffers
@@ -196,7 +196,9 @@ export default class AttributeTransitionManager {
     this.transform = new Transform(
       this.gl,
       Object.assign(
-        {},
+        {
+          elementCount: this.numInstances
+        },
         getBuffers(this.attributeTransitions),
         getShaders(this.attributeTransitions)
       )
@@ -206,7 +208,7 @@ export default class AttributeTransitionManager {
   // get current values of an attribute, clipped/padded to the size of the new buffer
   _getNextTransitionStates(transition) {
     const {attribute} = transition;
-    const {value, size} = attribute;
+    const {size} = attribute;
 
     let toState;
     if (attribute.isGeneric) {
@@ -238,13 +240,7 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength)
       });
     }
-    if (fromLength < toLength) {
-      const data = new Float32Array(toLength);
-      data.set(fromState.getData({}));
-      data.set(value.subarray(fromLength), fromLength);
-
-      fromState.setData({data});
-    }
+    padBuffer({fromState, toState, fromLength, toLength});
 
     return {fromState, toState, buffer};
   }
