@@ -65,7 +65,7 @@ export function getBuffers(transitions) {
   const sourceBuffers = {};
   const destinationBuffers = {};
   for (const attributeName in transitions) {
-    const {fromState, toState, buffer, attribute} = transitions[attributeName];
+    const {fromState, toState, buffer} = transitions[attributeName];
     sourceBuffers[`${attributeName}From`] = fromState;
     sourceBuffers[`${attributeName}To`] = toState;
     destinationBuffers[`${attributeName}`] = buffer;
@@ -82,13 +82,13 @@ export function padBuffer({fromState, toState, fromLength, toLength}) {
   const data = new Float32Array(toLength);
   // copy the currect values
   data.set(fromState.getData({}));
-  
+
   if (toState.isGeneric) {
     fillArray({
       target: data,
       source: data.value,
       start: fromLength,
-      count: (toLength - startLength) / data.value.length
+      count: (toLength - fromLength) / data.value.length
     });
   } else {
     data.set(toState.data.subarray(fromLength), fromLength);

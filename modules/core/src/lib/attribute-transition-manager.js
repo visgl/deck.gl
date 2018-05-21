@@ -69,7 +69,7 @@ export default class AttributeTransitionManager {
     if (!this.transform) {
       this._createModel();
     } else if (this.transform) {
-      const {sourceBuffers, destinationBuffers, elementCount} = getBuffers(changedTransitions);
+      const {sourceBuffers, destinationBuffers} = getBuffers(changedTransitions);
       this.transform.elementCount = this.numInstances;
       this.transform.update({
         sourceBuffers,
@@ -218,7 +218,7 @@ export default class AttributeTransitionManager {
     }
     const fromState = transition.buffer || toState;
     const toLength = this.numInstances * size;
-    const fromLength = fromState.data && fromState.data.length || toLength;
+    const fromLength = (fromState.data && fromState.data.length) || toLength;
 
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
