@@ -19,10 +19,10 @@
 // THE SOFTWARE.
 
 import {Layer, experimental} from '@deck.gl/core';
-const {defaultColorRange, quantizeScale, lerp} = experimental;
+const {defaultColorRange, quantizeScale} = experimental;
 
 import {GL, Model, Geometry} from 'luma.gl';
-
+import {lerp} from 'math.gl';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 const DEFAULT_MINCOLOR = [0, 0, 0, 255];

@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, experimental} from '@deck.gl/core';
-const {log} = experimental;
+import {CompositeLayer, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import {makeFontAtlas, DEFAULT_CHAR_SET} from './font-atlas';
 

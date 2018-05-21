@@ -25,7 +25,9 @@
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
 import {experimental} from '@deck.gl/core';
-const {fillArray, fp64LowPart} = experimental;
+const {fillArray} = experimental;
+import {fp64 as fp64Module} from 'luma.gl';
+const {fp64LowPart} = fp64Module;
 
 // Maybe deck.gl or luma.gl needs to export this
 function getPickingColor(index) {

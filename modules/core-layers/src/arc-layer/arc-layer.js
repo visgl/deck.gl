@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer, experimental} from '@deck.gl/core';
-const {log, fp64LowPart, enable64bitSupport} = experimental;
+import {COORDINATE_SYSTEM, Layer, log} from '@deck.gl/core';
 
-import {GL, Model, Geometry} from 'luma.gl';
+import {GL, Model, Geometry, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './arc-layer-vertex.glsl';
 import vs64 from './arc-layer-vertex-64.glsl';
@@ -52,7 +52,7 @@ export default class ArcLayer extends Layer {
   }
 
   getShaders() {
-    return enable64bitSupport(this.props)
+    return this.is64bitEnabled()
       ? {vs: vs64, fs, modules: ['project64', 'picking']}
       : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }

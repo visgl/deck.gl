@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
-const {log, fp64LowPart, enable64bitSupport} = experimental;
-import {GL, Model, Geometry} from 'luma.gl';
+import {Layer, log} from '@deck.gl/core';
+import {GL, Model, Geometry, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './line-layer-vertex.glsl';
 import fs from './line-layer-fragment.glsl';
@@ -49,7 +49,7 @@ export default class LineLayer extends Layer {
   }
 
   getShaders() {
-    const projectModule = enable64bitSupport(this.props) ? 'project64' : 'project32';
+    const projectModule = this.is64bitEnabled() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
   }
 
@@ -130,7 +130,7 @@ export default class LineLayer extends Layer {
   }
 
   calculateInstanceSourceTargetPositions64xyLow(attribute) {
-    const isFP64 = enable64bitSupport(this.props);
+    const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {

@@ -1,3 +1,4 @@
+import {clamp} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
 import WebMercatorViewport, {normalizeViewportProps} from 'viewport-mercator-project';
@@ -18,9 +19,6 @@ const DEFAULT_STATE = {
 };
 
 /* Utils */
-function clamp(value, min, max) {
-  return value < min ? min : value > max ? max : value;
-}
 
 class MapState extends ViewState {
   constructor({

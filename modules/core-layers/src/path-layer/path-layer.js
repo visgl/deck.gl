@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer, experimental} from '@deck.gl/core';
-const {fp64LowPart, enable64bitSupport} = experimental;
-import {GL, Model, Geometry} from 'luma.gl';
+import {COORDINATE_SYSTEM, Layer} from '@deck.gl/core';
+import {GL, Model, Geometry, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './path-layer-vertex.glsl';
 import vs64 from './path-layer-vertex-64.glsl';
@@ -55,7 +55,7 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return enable64bitSupport(this.props)
+    return this.is64bitEnabled()
       ? {vs: vs64, fs, modules: ['project64', 'picking']}
       : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }

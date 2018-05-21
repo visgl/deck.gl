@@ -18,9 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
-const {fp64LowPart} = experimental;
-import {GL, Model, Geometry} from 'luma.gl';
+import {Layer} from '@deck.gl/core';
+import {GL, Model, Geometry, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';

@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, experimental} from '@deck.gl/core';
+import {CompositeLayer, log, experimental} from '@deck.gl/core';
 import HexagonCellLayer from '../hexagon-cell-layer/hexagon-cell-layer';
 
-const {log, BinSorter, getQuantizeScale, getLinearScale, defaultColorRange} = experimental;
+const {BinSorter, getQuantizeScale, getLinearScale, defaultColorRange} = experimental;
 
 import {pointToHexbin} from './hexagon-aggregator';
 
