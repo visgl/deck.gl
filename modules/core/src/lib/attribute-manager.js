@@ -243,7 +243,11 @@ export default class AttributeManager {
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     }
 
-    this.attributeTransitionManager.update(this.attributes, transitions);
+    this.attributeTransitionManager.update({
+      attributes: this.attributes,
+      numInstances,
+      transitions
+    });
   }
 
   // Update attribute transition to the current timestamp

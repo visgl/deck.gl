@@ -175,7 +175,7 @@ export default class LayerAttribute extends Attribute {
 
       if (buffer instanceof Buffer) {
         if (this.externalBuffer !== buffer) {
-          this.update({externalBuffer: buffer});
+          this.update({isGeneric: false, buffer});
           state.needsRedraw = true;
         }
       } else {
