@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Layer, AttributeManager} from 'deck.gl';
+import {Layer, AttributeManager, COORDINATE_SYSTEM} from 'deck.gl';
 import {testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from 'probe.gl/test-utils';
 
@@ -163,6 +163,19 @@ test('Layer#diffProps', t => {
   );
   t.ok(spy.called, 'updateTriggers fired');
   spy.restore();
+
+  t.end();
+});
+
+test('Layer#is64bitEnabled', t => {
+  let layer = new SubLayer({});
+  t.false(layer.is64bitEnabled(), 'returns false for fp64: false');
+
+  layer = new SubLayer({fp64: true});
+  t.true(layer.is64bitEnabled(), 'returns true for fp64: true');
+
+  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS, fp64: true});
+  t.false(layer.is64bitEnabled(), 'returns false for non-lnglat mode');
 
   t.end();
 });
