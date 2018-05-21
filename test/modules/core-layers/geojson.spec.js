@@ -22,7 +22,7 @@ import test from 'tape-catch';
 import {
   getGeojsonFeatures,
   separateGeojsonFeatures
-} from '@deck.gl/core-layers/geojson-layer/geojson';
+} from '@deck.gl/layers/geojson-layer/geojson';
 
 const TEST_DATA = {
   POINT: {

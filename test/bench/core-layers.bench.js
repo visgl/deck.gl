@@ -25,7 +25,7 @@ import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer, TextLayer} from
 
 import {testInitializeLayer} from '@deck.gl/test-utils';
 
-import SolidPolygonLayer from '@deck.gl/core-layers/solid-polygon-layer/solid-polygon-layer';
+import SolidPolygonLayer from '@deck.gl/layers/solid-polygon-layer/solid-polygon-layer';
 
 // add tests
 export default function coreLayersBench(suite) {

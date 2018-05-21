@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@deck.gl/core": "^5.2.0",
+    "@deck.gl/layers": "^5.3.0-alpha",
     "mapbox-gl": "~0.44.2",
     "stats.js": "^0.17.0"
   },

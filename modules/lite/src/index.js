@@ -6,7 +6,7 @@
 /* global window, global */
 const lumaGL = require('luma.gl');
 const deckGLCore = require('@deck.gl/core');
-const deckGLCoreLayers = require('@deck.gl/core-layers');
+const deckGLCoreLayers = require('@deck.gl/layers');
 
 const DeckGL = require('./deckgl').default;
 

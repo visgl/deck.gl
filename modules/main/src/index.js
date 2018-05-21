@@ -152,7 +152,7 @@ export {
   PolygonLayer,
   GeoJsonLayer,
   TextLayer
-} from '@deck.gl/core-layers';
+} from '@deck.gl/layers';
 
 //
 // REACT BINDINGS PACKAGE
