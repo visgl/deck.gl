@@ -179,7 +179,9 @@ export default class LayerManager {
   // Get a set of viewports for a given width and height
   getViewports() {
     const viewports = this.viewManager.getViewports();
-    this.context.viewport = viewports[0];
+    if (viewports.length) {
+      this._activateViewport(viewports[0]);
+    }
     return viewports;
   }
 
@@ -456,13 +458,13 @@ export default class LayerManager {
     this._validateEventHandling();
   }
 
-  // Make a viewport "current" in layer context, primed for draw
+  // Make a viewport "current" in layer context, updating viewportChanged flags
   _activateViewport(viewport) {
     const oldViewport = this.context.viewport;
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
     if (viewportChanged) {
-      log.log(4, 'Viewport', viewport)();
+      log.log(4, 'Viewport changed', viewport)();
 
       this.context.viewport = viewport;
 
