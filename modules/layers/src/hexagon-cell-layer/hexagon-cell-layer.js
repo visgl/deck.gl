@@ -164,6 +164,7 @@ export default class HexagonCellLayer extends Layer {
       topCap: true,
       bottomCap: true,
       height: 1,
+      verticalAxis: 'z',
       nradial: 6,
       nvertical: 1
     });

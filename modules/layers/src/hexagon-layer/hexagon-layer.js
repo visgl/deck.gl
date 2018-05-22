@@ -368,7 +368,7 @@ export default class HexagonLayer extends CompositeLayer {
       hexagonVertices: this.state.hexagonVertices,
       radius,
       elevationScale,
-      angle: Math.PI,
+      angle: Math.PI / 2,
       extruded,
       coverage,
       lightSettings,
