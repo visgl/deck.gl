@@ -54,6 +54,10 @@ The [`View`](/docs/api-reference/view.md) classes can now build an orthographic 
 
 Many layer accessor props now accept constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. This is not only a convenience: constant values of accessors don't use GPU memory and can be updated very quickly and thus do not require an `updateTrigger`. Consult the documentation for each layer to see which accessors are supported.
 
+#### @deck.gl/layers submodule
+
+Core layers are broken out from ` @deck.gl/core` to a new submodule ` @deck.gl/layers`. Users of `deck.gl` are not affected by this change.
+
 
 ## deck.gl v5.2
 

@@ -20,8 +20,8 @@
 
 import test from 'tape-catch';
 
-import * as Polygon from '@deck.gl/core-layers/solid-polygon-layer/polygon';
-import {PolygonTesselator} from '@deck.gl/core-layers/solid-polygon-layer/polygon-tesselator';
+import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
+import {PolygonTesselator} from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';
 
 const POLYGONS = [[], [[1, 1]], [[1, 1], [1, 1], [1, 1]], [[[1, 1]]], [[[1, 1], [1, 1], [1, 1]]]];
 

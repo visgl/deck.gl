@@ -1,5 +1,5 @@
 import {Deck, MapController} from '@deck.gl/core';
-import {GeoJsonLayer} from '@deck.gl/core-layers';
+import {GeoJsonLayer} from '@deck.gl/layers';
 import Map from './mapbox';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz

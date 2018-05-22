@@ -19,6 +19,23 @@ new MapView().makeViewport({width, height, viewState: {longitude, latitude, zoom
 | `LineLayer`      | `strokeWidth`       | `getStrokeWidth` | Can be set to constant value |
 
 
+### Pure JS applications
+
+Core layers are broken out from ` @deck.gl/core` to a new submodule ` @deck.gl/layers`. Non-React users of deck.gl should now install both submodules:
+
+```bash
+npm install @deck.gl/core @deck.gl/layers
+```
+
+And import layers from the new submodule instead of core:
+
+```js
+import {ScatterplotLayer} from '@deck.gl/layers';
+```
+
+Users of `deck.gl` are not affected by this change.
+
+
 ## Upgrading from deck.gl v5.1 to v5.2
 
 ### DeckGL component

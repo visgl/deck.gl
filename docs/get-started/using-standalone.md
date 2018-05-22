@@ -12,11 +12,12 @@ Our [examples](https://github.com/uber/deck.gl/tree/5.2-release/examples/get-sta
 The [Deck](/docs/api-reference/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
 ```bash
-npm install @deck.gl/core
+npm install @deck.gl/core @deck.gl/layers
 ```
 
 ```js
-import {Deck, ScatterplotLayer, MapController} from '@deck.gl/core';
+import {Deck, MapController} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {
   latitude: 37.78,
