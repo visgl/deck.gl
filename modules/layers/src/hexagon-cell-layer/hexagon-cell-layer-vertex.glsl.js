@@ -65,7 +65,7 @@ void main(void) {
   // project center of hexagon
   vec3 centroidPosition = vec3(instancePositions.xy, elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
-  vec3 offset = vec3(rotationMatrix * positions.xy * dotRadius, positions.z);
+  vec3 offset = vec3(rotationMatrix * positions.xy * dotRadius, 0.);
 
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, offset, position_worldspace);
