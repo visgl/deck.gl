@@ -59,12 +59,12 @@ export default class GPUScreenGridLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      // TODO: Needed, since attributeManger.update() only updates existing attributes.
       instanceCounts: {
         size: 4,
         transition: true,
         accessor: ['getPosition', 'getWeight'],
-        update: this.calculateInstanceCounts
+        update: this.calculateInstanceCounts,
+        noAlloc: true
       }
     });
     /* eslint-disable max-len */
@@ -136,8 +136,10 @@ export default class GPUScreenGridLayer extends Layer {
   }
 
   calculateInstanceCounts(attribute, {numInstances}) {
-    // Empty method: Attribute manager requires an update method for each added attribute
-    // TODO: remove this when proper external buffer support is added to Attribute Manager.
+    const {countsBuffer} = this.state;
+    attribute.update({
+      buffer: countsBuffer
+    });
   }
 
   // HELPER Methods
@@ -222,15 +224,16 @@ export default class GPUScreenGridLayer extends Layer {
   }
 
   _updateAggregation(changeFlags) {
+    const attributeManager = this.getAttributeManager();
     if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
       this._updateGridParams();
+      attributeManager.invalidateAll();
     }
+    const {cellSizePixels, gpuAggregation} = this.props;
 
-    const {data, cellSizePixels, gpuAggregation} = this.props;
+    const {positions, weights, maxCountBuffer, countsBuffer} = this.state;
 
-    const {positions, weights, maxCountBuffer, countsBuffer, numInstances} = this.state;
-
-    const aggregatedData = this.state.gpuGridAggregator.run({
+    this.state.gpuGridAggregator.run({
       positions,
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
@@ -241,20 +244,7 @@ export default class GPUScreenGridLayer extends Layer {
       useGPU: gpuAggregation
     });
 
-    const attributeManager = this.getAttributeManager();
-
-    // TODO: AttributeManager should be able to just take new buffer for one or more attributes.
-    // data and numInstances shouldn't be needed.
-    attributeManager.update({
-      data,
-      numInstances,
-      buffers: {
-        instanceCounts: aggregatedData.countsBuffer
-      },
-      context: this,
-      ignoreUnknownAttributes: true
-    });
-    attributeManager.invalidateAll();
+    attributeManager.invalidate('instanceCounts');
   }
 
   _updateGridParams() {
