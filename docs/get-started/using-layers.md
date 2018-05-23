@@ -45,8 +45,6 @@ The main concern when rendering more than one instance of a specific layer (say 
 ]} />
 ```
 
-The `id` property works similarly (but not identically) to the `key` property on React components.
-
 ## Available Layers
 
 All deck.gl layers inherit from either the [`Layer`](/docs/api-reference/layer.md) or the [`CompositeLayer`](/docs/api-reference/composite-layer.md) base classes and the props of those layers are available to all layers unless otherwise documented.
