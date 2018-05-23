@@ -47,20 +47,14 @@ varying vec4 vColor;
 void main(void) {
 
   // rotate primitive position and normal
-  mat2 rotationMatrix = mat2(cos(angle), -sin(angle), sin(angle), cos(angle));
-
-  vec2 rPos = rotationMatrix * positions.xz;
-  vec2 rNorm = rotationMatrix * normals.xz; // the hexagon cells has y axis as the vertical axis
-
-  vec3 rotatedPositions = vec3(rPos.x, positions.y, rPos.y);
-  vec3 rotatedNormals = vec3(rNorm.x, rNorm.y, normals.y);
+  mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
   // calculate elevation, if 3d not enabled set to 0
   // cylindar gemoetry height are between -0.5 to 0.5, transform it to between 0, 1
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = instancePositions.z * (positions.y + 0.5) *
+    elevation = instancePositions.z * (positions.z + 0.5) *
       ELEVATION_SCALE * elevationScale;
   }
 
@@ -71,7 +65,7 @@ void main(void) {
   // project center of hexagon
   vec3 centroidPosition = vec3(instancePositions.xy, elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
-  vec3 offset = vec3(vec2(rotatedPositions.xz * dotRadius), 0.);
+  vec3 offset = vec3(rotationMatrix * positions.xy * dotRadius, 0.);
 
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, offset, position_worldspace);
@@ -79,7 +73,7 @@ void main(void) {
   // Light calculations
   // Worldspace is the linear space after Mercator projection
 
-  vec3 normals_worldspace = rotatedNormals;
+  vec3 normals_worldspace = vec3(rotationMatrix * normals.xy, normals.z);
 
   float lightWeight = 1.0;
 
