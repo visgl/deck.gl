@@ -132,7 +132,6 @@ export const examplePages = generatePath([
   }
 ]);
 
-
 export const showcasePages = generatePath([
   {
     name: 'Overview',
@@ -175,6 +174,10 @@ export const docPages = generatePath([
       {
         name: 'Roadmap',
         content: getDocUrl('roadmap.md')
+      },
+      {
+        name: 'Contributing',
+        content: getDocUrl('contributing.md')
       }
     ]
   },

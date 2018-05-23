@@ -18,79 +18,49 @@
 
 <h1 align="center">deck.gl | <a href="https://uber.github.io/deck.gl">Docs</a></h1>
 
-<h5 align="center">A WebGL overlay suite for React providing a set of highly performant data visualization overlays</h5>
+<h5 align="center">A suite of WebGL2-powered data visualization layers</h5>
 
 [![docs](http://i.imgur.com/mvfvgf0.jpg)](https://uber.github.io/deck.gl)
 
-Provides tested, highly performant layers for data visualization,
-such as scatterplots, arcs, geometries defined in GeoJSON, etc...
+Provides tested, highly performant layers for data visualization, such as scatterplots, arcs, geometries defined in GeoJSON, etc.
 
-    npm install --save deck.gl
+deck.gl has extensive documentation, please refer to the [docs website](https://uber.github.io/deck.gl) or browse it directly in the github [docs folder](./docs).
+
 
 ## Using deck.gl
 
-To learn how to use deck.gl through examples coming with the deck.gl repo,
-please clone the latest **release** branch.
+deck.gl can be used through its standard JavaScript API (available both as installable npm modules as well as a "script" file for use in scripting setups). However, if you are using React you will likely want to use the provided React integration. Again, consult the extensive documentation for more details on how to access what you need.
 
-`git clone -b 5.1-release --single-branch https://github.com/uber/deck.gl.git`
 
-A very simple usage of deck.gl is showcased in the [hello-world examples](./examples),
-using both [webpack2](./examples/hello-world-webpack2) and
-[browserify](./examples/hello-world-browserify),
-so you can choose which setup you prefer or are more familiar with.
+## Examples
+
+To get a quick feel for deck.gl applicaiton source code might look like, say the application has some data representing flights with start and end positions for each item. If it wanted to display this data as a set of arcs it would simply import and render a deck.gl `ArcLayer`:
 
 ```javascript
 import DeckGL, {ArcLayer} from 'deck.gl';
 
 const flights = new ArcLayer({
-  id: 'flights',
-  data: [] // Some flight points
+  data: [] // Some flight points,
+  ...
 });
 
 <DeckGL width={1920} height={1080} layers={[flights]} />
 ```
 
-You can also take a look at the [docs website](https://uber.github.io/deck.gl)
-or browse directly the [docs folder](./docs).
+Simple usage of deck.gl is also showcased in the [hello-world examples](./examples/get-started), using both [webpack2](./examples/get-started/hello-world-webpack2) and [browserify](./examples/get-started/hello-world-browserify), so you can choose which bundler you prefer or are more familiar with.
 
-## Developing deck.gl
+To learn how to use deck.gl through the many examples that coming with the deck.gl repo, please clone the latest **release** branch. `git clone -b 5.3-release --single-branch https://github.com/uber/deck.gl.git`
 
-The **master** branch is the active development branch.
+For the most up-to-date information, see our [docs](http://uber.github.io/deck.gl/#/docs/getting-started/installation?section=running-the-examples)
 
-    npm run bootstrap
-    npm test
-    npm start  # See note below
-
-Note that `npm start` in the main directory actually runs `examples/layer-browser`.
-
-
-#### Node Version Requirement
-
-Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `4.x` or higher.
-Building deck.gl from source has a dependency on Node `8.x` or higher.
-Either upgrade to a supported version, or install something like
-[nvm](https://github.com/creationix/nvm) to manage Node versions.
-
-#### Install yarn
-On macOS deck.gl uses [yarn](https://www.npmjs.com/package/yarn) to manage packages.
-To develop deck.gl, [install yarn](https://yarnpkg.com/en/docs/install) with brew
-
-```
-brew update
-brew install yarn
-
-```
 
 ## Contributing
 
-PRs and bug reports are welcome. Note that you once your PR is
-about to be merged, you will be asked to register as a contributor
-by filling in a short form.
+PRs and bug reports are welcome, and we are actively opening up the deck.gl roadmap to facilitate for external contributors.
+
+Note that you once your PR is about to be merged, you will be asked to register as a contributor by filling in a short form.
+
 
 ## Data sources
 
-[SF OpenData](https://data.sfgov.org)
-
-[TLC Trip Record Data](http://www.nyc.gov/html/tlc/html/about/trip_record_data.shtml)
-
-[Mapzen](https://mapzen.com/)
+Data sources are listed in each example.

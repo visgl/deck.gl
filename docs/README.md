@@ -48,20 +48,26 @@ deck.gl has been developed in parallel with a number of companion modules, e.g.:
 
 How you approach learning deck.gl will depend on your previous knowledge and how you want to use it.
 
-Learning the layer props, and reading the basic articles in the deck.gl documentation should of course be the first step. But where to go after that?
+Getting familiar with the various layers and their props, and reading the basic articles in the deck.gl developer guide should of course be one of the first steps.
 
-### Understanding the Reactive Programming Model
+Exploring the deck.gl examples is a good starting point.
 
-deck.gl is designed according to the principles of the [Reactive Programming Model](https://en.wikipedia.org/wiki/Reactive_programming).
+In-depth tutorials for how to develop deck.gl applications are available on the [Vis Academy](http://vis.academy/#/) website.
 
-The key to writing good, performant deck.gl applications and layers lies in understanding how to minimize updates and redundant calculations.
+And our [blog](https://medium.com/vis-gl) contains a lot of additional information that might be helpful.
 
-It is important to understand the implications of the shallow equality comparisons deck.gl performs on layer properties, and how this implies that new data and property objects must only be created when the underlying data actually changes in order to prevent unnecessary updates.
+But where to go after that?
 
-There is an impressive amount of information (documentation, blog posts, educational videos, etc.) on the reactive programming paradigm in relation to modern web frameworks such as React, Flux and Redux. Where to start depends mostly on your application architecture choices.
+
+### Learning Reactive UI Programming
+
+deck.gl is designed according to functional UI programming principles, made fashionable by frameworks like React. The key to writing good, performant deck.gl applications and layers lies in knowing how to minimize updates and redundant calculations, understanding concepts like "shallow equality" etc. This is critical when using deck.gl with React, but can still be helpful to understand when using deck.gl in non-React contexts.
+
+There is an impressive amount of information (documentation, blog posts, educational videos, etc.) on the reactive programming paradigm in relation to modern web frameworks such as React, Flux and Redux. Where to start depends mostly on your application architecture choices. Exploring such information will take you beyond what we can cover in the basic deck.gl developer guide article on Updates.
+
 
 ### Understanding WebGL
 
-This is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL knowledge.
+Knowledge of WebGL is only needed if you want to create custom layers in deck.gl. Note that while trying out a new ambitious rendering approach for a new layer will likely require deeper knowledge, it is often possible to modify or extend existing deck.gl layers (including modifying the shader code) with a surprisingly limited amount of WebGL knowledge.
 
 There are many web resources for learning WebGL. [luma.gl](https://uber.github.io/luma.gl/#/) can be a good start.

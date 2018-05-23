@@ -8,7 +8,7 @@ For more information consult the [Viewports](/docs/developer-guide/viewports.md)
 
 ## Usage
 
-The `WebMercatorViewport` is the default viewport for deck.gl. If you are using the `DeckGL` React component you may not even need to instantiate it explicitly.
+The `WebMercatorViewport` is the default viewport for deck.gl, created under the hood to do geospatial projections in JavaScript.
 
 ```jsx
 import DeckGL from 'deck.gl';
