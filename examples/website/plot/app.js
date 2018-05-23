@@ -35,7 +35,7 @@ class App extends Component {
     };
 
     this._onResize = this._onResize.bind(this);
-    this._onViewportChange = this._onViewportChange.bind(this);
+    this._onViewStateChange = this._onViewSttaeChange.bind(this);
   }
 
   componentDidMount() {
@@ -49,15 +49,16 @@ class App extends Component {
 
   _onResize() {
     const {fov} = this.state.viewState;
-    const newViewState = Object.assign({}, this.viewState, {
+    const viewState = Object.assign({}, this.viewState, {
       distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov})
     });
-    this._onViewportChange(newViewState, {});
+    this._onViewStateChange({viewState});
   }
 
-  _onViewportChange(viewState) {
-    Object.assign(this.state.viewState, viewState);
-    this.setState({viewState: this.state.viewState});
+  _onViewStateChange({viewState}) {
+    this.setState({
+      viewState: {...this.state.viewState, ...viewState}
+    });
   }
 
   render() {
@@ -98,7 +99,7 @@ class App extends Component {
         views={new OrbitView()}
         viewState={viewState}
         controller={OrbitController}
-        onViewportChange={this._onViewportChange}
+        onViewStateChange={this._onViewStateChange}
       />
     );
   }

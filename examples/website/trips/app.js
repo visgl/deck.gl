@@ -38,23 +38,9 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewport: {
-        ...App.defaultViewport,
-        width: 500,
-        height: 500
-      },
-      buildings: null,
-      trips: null,
+      viewState: INITIAL_VIEW_STATE,
       time: 0
     };
-
-    fetch(DATA_URL.BUILDINGS)
-      .then(resp => resp.json())
-      .then(data => this.setState({buildings: data}));
-
-    fetch(DATA_URL.TRIPS)
-      .then(resp => resp.json())
-      .then(data => this.setState({trips: data}));
   }
 
   componentDidMount() {
@@ -69,17 +55,6 @@ export default class App extends Component {
     }
   }
 
-  _animate() {
-    const timestamp = Date.now();
-    const loopLength = 1800;
-    const loopTime = 60000;
-
-    this.setState({
-      time: (timestamp % loopTime) / loopTime * loopLength
-    });
-    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
-  }
-
   _resize() {
     const viewState = Object.assign(this.state.viewState, {
       width: window.innerWidth,
@@ -92,6 +67,17 @@ export default class App extends Component {
     this.setState({
       viewState: {...this.state.viewState, ...viewState}
     });
+  }
+
+  _animate() {
+    const timestamp = Date.now();
+    const loopLength = 1800;
+    const loopTime = 60000;
+
+    this.setState({
+      time: (timestamp % loopTime) / loopTime * loopLength
+    });
+    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
 
   render() {

@@ -110,11 +110,9 @@ class DemoLauncher extends Component {
         reuseMap
 
         {...viewport}
-        onViewportChange={isInteractive ? this.props.updateMap : undefined}>
+        onViewStateChange={isInteractive ? this.props.updateMapViewState : undefined}>
 
         {component}
-
-        {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
 
       </MapGL>
     );
@@ -131,35 +129,30 @@ class DemoLauncher extends Component {
       return null;
     }
 
-    const demoComponent = (
-      <DemoComponent
-        ref="demo"
-
-        data={owner === demo ? data : null}
-
-        viewState={viewport}
-        onViewStateChange={isInteractive ? this._updateMapViewState : undefined}
-
-        viewport={viewport}
-        onViewportChange={isInteractive ? this.props.updateMap : undefined}
-
-        mapboxApiAccessToken={MapboxAccessToken}
-        mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-
-        params={params}
-        onStateChange={this.props.updateMeta}
-        mousePosition={this.state.mousePosition}
-        mouseEntered={this.state.mouseEntered}
-        />
-    );
-
     return (
       <div
         onMouseMove={this.state.trackMouseMove ? this._onMouseMove : null}
         onMouseEnter={this.state.trackMouseMove ? this._onMouseEnter : null}
         onMouseLeave={this.state.trackMouseMove ? this._onMouseLeave : null}>
 
-        {DemoComponent.addMap ? this.renderMap(demoComponent) : demoComponent}
+        <DemoComponent
+          ref="demo"
+
+          data={owner === demo ? data : null}
+
+          viewState={viewport}
+          onViewStateChange={isInteractive ? this._updateMapViewState : undefined}
+
+          mapboxApiAccessToken={MapboxAccessToken}
+          mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
+
+          params={params}
+          onStateChange={this.props.updateMeta}
+          mousePosition={this.state.mousePosition}
+          mouseEntered={this.state.mouseEntered}
+          />
+
+        {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
 
       </div>
     );

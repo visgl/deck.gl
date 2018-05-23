@@ -43,12 +43,7 @@ const colorRange = [
 
 const elevationScale = {min: 1, max: 50};
 
-const defaultProps = {
-  radius: 1000,
-  upperPercentile: 100,
-  coverage: 1
-};
-
+/* eslint-disable react/no-deprecated */
 class App extends Component {
   static get defaultColorRange() {
     return colorRange;
@@ -84,8 +79,8 @@ class App extends Component {
     this._animate();
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
-    if (nextProps.data.length !== this.props.data.length) {
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.data && this.props.data && (nextProps.data.length !== this.props.data.length)) {
       this._animate();
     }
   }
@@ -95,15 +90,16 @@ class App extends Component {
   }
 
   _resize() {
-    this._onViewportChange({
+    const viewState = Object.assign(this.state.viewState, {
       width: window.innerWidth,
       height: window.innerHeight
     });
+    this._onViewStateChange({viewState});
   }
 
-  _onViewportChange(viewport) {
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
     });
   }
 
@@ -136,10 +132,10 @@ class App extends Component {
       data = this.state.data,
 
       radius = 1000,
-      coverage = 1,
       upperPercentile = 100,
+      coverage = 1,
 
-      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
@@ -169,18 +165,16 @@ class App extends Component {
       <MapGL
         {...viewState}
         reuseMap
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+        onViewStateChange={onViewStateChange}
         mapboxApiAccessToken={mapboxApiAccessToken}
         mapStyle={mapStyle}
         preventStyleDiffing={true}
       >
-
         <DeckGL
           layers={layers}
           views={new MapView({id: 'map'})}
           viewState={viewState}
-          />;
-
+        />
       </MapGL>
     );
   }

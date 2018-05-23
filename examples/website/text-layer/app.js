@@ -51,9 +51,24 @@ class App extends Component {
     }
   }
 
-  _onViewportChange(viewport) {
+  _resize() {
+    const viewState = Object.assign(this.state.viewState, {
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    this._onViewStateChange({viewState});
+  }
+
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
+    });
+  }
+
+  _initialize(gl) {
+    setParameters(gl, {
+      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
+      blendEquation: gl.FUNC_ADD
     });
   }
 
@@ -101,23 +116,17 @@ class App extends Component {
     this._animationFrame = window.requestAnimationFrame(this._animateData.bind(this));
   }
 
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _initialize(gl) {
-    setParameters(gl, {
-      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
-      blendEquation: gl.FUNC_ADD
-    });
-  }
-
   render() {
-    const {viewport, dataSlice} = this.state;
-    const {data} = this.props;
+    const {
+      data = DATA_URL,
+
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState,
+
+      mapboxApiAccessToken = MAPBOX_TOKEN,
+      mapStyle = MAPBOX_STYLE
+    } = this.props;
+
 
     const layers = [
       new TextLayer({
@@ -131,13 +140,20 @@ class App extends Component {
 
     return (
       <MapGL
-        {...viewport}
-        mapStyle={MAPBOX_STYLE}
+        {...viewState}
+        reuseMap
+        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+        mapboxApiAccessToken={mapboxApiAccessToken}
+        mapStyle={mapStyle}
         preventStyleDiffing={true}
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
       >
-        return <DeckGL {...viewport} layers={layers} onWebGLInitialized={this._initialize} />;
+
+        <DeckGL
+          layers={layers}
+          views={new MapView({id: 'map'})}
+          viewState={viewState}
+          />;
+
       </MapGL>
     );
   }

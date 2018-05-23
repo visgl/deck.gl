@@ -108,7 +108,6 @@ class App extends Component {
           {...viewState}
           reuseMap
           mapboxApiAccessToken={mapboxApiAccessToken}
-          mapboxStyle={mapStyle}
           preventStyleDiffing={true}
         />
 

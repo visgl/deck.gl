@@ -30,27 +30,24 @@ class App extends Component {
       viewState: INITIAL_VIEW_STATE,
       data: null
     };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
+    window.addEventListener('resize', this._onResize.bind(this));
+    this._onResize();
   }
 
-  _resize() {
-    this._onViewportChange({
+  _onResize() {
+    const viewState = Object.assign(this.state.viewState, {
       width: window.innerWidth,
       height: window.innerHeight
     });
+    this._onViewStateChange({viewState});
   }
 
-  _onViewportChange(viewport) {
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
     });
   }
 

@@ -41,10 +41,12 @@ const INITIAL_VIEW_STATE = {
   bearing: 30
 };
 
+/* eslint-disable react/no-deprecated */
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      viewState: INITIAL_VIEW_STATE,
       counties: null,
       arcs: null,
       selectedCounty: null
@@ -67,8 +69,8 @@ class App extends Component {
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
+    window.addEventListener('resize', this._onResize.bind(this));
+    this._onResize();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -80,8 +82,33 @@ class App extends Component {
     }
   }
 
+  _onResize() {
+    const viewState = Object.assign(this.state.viewState, {
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    this._onViewStateChange({viewState});
+  }
+
+  _onViewStateChange({viewState}) {
+    this.setState({
+      viewState: {...this.state.viewState, ...viewState}
+    });
+  }
+
+  _onHover(info) {
+    // Hovered over a county
+  }
+
+  _onClick(info) {
+    // Clicked a county
+    const selectedCounty = info.object;
+    this.setState({selectedCounty});
+    this._recalculateArcs(this.props.data, selectedCounty);
+  }
+
   _recalculateArcs(data, selectedFeature) {
-    if (!data || !selectedFeature) {
+    if (!selectedFeature) {
       return;
     }
 
@@ -108,37 +135,13 @@ class App extends Component {
     this.setState({arcs});
   }
 
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onHover(info) {
-    // Hovered over a county
-  }
-
-  _onClick(info) {
-    // Clicked a county
-    const selectedCounty = info.object;
-    this.setState({selectedCounty});
-    this._recalculateArcs(this.props.data, selectedCounty);
-  }
-
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
-    });
-  }
-
   render() {
     const {
       strokeWidth = 2,
       onHover = this._onHover.bind(this),
       onClick = this._onClick.bind(this),
 
-      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
@@ -171,7 +174,7 @@ class App extends Component {
       <MapGL
         {...viewState}
         reuseMap
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+        onViewStateChange={onViewStateChange}
         mapboxApiAccessToken={mapboxApiAccessToken}
         mapStyle={mapStyle}
         preventStyleDiffing={true}

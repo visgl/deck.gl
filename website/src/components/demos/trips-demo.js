@@ -33,10 +33,6 @@ export default class TripsDemo extends Component {
     };
   }
 
-  static get addMap() {
-    return true;
-  }
-
   static renderInfo(meta) {
     return (
       <div>

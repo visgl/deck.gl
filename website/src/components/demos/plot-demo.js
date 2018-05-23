@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import {Parser} from 'expr-eval';
 import autobind from 'autobind-decorator';
 import {experimental} from 'deck.gl';
-const {OrbitController} = experimental;
-import PlotOverlay from 'website-examples/plot/deckgl-overlay';
+import {App} from 'website-examples/plot/app';
 
 export default class PlotDemo extends Component {
 
@@ -80,7 +79,7 @@ export default class PlotDemo extends Component {
 
     return (
       <div>
-        {resolution && <PlotOverlay
+        {resolution && <App
           width={width}
           height={height}
           equation={equation.valid ? equation.func : null}

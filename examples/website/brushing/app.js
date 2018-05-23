@@ -43,10 +43,12 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+/* eslint-disable react/no-deprecated */
 class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
+      viewState: INITIAL_VIEW_STATE,
       arcs: [],
       targets: [],
       sources: [],
@@ -72,12 +74,44 @@ class App extends Component {
   }
   /* eslint-enable react/no-did-mount-set-state */
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     if (nextProps.data !== this.props.data) {
       this.setState({
         ...this._getLayerData(nextProps)
       });
     }
+  }
+
+  _resize() {
+    const viewState = Object.assign(this.state.viewState, {
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    this._onViewStateChange({viewState});
+  }
+
+  _onViewStateChange({viewState}) {
+    this.setState({
+      viewState: {...this.state.viewState, ...viewState}
+    });
+  }
+
+  _onMouseMove(evt) {
+    if (evt.nativeEvent) {
+      this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
+    }
+  }
+
+  _onMouseEnter() {
+    this.setState({mouseEntered: true});
+  }
+
+  _onMouseLeave() {
+    this.setState({mouseEntered: false});
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
   }
 
   _getLayerData({data}) {
@@ -149,37 +183,6 @@ class App extends Component {
     return {arcs, targets, sources};
   }
 
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport}
-    });
-  }
-
-  _onMouseMove(evt) {
-    if (evt.nativeEvent) {
-      this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
-    }
-  }
-
-  _onMouseEnter() {
-    this.setState({mouseEntered: true});
-  }
-
-  _onMouseLeave() {
-    this.setState({mouseEntered: false});
-  }
-
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
-
   _renderTooltip() {
     const {x, y, hoveredObject} = this.state;
 
@@ -205,9 +208,9 @@ class App extends Component {
 
       mouseEntered = this.state.mouseEntered,
       mousePosition = this.sate.mousePosition,
-      onHover = this._onHover.bind(this),
+      // onHover = this._onHover.bind(this),
 
-      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
@@ -290,7 +293,7 @@ class App extends Component {
         <MapGL
           {...viewState}
           reuseMap
-          onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+          onViewStateChange={onViewStateChange}
           mapboxApiAccessToken={mapboxApiAccessToken}
           mapStyle={mapStyle}
           preventStyleDiffing={true}

@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import MapGL from 'react-map-gl';
-import DeckGL, {MapView, MapController, IconLayer, WebMercatorViewport} from 'deck.gl';
+import DeckGL, {MapView, IconLayer, WebMercatorViewport} from 'deck.gl';
 import rbush from 'rbush';
 
 // Set your mapbox token here
@@ -40,6 +40,7 @@ function getIconSize(size) {
   return Math.min(100, size) / 100 * 0.5 + 0.5;
 }
 
+/* eslint-disable react/no-deprecated */
 class App extends Component {
 
   constructor(props) {
@@ -76,7 +77,7 @@ class App extends Component {
     this._resize();
   }
 
-  UNSAFE_componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps) {
     const {viewport} = nextProps;
     const oldViewport = this.props.viewport;
 
@@ -90,15 +91,16 @@ class App extends Component {
   }
 
   _resize() {
-    this._onViewportChange({
+    const viewState = Object.assign(this.state.viewState, {
       width: window.innerWidth,
       height: window.innerHeight
     });
+    this._onViewStateChange({viewState});
   }
 
-  _onViewportChange(viewport) {
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
     });
   }
 
@@ -170,14 +172,14 @@ class App extends Component {
       iconAtlas = "data/location-icon-atlas.png",
       showCluster = true,
 
-      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
       mapStyle = "mapbox://styles/mapbox/dark-v9"
     } = this.props;
 
-    if (!data || !iconMapping) {
+    if (!iconMapping) {
       return null;
     }
 
@@ -185,36 +187,37 @@ class App extends Component {
     const size = showCluster ? 1 : Math.min(Math.pow(1.5, viewState.zoom - 10), 1);
     const updateTrigger = z * showCluster;
 
-    const layer = new IconLayer({
-      id: 'icon',
-      data,
-      pickable: this.props.onHover || this.props.onClick,
-      iconAtlas,
-      iconMapping,
-      sizeScale: ICON_SIZE * size * window.devicePixelRatio,
-      getPosition: d => d.coordinates,
-      getIcon: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].icon : 'marker'),
-      getSize: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].size : 1),
-      onHover: this.props.onHover,
-      onClick: this.props.onClick,
-      updateTriggers: {
-        getIcon: updateTrigger,
-        getSize: updateTrigger
-      }
-    });
+    const layers = [
+      new IconLayer({
+        id: 'icon',
+        data,
+        pickable: this.props.onHover || this.props.onClick,
+        iconAtlas,
+        iconMapping,
+        sizeScale: ICON_SIZE * size * window.devicePixelRatio,
+        getPosition: d => d.coordinates,
+        getIcon: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].icon : 'marker'),
+        getSize: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].size : 1),
+        onHover: this.props.onHover,
+        onClick: this.props.onClick,
+        updateTriggers: {
+          getIcon: updateTrigger,
+          getSize: updateTrigger
+        }
+      })
+    ];
 
     return (
       <MapGL
         {...viewState}
         reuseMap
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+        onViewStateChange={onViewStateChange}
         mapboxApiAccessToken={mapboxApiAccessToken}
         mapStyle={mapStyle}
-        mapboxStyle={mapStyle}
         preventStyleDiffing={true}
       >
         <DeckGL
-          layers={[layer]}
+          layers={layers}
           views={new MapView({id: 'map'})}
           viewState={viewState}
         />
