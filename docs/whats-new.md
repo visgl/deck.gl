@@ -49,6 +49,9 @@ deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` m
 
 The [`View`](/docs/api-reference/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orhtographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
+#### Per-instance stroke width in LineLayer and ArcLayer
+
+LineLayer and ArcLayer added a new accessor `getStrokeWidth` to replace the old `strokeWidth` prop. When specified with a function, you can control the width of each arc/line segment dynamically.
 
 #### Constant Accessors
 
