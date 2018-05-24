@@ -1,3 +1,6 @@
+import {Buffer} from 'luma.gl';
+import {fillArray} from '../utils/flatten';
+
 const ATTRIBUTE_MAPPING = {
   1: 'float',
   2: 'vec2',
@@ -61,14 +64,35 @@ void main(void) {
 export function getBuffers(transitions) {
   const sourceBuffers = {};
   const destinationBuffers = {};
-  let elementCount = null;
   for (const attributeName in transitions) {
-    const {fromState, toState, buffer, attribute} = transitions[attributeName];
-    const count = attribute.value.length / attribute.size;
+    const {fromState, toState, buffer} = transitions[attributeName];
     sourceBuffers[`${attributeName}From`] = fromState;
     sourceBuffers[`${attributeName}To`] = toState;
     destinationBuffers[`${attributeName}`] = buffer;
-    elementCount = elementCount === null ? count : Math.min(elementCount, count);
   }
-  return {sourceBuffers, destinationBuffers, elementCount};
+  return {sourceBuffers, destinationBuffers};
+}
+
+export function padBuffer({fromState, toState, fromLength, toLength}) {
+  // check if buffer needs to be padded
+  if (fromLength >= toLength || !(fromState instanceof Buffer)) {
+    return;
+  }
+
+  const data = new Float32Array(toLength);
+  // copy the currect values
+  data.set(fromState.getData({}));
+
+  if (toState.isGeneric) {
+    fillArray({
+      target: data,
+      source: data.value,
+      start: fromLength,
+      count: (toLength - fromLength) / data.value.length
+    });
+  } else {
+    data.set(toState.data.subarray(fromLength), fromLength);
+  }
+
+  fromState.setData({data});
 }
