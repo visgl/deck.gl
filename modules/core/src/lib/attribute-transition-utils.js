@@ -86,12 +86,12 @@ export function padBuffer({fromState, toState, fromLength, toLength}) {
   if (toState.isGeneric) {
     fillArray({
       target: data,
-      source: data.value,
+      source: toState.value,
       start: fromLength,
-      count: (toLength - fromLength) / data.value.length
+      count: (toLength - fromLength) / toState.size
     });
   } else {
-    data.set(toState.data.subarray(fromLength), fromLength);
+    data.set(toState.buffer.data.subarray(fromLength), fromLength);
   }
 
   fromState.setData({data});
