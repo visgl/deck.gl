@@ -24,7 +24,7 @@ export default class DataGenerator {
     this.radiusRange = radiusRange;
     this.countRange = countRange;
     this.vertexRange = vertexRange;
-    this.sizeRange = sizeRange
+    this.sizeRange = sizeRange;
 
     this.randomize();
   }
@@ -38,31 +38,19 @@ export default class DataGenerator {
       const vertexCount = randomInt(this.vertexRange);
       const a = random(0, Math.PI * 2);
       const d = random(0, this.maxDistance);
-      const center = [
-        d * Math.cos(a),
-        d * Math.sin(a)
-      ];
+      const center = [d * Math.cos(a), d * Math.sin(a)];
       const r = random(this.radiusRange);
-      const color = [
-        random(0, 255),
-        random(0, 255),
-        random(0, 255)
-      ];
+      const color = [random(0, 255), random(0, 255), random(0, 255)];
       const size = random(this.sizeRange);
 
       const vertices = Array.from({length: vertexCount + 1}, (v, i) => {
         const ai = Math.PI * 2 / vertexCount * i;
-        const p = [
-          center[0] + Math.cos(ai) * r,
-          center[1] + Math.sin(ai) * r
-        ];
+        const p = [center[0] + Math.cos(ai) * r, center[1] + Math.sin(ai) * r];
         this.points.push({color, position: p, radius: size * 2});
         return p;
       });
 
       return {color, polygon: vertices, width: size};
     });
-
   }
-
 }
