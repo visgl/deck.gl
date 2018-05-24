@@ -1,127 +1,105 @@
-/* global document, window, console */
+/* global document */
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
-import * as d3 from 'd3-ease';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {
+  COORDINATE_SYSTEM,
+  MapView,
+  ScatterplotLayer,
+  PolygonLayer,
+  MapController
+} from 'deck.gl';
 
-import PointGenerator from './point-generator';
+import DataGenerator from './data-generator';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+const MAP_CENTER = [-122.45, 37.78];
 
 class Root extends Component {
   constructor(props) {
     super(props);
 
-    this._pointGenerator = new PointGenerator({
-      center: [-122.44, 37.75],
-      distance: [0.064, 0.05],
-      radiusRange: [5, 100],
-      countRange: [1000, 10000]
-    });
+    this._dataGenerator = new DataGenerator();
 
     this.state = {
-      viewport: {
-        latitude: 37.75,
-        longitude: -122.44,
-        zoom: 12,
-        width: window.innerWidth,
-        height: window.innerHeight
-      },
-      data: this._pointGenerator.points,
-      pointsUpdated: 0,
-      radiusUpdated: 0,
-      colorsUpdated: 0
+      points: this._dataGenerator.points,
+      polygons: this._dataGenerator.polygons,
+      viewState: {
+        longitude: MAP_CENTER[0],
+        latitude: MAP_CENTER[1],
+        zoom: 10
+      }
     };
 
-    this._onViewportChange = this._onViewportChange.bind(this);
-    this._resize = this._resize.bind(this);
-    this._randomizeCount = this._randomizeCount.bind(this);
-    this._randomizePositions = this._randomizePositions.bind(this);
-    this._randomizeRadius = this._randomizeRadius.bind(this);
-    this._randomizeColors = this._randomizeColors.bind(this);
+    this._randomize = this._randomize.bind(this);
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize);
-  }
-
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onViewportChange(viewport) {
+  _randomize() {
+    this._dataGenerator.randomize();
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      points: this._dataGenerator.points,
+      polygons: this._dataGenerator.polygons
     });
-  }
-
-  _randomizeCount() {
-    this._pointGenerator.randomizeCount();
-    this.setState({data: this._pointGenerator.points});
-  }
-
-  _randomizePositions() {
-    this._pointGenerator.randomizePositions();
-    this.setState({positionsUpdated: Date.now()});
-  }
-
-  _randomizeRadius() {
-    this._pointGenerator.randomizeRadius();
-    this.setState({radiusUpdated: Date.now()});
-  }
-
-  _randomizeColors() {
-    this._pointGenerator.randomizeColors();
-    this.setState({colorsUpdated: Date.now()});
   }
 
   render() {
-    const {viewport, positionsUpdated, radiusUpdated, colorsUpdated} = this.state;
+    const {points, polygons, viewState} = this.state;
 
-    const layer = new ScatterplotLayer({
-      data: this._pointGenerator.points,
-      getPosition: d => d.position,
-      getColor: d => d.color,
-      getRadius: d => d.radius,
-      updateTriggers: {
-        getPosition: positionsUpdated,
-        getRadius: radiusUpdated,
-        getColor: colorsUpdated
-      },
-      transitions: {
-        getPosition: {
-          duration: 2000,
-          easing: d3.easeCubicInOut,
-          onStart: evt => console.log('position transition started', evt),
-          onEnd: evt => console.log('position transition ended', evt),
-          onInterrupt: evt => console.log('position transition interrupted', evt)
-        },
-        getRadius: 600,
-        getColor: 600
-      }
-    });
+    const layers = [
+      new ScatterplotLayer({
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: MAP_CENTER,
+        data: points,
+        getPosition: d => d.position,
+        getColor: d => d.color,
+        getRadius: d => d.radius,
+        transitions: {
+          getPosition: 600,
+          getRadius: 600,
+          getColor: 600
+        }
+      }),
+      new PolygonLayer({
+        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        coordinateOrigin: MAP_CENTER,
+        data: polygons,
+        stroked: true,
+        filled: true,
+        getPolygon: d => d.polygon,
+        getLineColor: d => d.color,
+        getFillColor: d => [d.color[0], d.color[1], d.color[2], 128],
+        getLineWidth: d => d.width,
+        transitions: {
+          getPolygon: 600,
+          getLineColor: 600,
+          getFillColor: 600,
+          getLineWidth: 600
+        }
+      })
+    ];
 
     return (
-      <MapGL
-        {...viewport}
-        mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
-        onViewportChange={this._onViewportChange}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
-      >
-        <DeckGL {...viewport} layers={[layer]} />
+      <div>
+        <DeckGL
+          views={new MapView({id: 'map'})}
+          controller={MapController}
+          viewState={viewState}
+          onViewStateChange={evt => this.setState({viewState: evt.viewState})}
+          layers={layers}
+        >
+          <StaticMap
+            viewId="map"
+            {...viewState}
+            mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        </DeckGL>
         <div id="control-panel">
-          <button onClick={this._randomizeCount}>Randomize All</button>
-          <button onClick={this._randomizePositions}>Randomize Positions</button>
-          <button onClick={this._randomizeRadius}>Randomize Radius</button>
-          <button onClick={this._randomizeColors}>Randomize Colors</button>
+          <button onClick={this._randomize}>Randomize</button>
         </div>
-      </MapGL>
+      </div>
     );
   }
 }

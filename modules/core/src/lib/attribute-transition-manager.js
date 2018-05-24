@@ -70,8 +70,8 @@ export default class AttributeTransitionManager {
       this._createModel();
     } else if (this.transform) {
       const {sourceBuffers, destinationBuffers} = getBuffers(changedTransitions);
-      this.transform.elementCount = this.numInstances;
       this.transform.update({
+        elementCount: this.numInstances,
         sourceBuffers,
         destinationBuffers
       });

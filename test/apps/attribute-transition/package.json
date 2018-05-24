@@ -4,7 +4,6 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open"
   },
   "dependencies": {
-    "d3-ease": "^1.0.3",
     "deck.gl": ">=5.2.0-alpha.7",
     "luma.gl": ">=5.2.0-alpha.11",
     "react": "^16.0.0",
