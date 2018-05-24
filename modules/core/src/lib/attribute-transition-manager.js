@@ -242,6 +242,8 @@ export default class AttributeTransitionManager {
     }
     padBuffer({fromState, toState, fromLength, toLength});
 
+    console.log(fromState.data, toState.buffer && toState.buffer.data, this.numInstances);
+
     return {fromState, toState, buffer};
   }
 
