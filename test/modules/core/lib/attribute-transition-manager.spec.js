@@ -19,7 +19,7 @@ const TEST_ATTRIBUTES = {
     accessor: ['getPosition', 'getElevation'],
     update: () => {},
     transition: true,
-    value: new Float32Array(4)
+    value: new Float32Array(12)
   }),
   instanceSizes: new Attribute(gl, {
     id: 'instanceSizes',
@@ -27,7 +27,7 @@ const TEST_ATTRIBUTES = {
     accessor: 'getSize',
     defaultValue: 1,
     transition: true,
-    value: new Float32Array(12)
+    value: new Float32Array(4)
   })
 };
 
@@ -57,22 +57,25 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.setNeedsRedraw('initial');
     attributes.instancePositions.setNeedsRedraw('initial');
 
-    manager.update(attributes, {});
+    manager.update({attributes, transitions: {}, numInstances: 4});
     t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
     t.notOk(manager.hasAttribute('instanceSizes'), 'no transition for instanceSizes');
     t.notOk(manager.hasAttribute('instancePositions'), 'no transition for instanceSizes');
     t.notOk(manager.transform, 'transform is not constructed');
 
-    manager.update(attributes, {getSize: 1000, getElevation: 1000});
+    manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
     t.ok(manager.transform, 'a new transform is constructed');
 
+    const sizeTransition = manager.attributeTransitions.instanceSizes;
+    t.is(sizeTransition.buffer.data.length, 4, 'buffer has correct size');
+
     let lastTransform = manager.transform;
     delete attributes.instancePositions;
 
-    manager.update(attributes, {getSize: 1000, getElevation: 1000});
+    manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.notOk(manager.hasAttribute('instancePositions'), 'removed transition for instancePositions');
     t.ok(
@@ -80,6 +83,16 @@ if (isWebGL2(gl)) {
       'a new transform is constructed'
     );
     t.notOk(lastTransform.model.program._handle, 'last transform is deleted');
+
+    attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
+    manager.update({attributes, transitions: {getSize: 1000}, numInstances: 5});
+    t.deepEquals(sizeTransition.fromState.data, [0, 0, 0, 0, 1], 'from buffer is extended');
+    t.is(sizeTransition.buffer.data.length, 5, 'buffer has correct size');
+
+    attributes.instanceSizes.update({isGeneric: true, value: [2]});
+    manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
+    t.deepEquals(sizeTransition.fromState.data, [0, 0, 0, 0, 0, 2], 'from buffer is extended');
+    t.is(sizeTransition.buffer.data.length, 6, 'buffer has correct size');
 
     lastTransform = manager.transform;
     manager.finalize();
@@ -113,19 +126,19 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.update({value: new Float32Array(4).fill(1)});
     attributes.instanceSizes.setNeedsRedraw('initial');
 
-    manager.update(attributes, transitions);
+    manager.update({attributes, transitions, numInstances: 4});
     manager.setCurrentTime(0);
     t.is(startCounter, 1, 'transition starts');
 
     attributes.instanceSizes.needsRedraw({clearChangedFlags: true});
-    manager.update(attributes, transitions);
+    manager.update({attributes, transitions, numInstances: 4});
     manager.setCurrentTime(500);
     t.is(startCounter, 1, 'no new transition is triggered');
 
     attributes.instanceSizes.update({value: new Float32Array(4).fill(3)});
     attributes.instanceSizes.setNeedsRedraw('update');
 
-    manager.update(attributes, transitions);
+    manager.update({attributes, transitions, numInstances: 4});
     manager.setCurrentTime(1000);
     t.is(interruptCounter, 1, 'transition is interrupted');
     t.is(startCounter, 2, 'new transition is triggered');
@@ -140,7 +153,7 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.update({value: new Float32Array(4).fill(4)});
     attributes.instanceSizes.setNeedsRedraw('update');
 
-    manager.update(attributes, transitions);
+    manager.update({attributes, transitions, numInstances: 4});
     manager.setCurrentTime(1500);
     t.is(interruptCounter, 2, 'transition is interrupted');
     t.is(startCounter, 3, 'new transition is triggered');
@@ -167,7 +180,7 @@ if (isWebGL2(gl)) {
 
     attributes.instanceSizes.setNeedsRedraw('initial');
 
-    manager.update(attributes, {getSize: 1000, getElevation: 1000});
+    manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.pass('update does not throw error');
 
     manager.setCurrentTime(0);
