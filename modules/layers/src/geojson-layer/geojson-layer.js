@@ -47,6 +47,7 @@ const defaultProps = {
   pointRadiusMinPixels: 0, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
 
+  lineDashJustified: false,
   fp64: false,
 
   // Line and polygon outline color
@@ -57,6 +58,8 @@ const defaultProps = {
   getRadius: f => (f.properties && (f.properties.radius || f.properties.size)) || 1,
   // Line and polygon outline accessors
   getLineWidth: f => (f.properties && f.properties.lineWidth) || 1,
+  // Line dash array accessor
+  getLineDashArray: null,
   // Polygon extrusion accessor
   getElevation: f => (f.properties && f.properties.elevation) || 1000,
 
@@ -113,6 +116,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
       elevationScale,
+      lineDashJustified,
       fp64
     } = this.props;
 
@@ -122,6 +126,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       getFillColor,
       getRadius,
       getLineWidth,
+      getLineDashArray,
       getElevation,
       updateTriggers
     } = this.props;
@@ -167,7 +172,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           id: 'polygon-outline',
           updateTriggers: {
             getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth
+            getWidth: updateTriggers.getLineWidth,
+            getDashArray: updateTriggers.getLineDashArray
           }
         }),
         {
@@ -179,10 +185,12 @@ export default class GeoJsonLayer extends CompositeLayer {
           widthMaxPixels: lineWidthMaxPixels,
           rounded: lineJointRounded,
           miterLimit: lineMiterLimit,
+          dashJustified: lineDashJustified,
 
           getPath: getCoordinates,
           getColor: getLineColor,
-          getWidth: getLineWidth
+          getWidth: getLineWidth,
+          getDashArray: getLineDashArray
         }
       );
 

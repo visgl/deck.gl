@@ -67,6 +67,16 @@ const IconLayerExample = {
 const GeoJsonLayerExample = {
   layer: GeoJsonLayer,
   getData: () => dataSamples.geojson,
+  propTypes: {
+    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
+    lineDashSizeLine: {
+      type: 'number',
+      max: 20,
+      onUpdate: (newValue, newSettings, change) => {
+        change('getLineDashArray', [newValue, 20 - newValue]);
+      }
+    }
+  },
   props: {
     id: 'geojsonLayer',
     getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
@@ -80,6 +90,7 @@ const GeoJsonLayerExample = {
       const opacity = (f.properties['stroke-opacity'] || 1) * 255;
       return setOpacity(color, opacity);
     },
+    getLineDashArray: f => [20, 0],
     getLineWidth: f => f.properties['stroke-width'],
     getElevation: f => 500,
     lineWidthScale: 10,
