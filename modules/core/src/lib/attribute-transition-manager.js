@@ -70,8 +70,8 @@ export default class AttributeTransitionManager {
       this._createModel();
     } else if (this.transform) {
       const {sourceBuffers, destinationBuffers} = getBuffers(changedTransitions);
-      this.transform.elementCount = this.numInstances;
       this.transform.update({
+        elementCount: this.numInstances,
         sourceBuffers,
         destinationBuffers
       });
@@ -241,8 +241,6 @@ export default class AttributeTransitionManager {
       });
     }
     padBuffer({fromState, toState, fromLength, toLength});
-
-    console.log(fromState.data, toState.buffer && toState.buffer.data, this.numInstances);
 
     return {fromState, toState, buffer};
   }
