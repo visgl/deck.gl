@@ -97,7 +97,7 @@ export default class App extends PureComponent {
     this._effects = [new ReflectionEffect()];
   }
 
-  componentWillMount() {
+  componentDidMount() {
     this._onResize();
     window.addEventListener('resize', this._onResize);
   }

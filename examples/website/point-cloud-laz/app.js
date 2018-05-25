@@ -70,13 +70,11 @@ class Example extends PureComponent {
     this._onUpdate = this._onUpdate.bind(this);
   }
 
-  componentWillMount() {
-    window.addEventListener('resize', this._onResize);
-    this._onResize();
-  }
-
   componentDidMount() {
     const {points} = this.state;
+
+    window.addEventListener('resize', this._onResize);
+    this._onResize();
 
     const skip = 10;
     loadLazFile(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {

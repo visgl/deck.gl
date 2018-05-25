@@ -34,12 +34,9 @@ class Root extends PureComponent {
     });
   }
 
-  componentWillMount() {
+  componentDidMount() {
     window.addEventListener('resize', this._onResize);
     this._onResize();
-  }
-
-  componentDidMount() {
     window.requestAnimationFrame(this._update);
   }
 
