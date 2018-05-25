@@ -148,6 +148,13 @@ The minimum radius in pixels.
 
 The maximum radius in pixels.
 
+##### `lineDashJustified` (Boolean, optional)
+
+* Default: `false`
+
+Justify dashes together.
+Only works if `getLineDashArray` is specified.
+
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`
@@ -176,7 +183,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 
 * Default: `f => f.properties.fillColor || [0, 0, 0, 255]`
 
-The solid color of the polygon and point features of a GeoJson. 
+The solid color of the polygon and point features of a GeoJson.
 Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 
 * If an array is provided, it is used as the fill color for all features.
@@ -219,6 +226,16 @@ otherwise will be in unit coordinates.
 * If a function is provided, it is called on each polygon feature to retrieve its elevation.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
+
+##### `getLineDashArray` (Function|Array, optional)
+
+* Default: `null`
+
+The dash array to draw each outline path with: `[dashSize, gapSize]` relative to the width of the line. (See PathLayer)
+
+* If an array is provided, it is used as the dash array for all paths.
+* If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
+* If this accessor is not specified, all paths are drawn as solid lines.
 
 ## Remarks
 
