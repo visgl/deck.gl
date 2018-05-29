@@ -29,7 +29,7 @@ A common use case of composite layers is to augment the interface of existing la
 A composite layer can be created by extending the `CompositeLayer` class:
 
 ```js
-import {Layer, ScatterplotLayer} from 'deck.gl';
+import {CompositeLayer, ScatterplotLayer} from 'deck.gl';
 
 class NiceScatterplotLayer extends CompositeLayer {
   // implementation
