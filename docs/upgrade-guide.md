@@ -1,5 +1,18 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v5.3 to v6.0
+
+#### Pixel sizes
+
+Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts. To achieve the same rendering output as v5, you should halve the following props:
+
+* `ArcLayer.getStrokeWidth`
+* `LineLayer.getStrokeWidth`
+* `IconLayer.getSize` or `IconLayer.sizeScale`
+* `TextLayer.getSize` or `TextLayer.sizeScale`
+* `PointCloudLayer.radiusPixels`
+
+
 ## Upgrading from deck.gl v5.2 to v5.3
 
 ### Viewport classes
