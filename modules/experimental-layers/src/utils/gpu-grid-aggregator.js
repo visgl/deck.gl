@@ -38,9 +38,7 @@ void main(void) {
 `;
 
 const AGGREGATE_TO_GRID_FS = `\
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying float vWeights;
 
@@ -71,9 +69,7 @@ void main(void) {
 `;
 
 const AGGREGATE_ALL_FS = `\
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying vec2 vTextureCoord;
 uniform sampler2D uSampler;

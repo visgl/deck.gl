@@ -120,9 +120,7 @@ RoundedRectangleLayer.defaultProps = {
 export default `\
 #define SHADER_NAME my-scatterplot-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform float cornerRadius;
 

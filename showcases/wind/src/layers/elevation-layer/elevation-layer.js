@@ -101,9 +101,7 @@ export default class ElevationLayer extends Layer {
     const fsSource = shaders.fs;
 
     const fsShader = `\
-#ifdef GL_ES
 precision highp float;
-#endif
 ${fsSource}`;
 
     const {lngResolution, latResolution, boundingBox} = this.props;

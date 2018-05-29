@@ -21,9 +21,7 @@
 export default `\
 #define SHADER_NAME reflection-effect-fs
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform sampler2D reflectionTexture;
 uniform int reflectionTextureWidth;

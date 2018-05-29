@@ -21,9 +21,7 @@
 export default `\
 #define SHADER_NAME icon-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform float opacity;
 uniform sampler2D iconsTexture;

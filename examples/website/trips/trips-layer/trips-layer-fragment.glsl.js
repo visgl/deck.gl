@@ -21,9 +21,7 @@
 export default `\
 #define SHADER_NAME trips-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying float vTime;
 varying vec4 vColor;

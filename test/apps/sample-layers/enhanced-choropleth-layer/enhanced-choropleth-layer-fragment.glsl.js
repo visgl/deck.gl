@@ -21,9 +21,7 @@
 module.exports = `\
 #define SHADER_NAME enhanced-choropleth-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying vec4 vColor;
 

@@ -1,9 +1,7 @@
 export default `
 #define SHADER_NAME mesh-layer-fs
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform bool hasTexture;
 uniform sampler2D sampler;

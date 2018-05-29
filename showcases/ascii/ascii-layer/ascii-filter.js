@@ -35,9 +35,7 @@ void main(void) {
 const fs = `
 #define SHADER_NAME feedback-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying vec4 instanceIconFrames;
 varying vec4 instanceColors;
