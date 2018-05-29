@@ -112,7 +112,7 @@ export const TEST_CASES = [
         ],
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getColor: d => [255, 255, 0, 128],
-        strokeWidth: 10
+        strokeWidth: 5
       })
     ],
     referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png'
@@ -141,7 +141,7 @@ export const TEST_CASES = [
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
         getColor: d => [255, 255, 0, 128],
-        radiusPixels: 100
+        radiusPixels: 50
       })
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
@@ -317,6 +317,7 @@ export const TEST_CASES = [
       new ArcLayer({
         id: 'arc-lnglat',
         data: dataSamples.routes,
+        strokeWidth: 0.5,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getSourceColor: d => [64, 255, 0],
@@ -339,6 +340,7 @@ export const TEST_CASES = [
       new ArcLayer({
         id: 'arc-lnglat-64',
         data: dataSamples.routes,
+        strokeWidth: 0.5,
         fp64: true,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
@@ -362,6 +364,7 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat',
         data: dataSamples.routes,
+        strokeWidth: 0.5,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
@@ -383,6 +386,7 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat-64',
         data: dataSamples.routes,
+        strokeWidth: 0.5,
         fp64: true,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
@@ -409,7 +413,7 @@ export const TEST_CASES = [
         data: dataSamples.points,
         iconAtlas: ICON_ATLAS,
         iconMapping: dataSamples.iconAtlas,
-        sizeScale: 24,
+        sizeScale: 12,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
@@ -437,7 +441,7 @@ export const TEST_CASES = [
         data: dataSamples.points,
         iconAtlas: ICON_ATLAS,
         iconMapping: dataSamples.iconAtlas,
-        sizeScale: 24,
+        sizeScale: 12,
         fp64: true,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
@@ -703,7 +707,7 @@ export const TEST_CASES = [
         getNormal: d => d.normal,
         getColor: d => d.color,
         opacity: 1,
-        radiusPixels: 4,
+        radiusPixels: 2,
         pickable: true,
         lightSettings: LIGHT_SETTINGS
       })
@@ -734,7 +738,7 @@ export const TEST_CASES = [
         getNormal: d => d.normal,
         getColor: d => d.color,
         opacity: 1,
-        radiusPixels: 4,
+        radiusPixels: 2,
         pickable: true,
         lightSettings: LIGHT_SETTINGS
       })
@@ -760,7 +764,7 @@ export const TEST_CASES = [
         getNormal: d => d.normal,
         getColor: d => d.color,
         opacity: 1,
-        radiusPixels: 4,
+        radiusPixels: 2,
         pickable: true,
         lightSettings: LIGHT_SETTINGS
       })
@@ -949,7 +953,7 @@ export const TEST_CASES = [
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [153, 0, 0],
-        getSize: x => 32,
+        getSize: x => 16,
         getAngle: x => 0,
         sizeScale: 1,
         getTextAnchor: x => 'start',
@@ -998,7 +1002,7 @@ export const TEST_CASES = [
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [153, 0, 0],
-        getSize: x => 32,
+        getSize: x => 16,
         getAngle: x => 0,
         sizeScale: 1,
         getTextAnchor: x => 'start',
