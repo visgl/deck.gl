@@ -36,12 +36,10 @@ class Example extends PureComponent {
     this._onUpdate = this._onUpdate.bind(this);
   }
 
-  componentWillMount() {
+  componentDidMount() {
     window.addEventListener('resize', this._onResize);
     this._onResize();
-  }
 
-  componentDidMount() {
     loadBinary(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
       const {vertex} = parsePLY(rawData);
 
