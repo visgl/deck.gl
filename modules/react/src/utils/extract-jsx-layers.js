@@ -21,7 +21,7 @@ export default function extractJSXLayers(children, layers) {
   });
 
   // Avoid modifying layers array if no JSX layers were found
-  layers = jsxLayers.length > 0 ? [...jsxLayers, ...layers] : layers
+  layers = jsxLayers.length > 0 ? [...jsxLayers, ...layers] : layers;
 
   return {layers, children: reactChildren};
 }
