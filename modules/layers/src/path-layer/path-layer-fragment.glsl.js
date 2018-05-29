@@ -21,9 +21,7 @@
 export default `\
 #define SHADER_NAME path-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform float jointType;
 uniform float miterLimit;

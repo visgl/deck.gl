@@ -21,9 +21,7 @@
 export default `\
 #define SHADER_NAME grid-cell-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying vec4 vColor;
 

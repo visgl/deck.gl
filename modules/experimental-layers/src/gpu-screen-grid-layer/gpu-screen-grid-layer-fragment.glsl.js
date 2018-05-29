@@ -23,9 +23,7 @@ export default `\
 #version 300 es
 #define SHADER_NAME screen-grid-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 in vec4 vColor;
 out vec4 fragColor;

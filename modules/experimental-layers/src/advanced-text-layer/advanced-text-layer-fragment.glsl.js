@@ -21,9 +21,7 @@
 export default `\
 #define SHADER_NAME advanced-text-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 uniform float opacity;
 uniform float smoothing;

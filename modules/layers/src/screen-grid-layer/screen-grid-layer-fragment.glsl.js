@@ -22,9 +22,7 @@
 export default `\
 #define SHADER_NAME screen-grid-layer-fragment-shader
 
-#ifdef GL_ES
 precision highp float;
-#endif
 
 varying vec4 vColor;
 
