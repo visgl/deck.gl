@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ArcOverlay, {inFlowColors, outFlowColors} from 'website-examples/arc/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE, inFlowColors, outFlowColors} from 'website-examples/arc/app';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
@@ -23,10 +23,11 @@ export default class ArcDemo extends Component {
   }
 
   static get viewport() {
-    return {
-      ...ArcOverlay.defaultViewport,
-      mapStyle: MAPBOX_STYLES.LIGHT
-    };
+    return INITIAL_VIEW_STATE;
+  }
+
+  static get mapStyle() {
+    return MAPBOX_STYLES.LIGHT;
   }
 
   static renderInfo(meta) {
@@ -98,17 +99,13 @@ export default class ArcDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
+    const {params} = this.props;
     const {selectedCounty} = this.state;
-
-    if (!data) {
-      return null;
-    }
 
     return (
       <div>
-        <ArcOverlay viewport={viewport}
-          data={data}
+        <App
+          {...this.props}
           selectedFeature={selectedCounty}
           strokeWidth={params.lineWidth.value}
           onHover={this._onHoverCounty.bind(this)}

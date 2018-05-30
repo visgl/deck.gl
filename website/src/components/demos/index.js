@@ -1,3 +1,4 @@
+// Tells demos to not start automatically on load
 export {default as ScatterplotDemo} from './scatterplot-demo';
 export {default as ArcDemo} from './arc-demo';
 export {default as BrushingDemo} from './brushing-demo';

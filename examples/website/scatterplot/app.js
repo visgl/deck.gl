@@ -1,8 +1,8 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, ScatterplotLayer} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -13,60 +13,100 @@ const FEMALE_COLOR = [255, 0, 128];
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
-class Root extends Component {
+const INITIAL_VIEW_STATE = {
+  longitude: -74,
+  latitude: 40.7,
+  zoom: 11,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0
+};
+
+
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 0,
-        height: 0
-      },
+      viewState: INITIAL_VIEW_STATE,
       data: null
     };
-
-    fetch(DATA_URL)
-      .then(resp => resp.json())
-      .then(data => this.setState({data}));
   }
 
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
+    window.addEventListener('resize', this._onResize.bind(this));
+    this._onResize();
   }
 
-  _resize() {
-    this._onViewportChange({
+  _onResize() {
+    const viewState = Object.assign(this.state.viewState, {
       width: window.innerWidth,
       height: window.innerHeight
     });
+    this._onViewStateChange({viewState});
   }
 
-  _onViewportChange(viewport) {
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
     });
   }
 
   render() {
-    const {viewport, data} = this.state;
+    const {
+      data = DATA_URL,
+      radius = 30,
+      maleColor = MALE_COLOR,
+      femaleColor = FEMALE_COLOR,
+
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState,
+
+      mapboxApiAccessToken = MAPBOX_TOKEN,
+      mapStyle = "mapbox://styles/mapbox/dark-v9"
+    } = this.props;
+
+    const layers = [
+      new ScatterplotLayer({
+        id: 'scatter-plot',
+        data,
+        radiusScale: radius,
+        radiusMinPixels: 0.25,
+        getPosition: d => [d[0], d[1], 0],
+        getColor: d => (d[2] === 1 ? maleColor : femaleColor),
+        getRadius: d => 1,
+        updateTriggers: {
+          getColor: [maleColor, femaleColor]
+        }
+      })
+    ];
 
     return (
-      <MapGL
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
-        <DeckGLOverlay
-          viewport={viewport}
-          data={data}
-          maleColor={MALE_COLOR}
-          femaleColor={FEMALE_COLOR}
-          radius={30}
+
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
+
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
         />
-      </MapGL>
+
+      </DeckGL>
     );
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
+export {App, INITIAL_VIEW_STATE};
+
+if (!window.demoLauncherActive) {
+  render(<App />, document.body.appendChild(document.createElement('div')));
+}

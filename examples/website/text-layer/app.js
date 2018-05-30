@@ -2,8 +2,9 @@
 /* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, TextLayer} from 'deck.gl';
+import {setParameters} from 'luma.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -17,23 +18,30 @@ const SECONDS_PER_DAY = 24 * 60 * 60;
 const TIME_WINDOW = 2;
 const TEXT_COLOR = [255, 200, 0];
 
-class Root extends Component {
+const INITIAL_VIEW_STATE = {
+  latitude: 39.1,
+  longitude: -94.57,
+  zoom: 3.8,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0
+};
+
+class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500
-      }
+      viewState: INITIAL_VIEW_STATE
     };
-    this._loadData();
+
+    if (!window.demoLauncherActive) {
+      this._loadData();
+    }
   }
 
   componentDidMount() {
     window.addEventListener('resize', this._resize.bind(this));
     this._resize();
-
     this._loadData();
   }
 
@@ -43,9 +51,24 @@ class Root extends Component {
     }
   }
 
-  _onViewportChange(viewport) {
+  _resize() {
+    const viewState = Object.assign(this.state.viewState, {
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
+    this._onViewStateChange({viewState});
+  }
+
+  _onViewStateChange({viewState}) {
     this.setState({
-      viewport: {...this.state.viewport, ...viewport}
+      viewState: {...this.state.viewState, ...viewState}
+    });
+  }
+
+  _initialize(gl) {
+    setParameters(gl, {
+      blendFunc: [gl.SRC_ALPHA, gl.ONE, gl.ONE_MINUS_DST_ALPHA, gl.ONE],
+      blendEquation: gl.FUNC_ADD
     });
   }
 
@@ -93,28 +116,55 @@ class Root extends Component {
     this._animationFrame = window.requestAnimationFrame(this._animateData.bind(this));
   }
 
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
   render() {
-    const {viewport, dataSlice} = this.state;
+    const {
+      data = DATA_URL,
+
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState,
+
+      mapboxApiAccessToken = MAPBOX_TOKEN,
+      mapStyle = MAPBOX_STYLE
+    } = this.props;
+
+
+    const layers = [
+      new TextLayer({
+        id: 'hashtag-layer',
+        data,
+        sizeScale: 8,
+        getColor: d => d.color,
+        getSize: d => d.size
+      })
+    ];
 
     return (
-      <MapGL
-        {...viewport}
-        mapStyle={MAPBOX_STYLE}
-        preventStyleDiffing={true}
-        onViewportChange={this._onViewportChange.bind(this)}
-        mapboxApiAccessToken={MAPBOX_TOKEN}
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
-        <DeckGLOverlay viewport={viewport} data={dataSlice} />
-      </MapGL>
+
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
+
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
+        />
+
+      </DeckGL>
     );
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
+export {App, INITIAL_VIEW_STATE};
+
+if (!window.demoLauncherActive) {
+  render(<App />, document.body.appendChild(document.createElement('div')));
+}

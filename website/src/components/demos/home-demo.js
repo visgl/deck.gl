@@ -19,5 +19,4 @@ export default class HomeDemo extends TripsDemo {
       pitch: 40
     };
   }
-
 }

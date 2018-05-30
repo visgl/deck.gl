@@ -4,7 +4,7 @@ import {connect} from 'react-redux';
 import Stats from 'stats.js';
 
 import {updateMap, setHeaderOpacity} from '../actions/app-actions';
-import Map from './map';
+import DemoLauncher from './demo-launcher';
 import ViewportAnimation from '../utils/map-utils';
 
 class Home extends Component {
@@ -69,7 +69,7 @@ class Home extends Component {
 
         <section ref="banner" id="banner">
           <div className="hero">
-            <Map demo="HomeDemo" isInteractive={false} />
+            <DemoLauncher key="home-demo" demo="HomeDemo" isInteractive={false} />
           </div>
           <div className="container soft-left">
             <h1>deck.gl</h1>

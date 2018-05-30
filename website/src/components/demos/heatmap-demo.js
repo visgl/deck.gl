@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import HeatmapOverlay from 'website-examples/3d-heatmap/deckgl-overlay';
+import {App, INITIAL_VIEW_STATE} from 'website-examples/3d-heatmap/app';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 
@@ -23,15 +23,16 @@ export default class HeatmapDemo extends Component {
   }
 
   static get viewport() {
-    return {
-      ...HeatmapOverlay.defaultViewport,
-      mapStyle: MAPBOX_STYLES.DARK
-    };
+    return INITIAL_VIEW_STATE;
+  }
+
+  static get mapStyle() {
+    return MAPBOX_STYLES.DARK;
   }
 
   static renderInfo(meta) {
 
-    const colorRamp = HeatmapOverlay.defaultColorRange.slice()
+    const colorRamp = App.defaultColorRange.slice()
       .map(color => `rgb(${color.join(',')})`);
 
     return (
@@ -81,6 +82,7 @@ export default class HeatmapDemo extends Component {
     if (!hoveredObject) {
       return null;
     }
+
     const lat = hoveredObject.centroid[1];
     const lng = hoveredObject.centroid[0];
     const count = hoveredObject.points.length;
@@ -96,17 +98,13 @@ export default class HeatmapDemo extends Component {
   }
 
   render() {
-    const {viewport, params, data} = this.props;
-
-    if (!data) {
-      return null;
-    }
+    const {data, params} = this.props;
 
     return (
       <div>
         {this._renderTooltip()}
-        <HeatmapOverlay
-          viewport={viewport}
+        <App
+          {...this.props}
           data={data}
           radius={params.radius.value}
           upperPercentile={params.upperPercentile.value}
