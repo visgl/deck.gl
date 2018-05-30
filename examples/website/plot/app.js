@@ -35,7 +35,7 @@ class App extends Component {
     };
 
     this._onResize = this._onResize.bind(this);
-    this._onViewStateChange = this._onViewSttaeChange.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
   componentDidMount() {

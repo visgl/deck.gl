@@ -106,9 +106,11 @@ class App extends Component {
         <StaticMap
           viewId="map"
           {...viewState}
-          reuseMap
-          mapboxApiAccessToken={mapboxApiAccessToken}
+          reuseMaps
+
+          mapStyle={mapStyle}
           preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
         />
 
       </DeckGL>

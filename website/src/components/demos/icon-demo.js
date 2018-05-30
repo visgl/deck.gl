@@ -32,9 +32,12 @@ export default class IconDemo extends Component {
   static get viewport() {
     return {
       ...INITIAL_VIEW_STATE,
-      dragToRotate: false,
-      mapStyle: MAPBOX_STYLES.DARK
+      dragToRotate: false
     };
+  }
+
+  static get mapStyle() {
+    return MAPBOX_STYLES.DARK;
   }
 
   static renderInfo(meta) {

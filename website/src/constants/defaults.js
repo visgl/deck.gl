@@ -11,7 +11,6 @@ export const MAPBOX_STYLES = {
 };
 
 export const DEFAULT_VIEWPORT_STATE = {
-  mapStyle: MAPBOX_STYLES.LIGHT,
   width: 600,
   height: 600,
   latitude: 37.7749295,

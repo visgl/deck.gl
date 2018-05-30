@@ -53,6 +53,7 @@ const COMMON_CONFIG = {
       // Website is using React 15
       react: resolve('.', './node_modules/react'),
       'react-dom': resolve('.', './node_modules/react-dom'),
+      'react-map-gl': resolve('.', './node_modules/react-map-gl'),
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     }

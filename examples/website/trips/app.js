@@ -1,8 +1,8 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, PolygonLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 // Set your mapbox token here
@@ -120,22 +120,25 @@ export default class App extends Component {
     ];
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMap
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
-        mapboxApiAccessToken={mapboxApiAccessToken}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
 
-        <DeckGL
-          layers={layers}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
-          />;
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
 
-      </MapGL>
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
+        />
+
+      </DeckGL>
     );
   }
 }

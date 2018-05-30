@@ -1,8 +1,8 @@
 /* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, GeoJsonLayer, ArcLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {scaleQuantile} from 'd3-scale';
 
 // Set your mapbox token here
@@ -171,22 +171,25 @@ class App extends Component {
     ];
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMap
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
         onViewStateChange={onViewStateChange}
-        mapboxApiAccessToken={mapboxApiAccessToken}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
+        controller={MapController}
       >
 
-        <DeckGL
-          layers={layers}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
-          />;
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
 
-      </MapGL>
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
+        />
+
+      </DeckGL>
     );
   }
 }

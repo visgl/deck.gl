@@ -23,10 +23,11 @@ export default class HeatmapDemo extends Component {
   }
 
   static get viewport() {
-    return {
-      ...INITIAL_VIEW_STATE,
-      mapStyle: MAPBOX_STYLES.DARK
-    };
+    return INITIAL_VIEW_STATE;
+  }
+
+  static get mapStyle() {
+    return MAPBOX_STYLES.DARK;
   }
 
   static renderInfo(meta) {

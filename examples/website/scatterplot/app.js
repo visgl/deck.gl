@@ -1,8 +1,8 @@
-/* global document, fetch, window */
+/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, ScatterplotLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, ScatterplotLayer} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -65,36 +65,41 @@ class App extends Component {
       mapStyle = "mapbox://styles/mapbox/dark-v9"
     } = this.props;
 
-    const layer = new ScatterplotLayer({
-      id: 'scatter-plot',
-      data,
-      radiusScale: radius,
-      radiusMinPixels: 0.25,
-      getPosition: d => [d[0], d[1], 0],
-      getColor: d => (d[2] === 1 ? maleColor : femaleColor),
-      getRadius: d => 1,
-      updateTriggers: {
-        getColor: [maleColor, femaleColor]
-      }
-    });
+    const layers = [
+      new ScatterplotLayer({
+        id: 'scatter-plot',
+        data,
+        radiusScale: radius,
+        radiusMinPixels: 0.25,
+        getPosition: d => [d[0], d[1], 0],
+        getColor: d => (d[2] === 1 ? maleColor : femaleColor),
+        getRadius: d => 1,
+        updateTriggers: {
+          getColor: [maleColor, femaleColor]
+        }
+      })
+    ];
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMap
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
-        mapboxApiAccessToken={mapboxApiAccessToken}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
 
-        <DeckGL
-          layers={[layer]}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
-          />;
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
 
-      </MapGL>
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
+        />
+
+      </DeckGL>
     );
   }
 }

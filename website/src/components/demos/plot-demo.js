@@ -72,7 +72,7 @@ export default class PlotDemo extends Component {
 
   render() {
     const {
-      viewport: {width, height},
+      viewState: {width, height},
       params: {resolution, showAxis}
     } = this.props;
     const {equation, hoverInfo} = this.state;

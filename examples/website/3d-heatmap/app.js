@@ -2,8 +2,8 @@
 /* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, HexagonLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, HexagonLayer} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
@@ -162,20 +162,25 @@ class App extends Component {
     ];
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMap
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
         onViewStateChange={onViewStateChange}
-        mapboxApiAccessToken={mapboxApiAccessToken}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
+        controller={MapController}
       >
-        <DeckGL
-          layers={layers}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
+
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
+
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
         />
-      </MapGL>
+
+      </DeckGL>
     );
   }
 }

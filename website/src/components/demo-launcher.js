@@ -2,8 +2,6 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
-import MapGL from 'react-map-gl';
-
 import * as Demos from './demos';
 import {updateMap, updateMeta, loadData, useParams, resetParams} from '../actions/app-actions';
 import ViewportAnimation from '../utils/map-utils';
@@ -41,18 +39,15 @@ class DemoLauncher extends Component {
       this.props.loadData(demo, DemoComponent.data);
       this.props.useParams(DemoComponent.parameters);
       let demoViewport = DemoComponent.viewport;
+      this._mapStyle = DemoComponent.mapStyle || (demoViewport && demoViewport.mapStyle);
 
-      if (!demoViewport) {
-        // do not show map
-        this.props.updateMap({
-          mapStyle: null
-        });
-      } else {
+      if (demoViewport) {
         demoViewport = {
           minZoom: 0,
           maxZoom: 20,
           ...demoViewport
         };
+        delete demoViewport.mapStyle;
 
         if (useTransition) {
           const {viewport} = this.props;
@@ -99,24 +94,24 @@ class DemoLauncher extends Component {
   }
 
   // Add map wrapper, use for examples that havn't yet been updated to render their own maps
-  renderMap(component) {
-    const {viewport, isInteractive} = this.props;
+  // renderMap(component) {
+  //   const {viewport, isInteractive} = this.props;
 
-    return (
-      <MapGL
-        mapboxApiAccessToken={MapboxAccessToken}
-        preventStyleDiffing={true}
-        mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
-        reuseMap
+  //   return (
+  //     <MapGL
+  //       mapboxApiAccessToken={MapboxAccessToken}
+  //       preventStyleDiffing={true}
+  //       mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
+  //       reuseMap
 
-        {...viewport}
-        onViewStateChange={isInteractive ? this.props.updateMapViewState : undefined}>
+  //       {...viewport}
+  //       onViewStateChange={isInteractive ? this.props.updateMapViewState : undefined}>
 
-        {component}
+  //       {component}
 
-      </MapGL>
-    );
-  }
+  //     </MapGL>
+  //   );
+  // }
 
   render() {
     const {viewport, demo, owner, data, isInteractive} = this.props;
@@ -144,7 +139,7 @@ class DemoLauncher extends Component {
           onViewStateChange={isInteractive ? this._updateMapViewState : undefined}
 
           mapboxApiAccessToken={MapboxAccessToken}
-          mapStyle={viewport.mapStyle || MAPBOX_STYLES.BLANK}
+          mapStyle={this._mapStyle || MAPBOX_STYLES.BLANK}
 
           params={params}
           onStateChange={this.props.updateMeta}

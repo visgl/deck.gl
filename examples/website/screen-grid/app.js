@@ -70,11 +70,12 @@ class App extends Component {
     return (
       <MapGL
         {...viewState}
-        reuseMap
+        reuseMaps
+
         onViewportChange={viewport => onViewStateChange({viewState: viewport})}
-        mapboxApiAccessToken={mapboxApiAccessToken}
         mapStyle={mapStyle}
         preventStyleDiffing={true}
+        mapboxApiAccessToken={mapboxApiAccessToken}
       >
 
         <DeckGL

@@ -1,8 +1,8 @@
 /* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController} from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer';
 import ScatterplotBrushingLayer from './scatterplot-brushing-layer';
 import {scaleLinear} from 'd3-scale';
@@ -290,22 +290,25 @@ class App extends Component {
       >
         {this._renderTooltip()}
 
-        <MapGL
-          {...viewState}
-          reuseMap
+        <DeckGL
+          layers={layers}
+          views={new MapView({id: 'map'})}
+          viewState={viewState}
           onViewStateChange={onViewStateChange}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
+          controller={MapController}
         >
 
-          <DeckGL
-            layers={layers}
-            views={new MapView({id: 'map'})}
-            viewState={viewState}
-            />;
+          <StaticMap
+            viewId="map"
+            {...viewState}
+            reuseMaps
 
-        </MapGL>
+            mapStyle={mapStyle}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={mapboxApiAccessToken}
+          />
+
+        </DeckGL>
 
       </div>
     );

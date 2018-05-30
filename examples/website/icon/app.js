@@ -1,8 +1,8 @@
 /* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, IconLayer, WebMercatorViewport} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, IconLayer, WebMercatorViewport} from 'deck.gl';
 import rbush from 'rbush';
 
 // Set your mapbox token here
@@ -64,38 +64,14 @@ class App extends Component {
     if (!window.demoLauncherActive) {
       fetch(DATA_URL)
         .then(resp => resp.json())
-        .then(data => this.setState({data}));
+        .then(data => {
+          this.setState({data});
+        });
 
       fetch('./data/location-icon-mapping.json')
         .then(resp => resp.json())
         .then(data => this.setState({iconMapping: data}));
     }
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const {viewport} = nextProps;
-    const oldViewport = this.props.viewport;
-
-    if (
-      nextProps.data !== this.props.data ||
-      viewport.width !== oldViewport.width ||
-      viewport.height !== oldViewport.height
-    ) {
-      this._updateCluster(nextProps);
-    }
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -108,15 +84,25 @@ class App extends Component {
   // We use the projected positions instead of longitude and latitude to build
   // the spatial index, because this particular dataset is distributed all over
   // the world, we can't use some fixed deltaLon and deltaLat
-  _updateCluster({data, viewport}) {
-    if (!data) {
+  _updateCluster({data, viewState}) {
+    const oldViewState = this._oldViewState || {};
+    const oldData = this._data;
+    const changed =
+      data !== oldData ||
+      viewState.width !== oldViewState.width ||
+      viewState.height !== oldViewState.height;
+
+    if (!data || !changed) {
       return;
     }
+
+    this._oldViewState = viewState;
+    this._oldData = data;
 
     const tree = this._tree;
 
     const transform = new WebMercatorViewport({
-      ...viewport,
+      ...viewState,
       zoom: 0
     });
 
@@ -179,16 +165,14 @@ class App extends Component {
       mapStyle = "mapbox://styles/mapbox/dark-v9"
     } = this.props;
 
-    if (!iconMapping) {
-      return null;
-    }
+    this._updateCluster({data, viewState});
 
     const z = Math.floor(viewState.zoom);
     const size = showCluster ? 1 : Math.min(Math.pow(1.5, viewState.zoom - 10), 1);
     const updateTrigger = z * showCluster;
 
     const layers = [
-      new IconLayer({
+      iconMapping && new IconLayer({
         id: 'icon',
         data,
         pickable: this.props.onHover || this.props.onClick,
@@ -208,20 +192,25 @@ class App extends Component {
     ];
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMap
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
         onViewStateChange={onViewStateChange}
-        mapboxApiAccessToken={mapboxApiAccessToken}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
+        controller={MapController}
       >
-        <DeckGL
-          layers={layers}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
+
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
+
+          mapStyle={mapStyle}
+          mapboxApiAccessToken={mapboxApiAccessToken}
+          preventStyleDiffing={true}
         />
-      </MapGL>
+
+      </DeckGL>
     );
   }
 }

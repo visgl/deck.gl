@@ -2,8 +2,8 @@
 /* global document, fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, TextLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, TextLayer} from 'deck.gl';
 import TagmapLayer from './tagmap-layer';
 
 // Set your mapbox token here
@@ -76,42 +76,47 @@ class App extends Component {
       mapStyle = MAPBOX_STYLE
     } = this.props;
 
-    const layer = cluster
-      ? new TagmapLayer({
-          id: 'twitter-topics-tagmap',
-          data,
-          getLabel: x => x.label,
-          getPosition: x => x.coordinates,
-          minFontSize: 14,
-          maxFontSize: fontSize * 2 - 14
-        })
-      : new TextLayer({
-          id: 'twitter-topics-raw',
-          data,
-          getText: d => d.label,
-          getPosition: x => x.coordinates,
-          getColor: d => DEFAULT_COLOR,
-          getSize: d => 20,
-          sizeScale: fontSize / 20
-        });
+    const layers = [
+      cluster
+        ? new TagmapLayer({
+            id: 'twitter-topics-tagmap',
+            data,
+            getLabel: x => x.label,
+            getPosition: x => x.coordinates,
+            minFontSize: 14,
+            maxFontSize: fontSize * 2 - 14
+          })
+        : new TextLayer({
+            id: 'twitter-topics-raw',
+            data,
+            getText: d => d.label,
+            getPosition: x => x.coordinates,
+            getColor: d => DEFAULT_COLOR,
+            getSize: d => 20,
+            sizeScale: fontSize / 20
+          })
+    ];
 
     return (
-      <MapGL
-        {...viewState}
-        reuseMap
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
-        mapboxApiAccessToken={mapboxApiAccessToken}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
+      <DeckGL
+        layers={layers}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
+        onViewStateChange={onViewStateChange}
+        controller={MapController}
       >
 
-        <DeckGL
-          layers={[layer]}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
-          />;
+        <StaticMap
+          viewId="map"
+          {...viewState}
+          reuseMaps
 
-      </MapGL>
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={mapboxApiAccessToken}
+        />
+
+      </DeckGL>
     );
   }
 }

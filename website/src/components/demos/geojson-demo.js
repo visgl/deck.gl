@@ -44,10 +44,11 @@ export default class GeoJsonDemo extends Component {
   }
 
   static get viewport() {
-    return {
-      ...INITIAL_VIEW_STATE,
-      mapStyle: MAPBOX_STYLES.LIGHT
-    };
+    return INITIAL_VIEW_STATE;
+  }
+
+  static get mapStyle() {
+    return MAPBOX_STYLES.LIGHT;
   }
 
   static renderInfo(meta) {
