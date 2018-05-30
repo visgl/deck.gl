@@ -1,10 +1,10 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import {experimental} from 'deck.gl';
+import DeckGL, {MapController, experimental} from 'deck.gl';
 import ControlPanel from './control-panel';
 
-const {ViewportFlyToInterpolator, TRANSITION_EVENTS, ViewportController, MapState} = experimental;
+const {ViewportFlyToInterpolator, TRANSITION_EVENTS} = experimental;
 
 const token = process.env.MapboxAccessToken; // eslint-disable-line
 const interruptionStyles = [
@@ -30,7 +30,7 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewport: {
+      viewState: {
         latitude: 37.7751,
         longitude: -122.4193,
         zoom: 11,
@@ -38,11 +38,11 @@ export default class App extends Component {
         pitch: 0,
         width: 500,
         height: 500
-      },
-      transitionDuration: 0
+      }
     };
     this._interruptionStyle = TRANSITION_EVENTS.BREAK;
     this._resize = this._resize.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
   componentDidMount() {
@@ -56,20 +56,27 @@ export default class App extends Component {
 
   _resize() {
     this.setState({
-      viewport: {
-        ...this.state.viewport,
+      viewState: {
+        ...this.state.viewState,
         width: this.props.width || window.innerWidth,
-        height: this.props.height || window.innerHeight,
-        transitionDuration: 0
+        height: this.props.height || window.innerHeight
       }
     });
   }
 
   _easeTo({longitude, latitude}) {
     this.setState({
-      viewport: {...this.state.viewport, longitude, latitude, zoom: 11, pitch: 0, bearing: 0},
-      transitionDuration: 8000,
-      viewportToggled: !this.state.viewportToggled
+      viewState: {
+        ...this.state.viewState,
+        longitude,
+        latitude,
+        zoom: 11,
+        pitch: 0,
+        bearing: 0,
+        transitionDuration: 8000,
+        transitionInterpolator: new ViewportFlyToInterpolator(),
+        transitionInterruption: this._interruptionStyle
+      }
     });
   }
 
@@ -77,40 +84,35 @@ export default class App extends Component {
     this._interruptionStyle = style;
   }
 
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport},
-      transitionDuration: 0
-    });
+  _onViewStateChange({viewState}) {
+    this.setState({viewState});
   }
 
   render() {
-    const {viewport, settings, transitionDuration} = this.state;
+    const {viewState} = this.state;
 
     return (
-      <ViewportController
-        viewportState={MapState}
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        transitionInterpolator={new ViewportFlyToInterpolator()}
-        transitionDuration={transitionDuration}
-        transitionInterruption={this._interruptionStyle}
-      >
-        <StaticMap
-          {...viewport}
-          {...settings}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange}
-          dragToRotate={false}
-          mapboxApiAccessToken={token}
-        />
+      <div>
+        <DeckGL
+          viewState={viewState}
+          controller={MapController}
+          onViewStateChange={this._onViewStateChange}
+        >
+          <StaticMap
+            {...viewState}
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            dragToRotate={false}
+            mapboxApiAccessToken={token}
+          />
+        </DeckGL>
+
         <ControlPanel
           containerComponent={this.props.containerComponent}
           onViewportChange={this._easeTo.bind(this)}
           interruptionStyles={interruptionStyles}
           onStyleChange={this._onStyleChange.bind(this)}
         />
-      </ViewportController>
+      </div>
     );
   }
 }
