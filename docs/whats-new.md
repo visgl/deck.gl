@@ -13,6 +13,10 @@ deck.gl layers can now specify additional type information about properties. Whe
 
 > For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
+### Set initial WebGL parameters using a prop
+
+It is now possible to set the initial WebGL parameters on the `Deck` WebGL context by supplying a `parameters` prop object, avoiding the need to define an `onWebGLInitialized` callback: `new Deck({..., parameters: {depthTest: false}});`
+
 
 #### Pixel Sizes
 
@@ -64,11 +68,6 @@ Many layer accessor props now accept constant values. For example, when construc
 #### @deck.gl/layers submodule
 
 Core layers are broken out from ` @deck.gl/core` to a new submodule ` @deck.gl/layers`. Users of `deck.gl` are not affected by this change.
-
-
-#### Set initial WebGL parameters using a prop
-
-It is now possible to set the initial WebGL parameters on the `Deck` WebGL context by supplying a `parameters` prop object, avoiding the need to define an `onWebGLInitialized` callback: `new Deck({..., parameters: {depthTest: false}});`
 
 
 ## deck.gl v5.2
