@@ -161,6 +161,9 @@ export default class TransitionManager {
     if (this.props.onViewportChange) {
       this.props.onViewportChange(this.propsInTransition, {inTransition: true});
     }
+    if (this.props.onViewStateChange) {
+      this.props.onViewStateChange({viewState: this.propsInTransition}, {inTransition: true});
+    }
   }
 }
 

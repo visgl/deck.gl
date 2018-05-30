@@ -151,7 +151,7 @@ export default class Controller {
       this.toggleEvents(this.events, true);
     }
 
-    this.transitionManager.processViewStateChange(props);
+    this.transitionManager.processViewStateChange(this.controllerStateProps);
 
     // TODO - make sure these are not reset on every setProps
     const {
@@ -217,14 +217,12 @@ export default class Controller {
     // const changed = Object.keys(viewState).some(key => oldViewState[key] !== viewState[key]);
 
     if (changed) {
+      const oldViewState = this.controllerState ? this.controllerState.getViewportProps() : null;
       if (this.onViewportChange) {
-        const viewport = this.controllerState.getViewport
-          ? this.controllerState.getViewport()
-          : null;
-        this.onViewportChange(viewState, interactionState, viewport);
+        this.onViewportChange(viewState, interactionState, oldViewState);
       }
       if (this.onViewStateChange) {
-        this.onViewStateChange({viewState, interactionState});
+        this.onViewStateChange({viewState, interactionState, oldViewState});
       }
     }
 
