@@ -12,8 +12,11 @@ const CORE_VERSION = require(resolve(ROOT, 'node_modules/@deck.gl/core/package.j
 
 const config = {
   resolve: {
+    mainFields: ['main'],
+
     alias: {
-      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src')
+      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
+      '@deck.gl/layers': resolve(ROOT, 'node_modules/@deck.gl/layers/src')
     }
   },
 
@@ -48,7 +51,7 @@ const devConfig = Object.assign({}, config, {
 const prodConfig = Object.assign({}, config, {
   entry: resolve(PACKAGE_ROOT, 'src/index.js'),
 
-  mode: 'production',
+  mode: 'development',
 
   output: {
     libraryTarget: 'umd',
