@@ -33,7 +33,7 @@ const config = {
 const devConfig = Object.assign({}, config, {
   entry: resolve(PACKAGE_ROOT, 'test/index.js'),
 
-  mode: 'production',
+  mode: 'development',
 
   devServer: {
     contentBase: resolve(PACKAGE_ROOT, 'test')
@@ -49,7 +49,7 @@ const devConfig = Object.assign({}, config, {
 const prodConfig = Object.assign({}, config, {
   entry: resolve(PACKAGE_ROOT, 'src/index.js'),
 
-  mode: 'development',
+  mode: 'production',
 
   output: {
     libraryTarget: 'umd',
