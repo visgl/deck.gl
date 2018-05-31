@@ -13,7 +13,8 @@ const CORE_VERSION = require(resolve(ROOT, 'node_modules/@deck.gl/core/package.j
 const config = {
   resolve: {
     alias: {
-      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src')
+      '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
+      '@deck.gl/layers': resolve(ROOT, 'node_modules/@deck.gl/layers/src')
     }
   },
 
