@@ -12,8 +12,6 @@ const CORE_VERSION = require(resolve(ROOT, 'node_modules/@deck.gl/core/package.j
 
 const config = {
   resolve: {
-    mainFields: ['main'],
-
     alias: {
       '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
       '@deck.gl/layers': resolve(ROOT, 'node_modules/@deck.gl/layers/src')
@@ -35,7 +33,7 @@ const config = {
 const devConfig = Object.assign({}, config, {
   entry: resolve(PACKAGE_ROOT, 'test/index.js'),
 
-  mode: 'development',
+  mode: 'production',
 
   devServer: {
     contentBase: resolve(PACKAGE_ROOT, 'test')
