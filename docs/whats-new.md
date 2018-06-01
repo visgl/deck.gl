@@ -2,27 +2,15 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
-
-## deck.gl v6.0
-
-Release date: TBD, target late Q2, 2018
-
-### Prop Types
-
-deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/developer-guide/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
-
-> For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
-
-
 ## deck.gl v5.3
 
-Release date: TBD, target May 25, 2018
+Release date: June 01, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/orthographic.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/orthographic.gif" />
         <p><i>Orthographic Mode</i></p>
       </td>
     </tr>
@@ -70,15 +58,15 @@ Release date: April 24, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/text-layer.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/text-layer.gif" />
         <p><i>New TextLayer</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/screenGrid-colorRangeDomain.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/screenGrid-colorRangeDomain.gif" />
         <p><i>ScreenGridLayer Color Scale</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/test-utils.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/test-utils.gif" />
         <p><i>Automated Render Tests</i></p>
       </td>
     </tr>
@@ -182,11 +170,11 @@ Release date: Feb 16, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/transitions.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/transitions.gif" />
         <p><i>Layer Transitions</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jsx-layers.png" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/jsx-layers.png" />
         <p><i>JSX Layers</i></p>
       </td>
     </tr>
@@ -226,15 +214,15 @@ Release date: Dec 21, 2017
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/object-highlighting.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/object-highlighting.gif" />
         <p><i>GPU-based Highlighting</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/path-dashes.png" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/path-dashes.png" />
         <p><i>Dashes in GeoJson</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/react-16.png" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/react-16.png" />
         <p><i>React 16 Support</i></p>
       </td>
     </tr>
@@ -322,11 +310,11 @@ Release date: July 27th, 2017
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/webgl2.jpg" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/webgl2.jpg" />
         <p><i>WebGL 2</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/seer.png" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/5.3-release/images/whats-new/seer.png" />
         <p><i>Seer Extension</i></p>
       </td>
     </tr>

@@ -231,5 +231,5 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
 ## Source
 
-[modules/core/src/core-layers/geojson-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/geojson-layer)
+[modules/core/src/core-layers/geojson-layer](https://github.com/uber/deck.gl/tree/5.3-release/modules/core/src/core-layers/geojson-layer)
 

@@ -33,4 +33,4 @@ Runs the test suite, calling the callbacks.
 
 ## Source
 
-[modules/test-utils/src/scene-renderer.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/test-utils/src/scene-renderer.js)
+[modules/test-utils/src/scene-renderer.js](https://github.com/uber/deck.gl/blob/5.3-release/modules/test-utils/src/scene-renderer.js)

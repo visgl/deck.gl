@@ -132,4 +132,4 @@ All [Deck](/docs/api-reference/deck.md#methods) methods are available on the `De
 
 ## Source
 
-[modules/react/src/deckgl.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/react/src/deckgl.js)
+[modules/react/src/deckgl.js](https://github.com/uber/deck.gl/blob/5.3-release/modules/react/src/deckgl.js)
