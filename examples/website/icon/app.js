@@ -208,10 +208,7 @@ class App extends Component {
           preventStyleDiffing={true}
         />
 
-        <div>
-          {this.props.children}
-        </div>
-
+        <div>{this.props.children}</div>
       </DeckGL>
     );
   }
