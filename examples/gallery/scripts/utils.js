@@ -1,16 +1,16 @@
 const fs = require('fs');
 const path = require('path');
 
-const INPUT_DIR = 'src';
-const IMAGE_DIR = 'images';
+const {INPUT_DIR, IMAGE_DIR, MAPBOX_TOKEN, PORT} = require('./constants');
 
-/* eslint-disable */
-const MAPBOX_TOKEN = process.env.MapboxAccessToken;
-if (!MAPBOX_TOKEN) {
-  console.log('Missing environment variable: MapboxAccessToken');
-  process.exit(1);
+const ARGS = parseArgs();
+
+let bundleUrl = null;
+if (ARGS.version === 'local') {
+  bundleUrl = `http://localhost:${PORT}/deckgl.min.js`;
+} else if (ARGS.version) {
+  bundleUrl = `https://unpkg.com/deck.gl@${ARGS.version}/deckgl.min.js`;
 }
-/* eslint-enable */
 
 function getAllMetadata() {
   return fs
@@ -69,8 +69,12 @@ function getIndexPage(pages) {
   </html>`;
 }
 
-function getPage(page) {
-  const content = fs.readFileSync(page.src, 'utf-8');
+function getPage(page, opts) {
+  let content = fs.readFileSync(page.src, 'utf-8');
+  if (bundleUrl) {
+    content = content.replace(/src="[^"]+\/deckgl\.min\.js"/, `src="${bundleUrl}"`);
+  }
+
   const iframeSrc = `data:text/html;charset=utf-8,${encodeURI(
     content.replace('<mapbox-access-token>', MAPBOX_TOKEN)
   )}`;
@@ -97,6 +101,19 @@ function getPage(page) {
       </div>
     </body>
   </html>`;
+}
+
+function parseArgs() {
+  const args = process.argv.slice(2); // eslint-disable-line
+  const argMap = {};
+
+  for (let i = 0; i < args.length; i++) {
+    const match = args[i].match(/--(\w+)=(.*)/);
+    if (match) {
+      argMap[match[1]] = match[2];
+    }
+  }
+  return argMap;
 }
 
 function fileExists(filePath) {

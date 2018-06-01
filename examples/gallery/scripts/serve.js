@@ -1,6 +1,9 @@
 const express = require('express');
-const utils = require('./utils');
 const path = require('path');
+const fs = require('fs');
+
+const {LOCAL_BUNDLE} = require('./constants');
+const utils = require('./utils');
 
 const app = express();
 
@@ -19,6 +22,12 @@ app.get('/', (req, resp) => {
 
 app.get('/404', (req, resp) => {
   resp.send('Page not found');
+});
+
+app.get('/deckgl.min.js', (req, resp) => {
+  const src = fs.readFileSync(LOCAL_BUNDLE, 'utf-8');
+  resp.append('Content-Type', 'text/javascript');
+  resp.send(src);
 });
 
 app.get('/*.html', (req, resp) => {

@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "build": "rm -rf dist && mkdir dist && cp -r images dist && node scripts/build",
-    "start": "node scripts/serve"
+    "start": "node scripts/serve",
+    "start-local": "node scripts/serve --version=local"
   },
   "dependencies": {},
   "devDependencies": {
