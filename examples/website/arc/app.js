@@ -67,11 +67,6 @@ class App extends Component {
     }
   }
 
-  // componentDidMount() {
-  //   window.addEventListener('resize', this._onResize.bind(this));
-  //   this._onResize();
-  // }
-
   componentWillReceiveProps(nextProps) {
     const arcsChanged =
       nextProps.data !== this.props.data ||
@@ -80,14 +75,6 @@ class App extends Component {
       this._recalculateArcs(nextProps.data, nextProps.selectedFeature);
     }
   }
-
-  // _onResize() {
-  //   const viewState = Object.assign(this.state.viewState, {
-  //     width: window.innerWidth,
-  //     height: window.innerHeight
-  //   });
-  //   this._onViewStateChange({viewState});
-  // }
 
   _onViewStateChange({viewState}) {
     this.setState({
