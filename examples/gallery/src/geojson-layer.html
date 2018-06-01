@@ -38,6 +38,8 @@
 
   <script type="text/javascript">
 
+    const {DeckGL, GeoJsonLayer} = deck;
+
     const LIGHT_SETTINGS = {
       lightsPosition: [-125, 50.5, 5000, -122.8, 48.5, 8000],
       ambientRatio: 0.2,
@@ -66,7 +68,7 @@
       [128, 0, 38]
     ];
 
-    const geojsonLayer = new deck.GeoJsonLayer({
+    const geojsonLayer = new GeoJsonLayer({
       data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json',
       opacity: 0.8,
       stroked: false,
@@ -84,7 +86,7 @@
       onHover: updateTooltip
     });
 
-    new deck.DeckGL({
+    new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
       latitude: 49.254,

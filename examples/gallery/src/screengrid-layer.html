@@ -20,7 +20,9 @@
 
   <script type="text/javascript">
 
-    new deck.DeckGL({
+    const {DeckGL, ScreenGridLayer} = deck;
+
+    new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
       longitude: -119.3,
@@ -28,7 +30,7 @@
       zoom: 6,
       maxZoom: 20,
       layers: [
-        new deck.ScreenGridLayer({
+        new ScreenGridLayer({
           id: 'grid',
           data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json',
           minColor: [0, 0, 0, 0],

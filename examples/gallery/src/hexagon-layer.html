@@ -57,7 +57,9 @@
 
   <script type="text/javascript">
 
-    const deckgl = new deck.DeckGL({
+    const {DeckGL, HexagonLayer} = deck;
+
+    const deckgl = new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/dark-v9',
       longitude: -1.4157,
@@ -102,7 +104,7 @@
         options[key] = value;
       });
 
-      const hexagonLayer = new deck.HexagonLayer({
+      const hexagonLayer = new HexagonLayer({
         id: 'heatmap',
         colorRange: COLOR_RANGE,
         data,

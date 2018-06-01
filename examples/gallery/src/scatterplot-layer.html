@@ -20,10 +20,12 @@
 
   <script type="text/javascript">
 
+    const {DeckGL, ScatterplotLayer} = deck;
+
     const MALE_COLOR = [0, 128, 255];
     const FEMALE_COLOR = [255, 0, 128];
 
-    new deck.DeckGL({
+    new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
       mapStyle: 'mapbox://styles/mapbox/light-v9',
       longitude: -74,
@@ -31,7 +33,7 @@
       zoom: 11,
       maxZoom: 16,
       layers: [
-        new deck.ScatterplotLayer({
+        new ScatterplotLayer({
           id: 'scatter-plot',
           data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json',
           radiusScale: 10,
