@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <title>deck.gl ScreenGridLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^5.3.0-rc/deckgl.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css" rel="stylesheet" />
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body></body>
+
+  <script type="text/javascript">
+
+    new deck.DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/dark-v9',
+      longitude: -119.3,
+      latitude: 35.6,
+      zoom: 6,
+      maxZoom: 20,
+      layers: [
+        new deck.ScreenGridLayer({
+          id: 'grid',
+          data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json',
+          minColor: [0, 0, 0, 0],
+          getPosition: d => d,
+          cellSizePixels: 20
+        })
+      ]
+    });
+
+  </script>
+</html>
