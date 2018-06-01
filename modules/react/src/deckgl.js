@@ -141,7 +141,8 @@ export default class DeckGL extends React.Component {
         return child;
       }
 
-      const viewport = this.deck.layerManager.viewManager.getViewport(viewId);
+      const viewport = this.deck.layerManager &&
+        this.deck.layerManager.viewManager.getViewport(viewId);
 
       // Drop (auto-hide) elements with viewId that are not matched by any current view
       if (!viewport) {

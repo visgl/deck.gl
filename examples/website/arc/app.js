@@ -67,10 +67,10 @@ class App extends Component {
     }
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._onResize.bind(this));
-    this._onResize();
-  }
+  // componentDidMount() {
+  //   window.addEventListener('resize', this._onResize.bind(this));
+  //   this._onResize();
+  // }
 
   componentWillReceiveProps(nextProps) {
     const arcsChanged =
@@ -81,13 +81,13 @@ class App extends Component {
     }
   }
 
-  _onResize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
-  }
+  // _onResize() {
+  //   const viewState = Object.assign(this.state.viewState, {
+  //     width: window.innerWidth,
+  //     height: window.innerHeight
+  //   });
+  //   this._onViewStateChange({viewState});
+  // }
 
   _onViewStateChange({viewState}) {
     this.setState({
@@ -103,7 +103,7 @@ class App extends Component {
     // Clicked a county
     const selectedCounty = info.object;
     this.setState({selectedCounty});
-    this._recalculateArcs(this.props.data, selectedCounty);
+    this._recalculateArcs(this.props.data || this.state.counties, selectedCounty);
   }
 
   _recalculateArcs(data, selectedFeature) {
@@ -176,6 +176,7 @@ class App extends Component {
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
+        pickingRadius={10}
       >
         <StaticMap
           viewId="map"
