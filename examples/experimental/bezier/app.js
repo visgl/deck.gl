@@ -124,9 +124,7 @@ class App extends Component {
     const {viewport} = this.state;
     const {width, height} = viewport;
 
-    const {
-      data = layoutGraph(SAMPLE_GRAPH)
-    } = this.props;
+    const {data = layoutGraph(SAMPLE_GRAPH)} = this.props;
 
     const view = new OrthographicView({
       left: -width / 2,

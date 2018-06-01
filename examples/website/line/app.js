@@ -62,11 +62,11 @@ class App extends Component {
       flightPaths = DATA_URL.FLIGHT_PATHS,
       strokeWidth = 3,
 
-      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      onViewStateChange = ({viewState}) => this.setState({viewState}),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/dark-v9"
+      mapStyle = 'mapbox://styles/mapbox/dark-v9'
     } = this.props;
 
     const layers = [
@@ -102,17 +102,14 @@ class App extends Component {
         controller={MapController}
         onWebGLInitialized={this._initialize}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }

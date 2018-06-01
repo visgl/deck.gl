@@ -91,7 +91,7 @@ export default class App extends Component {
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/dark-v9"
+      mapStyle = 'mapbox://styles/mapbox/dark-v9'
     } = this.props;
 
     const layers = [
@@ -127,17 +127,14 @@ export default class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }

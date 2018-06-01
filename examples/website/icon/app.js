@@ -42,7 +42,6 @@ function getIconSize(size) {
 
 /* eslint-disable react/no-deprecated */
 class App extends Component {
-
   constructor(props) {
     super(props);
 
@@ -155,14 +154,14 @@ class App extends Component {
     const {
       data = this.state.data,
       iconMapping = this.state.iconMapping,
-      iconAtlas = "data/location-icon-atlas.png",
+      iconAtlas = 'data/location-icon-atlas.png',
       showCluster = true,
 
       onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/dark-v9"
+      mapStyle = 'mapbox://styles/mapbox/dark-v9'
     } = this.props;
 
     this._updateCluster({data, viewState});
@@ -172,23 +171,24 @@ class App extends Component {
     const updateTrigger = z * showCluster;
 
     const layers = [
-      iconMapping && new IconLayer({
-        id: 'icon',
-        data,
-        pickable: this.props.onHover || this.props.onClick,
-        iconAtlas,
-        iconMapping,
-        sizeScale: ICON_SIZE * size * window.devicePixelRatio,
-        getPosition: d => d.coordinates,
-        getIcon: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].icon : 'marker'),
-        getSize: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].size : 1),
-        onHover: this.props.onHover,
-        onClick: this.props.onClick,
-        updateTriggers: {
-          getIcon: updateTrigger,
-          getSize: updateTrigger
-        }
-      })
+      iconMapping &&
+        new IconLayer({
+          id: 'icon',
+          data,
+          pickable: this.props.onHover || this.props.onClick,
+          iconAtlas,
+          iconMapping,
+          sizeScale: ICON_SIZE * size * window.devicePixelRatio,
+          getPosition: d => d.coordinates,
+          getIcon: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].icon : 'marker'),
+          getSize: d => (showCluster ? d.zoomLevels[z] && d.zoomLevels[z].size : 1),
+          onHover: this.props.onHover,
+          onClick: this.props.onClick,
+          updateTriggers: {
+            getIcon: updateTrigger,
+            getSize: updateTrigger
+          }
+        })
     ];
 
     return (
@@ -199,17 +199,14 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           mapboxApiAccessToken={mapboxApiAccessToken}
           preventStyleDiffing={true}
         />
-
       </DeckGL>
     );
   }

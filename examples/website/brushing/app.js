@@ -7,7 +7,6 @@ import ArcBrushingLayer from './arc-brushing-layer';
 import ScatterplotBrushingLayer from './scatterplot-brushing-layer';
 import {scaleLinear} from 'd3-scale';
 
-
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
@@ -214,7 +213,7 @@ class App extends Component {
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/dark-v9"
+      mapStyle = 'mapbox://styles/mapbox/dark-v9'
     } = this.props;
     const {arcs, targets, sources} = this.state;
 
@@ -297,19 +296,15 @@ class App extends Component {
           onViewStateChange={onViewStateChange}
           controller={MapController}
         >
-
           <StaticMap
             viewId="map"
             {...viewState}
             reuseMaps
-
             mapStyle={mapStyle}
             preventStyleDiffing={true}
             mapboxApiAccessToken={mapboxApiAccessToken}
           />
-
         </DeckGL>
-
       </div>
     );
   }

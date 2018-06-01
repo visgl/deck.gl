@@ -80,7 +80,7 @@ class App extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.data && this.props.data && (nextProps.data.length !== this.props.data.length)) {
+    if (nextProps.data && this.props.data && nextProps.data.length !== this.props.data.length) {
       this._animate();
     }
   }
@@ -139,7 +139,7 @@ class App extends Component {
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/dark-v9"
+      mapStyle = 'mapbox://styles/mapbox/dark-v9'
     } = this.props;
 
     const layers = [
@@ -169,17 +169,14 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }

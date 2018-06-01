@@ -105,17 +105,14 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }

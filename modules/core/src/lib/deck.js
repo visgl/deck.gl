@@ -47,22 +47,23 @@ function getPropTypes(PropTypes) {
     layerFilter: PropTypes.func,
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
-    controller: PropTypes.func,
-    onViewStateChange: PropTypes.func,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
+    controller: PropTypes.func,
 
     // GL settings
     glOptions: PropTypes.object,
     gl: PropTypes.object,
     pickingRadius: PropTypes.number,
+    useDevicePixels: PropTypes.bool,
 
+    // Callbacks
     onWebGLInitialized: PropTypes.func,
     onResize: PropTypes.func,
+    onViewStateChange: PropTypes.func,
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
     onLayerClick: PropTypes.func,
     onLayerHover: PropTypes.func,
-    useDevicePixels: PropTypes.bool,
 
     // Debug settings
     debug: PropTypes.bool,
@@ -83,13 +84,15 @@ const defaultProps = {
   effects: [],
   views: null,
   controller: null, // Rely on external controller, e.g. react-map-gl
+  useDevicePixels: true,
 
   onWebGLInitialized: noop,
+  onResize: noop,
+  onViewStateChange: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
-  useDevicePixels: true,
 
   debug: false,
   drawPickingColors: false
@@ -299,9 +302,7 @@ export default class Deck {
           height: this.height
         });
       }
-      if (this.props.onResize) {
-        this.props.onResize({width: this.width, height: this.height});
-      }
+      this.props.onResize({width: this.width, height: this.height});
     }
   }
 
@@ -367,9 +368,7 @@ export default class Deck {
 
   _onViewStateChange({viewState}, ...args) {
     // Let app know that view state is changing, and give it a chance to change it
-    if (this.props.onViewStateChange) {
-      viewState = this.props.onViewStateChange({viewState}, ...args) || viewState;
-    }
+    viewState = this.props.onViewStateChange({viewState}, ...args) || viewState;
 
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {

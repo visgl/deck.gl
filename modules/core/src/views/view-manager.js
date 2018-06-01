@@ -36,6 +36,7 @@ export default class ViewManager {
     this.viewState = INITIAL_VIEW_STATE;
 
     this._viewports = []; // Generated viewports
+    this._viewportMap = {};
     this._needsRedraw = 'Initial render';
     this._needsUpdate = true;
 
@@ -73,6 +74,11 @@ export default class ViewManager {
   getViewports() {
     this._rebuildViewportsFromViews();
     return this._viewports;
+  }
+
+  getViewport(viewId) {
+    this._rebuildViewportsFromViews();
+    return this._viewportMap[viewId];
   }
 
   /**
@@ -196,10 +202,23 @@ export default class ViewManager {
 
       this._viewports = views.map(view => view.makeViewport({width, height, viewState}));
 
+      this._buildViewportMap();
+
       // We've just rebuilt the Viewports to match the View descriptors,
       // so clear the update flag and set the render flag
       this._needsUpdate = false;
     }
+  }
+
+  _buildViewportMap() {
+    // Build a view id to view index
+    this._viewportMap = {};
+    this._viewports.forEach(viewport => {
+      if (viewport.id) {
+        // TODO - issue warning if multiple viewports use same id
+        this._viewportMap[viewport.id] = this._viewportMap[viewport.id] || viewport;
+      }
+    });
   }
 
   // Check if viewport array has changed, returns true if any change

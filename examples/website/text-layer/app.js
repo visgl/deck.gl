@@ -127,7 +127,6 @@ class App extends Component {
       mapStyle = MAPBOX_STYLE
     } = this.props;
 
-
     const layers = [
       new TextLayer({
         id: 'hashtag-layer',
@@ -146,17 +145,14 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }
