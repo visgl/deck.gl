@@ -111,6 +111,13 @@ Note:
 
 gl context, will be autocreated if not supplied.
 
+##### `parameters` (Object, optional)
+
+This prop will only be consulted once after deck.gl's WebGL context is initialized. If set, the value will be passed to luma.gl's `setParameters` function to do an initial configuration of the context, e.g. to disable depth testing, changing blending modes etc.
+
+Please refer to the luma.gl [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API for documentation on supported parameters and values.
+
+
 ##### `debug` (Boolean, optional)
 
 Flag to enable debug mode.
