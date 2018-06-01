@@ -125,12 +125,7 @@ class Root extends Component {
 
     return (
       <div>
-        <App
-          equation={EQUATION}
-          resolution={200}
-          showAxis={true}
-          onHover={this.props.onHover}
-        />
+        <App equation={EQUATION} resolution={200} showAxis={true} onHover={this.props.onHover} />
 
         {hoverInfo && (
           <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}}>

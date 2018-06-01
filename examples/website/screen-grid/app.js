@@ -56,7 +56,7 @@ class App extends Component {
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/dark-v9"
+      mapStyle = 'mapbox://styles/mapbox/dark-v9'
     } = this.props;
 
     const layer = new ScreenGridLayer({
@@ -71,19 +71,12 @@ class App extends Component {
       <MapGL
         {...viewState}
         reuseMaps
-
         onViewportChange={viewport => onViewStateChange({viewState: viewport})}
         mapStyle={mapStyle}
         preventStyleDiffing={true}
         mapboxApiAccessToken={mapboxApiAccessToken}
       >
-
-        <DeckGL
-          layers={[layer]}
-          views={new MapView({id: 'map'})}
-          viewState={viewState}
-          />;
-
+        <DeckGL layers={[layer]} views={new MapView({id: 'map'})} viewState={viewState} />;
       </MapGL>
     );
   }

@@ -61,7 +61,6 @@ class App extends Component {
             selectedCounty: features.find(f => f.properties.name === 'Los Angeles, CA')
           });
           this._recalculateArcs(this.state.counties, this.state.selectedCounty);
-
         });
     } else {
       this._recalculateArcs(this.props.data, this.props.selectedFeature);
@@ -145,7 +144,7 @@ class App extends Component {
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = "mapbox://styles/mapbox/light-v9"
+      mapStyle = 'mapbox://styles/mapbox/light-v9'
     } = this.props;
 
     const layers = [
@@ -178,17 +177,14 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }

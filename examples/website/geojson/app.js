@@ -32,7 +32,6 @@ const INITIAL_VIEW_STATE = {
 const DEFAULT_COLOR_SCALE = r => [r * 255, 140, 200 * (1 - r)];
 
 class App extends Component {
-
   constructor(props) {
     super(props);
     this.state = {viewState: INITIAL_VIEW_STATE};
@@ -42,7 +41,7 @@ class App extends Component {
     const {
       data = DATA_URL,
       colorScale = DEFAULT_COLOR_SCALE,
-      onViewStateChange = (({viewState}) => this.setState({viewState})),
+      onViewStateChange = ({viewState}) => this.setState({viewState}),
       viewState = this.state.viewState,
       mapboxApiAccessToken = MAPBOX_TOKEN,
       mapStyle = null
@@ -75,17 +74,14 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-
         <StaticMap
           viewId="map"
           {...viewState}
           reuseMaps
-
           mapStyle={mapStyle}
           preventStyleDiffing={true}
           mapboxApiAccessToken={mapboxApiAccessToken}
         />
-
       </DeckGL>
     );
   }
