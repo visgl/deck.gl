@@ -77,8 +77,8 @@ export default class IconDemo extends Component {
       return;
     }
 
-    const {viewport, params} = this.props;
-    const z = Math.floor(viewport.zoom);
+    const {viewState, params} = this.props;
+    const z = Math.floor(viewState.zoom);
     const showCluster = params.cluster.value;
 
     let hoveredItems = null;
@@ -159,18 +159,20 @@ export default class IconDemo extends Component {
     }
 
     return (
-      <div className={`icon-demo ${hoveredItems ? 'clickable' : ''}`}>
-        <App
-          {...this.props}
-          data={data[0]}
-          iconAtlas="images/location-icon-atlas.png"
-          iconMapping={data[1]}
-          showCluster={params.cluster.value}
-          onHover={this._onHover}
-          onClick={this._onClick} />
+      <App
+        {...this.props}
+        data={data[0]}
+        iconAtlas="images/location-icon-atlas.png"
+        iconMapping={data[1]}
+        showCluster={params.cluster.value}
+        onHover={this._onHover}
+        onClick={this._onClick} >
 
-        { this._renderhoveredItems() }
-      </div>
+        <div className={`icon-demo ${hoveredItems ? 'clickable' : ''}`}>
+          { this._renderhoveredItems() }
+        </div>
+
+      </App>
     );
   }
 }

@@ -85,7 +85,7 @@ class App extends Component {
   // the world, we can't use some fixed deltaLon and deltaLat
   _updateCluster({data, viewState}) {
     const oldViewState = this._oldViewState || {};
-    const oldData = this._data;
+    const oldData = this._oldData;
     const changed =
       data !== oldData ||
       viewState.width !== oldViewState.width ||
@@ -207,6 +207,8 @@ class App extends Component {
           mapboxApiAccessToken={mapboxApiAccessToken}
           preventStyleDiffing={true}
         />
+
+        <div>{this.props.children}</div>
       </DeckGL>
     );
   }
