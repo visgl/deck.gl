@@ -36,7 +36,7 @@ export default class ViewManager {
     this.viewState = INITIAL_VIEW_STATE;
 
     this._viewports = []; // Generated viewports
-    this._viewportMap = [];
+    this._viewportMap = {};
     this._needsRedraw = 'Initial render';
     this._needsUpdate = true;
 
