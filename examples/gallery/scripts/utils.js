@@ -4,14 +4,17 @@ const path = require('path');
 const INPUT_DIR = 'src';
 const IMAGE_DIR = 'images';
 
+/* eslint-disable */
 const MAPBOX_TOKEN = process.env.MapboxAccessToken;
 if (!MAPBOX_TOKEN) {
   console.log('Missing environment variable: MapboxAccessToken');
   process.exit(1);
 }
+/* eslint-enable */
 
 function getAllMetadata() {
-  return fs.readdirSync(INPUT_DIR)
+  return fs
+    .readdirSync(INPUT_DIR)
     .filter(filename => path.extname(filename) === '.html')
     .map(getPageMetadata);
 }
@@ -68,7 +71,9 @@ function getIndexPage(pages) {
 
 function getPage(page) {
   const content = fs.readFileSync(page.src, 'utf-8');
-  const iframeSrc = `data:text/html;charset=utf-8,${encodeURI(content.replace('<mapbox-access-token>', MAPBOX_TOKEN))}`;
+  const iframeSrc = `data:text/html;charset=utf-8,${encodeURI(
+    content.replace('<mapbox-access-token>', MAPBOX_TOKEN)
+  )}`;
 
   return `<html>
     <head>
@@ -94,9 +99,9 @@ function getPage(page) {
   </html>`;
 }
 
-function fileExists(path) {
+function fileExists(filePath) {
   try {
-    fs.accessSync(path, fs.constants.F_OK);
+    fs.accessSync(filePath, fs.constants.F_OK);
     return true;
   } catch (error) {
     return false;
@@ -104,7 +109,12 @@ function fileExists(path) {
 }
 
 function escapeHTML(content) {
-  return content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/[\n\r]/g, '<br/>').replace(/ /g, '&nbsp;');
+  return content
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/[\n\r]/g, '<br/>')
+    .replace(/ /g, '&nbsp;');
 }
 
 module.exports = {
