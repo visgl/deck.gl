@@ -101,7 +101,7 @@ It sometimes desirable to have a single layer render using multiple geometry pri
 (e.g both circles and lines, or triangles and textured meshes etc),
 rather than creating separate layers.
 The custom
-[AxesLayer example](https://github.com/uber/deck.gl/tree/5.2-release/examples/plot/plot-layer/axes-layer.js)
+[AxesLayer example](https://github.com/uber/deck.gl/tree/5.3-release/examples/plot/plot-layer/axes-layer.js)
 uses this technique to share attributes between grids and labels.
 
 #### Defining Attributes

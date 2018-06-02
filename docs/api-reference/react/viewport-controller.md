@@ -156,4 +156,4 @@ Min pitch in degrees.
 
 ## Source
 
-[modules/react/src/viewport-controller.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/react/src/viewport-controller.js)
+[modules/react/src/viewport-controller.js](https://github.com/uber/deck.gl/blob/5.3-release/modules/react/src/viewport-controller.js)

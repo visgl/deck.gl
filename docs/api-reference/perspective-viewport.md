@@ -52,4 +52,4 @@ Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
 ## Source
 
-[modules/core/src/core/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/viewports/perspective-viewport.js)
+[modules/core/src/core/viewports/perspective-viewport.js](https://github.com/uber/deck.gl/blob/5.3-release/modules/core/src/core/viewports/perspective-viewport.js)
