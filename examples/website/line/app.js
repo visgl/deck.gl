@@ -60,7 +60,7 @@ class App extends Component {
       flightPaths = DATA_URL.FLIGHT_PATHS,
       strokeWidth = 3,
 
-      onViewStateChange = ({viewState}) => this.setState({viewState}),
+      onViewStateChange = (({viewState}) => this.setState({viewState})),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
@@ -114,7 +114,9 @@ class App extends Component {
 }
 
 // NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
+// export {App, INITIAL_VIEW_STATE};
+
+console.log(window.demoLauncherActive);
 
 if (!window.demoLauncherActive) {
   render(<App />, document.body.appendChild(document.createElement('div')));
