@@ -1,0 +1,88 @@
+<html>
+  <head>
+    <title>deck.gl Viewport Transition Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^5.3.0/deckgl.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css" rel="stylesheet" />
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+
+      #control-panel {
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+        position: absolute;
+        background: #fff;
+        top: 0;
+        left: 0;
+        margin: 12px;
+        padding: 20px;
+        line-height: 2;
+        z-index: 1;
+      }
+
+    </style>
+  </head>
+
+  <body>
+    <div id="control-panel">
+    </div>
+  </body>
+
+  <script type="text/javascript">
+
+    const {DeckGL} = deck;
+
+    const CITIES = [
+      {"city":"San Francisco","state":"California","latitude":37.7751,"longitude":-122.4193},
+      {"city":"New York","state":"New York","latitude":40.6643,"longitude":-73.9385},
+      {"city":"Los Angeles","state":"California","latitude":34.051597,"longitude":-118.244263},
+      {"city":"London","state":"United Kingdom","latitude":51.5074,"longitude":-0.1278},
+      {"city":"Hyderabad","state":"India","latitude":17.3850,"longitude":78.4867}
+    ];
+
+    const deckgl = new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/light-v9',
+      viewState: {
+        longitude: CITIES[0].longitude,
+        latitude: CITIES[0].latitude,
+        zoom: 10
+      }
+    });
+
+    const inputs = d3.select('#control-panel').selectAll('div')
+      .data(CITIES)
+      .enter().append('div')
+        .on('change', d => {
+          deckgl.setProps({
+            viewState: {
+              longitude: d.longitude,
+              latitude: d.latitude,
+              zoom: 10
+            },
+            transitionInterpolator: new deck.experimental.ViewportFlyToInterpolator(),
+            transitionDuration: 5000
+          })
+        });
+
+    inputs.append('input')
+      .attr('type', 'radio')
+      .attr('name', 'city')
+      .attr('id', (d, i) => 'city-' + i);
+
+    inputs.append('label')
+      .attr('for', (d, i) => 'city-' + i)
+      .text(d => d.city + ', ' + d.state);
+
+    inputs.select('input').node().checked = true;
+
+  </script>
+</html>
