@@ -3,10 +3,10 @@
 <!-- Anything doesn't work as expected is a bug, including code, doc and test -->
 <!-- For rendering issue in deck.gl example, please provide detailed log by typing 
      "luma.log.priority=2" and "deck.log.priority=2" in browser console -->
-<!-- For any issue in your example, please provide runnable code package and data -->
 #### Actual Result
 #### Expected Result
 #### Reproduce Steps
+#### Code Example <!-- For any issue in your example, please provide runnable code package and data -->
 #### To Do List <!-- For developer only -->
   - [ ] Add label and assign to milestone
   - [ ] Coding
