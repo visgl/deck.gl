@@ -3,8 +3,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {MapView, MapController} from 'deck.gl';
-import ArcBrushingLayer from './arc-brushing-layer';
-import ScatterplotBrushingLayer from './scatterplot-brushing-layer';
+import ArcBrushingLayer from './arc-brushing-layer/arc-brushing-layer';
+import ScatterplotBrushingLayer from './scatterplot-brushing-layer/scatterplot-brushing-layer';
 import {scaleLinear} from 'd3-scale';
 
 // Set your mapbox token here
@@ -206,14 +206,14 @@ class App extends Component {
       opacity = 0.7,
 
       mouseEntered = this.state.mouseEntered,
-      mousePosition = this.sate.mousePosition,
+      mousePosition = this.state.mousePosition,
       // onHover = this._onHover.bind(this),
 
       onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/dark-v9'
+      mapStyle = 'mapbox://styles/mapbox/light-v9'
     } = this.props;
     const {arcs, targets, sources} = this.state;
 

@@ -54,13 +54,17 @@ class App extends Component {
     this.state = {viewState: INITIAL_VIEW_STATE};
   }
 
+  _onViewStateChange({viewState}) {
+    return this.setState({viewState});
+  }
+
   render() {
     const {
       airports = DATA_URL.AIRPORTS,
       flightPaths = DATA_URL.FLIGHT_PATHS,
       strokeWidth = 3,
 
-      onViewStateChange = ({viewState}) => this.setState({viewState}),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
