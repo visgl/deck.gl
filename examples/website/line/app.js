@@ -54,13 +54,17 @@ class App extends Component {
     this.state = {viewState: INITIAL_VIEW_STATE};
   }
 
+  _onViewStateChange({viewState}) {
+    return this.setState({viewState});
+  }
+
   render() {
     const {
       airports = DATA_URL.AIRPORTS,
       flightPaths = DATA_URL.FLIGHT_PATHS,
       strokeWidth = 3,
 
-      onViewStateChange = ({viewState}) => this.setState({viewState}),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
 
       mapboxApiAccessToken = MAPBOX_TOKEN,
@@ -114,7 +118,7 @@ class App extends Component {
 }
 
 // NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-// export {App, INITIAL_VIEW_STATE};
+export {App, INITIAL_VIEW_STATE};
 
 if (!window.demoLauncherActive) {
   render(<App />, document.body.appendChild(document.createElement('div')));

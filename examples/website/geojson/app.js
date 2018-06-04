@@ -37,11 +37,15 @@ class App extends Component {
     this.state = {viewState: INITIAL_VIEW_STATE};
   }
 
+  _onViewStateChange({viewState}) {
+    return this.setState({viewState});
+  }
+
   render() {
     const {
       data = DATA_URL,
       colorScale = DEFAULT_COLOR_SCALE,
-      onViewStateChange = ({viewState}) => this.setState({viewState}),
+      onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
       mapboxApiAccessToken = MAPBOX_TOKEN,
       mapStyle = null
