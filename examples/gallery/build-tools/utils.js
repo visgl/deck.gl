@@ -109,7 +109,7 @@ function escapeHTML(content) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/[\n\r]/g, '<br/>')
-    .replace(/ {2,}/g, function($0) {
+    .replace(/ {2,}/g, $0 => {
       return new Array($0.length).fill('&nbsp;').join('');
     });
 }

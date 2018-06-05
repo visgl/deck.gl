@@ -51,4 +51,4 @@ node build-tools/serve --version=6.0.0-alpha.0
 npm run build
 ```
 
-Copy contents of the `dist` directory to `gallery` in the gh-pages branch.
+Copy contents of the `dist` directory to `showcases/gallery` in the gh-pages branch.
