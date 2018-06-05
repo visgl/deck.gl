@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <title>deck.gl ScatterplotLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^5.3.0/deckgl.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js"></script>
+    <link href="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css" rel="stylesheet" />
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body></body>
+
+  <script type="text/javascript">
+
+    const {DeckGL, ScatterplotLayer} = deck;
+
+    const MALE_COLOR = [0, 128, 255];
+    const FEMALE_COLOR = [255, 0, 128];
+
+    new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/light-v9',
+      longitude: -74,
+      latitude: 40.76,
+      zoom: 11,
+      maxZoom: 16,
+      layers: [
+        new ScatterplotLayer({
+          id: 'scatter-plot',
+          data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json',
+          radiusScale: 10,
+          radiusMinPixels: 0.5,
+          getPosition: d => [d[0], d[1], 0],
+          getColor: d => (d[2] === 1 ? MALE_COLOR : FEMALE_COLOR)
+        })
+      ]
+    });
+
+  </script>
+</html>

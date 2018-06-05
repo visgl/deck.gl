@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <title>{{title}} | WebGL visualization</title>
+    <link rel="stylesheet" id="font-link" href="https://d1a3f4spazzrp4.cloudfront.net/uber-fonts/3.1.0/refresh.css">
+
+    <meta name="description" content="WebGL-based visualization examples using deck.gl">
+
+    <link rel="icon" type="img/ico" href="https://uber.github.io/deck.gl/favicon.ico">
+
+    <!-— facebook open graph tags -->
+    <meta property="og:url" content="https://uber.github.io/deck.gl/showcases/gallery" />
+    <meta property="og:title" content="{{title}} | WebGL visualization" />
+    <meta property="og:description" content="WebGL-based visualization examples using deck.gl" />
+    <meta property="og:site_name" content="deck.gl" />
+    <meta property="og:image" content="https://uber.github.io/deck.gl/showcases/gallery/{{image}}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="480" />
+    
+    <!-— twitter card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@uber">
+    <meta name="twitter:creator" content="@uber">
+    <meta name="twitter:title" content="{{title}} | WebGL visualization">
+    <meta name="twitter:description" content="WebGL-based visualization examples using deck.gl">
+    <meta name="twitter:image" content="https://uber.github.io/deck.gl/showcases/gallery/{{image}}" />
+
+    <style>
+      body {font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important; font-size: 12px;}
+      #container {width: 100%; max-width: 960px; padding: 40px 12px; margin: auto;}
+      #source {margin: 12px 0; border: solid 1px #ccc; padding: 24px}
+      #links {margin: 12px 0;}
+      #links a {text-decoration: none; color: #444;}
+      #links a:hover {color: #08f;}
+    </style>
+
+    {{{analytics}}}
+  </head>
+  <body>
+    <div id="container">
+      <h1>{{title}}</h1>
+      <div id="links">
+        <a href="./">↩ Back to Gallery</a>
+      </div>
+      <h2>Demo</h2>
+      <iframe width="100%" height="450" frameborder="0" src="{{iframeSrc}}" ></iframe>
+      <h2>Source</h2>
+      <div id="source">
+        <code class="prettyprint">{{content}}</code>
+      </div>
+    </div>
+  </body>
+</html>

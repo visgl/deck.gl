@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>deck.gl Script Gallery | WebGL visualization</title>
+    <link rel="stylesheet" id="font-link" href="https://d1a3f4spazzrp4.cloudfront.net/uber-fonts/3.1.0/refresh.css">
+
+    <meta name="description" content="WebGL-based visualization examples using deck.gl">
+
+    <link rel="icon" type="img/ico" href="https://uber.github.io/deck.gl/favicon.ico">
+
+    <!-— facebook open graph tags -->
+    <meta property="og:url" content="https://uber.github.io/deck.gl/showcases/gallery" />
+    <meta property="og:title" content="deck.gl Script Gallery | WebGL visualization" />
+    <meta property="og:description" content="WebGL-based visualization examples using deck.gl" />
+    <meta property="og:site_name" content="deck.gl" />
+    <meta property="og:image" content="https://uber.github.io/deck.gl/images/trips-layer-unfurl-4.0.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="800" />
+    
+    <!-— twitter card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@uber">
+    <meta name="twitter:creator" content="@uber">
+    <meta name="twitter:title" content="deck.gl Script Gallery | WebGL visualization">
+    <meta name="twitter:description" content="WebGL-based visualization examples using deck.gl">
+    <meta name="twitter:image" content="https://uber.github.io/deck.gl/images/trips-layer-unfurl-4.0.jpg" />
+
+    <style>
+      body {font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important;font-size: 12px;}
+      * {box-sizing: border-box;}
+      #container {width: 100%; max-width: 1280px; padding: 40px 12px; margin: auto;}
+      #footer {font-size: 11px; text-align: center; border-top: solid 1px #eee; margin-top: 40px; padding: 12px;}
+      #footer a {text-decoration: none; color: #444;}
+      #footer a:hover {color: #08f;}
+      .page-link {display: inline-block; width: 30%; padding: 12px; box-shadow: 0 0 0 rgba(0,0,0,0.3); transition: box-shadow 0.3s;}
+      .page-link:hover {box-shadow: 0 0 4px rgba(0,0,0,0.3);}
+      .thumb {width: 100%; height: 0; padding-top: 60%; background-size: cover; background-position: center; position: relative;}
+      .title {text-decoration: none; color: #000; font-weight: 600; background: #fff; position: absolute; bottom: 0; width: 100%; padding: 8px 0 4px;}
+      @media screen and (max-width: 768px) {
+        a {width: 100%;}
+      }
+    </style>
+
+    {{{analytics}}}
+  </head>
+  <body>
+    <div id="container">
+      {{#pages}}
+      <a class="page-link" href="{{name}}">
+        <div class="thumb" style="background-image:url({{image}})">
+          <div class="title">{{title}}</div>
+        </div>
+      </a>
+      {{/pages}}
+
+      <div id="footer">
+        <a href="https://github.com/uber/deck.gl">deck.gl on GitHub</a> |
+        <a href="https://github.com/uber/deck.gl/tree/master/examples/gallery">Contribute to this page</a>
+      </div>
+    </div>
+
+  </body>
+</html>
