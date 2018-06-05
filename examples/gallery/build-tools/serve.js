@@ -9,6 +9,8 @@ const app = express();
 
 let pagesByName = {};
 
+app.use('/images', express.static('./images'));
+
 app.get('/', (req, resp) => {
   /* Refresh page index */
   const pages = utils.getAllMetadata();
@@ -17,7 +19,7 @@ app.get('/', (req, resp) => {
     pagesByName[meta.name] = meta;
   });
 
-  resp.send(utils.getIndexPage(pages));
+  resp.send(utils.getIndexPage(pages, {noCache: true}));
 });
 
 app.get('/404', (req, resp) => {
@@ -30,15 +32,15 @@ app.get('/deckgl.min.js', (req, resp) => {
   resp.send(src);
 });
 
-app.get('/*.html', (req, resp) => {
+app.get('/*', (req, resp) => {
   const name = path.basename(req.path, '.html');
-  if (pagesByName[name]) {
-    resp.send(utils.getPage(pagesByName[name]));
+  const page = utils.getPage(pagesByName[name], {noCache: true});
+
+  if (page) {
+    resp.send(page);
   } else {
     resp.redirect('/404');
   }
 });
-
-app.use('/images', express.static('./images'));
 
 app.listen(3000);

@@ -3,12 +3,13 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist && mkdir dist && cp -r images dist && node scripts/build",
-    "start": "node scripts/serve",
-    "start-local": "node scripts/serve --version=local"
+    "build": "rm -rf dist && mkdir dist && cp -r images dist && node build-tools/build",
+    "start": "node build-tools/serve",
+    "start-local": "node build-tools/serve --version=local"
   },
   "dependencies": {},
   "devDependencies": {
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "mustache": "^2.3.0"
   }
 }
