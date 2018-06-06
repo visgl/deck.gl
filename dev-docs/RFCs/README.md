@@ -58,7 +58,7 @@ Possible other animation related RFCs:
 
 ## v6.0 RFCs
 
-Early directions for v6.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v60-rfcs)
+These RFCS are currently targeted for v6.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v60-rfcs)
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -69,7 +69,7 @@ Early directions for v6.0. Also see [luma.gl RFCs](https://github.com/uber/luma.
 
 ## v5.3 RFCs
 
-These RFCs are under consideration for v5.3.
+These RFCs were implemented in v5.3.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
