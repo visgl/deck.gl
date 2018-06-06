@@ -4,6 +4,7 @@
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
 const webpack = require('webpack');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CONFIG = {
   mode: 'development',
@@ -21,11 +22,7 @@ const CONFIG = {
         include: [resolve('.')],
         exclude: [/node_modules/],
         options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
+          objectAssign: 'Object.assign'
         }
       }
     ]
@@ -39,13 +36,15 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])],
+  plugins: [
+    new HtmlWebpackPlugin({title: 'deck.gl example'}),
+    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
+  ],
 
   node: {
     __dirname: true
   }
 };
 
-// DELETE THIS LINE WHEN COPYING THIS EXAMPLE FOLDER OUTSIDE OF DECK.GL
-// It enables bundling against src in this repo rather than installed deck.gl module
+// This line enables bundling against src in this repo rather than installed module
 module.exports = env => (env ? require('../../webpack.config.local')(CONFIG)(env) : CONFIG);
