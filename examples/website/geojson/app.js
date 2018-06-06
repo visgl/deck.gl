@@ -48,7 +48,7 @@ class App extends Component {
       onViewStateChange = this._onViewStateChange.bind(this),
       viewState = this.state.viewState,
       mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = null
+      mapStyle = 'mapbox://styles/mapbox/light-v9'
     } = this.props;
 
     const layers = [
