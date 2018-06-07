@@ -91,10 +91,6 @@ export function pickObject(
         })) ||
       NO_PICKED_OBJECT;
 
-    if (!pickInfo.pickedColor) {
-      break;
-    }
-
     // only exclude if we need to run picking again
     if (i + 1 < depth) {
       const layerId = pickInfo.pickedColor[3] - 1;
