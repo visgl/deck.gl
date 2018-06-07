@@ -91,12 +91,8 @@ export function pickObject(
         })) ||
       NO_PICKED_OBJECT;
 
-    if (!pickInfo.pickedColor) {
-      break;
-    }
-
     // only exclude if we need to run picking again
-    if (i + 1 < depth) {
+    if (pickInfo.pickedColor && i + 1 < depth) {
       const layerId = pickInfo.pickedColor[3] - 1;
       if (!affectedLayers[layerId]) {
         // backup original colors
@@ -120,6 +116,10 @@ export function pickObject(
 
     if (processedPickInfos) {
       processedPickInfos.forEach(info => result.push(info));
+    }
+
+    if (!pickInfo.pickedColor) {
+      break;
     }
   }
 
