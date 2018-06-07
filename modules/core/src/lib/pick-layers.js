@@ -91,7 +91,9 @@ export function pickObject(
         })) ||
       NO_PICKED_OBJECT;
 
-    // only exclude if we need to run picking again
+    // Only exclude if we need to run picking again.
+    // We need to run picking again if an object is detected AND
+    // we have not exhausted the requested depth.
     if (pickInfo.pickedColor && i + 1 < depth) {
       const layerId = pickInfo.pickedColor[3] - 1;
       if (!affectedLayers[layerId]) {
@@ -101,6 +103,7 @@ export function pickObject(
       layers[layerId].clearPickingColor(pickInfo.pickedColor);
     }
 
+    // This logic needs to run even if no object is picked.
     const processedPickInfos = processPickInfo({
       pickInfo,
       lastPickedInfo,
@@ -118,6 +121,7 @@ export function pickObject(
       processedPickInfos.forEach(info => result.push(info));
     }
 
+    // If no object is picked stop.
     if (!pickInfo.pickedColor) {
       break;
     }
