@@ -369,8 +369,6 @@ export default class SolidPolygonLayer extends Layer {
 
   calculatePositions(attribute) {
     attribute.value = this.state.polygonTesselator.positions();
-    const numInstances = attribute.value.length / attribute.size;
-    this.setState({numInstances});
   }
   calculatePositionsLow(attribute) {
     const isFP64 = this.is64bitEnabled();
