@@ -71,7 +71,7 @@ export function getBuffers(transitions) {
   return {sourceBuffers, destinationBuffers};
 }
 
-export function padBuffer({fromState, toState, fromLength, toLength}) {
+export function padBuffer({fromState, toState, fromLength, toLength, context}) {
   // check if buffer needs to be padded
   if (fromLength >= toLength || !(fromState instanceof Buffer)) {
     return;

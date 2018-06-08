@@ -38,9 +38,10 @@ export default class AttributeTransitionManager {
 
   // Called when attribute manager updates
   // Check the latest attributes for updates.
-  update({attributes, transitions = {}, numInstances}) {
+  update({attributes, transitions = {}, numInstances, context}) {
     this.opts = transitions;
     this.numInstances = numInstances;
+    this.context = context;
 
     if (!this.isSupported) {
       return;
@@ -240,7 +241,7 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength)
       });
     }
-    padBuffer({fromState, toState, fromLength, toLength});
+    padBuffer({fromState, toState, fromLength, toLength, context: this.context});
 
     return {fromState, toState, buffer};
   }

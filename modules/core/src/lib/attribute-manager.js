@@ -247,7 +247,8 @@ export default class AttributeManager {
     this.attributeTransitionManager.update({
       attributes: this.attributes,
       numInstances,
-      transitions
+      transitions,
+      context
     });
   }
 

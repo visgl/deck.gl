@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {GL, Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
+import {GL, Buffer, Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -139,21 +139,21 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {
         size: 3,
-        accessor: ['extruded', 'fp64'],
+        accessor: 'getPolygon',
         update: this.calculatePositions,
         noAlloc
       },
-      positions64xyLow: {size: 2, accessor: 'fp64', update: this.calculatePositionsLow},
+      positions64xyLow: {size: 2, update: this.calculatePositionsLow},
       nextPositions: {
         size: 3,
-        accessor: ['extruded', 'fp64'],
+        accessor: 'getPolygon',
         update: this.calculateNextPositions,
         noAlloc
       },
-      nextPositions64xyLow: {size: 2, accessor: 'fp64', update: this.calculateNextPositionsLow},
+      nextPositions64xyLow: {size: 2, update: this.calculateNextPositionsLow},
       elevations: {
         size: 1,
-        accessor: ['extruded', 'getElevation'],
+        accessor: 'getElevation',
         update: this.calculateElevations,
         noAlloc
       },
@@ -199,6 +199,7 @@ export default class SolidPolygonLayer extends Layer {
     this.updateGeometry(updateParams);
 
     const {props, oldProps} = updateParams;
+    const attributeManager = this.getAttributeManager();
 
     const regenerateModels =
       props.fp64 !== oldProps.fp64 ||
@@ -211,22 +212,8 @@ export default class SolidPolygonLayer extends Layer {
         this.state.models.forEach(model => model.delete());
       }
 
-      this.setState(
-        Object.assign(
-          {
-            // Set a flag to set attributes to new models
-            modelsChanged: true
-          },
-          this._getModels(this.context.gl)
-        )
-      );
-    }
-
-    if (props.extruded !== oldProps.extruded) {
-      this.state.attributeManager.invalidate('extruded');
-    }
-    if (props.fp64 !== oldProps.fp64) {
-      this.state.attributeManager.invalidate('fp64');
+      this.setState(this._getModels(this.context.gl));
+      attributeManager.invalidateAll();
     }
   }
 
@@ -241,12 +228,14 @@ export default class SolidPolygonLayer extends Layer {
     if (geometryConfigChanged) {
       // TODO - avoid creating a temporary array here: let the tesselator iterate
       const polygons = props.data.map(props.getPolygon);
+      const polygonTesselator = this._getPolygonTesselator(polygons, this.state.IndexType);
 
       this.setState({
-        polygonTesselator: this._getPolygonTesselator(polygons, this.state.IndexType)
+        polygonTesselator,
+        numInstances: polygonTesselator.pointCount
       });
 
-      this.state.attributeManager.invalidateAll();
+      this.getAttributeManager().invalidateAll();
     }
 
     if (
@@ -261,36 +250,14 @@ export default class SolidPolygonLayer extends Layer {
     }
   }
 
-  updateAttributes(props) {
-    const {attributeManager, modelsChanged} = this.state;
-
-    // Figure out data length
-    attributeManager.update({
-      data: props.data,
-      numInstances: 0,
-      props,
-      buffers: props,
-      context: this,
-      // Don't worry about non-attribute props
-      ignoreUnknownAttributes: true
-    });
-
-    if (modelsChanged) {
-      this._updateAttributes(attributeManager.getAttributes());
-      // clear the flag
-      this.setState({modelsChanged: false});
-    } else {
-      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-      this._updateAttributes(changedAttributes);
-    }
-  }
-
   // "Experimental" method indended to make it easier to support non-nested arrays in subclasses
   _getPolygonTesselator(polygons, IndexType) {
     return new PolygonTesselator({polygons, IndexType: this.state.IndexType});
   }
 
-  _updateAttributes(attributes) {
+  updateAttributes(props) {
+    super.updateAttributes(props);
+    const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
     const {modelsByName} = this.state;
 
     for (const modelName in modelsByName) {
@@ -310,7 +277,9 @@ export default class SolidPolygonLayer extends Layer {
 
         if (attribute) {
           newAttributes[attributeName] = attributeOverride
-            ? Object.assign({}, attribute, attributeOverride, {buffer: attribute.getBuffer()})
+            ? Object.assign({}, attribute, attributeOverride, {
+                buffer: attribute instanceof Buffer ? attribute : attribute.getBuffer()
+              })
             : attribute;
         }
       }
