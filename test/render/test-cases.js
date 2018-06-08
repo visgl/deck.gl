@@ -228,7 +228,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/path-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'path-lnglat-64',
@@ -253,7 +253,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/path-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'scatterplot-lnglat',
@@ -328,7 +328,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/arc-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'arc-lnglat-64',
@@ -353,7 +353,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/arc-lnglat-64.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'line-lnglat',
@@ -376,7 +376,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/line-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'line-lnglat-64',
@@ -492,7 +492,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/geojson-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'geojson-extruded-lnglat',
@@ -517,7 +517,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/geojson-extruded-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'gridcell-lnglat',
@@ -542,7 +542,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'gridcell-lnglat-64',
@@ -593,7 +593,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/grid-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'screengrid-lnglat',
@@ -642,7 +642,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'hexagoncell-lnglat-64',
@@ -723,7 +723,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-lnglat.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'pointcloud-lnglat-64',
@@ -755,7 +755,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-lnglat-64.png',
-    gpuVendorSkipList: [`Intel`]
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'pointcloud-meter',

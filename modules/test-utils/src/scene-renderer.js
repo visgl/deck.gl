@@ -23,7 +23,7 @@ import {Deck, MapView} from 'deck.gl';
 
 import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
 
-const GL_VENDOR = 0x1f00;
+const GL_VENDOR = 0x1F00;
 
 function noop() {}
 
@@ -126,18 +126,15 @@ export default class SceneRenderer {
     let nextSceneIndex = sceneIndex;
     while (nextSceneIndex < this.scenes.length) {
       const scene = this.scenes[nextSceneIndex];
-      let skipScene = false;
-      if (scene.gpuVendorSkipList) {
-        skipScene = scene.gpuVendorSkipList.reduce((skip, vendor) => {
-          skip = skip || vendor.startsWith(this.gpuVendor);
-          return skip;
-        });
+      let skip = false;
+      if (scene.ignoreGPUs) {
+        skip = scene.ignoreGPUs.some(gpu => this.gpuVendor.indexOf(gpu) >= 0);
       }
-      if (!skipScene) {
+      if (!skip) {
         break;
       }
       console.log(`Skipping render test ${scene.name} for ${this.gpuVendor} GPU`); // eslint-disable-line
-      nextSceneIndex++;
+      nextSceneIndex++
     }
     return nextSceneIndex;
   }
