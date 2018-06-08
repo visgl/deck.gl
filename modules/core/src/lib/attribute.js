@@ -4,8 +4,7 @@ import {GL, Buffer, experimental} from 'luma.gl';
 const {Attribute} = experimental;
 const DEFAULT_STATE = {
   isExternalBuffer: false,
-  needsAlloc: false,
-  needsUpdate: false,
+  needsUpdate: true,
   needsRedraw: false,
   allocedInstances: -1
 };
@@ -60,6 +59,10 @@ export default class LayerAttribute extends Attribute {
     return [this.id].concat(accessor || []);
   }
 
+  getAccessor() {
+    return this.userData.accessor;
+  }
+
   supportsTransition() {
     return this.userData.transition;
   }
@@ -75,38 +78,26 @@ export default class LayerAttribute extends Attribute {
     this.userData.needsRedraw = this.userData.needsRedraw || reason;
   }
 
-  setNumInstances(numInstances) {
+  allocate(numInstances) {
     const state = this.userData;
 
     if (state.isExternalBuffer || state.noAlloc) {
       // Data is provided through a Buffer object.
-      return;
+      return false;
     }
+
     // Do we need to reallocate the attribute's typed array?
     const instanceCount = this.getInstanceCount();
     const needsAlloc = instanceCount === 0 || instanceCount < numInstances;
     if (needsAlloc && (state.update || state.accessor)) {
-      state.needsAlloc = true;
-      this.setNeedsUpdate(this.id);
-    }
-  }
-
-  allocate(numInstances) {
-    this.setNumInstances(numInstances);
-
-    const state = this.userData;
-
-    // Allocate a new typed array if needed
-    if (state.needsAlloc) {
+      assert(Number.isFinite(numInstances));
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
 
       this.isGeneric = false;
       this.value = new ArrayType(this.size * allocCount);
-      state.needsAlloc = false;
       state.needsUpdate = true;
-
       state.allocedInstances = allocCount;
       return true;
     }
@@ -146,14 +137,16 @@ export default class LayerAttribute extends Attribute {
     return updated;
   }
 
-  setGenericValue({props}) {
+  // Use generic value
+  // Returns true if successful
+  setGenericValue(value) {
     const state = this.userData;
-    let value = props[state.accessor];
 
     if (value === undefined || typeof value === 'function') {
       // ignore if this attribute has no accessor
       // ignore if accessor is function, will be used in updateBuffer
-      return;
+      state.isExternalBuffer = false;
+      return false;
     }
 
     value = this._normalizeValue(value);
@@ -165,8 +158,11 @@ export default class LayerAttribute extends Attribute {
     state.needsRedraw = state.needsUpdate || hasChanged;
     state.needsUpdate = false;
     state.isExternalBuffer = true;
+    return true;
   }
 
+  // Use external buffer
+  // Returns true if successful
   setExternalBuffer(buffer, numInstances) {
     const state = this.userData;
 
@@ -188,13 +184,15 @@ export default class LayerAttribute extends Attribute {
           throw new Error('Attribute prop array must match length and size');
         }
         if (this.value !== buffer) {
-          this.update({value: buffer});
+          this.update({isGeneric: false, value: buffer});
           state.needsRedraw = true;
         }
       }
-    } else {
-      state.isExternalBuffer = false;
+      return true;
     }
+
+    state.isExternalBuffer = false;
+    return false;
   }
 
   // PRIVATE HELPER METHODS
