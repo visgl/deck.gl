@@ -83,13 +83,13 @@ Whether the layer should be rendered in high-precision 64-bit mode.
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getRadius` (Function|Number, optional)
+##### `getRadius` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.radius || 1`
 
@@ -98,7 +98,7 @@ The radius of each object, in meters.
 * If a number is provided, it is used as the radius for all objects.
 * If a function is provided, it is called on each object to retrieve its radius.
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.color || [0, 0, 0, 255]`
 

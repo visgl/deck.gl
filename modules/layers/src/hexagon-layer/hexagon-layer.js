@@ -357,7 +357,15 @@ export default class HexagonLayer extends CompositeLayer {
   // for subclassing, override this method to return
   // customized sub layer props
   getSubLayerProps() {
-    const {radius, elevationScale, extruded, coverage, lightSettings, fp64} = this.props;
+    const {
+      radius,
+      elevationScale,
+      extruded,
+      coverage,
+      lightSettings,
+      fp64,
+      transitions
+    } = this.props;
 
     // return props to the sublayer constructor
     return super.getSubLayerProps({
@@ -375,6 +383,10 @@ export default class HexagonLayer extends CompositeLayer {
 
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
+      transitions: transitions && {
+        getColor: transitions.getColorValue,
+        getElevation: transitions.getElevationValue
+      },
       updateTriggers: this.getUpdateTriggers()
     });
   }

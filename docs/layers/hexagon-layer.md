@@ -83,37 +83,6 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `getColorValue` (Function, optional)
-
-* Default: `points => points.length`
-
-`getColorValue` is the accessor function to get the value that bin color is based on.
-It takes an array of points inside each bin as arguments, returns a number. For example,
-You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
-By default `getColorValue` returns the length of the points array.
-
-Note: hexagon layer compares whether `getColorValue` has changed to
-recalculate the value for each bin that its color based on. You should
-pass in the function defined outside the render function so it doesn't create a
-new function on every rendering pass.
-
-```js
- class MyHexagonLayer {
-    getColorValue (points) {
-        return points.length;
-    }
-
-    renderLayers() {
-      return new HexagonLayer({
-        id: 'hexagon-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
-        data,
-        radius: 500
-      });
-    }
- }
-```
-
 ##### `coverage` (Number, optional)
 
 * Default: `1`
@@ -137,19 +106,6 @@ with the same elevation scale for comparison.
 * Default: `[0, 1000]`
 
 Elevation scale output range
-
-##### `getElevationValue` (Function, optional)
-
-* Default: `points => points.length`
-
-Similar to `getColorValue`, `getElevationValue` is the accessor function to get the value that bin elevation is based on.
-It takes an array of points inside each bin as arguments, returns a number.
-By default `getElevationValue` returns the length of the points array.
-
-Note: hexagon layer compares whether `getElevationValue` has changed to
-recalculate the value for each bin for elevation. You should
-pass in the function defined outside the render function so it doesn't create a
-new function on every rendering pass.
 
 ##### `elevationScale` (Number, optional)
 
@@ -211,6 +167,52 @@ This is an object that contains light settings for extruded polygons.
 * Default: `object => object.position`
 
 Method called to retrieve the position of each point.
+
+
+##### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `points => points.length`
+
+`getColorValue` is the accessor function to get the value that bin color is based on.
+It takes an array of points inside each bin as arguments, returns a number. For example,
+You can pass in `getColorValue` to color the bins by avg/mean/max of a specific attributes of each point.
+By default `getColorValue` returns the length of the points array.
+
+Note: hexagon layer compares whether `getColorValue` has changed to
+recalculate the value for each bin that its color based on. You should
+pass in the function defined outside the render function so it doesn't create a
+new function on every rendering pass.
+
+```js
+ class MyHexagonLayer {
+    getColorValue (points) {
+        return points.length;
+    }
+
+    renderLayers() {
+      return new HexagonLayer({
+        id: 'hexagon-layer',
+        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
+        data,
+        radius: 500
+      });
+    }
+ }
+```
+
+##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `points => points.length`
+
+Similar to `getColorValue`, `getElevationValue` is the accessor function to get the value that bin elevation is based on.
+It takes an array of points inside each bin as arguments, returns a number.
+By default `getElevationValue` returns the length of the points array.
+
+Note: hexagon layer compares whether `getElevationValue` has changed to
+recalculate the value for each bin for elevation. You should
+pass in the function defined outside the render function so it doesn't create a
+new function on every rendering pass.
+
 
 ##### `onSetColorDomain` (Function, optional)
 

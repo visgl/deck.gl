@@ -46,8 +46,8 @@ export default class MultiIconLayer extends IconLayer {
     attributeManager.addInstanced({
       instancePixelOffset: {
         size: 2,
-        accessor: 'getPixelOffset',
-        update: this.calculatePixelOffset
+        transition: true,
+        accessor: 'getPixelOffset'
       }
     });
   }

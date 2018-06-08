@@ -309,7 +309,15 @@ export default class GridLayer extends CompositeLayer {
   // for subclassing, override this method to return
   // customized sub layer props
   getSubLayerProps() {
-    const {elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
+    const {
+      elevationScale,
+      fp64,
+      extruded,
+      cellSize,
+      coverage,
+      lightSettings,
+      transitions
+    } = this.props;
 
     // return props to the sublayer constructor
     return super.getSubLayerProps({
@@ -325,6 +333,10 @@ export default class GridLayer extends CompositeLayer {
 
       getColor: this._onGetSublayerColor.bind(this),
       getElevation: this._onGetSublayerElevation.bind(this),
+      transitions: transitions && {
+        getColor: transitions.getColorValue,
+        getElevation: transitions.getElevationValue
+      },
       updateTriggers: this.getUpdateTriggers()
     });
   }

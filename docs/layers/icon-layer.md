@@ -90,7 +90,7 @@ Whether the layer should be rendered in high-precision 64-bit mode
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.position`
 
@@ -102,7 +102,7 @@ Method called to retrieve the position of each object, returns `[lng, lat, z]`.
 
 Method called to retrieve the icon name of each object, returns string.
 
-##### `getSize` (Function|Number, optional)
+##### `getSize` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.size || 1`
 
@@ -112,7 +112,7 @@ The height of each object, in pixels.
 * If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.color || [0, 0, 0, 255]`
 
@@ -122,7 +122,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If a function is provided, it is called on each object to retrieve its color.
 
 
-##### `getAngle` (Function|Number, optional)
+##### `getAngle` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.angle || 0`
 
