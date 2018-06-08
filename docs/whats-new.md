@@ -13,14 +13,14 @@ deck.gl layers can now specify additional type information about properties. Whe
 
 > For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
 
-### Set initial WebGL parameters using a prop
+### Declaratively set WebGL parameters
 
-It is now possible to set the initial WebGL parameters on the `Deck` WebGL context by supplying a `parameters` prop object, avoiding the need to define an `onWebGLInitialized` callback: `new Deck({..., parameters: {depthTest: false}});`
-
+It is now possible to globally set WebGL parameters (controlling how the GPU renders) by supplying a `Deck.parameters` prop object. This gives applications a simple declarative way to control things like blend modes and depth testing (`new Deck({..., parameters: {depthTest: false}});`), without having to define an `onWebGLInitialized()` callback. Note that `parameters` supplied to individual layers will of course override any global parameters.
 
 #### Pixel Sizes
 
-Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
+Pixel sizes in `LineLayer`, `IconLayer` and `TextLayer` now match their HTML/SVG counterparts.
+
 
 ## deck.gl v5.3
 

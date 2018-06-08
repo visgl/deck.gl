@@ -397,9 +397,6 @@ export default class Deck {
       depthFunc: GL.LEQUAL
     });
 
-    if (this.props.parameters) {
-      setParameters(gl, this.props.parameters);
-    }
     this.props.onWebGLInitialized(gl);
 
     this.eventManager = new EventManager(canvas);
@@ -408,10 +405,7 @@ export default class Deck {
     }
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager(gl, {
-      eventManager: this.eventManager,
-      stats: this.stats
-    });
+    this.layerManager = new LayerManager(gl, {eventManager: this.eventManager, stats: this.stats});
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
@@ -425,6 +419,7 @@ export default class Deck {
   }
 
   _onRenderFrame({gl}) {
+    // Log perf stats every second
     if (this.stats.oneSecondPassed()) {
       const table = this.stats.getStatsTable();
       this.stats.reset();
@@ -445,21 +440,16 @@ export default class Deck {
 
     this.stats.bump('render-fps');
 
-    if (this.props.onBeforeRender) {
-      this.props.onBeforeRender({gl}); // TODO - should be called by AnimationLoop
-    }
-    this.layerManager.drawLayers({
-      pass: 'screen',
-      redrawReason,
-      // Helps debug layer picking, especially in framebuffer powered layers
-      drawPickingColors: this.props.drawPickingColors
-    });
-    if (this.props.onAfterRender) {
-      this.props.onAfterRender({gl}); // TODO - should be called by AnimationLoop
-    }
+    setParameters(gl, this.props.parameters);
+
+    this.props.onBeforeRender({gl});
+
+    const {drawPickingColors} = this.props; // Debug picking, helpful in framebuffered layers
+    this.layerManager.drawLayers({pass: 'screen', redrawReason, drawPickingColors});
+
+    this.props.onAfterRender({gl});
   }
 }
 
-Deck.displayName = 'Deck';
 Deck.getPropTypes = getPropTypes;
 Deck.defaultProps = defaultProps;

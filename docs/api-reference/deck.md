@@ -113,21 +113,22 @@ gl context, will be autocreated if not supplied.
 
 ##### `parameters` (Object, optional)
 
-This prop will only be consulted once after deck.gl's WebGL context is initialized. If set, the value will be passed to luma.gl's `setParameters` function to do an initial configuration of the context, e.g. to disable depth testing, changing blending modes etc.
+Expects an object with WebGL settings. This object will be passed to luma.gl's `setParameters` function to configure the WebGL context, e.g. to disable depth testing, change blending modes etc.
+
+The `parameters` will be set before each frame is rendered. Naturally, any WebGL `parameters` prop supplied to individual layers will still override global parameters for that layer.
 
 Please refer to the luma.gl [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API for documentation on supported parameters and values.
 
-
 ##### `debug` (Boolean, optional)
 
-Flag to enable debug mode.
+Flag to enable WebGL debug mode.
 
 Default value is `false`.
 
 Notes:
 
 * debug mode is slower as it will use synchronous operations to keep track of GPU state.
-* Enabling debug mode requires an extra luma.gl import:
+* Enabling debug mode also requires an extra luma.gl import:
 
 ```js
 import 'luma.gl/debug'
@@ -147,7 +148,7 @@ Callback arguments:
 
 The `onViewStateChange` callback is fired when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
 
-`onViewStateChanged({viewState})`
+`onViewStateChange({viewState})`
 
 * `viewState` - An updated [view state](/docs/developer-guide/view-state.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
 
