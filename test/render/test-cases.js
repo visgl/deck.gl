@@ -227,7 +227,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/path-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'path-lnglat-64',
@@ -251,7 +252,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/path-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'scatterplot-lnglat',
@@ -325,7 +327,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/arc-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/arc-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'arc-lnglat-64',
@@ -349,7 +352,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/arc-lnglat-64.png'
+    referenceImageUrl: './test/render/golden-images/arc-lnglat-64.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'line-lnglat',
@@ -371,7 +375,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/line-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/line-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'line-lnglat-64',
@@ -486,7 +491,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/geojson-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/geojson-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'geojson-extruded-lnglat',
@@ -510,7 +516,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/geojson-extruded-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/geojson-extruded-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'gridcell-lnglat',
@@ -534,7 +541,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'gridcell-lnglat-64',
@@ -584,7 +592,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/grid-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/grid-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'screengrid-lnglat',
@@ -632,7 +641,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'hexagoncell-lnglat-64',
@@ -712,7 +722,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/pointcloud-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'pointcloud-lnglat-64',
@@ -743,7 +754,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-lnglat-64.png'
+    referenceImageUrl: './test/render/golden-images/pointcloud-lnglat-64.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'pointcloud-meter',
