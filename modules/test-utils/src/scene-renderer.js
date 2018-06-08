@@ -23,6 +23,8 @@ import {Deck, MapView} from 'deck.gl';
 
 import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
 
+const GL_VENDOR = 0x1f00;
+
 function noop() {}
 
 function makePromise() {
@@ -57,7 +59,8 @@ export default class SceneRenderer {
       width: this.width,
       height: this.height,
       debug: true,
-      useDevicePixels: false
+      useDevicePixels: false,
+      onWebGLInitialized: this._onWebGLInitialized.bind(this)
     });
 
     this.running = true;
@@ -81,6 +84,13 @@ export default class SceneRenderer {
       })
       .then(x => promise.resolve(x))
       .catch(error => promise.reject(error));
+  }
+
+  _onWebGLInitialized(gl) {
+    const vendorMasked = gl.getParameter(GL_VENDOR);
+    const ext = gl.getExtension('WEBGL_debug_renderer_info');
+    const vendorUnmasked = ext && gl.getParameter(ext.UNMASKED_VENDOR_WEBGL || GL_VENDOR);
+    this.gpuVendor = vendorUnmasked || vendorMasked;
   }
 
   _renderScene(scene) {
@@ -112,7 +122,28 @@ export default class SceneRenderer {
     return promise;
   }
 
+  _getNextSceneIndex(sceneIndex) {
+    let nextSceneIndex = sceneIndex;
+    while (nextSceneIndex < this.scenes.length) {
+      const scene = this.scenes[nextSceneIndex];
+      let skipScene = false;
+      if (scene.gpuVendorSkipList) {
+        skipScene = scene.gpuVendorSkipList.reduce((skip, vendor) => {
+          skip = skip || vendor.startsWith(this.gpuVendor);
+          return skip;
+        });
+      }
+      if (!skipScene) {
+        break;
+      }
+      console.log(`Skipping render test ${scene.name} for ${this.gpuVendor} GPU`); // eslint-disable-line
+      nextSceneIndex++;
+    }
+    return nextSceneIndex;
+  }
+
   _renderNextScene() {
+    this.sceneIndex = this._getNextSceneIndex(this.sceneIndex);
     const scene = this.scenes[this.sceneIndex];
     if (this.sceneIndex >= this.scenes.length) {
       this.running = false;
