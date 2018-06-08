@@ -21,7 +21,6 @@
 /* eslint-disable guard-for-in */
 import Attribute from './attribute';
 import log from '../utils/log';
-import assert from '../utils/assert';
 
 import AttributeTransitionManager from './attribute-transition-manager';
 
@@ -213,30 +212,32 @@ export default class AttributeManager {
   }
 
   // Ensure all attribute buffers are updated from props or data.
-  update({
-    data,
-    numInstances,
-    transitions,
-    props = {},
-    buffers = {},
-    context = {},
-    ignoreUnknownAttributes = false
-  } = {}) {
-    // First apply any application provided buffers
-    this._checkExternalBuffers({buffers, ignoreUnknownAttributes});
-    this._setExternalBuffers(buffers);
+  update({data, numInstances, transitions, props = {}, buffers = {}, context = {}} = {}) {
+    // keep track of whether some attributes are updated
+    let updated = false;
 
-    // Apply constant accessors
-    this._setGenericAttributes({data, props, context});
+    logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+    if (this.stats) {
+      this.stats.timeStart('attribute updates', this.id);
+    }
 
-    // Only initiate alloc/update (and logging) if actually needed
-    if (this._checkIfBuffersNeedUpdating({numInstances})) {
-      logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
-      if (this.stats) {
-        this.stats.timeStart('attribute updates', this.id);
+    for (const attributeName in this.attributes) {
+      const attribute = this.attributes[attributeName];
+
+      if (attribute.setExternalBuffer(buffers[attributeName], this.numInstances)) {
+        // Attribute is using external buffer from the props
+      } else if (attribute.setGenericValue(props[attribute.getAccessor()])) {
+        // Attribute is using generic value from the props
+      } else if (attribute.needsUpdate()) {
+        updated = true;
+        this._updateAttribute({attribute, numInstances, data, props, context});
       }
-      this._allocateBuffers({numInstances, data, props, context});
-      this._updateBuffers({numInstances, data, props, context});
+
+      this.needsRedraw |= attribute.needsRedraw();
+    }
+
+    if (updated) {
+      // Only initiate alloc/update (and logging) if actually needed
       if (this.stats) {
         this.stats.timeEnd('attribute updates', this.id);
       }
@@ -273,14 +274,11 @@ export default class AttributeManager {
    * This indicates which WebGLBuggers need to be updated
    * @return {Object} attributes - descriptors
    */
-  getChangedAttributes({transition = false, clearChangedFlags = false}) {
+  getChangedAttributes({clearChangedFlags = false}) {
     const {attributes, attributeTransitionManager} = this;
 
-    if (transition) {
-      return attributeTransitionManager.getAttributes();
-    }
+    const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
 
-    const changedAttributes = {};
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       if (attribute.needsRedraw({clearChangedFlags: true})) {
@@ -371,103 +369,27 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  // Set the buffers for the supplied attributes
-  // Update attribute buffers from any attributes in props
-  // Detach any previously set buffers, marking all
-  // Attributes for auto allocation
-  /* eslint-disable max-statements, max-depth */
-  _setExternalBuffers(bufferMap) {
-    // Copy the refs of any supplied buffers in the props
-    for (const attributeName in this.attributes) {
-      const attribute = this.attributes[attributeName];
-
-      const buffer = bufferMap[attributeName];
-      attribute.setExternalBuffer(buffer, this.numInstances);
-      this.needsRedraw |= attribute.needsRedraw();
-    }
-  }
-
-  // Checks that any attribute buffers in props are valid
-  // Note: This is just to help app catch mistakes
-  _checkExternalBuffers({buffers = {}, ignoreUnknownAttributes = false} = {}) {
-    const {attributes} = this;
-    for (const attributeName in buffers) {
-      const attribute = attributes[attributeName];
-      if (!attribute && !ignoreUnknownAttributes) {
-        throw new Error(`Unknown attribute prop ${attributeName}`);
-      }
-    }
-  }
-
-  /* Checks that typed arrays for attributes are big enough
-   * sets alloc flag if not
-   * @return {Boolean} whether any updates are needed
-   */
-  _checkIfBuffersNeedUpdating({numInstances}) {
-    assert(numInstances !== undefined, 'numInstances not defined');
-
-    // Track whether any allocations or updates are needed
-    let needsUpdate = false;
-
-    for (const attributeName in this.attributes) {
-      const attribute = this.attributes[attributeName];
-      attribute.setNumInstances(numInstances);
-      needsUpdate = needsUpdate || attribute.needsUpdate();
+  _updateAttribute({attribute, numInstances, data, props, context}) {
+    if (attribute.allocate(numInstances)) {
+      logFunctions.onUpdate({
+        level: LOG_DETAIL_PRIORITY,
+        message: `${attribute.id} allocated ${numInstances}`,
+        id: this.id
+      });
     }
 
-    return needsUpdate;
-  }
+    // Calls update on any buffers that need update
+    const timeStart = Date.now();
 
-  _setGenericAttributes({data, props, context}) {
-    const {attributes} = this;
+    const updated = attribute.updateBuffer({numInstances, data, props, context});
+    if (updated) {
+      this.needsRedraw = true;
 
-    for (const attributeName in attributes) {
-      const attribute = attributes[attributeName];
-      attribute.setGenericValue({props});
-    }
-  }
-
-  // Calls update on any buffers that need update
-  // TODO? - If app supplied all attributes, no need to iterate over data
-  //
-  // @param {Object} data - data (iterable object)
-  // @param {Object} numInstances - count of data
-  // @param {Object} props - passed to updaters
-  // @param {Object} context - Used as "this" context for updaters
-  _allocateBuffers({numInstances, data, props, context}) {
-    const {attributes} = this;
-
-    for (const attributeName in attributes) {
-      const attribute = attributes[attributeName];
-
-      if (attribute.allocate(numInstances)) {
-        logFunctions.onUpdate({
-          level: LOG_DETAIL_PRIORITY,
-          message: `${attributeName} allocated ${numInstances}`,
-          id: this.id
-        });
-      }
-    }
-  }
-
-  // Calls update on any buffers that need update
-  _updateBuffers({numInstances, data, props, context}) {
-    for (const attributeName in this.attributes) {
-      const attribute = this.attributes[attributeName];
-
-      // Call updater function if needed
-      const timeStart = Date.now();
-
-      const updated = attribute.updateBuffer({numInstances, data, props, context});
-      if (updated) {
-        this.needsRedraw = true;
-
-        const timeMs = Math.round(Date.now() - timeStart);
-        logFunctions.onUpdate({
-          level: LOG_DETAIL_PRIORITY,
-          message: `${attributeName} updated ${numInstances} in ${timeMs}ms`
-        });
-      }
+      const timeMs = Math.round(Date.now() - timeStart);
+      logFunctions.onUpdate({
+        level: LOG_DETAIL_PRIORITY,
+        message: `${attribute.id} updated ${numInstances} in ${timeMs}ms`
+      });
     }
   }
 }

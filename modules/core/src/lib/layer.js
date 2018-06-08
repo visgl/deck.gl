@@ -333,12 +333,9 @@ export default class Layer extends Component {
 
   // Update attribute transition
   updateTransition() {
-    const model = this.getSingleModel();
     const attributeManager = this.getAttributeManager();
-    const isInTransition = attributeManager && attributeManager.updateTransition();
-
-    if (model && isInTransition) {
-      model.setAttributes(attributeManager.getChangedAttributes({transition: true}));
+    if (attributeManager) {
+      attributeManager.updateTransition();
     }
   }
 
