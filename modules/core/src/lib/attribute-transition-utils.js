@@ -89,7 +89,7 @@ export function padBuffer({fromState, toState, fromLength, toLength, context}) {
       count: (toLength - fromLength) / toState.size
     });
   } else {
-    data.set(toState.buffer.data.subarray(fromLength), fromLength);
+    data.set(toState.buffer.data.subarray(fromLength, toLength), fromLength);
   }
 
   fromState.setData({data});
