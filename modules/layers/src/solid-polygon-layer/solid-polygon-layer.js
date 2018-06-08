@@ -140,6 +140,7 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {
         size: 3,
+        transition: true,
         accessor: 'getPolygon',
         update: this.calculatePositions,
         noAlloc
@@ -147,6 +148,7 @@ export default class SolidPolygonLayer extends Layer {
       positions64xyLow: {size: 2, update: this.calculatePositionsLow},
       nextPositions: {
         size: 3,
+        transition: true,
         accessor: 'getPolygon',
         update: this.calculateNextPositions,
         noAlloc
@@ -154,6 +156,7 @@ export default class SolidPolygonLayer extends Layer {
       nextPositions64xyLow: {size: 2, update: this.calculateNextPositionsLow},
       elevations: {
         size: 1,
+        transition: true,
         accessor: 'getElevation',
         update: this.calculateElevations,
         noAlloc
@@ -162,6 +165,7 @@ export default class SolidPolygonLayer extends Layer {
         alias: 'colors',
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
         defaultValue: defaultFillColor,
@@ -171,6 +175,7 @@ export default class SolidPolygonLayer extends Layer {
         alias: 'colors',
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
         defaultValue: defaultLineColor,
@@ -233,7 +238,9 @@ export default class SolidPolygonLayer extends Layer {
 
       this.setState({
         polygonTesselator,
-        numInstances: polygonTesselator.pointCount
+        numInstances: polygonTesselator.pointCount,
+        bufferLayout: polygonTesselator.bufferLayout,
+        oldBufferLayout: this.state.bufferLayout
       });
 
       this.getAttributeManager().invalidateAll();

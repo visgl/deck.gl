@@ -49,6 +49,7 @@ export class PolygonTesselator {
 
     this.polygons = polygons;
     this.pointCount = pointCount;
+    this.bufferLayout = polygons.map(polygon => Polygon.getVertexCount(polygon));
     this.IndexType = IndexType;
 
     // TODO: dynamically decide IndexType in tesselator?

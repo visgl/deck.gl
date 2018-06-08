@@ -72,14 +72,34 @@ export function getBuffers(transitions) {
 }
 
 export function padBuffer({fromState, toState, fromLength, toLength, context}) {
+
+  const hasBufferLayout = context && context.state && context.state.oldBufferLayout;
+
   // check if buffer needs to be padded
-  if (fromLength >= toLength || !(fromState instanceof Buffer)) {
+  if ((!hasBufferLayout && fromLength >= toLength) || !(fromState instanceof Buffer)) {
     return;
   }
 
   const data = new Float32Array(toLength);
-  // copy the currect values
-  data.set(fromState.getData({}));
+  const fromData = fromState.getData({});
+
+  if (hasBufferLayout) {
+    fromLength = padArray({
+      target: data,
+      data: fromData,
+      fromLayout: context.state.oldBufferLayout,
+      toLayout: context.state.bufferLayout,
+      size: toState.size
+    });
+
+    if (fromLength >= toLength) {
+      fromState.setData({data: data.subarray(0, toLength)});
+      return;
+    }
+  } else {
+    // copy the currect values
+    data.set(fromData);
+  }
 
   if (toState.constant) {
     fillArray({
@@ -93,4 +113,37 @@ export function padBuffer({fromState, toState, fromLength, toLength, context}) {
   }
 
   fromState.setData({data});
+}
+
+/*
+ * A layout is an array of numbers: [chunkSize0, chunkSize1, ...]
+ */
+function padArray({data, target, size, fromLayout, toLayout}) {
+  let fromIndex = 0;
+  let toIndex = 0;
+
+  const n = Math.min(fromLayout.length, toLayout.length);
+
+  for (let i = 0; i < n; i++) {
+    const fromChunk = fromLayout[i] * size;
+    const toChunk = toLayout[i] * size;
+
+    const overlap = Math.min(fromChunk, toChunk);
+    target.set(data.subarray(fromIndex, fromIndex + overlap), toIndex);
+
+    if (overlap < toChunk) {
+      fillArray({
+        target,
+        // duplicate the last item
+        source: target.subarray(toIndex + overlap - size, toIndex + overlap),
+        start: toIndex + overlap,
+        count: (toChunk - overlap) / size
+      });
+    }
+
+    fromIndex += fromChunk;
+    toIndex += toChunk;
+  }
+
+  return toIndex;
 }

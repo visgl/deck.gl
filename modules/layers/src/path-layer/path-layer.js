@@ -65,13 +65,24 @@ export default class PathLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instanceStartPositions: {size: 3, update: this.calculateStartPositions},
-      instanceEndPositions: {size: 3, update: this.calculateEndPositions},
+      instanceStartPositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getPath',
+        update: this.calculateStartPositions
+      },
+      instanceEndPositions: {
+        size: 3,
+        transition: true,
+        accessor: 'getPath',
+        update: this.calculateEndPositions
+      },
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
+        transition: true,
         update: this.calculateStrokeWidths,
         defaultValue: 1
       },
@@ -80,6 +91,7 @@ export default class PathLayer extends Layer {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
+        transition: true,
         update: this.calculateColors,
         defaultValue: DEFAULT_COLOR
       },
@@ -128,9 +140,15 @@ export default class PathLayer extends Layer {
     if (geometryChanged) {
       // this.state.paths only stores point positions in each path
       const paths = props.data.map(getPath);
-      const numInstances = paths.reduce((count, path) => count + path.length - 1, 0);
+      const bufferLayout = paths.map(path => path.length - 1);
+      const numInstances = bufferLayout.reduce((count, segments) => count + segments, 0);
 
-      this.setState({paths, numInstances});
+      this.setState({
+        paths,
+        numInstances,
+        bufferLayout,
+        oldBufferLayout: this.state.bufferLayout
+      });
       attributeManager.invalidateAll();
     }
   }
