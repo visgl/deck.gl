@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --port 3000 --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open"
+  },
+  "dependencies": {
+    "deck.gl": "^5.3.0",
+    "glsl-transpiler": "^1.5.8"
+  },
+  "devDependencies": {
+    "buble-loader": "^0.4.0",
+    "webpack": "^2.2.0",
+    "webpack-dev-server": "^2.2.0"
+  }
+}

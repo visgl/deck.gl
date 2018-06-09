@@ -1,0 +1,33 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>deck.gl example</title>
+    <style type="text/css">
+      body {margin: 0; padding: 0; font-family: Helvetica,arial,sans-serif;}
+      #control-panel {font-size: 12px; position: fixed; top: 0; left: 0; margin: 20px; padding: 12px; z-index: 9;}
+    </style>
+  </head>
+  <body>
+    <div id="control-panel">
+      <div>
+        <label for="debug-enabled">Debug</label>
+        <input type="checkbox" id="debug-enabled" name="enable"></input>
+      </div>
+      <h5>Color Mode</h5>
+      <div>
+        <input type="radio" id="color-mode-none" name="color-mode" checked></input>
+        <label for="color-mode-none">None</label>
+      </div>
+      <div>
+        <input type="radio" id="color-mode-depth" name="color-mode"></input>
+        <label for="color-mode-depth">Depth</label>
+      </div>
+      <div>
+        <input type="radio" id="color-mode-fragment" name="color-mode"></input>
+        <label for="color-mode-fragment">Fragment</label>
+      </div>
+    </div>
+    <script src='bundle.js'></script>
+  </body>
+</html>
