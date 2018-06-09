@@ -22,6 +22,12 @@ For Earlier Beta Releases see below
 ## Beta Releases
 
 ### deck.gl v5.3 Pre Releases
+####[5.3.0.1] - June 08
+-  Fix DeckGL 5.3 doesn't fire onHover event for last frame (#1882) (#1895)
+-  Fix mapbox wrapper error when use viewState (#1885)
+-  Fix whats-new layer demo links (#1883)
+-  5.3.0 website update (#1881)
+
 #### [5.3.0-rc.1] - May 29
 -  update whats new (#1859)
 -  Attribute transition bug fix (#1858)
