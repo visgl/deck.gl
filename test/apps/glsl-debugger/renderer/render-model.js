@@ -14,11 +14,6 @@ const MAX_DEPTH_COLOR = [0, 0, 1, 1];
 const DISCARDED_FRAG_COLOR = [1, 0, 0, 1];
 
 export default ({model, context, colorMode = COLOR_MODE.NONE}) => {
-  context.clear({
-    strokeStyle: '#000',
-    fillStyle: '#000'
-  });
-
   const shaders = getShaders(model);
 
   // draw params

@@ -13,11 +13,12 @@ export default class DrawingContext {
   }
 
   clear(opts = {}) {
+    const {context} = this;
     const {width, height} = this.canvas;
-    this.context.clearRect(0, 0, width, height);
+    context.clearRect(0, 0, width, height);
 
     for (const name in opts) {
-      this.context[name] = opts[name];
+      context[name] = opts[name];
     }
   }
 
@@ -99,7 +100,7 @@ export default class DrawingContext {
     if (Array.isArray(color)) {
       const rgb = color.slice(0, 3).map(x => (x * 255) | 0);
       const a = Number.isFinite(color[3]) ? color[3] : 1;
-      return `rgba(${rgb.join(',')},${a})`;
+      return `rgba(${rgb.join(',')},${a.toFixed(2)})`;
     }
     return color;
   }
@@ -129,11 +130,13 @@ export default class DrawingContext {
       return;
     }
 
-    if (color0 && color0 !== color1) {
+    context.beginPath();
+    if (color0 !== color1) {
       // Use gradient
       const gradient = context.createLinearGradient(p0[0], p0[1], p1[0], p1[1]);
       gradient.addColorStop(0, color0);
       gradient.addColorStop(1, color1);
+
       context.strokeStyle = gradient;
     } else if (color0) {
       // Single color

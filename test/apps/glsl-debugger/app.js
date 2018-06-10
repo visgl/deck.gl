@@ -39,7 +39,8 @@ const deck = new Deck({
   initialViewState: {
     latitude: 37.78,
     longitude: -122.4,
-    zoom: 13
+    zoom: 13,
+    pitch: 30
   },
   controller: MapController
 });

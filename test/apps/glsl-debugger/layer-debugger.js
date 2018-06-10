@@ -45,6 +45,11 @@ export default class LayerDebugger {
 
     this.drawingContext.resize({width: deck.width, height: deck.height});
 
+    this.drawingContext.clear({
+      strokeStyle: '#000',
+      fillStyle: '#000'
+    });
+
     const {layerManager} = deck;
     layerManager.layers = layerManager.layers.map(this._inject, this);
   }
@@ -59,7 +64,7 @@ export default class LayerDebugger {
         originalDraw.call(layer, ...args);
         this._drawLayer(layer);
       };
-      layer.__debugger = true;
+      layer.__debugger = this;
     }
     return layer;
   }
