@@ -193,52 +193,6 @@ export default class IconLayer extends Layer {
     );
   }
 
-  /*
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const position = getPosition(object);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
-    }
-  }
-
-  calculateInstanceSizes(attribute) {
-    const {data, getSize} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      value[i++] = getSize(object);
-    }
-  }
-
-  calculateInstanceAngles(attribute) {
-    const {data, getAngle} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      value[i++] = getAngle(object);
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getColor(object);
-
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
-    }
-  }
-  */
-
   calculateInstancePositions64xyLow(attribute) {
     const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;

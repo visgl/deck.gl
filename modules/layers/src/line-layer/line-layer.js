@@ -151,48 +151,6 @@ export default class LineLayer extends Layer {
       i += size;
     }
   }
-
-  /*
-  calculateInstanceSourcePositions(attribute) {
-    const {data, getSourcePosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      value[i + 0] = sourcePosition[0];
-      value[i + 1] = sourcePosition[1];
-      value[i + 2] = isNaN(sourcePosition[2]) ? 0 : sourcePosition[2];
-      i += size;
-    }
-  }
-
-  calculateInstanceTargetPositions(attribute) {
-    const {data, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = targetPosition[0];
-      value[i + 1] = targetPosition[1];
-      value[i + 2] = isNaN(targetPosition[2]) ? 0 : targetPosition[2];
-      i += size;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getColor(object);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
-      i += size;
-    }
-  }
-  */
 }
 
 LineLayer.layerName = 'LineLayer';
