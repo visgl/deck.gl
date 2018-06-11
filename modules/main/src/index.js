@@ -41,7 +41,6 @@ export {
   OrbitView,
   PerspectiveView,
   OrthographicView,
-
   // Viewports
   Viewport,
   WebMercatorViewport,
@@ -58,16 +57,13 @@ export {
   LayerManager,
   // Logging
   log,
-
-    // Controllers
+  // Controllers
   _OrbitController,
   _FirstPersonController,
-
   // Transition bindings
   _TRANSITION_EVENTS,
   _LinearInterpolator,
   _ViewportFlyToInterpolator,
-
   _EffectManager,
   _Effect,
   _ReflectionEffect
@@ -87,8 +83,7 @@ const {
   getQuantizeScale,
   defaultColorRange,
   flattenVertices,
-  fillArray,
-
+  fillArray
 } = CoreExperimental;
 
 Object.assign(experimental, {
@@ -100,7 +95,7 @@ Object.assign(experimental, {
   getQuantizeScale,
   defaultColorRange,
   flattenVertices,
-  fillArray,
+  fillArray
 });
 
 //
