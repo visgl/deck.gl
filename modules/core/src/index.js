@@ -90,5 +90,5 @@ export const experimental = {
   getQuantizeScale,
   defaultColorRange,
   flattenVertices,
-  fillArray,
+  fillArray
 };

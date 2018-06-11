@@ -41,11 +41,10 @@ export {
   OrbitView,
   PerspectiveView,
   OrthographicView,
+
   // Viewports
   Viewport,
   WebMercatorViewport,
-  PerspectiveViewport,
-  OrthographicViewport,
   // Controllers
   Controller,
   MapController,
@@ -58,50 +57,24 @@ export {
   // Internal classes
   LayerManager,
   // Logging
-  log
+  log,
+
+    // Controllers
+  _OrbitController,
+  _FirstPersonController,
+
+  // Transition bindings
+  _TRANSITION_EVENTS,
+  _LinearInterpolator,
+  _ViewportFlyToInterpolator,
+
+  _EffectManager,
+  _Effect,
+  _ReflectionEffect
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
 import {experimental as CoreExperimental} from '@deck.gl/core';
-
-const {
-  // Controllers
-  OrbitController,
-  FirstPersonController,
-
-  // Viewports
-  FirstPersonViewport,
-  OrbitViewport,
-  ThirdPersonViewport,
-
-  // Transition bindings
-  TRANSITION_EVENTS,
-  LinearInterpolator,
-  ViewportFlyToInterpolator,
-
-  EffectManager,
-  Effect
-} = CoreExperimental;
-
-Object.assign(experimental, {
-  // Controller helper classes
-  OrbitController,
-  FirstPersonController,
-
-  // Experimental viewports
-  FirstPersonViewport,
-  OrbitViewport,
-  ThirdPersonViewport,
-
-  // Transition bindings
-  TRANSITION_EVENTS,
-  LinearInterpolator,
-  ViewportFlyToInterpolator,
-
-  // Effects base classes
-  EffectManager,
-  Effect
-});
 
 // Experimental Data Accessor Helpers
 // INTERNAL - TODO remove from experimental exports
@@ -116,7 +89,6 @@ const {
   flattenVertices,
   fillArray,
 
-  ReflectionEffect
 } = CoreExperimental;
 
 Object.assign(experimental, {
@@ -129,8 +101,6 @@ Object.assign(experimental, {
   defaultColorRange,
   flattenVertices,
   fillArray,
-
-  ReflectionEffect
 });
 
 //
