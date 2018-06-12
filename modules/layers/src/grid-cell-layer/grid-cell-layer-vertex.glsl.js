@@ -26,8 +26,9 @@ export default `\
 attribute vec3 positions;
 attribute vec3 normals;
 
-attribute vec4 instancePositions;
+attribute vec3 instancePositions;
 attribute vec2 instancePositions64xyLow;
+attribute float instanceElevations;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
@@ -47,13 +48,13 @@ varying vec4 vColor;
 void main(void) {
 
   // if ahpha == 0.0 or z < 0.0, do not render element
-  float noRender = float(instanceColors.a == 0.0 || instancePositions.w < 0.0);
+  float noRender = float(instanceColors.a == 0.0 || instanceElevations < 0.0);
   float finalCellSize = project_scale(cellSize) * mix(1.0, 0.0, noRender);
 
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = instancePositions.w  * (positions.z + 1.0) *
+    elevation = instanceElevations  * (positions.z + 1.0) *
       ELEVATION_SCALE * elevationScale;
   }
 

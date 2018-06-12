@@ -179,6 +179,7 @@ export default class TextLayer extends CompositeLayer {
       getPixelOffset,
       fp64,
       sizeScale,
+      transitions,
       updateTriggers
     } = this.props;
 
@@ -201,6 +202,13 @@ export default class TextLayer extends CompositeLayer {
           getPixelOffset: this._getAccessor(getPixelOffset),
           fp64,
           sizeScale: sizeScale * scale,
+          transitions: transitions && {
+            getPosition: transitions.getPosition,
+            getAngle: transitions.getAngle,
+            getColor: transitions.getColor,
+            getSize: transitions.getSize,
+            getPixelOffset: updateTriggers.getPixelOffset
+          },
           updateTriggers: {
             getPosition: updateTriggers.getPosition,
             getAngle: updateTriggers.getAngle,

@@ -85,10 +85,14 @@ export default class HexagonCellLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {
-        size: 3,
+        size: 2,
         transition: true,
-        accessor: ['getCentroid', 'getElevation'],
-        update: this.calculateInstancePositions
+        accessor: 'getCentroid'
+      },
+      instanceElevations: {
+        size: 1,
+        transition: true,
+        accessor: 'getElevation'
       },
       instancePositions64xyLow: {
         size: 2,
@@ -195,20 +199,6 @@ export default class HexagonCellLayer extends Layer {
         elevationScale
       })
     );
-  }
-
-  calculateInstancePositions(attribute) {
-    const {data, getCentroid, getElevation} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const [lon, lat] = getCentroid(object);
-      const elevation = getElevation(object);
-      value[i + 0] = lon;
-      value[i + 1] = lat;
-      value[i + 2] = elevation || 0;
-      i += size;
-    }
   }
 
   calculateInstancePositions64xyLow(attribute) {

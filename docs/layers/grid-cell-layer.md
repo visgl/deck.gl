@@ -81,21 +81,21 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `cell => cell.position`
 
 Method called to retrieve the top left corner of each cell.
 Expecting [lon, lat].
 
-##### `getElevation` (Function, optional)
+##### `getElevation` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `cell => cell.elevation`
 
 Method called to retrieve the elevation of each cell.
 Expecting a number, 1 unit approximate to 100 meter
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `cell => cell.color`
 
