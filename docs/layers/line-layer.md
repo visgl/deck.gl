@@ -62,19 +62,19 @@ Whether the layer should be rendered in high-precision 64-bit mode
 
 ### Data Accessors
 
-##### `getSourcePosition` (Function, optional)
+##### `getSourcePosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.sourcePosition`
 
 Method called to retrieve the source position of each object.
 
-##### `getTargetPosition` (Function, optional)
+##### `getTargetPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.targetPosition`
 
 Method called to retrieve the target position of each object.
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.color || [0, 0, 0, 255]`
 
@@ -83,7 +83,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getStrokeWidth` (Function|Number, optional)
+##### `getStrokeWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 

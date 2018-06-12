@@ -50,15 +50,14 @@ const App = ({data, viewport}) => {
 
 Method called to retrieve the content of each text label.
 
-##### `getPosition` (Function, optional)
+##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `x => x.position || x.coordinates`
 
 Method called to retrieve the location of each text label.
 
-### Rendering Options
 
-##### `getSize` (Function|Number, optional)
+##### `getSize` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.size || 32`
 
@@ -68,7 +67,7 @@ The font size of each text label, in pixels.
 * If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.color || [0, 0, 0, 255]`
 
@@ -78,7 +77,7 @@ The rgba color of each text label, in `r, g, b, [a]`. Each component is in the 0
 * If a function is provided, it is called on each object to retrieve its color.
 
 
-##### `getAngle` (Function|Number, optional)
+##### `getAngle` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `d => d.angle || 0`
 
@@ -87,6 +86,8 @@ The rotating angle of each text label, in degrees.
 * If a number is provided, it is used as the angle for all objects.
 * If a function is provided, it is called on each object to retrieve its angle.
 
+
+### Rendering Options
 
 ##### `sizeScale` (Number, optional)
 
@@ -132,7 +133,7 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 * If a function is provided, it is called on each object to retrieve its alignment baseline.
 
 
-##### `getPixelOffset` (Function|Array, optional)
+##### `getPixelOffset` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `x.pixelOffset || [0, 0]`
 

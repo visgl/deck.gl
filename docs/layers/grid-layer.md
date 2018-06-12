@@ -149,7 +149,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 Method called to retrieve the position of each point.
 
-##### `getColorValue` (Function, optional)
+##### `getColorValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `points => points.length`
 
@@ -178,7 +178,7 @@ You should pass in the function defined outside the render function so it doesn'
  }
 ```
 
-##### `getElevationValue` (Function, optional)
+##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `points => points.length`
 

@@ -96,14 +96,14 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ### Data Accessors
 
-##### `getCentroid` (Function, optional)
+##### `getCentroid` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.centroid`
 
 Method called to retrieve the centroid of each hexagon. Centorid should be
 set to [lon, lat]
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.color`
 
@@ -112,7 +112,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getElevation` (Function, optional)
+##### `getElevation` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.elevation`
 

@@ -64,10 +64,14 @@ export default class GridCellLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instancePositions: {
-        size: 4,
+        size: 3,
         transition: true,
-        accessor: ['getPosition', 'getElevation'],
-        update: this.calculateInstancePositions
+        accessor: 'getPosition'
+      },
+      instanceElevations: {
+        size: 1,
+        transition: true,
+        accessor: 'getElevation'
       },
       instancePositions64xyLow: {
         size: 2,
@@ -120,21 +124,6 @@ export default class GridCellLayer extends Layer {
         coverage
       })
     );
-  }
-
-  calculateInstancePositions(attribute) {
-    const {data, getPosition, getElevation} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const position = getPosition(object);
-      const elevation = getElevation(object) || 0;
-      value[i + 0] = position[0];
-      value[i + 1] = position[1];
-      value[i + 2] = 0;
-      value[i + 3] = elevation;
-      i += size;
-    }
   }
 
   calculateInstancePositions64xyLow(attribute) {
