@@ -65,12 +65,12 @@ new ScatterplotLayer({
 
 Add a new shader module `filter` and add it as a default module. It adds the uniform `vec2 filterRange` from the layer prop with the same name. It also adds two vertex shader functions:
 
-* `bool filter_setVisibility(float filterValue)` - determine visibility by checking value against `filterRange`
-* `bool filter_setVisibility(bool visible)` - override data filter with custom logic
+* `void filter_setVisibility(float filterValue)` - determine visibility by checking value against `filterRange`
+* `void filter_setVisibility(bool visible)` - override the data filter with custom logic
 
 Ands one fragment shader function:
 
-* `bool filter_isVisible()` - returns `false` if fragment should be discarded
+* `vec4 filter_filterColor(vec4)` - recolor/discard the fragment based on the data filter.
 
 #### Examples
 
@@ -80,10 +80,8 @@ To use this module, a layer may add the following to its vertex shader:
 attribute float instanceFilterValue;
 
 void main() {
-    if (not(filter_setVisibility(instanceFilterValue))) {
-        return;
-    }
     ...
+    filter_setVisibility(instanceFilterValue);
 }
 ```
 
@@ -91,10 +89,8 @@ And the following to its fragment shader:
 
 ```glsl
 void main() {
-    if (not(filter_isVisible())) {
-        discard;
-    }
     ...
+    gl_FragColor = filter_filterColor(gl_FragColor);    
 }
 ```
 
