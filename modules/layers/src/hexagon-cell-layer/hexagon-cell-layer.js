@@ -201,26 +201,6 @@ export default class HexagonCellLayer extends Layer {
     );
   }
 
-  // calculateInstancePositions(attribute) {
-  //   const {data, getCentroid} = this.props;
-  //   const {value} = attribute;
-  //   let i = 0;
-  //   for (const object of data) {
-  //     const position = getCentroid(object);
-  //     value[i++] = position[0];
-  //     value[i++] = position[1];
-  //   }
-  // }
-
-  // calculateInstanceElevations(attribute) {
-  //   const {data, getElevation} = this.props;
-  //   const {value} = attribute;
-  //   let i = 0;
-  //   for (const object of data) {
-  //     value[i++] = getElevation(object) || 0;
-  //   }
-  // }
-
   calculateInstancePositions64xyLow(attribute) {
     const isFP64 = this.is64bitEnabled();
     attribute.isGeneric = !isFP64;
