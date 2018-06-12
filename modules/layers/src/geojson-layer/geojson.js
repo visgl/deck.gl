@@ -72,7 +72,15 @@ export function separateGeojsonFeatures(features) {
   const polygonFeatures = [];
   const polygonOutlineFeatures = [];
 
-  features.forEach(feature => {
+  // Store a mapping of index within each feature type to the index of the feature within `features`
+  const pointFeatureIndexMap = [];
+  const lineFeatureIndexMap = [];
+  const polygonFeatureIndexMap = [];
+  const polygonOutlineFeatureIndexMap = [];
+
+  for (let featureIndex = 0; featureIndex < features.length; featureIndex++) {
+    const feature = features[featureIndex];
+
     assert(feature && feature.geometry, 'GeoJSON does not have geometry');
 
     const {
@@ -84,48 +92,60 @@ export function separateGeojsonFeatures(features) {
     switch (type) {
       case 'Point':
         pointFeatures.push(feature);
+        pointFeatureIndexMap.push(featureIndex);
         break;
       case 'MultiPoint':
         // TODO - split multipoints
         coordinates.forEach(point => {
           pointFeatures.push({geometry: {coordinates: point}, properties, feature});
+          pointFeatureIndexMap.push(featureIndex);
         });
         break;
       case 'LineString':
         lineFeatures.push(feature);
+        lineFeatureIndexMap.push(featureIndex);
         break;
       case 'MultiLineString':
         // Break multilinestrings into multiple lines with same properties
         coordinates.forEach(path => {
           lineFeatures.push({geometry: {coordinates: path}, properties, feature});
+          lineFeatureIndexMap.push(featureIndex);
         });
         break;
       case 'Polygon':
         polygonFeatures.push(feature);
+        polygonFeatureIndexMap.push(featureIndex);
         // Break polygon into multiple lines with same properties
         coordinates.forEach(path => {
           polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+          polygonOutlineFeatureIndexMap.push(featureIndex);
         });
         break;
       case 'MultiPolygon':
         // Break multipolygons into multiple polygons with same properties
         coordinates.forEach(polygon => {
           polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
+          polygonFeatureIndexMap.push(featureIndex);
           // Break polygon into multiple lines with same properties
           polygon.forEach(path => {
             polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+            polygonOutlineFeatureIndexMap.push(featureIndex);
           });
         });
         break;
       default:
     }
-  });
+  }
 
   return {
     pointFeatures,
     lineFeatures,
     polygonFeatures,
-    polygonOutlineFeatures
+    polygonOutlineFeatures,
+    pointFeatureIndexMap,
+    lineFeatureIndexMap,
+    polygonFeatureIndexMap,
+    polygonOutlineFeatureIndexMap
   };
 }
 
