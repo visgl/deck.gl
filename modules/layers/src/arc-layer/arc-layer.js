@@ -187,36 +187,6 @@ export default class ArcLayer extends Layer {
       i += size;
     }
   }
-
-  /*
-  calculateInstanceSourceColors(attribute) {
-    const {data, getSourceColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getSourceColor(object);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
-      i += size;
-    }
-  }
-
-  calculateInstanceTargetColors(attribute) {
-    const {data, getTargetColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const object of data) {
-      const color = getTargetColor(object);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
-      i += size;
-    }
-  }
-  */
 }
 
 ArcLayer.layerName = 'ArcLayer';

@@ -137,43 +137,6 @@ export default class ScatterplotLayer extends Layer {
       value[i++] = fp64LowPart(position[1]);
     }
   }
-
-  /*
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
-    }
-  }
-
-  calculateInstanceRadius(attribute) {
-    const {data, getRadius} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const radius = getRadius(point);
-      value[i++] = isNaN(radius) ? 1 : radius;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const color = getColor(point) || DEFAULT_COLOR;
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
-    }
-  }
-  */
 }
 
 ScatterplotLayer.layerName = 'ScatterplotLayer';

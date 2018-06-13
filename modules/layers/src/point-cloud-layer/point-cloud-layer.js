@@ -137,45 +137,6 @@ export default class PointCloudLayer extends Layer {
       value[i++] = fp64LowPart(position[1]);
     }
   }
-
-  /*
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i++] = position[0];
-      value[i++] = position[1];
-      value[i++] = position[2] || 0;
-    }
-  }
-
-  calculateInstanceNormals(attribute) {
-    const {data, getNormal} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const normal = getNormal(point);
-      value[i++] = normal[0];
-      value[i++] = normal[1];
-      value[i++] = normal[2];
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const color = getColor(point);
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
-    }
-  }
-  */
 }
 
 PointCloudLayer.layerName = 'PointCloudLayer';
