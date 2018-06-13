@@ -23,7 +23,8 @@
 import {Layer, ScatterplotLayer, LineLayer, experimental} from 'deck.gl';
 import {inheritsFrom} from '@deck.gl/core/utils/inherits-from';
 
-const {get, fp64ify, fp64LowPart} = experimental;
+import {fp64} from 'luma.gl';
+const {fp64ify, fp64LowPart} = fp64;
 
 const POSITION = [-122.4, 37.8, 0];
 
@@ -32,9 +33,6 @@ const POSITION = [-122.4, 37.8, 0];
 export default function utilsBench(suite) {
   return suite
     .group('UTILS')
-    .add('get#Array', () => {
-      return get(POSITION, 0);
-    })
     .add('direct access#Array', () => {
       return POSITION[0];
     })
