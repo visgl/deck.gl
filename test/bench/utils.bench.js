@@ -20,7 +20,7 @@
 
 /* eslint-disable no-console, no-invalid-this */
 
-import {Layer, ScatterplotLayer, LineLayer, experimental} from 'deck.gl';
+import {Layer, ScatterplotLayer, LineLayer} from 'deck.gl';
 import {inheritsFrom} from '@deck.gl/core/utils/inherits-from';
 
 import {fp64} from 'luma.gl';

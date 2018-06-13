@@ -37,7 +37,8 @@ for (let i = 0; i < 1e1; i++) {
 
 // add tests
 
-const newArray = new Float32Array(1e1);
+// Small copies could be overwhelmed by array creation.
+const savedNewArray = new Float32Array(1e1);
 
 export default function arrayCopyBench(suite) {
   return suite
@@ -69,18 +70,16 @@ export default function arrayCopyBench(suite) {
     .add('copy#for-loop (10 elements)', () => {
       const length = SMALL_ARRAY.length;
       for (let i = 0; i < length; ++i) {
-        newArray[i] = SMALL_ARRAY[i];
+        savedNewArray[i] = SMALL_ARRAY[i];
       }
     })
     .add('copy#set (10 elements)', () => {
-      const length = SMALL_ARRAY.length;
-      newArray.set(SMALL_ARRAY);
+      savedNewArray.set(SMALL_ARRAY);
     })
     .add('check type#instanceof Float32Array', () => {
       return SMALL_ARRAY instanceof Float32Array;
     })
     .add('check type#ArrayBuffer.isView', () => {
       return ArrayBuffer.isView(SMALL_ARRAY);
-    })
-    ;
+    });
 }

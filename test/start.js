@@ -44,7 +44,6 @@ switch (mode) {
     require('./bench/index'); // Run the benchmarks
     break;
 
-
   case 'test-browser':
     new BrowserTestDriver().run({
       process: 'webpack-dev-server',

@@ -86,7 +86,6 @@ export default class MultiIconLayer extends IconLayer {
       value[i++] = rect.height / 2 * getAnchorY(object) || 0;
     }
   }
-
 }
 
 MultiIconLayer.layerName = 'MultiIconLayer';
