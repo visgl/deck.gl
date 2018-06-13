@@ -40,6 +40,10 @@ switch (mode) {
     // require('./hexagon-layer.spec');
     break;
 
+  case 'bench':
+    require('./bench/index'); // Run the benchmarks
+    break;
+
   case 'test-browser':
     new BrowserTestDriver().run({
       process: 'webpack-dev-server',
@@ -71,10 +75,6 @@ switch (mode) {
       parameters: ['--config', 'test/webpack.config.js', '--env.bench'],
       exposeFunction: 'testDone'
     });
-    break;
-
-  case 'bench':
-    require('./bench/index'); // Run the benchmarks
     break;
 
   default:

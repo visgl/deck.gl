@@ -23,6 +23,7 @@
 import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
 import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl/test/data';
+import {isWebGL2} from 'luma.gl';
 
 const {fixture, generateRandomGridPoints} = GridAggregationData;
 const aggregator = new GPUGridAggregator(gl);
@@ -32,6 +33,9 @@ const points100K = generateRandomGridPoints(100000);
 const points1M = generateRandomGridPoints(1000000);
 
 export default function gridAggregatorBench(suite) {
+  if (!isWebGL2(gl)) {
+    return suite;
+  }
   return suite
     .group('GRID AGGREGATION')
     .add('CPU 1K', () => {

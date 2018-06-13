@@ -26,9 +26,10 @@ import coreLayersBench from './core-layers.bench';
 import viewportBench from './viewport.bench';
 import colorBench from './color.bench';
 import pickLayersBench from './pick-layers.bench';
-import utilsBench from './utils.bench';
 import tesselationBench from './tesselation.bench';
 import gridAggregatorBench from './gpu-grid-aggregator.bench';
+import utilsBench from './utils.bench';
+import arrayCopyBench from './array-copy.bench';
 
 const suite = new Bench();
 
@@ -40,7 +41,8 @@ colorBench(suite);
 utilsBench(suite);
 pickLayersBench(suite);
 tesselationBench(suite);
-
 gridAggregatorBench(suite);
+arrayCopyBench(suite);
+
 // Run the suite
 suite.run();
