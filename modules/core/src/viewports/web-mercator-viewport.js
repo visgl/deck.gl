@@ -203,12 +203,12 @@ export default class WebMercatorViewport extends Viewport {
    */
   getMapCenterByLngLatPosition({lngLat, pos}) {
     const fromLocation = pixelsToWorld(pos, this.pixelUnprojectionMatrix);
-    const toLocation = lngLatToWorld(lngLat, this.scale);
+    const toLocation = this.projectFlat(lngLat);
 
     const translate = vec2_add([], toLocation, vec2_negate([], fromLocation));
     const newCenter = vec2_add([], this.center, translate);
 
-    return worldToLngLat(newCenter, this.scale);
+    return this.unprojectFlat(newCenter);
   }
 
   // Legacy method name
