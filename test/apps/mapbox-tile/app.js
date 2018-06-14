@@ -6,6 +6,9 @@ import DeckGL, {MapController} from 'deck.gl';
 
 import MapLayer from './map-layer/map-layer';
 import {MAP_STYLE} from './constants';
+import CustomView from './views';
+
+import './shaderlib';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -34,6 +37,7 @@ class Root extends Component {
   render() {
     return (
       <DeckGL
+        views={new CustomView()}
         controller={MapController}
         viewState={this.state.viewState}
         onViewStateChange={this._onViewStateChange}

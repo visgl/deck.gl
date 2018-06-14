@@ -57,8 +57,8 @@ export default class MapLayer extends CompositeLayer {
     return tiles && tiles.map((tile, i) =>
       new GeoJsonLayer(this.getSubLayerProps({
         id: `tile-${tile.x}-${tile.y}-${tile.z}`,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: tile.center,
+        // coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+        // coordinateOrigin: tile.center,
         data: tile.getData(),
         pickable: true,
         ...this.props.style

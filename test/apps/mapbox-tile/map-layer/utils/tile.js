@@ -18,10 +18,14 @@ export default class Tile {
 
     this.loader = null;
     this.isLoaded = false;
+
+    this.project = this.project.bind(this);
   }
 
   _init() {
     const scale = Math.pow(2, this.z);
+
+    this.scale = scale;
 
     this.center = worldToLngLat(
       [(this.x + 0.5) * TILE_SIZE, (this.y + 0.5) * TILE_SIZE],
@@ -35,6 +39,25 @@ export default class Tile {
       scale,
       highPrecision: true
     });
+  }
+
+  project(line, extent) {
+    const sizeToPixel = extent / TILE_SIZE;
+    // const b = extent / 2;
+    // const {pixelsPerMeter, pixelsPerMeter2} = this.distanceScales;
+    const l = this.x * TILE_SIZE;
+    const t = this.y * TILE_SIZE;
+
+    for (let ii = 0; ii < line.length; ii++) {
+      const p = line[ii];
+
+      // LNGLAT
+      line[ii] = worldToLngLat([l + p[0] / sizeToPixel, t + p[1] / sizeToPixel], this.scale);
+
+      // METER_OFFSET
+      // p[1] = (b - p[1]) / sizeToPixel / pixelsPerMeter[1];
+      // p[0] = (p[0] - b) / sizeToPixel / (pixelsPerMeter[0] + pixelsPerMeter2[0] * p[1]);
+    }
   }
 
   getData() {
@@ -51,7 +74,7 @@ export default class Tile {
 
             for (let i = 0; i < vectorTileLayer.length; i++) {
               const vectorTileFeature = vectorTileLayer.feature(i);
-              const features = getFeatures(vectorTileFeature, this.distanceScales);
+              const features = getFeatures(vectorTileFeature, this.project);
               features.forEach(f => {
                 f.properties.layer = layerName;
                 result.push(f);
@@ -67,37 +90,30 @@ export default class Tile {
 
 /* adapted from @mapbox/vector-tile/lib/vectortilefeature.js */
 
-function getFeatures(vectorTileFeature, {pixelsPerMeter, pixelsPerMeter2}) {
+function getFeatures(vectorTileFeature, project) {
   let coords = getCoordinates(vectorTileFeature);
-  const size = vectorTileFeature.extent / TILE_SIZE;
   const type = VectorTileFeature.types[vectorTileFeature.type];
-  const b = vectorTileFeature.extent / 2;
+  const extent = vectorTileFeature.extent;
   let i;
   let j;
-
-  function project(line) {
-    for (let ii = 0; ii < line.length; ii++) {
-      const p = line[ii];
-      p[1] = (b - p[1]) / size / pixelsPerMeter[1];
-      p[0] = (p[0] - b) / size / (pixelsPerMeter[0] + pixelsPerMeter2[0] * p[1]);
-    }
-  }
 
   switch (vectorTileFeature.type) {
   case 1:
     coords = coords.map(pts => pts[0]);
-    project(coords);
+    project(coords, extent);
     break;
 
   case 2:
-    coords.forEach(project);
+    for (i = 0; i < coords.length; i++) {
+      project(coords[i], extent);
+    }
     break;
 
   case 3:
     coords = classifyRings(coords);
     for (i = 0; i < coords.length; i++) {
       for (j = 0; j < coords[i].length; j++) {
-        project(coords[i][j]);
+        project(coords[i][j], extent);
       }
     }
     break;

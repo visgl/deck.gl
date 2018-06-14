@@ -23,7 +23,7 @@ function pixelsToTileIndex(a) {
 
 export function getTileIndices(viewport) {
   const z = Math.floor(viewport.zoom);
-  viewport = new WebMercatorViewport({
+  viewport = new viewport.constructor({
     ...viewport,
     zoom: z
   });
