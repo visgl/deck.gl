@@ -150,6 +150,7 @@ export default class App extends PureComponent {
     if (this.state.enableDepthPickOnClick && info) {
       this._multiDepthPick(info.x, info.y);
     } else {
+      console.log('onClick', info); // eslint-disable-line
       this.setState({clickedItem: info});
     }
   }
