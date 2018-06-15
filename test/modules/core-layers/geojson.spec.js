@@ -283,11 +283,11 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
         lineFeaturesLength: result.lineFeatures.length,
         polygonFeaturesLength: result.polygonFeatures.length,
         polygonOutlineFeaturesLength: result.polygonOutlineFeatures.length,
-        pointFeatureIndexes: result.pointFeatures.map(f => f.__deckMetadata.featureIndex),
-        lineFeatureIndexes: result.lineFeatures.map(f => f.__deckMetadata.featureIndex),
-        polygonFeatureIndexes: result.polygonFeatures.map(f => f.__deckMetadata.featureIndex),
+        pointFeatureIndexes: result.pointFeatures.map(f => f.deckPickingInfo.featureIndex),
+        lineFeatureIndexes: result.lineFeatures.map(f => f.deckPickingInfo.featureIndex),
+        polygonFeatureIndexes: result.polygonFeatures.map(f => f.deckPickingInfo.featureIndex),
         polygonOutlineFeatureIndexes: result.polygonOutlineFeatures.map(
-          f => f.__deckMetadata.featureIndex
+          f => f.deckPickingInfo.featureIndex
         )
       };
       t.deepEquals(

@@ -96,8 +96,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     return Object.assign(info, {
       // override object with picked feature
-      object: info.object ? info.object.__deckMetadata.feature : info.object,
-      index: info.object ? info.object.__deckMetadata.featureIndex : info.index
+      object: info.object ? info.object.deckPickingInfo.feature : info.object,
+      index: info.object ? info.object.deckPickingInfo.featureIndex : info.index
     });
   }
 
