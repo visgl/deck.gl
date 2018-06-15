@@ -19,6 +19,30 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 For Earlier Beta Releases see below
 
+### deck.gl v6.0.0 Pre Releases
+
+#### [6.0.0-alpha.0] - June 15
+- 6.0.0-alpha.0 (Bump luma version to 6.0.0-apha.1)
+- Bench fixes (#1915)
+- Remove commented functions from layers (#1910)
+- Data filter RFC (#1892)
+- Add transition prop forwarding for composite layers; docs (#1900)
+- Viewport transition example (#1909)
+- attribute manager cleanup (#1901)
+- Disable failing rendertests for Intel GPU (#1903)
+- Add node 10 to travis (#1898)
+- Update params per frame (#1897)
+- Fix DeckGL 5.3 doesn't fire onHover event for last frame (#1882) (#1895)
+- Update RFC catalog (#1891)
+- Remove index.html from examples (#1890)
+- Fix mapbox wrapper error when use viewState (#1885)
+- Scripting Gallery (#1879)
+- Make sure website examples start locally (#1884)
+- Update issue_template.md
+- Some example fixes (#1878)
+- Add Deck.parameters prop to enable declarative setting of initial GL params (#1832)
+- View Manager cleanup (#1864)
+
 ## Beta Releases
 
 ### deck.gl v5.3 Pre Releases
