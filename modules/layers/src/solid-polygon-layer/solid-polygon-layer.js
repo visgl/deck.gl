@@ -243,7 +243,7 @@ export default class SolidPolygonLayer extends Layer {
       const polygons = props.data.map(props.getPolygon);
 
       this.setState({
-        polygonTesselator: new PolygonTesselator({polygons, IndexType: this.state.IndexType})
+        polygonTesselator: this._getPolygonTesselator(polygons, IndexType: this.state.IndexType)
       });
 
       this.state.attributeManager.invalidateAll();
@@ -259,6 +259,10 @@ export default class SolidPolygonLayer extends Layer {
         extruded: props.extruded
       });
     }
+  }
+
+  _getPolygonTesselator(polygons, IndexType) {
+    new PolygonTesselator({polygons, IndexType: this.state.IndexType})
   }
 
   updateAttributes(props) {
@@ -460,3 +464,6 @@ export default class SolidPolygonLayer extends Layer {
 
 SolidPolygonLayer.layerName = 'SolidPolygonLayer';
 SolidPolygonLayer.defaultProps = defaultProps;
+
+// Experimental export
+SolidPolygonLayer._PolygonTesselator;
