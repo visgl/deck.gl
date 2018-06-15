@@ -462,6 +462,17 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
   }
 });
 
+function GeoJsonLayerPerfExample(id, getData) {
+  return {
+    layer: GeoJsonLayer,
+    getData,
+    props: {
+      id: `geojsonlayerperf-${id}`,
+      pointRadiusMinPixels: 4
+    }
+  };
+}
+
 /* eslint-disable quote-props */
 export default {
   'Core Layers - LngLat': {
@@ -496,6 +507,14 @@ export default {
     'ScatterplotLayer 10M': ScatterplotLayerPerfExample('10M', dataSamples.getPoints10M),
     'ScatterplotLayer64 100K': ScatterplotLayer64PerfExample('100K', dataSamples.getPoints100K),
     'ScatterplotLayer64 1M': ScatterplotLayer64PerfExample('1M', dataSamples.getPoints1M),
-    'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample('10M', dataSamples.getPoints10M)
+    'ScatterplotLayer64 10M': ScatterplotLayer64PerfExample('10M', dataSamples.getPoints10M),
+    'GeoJsonLayer (1M Point features)': GeoJsonLayerPerfExample(
+      '1M-point',
+      dataSamples.getPointFeatures1M
+    ),
+    'GeoJsonLayer (100K MultiPoint features, 10 points per feature)': GeoJsonLayerPerfExample(
+      '100K-multipoint',
+      dataSamples.getMultiPointFeatures100K
+    )
   }
 };

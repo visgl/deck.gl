@@ -72,80 +72,112 @@ const TEST_CASES = [
     title: 'geometry: Point',
     argument: TEST_DATA.POINT,
     expected: {
-      pointFeatures: 1,
-      lineFeatures: 0,
-      polygonFeatures: 0,
-      polygonOutlineFeatures: 0
+      pointFeaturesLength: 1,
+      lineFeaturesLength: 0,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointFeatureIndexes: [0],
+      lineFeatureIndexes: [],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
     }
   },
   {
     title: 'geometry: MultiLineString',
     argument: TEST_DATA.MULTI_LINESTRING,
     expected: {
-      pointFeatures: 0,
-      lineFeatures: 2,
-      polygonFeatures: 0,
-      polygonOutlineFeatures: 0
+      pointFeaturesLength: 0,
+      lineFeaturesLength: 2,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointFeatureIndexes: [],
+      lineFeatureIndexes: [0, 0],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
     }
   },
   {
     title: 'geometry: Polygon',
     argument: TEST_DATA.POLYGON,
     expected: {
-      pointFeatures: 0,
-      lineFeatures: 0,
-      polygonFeatures: 1,
-      polygonOutlineFeatures: 1
+      pointFeaturesLength: 0,
+      lineFeaturesLength: 0,
+      polygonFeaturesLength: 1,
+      polygonOutlineFeaturesLength: 1,
+      pointFeatureIndexes: [],
+      lineFeatureIndexes: [],
+      polygonFeatureIndexes: [0],
+      polygonOutlineFeatureIndexes: [0]
     }
   },
   {
     title: 'GeometryCollection',
     argument: TEST_DATA.GEOMETRY_COLLECTION,
     expected: {
-      pointFeatures: 1,
-      lineFeatures: 1,
-      polygonFeatures: 0,
-      polygonOutlineFeatures: 0
+      pointFeaturesLength: 1,
+      lineFeaturesLength: 1,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointFeatureIndexes: [0],
+      lineFeatureIndexes: [1],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
     }
   },
   {
     title: 'feature: MultiPoint',
     argument: {type: 'Feature', properties: {}, geometry: TEST_DATA.MULTI_POINT},
     expected: {
-      pointFeatures: 2,
-      lineFeatures: 0,
-      polygonFeatures: 0,
-      polygonOutlineFeatures: 0
+      pointFeaturesLength: 2,
+      lineFeaturesLength: 0,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointFeatureIndexes: [0, 0],
+      lineFeatureIndexes: [],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
     }
   },
   {
     title: 'feature: LineString',
     argument: {type: 'Feature', properties: {}, geometry: TEST_DATA.LINESTRING},
     expected: {
-      pointFeatures: 0,
-      lineFeatures: 1,
-      polygonFeatures: 0,
-      polygonOutlineFeatures: 0
+      pointFeaturesLength: 0,
+      lineFeaturesLength: 1,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointFeatureIndexes: [],
+      lineFeatureIndexes: [0],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
     }
   },
   {
     title: 'feature: MultiPolygon',
     argument: {type: 'Feature', properties: {}, geometry: TEST_DATA.MULTI_POLYGON},
     expected: {
-      pointFeatures: 0,
-      lineFeatures: 0,
-      polygonFeatures: 2,
-      polygonOutlineFeatures: 3
+      pointFeaturesLength: 0,
+      lineFeaturesLength: 0,
+      polygonFeaturesLength: 2,
+      polygonOutlineFeaturesLength: 3,
+      pointFeatureIndexes: [],
+      lineFeatureIndexes: [],
+      polygonFeatureIndexes: [0, 0],
+      polygonOutlineFeatureIndexes: [0, 0, 0]
     }
   },
   {
     title: 'empty data',
     argument: [],
     expected: {
-      pointFeatures: 0,
-      lineFeatures: 0,
-      polygonFeatures: 0,
-      polygonOutlineFeatures: 0
+      pointFeaturesLength: 0,
+      lineFeaturesLength: 0,
+      polygonFeaturesLength: 0,
+      polygonOutlineFeaturesLength: 0,
+      pointFeatureIndexes: [],
+      lineFeatureIndexes: [],
+      polygonFeatureIndexes: [],
+      polygonOutlineFeatureIndexes: []
     }
   },
   {
@@ -162,10 +194,14 @@ const TEST_CASES = [
       ]
     },
     expected: {
-      pointFeatures: 3,
-      lineFeatures: 3,
-      polygonFeatures: 3,
-      polygonOutlineFeatures: 4
+      pointFeaturesLength: 3,
+      lineFeaturesLength: 3,
+      polygonFeaturesLength: 3,
+      polygonOutlineFeaturesLength: 4,
+      pointFeatureIndexes: [0, 1, 1],
+      lineFeatureIndexes: [2, 3, 3],
+      polygonFeatureIndexes: [4, 5, 5],
+      polygonOutlineFeatureIndexes: [4, 5, 5, 5]
     }
   },
   {
@@ -242,12 +278,20 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
       t.ok(Array.isArray(featureArray), `getGeojsonFeatures ${tc.title} returned array`);
 
       const result = separateGeojsonFeatures(featureArray);
-      const stats = {};
-      for (const key in result) {
-        stats[key] = result[key].length;
-      }
+      const actual = {
+        pointFeaturesLength: result.pointFeatures.length,
+        lineFeaturesLength: result.lineFeatures.length,
+        polygonFeaturesLength: result.polygonFeatures.length,
+        polygonOutlineFeaturesLength: result.polygonOutlineFeatures.length,
+        pointFeatureIndexes: result.pointFeatures.map(f => f.deckPickingInfo.featureIndex),
+        lineFeatureIndexes: result.lineFeatures.map(f => f.deckPickingInfo.featureIndex),
+        polygonFeatureIndexes: result.polygonFeatures.map(f => f.deckPickingInfo.featureIndex),
+        polygonOutlineFeatureIndexes: result.polygonOutlineFeatures.map(
+          f => f.deckPickingInfo.featureIndex
+        )
+      };
       t.deepEquals(
-        stats,
+        actual,
         tc.expected,
         `separateGeojsonFeatures ${tc.title} returned expected result`
       );

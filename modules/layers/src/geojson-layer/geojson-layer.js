@@ -90,10 +90,14 @@ export default class GeoJsonLayer extends CompositeLayer {
     }
   }
 
-  getPickingInfo({info}) {
+  getPickingInfo({info, sourceLayer}) {
+    // `info.index` is the index within the particular sub-layer
+    // We want to expose the index of the feature the user provided
+
     return Object.assign(info, {
       // override object with picked feature
-      object: (info.object && info.object.feature) || info.object
+      object: info.object ? info.object.deckPickingInfo.feature : info.object,
+      index: info.object ? info.object.deckPickingInfo.featureIndex : info.index
     });
   }
 

@@ -72,7 +72,9 @@ export function separateGeojsonFeatures(features) {
   const polygonFeatures = [];
   const polygonOutlineFeatures = [];
 
-  features.forEach(feature => {
+  for (let featureIndex = 0; featureIndex < features.length; featureIndex++) {
+    const feature = features[featureIndex];
+
     assert(feature && feature.geometry, 'GeoJSON does not have geometry');
 
     const {
@@ -81,45 +83,69 @@ export function separateGeojsonFeatures(features) {
     } = feature;
     checkCoordinates(type, coordinates);
 
+    const deckPickingInfo = {
+      feature,
+      featureIndex
+    };
+    // Split each feature, but keep track of the source feature and index (for Multi* geometries)
     switch (type) {
       case 'Point':
-        pointFeatures.push(feature);
+        pointFeatures.push(Object.assign({}, feature, {deckPickingInfo}));
         break;
       case 'MultiPoint':
-        // TODO - split multipoints
         coordinates.forEach(point => {
-          pointFeatures.push({geometry: {coordinates: point}, properties, feature});
+          pointFeatures.push({
+            geometry: {type: 'Point', coordinates: point},
+            properties,
+            deckPickingInfo
+          });
         });
         break;
       case 'LineString':
-        lineFeatures.push(feature);
+        lineFeatures.push(Object.assign({}, feature, {deckPickingInfo}));
         break;
       case 'MultiLineString':
         // Break multilinestrings into multiple lines with same properties
         coordinates.forEach(path => {
-          lineFeatures.push({geometry: {coordinates: path}, properties, feature});
+          lineFeatures.push({
+            geometry: {type: 'LineString', coordinates: path},
+            properties,
+            deckPickingInfo
+          });
         });
         break;
       case 'Polygon':
-        polygonFeatures.push(feature);
+        polygonFeatures.push(Object.assign({}, feature, {deckPickingInfo}));
         // Break polygon into multiple lines with same properties
         coordinates.forEach(path => {
-          polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+          polygonOutlineFeatures.push({
+            geometry: {type: 'LineString', coordinates: path},
+            properties,
+            deckPickingInfo
+          });
         });
         break;
       case 'MultiPolygon':
         // Break multipolygons into multiple polygons with same properties
         coordinates.forEach(polygon => {
-          polygonFeatures.push({geometry: {coordinates: polygon}, properties, feature});
+          polygonFeatures.push({
+            geometry: {type: 'Polygon', coordinates: polygon},
+            properties,
+            deckPickingInfo
+          });
           // Break polygon into multiple lines with same properties
           polygon.forEach(path => {
-            polygonOutlineFeatures.push({geometry: {coordinates: path}, properties, feature});
+            polygonOutlineFeatures.push({
+              geometry: {type: 'LineString', coordinates: path},
+              properties,
+              deckPickingInfo
+            });
           });
         });
         break;
       default:
     }
-  });
+  }
 
   return {
     pointFeatures,
