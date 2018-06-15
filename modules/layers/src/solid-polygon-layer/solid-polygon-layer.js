@@ -262,7 +262,7 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   _getPolygonTesselator(polygons, IndexType) {
-    return new PolygonTesselator({polygons, IndexType: this.state.IndexType})
+    return new PolygonTesselator({polygons, IndexType: this.state.IndexType});
   }
 
   updateAttributes(props) {
@@ -466,4 +466,4 @@ SolidPolygonLayer.layerName = 'SolidPolygonLayer';
 SolidPolygonLayer.defaultProps = defaultProps;
 
 // Experimental export
-SolidPolygonLayer._PolygonTesselator;
+SolidPolygonLayer._PolygonTesselator = PolygonTesselator;
