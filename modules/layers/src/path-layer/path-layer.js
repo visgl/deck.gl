@@ -338,7 +338,9 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const width = getWidth(data[index], index);
-      for (let ptIndex = 1; ptIndex < this._getPathLength(path); ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = width;
       }
     });
@@ -355,7 +357,9 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const dashArray = getDashArray(data[index], index);
-      for (let ptIndex = 1; ptIndex < this._getPathLength(path); ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = dashArray[0];
         value[i++] = dashArray[1];
       }
@@ -373,7 +377,9 @@ export default class PathLayer extends Layer {
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }
-      for (let ptIndex = 1; ptIndex < this._getPathLength(path); ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = pointColor[0];
         value[i++] = pointColor[1];
         value[i++] = pointColor[2];
@@ -390,7 +396,9 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const pickingColor = this.encodePickingColor(index);
-      for (let ptIndex = 1; ptIndex < this._getPathLength(path); ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = pickingColor[0];
         value[i++] = pickingColor[1];
         value[i++] = pickingColor[2];
