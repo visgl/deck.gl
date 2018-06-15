@@ -93,11 +93,22 @@ export default class GeoJsonLayer extends CompositeLayer {
   getPickingInfo({info, sourceLayer}) {
     // `info.index` is the index within the particular sub-layer
     // We want to expose the index of the feature the user provided
+    let featureIndex = info.index;
+
+    if (sourceLayer.id === this.getSubLayerProps({id: 'points'}).id) {
+      featureIndex = this.state.features.pointFeatureIndexes[info.index];
+    } else if (sourceLayer.id === this.getSubLayerProps({id: 'line-paths'}).id) {
+      featureIndex = this.state.features.lineFeatureIndexes[info.index];
+    } else if (sourceLayer.id === this.getSubLayerProps({id: 'polygon-fill'}).id) {
+      featureIndex = this.state.features.polygonFeatureIndexes[info.index];
+    } else if (sourceLayer.id === this.getSubLayerProps({id: 'polygon-outline'}).id) {
+      featureIndex = this.state.features.polygonOutlineFeatureIndexes[info.index];
+    }
 
     return Object.assign(info, {
       // override object with picked feature
-      object: info.object ? info.object.__deckMetadata.feature : info.object,
-      index: info.object ? info.object.__deckMetadata.featureIndex : info.index
+      object: (info.object && info.object.__deckSourceFeature) || info.object,
+      index: featureIndex
     });
   }
 
