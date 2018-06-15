@@ -135,10 +135,10 @@ export function getPointCloud() {
   return _pointCloud;
 }
 
-const sfBoundingBox = [-122.6, 37.6, -122.2, 37.9];
+const SF_BOUNDING_BOX = [-122.6, 37.6, -122.2, 37.9];
 
 function generatePointFeatures(featureCount) {
-  const features = pointGrid(featureCount, sfBoundingBox).map(coordinate => ({
+  const features = pointGrid(featureCount, SF_BOUNDING_BOX).map(coordinate => ({
     type: 'Feature',
     geometry: {type: 'Point', coordinates: coordinate}
   }));
@@ -146,7 +146,7 @@ function generatePointFeatures(featureCount) {
 }
 
 function generateMultiPointFeatures(featureCount, pointsPerFeature) {
-  const allMultiPoints = pointGrid(featureCount * pointsPerFeature, sfBoundingBox);
+  const allMultiPoints = pointGrid(featureCount * pointsPerFeature, SF_BOUNDING_BOX);
   const features = [];
   for (let featureIndex = 0; featureIndex < featureCount; featureIndex++) {
     const multiPoints = allMultiPoints.slice(
@@ -163,25 +163,25 @@ function generateMultiPointFeatures(featureCount, pointsPerFeature) {
 
 let _points100K = null;
 export function getPoints100K() {
-  _points100K = _points100K || pointGrid(1e5, sfBoundingBox);
+  _points100K = _points100K || pointGrid(1e5, SF_BOUNDING_BOX);
   return _points100K;
 }
 
 let _points1M = null;
 export function getPoints1M() {
-  _points1M = _points1M || pointGrid(1e6, sfBoundingBox);
+  _points1M = _points1M || pointGrid(1e6, SF_BOUNDING_BOX);
   return _points1M;
 }
 
 let _points5M = null;
 export function getPoints5M() {
-  _points5M = _points5M || pointGrid(5 * 1e6, sfBoundingBox);
+  _points5M = _points5M || pointGrid(5 * 1e6, SF_BOUNDING_BOX);
   return _points5M;
 }
 
 let _points10M = null;
 export function getPoints10M() {
-  _points10M = _points10M || pointGrid(1e7, sfBoundingBox);
+  _points10M = _points10M || pointGrid(1e7, SF_BOUNDING_BOX);
   return _points10M;
 }
 
