@@ -135,26 +135,64 @@ export function getPointCloud() {
   return _pointCloud;
 }
 
+const sfBoundingBox = [-122.6, 37.6, -122.2, 37.9];
+
+function generatePointFeatures(featureCount) {
+  const features = pointGrid(featureCount, sfBoundingBox).map(coordinate => ({
+    type: 'Feature',
+    geometry: {type: 'Point', coordinates: coordinate}
+  }));
+  return features;
+}
+
+function generateMultiPointFeatures(featureCount, pointsPerFeature) {
+  const allMultiPoints = pointGrid(featureCount * pointsPerFeature, sfBoundingBox);
+  const features = [];
+  for (let featureIndex = 0; featureIndex < featureCount; featureIndex++) {
+    const multiPoints = allMultiPoints.slice(
+      featureIndex * pointsPerFeature,
+      featureIndex * pointsPerFeature + pointsPerFeature
+    );
+    features.push({
+      type: 'Feature',
+      geometry: {type: 'MultiPoint', coordinates: multiPoints}
+    });
+  }
+  return features;
+}
+
 let _points100K = null;
 export function getPoints100K() {
-  _points100K = _points100K || pointGrid(1e5, [-122.6, 37.6, -122.2, 37.9]);
+  _points100K = _points100K || pointGrid(1e5, sfBoundingBox);
   return _points100K;
 }
 
 let _points1M = null;
 export function getPoints1M() {
-  _points1M = _points1M || pointGrid(1e6, [-122.6, 37.6, -122.2, 37.9]);
+  _points1M = _points1M || pointGrid(1e6, sfBoundingBox);
   return _points1M;
 }
 
 let _points5M = null;
 export function getPoints5M() {
-  _points5M = _points5M || pointGrid(5 * 1e6, [-122.6, 37.6, -122.2, 37.9]);
+  _points5M = _points5M || pointGrid(5 * 1e6, sfBoundingBox);
   return _points5M;
 }
 
 let _points10M = null;
 export function getPoints10M() {
-  _points10M = _points10M || pointGrid(1e7, [-122.6, 37.6, -122.2, 37.9]);
+  _points10M = _points10M || pointGrid(1e7, sfBoundingBox);
   return _points10M;
+}
+
+let _pointFeatures1M = null;
+export function getPointFeatures1M() {
+  _pointFeatures1M = _pointFeatures1M || generatePointFeatures(1e6);
+  return _pointFeatures1M;
+}
+
+let _multiPointFeatures100K = null;
+export function getMultiPointFeatures100K() {
+  _multiPointFeatures100K = _multiPointFeatures100K || generateMultiPointFeatures(1e5, 10);
+  return _multiPointFeatures100K;
 }
