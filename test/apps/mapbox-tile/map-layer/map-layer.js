@@ -1,4 +1,4 @@
-import {CompositeLayer, GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {CompositeLayer, GeoJsonLayer} from 'deck.gl';
 import {getTileIndices} from './utils/viewport-utils';
 import TileCache from './utils/tile-cache';
 
@@ -11,7 +11,6 @@ const defaultProps = {
 const CACHE_SIZE = 50;
 
 export default class MapLayer extends CompositeLayer {
-
   initializeState() {
     this.state = {
       tileCache: new TileCache({source: this.props.source, size: CACHE_SIZE}),
@@ -41,12 +40,11 @@ export default class MapLayer extends CompositeLayer {
         this.setState({
           loadingTiles: tiles
         });
-        Promise.all(tiles.map(t => t.getData()))
-          .then(() => {
-            if (this.state.loadingTiles === tiles) {
-              this.setState({tiles});
-            }
-          });
+        Promise.all(tiles.map(t => t.getData())).then(() => {
+          if (this.state.loadingTiles === tiles) {
+            this.setState({tiles});
+          }
+        });
       }
     }
   }
@@ -54,18 +52,23 @@ export default class MapLayer extends CompositeLayer {
   renderLayers() {
     const {tiles} = this.state;
 
-    return tiles && tiles.map((tile, i) =>
-      new GeoJsonLayer(this.getSubLayerProps({
-        id: `tile-${tile.x}-${tile.y}-${tile.z}`,
-        // coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        // coordinateOrigin: tile.center,
-        data: tile.getData(),
-        pickable: true,
-        ...this.props.style
-      }))
+    return (
+      tiles &&
+      tiles.map(
+        (tile, i) =>
+          new GeoJsonLayer(
+            this.getSubLayerProps({
+              id: `tile-${tile.x}-${tile.y}-${tile.z}`,
+              // coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+              // coordinateOrigin: tile.center,
+              data: tile.getData(),
+              pickable: true,
+              ...this.props.style
+            })
+          )
+      )
     );
   }
-
 }
 
 MapLayer.defaultProps = defaultProps;

@@ -1,12 +1,14 @@
+/* global fetch */
 import {VectorTile, VectorTileFeature} from '@mapbox/vector-tile';
-import {worldToLngLat, getDistanceScales} from 'viewport-mercator-project';
+import {worldToLngLat} from 'viewport-mercator-project';
 import Protobuf from 'pbf';
 
 const TILE_SIZE = 512;
 
 export default class Tile {
   constructor({source, x, y, z}) {
-    this.sourceURL = source.replace('{x}', x)
+    this.sourceURL = source
+      .replace('{x}', x)
       .replace('{y}', y)
       .replace('{z}', z);
 
@@ -27,18 +29,15 @@ export default class Tile {
 
     this.scale = scale;
 
-    this.center = worldToLngLat(
-      [(this.x + 0.5) * TILE_SIZE, (this.y + 0.5) * TILE_SIZE],
-      scale
-    );
+    this.center = worldToLngLat([(this.x + 0.5) * TILE_SIZE, (this.y + 0.5) * TILE_SIZE], scale);
 
-    this.distanceScales = getDistanceScales({
-      longitude: this.center[0],
-      latitude: this.center[1],
-      zoom: this.z,
-      scale,
-      highPrecision: true
-    });
+    // this.distanceScales = getDistanceScales({
+    //   longitude: this.center[0],
+    //   latitude: this.center[1],
+    //   zoom: this.z,
+    //   scale,
+    //   highPrecision: true
+    // });
   }
 
   project(line, extent) {
@@ -79,7 +78,7 @@ export default class Tile {
                 f.properties.layer = layerName;
                 result.push(f);
               });
-            } 
+            }
           }
           return result;
         });
@@ -88,7 +87,8 @@ export default class Tile {
   }
 }
 
-/* adapted from @mapbox/vector-tile/lib/vectortilefeature.js */
+/* adapted from @mapbox/vector-tile/lib/vectortilefeature.js for better perf */
+/* eslint-disable */
 
 function getFeatures(vectorTileFeature, project) {
   let coords = getCoordinates(vectorTileFeature);
@@ -98,34 +98,35 @@ function getFeatures(vectorTileFeature, project) {
   let j;
 
   switch (vectorTileFeature.type) {
-  case 1:
-    coords = coords.map(pts => pts[0]);
-    project(coords, extent);
-    break;
+    case 1:
+      coords = coords.map(pts => pts[0]);
+      project(coords, extent);
+      break;
 
-  case 2:
-    for (i = 0; i < coords.length; i++) {
-      project(coords[i], extent);
-    }
-    break;
-
-  case 3:
-    coords = classifyRings(coords);
-    for (i = 0; i < coords.length; i++) {
-      for (j = 0; j < coords[i].length; j++) {
-        project(coords[i][j], extent);
+    case 2:
+      for (i = 0; i < coords.length; i++) {
+        project(coords[i], extent);
       }
-    }
-    break;
+      break;
+
+    case 3:
+      coords = classifyRings(coords);
+      for (i = 0; i < coords.length; i++) {
+        for (j = 0; j < coords[i].length; j++) {
+          project(coords[i][j], extent);
+        }
+      }
+      break;
+
+    default:
+      return [];
   }
 
-  var result = coords.map(coordinates => ({
-    type: "Feature",
+  return coords.map(coordinates => ({
+    type: 'Feature',
     geometry: {type, coordinates},
     properties: vectorTileFeature.properties
   }));
-
-  return result;
 }
 
 function getCoordinates(vectorTileFeature) {
@@ -154,22 +155,20 @@ function getCoordinates(vectorTileFeature) {
       x += pbf.readSVarint();
       y += pbf.readSVarint();
 
-      if (cmd === 1) { // moveTo
+      if (cmd === 1) {
+        // moveTo
         if (line) lines.push(line);
         line = [];
       }
 
       line.push([x, y]);
-
     } else if (cmd === 7) {
-
       // Workaround for https://github.com/mapbox/mapnik-vector-tile/issues/90
       if (line) {
         line.push(line[0].slice()); // closePolygon
       }
-
     } else {
-      throw new Error('unknown command ' + cmd);
+      throw new Error(`unknown command ${cmd}`);
     }
   }
 
@@ -204,7 +203,6 @@ function classifyRings(rings) {
         polygons.push(polygon);
       }
       polygon = [rings[i]];
-
     } else {
       polygon.push(rings[i]);
     }

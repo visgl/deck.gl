@@ -16,12 +16,14 @@ export const MAP_STYLE = {
   getLineWidth: f => {
     if (f.properties.layer === 'roads') {
       switch (f.properties['Segment.roadClass']) {
-      case 'MAJOR_ARTERY':
-        return 10;
-      case 'MINOR_ARTERY':
-        return 6;
-      case 'MOTORWAY':
-        return 14;
+        case 'MAJOR_ARTERY':
+          return 10;
+        case 'MINOR_ARTERY':
+          return 6;
+        case 'MOTORWAY':
+          return 14;
+        default:
+          return 3;
       }
     }
     return 1;

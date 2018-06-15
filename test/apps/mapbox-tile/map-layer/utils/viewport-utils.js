@@ -1,4 +1,4 @@
-import WebMercatorViewport, {lngLatToWorld} from 'viewport-mercator-project';
+import {lngLatToWorld} from 'viewport-mercator-project';
 
 function getBoundingBox(viewport) {
   const corners = [
@@ -9,11 +9,11 @@ function getBoundingBox(viewport) {
   ];
 
   return [
-    corners.reduce((minLng, p) => minLng < p[0] ? minLng : p[0], 180),
-    corners.reduce((minLat, p) => minLat < p[1] ? minLat : p[1], 90),
-    corners.reduce((maxLng, p) => maxLng > p[0] ? maxLng : p[0], -180),
-    corners.reduce((maxLat, p) => maxLat > p[1] ? maxLat : p[1], -90)
-  ]
+    corners.reduce((minLng, p) => (minLng < p[0] ? minLng : p[0]), 180),
+    corners.reduce((minLat, p) => (minLat < p[1] ? minLat : p[1]), 90),
+    corners.reduce((maxLng, p) => (maxLng > p[0] ? maxLng : p[0]), -180),
+    corners.reduce((maxLat, p) => (maxLat > p[1] ? maxLat : p[1]), -90)
+  ];
 }
 
 function pixelsToTileIndex(a) {

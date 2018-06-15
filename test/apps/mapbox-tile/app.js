@@ -2,11 +2,12 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {MapController} from 'deck.gl';
+import DeckGL, {View} from 'deck.gl';
 
 import MapLayer from './map-layer/map-layer';
 import {MAP_STYLE} from './constants';
-import CustomView from './views';
+import Viewport from './viewports';
+import MapController from './controller/map-controller';
 
 import './shaderlib';
 
@@ -37,7 +38,7 @@ class Root extends Component {
   render() {
     return (
       <DeckGL
-        views={new CustomView()}
+        views={new View({type: Viewport})}
         controller={MapController}
         viewState={this.state.viewState}
         onViewStateChange={this._onViewStateChange}
@@ -45,9 +46,10 @@ class Root extends Component {
           new MapLayer({
             source: 'https://d3dt5tsgfu6lcf.cloudfront.net/tile/v1/{z}/{x}/{y}/COMPOSITE?v=4',
             style: MAP_STYLE,
-            onClick: info => console.log(JSON.stringify(info.object))
+            onClick: info => console.log(JSON.stringify(info.object)) // eslint-disable-line
           })
-        ]} />
+        ]}
+      />
     );
   }
 }
