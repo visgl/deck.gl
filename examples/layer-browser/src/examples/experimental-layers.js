@@ -4,10 +4,19 @@ import {
   PathMarkerLayer,
   AdvancedTextLayer
 } from '@deck.gl/experimental-layers';
-import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
+import {GPUScreenGridLayer, GPUGridLayer} from '@deck.gl/experimental-layers';
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import {GL, CylinderGeometry} from 'luma.gl';
 import * as dataSamples from '../data-samples';
+
+const LIGHT_SETTINGS = {
+  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
+  ambientRatio: 0.3,
+  diffuseRatio: 0.6,
+  specularRatio: 0.4,
+  lightsStrength: [1, 0.0, 0.8, 0.0],
+  numberOfLights: 2
+};
 
 const MeshLayerExample = {
   layer: MeshLayer,
@@ -166,8 +175,22 @@ const GPUScreenGridLayerExample = {
     getPosition: d => d.COORDINATES,
     cellSizePixels: 40,
     minColor: [0, 0, 80, 0],
-    maxColor: [100, 255, 0, 128],
+    maxColor: [0, 255, 0, 128],
     pickable: false
+  }
+};
+
+const GPUGridLayerExample = {
+  layer: GPUGridLayer,
+  getData: () => dataSamples.points,
+  props: {
+    id: 'gpuGridLayer',
+    cellSize: 200,
+    opacity: 1,
+    extruded: true,
+    pickable: false,
+    getPosition: d => d.COORDINATES,
+    lightSettings: LIGHT_SETTINGS
   }
 };
 
@@ -184,6 +207,21 @@ const GPUScreenGridLayerPerfExample = (id, getData) => ({
   }
 });
 
+const GPUGridLayerPerfExample = (id, getData) => ({
+  layer: GPUGridLayer,
+  getData,
+  props: {
+    id: `gpuGridLayerPerf-${id}`,
+    cellSize: 200,
+    opacity: 1,
+    extruded: true,
+    pickable: false,
+    getPosition: d => d,
+    lightSettings: LIGHT_SETTINGS
+  }
+});
+
+
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
@@ -196,6 +234,9 @@ export default {
     GPUScreenGridLayer: GPUScreenGridLayerExample,
     'GPUScreenGridLayer (1M)': GPUScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUScreenGridLayer (5M)': GPUScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    'GPUScreenGridLayer (10M)': GPUScreenGridLayerPerfExample('10M', dataSamples.getPoints10M)
+    'GPUScreenGridLayer (10M)': GPUScreenGridLayerPerfExample('10M', dataSamples.getPoints10M),
+    GPUGridLayer: GPUGridLayerExample,
+    'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
+    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
   }
 };
