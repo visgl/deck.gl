@@ -44,17 +44,35 @@ export default function gridAggregatorBench(suite) {
     .add('GPU 1K', () => {
       runAggregation(Object.assign({}, {useGPU: true}, points1K));
     })
+    .add('CPU 1K with projection', () => {
+      runAggregation(Object.assign({}, {useGPU: false, projectPoints: true}, points1K));
+    })
+    .add('GPU 1K with projection', () => {
+      runAggregation(Object.assign({}, {useGPU: true, projectPoints: true}, points1K));
+    })
     .add('CPU 100K', () => {
       runAggregation(Object.assign({}, {useGPU: false}, points100K));
     })
     .add('GPU 100K', () => {
       runAggregation(Object.assign({}, {useGPU: true}, points100K));
     })
+    .add('CPU 100K with projection', () => {
+      runAggregation(Object.assign({}, {useGPU: false, projectPoints: true}, points100K));
+    })
+    .add('GPU 100K with projection', () => {
+      runAggregation(Object.assign({}, {useGPU: true, projectPoints: true}, points100K));
+    })
     .add('CPU 1M', () => {
       runAggregation(Object.assign({}, {useGPU: false}, points1M));
     })
     .add('GPU 1M', () => {
       runAggregation(Object.assign({}, {useGPU: true}, points1M));
+    })
+    .add('CPU 1M with projection', () => {
+      runAggregation(Object.assign({}, {useGPU: false, projectPoints: true}, points1M));
+    })
+    .add('GPU 1M with projection', () => {
+      runAggregation(Object.assign({}, {useGPU: true, projectPoints: true}, points1M));
     });
 }
 

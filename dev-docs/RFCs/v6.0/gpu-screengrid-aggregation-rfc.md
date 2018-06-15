@@ -32,6 +32,7 @@ Performs aggregation either on CPU or GPU based on the provided options and brow
 
 Input:
 * positions (Array) : Array of points in world space (lng, lat).
+* positions64xyLow (Array) : Array of low precision values of points in world space (lng, lat).
 * weights  (Array, optional, default: null) : Array of weights, if null, a default weight of 1 is used for all points.
 * cellSize: (Array) : Size of the cell, cellSize[0] is width and cellSize[1] is height.
 * width: (Number, Optional) : Grid width in pixels, deduced from ‘viewport’ when not provided.
@@ -44,6 +45,8 @@ Input:
 	* cellSizeChagned (Bool) : should be set to true when cellSize is changed.
 * countsBuffer: (Buffer, optional) : used to update aggregation data per grid, details in Output section.
 * maxCountBuffer: (Buffer, optional) : used to update total aggregation data, details in Output section.
+* projectPoints (Bool) : when true performs aggregation in screen space.
+* gridTransformMatrix (Mat4) : used to transform input positions before aggregating them (for example, lng/lat can be moved to +ve range, when doing world space aggregation, projectPoints=false).
 
 ### Output
 * results(Object): Contains following Buffer objects. If these buffers are not provided to the method, new Buffers with enough size are created and returned.

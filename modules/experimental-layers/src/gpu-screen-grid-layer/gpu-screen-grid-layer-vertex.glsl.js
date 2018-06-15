@@ -22,10 +22,10 @@ export default `\
 #version 300 es
 #define SHADER_NAME screen-grid-layer-vertex-shader
 
-attribute vec3 vertices;
-attribute vec3 instancePositions;
-attribute vec4 instanceCounts;
-attribute vec3 instancePickingColors;
+in vec3 vertices;
+in vec3 instancePositions;
+in vec4 instanceCounts;
+in vec3 instancePickingColors;
 
 layout(std140) uniform;
 uniform float opacity;
@@ -37,7 +37,7 @@ uniform AggregationData
   vec4 maxCount;
 } aggregationData;
 
-varying vec4 vColor;
+out vec4 vColor;
 
 void main(void) {
   float step = instanceCounts.g / aggregationData.maxCount.w;
