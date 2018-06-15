@@ -16,8 +16,6 @@ test('GPUGridAggregator#GPU', t => {
   t.end();
 });
 
-//*
-// NOTE:  Disabling these tests as they fail on Chromium browser, works fine on Chrome (test-browser)
 const {generateRandomGridPoints} = GridAggregationData;
 test('GPUGridAggregator#CPU', t => {
   const sa = new GPUGridAggregator(gl);
@@ -45,7 +43,6 @@ test('GPUGridAggregator#CompareCPUandGPU', t => {
     maxCount: result.maxCountBuffer.getData()
   };
 
-
   // Compare aggregation details for each grid-cell, total count and max count.
   t.deepEqual(cpuResults, gpuResults, 'cpu and gpu results should match');
   t.end();
@@ -58,7 +55,9 @@ test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
   };
-  result = sa.run(Object.assign({}, fixtureWorldSpace, {useGPU: true, projectPoints: false, fp64: true}));
+  result = sa.run(
+    Object.assign({}, fixtureWorldSpace, {useGPU: true, projectPoints: false, fp64: true})
+  );
   const gpuResults = {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
@@ -67,5 +66,3 @@ test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
   t.deepEqual(cpuResults, gpuResults, 'cpu and gpu results should match');
   t.end();
 });
-
-//*/

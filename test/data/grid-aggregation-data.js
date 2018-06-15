@@ -31,7 +31,6 @@ let positions = [
   10
 ];
 
-
 let positions64xyLow = positions.map(pos => fp64LowPart(pos));
 const fixture = {
   positions,
@@ -84,10 +83,10 @@ function generateRandomGridPoints(pointCount) {
   return {positions: pos, positions64xyLow: posLow, weights};
 }
 
-const X =  0;
+const X = 0;
 const Y = 0;
-const DX =  0.00575;
-const DY =  0.00455;
+const DX = 0.00575;
+const DY = 0.00455;
 
 positions = [
   // cell-0
@@ -98,7 +97,7 @@ positions = [
   Y + DY / 2,
 
   // cell -1
-  X + (1.1 * DX),
+  X + 1.1 * DX,
   0.8 * Y,
 
   // cell -2
@@ -127,18 +126,17 @@ positions = [
 
   X + 3.98 * DX,
   Y + 3.99 * DY
-
 ];
 positions64xyLow = positions.map(pos => fp64LowPart(pos));
 
 const fixtureWorldSpace = {
   positions,
   positions64xyLow,
-  cellSize : [DX, DY],
-  width: DX*5,
-  height: DY*5,
-  weights: [ 10, 0.1, 1, 4, 5, 6, 2, 3, 111, 44 ,123]
-}
+  cellSize: [DX, DY],
+  width: DX * 5,
+  height: DY * 5,
+  weights: [10, 0.1, 1, 4, 5, 6, 2, 3, 111, 44, 123]
+};
 export const GridAggregationData = {
   viewport,
   fixture,
