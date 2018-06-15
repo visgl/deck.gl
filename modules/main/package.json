@@ -26,8 +26,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.0.0-alpha.1",
-    "@deck.gl/layers": "^6.0.0-alpha.1",
-    "@deck.gl/react": "^6.0.0-alpha.1"
+    "@deck.gl/core": ">=6.0.0-alpha.1",
+    "@deck.gl/layers": ">=6.0.0-alpha.1",
+    "@deck.gl/react": ">=6.0.0-alpha.1"
   }
 }

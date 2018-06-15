@@ -21,8 +21,8 @@
     "build": "webpack --config webpack.config.js"
   },
   "dependencies": {
-    "@deck.gl/core": "^5.3.0-alpha.2",
-    "@deck.gl/layers": "^5.3.0-alpha.2"
+    "@deck.gl/core": ">=6.0.0-alpha.1",
+    "@deck.gl/layers": ">=6.0.0-alpha.1"
   },
   "devDependencies": {
     "react-map-gl": "^3.3.0-alpha.4"

@@ -22,7 +22,7 @@
     "src"
   ],
   "dependencies": {
-    "@deck.gl/core": "^6.0.0-alpha.1",
+    "@deck.gl/core": ">=6.0.0-alpha.1",
     "prop-types": "^15.6.0"
   },
   "scripts": {
