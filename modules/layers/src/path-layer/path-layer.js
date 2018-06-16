@@ -316,7 +316,7 @@ export default class PathLayer extends Layer {
 
     let i = 0;
     paths.forEach(path => {
-      for (let ptIndex = 1; ptIndex < this._getPathLength(path); ptIndex++) {
+      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
         const point = path[ptIndex];
         let nextPoint = path[ptIndex + 1];
         if (!nextPoint) {
