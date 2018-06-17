@@ -44,7 +44,6 @@ const defaultProps = {
 };
 
 export default class GPUGridCellLayer extends Layer {
-
   getShaders() {
     return {vs, fs, modules: ['project32', 'lighting', 'picking', 'fp64']};
   }
@@ -53,9 +52,9 @@ export default class GPUGridCellLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instanceCounts: {
-          size: 4,
-          update: this.calculateInstanceCounts,
-          noAlloc: true
+        size: 4,
+        update: this.calculateInstanceCounts,
+        noAlloc: true
       }
     });
   }
@@ -91,7 +90,18 @@ export default class GPUGridCellLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {cellSize, extruded, elevationScale, coverage, gridSize, gridOrigin, gridOffset, minColor, maxColor, maxCountBuffer} = this.props;
+    const {
+      cellSize,
+      extruded,
+      elevationScale,
+      coverage,
+      gridSize,
+      gridOrigin,
+      gridOffset,
+      minColor,
+      maxColor,
+      maxCountBuffer
+    } = this.props;
 
     const gridOriginLow = [fp64LowPart(gridOrigin[0]), fp64LowPart(gridOrigin[1])];
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];

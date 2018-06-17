@@ -22,7 +22,10 @@ import test from 'tape-catch';
 import {gl} from '@deck.gl/test-utils';
 import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
 import * as FIXTURES from 'deck.gl/test/data';
-import {pointToDensityGridData, alignToCellBoundary} from '@deck.gl/experimental-layers/gpu-grid-layer/gpu-grid-utils';
+import {
+  pointToDensityGridData,
+  alignToCellBoundary
+} from '@deck.gl/experimental-layers/gpu-grid-layer/gpu-grid-utils';
 // import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 //
 // import {GridLayer, GridCellLayer} from 'deck.gl';
@@ -33,15 +36,12 @@ const getPosition = d => d.COORDINATES;
 const CELLSIZE = 500;
 const gpuGridAggregator = new GPUGridAggregator(gl);
 
-
 test('GridAggregator#alignToCellBoundary (CPU)', t => {
-
   t.equal(alignToCellBoundary(-3, 5), -5);
   t.equal(alignToCellBoundary(3, 5), 0);
 
   t.end();
 });
-
 
 test('GridAggregator#pointToDensityGridData (CPU vs GPU)', t => {
   const opts = {
@@ -49,7 +49,7 @@ test('GridAggregator#pointToDensityGridData (CPU vs GPU)', t => {
     getPosition,
     cellSizeMeters: CELLSIZE,
     gpuGridAggregator
-  }
+  };
   opts.gpuAggregation = false;
   const cpuResults = pointToDensityGridData(opts);
   opts.gpuAggregation = true;
@@ -58,11 +58,11 @@ test('GridAggregator#pointToDensityGridData (CPU vs GPU)', t => {
 
   const cpuCountsData = cpuResults.countsBuffer.getData();
   const gpuCountsData = gpuResults.countsBuffer.getData();
-  t.deepEqual(cpuCountsData, gpuCountsData, "Aggregated data should match");
+  t.deepEqual(cpuCountsData, gpuCountsData, 'Aggregated data should match');
 
   const cpuMaxCountsData = cpuResults.maxCountBuffer.getData();
   const gpuMaxCountData = gpuResults.maxCountBuffer.getData();
-  t.deepEqual(cpuMaxCountsData, gpuMaxCountData, "Aggregated data should match");
+  t.deepEqual(cpuMaxCountsData, gpuMaxCountData, 'Aggregated data should match');
 
   t.end();
 });

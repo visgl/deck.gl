@@ -221,7 +221,6 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
-
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {

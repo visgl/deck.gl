@@ -30,7 +30,6 @@ const CPU_MAXCOLOR = [255, 0, 0, 255];
 const GPU_MAXCOLOR = [0, 255, 0, 255];
 
 const defaultProps = {
-
   // elevation
   elevationScale: 1,
 
@@ -57,7 +56,7 @@ export default class GPUGridLayer extends CompositeLayer {
       shaderCache: this.context.shaderCache
     };
     this.state = {
-      gpuGridAggregator: new GPUGridAggregator(gl, options),
+      gpuGridAggregator: new GPUGridAggregator(gl, options)
     };
   }
 
@@ -71,27 +70,20 @@ export default class GPUGridLayer extends CompositeLayer {
   }
 
   needsReProjectPoints(oldProps, props) {
-    return (
-      oldProps.cellSize !== props.cellSize ||
-      oldProps.gpuAggregation !== props.gpuAggregation
-    );
+    return oldProps.cellSize !== props.cellSize || oldProps.gpuAggregation !== props.gpuAggregation;
   }
 
   getLayerData() {
     const {data, cellSize, getPosition, gpuAggregation} = this.props;
-    const {
-      countsBuffer,
-      maxCountBuffer,
-      gridSize,
-      gridOrigin,
-      gridOffset,
-    } = pointToDensityGridData({
-      data,
-      cellSizeMeters: cellSize,
-      getPosition,
-      gpuAggregation,
-      gpuGridAggregator: this.state.gpuGridAggregator,
-    });
+    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset} = pointToDensityGridData(
+      {
+        data,
+        cellSizeMeters: cellSize,
+        getPosition,
+        gpuAggregation,
+        gpuGridAggregator: this.state.gpuGridAggregator
+      }
+    );
 
     this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset});
   }

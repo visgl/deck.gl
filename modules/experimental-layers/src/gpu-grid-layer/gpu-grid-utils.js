@@ -76,14 +76,13 @@ export function alignToCellBoundary(inValue, cellSize) {
 
   let value = sign < 0 ? Math.abs(inValue) + cellSize : Math.abs(inValue);
 
-  value = Math.floor(value/cellSize) * cellSize;
+  value = Math.floor(value / cellSize) * cellSize;
 
   return value * sign;
 }
 
 // Calculate grid parameters
 function _getGPUAggregationParams(gridData, gridOffset) {
-
   const {latMin, latMax, lngMin, lngMax, positions, positions64xyLow, weights} = gridData;
 
   // NOTE: this alignment will match grid cell boundaries with existing implementation
@@ -94,7 +93,7 @@ function _getGPUAggregationParams(gridData, gridOffset) {
 
   const cellSize = [gridOffset.xOffset, gridOffset.yOffset];
   const gridOrigin = [originX, originY];
-  const width =  lngMax - lngMin + gridOffset.xOffset;
+  const width = lngMax - lngMin + gridOffset.xOffset;
   const height = latMax - latMin + gridOffset.yOffset;
 
   return {
@@ -111,12 +110,12 @@ function _getGPUAggregationParams(gridData, gridOffset) {
 }
 
 /**
-* Based on geometric center of sample points, calculate cellSize in lng/lat (degree) space
-* @param {array} points
-* @param {number} cellSize - unit size in meters
-* @param {function} getPosition - position accessor
-* @returns {yOffset, xOffset} - cellSize size lng/lat (degree) space.
-*/
+ * Based on geometric center of sample points, calculate cellSize in lng/lat (degree) space
+ * @param {array} points
+ * @param {number} cellSize - unit size in meters
+ * @param {function} getPosition - position accessor
+ * @returns {yOffset, xOffset} - cellSize size lng/lat (degree) space.
+ */
 
 function _getGridOffset(gridData, cellSize) {
   const {latMin, latMax} = gridData;
