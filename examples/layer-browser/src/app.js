@@ -2,9 +2,8 @@
 
 // deck.gl ES6 components
 import {COORDINATE_SYSTEM, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
-
-import {experimental} from '@deck.gl/core';
-const {OrbitController, ReflectionEffect} = experimental;
+import {_OrbitController as OrbitController} from '@deck.gl/core';
+import {_ReflectionEffect as ReflectionEffect} from '@deck.gl/core';
 
 // deck.gl react components
 import DeckGL from '@deck.gl/react';

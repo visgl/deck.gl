@@ -38,7 +38,7 @@
 
   <script type="text/javascript">
 
-    const {DeckGL, ScatterplotLayer, experimental: {ViewportFlyToInterpolator}} = deck;
+    const {DeckGL, ScatterplotLayer, _ViewportFlyToInterpolator} = deck;
 
     // Data
     const CITIES = [
@@ -84,7 +84,7 @@
             latitude: d.latitude,
             zoom: 10
           },
-          transitionInterpolator: new ViewportFlyToInterpolator(),
+          transitionInterpolator: new _ViewportFlyToInterpolator(),
           transitionDuration: 5000
         })
       });

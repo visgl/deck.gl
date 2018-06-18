@@ -1,5 +1,4 @@
-import {Vector3, experimental} from 'math.gl';
-const {SphericalCoordinates} = experimental;
+import {Vector3, _SphericalCoordinates as SphericalCoordinates} from 'math.gl';
 import assert from '../utils/assert';
 
 const defaultState = {

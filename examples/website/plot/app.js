@@ -1,8 +1,8 @@
 /* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {OrbitView, experimental} from 'deck.gl';
-const {OrbitController} = experimental;
+import DeckGL, {OrbitView} from 'deck.gl';
+import {_OrbitController as OrbitController} from 'deck.gl';
 import PlotLayer from './plot-layer';
 import {scaleLinear} from 'd3-scale';
 
