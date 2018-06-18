@@ -2,6 +2,11 @@ import createViewport from './create-viewport';
 import {geoMercatorRaw, geoStereographicRaw} from 'd3-geo';
 
 export const MercatorViewport = createViewport(geoMercatorRaw);
+
+MercatorViewport.glsl = `
+  return vec2(x, log(tan_fp32(PI * 0.25 + y * 0.5)));
+`;
+
 export const StereographicViewport = createViewport(geoStereographicRaw);
 
 StereographicViewport.glsl = `
@@ -10,4 +15,4 @@ StereographicViewport.glsl = `
   return vec2(cy * sin(x) / k, sin(y) / k);
 `;
 
-export default StereographicViewport;
+export default MercatorViewport;
