@@ -11,7 +11,6 @@ import {
   MapView,
   FirstPersonView,
   ThirdPersonView,
-
   _FirstPersonState as FirstPersonState,
   _ViewportController as ViewportController,
   _LinearInterpolator as LinearInterpolator
