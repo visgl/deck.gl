@@ -31,8 +31,6 @@ out vec4 fragColor;
 void main(void) {
   fragColor = vColor;
 
-  // TODO: Enable picking (https://github.com/uber/deck.gl/issues/1592)
-  // fragColor = picking_filterHighlightColor(fragColor);
-  // fragColor = picking_filterPickingColor(fragColor);
+  fragColor = picking_filterColor(fragColor);
 }
 `;

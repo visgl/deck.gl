@@ -21,6 +21,7 @@
 export default `\
 #version 300 es
 #define SHADER_NAME screen-grid-layer-vertex-shader
+#define RANGE_COUNT 6
 
 in vec3 vertices;
 in vec3 instancePositions;
@@ -37,16 +38,49 @@ uniform AggregationData
   vec4 maxCount;
 } aggregationData;
 
+uniform vec4 colorRange[RANGE_COUNT];
+uniform vec2 colorDomain;
+uniform bool shouldUseMinMax;
+
 out vec4 vColor;
 
+vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
+  vec4 outColor = vec4(0., 0., 0., 0.);
+  if (value >= domain.x && value <= domain.y) {
+    float domainRange = domain.y - domain.x;
+    if (domainRange <= 0.) {
+      outColor = colorRange[0];
+    } else {
+      float rangeCount = float(RANGE_COUNT);
+      float rangeStep = domainRange / rangeCount;
+      float idx = floor((value - domain.x) / rangeStep);
+      idx = min(idx, rangeCount - 1.);
+      idx = max(idx, 0.);
+      int intIdx = int(idx);
+      outColor = colorRange[intIdx];
+    }
+  }
+  outColor = outColor / 255.;
+  return outColor;
+}
+
 void main(void) {
-  float step = instanceCounts.g / aggregationData.maxCount.w;
-  vec4 color = mix(minColor, maxColor, step) / 255.;
+  float weight = instanceCounts.g ;
+  float maxWeight = aggregationData.maxCount.w;
+  float step = weight / maxWeight;
+  vec4 minMaxColor = mix(minColor, maxColor, step) / 255.;
+
+  vec2 domain = colorDomain;
+  float domainMaxValid = float(colorDomain.y != 0.);
+  domain.y = mix(maxWeight, colorDomain.y, domainMaxValid);
+  vec4 rangeColor = quantizeScale(domain, colorRange, weight);
+
+  float rangeMinMax = float(shouldUseMinMax);
+  vec4 color = mix(rangeColor, minMaxColor, rangeMinMax);
   vColor = vec4(color.rgb, color.a * opacity);
 
-  // TODO: Enable picking (https://github.com/uber/deck.gl/issues/1592)
-  // // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  // picking_setPickingColor(instancePickingColors);
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
 
   gl_Position = vec4(instancePositions + vertices * cellScale, 1.);
 }
