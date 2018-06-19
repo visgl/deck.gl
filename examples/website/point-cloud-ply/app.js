@@ -2,8 +2,8 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, experimental} from 'deck.gl';
-const {OrbitController} = experimental;
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView} from 'deck.gl';
+import {_OrbitController as OrbitController} from 'deck.gl';
 import {loadBinary, parsePLY} from './utils/ply-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';

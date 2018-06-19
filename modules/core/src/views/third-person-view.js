@@ -1,7 +1,6 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
-import {Vector3, Matrix4, experimental} from 'math.gl';
-const {SphericalCoordinates} = experimental;
+import {Vector3, Matrix4, _SphericalCoordinates as SphericalCoordinates} from 'math.gl';
 
 function getDirectionFromBearingAndPitch({bearing, pitch}) {
   const spherical = new SphericalCoordinates({bearing, pitch});

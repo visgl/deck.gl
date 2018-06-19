@@ -11,15 +11,10 @@ import {
   MapView,
   FirstPersonView,
   ThirdPersonView,
-  experimental
+  _FirstPersonState as FirstPersonState,
+  _ViewportController as ViewportController,
+  _LinearInterpolator as LinearInterpolator
 } from 'deck.gl';
-// deck.gl React components
-const {
-  // Unified controller, together with state that determines interaction model
-  FirstPersonState,
-  ViewportController,
-  LinearInterpolator
-} = experimental;
 
 import TripsLayer from '../../../examples/website/trips/trips-layer';
 

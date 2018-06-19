@@ -57,62 +57,32 @@ export {default as OrthographicView} from './views/orthographic-view';
 export {default as Controller} from './controllers/controller';
 export {default as MapController} from './controllers/map-controller';
 // Experimental Controllers
-import {default as FirstPersonController} from './controllers/first-person-controller';
-import {default as OrbitController} from './controllers/orbit-controller';
+export {default as _FirstPersonController} from './controllers/first-person-controller';
+export {default as _OrbitController} from './controllers/orbit-controller';
 
 // EXPERIMENTAL EXPORTS
 
 // Experimental Effects (non-React) bindings
-import {default as EffectManager} from './experimental/lib/effect-manager';
-import {default as Effect} from './experimental/lib/effect';
+export {default as _EffectManager} from './experimental/lib/effect-manager';
+export {default as _Effect} from './experimental/lib/effect';
+export {default as _ReflectionEffect} from './experimental/reflection-effect/reflection-effect';
 
 // Eperimental Transitions
-import {TRANSITION_EVENTS} from './controllers/transition-manager';
-import {default as LinearInterpolator} from './transitions/linear-interpolator';
-import {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
-
-import ReflectionEffect from './experimental/reflection-effect/reflection-effect';
+export {TRANSITION_EVENTS as _TRANSITION_EVENTS} from './controllers/transition-manager';
+export {default as _LinearInterpolator} from './transitions/linear-interpolator';
+export {default as _ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 // Layer utilities
-export {default as log} from './utils/log'; // Export?
+export {default as log} from './utils/log';
+import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {defaultColorRange} from './utils/color-utils';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
 
-// Export? luma.gl?
-import {flattenVertices, fillArray} from './utils/flatten'; // luma.gl?
-
-// DEPRECATED EXPORTS
-export {default as PerspectiveViewport} from './deprecated/perspective-viewport';
-export {default as OrthographicViewport} from './deprecated/orthographic-viewport';
-import {default as FirstPersonViewport} from './deprecated/first-person-viewport';
-import {default as ThirdPersonViewport} from './deprecated/third-person-viewport';
-import {default as OrbitViewport} from './deprecated/orbit-viewport';
-
-// DEPRECATED
-
+// Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
-  FirstPersonController,
-  OrbitController,
-
-  FirstPersonViewport,
-  ThirdPersonViewport,
-  OrbitViewport,
-
-  EffectManager,
-  Effect,
-
-  // Transitions
-  TRANSITION_EVENTS,
-  LinearInterpolator,
-  ViewportFlyToInterpolator,
-
-  // TODO make this an internal export to set it apart from experimental
-  // export const internal
-
-  // For layers
   BinSorter,
   linearScale,
   getLinearScale,
@@ -120,7 +90,5 @@ export const experimental = {
   getQuantizeScale,
   defaultColorRange,
   flattenVertices,
-  fillArray,
-
-  ReflectionEffect
+  fillArray
 };
