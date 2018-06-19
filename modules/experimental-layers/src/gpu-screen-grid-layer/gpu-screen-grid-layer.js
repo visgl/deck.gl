@@ -241,7 +241,8 @@ export default class GPUScreenGridLayer extends Layer {
       countsBuffer,
       maxCountBuffer,
       changeFlags,
-      useGPU: gpuAggregation
+      useGPU: gpuAggregation,
+      projectPoints: true
     });
 
     attributeManager.invalidate('instanceCounts');
