@@ -40,14 +40,18 @@ test('standalone#DeckGL', t => {
       new deckgl.ScatterplotLayer({
         data: [{position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}]
       })
-    ]
+    ],
+    onAfterRender: () => {
+      t.ok(Object.keys(deck.viewManager.controllers).length > 0, 'component has controller');
+
+      deck.finalize();
+
+      t.notOk(deck.layerManager, 'component is finalized');
+      t.notOk(deck.viewManager, 'component is finalized');
+
+      t.end();
+    }
   });
 
   t.ok(deck, 'DeckGL constructor does not throw error');
-  t.ok(deck.controller, 'component has controller');
-
-  deck.finalize();
-  t.notOk(deck.controller, 'component is finalized');
-
-  t.end();
 });

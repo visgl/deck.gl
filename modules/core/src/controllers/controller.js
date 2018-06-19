@@ -108,10 +108,15 @@ export default class Controller {
   /* Event utils */
   // Event object: http://hammerjs.github.io/api/#event-object
   getCenter(event) {
-    const {
-      offsetCenter: {x, y}
-    } = event;
-    return [x, y];
+    const {x, y} = this.controllerStateProps;
+    const {offsetCenter} = event;
+    return [offsetCenter.x - x, offsetCenter.y - y];
+  }
+
+  isPointInBounds(pos) {
+    const {width, height} = this.controllerStateProps;
+
+    return pos[0] >= 0 && pos[0] <= width && pos[1] >= 0 && pos[1] <= height;
   }
 
   isFunctionKeyPressed(event) {
@@ -137,12 +142,7 @@ export default class Controller {
     if ('onStateChange' in props) {
       this.onStateChange = props.onStateChange;
     }
-    if ('viewState' in props) {
-      this.controllerStateProps = Object.assign({}, props, props.viewState);
-    } else {
-      // TODO - deprecated, props on top level
-      this.controllerStateProps = props;
-    }
+    this.controllerStateProps = props;
 
     if ('eventManager' in props && this.eventManager !== props.eventManager) {
       // EventManager has changed
@@ -212,7 +212,7 @@ export default class Controller {
     const viewState = Object.assign({}, newControllerState.getViewportProps(), extraProps);
 
     // TODO - to restore diffing, we need to include interactionState
-    const changed = true;
+    const changed = this.controllerState !== newControllerState;
     // const oldViewState = this.controllerState.getViewportProps();
     // const changed = Object.keys(viewState).some(key => oldViewState[key] !== viewState[key]);
 
@@ -240,6 +240,9 @@ export default class Controller {
   // Default handler for the `panstart` event.
   _onPanStart(event) {
     const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos)) {
+      return false;
+    }
     const newControllerState = this.controllerState.panStart({pos}).rotateStart({pos});
     return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
   }
@@ -323,6 +326,10 @@ export default class Controller {
     }
 
     const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos)) {
+      return false;
+    }
+
     const {delta} = event;
 
     // Map wheel delta to relative scale
@@ -338,6 +345,10 @@ export default class Controller {
   // Default handler for the `pinchstart` event.
   _onPinchStart(event) {
     const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos)) {
+      return false;
+    }
+
     const newControllerState = this.controllerState.zoomStart({pos}).rotateStart({pos});
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     this._state.startPinchRotation = event.rotation;
@@ -380,6 +391,10 @@ export default class Controller {
       return false;
     }
     const pos = this.getCenter(event);
+    if (!this.isPointInBounds(pos)) {
+      return false;
+    }
+
     const isZoomOut = this.isFunctionKeyPressed(event);
 
     const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});

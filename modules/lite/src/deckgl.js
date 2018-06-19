@@ -68,6 +68,7 @@ export default class DeckGL extends Deck {
     const isMap = Number.isFinite(props.initialViewState.latitude);
     const isOrbit = props.views && props.views[0] instanceof OrbitView;
     let Controller;
+
     if (isMap) {
       Controller = MapController;
     } else if (isOrbit) {
