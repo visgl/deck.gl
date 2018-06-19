@@ -48,13 +48,11 @@ test('LayerManager#constructor', t => {
   t.ok(LayerManager, 'LayerManager imported');
   const layerManager = new LayerManager(gl);
   t.ok(layerManager, 'LayerManager created');
-  layerManager.setViewport(new Viewport());
   t.end();
 });
 
 test('LayerManager#getLayers', t => {
   const layerManager = new LayerManager(gl);
-  layerManager.setViewport(new Viewport());
   layerManager.setLayers(LAYERS);
   let layers = layerManager.getLayers();
   t.equal(layers.length, 4, 'LayerManager.getLayers()');

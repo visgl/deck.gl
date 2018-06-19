@@ -125,11 +125,6 @@ export default class ViewManager {
     return null;
   }
 
-  /**
-   * Set props needed for layer rendering and picking.
-   * Parameters are to be passed as a single object, with the following values:
-   * @param {Boolean} useDevicePixels
-   */
   /* eslint-disable complexity */
   setProps(props) {
     if ('views' in props) {
@@ -143,10 +138,6 @@ export default class ViewManager {
 
     if ('width' in props || 'height' in props) {
       this.setSize(props.width, props.height);
-    }
-
-    if ('useDevicePixels' in props) {
-      this.context.useDevicePixels = props.useDevicePixels;
     }
   }
   /* eslint-enable complexity */

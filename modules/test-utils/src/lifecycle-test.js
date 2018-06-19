@@ -23,6 +23,12 @@ import {LayerManager, MapView} from 'deck.gl';
 import {makeSpy} from 'probe.gl/test-utils';
 import gl from './utils/setup-gl';
 
+const testViewport = new MapView().makeViewport({
+  width: 100,
+  height: 100,
+  viewState: {longitude: 0, latitude: 0, zoom: 1}
+});
+
 function checkDoesNotThrow(func, comment, userData) {
   try {
     return func();
@@ -61,7 +67,7 @@ export function testDrawLayer({layer, uniforms = {}}) {
 
   try {
     layerManager.setLayers([layer]);
-    layerManager.drawLayers();
+    layerManager.drawLayers({viewports: [testViewport]});
   } catch (error) {
     return error;
   }
@@ -79,7 +85,6 @@ export function testLayer({
   // assert(Layer);
 
   const layerManager = new LayerManager(gl);
-  layerManager.setViews([new MapView()]);
 
   const initialProps = testCases[0].props;
   const layer = new Layer(initialProps);
@@ -135,7 +140,7 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
     );
 
     // call draw layer
-    doesNotThrow(() => layerManager.drawLayers(), `draw ${layer} should not fail`, userData);
+    doesNotThrow(() => layerManager.drawLayers({viewports: [testViewport]}), `draw ${layer} should not fail`, userData);
 
     // layer manager should handle match subLayer and tranfer state and props
     // here we assume subLayer matches copy over the new props from a new subLayer
