@@ -24,7 +24,6 @@ import {
   alignToCellBoundary
 } from '@deck.gl/experimental-layers/gpu-grid-layer/gpu-grid-utils';
 
-
 test('GridAggregator#alignToCellBoundary (CPU)', t => {
   t.equal(alignToCellBoundary(-3, 5), -5);
   t.equal(alignToCellBoundary(3, 5), 0);

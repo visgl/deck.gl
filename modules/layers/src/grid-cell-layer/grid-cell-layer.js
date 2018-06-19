@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {GL, Model, CubeGeometry, fp64} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, CubeGeometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
 
 import vs from './grid-cell-layer-vertex.glsl';

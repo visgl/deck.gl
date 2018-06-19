@@ -1,10 +1,9 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PerspectiveView, experimental} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PerspectiveView} from 'deck.gl';
+import {_OrbitController as OrbitController} from 'deck.gl';
 import {BitmapLayer} from '@deck.gl/experimental-layers';
-
-const {OrbitController} = experimental;
 
 const IMAGES = {
   NEGX: 'images/skynegx1.png',

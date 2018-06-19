@@ -20,6 +20,8 @@
 
 require('tap-browser-color')();
 
+require('luma.gl/debug');
+
 const {callExposedFunction} = require('probe.gl/test-utils');
 
 const test = require('tape');

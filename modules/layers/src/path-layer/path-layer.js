@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {COORDINATE_SYSTEM, Layer} from '@deck.gl/core';
-import {GL, Model, Geometry, fp64} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
 
 import vs from './path-layer-vertex.glsl';

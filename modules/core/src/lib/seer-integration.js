@@ -130,7 +130,7 @@ function logPayload(layer) {
     }
     // TODO: Seer currently only handles single model layers
     if (layer.state.model) {
-      layer.state.model.timerQueryEnabled = true;
+      layer.state.model.setProps({timerQueryEnabled: true});
       const {lastFrameTime} = layer.state.model.stats;
       if (lastFrameTime) {
         badges.push(`${(lastFrameTime * 1000).toFixed(0)}μs`);

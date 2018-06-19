@@ -20,7 +20,8 @@
 
 import {COORDINATE_SYSTEM, Layer, log} from '@deck.gl/core';
 
-import {GL, Model, Geometry, fp64} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
 
 import vs from './arc-layer-vertex.glsl';

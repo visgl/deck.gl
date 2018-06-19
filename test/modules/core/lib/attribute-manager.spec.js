@@ -20,7 +20,7 @@
 
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import AttributeManager from '@deck.gl/core/lib/attribute-manager';
-import {GL} from 'luma.gl';
+import GL from 'luma.gl/constants';
 import test from 'tape-catch';
 import {gl} from '@deck.gl/test-utils';
 
@@ -58,10 +58,11 @@ test('AttributeManager constructor', t => {
 test('AttributeManager.add', t => {
   const attributeManager = new AttributeManager(gl);
 
-  t.throws(
-    () => attributeManager.add({positions: {update}}),
-    'AttributeManager.add - throws on missing attribute size'
-  );
+  // Now autodeduced from shader declarations
+  // t.throws(
+  //   () => attributeManager.add({positions: {update}}),
+  //   'AttributeManager.add - throws on missing attribute size'
+  // );
 
   t.throws(
     () => attributeManager.add({positions: {size: 2}}),

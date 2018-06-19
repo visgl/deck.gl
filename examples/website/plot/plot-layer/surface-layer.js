@@ -1,5 +1,6 @@
 import {Layer} from 'deck.gl';
-import {GL, Model, Geometry} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, Geometry} from 'luma.gl';
 
 import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './fragment.glsl';

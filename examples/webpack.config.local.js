@@ -29,6 +29,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
     devtool: 'source-map',
 
     resolve: {
+      // mainFields: ['esnext', 'module', 'main'],
+
       alias: Object.assign({}, ALIASES, {
         // Use luma.gl specified by root package.json
         'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
@@ -76,7 +78,7 @@ const BUBLE_CONFIG = {
 function addLocalDevSettings(config, exampleDir) {
   const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir);
   config = Object.assign({}, LOCAL_DEV_CONFIG, config);
-  config.resolve = config.resolve || {};
+  config.resolve = Object.assign({}, LOCAL_DEV_CONFIG.resolve, config.resolve || {});
   config.resolve.alias = config.resolve.alias || {};
   Object.assign(config.resolve.alias, LOCAL_DEV_CONFIG.resolve.alias);
 

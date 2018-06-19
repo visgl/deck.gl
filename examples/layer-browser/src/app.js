@@ -217,7 +217,7 @@ export default class App extends PureComponent {
     const {
       settings: {separation}
     } = this.state;
-    const modelMatrix = new Matrix4().translate([0, 0, 1000 * index * separation]);
+    const modelMatrix = new Matrix4().translate([0, 0, 5 * index * separation]);
 
     switch (coordinateSystem) {
       case COORDINATE_SYSTEM.METER_OFFSETS:

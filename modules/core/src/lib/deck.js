@@ -25,7 +25,8 @@ import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
-import {GL, AnimationLoop, createGLContext, setParameters} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {AnimationLoop, createGLContext, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
@@ -375,11 +376,12 @@ export default class Deck {
     const selectedInfos = this.layerManager.pickObject({
       x: pos.x,
       y: pos.y,
-      viewports: this.getViewports(),
       radius,
-      mode: options.mode
+      viewports: this.getViewports(),
+      mode: options.mode,
+      depth: 1
     });
-    if (options.callback) {
+    if (options.callback && selectedInfos) {
       const firstInfo = selectedInfos.find(info => info.index >= 0) || null;
       // As per documentation, send null value when no valid object is picked.
       options.callback(firstInfo, selectedInfos, options.event.srcEvent);
@@ -457,7 +459,7 @@ export default class Deck {
     if (this.stats.oneSecondPassed()) {
       const table = this.stats.getStatsTable();
       this.stats.reset();
-      log.table(1, table)();
+      log.table(3, table)();
     }
 
     this._updateCanvasSize();
@@ -517,7 +519,7 @@ export default class Deck {
   }
 
   _onPointerLeave(event) {
-    this.layerManager.pickObject({
+    this.pickObject({
       x: -1,
       y: -1,
       viewports: this.getViewports(),

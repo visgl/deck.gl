@@ -27,7 +27,8 @@ import {removeLayerInSeer} from './seer-integration';
 import {diffProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import {GL, withParameters} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {withParameters} from 'luma.gl';
 import assert from '../utils/assert';
 
 import Component from '../lifecycle/component';
