@@ -96,11 +96,6 @@ export default class App extends PureComponent {
     this._effects = [new ReflectionEffect()];
   }
 
-  componentDidMount() {
-    this._onResize();
-    window.addEventListener('resize', this._onResize);
-  }
-
   componentDidUpdate(prevProps, prevState) {
     if (prevState !== this.state) {
       this.props.onStateChange(this.state);
@@ -111,8 +106,8 @@ export default class App extends PureComponent {
     window.removeEventListener('resize', this._onResize);
   }
 
-  _onResize() {
-    this.setState({width: window.innerWidth, height: window.innerHeight});
+  _getSize() {
+    return {width: window.innerWidth, height: window.innerHeight};
   }
 
   _onViewStateChange({viewState}) {
@@ -155,7 +150,7 @@ export default class App extends PureComponent {
   }
 
   _onPickObjects() {
-    const {width, height} = this.state;
+    const {width, height} = this._getSize();
     const infos = this.refs.deckgl.pickObjects({x: 0, y: 0, width, height});
     console.log(infos); // eslint-disable-line
     this.setState({queriedItems: infos});

@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 
 import LayerManager from '../lib/layer-manager';
+import ViewManager from '../views/view-manager';
+import MapView from '../views/map-view';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
@@ -125,11 +127,15 @@ export default class Deck {
 
     this.width = 0; // "read-only", auto-updated from canvas
     this.height = 0; // "read-only", auto-updated from canvas
-    this.needsRedraw = true;
+
+    // Maps view descriptors to vieports, rebuilds when width/height/viewState/views change
+    this.viewManager = new ViewManager();
     this.layerManager = null;
     this.effectManager = null;
     this.controller = null;
     this.stats = new Stats({id: 'deck.gl'});
+
+    this._needsRedraw = true;
 
     this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
     this.interactiveState = {
@@ -137,6 +143,10 @@ export default class Deck {
     };
 
     // Bind methods
+    this._onClick = this._onClick.bind(this);
+    this._onPointerMove = this._onPointerMove.bind(this);
+    this._onPointerLeave = this._onPointerLeave.bind(this);
+    this._pickAndCallback = this._pickAndCallback.bind(this);
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
@@ -181,14 +191,20 @@ export default class Deck {
 
     // We need to overwrite CSS style width and height with actual, numeric values
     const newProps = Object.assign({}, props, {
+      views: this._getViews(props),
       viewState: this._getViewState(props),
       width: this.width,
       height: this.height
     });
 
+    // Update view manager props
+    if (this.viewManager) {
+      this.viewManager.setProps(newProps);
+    }
+
     // Update layer manager props (but not size)
     if (this.layerManager) {
-      this.layerManager.setParameters(newProps);
+      this.layerManager.setProps(newProps);
     }
 
     // Update animation loop
@@ -209,6 +225,29 @@ export default class Deck {
 
   // Public API
 
+  // Check if a redraw is needed
+  needsRedraw({clearRedrawFlags = true} = {}) {
+    let redraw = this._needsRedraw;
+
+    if (clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+
+    redraw = redraw || this.viewManager.needsRedraw({clearRedrawFlags});
+    redraw = redraw || this.layerManager.needsRedraw({clearRedrawFlags});
+    return redraw;
+  }
+
+  getViews() {
+    return this.viewManager.views;
+  }
+
+  // Get a set of viewports for a given width and height
+  getViewports() {
+    const viewports = this.viewManager.getViewports();
+    return viewports;
+  }
+
   pickObject({x, y, radius = 0, layerIds = null}) {
     this.stats.timeStart('deck.pickObject');
     const selectedInfos = this.layerManager.pickObject({
@@ -216,6 +255,7 @@ export default class Deck {
       y,
       radius,
       layerIds,
+      viewports: this.getViewports(),
       mode: 'query',
       depth: 1
     });
@@ -230,6 +270,7 @@ export default class Deck {
       y,
       radius,
       layerIds,
+      viewports: this.getViewports(),
       mode: 'query',
       depth
     });
@@ -239,13 +280,16 @@ export default class Deck {
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
     this.stats.timeStart('deck.pickObjects');
-    const infos = this.layerManager.pickObjects({x, y, width, height, layerIds});
+    const infos = this.layerManager.pickObjects({
+      x,
+      y,
+      width,
+      height,
+      layerIds,
+      viewports: this.getViewports()
+    });
     this.stats.timeEnd('deck.pickObjects');
     return infos;
-  }
-
-  getViewports() {
-    return this.layerManager ? this.layerManager.getViewports() : [];
   }
 
   // Private Methods
@@ -295,7 +339,7 @@ export default class Deck {
   _updateCanvasSize() {
     if (this._checkForCanvasSizeChange()) {
       const {width, height} = this;
-      this.layerManager.setParameters({width, height});
+      this.viewManager.setProps({width, height});
       if (this.controller) {
         this.controller.setProps({
           viewState: this._getViewState(this.props),
@@ -365,6 +409,29 @@ export default class Deck {
     });
   }
 
+  // Get the view descriptor list
+  _getViews(props) {
+    // Default to a full screen map view port
+    return props.views || [new MapView({id: 'default-view'})];
+  }
+
+  _pickAndCallback(options) {
+    const pos = options.event.offsetCenter;
+    const radius = this.props.pickingRadius;
+    const selectedInfos = this.layerManager.pickObject({
+      x: pos.x,
+      y: pos.y,
+      viewports: this.getViewports(),
+      radius,
+      mode: options.mode
+    });
+    if (options.callback) {
+      const firstInfo = selectedInfos.find(info => info.index >= 0) || null;
+      // As per documentation, send null value when no valid object is picked.
+      options.callback(firstInfo, selectedInfos, options.event.srcEvent);
+    }
+  }
+
   // Callbacks
 
   _onViewStateChange({viewState}, ...args) {
@@ -374,7 +441,7 @@ export default class Deck {
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
       this.viewState = viewState;
-      this.layerManager.setParameters({viewState});
+      this.viewManager.setProps({viewState});
       this.controller.setProps({viewState});
     }
   }
@@ -399,13 +466,20 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
-    this.eventManager = new EventManager(canvas);
+    this.eventManager = new EventManager(canvas, {
+      events: {
+        click: this._onClick,
+        pointermove: this._onPointerMove,
+        pointerleave: this._onPointerLeave
+      }
+    });
+
     if (this.controller) {
       this.controller.setProps({eventManager: this.eventManager});
     }
 
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager(gl, {eventManager: this.eventManager, stats: this.stats});
+    this.layerManager = new LayerManager(gl, {stats: this.stats});
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
@@ -433,7 +507,7 @@ export default class Deck {
 
     this.stats.bump('fps');
 
-    const redrawReason = this.layerManager.needsRedraw({clearRedrawFlags: true});
+    const redrawReason = this.needsRedraw({clearRedrawFlags: true});
     if (!redrawReason) {
       return;
     }
@@ -445,9 +519,51 @@ export default class Deck {
     this.props.onBeforeRender({gl});
 
     const {drawPickingColors} = this.props; // Debug picking, helpful in framebuffered layers
-    this.layerManager.drawLayers({pass: 'screen', redrawReason, drawPickingColors});
+    this.layerManager.drawLayers({
+      pass: 'screen',
+      viewports: this.getViewports(),
+      redrawReason,
+      drawPickingColors
+    });
 
     this.props.onAfterRender({gl});
+  }
+
+  // Route move events to layers. call the `onHover` prop of any picked layer,
+  // and `onLayerHover` is called directly from here with any picking info generated by `pickLayer`.
+  // @param {Object} event  A mjolnir.js event
+  _onClick(event) {
+    if (!event.offsetCenter) {
+      // Do not trigger onHover callbacks when click position is invalid.
+      return;
+    }
+    this._pickAndCallback({
+      callback: this.props.onLayerClick,
+      event,
+      mode: 'click'
+    });
+  }
+
+  _onPointerMove(event) {
+    if (event.leftButton || event.rightButton) {
+      // Do not trigger onHover callbacks if mouse button is down.
+      return;
+    }
+    this._pickAndCallback({
+      callback: this.props.onLayerHover,
+      event,
+      mode: 'hover'
+    });
+  }
+
+  _onPointerLeave(event) {
+    this.layerManager.pickObject({
+      x: -1,
+      y: -1,
+      viewports: this.getViewports(),
+      radius: this.props.pickingRadius,
+      mode: 'hover'
+    });
   }
 }
 
