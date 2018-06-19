@@ -78,67 +78,70 @@ export function separateGeojsonFeatures(features) {
     assert(feature && feature.geometry, 'GeoJSON does not have geometry');
 
     const {
-      geometry: {type, coordinates},
-      properties
+      geometry: {type, coordinates}
     } = feature;
     checkCoordinates(type, coordinates);
 
-    const deckPickingInfo = {
+    const sourceFeature = {
       feature,
-      featureIndex
+      index: featureIndex
     };
     // Split each feature, but keep track of the source feature and index (for Multi* geometries)
     switch (type) {
       case 'Point':
-        pointFeatures.push(Object.assign({}, feature, {deckPickingInfo}));
+        pointFeatures.push({
+          geometry: feature.geometry,
+          sourceFeature
+        });
         break;
       case 'MultiPoint':
         coordinates.forEach(point => {
           pointFeatures.push({
             geometry: {type: 'Point', coordinates: point},
-            properties,
-            deckPickingInfo
+            sourceFeature
           });
         });
         break;
       case 'LineString':
-        lineFeatures.push(Object.assign({}, feature, {deckPickingInfo}));
+        lineFeatures.push({
+          geometry: feature.geometry,
+          sourceFeature
+        });
         break;
       case 'MultiLineString':
-        // Break multilinestrings into multiple lines with same properties
+        // Break multilinestrings into multiple lines
         coordinates.forEach(path => {
           lineFeatures.push({
             geometry: {type: 'LineString', coordinates: path},
-            properties,
-            deckPickingInfo
+            sourceFeature
           });
         });
         break;
       case 'Polygon':
-        polygonFeatures.push(Object.assign({}, feature, {deckPickingInfo}));
-        // Break polygon into multiple lines with same properties
+        polygonFeatures.push({
+          geometry: feature.geometry,
+          sourceFeature
+        });
+        // Break polygon into multiple lines
         coordinates.forEach(path => {
           polygonOutlineFeatures.push({
             geometry: {type: 'LineString', coordinates: path},
-            properties,
-            deckPickingInfo
+            sourceFeature
           });
         });
         break;
       case 'MultiPolygon':
-        // Break multipolygons into multiple polygons with same properties
+        // Break multipolygons into multiple polygons
         coordinates.forEach(polygon => {
           polygonFeatures.push({
             geometry: {type: 'Polygon', coordinates: polygon},
-            properties,
-            deckPickingInfo
+            sourceFeature
           });
-          // Break polygon into multiple lines with same properties
+          // Break polygon into multiple lines
           polygon.forEach(path => {
             polygonOutlineFeatures.push({
               geometry: {type: 'LineString', coordinates: path},
-              properties,
-              deckPickingInfo
+              sourceFeature
             });
           });
         });
@@ -153,6 +156,22 @@ export function separateGeojsonFeatures(features) {
     polygonFeatures,
     polygonOutlineFeatures
   };
+}
+
+/**
+ * Returns the source feature that was passed to `separateGeojsonFeatures`
+ */
+export function unwrapSourceFeature(wrappedFeature) {
+  // The feature provided by the user is under `sourceFeature.feature`
+  return wrappedFeature.sourceFeature.feature;
+}
+
+/**
+ * Returns the index of the source feature that was passed to `separateGeojsonFeatures`
+ */
+export function unwrapSourceFeatureIndex(wrappedFeature) {
+  // The index of the feature provided by the user is under `sourceFeature.index`
+  return wrappedFeature.sourceFeature.index;
 }
 
 /**

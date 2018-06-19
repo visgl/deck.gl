@@ -19,7 +19,12 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {getGeojsonFeatures, separateGeojsonFeatures} from '@deck.gl/layers/geojson-layer/geojson';
+import {
+  getGeojsonFeatures,
+  separateGeojsonFeatures,
+  unwrapSourceFeature,
+  unwrapSourceFeatureIndex
+} from '@deck.gl/layers/geojson-layer/geojson';
 
 const TEST_DATA = {
   POINT: {
@@ -76,6 +81,10 @@ const TEST_CASES = [
       lineFeaturesLength: 0,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [TEST_DATA.POINT],
+      lineSourceFeatures: [],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [0],
       lineFeatureIndexes: [],
       polygonFeatureIndexes: [],
@@ -90,6 +99,10 @@ const TEST_CASES = [
       lineFeaturesLength: 2,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [],
+      lineSourceFeatures: [TEST_DATA.MULTI_LINESTRING, TEST_DATA.MULTI_LINESTRING],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [],
       lineFeatureIndexes: [0, 0],
       polygonFeatureIndexes: [],
@@ -104,6 +117,10 @@ const TEST_CASES = [
       lineFeaturesLength: 0,
       polygonFeaturesLength: 1,
       polygonOutlineFeaturesLength: 1,
+      pointSourceFeatures: [],
+      lineSourceFeatures: [],
+      polygonSourceFeatures: [TEST_DATA.POLYGON],
+      polygonOutlineSourceFeatures: [TEST_DATA.POLYGON],
       pointFeatureIndexes: [],
       lineFeatureIndexes: [],
       polygonFeatureIndexes: [0],
@@ -118,6 +135,10 @@ const TEST_CASES = [
       lineFeaturesLength: 1,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [TEST_DATA.GEOMETRY_COLLECTION.geometries[0]],
+      lineSourceFeatures: [TEST_DATA.GEOMETRY_COLLECTION.geometries[1]],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [0],
       lineFeatureIndexes: [1],
       polygonFeatureIndexes: [],
@@ -132,6 +153,10 @@ const TEST_CASES = [
       lineFeaturesLength: 0,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [TEST_DATA.MULTI_POINT, TEST_DATA.MULTI_POINT],
+      lineSourceFeatures: [],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [0, 0],
       lineFeatureIndexes: [],
       polygonFeatureIndexes: [],
@@ -146,6 +171,10 @@ const TEST_CASES = [
       lineFeaturesLength: 1,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [],
+      lineSourceFeatures: [TEST_DATA.LINESTRING],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [],
       lineFeatureIndexes: [0],
       polygonFeatureIndexes: [],
@@ -160,6 +189,14 @@ const TEST_CASES = [
       lineFeaturesLength: 0,
       polygonFeaturesLength: 2,
       polygonOutlineFeaturesLength: 3,
+      pointSourceFeatures: [],
+      lineSourceFeatures: [],
+      polygonSourceFeatures: [TEST_DATA.MULTI_POLYGON, TEST_DATA.MULTI_POLYGON],
+      polygonOutlineSourceFeatures: [
+        TEST_DATA.MULTI_POLYGON,
+        TEST_DATA.MULTI_POLYGON,
+        TEST_DATA.MULTI_POLYGON
+      ],
       pointFeatureIndexes: [],
       lineFeatureIndexes: [],
       polygonFeatureIndexes: [0, 0],
@@ -174,6 +211,10 @@ const TEST_CASES = [
       lineFeaturesLength: 0,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
+      pointSourceFeatures: [],
+      lineSourceFeatures: [],
+      polygonSourceFeatures: [],
+      polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [],
       lineFeatureIndexes: [],
       polygonFeatureIndexes: [],
@@ -198,6 +239,19 @@ const TEST_CASES = [
       lineFeaturesLength: 3,
       polygonFeaturesLength: 3,
       polygonOutlineFeaturesLength: 4,
+      pointSourceFeatures: [TEST_DATA.POINT, TEST_DATA.MULTI_POINT, TEST_DATA.MULTI_POINT],
+      lineSourceFeatures: [
+        TEST_DATA.LINESTRING,
+        TEST_DATA.MULTI_LINESTRING,
+        TEST_DATA.MULTI_LINESTRING
+      ],
+      polygonSourceFeatures: [TEST_DATA.POLYGON, TEST_DATA.MULTI_POLYGON, TEST_DATA.MULTI_POLYGON],
+      polygonOutlineSourceFeatures: [
+        TEST_DATA.POLYGON,
+        TEST_DATA.MULTI_POLYGON,
+        TEST_DATA.MULTI_POLYGON,
+        TEST_DATA.MULTI_POLYGON
+      ],
       pointFeatureIndexes: [0, 1, 1],
       lineFeatureIndexes: [2, 3, 3],
       polygonFeatureIndexes: [4, 5, 5],
@@ -283,11 +337,17 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
         lineFeaturesLength: result.lineFeatures.length,
         polygonFeaturesLength: result.polygonFeatures.length,
         polygonOutlineFeaturesLength: result.polygonOutlineFeatures.length,
-        pointFeatureIndexes: result.pointFeatures.map(f => f.deckPickingInfo.featureIndex),
-        lineFeatureIndexes: result.lineFeatures.map(f => f.deckPickingInfo.featureIndex),
-        polygonFeatureIndexes: result.polygonFeatures.map(f => f.deckPickingInfo.featureIndex),
-        polygonOutlineFeatureIndexes: result.polygonOutlineFeatures.map(
-          f => f.deckPickingInfo.featureIndex
+        pointSourceFeatures: result.pointFeatures.map(f => unwrapSourceFeature(f).geometry),
+        lineSourceFeatures: result.lineFeatures.map(f => unwrapSourceFeature(f).geometry),
+        polygonSourceFeatures: result.polygonFeatures.map(f => unwrapSourceFeature(f).geometry),
+        polygonOutlineSourceFeatures: result.polygonOutlineFeatures.map(
+          f => unwrapSourceFeature(f).geometry
+        ),
+        pointFeatureIndexes: result.pointFeatures.map(f => unwrapSourceFeatureIndex(f)),
+        lineFeatureIndexes: result.lineFeatures.map(f => unwrapSourceFeatureIndex(f)),
+        polygonFeatureIndexes: result.polygonFeatures.map(f => unwrapSourceFeatureIndex(f)),
+        polygonOutlineFeatureIndexes: result.polygonOutlineFeatures.map(f =>
+          unwrapSourceFeatureIndex(f)
         )
       };
       t.deepEquals(

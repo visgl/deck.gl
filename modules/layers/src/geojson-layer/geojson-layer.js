@@ -24,7 +24,12 @@ import PathLayer from '../path-layer/path-layer';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
-import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
+import {
+  getGeojsonFeatures,
+  separateGeojsonFeatures,
+  unwrapSourceFeature,
+  unwrapSourceFeatureIndex
+} from './geojson';
 
 const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
 const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
@@ -73,7 +78,18 @@ const defaultProps = {
   lightSettings: {}
 };
 
-const getCoordinates = f => f.geometry.coordinates;
+function getCoordinates(f) {
+  return f.geometry.coordinates;
+}
+
+/**
+ * Unwraps the real source feature passed into props and passes as the argument to `accessor`.
+ */
+function unwrappingAccessor(accessor) {
+  if (typeof accessor !== 'function') return accessor;
+
+  return feature => accessor(unwrapSourceFeature(feature));
+}
 
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
@@ -96,8 +112,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     return Object.assign(info, {
       // override object with picked feature
-      object: info.object ? info.object.deckPickingInfo.feature : info.object,
-      index: info.object ? info.object.deckPickingInfo.featureIndex : info.index
+      object: info.object ? unwrapSourceFeature(info.object) : info.object,
+      index: info.object ? unwrapSourceFeatureIndex(info.object) : info.index
     });
   }
 
@@ -161,9 +177,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           wireframe,
           lightSettings,
           getPolygon: getCoordinates,
-          getElevation,
-          getFillColor,
-          getLineColor
+          getElevation: unwrappingAccessor(getElevation),
+          getFillColor: unwrappingAccessor(getFillColor),
+          getLineColor: unwrappingAccessor(getLineColor)
         }
       );
 
@@ -192,9 +208,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           dashJustified: lineDashJustified,
 
           getPath: getCoordinates,
-          getColor: getLineColor,
-          getWidth: getLineWidth,
-          getDashArray: getLineDashArray
+          getColor: unwrappingAccessor(getLineColor),
+          getWidth: unwrappingAccessor(getLineWidth),
+          getDashArray: unwrappingAccessor(getLineDashArray)
         }
       );
 
@@ -219,8 +235,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           miterLimit: lineMiterLimit,
 
           getPath: getCoordinates,
-          getColor: getLineColor,
-          getWidth: getLineWidth
+          getColor: unwrappingAccessor(getLineColor),
+          getWidth: unwrappingAccessor(getLineWidth)
         }
       );
 
@@ -243,8 +259,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           radiusMaxPixels: pointRadiusMaxPixels,
 
           getPosition: getCoordinates,
-          getColor: getFillColor,
-          getRadius
+          getColor: unwrappingAccessor(getFillColor),
+          getRadius: unwrappingAccessor(getRadius)
         }
       );
 
