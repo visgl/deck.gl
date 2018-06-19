@@ -14,3 +14,5 @@ export {default as outline} from './shaderlib/outline/outline';
 export {default as BezierCurveLayer} from './bezier-curve-layer/bezier-curve-layer';
 
 export {default as GPUScreenGridLayer} from './gpu-screen-grid-layer/gpu-screen-grid-layer';
+
+export {default as BitmapLayer} from './bitmap-layer/bitmap-layer';
