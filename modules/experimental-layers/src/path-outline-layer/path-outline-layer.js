@@ -93,13 +93,11 @@ export default class PathOutlineLayer extends PathLayer {
     outlineFramebuffer.resize();
     outlineFramebuffer.clear({color: true, depth: true});
 
-    this.state.model.updateModuleSettings(
-      Object.assign({}, moduleParameters, {
-        outlineEnabled: true,
-        outlineRenderShadowmap: true,
-        outlineShadowmap: dummyTexture
-      })
-    );
+    this.state.model.updateModuleSettings({
+      outlineEnabled: true,
+      outlineRenderShadowmap: true,
+      outlineShadowmap: dummyTexture
+    });
 
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
@@ -114,13 +112,11 @@ export default class PathOutlineLayer extends PathLayer {
     });
 
     // Now use the outline shadowmap to render the lines (with outlines)
-    this.state.model.updateModuleSettings(
-      Object.assign({}, moduleParameters, {
-        outlineEnabled: true,
-        outlineRenderShadowmap: false,
-        outlineShadowmap: outlineFramebuffer
-      })
-    );
+    this.state.model.updateModuleSettings({
+      outlineEnabled: true,
+      outlineRenderShadowmap: false,
+      outlineShadowmap: outlineFramebuffer
+    });
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
         jointType: Number(rounded),
