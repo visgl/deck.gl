@@ -37,7 +37,7 @@ const PathOutlineExample = {
   // getData: () => dataSamples.zigzag,
   getData: () => dataSamples.routes,
   props: {
-    id: 'path-outline-layer',
+    id: 'path-outline-example',
     opacity: 0.6,
     getPath: f => [f.START, f.END],
     getColor: f => [128, 0, 0],
@@ -59,7 +59,7 @@ const PathMarkerExample = {
   layer: PathMarkerLayer,
   getData: () => dataSamples.routes,
   props: {
-    id: 'path-outline-layer',
+    id: 'path-marker-example',
     opacity: 0.6,
     getPath: f => [f.START, f.END],
     getColor: f => [230, 230, 230],
@@ -86,7 +86,7 @@ const PathMarkerExampleLngLatOffset = {
   layer: PathMarkerLayer,
   getData: () => dataSamples.routes,
   props: {
-    id: 'path-outline-layer',
+    id: 'path-marker-example-lnglat',
     opacity: 0.6,
     getPath: f => [coordDiff(f.START), coordDiff(f.END)],
     getColor: f => [230, 230, 230],
@@ -118,7 +118,7 @@ const PathMarkerExampleMeter = {
   layer: PathMarkerLayer,
   getData: () => PathMarkerExampleMeterData,
   props: {
-    id: 'path-outline-layer-meter',
+    id: 'path-marker-example-meter',
     opacity: 0.8,
     getColor: f => [230, 230, 230],
     getZLevel: f => Math.random() * 255,
