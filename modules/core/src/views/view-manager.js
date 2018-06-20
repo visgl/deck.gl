@@ -34,11 +34,18 @@ export default class ViewManager {
     this.width = 100;
     this.height = 100;
     this.viewState = INITIAL_VIEW_STATE;
+    this.controllers = {};
 
     this._viewports = []; // Generated viewports
     this._viewportMap = {};
     this._needsRedraw = 'Initial render';
     this._needsUpdate = true;
+
+    this._eventManager = props.eventManager;
+    this._eventCallbacks = {
+      onViewStateChange: props.onViewStateChange,
+      onInteractiveStateChange: props.onInteractiveStateChange
+    };
 
     Object.seal(this);
 
@@ -46,7 +53,12 @@ export default class ViewManager {
     this.setProps(props);
   }
 
-  finalize() {}
+  finalize() {
+    for (const key in this.controllers) {
+      this.controllers[key].finalize();
+    }
+    this.controllers = {};
+  }
 
   // Check if a redraw is needed
   needsRedraw({clearRedrawFlags = true} = {}) {
@@ -72,12 +84,10 @@ export default class ViewManager {
   // Get a set of viewports for a given width and height
   // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
   getViewports() {
-    this._rebuildViewportsFromViews();
     return this._viewports;
   }
 
   getViewport(viewId) {
-    this._rebuildViewportsFromViews();
     return this._viewportMap[viewId];
   }
 
@@ -128,21 +138,23 @@ export default class ViewManager {
   /* eslint-disable complexity */
   setProps(props) {
     if ('views' in props) {
-      this.setViews(props.views);
+      this._setViews(props.views);
     }
 
     // TODO - support multiple view states
     if ('viewState' in props) {
-      this.setViewState(props.viewState);
+      this._setViewState(props.viewState);
     }
 
     if ('width' in props || 'height' in props) {
-      this.setSize(props.width, props.height);
+      this._setSize(props.width, props.height);
     }
+
+    this._rebuildViewportsFromViews();
   }
   /* eslint-enable complexity */
 
-  setSize(width, height) {
+  _setSize(width, height) {
     assert(Number.isFinite(width) && Number.isFinite(height));
     if (width !== this.width || height !== this.height) {
       this.width = width;
@@ -153,11 +165,17 @@ export default class ViewManager {
 
   // Update the view descriptor list and set change flag if needed
   // Does not actually rebuild the `Viewport`s until `getViewports` is called
-  setViews(views) {
+  _setViews(views) {
     // DEPRECATED: Ensure any "naked" Viewports are wrapped in View instances
     views = flatten(views, {filter: Boolean}).map(
       view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
     );
+
+    views.forEach(view => {
+      if (view.controller && !this.controllers[view.id]) {
+        this.controllers[view.id] = this._createController(view);
+      }
+    });
 
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
@@ -167,7 +185,7 @@ export default class ViewManager {
     this.views = views;
   }
 
-  setViewState(viewState) {
+  _setViewState(viewState) {
     if (viewState) {
       const viewStateChanged = deepEqual(viewState, this.viewState);
 
@@ -185,13 +203,53 @@ export default class ViewManager {
   // PRIVATE METHODS
   //
 
+  _onViewStateChange(viewId, event) {
+    event.viewId = viewId;
+    this._eventCallbacks.onViewStateChange(event);
+  }
+
+  _createController(view) {
+    let controller = null;
+
+    if (view.controller) {
+      const Controller = view.controller;
+      controller = new Controller({
+        eventManager: this._eventManager,
+        viewState: this._getViewState(view.id),
+        // Set an internal callback that calls the prop callback if provided
+        onViewStateChange: this._onViewStateChange.bind(this, view.id),
+        onStateChange: this._eventCallbacks.onInteractiveStateChange
+      });
+    }
+
+    return controller;
+  }
+
   // Rebuilds viewports from descriptors towards a certain window size
   _rebuildViewportsFromViews() {
     const updateReason = this._needsUpdate;
     if (updateReason) {
-      const {width, height, views, viewState} = this;
+      const {width, height, views} = this;
 
-      this._viewports = views.map(view => view.makeViewport({width, height, viewState}));
+      this._viewports = views.map(view => {
+        const viewState = this._getViewState(view.id);
+        const viewport = view.makeViewport({width, height, viewState});
+
+        const controller = this.controllers[view.id];
+        // TODO - check for removed view ids?
+        if (controller) {
+          controller.setProps(
+            Object.assign({}, viewState, {
+              x: viewport.x,
+              y: viewport.y,
+              width: viewport.width,
+              height: viewport.height
+            })
+          );
+        }
+
+        return viewport;
+      });
 
       this._buildViewportMap();
 
@@ -210,6 +268,11 @@ export default class ViewManager {
         this._viewportMap[viewport.id] = this._viewportMap[viewport.id] || viewport;
       }
     });
+  }
+
+  _getViewState(viewId) {
+    // Backward compatibility: view state for single view
+    return this.viewState[viewId] || this.viewState;
   }
 
   // Check if viewport array has changed, returns true if any change

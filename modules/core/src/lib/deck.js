@@ -32,10 +32,17 @@ import {EventManager} from 'mjolnir.js';
 import assert from '../utils/assert';
 /* global document */
 
-// TODO - move into Controller classes
-import {MAPBOX_LIMITS} from '../controllers/map-controller';
-
 function noop() {}
+
+const PREFIX = '-webkit-';
+
+const CURSOR = {
+  GRABBING: `${PREFIX}grabbing`,
+  GRAB: `${PREFIX}grab`,
+  POINTER: 'pointer'
+};
+
+const getCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
 
 function getPropTypes(PropTypes) {
   // Note: Arrays (layers, views, ) can contain falsy values
@@ -97,29 +104,11 @@ const defaultProps = {
   onLayerClick: null,
   onLayerHover: null,
 
+  getCursor,
+
   debug: false,
   drawPickingColors: false
 };
-
-const PREFIX = '-webkit-';
-
-const CURSOR = {
-  GRABBING: `${PREFIX}grabbing`,
-  GRAB: `${PREFIX}grab`,
-  POINTER: 'pointer'
-};
-
-const getCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
-
-// TODO - move into Controller classes
-const defaultControllerProps = Object.assign({}, MAPBOX_LIMITS, {
-  scrollZoom: true,
-  dragPan: true,
-  dragRotate: true,
-  doubleClickZoom: true,
-  touchZoomRotate: true,
-  getCursor
-});
 
 export default class Deck {
   constructor(props) {
@@ -129,10 +118,10 @@ export default class Deck {
     this.height = 0; // "read-only", auto-updated from canvas
 
     // Maps view descriptors to vieports, rebuilds when width/height/viewState/views change
-    this.viewManager = new ViewManager();
+    this.viewManager = null;
     this.layerManager = null;
     this.effectManager = null;
-    this.controller = null;
+
     this.stats = new Stats({id: 'deck.gl'});
 
     this._needsRedraw = true;
@@ -154,7 +143,6 @@ export default class Deck {
 
     // Note: LayerManager creation deferred until gl context available
     this.canvas = this._createCanvas(props);
-    this.controller = this._createController(props);
     this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
@@ -171,9 +159,9 @@ export default class Deck {
       this.layerManager = null;
     }
 
-    if (this.controller) {
-      this.controller.finalize();
-      this.controller = null;
+    if (this.viewManager) {
+      this.viewManager.finalize();
+      this.viewManager = null;
     }
 
     if (this.eventManager) {
@@ -212,14 +200,6 @@ export default class Deck {
       this.animationLoop.setProps(newProps);
     }
 
-    // Update controller props
-    if (this.controller) {
-      this.controller.setProps(
-        Object.assign(newProps, {
-          onViewStateChange: this._onViewStateChange
-        })
-      );
-    }
     this.stats.timeEnd('deck.setProps');
   }
 
@@ -340,13 +320,6 @@ export default class Deck {
     if (this._checkForCanvasSizeChange()) {
       const {width, height} = this;
       this.viewManager.setProps({width, height});
-      if (this.controller) {
-        this.controller.setProps({
-          viewState: this._getViewState(this.props),
-          width: this.width,
-          height: this.height
-        });
-      }
       this.props.onResize({width: this.width, height: this.height});
     }
   }
@@ -360,27 +333,6 @@ export default class Deck {
       return true;
     }
     return false;
-  }
-
-  // Note: props.controller must be a class constructor, not an already created instance
-  _createController(props) {
-    let controller = null;
-
-    if (props.controller) {
-      const Controller = props.controller;
-      controller = new Controller(props);
-      controller.setProps(
-        Object.assign({}, this.props, defaultControllerProps, {
-          eventManager: this.eventManager,
-          viewState: this._getViewState(props),
-          // Set an internal callback that calls the prop callback if provided
-          onViewStateChange: this._onViewStateChange,
-          onStateChange: this._onInteractiveStateChange
-        })
-      );
-    }
-
-    return controller;
   }
 
   _createAnimationLoop(props) {
@@ -403,16 +355,18 @@ export default class Deck {
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
   _getViewState(props) {
-    return Object.assign({}, props.viewState || this.viewState || {}, {
-      width: this.width,
-      height: this.height
-    });
+    return props.viewState || this.viewState || {};
   }
 
   // Get the view descriptor list
   _getViews(props) {
     // Default to a full screen map view port
-    return props.views || [new MapView({id: 'default-view'})];
+    const views = props.views || [new MapView()];
+    if (views.length && props.controller) {
+      // Backward compatibility: support controller prop
+      views[0].controller = props.controller;
+    }
+    return views;
   }
 
   _pickAndCallback(options) {
@@ -434,15 +388,19 @@ export default class Deck {
 
   // Callbacks
 
-  _onViewStateChange({viewState}, ...args) {
+  _onViewStateChange(params) {
     // Let app know that view state is changing, and give it a chance to change it
-    viewState = this.props.onViewStateChange({viewState}, ...args) || viewState;
+    const viewState = this.props.onViewStateChange(params) || params.viewState;
+
+    // TODO - deprecate?
+    if (this.props.onViewportChange) {
+      this.props.onViewportChange(params.viewState, params.interactionState, params.oldViewState);
+    }
 
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
-      this.viewState = viewState;
+      this.viewState[params.viewId] = viewState;
       this.viewManager.setProps({viewState});
-      this.controller.setProps({viewState});
     }
   }
 
@@ -474,9 +432,11 @@ export default class Deck {
       }
     });
 
-    if (this.controller) {
-      this.controller.setProps({eventManager: this.eventManager});
-    }
+    this.viewManager = new ViewManager({
+      eventManager: this.eventManager,
+      onViewStateChange: this._onViewStateChange,
+      onInteractiveStateChange: this._onInteractiveStateChange
+    });
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {stats: this.stats});

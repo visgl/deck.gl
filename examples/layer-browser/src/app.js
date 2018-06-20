@@ -243,16 +243,25 @@ export default class App extends PureComponent {
     } = this.state;
 
     if (infovis) {
-      return new OrbitView({id: 'infovis'});
+      return new OrbitView({
+        id: 'infovis',
+        controller: OrbitController
+      });
     }
 
     if (multiview) {
       return [
         new FirstPersonView({id: 'first-person', height: '50%'}),
-        new MapView({id: 'basemap', y: '50%', height: '50%', orthographic})
+        new MapView({
+          id: 'basemap',
+          controller: MapController,
+          y: '50%',
+          height: '50%',
+          orthographic
+        })
       ];
     }
-    return new MapView({id: 'basemap', orthographic});
+    return new MapView({id: 'basemap', controller: MapController, orthographic});
   }
 
   // Only show infovis layers in infovis mode and vice versa
@@ -277,7 +286,6 @@ export default class App extends PureComponent {
           layerFilter={this._layerFilter}
           views={views}
           viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
-          controller={infovis ? OrbitController : MapController}
           onViewStateChange={this._onViewStateChange}
           effects={effects ? this._effects : []}
           pickingRadius={pickingRadius}

@@ -6,7 +6,7 @@ import assert from '../utils/assert';
 export default class View {
   constructor(props = {}) {
     const {
-      id = null,
+      id = 'default-view',
 
       // Window width/height in pixels (for pixel projection)
       x = 0,
@@ -24,12 +24,16 @@ export default class View {
       // A View can be a wrapper for a viewport instance
       viewportInstance = null,
 
+      // A controller class constructor, not an already created instance
+      controller = null,
+
       // Internal: Viewport Type
       type = Viewport // TODO - default to WebMercator?
     } = props;
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
     this.viewportInstance = viewportInstance;
+    this.controller = controller;
 
     // Id
     this.id = id || this.constructor.displayName || 'view';

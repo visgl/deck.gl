@@ -2,7 +2,6 @@ import Controller from './controller';
 import ViewState from './view-state';
 
 import {Vector3, clamp} from 'math.gl';
-import assert from '../utils/assert';
 
 const MOVEMENT_SPEED = 1; // 1 meter per keyboard click
 const ROTATION_STEP_DEGREES = 2;
@@ -95,7 +94,12 @@ class FirstPersonState extends ViewState {
    */
   pan({pos, startPos}) {
     const startPanEventPosition = this._interactiveState.startPanEventPosition || startPos;
-    assert(startPanEventPosition, '`startPanEventPosition` props is required');
+
+    // when the mouse starts dragging outside of this viewport, then drags over it.
+    // TODO - use interactionState flag instead
+    if (!startPanEventPosition) {
+      return this;
+    }
 
     let [translationX, translationY] = this._interactiveState.startPanPosition || [];
     translationX = ensureFinite(translationX, this._viewportProps.translationX);
@@ -137,6 +141,12 @@ class FirstPersonState extends ViewState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   rotate({deltaScaleX, deltaScaleY}) {
+    // when the mouse starts dragging outside of this viewport, then drags over it.
+    // TODO - use interactionState flag instead
+    if (!this._interactiveState.startRotateCenter) {
+      return this;
+    }
+
     const {bearing, pitch} = this._viewportProps;
 
     return this._getUpdatedState({
