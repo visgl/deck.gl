@@ -432,26 +432,6 @@ export const docPages = generatePath([
             name: 'Viewport',
             content: getDocUrl('api-reference/viewport.md')
           },
-          // Custom viewports will be deprecated and this was never documented before, so skip
-          // {
-          //   name: 'FirstPersonViewport',
-          //   tag: 'experimental',
-          //   content: getDocUrl('api-reference/first-person-viewport.md')
-          // },
-          {
-            name: 'OrthographicViewport',
-            content: getDocUrl('api-reference/orthographic-viewport.md')
-          },
-          {
-            name: 'PerspectiveViewport',
-            content: getDocUrl('api-reference/perspective-viewport.md')
-          },
-          // Custom viewports will be deprecated and this was never documented before, so skip
-          // {
-          //   name: 'ThirdPersonViewport',
-          //   tag: 'experimental',
-          //   content: getDocUrl('api-reference/third-person-viewport.md')
-          // },
           {
             name: 'WebMercatorViewport',
             content: getDocUrl('api-reference/web-mercator-viewport.md')

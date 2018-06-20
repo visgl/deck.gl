@@ -20,6 +20,7 @@
 
 import LinearInterpolator from '../transitions/linear-interpolator';
 import TransitionManager, {TRANSITION_EVENTS} from './transition-manager';
+import log from '../utils/log';
 import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
@@ -59,7 +60,6 @@ export default class Controller {
       isDragging: false
     };
     this.events = [];
-    this.onViewportChange = null;
     this.onViewStateChange = null;
     this.onStateChange = null;
     this.invertPan = false;
@@ -134,7 +134,7 @@ export default class Controller {
   /* eslint-disable complexity, max-statements */
   setProps(props) {
     if ('onViewportChange' in props) {
-      this.onViewportChange = props.onViewportChange;
+      log.removed('onViewportChange');
     }
     if ('onViewStateChange' in props) {
       this.onViewStateChange = props.onViewStateChange;
@@ -165,7 +165,7 @@ export default class Controller {
     } = props;
 
     // Register/unregister events
-    const isInteractive = Boolean(this.onViewportChange || this.onViewStateChange);
+    const isInteractive = Boolean(this.onViewStateChange);
     this.toggleEvents(EVENT_TYPES.WHEEL, isInteractive && scrollZoom);
     this.toggleEvents(EVENT_TYPES.PAN, isInteractive && (dragPan || dragRotate));
     this.toggleEvents(EVENT_TYPES.PINCH, isInteractive && (touchZoom || touchRotate));
@@ -218,9 +218,6 @@ export default class Controller {
 
     if (changed) {
       const oldViewState = this.controllerState ? this.controllerState.getViewportProps() : null;
-      if (this.onViewportChange) {
-        this.onViewportChange(viewState, interactionState, oldViewState);
-      }
       if (this.onViewStateChange) {
         this.onViewStateChange({viewState, interactionState, oldViewState});
       }
