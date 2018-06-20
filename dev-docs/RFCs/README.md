@@ -48,9 +48,11 @@ RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.c
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
+| [**PropTypes**](v6.1/project32-with-64bit-data-rfc.md) | @ibgreen @georgios-uber | **Draft** | New projection mode for mixed 32/64 bit precision. |
 | [**PropTypes**](v6.1/prop-types-rfc.md) | @ibgreen | **Review** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | **[Effects Manager](v6.1/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
