@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 /* eslint-disable func-style, no-console, max-len */
 import test from 'tape-catch';
-import {LayerManager, Viewport, Layer, CompositeLayer} from 'deck.gl';
+import {LayerManager, Layer, CompositeLayer} from 'deck.gl';
 import {gl} from '@deck.gl/test-utils';
 
 class TestLayer extends Layer {

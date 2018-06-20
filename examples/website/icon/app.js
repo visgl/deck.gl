@@ -37,7 +37,7 @@ function getIconName(size) {
 }
 
 function getIconSize(size) {
-  return Math.min(100, size) / 100 * 0.5 + 0.5;
+  return (Math.min(100, size) / 100) * 0.5 + 0.5;
 }
 
 /* eslint-disable react/no-deprecated */

@@ -53,7 +53,7 @@ class Root extends Component {
       id: 'points',
       data,
       radiusScale: 10,
-      getPosition: ({x, y}) => [x * width / 2 * scale, y * height / 2 * scale],
+      getPosition: ({x, y}) => [((x * width) / 2) * scale, ((y * height) / 2) * scale],
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       updateTriggers: {
         getSourcePosition: {scale},
@@ -105,10 +105,10 @@ class Root extends Component {
       height,
       // the size of canvas and viewport are no longer the same as we scale w/ an ortho-viewport
       // all four are needed - left top right bottom - to decide the viewport size
-      left: -width / 2 * scale,
-      top: -height / 2 * scale,
-      right: width / 2 * scale,
-      bottom: height / 2 * scale
+      left: (-width / 2) * scale,
+      top: (-height / 2) * scale,
+      right: (width / 2) * scale,
+      bottom: (height / 2) * scale
     });
 
     return (

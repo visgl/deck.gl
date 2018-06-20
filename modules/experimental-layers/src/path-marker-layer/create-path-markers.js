@@ -91,7 +91,7 @@ function createMarkerAlongPath({path, percentage, lineLength, color, object, pro
     .add(path[i]);
 
   const vDirection2 = new Vector2(projectFlat(path[i + 1])).subtract(projectFlat(path[i]));
-  const angle = -vDirection2.verticalAngle() * 180 / Math.PI;
+  const angle = (-vDirection2.verticalAngle() * 180) / Math.PI;
 
   return {position: [vCenter.x, vCenter.y, 0], angle, color, object};
 }
