@@ -388,18 +388,18 @@ export default class Deck {
 
   // Callbacks
 
-  _onViewStateChange(event) {
+  _onViewStateChange(params) {
     // Let app know that view state is changing, and give it a chance to change it
-    const viewState = this.props.onViewStateChange(event) || event.viewState;
+    const viewState = this.props.onViewStateChange(params) || params.viewState;
 
     // TODO - deprecate?
     if (this.props.onViewportChange) {
-      this.props.onViewportChange(event.viewState, event.interactionState, event.oldViewState);
+      this.props.onViewportChange(params.viewState, params.interactionState, params.oldViewState);
     }
 
     // If initialViewState was set on creation, auto track position
     if (this.viewState) {
-      this.viewState[event.viewId] = viewState;
+      this.viewState[params.viewId] = viewState;
       this.viewManager.setProps({viewState});
     }
   }

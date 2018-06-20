@@ -236,6 +236,7 @@ export default class ViewManager {
         const viewport = view.makeViewport({width, height, viewState});
 
         const controller = this.controllers[view.id];
+        // TODO - check for removed view ids?
         if (controller) {
           controller.setProps(
             Object.assign({}, viewState, {

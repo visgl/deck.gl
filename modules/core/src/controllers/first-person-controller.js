@@ -95,6 +95,8 @@ class FirstPersonState extends ViewState {
   pan({pos, startPos}) {
     const startPanEventPosition = this._interactiveState.startPanEventPosition || startPos;
 
+    // when the mouse starts dragging outside of this viewport, then drags over it.
+    // TODO - use interactionState flag instead
     if (!startPanEventPosition) {
       return this;
     }
@@ -139,6 +141,8 @@ class FirstPersonState extends ViewState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   rotate({deltaScaleX, deltaScaleY}) {
+    // when the mouse starts dragging outside of this viewport, then drags over it.
+    // TODO - use interactionState flag instead
     if (!this._interactiveState.startRotateCenter) {
       return this;
     }
