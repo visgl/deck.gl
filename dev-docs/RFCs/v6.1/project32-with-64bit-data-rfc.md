@@ -1,7 +1,7 @@
 # RFC: Projection Mode Improvements
 
 * **Authors**: Ib Green and Georgios Karnas
-* **Date**: June 2019
+* **Date**: June 2018
 * **Status**: Draft
 
 Notes:
