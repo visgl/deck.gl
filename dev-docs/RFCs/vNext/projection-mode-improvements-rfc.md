@@ -9,25 +9,27 @@ Notes:
 * Also see [PR 904](https://github.com/uber/deck.gl/pull/904)
 
 
+## Summary
+
+This RFC proposes generalizations to the project system in deck.gl.
+
+
 ## Motivation
 
 Cartographic Projections are a core functionality of deck.gl.
 
+## Proposal: Prop to supply JavaScript Project Function
 
-## Use Cases
-
-* Performance
-* Support non-Web-Mercator-Projections
-
-## Proposal: Support for 64 bit position attributes in 32 bit mode
-
-Without using full 64 bit shader processing. 64 bits could be used only for an initial center subtraction, the remaining processing could be done in 32 bits.
+What I have been thinking is to offer the user to provide a simple JS function that maps any position (from any other coordinates) to one of our supported coordinate systems. This function would be called during position attribute generation. I.e we'd still show a mercator projected world but be able to correctly position coordinates specified in other projections. If the project function projected to TILE_ZERO it would have perf advantages during render too.
 
 
-## Proposal: Automatic Offset Mode
+## Proposal: Replaceable Project Shader Module for Custom Projections
 
-Big precision advantages comes when using offset mode. Could we allow the app to specify a center point and auto calculate offsets. Especially effective combined with previous proposal.
+The shadertools module system was designed with a focus on interfaces, with an intention of allowing modules to be replaced with similar modules implementing the same interface. It would take a little more work on shadertools, but it is almost there. This was mostly intended for replacing e.g. lighting but would most likely work for projections as well.
 
+Also shadertools already supports a generic getUniforms system that allows each module to opt in and extract what uniforms it needs from a common JS object, so modules that have the same GLSL interface could still listen for different JS props.
+
+This should allow apps to plug in a replacement project module as you suggest, that could pick up any uniforms it wanted from the layers' props, e.g. your suggested projectionParams.
 
 ## Proposal: Support Preprojected Web Mercator Coordinates (Tile 0)
 
@@ -46,17 +48,4 @@ Note that the full "precision" advantages only come when we use offsets instead 
 Questions:
 * Maybe we could also add a `COORDINATE_SYSTEM.TILE_ZERO_OFFSETS` mode? But that makes the setup ever more complex... And what would the reference point be? lngLat or tile 0?
 
-
-## Proposal: Prop to supply JavaScript Project Function
-
-What I have been thinking is to offer the user to provide a simple JS function that maps any position (from any other coordinates) to one of our supported coordinate systems. This function would be called during position attribute generation. I.e we'd still show a mercator projected world but be able to correctly position coordinates specified in other projections. If the project function projected to TILE_ZERO it would have perf advantages during render too.
-
-
-## Proposal: Replaceable Project Shader Module for Custom Projections
-
-The shadertools module system was designed with a focus on interfaces, with an intention of allowing modules to be replaced with similar modules implementing the same interface. It would take a little more work on shadertools, but it is almost there. This was mostly intended for replacing e.g. lighting but would most likely work for projections as well.
-
-Also shadertools already supports a generic getUniforms system that allows each module to opt in and extract what uniforms it needs from a common JS object, so modules that have the same GLSL interface could still listen for different JS props.
-
-This should allow apps to plug in a replacement project module as you suggest, that could pick up any uniforms it wanted from the layers' props, e.g. your suggested projectionParams.
 
