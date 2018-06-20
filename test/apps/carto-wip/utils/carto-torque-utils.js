@@ -36,7 +36,7 @@ export function parseTile({tileParams, tileData}) {
     for (let i = 0; i < vals.length; ++i) {
       points.push({
         // TODO - for some reason divisor had to be changed from 256
-        position: [corners.west + x / 128 * xTileSize, corners.south + y / 128 * yTileSize],
+        position: [corners.west + (x / 128) * xTileSize, corners.south + (y / 128) * yTileSize],
         value: vals[i],
         time: dates[i]
       });
@@ -58,20 +58,20 @@ export function getTileUrl({userID, layergroupid, zoom, xTileNo, yTileNo}) {
 // http://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Lon..2Flat._to_tile_numbers_2
 export function tileToLngLatExtents({xTileNo, yTileNo, zoom}) {
   const n = Math.pow(2.0, zoom);
-  const west = xTileNo / n * 360 - 180;
-  const east = (xTileNo + 1) / n * 360 - 180;
-  const south = Math.atan(Math.sinh(Math.PI * (1 - 2 * (yTileNo + 1) / n))) / Math.PI * 180;
-  const north = Math.atan(Math.sinh(Math.PI * (1 - 2 * yTileNo / n))) / Math.PI * 180;
+  const west = (xTileNo / n) * 360 - 180;
+  const east = ((xTileNo + 1) / n) * 360 - 180;
+  const south = (Math.atan(Math.sinh(Math.PI * (1 - (2 * (yTileNo + 1)) / n))) / Math.PI) * 180;
+  const north = (Math.atan(Math.sinh(Math.PI * (1 - (2 * yTileNo) / n))) / Math.PI) * 180;
   // console.log('west, east, south, north: ', west, east, south, north);
   return {west, east, south, north};
 }
 
 export function lngLatToTile({longitude, latitude, zoom}) {
-  const lat_rad = latitude / 180 * Math.PI;
+  const lat_rad = (latitude / 180) * Math.PI;
   const n = Math.pow(2.0, zoom);
-  const xtile = Math.floor((longitude + 180.0) / 360.0 * n);
+  const xtile = Math.floor(((longitude + 180.0) / 360.0) * n);
   const ytile = Math.floor(
-    (1.0 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2.0 * n
+    ((1.0 - Math.log(Math.tan(lat_rad) + 1 / Math.cos(lat_rad)) / Math.PI) / 2.0) * n
   );
   return [xtile, ytile];
 }

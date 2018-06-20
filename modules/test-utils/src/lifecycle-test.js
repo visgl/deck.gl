@@ -140,7 +140,11 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
     );
 
     // call draw layer
-    doesNotThrow(() => layerManager.drawLayers({viewports: [testViewport]}), `draw ${layer} should not fail`, userData);
+    doesNotThrow(
+      () => layerManager.drawLayers({viewports: [testViewport]}),
+      `draw ${layer} should not fail`,
+      userData
+    );
 
     // layer manager should handle match subLayer and tranfer state and props
     // here we assume subLayer matches copy over the new props from a new subLayer

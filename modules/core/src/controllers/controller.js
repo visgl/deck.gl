@@ -302,7 +302,7 @@ export default class Controller {
     if (deltaY > 0) {
       if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
         // Move from 0 to -1 as we drag upwards
-        deltaScaleY = deltaY / (startY - height) * PITCH_ACCEL;
+        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
       }
     } else if (deltaY < 0) {
       if (startY > PITCH_MOUSE_THRESHOLD) {

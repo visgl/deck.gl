@@ -27,7 +27,7 @@ function getScale({min, max}) {
 // export default class DeckGLOverlay extends Component {
 // const {viewport, resolution, showAxis, equation} = this.props;
 
-const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
+const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 
 const PlotLayerInfovisExample = {
   layer: PlotLayer,
