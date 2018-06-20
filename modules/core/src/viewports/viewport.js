@@ -29,7 +29,6 @@ import mat4_invert from 'gl-mat4/invert';
 
 import {
   getDistanceScales,
-  getWorldPosition,
   getMeterZoom,
   worldToPixels,
   pixelsToWorld
@@ -342,13 +341,7 @@ export default class Viewport {
 
     if (this.isGeospatial) {
       // Determine camera center
-      this.center = getWorldPosition({
-        longitude,
-        latitude,
-        scale: this.scale,
-        distanceScales: this.distanceScales,
-        meterOffset: this.meterOffset
-      });
+      this.center = this._getCenterInWorld({longitude, latitude});
 
       // Make a centered version of the matrix for projection modes without an offset
       this.viewMatrix = new Matrix4()
@@ -365,6 +358,26 @@ export default class Viewport {
     }
   }
   /* eslint-enable complexity, max-statements */
+
+  _getCenterInWorld({longitude, latitude}) {
+    const {meterOffset, scale, distanceScales} = this;
+
+    // Make a centered version of the matrix for projection modes without an offset
+    const center2d = this.projectFlat([longitude, latitude], scale);
+    const center = new Vector3(center2d[0], center2d[1], 0);
+
+    if (meterOffset) {
+      const pixelPosition = new Vector3(meterOffset)
+        // Convert to pixels in current zoom
+        .scale(distanceScales.pixelsPerMeter)
+        // We want positive Y to represent an offset towards north,
+        // but web mercator world coordinates is top-left
+        .scale([1, -1, 1]);
+      center.add(pixelPosition);
+    }
+
+    return center;
+  }
 
   _initProjectionMatrix(opts) {
     const {
