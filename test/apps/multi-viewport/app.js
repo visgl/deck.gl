@@ -1,19 +1,17 @@
-/* global window, document, fetch */
+/* global document, fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 
-import DeckGL from 'deck.gl';
-import {
+import DeckGL, {
   COORDINATE_SYSTEM,
   PolygonLayer,
   PointCloudLayer,
   MapView,
   FirstPersonView,
   ThirdPersonView,
-  _FirstPersonState as FirstPersonState,
-  _ViewportController as ViewportController,
-  _LinearInterpolator as LinearInterpolator
+  MapController,
+  _FirstPersonController
 } from 'deck.gl';
 
 import TripsLayer from '../../../examples/website/trips/trips-layer';
@@ -52,33 +50,19 @@ const DEFAULT_VIEWPORT_PROPS = {
   up: [0, 0, 1] // Defines up direction, default positive y axis
 };
 
-const transitionInterpolator = new LinearInterpolator([
-  'longitude',
-  'latitude',
-  'zoom',
-  'bearing',
-  'pitch',
-  'position'
-]);
-
 class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      fov: 50,
-      animatePosition: true,
-      animateBearing: true,
-
-      viewportProps: {
-        ...DEFAULT_VIEWPORT_PROPS,
-        width: 500,
-        height: 500
+      viewState: {
+        '1st-person': {...DEFAULT_VIEWPORT_PROPS},
+        '3rd-person': {...DEFAULT_VIEWPORT_PROPS},
+        basemap: {...DEFAULT_VIEWPORT_PROPS}
       },
       buildings: null,
       trips: null,
       time: 0,
-      trailLength: 50,
-      transitionDuration: 0
+      trailLength: 50
     };
 
     fetch(DATA_URL.BUILDINGS)
@@ -89,70 +73,13 @@ class Root extends Component {
       .then(response => response.json())
       .then(data => this.setState({trips: data}));
 
-    this._onViewportChange = this._onViewportChange.bind(this);
-    this._onFovChange = this._onFovChange.bind(this);
-    this._animateViewport = this._animateViewport.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._onResize.bind(this));
-    this._onResize();
-    this._onAnimate();
-  }
-
-  componentWillUnmount() {
-    if (this._animationFrame) {
-      window.cancelAnimationFrame(this._animationFrame);
-    }
-  }
-
-  _onAnimate() {
-    const timestamp = Date.now();
-    const loopLength = 1800;
-    const loopTime = 20000;
-
+  _onViewStateChange({viewId, viewState}) {
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      viewState: {...this.state.viewState, [viewId]: viewState}
     });
-    this._animationFrame = window.requestAnimationFrame(this._onAnimate.bind(this));
-  }
-
-  _onResize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onViewportChange(viewportProps, viewport) {
-    this.setState({
-      viewportProps: {...this.state.viewportProps, ...viewportProps},
-      viewport,
-      transitionDuration: 0
-    });
-  }
-
-  _onFovChange() {
-    this.setState({fov: this.state.fov === 60 ? 35 : 60});
-  }
-
-  _animateViewport() {
-    const {animatePosition, animateBearing} = this.state;
-    if (animatePosition || animateBearing) {
-      const position = Array.from(this.state.viewportProps.position);
-      if (animatePosition) {
-        position[0] -= 100.0;
-        position[1] -= 100.0;
-      }
-      let bearing = this.state.viewportProps.bearing;
-      if (animateBearing) {
-        bearing += 30.0;
-      }
-      this.setState({
-        viewportProps: {...this.state.viewportProps, position, bearing},
-        transitionDuration: 3000
-      });
-    }
   }
 
   _onValueChange(settingName, newValue) {
@@ -160,64 +87,11 @@ class Root extends Component {
       [settingName]: newValue
     });
   }
-  _renderOptionsPanel() {
-    return (
-      <div style={{position: 'absolute', top: '8px', right: '8px'}}>
-        <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <button key="fov" onClick={this._onFovChange}>
-            {`FOV : ${this.state.fov}`}
-          </button>
-          <button key="AnimateViewport" onClick={this._animateViewport}>
-            {'AnimateViewport'}
-          </button>
-
-          <div className="input-group">
-            <label htmlFor={'animatePosition'} style={{color: 'white'}}>
-              <span>{'animatePosition'}</span>
-            </label>
-            <input
-              type="checkbox"
-              id={'animatePosition'}
-              checked={this.state.animatePosition}
-              onChange={e => this._onValueChange('animatePosition', e.target.checked)}
-            />
-          </div>
-
-          <div className="input-group">
-            <label htmlFor={'animateBearing'} style={{color: 'white'}}>
-              <span>{'animateBearing'}</span>
-            </label>
-            <input
-              type="checkbox"
-              id={'animateBearing'}
-              checked={this.state.animateBearing}
-              onChange={e => this._onValueChange('animateBearing', e.target.checked)}
-            />
-          </div>
-
-          <div style={{color: 'white'}}>
-            {Object.keys(this.state.viewportProps).map(key => (
-              <div key={key}>
-                {key}:{String(this.state.viewportProps[key])}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   _renderLayers() {
     const {longitude, latitude} = DEFAULT_VIEWPORT_PROPS;
-    const {viewportProps} = this.state;
-    const {position} = viewportProps;
+    const {viewState} = this.state;
+    const {position} = viewState['3rd-person'];
 
     const {buildings, trips} = this.state;
     const {trailLength, time} = this.state;
@@ -280,15 +154,16 @@ class Root extends Component {
   }
 
   _renderViews() {
-    const {fov} = this.state;
     return [
       new FirstPersonView({
         id: '1st-person',
+        controller: _FirstPersonController,
         height: '33.33%',
-        fovy: fov
+        fovy: 50
       }),
       new ThirdPersonView({
         id: '3rd-person',
+        controller: MapController,
         y: '33.33%',
         height: '33.33%',
         near: 0.1, // Distance of near clipping plane
@@ -296,6 +171,7 @@ class Root extends Component {
       }),
       new MapView({
         id: 'basemap',
+        controller: MapController,
         y: '66.67%',
         height: '33.33%'
       })
@@ -303,44 +179,31 @@ class Root extends Component {
   }
 
   render() {
-    const {viewportProps, transitionDuration} = this.state;
+    const {viewState} = this.state;
 
     return (
-      <div style={{backgroundColor: '#000'}}>
-        <ViewportController
-          viewportState={FirstPersonState}
-          {...viewportProps}
-          width={viewportProps.width}
-          height={viewportProps.height}
-          onViewportChange={this._onViewportChange}
-          transitionDuration={transitionDuration}
-          transitionInterpolator={transitionInterpolator}
-        >
-          <DeckGL
-            id="first-person"
-            width={viewportProps.width}
-            height={viewportProps.height}
-            viewState={viewportProps}
-            views={this._renderViews()}
-            layers={this._renderLayers()}
-          >
-            <StaticMap
-              viewId="3rd-person"
-              {...viewportProps}
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-            <StaticMap
-              viewId="basemap"
-              {...viewportProps}
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          </DeckGL>
-
-          {this._renderOptionsPanel()}
-        </ViewportController>
-      </div>
+      <DeckGL
+        id="first-person"
+        width="100%"
+        height="100%"
+        viewState={viewState}
+        onViewStateChange={this._onViewStateChange}
+        views={this._renderViews()}
+        layers={this._renderLayers()}
+      >
+        <StaticMap
+          viewId="3rd-person"
+          {...viewState['3rd-person']}
+          mapStyle="mapbox://styles/mapbox/light-v9"
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
+        <StaticMap
+          viewId="basemap"
+          {...viewState.basemap}
+          mapStyle="mapbox://styles/mapbox/dark-v9"
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
+      </DeckGL>
     );
   }
 }
