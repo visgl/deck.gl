@@ -237,6 +237,11 @@ export default class PathLayer extends Layer {
     );
   }
 
+  // "Experimental" method indended to make it easier to support non-nested arrays in subclasses
+  _getPathLength(path) {
+    return path.length;
+  }
+
   calculateStartPositions(attribute) {
     const {paths} = this.state;
     const {value} = attribute;
@@ -333,7 +338,9 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const width = getWidth(data[index], index);
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = width;
       }
     });
@@ -350,7 +357,9 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const dashArray = getDashArray(data[index], index);
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = dashArray[0];
         value[i++] = dashArray[1];
       }
@@ -368,7 +377,9 @@ export default class PathLayer extends Layer {
       if (isNaN(pointColor[3])) {
         pointColor[3] = 255;
       }
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = pointColor[0];
         value[i++] = pointColor[1];
         value[i++] = pointColor[2];
@@ -385,7 +396,9 @@ export default class PathLayer extends Layer {
     let i = 0;
     paths.forEach((path, index) => {
       const pickingColor = this.encodePickingColor(index);
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
+
+      const pathLength = this._getPathLength(path);
+      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
         value[i++] = pickingColor[0];
         value[i++] = pickingColor[1];
         value[i++] = pickingColor[2];

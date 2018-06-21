@@ -243,7 +243,7 @@ export default class SolidPolygonLayer extends Layer {
       const polygons = props.data.map(props.getPolygon);
 
       this.setState({
-        polygonTesselator: new PolygonTesselator({polygons, IndexType: this.state.IndexType})
+        polygonTesselator: this._getPolygonTesselator(polygons, this.state.IndexType)
       });
 
       this.state.attributeManager.invalidateAll();
@@ -283,6 +283,11 @@ export default class SolidPolygonLayer extends Layer {
       const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
       this._updateAttributes(changedAttributes);
     }
+  }
+
+  // "Experimental" method indended to make it easier to support non-nested arrays in subclasses
+  _getPolygonTesselator(polygons, IndexType) {
+    return new PolygonTesselator({polygons, IndexType: this.state.IndexType});
   }
 
   _updateAttributes(attributes) {

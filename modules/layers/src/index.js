@@ -38,3 +38,7 @@ export {default as PolygonLayer} from './polygon-layer/polygon-layer';
 export {default as GeoJsonLayer} from './geojson-layer/geojson-layer';
 
 export {default as TextLayer} from './text-layer/text-layer';
+
+// Experimental layer exports
+export {default as _SolidPolygonLayer} from './solid-polygon-layer/solid-polygon-layer';
+export {default as _MultiIconLayer} from './text-layer/multi-icon-layer/multi-icon-layer';
