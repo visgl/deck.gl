@@ -8,35 +8,61 @@ Notes:
 
 ## Summary
 
-This RFC proposes adding a new LNG/LAT projection mode that consumes 64bit input data but then uses 32 bit linearized calculations for 90% of 32 bit performance with 90% of 64 bit precision.
+This RFC proposes enhancing the "32-bit" `COORDINATE_SYSTEM.LNGLAT` projection mode so that it automatically switches to offset based "linear" approximation at higher zoom levels. The enables are calculation of 64bit "low" `position` attributes even in 32 bit mode, and the introduction of auto offset calculation. The goal is to get (close to) 32 bit performance with (close to) 64 bit precision.
 
 
-## Motivation
+## Motivation/Background
 
-Cartographic Projections are a core functionality of deck.gl and projection performance is key to most applications. As we know, naive 32 bit projections fail at high zoom levels. Today we can get good performance in 32 bit projections if we use LNGLAT_OFFSET or METER_OFFSET modes.
+Cartographic Projections are a core functionality of deck.gl and projection performance is key to most applications.
+* As we know, naive 32 bit projections fail at high zoom levels.
+* Workaround 1: `fp64` has a major performance impact, both on shader execution and shader compilation times.
+* Workaround 2: `LNGLAT_OFFSETS` solves the `fp64` perf issues, but at a cost: It can pose a major inconvenience (and recurring perf hit) for the application as it has to calculate (and may have to keep recalcuating) the lnglat offsets depending on center point.
 
-This will lead to improved performance for cartographic projection in street level views, without app having to preprocess lng/lat coordinates to offsets or meters, or recalculating deltas on CPU.
-
-
-## Proposals
-
-
-### Calculate 64 bit position attributes in 32 bit mode
-
-The idea is not to do full 64 bit shader processing (matrix multiplication). 64 bits will only be used only for an initial center subtraction, the remaining processing can be done in 32 bits.
+So the goal is improved performance for cartographic projection of LNGLAT coordinates in e.g. street level views, without app having to preprocess lng/lat coordinates to offsets or meters, or recalculating deltas on CPU.
 
 
-### Automatic Offset Mode
+## Proposed Changes
 
-* The big precision advantages comes when using offset modes, especially if subtractions are local. Could we allow the app to specify a center point and auto calculate offsets? Especially effective combined with previous proposal.
+The changes concern projection of layers with `props.coordinateSystem=COORDINATE_SYSTEM.LNGLAT`, in **non-fp64** mode:
 
-* Center point will need to be communicated to shader as 64 bits.
+* Calculate 64 bit position attributes even when using 32 bit shader.
+* If zoom level is below magic threshold (say 15, exact number TBD), use current 32-bit web mercator projection.
+* If zoom level is above magic threshold, switch to using "linear" approximation as currently used by `COORDINATE_SYSTEM.LNGLAT_OFFSETS`, however automatically calculate the delta using 64 bit subtraction from a center point (see below).
+
+
+### 64 bit position attributes
+
+* **64bit posititon attributes** - Always calculate 64bit position attributes when `coordinateSystem` is `COORDINATE_SYSTEM.LNG_LAT` (i.e. regardless of `fp64` flag. - We have a fair bit of ugly logic in layers pertaining to conditional calculation of 64 bit attributes. It has improved with the ability to set the low part to 0, but perhaps we should always calculate positions in 64 bit mode?
+
+
+
+### Center Point and Automatic Offset Mode
+
+The big precision advantages comes when using linear approximation based on offsets. But it is only good if the precision of the offsets are good. So, the offset subtraction should be done in fp64 mode and converted back to a single fp32 number. Could we allow the app to specify a center point and auto calculate offsets? Especially effective combined with previous proposal.
+
+The center point will likely not need to be provided as 64 bit uniform. It just needs to be padded to 64 bits for subtraction.
+
+
+### Converting small fp64 deltas into fp32 values
+
+Need to investigate if we have the right function available in fp64...
+
+**Use fp64-arithmetic module only** - Perhaps the subtraction can be performed on the high-order fp64 value without any fp64 library. If not, the full `fp64` shader module is enormous and can slow down shader compilation. There is a small `fp64-arithmetic` core module containing the required subtraction method, make sure it is exported from luma.gl.
+
+
+### Deprecate `COORDINATE_SYSTEM.LNGLAT_OFFSETS`
+
+Seems this mode is not very useful other than for performance benefits. Not aware of any data sets that are natively encoded in lnglat offsets. Might as well drop this mode to clean up both code as well as our coordinate system concepts.
 
 
 ## Open Issues
 
-* Center Point Selection - should we let the user decide using `coordinateOrigin`. Should we have it default to viewport center. Or both?
+* Always calculate 64bit attributes in LNGLAT mode? - For LNGLAT layer that don't need to zoom a bit of attribute generation speed could be gained by disabling 64 bit attribute generation. Is it worth offering the option to disable this?
 
-* Always calculate 64bit attributes? - We have a fair bit of ugly logic in layers pertaining to conditional calculation of 64 bit attributes. It has improved with the ability to set the low part to 0, but perhaps we should always calculate positions in 64 bit mode?
+** Offer 64bit attribute calculation in non LNGLAT modes? - The use cases are a little hard to imagine, but technically it would be easy to support. It is just a meter of API/prop choices.
+
+* An "extreme" alternative is to auto generate these only when zoom levels break the limit. Extra logic, but is elegant in the sense that "user will only pay for what he uses".
+
+* Center Point Selection - should we let the user decide using `coordinateOrigin`. Should we have it default to viewport center. Or both?
 
 * Support `Float64Array`? - An interesting side investigation would be looking at JavaScript's native `Float64Array`, to understand how these values break down into 32 bit pieces and how they can be accessed from shaders.
