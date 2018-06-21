@@ -204,7 +204,7 @@ const DEFAULT_CHANGE_FLAGS = {
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
   static getAggregationData({countsData, maxCountData, pixelIndex}) {
-    assert(countsData.length >= ((pixelIndex + 1) * PIXEL_SIZE));
+    assert(countsData.length >= (pixelIndex + 1) * PIXEL_SIZE);
     assert(maxCountData.length === PIXEL_SIZE);
     const index = pixelIndex * PIXEL_SIZE;
     const cellCount = countsData[index];
@@ -213,7 +213,11 @@ export default class GPUGridAggregator {
     const totalWeight = maxCountData[1];
     const maxCellWieght = maxCountData[3];
     return {
-      cellCount, cellWeight, totalCount, totalWeight, maxCellWieght
+      cellCount,
+      cellWeight,
+      totalCount,
+      totalWeight,
+      maxCellWieght
     };
   }
   constructor(gl, opts = {}) {

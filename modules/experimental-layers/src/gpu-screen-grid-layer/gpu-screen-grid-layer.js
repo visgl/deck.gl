@@ -74,7 +74,7 @@ export default class GPUScreenGridLayer extends Layer {
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
       maxCountBuffer: this._getMaxCountBuffer(gl),
-      aggregationData: null,
+      aggregationData: null
     });
 
     this._setupUniformBuffer();
@@ -163,7 +163,7 @@ export default class GPUScreenGridLayer extends Layer {
         aggregationData = {
           countsData: this.state.countsBuffer.getData(),
           maxCountData: this.state.maxCountBuffer.getData()
-        }
+        };
         // Cache aggregationData to avoid multiple buffer reads.
         this.setState({aggregationData});
       }
