@@ -73,7 +73,8 @@ export default class GPUScreenGridLayer extends Layer {
     this.setState({
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
-      maxCountBuffer: this._getMaxCountBuffer(gl)
+      maxCountBuffer: this._getMaxCountBuffer(gl),
+      aggregationData: null,
     });
 
     this._setupUniformBuffer();
@@ -90,7 +91,7 @@ export default class GPUScreenGridLayer extends Layer {
       this._processData();
     }
 
-    const changeFlags = this._getAggregationChagneFlags(opts);
+    const changeFlags = this._getAggregationChangeFlags(opts);
 
     if (changeFlags) {
       this._updateAggregation(changeFlags);
@@ -154,9 +155,34 @@ export default class GPUScreenGridLayer extends Layer {
     });
   }
 
+  getPickingInfo({info, mode}) {
+    const {index} = info;
+    if (index >= 0) {
+      let {aggregationData} = this.state;
+      if (!aggregationData) {
+        aggregationData = {
+          countsData: this.state.countsBuffer.getData(),
+          maxCountData: this.state.maxCountBuffer.getData()
+        }
+        // Cache aggregationData to avoid multiple buffer reads.
+        this.setState({aggregationData});
+      }
+      const {countsData, maxCountData} = aggregationData;
+      // Each instance (one cell) is aggregated into single pixel,
+      // Get current instance's aggregation details.
+      info.object = GPUGridAggregator.getAggregationData({
+        countsData,
+        maxCountData,
+        pixelIndex: index
+      });
+    }
+
+    return info;
+  }
+
   // HELPER Methods
 
-  _getAggregationChagneFlags({oldProps, props, changeFlags}) {
+  _getAggregationChangeFlags({oldProps, props, changeFlags}) {
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
     const dataChanged = changeFlags.dataChanged;
     const viewportChanged = changeFlags.viewportChanged;
@@ -256,6 +282,9 @@ export default class GPUScreenGridLayer extends Layer {
       useGPU: gpuAggregation,
       projectPoints: true
     });
+
+    // Aggregation changed, enforce reading buffer data for picking.
+    this.setState({aggregationData: null});
 
     attributeManager.invalidate('instanceCounts');
   }
