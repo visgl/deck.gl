@@ -7250,13 +7250,13 @@ preserve@^0.2.0:
   version "0.2.0"
   resolved "https://registry.yarnpkg.com/preserve/-/preserve-0.2.0.tgz#815ed1f6ebc65926f865b310c0713bcb3315ce4b"
 
-prettier-check@^2.0.0:
+prettier-check@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/prettier-check/-/prettier-check-2.0.0.tgz#edd086ee12d270579233ccb136a16e6afcfba1ae"
   dependencies:
     execa "^0.6.0"
 
-prettier@^1.12.1, prettier@^1.9.2:
+prettier@1.13.5, prettier@^1.12.1:
   version "1.13.5"
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-1.13.5.tgz#7ae2076998c8edce79d63834e9b7b09fead6bfd0"
 
