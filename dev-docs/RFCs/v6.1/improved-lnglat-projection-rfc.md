@@ -1,4 +1,4 @@
-# RFC: Projection Mode Improvements
+# RFC: Improved 32-bit LNGLAT projection mode
 
 * **Authors**: Ib Green and Georgios Karnas
 * **Date**: June 2018
@@ -8,7 +8,7 @@ Notes:
 
 ## Summary
 
-This RFC proposes enhancing the "32-bit" `COORDINATE_SYSTEM.LNGLAT` projection mode so that it automatically switches to offset based "linear" approximation at higher zoom levels. The enables are calculation of 64bit "low" `position` attributes even in 32 bit mode, and the introduction of auto offset calculation. The goal is to get (close to) 32 bit performance with (close to) 64 bit precision.
+This RFC proposes enhancing the "32-bit" `COORDINATE_SYSTEM.LNGLAT` projection mode so that it automatically switches to offset based polynomial approximation at higher zoom levels. The required changes are: 1) calculation of 64bit "low" `position` attributes even in 32 bit mode, and 2) the introduction of auto offset calculation in the shader using 64 bit subtraction and normalization. The expected result is to get (close to) 32 bit performance with (close to) 64 bit precision at all zoom levels.
 
 
 ## Motivation/Background
@@ -27,7 +27,7 @@ The changes concern projection of layers with `props.coordinateSystem=COORDINATE
 
 * Calculate 64 bit position attributes even when using 32 bit shader.
 * If zoom level is below magic threshold (say 15, exact number TBD), use current 32-bit web mercator projection.
-* If zoom level is above magic threshold, switch to using "linear" approximation as currently used by `COORDINATE_SYSTEM.LNGLAT_OFFSETS`, however automatically calculate the delta using 64 bit subtraction from a center point (see below).
+* If zoom level is above magic threshold, switch to using polynomial approximation as currently used by `COORDINATE_SYSTEM.LNGLAT_OFFSETS`, however automatically calculate the delta using 64 bit subtraction from a center point (see below).
 
 
 ### 64 bit position attributes
