@@ -19,16 +19,18 @@
 // THE SOFTWARE.
 
 import {Layer, experimental} from '@deck.gl/core';
-import GPUGridAggregator from '../utils/gpu-grid-aggregator';
 const {defaultColorRange} = experimental;
-
+import GPUGridAggregator from '../utils/gpu-grid-aggregator';
 import {GL, Model, Geometry, Buffer} from 'luma.gl';
-
 import vs from './gpu-screen-grid-layer-vertex.glsl';
 import fs from './gpu-screen-grid-layer-fragment.glsl';
-const DEFAULT_MINCOLOR = [0, 0, 0, 255];
+import assert from 'assert';
+
+const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const AGGREGATION_DATA_UBO_INDEX = 0;
+const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
+const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
   cellSizePixels: 100,
@@ -39,17 +41,12 @@ const defaultProps = {
   getPosition: d => d.position,
   getWeight: d => 1,
 
-  minColor: DEFAULT_MINCOLOR,
-  maxColor: DEFAULT_MAXCOLOR,
-
   gpuAggregation: true
 };
 
 export default class GPUScreenGridLayer extends Layer {
   getShaders() {
-    // TODO: enable picking (https://github.com/uber/deck.gl/issues/1592)
-    // return {vs, fs, modules: ['picking']};
-    return {vs, fs};
+    return {vs, fs, modules: ['picking']};
   }
 
   initializeState() {
@@ -98,12 +95,27 @@ export default class GPUScreenGridLayer extends Layer {
     if (changeFlags) {
       this._updateAggregation(changeFlags);
     }
+
+    this._updateColorUniforms(opts);
   }
 
   draw({uniforms}) {
-    const {minColor, maxColor, parameters = {}} = this.props;
-    const {model, maxCountBuffer, cellScale} = this.state;
-    uniforms = Object.assign({}, uniforms, {minColor, maxColor, cellScale});
+    const {parameters = {}} = this.props;
+    const minColor = this.props.minColor || DEFAULT_MINCOLOR;
+    const maxColor = this.props.maxColor || DEFAULT_MAXCOLOR;
+
+    // If colorDomain not specified we use default domain [1, maxCount]
+    // maxCount value will be deduced from aggregated buffer in the vertex shader.
+    const colorDomain = this.props.colorDomain || [1, 0];
+    const {model, maxCountBuffer, cellScale, shouldUseMinMax, colorRange} = this.state;
+    uniforms = Object.assign({}, uniforms, {
+      minColor,
+      maxColor,
+      cellScale,
+      colorRange,
+      colorDomain,
+      shouldUseMinMax
+    });
 
     // TODO: remove index specification (https://github.com/uber/luma.gl/pull/473)
     maxCountBuffer.bind({index: AGGREGATION_DATA_UBO_INDEX});
@@ -248,6 +260,23 @@ export default class GPUScreenGridLayer extends Layer {
     attributeManager.invalidate('instanceCounts');
   }
 
+  _updateColorUniforms({oldProps, props}) {
+
+    if (this._updateMinMaxUniform({oldProps, props})) {
+      const shouldUseMinMax = this._shouldUseMinMax();
+      this.setState({shouldUseMinMax});
+    }
+
+    if (oldProps.colorRange !== props.colorRange) {
+      const colorRangeUniform = [];
+      assert(props.colorRange && props.colorRange.length === COLOR_RANGE_LENGTH);
+      props.colorRange.forEach(color => {
+        colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
+      });
+      this.setState({colorRange: colorRangeUniform});
+    }
+  }
+
   _updateGridParams() {
     const {width, height} = this.context.viewport;
     const {cellSizePixels} = this.props;
@@ -283,6 +312,18 @@ export default class GPUScreenGridLayer extends Layer {
       countsBuffer
     });
   }
+
+  _updateMinMaxUniform({oldProps, props}) {
+    if (
+      COLOR_PROPS.some(key => {
+        return oldProps[key] !== props[key];
+      })
+    ) {
+      return true;
+    }
+    return false;
+  }
+
 }
 
 GPUScreenGridLayer.layerName = 'GPUScreenGridLayer';
