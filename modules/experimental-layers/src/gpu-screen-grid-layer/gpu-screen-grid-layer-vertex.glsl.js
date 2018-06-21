@@ -54,8 +54,7 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
       float rangeCount = float(RANGE_COUNT);
       float rangeStep = domainRange / rangeCount;
       float idx = floor((value - domain.x) / rangeStep);
-      idx = min(idx, rangeCount - 1.);
-      idx = max(idx, 0.);
+      idx = clamp(idx, 0., rangeCount - 1.);
       int intIdx = int(idx);
       outColor = colorRange[intIdx];
     }

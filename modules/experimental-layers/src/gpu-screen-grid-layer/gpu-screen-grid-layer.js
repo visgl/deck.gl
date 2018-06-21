@@ -29,6 +29,8 @@ import assert from 'assert';
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const AGGREGATION_DATA_UBO_INDEX = 0;
+const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
+const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
   cellSizePixels: 100,
@@ -259,19 +261,15 @@ export default class GPUScreenGridLayer extends Layer {
   }
 
   _updateColorUniforms({oldProps, props}) {
-    const colorProps = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
-    if (
-      colorProps.some(key => {
-        return oldProps[key] !== props[key];
-      })
-    ) {
+
+    if (this._updateMinMaxUniform({oldProps, props})) {
       const shouldUseMinMax = this._shouldUseMinMax();
       this.setState({shouldUseMinMax});
     }
+
     if (oldProps.colorRange !== props.colorRange) {
-      // const colorRangeUniform = [].concat(...props.colorRange);
       const colorRangeUniform = [];
-      assert(props.colorRange && props.colorRange.length === 6);
+      assert(props.colorRange && props.colorRange.length === COLOR_RANGE_LENGTH);
       props.colorRange.forEach(color => {
         colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
       });
@@ -314,6 +312,18 @@ export default class GPUScreenGridLayer extends Layer {
       countsBuffer
     });
   }
+
+  _updateMinMaxUniform({oldProps, props}) {
+    if (
+      COLOR_PROPS.some(key => {
+        return oldProps[key] !== props[key];
+      })
+    ) {
+      return true;
+    }
+    return false;
+  }
+
 }
 
 GPUScreenGridLayer.layerName = 'GPUScreenGridLayer';
