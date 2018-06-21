@@ -183,6 +183,19 @@ const LineLayerExample = {
   }
 };
 
+const LineLayerExampleNewCoords = {
+  layer: LineLayer,
+  getData: () => dataSamples.routes,
+  props: {
+    id: 'lineLayer',
+    getSourcePosition: d => d.START,
+    getTargetPosition: d => d.END,
+    getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
+    pickable: true,
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
+  }
+};
+
 const ScatterplotLayerExample = {
   layer: ScatterplotLayer,
   getData: () => dataSamples.points,
@@ -483,6 +496,7 @@ export default {
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
+    LineLayerNewCoords: LineLayerExampleNewCoords,
     IconLayer: IconLayerExample,
     GridCellLayer: GridCellLayerExample,
     GridLayer: GridLayerExample,

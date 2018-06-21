@@ -179,11 +179,6 @@ export default class Layer extends Component {
     return viewport.unprojectFlat(xy);
   }
 
-  is64bitEnabled() {
-    log.deprecated('is64bitEnabled', 'use64bitProjection')();
-    return this.use64bitProjection();
-  }
-
   use64bitProjection() {
     if (this.props.fp64) {
       if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
@@ -200,7 +195,7 @@ export default class Layer extends Component {
   }
 
   use64bitPositions() {
-    return this.props.fp64;
+    return this.props.fp64 || this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL;
   }
 
   // TODO - needs to refer to context for devicePixels setting
@@ -819,6 +814,11 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // TODO - set needsRedraw on the model(s)?
     this.setNeedsRedraw();
     log.deprecated('layer.setUniforms', 'model.setUniforms')();
+  }
+
+  is64bitEnabled() {
+    log.deprecated('is64bitEnabled', 'use64bitProjection')();
+    return this.use64bitProjection();
   }
 }
 

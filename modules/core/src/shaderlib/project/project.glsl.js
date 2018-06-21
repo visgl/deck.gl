@@ -24,6 +24,7 @@ const float COORDINATE_SYSTEM_IDENTITY = 0.;
 const float COORDINATE_SYSTEM_LNG_LAT = 1.;
 const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
 const float COORDINATE_SYSTEM_LNGLAT_OFFSETS = 3.;
+const float COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL = 4.;
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
@@ -38,6 +39,7 @@ uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
 uniform vec3 project_uCameraPosition;
+uniform vec2 project_coordinate_origin;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -95,7 +97,7 @@ vec2 project_mercator_(vec2 lnglat) {
 //
 // Projects lnglats (or meter offsets, depending on mode) to pixels
 //
-vec4 project_position(vec4 position) {
+vec4 project_position(vec4 position, vec2 position64xyLow) {
   // TODO - why not simply subtract center and fall through?
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return project_uModelMatrix * vec4(
@@ -103,6 +105,13 @@ vec4 project_position(vec4 position) {
       project_scale(position.z),
       position.w
     );
+  }
+
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL) {
+    // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
+    float X = position.x - project_coordinate_origin.x;
+    float Y = position.y - project_coordinate_origin.y;
+    return project_offset_(vec4(X + position64xyLow.x, Y + position64xyLow.y, position.z, position.w));
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
@@ -115,13 +124,22 @@ vec4 project_position(vec4 position) {
   return project_offset_(position_modelspace);
 }
 
+vec4 project_position(vec4 position) {
+  return project_position(position, vec2(0.0, 0.0));
+}
+
+vec3 project_position(vec3 position, vec2 position64xyLow) {
+  vec4 projected_position = project_position(vec4(position, 1.0), position64xyLow);
+  return projected_position.xyz;
+}
+
 vec3 project_position(vec3 position) {
-  vec4 projected_position = project_position(vec4(position, 1.0));
+  vec4 projected_position = project_position(vec4(position, 1.0), vec2(0.0, 0.0));
   return projected_position.xyz;
 }
 
 vec2 project_position(vec2 position) {
-  vec4 projected_position = project_position(vec4(position, 0.0, 1.0));
+  vec4 projected_position = project_position(vec4(position, 0.0, 1.0), vec2(0.0, 0.0));
   return projected_position.xy;
 }
 
