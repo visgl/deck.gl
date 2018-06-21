@@ -22,7 +22,11 @@ For Earlier Beta Releases see below
 ## Beta Releases
 
 ### deck.gl v5.3 Pre Releases
-####[5.3.0.1] - June 08
+####[5.3.2] - June 20
+- Fix path-marker-layer property passing, and remove moduleParameters to fix offset coordinates
+- Add transition prop forwarding for composite layers; docs (#1900)
+
+####[5.3.1] - June 08
 -  Fix DeckGL 5.3 doesn't fire onHover event for last frame (#1882) (#1895)
 -  Fix mapbox wrapper error when use viewState (#1885)
 -  Fix whats-new layer demo links (#1883)
