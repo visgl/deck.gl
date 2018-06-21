@@ -261,7 +261,6 @@ export default class GPUScreenGridLayer extends Layer {
   }
 
   _updateColorUniforms({oldProps, props}) {
-
     if (this._updateMinMaxUniform({oldProps, props})) {
       const shouldUseMinMax = this._shouldUseMinMax();
       this.setState({shouldUseMinMax});
@@ -323,7 +322,6 @@ export default class GPUScreenGridLayer extends Layer {
     }
     return false;
   }
-
 }
 
 GPUScreenGridLayer.layerName = 'GPUScreenGridLayer';
