@@ -70,7 +70,11 @@ export default class GPUGridLayer extends CompositeLayer {
   }
 
   needsReProjectPoints(oldProps, props) {
-    return oldProps.cellSize !== props.cellSize || oldProps.gpuAggregation !== props.gpuAggregation;
+    return (
+      oldProps.cellSize !== props.cellSize ||
+      oldProps.gpuAggregation !== props.gpuAggregation ||
+      oldProps.getPosition !== props.getPosition
+    );
   }
 
   getLayerData() {
