@@ -170,6 +170,44 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
+          getPosition: d => d.COORDINATES
+        },
+        assert({layer, oldState}) {
+          t.ok(oldState.layerData !== layer.state.layerData, 'getPosition prop change should update layer data');
+
+          t.ok(
+            oldState.sortedColorBins !== layer.state.sortedColorBins,
+            'getPosition prop change should update sortedColorBins'
+          );
+
+          t.ok(
+            oldState.colorValueDomain !== layer.state.colorValueDomain,
+            'getPosition prop change should update valueDomain'
+          );
+
+          t.ok(
+            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+            'getPosition prop change should update colorScaleFunc'
+          );
+
+          t.ok(
+            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+            'getPosition prop change should update sortedElevationBins'
+          );
+
+          t.ok(
+            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+            'getPosition prop change should update elevationValueDomain'
+          );
+
+          t.ok(
+            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+            'getPosition prop change should update elevationScaleFunc'
+          );
+        }
+      },
+      {
+        updateProps: {
           getColorValue
         },
         assert({layer, oldState}) {
