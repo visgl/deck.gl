@@ -18,26 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+export default `\
+#version 300 es
+#define SHADER_NAME gpu-grid-cell-layer-fragment-shader
 
-import {
-  Arrow2DGeometry,
-  BezierCurveLayer,
-  MeshLayer,
-  PathMarkerLayer,
-  PathOutlineLayer,
-  outline
-} from '@deck.gl/experimental-layers';
+precision highp float;
 
-test('Top-level imports', t => {
-  t.ok(MeshLayer, 'MeshLayer symbol imported');
-  t.ok(PathMarkerLayer, 'PathMarkerLayer symbol imported');
-  t.ok(PathOutlineLayer, 'PathOutlineLayer symbol imported');
-  t.ok(Arrow2DGeometry, 'Arrow2DGeometry symbol imported');
-  t.ok(outline, 'outline symbol imported');
-  t.ok(BezierCurveLayer, 'BezierCurveLayer symbol imported');
-  t.end();
-});
+in vec4 vColor;
 
-import './gpu-grid-aggregator.spec';
-import './gpu-grid-utils.spec';
+out vec4 fragColor;
+
+void main(void) {
+  fragColor = vColor;
+}
+`;
