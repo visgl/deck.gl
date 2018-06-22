@@ -5,6 +5,7 @@ import {fp64 as fp64Utils} from 'luma.gl';
 import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64Utils;
 const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const PIXEL_SIZE = 4; // RGBA32F
 const AGGREGATE_TO_GRID_VS = `\
 attribute vec2 positions;
 attribute vec2 positions64xyLow;
@@ -201,6 +202,24 @@ const DEFAULT_CHANGE_FLAGS = {
 };
 
 export default class GPUGridAggregator {
+  // Decode and return aggregation data of given pixel.
+  static getAggregationData({countsData, maxCountData, pixelIndex}) {
+    assert(countsData.length >= (pixelIndex + 1) * PIXEL_SIZE);
+    assert(maxCountData.length === PIXEL_SIZE);
+    const index = pixelIndex * PIXEL_SIZE;
+    const cellCount = countsData[index];
+    const cellWeight = countsData[index + 1];
+    const totalCount = maxCountData[0];
+    const totalWeight = maxCountData[1];
+    const maxCellWieght = maxCountData[3];
+    return {
+      cellCount,
+      cellWeight,
+      totalCount,
+      totalWeight,
+      maxCellWieght
+    };
+  }
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.shaderCache = opts.shaderCache || null;
