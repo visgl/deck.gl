@@ -26,8 +26,8 @@ So the goal is improved performance for cartographic projection of LNGLAT coordi
 The changes concern projection of layers with `props.coordinateSystem=COORDINATE_SYSTEM.LNGLAT`, in **non-fp64** mode:
 
 * Calculate 64 bit position attributes even when using 32 bit shader.
-* If zoom level is below magic threshold (say 15, exact number TBD), use current 32-bit web mercator projection.
-* If zoom level is above magic threshold, switch to using polynomial approximation as currently used by `COORDINATE_SYSTEM.LNGLAT_OFFSETS`, however automatically calculate the delta using 64 bit subtraction from a center point (see below).
+* If zoom level is less than a threshold (12), use current 32-bit web mercator projection.
+* If zoom level is above the threshold, switch to using polynomial approximation as currently used by `COORDINATE_SYSTEM.LNGLAT_OFFSETS`, however automatically calculate the delta using 64 bit subtraction from a center point (see below).
 
 
 ### 64 bit position attributes
@@ -50,11 +50,6 @@ Need to investigate if we have the right function available in fp64...
 **Use fp64-arithmetic module only** - Perhaps the subtraction can be performed on the high-order fp64 value without any fp64 library. If not, the full `fp64` shader module is enormous and can slow down shader compilation. There is a small `fp64-arithmetic` core module containing the required subtraction method, make sure it is exported from luma.gl.
 
 
-### Deprecate `COORDINATE_SYSTEM.LNGLAT_OFFSETS`
-
-Seems this mode is not very useful other than for performance benefits. Not aware of any data sets that are natively encoded in lnglat offsets. Might as well drop this mode to clean up both code as well as our coordinate system concepts.
-
-
 ## Open Issues
 
 * Always calculate 64bit attributes in LNGLAT mode? - For LNGLAT layer that don't need to zoom a bit of attribute generation speed could be gained by disabling 64 bit attribute generation. Is it worth offering the option to disable this?
@@ -66,3 +61,6 @@ Seems this mode is not very useful other than for performance benefits. Not awar
 * Center Point Selection - should we let the user decide using `coordinateOrigin`. Should we have it default to viewport center. Or both?
 
 * Support `Float64Array`? - An interesting side investigation would be looking at JavaScript's native `Float64Array`, to understand how these values break down into 32 bit pieces and how they can be accessed from shaders.
+
+* Consider Deprecating `COORDINATE_SYSTEM.LNGLAT_OFFSETS`. Seems this mode is not very useful other than for performance benefits. Not aware of any data sets that are natively encoded in lnglat offsets. Might as well drop this mode to clean up both code as well as our coordinate system concepts.
+
