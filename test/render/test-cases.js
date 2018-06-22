@@ -399,7 +399,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/line-lnglat-64.png'
+    referenceImageUrl: './test/render/golden-images/line-lnglat-64.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'icon-lnglat',
@@ -427,7 +428,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/icon-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/icon-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'icon-lnglat-64',
@@ -456,7 +458,8 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/icon-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/icon-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'geojson-lnglat',
@@ -567,7 +570,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'grid-lnglat',
