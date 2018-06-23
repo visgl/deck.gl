@@ -221,6 +221,18 @@ export default class GPUGridAggregator {
       maxCellWieght
     };
   }
+
+  // Decodes and retuns counts and weights of all cells
+  static getCellData({countsData}) {
+    const cellWeights = [];
+    const cellCounts = [];
+    for (let index = 0; index < countsData.length; index += 4) {
+      cellCounts.push(countsData[index]);
+      cellWeights.push(countsData[index + 1]);
+    }
+    return {cellCounts, cellWeights};
+  }
+
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.shaderCache = opts.shaderCache || null;

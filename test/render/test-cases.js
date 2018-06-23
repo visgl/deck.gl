@@ -89,7 +89,6 @@ export const TEST_PASS_THRESHOLD = 0.99;
 
 export const TEST_CASES = [
   // INFOVIS
-
   {
     name: 'bezier-curve-2d',
     views: [new OrthographicView()],
@@ -1031,4 +1030,57 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/text-layer.png'
   }
+  /* Enable when golden image saving works
+  {
+    name: 'gpu-grid-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new GPUGridLayer({
+        id: 'gpu-grid-lnglat',
+        data: dataSamples.points,
+        cellSize: 200,
+        opacity: 1,
+        extruded: true,
+        pickable: true,
+        getPosition: d => d.COORDINATES,
+        lightSettings: LIGHT_SETTINGS,
+        gpuAggregation: true
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/grid-lnglat.png'
+  },
+  {
+    name: 'contour-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-lnglat',
+        data: dataSamples.points,
+        cellSize: 200,
+        opacity: 1,
+        getPosition: d => d.COORDINATES,
+        lightSettings: LIGHT_SETTINGS,
+        getStrokeWidth: 3,
+        contours: [
+          {threshold: 1, color: [255, 0, 0]},
+          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 15, color: [0, 0, 255]},
+        ]
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/grid-lnglat.png'
+  }
+  */
 ];
