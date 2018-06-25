@@ -71,7 +71,7 @@ export function getBuffers(transitions) {
   return {sourceBuffers, destinationBuffers};
 }
 
-export function padBuffer({fromState, toState, fromLength, toLength}) {
+export function padBuffer({fromState, toState, fromLength, toLength, context}) {
   // check if buffer needs to be padded
   if (fromLength >= toLength || !(fromState instanceof Buffer)) {
     return;
@@ -89,7 +89,7 @@ export function padBuffer({fromState, toState, fromLength, toLength}) {
       count: (toLength - fromLength) / toState.size
     });
   } else {
-    data.set(toState.buffer.data.subarray(fromLength), fromLength);
+    data.set(toState.buffer.data.subarray(fromLength, toLength), fromLength);
   }
 
   fromState.setData({data});
