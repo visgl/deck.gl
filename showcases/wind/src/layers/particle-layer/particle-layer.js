@@ -1,7 +1,7 @@
 /* global window */
 import {Layer} from 'deck.gl';
 import GL from 'luma.gl/constants';
-import {Model, Geometry, Buffer, setParameters, loadTextures, Texture2D,} from 'luma.gl';
+import {Model, Geometry, Buffer, setParameters, loadTextures, Texture2D} from 'luma.gl';
 import {_Transform as Transform} from 'luma.gl';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
