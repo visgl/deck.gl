@@ -1074,8 +1074,9 @@ export const TEST_CASES = [
         contours: [
           {threshold: 1, color: [255, 0, 0]},
           {threshold: 5, color: [0, 255, 0]},
-          {threshold: 15, color: [0, 0, 255]},
-        ]
+          {threshold: 15, color: [0, 0, 255]}
+        ],
+        gpuAggregation: true
       })
     ],
     referenceImageUrl: './test/render/golden-images/contour-lnglat.png'
