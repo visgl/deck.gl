@@ -167,15 +167,25 @@ test('Layer#diffProps', t => {
   t.end();
 });
 
-test('Layer#is64bitEnabled', t => {
+test('Layer#use64bitProjection', t => {
   let layer = new SubLayer({});
-  t.false(layer.is64bitEnabled(), 'returns false for fp64: false');
+  t.false(layer.use64bitProjection(), 'returns false for fp64: false');
 
   layer = new SubLayer({fp64: true});
-  t.true(layer.is64bitEnabled(), 'returns true for fp64: true');
+  t.true(layer.use64bitProjection(), 'returns true for fp64: true');
 
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS, fp64: true});
-  t.false(layer.is64bitEnabled(), 'returns false for non-lnglat mode');
+  t.false(layer.use64bitProjection(), 'returns false for non-lnglat mode');
+
+  t.end();
+});
+
+test('Layer#use64bitPositions', t => {
+  let layer = new SubLayer({});
+  t.false(layer.use64bitPositions(), 'returns false for fp64: false');
+
+  layer = new SubLayer({fp64: true});
+  t.true(layer.use64bitPositions(), 'returns true for fp64: true');
 
   t.end();
 });

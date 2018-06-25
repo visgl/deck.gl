@@ -180,6 +180,11 @@ export default class Layer extends Component {
   }
 
   is64bitEnabled() {
+    log.deprecated('is64bitEnabled', 'use64bitProjection')();
+    return this.use64bitProjection();
+  }
+
+  use64bitProjection() {
     if (this.props.fp64) {
       if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
         return true;
@@ -192,6 +197,10 @@ export default class Layer extends Component {
     }
 
     return false;
+  }
+
+  use64bitPositions() {
+    return this.props.fp64;
   }
 
   // TODO - needs to refer to context for devicePixels setting

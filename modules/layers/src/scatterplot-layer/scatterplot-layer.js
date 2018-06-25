@@ -43,7 +43,7 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   getShaders(id) {
-    const projectModule = this.is64bitEnabled() ? 'project64' : 'project32';
+    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
   }
 
@@ -121,7 +121,7 @@ export default class ScatterplotLayer extends Layer {
   }
 
   calculateInstancePositions64xyLow(attribute) {
-    const isFP64 = this.is64bitEnabled();
+    const isFP64 = this.use64bitPositions();
     attribute.isGeneric = !isFP64;
 
     if (!isFP64) {
