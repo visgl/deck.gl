@@ -1051,7 +1051,7 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/grid-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png'
   },
   {
     name: 'contour-lnglat',
@@ -1078,6 +1078,6 @@ export const TEST_CASES = [
         ]
       })
     ],
-    referenceImageUrl: './test/render/golden-images/grid-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/contour-lnglat.png'
   }
 ];
