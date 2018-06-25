@@ -5,7 +5,7 @@ import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView} from 'deck.gl';
 import {_OrbitController as OrbitController} from 'deck.gl';
 
-import {GL} from 'luma.gl';
+import GL from 'luma.gl/constants';
 import {loadLazFile, parseLazData} from './utils/laslaz-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';

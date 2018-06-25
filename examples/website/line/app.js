@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {MapView, MapController, LineLayer, ScatterplotLayer} from 'deck.gl';
-import {GL} from 'luma.gl';
+import GL from 'luma.gl/constants';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line

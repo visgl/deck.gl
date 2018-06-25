@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {GL, Model, Geometry, loadTextures} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, Geometry, loadTextures} from 'luma.gl';
 
 import BITMAP_VERTEX_SHADER from './bitmap-layer-vertex';
 import BITMAP_FRAGMENT_SHADER from './bitmap-layer-fragment';

@@ -21,7 +21,8 @@
 import {Layer, experimental} from '@deck.gl/core';
 const {defaultColorRange, quantizeScale} = experimental;
 
-import {GL, Model, Geometry} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, Geometry} from 'luma.gl';
 import {lerp} from 'math.gl';
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';

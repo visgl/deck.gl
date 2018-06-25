@@ -4,6 +4,8 @@ const webpack = require('webpack');
 const rootDir = join(__dirname, '..');
 const libSources = join(rootDir, 'modules');
 
+const ALIASES = require('../aliases')('src');
+
 // Otherwise modules imported from outside this directory does not compile
 // Seems to be a Babel bug
 // https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
@@ -48,7 +50,7 @@ const COMMON_CONFIG = {
   resolve: {
     // Prefer root dependencies (dev) over local (prod)
     modules: [resolve('../node_modules'), resolve('./node_modules')],
-    alias: {
+    alias: Object.assign({}, ALIASES, {
       'website-examples': resolve('../examples/website'),
       // Website is using React 15
       react: resolve('.', './node_modules/react'),
@@ -56,7 +58,7 @@ const COMMON_CONFIG = {
       'react-map-gl': resolve('.', './node_modules/react-map-gl'),
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
-    }
+    })
   },
 
   node: {

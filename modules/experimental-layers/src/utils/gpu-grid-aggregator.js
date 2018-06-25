@@ -1,4 +1,5 @@
-import {Buffer, Model, GL, Framebuffer, Texture2D, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Buffer, Model, Framebuffer, Texture2D, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
 import {log} from '@deck.gl/core';
 import assert from 'assert';
 import {fp64 as fp64Utils} from 'luma.gl';

@@ -1,5 +1,6 @@
 import {Layer} from 'deck.gl';
-import {GL, Model, loadTextures} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, loadTextures} from 'luma.gl';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
 import GridGeometry from './grid-geometry';

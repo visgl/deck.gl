@@ -1,16 +1,8 @@
 /* global window */
 import {Layer} from 'deck.gl';
-import {
-  GL,
-  Model,
-  Geometry,
-  Buffer,
-  setParameters,
-  loadTextures,
-  Texture2D,
-  experimental
-} from 'luma.gl';
-const {Transform} = experimental;
+import GL from 'luma.gl/constants';
+import {Model, Geometry, Buffer, setParameters, loadTextures, Texture2D} from 'luma.gl';
+import {_Transform as Transform} from 'luma.gl';
 
 import {ELEVATION_DATA_IMAGE, ELEVATION_DATA_BOUNDS, ELEVATION_RANGE} from '../../defaults';
 
@@ -186,12 +178,12 @@ export default class ParticleLayer extends Layer {
     });
 
     const transform = new Transform(gl, {
-      sourceBuffers: {posFrom: bufferFrom},
-      destinationBuffers: {gl_Position: bufferTo},
-      sourceDestinationMap: {posFrom: 'gl_Position'},
       vs: vertexTF,
       varyings: ['gl_Position'],
-      elementCount: positions4.length / 4
+      elementCount: positions4.length / 4,
+      sourceBuffers: {posFrom: bufferFrom},
+      feebackBuffers: {gl_Position: bufferTo},
+      feedbackMap: {posFrom: 'gl_Position'}
     });
 
     this.setState({

@@ -1,5 +1,6 @@
 import {Layer} from 'deck.gl';
-import {GL, Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
+import GL from 'luma.gl/constants';
+import {Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 
 import {
   ELEVATION_DATA_IMAGE,

@@ -64,7 +64,7 @@ test('ScreenGridLayer#constructor', t => {
           t.ok(layer.state !== oldState, 'should update layer state');
           t.ok(layer.state.cellScale !== oldState.cellScale, 'should update cellScale');
           t.ok(
-            layer.state.cellScale === layer.state.model.uniforms.cellScale,
+            layer.state.cellScale === layer.state.model.program.uniforms.cellScale,
             'should update uniform cellScale'
           );
         }
@@ -102,7 +102,7 @@ test('ScatterplotLayer#constructor', t => {
         },
         assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.model.uniforms.radiusScale === 10, 'should update radiusScale');
+          t.ok(layer.state.model.program.uniforms.radiusScale === 10, 'should update radiusScale');
         }
       },
       {
@@ -175,7 +175,7 @@ test('PointCloudLayer#constructor', t => {
         },
         assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.model.uniforms.radiusPixels === 10, 'should update strokeWidth');
+          t.ok(layer.state.model.program.uniforms.radiusPixels === 10, 'should update strokeWidth');
         }
       }
     ]
@@ -295,7 +295,10 @@ test('PathLayer#constructor', t => {
         },
         assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.model.uniforms.widthMinPixels === 10, 'should update strokeWidth');
+          t.ok(
+            layer.state.model.program.uniforms.widthMinPixels === 10,
+            'should update strokeWidth'
+          );
         }
         // }, {
         //   updateProps: {

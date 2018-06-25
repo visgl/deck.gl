@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {Framebuffer, ShaderCache} from 'luma.gl';
+import {Framebuffer, _ShaderCache as ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
 import {drawLayers} from './draw-layers';
