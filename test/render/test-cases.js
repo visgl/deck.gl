@@ -1,7 +1,6 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-// TODO: remove hard path once @deck.gl/experimental-layers published with GPUScreenGridLayer
-import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
+import {GPUScreenGridLayer, GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
 import GL from 'luma.gl/constants';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
@@ -1029,8 +1028,7 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/text-layer.png'
-  }
-  /* Enable when golden image saving works
+  },
   {
     name: 'gpu-grid-lnglat',
     viewState: {
@@ -1082,5 +1080,4 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/grid-lnglat.png'
   }
-  */
 ];
