@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {GL} from 'luma.gl';
+import GL from 'luma.gl/constants';
 import DeckGL, {TextLayer} from 'deck.gl';
 
 const WEBGL_PARAMETERS = {
