@@ -295,7 +295,10 @@ test('PathLayer#constructor', t => {
         },
         assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.model.program.uniforms.widthMinPixels === 10, 'should update strokeWidth');
+          t.ok(
+            layer.state.model.program.uniforms.widthMinPixels === 10,
+            'should update strokeWidth'
+          );
         }
         // }, {
         //   updateProps: {
