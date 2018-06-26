@@ -116,6 +116,9 @@ const CONFIGS = {
     if (dist === 'es6') {
       resolve.mainFields = ['esnext', 'browser', 'module', 'main'];
     }
+    if (dist === 'es5') {
+      resolve.mainFields = ['main'];
+    }
     return config;
   },
 
@@ -136,9 +139,6 @@ const CONFIGS = {
         filename: 'bundle.js'
       },
       resolve: {
-        mainFields: env.es6
-          ? ['esnext', 'browser', 'module', 'main']
-          : ['browser', 'module', 'main'],
         alias: ALIASES
       },
       plugins: [
@@ -147,6 +147,14 @@ const CONFIGS = {
         new webpack.DefinePlugin({NODE_ENV: JSON.stringify('production')})
       ]
     });
+
+    const dist = getDist(env);
+    if (dist === 'es6') {
+      config.resolve.mainFields = ['esnext', 'browser', 'module', 'main'];
+    }
+    if (dist === 'es5') {
+      config.resolve.mainFields = ['main'];
+    }
 
     delete config.devtool;
     return config;

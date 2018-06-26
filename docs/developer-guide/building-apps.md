@@ -46,11 +46,11 @@ So, what bundle size impact should you expect? When do you know if you have set 
 
 > TBA - Table needs updating
 
-| Dist | 5.1.4 Bundle (Compressed) | 5.2.0 Bundle (Compressed) | Comments |
+| Dist | 6.0 Bundle (Compressed) | 5.2 Bundle (Compressed) | 5.1 Bundle (Compressed) | Comments |
 | ---  | ---                       | ---                       | --- |
-| ES6  | N/A                       | 527 KB (141 KB)           | New ES6 dist in v5.2 (minimally transpiled) |
-| ESM  | 708 KB (169 KB)           | 715 KB (159 KB)           | Transpiled, tree-shaking enabled   |
-| ES5  | 754 KB (176 KB)           | 748 KB (166 KB)           | Transpiled to ES5, no tree-shaking |
+| ES6  | 530 KB (142 KB)           | 527 KB (141 KB)           | N/A                       | New ES6 dist in v5.2 (minimally transpiled) |
+| ESM  | 633 KB (153 KB)           | 715 KB (159 KB)           | 708 KB (169 KB)           | Transpiled, tree-shaking enabled   |
+| ES5  | 695 KB (167 KB)           | 748 KB (166 KB)           | 754 KB (176 KB)           | Transpiled to ES5, no tree-shaking |
 
 Notes:
 
