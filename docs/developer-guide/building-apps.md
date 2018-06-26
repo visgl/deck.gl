@@ -44,18 +44,16 @@ Note that tree-shaking still has limitations:
 
 So, what bundle size impact should you expect? When do you know if you have set up your bundler optimally. To help answer these questions, we provide some numbers you can compare against. deck.gl has scripts that measure the size of a minified bundle after each build, which allows us to provide comparison numbers between releases.
 
-> TBA - Table needs updating
-
-| Dist | 6.0 Bundle (Compressed) | 5.2 Bundle (Compressed) | 5.1 Bundle (Compressed) | Comments |
-| ---  | ---                       | ---                       | --- |
-| ES6  | 530 KB (142 KB)           | 527 KB (141 KB)           | N/A                       | New ES6 dist in v5.2 (minimally transpiled) |
-| ESM  | 633 KB (153 KB)           | 715 KB (159 KB)           | 708 KB (169 KB)           | Transpiled, tree-shaking enabled   |
-| ES5  | 695 KB (167 KB)           | 748 KB (166 KB)           | 754 KB (176 KB)           | Transpiled to ES5, no tree-shaking |
+| Dist | 6.0 Bundle (Compressed) | 5.2 Bundle (Compr.) | 5.1 Bundle (Compr.) | Comments |
+| ---  | ---                     | ---                 | ---                 | ---      |
+| ES6  | 530 KB (142 KB)         | 527 KB (141 KB)     | N/A                 | Minimally transpiled, almost "pure" ES6 |
+| ESM  | 633 KB (153 KB)         | 715 KB (159 KB)     | 708 KB (169 KB)     | Transpiled, tree-shaking enabled   |
+| ES5  | 695 KB (167 KB)         | 748 KB (166 KB)     | 754 KB (176 KB)     | Transpiled to ES5, no tree-shaking |
 
 Notes:
 
-* Numbers represent the minified bundle size of a minimal application, bundled with Webpack 4, which means that the results benefit from some tree shaking.
-* The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your compressed bundle to get.
+* Numbers represent the minified bundle size of a minimal application, bundled with Webpack 4, which means that the ES6 and ESM distribution results benefit from some tree shaking.
+* The number in parenthesis is the compressed bundle size. This is how much bigger you might expect your compressed bundle to get by adding deck.gl as a dependency to your application.
 
 
 ### Future Work
