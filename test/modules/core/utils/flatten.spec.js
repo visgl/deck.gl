@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {flatten, flattenVertices, fillArray, padArray} from '@deck.gl/core/utils/flatten';
+import {flatten, flattenVertices, fillArray} from '@deck.gl/core/utils/flatten';
 
 const FLATTEN_TEST_CASES = [
   {
@@ -65,53 +65,6 @@ const FILL_ARRAY_TEST_CASES = [
   }
 ];
 
-const PAD_ARRAY_TEST_CASES = [
-  {
-    title: 'flat array, sufficient source',
-    arguments: {
-      target: new Float32Array(4),
-      source: new Float32Array([0, 1, 2, 3, 4, 5]),
-      size: 2,
-      enter: () => [-1, 0]
-    },
-    result: new Float32Array([0, 1, 2, 3])
-  },
-  {
-    title: 'flat array, insufficient source',
-    arguments: {
-      target: new Float32Array(10),
-      source: new Float32Array([0, 1, 2, 3, 4, 5]),
-      size: 2,
-      enter: i => [-1, i]
-    },
-    result: new Float32Array([0, 1, 2, 3, 4, 5, -1, 6, -1, 8])
-  },
-  {
-    title: 'compound array, sufficient source',
-    arguments: {
-      target: new Float32Array(4),
-      source: new Float32Array([0, 1, 2, 3, 4, 5]),
-      size: 2,
-      targetLayout: [1, 1],
-      sourceLayout: [1, 2],
-      enter: i => [-1, i]
-    },
-    result: new Float32Array([0, 1, 2, 3])
-  },
-  {
-    title: 'compound array, insufficient source',
-    arguments: {
-      target: new Float32Array(10),
-      source: new Float32Array([0, 1, 2, 3, 4, 5]),
-      size: 2,
-      targetLayout: [2, 1, 2],
-      sourceLayout: [1, 2],
-      enter: i => [-1, i]
-    },
-    result: new Float32Array([0, 1, -1, 2, 2, 3, -1, 6, -1, 8])
-  }
-];
-
 test('flatten#import', t => {
   t.ok(typeof flatten === 'function', 'flatten imported OK');
   t.ok(typeof flattenVertices === 'function', 'flattenVertices imported OK');
@@ -132,14 +85,6 @@ test('fillArray#tests', t => {
   for (const tc of FILL_ARRAY_TEST_CASES) {
     const result = fillArray(tc.arguments);
     t.deepEqual(result, tc.result, `fillArray ${tc.title} returned expected result`);
-  }
-  t.end();
-});
-
-test('padArray#tests', t => {
-  for (const tc of PAD_ARRAY_TEST_CASES) {
-    const result = padArray(tc.arguments);
-    t.deepEqual(result, tc.result, `padArray ${tc.title} returned expected result`);
   }
   t.end();
 });
