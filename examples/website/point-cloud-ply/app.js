@@ -32,7 +32,7 @@ class Example extends PureComponent {
     };
 
     this._onResize = this._onResize.bind(this);
-    this._onViewportChange = this._onViewportChange.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onUpdate = this._onUpdate.bind(this);
   }
 
@@ -70,10 +70,10 @@ class Example extends PureComponent {
         fov: this.state.viewState.fov
       })
     });
-    this._onViewportChange(newViewState, {});
+    this._onViewStateChange(newViewState, {});
   }
 
-  _onViewportChange(viewState) {
+  _onViewStateChange({viewState}) {
     this.setState({
       viewState: {...this.state.viewState, ...viewState}
     });
@@ -118,7 +118,7 @@ class Example extends PureComponent {
         views={view}
         viewState={viewState}
         controller={OrbitController}
-        onViewportChange={this._onViewportChange}
+        onViewStateChange={this._onViewStateChange}
         layers={[this._renderPointCloudLayer()]}
       />
     );

@@ -72,7 +72,7 @@ The viewport controller instance.
 
 By default, attempt to create a controller that works with the deck.gl viewport (`MapControllerJS` for `WebMercatorViewport`, or `OrbitControllerJS` for `OrbitViewport`).
 
-To use a custom controller, supply a `controller` object that contains two methods: `setProps(props)` and `finalize()`. The controller may invoke `props.onViewportChange` to update the viewport.
+To use a custom controller, supply a `controller` object that contains two methods: `setProps(props)` and `finalize()`. The controller may invoke `props.onViewStateChange` to update the viewport.
 
 Set `controller` to `null` to disable interaction.
 

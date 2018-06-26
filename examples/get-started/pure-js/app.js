@@ -29,7 +29,7 @@ export const deck = new Deck({
   height: '100%',
   initialViewState: INITIAL_VIEW_STATE,
   controller: MapController,
-  onViewportChange: viewState => {
+  onViewStateChange: ({viewState}) => {
     map.setProps({viewState});
   },
   layers: [

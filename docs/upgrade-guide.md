@@ -13,6 +13,18 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 * `PointCloudLayer.radiusPixels`
 
 
+#### Views and Controllers
+
+* `ViewportController` React component has been removed. The functionality is now built in to the `Deck` and `DeckGL` classes.
+* `Deck.onViewportChange(viewport)` etc callbacks are no longer supported. Use `Deck.onViewStateChange({viewState})`
+* `DeckGL.viewport` and `DeckGL.viewports` props are no longer supported. Use `DeckGL.views`.
+
+
+#### Shader Modules
+
+Some previously deprecated `project` module functions have now been removed.
+
+
 ## Upgrading from deck.gl v5.2 to v5.3
 
 ### Viewport classes

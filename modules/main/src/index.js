@@ -125,14 +125,6 @@ export {
 
 export {default, DeckGL} from '@deck.gl/react';
 
-import {
-  ViewportController // TODO - merge with deck.gl?
-} from '@deck.gl/react';
-
-Object.assign(experimental, {
-  ViewportController
-});
-
 //
 // EXPERIMENTAL EXPORTS
 //

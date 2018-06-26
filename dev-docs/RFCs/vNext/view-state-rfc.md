@@ -94,7 +94,6 @@ constructor(props) {
   }
 }
 
-// onViewportChanged will be supported for backwards compat
 onViewStateChanged(viewState) {
   if (viewState.id === 'firstPerson') {
   	this.setState(state1: viewState);

@@ -20,7 +20,6 @@
 
 import {fp32} from 'luma.gl';
 import projectShader from './project.glsl';
-import projectDeprecatedShader from '../../deprecated/shaderlib/project/project-deprecated.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
 const INITIAL_MODULE_OPTIONS = {};
@@ -35,7 +34,7 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
 export default {
   name: 'project',
   dependencies: [fp32],
-  vs: `${projectShader}${projectDeprecatedShader}`,
+  vs: projectShader,
   getUniforms,
   deprecations: [
     // Removed custom picking uinforms
@@ -58,9 +57,9 @@ export default {
     {type: 'uniform float', old: 'devicePixelRatio', new: 'project_uDevicePixelRatio'},
     {type: 'uniform vec3', old: 'cameraPos', new: 'project_uCameraPosition'},
 
-    // Deprecated project functions
-    {type: 'function', old: 'scale', new: 'project_scale', deprecated: 1},
-    {type: 'function', old: 'preproject', new: 'project_position', deprecated: 1},
-    {type: 'function', old: 'project', new: 'project_to_clipspace', deprecated: 1}
+    // Removed project functions
+    {type: 'function', old: 'scale', new: 'project_scale'},
+    {type: 'function', old: 'preproject', new: 'project_position'},
+    {type: 'function', old: 'project', new: 'project_to_clipspace'}
   ]
 };

@@ -71,7 +71,7 @@ class App extends Component {
       <MapGL
         {...viewState}
         reuseMaps
-        onViewportChange={viewport => onViewStateChange({viewState: viewport})}
+        onViewStateChange={onViewStateChange}
         mapStyle={mapStyle}
         preventStyleDiffing={true}
         mapboxApiAccessToken={mapboxApiAccessToken}
