@@ -56,7 +56,7 @@ const isClosed = path => {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return this.is64bitEnabled()
+    return this.use64bitProjection()
       ? {vs: vs64, fs, modules: ['project64', 'picking']}
       : {vs, fs, modules: ['picking']}; // 'project' module added by default.
   }

@@ -2,7 +2,7 @@ import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 // TODO: remove hard path once @deck.gl/experimental-layers published with GPUScreenGridLayer
 import {GPUScreenGridLayer} from '@deck.gl/experimental-layers';
-import {GL} from 'luma.gl';
+import GL from 'luma.gl/constants';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
@@ -785,7 +785,8 @@ export const TEST_CASES = [
         lightSettings: LIGHT_SETTINGS
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-meter.png'
+    referenceImageUrl: './test/render/golden-images/pointcloud-meter.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'path-meter',
@@ -886,7 +887,8 @@ export const TEST_CASES = [
         }
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-outline.png'
+    referenceImageUrl: './test/render/golden-images/path-outline.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'path-outline-64',
@@ -918,7 +920,8 @@ export const TEST_CASES = [
         }
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-outline-64.png'
+    referenceImageUrl: './test/render/golden-images/path-outline-64.png',
+    ignoreGPUs: [`Intel`]
   },
   // Chrome 65 can't render this case correctly
   /* {
