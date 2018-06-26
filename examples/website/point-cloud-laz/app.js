@@ -22,11 +22,6 @@ const INITIAL_VIEW_STATE = {
   maxDistance: 3
 };
 
-const WEBGL_PARAMETERS = {
-  clearColor: [0.07, 0.14, 0.19, 1],
-  blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA]
-};
-
 function normalize(points) {
   let xMin = Infinity;
   let yMin = Infinity;
@@ -166,8 +161,11 @@ class Example extends PureComponent {
         viewState={viewState}
         controller={OrbitController}
         layers={[this._renderLazPointCloudLayer()]}
-        parameters={WEBGL_PARAMETERS}
         onViewStateChange={this._onViewStateChange}
+        parameters={{
+          clearColor: [0.07, 0.14, 0.19, 1],
+          blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA]
+        }}
       />
     );
   }

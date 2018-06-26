@@ -26,11 +26,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const WEBGL_PARAMETERS = {
-  blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
-  blendEquation: GL.FUNC_ADD
-};
-
 function getColor(d) {
   const z = d.start[2];
   const r = z / 10000;
@@ -58,20 +53,14 @@ class App extends Component {
     return this.setState({viewState});
   }
 
-  render() {
+  _renderLayers() {
     const {
       airports = DATA_URL.AIRPORTS,
       flightPaths = DATA_URL.FLIGHT_PATHS,
-      strokeWidth = 3,
-
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/dark-v9'
+      strokeWidth = 3
     } = this.props;
 
-    const layers = [
+    return [
       new ScatterplotLayer({
         id: 'airports',
         data: airports,
@@ -94,24 +83,36 @@ class App extends Component {
         onHover: this.props.onHover
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
-        parameters={WEBGL_PARAMETERS}
+        parameters={{
+          blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
+          blendEquation: GL.FUNC_ADD
+        }}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

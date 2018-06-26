@@ -64,9 +64,6 @@ class App extends Component {
 
   /* eslint-disable react/no-did-mount-set-state */
   componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-
     this.setState({
       ...this._getLayerData(this.props)
     });
@@ -79,14 +76,6 @@ class App extends Component {
         ...this._getLayerData(nextProps)
       });
     }
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -198,7 +187,7 @@ class App extends Component {
     );
   }
 
-  render() {
+  _renderLayers() {
     const {
       enableBrushing = true,
       brushRadius = 100000,
@@ -206,15 +195,10 @@ class App extends Component {
       opacity = 0.7,
 
       mouseEntered = this.state.mouseEntered,
-      mousePosition = this.state.mousePosition,
+      mousePosition = this.state.mousePosition
       // onHover = this._onHover.bind(this),
-
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/light-v9'
     } = this.props;
+
     const {arcs, targets, sources} = this.state;
 
     // mouseEntered is undefined when mouse is in the component while it first loads
@@ -226,7 +210,7 @@ class App extends Component {
       return null;
     }
 
-    const layers = [
+    return [
       new ScatterplotBrushingLayer({
         id: 'sources',
         data: sources,
@@ -280,6 +264,13 @@ class App extends Component {
         getTargetColor: d => TARGET_COLOR
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <div
@@ -290,20 +281,22 @@ class App extends Component {
         {this._renderTooltip()}
 
         <DeckGL
-          layers={layers}
+          layers={this._renderLayers()}
           views={new MapView({id: 'map'})}
           viewState={viewState}
           onViewStateChange={onViewStateChange}
           controller={MapController}
         >
-          <StaticMap
-            viewId="map"
-            {...viewState}
-            reuseMaps
-            mapStyle={mapStyle}
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={mapboxApiAccessToken}
-          />
+          {!window.demoLauncherActive && (
+            <StaticMap
+              viewId="map"
+              viewState={viewState}
+              reuseMaps
+              mapStyle="mapbox://styles/mapbox/light-v9"
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          )}
         </DeckGL>
       </div>
     );

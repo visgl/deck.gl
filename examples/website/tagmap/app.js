@@ -35,19 +35,6 @@ class App extends Component {
     this._loadData();
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
-  }
-
   _onViewStateChange({viewState}) {
     this.setState({
       viewState: {...this.state.viewState, ...viewState}
@@ -63,20 +50,10 @@ class App extends Component {
       .then(data => this.setState({data: data.filter(d => !excludeList.has(d.label))}));
   }
 
-  render() {
-    const {
-      data = DATA_URL,
-      cluster = true,
-      fontSize = 32,
+  _renderLayers() {
+    const {data = DATA_URL, cluster = true, fontSize = 32} = this.props;
 
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = MAPBOX_STYLE
-    } = this.props;
-
-    const layers = [
+    return [
       cluster
         ? new TagmapLayer({
             id: 'twitter-topics-tagmap',
@@ -96,23 +73,32 @@ class App extends Component {
             sizeScale: fontSize / 20
           })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle={MAPBOX_STYLE}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

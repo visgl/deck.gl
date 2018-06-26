@@ -74,9 +74,7 @@ class Example extends PureComponent {
   }
 
   _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
+    this.setState({viewState});
   }
 
   _onUpdate() {

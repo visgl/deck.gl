@@ -1,8 +1,8 @@
 /* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import MapGL from 'react-map-gl';
-import DeckGL, {MapView, ScreenGridLayer} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+import DeckGL, {MapView, MapController, ScreenGridLayer} from 'deck.gl';
 
 const INITIAL_VIEW_STATE = {
   longitude: -119.3,
@@ -28,56 +28,49 @@ class App extends Component {
     };
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
-  }
-
   _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
+    this.setState({viewState});
+  }
+
+  _renderLayers() {
+    const {data = DATA_URL, cellSize = 20} = this.props;
+
+    return [
+      new ScreenGridLayer({
+        id: 'grid',
+        data,
+        minColor: [0, 0, 0, 0],
+        getPosition: d => d,
+        cellSizePixels: cellSize
+      })
+    ];
   }
 
   render() {
     const {
-      data = DATA_URL,
-      cellSize = 20,
-
       onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/dark-v9'
+      viewState = this.state.viewState
     } = this.props;
 
-    const layer = new ScreenGridLayer({
-      id: 'grid',
-      data,
-      minColor: [0, 0, 0, 0],
-      getPosition: d => d,
-      cellSizePixels: cellSize
-    });
-
     return (
-      <MapGL
-        {...viewState}
-        reuseMaps
+      <DeckGL
+        layers={this._renderLayers()}
+        views={new MapView({id: 'map'})}
+        viewState={viewState}
         onViewStateChange={onViewStateChange}
-        mapStyle={mapStyle}
-        preventStyleDiffing={true}
-        mapboxApiAccessToken={mapboxApiAccessToken}
+        controller={MapController}
       >
-        <DeckGL layers={[layer]} views={new MapView({id: 'map'})} viewState={viewState} />;
-      </MapGL>
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
+      </DeckGL>
     );
   }
 }
