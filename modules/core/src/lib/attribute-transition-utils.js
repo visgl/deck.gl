@@ -1,5 +1,5 @@
 import {Buffer} from 'luma.gl';
-import {padArray} from '../utils/flatten';
+import {padArray} from '../utils/array-utils';
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -71,8 +71,8 @@ export function getBuffers(transitions) {
   return {sourceBuffers, feedbackBuffers};
 }
 
-export function padBuffer({fromState, toState, fromLength, toLength, opts}) {
-  const hasBufferLayout = opts && opts.oldBufferLayout;
+export function padBuffer({fromState, toState, fromLength, toLength, fromBufferLayout, toBufferLayout}) {
+  const hasBufferLayout = fromBufferLayout && toBufferLayout;
 
   // check if buffer needs to be padded
   if ((!hasBufferLayout && fromLength >= toLength) || !(fromState instanceof Buffer)) {
@@ -88,8 +88,8 @@ export function padBuffer({fromState, toState, fromLength, toLength, opts}) {
   padArray({
     source: fromData,
     target: data,
-    sourceLayout: opts.oldBufferLayout,
-    targetLayout: opts.bufferLayout,
+    sourceLayout: fromBufferLayout,
+    targetLayout: toBufferLayout,
     size: toState.size,
     enter
   });

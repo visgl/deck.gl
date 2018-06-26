@@ -183,9 +183,9 @@ export default class AttributeTransitionManager {
       }
 
       if (hasChanged) {
-        this._triggerTransition(transition, settings, {
-          oldBufferLayout: this._bufferLayout,
-          bufferLayout
+        this._triggerTransition({transition, settings,
+          fromBufferLayout: this._bufferLayout,
+          toBufferLayout: bufferLayout
         });
         return true;
       }
@@ -221,7 +221,7 @@ export default class AttributeTransitionManager {
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getNextTransitionStates(transition, opts) {
+  _getNextTransitionStates({transition, fromBufferLayout, toBufferLayout}) {
     const {attribute} = transition;
     const {size} = attribute;
 
@@ -256,7 +256,7 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength)
       });
     }
-    padBuffer({fromState, toState, fromLength, toLength, opts});
+    padBuffer({fromState, toState, fromLength, toLength, fromBufferLayout, toBufferLayout});
 
     return {fromState, toState, buffer};
   }
@@ -294,14 +294,15 @@ export default class AttributeTransitionManager {
 
   // Start a new transition using the current settings
   // Updates transition state and from/to buffer
-  _triggerTransition(transition, settings, opts) {
+  _triggerTransition({transition, settings, fromBufferLayout, toBufferLayout}) {
     this.needsRedraw = true;
 
     const transitionSettings = this._normalizeTransitionSettings(settings);
 
     // Attribute descriptor to transition from
-    transition.start(
-      Object.assign({}, this._getNextTransitionStates(transition, opts), transitionSettings)
-    );
+    transition.start(Object.assign({},
+      this._getNextTransitionStates({transition, fromBufferLayout, toBufferLayout}),
+      transitionSettings
+    ));
   }
 }
