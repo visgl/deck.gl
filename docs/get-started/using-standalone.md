@@ -29,7 +29,7 @@ const deckgl = new Deck({
   canvas: 'my-deck-canvas',
   viewState: INITIAL_VIEW_STATE,
   controller: MapController,
-  onViewportChange,
+  onViewStateChange,
   layers: [
     new ScatterplotLayer({
       data: [
@@ -39,7 +39,7 @@ const deckgl = new Deck({
   ]
 });
 
-function onViewportChange(viewport) {
+function onViewStateChange({viewState}) {
   deckgl.setProps({viewState: viewport});
 }
 ```

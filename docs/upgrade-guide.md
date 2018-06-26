@@ -16,7 +16,7 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 #### Views and Controllers
 
 * `ViewportController` React component has been removed. The functionality is now built in to the `Deck` and `DeckGL` classes.
-* `Deck.onViewportChange(viewport)` etc callbacks are no longer supported. Use `Deck.onViewportChange({viewState})`
+* `Deck.onViewportChange(viewport)` etc callbacks are no longer supported. Use `Deck.onViewStateChange({viewState})`
 * `DeckGL.viewport` and `DeckGL.viewports` props are no longer supported. Use `DeckGL.views`.
 
 
