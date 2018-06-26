@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import MarchingSquares from '@deck.gl/experimental-layers/contour-layer/marching-squares';
+import {getCode, getVertices} from '@deck.gl/experimental-layers/contour-layer/marching-squares';
 
 const GETCODE_TESTS = [
   {
@@ -104,7 +104,7 @@ test('MarchingSquares#getCode', t => {
   const cellIndex = 0;
   const gridSize = [2, 2];
   GETCODE_TESTS.forEach(testCase => {
-    const code = MarchingSquares.getCode({
+    const code = getCode({
       cellWeights: testCase.cellWeights,
       thresholdValue,
       cellIndex: testCase.cellIndex || cellIndex,
@@ -120,7 +120,7 @@ test('MarchingSquares#getVertices', t => {
   const cellSize = [10, 20];
   const gridSize = [2, 2];
   GETVERTEX_TESTS.forEach(testCase => {
-    const vertices = MarchingSquares.getVertices({
+    const vertices = getVertices({
       gridOrigin: testCase.gridOrigin,
       cellIndex: testCase.cellIndex || cellIndex,
       cellSize,

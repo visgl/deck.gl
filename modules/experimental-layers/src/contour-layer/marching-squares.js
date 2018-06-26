@@ -1,11 +1,6 @@
 // All utility mehtods needed to implement Marching Squres algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 import assert from 'assert';
-// methods needed to generate contours
-const MarchingSquares = {
-  getCode,
-  getVertices
-};
 
 // Table to map code to the intersection offsets
 // All offsets are relative to the center of marching cell (which is top right corner of grid-cell)
@@ -37,7 +32,7 @@ const CODE_OFFSET_MAP = {
 };
 
 // Returns marching square code for given cell
-function getCode(params) {
+export function getCode(params) {
   // Assumptions
   // Origin is on bottom-left , and X increase to right, Y to top
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
@@ -66,7 +61,8 @@ function getCode(params) {
   return code;
 }
 
-function getVertices(params) {
+// Returns intersection vertices for given cellindex
+export function getVertices(params) {
   const {gridOrigin, cellIndex, cellSize, gridSize, code} = params;
 
   const offsets = CODE_OFFSET_MAP[code];
@@ -92,6 +88,3 @@ function getVertices(params) {
 
   return vertices;
 }
-
-export default MarchingSquares;
-/* eslint-enable max-params */

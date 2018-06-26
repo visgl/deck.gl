@@ -1,6 +1,7 @@
-import MarchingSquares from './marching-squares';
+import * as MarchingSquares from './marching-squares';
 import assert from 'assert';
 
+// Given all the cell weights, generates contours for each threshold.
 export function generateContours({
   thresholds,
   colors,
@@ -15,12 +16,14 @@ export function generateContours({
     const numCols = gridSize[0];
     for (let cellIndex = 0; cellIndex < gridSize[0] * (gridSize[1] - 1); cellIndex++) {
       if (cellIndex === 0 || (cellIndex + 1) % numCols !== 0) {
+        // Get the MarchingSquares code based on neighbor cell weights.
         const code = MarchingSquares.getCode({
           cellWeights,
           thresholdValue: threshold,
           cellIndex,
           gridSize
         });
+        // Get the intersection vertices based on MarchingSquares code.
         const vertices = MarchingSquares.getVertices({
           gridOrigin,
           cellIndex,
