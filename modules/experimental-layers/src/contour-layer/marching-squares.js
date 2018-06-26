@@ -1,6 +1,7 @@
 // All utility mehtods needed to implement Marching Squres algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 import assert from 'assert';
+// methods needed to generate contours
 const MarchingSquares = {
   getCode,
   getVertices
@@ -68,7 +69,6 @@ function getCode(params) {
 function getVertices(params) {
   const {gridOrigin, cellIndex, cellSize, gridSize, code} = params;
 
-  const vertices = [];
   const offsets = CODE_OFFSET_MAP[code];
   // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
   const row = Math.floor(cellIndex / gridSize[0]);
@@ -81,6 +81,7 @@ function getVertices(params) {
   const refVertexX = gridOrigin[0] + rX;
   const refVertexY = gridOrigin[1] + rY;
 
+  const vertices = [];
   offsets.forEach(xyOffsets => {
     xyOffsets.forEach(offset => {
       const x = refVertexX + offset[0] * cellSize[0];

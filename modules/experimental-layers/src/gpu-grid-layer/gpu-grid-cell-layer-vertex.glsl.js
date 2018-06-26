@@ -76,6 +76,7 @@ void main(void) {
   float yIndex = floor(float(gl_InstanceID) / gridSize[0]);
   float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
 
+  // Keeping 32-bit calculations for debugging, to be removed.
   // float instancePositionX = gridOffset[0] * xIndex + gridOrigin[0];
   // float instancePositionY = gridOffset[1] * yIndex + gridOrigin[1];
   // vec3 extrudedPosition = vec3(instancePositionX, instancePositionY, elevation);
