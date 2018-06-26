@@ -326,7 +326,7 @@ export default class GPUGridAggregator {
       id: 'Gird-Aggregation-Model',
       vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
-      modules: fp64 ? ['fp64', 'project64'] : [],
+      modules: fp64 ? ['fp64', 'project64'] : ['project32'],
       shaderCache,
       vertexCount: 0,
       drawMode: GL.POINTS
@@ -563,7 +563,7 @@ export default class GPUGridAggregator {
 
     this.gridAggregationModel.setAttributes(aggregationModelAttributes);
 
-    if (changeFlags.cellSizeChanged) {
+    if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
       this.allAggregationModel.setInstanceCount(numCol * numRow);
 
       const framebufferSize = {width: numCol, height: numRow};
