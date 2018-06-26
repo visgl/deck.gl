@@ -248,7 +248,7 @@ export default class AttributeManager {
       attributes: this.attributes,
       numInstances,
       transitions,
-      context
+      bufferLayout: context.state && context.state.bufferLayout
     });
   }
 

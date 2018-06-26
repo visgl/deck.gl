@@ -239,8 +239,7 @@ export default class SolidPolygonLayer extends Layer {
       this.setState({
         polygonTesselator,
         numInstances: polygonTesselator.pointCount,
-        bufferLayout: polygonTesselator.bufferLayout,
-        oldBufferLayout: this.state.bufferLayout
+        bufferLayout: polygonTesselator.bufferLayout
       });
 
       this.getAttributeManager().invalidateAll();

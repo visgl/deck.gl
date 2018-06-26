@@ -146,8 +146,7 @@ export default class PathLayer extends Layer {
       this.setState({
         paths,
         numInstances,
-        bufferLayout,
-        oldBufferLayout: this.state.bufferLayout
+        bufferLayout
       });
       attributeManager.invalidateAll();
     }

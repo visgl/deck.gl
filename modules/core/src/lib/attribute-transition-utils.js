@@ -1,5 +1,5 @@
 import {Buffer} from 'luma.gl';
-import {fillArray} from '../utils/flatten';
+import {padArray} from '../utils/flatten';
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -71,9 +71,8 @@ export function getBuffers(transitions) {
   return {sourceBuffers, feedbackBuffers};
 }
 
-export function padBuffer({fromState, toState, fromLength, toLength, context}) {
-
-  const hasBufferLayout = context && context.state && context.state.oldBufferLayout;
+export function padBuffer({fromState, toState, fromLength, toLength, opts}) {
+  const hasBufferLayout = opts && opts.oldBufferLayout;
 
   // check if buffer needs to be padded
   if ((!hasBufferLayout && fromLength >= toLength) || !(fromState instanceof Buffer)) {
@@ -83,67 +82,17 @@ export function padBuffer({fromState, toState, fromLength, toLength, context}) {
   const data = new Float32Array(toLength);
   const fromData = fromState.getData({});
 
-  if (hasBufferLayout) {
-    fromLength = padArray({
-      target: data,
-      data: fromData,
-      fromLayout: context.state.oldBufferLayout,
-      toLayout: context.state.bufferLayout,
-      size: toState.size
-    });
+  const {value, buffer, size, constant} = toState;
+  const enter = constant ? () => value : i => buffer.data.subarray(i, i + size);
 
-    if (fromLength >= toLength) {
-      fromState.setData({data: data.subarray(0, toLength)});
-      return;
-    }
-  } else {
-    // copy the currect values
-    data.set(fromData);
-  }
-
-  if (toState.constant) {
-    fillArray({
-      target: data,
-      source: toState.value,
-      start: fromLength,
-      count: (toLength - fromLength) / toState.size
-    });
-  } else {
-    data.set(toState.buffer.data.subarray(fromLength, toLength), fromLength);
-  }
+  padArray({
+    source: fromData,
+    target: data,
+    sourceLayout: opts.oldBufferLayout,
+    targetLayout: opts.bufferLayout,
+    size: toState.size,
+    enter
+  });
 
   fromState.setData({data});
-}
-
-/*
- * A layout is an array of numbers: [chunkSize0, chunkSize1, ...]
- */
-function padArray({data, target, size, fromLayout, toLayout}) {
-  let fromIndex = 0;
-  let toIndex = 0;
-
-  const n = Math.min(fromLayout.length, toLayout.length);
-
-  for (let i = 0; i < n; i++) {
-    const fromChunk = fromLayout[i] * size;
-    const toChunk = toLayout[i] * size;
-
-    const overlap = Math.min(fromChunk, toChunk);
-    target.set(data.subarray(fromIndex, fromIndex + overlap), toIndex);
-
-    if (overlap < toChunk) {
-      fillArray({
-        target,
-        // duplicate the last item
-        source: target.subarray(toIndex + overlap - size, toIndex + overlap),
-        start: toIndex + overlap,
-        count: (toChunk - overlap) / size
-      });
-    }
-
-    fromIndex += fromChunk;
-    toIndex += toChunk;
-  }
-
-  return toIndex;
 }

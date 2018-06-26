@@ -18,6 +18,8 @@ export default class AttributeTransitionManager {
     this.transform = null;
     this.numInstances = 0;
 
+    this._bufferLayout = null;
+
     if (Transform.isSupported(gl)) {
       this.isSupported = true;
     } else {
@@ -38,10 +40,9 @@ export default class AttributeTransitionManager {
 
   // Called when attribute manager updates
   // Check the latest attributes for updates.
-  update({attributes, transitions = {}, numInstances, context}) {
+  update({attributes, transitions = {}, numInstances, bufferLayout}) {
     this.opts = transitions;
     this.numInstances = numInstances;
-    this.context = context;
 
     if (!this.isSupported) {
       return;
@@ -51,7 +52,11 @@ export default class AttributeTransitionManager {
     const changedTransitions = {};
 
     for (const attributeName in attributes) {
-      const hasChanged = this._updateAttribute(attributeName, attributes[attributeName]);
+      const hasChanged = this._updateAttribute(
+        attributeName,
+        attributes[attributeName],
+        bufferLayout
+      );
 
       if (hasChanged) {
         changedTransitions[attributeName] = attributeTransitions[attributeName];
@@ -77,6 +82,8 @@ export default class AttributeTransitionManager {
         feedbackBuffers
       });
     }
+
+    this._bufferLayout = bufferLayout;
   }
 
   // Returns `true` if attribute is transition-enabled
@@ -161,7 +168,7 @@ export default class AttributeTransitionManager {
 
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
-  _updateAttribute(attributeName, attribute) {
+  _updateAttribute(attributeName, attribute, bufferLayout) {
     const settings = this._getTransitionSettings(attribute);
 
     if (settings) {
@@ -176,7 +183,10 @@ export default class AttributeTransitionManager {
       }
 
       if (hasChanged) {
-        this._triggerTransition(transition, settings);
+        this._triggerTransition(transition, settings, {
+          oldBufferLayout: this._bufferLayout,
+          bufferLayout
+        });
         return true;
       }
     }
@@ -211,7 +221,7 @@ export default class AttributeTransitionManager {
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getNextTransitionStates(transition) {
+  _getNextTransitionStates(transition, opts) {
     const {attribute} = transition;
     const {size} = attribute;
 
@@ -246,7 +256,7 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength)
       });
     }
-    padBuffer({fromState, toState, fromLength, toLength, context: this.context});
+    padBuffer({fromState, toState, fromLength, toLength, opts});
 
     return {fromState, toState, buffer};
   }
@@ -284,14 +294,14 @@ export default class AttributeTransitionManager {
 
   // Start a new transition using the current settings
   // Updates transition state and from/to buffer
-  _triggerTransition(transition, settings) {
+  _triggerTransition(transition, settings, opts) {
     this.needsRedraw = true;
 
     const transitionSettings = this._normalizeTransitionSettings(settings);
 
     // Attribute descriptor to transition from
     transition.start(
-      Object.assign({}, this._getNextTransitionStates(transition), transitionSettings)
+      Object.assign({}, this._getNextTransitionStates(transition, opts), transitionSettings)
     );
   }
 }
