@@ -85,11 +85,19 @@ export function alignToCellBoundary(inValue, cellSize) {
 function _getGPUAggregationParams(gridData, gridOffset) {
   const {latMin, latMax, lngMin, lngMax, positions, positions64xyLow, weights} = gridData;
 
-  // NOTE: this alignment will match grid cell boundaries with existing implementation
-  // this gurantees identical aggregation results.
-  const originY = alignToCellBoundary(latMin + 90, gridOffset.yOffset);
-  const originX = alignToCellBoundary(lngMin + 180, gridOffset.xOffset);
-  const gridTransformMatrix = new Matrix4().translate([-1 * originX + 180, -1 * originY + 90, 0]);
+  // NOTE: this alignment will match grid cell boundaries with existing CPU implementation
+  // this gurantees identical aggregation results between current and new layer.
+  // We align the origin to cellSize in positive space lng:[0 360], lat:[0 180]
+  // After alignment we move it back to original range
+  // Origin = [minX, minY]
+  // Origin = Origin + [180, 90] // moving to +ve space
+  // Origin = Align(Origin, cellSize) //Align to cell boundary
+  // Origin = Origin - [180, 90]
+  const originY = alignToCellBoundary(latMin + 90, gridOffset.yOffset) - 90;
+  const originX = alignToCellBoundary(lngMin + 180, gridOffset.xOffset) - 180;
+
+  // Setup transformation matrix so that every point is in +ve range
+  const gridTransformMatrix = new Matrix4().translate([-1 * originX, -1 * originY, 0]);
 
   const cellSize = [gridOffset.xOffset, gridOffset.yOffset];
   const gridOrigin = [originX, originY];

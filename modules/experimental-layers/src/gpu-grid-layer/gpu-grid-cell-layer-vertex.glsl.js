@@ -76,15 +76,16 @@ void main(void) {
   float yIndex = floor(float(gl_InstanceID) / gridSize[0]);
   float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
 
-  // float instancePositionX = gridOffset[0] * xIndex - 180.0 + gridOrigin[0];
-  // float instancePositionY = gridOffset[1] * yIndex - 90.0 + gridOrigin[1];
+  // Keeping 32-bit calculations for debugging, to be removed.
+  // float instancePositionX = gridOffset[0] * xIndex + gridOrigin[0];
+  // float instancePositionY = gridOffset[1] * yIndex + gridOrigin[1];
   // vec3 extrudedPosition = vec3(instancePositionX, instancePositionY, elevation);
   // vec2 extrudedPosition64xyLow = vec2(0., 0.);
 
   vec2 instancePositionXFP64 = mul_fp64(vec2(gridOffset[0], gridOffsetLow[0]), vec2(xIndex, 0.));
-  instancePositionXFP64 = sum_fp64(instancePositionXFP64, vec2(gridOrigin[0] - 180., gridOriginLow[0]));
+  instancePositionXFP64 = sum_fp64(instancePositionXFP64, vec2(gridOrigin[0], gridOriginLow[0]));
   vec2 instancePositionYFP64 = mul_fp64(vec2(gridOffset[1], gridOffsetLow[1]), vec2(yIndex, 0.));
-  instancePositionYFP64 = sum_fp64(instancePositionYFP64, vec2(gridOrigin[1] - 90., gridOriginLow[1]));
+  instancePositionYFP64 = sum_fp64(instancePositionYFP64, vec2(gridOrigin[1], gridOriginLow[1]));
   vec3 extrudedPosition = vec3(instancePositionXFP64[0], instancePositionYFP64[0], elevation);
   vec2 extrudedPosition64xyLow = vec2(instancePositionXFP64[1], instancePositionYFP64[1]);
 

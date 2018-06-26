@@ -41,3 +41,4 @@ test('Top-level imports', t => {
 
 import './gpu-grid-aggregator.spec';
 import './gpu-grid-utils.spec';
+import './contour-layer/marching-squares.spec';
