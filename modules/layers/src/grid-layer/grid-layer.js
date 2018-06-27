@@ -83,7 +83,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   needsReProjectPoints(oldProps, props) {
-    return oldProps.cellSize !== props.cellSize;
+    return oldProps.cellSize !== props.cellSize || oldProps.getPosition !== props.getPosition;
   }
 
   getDimensionUpdaters() {
