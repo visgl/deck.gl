@@ -25,6 +25,11 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 Some previously deprecated `project` module functions have now been removed.
 
 
+#### `Layer.is64bitEnabled()` deprecated
+
+Instead use `use64bitProjection` and `use64bitPositions`.
+
+
 ## Upgrading from deck.gl v5.2 to v5.3
 
 ### Viewport classes

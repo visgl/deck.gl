@@ -27,6 +27,7 @@ export const COORDINATE_SYSTEM = {
   // Positions are interpreted as [lng, lat, elevation]
   // lng lat are degrees, elevation is meters. distances as meters.
   LNGLAT: 1.0,
+  LNGLAT_EXPERIMENTAL: 4.0,
 
   // Positions are interpreted as meter offsets, distances as meters
   // Planned to deprecate in later versions

@@ -21,9 +21,6 @@ It is now possible to globally set WebGL parameters (controlling how the GPU ren
 
 Pixel sizes in `LineLayer`, `IconLayer` and `TextLayer` now match their HTML/SVG counterparts.
 
-### `is64bitEnabled()` deprecated
-
-Instead use `use64bitProjection` and `use64bitPositions`.
 
 ## deck.gl v5.3
 

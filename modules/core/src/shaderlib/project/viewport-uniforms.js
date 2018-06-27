@@ -35,6 +35,9 @@ const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
+// TODO: Find the best value for this to maximize accuracy
+const LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD = 12;
+
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
@@ -54,8 +57,20 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
+  let shaderCoordinateSystem = coordinateSystem;
+  let shaderCoordinateOrigin = coordinateOrigin;
 
-  switch (coordinateSystem) {
+  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
+    if (coordinateZoom < LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD) {
+      shaderCoordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+    } else {
+      const lng = Math.fround(viewport.longitude);
+      const lat = Math.fround(viewport.latitude);
+      shaderCoordinateOrigin = [lng, lat];
+    }
+  }
+
+  switch (shaderCoordinateSystem) {
     case COORDINATE_SYSTEM.IDENTITY:
     case COORDINATE_SYSTEM.LNGLAT:
       projectionCenter = ZERO_VECTOR;
@@ -64,10 +79,14 @@ function calculateMatrixAndOffset({
     // TODO: make lighting work for meter offset mode
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
     case COORDINATE_SYSTEM.METER_OFFSETS:
+    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionPixels = viewport.projectFlat(coordinateOrigin, Math.pow(2, coordinateZoom));
+      const positionPixels = viewport.projectFlat(
+        shaderCoordinateOrigin,
+        Math.pow(2, coordinateZoom)
+      );
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
       projectionCenter = vec4_transformMat4(
@@ -94,7 +113,9 @@ function calculateMatrixAndOffset({
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
-    cameraPos: viewport.cameraPosition
+    cameraPos: viewport.cameraPosition,
+    shaderCoordinateSystem,
+    shaderCoordinateOrigin
   };
 }
 
@@ -144,7 +165,13 @@ function calculateViewportUniforms({
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
 
-  const {projectionCenter, viewProjectionMatrix, cameraPos} = calculateMatrixAndOffset({
+  const {
+    projectionCenter,
+    viewProjectionMatrix,
+    cameraPos,
+    shaderCoordinateSystem,
+    shaderCoordinateOrigin
+  } = calculateMatrixAndOffset({
     coordinateSystem,
     coordinateOrigin,
     coordinateZoom,
@@ -160,7 +187,7 @@ function calculateViewportUniforms({
 
   const uniforms = {
     // Projection mode values
-    project_uCoordinateSystem: coordinateSystem,
+    project_uCoordinateSystem: shaderCoordinateSystem,
     project_uCenter: projectionCenter,
 
     // Screen size
@@ -181,15 +208,21 @@ function calculateViewportUniforms({
     project_uCameraPosition: cameraPos
   };
 
-  if (coordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+  if (shaderCoordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
   }
-  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(coordinateOrigin);
+  if (
+    shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
+    shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
+  ) {
+    const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
     uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
     uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+  }
+  if (shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
+    uniforms.project_coordinate_origin = shaderCoordinateOrigin;
   }
 
   return uniforms;
