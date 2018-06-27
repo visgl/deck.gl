@@ -91,6 +91,10 @@ export default class ViewManager {
     return this._viewportMap[viewId];
   }
 
+  getViewState(viewId) {
+    return this._getViewState(viewId);
+  }
+
   /**
    * Projects xyz (possibly latitude and longitude) to pixel coordinates in window
    * using viewport projection parameters
