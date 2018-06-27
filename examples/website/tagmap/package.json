@@ -11,7 +11,7 @@
     "deck.gl": "^5.2.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^3.3.0-alpha.4",
+    "react-map-gl": "^3.3.0-alpha.5",
     "tagmap.js": "^1.1.1"
   },
   "devDependencies": {

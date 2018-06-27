@@ -43,24 +43,10 @@ export default class App extends Component {
     };
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-    this._animate();
-  }
-
   componentWillUnmount() {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
-
-  _resize() {
-    const viewState = Object.assign(this.state.viewState, {
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-    this._onViewStateChange({viewState});
   }
 
   _onViewStateChange({viewState}) {
@@ -80,21 +66,15 @@ export default class App extends Component {
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
 
-  render() {
+  _renderLayers() {
     const {
       buildings = DATA_URL.BUILDINGS,
       trips = DATA_URL.TRIPS,
       trailLength = 180,
-      time = this.state.time,
-
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/dark-v9'
+      time = this.state.time
     } = this.props;
 
-    const layers = [
+    return [
       new TripsLayer({
         id: 'trips',
         data: trips,
@@ -118,23 +98,32 @@ export default class App extends Component {
         lightSettings: LIGHT_SETTINGS
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

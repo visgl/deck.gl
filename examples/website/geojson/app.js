@@ -41,17 +41,10 @@ class App extends Component {
     return this.setState({viewState});
   }
 
-  render() {
-    const {
-      data = DATA_URL,
-      colorScale = DEFAULT_COLOR_SCALE,
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/light-v9'
-    } = this.props;
+  _renderLayers() {
+    const {data = DATA_URL, colorScale = DEFAULT_COLOR_SCALE} = this.props;
 
-    const layers = [
+    return [
       new GeoJsonLayer({
         id: 'geojson',
         data,
@@ -69,23 +62,32 @@ class App extends Component {
         onHover: this.props.onHover
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

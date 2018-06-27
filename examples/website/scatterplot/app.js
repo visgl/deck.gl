@@ -50,21 +50,15 @@ class App extends Component {
     });
   }
 
-  render() {
+  _renderLayers() {
     const {
       data = DATA_URL,
       radius = 30,
       maleColor = MALE_COLOR,
-      femaleColor = FEMALE_COLOR,
-
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/light-v9'
+      femaleColor = FEMALE_COLOR
     } = this.props;
 
-    const layers = [
+    return [
       new ScatterplotLayer({
         id: 'scatter-plot',
         data,
@@ -78,23 +72,32 @@ class App extends Component {
         }
       })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={mapStyle}
-          preventStyleDiffing={true}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-        />
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            {...viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

@@ -150,18 +150,14 @@ class App extends Component {
     }
   }
 
-  render() {
+  _renderLayers() {
     const {
       data = this.state.data,
       iconMapping = this.state.iconMapping,
       iconAtlas = 'data/location-icon-atlas.png',
       showCluster = true,
 
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-
-      mapboxApiAccessToken = MAPBOX_TOKEN,
-      mapStyle = 'mapbox://styles/mapbox/dark-v9'
+      viewState = this.state.viewState
     } = this.props;
 
     this._updateCluster({data, viewState});
@@ -170,7 +166,7 @@ class App extends Component {
     const size = showCluster ? 1 : Math.min(Math.pow(1.5, viewState.zoom - 10), 1);
     const updateTrigger = z * showCluster;
 
-    const layers = [
+    return [
       iconMapping &&
         new IconLayer({
           id: 'icon',
@@ -190,25 +186,32 @@ class App extends Component {
           }
         })
     ];
+  }
+
+  render() {
+    const {
+      onViewStateChange = this._onViewStateChange.bind(this),
+      viewState = this.state.viewState
+    } = this.props;
 
     return (
       <DeckGL
-        layers={layers}
+        layers={this._renderLayers()}
         views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        <StaticMap
-          viewId="map"
-          {...viewState}
-          reuseMaps
-          mapStyle={mapStyle}
-          mapboxApiAccessToken={mapboxApiAccessToken}
-          preventStyleDiffing={true}
-        />
-
-        <div>{this.props.children}</div>
+        {!window.demoLauncherActive && (
+          <StaticMap
+            viewId="map"
+            viewState={viewState}
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }
