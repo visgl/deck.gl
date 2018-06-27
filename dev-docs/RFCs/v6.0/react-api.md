@@ -97,7 +97,7 @@ Although props such as `width`, `height`, `views`, `viewState`, `onViewStateChan
 </DeckGL>
 ```
 
-**Using react-map-gl controls:**
+**Using react-map-gl components:**
 
 ```jsx
 <DeckGL
@@ -118,11 +118,9 @@ Although props such as `width`, `height`, `views`, `viewState`, `onViewStateChan
 </DeckGL>
 ```
 
-## Proposal: View Components
+## Proposal: JSX View
 
-Add `View` React component to the `@deck.gl/react` module. In the main `deck.gl` module, replace the `View` exports with their React counterparts.
-
-It gives the JSX a cleaner hierarchy in multi-view apps:
+Similar to JSX layers, we can support JSX views. It gives the JSX a cleaner hierarchy in multi-view apps:
 
 ```jsx
 <DeckGL
