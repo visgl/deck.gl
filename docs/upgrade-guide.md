@@ -25,7 +25,7 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 Some previously deprecated `project` module functions have now been removed.
 
 
-#### `is64bitEnabled()` deprecated
+#### `Layer.is64bitEnabled()` deprecated
 
 Instead use `use64bitProjection` and `use64bitPositions`.
 

@@ -44,6 +44,7 @@ uniform vec2 project_coordinate_origin;
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
 const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
+const vec2 ZERO_64_XY_LOW = vec2(0.0, 0.0);
 
 //
 // Scaling offsets - scales meters to "pixels"
@@ -125,7 +126,7 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
 }
 
 vec4 project_position(vec4 position) {
-  return project_position(position, vec2(0.0, 0.0));
+  return project_position(position, ZERO_64_XY_LOW);
 }
 
 vec3 project_position(vec3 position, vec2 position64xyLow) {
@@ -134,12 +135,12 @@ vec3 project_position(vec3 position, vec2 position64xyLow) {
 }
 
 vec3 project_position(vec3 position) {
-  vec4 projected_position = project_position(vec4(position, 1.0), vec2(0.0, 0.0));
+  vec4 projected_position = project_position(vec4(position, 1.0), ZERO_64_XY_LOW);
   return projected_position.xyz;
 }
 
 vec2 project_position(vec2 position) {
-  vec4 projected_position = project_position(vec4(position, 0.0, 1.0), vec2(0.0, 0.0));
+  vec4 projected_position = project_position(vec4(position, 0.0, 1.0), ZERO_64_XY_LOW);
   return projected_position.xy;
 }
 
