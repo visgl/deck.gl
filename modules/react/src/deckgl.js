@@ -164,19 +164,15 @@ export default class DeckGL extends React.PureComponent {
       const {x, y, width, height} = viewport;
 
       let viewChildren = child.props.children;
-      if (!Array.isArray(viewChildren)) {
-        viewChildren = [viewChildren];
-      }
-
-      viewChildren = viewChildren.map(viewChild => {
-        if (typeof viewChild === 'function') {
-          return viewChild({width, height, viewport, viewState});
-        }
-        return viewChild;
-      });
-
-      if (viewChildren.length === 1) {
-        viewChildren = viewChildren[0];
+      if (typeof viewChildren === 'function') {
+        viewChildren = viewChildren({width, height, viewport, viewState});
+      } else if (Array.isArray(viewChildren)) {
+        viewChildren = viewChildren.map(viewChild => {
+          if (typeof viewChild === 'function') {
+            return viewChild({width, height, viewport, viewState});
+          }
+          return viewChild;
+        });
       }
 
       const style = {position: 'absolute', left: x, top: y, width, height};
