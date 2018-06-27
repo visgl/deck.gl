@@ -40,13 +40,10 @@ Although props such as `width`, `height`, `views`, `viewState`, `onViewStateChan
 </DeckGL>
 ```
 
-Here the `views` and `viewId` are required for `StaticMap` to receive dynamic `width` and `height` props.
-
-`onViewStateChange` callback is required because `DeckGL` does not pass `viewState` to its children.
-
-`viewId` is a non-standard prop and causes warnings when assigned to components such as `div`.
-
-If a child component only desires to be placed at the correct offset in a multi-view canvas, its `width` and `height` would still be overwritten to the viewport size during render, which may cause undesired side effects.
+- The `views` and `viewId` are required for `StaticMap` to receive dynamic `width` and `height` props.
+- `onViewStateChange` callback is required because `DeckGL` does not pass `viewState` to its children.
+- `viewId` is a non-standard prop and causes warnings when assigned to components such as `div`.
+- Regardless if a child component only desires to be placed at the correct offset in a multi-view canvas, its `width` and `height` would still be overwritten to the viewport size during render, which may cause render problems.
 
 
 ### Usage of Deprecated React Lifecycle Methods
