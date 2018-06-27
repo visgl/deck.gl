@@ -118,14 +118,15 @@ export default class DeckGL extends React.PureComponent {
     }
 
     // extract any deck.gl layers masquerading as react elements from props.children
-    const {layers, children} = extractJSXLayers(nextProps.children, nextProps.layers);
+    const {layers, views, children} = extractJSXLayers(nextProps);
 
     this.deck.setProps(
       Object.assign({}, nextProps, {
         onViewStateChange: this._onViewStateChange,
         onResize: this._onResize,
         viewState: this._getViewState(nextProps),
-        layers
+        layers,
+        views
       })
     );
 
@@ -150,7 +151,7 @@ export default class DeckGL extends React.PureComponent {
         return child;
       }
 
-      const viewId = child.props.id;
+      const viewId = child.props.id || 'default-view';
       const {viewManager} = this.deck;
       const viewport = viewManager && viewManager.getViewport(viewId);
       const viewState = viewManager && viewManager.getViewState(viewId);
