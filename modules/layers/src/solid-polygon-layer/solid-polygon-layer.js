@@ -282,7 +282,7 @@ export default class SolidPolygonLayer extends Layer {
           // otherwise it is an Attribute object
           newAttributes[attributeName] = attributeOverride
             ? Object.assign({}, attribute, attributeOverride, {
-                buffer: attribute instanceof Buffer ? attribute : attribute.getBuffer()
+                buffer: attribute.getBuffer()
               })
             : attribute;
         }
