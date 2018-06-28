@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
+import {Layer, experimental, WebMercatorViewport} from '@deck.gl/core';
 const {defaultColorRange} = experimental;
 
 import GL from 'luma.gl/constants';
@@ -91,6 +91,8 @@ export default class GPUScreenGridLayer extends Layer {
   updateState(opts) {
     super.updateState(opts);
 
+    this._updateColorUniforms(opts);
+
     if (opts.changeFlags.dataChanged) {
       this._processData();
     }
@@ -100,8 +102,6 @@ export default class GPUScreenGridLayer extends Layer {
     if (changeFlags) {
       this._updateAggregation(changeFlags);
     }
-
-    this._updateColorUniforms(opts);
   }
 
   draw({uniforms}) {
@@ -275,6 +275,7 @@ export default class GPUScreenGridLayer extends Layer {
 
     const {positions, weights, maxCountBuffer, countsBuffer} = this.state;
 
+    const projectPoints = this.context.viewport instanceof WebMercatorViewport;
     this.state.gpuGridAggregator.run({
       positions,
       weights,
@@ -284,7 +285,7 @@ export default class GPUScreenGridLayer extends Layer {
       maxCountBuffer,
       changeFlags,
       useGPU: gpuAggregation,
-      projectPoints: true
+      projectPoints
     });
 
     // Aggregation changed, enforce reading buffer data for picking.

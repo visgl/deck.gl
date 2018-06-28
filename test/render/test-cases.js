@@ -144,6 +144,42 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
   },
+  {
+    name: 'gpu-screengrid-infoviz',
+    views: [new OrthographicView()],
+    viewState: {
+      left: -WIDTH / 2,
+      top: -HEIGHT / 2,
+      right: WIDTH / 2,
+      bottom: HEIGHT / 2
+    },
+    layers: [
+      new GPUScreenGridLayer({
+        id: 'gpu-screengrid-infoviz',
+        data: [
+          [0, -100],
+          [0, -110],
+          [0, -115],
+          [10, -100],
+          [0, 100],
+          [0, 105],
+          [-100, -100],
+          [-100, -100],
+          [100, 10],
+          [100, 12],
+          [100, 100],
+          [110, 90]
+        ],
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        getPosition: d => d,
+        cellSizePixels: 40,
+        minColor: [0, 0, 0, 0],
+        maxColor: [0, 255, 0, 255],
+        pickable: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/gpu-screengrid-infoviz.png'
+  },
 
   // GEOSPATIAL
 
