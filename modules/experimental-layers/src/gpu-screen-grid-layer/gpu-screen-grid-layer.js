@@ -188,7 +188,8 @@ export default class GPUScreenGridLayer extends Layer {
   // HELPER Methods
 
   _getAggregationChangeFlags({oldProps, props, changeFlags}) {
-    const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels ||
+    const cellSizeChanged =
+      props.cellSizePixels !== oldProps.cellSizePixels ||
       props.cellMarginSizePixels !== oldProps.cellMarginSizePixels;
     const dataChanged = changeFlags.dataChanged;
     const viewportChanged = changeFlags.viewportChanged;
@@ -308,22 +309,23 @@ export default class GPUScreenGridLayer extends Layer {
       props.colorRange.forEach(color => {
         colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
       });
-      newState.colorRange =  colorRangeUniform;
+      newState.colorRange = colorRangeUniform;
     }
 
-    if (oldProps.cellMarginSizePixels !== props.cellMarginSizePixels ||
-        oldProps.cellSizePixels !== props.cellSizePixels ||
-        changeFlags.viewportChanged ) {
+    if (
+      oldProps.cellMarginSizePixels !== props.cellMarginSizePixels ||
+      oldProps.cellSizePixels !== props.cellSizePixels ||
+      changeFlags.viewportChanged
+    ) {
+      const {width, height} = this.context.viewport;
+      const {cellSizePixels, cellMarginSizePixels} = this.props;
+      const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
 
-        const {width, height} = this.context.viewport;
-        const {cellSizePixels, cellMarginSizePixels} = this.props;
-        const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
-
-        newState.cellScale = new Float32Array([
-          ((cellSizePixels - margin) / width) * 2,
-          (-(cellSizePixels - margin) / height) * 2,
-          1
-        ]);
+      newState.cellScale = new Float32Array([
+        ((cellSizePixels - margin) / width) * 2,
+        (-(cellSizePixels - margin) / height) * 2,
+        1
+      ]);
     }
     this.setState(newState);
   }
