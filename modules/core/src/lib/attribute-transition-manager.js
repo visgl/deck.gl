@@ -176,13 +176,7 @@ export default class AttributeTransitionManager {
       }
 
       if (hasChanged) {
-        this._triggerTransition({
-          transition,
-          settings,
-          fromBufferLayout: transition.bufferLayout,
-          toBufferLayout: attribute.bufferLayout
-        });
-        transition.bufferLayout = attribute.bufferLayout;
+        this._triggerTransition(transition, settings);
         return true;
       }
     }
@@ -217,7 +211,7 @@ export default class AttributeTransitionManager {
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getNextTransitionStates({transition, fromBufferLayout, toBufferLayout}) {
+  _getNextTransitionStates(transition) {
     const {attribute} = transition;
     const {size} = attribute;
 
@@ -252,7 +246,16 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength)
       });
     }
-    padBuffer({fromState, toState, fromLength, toLength, fromBufferLayout, toBufferLayout});
+    padBuffer({
+      fromState,
+      toState,
+      fromLength,
+      toLength,
+      fromBufferLayout: transition.bufferLayout,
+      toBufferLayout: attribute.bufferLayout
+    });
+
+    transition.bufferLayout = attribute.bufferLayout;
 
     return {fromState, toState, buffer};
   }
@@ -290,18 +293,14 @@ export default class AttributeTransitionManager {
 
   // Start a new transition using the current settings
   // Updates transition state and from/to buffer
-  _triggerTransition({transition, settings, fromBufferLayout, toBufferLayout}) {
+  _triggerTransition(transition, settings) {
     this.needsRedraw = true;
 
     const transitionSettings = this._normalizeTransitionSettings(settings);
 
     // Attribute descriptor to transition from
     transition.start(
-      Object.assign(
-        {},
-        this._getNextTransitionStates({transition, fromBufferLayout, toBufferLayout}),
-        transitionSettings
-      )
+      Object.assign({}, this._getNextTransitionStates(transition), transitionSettings)
     );
   }
 }
