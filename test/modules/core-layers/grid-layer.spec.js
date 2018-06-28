@@ -173,7 +173,10 @@ test('GridLayer#updates', t => {
           getPosition: d => d.COORDINATES
         },
         assert({layer, oldState}) {
-          t.ok(oldState.layerData !== layer.state.layerData, 'getPosition prop change should update layer data');
+          t.ok(
+            oldState.layerData !== layer.state.layerData,
+            'getPosition prop change should update layer data'
+          );
 
           t.ok(
             oldState.sortedColorBins !== layer.state.sortedColorBins,

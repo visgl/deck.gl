@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from 'luma.gl/constants';
-import {Model, Buffer, Geometry, hasFeature, FEATURES} from 'luma.gl';
+import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -278,8 +278,6 @@ export default class SolidPolygonLayer extends Layer {
 
         if (attribute) {
           // Apply layout override to the attribute.
-          // If the attribute is being animated, it is a Buffer object
-          // otherwise it is an Attribute object
           newAttributes[attributeName] = attributeOverride
             ? Object.assign({}, attribute, attributeOverride, {
                 buffer: attribute.getBuffer()
