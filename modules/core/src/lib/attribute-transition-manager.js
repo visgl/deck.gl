@@ -18,8 +18,6 @@ export default class AttributeTransitionManager {
     this.transform = null;
     this.numInstances = 0;
 
-    this._bufferLayout = null;
-
     if (Transform.isSupported(gl)) {
       this.isSupported = true;
     } else {
@@ -40,7 +38,7 @@ export default class AttributeTransitionManager {
 
   // Called when attribute manager updates
   // Check the latest attributes for updates.
-  update({attributes, transitions = {}, numInstances, bufferLayout}) {
+  update({attributes, transitions = {}, numInstances}) {
     this.opts = transitions;
     this.numInstances = numInstances;
 
@@ -52,11 +50,7 @@ export default class AttributeTransitionManager {
     const changedTransitions = {};
 
     for (const attributeName in attributes) {
-      const hasChanged = this._updateAttribute(
-        attributeName,
-        attributes[attributeName],
-        bufferLayout
-      );
+      const hasChanged = this._updateAttribute(attributeName, attributes[attributeName]);
 
       if (hasChanged) {
         changedTransitions[attributeName] = attributeTransitions[attributeName];
@@ -82,8 +76,6 @@ export default class AttributeTransitionManager {
         feedbackBuffers
       });
     }
-
-    this._bufferLayout = bufferLayout;
   }
 
   // Returns `true` if attribute is transition-enabled
@@ -143,7 +135,8 @@ export default class AttributeTransitionManager {
       transition = new Transition({
         name: attributeName,
         attribute,
-        attributeInTransition: new Attribute(this.gl, attribute)
+        attributeInTransition: new Attribute(this.gl, attribute),
+        bufferLayout: attribute.bufferLayout
       });
       this.attributeTransitions[attributeName] = transition;
       this._invalidateModel();
@@ -168,7 +161,7 @@ export default class AttributeTransitionManager {
 
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
-  _updateAttribute(attributeName, attribute, bufferLayout) {
+  _updateAttribute(attributeName, attribute) {
     const settings = this._getTransitionSettings(attribute);
 
     if (settings) {
@@ -186,9 +179,10 @@ export default class AttributeTransitionManager {
         this._triggerTransition({
           transition,
           settings,
-          fromBufferLayout: this._bufferLayout,
-          toBufferLayout: bufferLayout
+          fromBufferLayout: transition.bufferLayout,
+          toBufferLayout: attribute.bufferLayout
         });
+        transition.bufferLayout = attribute.bufferLayout;
         return true;
       }
     }

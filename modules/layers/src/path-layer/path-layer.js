@@ -261,8 +261,10 @@ export default class PathLayer extends Layer {
   }
 
   calculateStartPositions(attribute) {
-    const {paths} = this.state;
+    const {paths, bufferLayout} = this.state;
     const {value} = attribute;
+
+    attribute.bufferLayout = bufferLayout;
 
     let i = 0;
     paths.forEach(path => {
@@ -277,8 +279,10 @@ export default class PathLayer extends Layer {
   }
 
   calculateEndPositions(attribute) {
-    const {paths} = this.state;
+    const {paths, bufferLayout} = this.state;
     const {value} = attribute;
+
+    attribute.bufferLayout = bufferLayout;
 
     let i = 0;
     paths.forEach(path => {
@@ -350,8 +354,10 @@ export default class PathLayer extends Layer {
 
   calculateStrokeWidths(attribute) {
     const {data, getWidth} = this.props;
-    const {paths} = this.state;
+    const {paths, bufferLayout} = this.state;
     const {value} = attribute;
+
+    attribute.bufferLayout = bufferLayout;
 
     let i = 0;
     paths.forEach((path, index) => {
@@ -386,8 +392,10 @@ export default class PathLayer extends Layer {
 
   calculateColors(attribute) {
     const {data, getColor} = this.props;
-    const {paths} = this.state;
+    const {paths, bufferLayout} = this.state;
     const {value} = attribute;
+
+    attribute.bufferLayout = bufferLayout;
 
     let i = 0;
     paths.forEach((path, index) => {

@@ -238,8 +238,7 @@ export default class SolidPolygonLayer extends Layer {
 
       this.setState({
         polygonTesselator,
-        numInstances: polygonTesselator.pointCount,
-        bufferLayout: polygonTesselator.bufferLayout
+        numInstances: polygonTesselator.pointCount
       });
 
       this.getAttributeManager().invalidateAll();
@@ -376,7 +375,9 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculatePositions(attribute) {
-    attribute.value = this.state.polygonTesselator.positions();
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.positions();
   }
   calculatePositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
@@ -391,7 +392,9 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateNextPositions(attribute) {
-    attribute.value = this.state.polygonTesselator.nextPositions();
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.nextPositions();
   }
   calculateNextPositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
@@ -406,10 +409,13 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateElevations(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+
     const {extruded, getElevation} = this.props;
     if (extruded && typeof getElevation === 'function') {
       attribute.constant = false;
-      attribute.value = this.state.polygonTesselator.elevations({
+      attribute.value = polygonTesselator.elevations({
         getElevation: polygonIndex => getElevation(this.props.data[polygonIndex])
       });
     } else {
@@ -420,13 +426,17 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateFillColors(attribute) {
-    attribute.value = this.state.polygonTesselator.colors({
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.colors({
       key: 'fillColors',
       getColor: polygonIndex => this.props.getFillColor(this.props.data[polygonIndex])
     });
   }
   calculateLineColors(attribute) {
-    attribute.value = this.state.polygonTesselator.colors({
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.colors({
       key: 'lineColors',
       getColor: polygonIndex => this.props.getLineColor(this.props.data[polygonIndex])
     });
