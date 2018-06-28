@@ -7,6 +7,16 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: TBD, target late Q2, 2018
 
+### React API
+
+The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
+
+* Use render callbacks for rendering children dynamically from view states
+* Can be used as a stateful component with automatic interactivity
+* Specify views in JSX
+
+See [Use with React](/docs/get-started/using-with-react.md) for more details.
+
 ### Prop Types
 
 deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/developer-guide/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.

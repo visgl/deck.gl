@@ -13,60 +13,42 @@ The `DeckGL` class is a React wrapper of the `Deck` JavaScript class which expos
 // Basic usage
 import DeckGL, {ScatterplotLayer} from 'deck.gl';
 
-const App = (viewState, data) => (
+const App = (data) => (
   <DeckGL
-    {...viewState}
+    longitude={-122.45}
+    latitude={37.78}
+    zoom={12}
     layers={[new ScatterplotLayer({data})]} />
 );
 ```
 
-Like any React component, `DeckGL` can accept child components. Child components can be automatically positioned and sized to fit perfectly underneath any `View` in the list of `views`. Child components are often maps (e.g. the `StaticMap` component from react-map-gl), but can be any React components.
+Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `StaticMap` component from react-map-gl), but can be any React components.
 
 ```js
-import DeckGL, {MapView, FirstPersonView} from 'deck.gl';
-// Multiple views and an auto-positioned base map
-const views = [
-  new FirstPersonView({...}),
-  new MapView({id: 'basemap', ...})
-];
+import DeckGL, {MapController} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
 
-render() {
-  return (
-    <DeckGL
-      width={width}
-      height={height}
-      layers={this._renderLayers()}
-      views={views} />
+const App = (data) => (
+  <DeckGL
+    initialViewState={{longitude: -122.45, latitude: 37.78, zoom: 12}}
+    controller={MapController}
+    layers={[new ScatterplotLayer({data})]}
+  >
+    {({width, height, viewState}) => (
+        <StaticMap
+          {...viewState}
+          width={width}
+          height={height}
+          mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      )}
+  </DeckGL>
+);
 
-      <StaticMap
-        viewId='basemap'
-        {...viewState}/>
-
-    </DeckGL>
-  );
-}
 ```
 
 ## Properties
 
 `DeckGL` accepts all [Deck](/docs/api-reference/deck.md#properties) properties, with these additional semantics:
-
-
-##### `views` (`View[]`, optional)
-
-An array of `View`s (or optionally `Viewport`s, mainly for backward compatibility).
-
-This property should contain one or more [`View`](/docs/api-reference/view.md) instances which represents your "cameras" from which to display your data. By changing the `views` property you change the view(s) of your layers, e.g. as a result of mouse events or through programmatic animations.
-
-Default: If the `views` property is not supplied, deck.gl will create a full screen `MapView`, which requires the app to supply geospatial view state (like longitude, latitude, ...).
-
-> deck.gl will render all the views in the provided order. This may not matter as depth testing is enabled by default by deck.gl (unless transparent layers are being rendered, in which case rendering order starts to matter again), but is useful when rendering 2D layers and disabling depth testing.
-
-##### `controller` (Function | Boolean | Object, optional)
-
-Specify the options for viewport interaction. The value is applied to the default (first) view. See [`View`](/docs/api-reference/view.md) for more information.
-
-Default `null`.
 
 
 ### View State Properties
@@ -98,6 +80,27 @@ Current pitch - used to define a mercator projection if `viewState` is not suppl
 
 The following semantics of the standard React `children` property are considered experimental.
 
+#### Render callbacks
+
+To leverage the automatic layout and interactivity features, you may specify a function as a child of `DeckGL` or a `View` node (see **JSX views** below). If a render callback is the direct child of `DeckGL`, it is assumed to be under the default view. Otherwise, it is under the view that is its parent.
+
+```jsx
+  <DeckGL {...viewState}>
+    {({x, y, width, height, viewState, viewport}) => {
+      // return React element(s)
+    }}
+  <DeckGL />
+```
+
+Each callback will be called to retreive the React children when the view state updates. The following arguments are passed:
+
+* `x` - the left offset of the current view, in pixels
+* `y` - the top offset of the current view, in pixels
+* `width` - the width of the current view, in pixels
+* `height` - the height of the current view, in pixels
+* `viewState` - the view state of the current view
+* `viewport` - the `Viewport` instance of the current view
+
 
 #### JSX layers
 
@@ -112,23 +115,47 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
 For more information on this syntax and its limitations, see [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
 
 
-#### Auto-Positioned Children
+#### JSX views
+
+It is possible to use JSX syntax to create deck.gl views as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `views` prop.
+
+```jsx
+  <DeckGL initialViewState={...viewState} layers={layers} >
+    <MapView id="map" width="50%" controller={MapController} />
+    <FirstPersonView width="50%" x="50%" fovy={50} />
+  <DeckGL />
+```
+
+For more information on this syntax, see [Using deck.gl with React](/docs/get-started/using-with-react.md) article.
+
+
+#### Position Children in Viewport
 
 To make it easy to use React components in combination with deck.gl views (e.g. to place a base map under a view, or add a label on top of a view), deck.gl can make such components automatically adjust as that view is added, removed or resized.
 
-`DeckGL` classifies any top-level children (`props.children`) that have a `viewId` property as "view base components". It will perform special processing on them as follows:
+`DeckGL` accepts top-level children (`props.children`) that are instances of the `View` class. Any children nested under a `<View>` are automatically positioned as such:
 
-* It resizes and repositions any `viewId` children to precisely match the extends of the deck.gl view with the corresponding id.
-* It automatically hides any `viewId` children whose id is not matched by any current deck.gl view.
-* It injects view state properties (`longitude`, `latitude` etc).
-* Also injects the `visible: viewport.isMapSynched()` prop to hide base maps that cannot display per the current view state parameters.
+* It is offset to be relative to the deck.gl view with the corresponding view id.
+* Its parent DOM container is resized to match the extent of the deck.gl view with the corresponding view id.
+* If it is a callback function, it receives view state properties (`width`, `height`, `viewState` etc).
+
+```jsx
+  <DeckGL {...viewState} layers={layers} >
+    <MapView id="map" width="50%" >
+      <div>Map</div>
+    </MapView>
+    <FirstPersonView width="50%" x="50%" fovy={50} >
+      <div>First Person</div>
+    </FirstPersonView>
+  <DeckGL />
+```
 
 Additional Notes:
 
 * The DeckGL components own `canvas` element is added last to the child list, to sit on top of all the base components, however Z index can be used to override this.
-* Child repositioning is done with CSS styling on a wrapper div, resizing is done through width and height properties.
-* Hiding of children is performed by removing the elements from the child list
-* Children without the `viewId` property are rendered as is.
+* Child repositioning is done with CSS styling on a wrapper div.
+* Children that do not belong to any `<View>` tag and are functions are called with the properties of the default view.
+* Children that do not belong to any `<View>` tag and are valid React elements are rendered as is.
 
 
 ## Methods
