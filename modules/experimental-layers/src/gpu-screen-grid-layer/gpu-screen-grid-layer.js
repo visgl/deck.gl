@@ -37,7 +37,8 @@ const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
 const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
-  cellSizePixels: 100,
+  cellSizePixels: {value: 100, min: 1},
+  cellMarginPixels: {value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -91,7 +92,7 @@ export default class GPUScreenGridLayer extends Layer {
   updateState(opts) {
     super.updateState(opts);
 
-    this._updateColorUniforms(opts);
+    this._updateUniforms(opts);
 
     if (opts.changeFlags.dataChanged) {
       this._processData();
@@ -187,7 +188,9 @@ export default class GPUScreenGridLayer extends Layer {
   // HELPER Methods
 
   _getAggregationChangeFlags({oldProps, props, changeFlags}) {
-    const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
+    const cellSizeChanged =
+      props.cellSizePixels !== oldProps.cellSizePixels ||
+      props.cellMarginPixels !== oldProps.cellMarginPixels;
     const dataChanged = changeFlags.dataChanged;
     const viewportChanged = changeFlags.viewportChanged;
 
@@ -294,10 +297,10 @@ export default class GPUScreenGridLayer extends Layer {
     attributeManager.invalidate('instanceCounts');
   }
 
-  _updateColorUniforms({oldProps, props}) {
-    if (this._updateMinMaxUniform({oldProps, props})) {
-      const shouldUseMinMax = this._shouldUseMinMax();
-      this.setState({shouldUseMinMax});
+  _updateUniforms({oldProps, props, changeFlags}) {
+    const newState = {};
+    if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
+      newState.shouldUseMinMax = this._shouldUseMinMax();
     }
 
     if (oldProps.colorRange !== props.colorRange) {
@@ -306,8 +309,25 @@ export default class GPUScreenGridLayer extends Layer {
       props.colorRange.forEach(color => {
         colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
       });
-      this.setState({colorRange: colorRangeUniform});
+      newState.colorRange = colorRangeUniform;
     }
+
+    if (
+      oldProps.cellMarginPixels !== props.cellMarginPixels ||
+      oldProps.cellSizePixels !== props.cellSizePixels ||
+      changeFlags.viewportChanged
+    ) {
+      const {width, height} = this.context.viewport;
+      const {cellSizePixels, cellMarginPixels} = this.props;
+      const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
+
+      newState.cellScale = new Float32Array([
+        ((cellSizePixels - margin) / width) * 2,
+        (-(cellSizePixels - margin) / height) * 2,
+        1
+      ]);
+    }
+    this.setState(newState);
   }
 
   _updateGridParams() {
@@ -315,12 +335,6 @@ export default class GPUScreenGridLayer extends Layer {
     const {cellSizePixels} = this.props;
     const {gl} = this.context;
 
-    const MARGIN = 2;
-    const cellScale = new Float32Array([
-      ((cellSizePixels - MARGIN) / width) * 2,
-      (-(cellSizePixels - MARGIN) / height) * 2,
-      1
-    ]);
     const numCol = Math.ceil(width / cellSizePixels);
     const numRow = Math.ceil(height / cellSizePixels);
     const numInstances = numCol * numRow;
@@ -338,23 +352,11 @@ export default class GPUScreenGridLayer extends Layer {
     });
 
     this.setState({
-      cellScale,
       numCol,
       numRow,
       numInstances,
       countsBuffer
     });
-  }
-
-  _updateMinMaxUniform({oldProps, props}) {
-    if (
-      COLOR_PROPS.some(key => {
-        return oldProps[key] !== props[key];
-      })
-    ) {
-      return true;
-    }
-    return false;
   }
 }
 

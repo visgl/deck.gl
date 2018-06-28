@@ -30,7 +30,8 @@ const DEFAULT_MINCOLOR = [0, 0, 0, 255];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 
 const defaultProps = {
-  cellSizePixels: 100,
+  cellSizePixels: {value: 100, min: 1},
+  cellMarginPixels: {value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -71,9 +72,14 @@ export default class ScreenGridLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
+    const cellMarginChanged = props.cellMarginPixels !== oldProps.cellMarginPixels;
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
+    }
+
+    if (cellSizeChanged || cellMarginChanged || changeFlags.viewportChanged) {
+      this.updateCellScale();
     }
   }
 
@@ -110,21 +116,15 @@ export default class ScreenGridLayer extends Layer {
     );
   }
 
+  // Update cell size parameters and invalidated attributes for re-calculation.
   updateCell() {
     const {width, height} = this.context.viewport;
     const {cellSizePixels} = this.props;
 
-    const MARGIN = 2;
-    const cellScale = new Float32Array([
-      ((cellSizePixels - MARGIN) / width) * 2,
-      (-(cellSizePixels - MARGIN) / height) * 2,
-      1
-    ]);
     const numCol = Math.ceil(width / cellSizePixels);
     const numRow = Math.ceil(height / cellSizePixels);
 
     this.setState({
-      cellScale,
       numCol,
       numRow,
       numInstances: numCol * numRow
@@ -132,6 +132,19 @@ export default class ScreenGridLayer extends Layer {
 
     const attributeManager = this.getAttributeManager();
     attributeManager.invalidateAll();
+  }
+
+  // update cellScale uniform used in vertex shader.
+  updateCellScale() {
+    const {width, height} = this.context.viewport;
+    const {cellSizePixels, cellMarginPixels} = this.props;
+    const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
+    const cellScale = new Float32Array([
+      ((cellSizePixels - margin) / width) * 2,
+      (-(cellSizePixels - margin) / height) * 2,
+      1
+    ]);
+    this.setState({cellScale});
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
