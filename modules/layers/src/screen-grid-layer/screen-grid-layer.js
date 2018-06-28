@@ -72,9 +72,14 @@ export default class ScreenGridLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
+    const cellMarginChanged = props.cellMarginSizePixels !== oldProps.cellMarginSizePixels;
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
+    }
+
+    if (cellSizeChanged || cellMarginChanged || changeFlags.viewportChanged) {
+      this.updateCellScale();
     }
   }
 
@@ -113,19 +118,12 @@ export default class ScreenGridLayer extends Layer {
 
   updateCell() {
     const {width, height} = this.context.viewport;
-    const {cellSizePixels, cellMarginSizePixels} = this.props;
+    const {cellSizePixels} = this.props;
 
-    const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
-    const cellScale = new Float32Array([
-      ((cellSizePixels - margin) / width) * 2,
-      (-(cellSizePixels - margin) / height) * 2,
-      1
-    ]);
     const numCol = Math.ceil(width / cellSizePixels);
     const numRow = Math.ceil(height / cellSizePixels);
 
     this.setState({
-      cellScale,
       numCol,
       numRow,
       numInstances: numCol * numRow
@@ -133,6 +131,18 @@ export default class ScreenGridLayer extends Layer {
 
     const attributeManager = this.getAttributeManager();
     attributeManager.invalidateAll();
+  }
+
+  updateCellScale() {
+    const {width, height} = this.context.viewport;
+    const {cellSizePixels, cellMarginSizePixels} = this.props;
+    const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
+    const cellScale = new Float32Array([
+      ((cellSizePixels - margin) / width) * 2,
+      (-(cellSizePixels - margin) / height) * 2,
+      1
+    ]);
+    this.setState({cellScale});
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
