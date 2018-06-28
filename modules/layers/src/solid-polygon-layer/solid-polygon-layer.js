@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from 'luma.gl/constants';
-import {Model, Buffer, Geometry, hasFeature, FEATURES} from 'luma.gl';
+import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import {PolygonTesselator} from './polygon-tesselator';
@@ -278,11 +278,9 @@ export default class SolidPolygonLayer extends Layer {
 
         if (attribute) {
           // Apply layout override to the attribute.
-          // If the attribute is being animated, it is a Buffer object
-          // otherwise it is an Attribute object
           newAttributes[attributeName] = attributeOverride
             ? Object.assign({}, attribute, attributeOverride, {
-                buffer: attribute instanceof Buffer ? attribute : attribute.getBuffer()
+                buffer: attribute.getBuffer()
               })
             : attribute;
         }
@@ -304,9 +302,9 @@ export default class SolidPolygonLayer extends Layer {
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, isGeneric: true, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, isGeneric: true, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, isGeneric: true, value: new Float32Array(2)}
+              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])},
+              nextPositions: {size: 3, constant: true, value: new Float32Array(3)},
+              nextPositions64xyLow: {size: 2, constant: true, value: new Float32Array(2)}
             }
           }),
           uniforms: {
@@ -376,7 +374,7 @@ export default class SolidPolygonLayer extends Layer {
   }
   calculatePositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
-    attribute.isGeneric = !isFP64;
+    attribute.constant = !isFP64;
 
     if (!isFP64) {
       attribute.value = new Float32Array(2);
@@ -391,7 +389,7 @@ export default class SolidPolygonLayer extends Layer {
   }
   calculateNextPositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
-    attribute.isGeneric = !isFP64;
+    attribute.constant = !isFP64;
 
     if (!isFP64) {
       attribute.value = new Float32Array(2);
@@ -404,13 +402,13 @@ export default class SolidPolygonLayer extends Layer {
   calculateElevations(attribute) {
     const {extruded, getElevation} = this.props;
     if (extruded && typeof getElevation === 'function') {
-      attribute.isGeneric = false;
+      attribute.constant = false;
       attribute.value = this.state.polygonTesselator.elevations({
         getElevation: polygonIndex => getElevation(this.props.data[polygonIndex])
       });
     } else {
       const elevation = extruded ? getElevation : 0;
-      attribute.isGeneric = true;
+      attribute.constant = true;
       attribute.value = new Float32Array([elevation]);
     }
   }

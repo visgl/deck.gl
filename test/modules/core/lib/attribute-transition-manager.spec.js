@@ -89,7 +89,7 @@ if (isWebGL2(gl)) {
     t.deepEquals(sizeTransition.fromState.data, [0, 0, 0, 0, 1], 'from buffer is extended');
     t.is(sizeTransition.buffer.data.length, 5, 'buffer has correct size');
 
-    attributes.instanceSizes.update({isGeneric: true, value: [2]});
+    attributes.instanceSizes.update({constant: true, value: [2]});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
     t.deepEquals(sizeTransition.fromState.data, [0, 0, 0, 0, 0, 2], 'from buffer is extended');
     t.is(sizeTransition.buffer.data.length, 6, 'buffer has correct size');

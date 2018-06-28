@@ -471,7 +471,6 @@ export default class Layer extends Component {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
       model.geometry.id = `${this.props.id}-geometry`;
-      model.setAttributes(this.getAttributeManager().getAttributes());
     }
   }
 

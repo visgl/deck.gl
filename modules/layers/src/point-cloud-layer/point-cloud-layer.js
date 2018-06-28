@@ -122,7 +122,7 @@ export default class PointCloudLayer extends Layer {
 
   calculateInstancePositions64xyLow(attribute) {
     const isFP64 = this.use64bitPositions();
-    attribute.isGeneric = !isFP64;
+    attribute.constant = !isFP64;
 
     if (!isFP64) {
       attribute.value = new Float32Array(2);
