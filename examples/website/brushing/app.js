@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapView, MapController} from 'deck.gl';
+import DeckGL, {MapController} from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer/arc-brushing-layer';
 import ScatterplotBrushingLayer from './scatterplot-brushing-layer/scatterplot-brushing-layer';
 import {scaleLinear} from 'd3-scale';
@@ -282,21 +282,20 @@ class App extends Component {
 
         <DeckGL
           layers={this._renderLayers()}
-          views={new MapView({id: 'map'})}
           viewState={viewState}
           onViewStateChange={onViewStateChange}
           controller={MapController}
         >
-          {!window.demoLauncherActive && (
-            <StaticMap
-              viewId="map"
-              viewState={viewState}
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          )}
+          {!window.demoLauncherActive &&
+            (viewProps => (
+              <StaticMap
+                {...viewProps}
+                reuseMaps
+                mapStyle="mapbox://styles/mapbox/light-v9"
+                preventStyleDiffing={true}
+                mapboxApiAccessToken={MAPBOX_TOKEN}
+              />
+            ))}
         </DeckGL>
       </div>
     );

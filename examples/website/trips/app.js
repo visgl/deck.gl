@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapView, MapController, PolygonLayer} from 'deck.gl';
+import DeckGL, {MapController, PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 // Set your mapbox token here
@@ -109,21 +109,20 @@ export default class App extends Component {
     return (
       <DeckGL
         layers={this._renderLayers()}
-        views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        {!window.demoLauncherActive && (
-          <StaticMap
-            viewId="map"
-            viewState={viewState}
-            reuseMaps
-            mapStyle="mapbox://styles/mapbox/dark-v9"
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        )}
+        {!window.demoLauncherActive &&
+          (viewProps => (
+            <StaticMap
+              {...viewProps}
+              reuseMaps
+              mapStyle="mapbox://styles/mapbox/dark-v9"
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          ))}
       </DeckGL>
     );
   }

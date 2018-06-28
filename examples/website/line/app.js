@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapView, MapController, LineLayer, ScatterplotLayer} from 'deck.gl';
+import DeckGL, {MapController, LineLayer, ScatterplotLayer} from 'deck.gl';
 import GL from 'luma.gl/constants';
 
 // Set your mapbox token here
@@ -94,7 +94,6 @@ class App extends Component {
     return (
       <DeckGL
         layers={this._renderLayers()}
-        views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
@@ -103,16 +102,16 @@ class App extends Component {
           blendEquation: GL.FUNC_ADD
         }}
       >
-        {!window.demoLauncherActive && (
-          <StaticMap
-            viewId="map"
-            viewState={viewState}
-            reuseMaps
-            mapStyle="mapbox://styles/mapbox/dark-v9"
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        )}
+        {!window.demoLauncherActive &&
+          (viewProps => (
+            <StaticMap
+              {...viewProps}
+              reuseMaps
+              mapStyle="mapbox://styles/mapbox/dark-v9"
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          ))}
       </DeckGL>
     );
   }

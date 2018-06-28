@@ -60,16 +60,16 @@ class App extends Component {
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        {!window.demoLauncherActive && (
-          <StaticMap
-            viewId="map"
-            viewState={viewState}
-            reuseMaps
-            mapStyle="mapbox://styles/mapbox/dark-v9"
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        )}
+        {!window.demoLauncherActive &&
+          (viewProps => (
+            <StaticMap
+              {...viewProps}
+              reuseMaps
+              mapStyle="mapbox://styles/mapbox/dark-v9"
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          ))}
       </DeckGL>
     );
   }
