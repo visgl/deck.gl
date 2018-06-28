@@ -77,7 +77,8 @@ export function padBuffer({
   fromLength,
   toLength,
   fromBufferLayout,
-  toBufferLayout
+  toBufferLayout,
+  getData = x => x
 }) {
   const hasBufferLayout = fromBufferLayout && toBufferLayout;
 
@@ -90,7 +91,10 @@ export function padBuffer({
   const fromData = fromState.getData({});
 
   const {value, buffer, size, constant} = toState;
-  const enter = constant ? () => value : i => buffer.data.subarray(i, i + size);
+
+  const getMissingData = constant
+    ? (i, chunk) => getData(value, chunk)
+    : (i, chunk) => getData(buffer.data.subarray(i, i + size), chunk);
 
   padArray({
     source: fromData,
@@ -98,7 +102,7 @@ export function padBuffer({
     sourceLayout: fromBufferLayout,
     targetLayout: toBufferLayout,
     size: toState.size,
-    enter
+    getData: getMissingData
   });
 
   fromState.setData({data});
