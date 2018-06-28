@@ -3,7 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapView, MapController, HexagonLayer} from 'deck.gl';
+import DeckGL, {MapController, HexagonLayer} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
@@ -52,7 +52,6 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
       data: null,
       elevationScale: elevationScale.min
     };
@@ -85,12 +84,6 @@ class App extends Component {
 
   componentWillUnmount() {
     this._stopAnimate();
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
   }
 
   _animate() {
@@ -142,28 +135,29 @@ class App extends Component {
 
   render() {
     const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
+      onViewStateChange,
+      viewState
     } = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
-        views={new MapView({id: 'map'})}
+        initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        {!window.demoLauncherActive && (
+        {!window.demoLauncherActive && (({viewState: mapViewState, width, height}) => (
           <StaticMap
-            viewId="map"
-            viewState={viewState}
+            width={width}
+            height={height}
+            viewState={mapViewState}
             reuseMaps
             mapStyle="mapbox://styles/mapbox/dark-v9"
             preventStyleDiffing={true}
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
-        )}
+        ))}
       </DeckGL>
     );
   }

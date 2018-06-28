@@ -6,7 +6,7 @@ import assert from '../utils/assert';
 export default class View {
   constructor(props = {}) {
     const {
-      id = 'default-view',
+      id = null,
 
       // Window width/height in pixels (for pixel projection)
       x = 0,

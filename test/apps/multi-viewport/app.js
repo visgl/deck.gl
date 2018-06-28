@@ -54,11 +54,7 @@ class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: {
-        '1st-person': {...DEFAULT_VIEWPORT_PROPS},
-        '3rd-person': {...DEFAULT_VIEWPORT_PROPS},
-        basemap: {...DEFAULT_VIEWPORT_PROPS}
-      },
+      position: DEFAULT_VIEWPORT_PROPS.position,
       buildings: null,
       trips: null,
       time: 0,
@@ -77,9 +73,11 @@ class Root extends Component {
   }
 
   _onViewStateChange({viewId, viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, [viewId]: viewState}
-    });
+    if (viewId === '3rd-person') {
+      this.setState({
+        position: viewState.position
+      });
+    }
   }
 
   _onValueChange(settingName, newValue) {
@@ -90,8 +88,7 @@ class Root extends Component {
 
   _renderLayers() {
     const {longitude, latitude} = DEFAULT_VIEWPORT_PROPS;
-    const {viewState} = this.state;
-    const {position} = viewState['3rd-person'];
+    const {position} = this.state;
 
     const {buildings, trips} = this.state;
     const {trailLength, time} = this.state;
@@ -153,56 +150,49 @@ class Root extends Component {
     ];
   }
 
-  _renderViews() {
-    return [
-      new FirstPersonView({
-        id: '1st-person',
-        controller: _FirstPersonController,
-        height: '33.33%',
-        fovy: 50
-      }),
-      new ThirdPersonView({
-        id: '3rd-person',
-        controller: MapController,
-        y: '33.33%',
-        height: '33.33%',
-        near: 0.1, // Distance of near clipping plane
-        far: 10000 // Distance of far clipping plane
-      }),
-      new MapView({
-        id: 'basemap',
-        controller: MapController,
-        y: '66.67%',
-        height: '33.33%'
-      })
-    ];
+  _renderMap({width, height, viewState}) {
+    return (
+      <StaticMap
+        {...viewState}
+        width={width}
+        height={height}
+        mapStyle="mapbox://styles/mapbox/dark-v9"
+        mapboxApiAccessToken={MAPBOX_TOKEN}
+      />
+    );
   }
 
   render() {
-    const {viewState} = this.state;
-
     return (
       <DeckGL
         id="first-person"
         width="100%"
         height="100%"
-        viewState={viewState}
+        initialViewState={DEFAULT_VIEWPORT_PROPS}
         onViewStateChange={this._onViewStateChange}
-        views={this._renderViews()}
         layers={this._renderLayers()}
       >
-        <StaticMap
-          viewId="3rd-person"
-          {...viewState['3rd-person']}
-          mapStyle="mapbox://styles/mapbox/light-v9"
-          mapboxApiAccessToken={MAPBOX_TOKEN}
+        <FirstPersonView
+          id="1st-person"
+          controller={_FirstPersonController}
+          height="33.33%"
+          fovy={50}
         />
-        <StaticMap
-          viewId="basemap"
-          {...viewState.basemap}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        />
+
+        <ThirdPersonView
+          id="3rd-person"
+          controller={MapController}
+          y="33.33%"
+          height="33.33%"
+          near={0.1}
+          far={10000}
+        >
+          {this._renderMap}
+        </ThirdPersonView>
+
+        <MapView id="basemap" controller={MapController} y="66.67%" height="33.33%">
+          {this._renderMap}
+        </MapView>
       </DeckGL>
     );
   }

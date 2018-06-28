@@ -18,20 +18,26 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import React, {createElement, cloneElement} from 'react';
+import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import {Deck, log} from '@deck.gl/core';
+import {Deck, View, log} from '@deck.gl/core';
 import extractJSXLayers from './utils/extract-jsx-layers';
+import {inheritsFrom} from './utils/inherits-from';
+import evaluateChildren from './utils/evaluate-children';
 import autobind from './utils/autobind';
 
 const propTypes = Deck.getPropTypes(PropTypes);
 
 const defaultProps = Deck.defaultProps;
 
-export default class DeckGL extends React.Component {
+export default class DeckGL extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      width: 0,
+      height: 0,
+      viewState: props.initialViewState
+    };
     this.children = [];
     autobind(this);
   }
@@ -39,6 +45,7 @@ export default class DeckGL extends React.Component {
   componentDidMount() {
     this.deck = new Deck(
       Object.assign({}, this.props, {
+        initialViewState: null,
         canvas: this.deckCanvas,
         viewState: this._getViewState(this.props),
         // Note: If Deck event handling change size or view state, it calls onResize to update
@@ -46,11 +53,6 @@ export default class DeckGL extends React.Component {
         onResize: this._onResize
       })
     );
-    this._updateFromProps(this.props);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    this._updateFromProps(nextProps);
   }
 
   componentWillUnmount() {
@@ -82,16 +84,24 @@ export default class DeckGL extends React.Component {
   // Callbacks
 
   // Forward callback and then call forceUpdate to guarantee that sub components update
-  _onResize(...args) {
-    this.props.onResize(...args);
-    this.forceUpdate();
+  _onResize(params) {
+    this.setState(params);
+    this.props.onResize(params);
   }
 
   // Forward callback and then call forceUpdate to guarantee that sub components update
-  _onViewStateChange(...args) {
-    const viewState = this.props.onViewStateChange(...args);
-    this.forceUpdate();
-    return viewState;
+  _onViewStateChange(params) {
+    // Let app know that view state is changing, and give it a chance to change it
+    const viewState = this.props.onViewStateChange(params) || params.viewState;
+
+    // If initialViewState was set on creation, auto track position
+    if (this.state.viewState) {
+      this.setState({
+        viewState: Object.assign({}, this.state.viewState, {
+          [params.viewId]: viewState
+        })
+      });
+    }
   }
 
   // Private Helpers
@@ -100,17 +110,24 @@ export default class DeckGL extends React.Component {
   // 2. Handle any backwards compatiblity props for React layer
   // Needs to be called both from initial mount, and when new props arrive
   _updateFromProps(nextProps) {
+    if (!this.deck) {
+      return;
+    }
+
     if (nextProps.viewports || nextProps.viewport) {
       log.removed('DeckGL.viewport(s)', 'DeckGL.views')();
     }
 
     // extract any deck.gl layers masquerading as react elements from props.children
-    const {layers, children} = extractJSXLayers(nextProps.children, nextProps.layers);
+    const {layers, views, children} = extractJSXLayers(nextProps);
 
     this.deck.setProps(
       Object.assign({}, nextProps, {
+        onViewStateChange: this._onViewStateChange,
+        onResize: this._onResize,
         viewState: this._getViewState(nextProps),
-        layers
+        layers,
+        views
       })
     );
 
@@ -123,7 +140,7 @@ export default class DeckGL extends React.Component {
       const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
       return {latitude, longitude, zoom, pitch, bearing};
     }
-    return props.viewState;
+    return props.viewState || this.state.viewState;
   }
 
   // Iterate over views and reposition children associated with views
@@ -131,18 +148,21 @@ export default class DeckGL extends React.Component {
   _positionChildrenUnderViews(children) {
     return children.map((child, i) => {
       if (child.props.viewportId) {
-        log.removed('viewportId', 'viewId')();
+        log.removed('viewportId', '<View>')();
+      }
+      if (child.props.viewportId) {
+        log.removed('viewId', '<View>')();
       }
 
-      const {viewId} = child.props;
-
-      // If child does not specify props.viewId, position / render as normal
-      if (!viewId) {
+      // If child is not a View, position / render as normal
+      if (!inheritsFrom(child.type, View)) {
         return child;
       }
 
+      const viewId = child.props.id || 'default-view';
       const {viewManager} = this.deck;
       const viewport = viewManager && viewManager.getViewport(viewId);
+      const viewState = viewManager && viewManager.getViewState(viewId);
 
       // Drop (auto-hide) elements with viewId that are not matched by any current view
       if (!viewport) {
@@ -152,25 +172,24 @@ export default class DeckGL extends React.Component {
       // Resolve potentially relative dimensions using the deck.gl container size
       const {x, y, width, height} = viewport;
 
-      // Clone the element with width and height set per view
-      const newProps = Object.assign({}, child.props, {width, height});
-
-      // Inject map properties
-      // TODO - this is too react-map-gl specific
-      Object.assign(newProps, viewport.getMercatorParams(), {
-        visible: viewport.isMapSynched()
+      const viewChildren = evaluateChildren(child.props.children, {
+        x,
+        y,
+        width,
+        height,
+        viewport,
+        viewState
       });
 
-      const clone = cloneElement(child, newProps);
-
-      // Wrap it in an absolutely positioning div
       const style = {position: 'absolute', left: x, top: y, width, height};
       const key = `view-child-${viewId}-${i}`;
-      return createElement('div', {key, id: key, style}, clone);
+      return createElement('div', {key, id: key, style}, viewChildren);
     });
   }
 
   render() {
+    this._updateFromProps(this.props);
+
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
     const children = this._positionChildrenUnderViews(this.children);

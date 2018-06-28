@@ -91,6 +91,11 @@ export default class ViewManager {
     return this._viewportMap[viewId];
   }
 
+  getViewState(viewId) {
+    // Backward compatibility: view state for single view
+    return this.viewState[viewId] || this.viewState;
+  }
+
   /**
    * Projects xyz (possibly latitude and longitude) to pixel coordinates in window
    * using viewport projection parameters
@@ -215,7 +220,7 @@ export default class ViewManager {
       const Controller = view.controller;
       controller = new Controller({
         eventManager: this._eventManager,
-        viewState: this._getViewState(view.id),
+        viewState: this.getViewState(view.id),
         // Set an internal callback that calls the prop callback if provided
         onViewStateChange: this._onViewStateChange.bind(this, view.id),
         onStateChange: this._eventCallbacks.onInteractiveStateChange
@@ -232,7 +237,7 @@ export default class ViewManager {
       const {width, height, views} = this;
 
       this._viewports = views.map(view => {
-        const viewState = this._getViewState(view.id);
+        const viewState = this.getViewState(view.id);
         const viewport = view.makeViewport({width, height, viewState});
 
         const controller = this.controllers[view.id];
@@ -268,11 +273,6 @@ export default class ViewManager {
         this._viewportMap[viewport.id] = this._viewportMap[viewport.id] || viewport;
       }
     });
-  }
-
-  _getViewState(viewId) {
-    // Backward compatibility: view state for single view
-    return this.viewState[viewId] || this.viewState;
   }
 
   // Check if viewport array has changed, returns true if any change

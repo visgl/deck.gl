@@ -193,17 +193,6 @@ export default class Viewport {
     return xyz;
   }
 
-  getMercatorParams() {
-    const lngLat = this._addMetersToLngLat(
-      [this.longitude || 0, this.latitude || 0],
-      this.meterOffset
-    );
-    return {
-      longitude: lngLat[0],
-      latitude: lngLat[1]
-    };
-  }
-
   isMapSynched() {
     return false;
   }
