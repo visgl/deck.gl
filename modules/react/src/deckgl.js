@@ -146,6 +146,14 @@ export default class DeckGL extends React.PureComponent {
   // Iterate over views and reposition children associated with views
   // TODO - Can we supply a similar function for the non-React case?
   _positionChildrenUnderViews(children) {
+    const {viewManager} = this.deck || {};
+
+    if (!viewManager || !viewManager.views.length) {
+      return [];
+    }
+
+    const defaultViewId = viewManager.views[0].id;
+
     return children.map((child, i) => {
       if (child.props.viewportId) {
         log.removed('viewportId', '<View>')();
@@ -154,15 +162,16 @@ export default class DeckGL extends React.PureComponent {
         log.removed('viewId', '<View>')();
       }
 
-      // If child is not a View, position / render as normal
-      if (!inheritsFrom(child.type, View)) {
-        return child;
+      // Unless child is a View, position / render as part of the default view
+      let viewId = defaultViewId;
+      let viewChildren = child;
+      if (inheritsFrom(child.type, View)) {
+        viewId = child.props.id || defaultViewId;
+        viewChildren = child.props.children;
       }
 
-      const viewId = child.props.id || 'default-view';
-      const {viewManager} = this.deck;
-      const viewport = viewManager && viewManager.getViewport(viewId);
-      const viewState = viewManager && viewManager.getViewState(viewId);
+      const viewport = viewManager.getViewport(viewId);
+      const viewState = viewManager.getViewState(viewId);
 
       // Drop (auto-hide) elements with viewId that are not matched by any current view
       if (!viewport) {
@@ -172,7 +181,7 @@ export default class DeckGL extends React.PureComponent {
       // Resolve potentially relative dimensions using the deck.gl container size
       const {x, y, width, height} = viewport;
 
-      const viewChildren = evaluateChildren(child.props.children, {
+      viewChildren = evaluateChildren(viewChildren, {
         x,
         y,
         width,
