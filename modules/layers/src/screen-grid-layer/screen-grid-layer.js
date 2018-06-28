@@ -31,7 +31,7 @@ const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
-  cellMarginSizePixels: {value: 2, min: 0, max: 5},
+  cellMarginPixels: {value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -72,7 +72,7 @@ export default class ScreenGridLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
-    const cellMarginChanged = props.cellMarginSizePixels !== oldProps.cellMarginSizePixels;
+    const cellMarginChanged = props.cellMarginPixels !== oldProps.cellMarginPixels;
 
     if (cellSizeChanged || changeFlags.viewportChanged) {
       this.updateCell();
@@ -116,6 +116,7 @@ export default class ScreenGridLayer extends Layer {
     );
   }
 
+  // Update cell size parameters and invalidated attributes for re-calculation.
   updateCell() {
     const {width, height} = this.context.viewport;
     const {cellSizePixels} = this.props;
@@ -133,10 +134,11 @@ export default class ScreenGridLayer extends Layer {
     attributeManager.invalidateAll();
   }
 
+  // update cellScale uniform used in vertex shader.
   updateCellScale() {
     const {width, height} = this.context.viewport;
-    const {cellSizePixels, cellMarginSizePixels} = this.props;
-    const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
+    const {cellSizePixels, cellMarginPixels} = this.props;
+    const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
     const cellScale = new Float32Array([
       ((cellSizePixels - margin) / width) * 2,
       (-(cellSizePixels - margin) / height) * 2,

@@ -38,7 +38,7 @@ const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
-  cellMarginSizePixels: {value: 2, min: 0, max: 5},
+  cellMarginPixels: {value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -190,7 +190,7 @@ export default class GPUScreenGridLayer extends Layer {
   _getAggregationChangeFlags({oldProps, props, changeFlags}) {
     const cellSizeChanged =
       props.cellSizePixels !== oldProps.cellSizePixels ||
-      props.cellMarginSizePixels !== oldProps.cellMarginSizePixels;
+      props.cellMarginPixels !== oldProps.cellMarginPixels;
     const dataChanged = changeFlags.dataChanged;
     const viewportChanged = changeFlags.viewportChanged;
 
@@ -299,7 +299,7 @@ export default class GPUScreenGridLayer extends Layer {
 
   _updateUniforms({oldProps, props, changeFlags}) {
     const newState = {};
-    if (this._updateMinMaxUniform({oldProps, props})) {
+    if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
       newState.shouldUseMinMax = this._shouldUseMinMax();
     }
 
@@ -313,13 +313,13 @@ export default class GPUScreenGridLayer extends Layer {
     }
 
     if (
-      oldProps.cellMarginSizePixels !== props.cellMarginSizePixels ||
+      oldProps.cellMarginPixels !== props.cellMarginPixels ||
       oldProps.cellSizePixels !== props.cellSizePixels ||
       changeFlags.viewportChanged
     ) {
       const {width, height} = this.context.viewport;
-      const {cellSizePixels, cellMarginSizePixels} = this.props;
-      const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
+      const {cellSizePixels, cellMarginPixels} = this.props;
+      const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
 
       newState.cellScale = new Float32Array([
         ((cellSizePixels - margin) / width) * 2,
@@ -357,17 +357,6 @@ export default class GPUScreenGridLayer extends Layer {
       numInstances,
       countsBuffer
     });
-  }
-
-  _updateMinMaxUniform({oldProps, props}) {
-    if (
-      COLOR_PROPS.some(key => {
-        return oldProps[key] !== props[key];
-      })
-    ) {
-      return true;
-    }
-    return false;
   }
 }
 
