@@ -259,7 +259,8 @@ new Layer({
     getPositions: 600,
     getColors: {
       duration: 300,
-      easing: d3.easeCubicInOut
+      easing: d3.easeCubicInOut,
+      enter: value => [value[0], value[1], value[2], 0] // fade in
     }
   }
 });
@@ -269,6 +270,7 @@ new Layer({
 | ---------     | --------   | ----------- | ----------- |
 | `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
 | `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/)  |
+| `enter`      | `Function` | APPEARANCE (`x => x`) | Callback to get the value that the entering vertices are transitioning from. |
 | `onStart`     | `Function` | `null`      | Callback when the transition is started |
 | `onEnd`       | `Function` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |

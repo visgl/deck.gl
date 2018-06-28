@@ -78,6 +78,28 @@ export default class LayerAttribute extends Attribute {
     return this.userData.transition;
   }
 
+  // Resolve transition settings object if transition is enabled, otherwise `null`
+  getTransitionSetting(opts) {
+    const {transition, accessor} = this.userData;
+    if (!transition) {
+      return null;
+    }
+    let settings = Array.isArray(accessor)
+      ? accessor.map(a => opts[a]).find(Boolean)
+      : opts[accessor];
+
+    // Shorthand: use duration instead of parameter object
+    if (Number.isFinite(settings)) {
+      settings = {duration: settings};
+    }
+
+    if (settings && settings.duration > 0) {
+      return Object.assign({}, transition, settings);
+    }
+
+    return null;
+  }
+
   // Checks that typed arrays for attributes are big enough
   // sets alloc flag if not
   // @return {Boolean} whether any updates are needed
