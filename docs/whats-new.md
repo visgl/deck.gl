@@ -11,8 +11,8 @@ Release date: TBD, target late Q2, 2018
 
 The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
 
+* Use as a stateful component with automatic interactivity
 * Use render callbacks for rendering children dynamically from view states
-* Can be used as a stateful component with automatic interactivity
 * Specify views in JSX
 
 See [Use with React](/docs/get-started/using-with-react.md) for more details.

@@ -65,17 +65,6 @@ const initialViewState = {
 const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
 class App extends React.Component {
-
-  _renderMap({width, height, viewState}) {
-    return (
-      <StaticMap
-        {...viewState}
-        width={width}
-        height={height}
-        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
-    );
-  }
-
   render() {
     const layers = [
       new LineLayer({id: 'line-layer', data})
@@ -87,7 +76,7 @@ class App extends React.Component {
         controller={MapController}
         layers={layers}
       >
-        {this._renderMap}
+        <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
       </DeckGL>
     );
   }
@@ -109,7 +98,7 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
   }
 ```
 
-> Caveat: The JSX layer syntax is limitated in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
+For more information on this syntax and its limitations, see [DeckGL API](/docs/api-reference/api/deckgl.md).
 
 
 ## Using JSX with deck.gl views
@@ -127,13 +116,15 @@ The following code renders the same set of layers in two viewports, splitting th
     return (
       <DeckGL initialViewState={initialViewState} layers={layers} >
         <MapView id="map" width="50%" controller={MapController}>
-          {this._renderMap}
+          <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
         </MapView>
         <FirstPersonView width="50%" x="50%" fovy={50} />
       <DeckGL />
     );
   }
 ```
+
+For more information on this syntax, see [DeckGL API](/docs/api-reference/api/deckgl.md).
 
 
 ## Remarks
