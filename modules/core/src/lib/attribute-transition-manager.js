@@ -183,7 +183,9 @@ export default class AttributeTransitionManager {
       }
 
       if (hasChanged) {
-        this._triggerTransition({transition, settings,
+        this._triggerTransition({
+          transition,
+          settings,
           fromBufferLayout: this._bufferLayout,
           toBufferLayout: bufferLayout
         });
@@ -300,9 +302,12 @@ export default class AttributeTransitionManager {
     const transitionSettings = this._normalizeTransitionSettings(settings);
 
     // Attribute descriptor to transition from
-    transition.start(Object.assign({},
-      this._getNextTransitionStates({transition, fromBufferLayout, toBufferLayout}),
-      transitionSettings
-    ));
+    transition.start(
+      Object.assign(
+        {},
+        this._getNextTransitionStates({transition, fromBufferLayout, toBufferLayout}),
+        transitionSettings
+      )
+    );
   }
 }

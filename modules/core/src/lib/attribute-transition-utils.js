@@ -71,7 +71,14 @@ export function getBuffers(transitions) {
   return {sourceBuffers, feedbackBuffers};
 }
 
-export function padBuffer({fromState, toState, fromLength, toLength, fromBufferLayout, toBufferLayout}) {
+export function padBuffer({
+  fromState,
+  toState,
+  fromLength,
+  toLength,
+  fromBufferLayout,
+  toBufferLayout
+}) {
   const hasBufferLayout = fromBufferLayout && toBufferLayout;
 
   // check if buffer needs to be padded
