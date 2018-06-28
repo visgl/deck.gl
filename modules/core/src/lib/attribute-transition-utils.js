@@ -61,14 +61,14 @@ void main(void) {
 
 export function getBuffers(transitions) {
   const sourceBuffers = {};
-  const destinationBuffers = {};
+  const feedbackBuffers = {};
   for (const attributeName in transitions) {
     const {fromState, toState, buffer} = transitions[attributeName];
     sourceBuffers[`${attributeName}From`] = fromState;
     sourceBuffers[`${attributeName}To`] = toState;
-    destinationBuffers[`${attributeName}`] = buffer;
+    feedbackBuffers[`${attributeName}`] = buffer;
   }
-  return {sourceBuffers, destinationBuffers};
+  return {sourceBuffers, feedbackBuffers};
 }
 
 export function padBuffer({fromState, toState, fromLength, toLength, context}) {

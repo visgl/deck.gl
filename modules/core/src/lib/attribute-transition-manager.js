@@ -1,6 +1,7 @@
 import GL from 'luma.gl/constants';
 import {Buffer, _Transform as Transform} from 'luma.gl';
 import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
+import Attribute from './attribute';
 import Transition from '../transitions/transition';
 import log from '../utils/log';
 import assert from '../utils/assert';
@@ -69,11 +70,11 @@ export default class AttributeTransitionManager {
     if (!this.transform) {
       this._createModel();
     } else if (this.transform) {
-      const {sourceBuffers, destinationBuffers} = getBuffers(changedTransitions);
+      const {sourceBuffers, feedbackBuffers} = getBuffers(changedTransitions);
       this.transform.update({
         elementCount: this.numInstances,
         sourceBuffers,
-        destinationBuffers
+        feedbackBuffers
       });
     }
   }
@@ -91,7 +92,7 @@ export default class AttributeTransitionManager {
       const transition = this.attributeTransitions[attributeName];
 
       if (transition.buffer) {
-        animatedAttributes[attributeName] = transition.buffer;
+        animatedAttributes[attributeName] = transition.attributeInTransition;
       }
     }
 
@@ -132,7 +133,11 @@ export default class AttributeTransitionManager {
   _createTransition(attributeName, attribute) {
     let transition = this.attributeTransitions[attributeName];
     if (!transition) {
-      transition = new Transition({name: attributeName, attribute});
+      transition = new Transition({
+        name: attributeName,
+        attribute,
+        attributeInTransition: new Attribute(this.gl, attribute)
+      });
       this.attributeTransitions[attributeName] = transition;
       this._invalidateModel();
       return transition;
@@ -228,11 +233,12 @@ export default class AttributeTransitionManager {
 
     if (!buffer) {
       buffer = new Buffer(this.gl, {
-        size,
         data: new Float32Array(toLength),
         usage: GL.DYNAMIC_COPY
       });
     }
+
+    transition.attributeInTransition.update({isGeneric: false, buffer});
 
     // Pad buffers to be the same length
     if (buffer.data.length < toLength) {
