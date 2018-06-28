@@ -37,7 +37,8 @@ const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
 const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
-  cellSizePixels: 100,
+  cellSizePixels: {value: 100, min: 1},
+  cellMarginSizePixels: {value: 2, min: 0, max: 5},
 
   colorDomain: null,
   colorRange: defaultColorRange,
@@ -312,13 +313,13 @@ export default class GPUScreenGridLayer extends Layer {
 
   _updateGridParams() {
     const {width, height} = this.context.viewport;
-    const {cellSizePixels} = this.props;
+    const {cellSizePixels, cellMarginSizePixels} = this.props;
     const {gl} = this.context;
 
-    const MARGIN = 2;
+    const margin = cellSizePixels > cellMarginSizePixels ? cellMarginSizePixels : 0;
     const cellScale = new Float32Array([
-      ((cellSizePixels - MARGIN) / width) * 2,
-      (-(cellSizePixels - MARGIN) / height) * 2,
+      ((cellSizePixels - margin) / width) * 2,
+      (-(cellSizePixels - margin) / height) * 2,
       1
     ]);
     const numCol = Math.ceil(width / cellSizePixels);
