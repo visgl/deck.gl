@@ -81,7 +81,7 @@ export function padBuffer({fromState, toState, fromLength, toLength, context}) {
   // copy the currect values
   data.set(fromState.getData({}));
 
-  if (toState.isGeneric) {
+  if (toState.constant) {
     fillArray({
       target: data,
       source: toState.value,

@@ -319,7 +319,7 @@ export default class AttributeManager {
         Object.assign({}, attribute, {
           id: attributeName,
           // Luma fields
-          isGeneric: attribute.isGeneric || false,
+          constant: attribute.constant || false,
           isIndexed: attribute.isIndexed || attribute.elements,
           size: (attribute.elements && 1) || attribute.size,
           value: attribute.value || null,

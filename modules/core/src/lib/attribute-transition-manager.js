@@ -216,10 +216,10 @@ export default class AttributeTransitionManager {
     const {size} = attribute;
 
     let toState;
-    if (attribute.isGeneric) {
-      toState = {isGeneric: true, value: attribute.value, size};
+    if (attribute.constant) {
+      toState = {constant: true, value: attribute.value, size};
     } else {
-      toState = {isGeneric: false, buffer: attribute.getBuffer(), size};
+      toState = {constant: false, buffer: attribute.getBuffer(), size};
     }
     const fromState = transition.buffer || toState;
     const toLength = this.numInstances * size;
@@ -238,7 +238,7 @@ export default class AttributeTransitionManager {
       });
     }
 
-    transition.attributeInTransition.update({isGeneric: false, buffer});
+    transition.attributeInTransition.update({buffer});
 
     // Pad buffers to be the same length
     if (buffer.data.length < toLength) {

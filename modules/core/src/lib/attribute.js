@@ -96,7 +96,7 @@ export default class LayerAttribute extends Attribute {
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
 
-      this.isGeneric = false;
+      this.constant = false;
       this.value = new ArrayType(this.size * allocCount);
       state.needsUpdate = true;
       state.allocedInstances = allocCount;
@@ -121,7 +121,7 @@ export default class LayerAttribute extends Attribute {
       update.call(context, this, {data, props, numInstances});
       this.update({
         value: this.value,
-        isGeneric: this.isGeneric
+        constant: this.constant
       });
       this._checkAttributeArray();
     } else if (accessor) {
@@ -151,10 +151,10 @@ export default class LayerAttribute extends Attribute {
     }
 
     value = this._normalizeValue(value);
-    const hasChanged = !this.isGeneric || !this._areValuesEqual(value, this.value);
+    const hasChanged = !this.constant || !this._areValuesEqual(value, this.value);
 
     if (hasChanged) {
-      this.update({isGeneric: true, value});
+      this.update({constant: true, value});
     }
     state.needsRedraw = state.needsUpdate || hasChanged;
     state.needsUpdate = false;
@@ -173,7 +173,7 @@ export default class LayerAttribute extends Attribute {
 
       if (buffer instanceof Buffer) {
         if (this.externalBuffer !== buffer) {
-          this.update({isGeneric: false, buffer});
+          this.update({constant: false, buffer});
           state.needsRedraw = true;
         }
       } else {
@@ -185,7 +185,7 @@ export default class LayerAttribute extends Attribute {
           throw new Error('Attribute prop array must match length and size');
         }
         if (this.value !== buffer) {
-          this.update({isGeneric: false, value: buffer});
+          this.update({constant: false, value: buffer});
           state.needsRedraw = true;
         }
       }
