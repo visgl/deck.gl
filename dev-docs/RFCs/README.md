@@ -68,6 +68,7 @@ These RFCS are currently targeted for v6.0. Also see [luma.gl RFCs](https://gith
 | [**Property Animation**](v6.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | **[GPU Aggregations](v6.0/gpu-screengrid-aggregation-rfc.md)** | @1chandu | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 | **[Data Filter](v6.0/data-filter-rfc.md)** | @pessimistress | Draft | Add generic support to filter data objects on the GPU.  |
+| **[React API](v6.0/react-api.md)** | @pessimistress | Draft | React API refresh.  |
 
 
 ## v5.3 RFCs
