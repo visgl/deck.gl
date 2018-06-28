@@ -29,5 +29,6 @@ import './core-layers';
 // TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
   require('./experimental-layers');
+  require('./react');
   require('./lite');
 }

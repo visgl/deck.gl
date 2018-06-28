@@ -7,13 +7,17 @@ function wrapInView(node) {
   if (!node) {
     return node;
   }
+  if (typeof node === 'function') {
+    // All render callbacks must be assigned to a View
+    return createElement(View, {}, node);
+  }
   if (Array.isArray(node)) {
     return node.map(wrapInView);
   }
   if (inheritsFrom(node.type, View)) {
     return node;
   }
-  return createElement(View, {}, node);
+  return node;
 }
 
 // extracts any deck.gl layers masquerading as react elements from props.children

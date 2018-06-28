@@ -23,6 +23,7 @@ import PropTypes from 'prop-types';
 import {Deck, View, log} from '@deck.gl/core';
 import extractJSXLayers from './utils/extract-jsx-layers';
 import {inheritsFrom} from './utils/inherits-from';
+import evaluateChildren from './utils/evaluate-children';
 import autobind from './utils/autobind';
 
 const propTypes = Deck.getPropTypes(PropTypes);
@@ -41,21 +42,21 @@ export default class DeckGL extends React.PureComponent {
     autobind(this);
   }
 
-  _initializeDeck(deckCanvas) {
-    if (deckCanvas) {
-      this.deck = new Deck(
-        Object.assign({}, this.props, {
-          initialViewState: null,
-          canvas: deckCanvas,
-          viewState: this._getViewState(this.props),
-          // Note: If Deck event handling change size or view state, it calls onResize to update
-          onViewStateChange: this._onViewStateChange,
-          onResize: this._onResize
-        })
-      );
-    } else if (this.deck) {
-      this.deck.finalize();
-    }
+  componentDidMount() {
+    this.deck = new Deck(
+      Object.assign({}, this.props, {
+        initialViewState: null,
+        canvas: this.deckCanvas,
+        viewState: this._getViewState(this.props),
+        // Note: If Deck event handling change size or view state, it calls onResize to update
+        onViewStateChange: this._onViewStateChange,
+        onResize: this._onResize
+      })
+    );
+  }
+
+  componentWillUnmount() {
+    this.deck.finalize();
   }
 
   // Public API
@@ -146,7 +147,14 @@ export default class DeckGL extends React.PureComponent {
   // TODO - Can we supply a similar function for the non-React case?
   _positionChildrenUnderViews(children) {
     return children.map((child, i) => {
-      // If child does not specify props.viewId, position / render as normal
+      if (child.props.viewportId) {
+        log.removed('viewportId', '<View>')();
+      }
+      if (child.props.viewportId) {
+        log.removed('viewId', '<View>')();
+      }
+
+      // If child is not a View, position / render as normal
       if (!inheritsFrom(child.type, View)) {
         return child;
       }
@@ -164,17 +172,14 @@ export default class DeckGL extends React.PureComponent {
       // Resolve potentially relative dimensions using the deck.gl container size
       const {x, y, width, height} = viewport;
 
-      let viewChildren = child.props.children;
-      if (typeof viewChildren === 'function') {
-        viewChildren = viewChildren({width, height, viewport, viewState});
-      } else if (Array.isArray(viewChildren)) {
-        viewChildren = viewChildren.map(viewChild => {
-          if (typeof viewChild === 'function') {
-            return viewChild({width, height, viewport, viewState});
-          }
-          return viewChild;
-        });
-      }
+      const viewChildren = evaluateChildren(child.props.children, {
+        x,
+        y,
+        width,
+        height,
+        viewport,
+        viewState
+      });
 
       const style = {position: 'absolute', left: x, top: y, width, height};
       const key = `view-child-${viewId}-${i}`;
@@ -195,7 +200,7 @@ export default class DeckGL extends React.PureComponent {
     const style = Object.assign({}, {position: 'absolute', left: 0, top: 0}, this.props.style);
 
     const canvas = createElement('canvas', {
-      ref: this._initializeDeck,
+      ref: c => (this.deckCanvas = c),
       key: 'deck-canvas',
       id: this.props.id,
       style

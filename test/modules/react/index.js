@@ -19,3 +19,4 @@
 // THE SOFTWARE.
 
 import './deckgl.spec';
+import './utils/extract-jsx-layers.spec';
