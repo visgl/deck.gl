@@ -3,7 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapView, MapController, TextLayer} from 'deck.gl';
+import DeckGL, {MapController, TextLayer} from 'deck.gl';
 import TagmapLayer from './tagmap-layer';
 
 // Set your mapbox token here
@@ -36,9 +36,7 @@ class App extends Component {
   }
 
   _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
+    this.setState({viewState});
   }
 
   _loadData() {
@@ -84,21 +82,20 @@ class App extends Component {
     return (
       <DeckGL
         layers={this._renderLayers()}
-        views={new MapView({id: 'map'})}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
         controller={MapController}
       >
-        {!window.demoLauncherActive && (
-          <StaticMap
-            viewId="map"
-            viewState={viewState}
-            reuseMaps
-            mapStyle={MAPBOX_STYLE}
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        )}
+        {!window.demoLauncherActive &&
+          (viewProps => (
+            <StaticMap
+              {...viewProps}
+              reuseMaps
+              mapStyle={MAPBOX_STYLE}
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          ))}
       </DeckGL>
     );
   }
