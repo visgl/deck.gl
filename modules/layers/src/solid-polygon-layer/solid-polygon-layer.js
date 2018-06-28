@@ -140,6 +140,7 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {
         size: 3,
+        transition: true,
         accessor: 'getPolygon',
         update: this.calculatePositions,
         noAlloc
@@ -147,6 +148,7 @@ export default class SolidPolygonLayer extends Layer {
       positions64xyLow: {size: 2, update: this.calculatePositionsLow},
       nextPositions: {
         size: 3,
+        transition: true,
         accessor: 'getPolygon',
         update: this.calculateNextPositions,
         noAlloc
@@ -154,6 +156,7 @@ export default class SolidPolygonLayer extends Layer {
       nextPositions64xyLow: {size: 2, update: this.calculateNextPositionsLow},
       elevations: {
         size: 1,
+        transition: true,
         accessor: 'getElevation',
         update: this.calculateElevations,
         noAlloc
@@ -162,6 +165,7 @@ export default class SolidPolygonLayer extends Layer {
         alias: 'colors',
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
         defaultValue: defaultFillColor,
@@ -171,6 +175,7 @@ export default class SolidPolygonLayer extends Layer {
         alias: 'colors',
         size: 4,
         type: GL.UNSIGNED_BYTE,
+        transition: true,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
         defaultValue: defaultLineColor,
@@ -370,7 +375,9 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculatePositions(attribute) {
-    attribute.value = this.state.polygonTesselator.positions();
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.positions();
   }
   calculatePositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
@@ -385,7 +392,9 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateNextPositions(attribute) {
-    attribute.value = this.state.polygonTesselator.nextPositions();
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.nextPositions();
   }
   calculateNextPositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
@@ -400,10 +409,13 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateElevations(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+
     const {extruded, getElevation} = this.props;
     if (extruded && typeof getElevation === 'function') {
       attribute.constant = false;
-      attribute.value = this.state.polygonTesselator.elevations({
+      attribute.value = polygonTesselator.elevations({
         getElevation: polygonIndex => getElevation(this.props.data[polygonIndex])
       });
     } else {
@@ -414,13 +426,17 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   calculateFillColors(attribute) {
-    attribute.value = this.state.polygonTesselator.colors({
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.colors({
       key: 'fillColors',
       getColor: polygonIndex => this.props.getFillColor(this.props.data[polygonIndex])
     });
   }
   calculateLineColors(attribute) {
-    attribute.value = this.state.polygonTesselator.colors({
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.colors({
       key: 'lineColors',
       getColor: polygonIndex => this.props.getLineColor(this.props.data[polygonIndex])
     });

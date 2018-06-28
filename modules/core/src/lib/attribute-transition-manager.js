@@ -38,10 +38,9 @@ export default class AttributeTransitionManager {
 
   // Called when attribute manager updates
   // Check the latest attributes for updates.
-  update({attributes, transitions = {}, numInstances, context}) {
+  update({attributes, transitions = {}, numInstances}) {
     this.opts = transitions;
     this.numInstances = numInstances;
-    this.context = context;
 
     if (!this.isSupported) {
       return;
@@ -136,7 +135,8 @@ export default class AttributeTransitionManager {
       transition = new Transition({
         name: attributeName,
         attribute,
-        attributeInTransition: new Attribute(this.gl, attribute)
+        attributeInTransition: new Attribute(this.gl, attribute),
+        bufferLayout: attribute.bufferLayout
       });
       this.attributeTransitions[attributeName] = transition;
       this._invalidateModel();
@@ -246,7 +246,16 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength)
       });
     }
-    padBuffer({fromState, toState, fromLength, toLength, context: this.context});
+    padBuffer({
+      fromState,
+      toState,
+      fromLength,
+      toLength,
+      fromBufferLayout: transition.bufferLayout,
+      toBufferLayout: attribute.bufferLayout
+    });
+
+    transition.bufferLayout = attribute.bufferLayout;
 
     return {fromState, toState, buffer};
   }

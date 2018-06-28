@@ -19,7 +19,8 @@ export default class LayerAttribute extends Attribute {
       transition = false,
       noAlloc = false,
       update = null,
-      accessor = null
+      accessor = null,
+      bufferLayout = null
     } = opts;
 
     let {defaultValue = [0, 0, 0, 0]} = opts;
@@ -30,13 +31,22 @@ export default class LayerAttribute extends Attribute {
       noAlloc,
       update,
       accessor,
-      defaultValue
+      defaultValue,
+      bufferLayout
     });
 
     Object.seal(this.userData);
 
     // Check all fields and generate helpful error messages
     this._validateAttributeUpdaters();
+  }
+
+  get bufferLayout() {
+    return this.userData.bufferLayout;
+  }
+
+  set bufferLayout(layout) {
+    this.userData.bufferLayout = layout;
   }
 
   needsUpdate() {

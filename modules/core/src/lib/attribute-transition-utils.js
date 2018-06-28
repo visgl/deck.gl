@@ -1,5 +1,5 @@
 import {Buffer} from 'luma.gl';
-import {fillArray} from '../utils/flatten';
+import {padArray} from '../utils/array-utils';
 
 const ATTRIBUTE_MAPPING = {
   1: 'float',
@@ -71,26 +71,39 @@ export function getBuffers(transitions) {
   return {sourceBuffers, feedbackBuffers};
 }
 
-export function padBuffer({fromState, toState, fromLength, toLength, context}) {
+export function padBuffer({
+  fromState,
+  toState,
+  fromLength,
+  toLength,
+  fromBufferLayout,
+  toBufferLayout,
+  getData = x => x
+}) {
+  const hasBufferLayout = fromBufferLayout && toBufferLayout;
+
   // check if buffer needs to be padded
-  if (fromLength >= toLength || !(fromState instanceof Buffer)) {
+  if ((!hasBufferLayout && fromLength >= toLength) || !(fromState instanceof Buffer)) {
     return;
   }
 
   const data = new Float32Array(toLength);
-  // copy the currect values
-  data.set(fromState.getData({}));
+  const fromData = fromState.getData({});
 
-  if (toState.constant) {
-    fillArray({
-      target: data,
-      source: toState.value,
-      start: fromLength,
-      count: (toLength - fromLength) / toState.size
-    });
-  } else {
-    data.set(toState.buffer.data.subarray(fromLength, toLength), fromLength);
-  }
+  const {value, buffer, size, constant} = toState;
+
+  const getMissingData = constant
+    ? (i, chunk) => getData(value, chunk)
+    : (i, chunk) => getData(buffer.data.subarray(i, i + size), chunk);
+
+  padArray({
+    source: fromData,
+    target: data,
+    sourceLayout: fromBufferLayout,
+    targetLayout: toBufferLayout,
+    size: toState.size,
+    getData: getMissingData
+  });
 
   fromState.setData({data});
 }
