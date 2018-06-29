@@ -40,6 +40,12 @@ export default class OrbitView extends View {
     return distance;
   }
 
+  get controller() {
+    return this._getControllerProps({
+      type: OrbitController
+    });
+  }
+
   /* eslint-disable complexity, max-statements */
   _getViewport(props) {
     const {viewState} = props;
@@ -119,7 +125,3 @@ export default class OrbitView extends View {
 }
 
 OrbitView.displayName = 'OrbitView';
-
-OrbitView.defaultController = {
-  type: OrbitController
-};

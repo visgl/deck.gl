@@ -10,10 +10,12 @@ export default class MapView extends View {
       })
     );
   }
+
+  get controller() {
+    return this._getControllerProps({
+      type: MapController
+    });
+  }
 }
 
 MapView.displayName = 'MapView';
-
-MapView.defaultController = {
-  type: MapController
-};

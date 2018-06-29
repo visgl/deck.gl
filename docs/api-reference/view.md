@@ -54,11 +54,14 @@ If `projectionMatrix` is not supplied, `Viewport` will build a matrix from the f
 * `orthographicFocalDistance` (`Number`) - (orthographic projections only) Can be used to specify different values for pixel scale focal distance and orthographic focal distance.
 
 * `controller` (`Function` | `Boolean` | `Object`) - options for viewport interactivity.
-  - If falsy, this view is not interactive.
-  - If set to `true`, the default controller options are used.
-  - If set to a class construcor, it is used to construct the controller.
-  - If set to an object, it is merged with the default controller options. Use `controller.type` to specify a custom constructor.
+  - `null` or `false`: this view is not interactive.
+  - `true`: initiates the default controller with default options.
+  - `Controller` class (not instance): initiates the provided controller with default options.
+  - `Object`: controller options. This will be merged with the default controller options. 
+    + `controller.type`: the controller class
+    + For other options, consult the documentation of each Controller class.
 
+Default `null`.
 
 ## Methods
 

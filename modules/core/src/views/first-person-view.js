@@ -10,6 +10,12 @@ function getDirectionFromBearingAndPitch({bearing, pitch}) {
 }
 
 export default class FirstPersonView extends View {
+  get controller() {
+    return this._getControllerProps({
+      type: FirstPersonController
+    });
+  }
+
   _getViewport(props) {
     // TODO - push direction handling into Matrix4.lookAt
     const {
@@ -41,7 +47,3 @@ export default class FirstPersonView extends View {
 }
 
 FirstPersonView.displayName = 'FirstPersonView';
-
-FirstPersonView.defaultController = {
-  type: FirstPersonController
-};
