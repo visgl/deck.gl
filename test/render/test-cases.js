@@ -145,7 +145,7 @@ export const TEST_CASES = [
     referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
   },
   {
-    name: 'gpu-screengrid-infoviz',
+    name: 'screengrid-infoviz',
     views: [new OrthographicView()],
     viewState: {
       left: -WIDTH / 2,
@@ -155,7 +155,7 @@ export const TEST_CASES = [
     },
     layers: [
       new ScreenGridLayer({
-        id: 'gpu-screengrid-infoviz',
+        id: 'screengrid-infoviz',
         data: [
           [0, -100],
           [0, -110],
@@ -178,7 +178,7 @@ export const TEST_CASES = [
         pickable: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gpu-screengrid-infoviz.png'
+    referenceImageUrl: './test/render/golden-images/screengrid-infoviz.png'
   },
 
   // GEOSPATIAL
@@ -1035,28 +1035,6 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/text-layer.png'
-  },
-  {
-    name: 'gpu-screengrid-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new GPUScreenGridLayer({
-        id: 'gpu-screengrid-lnglat',
-        data: dataSamples.points,
-        getPosition: d => d.COORDINATES,
-        cellSizePixels: 40,
-        minColor: [0, 0, 80, 0],
-        maxColor: [100, 255, 0, 128],
-        pickable: false
-      })
-    ],
-    referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
   },
   {
     name: 'text-layer-64',
