@@ -656,6 +656,26 @@ export const TEST_CASES = [
     referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
   },
   {
+    name: 'screengrid-lnglat-colorRange',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScreenGridLayer({
+        id: 'screengrid-lnglat-colorRange',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        cellSizePixels: 40,
+        pickable: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/screengrid-lnglat-colorRange.png'
+  },
+  {
     name: 'hexagoncell-lnglat',
     viewState: {
       latitude: 37.751537058389985,
