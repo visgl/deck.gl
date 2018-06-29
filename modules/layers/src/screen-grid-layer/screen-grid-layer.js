@@ -18,7 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental, WebMercatorViewport, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
+import {
+  Layer,
+  experimental,
+  WebMercatorViewport,
+  _GPUGridAggregator as GPUGridAggregator
+} from '@deck.gl/core';
 const {defaultColorRange} = experimental;
 
 import GL from 'luma.gl/constants';

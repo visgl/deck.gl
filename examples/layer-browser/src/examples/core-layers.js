@@ -499,7 +499,6 @@ const ScreenGridLayerPerfExample = (id, getData) => ({
   }
 });
 
-
 /* eslint-disable quote-props */
 export default {
   'Core Layers - LngLat': {
@@ -546,6 +545,6 @@ export default {
     ),
     'ScreenGridLayer (1M)': ScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'ScreenGridLayer (5M)': ScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    'ScreenGridLayer (10M)': ScreenGridLayerPerfExample('10M', dataSamples.getPoints10M),
+    'ScreenGridLayer (10M)': ScreenGridLayerPerfExample('10M', dataSamples.getPoints10M)
   }
 };
