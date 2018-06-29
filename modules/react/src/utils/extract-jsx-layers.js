@@ -8,7 +8,8 @@ function wrapInView(node) {
     return node;
   }
   if (typeof node === 'function') {
-    // All render callbacks must be assigned to a View
+    // React.Children does not traverse functions.
+    // All render callbacks must be protected under a <View>
     return createElement(View, {}, node);
   }
   if (Array.isArray(node)) {
