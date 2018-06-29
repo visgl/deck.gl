@@ -20,4 +20,3 @@
 
 import './lib';
 import './container.spec';
-import './utils/gpu-grid-aggregator.spec';
