@@ -84,7 +84,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ### Data Accessors
 
-##### `getPolygon` (Function, optional)
+##### `getPolygon` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.polygon`
 
@@ -94,7 +94,7 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-##### `getFillColor` (Function|Array, optional)
+##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.fillColor || [0, 0, 0, 255]`
 
@@ -103,7 +103,7 @@ The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component 
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` (Function|Array, optional)
+##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.lineColor || [0, 0, 0, 255]`
 
@@ -112,7 +112,7 @@ The rgba stroke color of each object's polygon, in `r, g, b, [a]`. Each componen
 * If an array is provided, it is used as the stroke color for all polygons.
 * If a function is provided, it is called on each object to retrieve its stroke color.
 
-##### `getElevation` (Function|Number, optional)
+##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.elevation`
 

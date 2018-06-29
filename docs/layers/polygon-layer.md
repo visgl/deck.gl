@@ -163,7 +163,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ### Data Accessors
 
-##### `getPolygon` (Function, optional)
+##### `getPolygon` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * default: `object => object.polygon`
 
@@ -173,7 +173,7 @@ that extracts a polygon (simple or complex) from each object.
 
 This accessor returns the polygon corresponding to an object in the `data` stream.
 
-##### `getFillColor` (Function|Array, optional)
+##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.fillColor || [0, 0, 0, 255]`
 
@@ -182,7 +182,7 @@ The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` (Function|Array, optional)
+##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.color || object => object.strokeColor || [0, 0, 0, 255]`
 
@@ -192,7 +192,7 @@ The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in 
 * If a function is provided, it is called on each polygon to retrieve its outline color.
 
 
-##### `getLineWidth` (Function|Number, optional)
+##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.strokeWidth || 1`
 
@@ -201,7 +201,7 @@ The width of the outline of the polygon, in meters. Only applies if `extruded: f
 * If a number is provided, it is used as the outline width for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline width.
 
-##### `getElevation` (Function|Number, optional)
+##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.elevation || 1000`
 
