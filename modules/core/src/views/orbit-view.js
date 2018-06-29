@@ -11,6 +11,7 @@ import mat4_translate from 'gl-mat4/translate';
 import mat4_rotateX from 'gl-mat4/rotateX';
 import mat4_rotateY from 'gl-mat4/rotateY';
 import mat4_rotateZ from 'gl-mat4/rotateZ';
+import OrbitController from '../controllers/orbit-controller';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -118,3 +119,7 @@ export default class OrbitView extends View {
 }
 
 OrbitView.displayName = 'OrbitView';
+
+OrbitView.defaultController = {
+  type: OrbitController
+};

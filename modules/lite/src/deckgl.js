@@ -2,7 +2,7 @@
 /* eslint-disable max-statements */
 import Mapbox from 'react-map-gl/src/mapbox/mapbox';
 
-import {Deck, MapController, OrbitView, _OrbitController as OrbitController} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 
 const CANVAS_STYLE = {
   position: 'absolute',
@@ -53,7 +53,7 @@ function createCanvas(props) {
 /**
  * @params container (Element) - DOM element to add deck.gl canvas to
  * @params map (Object) - map API. Set to falsy to disable
- * @params controller (Object) - Controller class. Leave empty for auto detection
+ * @params controller (Object) - Controller options. Leave empty for auto detection
  */
 export default class DeckGL extends Deck {
   constructor(props = {}) {
@@ -66,26 +66,19 @@ export default class DeckGL extends Deck {
 
     normalizeProps(props);
     const isMap = Number.isFinite(props.initialViewState.latitude);
-    const isOrbit = props.views && props.views[0] instanceof OrbitView;
-    let Controller;
-    if (isMap) {
-      Controller = MapController;
-    } else if (isOrbit) {
-      Controller = OrbitController;
-    }
+    const {map = window.mapboxgl, controller = true} = props;
 
     super(
       Object.assign({}, props, {
         width: '100%',
         height: '100%',
         canvas: deckCanvas,
-        controller: props.controller || Controller,
+        controller,
         onViewStateChange: ({viewState}) =>
           this._map && this._map.setProps({viewState}) && viewState
       })
     );
 
-    const {map = window.mapboxgl} = props;
     if (map && map.Map) {
       // Default create mapbox map
       this._map =

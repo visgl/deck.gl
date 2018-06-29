@@ -26,6 +26,7 @@ export default class View {
 
       // A controller class constructor, not an already created instance
       controller = null,
+      defaultController = null,
 
       // Internal: Viewport Type
       type = Viewport // TODO - default to WebMercator?
@@ -33,6 +34,8 @@ export default class View {
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
     this.viewportInstance = viewportInstance;
+
+    this.defaultController = defaultController;
     this.controller = controller;
 
     // Id
@@ -54,6 +57,17 @@ export default class View {
     this.equals = this.equals.bind(this);
 
     Object.seal(this);
+  }
+
+  get controller() {
+    return this._controller;
+  }
+
+  set controller(value) {
+    if (typeof value === 'function') {
+      value = {type: value};
+    }
+    this._controller = value ? Object.assign({}, this.constructor.defaultController, value) : null;
   }
 
   equals(view) {

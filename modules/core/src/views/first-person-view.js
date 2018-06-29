@@ -1,6 +1,7 @@
 import View from './view';
 import Viewport from '../viewports/viewport';
 import {Matrix4, _SphericalCoordinates as SphericalCoordinates} from 'math.gl';
+import FirstPersonController from '../controllers/first-person-controller';
 
 function getDirectionFromBearingAndPitch({bearing, pitch}) {
   const spherical = new SphericalCoordinates({bearing, pitch});
@@ -40,3 +41,7 @@ export default class FirstPersonView extends View {
 }
 
 FirstPersonView.displayName = 'FirstPersonView';
+
+FirstPersonView.defaultController = {
+  type: FirstPersonController
+};
