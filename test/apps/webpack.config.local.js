@@ -10,7 +10,7 @@ const resolve = require('path').resolve;
 const webpack = require('webpack');
 
 const LIB_DIR = resolve(__dirname, '../..');
-const SRC_DIR = resolve(LIB_DIR, '../modules');
+const SRC_DIR = resolve(LIB_DIR, 'modules');
 
 const ALIASES = require('../../aliases')('src');
 
