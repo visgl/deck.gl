@@ -4,7 +4,7 @@
 
 The Screen Grid Layer takes in an array of latitude and longitude
 coordinated points, aggregates them into histogram bins and
-renders as a grid.
+renders as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to false.
 
 ```js
 import DeckGL, {ScreenGridLayer} from 'deck.gl';
@@ -52,6 +52,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Unit width/height of the bins.
 
+##### `cellMarginPixels` (Number, optional) **NEW in 6.0**
+
+* Default: `2`, gets clamped to [0, 5]
+
+Cell margin size in pixels.
+
 ##### `minColor` (Number[4], optional)
 
 * Default: `[0, 0, 0, 255]`
@@ -81,6 +87,13 @@ Specified as an array of colors formatted as `[[255, 255, 255, 255]]`. Default i
 
 NOTE: `minColor` and `maxColor` take precedence over `colorDomain` and `colorRange`, to use `colorDomain` and `colorRange` do not provide `minColor` and `maxColor`.
 
+##### `gpuAggregation` (bool, optional) **NEW in 6.0**
+
+* Default: true
+
+When set to true and browser supports GPU aggregation, aggregation is performed on GPU. GPU aggregation can be 10 to 20 times faster depending upon number of points and number of cells.
+
+NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregation` is set to true and browser doesn't support WebGL2, aggregation falls back to CPU.
 
 ### Data Accessors
 
