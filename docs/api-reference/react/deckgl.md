@@ -62,6 +62,12 @@ Default: If the `views` property is not supplied, deck.gl will create a full scr
 
 > deck.gl will render all the views in the provided order. This may not matter as depth testing is enabled by default by deck.gl (unless transparent layers are being rendered, in which case rendering order starts to matter again), but is useful when rendering 2D layers and disabling depth testing.
 
+##### `controller` (Function | Boolean | Object, optional)
+
+Specify the options for viewport interaction. The value is applied to the default (first) view. See [`View`](/docs/api-reference/view.md) for more information.
+
+Default `null`.
+
 
 ### View State Properties
 

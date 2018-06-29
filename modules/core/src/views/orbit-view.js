@@ -11,6 +11,7 @@ import mat4_translate from 'gl-mat4/translate';
 import mat4_rotateX from 'gl-mat4/rotateX';
 import mat4_rotateY from 'gl-mat4/rotateY';
 import mat4_rotateZ from 'gl-mat4/rotateZ';
+import OrbitController from '../controllers/orbit-controller';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -37,6 +38,12 @@ export default class OrbitView extends View {
     const halfMaxSide = Math.max(boundingBox[0], boundingBox[1], boundingBox[2]) / 2;
     const distance = halfMaxSide / Math.tan(((fov / 180) * Math.PI) / 2);
     return distance;
+  }
+
+  get controller() {
+    return this._getControllerProps({
+      type: OrbitController
+    });
   }
 
   /* eslint-disable complexity, max-statements */

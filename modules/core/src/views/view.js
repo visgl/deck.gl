@@ -24,16 +24,12 @@ export default class View {
       // A View can be a wrapper for a viewport instance
       viewportInstance = null,
 
-      // A controller class constructor, not an already created instance
-      controller = null,
-
       // Internal: Viewport Type
       type = Viewport // TODO - default to WebMercator?
     } = props;
 
     assert(!viewportInstance || viewportInstance instanceof Viewport);
     this.viewportInstance = viewportInstance;
-    this.controller = controller;
 
     // Id
     this.id = id || this.constructor.displayName || 'view';
@@ -94,6 +90,22 @@ export default class View {
       width: getPosition(this._width, width),
       height: getPosition(this._height, height)
     };
+  }
+
+  // Used by sub classes to resolve controller props
+  _getControllerProps(defaultOpts) {
+    let opts = this.props.controller;
+
+    if (!opts) {
+      return null;
+    }
+    if (opts === true) {
+      return defaultOpts;
+    }
+    if (typeof opts === 'function') {
+      opts = {type: opts};
+    }
+    return Object.assign({}, defaultOpts, opts);
   }
 
   // Overridable method

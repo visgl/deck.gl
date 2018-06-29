@@ -10,6 +10,7 @@ To render, `MapView` requires the application to use a `viewState` that contains
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
+The default controller of a `MapView` is [MapController](/docs/api-reference/map-controller.md).
 
 ## Usage
 

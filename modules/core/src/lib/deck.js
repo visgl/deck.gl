@@ -365,7 +365,7 @@ export default class Deck {
     const views = props.views || [new MapView({id: 'default-view'})];
     if (views.length && props.controller) {
       // Backward compatibility: support controller prop
-      views[0].controller = props.controller;
+      views[0].props.controller = props.controller;
     }
     return views;
   }

@@ -214,20 +214,16 @@ export default class ViewManager {
   }
 
   _createController(view) {
-    let controller = null;
+    const controllerProps = Object.assign({}, view.controller, {
+      eventManager: this._eventManager,
+      viewState: this.getViewState(view.id),
+      // Set an internal callback that calls the prop callback if provided
+      onViewStateChange: this._onViewStateChange.bind(this, view.id),
+      onStateChange: this._eventCallbacks.onInteractiveStateChange
+    });
+    const Controller = controllerProps.type;
 
-    if (view.controller) {
-      const Controller = view.controller;
-      controller = new Controller({
-        eventManager: this._eventManager,
-        viewState: this.getViewState(view.id),
-        // Set an internal callback that calls the prop callback if provided
-        onViewStateChange: this._onViewStateChange.bind(this, view.id),
-        onStateChange: this._eventCallbacks.onInteractiveStateChange
-      });
-    }
-
-    return controller;
+    return new Controller(controllerProps);
   }
 
   // Rebuilds viewports from descriptors towards a certain window size
@@ -244,7 +240,7 @@ export default class ViewManager {
         // TODO - check for removed view ids?
         if (controller) {
           controller.setProps(
-            Object.assign({}, viewState, {
+            Object.assign({}, view.controller, viewState, {
               x: viewport.x,
               y: viewport.y,
               width: viewport.width,

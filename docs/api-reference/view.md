@@ -53,6 +53,15 @@ If `projectionMatrix` is not supplied, `Viewport` will build a matrix from the f
 * `focalDistance`=`1` (`Number`) - (orthographic projections only) The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Note: lso used for pixel scale identity distance above.
 * `orthographicFocalDistance` (`Number`) - (orthographic projections only) Can be used to specify different values for pixel scale focal distance and orthographic focal distance.
 
+* `controller` (`Function` | `Boolean` | `Object`) - options for viewport interactivity.
+  - `null` or `false`: this view is not interactive.
+  - `true`: initiates the default controller with default options.
+  - `Controller` class (not instance): initiates the provided controller with default options.
+  - `Object`: controller options. This will be merged with the default controller options. 
+    + `controller.type`: the controller class
+    + For other options, consult the documentation of each Controller class.
+
+Default `null`.
 
 ## Methods
 
