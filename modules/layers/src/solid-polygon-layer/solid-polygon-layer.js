@@ -122,10 +122,7 @@ const ATTRIBUTE_MAPS = {
 
 const ATTRIBUTE_TRANSITION = {
   enter: (value, chunk) => {
-    if (chunk.length) {
-      return chunk.subarray(chunk.length - value.length);
-    }
-    return value;
+    return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
   }
 };
 

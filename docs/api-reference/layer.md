@@ -270,12 +270,17 @@ new Layer({
 | ---------     | --------   | ----------- | ----------- |
 | `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
 | `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/)  |
-| `enter`      | `Function` | APPEARANCE (`x => x`) | Callback to get the value that the entering vertices are transitioning from. |
+| `enter`      | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
 | `onStart`     | `Function` | `null`      | Callback when the transition is started |
 | `onEnd`       | `Function` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |
 
-As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
+Notes: 
+* As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
+* Attribute transition is performed between the values at the same index. If the new data is larger, `enter` callback is called for each new vertex to backfill the values to transition from.
+* `enter` should return the value to transition from. for the current vertex. It receives two arguments:
+  - `toValue` (TypedArray) - the new value to transition to, for the current vertex
+  - `fromChunk` (Array | TypedArray) - the existing value to transition from, for the chunk that the current vertex belongs to. A "chunk" is a group of vertices that help the callback determine the context of this transition. For most layers, all objects are in one chunk. For PathLayer and PolygonLayer, each path/polygon is a chunk.
 
 
 ## Members

@@ -84,9 +84,7 @@ export default class LayerAttribute extends Attribute {
     if (!transition) {
       return null;
     }
-    let settings = Array.isArray(accessor)
-      ? accessor.map(a => opts[a]).find(Boolean)
-      : opts[accessor];
+    let settings = Array.isArray(accessor) ? opts[accessor.find(a => opts[a])] : opts[accessor];
 
     // Shorthand: use duration instead of parameter object
     if (Number.isFinite(settings)) {
