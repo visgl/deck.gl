@@ -486,6 +486,20 @@ function GeoJsonLayerPerfExample(id, getData) {
   };
 }
 
+const ScreenGridLayerPerfExample = (id, getData) => ({
+  layer: ScreenGridLayer,
+  getData,
+  props: {
+    id: `screenGridLayerPerf-${id}`,
+    getPosition: d => d,
+    cellSizePixels: 40,
+    minColor: [0, 0, 80, 0],
+    maxColor: [100, 255, 0, 128],
+    pickable: false
+  }
+});
+
+
 /* eslint-disable quote-props */
 export default {
   'Core Layers - LngLat': {
@@ -529,6 +543,9 @@ export default {
     'GeoJsonLayer (100K MultiPoint features, 10 points per feature)': GeoJsonLayerPerfExample(
       '100K-multipoint',
       dataSamples.getMultiPointFeatures100K
-    )
+    ),
+    'ScreenGridLayer (1M)': ScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
+    'ScreenGridLayer (5M)': ScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
+    'ScreenGridLayer (10M)': ScreenGridLayerPerfExample('10M', dataSamples.getPoints10M),
   }
 };

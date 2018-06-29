@@ -18,16 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, experimental} from '@deck.gl/core';
-const {defaultColorRange, quantizeScale} = experimental;
+import {Layer, experimental, WebMercatorViewport, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
+const {defaultColorRange} = experimental;
 
 import GL from 'luma.gl/constants';
-import {Model, Geometry} from 'luma.gl';
-import {lerp} from 'math.gl';
+import {Model, Geometry, Buffer} from 'luma.gl';
+
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
-const DEFAULT_MINCOLOR = [0, 0, 0, 255];
+import assert from 'assert';
+
+const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
+const AGGREGATION_DATA_UBO_INDEX = 0;
+const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
+const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
@@ -37,12 +42,14 @@ const defaultProps = {
   colorRange: defaultColorRange,
 
   getPosition: d => d.position,
-  getWeight: d => 1
+  getWeight: d => 1,
+
+  gpuAggregation: true
 };
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    return {vs, fs, modules: ['picking']};
   }
 
   initializeState() {
@@ -52,41 +59,70 @@ export default class ScreenGridLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceColors: {
+      instanceCounts: {
         size: 4,
-        type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: ['getPosition', 'getWeight'],
-        update: this.calculateInstanceColors
+        update: this.calculateInstanceCounts,
+        noAlloc: true
       }
     });
     /* eslint-disable max-len */
 
-    this.setState({model: this._getModel(gl)});
+    const options = {
+      id: `${this.id}-aggregator`,
+      shaderCache: this.context.shaderCache
+    };
+    this.setState({
+      model: this._getModel(gl),
+      gpuGridAggregator: new GPUGridAggregator(gl, options),
+      maxCountBuffer: this._getMaxCountBuffer(gl),
+      aggregationData: null
+    });
+
+    this._setupUniformBuffer();
   }
 
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
-    const cellSizeChanged = props.cellSizePixels !== oldProps.cellSizePixels;
-    const cellMarginChanged = props.cellMarginPixels !== oldProps.cellMarginPixels;
+  updateState(opts) {
+    super.updateState(opts);
 
-    if (cellSizeChanged || changeFlags.viewportChanged) {
-      this.updateCell();
+    this._updateUniforms(opts);
+
+    if (opts.changeFlags.dataChanged) {
+      this._processData();
     }
 
-    if (cellSizeChanged || cellMarginChanged || changeFlags.viewportChanged) {
-      this.updateCellScale();
+    const changeFlags = this._getAggregationChangeFlags(opts);
+
+    if (changeFlags) {
+      this._updateAggregation(changeFlags);
     }
   }
 
   draw({uniforms}) {
     const {parameters = {}} = this.props;
-    const {model, cellScale} = this.state;
-    uniforms = Object.assign({}, uniforms, {cellScale});
+    const minColor = this.props.minColor || DEFAULT_MINCOLOR;
+    const maxColor = this.props.maxColor || DEFAULT_MAXCOLOR;
+
+    // If colorDomain not specified we use default domain [1, maxCount]
+    // maxCount value will be deduced from aggregated buffer in the vertex shader.
+    const colorDomain = this.props.colorDomain || [1, 0];
+    const {model, maxCountBuffer, cellScale, shouldUseMinMax, colorRange} = this.state;
+    uniforms = Object.assign({}, uniforms, {
+      minColor,
+      maxColor,
+      cellScale,
+      colorRange,
+      colorDomain,
+      shouldUseMinMax
+    });
+
+    // TODO: remove index specification (https://github.com/uber/luma.gl/pull/473)
+    maxCountBuffer.bind({index: AGGREGATION_DATA_UBO_INDEX});
     model.draw({
       uniforms,
       parameters: Object.assign(
@@ -97,6 +133,70 @@ export default class ScreenGridLayer extends Layer {
         parameters
       )
     });
+    maxCountBuffer.unbind({index: AGGREGATION_DATA_UBO_INDEX});
+  }
+
+  calculateInstancePositions(attribute, {numInstances}) {
+    const {width, height} = this.context.viewport;
+    const {cellSizePixels} = this.props;
+    const {numCol} = this.state;
+    const {value, size} = attribute;
+
+    for (let i = 0; i < numInstances; i++) {
+      const x = i % numCol;
+      const y = Math.floor(i / numCol);
+      value[i * size + 0] = ((x * cellSizePixels) / width) * 2 - 1;
+      value[i * size + 1] = 1 - ((y * cellSizePixels) / height) * 2;
+      value[i * size + 2] = 0;
+    }
+  }
+
+  calculateInstanceCounts(attribute, {numInstances}) {
+    const {countsBuffer} = this.state;
+    attribute.update({
+      buffer: countsBuffer
+    });
+  }
+
+  getPickingInfo({info, mode}) {
+    const {index} = info;
+    if (index >= 0) {
+      let {aggregationData} = this.state;
+      if (!aggregationData) {
+        aggregationData = {
+          countsData: this.state.countsBuffer.getData(),
+          maxCountData: this.state.maxCountBuffer.getData()
+        };
+        // Cache aggregationData to avoid multiple buffer reads.
+        this.setState({aggregationData});
+      }
+      const {countsData, maxCountData} = aggregationData;
+      // Each instance (one cell) is aggregated into single pixel,
+      // Get current instance's aggregation details.
+      info.object = GPUGridAggregator.getAggregationData({
+        countsData,
+        maxCountData,
+        pixelIndex: index
+      });
+    }
+
+    return info;
+  }
+
+  // HELPER Methods
+
+  _getAggregationChangeFlags({oldProps, props, changeFlags}) {
+    const cellSizeChanged =
+      props.cellSizePixels !== oldProps.cellSizePixels ||
+      props.cellMarginPixels !== oldProps.cellMarginPixels;
+    const dataChanged = changeFlags.dataChanged;
+    const viewportChanged = changeFlags.viewportChanged;
+
+    if (cellSizeChanged || dataChanged || viewportChanged) {
+      return {cellSizeChanged, dataChanged, viewportChanged};
+    }
+
+    return null;
   }
 
   _getModel(gl) {
@@ -116,106 +216,40 @@ export default class ScreenGridLayer extends Layer {
     );
   }
 
-  // Update cell size parameters and invalidated attributes for re-calculation.
-  updateCell() {
-    const {width, height} = this.context.viewport;
-    const {cellSizePixels} = this.props;
-
-    const numCol = Math.ceil(width / cellSizePixels);
-    const numRow = Math.ceil(height / cellSizePixels);
-
-    this.setState({
-      numCol,
-      numRow,
-      numInstances: numCol * numRow
+  // Creates and returns a Uniform Buffer object to hold maxCount value.
+  _getMaxCountBuffer(gl) {
+    return new Buffer(gl, {
+      target: GL.UNIFORM_BUFFER,
+      bytes: 4 * 4, // Four floats
+      size: 4,
+      index: AGGREGATION_DATA_UBO_INDEX
     });
-
-    const attributeManager = this.getAttributeManager();
-    attributeManager.invalidateAll();
   }
 
-  // update cellScale uniform used in vertex shader.
-  updateCellScale() {
-    const {width, height} = this.context.viewport;
-    const {cellSizePixels, cellMarginPixels} = this.props;
-    const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
-    const cellScale = new Float32Array([
-      ((cellSizePixels - margin) / width) * 2,
-      (-(cellSizePixels - margin) / height) * 2,
-      1
-    ]);
-    this.setState({cellScale});
-  }
+  // Process 'data' and build positions and weights Arrays.
+  _processData() {
+    const {data, getPosition, getWeight} = this.props;
+    const positions = [];
+    const weights = [];
 
-  calculateInstancePositions(attribute, {numInstances}) {
-    const {width, height} = this.context.viewport;
-    const {cellSizePixels} = this.props;
-    const {numCol} = this.state;
-    const {value, size} = attribute;
-
-    for (let i = 0; i < numInstances; i++) {
-      const x = i % numCol;
-      const y = Math.floor(i / numCol);
-      value[i * size + 0] = ((x * cellSizePixels) / width) * 2 - 1;
-      value[i * size + 1] = 1 - ((y * cellSizePixels) / height) * 2;
-      value[i * size + 2] = 0;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, cellSizePixels, getPosition, getWeight} = this.props;
-    const {numCol, numRow, numInstances} = this.state;
-    const {value, size} = attribute;
-    const weights = new Array(numInstances);
-    let maxCount = 0;
-
-    weights.fill(0.0);
-
-    // aggregate weights
     for (const point of data) {
-      const pixel = this.project(getPosition(point));
-      const colId = Math.floor(pixel[0] / cellSizePixels);
-      const rowId = Math.floor(pixel[1] / cellSizePixels);
-      if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
-        const i = colId + rowId * numCol;
-        weights[i] += getWeight(point);
-        if (weights[i] > maxCount) {
-          maxCount = weights[i];
-        }
-      }
+      const position = getPosition(point);
+      positions.push(position[0]);
+      positions.push(position[1]);
+      weights.push(getWeight(point));
     }
-    this.setState({maxCount});
 
-    // Convert weights to colors.
-    for (let i = 0; i < numInstances; i++) {
-      const color = this._getColor(weights[i], maxCount);
-      const index = i * size;
-      value[index + 0] = color[0];
-      value[index + 1] = color[1];
-      value[index + 2] = color[2];
-      value[index + 3] = color[3];
-    }
+    this.setState({positions, weights});
   }
 
-  _getColor(weight, maxCount) {
-    let color;
-    const {minColor, maxColor, colorRange} = this.props;
-    if (this._shouldUseMinMax()) {
-      const step = weight / maxCount;
-      // We are supporting optional props as deprecated, set default value if not provided
-      color = lerp(minColor || DEFAULT_MINCOLOR, maxColor || DEFAULT_MAXCOLOR, step);
-      return color;
-    }
-    // if colorDomain not set , use default domain [1, maxCount]
-    const colorDomain = this.props.colorDomain || [1, maxCount];
-    if (weight < colorDomain[0] || weight > colorDomain[1]) {
-      // wight outside the domain, set color alpha to 0.
-      return [0, 0, 0, 0];
-    }
-    color = quantizeScale(colorDomain, colorRange, weight);
-    // add alpha to color if not defined in colorRange
-    color[3] = Number.isFinite(color[3]) ? color[3] : 255;
-    return color;
+  // Set a binding point for the aggregation uniform block index
+  _setupUniformBuffer() {
+    const gl = this.context.gl;
+    const programHandle = this.state.model.program.handle;
+
+    // TODO: Replace with luma.gl api when ready.
+    const uniformBlockIndex = gl.getUniformBlockIndex(programHandle, 'AggregationData');
+    gl.uniformBlockBinding(programHandle, uniformBlockIndex, AGGREGATION_DATA_UBO_INDEX);
   }
 
   _shouldUseMinMax() {
@@ -230,6 +264,97 @@ export default class ScreenGridLayer extends Layer {
     }
     // None specified, use default minColor and maxColor
     return true;
+  }
+
+  _updateAggregation(changeFlags) {
+    const attributeManager = this.getAttributeManager();
+    if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
+      this._updateGridParams();
+      attributeManager.invalidateAll();
+    }
+    const {cellSizePixels, gpuAggregation} = this.props;
+
+    const {positions, weights, maxCountBuffer, countsBuffer} = this.state;
+
+    const projectPoints = this.context.viewport instanceof WebMercatorViewport;
+    this.state.gpuGridAggregator.run({
+      positions,
+      weights,
+      cellSize: [cellSizePixels, cellSizePixels],
+      viewport: this.context.viewport,
+      countsBuffer,
+      maxCountBuffer,
+      changeFlags,
+      useGPU: gpuAggregation,
+      projectPoints
+    });
+
+    // Aggregation changed, enforce reading buffer data for picking.
+    this.setState({aggregationData: null});
+
+    attributeManager.invalidate('instanceCounts');
+  }
+
+  _updateUniforms({oldProps, props, changeFlags}) {
+    const newState = {};
+    if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
+      newState.shouldUseMinMax = this._shouldUseMinMax();
+    }
+
+    if (oldProps.colorRange !== props.colorRange) {
+      const colorRangeUniform = [];
+      assert(props.colorRange && props.colorRange.length === COLOR_RANGE_LENGTH);
+      props.colorRange.forEach(color => {
+        colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
+      });
+      newState.colorRange = colorRangeUniform;
+    }
+
+    if (
+      oldProps.cellMarginPixels !== props.cellMarginPixels ||
+      oldProps.cellSizePixels !== props.cellSizePixels ||
+      changeFlags.viewportChanged
+    ) {
+      const {width, height} = this.context.viewport;
+      const {cellSizePixels, cellMarginPixels} = this.props;
+      const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
+
+      newState.cellScale = new Float32Array([
+        ((cellSizePixels - margin) / width) * 2,
+        (-(cellSizePixels - margin) / height) * 2,
+        1
+      ]);
+    }
+    this.setState(newState);
+  }
+
+  _updateGridParams() {
+    const {width, height} = this.context.viewport;
+    const {cellSizePixels} = this.props;
+    const {gl} = this.context;
+
+    const numCol = Math.ceil(width / cellSizePixels);
+    const numRow = Math.ceil(height / cellSizePixels);
+    const numInstances = numCol * numRow;
+    const dataBytes = numInstances * 4 * 4;
+    let countsBuffer = this.state.countsBuffer;
+    if (countsBuffer) {
+      countsBuffer.delete();
+    }
+
+    countsBuffer = new Buffer(gl, {
+      size: 4,
+      bytes: dataBytes,
+      type: GL.FLOAT,
+      instanced: 1
+    });
+
+    this.setState({
+      numCol,
+      numRow,
+      numInstances,
+      countsBuffer
+    });
   }
 }
 

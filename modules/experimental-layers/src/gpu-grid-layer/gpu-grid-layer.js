@@ -18,12 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
 
 import GPUGridCellLayer from './gpu-grid-cell-layer';
 
 import {pointToDensityGridData} from './gpu-grid-utils';
-import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
 
 const MINCOLOR = [0, 0, 0, 255];
 const CPU_MAXCOLOR = [255, 0, 0, 255];

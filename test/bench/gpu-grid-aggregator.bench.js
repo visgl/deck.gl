@@ -20,7 +20,7 @@
 
 /* eslint-disable no-console, no-invalid-this */
 // TODO: remove hard path once @deck.gl/experimental-layers published with GPUScreenGridLayer
-import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
+import {_GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core'
 import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl/test/data';
 import {isWebGL2} from 'luma.gl';

@@ -1,6 +1,6 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {GPUScreenGridLayer, GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
+import {GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
 import GL from 'luma.gl/constants';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
@@ -154,7 +154,7 @@ export const TEST_CASES = [
       bottom: HEIGHT / 2
     },
     layers: [
-      new GPUScreenGridLayer({
+      new ScreenGridLayer({
         id: 'gpu-screengrid-infoviz',
         data: [
           [0, -100],
