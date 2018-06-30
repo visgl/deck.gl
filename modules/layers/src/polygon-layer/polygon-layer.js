@@ -102,7 +102,7 @@ export default class PolygonLayer extends CompositeLayer {
   /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
-    const {data, stroked, filled, extruded, wireframe, elevationScale} = this.props;
+    const {data, stroked, filled, extruded, wireframe, elevationScale, transitions} = this.props;
 
     // Rendering props underlying layer
     const {
@@ -157,7 +157,8 @@ export default class PolygonLayer extends CompositeLayer {
           getFillColor,
           getLineColor,
 
-          lightSettings
+          lightSettings,
+          transitions
         }
       );
 
@@ -185,6 +186,12 @@ export default class PolygonLayer extends CompositeLayer {
           rounded: lineJointRounded,
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
+
+          transitions: transitions && {
+            getWidth: transitions.getLineWidth,
+            getColor: transitions.getLineColor,
+            getPath: transitions.getPolygon
+          },
 
           getPath: x => x.path,
           getColor: this._getAccessor(getLineColor),

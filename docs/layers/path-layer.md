@@ -91,7 +91,7 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 ### Data Accessors
 
-##### `getPath` (Function, optional)
+##### `getPath` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `(object, index) => object.paths`
 
@@ -99,7 +99,7 @@ Returns the specified path for the object.
 
 A path is an array of coordinates.
 
-##### `getColor` (Function|Array, optional)
+##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default `(object, index) => object.color || [0, 0, 0, 255]`
 
@@ -108,7 +108,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getWidth` (Function|Number, optional)
+##### `getWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `(object, index) => object.width || 1`
 

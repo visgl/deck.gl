@@ -7,6 +7,13 @@ import log from '../utils/log';
 import assert from '../utils/assert';
 
 const noop = () => {};
+const DEFAULT_TRANSITION_SETTINGS = {
+  duration: 0,
+  easing: t => t,
+  onStart: noop,
+  onEnd: noop,
+  onInterrupt: noop
+};
 
 export default class AttributeTransitionManager {
   constructor(gl, {id}) {
@@ -162,7 +169,7 @@ export default class AttributeTransitionManager {
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
   _updateAttribute(attributeName, attribute) {
-    const settings = this._getTransitionSettings(attribute);
+    const settings = attribute.getTransitionSetting(this.opts);
 
     if (settings) {
       let hasChanged;
@@ -211,7 +218,7 @@ export default class AttributeTransitionManager {
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
-  _getNextTransitionStates(transition) {
+  _getNextTransitionStates(transition, settings) {
     const {attribute} = transition;
     const {size} = attribute;
 
@@ -252,7 +259,8 @@ export default class AttributeTransitionManager {
       fromLength,
       toLength,
       fromBufferLayout: transition.bufferLayout,
-      toBufferLayout: attribute.bufferLayout
+      toBufferLayout: attribute.bufferLayout,
+      getData: settings.enter
     });
 
     transition.bufferLayout = attribute.bufferLayout;
@@ -260,47 +268,19 @@ export default class AttributeTransitionManager {
     return {fromState, toState, buffer};
   }
 
-  // Returns transition settings object if transition is enabled, otherwise `null`
-  _getTransitionSettings(attribute) {
-    const {opts} = this;
-    const {transition, accessor} = attribute.userData;
-
-    if (!transition) {
-      return null;
-    }
-
-    return Array.isArray(accessor) ? accessor.map(a => opts[a]).find(Boolean) : opts[accessor];
-  }
-
-  // Normalizes transition settings object, merge with default settings
-  _normalizeTransitionSettings(settings) {
-    // Shorthand: use duration instead of parameter object
-    if (Number.isFinite(settings)) {
-      settings = {duration: settings};
-    }
-
-    // Check if settings is valid
-    assert(settings && settings.duration > 0);
-
-    return {
-      duration: settings.duration,
-      easing: settings.easing || (t => t),
-      onStart: settings.onStart || noop,
-      onEnd: settings.onEnd || noop,
-      onInterrupt: settings.onInterrupt || noop
-    };
-  }
-
   // Start a new transition using the current settings
   // Updates transition state and from/to buffer
   _triggerTransition(transition, settings) {
+    // Check if settings is valid
+    assert(settings && settings.duration > 0);
+
     this.needsRedraw = true;
 
-    const transitionSettings = this._normalizeTransitionSettings(settings);
+    const transitionSettings = Object.assign({}, DEFAULT_TRANSITION_SETTINGS, settings);
 
     // Attribute descriptor to transition from
     transition.start(
-      Object.assign({}, this._getNextTransitionStates(transition), transitionSettings)
+      Object.assign({}, this._getNextTransitionStates(transition, settings), transitionSettings)
     );
   }
 }

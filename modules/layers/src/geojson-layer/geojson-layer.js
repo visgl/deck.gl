@@ -123,7 +123,15 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
-    const {stroked, filled, extruded, wireframe, subLayers, lightSettings} = this.props;
+    const {
+      stroked,
+      filled,
+      extruded,
+      wireframe,
+      subLayers,
+      lightSettings,
+      transitions
+    } = this.props;
 
     // Rendering props underlying layer
     const {
@@ -179,7 +187,14 @@ export default class GeoJsonLayer extends CompositeLayer {
           getPolygon: getCoordinates,
           getElevation: unwrappingAccessor(getElevation),
           getFillColor: unwrappingAccessor(getFillColor),
-          getLineColor: unwrappingAccessor(getLineColor)
+          getLineColor: unwrappingAccessor(getLineColor),
+
+          transitions: transitions && {
+            getPolygon: transitions.geometry,
+            getElevation: transitions.getElevation,
+            getFillColor: transitions.getFillColor,
+            getLineColor: transitions.getLineColor
+          }
         }
       );
 
@@ -208,9 +223,16 @@ export default class GeoJsonLayer extends CompositeLayer {
           dashJustified: lineDashJustified,
 
           getPath: getCoordinates,
+
           getColor: unwrappingAccessor(getLineColor),
           getWidth: unwrappingAccessor(getLineWidth),
-          getDashArray: unwrappingAccessor(getLineDashArray)
+          getDashArray: unwrappingAccessor(getLineDashArray),
+
+          transitions: transitions && {
+            getPath: transitions.geometry,
+            getColor: transitions.getColor,
+            getWidth: transitions.getWidth
+          }
         }
       );
 
@@ -236,7 +258,14 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPath: getCoordinates,
           getColor: unwrappingAccessor(getLineColor),
-          getWidth: unwrappingAccessor(getLineWidth)
+          getWidth: unwrappingAccessor(getLineWidth),
+          getDashArray: unwrappingAccessor(getLineDashArray),
+
+          transitions: transitions && {
+            getPath: transitions.geometry,
+            getColor: transitions.getColor,
+            getWidth: transitions.getWidth
+          }
         }
       );
 
@@ -260,7 +289,13 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           getPosition: getCoordinates,
           getColor: unwrappingAccessor(getFillColor),
-          getRadius: unwrappingAccessor(getRadius)
+          getRadius: unwrappingAccessor(getRadius),
+
+          transitions: transitions && {
+            getPosition: transitions.geometry,
+            getColor: transitions.getColor,
+            getRadius: transitions.getRadius
+          }
         }
       );
 
