@@ -54,6 +54,12 @@ const isClosed = path => {
   );
 };
 
+const ATTRIBUTE_TRANSITION = {
+  enter: (value, chunk) => {
+    return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
+  }
+};
+
 export default class PathLayer extends Layer {
   getShaders() {
     return this.use64bitProjection()
@@ -67,13 +73,13 @@ export default class PathLayer extends Layer {
     attributeManager.addInstanced({
       instanceStartPositions: {
         size: 3,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateStartPositions
       },
       instanceEndPositions: {
         size: 3,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateEndPositions
       },
@@ -82,7 +88,7 @@ export default class PathLayer extends Layer {
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         update: this.calculateStrokeWidths,
         defaultValue: 1
       },
@@ -91,7 +97,7 @@ export default class PathLayer extends Layer {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         update: this.calculateColors,
         defaultValue: DEFAULT_COLOR
       },

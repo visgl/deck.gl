@@ -120,6 +120,12 @@ const ATTRIBUTE_MAPS = {
   }
 };
 
+const ATTRIBUTE_TRANSITION = {
+  enter: (value, chunk) => {
+    return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
+  }
+};
+
 export default class SolidPolygonLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
@@ -140,7 +146,7 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {
         size: 3,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
         update: this.calculatePositions,
         noAlloc
@@ -148,7 +154,7 @@ export default class SolidPolygonLayer extends Layer {
       positions64xyLow: {size: 2, update: this.calculatePositionsLow},
       nextPositions: {
         size: 3,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
         update: this.calculateNextPositions,
         noAlloc
@@ -156,7 +162,7 @@ export default class SolidPolygonLayer extends Layer {
       nextPositions64xyLow: {size: 2, update: this.calculateNextPositionsLow},
       elevations: {
         size: 1,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
         update: this.calculateElevations,
         noAlloc
@@ -165,7 +171,7 @@ export default class SolidPolygonLayer extends Layer {
         alias: 'colors',
         size: 4,
         type: GL.UNSIGNED_BYTE,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
         defaultValue: defaultFillColor,
@@ -175,7 +181,7 @@ export default class SolidPolygonLayer extends Layer {
         alias: 'colors',
         size: 4,
         type: GL.UNSIGNED_BYTE,
-        transition: true,
+        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
         defaultValue: defaultLineColor,
