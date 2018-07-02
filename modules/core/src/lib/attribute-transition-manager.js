@@ -1,6 +1,6 @@
 import GL from 'luma.gl/constants';
 import {Buffer, _Transform as Transform} from 'luma.gl';
-import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
+import {getShaders, getBuffers, padBuffer, getBufferLength} from './attribute-transition-utils';
 import Attribute from './attribute';
 import Transition from '../transitions/transition';
 import log from '../utils/log';
@@ -226,11 +226,18 @@ export default class AttributeTransitionManager {
     if (attribute.constant) {
       toState = {constant: true, value: attribute.value, size};
     } else {
-      toState = {constant: false, buffer: attribute.getBuffer(), size};
+      toState = {
+        constant: false,
+        buffer: attribute.getBuffer(),
+        size,
+        // attribute's `value` does not match the content of external buffer,
+        // will need to call buffer.getData if needed
+        value: attribute.externalBuffer ? null : attribute.value
+      };
     }
     const fromState = transition.buffer || toState;
     const toLength = this.numInstances * size;
-    const fromLength = (fromState.data && fromState.data.length) || toLength;
+    const fromLength = (fromState instanceof Buffer && getBufferLength(fromState)) || toLength;
 
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
@@ -243,16 +250,15 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength),
         usage: GL.DYNAMIC_COPY
       });
-    }
-
-    transition.attributeInTransition.update({buffer});
-
-    // Pad buffers to be the same length
-    if (buffer.data.length < toLength) {
+    } else if (getBufferLength(buffer) < toLength) {
+      // Pad buffers to be the same length
       buffer.setData({
         data: new Float32Array(toLength)
       });
     }
+
+    transition.attributeInTransition.update({buffer});
+
     padBuffer({
       fromState,
       toState,
