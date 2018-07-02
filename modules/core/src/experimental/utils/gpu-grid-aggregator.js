@@ -337,9 +337,9 @@ export default class GPUGridAggregator {
     const {gl, shaderCache} = this;
     return new Model(gl, {
       id: 'All-Aggregation-Model',
-      vs: fp64 ? AGGREGATE_ALL_VS_FP64 : AGGREGATE_ALL_VS,
+      vs: AGGREGATE_ALL_VS_FP64,
       fs: AGGREGATE_ALL_FS,
-      modules: fp64 ? ['fp64'] : [],
+      modules:['fp64'],
       shaderCache,
       vertexCount: 1,
       drawMode: GL.POINTS,
