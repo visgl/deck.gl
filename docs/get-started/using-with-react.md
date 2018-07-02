@@ -32,7 +32,7 @@ class App extends React.Component {
     ];
 
     return (
-      <DeckGL {...viewState} layers={layers} />
+      <DeckGL viewState={viewState} layers={layers} />
     );
   }
 }
@@ -46,7 +46,7 @@ An important companion to deck.gl is `react-map-gl`. It is a React wrapper for [
 ```jsx
 /// app.js
 import React from 'react';
-import DeckGL, {MapController, LineLayer} from 'deck.gl';
+import DeckGL, {LineLayer} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
 
 // Set your mapbox access token here
@@ -73,7 +73,7 @@ class App extends React.Component {
     return (
       <DeckGL
         initialViewState={initialViewState}
-        controller={MapController}
+        controller={true}
         layers={layers}
       >
         <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
@@ -115,7 +115,7 @@ The following code renders the same set of layers in two viewports, splitting th
 
     return (
       <DeckGL initialViewState={initialViewState} layers={layers} >
-        <MapView id="map" width="50%" controller={MapController}>
+        <MapView id="map" width="50%" controller={true}>
           <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
         </MapView>
         <FirstPersonView width="50%" x="50%" fovy={50} />

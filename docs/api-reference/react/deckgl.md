@@ -34,13 +34,9 @@ const App = (data) => (
     controller={MapController}
     layers={[new ScatterplotLayer({data})]}
   >
-    {({width, height, viewState}) => (
-        <StaticMap
-          {...viewState}
-          width={width}
-          height={height}
-          mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
-      )}
+    <StaticMap
+      mapStyle="mapbox://styles/mapbox/dark-v9"
+      mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
   </DeckGL>
 );
 
