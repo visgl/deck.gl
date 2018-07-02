@@ -132,8 +132,7 @@ export default class ScreenGridLayer extends Layer {
     };
 
     if (isWebGL2(gl)) {
-      // TODO: remove index specification (https://github.com/uber/luma.gl/pull/473)
-      maxCountBuffer.bind({target: GL.UNIFORM_BUFFER, index: AGGREGATION_DATA_UBO_INDEX});
+      maxCountBuffer.bind({target: GL.UNIFORM_BUFFER});
     } else {
       layerUniforms.maxWeight =  maxWeight;
     }
@@ -149,7 +148,7 @@ export default class ScreenGridLayer extends Layer {
       )
     });
     if (isWebGL2(gl)) {
-      maxCountBuffer.unbind({target: GL.UNIFORM_BUFFER, index: AGGREGATION_DATA_UBO_INDEX});
+      maxCountBuffer.unbind();
     }
   }
 
