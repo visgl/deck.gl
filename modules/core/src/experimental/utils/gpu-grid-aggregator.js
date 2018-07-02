@@ -479,7 +479,14 @@ export default class GPUGridAggregator {
     } else {
       maxCountBuffer = new Buffer(this.gl, {data: maxCountBufferData});
     }
-    return {countsBuffer, maxCountBuffer};
+    return {
+      countsBuffer,
+      maxCountBuffer,
+      // Return total aggregaton values to avoid buffer for WebGL1 cases
+      totalCount,
+      totalWeight,
+      maxWeight
+    };
   }
   /* eslint-enable max-statements */
 
