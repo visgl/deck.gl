@@ -38,6 +38,12 @@ export default class CompositeLayer extends Layer {
   // Provide empty definition to disable check for missing definition
   initializeState() {}
 
+  // Updates selected state members and marks the composite layer to need rerender
+  setState(updateObject) {
+    super.setState(updateObject);
+    this.setLayerNeedsUpdate();
+  }
+
   // called to augment the info object that is bubbled up from a sublayer
   // override Layer.getPickingInfo() because decoding / setting uniform do
   // not apply to a composite layer.
