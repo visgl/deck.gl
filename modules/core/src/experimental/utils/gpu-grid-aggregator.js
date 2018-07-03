@@ -314,7 +314,7 @@ export default class GPUGridAggregator {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
       fs: AGGREGATE_ALL_FS,
-      modules:['fp64'],
+      modules: ['fp64'],
       shaderCache,
       vertexCount: 1,
       drawMode: GL.POINTS,
@@ -457,7 +457,7 @@ export default class GPUGridAggregator {
     return {
       countsBuffer,
       maxCountBuffer,
-      // Return total aggregaton values to avoid buffer for WebGL1 cases
+      // Return total aggregaton values to avoid UBO setup for WebGL1 cases
       totalCount,
       totalWeight,
       maxWeight
