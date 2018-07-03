@@ -125,31 +125,6 @@ void main(void) {
 }
 `;
 
-const AGGREGATE_ALL_VS = `\
-#version 300 es
-
-in vec2 position;
-uniform vec2 gridSize;
-
-out vec2 vTextureCoord;
-void main(void) {
-  // Map each position to single pixel
-  vec2 pos = vec2(-1.0, -1.0);
-
-  // Move to pixel center, pixel-size in screen sapce (2/gridSize) * 0.5 => 1/gridSize
-  vec2 offset = 1.0 / gridSize;
-  pos = pos + offset;
-
-  gl_Position = vec4(pos, 0.0, 1.0);
-
-  float yIndex = floor(float(gl_InstanceID) / gridSize[0]);
-  float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
-
-  vTextureCoord = vec2(yIndex/gridSize[1], xIndex/gridSize[0]);
-  // vTextureCoord = vec2(0.5, 0.5);
-}
-`;
-
 const AGGREGATE_ALL_VS_FP64 = `\
 #version 300 es
 

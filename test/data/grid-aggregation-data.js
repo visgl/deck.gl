@@ -140,11 +140,10 @@ const viewport2 = new WebMercatorViewport({
   height: 500
 });
 
-const positions2 = dataSamples.points
-  .reduce((acc, point) => {
-    acc.push(...point.COORDINATES);
-    return acc;
-  }, []);
+const positions2 = dataSamples.points.reduce((acc, point) => {
+  acc.push(...point.COORDINATES);
+  return acc;
+}, []);
 
 const positions64xyLow2 = positions2.map(pos => fp64LowPart(pos));
 const weights2 = dataSamples.points.map(_ => 1.0);

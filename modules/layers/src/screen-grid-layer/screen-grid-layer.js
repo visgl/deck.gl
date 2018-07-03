@@ -134,7 +134,7 @@ export default class ScreenGridLayer extends Layer {
     if (isWebGL2(gl)) {
       maxCountBuffer.bind({target: GL.UNIFORM_BUFFER});
     } else {
-      layerUniforms.maxWeight =  maxWeight;
+      layerUniforms.maxWeight = maxWeight;
     }
     uniforms = Object.assign(layerUniforms, uniforms);
     model.draw({

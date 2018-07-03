@@ -26,7 +26,7 @@ import {
   IconLayer,
   ArcLayer,
   LineLayer,
-   ScreenGridLayer,
+  ScreenGridLayer,
   PointCloudLayer,
   PathLayer
   // TextLayer
