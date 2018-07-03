@@ -7,6 +7,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: TBD, target late Q2, 2018
 
+TODO: add gifs
+
 ### React API
 
 The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
@@ -30,6 +32,10 @@ It is now possible to globally set WebGL parameters (controlling how the GPU ren
 #### Pixel Sizes
 
 Pixel sizes in `LineLayer`, `IconLayer` and `TextLayer` now match their HTML/SVG counterparts.
+
+### ScreenGridLayer with GPU accelerated aggregation
+
+ScreenGridLayer is updated to support aggregation on GPU. Depending on the data set aggregation on GPU can be 10-12X faster and capable of handling large data sets (MM) where CPU version freezes the UI. Also picking information now contains aggregated details. Two new props `gpuAggregation` for selecting CPU or GPU aggregation and `cellMarginPixels` to control cell margin size are added.
 
 
 ## deck.gl v5.3
