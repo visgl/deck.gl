@@ -9,13 +9,11 @@ To use deck.gl with React, simply import the `DeckGL` React component and render
 
 ```jsx
 /// app.js
-import React, {Component} from 'react';
+import React from 'react';
 import DeckGL, {LineLayer} from 'deck.gl';
 
 // Viewport settings
-const viewport = {
-  width: 500,
-  height: 500,
+const viewState = {
   longitude: -122.41669,
   latitude: 37.7853,
   zoom: 13,
@@ -27,12 +25,14 @@ const viewport = {
 const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
 // DeckGL react component
-class App extends Component {
+class App extends React.Component {
   render() {
+    const layers = [
+      new LineLayer({id: 'line-layer', data})
+    ];
+
     return (
-      <DeckGL {...viewport} layers={[
-        new LineLayer({id: 'line-layer', data})
-      ]} />
+      <DeckGL viewState={viewState} layers={layers} />
     );
   }
 }
@@ -41,21 +41,19 @@ class App extends Component {
 
 ## Adding a Base Map
 
-An important companion to deck.gl is `react-map-gl`. It can provide both a base map as well as event handling for deck.gl.
+An important companion to deck.gl is `react-map-gl`. It is a React wrapper for [Mapbox](https://mapbox.com) that can share the same web mercator viewport settings.
 
 ```jsx
 /// app.js
-import React, {Component} from 'react';
+import React from 'react';
 import DeckGL, {LineLayer} from 'deck.gl';
-import MapGL from 'react-map-gl';
+import {StaticMap} from 'react-map-gl';
 
 // Set your mapbox access token here
 const MAPBOX_ACCESS_TOKEN = 'MAPBOX_ACCESS_TOKEN';
 
-// Viewport settings that is shared between mapbox and deck.gl
-const viewport = {
-  width: 500,
-  height: 500,
+// Initial viewport settings
+const initialViewState = {
   longitude: -122.41669,
   latitude: 37.7853,
   zoom: 13,
@@ -66,14 +64,20 @@ const viewport = {
 // Data to be used by the LineLayer
 const data = [{sourcePosition: [-122.41669, 37.7853], targetPosition: [-122.41669, 37.781]}];
 
-class App extends Component {
+class App extends React.Component {
   render() {
+    const layers = [
+      new LineLayer({id: 'line-layer', data})
+    ];
+
     return (
-      <MapGL {...viewport} mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}>
-        <DeckGL {...viewport} layers={[
-          new LineLayer({id: 'line-layer', data})
-        ]} />
-      </MapGL>
+      <DeckGL
+        initialViewState={initialViewState}
+        controller={true}
+        layers={layers}
+      >
+        <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+      </DeckGL>
     );
   }
 }
@@ -87,14 +91,40 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
 ```jsx
   render() {
     return (
-      <DeckGL {...viewport}>
+      <DeckGL {...viewState}>
         <LineLayer id="line-layer" data={data} />
       <DeckGL />
     );
   }
 ```
 
-> Caveat: The JSX layer syntax is limitated in that it only works when the layers are direct children of the `DeckGL` component. deck.gl layers are not true React components and cannot be rendered independently by React, and the JSX support depends on deck.gl intercepting the JSX generated child elements before React tries to render them.
+For more information on this syntax and its limitations, see [DeckGL API](/docs/api-reference/api/deckgl.md).
+
+
+## Using JSX with deck.gl views
+
+It is possible to use JSX syntax to create deck.gl views as React children of the `DeckGL` React components, instead of providing them as ES6 class instances to the `views` prop.
+
+The following code renders the same set of layers in two viewports, splitting the canvas into two columns:
+
+```jsx
+  render() {
+    const layers = [
+      new LineLayer({id: 'line-layer', data})
+    ];
+
+    return (
+      <DeckGL initialViewState={initialViewState} layers={layers} >
+        <MapView id="map" width="50%" controller={true}>
+          <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
+        </MapView>
+        <FirstPersonView width="50%" x="50%" fovy={50} />
+      <DeckGL />
+    );
+  }
+```
+
+For more information on this syntax, see [DeckGL API](/docs/api-reference/api/deckgl.md).
 
 
 ## Remarks
