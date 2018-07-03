@@ -275,7 +275,8 @@ new Layer({
 | `onEnd`       | `Function` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |
 
-Notes: 
+Notes:
+
 * As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
 * Attribute transition is performed between the values at the same index. If the new data is larger, `enter` callback is called for each new vertex to backfill the values to transition from.
 * `enter` should return the value to transition from. for the current vertex. It receives two arguments:
@@ -328,8 +329,8 @@ This method is called only once for each layer to set up the initial state.
 `initializeState(context)`
 
 * `context` - The layer context is supplied as a parameter
-  + `context.gl` (`WebGLRenderingContext`) - gl context
-  + ...
+  - `context.gl` (`WebGLRenderingContext`) - gl context
+  - ...
 
 deck.gl will already have created the `state` object at this time, and added the `gl` context and the `attributeManager` state.
 
@@ -393,8 +394,8 @@ Parameters:
 
 * an object that contains all the [default unforms](/docs/developer-guide/writing-shaders.md#uniforms) to be passed to the shaders.
 * `context` - The layer context is supplied as a parameter
-  + `context.gl` (`WebGLRenderingContext`) - gl context
-  + ...
+  - `context.gl` (`WebGLRenderingContext`) - gl context
+  - ...
 
 The default implementation looks for a variable `model` in the layer's state (which is expected to be an instance of the luma.gl `Model` class) and calls `draw` on that model with the parameters.
 
@@ -405,16 +406,16 @@ Called when a layer is being hovered or clicked, before any user callbacks are c
 Parameters:
 
 * `pickParams` (Object)
-  + `pickParams.info` (Object) - The current `info` object. By default it contains the
+  - `pickParams.info` (Object) - The current `info` object. By default it contains the
   following fields:
 
-    - `x` (Number) - Mouse position x relative to the viewport.
-    - `y` (Number) - Mouse position y relative to the viewport.
-    - `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](/docs/api-reference/layer.md#-projectionmode-number-optional-) is `COORDINATE_SYSTEM.LNGLAT`.
-    - `color` (Number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-).
-    - `index` (Number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-).
-    - `picked` (Boolean) - `true` if `index` is not `-1`.
-  + `pickParams.mode` (String) - One of `hover` and `click`
+    + `x` (Number) - Mouse position x relative to the viewport.
+    + `y` (Number) - Mouse position y relative to the viewport.
+    + `lngLat` ([Number, Number]) - Mouse position in world coordinates. Only applies if [`coordinateSystem`](/docs/api-reference/layer.md#-projectionmode-number-optional-) is `COORDINATE_SYSTEM.LNGLAT`.
+    + `color` (Number[4]) - The color of the pixel that is being picked. It represents a "picking color" that is encoded by [`layer.encodePickingColor()`](/docs/api-reference/layer.md#-encodepickingcolor-).
+    + `index` (Number) - The index of the object that is being picked. It is the returned value of [`layer.decodePickingColor()`](/docs/api-reference/layer.md#-decodepickingcolor-).
+    + `picked` (Boolean) - `true` if `index` is not `-1`.
+  - `pickParams.mode` (String) - One of `hover` and `click`
 
 Returns:
 
@@ -440,7 +441,7 @@ Parameters:
 
 * `coordinates` (Array) - `[lng, lat, altitude]` Passing an altitude is optional.
 * `opts` (Object)
-  + `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
+  - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 
@@ -454,7 +455,7 @@ Parameters:
 
 * `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
 * `opts` (Object)
-  + `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
+  - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 

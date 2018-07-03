@@ -19,21 +19,63 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
 #define SHADER_NAME screen-grid-layer-vertex-shader
+#define RANGE_COUNT 6
 
-attribute vec3 vertices;
-attribute vec3 instancePositions;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
+in vec3 vertices;
+in vec3 instancePositions;
+in vec4 instanceCounts;
+in vec3 instancePickingColors;
 
+layout(std140) uniform;
 uniform float opacity;
 uniform vec3 cellScale;
+uniform vec4 minColor;
+uniform vec4 maxColor;
+uniform AggregationData
+{
+  vec4 maxCount;
+} aggregationData;
 
-varying vec4 vColor;
+uniform vec4 colorRange[RANGE_COUNT];
+uniform vec2 colorDomain;
+uniform bool shouldUseMinMax;
+
+out vec4 vColor;
+
+vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
+  vec4 outColor = vec4(0., 0., 0., 0.);
+  if (value >= domain.x && value <= domain.y) {
+    float domainRange = domain.y - domain.x;
+    if (domainRange <= 0.) {
+      outColor = colorRange[0];
+    } else {
+      float rangeCount = float(RANGE_COUNT);
+      float rangeStep = domainRange / rangeCount;
+      float idx = floor((value - domain.x) / rangeStep);
+      idx = clamp(idx, 0., rangeCount - 1.);
+      int intIdx = int(idx);
+      outColor = colorRange[intIdx];
+    }
+  }
+  outColor = outColor / 255.;
+  return outColor;
+}
 
 void main(void) {
-  vec4 color = instanceColors / 255.;
+  float weight = instanceCounts.g ;
+  float maxWeight = aggregationData.maxCount.w;
+  float step = weight / maxWeight;
+  vec4 minMaxColor = mix(minColor, maxColor, step) / 255.;
 
+  vec2 domain = colorDomain;
+  float domainMaxValid = float(colorDomain.y != 0.);
+  domain.y = mix(maxWeight, colorDomain.y, domainMaxValid);
+  vec4 rangeColor = quantizeScale(domain, colorRange, weight);
+
+  float rangeMinMax = float(shouldUseMinMax);
+  vec4 color = mix(rangeColor, minMaxColor, rangeMinMax);
   vColor = vec4(color.rgb, color.a * opacity);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

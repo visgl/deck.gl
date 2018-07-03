@@ -4,7 +4,7 @@ import {
   PathMarkerLayer,
   AdvancedTextLayer
 } from '@deck.gl/experimental-layers';
-import {GPUScreenGridLayer, GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
+import {GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import GL from 'luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
@@ -168,19 +168,6 @@ const AdvancedTextLayerExample = {
   }
 };
 
-const GPUScreenGridLayerExample = {
-  layer: GPUScreenGridLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'gpuScreenGridLayer',
-    getPosition: d => d.COORDINATES,
-    cellSizePixels: 40,
-    minColor: [0, 0, 80, 0],
-    maxColor: [0, 255, 0, 128],
-    pickable: false
-  }
-};
-
 const GPUGridLayerExample = {
   layer: GPUGridLayer,
   getData: () => dataSamples.points,
@@ -194,19 +181,6 @@ const GPUGridLayerExample = {
     lightSettings: LIGHT_SETTINGS
   }
 };
-
-const GPUScreenGridLayerPerfExample = (id, getData) => ({
-  layer: GPUScreenGridLayer,
-  getData,
-  props: {
-    id: `gpuScreenGridLayerPerf-${id}`,
-    getPosition: d => d,
-    cellSizePixels: 40,
-    minColor: [0, 0, 80, 0],
-    maxColor: [100, 255, 0, 128],
-    pickable: false
-  }
-});
 
 const GPUGridLayerPerfExample = (id, getData) => ({
   layer: GPUGridLayer,
@@ -247,10 +221,6 @@ export default {
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
     'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
     AdvancedTextLayer: AdvancedTextLayerExample,
-    GPUScreenGridLayer: GPUScreenGridLayerExample,
-    'GPUScreenGridLayer (1M)': GPUScreenGridLayerPerfExample('1M', dataSamples.getPoints1M),
-    'GPUScreenGridLayer (5M)': GPUScreenGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    'GPUScreenGridLayer (10M)': GPUScreenGridLayerPerfExample('10M', dataSamples.getPoints10M),
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),

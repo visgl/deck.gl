@@ -20,19 +20,17 @@
 
 /* fragment shader for the grid-layer */
 export default `\
+#version 300 es
 #define SHADER_NAME screen-grid-layer-fragment-shader
 
 precision highp float;
 
-varying vec4 vColor;
+in vec4 vColor;
+out vec4 fragColor;
 
 void main(void) {
-  gl_FragColor = vColor;
+  fragColor = vColor;
 
-  // use highlight color if this fragment belongs to the selected object.
-  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
-
-  // use picking color if rendering to picking FBO.
-  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+  fragColor = picking_filterColor(fragColor);
 }
 `;

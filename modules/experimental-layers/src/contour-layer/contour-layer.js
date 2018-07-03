@@ -18,9 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
-import GPUGridAggregator from '@deck.gl/experimental-layers/utils/gpu-grid-aggregator';
 
 // TODO: move out of grid-layer as common grid-aggregation util method.
 import {pointToDensityGridData} from '../gpu-grid-layer/gpu-grid-utils';
