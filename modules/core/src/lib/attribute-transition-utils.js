@@ -108,10 +108,3 @@ export function padBuffer({
 
   fromState.setData({data});
 }
-
-export function getBufferLength(buffer) {
-  if (buffer.data) {
-    return buffer.bytes / buffer.data.BYTES_PER_ELEMENT;
-  }
-  return 0;
-}

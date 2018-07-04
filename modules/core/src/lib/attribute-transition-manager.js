@@ -1,6 +1,6 @@
 import GL from 'luma.gl/constants';
 import {Buffer, _Transform as Transform} from 'luma.gl';
-import {getShaders, getBuffers, padBuffer, getBufferLength} from './attribute-transition-utils';
+import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
 import Attribute from './attribute';
 import Transition from '../transitions/transition';
 import log from '../utils/log';
@@ -237,7 +237,7 @@ export default class AttributeTransitionManager {
     }
     const fromState = transition.buffer || toState;
     const toLength = this.numInstances * size;
-    const fromLength = (fromState instanceof Buffer && getBufferLength(fromState)) || toLength;
+    const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
 
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
@@ -250,7 +250,7 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength),
         usage: GL.DYNAMIC_COPY
       });
-    } else if (getBufferLength(buffer) < toLength) {
+    } else if (buffer.getElementCount() < toLength) {
       // Pad buffers to be the same length
       buffer.setData({
         data: new Float32Array(toLength)
