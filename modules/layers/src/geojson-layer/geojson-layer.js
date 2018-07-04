@@ -230,8 +230,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           transitions: transitions && {
             getPath: transitions.geometry,
-            getColor: transitions.getColor,
-            getWidth: transitions.getWidth
+            getColor: transitions.getLineColor,
+            getWidth: transitions.getLineWidth
           }
         }
       );
@@ -263,8 +263,8 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           transitions: transitions && {
             getPath: transitions.geometry,
-            getColor: transitions.getColor,
-            getWidth: transitions.getWidth
+            getColor: transitions.getLineColor,
+            getWidth: transitions.getLineWidth
           }
         }
       );
@@ -293,7 +293,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
           transitions: transitions && {
             getPosition: transitions.geometry,
-            getColor: transitions.getColor,
+            getColor: transitions.getFillColor,
             getRadius: transitions.getRadius
           }
         }
