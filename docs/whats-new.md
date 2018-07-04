@@ -7,7 +7,16 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release date: TBD, target late Q2, 2018
 
-TODO: add gifs
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/attribute-transition.gif" />
+        <p><i>GeoJson Transition</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### React API
 
@@ -19,6 +28,10 @@ The `DeckGL` React component now provides a more powerful API to create sophisti
 
 See [Use with React](/docs/get-started/using-with-react.md) for more details.
 
+### Attribute Transition
+
+First introduced in v5.1, attribute transition uses WebGL2's Transform Feedback feature to interpolate layer attributes on the GPU. Starting v6.0, all core layers support attribute transition, including HexagonLayer, GridLayer and GeoJsonLayer. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/layer.md).
+
 ### Prop Types
 
 deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/developer-guide/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
@@ -29,7 +42,7 @@ deck.gl layers can now specify additional type information about properties. Whe
 
 It is now possible to globally set WebGL parameters (controlling how the GPU renders) by supplying a `Deck.parameters` prop object. This gives applications a simple declarative way to control things like blend modes and depth testing (`new Deck({..., parameters: {depthTest: false}});`), without having to define an `onWebGLInitialized()` callback. Note that `parameters` supplied to individual layers will of course override any global parameters.
 
-#### Pixel Sizes
+### Pixel Sizes
 
 Pixel sizes in `LineLayer`, `IconLayer` and `TextLayer` now match their HTML/SVG counterparts.
 
@@ -40,7 +53,7 @@ ScreenGridLayer is updated to support aggregation on GPU. Depending on the data 
 
 ## deck.gl v5.3
 
-Release date: TBD, target May 25, 2018
+Release date: June 01, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
