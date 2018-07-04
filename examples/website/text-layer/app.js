@@ -3,7 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, TextLayer} from 'deck.gl';
+import DeckGL, {TextLayer} from 'deck.gl';
 import GL from 'luma.gl/constants';
 
 // Set your mapbox token here
@@ -30,27 +30,18 @@ const INITIAL_VIEW_STATE = {
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      viewState: INITIAL_VIEW_STATE
-    };
+
+    this.state = {};
 
     if (!window.demoLauncherActive) {
       this._loadData();
     }
   }
 
-  componentDidMount() {
-    // this._loadData();
-  }
-
   componentWillUnmount() {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
   }
 
   _loadData() {
@@ -111,32 +102,28 @@ class App extends Component {
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
-    } = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
+        initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
         parameters={{
           blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
           blendEquation: GL.FUNC_ADD
         }}
       >
-        {!window.demoLauncherActive &&
-          (viewProps => (
-            <StaticMap
-              {...viewProps}
-              reuseMaps
-              mapStyle={MAPBOX_STYLE}
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          ))}
+        {baseMap && (
+          <StaticMap
+            reuseMaps
+            mapStyle={MAPBOX_STYLE}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

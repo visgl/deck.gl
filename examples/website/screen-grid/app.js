@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapView, MapController, ScreenGridLayer} from 'deck.gl';
+import DeckGL, {ScreenGridLayer} from 'deck.gl';
 
 const INITIAL_VIEW_STATE = {
   longitude: -119.3,
@@ -21,17 +21,6 @@ const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json'; // eslint-disable-line
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      viewState: INITIAL_VIEW_STATE
-    };
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
-  }
-
   _renderLayers() {
     const {data = DATA_URL, cellSize = 20} = this.props;
 
@@ -47,29 +36,24 @@ class App extends Component {
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
-    } = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
-        views={new MapView({id: 'map'})}
+        initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
       >
-        {!window.demoLauncherActive &&
-          (viewProps => (
-            <StaticMap
-              {...viewProps}
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          ))}
+        {baseMap && (
+          <StaticMap
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

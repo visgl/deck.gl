@@ -8,10 +8,9 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "@deck.gl/core": "^5.3.0-rc",
-    "@deck.gl/layers": "^5.3.0-rc",
-    "mapbox-gl": "~0.44.2",
-    "stats.js": "^0.17.0"
+    "@deck.gl/core": "^6.0.0-beta",
+    "@deck.gl/layers": "^6.0.0-beta",
+    "mapbox-gl": "~0.44.2"
   },
   "devDependencies": {
     "buble": "^0.19.3",

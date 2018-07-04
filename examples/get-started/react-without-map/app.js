@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {GeoJsonLayer, MapController} from 'deck.gl';
+import DeckGL, {GeoJsonLayer} from 'deck.gl';
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz
@@ -21,7 +21,7 @@ class Root extends Component {
       <DeckGL
         width="100%"
         height="100%"
-        controller={MapController}
+        controller={true}
         initialViewState={INITIAL_VIEW_STATE}
         layers={[
           new GeoJsonLayer({

@@ -119,7 +119,6 @@ export default class TagmapLayer extends CompositeLayer {
     if (discreteZoomLevel <= MAX_CACHED_ZOOM_LEVEL) {
       tagsCache[discreteZoomLevel] = tags;
     }
-
     this.setState({tags});
   }
 
