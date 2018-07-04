@@ -21,6 +21,42 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0 Pre Releases
 
+#### [6.0.0-beta.1] - July 4
+
+- Attribute Transition bug fix (#1996)
+- Upgrade to luma.gl 6.0.0-beta.1 (#1990)
+- Replace ScreenGridLayer with GPUScreenGridLayer (#1988)
+- More Flexible Controller API (#1984)
+- Restore prop override for regular React children (#1983)
+- Add enter parameter for transitions (#1982)
+- ScreenGridLayer: Fix cell margin bug (#1977)
+- Fix attribute transition (#1975)
+- Fix aggregation in OrthoGraphicView (#1973)
+- Implement React API RFC (#1971)
+- Add padArray util for attribute transition (#1966)
+
+#### [6.0.0-alpha.2] - June 27
+
+- Remove viewports (#1965)
+- Add needs64bitPositions() to Layer (#1963)
+- Update deck.js _pickAndCallback to discard invalid events (#1962)
+- Add Contour Layer (#1958)
+- Adding Marching-Squares utility methods (#1957)
+- GridLayer: re-project points on prop change (#1953)
+- Implement RFC: Improved 32-bit LNGLAT projection mode (#1951)
+- GPUScreenGridLayer: Provide aggregated data as picking information (#1950)
+- Initial layer prop type generator (#1943)
+- Fix path-marker-layer property passing (#1939)
+- GPUScreenGridLayer: Add colorRange and colorDomain support (#1932)
+- Deprecate ViewportController and onViewportChange (#1930)
+- Per-view controller (#1929)
+- Upgrade to luma v6 (#1928)
+- Move ViewManager out of LayerManager (#1926)
+- Add experimental GPUGridLayer (#1925)
+- GeoJsonLayer picking returns real feature (#1924)
+- Add world-space aggregation support to GPUAggregator (#1923)
+- Expose more internals (as experimental exports) (#1921)
+
 #### [6.0.0-alpha.0] - June 15
 - 6.0.0-alpha.0 (Bump luma version to 6.0.0-apha.1)
 - Bench fixes (#1915)
