@@ -91,10 +91,11 @@ export function padBuffer({
   const fromData = fromState.getData({});
 
   const {value, buffer, size, constant} = toState;
+  const toData = value || buffer.getData({});
 
   const getMissingData = constant
     ? (i, chunk) => getData(value, chunk)
-    : (i, chunk) => getData(buffer.data.subarray(i, i + size), chunk);
+    : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 
   padArray({
     source: fromData,

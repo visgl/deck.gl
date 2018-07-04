@@ -226,11 +226,18 @@ export default class AttributeTransitionManager {
     if (attribute.constant) {
       toState = {constant: true, value: attribute.value, size};
     } else {
-      toState = {constant: false, buffer: attribute.getBuffer(), size};
+      toState = {
+        constant: false,
+        buffer: attribute.getBuffer(),
+        size,
+        // attribute's `value` does not match the content of external buffer,
+        // will need to call buffer.getData if needed
+        value: attribute.externalBuffer ? null : attribute.value
+      };
     }
     const fromState = transition.buffer || toState;
     const toLength = this.numInstances * size;
-    const fromLength = (fromState.data && fromState.data.length) || toLength;
+    const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
 
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
@@ -243,16 +250,15 @@ export default class AttributeTransitionManager {
         data: new Float32Array(toLength),
         usage: GL.DYNAMIC_COPY
       });
-    }
-
-    transition.attributeInTransition.update({buffer});
-
-    // Pad buffers to be the same length
-    if (buffer.data.length < toLength) {
+    } else if (buffer.getElementCount() < toLength) {
+      // Pad buffers to be the same length
       buffer.setData({
         data: new Float32Array(toLength)
       });
     }
+
+    transition.attributeInTransition.update({buffer});
+
     padBuffer({
       fromState,
       toState,
