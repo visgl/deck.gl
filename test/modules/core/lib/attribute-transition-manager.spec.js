@@ -70,7 +70,7 @@ if (isWebGL2(gl)) {
     t.ok(manager.transform, 'a new transform is constructed');
 
     const sizeTransition = manager.attributeTransitions.instanceSizes;
-    t.is(sizeTransition.buffer.data.length, 4, 'buffer has correct size');
+    t.is(sizeTransition.buffer.getElementCount(), 4, 'buffer has correct size');
 
     let lastTransform = manager.transform;
     delete attributes.instancePositions;
@@ -86,13 +86,13 @@ if (isWebGL2(gl)) {
 
     attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 5});
-    t.deepEquals(sizeTransition.fromState.data, [0, 0, 0, 0, 1], 'from buffer is extended');
-    t.is(sizeTransition.buffer.data.length, 5, 'buffer has correct size');
+    t.deepEquals(sizeTransition.fromState.getData({}), [0, 0, 0, 0, 1], 'from buffer is extended');
+    t.is(sizeTransition.buffer.getElementCount(), 5, 'buffer has correct size');
 
     attributes.instanceSizes.update({constant: true, value: [2]});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
-    t.deepEquals(sizeTransition.fromState.data, [0, 0, 0, 0, 0, 2], 'from buffer is extended');
-    t.is(sizeTransition.buffer.data.length, 6, 'buffer has correct size');
+    t.deepEquals(sizeTransition.fromState.getData({}), [0, 0, 0, 0, 0, 2], 'from buffer is extended');
+    t.is(sizeTransition.buffer.getElementCount(), 6, 'buffer has correct size');
 
     lastTransform = manager.transform;
     manager.finalize();
