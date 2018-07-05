@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, IconLayer, WebMercatorViewport} from 'deck.gl';
+import DeckGL, {IconLayer, WebMercatorViewport} from 'deck.gl';
 import rbush from 'rbush';
 
 // Set your mapbox token here
@@ -54,23 +54,8 @@ class App extends Component {
       x: 0,
       y: 0,
       hoveredItems: null,
-      expanded: false,
-
-      data: null,
-      iconMapping: null
+      expanded: false
     };
-
-    if (!window.demoLauncherActive) {
-      fetch(DATA_URL)
-        .then(resp => resp.json())
-        .then(data => {
-          this.setState({data});
-        });
-
-      fetch('./data/location-icon-mapping.json')
-        .then(resp => resp.json())
-        .then(data => this.setState({iconMapping: data}));
-    }
   }
 
   _onViewStateChange({viewState}) {
@@ -152,8 +137,8 @@ class App extends Component {
 
   _renderLayers() {
     const {
-      data = this.state.data,
-      iconMapping = this.state.iconMapping,
+      data,
+      iconMapping,
       iconAtlas = 'data/location-icon-atlas.png',
       showCluster = true,
 
@@ -191,7 +176,8 @@ class App extends Component {
   render() {
     const {
       onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
+      viewState = this.state.viewState,
+      baseMap = true
     } = this.props;
 
     return (
@@ -199,18 +185,16 @@ class App extends Component {
         layers={this._renderLayers()}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
       >
-        {!window.demoLauncherActive &&
-          (viewProps => (
-            <StaticMap
-              {...viewProps}
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          ))}
+        {baseMap && (
+          <StaticMap
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }
@@ -220,5 +204,13 @@ class App extends Component {
 export {App, INITIAL_VIEW_STATE};
 
 if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+  const container = document.body.appendChild(document.createElement('div'));
+  render(<App />, container);
+
+  Promise.all([
+    fetch(DATA_URL).then(resp => resp.json()),
+    fetch('./data/location-icon-mapping.json').then(resp => resp.json())
+  ]).then(([data, iconMapping]) => {
+    render(<App data={data} iconMapping={iconMapping} />, container);
+  });
 }

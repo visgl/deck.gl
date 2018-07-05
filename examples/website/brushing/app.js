@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController} from 'deck.gl';
+import DeckGL from 'deck.gl';
 import ArcBrushingLayer from './arc-brushing-layer/arc-brushing-layer';
 import ScatterplotBrushingLayer from './scatterplot-brushing-layer/scatterplot-brushing-layer';
 import {scaleLinear} from 'd3-scale';
@@ -47,28 +47,13 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
       arcs: [],
       targets: [],
       sources: [],
-      data: null,
-      mousePosition: [0, 0]
+      mousePosition: [0, 0],
+      ...this._getLayerData(props)
     };
-
-    if (!window.demoLauncherActive) {
-      fetch(DATA_URL)
-        .then(response => response.json())
-        .then(({features}) => this.setState({data: features}));
-    }
   }
-
-  /* eslint-disable react/no-did-mount-set-state */
-  componentDidMount() {
-    this.setState({
-      ...this._getLayerData(this.props)
-    });
-  }
-  /* eslint-enable react/no-did-mount-set-state */
 
   componentWillReceiveProps(nextProps) {
     if (nextProps.data !== this.props.data) {
@@ -76,12 +61,6 @@ class App extends Component {
         ...this._getLayerData(nextProps)
       });
     }
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
   }
 
   _onMouseMove(evt) {
@@ -182,7 +161,6 @@ class App extends Component {
       <div style={{...TOOLTIP_STYLE, left: x, top: y}}>
         <div>{hoveredObject.name}</div>
         <div>{`Net gain: ${hoveredObject.net}`}</div>
-        <div>{`i: ${hoveredObject.i}`}</div>
       </div>
     );
   }
@@ -195,8 +173,8 @@ class App extends Component {
       opacity = 0.7,
 
       mouseEntered = this.state.mouseEntered,
-      mousePosition = this.state.mousePosition
-      // onHover = this._onHover.bind(this),
+      mousePosition = this.state.mousePosition,
+      onHover = this._onHover.bind(this)
     } = this.props;
 
     const {arcs, targets, sources} = this.state;
@@ -247,7 +225,7 @@ class App extends Component {
         enableBrushing: startBrushing,
         pickable: true,
         radiusScale: 3000,
-        onHover: this.props.onHover,
+        onHover,
         getColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
       }),
       new ArcBrushingLayer({
@@ -267,10 +245,7 @@ class App extends Component {
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
-    } = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <div
@@ -282,20 +257,19 @@ class App extends Component {
 
         <DeckGL
           layers={this._renderLayers()}
+          initialViewState={INITIAL_VIEW_STATE}
           viewState={viewState}
           onViewStateChange={onViewStateChange}
-          controller={MapController}
+          controller={true}
         >
-          {!window.demoLauncherActive &&
-            (viewProps => (
-              <StaticMap
-                {...viewProps}
-                reuseMaps
-                mapStyle="mapbox://styles/mapbox/light-v9"
-                preventStyleDiffing={true}
-                mapboxApiAccessToken={MAPBOX_TOKEN}
-              />
-            ))}
+          {baseMap && (
+            <StaticMap
+              reuseMaps
+              mapStyle="mapbox://styles/mapbox/light-v9"
+              preventStyleDiffing={true}
+              mapboxApiAccessToken={MAPBOX_TOKEN}
+            />
+          )}
         </DeckGL>
       </div>
     );
@@ -306,5 +280,12 @@ class App extends Component {
 export {App, INITIAL_VIEW_STATE};
 
 if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+  const container = document.body.appendChild(document.createElement('div'));
+  render(<App />, container);
+
+  fetch(DATA_URL)
+    .then(response => response.json())
+    .then(({features}) => {
+      render(<App data={features} />, container);
+    });
 }

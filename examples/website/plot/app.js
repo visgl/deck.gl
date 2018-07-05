@@ -2,7 +2,6 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {OrbitView} from 'deck.gl';
-import {_OrbitController as OrbitController} from 'deck.gl';
 import PlotLayer from './plot-layer';
 import {scaleLinear} from 'd3-scale';
 
@@ -98,7 +97,7 @@ class App extends Component {
         height={height}
         views={new OrbitView()}
         viewState={viewState}
-        controller={OrbitController}
+        controller={true}
         onViewStateChange={this._onViewStateChange}
       />
     );

@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, PolygonLayer} from 'deck.gl';
+import DeckGL, {PolygonLayer} from 'deck.gl';
 import TripsLayer from './trips-layer';
 
 // Set your mapbox token here
@@ -38,7 +38,6 @@ export default class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
       time: 0
     };
   }
@@ -47,12 +46,6 @@ export default class App extends Component {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
     }
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
   }
 
   _animate() {
@@ -94,35 +87,31 @@ export default class App extends Component {
         opacity: 0.5,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
-        getFillColor: f => [74, 80, 87],
+        getFillColor: [74, 80, 87],
         lightSettings: LIGHT_SETTINGS
       })
     ];
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
-    } = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
+        initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
       >
-        {!window.demoLauncherActive &&
-          (viewProps => (
-            <StaticMap
-              {...viewProps}
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          ))}
+        {baseMap && (
+          <StaticMap
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

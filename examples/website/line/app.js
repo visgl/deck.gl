@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, LineLayer, ScatterplotLayer} from 'deck.gl';
+import DeckGL, {LineLayer, ScatterplotLayer} from 'deck.gl';
 import GL from 'luma.gl/constants';
 
 // Set your mapbox token here
@@ -44,15 +44,6 @@ function getSize(type) {
 }
 
 class App extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {viewState: INITIAL_VIEW_STATE};
-  }
-
-  _onViewStateChange({viewState}) {
-    return this.setState({viewState});
-  }
-
   _renderLayers() {
     const {
       airports = DATA_URL.AIRPORTS,
@@ -66,7 +57,7 @@ class App extends Component {
         data: airports,
         radiusScale: 20,
         getPosition: d => d.coordinates,
-        getColor: d => [255, 140, 0],
+        getColor: [255, 140, 0],
         getRadius: d => getSize(d.type),
         pickable: Boolean(this.props.onHover),
         onHover: this.props.onHover
@@ -86,32 +77,28 @@ class App extends Component {
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
-    } = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
+        initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
         parameters={{
           blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
           blendEquation: GL.FUNC_ADD
         }}
       >
-        {!window.demoLauncherActive &&
-          (viewProps => (
-            <StaticMap
-              {...viewProps}
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/dark-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          ))}
+        {baseMap && (
+          <StaticMap
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/dark-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }

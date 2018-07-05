@@ -1,4 +1,4 @@
-import {Deck, MapController} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import Map from './mapbox';
 
@@ -28,7 +28,7 @@ export const deck = new Deck({
   width: '100%',
   height: '100%',
   initialViewState: INITIAL_VIEW_STATE,
-  controller: MapController,
+  controller: true,
   onViewStateChange: ({viewState}) => {
     map.setProps({viewState});
   },

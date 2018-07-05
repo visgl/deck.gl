@@ -2,7 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, GeoJsonLayer, ArcLayer} from 'deck.gl';
+import DeckGL, {GeoJsonLayer, ArcLayer} from 'deck.gl';
 import {scaleQuantile} from 'd3-scale';
 
 // Set your mapbox token here
@@ -46,25 +46,11 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
-      counties: null,
       arcs: null,
       selectedCounty: null
     };
 
-    if (!window.demoLauncherActive) {
-      fetch(DATA_URL)
-        .then(response => response.json())
-        .then(({features}) => {
-          this.setState({
-            counties: features,
-            selectedCounty: features.find(f => f.properties.name === 'Los Angeles, CA')
-          });
-          this._recalculateArcs(this.state.counties, this.state.selectedCounty);
-        });
-    } else {
-      this._recalculateArcs(this.props.data, this.props.selectedFeature);
-    }
+    this._recalculateArcs(this.props.data, this.props.selectedFeature);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -76,12 +62,6 @@ class App extends Component {
     }
   }
 
-  _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
-  }
-
   _onHover(info) {
     // Hovered over a county
   }
@@ -90,7 +70,7 @@ class App extends Component {
     // Clicked a county
     const selectedCounty = info.object;
     this.setState({selectedCounty});
-    this._recalculateArcs(this.props.data || this.state.counties, selectedCounty);
+    this._recalculateArcs(this.props.data, selectedCounty);
   }
 
   _recalculateArcs(data, selectedFeature) {
@@ -123,6 +103,7 @@ class App extends Component {
 
   _renderLayers() {
     const {
+      data,
       strokeWidth = 2,
       onHover = this._onHover.bind(this),
       onClick = this._onClick.bind(this)
@@ -131,10 +112,10 @@ class App extends Component {
     return [
       new GeoJsonLayer({
         id: 'geojson',
-        data: this.state.counties,
+        data,
         stroked: false,
         filled: true,
-        getFillColor: () => [0, 0, 0, 0],
+        getFillColor: [0, 0, 0, 0],
         onHover,
         onClick,
         pickable: Boolean(onHover || onClick)
@@ -152,28 +133,24 @@ class App extends Component {
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState
-    } = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
+        initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
       >
-        {!window.demoLauncherActive &&
-          (viewProps => (
-            <StaticMap
-              {...viewProps}
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          ))}
+        {baseMap && (
+          <StaticMap
+            reuseMaps
+            mapStyle="mapbox://styles/mapbox/light-v9"
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
+        )}
       </DeckGL>
     );
   }
@@ -184,5 +161,13 @@ export {App, INITIAL_VIEW_STATE};
 export {inFlowColors, outFlowColors};
 
 if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+  const container = document.body.appendChild(document.createElement('div'));
+  render(<App />, container);
+
+  fetch(DATA_URL)
+    .then(response => response.json())
+    .then(({features}) => {
+      const selectedFeature = features.find(f => f.properties.name === 'Los Angeles, CA');
+      render(<App data={features} selectedFeature={selectedFeature} />, container);
+    });
 }

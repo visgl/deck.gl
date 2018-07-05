@@ -1,4 +1,4 @@
-import {Deck, MapController} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
@@ -17,7 +17,7 @@ export const deck = new Deck({
   width: '100%',
   height: '100%',
   initialViewState: INITIAL_VIEW_STATE,
-  controller: MapController,
+  controller: true,
   layers: [
     new GeoJsonLayer({
       data: GEOJSON,

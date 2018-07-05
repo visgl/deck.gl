@@ -3,7 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, HexagonLayer} from 'deck.gl';
+import DeckGL, {HexagonLayer} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
@@ -52,18 +52,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: null,
       elevationScale: elevationScale.min
     };
-
-    if (!window.demoLauncherActive) {
-      requestCsv(DATA_URL, (error, response) => {
-        if (!error) {
-          const data = response.map(d => [Number(d.lng), Number(d.lat)]);
-          this.setState({data});
-        }
-      });
-    }
 
     this.startAnimationTimer = null;
     this.intervalTimer = null;
@@ -111,7 +101,7 @@ class App extends Component {
   }
 
   _renderLayers() {
-    const {data = this.state.data, radius = 1000, upperPercentile = 100, coverage = 1} = this.props;
+    const {data, radius = 1000, upperPercentile = 100, coverage = 1} = this.props;
 
     return [
       new HexagonLayer({
@@ -134,7 +124,7 @@ class App extends Component {
   }
 
   render() {
-    const {onViewStateChange, viewState} = this.props;
+    const {onViewStateChange, viewState, baseMap = true} = this.props;
 
     return (
       <DeckGL
@@ -142,9 +132,9 @@ class App extends Component {
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         onViewStateChange={onViewStateChange}
-        controller={MapController}
+        controller={true}
       >
-        {!window.demoLauncherActive && (
+        {baseMap && (
           <StaticMap
             reuseMaps
             mapStyle="mapbox://styles/mapbox/dark-v9"
@@ -161,5 +151,13 @@ class App extends Component {
 export {App, INITIAL_VIEW_STATE};
 
 if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+  const container = document.body.appendChild(document.createElement('div'));
+  render(<App />, container);
+
+  requestCsv(DATA_URL, (error, response) => {
+    if (!error) {
+      const data = response.map(d => [Number(d.lng), Number(d.lat)]);
+      render(<App data={data} />, container);
+    }
+  });
 }
