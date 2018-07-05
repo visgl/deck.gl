@@ -1,4 +1,5 @@
 import {WebMercatorViewport} from 'deck.gl';
+import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {fp64} from 'luma.gl';
 
 const {fp64LowPart} = fp64;
@@ -129,6 +130,36 @@ positions = [
 ];
 positions64xyLow = positions.map(pos => fp64LowPart(pos));
 
+const viewport2 = new WebMercatorViewport({
+  latitude: 37.751537058389985,
+  longitude: -122.42694203247012,
+  zoom: 11.5,
+  pitch: 0,
+  bearing: 0,
+  width: 500,
+  height: 500
+});
+
+const positions2 = dataSamples.points.reduce((acc, point) => {
+  acc.push(...point.COORDINATES);
+  return acc;
+}, []);
+
+const positions64xyLow2 = positions2.map(pos => fp64LowPart(pos));
+const weights2 = dataSamples.points.map(_ => 1.0);
+const fixture2 = {
+  positions: positions2,
+  positions64xyLow: positions64xyLow2,
+  weights: weights2,
+  windowSize: [800, 450],
+  cellSize: [40, 40],
+  gridSize: [20, 12],
+  changeFlags: {
+    dataChanged: true
+  },
+  viewport: viewport2
+};
+
 const fixtureWorldSpace = {
   positions,
   positions64xyLow,
@@ -140,6 +171,7 @@ const fixtureWorldSpace = {
 export const GridAggregationData = {
   viewport,
   fixture,
+  fixture2,
   generateRandomGridPoints,
   fixtureWorldSpace
 };

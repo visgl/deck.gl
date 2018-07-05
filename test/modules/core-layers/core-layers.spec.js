@@ -26,7 +26,7 @@ import {
   IconLayer,
   ArcLayer,
   LineLayer,
-  //  ScreenGridLayer,
+  ScreenGridLayer,
   PointCloudLayer,
   PathLayer
   // TextLayer
@@ -36,8 +36,6 @@ import * as FIXTURES from 'deck.gl/test/data';
 
 const getPointPosition = d => d.COORDINATES;
 
-/*
-TODO: https://github.com/uber/deck.gl/issues/1987
 test('ScreenGridLayer#constructor', t => {
   const data = FIXTURES.points;
 
@@ -77,7 +75,6 @@ test('ScreenGridLayer#constructor', t => {
 
   t.end();
 });
-*/
 
 test('ScatterplotLayer#constructor', t => {
   const data = FIXTURES.points;

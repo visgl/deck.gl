@@ -27,10 +27,12 @@ import {
 const {defaultColorRange} = experimental;
 
 import GL from 'luma.gl/constants';
-import {Model, Geometry, Buffer} from 'luma.gl';
+import {Model, Geometry, Buffer, isWebGL2} from 'luma.gl';
 
 import vs from './screen-grid-layer-vertex.glsl';
+import vs_WebGL1 from './screen-grid-layer-vertex-webgl1.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
+import fs_WebGL1 from './screen-grid-layer-fragment-webgl1.glsl';
 import assert from 'assert';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
@@ -54,7 +56,9 @@ const defaultProps = {
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['picking']};
+    const shaders = isWebGL2(this.context.gl) ? {vs, fs} : {vs: vs_WebGL1, fs: fs_WebGL1};
+    shaders.modules = ['picking'];
+    return shaders;
   }
 
   initializeState() {
@@ -109,6 +113,7 @@ export default class ScreenGridLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {gl} = this.context;
     const {parameters = {}} = this.props;
     const minColor = this.props.minColor || DEFAULT_MINCOLOR;
     const maxColor = this.props.maxColor || DEFAULT_MAXCOLOR;
@@ -116,18 +121,22 @@ export default class ScreenGridLayer extends Layer {
     // If colorDomain not specified we use default domain [1, maxCount]
     // maxCount value will be deduced from aggregated buffer in the vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model, maxCountBuffer, cellScale, shouldUseMinMax, colorRange} = this.state;
-    uniforms = Object.assign({}, uniforms, {
+    const {model, maxCountBuffer, cellScale, shouldUseMinMax, colorRange, maxWeight} = this.state;
+    const layerUniforms = {
       minColor,
       maxColor,
       cellScale,
       colorRange,
       colorDomain,
       shouldUseMinMax
-    });
+    };
 
-    // TODO: remove index specification (https://github.com/uber/luma.gl/pull/473)
-    maxCountBuffer.bind({index: AGGREGATION_DATA_UBO_INDEX});
+    if (isWebGL2(gl)) {
+      maxCountBuffer.bind({target: GL.UNIFORM_BUFFER});
+    } else {
+      layerUniforms.maxWeight = maxWeight;
+    }
+    uniforms = Object.assign(layerUniforms, uniforms);
     model.draw({
       uniforms,
       parameters: Object.assign(
@@ -138,7 +147,9 @@ export default class ScreenGridLayer extends Layer {
         parameters
       )
     });
-    maxCountBuffer.unbind({index: AGGREGATION_DATA_UBO_INDEX});
+    if (isWebGL2(gl)) {
+      maxCountBuffer.unbind();
+    }
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
@@ -224,7 +235,6 @@ export default class ScreenGridLayer extends Layer {
   // Creates and returns a Uniform Buffer object to hold maxCount value.
   _getMaxCountBuffer(gl) {
     return new Buffer(gl, {
-      target: GL.UNIFORM_BUFFER,
       bytes: 4 * 4, // Four floats
       size: 4,
       index: AGGREGATION_DATA_UBO_INDEX
@@ -250,6 +260,10 @@ export default class ScreenGridLayer extends Layer {
   // Set a binding point for the aggregation uniform block index
   _setupUniformBuffer() {
     const gl = this.context.gl;
+    // For WebGL1, uniform buffer is not used.
+    if (!isWebGL2(gl)) {
+      return;
+    }
     const programHandle = this.state.model.program.handle;
 
     // TODO: Replace with luma.gl api when ready.
@@ -282,7 +296,7 @@ export default class ScreenGridLayer extends Layer {
     const {positions, weights, maxCountBuffer, countsBuffer} = this.state;
 
     const projectPoints = this.context.viewport instanceof WebMercatorViewport;
-    this.state.gpuGridAggregator.run({
+    const results = this.state.gpuGridAggregator.run({
       positions,
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
@@ -294,8 +308,11 @@ export default class ScreenGridLayer extends Layer {
       projectPoints
     });
 
-    // Aggregation changed, enforce reading buffer data for picking.
-    this.setState({aggregationData: null});
+    const {maxWeight = 0} = results;
+    this.setState({
+      aggregationData: null, // Aggregation changed, enforce reading buffer data for picking.
+      maxWeight // uniform to use under WebGL1
+    });
 
     attributeManager.invalidate('instanceCounts');
   }
