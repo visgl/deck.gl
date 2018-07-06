@@ -40,7 +40,7 @@ uniform float strokeWidth;
 // uniform for brushing
 uniform vec2 mousePos;
 uniform float brushRadius;
-uniform float enableBrushing;
+uniform bool enableBrushing;
 uniform float brushTarget;
 
 varying vec4 vColor;
@@ -63,9 +63,9 @@ float distanceBetweenLatLng(vec2 source, vec2 target) {
 }
 
 // range is km
-float isPointInRange(vec2 ptLatLng, vec2 mouseLatLng, float range, float enabled) {
+float isPointInRange(vec2 ptLatLng, vec2 mouseLatLng, float range, bool enabled) {
 
-  return float(enabled <= 0. || distanceBetweenLatLng(ptLatLng, mouseLatLng) <= range);
+  return float(enabled && distanceBetweenLatLng(ptLatLng, mouseLatLng) <= range);
 }
 
 void main(void) {
@@ -75,7 +75,7 @@ void main(void) {
 
   // for use with arc layer, if brushTarget is truthy
   // calculate whether instanceTargetPositions is in range
-  float isTargetInBrush = isPointInRange(instanceTargetPositions.xy, mousePos, brushRadius, 1.);
+  float isTargetInBrush = isPointInRange(instanceTargetPositions.xy, mousePos, brushRadius, true);
 
   // if brushTarget is falsy, when pt is in brush return true
   // if brushTarget is truthy and target is in brush return true

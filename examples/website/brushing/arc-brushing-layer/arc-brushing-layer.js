@@ -45,20 +45,19 @@ export default class ArcBrushingLayer extends ArcLayer {
     });
   }
 
-  draw({uniforms}) {
+  draw(opts) {
     // add uniforms
-    super.draw({
-      uniforms: {
-        ...uniforms,
-        brushSource: this.props.brushSource,
-        brushTarget: this.props.brushTarget,
-        brushRadius: this.props.brushRadius,
-        mousePos: this.props.mousePosition
-          ? new Float32Array(this.unproject(this.props.mousePosition))
-          : defaultProps.mousePosition,
-        enableBrushing: this.props.enableBrushing ? 1 : 0
-      }
+    const uniforms = Object.assign({}, opts.uniforms, {
+      brushSource: this.props.brushSource,
+      brushTarget: this.props.brushTarget,
+      brushRadius: this.props.brushRadius,
+      mousePos: this.props.mousePosition
+        ? new Float32Array(this.unproject(this.props.mousePosition))
+        : defaultProps.mousePosition,
+      enableBrushing: this.props.enableBrushing
     });
+    const newOpts = Object.assign({}, opts, {uniforms});
+    super.draw(newOpts);
   }
 }
 
