@@ -47,7 +47,7 @@ const flights = new ArcLayer({
 <DeckGL width={1920} height={1080} layers={[flights]} />
 ```
 
-Simple usage of deck.gl is also showcased in the [hello-world examples](./examples/get-started), using both [webpack2](./examples/get-started/hello-world-webpack2) and [browserify](./examples/get-started/hello-world-browserify), so you can choose which bundler you prefer or are more familiar with.
+Simple usage of deck.gl is also showcased in the [hello-world examples](./examples/get-started), using both [webpack2](./examples/get-started/react-webpack-2) and [browserify](./examples/get-started/react-browserify), so you can choose which bundler you prefer or are more familiar with.
 
 To learn how to use deck.gl through the many examples that coming with the deck.gl repo, please clone the latest **release** branch. `git clone -b 5.3-release --single-branch https://github.com/uber/deck.gl.git`
 
