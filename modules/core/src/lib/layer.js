@@ -85,6 +85,7 @@ export default class Layer extends Component {
 
   // Updates selected state members and marks the object for redraw
   setState(updateObject) {
+    this.setChangeFlags({stateChanged: true});
     Object.assign(this.state, updateObject);
     this.setNeedsRedraw();
   }
@@ -597,13 +598,20 @@ export default class Layer extends Component {
         () => `viewportChanged: ${flags.viewportChanged} in ${this.id}`
       )();
     }
+    if (flags.stateChanged && !changeFlags.stateChanged) {
+      changeFlags.stateChanged = flags.stateChanged;
+      log.log(LOG_PRIORITY_UPDATE + 1, () => `stateChanged: ${flags.stateChanged} in ${this.id}`)();
+    }
 
     // Update composite flags
     const propsOrDataChanged =
       flags.dataChanged || flags.updateTriggersChanged || flags.propsChanged;
     changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged || propsOrDataChanged;
     changeFlags.somethingChanged =
-      changeFlags.somethingChanged || propsOrDataChanged || flags.viewportChanged;
+      changeFlags.somethingChanged ||
+      propsOrDataChanged ||
+      flags.viewportChanged ||
+      flags.stateChanged;
   }
   /* eslint-enable complexity */
 
@@ -615,6 +623,7 @@ export default class Layer extends Component {
       propsChanged: false,
       updateTriggersChanged: false,
       viewportChanged: false,
+      stateChanged: false,
 
       // Derived changeFlags
       propsOrDataChanged: false,
