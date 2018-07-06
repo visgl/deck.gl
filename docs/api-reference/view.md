@@ -59,7 +59,7 @@ If `projectionMatrix` is not supplied, `Viewport` will build a matrix from the f
   - `Controller` class (not instance): initiates the provided controller with default options.
   - `Object`: controller options. This will be merged with the default controller options. 
     + `controller.type`: the controller class
-    + For other options, consult the documentation of each Controller class.
+    + For other options, consult the documentation of [Controller](/docs/api-reference/controller.md).
 
 Default `null`.
 
