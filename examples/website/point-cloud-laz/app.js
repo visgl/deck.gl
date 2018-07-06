@@ -101,18 +101,19 @@ class Example extends PureComponent {
   _onResize() {
     this.setState({width: window.innerWidth, height: window.innerHeight});
 
-    const newViewState = Object.assign({}, this.viewState, {
-      distance: OrbitView.getDistance({
-        boundingBox: [1, 1, 1],
-        fov: this.state.viewState.fov
-      })
-    });
-    this._onViewStateChange(newViewState, {});
+    if (this.viewState) {
+      const newViewState = Object.assign({}, this.viewState, {
+        distance: OrbitView.getDistance({
+          boundingBox: [1, 1, 1], fov: this.state.viewState.fov
+        })
+      });
+      this._onViewStateChange(newViewState, {});
+    }
   }
 
-  _onViewStateChange({viewState, interactiveState}) {
+  _onViewStateChange({viewState, interactionState}) {
     this.setState({
-      rotating: !interactiveState.isDragging,
+      rotating: !interactionState.isDragging,
       viewState: {...this.state.viewState, ...viewState}
     });
   }
@@ -157,7 +158,7 @@ class Example extends PureComponent {
       <DeckGL
         width={width}
         height={height}
-        views={view}
+        views={[view]}
         viewState={viewState}
         controller={OrbitController}
         layers={[this._renderLazPointCloudLayer()]}
