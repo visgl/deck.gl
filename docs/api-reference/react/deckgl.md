@@ -25,13 +25,13 @@ const App = (data) => (
 Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `StaticMap` component from react-map-gl), but can be any React components.
 
 ```js
-import DeckGL, {MapController} from 'deck.gl';
+import DeckGL from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
 
 const App = (data) => (
   <DeckGL
     initialViewState={{longitude: -122.45, latitude: 37.78, zoom: 12}}
-    controller={MapController}
+    controller={true}
     layers={[new ScatterplotLayer({data})]}
   >
     <StaticMap
@@ -71,6 +71,17 @@ Current bearing - used to define a mercator projection if `viewState` is not sup
 
 Current pitch - used to define a mercator projection if `viewState` is not supplied.
 
+##### `controller` (Function | Boolean | Object, optional)
+
+Options for viewport interactivity.
+
+* `null` or `false`: this view is not interactive.
+* `true`: initiates the default controller with default options.
+* `Controller` class: initiates the provided controller with default options.
+* `Object`: controller options. This will be merged with the default controller options. 
+  - `controller.type`: the controller class
+  - For other options, consult the documentation of each Controller class.
+
 
 ### Children
 
@@ -96,7 +107,7 @@ It is possible to use JSX syntax to create deck.gl views as React children of th
 
 ```jsx
   <DeckGL initialViewState={...viewState} layers={layers} >
-    <MapView id="map" width="50%" controller={MapController} >
+    <MapView id="map" width="50%" controller={true} >
       <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
     </MapView>
     <FirstPersonView width="50%" x="50%" fovy={50} />
@@ -107,7 +118,7 @@ If a certain view id is used in both JSX views and the `views` prop, the view in
 
 ```jsx
   const views = [
-    new MapView({id: 'map', width: '50%', controller: MapController}),
+    new MapView({id: 'map', width: '50%', controller: true}),
     new FirstPersonView({width: '50%', x: '50%', fovy: 50})
   ];
 
