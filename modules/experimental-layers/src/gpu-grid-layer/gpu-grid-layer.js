@@ -25,8 +25,7 @@ import GPUGridCellLayer from './gpu-grid-cell-layer';
 import {pointToDensityGridData} from './gpu-grid-utils';
 
 const MINCOLOR = [0, 0, 0, 255];
-const CPU_MAXCOLOR = [255, 0, 0, 255];
-const GPU_MAXCOLOR = [0, 255, 0, 255];
+const MAXCOLOR = [0, 255, 0, 255];
 
 const defaultProps = {
   // elevation
@@ -98,7 +97,7 @@ export default class GPUGridLayer extends CompositeLayer {
 
     const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset} = this.state;
     const minColor = MINCOLOR;
-    const maxColor = this.props.gpuAggregation ? GPU_MAXCOLOR : CPU_MAXCOLOR;
+    const maxColor = MAXCOLOR;
 
     // return props to the sublayer constructor
     return super.getSubLayerProps({

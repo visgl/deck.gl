@@ -25,7 +25,7 @@ import {LineLayer} from '@deck.gl/layers';
 import {pointToDensityGridData} from '../gpu-grid-layer/gpu-grid-utils';
 import {generateContours} from './contour-utils';
 
-const DEFAULT_COLOR = [255, 0, 255];
+const DEFAULT_COLOR = [255, 255, 255];
 const DEFAULT_THRESHOLD = 1;
 
 const defaultProps = {

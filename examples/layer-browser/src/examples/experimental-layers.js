@@ -172,7 +172,7 @@ const GPUGridLayerExample = {
   layer: GPUGridLayer,
   getData: () => dataSamples.points,
   props: {
-    id: 'gpuGridLayer',
+    id: 'gpu-grid-layer',
     cellSize: 200,
     opacity: 1,
     extruded: true,
