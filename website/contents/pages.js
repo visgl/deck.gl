@@ -471,6 +471,10 @@ export const docPages = generatePath([
         name: 'Controllers',
         children: [
           {
+            name: 'Controller',
+            content: getDocUrl('api-reference/controller.md')
+          },
+          {
             name: 'MapController',
             content: getDocUrl('api-reference/map-controller.md')
           }

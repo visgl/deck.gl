@@ -1,5 +1,7 @@
 # MapController
 
+Inherits from [Base Controller](/docs/api-reference/controller.md).
+
 The `MapController` class can be passed to the `Deck.controller` or `View.controller` prop to specify that map interaction should be enabled.
 
 `MapController` is the default controller for `MapView`.
@@ -34,17 +36,8 @@ onViewportChange={v => this.setState({viewport: v})}
 />
 ```
 
-## Options
+For a list of supported options, see [Controller](/docs/api-reference/controller.md).
 
-- `scrollZoom` (`Boolean`) - enable zooming with mouse wheel. Default `true`
-- `dragPan` (`Boolean`) - enable panning with pointer drag. Default `true`
-- `dragRotate` (`Boolean`) - enable rotating with pointer drag. Default `true`
-- `doubleClickZoom` (`Boolean`) - enable zooming with double click. Default `true`
-- `touchZoom` (`Boolean`) - enable zooming with multi-touch. Default `true`
-- `touchRotate` (`Boolean`) - enable rotating with multi-touch. Default `false`
-- `keyboard` (`Boolean`) - enable interaction with keyboard. Default `true`
+## Source
 
-
-## Methods
-
-Note that the `MapController` class should not be instantiated by the application.
+[modules/core/src/core/controllers/map-controller.js](https://github.com/uber/deck.gl/blob/5.2-release/modules/core/src/core/controllers/map-controller.js)
