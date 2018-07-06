@@ -50,6 +50,10 @@ Pixel sizes in `LineLayer`, `IconLayer` and `TextLayer` now match their HTML/SVG
 
 ScreenGridLayer is updated to support aggregation on GPU. Depending on the data set aggregation on GPU can be 10-12X faster and capable of handling large data sets (MM) where CPU version freezes the UI. Also picking information now contains aggregated details. Two new props `gpuAggregation` for selecting CPU or GPU aggregation and `cellMarginPixels` to control cell margin size are added.
 
+### Simplified controller prop
+
+DeckGL can now infer controller type from the type of the view. For example, when using the default geospatial view, `controller={MapController}` can also be written as `controller={true}`. You may also pass additional controller options to this prop, for example `controller={{doubleClickZoom: false}}`. See documentation of [View](/docs/api-reference/view.md).
+
 
 ## deck.gl v5.3
 
