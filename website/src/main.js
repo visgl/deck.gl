@@ -6,11 +6,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Provider} from 'react-redux';
 
-/* global window */
-window.demoLauncherActive = true;
-// Use require to ensure `window.demoLauncherActive` flag is set before demos are imported.
-const AppState = require('./reducers').default;
-const Routes = require('./routes').default;
+import AppState from './reducers';
+import Routes from './routes';
 
 const el = document.createElement('div');
 document.body.appendChild(el);

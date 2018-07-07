@@ -1,5 +1,4 @@
 /* eslint-disable max-len */
-/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -16,7 +15,7 @@ const MAPBOX_STYLE =
 
 const DEFAULT_COLOR = [29, 145, 192];
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   latitude: 39.1,
   longitude: -94.57,
   zoom: 3.8,
@@ -25,7 +24,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-class App extends Component {
+export class App extends Component {
   _renderLayers() {
     const {data = DATA_URL, cluster = true, fontSize = 32} = this.props;
 
@@ -74,9 +73,6 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
 }

@@ -1,4 +1,3 @@
-/* global window,document */
 /* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
@@ -13,7 +12,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   longitude: -1.4157267858730052,
   latitude: 52.232395363869415,
   zoom: 6.6,
@@ -44,7 +43,7 @@ const colorRange = [
 const elevationScale = {min: 1, max: 50};
 
 /* eslint-disable react/no-deprecated */
-class App extends Component {
+export class App extends Component {
   static get defaultColorRange() {
     return colorRange;
   }
@@ -146,11 +145,7 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  const container = document.body.appendChild(document.createElement('div'));
+export function renderToDOM(container) {
   render(<App />, container);
 
   requestCsv(DATA_URL, (error, response) => {

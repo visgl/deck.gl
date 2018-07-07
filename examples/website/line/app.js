@@ -1,4 +1,3 @@
-/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
@@ -17,7 +16,7 @@ const DATA_URL = {
     'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json' // eslint-disable-line
 };
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   latitude: 47.65,
   longitude: 7,
   zoom: 4.5,
@@ -43,7 +42,7 @@ function getSize(type) {
   return 60;
 }
 
-class App extends Component {
+export class App extends Component {
   _renderLayers() {
     const {
       airports = DATA_URL.AIRPORTS,
@@ -103,9 +102,6 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
 }

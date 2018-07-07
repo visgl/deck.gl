@@ -12,6 +12,10 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
+  output: {
+    library: ['App']
+  },
+
   module: {
     rules: [
       {

@@ -12,6 +12,10 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
+  output: {
+    library: ['App']
+  },
+
   devtool: 'source-map',
 
   module: {
@@ -29,7 +33,7 @@ const CONFIG = {
     ]
   },
 
-  plugins: [new HtmlWebpackPlugin()]
+  plugins: [new HtmlWebpackPlugin({template: '../template.html'})]
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module

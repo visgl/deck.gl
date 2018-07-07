@@ -1,4 +1,4 @@
-/* global document, window */
+/* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -25,7 +25,7 @@ const LIGHT_SETTINGS = {
   numberOfLights: 2
 };
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   longitude: -74,
   latitude: 40.72,
   zoom: 13,
@@ -34,7 +34,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-export default class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -120,9 +120,6 @@ export default class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
 }

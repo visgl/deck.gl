@@ -13,6 +13,10 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
+  output: {
+    library: ['App']
+  },
+
   module: {
     rules: [
       {
@@ -37,7 +41,7 @@ const CONFIG = {
 
   // Optional: Enables reading mapbox token from environment variable
   plugins: [
-    new HtmlWebpackPlugin({title: 'deck.gl example'}),
+    new HtmlWebpackPlugin({template: '../template.html'}),
     new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ]
 };
