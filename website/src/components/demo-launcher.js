@@ -1,34 +1,14 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
+import {FlyToInterpolator} from 'react-map-gl';
 
 import MapGL from 'react-map-gl';
 import * as Demos from './demos';
-import {updateMap, updateMeta, loadData, useParams, resetParams} from '../actions/app-actions';
-import ViewportAnimation from '../utils/map-utils';
+import {updateMapState, updateMeta, loadData, useParams, resetParams} from '../actions/app-actions';
 import {MAPBOX_STYLES} from '../constants/defaults';
 
 class DemoLauncher extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      trackMouseMove: false,
-      mousePosition: null
-    };
-  }
-
-  componentDidMount() {
-    /* global window */
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    this.setState({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
 
   componentWillMount() {
     this._loadDemo(this.props.demo, false);
@@ -53,29 +33,19 @@ class DemoLauncher extends Component {
       this.props.loadData(demo, DemoComponent.data);
       this.props.useParams(DemoComponent.parameters);
       let demoViewport = DemoComponent.viewport;
-      this._mapStyle = DemoComponent.mapStyle || (demoViewport && demoViewport.mapStyle);
+      this._mapStyle = DemoComponent.mapStyle;
 
       if (demoViewport) {
         demoViewport = {
+          transitionDuration: useTransition ? 2000 : 0,
+          transitionInterpolator: new FlyToInterpolator(),
           minZoom: 0,
           maxZoom: 20,
           ...demoViewport
         };
-        delete demoViewport.mapStyle;
 
-        if (useTransition) {
-          const {viewport} = this.props;
-          ViewportAnimation.fly(viewport, demoViewport, 1000, this.props.updateMap)
-          .easing(ViewportAnimation.Easing.Exponential.Out)
-          .start();
-        } else {
-          this.props.updateMap(demoViewport);
-        }
+        this.props.updateMapState(demoViewport);
       }
-
-      this.setState({
-        trackMouseMove: Boolean(DemoComponent.trackMouseMove)
-      });
     }
   }
 
@@ -86,53 +56,34 @@ class DemoLauncher extends Component {
   }
 
   @autobind
-  _onMouseMove(evt) {
-    if (evt.nativeEvent) {
-      this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
-    }
-  }
-
-  @autobind
-  _onMouseEnter() {
-    this.setState({mouseEntered: true});
-  }
-
-  @autobind
-  _onMouseLeave() {
-    this.setState({mouseEntered: false});
-  }
-
-  @autobind
   _updateMapViewState({viewState}) {
-    this.props.updateMap(viewState);
+    this.props.updateMapState(viewState);
   }
 
   // Add map wrapper, use for examples that havn't yet been updated to render their own maps
-  _renderMap(mapStyle, component) {
-    const {viewport, isInteractive} = this.props;
-
-    mapStyle = mapStyle || viewport.mapStyle || MAPBOX_STYLES.BLANK;
+  _renderMap(mapStyle = MAPBOX_STYLES.BLANK, component) {
+    const {viewState, width, height, isInteractive} = this.props;
 
     return (
       <MapGL
         mapboxApiAccessToken={MapboxAccessToken}
-        preventStyleDiffing={true}
         mapStyle={mapStyle}
         reuseMap
 
-        width={this.state.width}
-        height={this.state.height}
-        viewState={viewport}
-        onViewStateChange={isInteractive ? this._updateMapViewState : undefined}>
+        {...viewState}
+        width={width}
+        height={height}
+        onViewStateChange={this._updateMapViewState}>
 
         {component}
+        {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
 
       </MapGL>
     );
   }
 
   render() {
-    const {viewport, demo, owner, data, isInteractive} = this.props;
+    const {viewState, demo, owner, data, isInteractive} = this.props;
     const DemoComponent = Demos[demo];
 
     // Params are not initialized in time
@@ -142,42 +93,30 @@ class DemoLauncher extends Component {
       return null;
     }
 
-    return (
-      <div
-        onMouseMove={this.state.trackMouseMove ? this._onMouseMove : null}
-        onMouseEnter={this.state.trackMouseMove ? this._onMouseEnter : null}
-        onMouseLeave={this.state.trackMouseMove ? this._onMouseLeave : null}>
+    return this._renderMap(
+      DemoComponent.mapStyle,
+      <DemoComponent
+        ref="demo"
 
-        {this._renderMap(
-          DemoComponent.mapStyle,
-          <DemoComponent
-            ref="demo"
+        controller={false}
+        baseMap={false}
 
-            data={owner === demo ? data : null}
+        data={owner === demo ? data : null}
+        viewState={viewState}
 
-            viewState={viewport}
-            onViewStateChange={isInteractive ? this._updateMapViewState : undefined}
+        mapboxApiAccessToken={MapboxAccessToken}
+        mapStyle={this._mapStyle || MAPBOX_STYLES.BLANK}
 
-            mapboxApiAccessToken={MapboxAccessToken}
-            mapStyle={this._mapStyle || MAPBOX_STYLES.BLANK}
-
-            params={params}
-            onStateChange={this.props.updateMeta}
-            mousePosition={this.state.mousePosition}
-            mouseEntered={this.state.mouseEntered}
-            />
-        )}
-
-        {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
-
-      </div>
+        params={params}
+        onStateChange={this.props.updateMeta}
+        />
     );
   }
 
 }
 
 const mapStateToProps = state => ({
-  viewport: state.viewport,
+  ...state.map,
   ...state.vis
 });
 
@@ -187,5 +126,5 @@ DemoLauncher.defaultProps = {
 
 export default connect(
   mapStateToProps,
-  {updateMap, updateMeta, loadData, useParams, resetParams}
+  {updateMapState, updateMeta, loadData, useParams, resetParams}
 )(DemoLauncher);

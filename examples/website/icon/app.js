@@ -174,19 +174,10 @@ class App extends Component {
   }
 
   render() {
-    const {
-      onViewStateChange = this._onViewStateChange.bind(this),
-      viewState = this.state.viewState,
-      baseMap = true
-    } = this.props;
+    const {viewState, controller = true, baseMap = true} = this.props;
 
     return (
-      <DeckGL
-        layers={this._renderLayers()}
-        viewState={viewState}
-        onViewStateChange={onViewStateChange}
-        controller={true}
-      >
+      <DeckGL layers={this._renderLayers()} viewState={viewState} controller={controller}>
         {baseMap && (
           <StaticMap
             reuseMaps

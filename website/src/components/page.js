@@ -7,7 +7,7 @@ import autobind from 'autobind-decorator';
 import DemoLauncher from './demo-launcher';
 import InfoPanel from './info-panel';
 import MarkdownPage from './markdown-page';
-import {loadContent, updateMap} from '../actions/app-actions';
+import {loadContent, updateMapSize} from '../actions/app-actions';
 
 class Page extends Component {
 
@@ -46,7 +46,7 @@ class Page extends Component {
   @autobind _resizeMap() {
     const page = document.querySelector('.page');
     if (page) {
-      this.props.updateMap({
+      this.props.updateMapSize({
         width: page.clientWidth,
         height: page.clientHeight
       });
@@ -56,7 +56,7 @@ class Page extends Component {
   @autobind _renderDemo(name, sourceLink) {
     return (
       <div className="demo">
-        <DemoLauncher key={name} demo={name} />
+        <DemoLauncher demo={name} />
         <InfoPanel demo={name} >
 
           {sourceLink && (<div className="source-link">
@@ -108,4 +108,4 @@ function mapStateToProps(state) {
   };
 }
 
-export default connect(mapStateToProps, {loadContent, updateMap})(Page);
+export default connect(mapStateToProps, {loadContent, updateMapSize})(Page);

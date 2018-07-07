@@ -10,18 +10,16 @@ export const MAPBOX_STYLES = {
   })
 };
 
-export const DEFAULT_VIEWPORT_STATE = {
-  width: 600,
-  height: 600,
-  latitude: 37.7749295,
-  longitude: -122.4194155,
-  zoom: 11,
-  isDragging: false,
-  startDragLngLat: null,
-  startBearing: null,
-  startPitch: null,
-  bearing: 0,
-  pitch: 0
+export const DEFAULT_MAP_STATE = {
+  width: 0,
+  height: 0,
+  viewState: {
+    latitude: 37.7749295,
+    longitude: -122.4194155,
+    zoom: 11,
+    bearing: 0,
+    pitch: 0
+  }
 };
 
 export const DEFAULT_VIS_STATE = {
