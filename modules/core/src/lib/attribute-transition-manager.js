@@ -236,6 +236,7 @@ export default class AttributeTransitionManager {
       };
     }
     const fromState = transition.buffer || toState;
+    // Rendering to an empty buffer causes WebGL error
     const toLength = (this.numInstances || 1) * size;
     const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
 
