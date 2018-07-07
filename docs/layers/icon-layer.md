@@ -61,7 +61,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Atlas image url or texture
 
-##### `iconMapping` (Object, required)
+##### `iconMapping` (Object | String, required)
 
 Icon names mapped to icon definitions. Each icon is defined with the following values:
 

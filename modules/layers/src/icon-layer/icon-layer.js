@@ -55,7 +55,7 @@ const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR;
  */
 const defaultProps = {
   iconAtlas: null,
-  iconMapping: {},
+  iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: 1,
   fp64: false,
 

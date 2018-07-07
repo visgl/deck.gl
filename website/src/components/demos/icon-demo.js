@@ -12,15 +12,10 @@ function stopPropagation(evt) {
 export default class IconDemo extends Component {
 
   static get data() {
-    return [
-      {
-        url: `${DATA_URI}/meteorites.txt`,
-        worker: 'workers/meteorites-decoder.js'
-      },
-      {
-        url: 'images/location-icon-mapping.json'
-      }
-    ];
+    return {
+      url: `${DATA_URI}/meteorites.txt`,
+      worker: 'workers/meteorites-decoder.js'
+    };
   }
 
   static get parameters() {
@@ -161,9 +156,9 @@ export default class IconDemo extends Component {
     return (
       <App
         {...this.props}
-        data={data[0]}
+        data={data}
         iconAtlas="images/location-icon-atlas.png"
-        iconMapping={data[1]}
+        iconMapping="images/location-icon-mapping.json"
         showCluster={params.cluster.value}
         onHover={this._onHover}
         onClick={this._onClick} >
