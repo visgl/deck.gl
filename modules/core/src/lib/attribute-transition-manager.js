@@ -236,7 +236,7 @@ export default class AttributeTransitionManager {
       };
     }
     const fromState = transition.buffer || toState;
-    const toLength = this.numInstances * size;
+    const toLength = (this.numInstances || 1) * size;
     const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
 
     // Alternate between two buffers when new transitions start.
