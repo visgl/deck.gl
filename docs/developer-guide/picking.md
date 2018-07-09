@@ -92,12 +92,12 @@ new Model(gl, {
 Vertex shader should set current picking color using `picking_setPickingColor` method provided by picking shader module.
 
 ```glsl
-attribute vec3 instancePickingColors;
+attribute vec3 pickingColors;
 
 void main(void) {
   ...
 
-  picking_setPickingColor(instancePickingColors);
+  picking_setPickingColor(pickingColors);
 
   ....
 }
@@ -108,8 +108,6 @@ void main(void) {
 Fragment shader should use `picking_filterPickingColor` to update `gl_FragColor`, which outputs picking color if it is the picking pass.
 
 ```glsl
-attribute vec3 instancePickingColors;
-
 void main(void) {
   ...
 
