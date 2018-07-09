@@ -102,7 +102,7 @@ class Example extends PureComponent {
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       getPosition: d => d.position,
       getNormal: d => d.normal,
-      radiusPixels: 2
+      radiusPixels: 1
     });
   }
 
