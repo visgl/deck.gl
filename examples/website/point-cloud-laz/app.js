@@ -13,7 +13,7 @@ const FILE_PATH = 'examples/point-cloud-laz/indoor.laz';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  distance: 1,
+  distance: 2,
   rotationX: 0,
   rotationOrbit: 0,
   orbitAxis: 'Y',
@@ -104,7 +104,8 @@ class Example extends PureComponent {
     if (this.viewState) {
       const newViewState = Object.assign({}, this.viewState, {
         distance: OrbitView.getDistance({
-          boundingBox: [1, 1, 1], fov: this.state.viewState.fov
+          boundingBox: [1, 1, 1],
+          fov: this.state.viewState.fov
         })
       });
       this._onViewStateChange(newViewState, {});
@@ -146,7 +147,7 @@ class Example extends PureComponent {
       getPosition: d => d.position,
       getNormal: d => [0, 0.5, 0.2],
       getColor: d => [255, 255, 255, 128],
-      radiusPixels: 1
+      radiusPixels: 0.5
     });
   }
 

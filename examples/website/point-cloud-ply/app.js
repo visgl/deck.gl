@@ -67,7 +67,8 @@ class Example extends PureComponent {
     if (this.viewState) {
       const newViewState = Object.assign({}, this.viewState, {
         distance: OrbitView.getDistance({
-          boundingBox: [1, 1, 1], fov: this.state.viewState.fov
+          boundingBox: [1, 1, 1],
+          fov: this.state.viewState.fov
         })
       });
       this._onViewStateChange(newViewState, {});
@@ -101,7 +102,7 @@ class Example extends PureComponent {
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       getPosition: d => d.position,
       getNormal: d => d.normal,
-      radiusPixels: 2
+      radiusPixels: 1
     });
   }
 
