@@ -109,7 +109,7 @@ export default class AttributeTransitionManager {
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   setCurrentTime(currentTime) {
-    if (!this.transform) {
+    if (!this.transform || this.numInstances === 0) {
       return false;
     }
 
@@ -236,8 +236,7 @@ export default class AttributeTransitionManager {
       };
     }
     const fromState = transition.buffer || toState;
-    // Rendering to an empty buffer causes WebGL error
-    const toLength = (this.numInstances || 1) * size;
+    const toLength = this.numInstances * size;
     const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
 
     // Alternate between two buffers when new transitions start.
