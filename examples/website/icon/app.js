@@ -1,4 +1,3 @@
-/* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
