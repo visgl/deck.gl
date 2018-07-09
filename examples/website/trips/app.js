@@ -53,9 +53,12 @@ export class App extends Component {
   }
 
   _animate() {
-    const timestamp = Date.now();
-    const loopLength = 1800;
-    const loopTime = 60000;
+    const {
+      loopLength = 1800, // unit corresponds to the timestamp in source data
+      animationSpeed = 30 // unit time per second
+    } = this.props;
+    const timestamp = Date.now() / 1000;
+    const loopTime = loopLength / animationSpeed;
 
     this.setState({
       time: ((timestamp % loopTime) / loopTime) * loopLength
@@ -64,12 +67,7 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {
-      buildings = DATA_URL.BUILDINGS,
-      trips = DATA_URL.TRIPS,
-      trailLength = 180,
-      time = this.state.time
-    } = this.props;
+    const {buildings = DATA_URL.BUILDINGS, trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
 
     return [
       new TripsLayer({
@@ -80,7 +78,7 @@ export class App extends Component {
         opacity: 0.3,
         strokeWidth: 2,
         trailLength,
-        currentTime: time
+        currentTime: this.state.time
       }),
       new PolygonLayer({
         id: 'buildings',

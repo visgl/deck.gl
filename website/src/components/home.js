@@ -5,7 +5,7 @@ import Stats from 'stats.js';
 
 import {updateMapState, updateMapSize, setHeaderOpacity} from '../actions/app-actions';
 import DemoLauncher from './demo-launcher';
-import Animation from '../utils/animation-utils';
+import TWEEN from '@tweenjs/tween.js';
 import HomeDemo from './demos/home-demo';
 
 class Home extends Component {
@@ -13,13 +13,15 @@ class Home extends Component {
     super(props);
     this.state = {};
 
-    this.cameraAnimation = Animation.ease(
-      {...HomeDemo.viewport, bearing: 0},
-      {...HomeDemo.viewport, bearing: -15},
+    const viewport = {...HomeDemo.viewport};
+
+    TWEEN.removeAll();
+    this.cameraAnimation = new TWEEN.Tween(viewport).to(
+      {...viewport, bearing: -15},
       29000
-    ).easing(Animation.Easing.Sinusoidal.InOut)
+    ).easing(TWEEN.Easing.Sinusoidal.InOut)
     .onUpdate(function tweenUpdate() {
-      props.updateMapState({...this}); // eslint-disable-line
+      props.updateMapState({...viewport}); // eslint-disable-line
     })
     .repeat(Infinity)
     .yoyo(true);
@@ -36,6 +38,7 @@ class Home extends Component {
     this.refs.fps.appendChild(this._stats.dom);
 
     const calcFPS = () => {
+      TWEEN.update();
       this._stats.begin();
       this._stats.end();
       this._animateRef = window.requestAnimationFrame(calcFPS);
