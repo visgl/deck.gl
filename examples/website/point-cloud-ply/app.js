@@ -11,7 +11,7 @@ const FILE_PATH = 'examples/point-cloud-ply/lucy100k.ply';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  distance: 100,
+  distance: 2,
   rotationX: 0,
   rotationOrbit: 0,
   orbitAxis: 'Y',
@@ -64,13 +64,14 @@ class Example extends PureComponent {
   _onResize() {
     this.setState({width: window.innerWidth, height: window.innerHeight});
 
-    const newViewState = Object.assign({}, this.viewState, {
-      distance: OrbitView.getDistance({
-        boundingBox: [1, 1, 1],
-        fov: this.state.viewState.fov
-      })
-    });
-    this._onViewStateChange(newViewState, {});
+    if (this.viewState) {
+      const newViewState = Object.assign({}, this.viewState, {
+        distance: OrbitView.getDistance({
+          boundingBox: [1, 1, 1], fov: this.state.viewState.fov
+        })
+      });
+      this._onViewStateChange(newViewState, {});
+    }
   }
 
   _onViewStateChange({viewState}) {
@@ -113,7 +114,7 @@ class Example extends PureComponent {
       <DeckGL
         width={width}
         height={height}
-        views={view}
+        views={[view]}
         viewState={viewState}
         controller={OrbitController}
         onViewStateChange={this._onViewStateChange}
