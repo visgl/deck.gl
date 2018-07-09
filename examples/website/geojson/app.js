@@ -1,4 +1,3 @@
-/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -20,7 +19,7 @@ const LIGHT_SETTINGS = {
   numberOfLights: 2
 };
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   latitude: 49.254,
   longitude: -123.13,
   zoom: 11,
@@ -31,7 +30,7 @@ const INITIAL_VIEW_STATE = {
 
 const DEFAULT_COLOR_SCALE = r => [r * 255, 140, 200 * (1 - r)];
 
-class App extends Component {
+export class App extends Component {
   _renderLayers() {
     const {data = DATA_URL, colorScale = DEFAULT_COLOR_SCALE} = this.props;
 
@@ -78,9 +77,6 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
 }

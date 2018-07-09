@@ -1,4 +1,4 @@
-/* global document, fetch, window */
+/* global fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -33,7 +33,7 @@ const SOURCE_COLOR = [166, 3, 3];
 // migrate in
 const TARGET_COLOR = [35, 181, 184];
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   longitude: -100,
   latitude: 40.7,
   zoom: 3,
@@ -43,7 +43,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 /* eslint-disable react/no-deprecated */
-class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -275,11 +275,7 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  const container = document.body.appendChild(document.createElement('div'));
+export function renderToDOM(container) {
   render(<App />, container);
 
   fetch(DATA_URL)

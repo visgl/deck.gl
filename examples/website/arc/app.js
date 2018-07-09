@@ -1,4 +1,4 @@
-/* global document, fetch, window */
+/* global fetch */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -12,7 +12,7 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json'; // eslint-disable-line
 
-const inFlowColors = [
+export const inFlowColors = [
   [255, 255, 204],
   [199, 233, 180],
   [127, 205, 187],
@@ -22,7 +22,7 @@ const inFlowColors = [
   [12, 44, 132]
 ];
 
-const outFlowColors = [
+export const outFlowColors = [
   [255, 255, 178],
   [254, 217, 118],
   [254, 178, 76],
@@ -32,7 +32,7 @@ const outFlowColors = [
   [177, 0, 38]
 ];
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   longitude: -100,
   latitude: 40.7,
   zoom: 3,
@@ -42,7 +42,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 /* eslint-disable react/no-deprecated */
-class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -155,12 +155,7 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-export {inFlowColors, outFlowColors};
-
-if (!window.demoLauncherActive) {
-  const container = document.body.appendChild(document.createElement('div'));
+export function renderToDOM(container) {
   render(<App />, container);
 
   fetch(DATA_URL)

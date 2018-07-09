@@ -1,4 +1,4 @@
-/* global document, window */
+/* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {OrbitView} from 'deck.gl';
@@ -26,7 +26,7 @@ function getScale({min, max}) {
     .range([0, 1]);
 }
 
-class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -136,10 +136,6 @@ class Root extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App};
-// App.INITIAL_VIEW_STATE = INITIAL_VIEW_STATE;
-
-if (!window.demoLauncherActive) {
-  render(<Root />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<Root />, container);
 }

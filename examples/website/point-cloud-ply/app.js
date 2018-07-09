@@ -1,4 +1,4 @@
-/* global document, window,*/
+/* global window */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
@@ -125,6 +125,6 @@ class Example extends PureComponent {
   }
 }
 
-if (!window.demoLauncherActive) {
-  render(<Example />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<Example />, container);
 }

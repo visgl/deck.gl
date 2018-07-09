@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-/* global document, fetch, window */
+/* global fetch, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -18,7 +18,7 @@ const SECONDS_PER_DAY = 24 * 60 * 60;
 const TIME_WINDOW = 2;
 const TEXT_COLOR = [255, 200, 0];
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   latitude: 39.1,
   longitude: -94.57,
   zoom: 3.8,
@@ -27,7 +27,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
 
@@ -128,9 +128,6 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
 }

@@ -1,4 +1,3 @@
-/* global document, window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -13,7 +12,7 @@ const FEMALE_COLOR = [255, 0, 128];
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
 
-const INITIAL_VIEW_STATE = {
+export const INITIAL_VIEW_STATE = {
   longitude: -74,
   latitude: 40.7,
   zoom: 11,
@@ -22,7 +21,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-class App extends Component {
+export class App extends Component {
   _renderLayers() {
     const {
       data = DATA_URL,
@@ -70,9 +69,6 @@ class App extends Component {
   }
 }
 
-// NOTE: EXPORTS FOR DECK.GL WEBSITE DEMO LAUNCHER - CAN BE REMOVED IN APPS
-export {App, INITIAL_VIEW_STATE};
-
-if (!window.demoLauncherActive) {
-  render(<App />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
 }
