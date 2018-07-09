@@ -29,15 +29,15 @@ attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
 attribute vec3 instancePickingColors;
+attribute float instanceWidths;
 
 uniform float numSegments;
-uniform float strokeWidth;
 uniform float opacity;
 
 // uniform for brushing
 uniform vec2 mousePos;
 uniform float brushRadius;
-uniform float enableBrushing;
+uniform bool enableBrushing;
 uniform float brushSource;
 uniform float brushTarget;
 
@@ -74,7 +74,7 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
   return (dSourceCenter + dXCenter) * (dSourceCenter - dXCenter);
 }
 
-// offset vector by strokeWidth pixels
+// offset vector by instanceWidths pixels
 // offset_direction is -1 (left) or 1 (right)
 vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float strokeWidth) {
   // normalized direction of the line
@@ -109,7 +109,7 @@ void main(void) {
   float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
   float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
 
-  float isInBrush = float(enableBrushing <= 0. ||
+  float isInBrush = float(enableBrushing &&
   (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
 
   float segmentIndex = positions.x;
@@ -125,8 +125,8 @@ void main(void) {
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
 
-  // mix strokeWidth with brush, if not in brush, return 0
-  float finalWidth = mix(0.0, strokeWidth, isInBrush);
+  // mix instanceWidths with brush, if not in brush, return 0
+  float finalWidth = mix(0.0, instanceWidths, isInBrush);
 
   // extrude
   vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, finalWidth);

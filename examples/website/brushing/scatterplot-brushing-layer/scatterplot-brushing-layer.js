@@ -58,19 +58,18 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
     });
   }
 
-  draw({uniforms}) {
+  draw(opts) {
     // add uniforms
-    super.draw({
-      uniforms: {
-        ...uniforms,
-        brushTarget: this.props.brushTarget,
-        brushRadius: this.props.brushRadius,
-        mousePos: this.props.mousePosition
-          ? new Float32Array(this.unproject(this.props.mousePosition))
-          : defaultProps.mousePosition,
-        enableBrushing: Boolean(this.props.enableBrushing)
-      }
+    const uniforms = Object.assign({}, opts.uniforms, {
+      brushTarget: this.props.brushTarget,
+      brushRadius: this.props.brushRadius,
+      mousePos: this.props.mousePosition
+        ? new Float32Array(this.unproject(this.props.mousePosition))
+        : defaultProps.mousePosition,
+      enableBrushing: Boolean(this.props.enableBrushing)
     });
+    const newOpts = Object.assign({}, opts, {uniforms});
+    super.draw(newOpts);
   }
 
   // calculate instanceSourcePositions
