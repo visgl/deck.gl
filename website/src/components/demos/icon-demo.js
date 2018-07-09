@@ -146,7 +146,7 @@ export default class IconDemo extends Component {
   }
 
   render() {
-    const {params, data} = this.props;
+    const {params, data, ...otherProps} = this.props;
     const {hoveredItems} = this.state;
 
     if (!data) {
@@ -156,7 +156,7 @@ export default class IconDemo extends Component {
     return (
       <div>
         <App
-          {...this.props}
+          {...otherProps}
           data={data}
           iconAtlas="images/location-icon-atlas.png"
           iconMapping="images/location-icon-mapping.json"

@@ -3,6 +3,8 @@ import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {App, INITIAL_VIEW_STATE} from 'website-examples/line/app';
 
+const EMPTY_ARRAY = [];
+
 export default class LineDemo extends Component {
 
   static get data() {
@@ -77,14 +79,14 @@ export default class LineDemo extends Component {
   }
 
   render() {
-    const {params, data} = this.props;
+    const {params, data, ...otherProps} = this.props;
 
     return (
       <div>
         <App
-          {...this.props}
-          flightPaths={data && data[0]}
-          airports={data && data[1]}
+          {...otherProps}
+          flightPaths={data && data[0] || EMPTY_ARRAY}
+          airports={data && data[1] || EMPTY_ARRAY}
           onHover={this._onHover.bind(this)}
           strokeWidth={params.strokeWidth.value} />
 
