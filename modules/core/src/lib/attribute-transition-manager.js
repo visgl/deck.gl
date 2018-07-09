@@ -109,7 +109,7 @@ export default class AttributeTransitionManager {
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   setCurrentTime(currentTime) {
-    if (!this.transform) {
+    if (!this.transform || this.numInstances === 0) {
       return false;
     }
 
