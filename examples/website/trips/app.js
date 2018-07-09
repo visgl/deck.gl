@@ -42,6 +42,10 @@ export default class App extends Component {
     };
   }
 
+  componentDidMount() {
+    this._animate();
+  }
+
   componentWillUnmount() {
     if (this._animationFrame) {
       window.cancelAnimationFrame(this._animationFrame);
