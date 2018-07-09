@@ -245,7 +245,7 @@ class App extends Component {
   }
 
   render() {
-    const {onViewStateChange, viewState, baseMap = true} = this.props;
+    const {viewState, controller = true, baseMap = true} = this.props;
 
     return (
       <div
@@ -259,8 +259,7 @@ class App extends Component {
           layers={this._renderLayers()}
           initialViewState={INITIAL_VIEW_STATE}
           viewState={viewState}
-          onViewStateChange={onViewStateChange}
-          controller={true}
+          controller={controller}
         >
           {baseMap && (
             <StaticMap

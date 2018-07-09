@@ -102,15 +102,14 @@ class App extends Component {
   }
 
   render() {
-    const {onViewStateChange, viewState, baseMap = true} = this.props;
+    const {viewState, controller = true, baseMap = true} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
-        onViewStateChange={onViewStateChange}
-        controller={true}
+        controller={controller}
         parameters={{
           blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
           blendEquation: GL.FUNC_ADD

@@ -112,7 +112,8 @@ export const loadData = (owner, source) => {
   };
 };
 
-export const updateMap = viewport => ({type: 'UPDATE_MAP', viewport});
+export const updateMapSize = ({width, height}) => ({type: 'UPDATE_MAP_SIZE', width, height});
+export const updateMapState = viewState => ({type: 'UPDATE_MAP_STATE', viewState});
 
 export const updateMeta = meta => ({type: 'UPDATE_META', meta});
 

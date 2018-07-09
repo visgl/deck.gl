@@ -8,9 +8,6 @@ const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
 
 export default class BrushingDemo extends Component {
-  static get trackMouseMove() {
-    return true;
-  }
 
   static get data() {
     return {
@@ -98,14 +95,13 @@ export default class BrushingDemo extends Component {
   }
 
   render() {
-    const {params, mousePosition, mouseEntered} = this.props;
+    const {params, mouseEntered} = this.props;
 
     return (
       <div>
         {this._renderTooltip()}
         <App
           {...this.props}
-          mousePosition={mousePosition}
           mouseEntered={mouseEntered}
           enableBrushing={params.enableBrushing.value}
           strokeWidth={params.lineWidth.value}

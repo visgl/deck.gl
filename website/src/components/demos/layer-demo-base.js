@@ -7,7 +7,6 @@ import {MAPBOX_STYLES} from '../../constants/defaults';
 import {getLayerParams} from '../../utils/layer-params';
 
 const defaultViewport = {
-  mapStyle: MAPBOX_STYLES.LIGHT,
   longitude: -122.4,
   latitude: 37.74,
   zoom: 11,
@@ -43,6 +42,8 @@ export default function createLayerDemoClass(settings) {
     }
 
     static viewport = defaultViewport;
+
+    static mapStyle = MAPBOX_STYLES.LIGHT;
 
     static get parameters() {
       return getLayerParams(renderLayer([]));

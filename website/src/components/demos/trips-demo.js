@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import ViewportAnimation from '../../utils/map-utils';
+import Animation from '../../utils/animation-utils';
 import {App, INITIAL_VIEW_STATE} from 'website-examples/trips/app';
 
 export default class TripsDemo extends Component {
@@ -71,7 +71,7 @@ export default class TripsDemo extends Component {
 
     const thisDemo = this; // eslint-disable-line
 
-    this.tween = ViewportAnimation.ease({time: 0}, {time: 1800}, 60000)
+    this.tween = Animation.ease({time: 0}, {time: 1800}, 60000)
       .onUpdate(function tweenUpdate() {
         thisDemo.setState(this); // eslint-disable-line
       })
@@ -87,7 +87,7 @@ export default class TripsDemo extends Component {
   }
 
   render() {
-    const {viewport, data, params} = this.props;
+    const {data, params} = this.props;
 
     if (!data) {
       return null;
@@ -96,7 +96,6 @@ export default class TripsDemo extends Component {
     return (
       <App
         {...this.props}
-        viewport={viewport}
         trips={data[0]}
         buildings={data[1]}
         trailLength={params.trail.value}

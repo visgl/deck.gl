@@ -3,20 +3,24 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import Stats from 'stats.js';
 
-import {updateMap, setHeaderOpacity} from '../actions/app-actions';
+import {updateMapState, updateMapSize, setHeaderOpacity} from '../actions/app-actions';
 import DemoLauncher from './demo-launcher';
-import ViewportAnimation from '../utils/map-utils';
+import Animation from '../utils/animation-utils';
+import HomeDemo from './demos/home-demo';
 
 class Home extends Component {
   constructor(props) {
     super(props);
     this.state = {};
-    this.cameraAnimation = ViewportAnimation.fly(
-      {bearing: 0},
-      {bearing: -15},
-      29000,
-      this.props.updateMap
-    ).easing(ViewportAnimation.Easing.Sinusoidal.InOut)
+
+    this.cameraAnimation = Animation.ease(
+      {...HomeDemo.viewport, bearing: 0},
+      {...HomeDemo.viewport, bearing: -15},
+      29000
+    ).easing(Animation.Easing.Sinusoidal.InOut)
+    .onUpdate(function tweenUpdate() {
+      props.updateMapState({...this}); // eslint-disable-line
+    })
     .repeat(Infinity)
     .yoyo(true);
   }
@@ -53,7 +57,7 @@ class Home extends Component {
     const container = this.refs.banner;
     const width = container.clientWidth;
     const height = container.clientHeight;
-    this.props.updateMap({width, height});
+    this.props.updateMapSize({width, height});
   }
 
   _onScroll() {
@@ -143,5 +147,5 @@ class Home extends Component {
 
 export default connect(
   state => ({}),
-  {updateMap, setHeaderOpacity}
+  {updateMapState, updateMapSize, setHeaderOpacity}
 )(Home);
