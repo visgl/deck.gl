@@ -154,20 +154,21 @@ export default class IconDemo extends Component {
     }
 
     return (
-      <App
-        {...this.props}
-        data={data}
-        iconAtlas="images/location-icon-atlas.png"
-        iconMapping="images/location-icon-mapping.json"
-        showCluster={params.cluster.value}
-        onHover={this._onHover}
-        onClick={this._onClick} >
+      <div>
+        <App
+          {...this.props}
+          data={data}
+          iconAtlas="images/location-icon-atlas.png"
+          iconMapping="images/location-icon-mapping.json"
+          showCluster={params.cluster.value}
+          onHover={this._onHover}
+          onClick={this._onClick} />
 
         <div className={`icon-demo ${hoveredItems ? 'clickable' : ''}`}>
           { this._renderhoveredItems() }
         </div>
 
-      </App>
+      </div>
     );
   }
 }
