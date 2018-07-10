@@ -362,9 +362,8 @@ export default class Deck {
   // Get the view descriptor list
   _getViews(props) {
     // Default to a full screen map view port
-    const views = (props.views instanceof Array ? props.views : [props.views]) || [
-      new MapView({id: 'default-view'})
-    ];
+    let views = props.views || [new MapView({id: 'default-view'})];
+    views = views instanceof Array ? views : [views];
     if (views.length && props.controller) {
       // Backward compatibility: support controller prop
       views[0].props.controller = props.controller;
