@@ -1,9 +1,8 @@
-/* global window,document */
+/* global document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGLOverlay from './deckgl-overlay.js';
-import {experimental} from 'deck.gl';
+import DeckGL, {HexagonLayer, _LinearInterpolator as LinearInterpolator} from 'deck.gl';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
@@ -13,24 +12,49 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'; // eslint-disable-line
 
-const {ViewportController, LinearInterpolator, MapState} = experimental;
 const transitionInterpolator = new LinearInterpolator(['bearing']);
+
+const INITIAL_VIEW_STATE = {
+  longitude: -1.4157267858730052,
+  latitude: 52.232395363869415,
+  zoom: 6.6,
+  minZoom: 5,
+  maxZoom: 15,
+  pitch: 40.5,
+  bearing: 0
+};
+
+const LIGHT_SETTINGS = {
+  lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
+  ambientRatio: 0.4,
+  diffuseRatio: 0.6,
+  specularRatio: 0.2,
+  lightsStrength: [0.8, 0.0, 0.8, 0.0],
+  numberOfLights: 2
+};
+
+const COLOR_RANGE = [
+  [1, 152, 189],
+  [73, 227, 206],
+  [216, 254, 181],
+  [254, 237, 177],
+  [254, 173, 84],
+  [209, 55, 78]
+];
 
 class Root extends Component {
   constructor(props) {
     super(props);
     this.rotationStep = 0;
     this.state = {
-      viewport: {
-        ...DeckGLOverlay.defaultViewport,
-        width: 500,
-        height: 500,
-        bearing: 0
-      },
+      viewState: INITIAL_VIEW_STATE,
       data: null,
-      transitionDuration: 0,
-      viewportToggled: false
+      loaded: false
     };
+
+    this._onResize = this._onResize.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
+    this._rotateCamera = this._rotateCamera.bind(this);
 
     requestCsv(DATA_URL, (error, response) => {
       if (!error) {
@@ -40,78 +64,66 @@ class Root extends Component {
     });
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-
-    // TODO: this is to just simulate viwport prop change and test animation.
-    // this._interval = setInterval(() => this._toggleViewport(), 8000);
-    this._rotateCamera();
+  // TODO - this is a hack. Deck does not have an onLoad callback
+  _onResize() {
+    if (!this.state.loaded) {
+      this.setState({loaded: true});
+      this._rotateCamera();
+    }
   }
 
-  _resize() {
-    this._onViewportChange({
-      width: window.innerWidth,
-      height: window.innerHeight
-    });
-  }
-
-  _onViewportChange(viewport) {
-    this.setState({
-      viewport: {...this.state.viewport, ...viewport},
-      transitionDuration: 0
-    });
-  }
-
-  // TODO: this is to just simulate viwport prop change and test animation.
-  // Add proper UI to change viewport.
-  _toggleViewport() {
-    const newViewport = {};
-    // newViewport.pitch = this.state.viewportToggled ? 60.0 : 0.0;
-    // newViewport.bearing = this.state.viewportToggled ? -90.0 : 0.0;
-    newViewport.bearing = (this.state.viewport.bearing + 120) % 360;
-    this.setState({
-      viewport: {...this.state.viewport, ...newViewport},
-      transitionDuration: 4000,
-      viewportToggled: !this.state.viewportToggled
-    });
+  _onViewStateChange({viewState}) {
+    this.setState({viewState});
   }
 
   _rotateCamera() {
     const angleDelta = 120.0;
-    const bearing = this.state.viewport.bearing + angleDelta;
-    const transitionDuration = angleDelta * 35;
+    const bearing = this.state.viewState.bearing + angleDelta;
     this.setState({
-      viewport: {
-        ...this.state.viewport,
+      viewState: {
+        ...this.state.viewState,
         bearing,
-        width: window.innerWidth,
-        height: window.innerHeight
-      },
-      transitionDuration
+        transitionDuration: angleDelta * 35,
+        transitionInterpolator,
+        onTransitionEnd: this._rotateCamera
+      }
     });
   }
 
+  _renderLayers() {
+    const {data} = this.state;
+
+    return [
+      data &&
+        new HexagonLayer({
+          id: 'heatmap',
+          colorRange: COLOR_RANGE,
+          data,
+          elevationRange: [0, 3000],
+          elevationScale: 50,
+          extruded: true,
+          getPosition: d => d,
+          lightSettings: LIGHT_SETTINGS,
+          opacity: 1,
+          radius: 1000,
+          upperPercentile: 100,
+          coverage: 1
+        })
+    ];
+  }
+
   render() {
-    const {viewport, data, transitionDuration} = this.state;
+    const {viewState} = this.state;
     return (
-      <ViewportController
-        viewportState={MapState}
-        {...viewport}
-        onViewportChange={this._onViewportChange.bind(this)}
-        transitionDuration={transitionDuration}
-        transitionInterpolator={transitionInterpolator}
-        onTransitionEnd={this._rotateCamera.bind(this)}
+      <DeckGL
+        layers={this._renderLayers()}
+        viewState={viewState}
+        onViewStateChange={this._onViewStateChange}
+        onResize={this._onResize}
+        controller={true}
       >
-        <StaticMap
-          {...viewport}
-          mapStyle="mapbox://styles/mapbox/dark-v9"
-          onViewportChange={this._onViewportChange.bind(this)}
-          mapboxApiAccessToken={MAPBOX_TOKEN}
-        >
-          <DeckGLOverlay viewport={viewport} data={data || []} />
-        </StaticMap>
-      </ViewportController>
+        <StaticMap mapStyle="mapbox://styles/mapbox/dark-v9" mapboxApiAccessToken={MAPBOX_TOKEN} />
+      </DeckGL>
     );
   }
 }

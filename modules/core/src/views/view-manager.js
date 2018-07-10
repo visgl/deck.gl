@@ -214,9 +214,9 @@ export default class ViewManager {
   }
 
   _createController(view) {
-    const controllerProps = Object.assign({}, view.controller, {
+    const viewState = this.getViewState(view.id);
+    const controllerProps = Object.assign({}, view.controller, viewState, {
       eventManager: this._eventManager,
-      viewState: this.getViewState(view.id),
       // Set an internal callback that calls the prop callback if provided
       onViewStateChange: this._onViewStateChange.bind(this, view.id),
       onStateChange: this._eventCallbacks.onInteractiveStateChange
