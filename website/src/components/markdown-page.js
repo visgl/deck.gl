@@ -90,7 +90,7 @@ export default class MarkdownPage extends PureComponent {
   }
 
   componentDidMount() {
-    this._jumpTo(this.props.query.section);
+    this._jumpTo(this.props.query);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -104,7 +104,7 @@ export default class MarkdownPage extends PureComponent {
   }
 
   componentDidUpdate() {
-    this._jumpTo(this.props.query.section);
+    this._jumpTo(this.props.query);
   }
 
   // get the vertical scroll position of a DOM object relative to this component
@@ -121,8 +121,11 @@ export default class MarkdownPage extends PureComponent {
 
   // Because we use hash paths in react-router, hash jump links do not work
   // In-page links can be passed using ?section=<id>
-  _jumpTo(section) {
-    if (section !== this._currentSection) {
+  _jumpTo(search) {
+    let section = search.match(/section=([^\?&]+)/);
+    section = section && section[1];
+
+    if (section && section !== this._currentSection) {
       const anchor = this.refs.container.querySelector(`#${section}`);
       const scrollTop = this._getScrollPosition(anchor);
       if (this.refs.container.scrollTop !== scrollTop) {

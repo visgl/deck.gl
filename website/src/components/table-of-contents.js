@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import {Link} from 'react-router';
+import {NavLink} from 'react-router-dom';
 
 const ITEM_HEIGHT = 40;
 const INDENT_BASE = 16;
@@ -23,10 +23,10 @@ export default class TableOfContents extends Component {
 
       return (
         <div key={`page-${i}`}>
-          <Link className={`list-header ${expanded ? 'expanded' : ''}`}
+          <NavLink className={`list-header ${expanded ? 'expanded' : ''}`}
             activeClassName="active" key={`group-header${i}`} to={path}>
             {name}
-          </Link>
+          </NavLink>
           <div className="subpages" style={{maxHeight}}>
             <ul key={`group-list${i}`} >
               {children.map(this._renderPage.bind(this, path))}
@@ -61,7 +61,7 @@ export default class TableOfContents extends Component {
 
     return (
       <li key={`page-${i}`}>
-        <Link className="link" style={{paddingLeft: indent}} to={path} activeClassName="active">{page.name}</Link>
+        <NavLink className="link" style={{paddingLeft: indent}} to={path} activeClassName="active">{page.name}</NavLink>
         {tag}
       </li>
     );

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {Link} from 'react-router';
+import {NavLink} from 'react-router-dom';
 
 import {FRAMEWORK_NAME, FRAMEWORK_GITHUB_URL} from '../../contents/framework';
 import FRAMEWORK_LINKS from '../../contents/links';
@@ -39,13 +39,13 @@ export default class Header extends Component {
             <i className={`icon icon-${isMenuOpen ? 'close' : 'menu'}`} />
           </div>
           <div className="links">
-            <Link activeClassName="active" to="examples">Examples</Link>
-            <Link activeClassName="active" to="showcases">Showcases</Link>
-            <Link activeClassName="active" to="documentation">Documentation</Link>
+            <NavLink activeClassName="active" to="/examples">Examples</NavLink>
+            <NavLink activeClassName="active" to="/showcases">Showcases</NavLink>
+            <NavLink activeClassName="active" to="/documentation">Documentation</NavLink>
             <a href="https://medium.com/vis-gl">Blog</a>
-            <Link activeClassName="active" href={FRAMEWORK_GITHUB_URL}>
+            <NavLink activeClassName="active" to={FRAMEWORK_GITHUB_URL}>
               Github<i className="icon icon-github" />
-            </Link>
+            </NavLink>
           </div>
         </div>
       </header>

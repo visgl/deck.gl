@@ -1,8 +1,13 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
+import {Switch, Route, Redirect} from 'react-router';
 
+import {examplePages, showcasePages, docPages} from '../../contents/pages';
 import {toggleMenu, setHeaderOpacity} from '../actions/app-actions';
 import Header from './header';
+
+import Home from './home';
+import Gallery from './gallery';
 
 import '../stylesheets/main.scss';
 
@@ -24,7 +29,20 @@ class App extends Component {
           isMenuOpen={isMenuOpen}
           toggleMenu={this.props.toggleMenu}
           opacity={headerOpacity} />
-        {children}
+
+        <Switch>
+          <Route exact path="/" component={Home} />
+          <Route path="/examples" >
+            {(props) => <Gallery {...props} pages={examplePages} />}
+          </Route>
+          <Route path="/showcases" >
+            {(props) => <Gallery {...props} pages={showcasePages} />}
+          </Route>
+          <Route path="/documentation" >
+            {(props) => <Gallery {...props} pages={docPages} />}
+          </Route>
+          <Redirect to="/" />
+        </Switch>
       </div>
     );
   }

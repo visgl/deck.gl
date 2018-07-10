@@ -24,6 +24,11 @@ const COMMON_CONFIG = {
 
   entry: ['./src/main'],
 
+  output: {
+    path: resolve(__dirname, './dist'),
+    filename: 'bundle.js'
+  },
+
   module: {
     rules: [
       {
@@ -35,7 +40,7 @@ const COMMON_CONFIG = {
         exclude: [/node_modules/]
       }, {
         test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader', 'sass-loader', 'autoprefixer-loader']
+        loaders: ['style-loader', 'css-loader', 'sass-loader']
       }, {
         test: /\.(eot|svg|ttf|woff|woff2|gif|jpe?g|png)$/,
         loader: 'url-loader'
@@ -48,14 +53,10 @@ const COMMON_CONFIG = {
   },
 
   resolve: {
-    // Prefer root dependencies (dev) over local (prod)
-    modules: [resolve('../node_modules'), resolve('./node_modules')],
+    // Prefer local dependencies over root
+    modules: [resolve('./node_modules'), resolve('../node_modules')],
     alias: Object.assign({}, ALIASES, {
       'website-examples': resolve('../examples/website'),
-      // Website is using React 15
-      react: resolve('.', './node_modules/react'),
-      'react-dom': resolve('.', './node_modules/react-dom'),
-      'react-map-gl': resolve('.', './node_modules/react-map-gl'),
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
       'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
     })
@@ -83,7 +84,7 @@ const addDevConfig = config => {
   });
 
   return Object.assign(config, {
-
+    mode: 'development',
     devtool: 'source-maps',
 
     plugins: config.plugins.concat([
@@ -98,10 +99,7 @@ const addDevConfig = config => {
 const addProdConfig = config => {
 
   return Object.assign(config, {
-    output: {
-      path: resolve(__dirname, './dist'),
-      filename: 'bundle.js'
-    }
+    mode: 'production'
   });
 };
 
