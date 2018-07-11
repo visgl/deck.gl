@@ -1,7 +1,7 @@
 /* global window */
 
 // deck.gl ES6 components
-import {COORDINATE_SYSTEM, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
+import {COORDINATE_SYSTEM, View, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
 import {_OrbitController as OrbitController} from '@deck.gl/core';
 import {_ReflectionEffect as ReflectionEffect} from '@deck.gl/core';
 
@@ -295,18 +295,24 @@ export default class App extends PureComponent {
           debug={false}
           drawPickingColors={drawPickingColors}
         >
-          <StaticMap
-            viewId="basemap"
-            mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
-            {...mapViewState}
-            mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
-          />
+          <View id="basemap">
+            <StaticMap
+              key="map"
+              mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
+              mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
+            />
+            <ViewportLabel key="label" viewId="basemap">
+              Map View
+            </ViewportLabel>
+          </View>
 
-          <ViewportLabel viewId="first-person">First Person View</ViewportLabel>
+          <View id="first-person">
+            <ViewportLabel>First Person View</ViewportLabel>
+          </View>
 
-          <ViewportLabel viewId="basemap">Map View</ViewportLabel>
-
-          <ViewportLabel viewId="infovis">Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
+          <View id="infovis">
+            <ViewportLabel>Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
+          </View>
         </DeckGL>
       </div>
     );

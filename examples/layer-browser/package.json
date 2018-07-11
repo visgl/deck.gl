@@ -10,13 +10,13 @@
   "dependencies": {
     "colorbrewer": "^1.0.0",
     "d3-scale": "^1.0.6",
-    "deck.gl": ">=5.3.0-alpha.1",
-    "@deck.gl/experimental-layers": ">=5.3.0-alpha.1",
+    "deck.gl": "^6.0.0-beta",
+    "@deck.gl/experimental-layers": "^6.0.0-beta",
     "extrude-polyline": "^1.0.6",
     "react": "^16.3.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^3.2.0",
+    "react-map-gl": "^3.3.0",
     "react-stats-zavatta": "^0.0.6",
     "s2-geometry": "^1.2.9"
   },
