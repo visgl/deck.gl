@@ -102,7 +102,6 @@ export default class App extends Component {
           onViewStateChange={this._onViewStateChange}
         >
           <StaticMap
-            {...viewState}
             mapStyle="mapbox://styles/mapbox/dark-v9"
             dragToRotate={false}
             mapboxApiAccessToken={token}

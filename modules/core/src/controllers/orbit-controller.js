@@ -2,6 +2,15 @@ import {clamp} from 'math.gl';
 import Controller from './controller';
 import OrbitViewport from '../deprecated/orbit-viewport';
 import assert from '../utils/assert';
+import LinearInterpolator from '../transitions/linear-interpolator';
+import {TRANSITION_EVENTS} from './transition-manager';
+
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterpolator: new LinearInterpolator(),
+  transitionInterruption: TRANSITION_EVENTS.BREAK
+};
 
 const defaultState = {
   lookAt: [0, 0, 0],
@@ -216,6 +225,12 @@ class OrbitState {
     });
   }
 
+  // default implementation of shortest path between two view states
+  shortestPathFrom(viewState) {
+    const props = Object.assign({}, this._viewportProps);
+    return props;
+  }
+
   /**
    * Start zooming
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
@@ -292,5 +307,10 @@ class OrbitState {
 export default class OrbitController extends Controller {
   constructor(props) {
     super(OrbitState, props);
+  }
+
+  _getTransitionProps() {
+    // Enables Transitions on double-tap and key-down events.
+    return LINEAR_TRANSITION_PROPS;
   }
 }
