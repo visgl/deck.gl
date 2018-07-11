@@ -5,11 +5,11 @@
   },
   "dependencies": {
     "d3-request": "^1.0.5",
-    "deck.gl": ">=5.2.0-alpha.7",
-    "luma.gl": ">=5.2.0-alpha.11",
+    "deck.gl": ">=6.0.0-beta",
+    "luma.gl": ">=6.0.0-beta",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
-    "react-map-gl": "^3.2.0"
+    "react-map-gl": "^3.3.0"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",

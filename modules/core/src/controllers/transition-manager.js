@@ -30,6 +30,8 @@ export default class TransitionManager {
     this.propsInTransition = null;
     this.transition = new Transition();
 
+    this.onViewStateChange = props.onViewStateChange;
+
     this._onTransitionFrame = this._onTransitionFrame.bind(this);
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
@@ -45,7 +47,7 @@ export default class TransitionManager {
     let transitionTriggered = false;
     const currentProps = this.props;
     // Set this.props here as '_triggerTransition' calls '_updateViewport' that uses this.props.
-    nextProps = Object.assign({}, this.props, nextProps);
+    nextProps = Object.assign({}, DEFAULT_PROPS, nextProps);
     this.props = nextProps;
 
     // NOTE: Be cautious re-ordering statements in this function.
@@ -158,8 +160,8 @@ export default class TransitionManager {
       Object.assign({}, this.props, viewport)
     ).getViewportProps();
 
-    if (this.props.onViewStateChange) {
-      this.props.onViewStateChange({
+    if (this.onViewStateChange) {
+      this.onViewStateChange({
         viewState: this.propsInTransition,
         interactionState: {inTransition: true}
       });
