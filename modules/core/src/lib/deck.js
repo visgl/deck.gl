@@ -31,11 +31,12 @@ import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
+import VENDOR_PREFIX from '../utils/css-vendor-prefix';
 /* global document */
 
 function noop() {}
 
-const PREFIX = '-webkit-';
+const PREFIX = VENDOR_PREFIX === '-webkit-' ? VENDOR_PREFIX : '';
 
 const CURSOR = {
   GRABBING: `${PREFIX}grabbing`,
@@ -411,10 +412,11 @@ export default class Deck {
   _onInteractiveStateChange({isDragging = false}) {
     if (isDragging !== this.interactiveState.isDragging) {
       this.interactiveState.isDragging = isDragging;
-      if (this.props.getCursor) {
-        this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
-      }
     }
+  }
+
+  _updateCursor() {
+    this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
   }
 
   _onRendererInitialized({gl, canvas}) {
@@ -465,6 +467,8 @@ export default class Deck {
     }
 
     this._updateCanvasSize();
+
+    this._updateCursor();
 
     // Update layers if needed (e.g. some async prop has loaded)
     this.layerManager.updateLayers();
