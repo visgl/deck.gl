@@ -2,51 +2,69 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {View} from 'deck.gl';
+import DeckGL from 'deck.gl';
 
 import MapLayer from './map-layer/map-layer';
-import {MAP_STYLE} from './constants';
-import Viewport from './viewports';
-import MapController from './controller/map-controller';
-
-import './shaderlib';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-class Root extends Component {
-  constructor(props) {
-    super(props);
+const INITIAL_VIEW_STATE = {
+  longitude: -122.45,
+  latitude: 37.78,
+  zoom: 12,
+  minZoom: 2,
+  maxZoom: 14
+};
 
-    this.state = {
-      viewState: {
-        longitude: -122.45,
-        latitude: 37.78,
-        zoom: 12,
-        minZoom: 2,
-        maxZoom: 14
+const MAP_LAYER_STYLES = {
+  source: 'https://maps.tilehosting.com/data/v3/{z}/{x}/{y}.pbf?key=U0iNgiZKlYdwvgs9UPm1',
+
+  stroked: false,
+
+  getLineColor: [192, 192, 192],
+
+  getFillColor: f => {
+    switch (f.properties.layer) {
+      case 'water':
+        return [140, 170, 180];
+      case 'landcover':
+        return [120, 190, 100];
+      default:
+        return [218, 218, 218];
+    }
+  },
+
+  getLineWidth: f => {
+    if (f.properties.layer === 'transportation') {
+      switch (f.properties.class) {
+        case 'primary':
+          return 12;
+        case 'motorway':
+          return 16;
+        default:
+          return 6;
       }
-    };
+    }
+    return 1;
+  },
+  lineWidthMinPixels: 1,
 
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-  }
+  getPointRadius: 100,
+  pointRadiusMinPixels: 2
+};
 
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
-  }
-
+class Root extends Component {
   render() {
     return (
       <DeckGL
-        views={new View({type: Viewport})}
-        controller={MapController}
-        viewState={this.state.viewState}
-        onViewStateChange={this._onViewStateChange}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
         layers={[
           new MapLayer({
-            source: 'https://d3dt5tsgfu6lcf.cloudfront.net/tile/v1/{z}/{x}/{y}/COMPOSITE?v=4',
-            style: MAP_STYLE,
-            onClick: info => console.log(JSON.stringify(info.object)) // eslint-disable-line
+            ...MAP_LAYER_STYLES,
+            pickable: true,
+            onClick: info => console.log(info.object.properties) // eslint-disable-line
           })
         ]}
       />

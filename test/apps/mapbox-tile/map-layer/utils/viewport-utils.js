@@ -1,5 +1,7 @@
 import {lngLatToWorld} from 'viewport-mercator-project';
 
+const TILE_SIZE = 512;
+
 function getBoundingBox(viewport) {
   const corners = [
     viewport.unproject([0, 0]),
@@ -17,8 +19,7 @@ function getBoundingBox(viewport) {
 }
 
 function pixelsToTileIndex(a) {
-  // const TILE_SIZE = 512;
-  return Math.floor(a / 512);
+  return Math.floor(a / TILE_SIZE);
 }
 
 export function getTileIndices(viewport) {
