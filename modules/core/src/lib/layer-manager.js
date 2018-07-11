@@ -210,6 +210,8 @@ export default class LayerManager {
 
     this.layers = generatedLayers;
 
+    this.setNeedsUpdate('layers changed');
+
     // Throw first error found, if any
     if (error) {
       throw error;
