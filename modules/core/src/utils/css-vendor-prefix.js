@@ -18,13 +18,19 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './color.spec';
-import './css-vendor-prefix.spec';
-import './deep-equal.spec';
-import './get.spec';
-import './flatten.spec';
-import './positions.spec';
-import './memoize.spec';
-import './array-utils.spec';
-import './scale-utils.spec';
-// import './compare-objects.spec';
+/* global document */
+let venderPrefix = '';
+
+// Get CSS vendor prefix
+if (typeof document !== 'undefined') {
+  const styleObj = document.body.style;
+  const prefix = /^(webkit|moz|ms|o)(?=[A-Z])/;
+  for (const key in styleObj) {
+    if (prefix.test(key)) {
+      venderPrefix = `-${key.match(prefix)[0]}-`;
+      break;
+    }
+  }
+}
+
+export default venderPrefix;
