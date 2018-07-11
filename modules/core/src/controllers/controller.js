@@ -69,7 +69,14 @@ export default class Controller {
     this.setProps(options);
   }
 
-  finalize() {}
+  finalize() {
+    for (const eventName in this._events) {
+      if (this._events[eventName]) {
+        this.eventManager.off(eventName, this.handleEvent);
+      }
+    }
+    this.transitionManager.finalize();
+  }
 
   /**
    * Callback for events

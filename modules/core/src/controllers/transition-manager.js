@@ -36,6 +36,10 @@ export default class TransitionManager {
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
 
+  finalize() {
+    cancelAnimationFrame(this.animation);
+  }
+
   // Returns current transitioned viewport.
   getViewportInTransition() {
     return this.propsInTransition;

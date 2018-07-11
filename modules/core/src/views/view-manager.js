@@ -25,15 +25,13 @@ import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
-const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};
-
 export default class ViewManager {
   constructor(props = {}) {
     // List of view descriptors, gets re-evaluated when width/height changes
     this.views = [];
     this.width = 100;
     this.height = 100;
-    this.viewState = INITIAL_VIEW_STATE;
+    this.viewState = {};
     this.controllers = {};
 
     this._viewports = []; // Generated viewports
@@ -176,12 +174,6 @@ export default class ViewManager {
       view => (view instanceof Viewport ? new View({viewportInstance: view}) : view)
     );
 
-    views.forEach(view => {
-      if (view.controller && !this.controllers[view.id]) {
-        this.controllers[view.id] = this._createController(view);
-      }
-    });
-
     const viewsChanged = this._diffViews(views, this.views);
     if (viewsChanged) {
       this.setNeedsUpdate('views changed');
@@ -192,7 +184,7 @@ export default class ViewManager {
 
   _setViewState(viewState) {
     if (viewState) {
-      const viewStateChanged = deepEqual(viewState, this.viewState);
+      const viewStateChanged = !deepEqual(viewState, this.viewState);
 
       if (viewStateChanged) {
         this.setNeedsUpdate('viewState changed');
@@ -213,17 +205,22 @@ export default class ViewManager {
     this._eventCallbacks.onViewStateChange(event);
   }
 
-  _createController(view) {
-    const viewState = this.getViewState(view.id);
-    const controllerProps = Object.assign({}, view.controller, viewState, {
-      eventManager: this._eventManager,
-      // Set an internal callback that calls the prop callback if provided
-      onViewStateChange: this._onViewStateChange.bind(this, view.id),
-      onStateChange: this._eventCallbacks.onInteractiveStateChange
-    });
-    const Controller = controllerProps.type;
+  _createController(props) {
+    const Controller = props.type;
 
-    return new Controller(controllerProps);
+    const controller = new Controller(
+      Object.assign(
+        {
+          eventManager: this._eventManager,
+          // Set an internal callback that calls the prop callback if provided
+          onViewStateChange: this._onViewStateChange.bind(this, props.id),
+          onStateChange: this._eventCallbacks.onInteractiveStateChange
+        },
+        props
+      )
+    );
+
+    return controller;
   }
 
   // Rebuilds viewports from descriptors towards a certain window size
@@ -232,25 +229,41 @@ export default class ViewManager {
     if (updateReason) {
       const {width, height, views} = this;
 
+      const oldControllers = this.controllers;
+      this.controllers = {};
+
       this._viewports = views.map(view => {
         const viewState = this.getViewState(view.id);
         const viewport = view.makeViewport({width, height, viewState});
 
-        const controller = this.controllers[view.id];
-        // TODO - check for removed view ids?
-        if (controller) {
-          controller.setProps(
-            Object.assign({}, view.controller, viewState, {
-              x: viewport.x,
-              y: viewport.y,
-              width: viewport.width,
-              height: viewport.height
-            })
-          );
+        // Update the controller
+        if (view.controller) {
+          const controllerProps = Object.assign({}, view.controller, view.defaultState, viewState, {
+            id: view.id,
+            x: viewport.x,
+            y: viewport.y,
+            width: viewport.width,
+            height: viewport.height
+          });
+
+          let controller = oldControllers[view.id];
+          if (controller) {
+            controller.setProps(controllerProps);
+          } else {
+            controller = this._createController(controllerProps);
+          }
+          this.controllers[view.id] = controller;
         }
 
         return viewport;
       });
+
+      // Remove unused controllers
+      for (const id in oldControllers) {
+        if (!this.controllers[id]) {
+          oldControllers[id].finalize();
+        }
+      }
 
       this._buildViewportMap();
 
