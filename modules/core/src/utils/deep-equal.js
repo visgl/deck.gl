@@ -1,7 +1,7 @@
 // Compare two objects, partial deep equal
 export function deepEqual(a, b) {
   // TODO - implement deep equal on view descriptors
-  return Object.keys(a).some(key => {
+  return Object.keys(a).every(key => {
     if (Array.isArray(a[key]) && Array.isArray(b[key])) {
       return deepEqual(a[key], b[key]);
     }

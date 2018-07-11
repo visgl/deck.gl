@@ -192,7 +192,7 @@ export default class ViewManager {
 
   _setViewState(viewState) {
     if (viewState) {
-      const viewStateChanged = deepEqual(viewState, this.viewState);
+      const viewStateChanged = !deepEqual(viewState, this.viewState);
 
       if (viewStateChanged) {
         this.setNeedsUpdate('viewState changed');
