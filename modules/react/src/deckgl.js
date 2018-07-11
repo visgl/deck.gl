@@ -158,7 +158,7 @@ export default class DeckGL extends React.PureComponent {
       if (child.props.viewportId) {
         log.removed('viewportId', '<View>')();
       }
-      if (child.props.viewportId) {
+      if (child.props.viewId) {
         log.removed('viewId', '<View>')();
       }
 

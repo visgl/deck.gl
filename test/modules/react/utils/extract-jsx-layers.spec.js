@@ -108,6 +108,19 @@ const TEST_CASES = [
   },
   {
     input: {
+      children: createElement(View, {id: 'not-map'}, noop),
+      views: mapView,
+      layers: []
+    },
+    output: {
+      children: [createElement(View, {id: 'not-map'}, noop)],
+      views: mapView,
+      layers: []
+    },
+    title: 'JSX views with views prop'
+  },
+  {
+    input: {
       children: reactLineLayer,
       views: null,
       layers: []
