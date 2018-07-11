@@ -6,14 +6,12 @@ import assert from '../utils/assert';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
 
-
 const LINEAR_TRANSITION_PROPS = {
   transitionDuration: 300,
   transitionEasing: t => t,
   transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK
 };
-
 
 // MAPBOX LIMITS
 export const MAPBOX_LIMITS = {

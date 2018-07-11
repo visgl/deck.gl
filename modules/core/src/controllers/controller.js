@@ -57,7 +57,6 @@ export default class Controller {
     this.invertPan = false;
 
     this.handleEvent = this.handleEvent.bind(this);
-    this._transitionProps = this._getTransitionProps();
 
     this.setProps(options);
   }
@@ -376,7 +375,7 @@ export default class Controller {
     const isZoomOut = this.isFunctionKeyPressed(event);
 
     const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    return this.updateViewport(newControllerState, this._transitionProps);
+    return this.updateViewport(newControllerState, this._getTransitionProps());
   }
 
   /* eslint-disable complexity */
@@ -413,7 +412,7 @@ export default class Controller {
       default:
         return false;
     }
-    return this.updateViewport(newControllerState, this._transitionProps);
+    return this.updateViewport(newControllerState, this._getTransitionProps());
   }
   /* eslint-enable complexity */
 
