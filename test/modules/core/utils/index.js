@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import './color.spec';
+import './css-vendor-prefix.spec';
 import './deep-equal.spec';
 import './get.spec';
 import './flatten.spec';
