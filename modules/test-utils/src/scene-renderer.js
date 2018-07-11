@@ -18,7 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global setTimeout */
 import {Deck, MapView} from 'deck.gl';
 
 import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
@@ -94,7 +93,7 @@ export default class SceneRenderer {
   }
 
   _renderScene(scene) {
-    const {viewState, layers, views, viewports, timeout = 0} = scene;
+    const {viewState, layers, views, viewports} = scene;
 
     const promise = makePromise();
 
@@ -103,7 +102,7 @@ export default class SceneRenderer {
       layers,
       views: views || [new MapView()],
       viewState,
-      onAfterRender: () => {},
+      onAfterRender: this._onAfterRender.bind(this, promise, scene),
 
       // DEPRECATED - temporary 5.1 compatibility, remove when 5.2 is released
       viewports
@@ -111,12 +110,6 @@ export default class SceneRenderer {
 
     // Render again after a timeout to allow layer to load
     // This time the afterRender function will resolve the promise
-    setTimeout(() => {
-      this.deckgl.setProps({
-        layers,
-        onAfterRender: this._onAfterRender.bind(this, promise, scene)
-      });
-    }, timeout);
 
     // promise that resolves when scene is rendered
     return promise;
