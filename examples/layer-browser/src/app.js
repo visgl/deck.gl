@@ -301,9 +301,7 @@ export default class App extends PureComponent {
               mapStyle="mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs"
               mapboxApiAccessToken={MapboxAccessToken || 'no_token'}
             />
-            <ViewportLabel key="label" viewId="basemap">
-              Map View
-            </ViewportLabel>
+            <ViewportLabel key="label">Map View</ViewportLabel>
           </View>
 
           <View id="first-person">
