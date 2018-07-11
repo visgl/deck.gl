@@ -23,8 +23,6 @@
 import Viewport from './viewport';
 
 import {
-  lngLatToWorld,
-  worldToLngLat,
   pixelsToWorld,
   getViewMatrix,
   getProjectionParameters,
@@ -229,31 +227,6 @@ export default class WebMercatorViewport extends Viewport {
     const {width, height} = this;
     const {longitude, latitude, zoom} = fitBounds(Object.assign({width, height, bounds}, options));
     return new WebMercatorViewport({width, height, longitude, latitude, zoom});
-  }
-
-  // TODO - should support user supplied constraints
-  isMapSynched() {
-    const EPSILON = 0.000001;
-    const MAPBOX_LIMITS = {
-      pitch: 60,
-      zoom: 40
-    };
-
-    const {pitch, zoom} = this;
-
-    return pitch <= MAPBOX_LIMITS.pitch + EPSILON && zoom <= MAPBOX_LIMITS.zoom + EPSILON;
-  }
-
-  // INTERNAL METHODS
-
-  // Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.
-  _projectFlat(lngLat, scale = this.scale) {
-    return lngLatToWorld(lngLat, scale);
-  }
-
-  // Unproject world point [x,y] on map onto {lat, lon} on sphere
-  _unprojectFlat(xy, scale = this.scale) {
-    return worldToLngLat(xy, scale);
   }
 }
 
