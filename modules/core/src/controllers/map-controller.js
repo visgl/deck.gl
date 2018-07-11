@@ -3,6 +3,17 @@ import Controller from './controller';
 import ViewState from './view-state';
 import WebMercatorViewport, {normalizeViewportProps} from 'viewport-mercator-project';
 import assert from '../utils/assert';
+import LinearInterpolator from '../transitions/linear-interpolator';
+import {TRANSITION_EVENTS} from './transition-manager';
+
+
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterpolator: new LinearInterpolator(),
+  transitionInterruption: TRANSITION_EVENTS.BREAK
+};
+
 
 // MAPBOX LIMITS
 export const MAPBOX_LIMITS = {
@@ -404,6 +415,11 @@ export default class MapController extends Controller {
   constructor(props) {
     super(MapState, props);
     this.invertPan = true;
+  }
+
+  _getTransitionProps() {
+    // Transitions on double-tap and key-down are only supported by MapController
+    return LINEAR_TRANSITION_PROPS;
   }
 }
 

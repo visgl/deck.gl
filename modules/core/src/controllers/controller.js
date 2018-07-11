@@ -18,19 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import LinearInterpolator from '../transitions/linear-interpolator';
-import TransitionManager, {TRANSITION_EVENTS} from './transition-manager';
+import TransitionManager from './transition-manager';
 import assert from '../utils/assert';
 
 const NO_TRANSITION_PROPS = {
   transitionDuration: 0
-};
-
-const LINEAR_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
 // EVENT HANDLING PARAMETERS
@@ -65,6 +57,7 @@ export default class Controller {
     this.invertPan = false;
 
     this.handleEvent = this.handleEvent.bind(this);
+    this._transitionProps = this._getTransitionProps();
 
     this.setProps(options);
   }
@@ -383,7 +376,7 @@ export default class Controller {
     const isZoomOut = this.isFunctionKeyPressed(event);
 
     const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    return this.updateViewport(newControllerState, LINEAR_TRANSITION_PROPS);
+    return this.updateViewport(newControllerState, this._transitionProps);
   }
 
   /* eslint-disable complexity */
@@ -420,7 +413,12 @@ export default class Controller {
       default:
         return false;
     }
-    return this.updateViewport(newControllerState, LINEAR_TRANSITION_PROPS);
+    return this.updateViewport(newControllerState, this._transitionProps);
   }
   /* eslint-enable complexity */
+
+  _getTransitionProps() {
+    // Transitions on double-tap and key-down are only supported by MapController
+    return NO_TRANSITION_PROPS;
+  }
 }
