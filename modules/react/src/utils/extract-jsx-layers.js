@@ -40,7 +40,7 @@ export default function extractJSXLayers({children, layers, views}) {
       }
 
       // empty id => default view
-      if (inheritsFrom(ElementType, View) && reactElement.props.id) {
+      if (ElementType !== View && inheritsFrom(ElementType, View) && reactElement.props.id) {
         const view = new ElementType(reactElement.props);
         jsxViews[view.id] = view;
       }
