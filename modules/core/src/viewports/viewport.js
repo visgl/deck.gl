@@ -30,6 +30,8 @@ import mat4_invert from 'gl-mat4/invert';
 import {
   getDistanceScales,
   getMeterZoom,
+  lngLatToWorld,
+  worldToLngLat,
   worldToPixels,
   pixelsToWorld
 } from 'viewport-mercator-project';
@@ -168,8 +170,11 @@ export default class Viewport {
    *   Specifies a point on the sphere to project onto the map.
    * @return {Array} [x,y] coordinates.
    */
-  projectFlat([x, y], scale = this.scale) {
-    return this._projectFlat(...arguments);
+  projectFlat(xyz, scale = this.scale) {
+    if (this.isGeospatial) {
+      return lngLatToWorld(xyz, scale);
+    }
+    return xyz;
   }
 
   /**
@@ -181,20 +186,10 @@ export default class Viewport {
    *   Per cartographic tradition, lat and lon are specified as degrees.
    */
   unprojectFlat(xyz, scale = this.scale) {
-    return this._unprojectFlat(...arguments);
-  }
-
-  // TODO - why do we need these?
-  _projectFlat(xyz, scale = this.scale) {
+    if (this.isGeospatial) {
+      return worldToLngLat(xyz, scale);
+    }
     return xyz;
-  }
-
-  _unprojectFlat(xyz, scale = this.scale) {
-    return xyz;
-  }
-
-  isMapSynched() {
-    return false;
   }
 
   getDistanceScales(coordinateOrigin = null) {

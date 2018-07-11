@@ -9,9 +9,7 @@ import DeckGL, {
   PointCloudLayer,
   MapView,
   FirstPersonView,
-  ThirdPersonView,
-  MapController,
-  _FirstPersonController
+  ThirdPersonView
 } from 'deck.gl';
 
 import TripsLayer from '../../../examples/website/trips/trips-layer';
@@ -92,9 +90,6 @@ class Root extends Component {
 
     const {buildings, trips} = this.state;
     const {trailLength, time} = this.state;
-    if (!buildings || !trips) {
-      return [];
-    }
 
     return [
       new TripsLayer({
@@ -172,25 +167,20 @@ class Root extends Component {
         onViewStateChange={this._onViewStateChange}
         layers={this._renderLayers()}
       >
-        <FirstPersonView
-          id="1st-person"
-          controller={_FirstPersonController}
-          height="33.33%"
-          fovy={50}
-        />
+        <FirstPersonView id="1st-person" controller={true} height="33.33%" fovy={50} />
 
         <ThirdPersonView
           id="3rd-person"
-          controller={MapController}
+          controller={true}
           y="33.33%"
           height="33.33%"
-          near={0.1}
+          near={1}
           far={10000}
         >
           {this._renderMap}
         </ThirdPersonView>
 
-        <MapView id="basemap" controller={MapController} y="66.67%" height="33.33%">
+        <MapView id="basemap" controller={true} y="66.67%" height="33.33%">
           {this._renderMap}
         </MapView>
       </DeckGL>
