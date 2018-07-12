@@ -464,6 +464,10 @@ export const docPages = generatePath([
           {
             name: 'PerspectiveView',
             content: getDocUrl('api-reference/perspective-view.md')
+          },
+          {
+            name: 'OrbitView',
+            content: getDocUrl('api-reference/orbit-view.md')
           }
         ]
       },
