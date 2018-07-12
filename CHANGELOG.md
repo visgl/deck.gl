@@ -21,6 +21,17 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0 Pre Releases
 
+#### [6.0.0-beta.4] - July 11
+- disable updateTrigger warning (#2036)
+- Make doubleTap and keyboard transitions exlusive to MapController (#2033)
+- fix rendering test (#2035)
+- Fix getCursor bugs (#2034)
+- Upgrade layer browser to v6 API (#2029)
+- React: JSX view bug fixes (#2028)
+- Delete controller when view is removed (#2026)
+- Fix first-person and third-person viewports (#2025)
+- Fix view state comparison (#2024)
+
 #### [6.0.0-beta.1] - July 4
 
 - Attribute Transition bug fix (#1996)
