@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/geopspatial-no-lightgrey.svg?style=flat-square" alt="geospatial" />
 </p>
 
-# OrbitView Class (Experimental)
+# OrbitView Class
 
 The [OrbitView`] class is a subclass of [View](/docs/api-reference/view.md) that creates an orbital view using classic "3D camera" view state parameters.
 
