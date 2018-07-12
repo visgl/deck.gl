@@ -521,13 +521,14 @@ export default class Deck {
   }
 
   _onPointerLeave(event) {
-    this.pickObject({
+    this.layerManager.pickObject({
       x: -1,
       y: -1,
       viewports: this.getViewports(),
-      radius: this.props.pickingRadius,
+      radius: 1,
       mode: 'hover'
     });
+    this.props.onLayerHover(null, [], event.srcEvent);
   }
 }
 
