@@ -354,17 +354,17 @@ export default class AttributeManager {
     const {attributes, updateTriggers} = this;
     const invalidatedAttributes = updateTriggers[triggerName];
 
-    if (!invalidatedAttributes) {
-      let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
-      message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
-      log.warn(message, invalidatedAttributes)();
-    } else {
+    if (invalidatedAttributes) {
       invalidatedAttributes.forEach(name => {
         const attribute = attributes[name];
         if (attribute) {
           attribute.setNeedsUpdate();
         }
       });
+    } else {
+      // let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
+      // message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
+      // log.warn(message, invalidatedAttributes)();
     }
     return invalidatedAttributes;
   }
