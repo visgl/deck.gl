@@ -190,7 +190,7 @@ function drawLayersInViewport(
   // render layers in normal colors
   layers.forEach((layer, layerIndex) => {
     // Check if we should draw layer
-    let shouldDrawLayer = layer.props.visible;
+    let shouldDrawLayer = !layer.isComposite && layer.props.visible;
     if (drawPickingColors) {
       shouldDrawLayer = shouldDrawLayer && layer.props.pickable;
     }
@@ -208,9 +208,7 @@ function drawLayersInViewport(
 
     // Draw the layer
     if (shouldDrawLayer) {
-      if (!layer.isComposite) {
-        renderStats.visibleCount++;
-      }
+      renderStats.visibleCount++;
 
       drawLayerInViewport({
         gl,
