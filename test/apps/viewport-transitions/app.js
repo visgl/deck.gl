@@ -48,8 +48,7 @@ class Root extends Component {
     this.rotationStep = 0;
     this.state = {
       viewState: INITIAL_VIEW_STATE,
-      data: null,
-      loaded: false
+      data: null
     };
 
     this._onLoad = this._onLoad.bind(this);
