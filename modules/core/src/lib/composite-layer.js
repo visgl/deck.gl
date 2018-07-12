@@ -101,6 +101,10 @@ export default class CompositeLayer extends Layer {
     return newProps;
   }
 
+  _getAttributeManager() {
+    return null;
+  }
+
   // Called by layer manager to render subLayers
   _renderLayers() {
     let {subLayers} = this.internalState;
