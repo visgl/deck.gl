@@ -24,7 +24,7 @@ test('ViewManager#getViewports', t => {
     height: 100
   });
 
-  const viewports = viewManager.getViewports();
+  let viewports = viewManager.getViewports();
   t.equals(viewports.length, 2, 'Correct number of viewports returned');
   t.ok(viewports[0] instanceof Viewport, 'Viewport 0 of corrrect type');
   t.ok(viewports[1] instanceof Viewport, 'Viewport 1 of corrrect type');
@@ -33,6 +33,16 @@ test('ViewManager#getViewports', t => {
   t.equals(viewports[0].y, 0, 'viewport dimensions correct');
   t.equals(viewports[1].height, 50, 'viewport dimensions correct');
   t.equals(viewports[1].y, 50, 'viewport dimensions correct');
+
+  viewports = viewManager.getViewports({x: 40, y: 40});
+  t.is(viewports.length, 1, 'Correct number of viewports returned');
+  t.is(viewports[0].y, 0, 'Correct viewport returned');
+
+  viewports = viewManager.getViewports({x: 40, y: 40, width: 20, height: 20});
+  t.is(viewports.length, 2, 'Correct number of viewports returned');
+
+  viewports = viewManager.getViewports({x: -1, y: -1});
+  t.is(viewports.length, 0, 'Correct number of viewports returned');
 
   t.end();
 });

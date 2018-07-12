@@ -84,3 +84,18 @@ test('Viewport.getScales', t => {
   }
   t.end();
 });
+
+test('Viewport.containsPixel', t => {
+  const viewport = new Viewport({x: 0, y: 0, width: 10, height: 10});
+
+  t.ok(viewport.containsPixel({x: 5, y: 5}), 'pixel is inside');
+  t.ok(viewport.containsPixel({x: 0, y: 0}), 'pixel is inside');
+  t.notOk(viewport.containsPixel({x: 10, y: 10}), 'pixel is outside');
+  t.ok(viewport.containsPixel({x: -1, y: -1, width: 2, height: 2}), 'rectangle overlaps');
+  t.notOk(viewport.containsPixel({x: -3, y: -3, width: 2, height: 2}), 'rectangle is outside');
+  t.ok(viewport.containsPixel({x: 9, y: 0, width: 2, height: 2}), 'rectangle overlaps');
+  t.ok(viewport.containsPixel({x: 0, y: 9, width: 2, height: 2}), 'rectangle overlaps');
+  t.notOk(viewport.containsPixel({x: 11, y: 11, width: 2, height: 2}), 'rectangle is outside');
+
+  t.end();
+});
