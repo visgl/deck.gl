@@ -81,7 +81,11 @@ export default class ViewManager {
 
   // Get a set of viewports for a given width and height
   // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
-  getViewports() {
+  // @param rect ([object]) - x, y, [width], [height] of the pixel/area that the viewports should cover
+  getViewports(rect) {
+    if (rect) {
+      return this._viewports.filter(viewport => viewport.containsPixel(rect));
+    }
     return this._viewports;
   }
 

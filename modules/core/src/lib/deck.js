@@ -225,9 +225,8 @@ export default class Deck {
   }
 
   // Get a set of viewports for a given width and height
-  getViewports() {
-    const viewports = this.viewManager.getViewports();
-    return viewports;
+  getViewports(rect) {
+    return this.viewManager.getViewports(rect);
   }
 
   pickObject({x, y, radius = 0, layerIds = null}) {
@@ -237,7 +236,7 @@ export default class Deck {
       y,
       radius,
       layerIds,
-      viewports: this.getViewports(),
+      viewports: this.getViewports({x, y}),
       mode: 'query',
       depth: 1
     });
@@ -252,7 +251,7 @@ export default class Deck {
       y,
       radius,
       layerIds,
-      viewports: this.getViewports(),
+      viewports: this.getViewports({x, y}),
       mode: 'query',
       depth
     });
@@ -268,7 +267,7 @@ export default class Deck {
       width,
       height,
       layerIds,
-      viewports: this.getViewports()
+      viewports: this.getViewports({x, y, width, height})
     });
     this.stats.timeEnd('deck.pickObjects');
     return infos;
@@ -385,7 +384,7 @@ export default class Deck {
       x: pos.x,
       y: pos.y,
       radius,
-      viewports: this.getViewports(),
+      viewports: this.getViewports(pos),
       mode: options.mode,
       depth: 1
     });
@@ -524,7 +523,7 @@ export default class Deck {
     this.layerManager.pickObject({
       x: -1,
       y: -1,
-      viewports: this.getViewports(),
+      viewports: [],
       radius: 1,
       mode: 'hover'
     });
