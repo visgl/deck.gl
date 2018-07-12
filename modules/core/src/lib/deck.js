@@ -76,6 +76,7 @@ function getPropTypes(PropTypes) {
     onAfterRender: PropTypes.func,
     onLayerClick: PropTypes.func,
     onLayerHover: PropTypes.func,
+    onLoad: PropTypes.func,
 
     // Debug settings
     debug: PropTypes.bool,
@@ -105,6 +106,7 @@ const defaultProps = {
   onAfterRender: noop,
   onLayerClick: null,
   onLayerHover: null,
+  onLoad: noop,
 
   getCursor,
 
@@ -456,6 +458,7 @@ export default class Deck {
     this.setProps(this.props);
 
     this._updateCanvasSize();
+    this.props.onLoad();
   }
 
   _onRenderFrame({gl}) {
