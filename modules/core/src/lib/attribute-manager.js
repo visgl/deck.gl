@@ -362,9 +362,9 @@ export default class AttributeManager {
         }
       });
     } else {
-      // let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
-      // message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
-      // log.warn(message, invalidatedAttributes)();
+      let message = `invalidating non-existent trigger ${triggerName} for ${this.id}\n`;
+      message += `Valid triggers: ${Object.keys(attributes).join(', ')}`;
+      log.warn(message, invalidatedAttributes)();
     }
     return invalidatedAttributes;
   }

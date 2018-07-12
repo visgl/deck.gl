@@ -156,7 +156,7 @@ export default class IconLayer extends Layer {
         this.state.model.delete();
       }
       this.setState({model: this._getModel(gl)});
-      this.state.attributeManager.invalidateAll();
+      this.getAttributeManager().invalidateAll();
     }
   }
 

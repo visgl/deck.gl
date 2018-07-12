@@ -48,7 +48,7 @@ export default class ScatterplotLayer extends Layer {
   }
 
   initializeState() {
-    this.state.attributeManager.addInstanced({
+    this.getAttributeManager().addInstanced({
       instancePositions: {
         size: 3,
         transition: true,
@@ -83,7 +83,7 @@ export default class ScatterplotLayer extends Layer {
         this.state.model.delete();
       }
       this.setState({model: this._getModel(gl)});
-      this.state.attributeManager.invalidateAll();
+      this.getAttributeManager().invalidateAll();
     }
   }
 

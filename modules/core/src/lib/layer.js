@@ -260,7 +260,10 @@ export default class Layer extends Component {
     for (const model of this.getModels()) {
       model.delete();
     }
-    this.getAttributeManager().finalize();
+    const attributeManager = this.getAttributeManager();
+    if (attributeManager) {
+      attributeManager.finalize();
+    }
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -699,24 +702,31 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     return redraw;
   }
 
-  _initState() {
-    assert(!this.internalState && !this.state);
-
-    const attributeManager = new AttributeManager(this.context.gl, {
+  // Create new attribute manager
+  _getAttributeManager() {
+    return new AttributeManager(this.context.gl, {
       id: this.props.id,
       stats: this.context.stats
     });
+  }
 
-    // All instanced layers get instancePickingColors attribute by default
-    // Their shaders can use it to render a picking scene
-    // TODO - this slightly slows down non instanced layers
-    attributeManager.addInstanced({
-      instancePickingColors: {
-        type: GL.UNSIGNED_BYTE,
-        size: 3,
-        update: this.calculateInstancePickingColors
-      }
-    });
+  _initState() {
+    assert(!this.internalState && !this.state);
+
+    const attributeManager = this._getAttributeManager();
+
+    if (attributeManager) {
+      // All instanced layers get instancePickingColors attribute by default
+      // Their shaders can use it to render a picking scene
+      // TODO - this slightly slows down non instanced layers
+      attributeManager.addInstanced({
+        instancePickingColors: {
+          type: GL.UNSIGNED_BYTE,
+          size: 3,
+          update: this.calculateInstancePickingColors
+        }
+      });
+    }
 
     this.internalState = new LayerState({
       attributeManager,
@@ -725,7 +735,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     this.state = {};
     // TODO deprecated, for backwards compatibility with older layers
-    this.state.attributeManager = this.getAttributeManager();
+    this.state.attributeManager = attributeManager;
 
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
