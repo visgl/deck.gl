@@ -530,7 +530,9 @@ export default class Deck {
       radius: 1,
       mode: 'hover'
     });
-    this.props.onLayerHover(null, [], event.srcEvent);
+    if (this.props.onLayerHover) {
+      this.props.onLayerHover(null, [], event.srcEvent);
+    }
   }
 }
 
