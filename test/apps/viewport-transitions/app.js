@@ -48,11 +48,10 @@ class Root extends Component {
     this.rotationStep = 0;
     this.state = {
       viewState: INITIAL_VIEW_STATE,
-      data: null,
-      loaded: false
+      data: null
     };
 
-    this._onResize = this._onResize.bind(this);
+    this._onLoad = this._onLoad.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._rotateCamera = this._rotateCamera.bind(this);
 
@@ -64,12 +63,8 @@ class Root extends Component {
     });
   }
 
-  // TODO - this is a hack. Deck does not have an onLoad callback
-  _onResize() {
-    if (!this.state.loaded) {
-      this.setState({loaded: true});
-      this._rotateCamera();
-    }
+  _onLoad() {
+    this._rotateCamera();
   }
 
   _onViewStateChange({viewState}) {
@@ -118,8 +113,8 @@ class Root extends Component {
       <DeckGL
         layers={this._renderLayers()}
         viewState={viewState}
+        onLoad={this._onLoad}
         onViewStateChange={this._onViewStateChange}
-        onResize={this._onResize}
         controller={true}
       >
         <StaticMap mapStyle="mapbox://styles/mapbox/dark-v9" mapboxApiAccessToken={MAPBOX_TOKEN} />

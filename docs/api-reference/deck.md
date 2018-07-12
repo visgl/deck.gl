@@ -176,6 +176,10 @@ Callback Arguments:
 * `pickedInfos` - an array of info objects for all pickable layers that are affected.
 * `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
+##### `onLoad` (Function, optional)
+
+Callback, called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. Can be used to trigger viewport transitions.
+
 
 ## Methods
 
