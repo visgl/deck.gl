@@ -79,9 +79,17 @@ export default class ViewManager {
     this._needsRedraw = this._needsRedraw || reason;
   }
 
-  // Get a set of viewports for a given width and height
-  // TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
-  getViewports() {
+  /** Get a set of viewports for a given width and height
+   * TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
+   * @param rect (object, optional) - filter the viewports
+   *   + not provided - return all viewports
+   *   + {x, y} - only return viewports that contain this pixel
+   *   + {x, y, width, height} - only return viewports that overlap with this rectangle
+   */
+  getViewports(rect) {
+    if (rect) {
+      return this._viewports.filter(viewport => viewport.containsPixel(rect));
+    }
     return this._viewports;
   }
 

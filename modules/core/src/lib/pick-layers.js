@@ -331,7 +331,7 @@ function processPickInfo({
     x,
     y,
     pixel: [x, y],
-    lngLat: viewport.unproject([x, y]),
+    lngLat: viewport && viewport.unproject([x, y]),
     devicePixel: [deviceX, deviceY],
     pixelRatio
   };

@@ -233,6 +233,15 @@ export default class Viewport {
     return matrices;
   }
 
+  containsPixel({x, y, width = 1, height = 1}) {
+    return (
+      x < this.x + this.width &&
+      this.x < x + width &&
+      y < this.y + this.height &&
+      this.y < y + height
+    );
+  }
+
   // EXPERIMENTAL METHODS
 
   getCameraPosition() {
