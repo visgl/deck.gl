@@ -98,7 +98,7 @@ export default class GridCellLayer extends Layer {
         this.state.model.delete();
       }
       this.setState({model: this._getModel(gl)});
-      this.state.attributeManager.invalidateAll();
+      this.getAttributeManager().invalidateAll();
     }
   }
 
