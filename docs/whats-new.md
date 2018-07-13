@@ -18,6 +18,10 @@ Release date: TBD, target late Q2, 2018
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
         <p><i>ViewState flyTo Transitions</i></p>
       </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/GPUAcceleratedScreenGridAggregation.gif" />
+        <p><i>GPU Accelerated ScreenGrid Layer</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
