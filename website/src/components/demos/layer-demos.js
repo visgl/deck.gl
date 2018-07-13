@@ -93,7 +93,7 @@ export const IconLayerDemo = createLayerDemoClass({
         mask: true
       }
     },
-    sizeScale: 15,
+    sizeScale: 8,
     getPosition: d => d.coordinates,
     getIcon: d => 'marker',
     getSize: d => 5,
@@ -187,7 +187,7 @@ export const PointCloudLayerDemo = createLayerDemoClass({
     pickable: false,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: [-122.4, 37.74],
-    radiusPixels: 4,
+    radiusPixels: 2,
     getPosition: d => d.position,
     getNormal: d => d.normal,
     getColor: d => d.color,
@@ -204,7 +204,7 @@ export const TextLayerDemo = createLayerDemoClass({
     sizeScale: 1,
     getPosition: d => d.coordinates,
     getText: d => d.name,
-    getSize: 32,
+    getSize: 16,
     getAngle: 0,
     getTextAnchor: 'middle',
     getAlignmentBaseline: 'center'

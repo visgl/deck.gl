@@ -30,11 +30,14 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE
+      viewState: INITIAL_VIEW_STATE,
+      hoverInfo: null
     };
 
     this._onResize = this._onResize.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
+    this._onHover = this._onHover.bind(this);
+    this._renderTooltip = this._renderTooltip.bind(this);
   }
 
   componentDidMount() {
@@ -60,12 +63,31 @@ export class App extends Component {
     });
   }
 
+  _onHover(info) {
+    const hoverInfo = info.sample ? info : null;
+    if (hoverInfo !== this.state.hoverInfo) {
+      this.setState({hoverInfo});
+    }
+  }
+
+  _renderTooltip() {
+    const {hoverInfo} = this.state;
+    return (
+      hoverInfo && (
+        <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}}>
+          {hoverInfo.sample.map(x => x.toFixed(3)).join(', ')}
+        </div>
+      )
+    );
+  }
+
   render() {
-    const {width = '100%', height = '100%', resolution, showAxis, equation} = this.props;
+    const {resolution = 200, showAxis = true, equation = EQUATION} = this.props;
     const {viewState} = this.state;
 
     const layers = [
       equation &&
+        resolution &&
         new PlotLayer({
           getPosition: (u, v) => {
             const x = (u - 1 / 2) * Math.PI * 2;
@@ -82,8 +104,8 @@ export class App extends Component {
           axesPadding: 0.25,
           axesColor: [0, 0, 0, 128],
           opacity: 1,
-          pickable: Boolean(this.props.onHover),
-          onHover: this.props.onHover,
+          pickable: true,
+          onHover: this._onHover,
           updateTriggers: {
             getPosition: equation
           }
@@ -93,49 +115,17 @@ export class App extends Component {
     return (
       <DeckGL
         layers={layers}
-        width={width}
-        height={height}
         views={new OrbitView()}
         viewState={viewState}
         controller={true}
         onViewStateChange={this._onViewStateChange}
-      />
-    );
-  }
-}
-
-class Root extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-
-    this._onHover = this._onHover.bind(this);
-  }
-
-  _onHover(info) {
-    const hoverInfo = info.sample ? info : null;
-    if (hoverInfo !== this.state.hoverInfo) {
-      this.setState({hoverInfo});
-    }
-  }
-
-  render() {
-    const {hoverInfo} = this.state;
-
-    return (
-      <div>
-        <App equation={EQUATION} resolution={200} showAxis={true} onHover={this.props.onHover} />
-
-        {hoverInfo && (
-          <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}}>
-            {hoverInfo.sample.map(x => x.toFixed(3)).join(', ')}
-          </div>
-        )}
-      </div>
+      >
+        {this._renderTooltip}
+      </DeckGL>
     );
   }
 }
 
 export function renderToDOM(container) {
-  render(<Root />, container);
+  render(<App />, container);
 }

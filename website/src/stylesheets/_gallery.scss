@@ -283,11 +283,6 @@ code {
 }
 
 .icon-demo {
-  position: relative;
-
-  &.clickable {
-    cursor: pointer;
-  }
   .tooltip {
     padding: 4px 12px;
     max-width: 240px;

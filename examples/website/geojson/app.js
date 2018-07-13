@@ -2,6 +2,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import {scaleThreshold} from 'd3-scale';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -9,6 +10,25 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // Source data GeoJSON
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
+
+export const COLOR_SCALE = scaleThreshold()
+  .domain([-0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1, 1.2])
+  .range([
+    [65, 182, 196],
+    [127, 205, 187],
+    [199, 233, 180],
+    [237, 248, 177],
+    // zero
+    [255, 255, 204],
+    [255, 237, 160],
+    [254, 217, 118],
+    [254, 178, 76],
+    [253, 141, 60],
+    [252, 78, 42],
+    [227, 26, 28],
+    [189, 0, 38],
+    [128, 0, 38]
+  ]);
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-125, 50.5, 5000, -122.8, 48.5, 8000],
@@ -28,11 +48,23 @@ export const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const DEFAULT_COLOR_SCALE = r => [r * 255, 140, 200 * (1 - r)];
-
 export class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      hoveredObject: null
+    };
+    this._onHover = this._onHover.bind(this);
+    this._renderTooltip = this._renderTooltip.bind(this);
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
   _renderLayers() {
-    const {data = DATA_URL, colorScale = DEFAULT_COLOR_SCALE} = this.props;
+    const {data = DATA_URL} = this.props;
 
     return [
       new GeoJsonLayer({
@@ -45,13 +77,36 @@ export class App extends Component {
         wireframe: true,
         fp64: true,
         getElevation: f => Math.sqrt(f.properties.valuePerSqm) * 10,
-        getFillColor: f => colorScale(f.properties.growth),
+        getFillColor: f => COLOR_SCALE(f.properties.growth),
         getLineColor: [255, 255, 255],
         lightSettings: LIGHT_SETTINGS,
-        pickable: Boolean(this.props.onHover),
-        onHover: this.props.onHover
+        pickable: true,
+        onHover: this._onHover
       })
     ];
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredObject} = this.state;
+    return (
+      hoveredObject && (
+        <div className="tooltip" style={{top: y, left: x}}>
+          <div>
+            <b>Average Property Value</b>
+          </div>
+          <div>
+            <div>${hoveredObject.properties.valuePerParcel} / parcel</div>
+            <div>
+              ${hoveredObject.properties.valuePerSqm} / m<sup>2</sup>
+            </div>
+          </div>
+          <div>
+            <b>Growth</b>
+          </div>
+          <div>{Math.round(hoveredObject.properties.growth * 100)}%</div>
+        </div>
+      )
+    );
   }
 
   render() {
@@ -72,6 +127,8 @@ export class App extends Component {
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         )}
+
+        {this._renderTooltip}
       </DeckGL>
     );
   }

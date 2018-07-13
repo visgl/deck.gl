@@ -88,7 +88,7 @@ export default function createLayerDemoClass(settings) {
     }
 
     render() {
-      const {viewport, params, data} = this.props;
+      const {viewState, params, data} = this.props;
       const layers = [
         renderLayer(data, params, {
           onHover: this._onHover
@@ -97,7 +97,7 @@ export default function createLayerDemoClass(settings) {
 
       return (
         <div>
-          <DeckGL {...viewport} layers={ layers } />
+          <DeckGL pickingRadius={5} viewState={viewState} layers={ layers } />
           { this._renderTooltip() }
         </div>
       );

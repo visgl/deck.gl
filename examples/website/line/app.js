@@ -43,6 +43,31 @@ function getSize(type) {
 }
 
 export class App extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      hoveredObject: null
+    };
+    this._onHover = this._onHover.bind(this);
+    this._renderTooltip = this._renderTooltip.bind(this);
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredObject} = this.state;
+    return (
+      hoveredObject && (
+        <div className="tooltip" style={{left: x, top: y}}>
+          <div>{hoveredObject.country || hoveredObject.abbrev}</div>
+          <div>{hoveredObject.name.indexOf('0x') >= 0 ? '' : hoveredObject.name}</div>
+        </div>
+      )
+    );
+  }
+
   _renderLayers() {
     const {
       airports = DATA_URL.AIRPORTS,
@@ -58,8 +83,8 @@ export class App extends Component {
         getPosition: d => d.coordinates,
         getColor: [255, 140, 0],
         getRadius: d => getSize(d.type),
-        pickable: Boolean(this.props.onHover),
-        onHover: this.props.onHover
+        pickable: true,
+        onHover: this._onHover
       }),
       new LineLayer({
         id: 'flight-paths',
@@ -69,8 +94,8 @@ export class App extends Component {
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,
-        pickable: Boolean(this.props.onHover),
-        onHover: this.props.onHover
+        pickable: true,
+        onHover: this._onHover
       })
     ];
   }
@@ -84,6 +109,7 @@ export class App extends Component {
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}
+        pickingRadius={5}
         parameters={{
           blendFunc: [GL.SRC_ALPHA, GL.ONE, GL.ONE_MINUS_DST_ALPHA, GL.ONE],
           blendEquation: GL.FUNC_ADD
@@ -97,6 +123,8 @@ export class App extends Component {
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         )}
+
+        {this._renderTooltip}
       </DeckGL>
     );
   }

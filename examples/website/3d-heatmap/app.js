@@ -3,7 +3,6 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {HexagonLayer} from 'deck.gl';
-import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -148,7 +147,7 @@ export class App extends Component {
 export function renderToDOM(container) {
   render(<App />, container);
 
-  requestCsv(DATA_URL, (error, response) => {
+  require('d3-request').csv(DATA_URL, (error, response) => {
     if (!error) {
       const data = response.map(d => [Number(d.lng), Number(d.lat)]);
       render(<App data={data} />, container);

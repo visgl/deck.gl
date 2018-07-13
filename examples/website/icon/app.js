@@ -21,6 +21,8 @@ export const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const stopPropagation = evt => evt.stopPropagation();
+
 /* eslint-disable react/no-deprecated */
 export class App extends Component {
   constructor(props) {
@@ -32,6 +34,89 @@ export class App extends Component {
       hoveredItems: null,
       expanded: false
     };
+    this._onHover = this._onHover.bind(this);
+    this._onClick = this._onClick.bind(this);
+    this._closePopup = this._closePopup.bind(this);
+    this._renderhoveredItems = this._renderhoveredItems.bind(this);
+  }
+
+  _onHover(info) {
+    if (this.state.expanded) {
+      return;
+    }
+
+    const {x, y, object} = info;
+    const z = info.layer.state.z;
+    const {showCluster = true} = this.props;
+
+    let hoveredItems = null;
+
+    if (object) {
+      if (showCluster) {
+        hoveredItems = object.zoomLevels[z].points.sort((m1, m2) => m1.year - m2.year);
+      } else {
+        hoveredItems = [object];
+      }
+    }
+
+    this.setState({x, y, hoveredItems, expanded: false});
+  }
+
+  _onClick() {
+    this.setState({expanded: true});
+  }
+
+  _onPopupLoad(ref) {
+    if (ref) {
+      // React events are triggered after native events
+      ref.addEventListener('wheel', stopPropagation);
+    }
+  }
+
+  _closePopup() {
+    this.setState({expanded: false, hoveredItems: null});
+  }
+
+  _renderhoveredItems() {
+    const {x, y, hoveredItems, expanded} = this.state;
+
+    if (!hoveredItems) {
+      return null;
+    }
+
+    if (expanded) {
+      return (
+        <div
+          className="tooltip interactive"
+          ref={this._onPopupLoad}
+          style={{left: x, top: y}}
+          onMouseLeave={this._closePopup}
+        >
+          {hoveredItems.map(({name, year, mass, class: meteorClass}) => {
+            return (
+              <div key={name}>
+                <h5>{name}</h5>
+                <div>Year: {year || 'unknown'}</div>
+                <div>Class: {meteorClass}</div>
+                <div>Mass: {mass}g</div>
+              </div>
+            );
+          })}
+        </div>
+      );
+    }
+
+    return (
+      <div className="tooltip" style={{left: x, top: y}}>
+        {hoveredItems.slice(0, 20).map(({name, year}) => (
+          <div key={name}>
+            <h5>
+              {name} {year ? `(${year})` : ''}
+            </h5>
+          </div>
+        ))}
+      </div>
+    );
   }
 
   _renderLayers() {
@@ -40,19 +125,17 @@ export class App extends Component {
       iconMapping = 'data/location-icon-mapping.json',
       iconAtlas = 'data/location-icon-atlas.png',
       showCluster = true,
-      viewState,
-      onHover,
-      onClick
+      viewState
     } = this.props;
 
     const layerProps = {
       data,
-      pickable: Boolean(onHover || onClick),
+      pickable: true,
       getPosition: d => d.coordinates,
       iconAtlas,
       iconMapping,
-      onHover,
-      onClick,
+      onHover: this._onHover,
+      onClick: this._onClick,
       sizeScale: 60
     };
 
@@ -88,6 +171,8 @@ export class App extends Component {
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         )}
+
+        {this._renderhoveredItems}
       </DeckGL>
     );
   }

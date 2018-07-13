@@ -36,8 +36,7 @@ export default class PlotDemo extends Component {
     super(props);
 
     this.state = {
-      equation: {},
-      hoverInfo: null
+      equation: {}
     };
   }
 
@@ -62,35 +61,17 @@ export default class PlotDemo extends Component {
     }
   }
 
-  @autobind _onHover(info) {
-    const hoverInfo = info.sample ? info : null;
-    if (hoverInfo !== this.state.hoverInfo) {
-      this.setState({hoverInfo});
-    }
-  }
-
   render() {
     const {
-      viewState: {width, height},
       params: {resolution, showAxis}
     } = this.props;
     const {equation, hoverInfo} = this.state;
 
     return (
-      <div>
-        {resolution && <App
-          width={width}
-          height={height}
-          equation={equation.valid ? equation.func : null}
-          resolution={resolution.value}
-          showAxis={showAxis.value}
-          onHover={this._onHover} />}
-
-        {hoverInfo && <div className="tooltip" style={{left: hoverInfo.x, top: hoverInfo.y}} >
-          { hoverInfo.sample.map(x => x.toFixed(3)).join(', ') }
-          </div>}
-
-      </div>
+      <App
+        equation={equation.valid ? equation.func : null}
+        resolution={resolution.value}
+        showAxis={showAxis.value} />
     );
   }
 }
