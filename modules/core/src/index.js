@@ -68,9 +68,9 @@ export {default as _Effect} from './experimental/lib/effect';
 export {default as _ReflectionEffect} from './experimental/reflection-effect/reflection-effect';
 
 // Eperimental Transitions
-export {TRANSITION_EVENTS as _TRANSITION_EVENTS} from './controllers/transition-manager';
-export {default as _LinearInterpolator} from './transitions/linear-interpolator';
-export {default as _ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
+export {TRANSITION_EVENTS} from './controllers/transition-manager';
+export {default as LinearInterpolator} from './transitions/linear-interpolator';
+export {default as ViewportFlyToInterpolator} from './transitions/viewport-fly-to-interpolator';
 
 // Layer utilities
 export {default as log} from './utils/log';

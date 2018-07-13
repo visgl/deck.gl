@@ -32,6 +32,10 @@ See [Use with React](/docs/get-started/using-with-react.md) for more details.
 
 First introduced in v5.1, attribute transition uses WebGL2's Transform Feedback feature to interpolate layer attributes on the GPU. Starting v6.0, all core layers support attribute transition, including HexagonLayer, GridLayer and GeoJsonLayer. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/layer.md).
 
+### ViewState Transitions
+
+ViewState Transitions (aka Viewport Transitions) were introduced in v5.0 as experimental are now official in v6.0. Transitions are provided through `DeckGL`'s `ViewState` prop. For more details check [ViewState Transitions](/docs/api-reference/view-state-transitions.md) documentation.
+
 ### Prop Types
 
 deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/developer-guide/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
