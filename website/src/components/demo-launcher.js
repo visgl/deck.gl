@@ -61,8 +61,16 @@ class DemoLauncher extends Component {
   }
 
   // Add map wrapper, use for examples that havn't yet been updated to render their own maps
-  _renderMap(mapStyle = MAPBOX_STYLES.BLANK, component) {
+  _renderMap(mapStyle, component) {
     const {viewState, width, height, isInteractive} = this.props;
+
+    if (!mapStyle) {
+      return (
+        <div style={{width, height, position: 'relative'}}>
+          {component}
+        </div>
+      );
+    }
 
     return (
       <MapGL

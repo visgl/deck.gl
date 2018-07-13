@@ -98,8 +98,11 @@ export const examplePages = generatePath([
         }
       },
       {
-        name: '3D Indoor Scan',
-        external: 'http://uber.github.io/deck.gl/examples/point-cloud-laz'
+        name: 'PointCloudLayer',
+        content: {
+          demo: 'PointCloudDemo',
+          code: getCodeUrl('examples/website/point-cloud-laz')
+        }
       },
       {
         name: 'TextLayer',

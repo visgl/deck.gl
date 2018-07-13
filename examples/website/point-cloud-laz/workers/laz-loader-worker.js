@@ -1,5 +1,11 @@
-// laz-loader-worker.js
+/* eslint-disable */
+/*
+  Modified from Uday Verma and Howard Butler's plasio
+  https://github.com/verma/plasio/
+  MIT License
+*/
 
+// laz-loader-worker.js
 importScripts('laz-perf.js');
 
 var instance = null; // laz-perf instance
