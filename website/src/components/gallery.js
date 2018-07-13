@@ -37,7 +37,7 @@ function findPage(pages, path) {
 class Gallery extends Component {
 
   _renderPage() {
-    const {match, location, pages} = this.props;
+    const {match, history, location, pages} = this.props;
     const path = location.pathname.replace(match.path, '').split('/').filter(Boolean);
     const {page, redirect} = findPage(pages, path);
 
@@ -45,7 +45,7 @@ class Gallery extends Component {
       return <Redirect from="*" to={`${match.path}/${redirect.join('/')}`} />
     }
 
-    return <Page location={location} content={page.content} />;
+    return <Page history={history} location={location} content={page.content} />;
   }
 
   render() {

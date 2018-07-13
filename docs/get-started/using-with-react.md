@@ -98,7 +98,7 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
   }
 ```
 
-For more information on this syntax and its limitations, see [DeckGL API](/docs/api-reference/api/deckgl.md).
+For more information on this syntax and its limitations, see [DeckGL API](/docs/api-reference/react/deckgl.md).
 
 
 ## Using JSX with deck.gl views
@@ -124,7 +124,7 @@ The following code renders the same set of layers in two viewports, splitting th
   }
 ```
 
-For more information on this syntax, see [DeckGL API](/docs/api-reference/api/deckgl.md).
+For more information on this syntax, see [DeckGL API](/docs/api-reference/react/deckgl.md).
 
 
 ## Remarks
