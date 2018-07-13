@@ -145,6 +145,6 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 ## Source
 
-[modules/core/src/core-layers/text-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/text-layer)
+[modules/core/src/core-layers/text-layer](https://github.com/uber/deck.gl/tree/6.0-release/modules/layers/src/text-layer)
 
 

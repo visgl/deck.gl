@@ -55,10 +55,6 @@ All deck.gl layers inherit from either the [`Layer`](/docs/api-reference/layer.m
 
 The "core layers" are a group of geospatial visualization focused layers, intended to represent a small set of widely applicable data visualization building blocks. The core layers are the most stable and supported deck.gl layers.
 
-### Sample Layers
-
-deck.gl provides a number of sample layers in the [examples directory](https://github.com/uber/deck.gl/tree/5.2-release/examples/sample-layers) intended to illustrate various ideas and approaches to how layers can be designed. These layers have documentation in their respective folders, but they are not listed here in the official documentation.
-
 ## Layer Creation, Update and Destruction
 
 Every time some state in your application that affects visualization changes, you simply create new layer instances with updated properties and pass them to deck.gl for rendering.

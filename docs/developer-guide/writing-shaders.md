@@ -35,7 +35,7 @@ for more information.
 
 ### picking
 
-Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.2-release/src/shadertools/modules/picking).
+Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/6.0-release/src/shadertools/modules/picking).
 
 
 ## Shader Techniques and Ideas

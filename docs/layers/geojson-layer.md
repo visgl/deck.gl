@@ -249,5 +249,5 @@ The dash array to draw each outline path with: `[dashSize, gapSize]` relative to
 
 ## Source
 
-[modules/core/src/core-layers/geojson-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/geojson-layer)
+[modules/core/src/core-layers/geojson-layer](https://github.com/uber/deck.gl/tree/6.0-release/modules/layers/src/geojson-layer)
 

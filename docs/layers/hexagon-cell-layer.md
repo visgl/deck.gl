@@ -120,5 +120,5 @@ Method called to retrieve the elevation of each object. 1 unit approximate to 10
 
 ## Source
 
-[modules/core/src/core-layers/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/hexagon-cell-layer)
+[modules/core/src/core-layers/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/6.0-release/modules/layers/src/hexagon-cell-layer)
 

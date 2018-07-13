@@ -134,5 +134,5 @@ The rotating angle  of each object, in degrees.
 
 ## Source
 
-[modules/core/src/core-layers/icon-layer](https://github.com/uber/deck.gl/tree/5.2-release/modules/core/src/core-layers/icon-layer)
+[modules/core/src/core-layers/icon-layer](https://github.com/uber/deck.gl/tree/6.0-release/modules/layers/src/icon-layer)
 
