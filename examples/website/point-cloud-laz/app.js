@@ -1,19 +1,18 @@
-/* global window */
-/* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView} from 'deck.gl';
-import {_OrbitController as OrbitController} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
 import GL from 'luma.gl/constants';
-import {loadLazFile, parseLazData} from './utils/laslaz-loader';
+import loadLazFile from './utils/laslaz-loader';
+import {normalize} from './utils/point-cloud-utils';
 
-const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
-const FILE_PATH = 'examples/point-cloud-laz/indoor.laz';
+// Data source: kaarta.com
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.laz';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  distance: 2,
+  distance: OrbitView.getDistance({boundingBox: [1, 1, 1], fov: 30}),
   rotationX: 0,
   rotationOrbit: 0,
   orbitAxis: 'Y',
@@ -23,148 +22,100 @@ const INITIAL_VIEW_STATE = {
   zoom: 1
 };
 
-function normalize(points) {
-  let xMin = Infinity;
-  let yMin = Infinity;
-  let zMin = Infinity;
-  let xMax = -Infinity;
-  let yMax = -Infinity;
-  let zMax = -Infinity;
+const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
-  for (let i = 0; i < points.length; i++) {
-    xMin = Math.min(xMin, points[i].position[0]);
-    yMin = Math.min(yMin, points[i].position[1]);
-    zMin = Math.min(zMin, points[i].position[2]);
-    xMax = Math.max(xMax, points[i].position[0]);
-    yMax = Math.max(yMax, points[i].position[1]);
-    zMax = Math.max(zMax, points[i].position[2]);
-  }
-
-  const scale = Math.max(...[xMax - xMin, yMax - yMin, zMax - zMin]);
-  const xMid = (xMin + xMax) / 2;
-  const yMid = (yMin + yMax) / 2;
-  const zMid = (zMin + zMax) / 2;
-
-  for (let i = 0; i < points.length; i++) {
-    points[i].position[0] = (points[i].position[0] - xMid) / scale;
-    points[i].position[1] = (points[i].position[1] - yMid) / scale;
-    points[i].position[2] = (points[i].position[2] - zMid) / scale;
-  }
-}
-
-class Example extends PureComponent {
+export class App extends PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      width: 0,
-      height: 0,
+      viewState: INITIAL_VIEW_STATE,
       points: [],
-      progress: 0,
-      rotating: true,
-      viewState: INITIAL_VIEW_STATE
+      progress: 0
     };
 
-    this._onResize = this._onResize.bind(this);
+    this._onLoad = this._onLoad.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onUpdate = this._onUpdate.bind(this);
+    this._rotateCamera = this._rotateCamera.bind(this);
+
+    this._loadData();
   }
 
-  componentDidMount() {
-    const {points} = this.state;
-
-    window.addEventListener('resize', this._onResize);
-    this._onResize();
-
-    const skip = 10;
-    loadLazFile(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
-      parseLazData(rawData, skip, (decoder, progress) => {
-        for (let i = 0; i < decoder.pointsCount; i++) {
-          const {color, position} = decoder.getPoint(i);
-          points.push({color, position});
-        }
-
-        if (progress >= 1) {
-          normalize(points);
-        }
-
-        this.setState({points, progress});
-      });
-    });
-
-    window.requestAnimationFrame(this._onUpdate);
+  _onViewStateChange({viewState}) {
+    this.setState({viewState});
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._onResize);
+  _onLoad() {
+    this._rotateCamera();
   }
 
-  _onResize() {
-    this.setState({width: window.innerWidth, height: window.innerHeight});
-
-    if (this.viewState) {
-      const newViewState = Object.assign({}, this.viewState, {
-        distance: OrbitView.getDistance({
-          boundingBox: [1, 1, 1],
-          fov: this.state.viewState.fov
-        })
-      });
-      this._onViewStateChange(newViewState, {});
-    }
-  }
-
-  _onViewStateChange({viewState, interactionState}) {
+  _rotateCamera() {
+    const {viewState} = this.state;
     this.setState({
-      rotating: !interactionState.isDragging,
-      viewState: {...this.state.viewState, ...viewState}
+      viewState: {
+        ...viewState,
+        rotationOrbit: viewState.rotationOrbit + 30,
+        transitionDuration: 600,
+        transitionInterpolator,
+        onTransitionEnd: this._rotateCamera
+      }
     });
   }
 
-  _onUpdate() {
-    const {rotating, viewState, progress} = this.state;
+  _loadData() {
+    const {points} = this.state;
+    const skip = 10;
 
-    if (rotating && progress >= 1.0) {
-      this.setState({
-        viewState: {
-          ...viewState,
-          rotationOrbit: viewState.rotationOrbit + 1
-        }
-      });
+    if (this.props.onLoad) {
+      this.props.onLoad({count: 0, progress: 0});
     }
 
-    window.requestAnimationFrame(this._onUpdate);
+    loadLazFile(DATA_URL, skip, (decoder, progress) => {
+      for (let i = 0; i < decoder.pointsCount; i++) {
+        const {position} = decoder.getPoint(i);
+        points.push(position);
+      }
+
+      if (this.props.onLoad) {
+        this.props.onLoad({count: points.length, progress});
+      }
+
+      if (progress >= 1) {
+        normalize(points);
+      }
+
+      this.setState({points, progress});
+    });
   }
 
-  _renderLazPointCloudLayer() {
+  _renderLayers() {
     const {points, progress} = this.state;
-    if (!points || points.length === 0 || progress < 1.0) {
-      return null;
-    }
 
-    return new PointCloudLayer({
-      id: 'laz-point-cloud-layer',
-      data: points,
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-      getPosition: d => d.position,
-      getNormal: d => [0, 0.5, 0.2],
-      getColor: d => [255, 255, 255, 128],
-      radiusPixels: 0.5
-    });
+    return [
+      progress >= 1.0 &&
+        new PointCloudLayer({
+          id: 'laz-point-cloud-layer',
+          data: points,
+          coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+          getPosition: d => d,
+          getNormal: [0, 1, 0],
+          getColor: [255, 255, 255],
+          radiusPixels: 0.5
+        })
+    ];
   }
 
-  _renderDeckGLCanvas() {
-    const {width, height, viewState} = this.state;
-    const view = new OrbitView();
+  render() {
+    const {viewState} = this.state;
 
     return (
       <DeckGL
-        width={width}
-        height={height}
-        views={[view]}
+        views={new OrbitView()}
         viewState={viewState}
-        controller={OrbitController}
-        layers={[this._renderLazPointCloudLayer()]}
+        controller={true}
+        onLoad={this._onLoad}
         onViewStateChange={this._onViewStateChange}
+        layers={this._renderLayers()}
         parameters={{
           clearColor: [0.07, 0.14, 0.19, 1],
           blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA]
@@ -172,49 +123,8 @@ class Example extends PureComponent {
       />
     );
   }
-
-  _renderProgressInfo() {
-    const progress = (this.state.progress * 100).toFixed(2);
-    return (
-      <div>
-        <div
-          style={{
-            position: 'absolute',
-            left: '8px',
-            bottom: '8px',
-            color: '#FFF',
-            fontSize: '15px'
-          }}
-        >
-          {this.state.progress < 1 ? (
-            <div>
-              <div>This example might not work on mobile devices due to browser limitations.</div>
-              <div>Please try checking it with a desktop machine instead.</div>
-              <div>{`Loading ${progress}% (laslaz loader by plas.io)`}</div>
-            </div>
-          ) : (
-            <div>Data source: kaarta.com</div>
-          )}
-        </div>
-      </div>
-    );
-  }
-
-  render() {
-    const {width, height} = this.state;
-    if (width <= 0 || height <= 0) {
-      return null;
-    }
-
-    return (
-      <div>
-        {this._renderDeckGLCanvas()}
-        {this._renderProgressInfo()}
-      </div>
-    );
-  }
 }
 
 export function renderToDOM(container) {
-  render(<Example />, container);
+  render(<App />, container);
 }

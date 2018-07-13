@@ -1,5 +1,11 @@
-/* eslint no-use-before-define: 0 */
+/* eslint-disable */
+/*
+  Modified from Uday Verma and Howard Butler's plasio
+  https://github.com/verma/plasio/
+  MIT License
+*/
 
+// laz-perf.js
 var Module;
 if (!Module) Module = (typeof Module !== 'undefined' ? Module : null) || {};
 var moduleOverrides = {};

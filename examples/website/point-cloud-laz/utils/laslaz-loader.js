@@ -1,36 +1,26 @@
 // ported and es6-ified from https://github.com/verma/plasio/
-/* global XMLHttpRequest */
-import {LASFile} from '../worker/laslaz';
+import {request} from 'd3-request';
+import {LASFile} from './laslaz';
 
 /**
  * loads laz data
  * @param {string} url
  * @return {Promise} promise that resolves to the laz data
  */
-export function loadLazFile(url) {
-  let request = null;
-  const promise = new Promise((resolve, reject) => {
-    request = new XMLHttpRequest();
-    try {
-      request.open('GET', url, true);
-      request.responseType = 'arraybuffer';
-
-      request.onload = () => {
-        if (request.status === 200) {
-          resolve(new LASFile(request.response));
+export default function loadLazFile(url, skip, onParseData) {
+  return new Promise((resolve, reject) => {
+    request(url)
+      .responseType('arraybuffer')
+      .get((error, response) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response.response);
         }
-        reject(new Error('Could not get binary data'));
-      };
-
-      request.onerror = error => reject(error);
-      request.send();
-    } catch (error) {
-      reject(error);
-    }
+      });
+  }).then(rawData => {
+    return parseLazData(new LASFile(rawData), skip, onParseData);
   });
-  // Make abort() available
-  promise.abort = request.abort.bind(request);
-  return promise;
 }
 
 /**
@@ -38,7 +28,7 @@ export function loadLazFile(url) {
  * @param {Binary} data
  * @return {*} parsed point cloud
  */
-export function parseLazData(dataHandler, skip, onParseData) {
+function parseLazData(dataHandler, skip, onParseData) {
   return (
     dataHandler
       .open()

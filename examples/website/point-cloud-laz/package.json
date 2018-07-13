@@ -11,6 +11,7 @@
     "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
   "dependencies": {
+    "d3-request": "^1.0.5",
     "deck.gl": "^5.2.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"

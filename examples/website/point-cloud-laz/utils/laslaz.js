@@ -1,8 +1,11 @@
-/* eslint no-use-before-define: 0 */
-// https://github.com/verma/plasio/
-// laslaz.js
-// LAS/LAZ loading
+/* eslint-disable */
+/*
+  Modified from Uday Verma and Howard Butler's plasio
+  https://github.com/verma/plasio/
+  MIT License
+*/
 
+// laslaz.js
 (function(scope) {
   'use strict';
 
@@ -202,7 +205,7 @@
   //
   var LAZLoader = function(arraybuffer) {
     this.arraybuffer = arraybuffer;
-    this.ww = new Worker(`worker/laz-loader-worker.js`);
+    this.ww = new Worker(`workers/laz-loader-worker.js`);
 
     this.nextCB = null;
     var o = this;
