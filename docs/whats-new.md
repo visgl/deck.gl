@@ -14,6 +14,10 @@ Release date: TBD, target late Q2, 2018
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/attribute-transition.gif" />
         <p><i>GeoJson Transition</i></p>
       </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
+        <p><i>ViewState flyTo Transitions</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
@@ -31,6 +35,10 @@ See [Use with React](/docs/get-started/using-with-react.md) for more details.
 ### Attribute Transition
 
 First introduced in v5.1, attribute transition uses WebGL2's Transform Feedback feature to interpolate layer attributes on the GPU. Starting v6.0, all core layers support attribute transition, including HexagonLayer, GridLayer and GeoJsonLayer. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/layer.md).
+
+### ViewState Transitions
+
+ViewState Transitions (aka Viewport Transitions) were introduced in v5.0 as experimental are now official in v6.0. Transitions are provided through `DeckGL`'s `ViewState` prop. For more details check [ViewState Transitions](/docs/api-reference/view-state-transitions.md) documentation.
 
 ### Prop Types
 

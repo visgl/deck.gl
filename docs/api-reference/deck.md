@@ -70,6 +70,7 @@ A geospatial `viewState` would typically contain the following fields:
 * `bearing` (Number, optional) - Current bearing - used to define a mercator projection if `viewport` is not supplied.
 * `pitch` (Number, optional) - Current pitch - used to define a mercator projection if `viewport` is not supplied.
 
+Transitions between two viewState objects can also be achieved by providing set of fields to `viewState` prop, for more details check [ViewState Transitions](/docs/api-reference/view-state-transitions.md)).
 
 #### `initialViewState` (Object)
 
