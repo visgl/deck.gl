@@ -62,7 +62,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {trips: tripsCount, vertices: vertexCount, progress: tripsCount / 9970 / * 0.8}
+    meta: {trips: tripsCount, vertices: vertexCount, progress: tripsCount / 9970 * 0.8}
   });
   result = [];
 }
