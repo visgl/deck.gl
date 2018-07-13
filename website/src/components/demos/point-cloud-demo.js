@@ -26,7 +26,6 @@ export default class PointCloudDemo extends Component {
         <div className="stat">No. of Points
           <b>{ readableInteger(meta.count) }</b>
         </div>
-        {meta.progress < 1 && <p>Loading {(meta.progress * 100).toFixed(2)}%</p>}
       </div>
     );
   }

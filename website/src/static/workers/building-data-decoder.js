@@ -42,7 +42,7 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: {buildings: count, triangles: triangleCount}
+    meta: {buildings: count, triangles: triangleCount, progressAlt: count / 3895 * 0.2}
   });
   result = [];
 }
