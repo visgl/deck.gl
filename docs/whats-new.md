@@ -14,6 +14,10 @@ Release date: TBD, target late Q2, 2018
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/attribute-transition.gif" />
         <p><i>GeoJson Transition</i></p>
       </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/viewstateTransitionsFlyTo.gif" />
+        <p><i>ViewState flyTo Transitions</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
