@@ -1,15 +1,14 @@
-/* global window */
-/* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, _LinearInterpolator as LinearInterpolator} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
 import GL from 'luma.gl/constants';
 import loadLazFile from './utils/laslaz-loader';
 import {normalize} from './utils/point-cloud-utils';
 
 // Data source: kaarta.com
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.laz';
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.laz';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
@@ -93,15 +92,16 @@ export class App extends PureComponent {
     const {points, progress} = this.state;
 
     return [
-      progress >= 1.0 && new PointCloudLayer({
-        id: 'laz-point-cloud-layer',
-        data: points,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        getPosition: d => d,
-        getNormal: [0, 1, 0],
-        getColor: [255, 255, 255],
-        radiusPixels: 0.5
-      })
+      progress >= 1.0 &&
+        new PointCloudLayer({
+          id: 'laz-point-cloud-layer',
+          data: points,
+          coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+          getPosition: d => d,
+          getNormal: [0, 1, 0],
+          getColor: [255, 255, 255],
+          radiusPixels: 0.5
+        })
     ];
   }
 

@@ -8,13 +8,15 @@ import PLYParser from './ply-parser';
  */
 export default function loadPLY(url) {
   return new Promise((resolve, reject) => {
-    request(url).responseType('arraybuffer').get((error, response) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(response.response);
-      }
-    });
+    request(url)
+      .responseType('arraybuffer')
+      .get((error, response) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response.response);
+        }
+      });
   }).then(parsePLY);
 }
 

@@ -9,13 +9,15 @@ import {LASFile} from './laslaz';
  */
 export default function loadLazFile(url, skip, onParseData) {
   return new Promise((resolve, reject) => {
-    request(url).responseType('arraybuffer').get((error, response) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(response.response);
-      }
-    });
+    request(url)
+      .responseType('arraybuffer')
+      .get((error, response) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(response.response);
+        }
+      });
   }).then(rawData => {
     return parseLazData(new LASFile(rawData), skip, onParseData);
   });

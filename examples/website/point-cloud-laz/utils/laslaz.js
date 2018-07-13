@@ -1,8 +1,11 @@
-/* eslint no-use-before-define: 0 */
-// https://github.com/verma/plasio/
-// laslaz.js
-// LAS/LAZ loading
+/* eslint-disable */
+/*
+  Modified from Uday Verma and Howard Butler's plasio
+  https://github.com/verma/plasio/
+  MIT License
+*/
 
+// laslaz.js
 (function(scope) {
   'use strict';
 

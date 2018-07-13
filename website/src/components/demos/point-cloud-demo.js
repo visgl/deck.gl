@@ -22,11 +22,11 @@ export default class PointCloudDemo extends Component {
       <div>
         <h3>3D Indoor Scan</h3>
         <p>This demo may not work on mobile devices due to browser limitations.</p>
-        {meta.progress < 1 && <p>Loading {(meta.progress * 100).toFixed(2)}%</p>}
+        <p>Data source: <a href="https://kaarta.com">kaarta.com</a></p>
         <div className="stat">No. of Points
           <b>{ readableInteger(meta.count) }</b>
         </div>
-        <p>Data source: <a href="https://kaarta.com">kaarta.com</a></p>
+        {meta.progress < 1 && <p>Loading {(meta.progress * 100).toFixed(2)}%</p>}
       </div>
     );
   }

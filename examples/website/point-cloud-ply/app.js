@@ -1,12 +1,11 @@
-/* global window */
-/* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
 import loadPLY from './utils/ply-loader';
 
-const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy100k.ply';
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy100k.ply';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
