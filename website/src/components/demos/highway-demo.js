@@ -37,13 +37,13 @@ export default class HighwayDemo extends Component {
   static renderInfo(meta) {
 
     const legends = COLOR_SCALE.domain();
-    const width = `${100 / (legends.length - 1)}%`;
+    const width = `${100 / legends.length}%`;
 
     return (
       <div>
         <h3>Highway Safety in the US</h3>
         <p>Fatal accidents on U.S. highways<br/>
-           (1990 - 2015)</p>
+           ({1990 - 2015})</p>
         <p>Fatalities per 1,000 miles:</p>
         <div className="layout">
           {legends.map((l, i) => (

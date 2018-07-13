@@ -1,49 +1,55 @@
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import {Switch, Route, Redirect} from 'react-router';
+import {Redirect} from 'react-router';
 
 import Page from './page';
 import TableOfContents from './table-of-contents';
 
 function getDefaultPath(pages) {
-  const path = [];
-  let page;
-  while (pages) {
-    page = pages[0];
-    pages = page.children;
-    path.push(page.path);
+  if (!pages || !pages.length) {
+    return [];
   }
-  return path.join('/');
+  const page = pages[0];
+  return [page.path].concat(getDefaultPath(page.children));
 }
 
-function renderRoutes(pages, parentPath) {
-  const defaultPath = `${parentPath}/${getDefaultPath(pages)}`;
-  const results = [
-    <Redirect key="redirect" exact from={parentPath} to={defaultPath} />
-  ];
+// We can't use <Route> here because for viewport transition to work, <Page> cannot be unmounted
+function findPage(pages, path) {
+  const p = path.shift();
+  const page = pages.find(page => page.path === p);
 
-  pages.forEach((page, i) => {
-    const {children, content} = page;
-    const path = `${parentPath}/${page.path}`;
-
-    if (children) {
-      results.push(renderRoutes(children, path))
-    } else {
-      results.push(
-        <Route key={i} path={path}>
-          {props => <Page {...props} content={content} />}
-        </Route>
-      );
+  if (!page) {
+    return {redirect: getDefaultPath(pages)};
+  }
+  if (page.children) {
+    const result = findPage(page.children, path);
+    if (result.page) {
+      return result;
     }
-  });
-
-  return results;
+    return {redirect: [p].concat(result.redirect)};
+  }
+  if (path.length) {
+    return {redirect: []};
+  }
+  return {page};
 }
 
 class Gallery extends Component {
 
+  _renderPage() {
+    const {match, location, pages} = this.props;
+    const path = location.pathname.replace(match.path, '').split('/').filter(Boolean);
+    const {page, redirect} = findPage(pages, path);
+
+    if (redirect) {
+      return <Redirect from="*" to={`${match.path}/${redirect.join('/')}`} />
+    }
+
+    return <Page location={location} content={page.content} />;
+  }
+
   render() {
-    const {children, match: {path}, pages, isMenuOpen} = this.props;
+    const {match: {path}, pages, isMenuOpen} = this.props;
 
     return (
       <div className="gallery-wrapper">
@@ -54,9 +60,7 @@ class Gallery extends Component {
             </div>
             <div className={'flexbox-item flexbox-item--fill'}>
               
-              <Switch>
-                {renderRoutes(pages, path)}
-              </Switch>
+              {this._renderPage()}
 
             </div>
           </div>
