@@ -1,13 +1,12 @@
-import {fromJS} from 'immutable';
 
 export const MAPBOX_STYLES = {
   LIGHT: 'mapbox://styles/uberdata/cive48w2e001a2imn5mcu2vrs',
   DARK: 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc',
-  BLANK: fromJS({
+  BLANK: {
     version: 8,
     sources: {},
     layers: []
-  })
+  }
 };
 
 export const DEFAULT_MAP_STATE = {
