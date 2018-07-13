@@ -22,7 +22,8 @@ const INITIAL_VIEW_STATE = {
   orbitAxis: 'Y',
   fov: 30,
   minDistance: 1.5,
-  maxDistance: 10
+  maxDistance: 10,
+  zoom: 1
 };
 
 class Example extends PureComponent {

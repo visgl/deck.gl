@@ -5,10 +5,10 @@ import assert from '../utils/assert';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
 
-const LINEAR_TRANSITION_PROPS = {
+const ZOOM_TRANSITION_PROPS = {
   transitionDuration: 300,
   transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(),
+  transitionInterpolator: new LinearInterpolator(['zoom']),
   transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
@@ -310,7 +310,7 @@ export default class OrbitController extends Controller {
   }
 
   _getTransitionProps() {
-    // Enables Transitions on double-tap and key-down events.
-    return LINEAR_TRANSITION_PROPS;
+    // Enable transitions for zoom change
+    return ZOOM_TRANSITION_PROPS;
   }
 }

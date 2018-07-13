@@ -19,7 +19,8 @@ const INITIAL_VIEW_STATE = {
   orbitAxis: 'Y',
   fov: 30,
   minDistance: 0.5,
-  maxDistance: 3
+  maxDistance: 3,
+  zoom: 1
 };
 
 function normalize(points) {
