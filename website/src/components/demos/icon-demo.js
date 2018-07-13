@@ -63,8 +63,8 @@ export default class IconDemo extends Component {
         <App
           {...otherProps}
           data={data}
-          iconAtlas="images/location-icon-atlas.png"
-          iconMapping="images/location-icon-mapping.json"
+          iconAtlas={`${DATA_URI}/../examples/icon/location-icon-atlas.png`}
+          iconMapping={`${DATA_URI}/../examples/icon/location-icon-mapping.json`}
           showCluster={params.cluster.value} />
       </div>
     );
