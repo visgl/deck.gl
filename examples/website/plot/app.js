@@ -9,15 +9,13 @@ const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  distance: 3,
+  distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov: 50}),
   rotationX: -30,
   rotationOrbit: 30,
   orbitAxis: 'Y',
   fov: 50,
   minDistance: 1,
-  maxDistance: 20,
-  width: 500,
-  height: 500
+  maxDistance: 20
 };
 
 function getScale({min, max}) {
@@ -30,37 +28,11 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      viewState: INITIAL_VIEW_STATE,
       hoverInfo: null
     };
 
-    this._onResize = this._onResize.bind(this);
-    this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onHover = this._onHover.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this._onResize);
-    this._onResize();
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._onResize);
-  }
-
-  _onResize() {
-    const {fov} = this.state.viewState;
-    const viewState = Object.assign({}, this.viewState, {
-      distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov})
-    });
-    this._onViewStateChange({viewState});
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({
-      viewState: {...this.state.viewState, ...viewState}
-    });
   }
 
   _onHover(info) {
@@ -83,7 +55,6 @@ export class App extends Component {
 
   render() {
     const {resolution = 200, showAxis = true, equation = EQUATION} = this.props;
-    const {viewState} = this.state;
 
     const layers = [
       equation &&
@@ -116,9 +87,8 @@ export class App extends Component {
       <DeckGL
         layers={layers}
         views={new OrbitView()}
-        viewState={viewState}
+        initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        onViewStateChange={this._onViewStateChange}
       >
         {this._renderTooltip}
       </DeckGL>

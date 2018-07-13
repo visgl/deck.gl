@@ -2,18 +2,15 @@
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView} from 'deck.gl';
-import {_OrbitController as OrbitController, LinearInterpolator} from 'deck.gl';
-import {loadBinary, parsePLY} from './utils/ply-loader';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
-const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
-const FILE_PATH = 'examples/point-cloud-ply/lucy100k.ply';
+import loadPLY from './utils/ply-loader';
 
-const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
+const DATA_URL = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy100k.ply';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  distance: 2,
+  distance: OrbitView.getDistance({boundingBox: [1, 1, 1], fov: 30}),
   rotationX: 0,
   rotationOrbit: 0,
   orbitAxis: 'Y',
@@ -23,29 +20,26 @@ const INITIAL_VIEW_STATE = {
   zoom: 1
 };
 
+const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
+
 class Example extends PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      width: 0,
-      height: 0,
-      points: [],
-      viewState: INITIAL_VIEW_STATE
+      viewState: INITIAL_VIEW_STATE,
+      points: []
     };
 
     this._onLoad = this._onLoad.bind(this);
-    this._onResize = this._onResize.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._rotateCamera = this._rotateCamera.bind(this);
+
+    this._loadData();
   }
 
-  componentDidMount() {
-    window.addEventListener('resize', this._onResize);
-
-    loadBinary(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
-      const {vertex} = parsePLY(rawData);
-
+  _loadData() {
+    loadPLY(DATA_URL).then(({vertex}) => {
       const points = [];
       vertex.x.forEach((_, i) => {
         points.push({
@@ -58,31 +52,12 @@ class Example extends PureComponent {
     });
   }
 
-  componentWillUnmount() {
-    window.removeEventListener('resize', this._onResize);
+  _onViewStateChange({viewState}) {
+    this.setState({viewState});
   }
 
   _onLoad() {
-    this.setState({width: window.innerWidth, height: window.innerHeight});
     this._rotateCamera();
-  }
-
-  _onResize() {
-    this.setState({width: window.innerWidth, height: window.innerHeight});
-
-    if (this.viewState) {
-      const newViewState = Object.assign({}, this.viewState, {
-        distance: OrbitView.getDistance({
-          boundingBox: [1, 1, 1],
-          fov: this.state.viewState.fov
-        })
-      });
-      this._onViewStateChange(newViewState, {});
-    }
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
   }
 
   _rotateCamera() {
@@ -98,38 +73,32 @@ class Example extends PureComponent {
     });
   }
 
-  _renderPointCloudLayer() {
+  _renderLayers() {
     const {points} = this.state;
-    if (!points || points.length === 0) {
-      return null;
-    }
 
-    return new PointCloudLayer({
-      id: 'point-cloud-layer',
-      data: points,
-      coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-      getPosition: d => d.position,
-      getNormal: d => d.normal,
-      radiusPixels: 1
-    });
+    return [
+      new PointCloudLayer({
+        id: 'point-cloud-layer',
+        data: points,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        getPosition: d => d.position,
+        getNormal: d => d.normal,
+        radiusPixels: 1
+      })
+    ];
   }
 
   render() {
-    const {width, height, viewState} = this.state;
-
-    const view = new OrbitView();
+    const {viewState} = this.state;
 
     return (
       <DeckGL
-        width={width}
-        height={height}
-        views={[view]}
+        views={new OrbitView()}
         viewState={viewState}
-        controller={OrbitController}
-        onViewStateChange={this._onViewStateChange}
-        layers={[this._renderPointCloudLayer()]}
+        controller={true}
         onLoad={this._onLoad}
-        onResize={this._onResize}
+        onViewStateChange={this._onViewStateChange}
+        layers={this._renderLayers()}
       />
     );
   }
