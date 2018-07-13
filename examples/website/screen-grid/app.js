@@ -21,15 +21,19 @@ export const INITIAL_VIEW_STATE = {
 
 export class App extends Component {
   _renderLayers() {
-    const {data = DATA_URL, cellSize = 20, gpuAggregation = true} = this.props;
+    const {data = DATA_URL, cellSize = 20, gpuAggregation = true, colorRange} = this.props;
 
+    const props = {cellSizePixels: cellSize, gpuAggregation};
+    if (colorRange) {
+      props.colorRange = colorRange;
+    }
     return [
       new ScreenGridLayer({
+        ...props,
         id: 'grid',
         data,
         getPosition: d => d,
         cellSizePixels: cellSize,
-        cellMarginPixels: 0,
         gpuAggregation
       })
     ];

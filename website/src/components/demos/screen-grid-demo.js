@@ -12,6 +12,15 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+export const colorRange = [
+  [255, 255, 178, 25],
+  [254, 217, 118, 85],
+  [254, 178, 76, 127],
+  [253, 141, 60, 170],
+  [240, 59, 32, 212],
+  [189, 0, 38, 255]
+];
+
 export default class ScreenGridDemo extends Component {
 
   static get data() {
@@ -24,7 +33,7 @@ export default class ScreenGridDemo extends Component {
   static get parameters() {
     return {
       gpuAggregation: {displayName: 'GPU Accelerated', type: 'checkbox', value: true},
-      cellSize: {displayName: 'Cell Size', type: 'range', value: 1, step: 1, min: 1, max: 20}
+      cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
     };
   }
 
@@ -58,7 +67,7 @@ export default class ScreenGridDemo extends Component {
     const gpuAggregation = params.gpuAggregation.value;
 
     return (
-      <App {...this.props} data={data} cellSize={cellSize} gpuAggregation={gpuAggregation} />
+      <App {...this.props} data={data} cellSize={cellSize} gpuAggregation={gpuAggregation} colorRange={colorRange} />
     );
   }
 }
