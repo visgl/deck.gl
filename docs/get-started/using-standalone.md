@@ -16,7 +16,7 @@ npm install @deck.gl/core @deck.gl/layers
 ```
 
 ```js
-import {Deck, MapController} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {
@@ -27,9 +27,8 @@ const INITIAL_VIEW_STATE = {
 
 const deckgl = new Deck({
   canvas: 'my-deck-canvas',
-  viewState: INITIAL_VIEW_STATE,
-  controller: MapController,
-  onViewStateChange,
+  initialViewState: INITIAL_VIEW_STATE,
+  controller: true,
   layers: [
     new ScatterplotLayer({
       data: [
@@ -38,10 +37,6 @@ const deckgl = new Deck({
     })
   ]
 });
-
-function onViewStateChange({viewState}) {
-  deckgl.setProps({viewState: viewport});
-}
 ```
 
 ## Using the Scripting API
