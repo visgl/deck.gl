@@ -3,11 +3,16 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView} from 'deck.gl';
-import {_OrbitController as OrbitController} from 'deck.gl';
+import {
+  _OrbitController as OrbitController,
+  _LinearInterpolator as LinearInterpolator
+} from 'deck.gl';
 import {loadBinary, parsePLY} from './utils/ply-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';
 const FILE_PATH = 'examples/point-cloud-ply/lucy100k.ply';
+
+const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
@@ -17,7 +22,8 @@ const INITIAL_VIEW_STATE = {
   orbitAxis: 'Y',
   fov: 30,
   minDistance: 1.5,
-  maxDistance: 10
+  maxDistance: 10,
+  zoom: 1
 };
 
 class Example extends PureComponent {
@@ -31,14 +37,14 @@ class Example extends PureComponent {
       viewState: INITIAL_VIEW_STATE
     };
 
+    this._onLoad = this._onLoad.bind(this);
     this._onResize = this._onResize.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
-    this._onUpdate = this._onUpdate.bind(this);
+    this._rotateCamera = this._rotateCamera.bind(this);
   }
 
   componentDidMount() {
     window.addEventListener('resize', this._onResize);
-    this._onResize();
 
     loadBinary(`${DATA_REPO}/${FILE_PATH}`).then(rawData => {
       const {vertex} = parsePLY(rawData);
@@ -53,12 +59,15 @@ class Example extends PureComponent {
       });
       this.setState({points});
     });
-
-    window.requestAnimationFrame(this._onUpdate);
   }
 
   componentWillUnmount() {
     window.removeEventListener('resize', this._onResize);
+  }
+
+  _onLoad() {
+    this.setState({width: window.innerWidth, height: window.innerHeight});
+    this._rotateCamera();
   }
 
   _onResize() {
@@ -79,15 +88,17 @@ class Example extends PureComponent {
     this.setState({viewState});
   }
 
-  _onUpdate() {
+  _rotateCamera() {
     const {viewState} = this.state;
     this.setState({
       viewState: {
         ...viewState,
-        rotationOrbit: viewState.rotationOrbit + 1
+        rotationOrbit: viewState.rotationOrbit + 30,
+        transitionDuration: 350,
+        transitionInterpolator,
+        onTransitionEnd: this._rotateCamera
       }
     });
-    window.requestAnimationFrame(this._onUpdate);
   }
 
   _renderPointCloudLayer() {
@@ -120,6 +131,8 @@ class Example extends PureComponent {
         controller={OrbitController}
         onViewStateChange={this._onViewStateChange}
         layers={[this._renderPointCloudLayer()]}
+        onLoad={this._onLoad}
+        onResize={this._onResize}
       />
     );
   }
