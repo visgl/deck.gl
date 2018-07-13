@@ -4,8 +4,8 @@ import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {App} from 'website-examples/screen-grid/app';
 
 const INITIAL_VIEW_STATE = {
-  longitude: -73.74707523647024,
-  latitude: 40.72589088052923,
+  longitude: -73.75,
+  latitude: 40.73,
   zoom: 9.6,
   maxZoom: 16,
   pitch: 0,
