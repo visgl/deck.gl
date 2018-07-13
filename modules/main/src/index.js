@@ -61,9 +61,10 @@ export {
   _OrbitController,
   _FirstPersonController,
   // Transition bindings
-  _TRANSITION_EVENTS,
-  _LinearInterpolator,
-  _ViewportFlyToInterpolator,
+  TRANSITION_EVENTS,
+  LinearInterpolator,
+  FlyToInterpolator,
+  // Effects
   _EffectManager,
   _Effect,
   _ReflectionEffect

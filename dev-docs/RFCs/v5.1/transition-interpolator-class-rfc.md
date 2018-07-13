@@ -10,7 +10,7 @@ Users may want to make slight modifications to the behavior of a built-in interp
 
 ### Problems in the Current Solution
 
-The solution introduced in [PR1111](https://github.com/uber/deck.gl/pull/1111) added a new prop `transitionProps` to the viewport controller. Unfortunately, this introduced new issues. `viewportFlyToInterpolator` and `viewportLinearInterpolator` require different `transitionProps`. `viewportFlyToInterpolator` requires `width` and `height` to be included to calculate the transition correctly. `viewportLinearInterpolator` by default leaves out `width` and `height` to avoid expensive updates to the canvas size. Current multi-viewport implementation also makes width and height unavailable to the Viewport class as they are calculated outside of viewport. Therefore, significant knowledge regarding the specific interpolator classes is required for user to provide valid values to viewport controller and providing a good default value for `transitionProps` also becomes a challenge. Failing to conform to the hidden requirement of `transitionProps` will cause the application to break (`viewportFlyToInterpolator` checks the extracted viewport, which is set by `transitionProps`, and throws an error if any required field is missing).
+The solution introduced in [PR1111](https://github.com/uber/deck.gl/pull/1111) added a new prop `transitionProps` to the viewport controller. Unfortunately, this introduced new issues. `FlyToInterpolator` and `viewportLinearInterpolator` require different `transitionProps`. `FlyToInterpolator` requires `width` and `height` to be included to calculate the transition correctly. `viewportLinearInterpolator` by default leaves out `width` and `height` to avoid expensive updates to the canvas size. Current multi-viewport implementation also makes width and height unavailable to the Viewport class as they are calculated outside of viewport. Therefore, significant knowledge regarding the specific interpolator classes is required for user to provide valid values to viewport controller and providing a good default value for `transitionProps` also becomes a challenge. Failing to conform to the hidden requirement of `transitionProps` will cause the application to break (`FlyToInterpolator` checks the extracted viewport, which is set by `transitionProps`, and throws an error if any required field is missing).
 
 Another concern is that `transitionProps` is specific to `viewportLinearInterpolator`. We may encounter other use cases in the future. Adding a new prop every time will make the API more cluttered, harder to debug, and affect existing applications and interpolators in unintended ways.
 
@@ -30,10 +30,10 @@ This RFC proposes:
 
 2. Change the current controller prop `transitionInterpolator` from a function to an instance of `ViewportTransitionInterpolator`. Remove the `transitionProps` prop.
 
-3. Replace the experimental exports `viewportLinearInterpolator` and `viewportFlyToInterpolator` with classes `ViewportLinearInterpolator` and `ViewportFlyToInterpolator` that extend `ViewportTransitionInterpolator`. To use them, the user would supply:
+3. Replace the experimental exports `viewportLinearInterpolator` and `FlyToInterpolator` with classes `ViewportLinearInterpolator` and `FlyToInterpolator` that extend `ViewportTransitionInterpolator`. To use them, the user would supply:
 
 ```
-<MapController transitionInterpolator={new ViewportFlyToInterpolator()} />
+<MapController transitionInterpolator={new FlyToInterpolator()} />
 ```
 
 An interpolator class may also offer further customization:

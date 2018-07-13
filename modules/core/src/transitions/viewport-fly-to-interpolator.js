@@ -12,7 +12,7 @@ const LINEARLY_INTERPOLATED_PROPS = ['bearing', 'pitch'];
  * It implements “Smooth and efficient zooming and panning.” algorithm by
  * "Jarke J. van Wijk and Wim A.A. Nuij"
  */
-export default class ViewportFlyToInterpolator extends TransitionInterpolator {
+export default class FlyToInterpolator extends TransitionInterpolator {
   constructor() {
     super({
       compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch'],

@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import ViewportFlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator';
+import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator';
 import {toLowPrecision} from '@deck.gl/test-utils';
 
 /* eslint-disable max-len */
@@ -60,7 +60,7 @@ const TEST_CASES = [
 /* eslint-enable max-len */
 
 test('LinearInterpolator#initializeProps', t => {
-  const interpolator = new ViewportFlyToInterpolator();
+  const interpolator = new FlyToInterpolator();
 
   TEST_CASES.forEach(testCase => {
     const getResult = () => interpolator.initializeProps(testCase.startProps, testCase.endProps);
@@ -76,7 +76,7 @@ test('LinearInterpolator#initializeProps', t => {
 });
 
 test('LinearInterpolator#interpolateProps', t => {
-  const interpolator = new ViewportFlyToInterpolator();
+  const interpolator = new FlyToInterpolator();
 
   TEST_CASES.filter(testCase => testCase.transition).forEach(testCase => {
     Object.keys(testCase.transition).forEach(time => {
