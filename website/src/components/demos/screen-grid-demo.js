@@ -24,7 +24,7 @@ export default class ScreenGridDemo extends Component {
   static get parameters() {
     return {
       gpuAggregation: {displayName: 'GPU Accelerated', type: 'checkbox', value: true},
-      cellSize: {displayName: 'Cell Size', type: 'range', value: 1, step: 1, min: 1, max: 20}
+      cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
     };
   }
 

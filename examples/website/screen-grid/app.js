@@ -19,6 +19,16 @@ export const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const colorRange = [
+  [255, 255, 178, 25],
+  [254, 217, 118, 85],
+  [254, 178, 76, 127],
+  [253, 141, 60, 170],
+  [240, 59, 32, 212],
+  [189, 0, 38, 255]
+];
+
+
 export class App extends Component {
   _renderLayers() {
     const {data = DATA_URL, cellSize = 20, gpuAggregation = true} = this.props;
@@ -29,7 +39,7 @@ export class App extends Component {
         data,
         getPosition: d => d,
         cellSizePixels: cellSize,
-        cellMarginPixels: 0,
+        colorRange,
         gpuAggregation
       })
     ];
