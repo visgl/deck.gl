@@ -211,8 +211,8 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/using-with-mapbox-gl.md')
       },
       {
-        name: 'Vis Academy',
-        content: getDocUrl('get-started/vis-academy.md')
+        name: 'Learning Resources',
+        content: getDocUrl('get-started/learning-resources.md')
       }
     ]
   },
@@ -478,6 +478,10 @@ export const docPages = generatePath([
           {
             name: 'OrbitView',
             content: getDocUrl('api-reference/orbit-view.md')
+          },
+          {
+            name: 'View State Transitions',
+            content: getDocUrl('api-reference/view-state-transitions.md')
           }
         ]
       },
