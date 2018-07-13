@@ -50,49 +50,15 @@ export default class LineDemo extends Component {
     );
   }
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      tooltipLine1: '',
-      tooltipLine2: ''
-    };
-  }
-
-  _onHover({x, y, object}) {
-    let tooltipLine1 = '';
-    let tooltipLine2 = '';
-    if (object) {
-      tooltipLine1 = object.country || object.abbrev;
-      tooltipLine2 = object.name.indexOf('0x') >= 0 ? '' : object.name;
-    }
-    this.setState({x, y, tooltipLine1, tooltipLine2});
-  }
-
-  _renderTooltip() {
-    const {x, y, tooltipLine1, tooltipLine2} = this.state;
-    return tooltipLine1 && (
-      <div className="tooltip" style={{left: x, top: y}}>
-        <div>{ tooltipLine1 }</div>
-        <div>{ tooltipLine2 }</div>
-      </div>
-    );
-  }
-
   render() {
     const {params, data, ...otherProps} = this.props;
 
     return (
-      <div>
-        <App
-          {...otherProps}
-          flightPaths={data && data[0] || EMPTY_ARRAY}
-          airports={data && data[1] || EMPTY_ARRAY}
-          onHover={this._onHover.bind(this)}
-          strokeWidth={params.strokeWidth.value} />
-
-        { this._renderTooltip() }
-
-      </div>
+      <App
+        {...otherProps}
+        flightPaths={data && data[0] || EMPTY_ARRAY}
+        airports={data && data[1] || EMPTY_ARRAY}
+        strokeWidth={params.strokeWidth.value} />
     );
   }
 }

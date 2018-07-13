@@ -1,4 +1,3 @@
-/* global window */
 import {Layer} from 'deck.gl';
 import GL from 'luma.gl/constants';
 import {Model, Geometry} from 'luma.gl';
@@ -17,7 +16,7 @@ const DEFAULT_TICK_FORMAT = x => x.toFixed(2);
 
 const defaultProps = {
   data: [],
-  fontSize: DEFAULT_FONT_SIZE * window.devicePixelRatio,
+  fontSize: DEFAULT_FONT_SIZE,
   xScale: null,
   yScale: null,
   zScale: null,

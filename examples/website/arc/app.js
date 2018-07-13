@@ -46,39 +46,53 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      arcs: null,
+      hoveredCounty: null,
+      // Set default selection to San Francisco
       selectedCounty: null
     };
+    this._onHoverCounty = this._onHoverCounty.bind(this);
+    this._onSelectCounty = this._onSelectCounty.bind(this);
+    this._renderTooltip = this._renderTooltip.bind(this);
 
-    this._recalculateArcs(this.props.data, this.props.selectedFeature);
+    this._recalculateArcs(this.props.data);
   }
 
   componentWillReceiveProps(nextProps) {
-    const arcsChanged =
-      nextProps.data !== this.props.data ||
-      nextProps.selectedFeature !== this.props.selectedFeature;
-    if (arcsChanged) {
-      this._recalculateArcs(nextProps.data, nextProps.selectedFeature);
+    if (nextProps.data !== this.props.data) {
+      this._recalculateArcs(nextProps.data);
     }
   }
 
-  _onHover(info) {
-    // Hovered over a county
+  _onHoverCounty({x, y, object}) {
+    this.setState({x, y, hoveredCounty: object});
   }
 
-  _onClick(info) {
-    // Clicked a county
-    const selectedCounty = info.object;
-    this.setState({selectedCounty});
-    this._recalculateArcs(this.props.data, selectedCounty);
+  _onSelectCounty({object}) {
+    this._recalculateArcs(this.props.data, object);
+    if (this.props.onSelectCounty) {
+      this.props.onSelectCounty(object);
+    }
   }
 
-  _recalculateArcs(data, selectedFeature) {
-    if (!selectedFeature) {
+  _renderTooltip() {
+    const {x, y, hoveredCounty} = this.state;
+    return (
+      hoveredCounty && (
+        <div className="tooltip" style={{left: x, top: y}}>
+          {hoveredCounty.properties.name}
+        </div>
+      )
+    );
+  }
+
+  _recalculateArcs(data, selectedCounty = this.state.selectedCounty) {
+    if (!data) {
       return;
     }
-
-    const {flows, centroid} = selectedFeature.properties;
+    if (!selectedCounty) {
+      selectedCounty = data.find(f => f.properties.name === 'Los Angeles, CA');
+    }
+    const {flows, centroid} = selectedCounty.properties;
 
     const arcs = Object.keys(flows).map(toId => {
       const f = data[toId];
@@ -98,16 +112,11 @@ export class App extends Component {
       a.quantile = scale(Math.abs(a.value));
     });
 
-    this.setState({arcs});
+    this.setState({arcs, selectedCounty});
   }
 
   _renderLayers() {
-    const {
-      data,
-      strokeWidth = 2,
-      onHover = this._onHover.bind(this),
-      onClick = this._onClick.bind(this)
-    } = this.props;
+    const {data, strokeWidth = 2} = this.props;
 
     return [
       new GeoJsonLayer({
@@ -116,9 +125,9 @@ export class App extends Component {
         stroked: false,
         filled: true,
         getFillColor: [0, 0, 0, 0],
-        onHover,
-        onClick,
-        pickable: Boolean(onHover || onClick)
+        onHover: this._onHoverCounty,
+        onClick: this._onSelectCounty,
+        pickable: true
       }),
       new ArcLayer({
         id: 'arc',
@@ -150,6 +159,8 @@ export class App extends Component {
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         )}
+
+        {this._renderTooltip}
       </DeckGL>
     );
   }
@@ -161,7 +172,6 @@ export function renderToDOM(container) {
   fetch(DATA_URL)
     .then(response => response.json())
     .then(({features}) => {
-      const selectedFeature = features.find(f => f.properties.name === 'Los Angeles, CA');
-      render(<App data={features} selectedFeature={selectedFeature} />, container);
+      render(<App data={features} />, container);
     });
 }

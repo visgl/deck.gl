@@ -53,6 +53,10 @@ export class App extends Component {
       mousePosition: [0, 0],
       ...this._getLayerData(props)
     };
+    this._onMouseMove = this._onMouseMove.bind(this);
+    this._onMouseEnter = this._onMouseEnter.bind(this);
+    this._onMouseLeave = this._onMouseLeave.bind(this);
+    this._onHover = this._onHover.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -170,14 +174,10 @@ export class App extends Component {
       enableBrushing = true,
       brushRadius = 100000,
       strokeWidth = 2,
-      opacity = 0.7,
-
-      mouseEntered = this.state.mouseEntered,
-      mousePosition = this.state.mousePosition,
-      onHover = this._onHover.bind(this)
+      opacity = 0.7
     } = this.props;
 
-    const {arcs, targets, sources} = this.state;
+    const {arcs, targets, sources, mouseEntered, mousePosition} = this.state;
 
     // mouseEntered is undefined when mouse is in the component while it first loads
     // enableBrushing if mouseEntered is not defined
@@ -225,7 +225,7 @@ export class App extends Component {
         enableBrushing: startBrushing,
         pickable: true,
         radiusScale: 3000,
-        onHover,
+        onHover: this._onHover,
         getColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
       }),
       new ArcBrushingLayer({
@@ -249,9 +249,9 @@ export class App extends Component {
 
     return (
       <div
-        onMouseMove={this._onMouseMove.bind(this)}
-        onMouseEnter={this._onMouseEnter.bind(this)}
-        onMouseLeave={this._onMouseLeave.bind(this)}
+        onMouseMove={this._onMouseMove}
+        onMouseEnter={this._onMouseEnter}
+        onMouseLeave={this._onMouseLeave}
       >
         {this._renderTooltip()}
 

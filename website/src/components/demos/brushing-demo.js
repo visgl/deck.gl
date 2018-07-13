@@ -66,50 +66,17 @@ export default class BrushingDemo extends Component {
     );
   }
 
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      hoveredObject: null
-    };
-  }
-
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
-  }
-
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-
-    if (!hoveredObject) {
-      return null;
-    }
-
-    return (
-      <div className="tooltip"
-           style={{left: x, top: y}}>
-        <div>{hoveredObject.name}</div>
-        <div>{`Net gain: ${hoveredObject.net}`}</div>
-      </div>
-    );
-  }
-
   render() {
-    const {params, mouseEntered} = this.props;
+    const {params} = this.props;
 
     return (
-      <div>
-        {this._renderTooltip()}
-        <App
-          {...this.props}
-          mouseEntered={mouseEntered}
-          enableBrushing={params.enableBrushing.value}
-          strokeWidth={params.lineWidth.value}
-          brushRadius={params.brushRadius.value}
-          opacity={params.opacity.value}
-          onHover={this._onHover.bind(this)}
-        />
-      </div>
+      <App
+        {...this.props}
+        enableBrushing={params.enableBrushing.value}
+        strokeWidth={params.lineWidth.value}
+        brushRadius={params.brushRadius.value}
+        opacity={params.opacity.value}
+      />
     );
   }
 }
