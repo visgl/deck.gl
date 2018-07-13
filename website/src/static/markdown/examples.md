@@ -24,7 +24,7 @@
   </div>
   <div class="thumb">
     <div data-title="Vancouver Property Value" data-name="GeoJsonLayer">
-      <a href="#/examples/core-layers/geojson-layer">
+      <a href="#/examples/core-layers/geojson-layer-polygons">
         <img src="images/demo-thumb-geojson.jpg" />
       </a>
     </div>
@@ -61,6 +61,13 @@
     <div class="bg-black" data-title="Twitter Tag Cloud" data-name="TextLayer">
       <a href="#/examples/core-layers/text-layer">
         <img src="images/demo-thumb-text.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb">
+    <div class="bg-black" data-title="Highway Safety in US" data-name="GeoJsonLayer">
+      <a href="#/examples/core-layers/geojson-layer-paths">
+        <img src="images/demo-thumb-highway.jpg" />
       </a>
     </div>
   </div>
