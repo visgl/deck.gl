@@ -98,7 +98,7 @@ export const examplePages = generatePath([
         }
       },
       {
-        name: '3D Indoor Scan',
+        name: 'PointCloudLayer',
         content: {
           demo: 'PointCloudDemo',
           code: getCodeUrl('examples/website/point-cloud-laz')
