@@ -5,7 +5,7 @@ ViewState Transitions provide smooth and visually appealing transitions when Vie
 Following fields of `viewState` can be used to achieve viewport transitions.
 
 * `transitionDuration` (Number, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
-* `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: http://easings.net/)
+* `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: <http://easings.net/>)
 * `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two viewports, deck.gl provides `LinearInterpolator` and `ViewportFlyToInterpolator`. Default value, `LinearInterpolator`, performs linear interpolation on `ViewState` fields. `ViewportFlyToInterpolator` animates `ViewStates` similar to MapBox `flyTo` API and applicable for `MapState`, this is pretty useful when camera center changes by long distance. But a user can provide any custom implementation for this object using `TrasitionInterpolator` base class.    
 * `transitionInterruption` (TRANSITION_EVENTS (Number), optional, default: BREAK) - This field controls how to process a new `ViewState` change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
 
@@ -24,7 +24,7 @@ Following fields of `viewState` can be used to achieve viewport transitions.
 
 Sample code that provides `flyTo` style transition to move camera from current location to NewYork city.
 
-```
+```js
 class App extends Component {
   constructor(props) {
     super(props);
@@ -86,7 +86,7 @@ class App extends Component {
 
 Sample code to get continuous rotations along vertical axis until user interrupts by rotating the map by mouse interaction. It uses `LinearInterpolator` and restricts transitions for `bearing` prop. Continuous transitions are achieved by triggering new transitions using `onTranstionEnd` callback.
 
-```
+```js
 const transitionInterpolator = new LinearInterpolator(['bearing']);
 
 const INITIAL_VIEW_STATE = {
@@ -165,31 +165,35 @@ Parameters:
 
 * opts (Object | Array) -
 
-- Object with following fields
+* Object with following fields
 * compare: prop names used in equality check.
 * extract: prop names needed for interpolation.
 * required: prop names that must be supplied.
 
-- Array of prop names that are used for all above fields.
+* Array of prop names that are used for all above fields.
 
 ### Methods
 
 #### arePropsEqual
 
 Parameters:
+
 * currentProps: Object with ViewState props.
 * nextProps: Object with ViewState props.
 
 Returns:
+
 * `true` if the ViewStates have equal value for all `compare` props.
 
 #### initializeProps
 
 Parameters:
+
 * startProps (Object): Object with staring ViewState props.
 * endProps (Object): Object with ending ViewState props.
 
 Returns:
+
 * {start, end}, transition props are validated and extracted from inputs and returned.
 
 #### interpolateProps
@@ -210,11 +214,13 @@ Parameters:
 #### interpolateProps
 
 Parameters:
+
 * startProps (Object): Object with staring ViewState props.
 * endProps (Object): Object with ending ViewState props.
 * t (Number) : Number in [0, 1] range.
 
 Returns:
+
 * Object with interpolated ViewState props.
 
 
@@ -225,6 +231,7 @@ Interpolator class, inherits from `TransitionInterpolator`. This class is design
 ### Constructor
 
 Initializes super class with an object with following props:
+
 * compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch']
 * extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch']
 * required: ['width', 'height', 'latitude', 'longitude', 'zoom']
@@ -232,9 +239,11 @@ Initializes super class with an object with following props:
 #### interpolateProps
 
 Parameters:
+
 * startProps (Object): Object with staring ViewState props.
 * endProps (Object): Object with ending ViewState props.
 * t (Number) : Number in [0, 1] range.
 
 Returns:
+
 * Object with interpolated ViewState props.

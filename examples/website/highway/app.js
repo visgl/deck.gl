@@ -9,8 +9,10 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data GeoJSON
 const DATA_URL = {
-  ACCIDENTS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/accidents.csv',
-  ROADS: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/roads.json'
+  ACCIDENTS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/accidents.csv',
+  ROADS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/roads.json'
 };
 
 function getKey({state, type, id}) {
@@ -19,9 +21,23 @@ function getKey({state, type, id}) {
 
 export const COLOR_SCALE = scaleThreshold()
   .domain([0, 4, 8, 12, 20, 32, 52, 84, 136, 220])
-  .range([[26,152,80], [102,189,99], [166,217,106], [217,239,139], [255,255,191], [254,224,139], [253,174,97], [244,109,67], [215,48,39], [168,0,0]]);
+  .range([
+    [26, 152, 80],
+    [102, 189, 99],
+    [166, 217, 106],
+    [217, 239, 139],
+    [255, 255, 191],
+    [254, 224, 139],
+    [253, 174, 97],
+    [244, 109, 67],
+    [215, 48, 39],
+    [168, 0, 0]
+  ]);
 
-const WIDTH_SCALE = scaleLinear().clamp(true).domain([0, 200]).range([10, 2000]);
+const WIDTH_SCALE = scaleLinear()
+  .clamp(true)
+  .domain([0, 200])
+  .range([10, 2000]);
 
 export const INITIAL_VIEW_STATE = {
   latitude: 38,
@@ -32,7 +48,6 @@ export const INITIAL_VIEW_STATE = {
 };
 
 export class App extends Component {
-
   constructor(props) {
     super(props);
 
@@ -56,8 +71,8 @@ export class App extends Component {
 
     if (accidents) {
       accidents.forEach(a => {
-        const r = incidents[a.year] = incidents[a.year] || {};
-        const f = fatalities[a.year] = fatalities[a.year] || {};
+        const r = (incidents[a.year] = incidents[a.year] || {});
+        const f = (fatalities[a.year] = fatalities[a.year] || {});
         const key = getKey(a);
         r[key] = a.incidents;
         f[key] = a.fatalities;
@@ -71,7 +86,7 @@ export class App extends Component {
       return [200, 200, 200];
     }
     const key = getKey(f.properties);
-    const fatalitiesPer1KMile = (fatalities[key] || 0) / f.properties.length * 1000;
+    const fatalitiesPer1KMile = ((fatalities[key] || 0) / f.properties.length) * 1000;
     return COLOR_SCALE(fatalitiesPer1KMile);
   }
 
@@ -80,7 +95,7 @@ export class App extends Component {
       return 10;
     }
     const key = getKey(f.properties);
-    const incidentsPer1KMile = (incidents[key] || 0) / f.properties.length * 1000;
+    const incidentsPer1KMile = ((incidents[key] || 0) / f.properties.length) * 1000;
     return WIDTH_SCALE(incidentsPer1KMile);
   }
 
@@ -138,16 +153,20 @@ export class App extends Component {
 
     const content = r ? (
       <div>
-        <b>{f}</b> people died from <b>{r}</b> crashes
-        on {props.type === 'SR' ? props.state : props.type}-{props.id} in <b>{year}</b>
+        <b>{f}</b> people died from <b>{r}</b> crashes on{' '}
+        {props.type === 'SR' ? props.state : props.type}-{props.id} in <b>{year}</b>
       </div>
     ) : (
-      <div>no accidents recorded in <b>{year}</b></div>
+      <div>
+        no accidents recorded in <b>{year}</b>
+      </div>
     );
 
     return (
       <div className="tooltip" style={{left: x, top: y}}>
-        <big>{props.name} ({props.state})</big>
+        <big>
+          {props.name} ({props.state})
+        </big>
         {content}
       </div>
     );
