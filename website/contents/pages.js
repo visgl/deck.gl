@@ -63,10 +63,17 @@ export const examplePages = generatePath([
         }
       },
       {
-        name: 'GeoJsonLayer',
+        name: 'GeoJsonLayer (Polygons)',
         content: {
           demo: 'GeoJsonDemo',
           code: getCodeUrl('examples/website/geojson')
+        }
+      },
+      {
+        name: 'GeoJsonLayer (Paths)',
+        content: {
+          demo: 'HighwayDemo',
+          code: getCodeUrl('examples/website/highway')
         }
       },
       {
