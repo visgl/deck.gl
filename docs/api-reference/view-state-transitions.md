@@ -6,7 +6,7 @@ Following fields of `viewState` can be used to achieve viewport transitions.
 
 * `transitionDuration` (Number, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
 * `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: <http://easings.net/>)
-* `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two viewports, deck.gl provides `LinearInterpolator` and `ViewportFlyToInterpolator`. Default value, `LinearInterpolator`, performs linear interpolation on `ViewState` fields. `ViewportFlyToInterpolator` animates `ViewStates` similar to MapBox `flyTo` API and applicable for `MapState`, this is pretty useful when camera center changes by long distance. But a user can provide any custom implementation for this object using `TrasitionInterpolator` base class.    
+* `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two viewports, deck.gl provides `LinearInterpolator` and `FlyToInterpolator`. Default value, `LinearInterpolator`, performs linear interpolation on `ViewState` fields. `FlyToInterpolator` animates `ViewStates` similar to MapBox `flyTo` API and applicable for `MapState`, this is pretty useful when camera center changes by long distance. But a user can provide any custom implementation for this object using `TrasitionInterpolator` base class.    
 * `transitionInterruption` (TRANSITION_EVENTS (Number), optional, default: BREAK) - This field controls how to process a new `ViewState` change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
 
 | TRANSITION_EVENTS | Result |
@@ -52,7 +52,7 @@ class App extends Component {
         pitch: 0,
         bearing: 0,
         transitionDuration: 8000,
-        transitionInterpolator: new ViewportFlyToInterpolator()
+        transitionInterpolator: new FlyToInterpolator()
       }
     });
   }
@@ -224,7 +224,7 @@ Returns:
 * Object with interpolated ViewState props.
 
 
-## ViewportFlyToInterpolator
+## FlyToInterpolator
 
 Interpolator class, inherits from `TransitionInterpolator`. This class is designed to perform `flyTo` style interpolation between two `MapState` objects.
 

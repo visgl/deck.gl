@@ -3,10 +3,7 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView} from 'deck.gl';
-import {
-  _OrbitController as OrbitController,
-  _LinearInterpolator as LinearInterpolator
-} from 'deck.gl';
+import {_OrbitController as OrbitController, LinearInterpolator} from 'deck.gl';
 import {loadBinary, parsePLY} from './utils/ply-loader';
 
 const DATA_REPO = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master';

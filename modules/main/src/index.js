@@ -63,7 +63,7 @@ export {
   // Transition bindings
   TRANSITION_EVENTS,
   LinearInterpolator,
-  ViewportFlyToInterpolator,
+  FlyToInterpolator,
   // Effects
   _EffectManager,
   _Effect,

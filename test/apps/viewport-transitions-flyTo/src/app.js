@@ -1,7 +1,7 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, ViewportFlyToInterpolator, TRANSITION_EVENTS} from 'deck.gl';
+import DeckGL, {MapController, FlyToInterpolator, TRANSITION_EVENTS} from 'deck.gl';
 
 import ControlPanel from './control-panel';
 
@@ -73,7 +73,7 @@ export default class App extends Component {
         pitch: 0,
         bearing: 0,
         transitionDuration: 8000,
-        transitionInterpolator: new ViewportFlyToInterpolator(),
+        transitionInterpolator: new FlyToInterpolator(),
         transitionInterruption: this._interruptionStyle
       }
     });
