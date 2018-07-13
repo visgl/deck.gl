@@ -1,20 +1,30 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App, INITIAL_VIEW_STATE} from 'website-examples/screen-grid/app';
+import {App} from 'website-examples/screen-grid/app';
+
+const INITIAL_VIEW_STATE = {
+  longitude: -73.74707523647024,
+  latitude: 40.72589088052923,
+  zoom: 9.6,
+  maxZoom: 16,
+  pitch: 0,
+  bearing: 0
+};
 
 export default class ScreenGridDemo extends Component {
 
   static get data() {
     return {
-      url: `${DATA_URI}/screen-grid-data.txt`,
+      url: `${DATA_URI}/screen-grid-data-uber-pickups-nyc.txt`,
       worker: 'workers/screen-grid-data-decoder.js'
     };
   }
 
   static get parameters() {
     return {
-      cellSize: {displayName: 'Cell Size', type: 'range', value: 30, step: 1, min: 10, max: 100}
+      gpuAggregation: {displayName: 'GPU Accelerated', type: 'checkbox', value: true},
+      cellSize: {displayName: 'Cell Size', type: 'range', value: 1, step: 1, min: 1, max: 20}
     };
   }
 
@@ -32,11 +42,11 @@ export default class ScreenGridDemo extends Component {
   static renderInfo(meta) {
     return (
       <div>
-        <h3>Public Transit Accessibility In California</h3>
-        <p>Distribution of public transportation stops.</p>
+        <h3>Uber Pickup Locations In NewYork City</h3>
+        <p>Pickup locaitons form April to September 2014.</p>
         <p>The layer aggregates data within the boundary of screen grid cells
            and maps the aggregated values to a dynamic color scale</p>
-        <p>Data source: <a href="http://openstreetmap.org">OpenStreetMaps</a></p>
+        <p>Data source: <a href="https://github.com/fivethirtyeight/uber-tlc-foil-response">Uber TLC FOIL Response</a></p>
         <div className="stat">No. of Samples<b>{ readableInteger(meta.count || 0) }</b></div>
       </div>
     );
@@ -45,9 +55,10 @@ export default class ScreenGridDemo extends Component {
   render() {
     const {params, data} = this.props;
     const cellSize = params.cellSize.value;
+    const gpuAggregation = params.gpuAggregation.value;
 
     return (
-      <App {...this.props} data={data} cellSize={cellSize} />
+      <App {...this.props} data={data} cellSize={cellSize} gpuAggregation={gpuAggregation} />
     );
   }
 }
