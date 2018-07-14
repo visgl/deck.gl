@@ -21,6 +21,32 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0 Pre Releases
 
+### [6.0.0-rc.1] - July 13
+- Update scripting examples (#2063)
+- ScreenGridLayer: deprecate minColor and maxColor props (#2062)
+- Fix crash in get vendor prefix (#2061)
+- Add progress bar to website demos (#2060)
+- Use custom colorRange for ScreenGridDemo (#2059)
+- Update ScreenGrid website demo (#2056)
+- Documentation minor fixes (#2058)
+- Orbit examples clean up (#2054)
+- Make ViewState Transitions API official (#2053)
+- Website demos clean up (#2052)
+- OrbitController: Add support for viewport transitions (#2047)
+- add geojson transition example (#2048)
+- Fix callback error on pointer leave (#2049)
+- Multi-view picking perf: filter viewports by pointer position (#2043)
+- Deck: Add onLoad callback (#2042)
+- another round of link changes
+- change 5.3-release to 6.0-release in readme
+- change code links for docs
+- change code links for showcases
+- change doc and code links to 6.0-release
+- add doc for OrbitView (#2045)
+- Perf: skip draw call for composite layers (#2040)
+- no attribute manager for composite layers (#2037)
+- fix pointer leave callback (#2038)
+
 #### [6.0.0-beta.4] - July 11
 - disable updateTrigger warning (#2036)
 - Make doubleTap and keyboard transitions exlusive to MapController (#2033)
