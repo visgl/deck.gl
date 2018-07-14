@@ -12,7 +12,7 @@ const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json'; // eslint-disable-line
 
 export const COLOR_SCALE = scaleThreshold()
-  .domain([-0.4, -0.3, -0.2, -0.1, 0, 0.1, 0.2, 0.3, 0.4, 0.6, 0.8, 1, 1.2])
+  .domain([-0.6, -0.45, -0.3, -0.15, 0, 0.15, 0.3, 0.45, 0.6, 0.75, 0.9, 1.05, 1.2])
   .range([
     [65, 182, 196],
     [127, 205, 187],
