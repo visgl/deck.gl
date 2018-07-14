@@ -28,7 +28,6 @@ const colorRange = [
   [189, 0, 38, 255]
 ];
 
-
 export class App extends Component {
   _renderLayers() {
     const {data = DATA_URL, cellSize = 20, gpuAggregation = true} = this.props;
