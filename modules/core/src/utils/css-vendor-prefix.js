@@ -22,7 +22,7 @@
 let venderPrefix = '';
 
 // Get CSS vendor prefix
-if (typeof document !== 'undefined') {
+try {
   const styleObj = document.createElement('div').style;
   const prefix = /^(webkit|moz|ms|o)(?=[A-Z])/;
   for (const key in styleObj) {
@@ -31,6 +31,8 @@ if (typeof document !== 'undefined') {
       break;
     }
   }
+} catch (error) {
+  // document not available
 }
 
 export default venderPrefix;
