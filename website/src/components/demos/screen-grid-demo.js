@@ -43,7 +43,7 @@ export default class ScreenGridDemo extends Component {
     return (
       <div>
         <h3>Uber Pickup Locations In NewYork City</h3>
-        <p>Pickup locaitons form April to September 2014.</p>
+        <p>Pickup locations form April to September 2014.</p>
         <p>The layer aggregates data within the boundary of screen grid cells
            and maps the aggregated values to a dynamic color scale</p>
         <p>Data source: <a href="https://github.com/fivethirtyeight/uber-tlc-foil-response">Uber TLC FOIL Response</a></p>

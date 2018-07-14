@@ -30,7 +30,7 @@
     </div>
   </div>
   <div class="thumb">
-    <div class="bg-black" data-title="Access Public Transit in California" data-name="ScreenGridLayer">
+    <div class="bg-black" data-title="Uber Pickup Locations" data-name="ScreenGridLayer">
       <a href="#/examples/core-layers/screen-grid-layer">
         <img src="images/demo-thumb-screengrid.jpg" />
       </a>
