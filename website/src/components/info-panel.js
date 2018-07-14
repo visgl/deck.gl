@@ -4,6 +4,7 @@ import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
 
 import GenericInput from './input';
+import Spinner from './spinner';
 import * as Demos from './demos';
 import {updateParam} from '../actions/app-actions';
 
@@ -53,6 +54,7 @@ class InfoPanel extends Component {
 
         {this.props.children}
 
+        <Spinner meta={metaLoaded} />
       </div>
     );
   }
