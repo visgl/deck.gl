@@ -22,7 +22,8 @@ import {
   Layer,
   experimental,
   WebMercatorViewport,
-  _GPUGridAggregator as GPUGridAggregator
+  _GPUGridAggregator as GPUGridAggregator,
+  log
 } from '@deck.gl/core';
 const {defaultColorRange} = experimental;
 
@@ -274,6 +275,7 @@ export default class ScreenGridLayer extends Layer {
   _shouldUseMinMax() {
     const {minColor, maxColor, colorDomain, colorRange} = this.props;
     if (minColor || maxColor) {
+      log.deprecated('ScreenGridLayer props: minColor and maxColor', 'colorRange, colorDomain')();
       return true;
     }
     // minColor and maxColor not supplied, check if colorRange or colorDomain supplied.

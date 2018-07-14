@@ -58,19 +58,19 @@ Unit width/height of the bins.
 
 Cell margin size in pixels.
 
-##### `minColor` (Number[4], optional)
+##### `minColor` (Number[4], optional) **DEPRECATED**
 
 * Default: `[0, 0, 0, 255]`
 
 Expressed as an rgba array, minimal color that could be rendered by a tile. This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `maxColor` (Number[4], optional)
+##### `maxColor` (Number[4], optional) **DEPRECATED**
 
 * Default: `[0, 255, 0, 255]`
 
 Expressed as an rgba array, maximal color that could be rendered by a tile.  This prop is deprecated in version 5.2.0, use `colorRange` and `colorDomain` instead.
 
-##### `colorDomain` (Array, optional) **EXPERIMENTAL**
+##### `colorDomain` (Array, optional)
 
 * Default: `[1, max(weight)]`
 
@@ -78,7 +78,7 @@ Color scale input domain. The color scale maps continues numeric domain into
 discrete color range. If not provided, the layer will set `colorDomain` to [1, max-of-all-cell-weights], You can control how the color of cells mapped
 to value of its weight by passing in an arbitrary color domain. This property is extremely handy when you want to render different data input with the same color mapping for comparison.
 
-##### `colorRange` (Array, optional) **EXPERIMENTAL**
+##### `colorRange` (Array, optional)
 
 * Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
