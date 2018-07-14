@@ -30,6 +30,12 @@ Some previously deprecated `project` module functions have now been removed.
 Instead use `use64bitProjection` and `use64bitPositions`.
 
 
+#### ScreenGridLayer
+
+`minColor` and `maxColor` props are deprecated. Use `colorRange` and `colorDomain` props.
+
+
+
 ## Upgrading from deck.gl v5.2 to v5.3
 
 ### Viewport classes
