@@ -155,7 +155,7 @@ export class App extends Component {
 
     const content = r ? (
       <div>
-        <b>{f}</b> people died from <b>{r}</b> crashes on{' '}
+        <b>{f}</b> people died in <b>{r}</b> crashes on{' '}
         {props.type === 'SR' ? props.state : props.type}-{props.id} in <b>{year}</b>
       </div>
     ) : (
