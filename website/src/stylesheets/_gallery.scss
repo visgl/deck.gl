@@ -111,6 +111,7 @@
   pointer-events: none;
 }
 .options-panel {
+  position: relative;
   width: 284px;
   background: #fff;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
@@ -194,6 +195,41 @@
     width: 12px;
     height: 12px;
   }
+  .spinner {
+    height: 18px;
+    line-height: 18px;
+    font-size: 10px;
+
+    >div {
+      white-space: nowrap;
+      left: 0;
+      bottom: 0;
+      position: absolute;
+      height: 18px;
+      padding-left: 20px;
+      transition: width 0.5s;
+    }
+    .spinner--fill {
+      background: $primary;
+      color: $white;
+      overflow: hidden;
+    }
+    .spinner--text {
+      color: $black-40;
+    }
+
+    &.done {
+      height: 0 !important;
+      line-height: 0;
+      font-size: 0;
+      transition: height 0.5s 1s;
+
+      >div {
+        height: 0 !important;
+        transition: height 0.5s 1s;
+      }
+    }
+  }
 }
 code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace !important;
@@ -261,7 +297,7 @@ code {
     >div > *, hr, .input {
       display: none;
     }
-    >div:before {
+    &:before {
       position: absolute;
       top: 12px;
       right: 12px;
@@ -269,6 +305,16 @@ code {
       font-size: 24px;
       font-family: 'deckgl';
       content: "\e906";
+    }
+    >.spinner {
+      height: 3px;
+      line-height: 0;
+      font-size: 0;
+
+      .spinner--fill {
+        height: 3px;
+        display: block;
+      }
     }
     h3 {
       display: block;

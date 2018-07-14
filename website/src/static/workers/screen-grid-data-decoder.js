@@ -1,9 +1,9 @@
 importScripts('./util.js');
 let total = 0;
+const result = [];
 
 onmessage = function(e) {
   const lines = e.data.text.split('\n');
-  const result = [];
 
   lines.forEach(function(line) {
     if (!line) {
@@ -19,9 +19,13 @@ onmessage = function(e) {
       }
     }
   });
-  postMessage({
-    action: 'add',
-    data: result,
-    meta: {count: total}
-  });
+
+  if (e.data.event === 'load') {
+    postMessage({
+      action: 'add',
+      data: result,
+      meta: {count: total, progress: 1}
+    });
+    postMessage({action: 'end'});
+  }
 };
