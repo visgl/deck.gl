@@ -1,0 +1,222 @@
+<html>
+  <head>
+    <title>deck.gl GeoJsonLayer (Path) Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^6.0.0/deckgl.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+      }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
+      #options {
+        position: fixed;
+        z-index: 1;
+        background: #fff;
+        top: 0;
+        left: 0;
+        margin: 20px;
+        padding: 12px;
+        font-size: 11px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.3);
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="options"></div>
+    <div id="tooltip"></div>
+  </body>
+
+  <script type="text/javascript">
+
+  const {DeckGL, GeoJsonLayer} = deck;
+
+  const COLOR_SCALE = d3.scaleThreshold()
+    .domain([0, 4, 8, 12, 20, 32, 52, 84, 136, 220])
+    .range([
+      [26, 152, 80],
+      [102, 189, 99],
+      [166, 217, 106],
+      [217, 239, 139],
+      [255, 255, 191],
+      [254, 224, 139],
+      [253, 174, 97],
+      [244, 109, 67],
+      [215, 48, 39],
+      [168, 0, 0]
+    ]);
+
+  const WIDTH_SCALE = d3.scaleLinear()
+    .clamp(true)
+    .domain([0, 200])
+    .range([10, 2000]);
+
+  let accidents = {};
+  let fatalities = {};
+  let year = -1;
+
+  const deckgl = new deck.DeckGL({
+    viewState: {
+      longitude: -100,
+      latitude: 38,
+      zoom: 4,
+      pitch: 0,
+      minZoom: 2,
+      maxZoom: 8
+    },
+    mapboxApiAccessToken: '<mapbox-access-token>',
+    mapStyle: 'mapbox://styles/mapbox/dark-v9',
+    pickingRadius: 5,
+    layers: []
+  });
+
+  d3.csv('https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/accidents.csv')
+    .then(accidents => {
+
+    // sort accident data
+    incidents = {};
+    fatalities = {};
+
+    accidents.forEach(a => {
+      const r = (incidents[a.year] = incidents[a.year] || {});
+      const f = (fatalities[a.year] = fatalities[a.year] || {});
+      const key = getKey(a);
+      r[key] = a.incidents;
+      f[key] = a.fatalities;
+    });
+
+    year = accidents[0].year;
+    
+    initInputs(d3.select('#options'));
+    redraw();
+  });
+
+  // Update deck.gl layers
+  function redraw() {
+
+    const layers = [
+      new GeoJsonLayer({
+        id: 'geojson',
+        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/highway/roads.json',
+        opacity: 1,
+        stroked: false,
+        filled: false,
+        lineWidthMinPixels: 1,
+        parameters: {
+          depthTest: false
+        },
+
+        getLineColor: getLineColor,
+        getLineWidth: getLineWidth,
+
+        pickable: true,
+        onHover: updateTooltip,
+
+        updateTriggers: {
+          getLineColor: {year},
+          getLineWidth: {year}
+        },
+
+        transitions: {
+          getLineColor: 1000,
+          getLineWidth: 1000
+        }
+      })
+    ];
+
+    deckgl.setProps({layers});
+  }
+
+  function getKey({state, type, id}) {
+    return `${state}-${type}-${id}`;
+  }
+
+  function getLineColor(f) {
+    if (!fatalities[year]) {
+      return [200, 200, 200];
+    }
+    const key = getKey(f.properties);
+    const fatalitiesPer1KMile = ((fatalities[year][key] || 0) / f.properties.length) * 1000;
+    return COLOR_SCALE(fatalitiesPer1KMile);
+  }
+
+  function getLineWidth(f) {
+    if (!incidents[year]) {
+      return 10;
+    }
+    const key = getKey(f.properties);
+    const incidentsPer1KMile = ((incidents[year][key] || 0) / f.properties.length) * 1000;
+    return WIDTH_SCALE(incidentsPer1KMile);
+  }
+
+  /* UI */
+
+  function initInputs(container) {
+    const inputValue = container.append('div').text(`YEAR: ${year}`);
+
+    const yearRange = Object.keys(incidents).map(Number);
+
+    const input = container.append('input').attr('type', 'range')
+      .attr('min', d3.min(yearRange))
+      .attr('max', d3.max(yearRange))
+      .attr('step', 5)
+      .attr('value', year)
+      .on('input', () => {
+        year = input.property('value');
+        inputValue.text(`YEAR: ${year}`);
+        redraw();
+      });
+  }
+
+  function updateTooltip(info) {
+    const tooltip = d3.select('#tooltip');
+    const props = info.object ? info.object.properties : null;
+    let content = '';
+
+    if (props) {
+      const key = getKey(props);
+      const r = incidents[year][key];
+      const f = fatalities[year][key];
+
+      let content = `<big>${props.name} (${props.state})</big>`;
+      if (r) {
+        content += `
+  <div>
+    <b>${f}</b> people died in
+    <b>${r}</b> crashes
+    on ${props.type === 'SR' ? props.state : props.type}-${props.id}
+    in <b>${year}</b>
+  </div>`;
+      } else {
+        content += `<div>no accidents recorded in <b>${year}</b></div>`;
+      }
+      tooltip.style('display', 'block').style('left', info.x).style('top', info.y).html(content);
+    } else {
+      tooltip.style('display', 'none');
+    }
+  }
+
+  </script>
+</html>
