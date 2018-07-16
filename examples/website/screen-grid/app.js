@@ -2,19 +2,20 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {ScreenGridLayer} from 'deck.gl';
+import {isWebGL2} from 'luma.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 // Source data CSV
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json'; // eslint-disable-line
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
 
 export const INITIAL_VIEW_STATE = {
-  longitude: -119.3,
-  latitude: 35.6,
-  zoom: 6,
-  maxZoom: 20,
+  longitude: -73.75,
+  latitude: 40.73,
+  zoom: 9.6,
+  maxZoom: 16,
   pitch: 0,
   bearing: 0
 };
@@ -44,6 +45,15 @@ export class App extends Component {
     ];
   }
 
+  _onInitialized(gl) {
+    if (!isWebGL2(gl)) {
+      console.warn('GPU aggregation is not supported'); // eslint-disable-line
+      if (this.props.disableGPUAggregation) {
+        this.props.disableGPUAggregation();
+      }
+    }
+  }
+
   render() {
     const {viewState, controller = true, baseMap = true} = this.props;
 
@@ -51,6 +61,7 @@ export class App extends Component {
       <DeckGL
         layers={this._renderLayers()}
         initialViewState={INITIAL_VIEW_STATE}
+        onWebGLInitialized={this._onInitialized.bind(this)}
         viewState={viewState}
         controller={controller}
       >

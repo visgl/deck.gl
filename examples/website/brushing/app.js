@@ -241,10 +241,7 @@ export class App extends Component {
     const {viewState, controller = true, baseMap = true} = this.props;
 
     return (
-      <div
-        onMouseMove={this._onMouseMove}
-        onMouseLeave={this._onMouseLeave}
-      >
+      <div onMouseMove={this._onMouseMove} onMouseLeave={this._onMouseLeave}>
         {this._renderTooltip()}
 
         <DeckGL
