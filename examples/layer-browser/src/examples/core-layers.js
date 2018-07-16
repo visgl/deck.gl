@@ -147,12 +147,23 @@ const PolygonLayerExample = {
 const PathLayerExample = {
   layer: PathLayer,
   getData: () => dataSamples.zigzag,
+  propTypes: {
+    getDashArray: {type: 'compound', elements: ['dashSizeLine']},
+    dashSizeLine: {
+      type: 'number',
+      max: 20,
+      onUpdate: (newValue, newSettings, change) => {
+        change('getDashArray', [newValue, 20 - newValue]);
+      }
+    }
+  },
   props: {
     id: 'pathLayer',
     opacity: 0.6,
     getPath: f => f.path,
     getColor: f => [128, 0, 0],
     getWidth: f => 10,
+    getDashArray: f => [20, 0],
     widthMinPixels: 1,
     pickable: true
   }
