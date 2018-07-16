@@ -15,7 +15,8 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 
 #### Views and Controllers
 
-* `ViewportController` React component has been removed. The functionality is now built in to the `Deck` and `DeckGL` classes.
+* (React only) Viewport constraint props: `maxZoom`, `minZoom`, `maxPitch`, `minPitch` are no longer supported by the `DeckGL` component. They must be specified as part of the `viewState` object.
+* (React only) `ViewportController` React component has been removed. The functionality is now built in to the `Deck` and `DeckGL` classes.
 * `Deck.onViewportChange(viewport)` etc callbacks are no longer supported. Use `Deck.onViewStateChange({viewState})`
 * `DeckGL.viewport` and `DeckGL.viewports` props are no longer supported. Use `DeckGL.views`.
 
