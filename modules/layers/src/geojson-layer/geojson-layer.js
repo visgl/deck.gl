@@ -223,7 +223,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           dashJustified: lineDashJustified,
 
           getPath: getCoordinates,
-
           getColor: unwrappingAccessor(getLineColor),
           getWidth: unwrappingAccessor(getLineWidth),
           getDashArray: unwrappingAccessor(getLineDashArray),
@@ -243,7 +242,8 @@ export default class GeoJsonLayer extends CompositeLayer {
           id: 'line-paths',
           updateTriggers: {
             getColor: updateTriggers.getLineColor,
-            getWidth: updateTriggers.getLineWidth
+            getWidth: updateTriggers.getLineWidth,
+            getDashArray: updateTriggers.getLineDashArray
           }
         }),
         {
@@ -255,6 +255,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           widthMaxPixels: lineWidthMaxPixels,
           rounded: lineJointRounded,
           miterLimit: lineMiterLimit,
+          dashJustified: lineDashJustified,
 
           getPath: getCoordinates,
           getColor: unwrappingAccessor(getLineColor),
