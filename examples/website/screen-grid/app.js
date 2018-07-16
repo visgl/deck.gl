@@ -37,7 +37,8 @@ export class App extends Component {
       new ScreenGridLayer({
         id: 'grid',
         data,
-        getPosition: d => d,
+        getPosition: d => [d[0], d[1]],
+        getWeight: d => d[2],
         cellSizePixels: cellSize,
         colorRange,
         gpuAggregation

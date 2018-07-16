@@ -4,8 +4,6 @@ import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {App, INITIAL_VIEW_STATE} from 'website-examples/screen-grid/app';
 
-const DATA_SAMPLE_SIZE = 1e5;
-
 export default class ScreenGridDemo extends Component {
 
   static get data() {
@@ -68,6 +66,7 @@ export default class ScreenGridDemo extends Component {
     if (!data) {
       return null;
     }
+    const DATA_SAMPLE_SIZE = 1e5;
     const result = new Array(DATA_SAMPLE_SIZE);
     const stride = Math.floor(data.length / DATA_SAMPLE_SIZE);
     for (let i = 0; i < DATA_SAMPLE_SIZE; i++) {
