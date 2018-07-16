@@ -137,11 +137,8 @@ export default class DeckGL extends React.PureComponent {
   // Supports old "geospatial view state as separate props" style (React only!)
   _getViewState(props) {
     if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
-      if ('maxZoom' in props) {
-        log.removed('maxZoom', 'viewState');
-      }
-      if ('minZoom' in props) {
-        log.removed('minZoom', 'viewState');
+      if (('maxZoom' in props) || ('minZoom' in props)) {
+        log.removed('maxZoom/minZoom', 'viewState');
       }
       const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
       return {latitude, longitude, zoom, pitch, bearing};
