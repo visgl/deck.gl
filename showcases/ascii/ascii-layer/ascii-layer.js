@@ -1,5 +1,5 @@
 import {CompositeLayer, IconLayer, COORDINATE_SYSTEM} from 'deck.gl';
-import {makeFontAtlas} from '@deck.gl/core/core-layers/text-layer/font-atlas';
+import {makeFontAtlas} from '@deck.gl/layers/dist/esm/text-layer/font-atlas';
 import AsciiFilter from './ascii-filter';
 
 const LETTER_HEIGHT = 32;
@@ -111,7 +111,7 @@ export default class AsciiLayer extends CompositeLayer {
       opacity: 1,
       iconAtlas,
       iconMapping,
-      sizeScale: LETTER_HEIGHT * 2 * sizeScale,
+      sizeScale: LETTER_HEIGHT * sizeScale,
 
       getIcon: d => ' ',
       // getColor: d => d.color,

@@ -1,4 +1,5 @@
-import {Texture2D, Model, Buffer, Framebuffer, Geometry, TransformFeedback, GL} from 'luma.gl';
+import {Texture2D, Model, Buffer, Framebuffer, Geometry, TransformFeedback} from 'luma.gl';
+import GL from 'luma.gl/constants';
 import {sortCharactersByBrightness} from './utils';
 
 const vs = `
@@ -201,12 +202,9 @@ export default class AsciiFilter {
       instanceColors: colorBuffer
     };
 
-    transformFeedback.bindBuffers(
-      {
-        0: iconFrameBuffer,
-        1: colorBuffer
-      },
-      {}
-    );
+    transformFeedback.setBuffers({
+      0: iconFrameBuffer,
+      1: colorBuffer
+    });
   }
 }
