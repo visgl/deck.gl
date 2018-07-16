@@ -2,11 +2,10 @@
   "scripts": {
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
     "start": "webpack-dev-server --progress --hot --open",
-    "build": "webpack --env.local -p --output-filename bundle.js"
+    "build": "webpack -p --output-filename bundle.js"
   },
   "dependencies": {
-    "deck.gl": ">=5.2.0-beta.1",
-    "luma.gl": ">=5.2.0-beta.1",
+    "deck.gl": "^6.0.0-rc",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
