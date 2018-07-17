@@ -59,13 +59,35 @@ export const deckgl = new JSONDeck({
 ```
 
 
+### Support Declarative Syntax for Accessor-Style functions
+
+In most cases, to meaningfully use deck.gl layers, the user must at least be able to configure accessor functions. Currently deck.gl does not support a fully "declarative" syntax for accessors.
+
+Constant accessors are supported by default, function valued accessors are not. JSON cannot contain functions, however it can contain strings that can be parsed and used to generate functions.
+
+While more advanced formats are possible in the future, the initial idea is to treat strings simplh as object access "paths".
+
+Examples:
+* the string `'position'` will generate a function `x => x.position`
+* `'props.color'` will generate a function `x => x.props.color`
+* The empty string `''` will generate a function `x => x`
+
+A second key problem is to determine which strings (layer props) should be parsed into functions? Since we have started build out a prop types system, it is suggested we extend this as needed and parse and generate functions based on prop types.
+
+
 ## Open Questions
 
 ### Where to put the new classes?
 
 * They are quite small. Perhaps `@deck.gl/addons` or `@deck.gl/experimental-layers/addons`?
 * They could also be incubated in a separate infovis repo.
-* However, there xwill be changes to e.g. accessors that must be done in the `core` and `layers` modules.
+* However, there could be changes to e.g. accessor handling etc that must be done in the `core` and `layers` modules.
+
+
+### Any reason to support string accessors in non-JSON APIs?
+
+* Better performance characteristics? String comparison succeeds where function comparison fails.
+* The conversion from strings to functions could be built into the prop type system?
 
 
 ### Future Extensions
@@ -77,7 +99,7 @@ An example could be **hover tooltips**, which is a common feature in many visual
 Some of these requirements should naturally be implemented by applications, but some features may be small and helpful for other APIs (scripting, React) that they could make sense to build into deck.gl itself.
 
 
-## Philosophical Final Thoughts
+## (Philosophical) Final Thoughts
 
 Ideally, we should view the support for JSON Layers simply as the "fourth incarnation" of the deck.gl API (next to vanilla JS, scripting and React). And as always, the rule that deck.gl fundamentally only has "one API" should still apply here.
 
