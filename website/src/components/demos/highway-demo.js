@@ -43,7 +43,7 @@ export default class HighwayDemo extends Component {
       <div>
         <h3>Highway Safety in the US</h3>
         <p>Fatal accidents on U.S. highways<br/>
-           ({1990 - 2015})</p>
+           (1990 - 2015)</p>
         <p>Fatalities per 1,000 miles:</p>
         <div className="layout">
           {legends.map((l, i) => (

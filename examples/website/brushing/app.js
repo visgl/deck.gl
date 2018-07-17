@@ -50,11 +50,10 @@ export class App extends Component {
       arcs: [],
       targets: [],
       sources: [],
-      mousePosition: [0, 0],
+      mousePosition: null,
       ...this._getLayerData(props)
     };
     this._onMouseMove = this._onMouseMove.bind(this);
-    this._onMouseEnter = this._onMouseEnter.bind(this);
     this._onMouseLeave = this._onMouseLeave.bind(this);
     this._onHover = this._onHover.bind(this);
   }
@@ -73,12 +72,8 @@ export class App extends Component {
     }
   }
 
-  _onMouseEnter() {
-    this.setState({mouseEntered: true});
-  }
-
   _onMouseLeave() {
-    this.setState({mouseEntered: false});
+    this.setState({mousePosition: null});
   }
 
   _onHover({x, y, object}) {
@@ -177,11 +172,9 @@ export class App extends Component {
       opacity = 0.7
     } = this.props;
 
-    const {arcs, targets, sources, mouseEntered, mousePosition} = this.state;
+    const {arcs, targets, sources, mousePosition} = this.state;
 
-    // mouseEntered is undefined when mouse is in the component while it first loads
-    // enableBrushing if mouseEntered is not defined
-    const isMouseover = mouseEntered !== false;
+    const isMouseover = mousePosition !== null;
     const startBrushing = Boolean(isMouseover && enableBrushing);
 
     if (!arcs || !targets) {
@@ -248,11 +241,7 @@ export class App extends Component {
     const {viewState, controller = true, baseMap = true} = this.props;
 
     return (
-      <div
-        onMouseMove={this._onMouseMove}
-        onMouseEnter={this._onMouseEnter}
-        onMouseLeave={this._onMouseLeave}
-      >
+      <div onMouseMove={this._onMouseMove} onMouseLeave={this._onMouseLeave}>
         {this._renderTooltip()}
 
         <DeckGL

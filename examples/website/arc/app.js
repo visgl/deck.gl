@@ -69,9 +69,6 @@ export class App extends Component {
 
   _onSelectCounty({object}) {
     this._recalculateArcs(this.props.data, object);
-    if (this.props.onSelectCounty) {
-      this.props.onSelectCounty(object);
-    }
   }
 
   _renderTooltip() {
@@ -111,6 +108,10 @@ export class App extends Component {
       a.gain = Math.sign(a.value);
       a.quantile = scale(Math.abs(a.value));
     });
+
+    if (this.props.onSelectCounty) {
+      this.props.onSelectCounty(selectedCounty);
+    }
 
     this.setState({arcs, selectedCounty});
   }

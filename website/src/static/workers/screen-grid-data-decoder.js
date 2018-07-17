@@ -13,10 +13,9 @@ onmessage = function(e) {
     const coords = decodePolyline(line.slice(2));
     for (let i = 0; i < coords.length; i++) {
       const c = coords[i];
-      for (let j = 0; j < count; j++) {
-        result.push(c);
-        total++;
-      }
+      c[2] = count;
+      result.push(c);
+      total++;
     }
   });
 

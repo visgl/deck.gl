@@ -6,5 +6,8 @@
   ],
   plugins: [
     "transform-decorators-legacy"
+  ],
+  "ignore": [
+    "workers/laz*"
   ]
 }
