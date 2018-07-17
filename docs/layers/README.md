@@ -23,7 +23,7 @@ These are layers from an older releases that now have better counterparts. They 
 
 ## Experimental Layers
 
-deck.gl provides a number of experimental layers in the [@deck.gl/experimental-layers](https://github.com/uber/deck.gl/tree/5.2-release/modules/experimental-layers) module. These layers are being actively developed and subject to major changes. Their documentations can be found along with the source code, but not hosted on the official documentation website.
+deck.gl provides a number of experimental layers in the [@deck.gl/experimental-layers](https://github.com/uber/deck.gl/tree/master/modules/experimental-layers) module. These layers are being actively developed and subject to major changes. Their documentations can be found along with the source code, but not hosted on the official documentation website.
 
 The experimental layers may graduate to core layers in a later release. 
 
