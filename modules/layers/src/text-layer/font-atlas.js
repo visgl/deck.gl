@@ -8,15 +8,18 @@ const MAX_CANVAS_WIDTH = 1024;
 const DEFAULT_FONT_SIZE = 64;
 const DEFAULT_PADDING = 4;
 
+const BASELINE_SCALE = 0.9;
+const HEIGHT_SCALE = 1.2;
+
 export const DEFAULT_CHAR_SET = [];
 for (let i = 32; i < 128; i++) {
   DEFAULT_CHAR_SET.push(String.fromCharCode(i));
 }
 
-function setTextStyle(ctx, fontFamily, fontSize, useAdvancedMetrics) {
+function setTextStyle(ctx, fontFamily, fontSize) {
   ctx.font = `${fontSize}px ${fontFamily}`;
   ctx.fillStyle = '#000';
-  ctx.textBaseline = useAdvancedMetrics ? 'top' : 'hanging';
+  ctx.textBaseline = 'baseline';
   ctx.textAlign = 'left';
 }
 
@@ -31,18 +34,14 @@ export function makeFontAtlas(
 ) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-  setTextStyle(ctx, fontFamily, fontSize, true);
 
   // measure texts
   let row = 0;
   let x = 0;
-  // Get a sample of text metrics
-  // Advanced text metrics are only implemented in Chrome:
+  // TODO - use Advanced text metrics when they are adopted:
   // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-  const {fontBoundingBoxDescent} = ctx.measureText(characterSet[0]);
-  // Fallback to height=fontSize
-  const fontHeight = fontBoundingBoxDescent || fontSize;
-  const useAdvancedMetrics = Boolean(fontBoundingBoxDescent);
+  const fontHeight = fontSize * HEIGHT_SCALE;
+  setTextStyle(ctx, fontFamily, fontSize);
   const mapping = {};
 
   Array.from(characterSet).forEach(char => {
@@ -65,13 +64,13 @@ export function makeFontAtlas(
   canvas.width = MAX_CANVAS_WIDTH;
   canvas.height = (row + 1) * (fontHeight + padding);
 
-  setTextStyle(ctx, fontFamily, fontSize, useAdvancedMetrics);
+  setTextStyle(ctx, fontFamily, fontSize);
   for (const char in mapping) {
-    ctx.fillText(char, mapping[char].x, mapping[char].y);
+    ctx.fillText(char, mapping[char].x, mapping[char].y + fontSize * BASELINE_SCALE);
   }
 
   return {
-    scale: fontHeight / fontSize,
+    scale: HEIGHT_SCALE,
     mapping,
     texture: new Texture2D(gl, {
       pixels: canvas,
