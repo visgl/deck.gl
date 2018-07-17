@@ -22,11 +22,10 @@ export default `\
 #define SHADER_NAME point-cloud-layer-vertex-shader
 
 attribute vec3 positions;
-
-attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
 attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
+attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
 attribute vec3 instancePickingColors;
 
 uniform float opacity;
