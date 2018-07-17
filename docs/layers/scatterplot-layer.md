@@ -109,5 +109,5 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 ## Source
 
-[modules/core/src/core-layers/scatterplot-layer](https://github.com/uber/deck.gl/tree/5.3-release/modules/core/src/core-layers/scatterplot-layer)
+[modules/layers/src/scatterplot-layer](https://github.com/uber/deck.gl/tree/5.3-release/modules/layers/src/scatterplot-layer)
 

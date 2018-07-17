@@ -66,4 +66,4 @@ Inherits all [View methods](/docs/api-reference/view.md#methods).
 
 ## Source
 
-[modules/core/src/core/views/third-person-view.js](https://github.com/uber/deck.gl/blob/5.3-release/modules/core/src/core/views/third-person-view.js)
+[modules/core/src/views/third-person-view.js](https://github.com/uber/deck.gl/blob/5.3-release/modules/core/src/views/third-person-view.js)
