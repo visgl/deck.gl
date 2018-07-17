@@ -117,6 +117,7 @@ class DemoLauncher extends Component {
 
         params={params}
         onStateChange={this.props.updateMeta}
+        useParams={this.props.useParams}
         />
     );
   }

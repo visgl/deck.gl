@@ -65,7 +65,7 @@ float distanceBetweenLatLng(vec2 source, vec2 target) {
 // range is km
 float isPointInRange(vec2 ptLatLng, vec2 mouseLatLng, float range, bool enabled) {
 
-  return float(enabled && distanceBetweenLatLng(ptLatLng, mouseLatLng) <= range);
+  return float(!enabled || distanceBetweenLatLng(ptLatLng, mouseLatLng) <= range);
 }
 
 void main(void) {

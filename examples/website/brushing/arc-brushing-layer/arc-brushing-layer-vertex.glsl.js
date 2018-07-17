@@ -109,7 +109,7 @@ void main(void) {
   float isSourceInBrush = isPointInRange(instancePositions.xy, mousePos, brushRadius, brushSource);
   float isTargetInBrush = isPointInRange(instancePositions.zw, mousePos, brushRadius, brushTarget);
 
-  float isInBrush = float(enableBrushing &&
+  float isInBrush = float(!enableBrushing ||
   (brushSource * isSourceInBrush > 0. || brushTarget * isTargetInBrush > 0.));
 
   float segmentIndex = positions.x;
