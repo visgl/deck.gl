@@ -8,7 +8,7 @@ import {normalize} from './utils/point-cloud-utils';
 
 // Data source: kaarta.com
 const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.laz';
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
@@ -64,7 +64,7 @@ export class App extends PureComponent {
 
   _loadData() {
     const {points} = this.state;
-    const skip = 10;
+    const skip = 1;
 
     if (this.props.onLoad) {
       this.props.onLoad({count: 0, progress: 0});
