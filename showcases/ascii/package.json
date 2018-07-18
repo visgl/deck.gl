@@ -5,7 +5,7 @@
     "build": "webpack -p --output-filename bundle.js"
   },
   "dependencies": {
-    "deck.gl": "^6.0.0-rc",
+    "deck.gl": "^6.0.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0"
   },
