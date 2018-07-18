@@ -229,20 +229,16 @@ export default class LayerAttribute extends Attribute {
   // PRIVATE HELPER METHODS
 
   /* check user supplied values and apply fallback */
-  _normalizeValue(
-    value,
-    size = this.size,
-    defaultValue = this.userData.defaultValue,
-    out = [],
-    start = 0
-  ) {
+  _normalizeValue(value, out = [], start = 0) {
+    const {defaultValue} = this.userData;
+
     if (!Array.isArray(value) && !ArrayBuffer.isView(value)) {
       out[start] = Number.isFinite(value) ? value : defaultValue[0];
       return out;
     }
 
     /* eslint-disable no-fallthrough, default-case */
-    switch (size) {
+    switch (this.size) {
       case 4:
         out[start + 3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
       case 3:
@@ -268,7 +264,7 @@ export default class LayerAttribute extends Attribute {
   _updateBufferViaStandardAccessor(data, props) {
     const state = this.userData;
 
-    const {accessor, defaultValue} = state;
+    const {accessor} = state;
     const {value, size} = this;
     const accessorFunc = props[accessor];
 
@@ -277,7 +273,7 @@ export default class LayerAttribute extends Attribute {
     let i = 0;
     for (const object of data) {
       const objectValue = accessorFunc(object);
-      this._normalizeValue(objectValue, size, defaultValue, value, i);
+      this._normalizeValue(objectValue, value, i);
       i += size;
     }
     this.update({value});
