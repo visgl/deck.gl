@@ -314,8 +314,8 @@ export default class SolidPolygonLayer extends Layer {
             drawMode: GL.TRIANGLES,
             attributes: {
               vertexPositions: {size: 2, isInstanced: true, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, constant: true, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, constant: true, value: new Float32Array(2)}
+              nextPositions: {size: 3, isInstanced: true, value: new Float32Array(3)},
+              nextPositions64xyLow: {size: 2, isInstanced: true, value: new Float32Array(2)}
             }
           }),
           uniforms: {
