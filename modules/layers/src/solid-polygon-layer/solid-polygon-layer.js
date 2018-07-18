@@ -54,72 +54,6 @@ const defaultProps = {
   lightSettings: {}
 };
 
-// Side model attributes
-const SIDE_FILL_POSITIONS = new Float32Array([
-  // top left corner
-  0,
-  1,
-  // bottom left corner
-  0,
-  0,
-  // top right corner
-  1,
-  1,
-  // bottom right corner
-  1,
-  0
-]);
-const SIDE_WIRE_POSITIONS = new Float32Array([
-  // top right corner
-  1,
-  1,
-  // top left corner
-  0,
-  1,
-  // bottom left corner
-  0,
-  0,
-  // bottom right corner
-  1,
-  0
-]);
-
-// Model types
-const ATTRIBUTE_OVERRIDES = {
-  TOP: null,
-  SIDE: {instanced: 1},
-  WIRE: {instanced: 1}
-};
-
-const ATTRIBUTE_MAPS = {
-  TOP: {
-    indices: 'indices',
-    positions: 'positions',
-    positions64xyLow: 'positions64xyLow',
-    elevations: 'elevations',
-    colors: 'fillColors',
-    pickingColors: 'pickingColors'
-  },
-  SIDE: {
-    positions: 'positions',
-    positions64xyLow: 'positions64xyLow',
-    nextPositions: 'nextPositions',
-    nextPositions64xyLow: 'nextPositions64xyLow',
-    elevations: 'elevations',
-    colors: 'fillColors',
-    pickingColors: 'pickingColors'
-  },
-  WIRE: {
-    positions: 'positions',
-    positions64xyLow: 'positions64xyLow',
-    nextPositions: 'nextPositions',
-    nextPositions64xyLow: 'nextPositions64xyLow',
-    elevations: 'elevations',
-    colors: 'lineColors',
-    pickingColors: 'pickingColors'
-  }
-};
-
 const ATTRIBUTE_TRANSITION = {
   enter: (value, chunk) => {
     return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
@@ -141,6 +75,9 @@ export default class SolidPolygonLayer extends Layer {
 
     const attributeManager = this.getAttributeManager();
     const noAlloc = true;
+
+    attributeManager.remove(['instancePickingColors']);
+
     /* eslint-disable max-len */
     attributeManager.add({
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
@@ -193,16 +130,29 @@ export default class SolidPolygonLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {extruded, elevationScale} = this.props;
+    const {extruded, filled, wireframe, elevationScale} = this.props;
+    const {topModel, sideModel} = this.state;
 
     const renderUniforms = Object.assign({}, uniforms, {
       extruded: extruded ? 1.0 : 0.0,
+      wireframe: 0,
       elevationScale
     });
 
-    this.state.models.forEach(model => {
-      model.render(renderUniforms);
-    });
+    if (topModel) {
+      topModel.render(renderUniforms);
+    }
+    if (sideModel) {
+      sideModel.setUniforms(renderUniforms);
+      if (wireframe) {
+        sideModel.setDrawMode(GL.LINE_STRIP);
+        sideModel.render(Object.assign({}, renderUniforms, {wireframe: 1.0}));
+      }
+      if (filled) {
+        sideModel.setDrawMode(GL.TRIANGLE_FAN);
+        sideModel.render(renderUniforms);
+      }
+    }
   }
 
   updateState(updateParams) {
@@ -216,8 +166,7 @@ export default class SolidPolygonLayer extends Layer {
     const regenerateModels =
       props.fp64 !== oldProps.fp64 ||
       props.filled !== oldProps.filled ||
-      props.extruded !== oldProps.extruded ||
-      props.wireframe !== oldProps.wireframe;
+      props.extruded !== oldProps.extruded;
 
     if (regenerateModels) {
       if (this.state.models) {
@@ -270,52 +219,45 @@ export default class SolidPolygonLayer extends Layer {
   updateAttributes(props) {
     super.updateAttributes(props);
     const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
-    const {modelsByName} = this.state;
+    const {topModel, sideModel, numVertex, numInstances} = this.state;
 
-    for (const modelName in modelsByName) {
-      const model = modelsByName[modelName];
-
-      if (modelName === 'TOP') {
-        model.setVertexCount(this.state.numVertex);
-      } else {
-        model.setInstanceCount(this.state.numInstances);
-      }
-
-      const attributeMap = ATTRIBUTE_MAPS[modelName];
-      const attributeOverride = ATTRIBUTE_OVERRIDES[modelName];
+    if (topModel) {
+      topModel.setVertexCount(numVertex);
+      topModel.setAttributes(attributes);
+    }
+    if (sideModel) {
+      sideModel.setInstanceCount(numInstances);
       const newAttributes = {};
-      for (const attributeName in attributeMap) {
-        const attribute = attributes[attributeMap[attributeName]];
+      for (const attributeName in attributes) {
+        const attribute = attributes[attributeName];
 
-        if (attribute) {
+        if (attributeName !== 'indices') {
           // Apply layout override to the attribute.
-          newAttributes[attributeName] = attributeOverride
-            ? Object.assign({}, attribute, attributeOverride, {
-                buffer: attribute.getBuffer()
-              })
-            : attribute;
+          newAttributes[attributeName] = Object.assign({}, attribute, {
+            isInstanced: true,
+            buffer: attribute.getBuffer()
+          });
         }
       }
-      model.setAttributes(newAttributes);
+      sideModel.setAttributes(newAttributes);
     }
   }
 
   _getModels(gl) {
-    const {id, filled, extruded, wireframe} = this.props;
+    const {id, filled, extruded} = this.props;
 
-    const models = {};
+    let topModel;
+    let sideModel;
 
     if (filled) {
-      models.TOP = new Model(
+      topModel = new Model(
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-top`,
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, isInstanced: true, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, isInstanced: true, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, isInstanced: true, value: new Float32Array(2)}
+              vertexPositions: {size: 2, isInstanced: true, value: new Float32Array([0, 1])}
             }
           }),
           uniforms: {
@@ -327,36 +269,17 @@ export default class SolidPolygonLayer extends Layer {
         })
       );
     }
-    if (filled && extruded) {
-      models.SIDE = new Model(
+    if (extruded) {
+      sideModel = new Model(
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-side`,
           geometry: new Geometry({
-            drawMode: GL.TRIANGLE_STRIP,
+            drawMode: GL.LINES,
             vertexCount: 4,
             attributes: {
-              vertexPositions: {size: 2, value: SIDE_FILL_POSITIONS}
-            }
-          }),
-          uniforms: {
-            isSideVertex: 1
-          },
-          isInstanced: 1,
-          shaderCache: this.context.shaderCache
-        })
-      );
-    }
-    if (extruded && wireframe) {
-      models.WIRE = new Model(
-        gl,
-        Object.assign({}, this.getShaders(), {
-          id: `${id}-wire`,
-          geometry: new Geometry({
-            drawMode: GL.LINE_STRIP,
-            vertexCount: 4,
-            attributes: {
-              vertexPositions: {size: 2, value: SIDE_WIRE_POSITIONS}
+              // top right - top left - bootom left - bottom right
+              vertexPositions: {size: 2, value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])}
             }
           }),
           uniforms: {
@@ -369,8 +292,9 @@ export default class SolidPolygonLayer extends Layer {
     }
 
     return {
-      models: [models.WIRE, models.SIDE, models.TOP].filter(Boolean),
-      modelsByName: models
+      models: [sideModel, topModel].filter(Boolean),
+      topModel,
+      sideModel
     };
   }
 

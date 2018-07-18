@@ -27,11 +27,13 @@ attribute vec2 positions64xyLow;
 attribute vec3 nextPositions;
 attribute vec2 nextPositions64xyLow;
 attribute float elevations;
-attribute vec4 colors;
+attribute vec4 fillColors;
+attribute vec4 lineColors;
 attribute vec3 pickingColors;
 
 uniform float isSideVertex;
 uniform float extruded;
+uniform float wireframe;
 uniform float elevationScale;
 uniform float opacity;
 
@@ -41,6 +43,7 @@ void main(void) {
   vec3 pos;
   vec2 pos64xyLow;
   vec3 normal;
+  vec4 colors = mix(fillColors, lineColors, wireframe);
 
   if (isSideVertex > 0.5) {
     pos = mix(positions, nextPositions, vertexPositions.x);
