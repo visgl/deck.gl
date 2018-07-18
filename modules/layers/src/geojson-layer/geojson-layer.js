@@ -31,8 +31,8 @@ import {
   unwrapSourceFeatureIndex
 } from './geojson';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
+const defaultLineColor = [0, 0, 0, 255];
+const defaultFillColor = [0, 0, 0, 255];
 
 const defaultProps = {
   stroked: true,
@@ -56,17 +56,17 @@ const defaultProps = {
   fp64: false,
 
   // Line and polygon outline color
-  getLineColor: f => (f.properties && f.properties.lineColor) || defaultLineColor,
+  getLineColor: defaultLineColor,
   // Point and polygon fill color
-  getFillColor: f => (f.properties && f.properties.fillColor) || defaultFillColor,
+  getFillColor: defaultFillColor,
   // Point radius
-  getRadius: f => (f.properties && (f.properties.radius || f.properties.size)) || 1,
+  getRadius: 1,
   // Line and polygon outline accessors
-  getLineWidth: f => (f.properties && f.properties.lineWidth) || 1,
+  getLineWidth: 1,
   // Line dash array accessor
   getLineDashArray: null,
   // Polygon extrusion accessor
-  getElevation: f => (f.properties && f.properties.elevation) || 1000,
+  getElevation: 1000,
 
   subLayers: {
     PointLayer: ScatterplotLayer,

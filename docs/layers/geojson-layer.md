@@ -171,7 +171,7 @@ deck.gl.
 
 ##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `f => f.properties.lineColor || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba color of line string and/or the outline of polygon for a GeoJson feature, depending on its type.
 Format is `r, g, b, [a]`. Each component is in the 0-255 range.
@@ -181,7 +181,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 
 ##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `f => f.properties.fillColor || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The solid color of the polygon and point features of a GeoJson.
 Format is `r, g, b, [a]`. Each component is in the 0-255 range.
@@ -193,7 +193,7 @@ Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` 
 
 ##### `getRadius` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `f => f.properties.radius || f.properties.size || 1`
+* Default: `1`
 
 The radius of `Point` and `MultiPoint` feature, in meters.
 
@@ -202,7 +202,7 @@ The radius of `Point` and `MultiPoint` feature, in meters.
 
 ##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `f => f.properties.lineWidth || 1`
+* Default: `1`
 
 The width of line string and/or the outline of polygon for a GeoJson feature, depending on its type. Unit is meters.
 
@@ -215,7 +215,7 @@ features. It is called for `Polygon` and `MultiPolygon` features if the
 
 ##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `f => f.properties.elevation || 1000`
+* Default: `1000`
 
 The elevation of a polygon feature (when `extruded` is true).
 

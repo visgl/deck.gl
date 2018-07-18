@@ -27,14 +27,15 @@ import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_NORMAL = [0, 0, 1];
 
 const defaultProps = {
   radiusPixels: 10, //  point radius in pixels
   fp64: false,
 
   getPosition: x => x.position,
-  getNormal: x => x.normal,
-  getColor: x => x.color || DEFAULT_COLOR,
+  getNormal: DEFAULT_NORMAL,
+  getColor: DEFAULT_COLOR,
 
   lightSettings: {}
 };
@@ -62,14 +63,14 @@ export default class PointCloudLayer extends Layer {
         size: 3,
         transition: true,
         accessor: 'getNormal',
-        defaultValue: [0, 0, 1]
+        defaultValue: DEFAULT_NORMAL
       },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        defaultValue: [0, 0, 0, 255]
+        defaultValue: DEFAULT_COLOR
       }
     });
     /* eslint-enable max-len */

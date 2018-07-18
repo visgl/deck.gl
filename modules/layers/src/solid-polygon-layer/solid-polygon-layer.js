@@ -28,8 +28,8 @@ import {PolygonTesselator} from './polygon-tesselator';
 import vs from './solid-polygon-layer-vertex.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
+const defaultLineColor = [0, 0, 0, 255];
+const defaultFillColor = [0, 0, 0, 255];
 
 const defaultProps = {
   filled: true,
@@ -45,10 +45,10 @@ const defaultProps = {
   // Accessor for polygon geometry
   getPolygon: f => f.polygon,
   // Accessor for extrusion height
-  getElevation: f => f.elevation || 0,
+  getElevation: 1000,
   // Accessor for colors
-  getFillColor: f => f.fillColor || defaultFillColor,
-  getLineColor: f => f.lineColor || defaultLineColor,
+  getFillColor: defaultFillColor,
+  getLineColor: defaultLineColor,
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}

@@ -38,8 +38,8 @@ const defaultProps = {
   fp64: false,
 
   getCentroid: x => x.centroid,
-  getColor: x => x.color,
-  getElevation: x => x.elevation,
+  getColor: DEFAULT_COLOR,
+  getElevation: 1000,
 
   lightSettings: {}
 };

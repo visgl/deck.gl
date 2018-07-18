@@ -91,7 +91,7 @@ Method called to retrieve the position of each object.
 
 ##### `getRadius` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.radius || 1`
+* Default: `1`
 
 The radius of each object, in meters.
 
@@ -100,7 +100,7 @@ The radius of each object, in meters.
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.color || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
