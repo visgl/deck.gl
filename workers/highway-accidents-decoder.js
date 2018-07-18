@@ -1,10 +1,9 @@
 'use strict';
 
 importScripts('./util.js');
-var FLUSH_LIMIT = 20000;
 var result = [];
-var count = 0;
-var triangleCount = 0;
+
+var ID_PATTERN = /(\w\w)(I|US|SR)(.*)/;
 
 onmessage = function onmessage(e) {
   var lines = e.data.text.split('\n');
@@ -13,25 +12,29 @@ onmessage = function onmessage(e) {
     if (!line) {
       return;
     }
-    var parts = line.split('\x01');
-    var height = decodeNumber(parts[0], 90, 32);
 
-    // footprints
+    var parts = line.split('\x01');
+
+    var match = parts[0].match(ID_PATTERN);
+    var state = match[1];
+    var type = match[2];
+    var id = match[3];
+
     parts.slice(1).forEach(function (str) {
-      var coords = decodePolyline(str);
-      triangleCount += coords.length * 3 - 2;
-      coords.push(coords[0]);
+
+      var items = str.split('\t').map(function (x) {
+        return decodeNumber(x, 90, 32);
+      });
+
       result.push({
-        height: height,
-        polygon: coords
+        state: state,
+        type: type,
+        id: id,
+        year: 1990 + items[0] * 5,
+        incidents: items[1],
+        fatalities: items[1] + (items[2] || 0)
       });
     });
-
-    count++;
-
-    if (result.length >= FLUSH_LIMIT) {
-      flush();
-    }
   });
 
   if (e.data.event === 'load') {
@@ -43,8 +46,7 @@ onmessage = function onmessage(e) {
 function flush() {
   postMessage({
     action: 'add',
-    data: result,
-    meta: { buildings: count, triangles: triangleCount, progressAlt: count / 3895 * 0.2 }
+    data: result
   });
   result = [];
 }

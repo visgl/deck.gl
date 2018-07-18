@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <title>deck.gl PointCloudLayer Example | WebGL visualization</title>
+    <link rel="stylesheet" id="font-link" href="https://d1a3f4spazzrp4.cloudfront.net/uber-fonts/3.1.0/refresh.css">
+
+    <meta name="description" content="WebGL-based visualization examples using deck.gl">
+
+    <link rel="icon" type="img/ico" href="https://uber.github.io/deck.gl/favicon.ico">
+
+    <!-— facebook open graph tags -->
+    <meta property="og:url" content="https://uber.github.io/deck.gl/showcases/gallery" />
+    <meta property="og:title" content="deck.gl PointCloudLayer Example | WebGL visualization" />
+    <meta property="og:description" content="WebGL-based visualization examples using deck.gl" />
+    <meta property="og:site_name" content="deck.gl" />
+    <meta property="og:image" content="https://uber.github.io/deck.gl/showcases/gallery/images/point-cloud-layer.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="480" />
+    
+    <!-— twitter card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@uber">
+    <meta name="twitter:creator" content="@uber">
+    <meta name="twitter:title" content="deck.gl PointCloudLayer Example | WebGL visualization">
+    <meta name="twitter:description" content="WebGL-based visualization examples using deck.gl">
+    <meta name="twitter:image" content="https://uber.github.io/deck.gl/showcases/gallery/images/point-cloud-layer.jpg" />
+
+    <style>
+      body {font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important; font-size: 12px;}
+      #container {width: 100%; max-width: 960px; padding: 40px 12px; margin: auto;}
+      #source {margin: 12px 0; border: solid 1px #ccc; padding: 24px}
+      #links {margin: 12px 0;}
+      #links a {text-decoration: none; color: #444;}
+      #links a:hover {color: #08f;}
+    </style>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7157694-83', 'auto');
+  ga('send', 'pageview');
+</script>
+  </head>
+  <body>
+    <div id="container">
+      <h1>deck.gl PointCloudLayer Example</h1>
+      <div id="links">
+        <a href="./">↩ Back to Gallery</a>
+      </div>
+      <h2>Demo</h2>
+      <iframe width="100%" height="450" frameborder="0" src="data:text/html;charset=utf-8,%3Chtml%3E%0A%20%20%3Chead%3E%0A%20%20%20%20%3Ctitle%3Edeck.gl%20PointCloudLayer%20Example%3C/title%3E%0A%0A%20%20%20%20%3Cscript%20src=%22https://unpkg.com/deck.gl@%5E6.0.0/deckgl.min.js%22%3E%3C/script%3E%0A%0A%20%20%20%20%3Cstyle%20type=%22text/css%22%3E%0A%20%20%20%20%20%20body%20%7B%0A%20%20%20%20%20%20%20%20width:%20100vw;%0A%20%20%20%20%20%20%20%20height:%20100vh;%0A%20%20%20%20%20%20%20%20margin:%200;%0A%20%20%20%20%20%20%20%20background:%20#000;%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C/style%3E%0A%20%20%3C/head%3E%0A%0A%20%20%3Cbody%3E%3C/body%3E%0A%0A%20%20%3Cscript%20type=%22text/javascript%22%3E%0A%0A%20%20%20%20const%20%7BDeckGL,%20PointCloudLayer,%20COORDINATE_SYSTEM%7D%20=%20deck;%0A%0A%20%20%20%20//%20One%20million%20points%0A%20%20%20%20const%20SAMPLE_SIZE%20=%201e6;%0A%20%20%20%20const%20SURFACE_EQUATION%20=%20(x,%20y)%20=%3E%20Math.sin(x%20*%20x%20+%20y%20*%20y)%20*%20x%20/%20Math.PI;%0A%20%20%20%20const%20EPSILON%20=%201e-4;%0A%0A%20%20%20%20const%20points%20=%20%5B%5D;%0A%20%20%20%20const%20dim%20=%20Math.sqrt(SAMPLE_SIZE);%0A%0A%20%20%20%20function%20getPosition(u,%20v)%20%7B%0A%20%20%20%20%20%20const%20x%20=%20(u%20-%201/2)%20*%20Math.PI%20*%202;%0A%20%20%20%20%20%20const%20y%20=%20(v%20-%201/2)%20*%20Math.PI%20*%202;%0A%20%20%20%20%20%20const%20z%20=%20SURFACE_EQUATION(x,%20y);%0A%0A%20%20%20%20%20%20return%20%5Bx,%20y,%20z%5D;%0A%20%20%20%20%7D%0A%0A%20%20%20%20function%20getNormal(u,%20v)%20%7B%0A%20%20%20%20%20%20const%20p0%20=%20getPosition(u%20-%20EPSILON,%20v%20-%20EPSILON);%0A%20%20%20%20%20%20const%20p1%20=%20getPosition(u%20+%20EPSILON,%20v%20+%20EPSILON);%0A%0A%20%20%20%20%20%20const%20nx%20=%20(p1%5B1%5D%20-%20p0%5B1%5D)%20*%20(p1%5B2%5D%20-%20p0%5B2%5D);%0A%20%20%20%20%20%20const%20ny%20=%20(p1%5B2%5D%20-%20p0%5B2%5D)%20*%20(p1%5B0%5D%20-%20p0%5B0%5D);%0A%20%20%20%20%20%20const%20nz%20=%20(p1%5B0%5D%20-%20p0%5B0%5D)%20*%20(p1%5B1%5D%20-%20p0%5B1%5D);%0A%0A%20%20%20%20%20%20return%20%5Bnx,%20ny,%20nz%5D;%0A%20%20%20%20%7D%0A%0A%20%20%20%20for%20(let%20i%20=%200;%20i%20%3C%20dim;%20i++)%20%7B%0A%20%20%20%20%20%20for%20(let%20j%20=%200;%20j%20%3C%20dim;%20j++)%20%7B%0A%20%20%20%20%20%20%20%20const%20u%20=%20i%20/%20(dim%20-%201);%0A%20%20%20%20%20%20%20%20const%20v%20=%20j%20/%20(dim%20-%201);%0A%20%20%20%20%20%20%0A%20%20%20%20%20%20%20%20const%20p%20=%20getPosition(u,%20v);%0A%20%20%20%20%20%20%20%20const%20n%20=%20getNormal(u,%20v);%0A%20%20%20%20%20%20%20%20points.push(%7B%0A%20%20%20%20%20%20%20%20%20%20position:%20p,%0A%20%20%20%20%20%20%20%20%20%20normal:%20n,%0A%20%20%20%20%20%20%20%20%20%20color:%20%5Bu%20*128,%20v%20*128,%20p%5B2%5D%20*%20255%5D%0A%20%20%20%20%20%20%20%20%7D);%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%7D%0A%0A%20%20%20%20new%20DeckGL(%7B%0A%20%20%20%20%20%20views:%20%5Bnew%20OrbitView()%5D,%0A%20%20%20%20%20%20viewState:%20%7Bfov:%2050,%20distance:%2010,%20rotationX:%2045,%20rotationOrbit:%2045,%20zoom:%201%7D,%0A%20%20%20%20%20%20layers:%20%5B%0A%20%20%20%20%20%20%20%20new%20PointCloudLayer(%7B%0A%20%20%20%20%20%20%20%20%20%20id:%20'pointCloud',%0A%20%20%20%20%20%20%20%20%20%20coordinateSystem:%20COORDINATE_SYSTEM.IDENTITY,%0A%20%20%20%20%20%20%20%20%20%20opacity:%201,%0A%20%20%20%20%20%20%20%20%20%20data:%20points,%0A%20%20%20%20%20%20%20%20%20%20radiusPixels:%2010,%0A%20%20%20%20%20%20%20%20%20%20lightSettings:%20%7B%0A%20%20%20%20%20%20%20%20%20%20%20%20coordinateSystem:%20COORDINATE_SYSTEM.IDENTITY,%0A%20%20%20%20%20%20%20%20%20%20%20%20lightsPosition:%20%5B20,%20100,%20100,%2050,%200,%200%5D,%0A%20%20%20%20%20%20%20%20%20%20%20%20lightsStrength:%20%5B1,%200,%202,%200%5D,%0A%20%20%20%20%20%20%20%20%20%20%20%20numberOfLights:%202,%0A%20%20%20%20%20%20%20%20%20%20%20%20ambientRatio:%200.2%0A%20%20%20%20%20%20%20%20%20%20%7D%0A%20%20%20%20%20%20%20%20%7D)%0A%20%20%20%20%20%20%5D%0A%20%20%20%20%7D);%0A%0A%20%20%3C/script%3E%0A%3C/html%3E" ></iframe>
+      <h2>Source</h2>
+      <div id="source">
+        <code class="prettyprint">&lt;html&gt;<br/>&nbsp;&nbsp;&lt;head&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;title&gt;deck.gl PointCloudLayer Example&lt;/title&gt;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;script src="https://unpkg.com/deck.gl@^6.0.0/deckgl.min.js"&gt;&lt;/script&gt;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;style type="text/css"&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;body {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100vw;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height: 100vh;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;margin: 0;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;background: #000;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/style&gt;<br/>&nbsp;&nbsp;&lt;/head&gt;<br/><br/>&nbsp;&nbsp;&lt;body&gt;&lt;/body&gt;<br/><br/>&nbsp;&nbsp;&lt;script type="text/javascript"&gt;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;const {DeckGL, PointCloudLayer, COORDINATE_SYSTEM} = deck;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;// One million points<br/>&nbsp;&nbsp;&nbsp;&nbsp;const SAMPLE_SIZE = 1e6;<br/>&nbsp;&nbsp;&nbsp;&nbsp;const SURFACE_EQUATION = (x, y) =&gt; Math.sin(x * x + y * y) * x / Math.PI;<br/>&nbsp;&nbsp;&nbsp;&nbsp;const EPSILON = 1e-4;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;const points = [];<br/>&nbsp;&nbsp;&nbsp;&nbsp;const dim = Math.sqrt(SAMPLE_SIZE);<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;function getPosition(u, v) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const x = (u - 1/2) * Math.PI * 2;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const y = (v - 1/2) * Math.PI * 2;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const z = SURFACE_EQUATION(x, y);<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [x, y, z];<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;function getNormal(u, v) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const p0 = getPosition(u - EPSILON, v - EPSILON);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const p1 = getPosition(u + EPSILON, v + EPSILON);<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const nx = (p1[1] - p0[1]) * (p1[2] - p0[2]);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const ny = (p1[2] - p0[2]) * (p1[0] - p0[0]);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const nz = (p1[0] - p0[0]) * (p1[1] - p0[1]);<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return [nx, ny, nz];<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;for (let i = 0; i &lt; dim; i++) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;for (let j = 0; j &lt; dim; j++) {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const u = i / (dim - 1);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const v = j / (dim - 1);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const p = getPosition(u, v);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;const n = getNormal(u, v);<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;points.push({<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;position: p,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;normal: n,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;color: [u *128, v *128, p[2] * 255]<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;});<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;&nbsp;}<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;new DeckGL({<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;views: [new OrbitView()],<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;viewState: {fov: 50, distance: 10, rotationX: 45, rotationOrbit: 45, zoom: 1},<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;layers: [<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new PointCloudLayer({<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id: 'pointCloud',<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coordinateSystem: COORDINATE_SYSTEM.IDENTITY,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;opacity: 1,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data: points,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radiusPixels: 10,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lightSettings: {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coordinateSystem: COORDINATE_SYSTEM.IDENTITY,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lightsPosition: [20, 100, 100, 50, 0, 0],<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lightsStrength: [1, 0, 2, 0],<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numberOfLights: 2,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ambientRatio: 0.2<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;})<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>&nbsp;&nbsp;&nbsp;&nbsp;});<br/><br/>&nbsp;&nbsp;&lt;/script&gt;<br/>&lt;/html&gt;</code>
+      </div>
+    </div>
+  </body>
+</html>

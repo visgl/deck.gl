@@ -2,10 +2,10 @@
 
 importScripts('./util.js');
 var total = 0;
+var result = [];
 
 onmessage = function onmessage(e) {
   var lines = e.data.text.split('\n');
-  var result = [];
 
   lines.forEach(function (line) {
     if (!line) {
@@ -15,15 +15,18 @@ onmessage = function onmessage(e) {
     var coords = decodePolyline(line.slice(2));
     for (var i = 0; i < coords.length; i++) {
       var c = coords[i];
-      for (var j = 0; j < count; j++) {
-        result.push(c);
-        total++;
-      }
+      c[2] = count;
+      result.push(c);
+      total++;
     }
   });
-  postMessage({
-    action: 'add',
-    data: result,
-    meta: { count: total }
-  });
+
+  if (e.data.event === 'load') {
+    postMessage({
+      action: 'add',
+      data: result,
+      meta: { count: total, progress: 1 }
+    });
+    postMessage({ action: 'end' });
+  }
 };
