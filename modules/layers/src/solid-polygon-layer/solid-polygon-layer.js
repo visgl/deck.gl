@@ -139,9 +139,7 @@ export default class SolidPolygonLayer extends Layer {
       elevationScale
     });
 
-    if (topModel) {
-      topModel.render(renderUniforms);
-    }
+    // Note: the order is important
     if (sideModel) {
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
@@ -152,6 +150,9 @@ export default class SolidPolygonLayer extends Layer {
         sideModel.setDrawMode(GL.TRIANGLE_FAN);
         sideModel.render(renderUniforms);
       }
+    }
+    if (topModel) {
+      topModel.render(renderUniforms);
     }
   }
 
