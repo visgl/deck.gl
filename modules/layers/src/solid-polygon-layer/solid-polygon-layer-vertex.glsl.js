@@ -27,11 +27,13 @@ attribute vec2 positions64xyLow;
 attribute vec3 nextPositions;
 attribute vec2 nextPositions64xyLow;
 attribute float elevations;
-attribute vec4 colors;
+attribute vec4 fillColors;
+attribute vec4 lineColors;
 attribute vec3 pickingColors;
 
-uniform float isSideVertex;
-uniform float extruded;
+uniform bool isSideVertex;
+uniform bool extruded;
+uniform bool isWireframe;
 uniform float elevationScale;
 uniform float opacity;
 
@@ -41,15 +43,16 @@ void main(void) {
   vec3 pos;
   vec2 pos64xyLow;
   vec3 normal;
+  vec4 colors = isWireframe ? lineColors : fillColors;
 
-  if (isSideVertex > 0.5) {
+  if (isSideVertex) {
     pos = mix(positions, nextPositions, vertexPositions.x);
     pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
   } else {
     pos = positions;
     pos64xyLow = positions64xyLow;
   }
-  if (extruded > 0.5) {
+  if (extruded) {
     pos.z += elevations * vertexPositions.y;
   }
   pos.z *= elevationScale;
@@ -59,8 +62,8 @@ void main(void) {
 
   float lightWeight = 1.0;
   
-  if (extruded > 0.5) {
-    if (isSideVertex > 0.5) {
+  if (extruded) {
+    if (isSideVertex) {
       normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
       normal = project_normal(normal);
     } else {
