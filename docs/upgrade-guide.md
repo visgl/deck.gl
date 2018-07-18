@@ -12,6 +12,9 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 * `TextLayer.getSize` or `TextLayer.sizeScale`
 * `PointCloudLayer.radiusPixels`
 
+#### Accessors
+
+All layer accessors that support constant values are default to constants to prioritize performance. For example, `ScatterplotLayer`'s default `getRadius` prop is changed from `d => d.radius || 1` to `1`. All dynamic attributes now must be explicitly specified. 
 
 #### Views and Controllers
 

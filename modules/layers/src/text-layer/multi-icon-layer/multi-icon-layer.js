@@ -29,7 +29,7 @@ const defaultProps = {
   getAnchorX: x => x.anchorX || 0,
   // 1: top, 0: center, -1: bottom
   getAnchorY: x => x.anchorY || 0,
-  getPixelOffset: x => x.pixelOffset || [0, 0]
+  getPixelOffset: [0, 0]
 };
 
 export default class MultiIconLayer extends IconLayer {

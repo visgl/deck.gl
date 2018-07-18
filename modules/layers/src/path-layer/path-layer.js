@@ -39,8 +39,8 @@ const defaultProps = {
   dashJustified: false,
 
   getPath: object => object.path,
-  getColor: object => object.color || DEFAULT_COLOR,
-  getWidth: object => object.width || 1,
+  getColor: DEFAULT_COLOR,
+  getWidth: 1,
   getDashArray: null
 };
 

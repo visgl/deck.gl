@@ -23,8 +23,8 @@ import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
+const defaultLineColor = [0, 0, 0, 255];
+const defaultFillColor = [0, 0, 0, 255];
 
 const defaultProps = {
   stroked: true,
@@ -43,15 +43,15 @@ const defaultProps = {
 
   getPolygon: f => f.polygon,
   // Polygon fill color
-  getFillColor: f => f.fillColor || defaultFillColor,
+  getFillColor: defaultFillColor,
   // Point, line and polygon outline color
-  getLineColor: f => f.lineColor || defaultLineColor,
+  getLineColor: defaultLineColor,
   // Line and polygon outline accessors
-  getLineWidth: f => f.lineWidth || 1,
+  getLineWidth: 1,
   // Line dash array accessor
   getLineDashArray: null,
   // Polygon extrusion accessor
-  getElevation: f => f.elevation || 1000,
+  getElevation: 1000,
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}

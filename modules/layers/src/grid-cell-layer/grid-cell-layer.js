@@ -36,8 +36,8 @@ const defaultProps = {
   fp64: false,
 
   getPosition: x => x.position,
-  getElevation: x => x.elevation,
-  getColor: x => x.color,
+  getElevation: 1000,
+  getColor: DEFAULT_COLOR,
 
   lightSettings: {}
 };

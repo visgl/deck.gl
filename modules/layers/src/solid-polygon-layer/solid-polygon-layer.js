@@ -28,8 +28,8 @@ import {PolygonTesselator} from './polygon-tesselator';
 import vs from './solid-polygon-layer-vertex.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
-const defaultLineColor = [0x0, 0x0, 0x0, 0xff];
-const defaultFillColor = [0x0, 0x0, 0x0, 0xff];
+const defaultLineColor = [0, 0, 0, 255];
+const defaultFillColor = [0, 0, 0, 255];
 
 const defaultProps = {
   filled: true,
@@ -45,10 +45,10 @@ const defaultProps = {
   // Accessor for polygon geometry
   getPolygon: f => f.polygon,
   // Accessor for extrusion height
-  getElevation: f => f.elevation || 0,
+  getElevation: 1000,
   // Accessor for colors
-  getFillColor: f => f.fillColor || defaultFillColor,
-  getLineColor: f => f.lineColor || defaultLineColor,
+  getFillColor: defaultFillColor,
+  getLineColor: defaultLineColor,
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}
@@ -314,8 +314,8 @@ export default class SolidPolygonLayer extends Layer {
             drawMode: GL.TRIANGLES,
             attributes: {
               vertexPositions: {size: 2, isInstanced: true, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, constant: true, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, constant: true, value: new Float32Array(2)}
+              nextPositions: {size: 3, isInstanced: true, value: new Float32Array(3)},
+              nextPositions64xyLow: {size: 2, isInstanced: true, value: new Float32Array(2)}
             }
           }),
           uniforms: {

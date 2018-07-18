@@ -76,7 +76,7 @@ Method called to retrieve the target position of each object.
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.color || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
