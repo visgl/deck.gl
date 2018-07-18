@@ -134,7 +134,6 @@ export default class SolidPolygonLayer extends Layer {
 
     const renderUniforms = Object.assign({}, uniforms, {
       extruded: Boolean(extruded),
-      isWireframe: false,
       elevationScale
     });
 
@@ -143,11 +142,11 @@ export default class SolidPolygonLayer extends Layer {
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
         sideModel.setDrawMode(GL.LINE_STRIP);
-        sideModel.render(Object.assign({}, renderUniforms, {isWireframe: true}));
+        sideModel.render({isWireframe: true});
       }
       if (filled) {
         sideModel.setDrawMode(GL.TRIANGLE_FAN);
-        sideModel.render(renderUniforms);
+        sideModel.render({isWireframe: false});
       }
     }
     if (topModel) {
@@ -261,6 +260,7 @@ export default class SolidPolygonLayer extends Layer {
             }
           }),
           uniforms: {
+            isWireframe: false,
             isSideVertex: false
           },
           vertexCount: 0,
