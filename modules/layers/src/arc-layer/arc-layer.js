@@ -35,8 +35,8 @@ const defaultProps = {
 
   getSourcePosition: x => x.sourcePosition,
   getTargetPosition: x => x.targetPosition,
-  getSourceColor: x => x.color || DEFAULT_COLOR,
-  getTargetColor: x => x.color || DEFAULT_COLOR,
+  getSourceColor: DEFAULT_COLOR,
+  getTargetColor: DEFAULT_COLOR,
   getStrokeWidth: 1
 };
 

@@ -47,12 +47,12 @@ const defaultProps = {
 
   getText: x => x.text,
   getPosition: x => x.position,
-  getColor: x => x.color || DEFAULT_COLOR,
-  getSize: x => x.size || 32,
-  getAngle: x => x.angle || 0,
-  getTextAnchor: x => x.textAnchor || 'middle',
-  getAlignmentBaseline: x => x.alignmentBaseline || 'center',
-  getPixelOffset: x => x.offset || x.pixelOffset || [0, 0]
+  getColor: DEFAULT_COLOR,
+  getSize: 32,
+  getAngle: 0,
+  getTextAnchor: 'middle',
+  getAlignmentBaseline: 'center',
+  getPixelOffset: [0, 0]
 };
 
 export default class TextLayer extends CompositeLayer {

@@ -61,9 +61,9 @@ const defaultProps = {
 
   getPosition: x => x.position,
   getIcon: x => x.icon,
-  getColor: x => x.color || DEFAULT_COLOR,
-  getSize: x => x.size || 1,
-  getAngle: x => x.angle || 0
+  getColor: DEFAULT_COLOR,
+  getSize: 1,
+  getAngle: 0
 };
 
 export default class IconLayer extends Layer {

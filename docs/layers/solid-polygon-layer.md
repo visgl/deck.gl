@@ -96,7 +96,7 @@ This accessor returns the polygon corresponding to an object in the `data` strea
 
 ##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.fillColor || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -105,7 +105,7 @@ The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component 
 
 ##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.lineColor || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba stroke color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -114,7 +114,7 @@ The rgba stroke color of each object's polygon, in `r, g, b, [a]`. Each componen
 
 ##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.elevation`
+* Default: `1000`
 
 The elevation of each object's polygon.
 

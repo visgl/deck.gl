@@ -90,14 +90,14 @@ Expecting [lon, lat].
 
 ##### `getElevation` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `cell => cell.elevation`
+* Default: `1000`
 
 Method called to retrieve the elevation of each cell.
 Expecting a number, 1 unit approximate to 100 meter
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `cell => cell.color`
+* Default: `[255, 0, 255, 255]`
 
 The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 

@@ -37,8 +37,8 @@ const defaultProps = {
   fp64: false,
 
   getPosition: x => x.position,
-  getRadius: x => x.radius || 1,
-  getColor: x => x.color || DEFAULT_COLOR
+  getRadius: 1,
+  getColor: DEFAULT_COLOR
 };
 
 export default class ScatterplotLayer extends Layer {

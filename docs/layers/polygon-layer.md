@@ -175,7 +175,7 @@ This accessor returns the polygon corresponding to an object in the `data` strea
 
 ##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.fillColor || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -184,7 +184,7 @@ The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the
 
 ##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.color || object => object.strokeColor || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -194,7 +194,7 @@ The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in 
 
 ##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.strokeWidth || 1`
+* Default: `1`
 
 The width of the outline of the polygon, in meters. Only applies if `extruded: false`.
 
@@ -203,7 +203,7 @@ The width of the outline of the polygon, in meters. Only applies if `extruded: f
 
 ##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.elevation || 1000`
+* Default: `1000`
 
 The elevation to extrude each polygon with, in meters. Only applies if `extruded: true`.
 

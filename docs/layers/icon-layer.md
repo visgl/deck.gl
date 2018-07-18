@@ -104,7 +104,7 @@ Method called to retrieve the icon name of each object, returns string.
 
 ##### `getSize` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `d => d.size || 1`
+* Default: `1`
 
 The height of each object, in pixels.
 
@@ -114,7 +114,7 @@ The height of each object, in pixels.
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `d => d.color || [0, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -124,7 +124,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 ##### `getAngle` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `d => d.angle || 0`
+* Default: `0`
 
 The rotating angle  of each object, in degrees.
 
