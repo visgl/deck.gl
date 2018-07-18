@@ -19,6 +19,21 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 For Earlier Beta Releases see below
 
+### deck.gl v6.0.0
+
+### [6.0.0] - July 18
+- Avoid mutating source data (#2092)
+- Bump dependency versions (#2093)
+- Use constants for default props (#2091)
+- fix constant accessors in safari (#2088)
+- fix text rendering in FF and Safari (#2087)
+- 3DSurfaceExplorer Demo: fix crash (#2082)
+- Website minor bug fixes (#2064)
+- Fix website in Firefox (#2081)
+- fix ascii example (#2074)
+- Controller upgrade guide (#2073)
+- Fix bug with updating dashed lines for LineStrings (#2066)
+
 ### deck.gl v6.0.0 Pre Releases
 
 ### [6.0.0-rc.1] - July 13
