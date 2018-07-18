@@ -229,24 +229,27 @@ export default class LayerAttribute extends Attribute {
   // PRIVATE HELPER METHODS
 
   /* check user supplied values and apply fallback */
-  _normalizeValue(value, size = this.size, defaultValue = this.userData.defaultValue) {
+  _normalizeValue(value, out = [], start = 0) {
+    const {defaultValue} = this.userData;
+
     if (!Array.isArray(value) && !ArrayBuffer.isView(value)) {
-      value = [value];
+      out[start] = Number.isFinite(value) ? value : defaultValue[0];
+      return out;
     }
 
     /* eslint-disable no-fallthrough, default-case */
-    switch (size) {
+    switch (this.size) {
       case 4:
-        value[3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
+        out[start + 3] = Number.isFinite(value[3]) ? value[3] : defaultValue[3];
       case 3:
-        value[2] = Number.isFinite(value[2]) ? value[2] : defaultValue[2];
+        out[start + 2] = Number.isFinite(value[2]) ? value[2] : defaultValue[2];
       case 2:
-        value[1] = Number.isFinite(value[1]) ? value[1] : defaultValue[1];
+        out[start + 1] = Number.isFinite(value[1]) ? value[1] : defaultValue[1];
       case 1:
-        value[0] = Number.isFinite(value[0]) ? value[0] : defaultValue[0];
+        out[start + 0] = Number.isFinite(value[0]) ? value[0] : defaultValue[0];
     }
 
-    return value;
+    return out;
   }
 
   _areValuesEqual(value1, value2, size = this.size) {
@@ -261,7 +264,7 @@ export default class LayerAttribute extends Attribute {
   _updateBufferViaStandardAccessor(data, props) {
     const state = this.userData;
 
-    const {accessor, defaultValue} = state;
+    const {accessor} = state;
     const {value, size} = this;
     const accessorFunc = props[accessor];
 
@@ -269,11 +272,9 @@ export default class LayerAttribute extends Attribute {
 
     let i = 0;
     for (const object of data) {
-      let objectValue = accessorFunc(object);
-      objectValue = this._normalizeValue(objectValue, size, defaultValue);
-      for (let j = 0; j < size; j++) {
-        value[i++] = objectValue[j];
-      }
+      const objectValue = accessorFunc(object);
+      this._normalizeValue(objectValue, value, i);
+      i += size;
     }
     this.update({value});
   }
