@@ -28,8 +28,7 @@ import {PolygonTesselator} from './polygon-tesselator';
 import vs from './solid-polygon-layer-vertex.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
-const defaultLineColor = [0, 0, 0, 255];
-const defaultFillColor = [0, 0, 0, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   filled: true,
@@ -47,8 +46,8 @@ const defaultProps = {
   // Accessor for extrusion height
   getElevation: 1000,
   // Accessor for colors
-  getFillColor: defaultFillColor,
-  getLineColor: defaultLineColor,
+  getFillColor: DEFAULT_COLOR,
+  getLineColor: DEFAULT_COLOR,
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}
@@ -111,7 +110,7 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
-        defaultValue: defaultFillColor,
+        defaultValue: DEFAULT_COLOR,
         noAlloc
       },
       lineColors: {
@@ -121,7 +120,7 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
-        defaultValue: defaultLineColor,
+        defaultValue: DEFAULT_COLOR,
         noAlloc
       },
       pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors, noAlloc}
@@ -134,8 +133,8 @@ export default class SolidPolygonLayer extends Layer {
     const {topModel, sideModel} = this.state;
 
     const renderUniforms = Object.assign({}, uniforms, {
-      extruded: extruded ? 1.0 : 0.0,
-      wireframe: 0,
+      extruded: Boolean(extruded),
+      isWireframe: false,
       elevationScale
     });
 
@@ -144,7 +143,7 @@ export default class SolidPolygonLayer extends Layer {
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
         sideModel.setDrawMode(GL.LINE_STRIP);
-        sideModel.render(Object.assign({}, renderUniforms, {wireframe: 1.0}));
+        sideModel.render(Object.assign({}, renderUniforms, {isWireframe: true}));
       }
       if (filled) {
         sideModel.setDrawMode(GL.TRIANGLE_FAN);
@@ -220,10 +219,10 @@ export default class SolidPolygonLayer extends Layer {
   updateAttributes(props) {
     super.updateAttributes(props);
     const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
-    const {topModel, sideModel, numVertex, numInstances} = this.state;
+    const {topModel, sideModel, vertexCount, numInstances} = this.state;
 
     if (topModel) {
-      topModel.setVertexCount(numVertex);
+      topModel.setVertexCount(vertexCount);
       topModel.setAttributes(attributes);
     }
     if (sideModel) {
@@ -262,7 +261,7 @@ export default class SolidPolygonLayer extends Layer {
             }
           }),
           uniforms: {
-            isSideVertex: 0
+            isSideVertex: false
           },
           vertexCount: 0,
           isIndexed: true,
@@ -284,7 +283,7 @@ export default class SolidPolygonLayer extends Layer {
             }
           }),
           uniforms: {
-            isSideVertex: 1
+            isSideVertex: true
           },
           isInstanced: 1,
           shaderCache: this.context.shaderCache
@@ -301,8 +300,8 @@ export default class SolidPolygonLayer extends Layer {
 
   calculateIndices(attribute) {
     attribute.value = this.state.polygonTesselator.indices();
-    const numVertex = attribute.value.length / attribute.size;
-    this.setState({numVertex});
+    const vertexCount = attribute.value.length / attribute.size;
+    this.setState({vertexCount});
   }
 
   calculatePositions(attribute) {
