@@ -253,7 +253,7 @@ export default class LayerManager {
   }
 
   // Pick the closest info at given coordinate
-  pickObject({x, y, mode, radius = 0, layerIds, layerFilter, viewports, depth = 1}) {
+  pickObject({x, y, mode, radius = 0, layerIds, viewports, depth = 1}) {
     const {gl, useDevicePixels} = this.context;
 
     const layers = this.getLayers({layerIds});
@@ -265,7 +265,7 @@ export default class LayerManager {
       radius,
       layers,
       mode,
-      layerFilter,
+      layerFilter: this.layerFilter,
       depth,
       // Injected params
       viewports,
@@ -277,7 +277,7 @@ export default class LayerManager {
   }
 
   // Get all unique infos within a bounding box
-  pickObjects({x, y, width, height, layerIds, layerFilter, viewports}) {
+  pickObjects({x, y, width, height, layerIds, viewports}) {
     const {gl, useDevicePixels} = this.context;
 
     const layers = this.getLayers({layerIds});
@@ -288,7 +288,7 @@ export default class LayerManager {
       width,
       height,
       layers,
-      layerFilter,
+      layerFilter: this.layerFilter,
       mode: 'pickObjects',
       viewports,
       onViewportActive: this._activateViewport,
