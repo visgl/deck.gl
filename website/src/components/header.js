@@ -43,9 +43,9 @@ export default class Header extends Component {
             <NavLink activeClassName="active" to="/showcases">Showcases</NavLink>
             <NavLink activeClassName="active" to="/documentation">Documentation</NavLink>
             <a href="https://medium.com/vis-gl">Blog</a>
-            <NavLink activeClassName="active" to={FRAMEWORK_GITHUB_URL}>
+            <a href={FRAMEWORK_GITHUB_URL}>
               Github<i className="icon icon-github" />
-            </NavLink>
+            </a>
           </div>
         </div>
       </header>
