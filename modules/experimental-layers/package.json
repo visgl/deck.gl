@@ -2,7 +2,7 @@
   "name": "@deck.gl/experimental-layers",
   "description": "Experimental layers for deck.gl",
   "license": "MIT",
-  "version": "6.0.0",
+  "version": "6.0.1",
   "publishConfig": {
     "access": "public"
   },
@@ -32,7 +32,7 @@
     "test-node": "node test/node.js"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.0.0",
-    "@deck.gl/layers": "^6.0.0"
+    "@deck.gl/core": "^6.0.1",
+    "@deck.gl/layers": "^6.0.1"
   }
 }

@@ -21,6 +21,10 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0
 
+### [6.0.1] - July 19
+- fix layerFilter in picking (#2104)
+- Fix website link to github (#2094)
+
 ### [6.0.0] - July 18
 - Avoid mutating source data (#2092)
 - Bump dependency versions (#2093)
