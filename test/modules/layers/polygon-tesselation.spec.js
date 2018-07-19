@@ -55,7 +55,6 @@ test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
   t.ok(typeof Polygon.getVertexCount === 'function', 'Polygon.getVertexCount imported');
   t.ok(typeof Polygon.getTriangleCount === 'function', 'Polygon.getTriangleCount imported');
-  t.ok(typeof Polygon.forEachVertex === 'function', 'Polygon.forEachVertex imported');
   t.end();
 });
 
@@ -85,16 +84,12 @@ test('PolygonTesselator#constructor', t => {
       tesselator.updatePositions(testCase.params);
 
       t.ok(ArrayBuffer.isView(tesselator.positions()), 'PolygonTesselator.positions');
-      t.ok(ArrayBuffer.isView(tesselator.nextPositions()), 'PolygonTesselator.nextPositions');
+      t.ok(ArrayBuffer.isView(tesselator.vertexEnabled()), 'PolygonTesselator.vertexEnabled');
 
       if (testCase.params.fp64) {
         t.ok(
           ArrayBuffer.isView(tesselator.positions64xyLow()),
           'PolygonTesselator.positions64xyLow'
-        );
-        t.ok(
-          ArrayBuffer.isView(tesselator.nextPositions64xyLow()),
-          'PolygonTesselator.nextPositions64xyLow'
         );
       }
     });

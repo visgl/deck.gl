@@ -87,15 +87,13 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculatePositions,
         noAlloc
       },
-      positions64xyLow: {size: 2, update: this.calculatePositionsLow},
-      nextPositions: {
-        size: 3,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPolygon',
-        update: this.calculateNextPositions,
+      positions64xyLow: {size: 2, update: this.calculatePositionsLow, noAlloc},
+      vertexEnabled: {
+        size: 1,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateVertexEnabled,
         noAlloc
       },
-      nextPositions64xyLow: {size: 2, update: this.calculateNextPositionsLow},
       elevations: {
         size: 1,
         transition: ATTRIBUTE_TRANSITION,
@@ -225,7 +223,8 @@ export default class SolidPolygonLayer extends Layer {
       topModel.setAttributes(attributes);
     }
     if (sideModel) {
-      sideModel.setInstanceCount(numInstances);
+      // Remove one to account for the offset
+      sideModel.setInstanceCount(numInstances - 1);
       const newAttributes = {};
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
@@ -237,6 +236,20 @@ export default class SolidPolygonLayer extends Layer {
             buffer: attribute.getBuffer()
           });
         }
+      }
+      if (newAttributes.positions) {
+        newAttributes.nextPositions = Object.assign(
+          {},
+          newAttributes.positions,
+          {id: 'nextPositions', offset: 12} // 1 vertex * 3 floats * 4 bits
+        );
+      }
+      if (newAttributes.positions64xyLow) {
+        newAttributes.nextPositions64xyLow = Object.assign(
+          {},
+          newAttributes.positions64xyLow,
+          {id: 'nextPositions64xyLow', offset: 8} // 1 vertex * 2 floats * 4 bits
+        );
       }
       sideModel.setAttributes(newAttributes);
     }
@@ -256,7 +269,9 @@ export default class SolidPolygonLayer extends Layer {
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, isInstanced: true, value: new Float32Array([0, 1])}
+              vertexPositions: {size: 2, isInstanced: true, value: new Float32Array([0, 1])},
+              nextPositions: {size: 3, isInstanced: true, value: new Float32Array(3)},
+              nextPositions64xyLow: {size: 2, isInstanced: true, value: new Float32Array(2)}
             }
           }),
           uniforms: {
@@ -321,21 +336,8 @@ export default class SolidPolygonLayer extends Layer {
     attribute.value = this.state.polygonTesselator.positions64xyLow();
   }
 
-  calculateNextPositions(attribute) {
-    const {polygonTesselator} = this.state;
-    attribute.bufferLayout = polygonTesselator.bufferLayout;
-    attribute.value = polygonTesselator.nextPositions();
-  }
-  calculateNextPositionsLow(attribute) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    attribute.value = this.state.polygonTesselator.nextPositions64xyLow();
+  calculateVertexEnabled(attribute) {
+    attribute.value = this.state.polygonTesselator.vertexEnabled();
   }
 
   calculateElevations(attribute) {

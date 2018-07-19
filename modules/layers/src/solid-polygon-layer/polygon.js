@@ -39,6 +39,21 @@ export function isSimple(polygon) {
 }
 
 /**
+ * Ensure that all simple polygons have the same start and end vertex
+ */
+function closeLoop(simplePolygon) {
+  // check if first and last vertex are the same
+  const p0 = simplePolygon[0];
+  const p1 = simplePolygon[simplePolygon.length - 1];
+
+  if (p0[0] === p1[0] && p0[1] === p1[1] && p0[2] === p1[2]) {
+    return simplePolygon;
+  }
+  // duplicate the starting vertex at end
+  return simplePolygon.concat([p0]);
+}
+
+/**
  * Normalize to ensure that all polygons in a list are complex - simplifies processing
  * @param {Array} polygon - either a complex or a simple polygon
  * @param {Object} opts
@@ -46,7 +61,7 @@ export function isSimple(polygon) {
  * @return {Array} - returns a complex polygons
  */
 export function normalize(polygon, {dimensions = 3} = {}) {
-  return isSimple(polygon) ? [polygon] : polygon;
+  return isSimple(polygon) ? [closeLoop(polygon)] : polygon.map(closeLoop);
 }
 
 /**
@@ -74,17 +89,6 @@ export function getTriangleCount(polygon) {
     first = false;
   }
   return triangleCount;
-}
-
-export function forEachVertex(polygon, visitor) {
-  if (isSimple(polygon)) {
-    polygon.forEach(visitor);
-    return;
-  }
-
-  polygon.forEach(simplePolygon => {
-    simplePolygon.forEach(visitor);
-  });
 }
 
 // Returns the offset of each hole polygon in the flattened array for that polygon

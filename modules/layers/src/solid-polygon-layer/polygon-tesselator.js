@@ -67,13 +67,12 @@ export class PolygonTesselator {
     const {attributes, polygons, pointCount} = this;
 
     attributes.positions = attributes.positions || new Float32Array(pointCount * 3);
-    attributes.nextPositions = attributes.nextPositions || new Float32Array(pointCount * 3);
+    attributes.vertexEnabled =
+      attributes.vertexEnabled || new Uint8ClampedArray(pointCount).fill(1);
 
     if (fp64) {
       // We only need x, y component
       attributes.positions64xyLow = attributes.positions64xyLow || new Float32Array(pointCount * 2);
-      attributes.nextPositions64xyLow =
-        attributes.nextPositions64xyLow || new Float32Array(pointCount * 2);
     }
 
     updatePositions({cache: attributes, polygons, extruded, fp64});
@@ -91,11 +90,8 @@ export class PolygonTesselator {
     return this.attributes.positions64xyLow;
   }
 
-  nextPositions() {
-    return this.attributes.nextPositions;
-  }
-  nextPositions64xyLow() {
-    return this.attributes.nextPositions64xyLow;
+  vertexEnabled() {
+    return this.attributes.vertexEnabled;
   }
 
   elevations({key = 'elevations', getElevation = x => 100} = {}) {
@@ -160,74 +156,42 @@ function calculateIndices({polygons, IndexType = Uint32Array}) {
 }
 
 function updatePositions({
-  cache: {positions, positions64xyLow, nextPositions, nextPositions64xyLow},
+  cache: {positions, positions64xyLow, vertexEnabled},
   polygons,
   extruded,
   fp64
 }) {
   // Flatten out all the vertices of all the sub subPolygons
   let i = 0;
-  let nextI = 0;
-  let startVertex = null;
-
-  const pushStartVertex = (x, y, z, xLow, yLow) => {
-    if (extruded) {
-      // Save first vertex for setting nextPositions at the end of the loop
-      startVertex = {x, y, z, xLow, yLow};
-    }
-  };
-
-  const popStartVertex = () => {
-    if (startVertex) {
-      nextPositions[nextI * 3] = startVertex.x;
-      nextPositions[nextI * 3 + 1] = startVertex.y;
-      nextPositions[nextI * 3 + 2] = startVertex.z;
-      if (fp64) {
-        nextPositions64xyLow[nextI * 2] = startVertex.xLow;
-        nextPositions64xyLow[nextI * 2 + 1] = startVertex.yLow;
-      }
-      nextI++;
-    }
-    startVertex = null;
-  };
-
   polygons.forEach((polygon, polygonIndex) => {
-    Polygon.forEachVertex(polygon, (vertex, vertexIndex) => {
-      // eslint-disable-line
-      const x = vertex[0];
-      const y = vertex[1];
-      const z = vertex[2] || 0;
-      let xLow;
-      let yLow;
+    polygon.forEach(loop => {
+      loop.forEach((vertex, vertexIndex) => {
+        // eslint-disable-line
+        const x = vertex[0];
+        const y = vertex[1];
+        const z = vertex[2] || 0;
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-      if (fp64) {
-        xLow = fp64LowPart(x);
-        yLow = fp64LowPart(y);
-        positions64xyLow[i * 2] = xLow;
-        positions64xyLow[i * 2 + 1] = yLow;
-      }
-      i++;
-
-      if (extruded && vertexIndex > 0) {
-        nextPositions[nextI * 3] = x;
-        nextPositions[nextI * 3 + 1] = y;
-        nextPositions[nextI * 3 + 2] = z;
+        positions[i * 3] = x;
+        positions[i * 3 + 1] = y;
+        positions[i * 3 + 2] = z;
         if (fp64) {
-          nextPositions64xyLow[nextI * 2] = xLow;
-          nextPositions64xyLow[nextI * 2 + 1] = yLow;
+          positions64xyLow[i * 2] = fp64LowPart(x);
+          positions64xyLow[i * 2 + 1] = fp64LowPart(y);
         }
-        nextI++;
-      }
-      if (vertexIndex === 0) {
-        popStartVertex();
-        pushStartVertex(x, y, z, xLow, yLow);
-      }
+        i++;
+      });
+      /* We are reusing the some buffer for `nextPositions` by offsetting one vertex
+       * to the left. As a result,
+       * the last vertex of each loop overlaps with the first vertex of the next loop.
+       * `vertexEnabled` is used to mark the end of each loop so we don't draw these
+       * segments:
+        positions      A0 A1 A2 A3 A4 B0 B1 B2 C0 ...
+        nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
+        vertexEnabled   1  1  1  1  0  1  1  0  1 ...
+       */
+      vertexEnabled[i - 1] = 0;
     });
   });
-  popStartVertex();
 }
 
 function updateElevations({cache, polygons, pointCount, getElevation}) {
