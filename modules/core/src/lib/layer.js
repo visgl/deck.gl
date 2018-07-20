@@ -507,7 +507,6 @@ export default class Layer extends Component {
     // Add any subclass attributes
     this.updateAttributes(this.props);
     this._updateBaseUniforms();
-    this._updateModuleSettings();
 
     // Note: Automatic instance count update only works for single layers
     if (this.state.model) {
@@ -535,11 +534,14 @@ export default class Layer extends Component {
       this.updateTransition();
     }
 
-    // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
-      for (const model of this.getModels()) {
-        model.updateModuleSettings(moduleParameters);
-      }
+      // moduleParameters extend layer.props, cannot be used to extend other objects
+      Object.assign(moduleParameters, this._getModuleParameters());
+    } else {
+      moduleParameters = this._getModuleParameters();
+    }
+    for (const model of this.getModels()) {
+      model.updateModuleSettings(moduleParameters);
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -550,7 +552,12 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle method
     withParameters(this.context.gl, parameters, () => {
-      this.draw({moduleParameters, uniforms, parameters, context: this.context});
+      this.draw({
+        moduleParameters,
+        uniforms,
+        parameters,
+        context: this.context
+      });
     });
     // End lifecycle method
   }
@@ -660,6 +667,13 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     return this.setChangeFlags(changeFlags);
+  }
+
+  setModuleParameters(moduleParameters) {
+    if (this.internalState) {
+      Object.assign(this.internalState.moduleParameters, moduleParameters);
+    }
+    this.setNeedsRedraw();
   }
 
   // PRIVATE METHODS
@@ -811,13 +825,8 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.setNeedsRedraw();
   }
 
-  _updateModuleSettings() {
-    const settings = {
-      pickingHighlightColor: this.props.highlightColor
-    };
-    for (const model of this.getModels()) {
-      model.updateModuleSettings(settings);
-    }
+  _getModuleParameters() {
+    return this.internalState && this.internalState.moduleParameters;
   }
 
   // DEPRECATED METHODS

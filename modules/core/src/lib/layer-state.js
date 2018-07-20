@@ -7,6 +7,7 @@ export default class LayerState extends ComponentState {
     this.model = null;
     this.needsRedraw = true;
     this.subLayers = null; // reference to sublayers rendered in a previous cycle
+    this.moduleParameters = {};
   }
 
   get layer() {
