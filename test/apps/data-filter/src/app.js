@@ -1,4 +1,4 @@
-/* global document */
+/* global window, document */
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
@@ -7,8 +7,6 @@ import DeckGL, {COORDINATE_SYSTEM} from 'deck.gl';
 import ScatterplotLayer from './scatterplot-layer';
 import POINTS from './data-sample';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const INITIAL_VIEW_STATE = {
   longitude: -122.45,
   latitude: 37.78,
@@ -60,7 +58,8 @@ class Root extends Component {
       <DeckGL
         controller={true}
         initialViewState={INITIAL_VIEW_STATE}
-        layers={this._renderLayers()} />
+        layers={this._renderLayers()}
+      />
     );
   }
 }

@@ -5,10 +5,10 @@ const vs = `
 uniform vec2 filter_range;
 varying float filter_isVisible;
 
-void filter_setVisibility(float value) {
+void filter_setValue(float value) {
   filter_isVisible = step(filter_range.x, value) * step(value, filter_range.y);
 }
-void filter_setVisibility(bool visible) {
+void filter_setValue(bool visible) {
   filter_isVisible = float(visible);
 }
 `;
@@ -21,22 +21,20 @@ vec4 filter_filterColor(vec4 color) {
   }
   return color;
 }
-`
+`;
 
 const INITIAL_MODULE_OPTIONS = {};
-const DEFAULT_FILTER_RANGE = [0, 2];
 
 export default {
   name: 'data-filter',
   vs,
   fs,
   getUniforms: (opts = INITIAL_MODULE_OPTIONS) => {
-    if (!opts.data) {
-      // Not layer props
+    if (!opts.filterRange) {
       return {};
     }
     return {
-      filter_range: opts.filterRange || DEFAULT_FILTER_RANGE
+      filter_range: opts.filterRange
     };
   }
 };
