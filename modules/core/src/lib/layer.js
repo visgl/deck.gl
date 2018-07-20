@@ -534,12 +534,12 @@ export default class Layer extends Component {
       this.updateTransition();
     }
 
-    if (moduleParameters) {
-      // moduleParameters extend layer.props, cannot be used to extend other objects
-      Object.assign(moduleParameters, this._getModuleParameters());
-    } else {
-      moduleParameters = this._getModuleParameters();
-    }
+    moduleParameters = Object.assign(
+      // Extending Props object directly will lose inherited keys
+      Object.create(this.props),
+      this._getModuleParameters(),
+      moduleParameters
+    );
     for (const model of this.getModels()) {
       model.updateModuleSettings(moduleParameters);
     }
@@ -552,12 +552,7 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle method
     withParameters(this.context.gl, parameters, () => {
-      this.draw({
-        moduleParameters,
-        uniforms,
-        parameters,
-        context: this.context
-      });
+      this.draw({moduleParameters, uniforms, parameters, context: this.context});
     });
     // End lifecycle method
   }

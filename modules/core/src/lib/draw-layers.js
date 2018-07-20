@@ -236,11 +236,11 @@ function drawLayerInViewport({
   glViewport,
   parameters
 }) {
-  const moduleParameters = Object.assign(Object.create(layer.props), {
+  const moduleParameters = {
     viewport: layer.context.viewport,
     pickingActive: drawPickingColors ? 1 : 0,
     devicePixelRatio: pixelRatio
-  });
+  };
 
   const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
 
