@@ -1,23 +1,20 @@
 # RFC Directory (deck.gl)
 
-Implementation of non-trivial new deck.gl features should typically be started off with the creation of an RFC (Request for Comments) to make sure we have a complete story. It also allow the bigger team (as well as the community) to comment and contribute insights.
 
-| RFC Status       | Description |
-| ---              | --- |
-| **Proposed**     | Call for an RFC to be written |
-| **Draft**        | Work-in-progress, not ready for formal review |
-| **Pre-Approved** | No major initial objections, draft pre-approved for prototyping |
-| **Review**       | Ready for formal review |
-| **Approved**     | Approved, ready for implementation |
-| **Experimental** | Approved, implemented as experimental API |
-| **Implemented**  | Approved and implemented (as officially supported API) |
-| **Deferred**     | Review uncovered reasons not to proceed at this time |
-| **Rejected**     | Review uncovered reasons not to proceed |
+## Guidelines
+
+The core developers will review RFCs (and of course, comments from the community are always welcome). Recommended review criteria are being documented in [RFC Review Guidelines](../common/RFC-GUIDELINES.md).
 
 
-## Reviews
+## Roadmaps
 
-The core developers will review RFCs (and of course, comments from the community are always welcome). Recommended review criteria are being documented in [RFC Review Guidelines](../common/RFC-REVIEW-GUIDELINES.md).
+Documents indicating intent and direction for major areas of interest. These are on a higher level than the more detailed RFCs.
+
+| Roadmap                                         | Status  | Description |
+| ---                                             | ---     | ---         |
+| [**Infovis**](../roadmaps/gpgpu-roadmap.md)     | Just started | infovis (non-geospatial) features roadmap |
+| [**New Layers**](../roadmaps/layers-roadmap.md) | Draft | Ideas for new layers |
+| [**Effects**](../roadmaps/pure-js.md)           | Implemented | Support for Scripting and Pure-JS APIs |
 
 
 ## Longer-Terms RFCs
