@@ -1,4 +1,4 @@
-# RFC: New layers in deck.gl v.Next
+# Roadmap: New layers in deck.gl v.Next
 
 * **Author**: Shaojing Li
 * **Date**: May 10, 2017
