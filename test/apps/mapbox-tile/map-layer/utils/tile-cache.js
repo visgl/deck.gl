@@ -62,10 +62,7 @@ export default class TileCache {
     if (!tile.isLoaded) {
       // Waiting for tile to load, display loaded tiles that cover this area
       cache.forEach(t => {
-        if (t !== tile &&
-          t.isLoaded &&
-          tile.overlaps(t) &&
-          !altTiles.some(at => at.overlaps(t))) {
+        if (t !== tile && t.isLoaded && tile.overlaps(t) && !altTiles.some(at => at.overlaps(t))) {
           altTiles.push(t);
         }
       });

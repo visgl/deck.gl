@@ -32,23 +32,24 @@ export default class MapLayer extends CompositeLayer {
       });
     }
     if (changeFlags.viewportChanged) {
-      this.state.tileCache.update(context.viewport, (tiles) => this.setState({tiles}));
+      this.state.tileCache.update(context.viewport, tiles => this.setState({tiles}));
     }
   }
 
   renderLayers() {
     const {tiles} = this.state;
 
-    return tiles.map((tile, i) =>
-      new GeoJsonLayer({
-        ...this.props,
-        opacity: 1,
-        id: `${tile.x}-${tile.y}-${tile.z}`,
-        data: tile.data,
-        visible: tile.isVisible,
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: tile.center
-      })
+    return tiles.map(
+      (tile, i) =>
+        new GeoJsonLayer({
+          ...this.props,
+          opacity: 1,
+          id: `${tile.x}-${tile.y}-${tile.z}`,
+          data: tile.data,
+          visible: tile.isVisible,
+          coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+          coordinateOrigin: tile.center
+        })
     );
   }
 }
