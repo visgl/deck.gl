@@ -2,9 +2,15 @@
 
 ## Upgrading from deck.gl v5.3 to v6.0
 
+
+#### luma.gl v6.0
+
+deck.gl v6.0 brings in luma.gl v6.0 which is a major release with a few breaking changes. The change that is most likely to affect deck.gl applications is probably that the way the `GL` constant is imported has changed. For details, see to the luma.gl [Upgrade Guide](https://luma.gl/#/documentation/overview/upgrade-guide).
+
+
 #### Pixel sizes
 
-Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts. To achieve the same rendering output as v5, you should halve the following props:
+Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts. To achieve the same rendering output as v5, you should use half the previous value in the following props:
 
 * `ArcLayer.getStrokeWidth`
 * `LineLayer.getStrokeWidth`
@@ -12,9 +18,11 @@ Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts.
 * `TextLayer.getSize` or `TextLayer.sizeScale`
 * `PointCloudLayer.radiusPixels`
 
+
 #### Accessors
 
-All layer accessors that support constant values are default to constants to prioritize performance. For example, `ScatterplotLayer`'s default `getRadius` prop is changed from `d => d.radius || 1` to `1`. All dynamic attributes now must be explicitly specified. 
+All layer accessors that support constant values have had their default values changed to constants. For example, `ScatterplotLayer`'s default `getRadius` prop is changed from `d => d.radius || 1` to `1`. All dynamic attributes now must be explicitly specified. This change makes sure that using default values results in best performance.
+
 
 #### Views and Controllers
 
@@ -24,19 +32,14 @@ All layer accessors that support constant values are default to constants to pri
 * `DeckGL.viewport` and `DeckGL.viewports` props are no longer supported. Use `DeckGL.views`.
 
 
-#### Shader Modules
-
-Some previously deprecated `project` module functions have now been removed.
-
-
-#### `Layer.is64bitEnabled()` deprecated
-
-Instead use `use64bitProjection` and `use64bitPositions`.
-
-
 #### ScreenGridLayer
 
 `minColor` and `maxColor` props are deprecated. Use `colorRange` and `colorDomain` props.
+
+
+#### Shader Modules
+
+Some previously deprecated `project_` module GLSL functions have now been removed.
 
 
 
