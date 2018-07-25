@@ -18,11 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
+import {} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  _GPUGridAggregator as GPUGridAggregator,
+  _pointToDensityGridData as pointToDensityGridData
+} from '@deck.gl/core';
 
 import GPUGridCellLayer from './gpu-grid-cell-layer';
-
-import {pointToDensityGridData} from './gpu-grid-utils';
 
 const MINCOLOR = [0, 0, 0, 255];
 const MAXCOLOR = [0, 255, 0, 255];
@@ -76,26 +79,26 @@ export default class GPUGridLayer extends CompositeLayer {
   }
 
   getLayerData() {
-    const {data, cellSize, getPosition, gpuAggregation} = this.props;
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset} = pointToDensityGridData(
+    const {data, cellSize: cellSizeMeters, getPosition, gpuAggregation} = this.props;
+    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData(
       {
         data,
-        cellSizeMeters: cellSize,
+        cellSizeMeters,
         getPosition,
         gpuAggregation,
-        gpuGridAggregator: this.state.gpuGridAggregator
+        gpuGridAggregator: this.state.gpuGridAggregator,
+        alignToCellBoundary: true
       }
     );
-
-    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset});
+    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
   }
 
   // for subclassing, override this method to return
   // customized sub layer props
   getSubLayerProps() {
-    const {elevationScale, fp64, extruded, cellSize, coverage, lightSettings} = this.props;
+    const {elevationScale, fp64, extruded, cellSize: cellSizeMeters, coverage, lightSettings} = this.props;
 
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset} = this.state;
+    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = this.state;
     const minColor = MINCOLOR;
     const maxColor = MAXCOLOR;
 
@@ -108,13 +111,13 @@ export default class GPUGridLayer extends CompositeLayer {
       maxCountBuffer,
       gridSize,
       gridOrigin,
-      gridOffset,
+      gridOffset: cellSize,
       numInstances: gridSize[0] * gridSize[1],
       minColor,
       maxColor,
 
       fp64,
-      cellSize,
+      cellSize: cellSizeMeters,
       coverage,
       lightSettings,
       elevationScale,

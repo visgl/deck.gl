@@ -32,4 +32,5 @@ if (typeof document !== 'undefined') {
   require('./react');
   require('./lite');
   require('./core/experimental/utils/gpu-grid-aggregator.spec');
+  require('./core/experimental/utils/grid-aggregation-utils.spec');
 }

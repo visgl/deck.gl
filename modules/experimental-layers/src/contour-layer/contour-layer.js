@@ -18,11 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
+import {
+  CompositeLayer,
+  _GPUGridAggregator as GPUGridAggregator,
+  _pointToDensityGridData as pointToDensityGridData
+} from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
+import {COORDINATE_SYSTEM} from 'deck.gl';
 
-// TODO: move out of grid-layer as common grid-aggregation util method.
-import {pointToDensityGridData} from '../gpu-grid-layer/gpu-grid-utils';
 import {generateContours} from './contour-utils';
 
 const DEFAULT_COLOR = [255, 255, 255];
@@ -96,23 +99,25 @@ export default class ContourLayer extends CompositeLayer {
   // Private
 
   aggregateData() {
-    const {data, cellSize, getPosition, gpuAggregation, fp64} = this.props;
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset} = pointToDensityGridData(
+    const {data, cellSize: cellSizeMeters, getPosition, gpuAggregation, fp64, coordinateSystem} = this.props;
+    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData(
       {
         data,
-        cellSizeMeters: cellSize,
+        cellSizeMeters,
         getPosition,
         gpuAggregation,
         gpuGridAggregator: this.state.gridAggregator,
-        fp64
+        fp64,
+        alignToCellBoundary: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem
       }
     );
 
-    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, gridOffset});
+    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
   }
 
   generateContours() {
-    const {gridSize, gridOrigin, gridOffset} = this.state;
+    const {gridSize, gridOrigin, cellSize} = this.state;
     let {countsData} = this.state;
     if (!countsData) {
       const {countsBuffer} = this.state;
@@ -127,7 +132,7 @@ export default class ContourLayer extends CompositeLayer {
       cellWeights,
       gridSize,
       gridOrigin,
-      cellSize: gridOffset
+      cellSize
     });
 
     this.setState({contourData});

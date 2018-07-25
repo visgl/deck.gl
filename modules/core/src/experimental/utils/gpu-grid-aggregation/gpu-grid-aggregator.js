@@ -208,6 +208,18 @@ export default class GPUGridAggregator {
     return {cellCounts, cellWeights};
   }
 
+  // DEBUG ONLY
+  // static logData({countsBuffer, maxCountBuffer}) {
+  //   const countsData = countsBuffer.getData();
+  //   for (let index = 0; index < countsData.length; index += 4) {
+  //     if (countsData[index] > 0) {
+  //       console.log(`index: ${index} count: ${countsData[index]}`);
+  //     }
+  //   }
+  //   const maxCountData = maxCountBuffer.getData();
+  //   console.log(`totalCount: ${maxCountData[0]} totalWeight: ${maxCountData[1]} maxCellWieght: ${maxCountData[3]}`);
+  // }
+
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
     this.shaderCache = opts.shaderCache || null;
