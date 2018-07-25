@@ -801,8 +801,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _updateBaseUniforms() {
     const uniforms = {
       // apply gamma to opacity to make it visually "linear"
-      opacity: Math.pow(this.props.opacity, 1 / 2.2),
-      ONE: 1.0
+      opacity: Math.pow(this.props.opacity, 1 / 2.2)
     };
     for (const model of this.getModels()) {
       model.setUniforms(uniforms);
