@@ -372,7 +372,8 @@ export default class GPUGridAggregator {
         gridSize,
         uProjectionMatrix: gridTransformMatrix,
         uProjectionMatrixFP64,
-        projectPoints
+        projectPoints,
+        ONE: 1.0
       }
     });
     gridAggregationFramebuffer.unbind();
@@ -391,7 +392,8 @@ export default class GPUGridAggregator {
       },
       uniforms: {
         uSampler: gridAggregationFramebuffer.texture,
-        gridSize
+        gridSize,
+        ONE: 1.0
       }
     });
     allAggregrationFramebuffer.unbind();
