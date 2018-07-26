@@ -75,13 +75,33 @@ Examples:
 A second key problem is to determine which strings (layer props) should be parsed into functions? Since we have started build out a prop types system, it is suggested we extend this as needed and parse and generate functions based on prop types.
 
 
+## Error Handling
+
+When asking users to provide data in a textual format such as JSON, there are many opportunities for the user to make mistakes tht are simple to solve but hard to find (compare with our support for GeoJSON, where we sometimes get questions from users who fail to render successfully due to some simple formatting issue in their data, where a simple error message from deck.gl could have saved them a lot of time).
+
+We should have a plan for detecting errors and providing the best possible messages:
+
+* **JSON parsing Errors** - The built-in `JSON.parse()` function is fast but notorious for giving poor error messages. There are JSON parsing modules on npm that do better, possibly at the cost of speed. Maybe an initial parse if JSON.parse, and a reparse with such a module in case of error?
+
+* **Top Level Prop Validation** - P1 - Currently we have a roundaout React prop-types set of definitions. Not clear if we want to use this for non-React purposes, but it is an option. Maybe layer prop types system could be extended to cover this?
+
+* **Layer Prop Validation** - P0 - This should almost certainly build on the nascent prop types system for layers, and the resulting error validation should be available to all incarnations of the API, not just the JSON layers.
+
+* **View Prop Validation** - P1 - The prop system hasn't been extended to cover non-layer object props, such as `View`s, but perhaps this is a possibility. The `View` props are reportedly hard to understand for some users so error messages here would be really valuable. Ideally should be done in a way that covers all incarnations of the API.
+
+
+**Showing Errors** - P2 - It would be really nice if we could show the user in an editor exacly where his problems are, but this would likely require more work. This feature would likely be JSON layer specific.
+
+
 ## Open Questions
 
 ### Where to put the new classes?
 
-* They are quite small. Perhaps `@deck.gl/addons` or `@deck.gl/experimental-layers/addons`?
-* They could also be incubated in a separate infovis repo.
-* However, there could be changes to e.g. accessor handling etc that must be done in the `core` and `layers` modules.
+* They are quite small. Don't quite deserve to be in core/layers, and don't quite deserve their own module.
+* Perhaps in a `@deck.gl/addons` `@deck.gl/experimental` or `@deck.gl/experimental-layers/addons`?
+* They are being incubated in a separate infovis repo, but that is not public yet.
+
+Note, there could be changes to e.g. error handling etc that must be done in the `core` and `layers` modules.
 
 
 ### Any reason to support string accessors in non-JSON APIs?
@@ -90,13 +110,15 @@ A second key problem is to determine which strings (layer props) should be parse
 * The conversion from strings to functions could be built into the prop type system?
 
 
-### Future Extensions
+### Future Extensions / Interactivity
 
-As JSON layers get more usage, users will ask for more functionality to be made available declaratively.
+As JSON layers get more usage, users will ask for more functionality to be made available declaratively. In particular *interactivity* will be requested.
 
 An example could be **hover tooltips**, which is a common feature in many visualizations.
 
 Some of these requirements should naturally be implemented by applications, but some features may be small and helpful for other APIs (scripting, React) that they could make sense to build into deck.gl itself.
+
+For extensive interactivity support is probably best to implement a system that has already done the hard work to solve interactivity problems in a declarative JSON environment , such as a Vega. Again it is assumed that such an effort should remain separate from this RFC, as the scope will be much bigger, and the API will diverge considerably from the code deck.gl API.
 
 
 ## (Philosophical) Final Thoughts
