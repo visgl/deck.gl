@@ -20,9 +20,7 @@
 
 import test from 'tape-catch';
 
-import {
- _alignToCell as alignToCell
-} from '@deck.gl/core/experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
+import {_alignToCell as alignToCell} from '@deck.gl/core/experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 test('GridAggregationUtils#alignToCell (CPU)', t => {
   t.equal(alignToCell(-3, 5), -5);

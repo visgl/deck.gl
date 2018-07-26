@@ -99,19 +99,24 @@ export default class ContourLayer extends CompositeLayer {
   // Private
 
   aggregateData() {
-    const {data, cellSize: cellSizeMeters, getPosition, gpuAggregation, fp64, coordinateSystem} = this.props;
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData(
-      {
-        data,
-        cellSizeMeters,
-        getPosition,
-        gpuAggregation,
-        gpuGridAggregator: this.state.gridAggregator,
-        fp64,
-        alignToCellBoundary: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
-        coordinateSystem
-      }
-    );
+    const {
+      data,
+      cellSize: cellSizeMeters,
+      getPosition,
+      gpuAggregation,
+      fp64,
+      coordinateSystem
+    } = this.props;
+    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData({
+      data,
+      cellSizeMeters,
+      getPosition,
+      gpuAggregation,
+      gpuGridAggregator: this.state.gridAggregator,
+      fp64,
+      alignToCellBoundary: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
+      coordinateSystem
+    });
 
     this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
   }

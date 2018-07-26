@@ -80,8 +80,12 @@ import {default as BinSorter} from './utils/bin-sorter';
 import {defaultColorRange} from './utils/color-utils';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
 
-export {default as _GPUGridAggregator} from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator';
-export {pointToDensityGridData as _pointToDensityGridData} from './experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
+export {
+  default as _GPUGridAggregator
+} from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator';
+export {
+  pointToDensityGridData as _pointToDensityGridData
+} from './experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)

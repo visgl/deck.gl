@@ -20,8 +20,7 @@ export function pointToDensityGridData({
   const gridData = _parseGridData(data, getPosition);
   let cellSize = [cellSizeMeters, cellSizeMeters];
   assert(
-    coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
-    coordinateSystem === COORDINATE_SYSTEM.IDENTITY
+    coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
   );
   if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
     // TODO: also for COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL ?

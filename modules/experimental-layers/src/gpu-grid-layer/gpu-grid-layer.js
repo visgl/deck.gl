@@ -80,23 +80,28 @@ export default class GPUGridLayer extends CompositeLayer {
 
   getLayerData() {
     const {data, cellSize: cellSizeMeters, getPosition, gpuAggregation} = this.props;
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData(
-      {
-        data,
-        cellSizeMeters,
-        getPosition,
-        gpuAggregation,
-        gpuGridAggregator: this.state.gpuGridAggregator,
-        alignToCellBoundary: true
-      }
-    );
+    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData({
+      data,
+      cellSizeMeters,
+      getPosition,
+      gpuAggregation,
+      gpuGridAggregator: this.state.gpuGridAggregator,
+      alignToCellBoundary: true
+    });
     this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
   }
 
   // for subclassing, override this method to return
   // customized sub layer props
   getSubLayerProps() {
-    const {elevationScale, fp64, extruded, cellSize: cellSizeMeters, coverage, lightSettings} = this.props;
+    const {
+      elevationScale,
+      fp64,
+      extruded,
+      cellSize: cellSizeMeters,
+      coverage,
+      lightSettings
+    } = this.props;
 
     const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = this.state;
     const minColor = MINCOLOR;

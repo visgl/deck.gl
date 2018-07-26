@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME gpu-aggregation-all-vs-64
-
 #version 300 es
+#define SHADER_NAME gpu-aggregation-all-vs-64
 
 in vec2 position;
 uniform vec2 gridSize;
