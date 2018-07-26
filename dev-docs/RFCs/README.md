@@ -8,29 +8,29 @@ The core developers will review RFCs (and of course, comments from the community
 
 ## Roadmaps
 
-Documents indicating intent and direction for major areas of interest. These are on a higher level than the more detailed RFCs.
+Documents indicating intent and direction for bigger areas of functionality. Roadmap documents are intended to provide higher level descriptions than the more detailed, topic-focused RFCs.
 
-| Roadmap                                         | Status  | Description |
-| ---                                             | ---     | ---         |
-| [**Infovis**](../roadmaps/gpgpu-roadmap.md)     | Just started | infovis (non-geospatial) features roadmap |
-| [**New Layers**](../roadmaps/layers-roadmap.md) | Draft | Ideas for new layers |
-| [**Effects**](../roadmaps/pure-js.md)           | Implemented | Support for Scripting and Pure-JS APIs |
+| Roadmap                                                            | Status       | Description |
+| ---                                                                | ---          | ---         |
+| [**Infovis Roadmap**](../roadmaps/gpgpu-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
+| [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
+| [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
+| [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Ongoing      | Reduce size of distribution and the bundle size of applications using deck.gl |
 
 
 ## Longer-Terms RFCs
 
-These are early ideas not yet associated with any release.
+These RFCs are not yet associated with any specific release.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
+| **Ongoing Efforts** | | | |
+| [**Reduce Repository Size**](vNext/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | Reduce size of deck.gl github repository |
+| | | | |
 | **WIP/Draft** | | | |
 | [**Projection Mode Improvements**](vNext/projection-mode-improvements-rfc.md) | @ibgreen @pessimistress | **Draft** | Improvements to projection system |
 | [**Composite Layer Customization**](vNext/composite-layer-customization-rfc.md) | @ibgreen | **Draft** | Improvements to customizing composite layers |
 | **[Render Layer to Texture](vNext/render-layer-to-texture-rfc.md)** | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
-| | | | |
-| **Ongoing Efforts** | | | |
-| [**Reduce Distribution Size**](vNext/reduce-distribution-size-rfc.md) | @ibgreen | **Review** | **Hygiene** Reduce size of distribution and the bundle size of apps consuming deck.gl |
-| [**Reduce Repository Size**](vNext/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | Reduce size of deck.gl github repository |
 | | | | |
 | **Reviewed/Deferred** | | | |
 | [**Off-thread attribute generation**](vNext/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** has been broken out. |
