@@ -1,7 +1,12 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
+import DeckGL, {
+  COORDINATE_SYSTEM,
+  ScatterplotLayer,
+  OrthographicView
+} from 'deck.gl';
+import {_OrthographicController as OrthographicController} from '@deck.gl/core';
 import {BezierCurveLayer} from '@deck.gl/experimental-layers';
 
 import SAMPLE_GRAPH from './sample-graph';
@@ -98,12 +103,18 @@ function layoutGraph(graph) {
 class App extends Component {
   constructor(props) {
     super(props);
+    const width = 500;
+    const height = 500;
     this.state = {
-      viewport: {
-        width: 500,
-        height: 500
+      viewState: {
+        width,
+        height,
+        offset: [0, 0],
+        zoom: 1
       }
     };
+
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
   componentDidMount() {
@@ -113,26 +124,27 @@ class App extends Component {
 
   _resize() {
     this.setState({
-      viewport: {
+      viewState: {
+        ...this.state.viewState,
         width: window.innerWidth,
         height: window.innerHeight
       }
     });
   }
 
+  _onViewStateChange({viewState}) {
+    // console.log(viewState);
+    this.setState({viewState});
+  }
+
   render() {
-    const {viewport} = this.state;
-    const {width, height} = viewport;
+    const {viewState} = this.state;
 
     const {data = layoutGraph(SAMPLE_GRAPH)} = this.props;
 
     const view = new OrthographicView({
-      left: -width / 2,
-      top: -height / 2,
-      right: width / 2,
-      bottom: height / 2,
-      near: 0,
-      far: 100
+      controller: OrthographicController,
+      viewState: viewState
     });
 
     const layers = [
@@ -166,7 +178,14 @@ class App extends Component {
 
     return (
       <div style={{pointerEvents: 'all'}}>
-        <DeckGL width="100%" height="100%" views={view} layers={layers} />
+        <DeckGL
+          width="100%"
+          height="100%"
+          views={view}
+          viewState={this.state.viewState}
+          layers={layers}
+          onViewStateChange={this._onViewStateChange}
+        />
       </div>
     );
   }
