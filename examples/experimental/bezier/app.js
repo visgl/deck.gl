@@ -1,11 +1,7 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  ScatterplotLayer,
-  OrthographicView
-} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
 import {_OrthographicController as OrthographicController} from '@deck.gl/core';
 import {BezierCurveLayer} from '@deck.gl/experimental-layers';
 
@@ -133,7 +129,6 @@ class App extends Component {
   }
 
   _onViewStateChange({viewState}) {
-    // console.log(viewState);
     this.setState({viewState});
   }
 
@@ -144,7 +139,7 @@ class App extends Component {
 
     const view = new OrthographicView({
       controller: OrthographicController,
-      viewState: viewState
+      viewState
     });
 
     const layers = [

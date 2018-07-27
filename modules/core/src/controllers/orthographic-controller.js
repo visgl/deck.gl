@@ -6,7 +6,6 @@ import {Vector2, clamp} from 'math.gl';
 // TODO: not sure whether we should have these constants
 // as part of viewport props
 const MOVEMENT_SPEED = 10; // per keyboard click
-const ZOOM_SPEED = 0.1; // per keyboard click
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 10;
 
