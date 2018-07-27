@@ -32,6 +32,7 @@ const CODE_OFFSET_MAP = {
 };
 
 // Returns marching square code for given cell
+/* eslint-disable complexity */
 export function getCode(params) {
   // Assumptions
   // Origin is on bottom-left , and X increase to right, Y to top
@@ -39,15 +40,6 @@ export function getCode(params) {
   // to create a 2X2 cell grid
 
   const {cellWeights, thresholdValue, x, y, width, height} = params;
-
-  // const numRows = gridSize[1];
-  // const numCols = gridSize[0];
-  //
-  // // TODO: duplicate top row and right column
-  // // We shouldn't process the right column
-  // assert((cellIndex + 1) % numCols);
-  // // We shouldn't process the topmost row
-  // assert(cellIndex + 1 < (numRows - 1) * numCols);
 
   assert(x >= -1 && x < width);
   assert(y >= -1 && y < height);
@@ -62,40 +54,32 @@ export function getCode(params) {
   const right = rightBoundary ? 0 : (cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0);
   const current = (leftBoundary || bottomBoundary) ? 0 : (cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0);
 
-  console.log(`x: ${x} y: ${y} leftBoundary: ${leftBoundary} rightBoundary: ${rightBoundary} bottomBoundary: ${bottomBoundary} topBoundary: ${topBoundary}`);
-  console.log(`Codes: current: ${current} top: ${top} topRight: ${topRight} right: ${right}`);
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
   assert(code >= 0 && code < 16);
 
   return code;
 }
+/* eslint-enable complexity */
 
 // Returns intersection vertices for given cellindex
 export function getVertices(params) {
   const {gridOrigin, cellSize,  x, y, code} = params;
 
   const offsets = CODE_OFFSET_MAP[code];
-  // // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
-  // const row = Math.floor(cellIndex / gridSize[0]);
-  // const col = cellIndex - row * gridSize[0];
-
+  // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
   // Move to top-right corner
   const rX = (x + 1) * cellSize[0];
   const rY = (y + 1) * cellSize[1];
 
-  console.log(`getVertices: x: ${x} y: ${y} rX: ${rX} rY: ${rY}`);
-
   const refVertexX = gridOrigin[0] + rX;
   const refVertexY = gridOrigin[1] + rY;
-  console.log(`getVertices: window space: refVertexX: ${refVertexX} refVertexY: ${refVertexY}`);
 
   const vertices = [];
   offsets.forEach(xyOffsets => {
     xyOffsets.forEach(offset => {
       const vX = refVertexX + offset[0] * cellSize[0];
       const vY = refVertexY + offset[1] * cellSize[1];
-      console.log(`offset: ${offset[0]} ${offset[1]} => [${vX} ${vY}]`);
       vertices.push([vX, vY]);
     });
   });

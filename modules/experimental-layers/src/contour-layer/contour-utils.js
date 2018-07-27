@@ -46,14 +46,8 @@ export function generateContours({
             threshold
           });
         }
-
       }
     }
-
-    // for (let cellIndex = 0; cellIndex < gridSize[0] * (gridSize[1] - 1); cellIndex++) {
-    //   if (cellIndex === 0 || (cellIndex + 1) % numCols !== 0) {
-    //   }
-    // }
   });
   return contourSegments;
 }
