@@ -143,7 +143,7 @@ class Root extends PureComponent {
       ],
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       cellSize: 20,
-      getStrokeWidth: 6,
+      getStrokeWidth: 4,
       contours: [
         {threshold: 2, color: [0, 250, 250]},
         {threshold: 25, color: [0, 150, 150]},
