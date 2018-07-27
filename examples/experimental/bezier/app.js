@@ -1,11 +1,15 @@
-/* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
 import {_OrthographicController as OrthographicController} from '@deck.gl/core';
 import {BezierCurveLayer} from '@deck.gl/experimental-layers';
 
-import SAMPLE_GRAPH from './sample-graph';
+import SAMPLE_GRAPH from './sample-graph.json';
+
+const INITIAL_VIEW_STATE = {
+  offset: [0, 0],
+  zoom: 1
+};
 
 /**
  * A helper function to compute the control point of a quadratic bezier curve
@@ -99,47 +103,13 @@ function layoutGraph(graph) {
 class App extends Component {
   constructor(props) {
     super(props);
-    const width = 500;
-    const height = 500;
-    this.state = {
-      viewState: {
-        width,
-        height,
-        offset: [0, 0],
-        zoom: 1
-      }
-    };
-
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this._resize.bind(this));
-    this._resize();
-  }
-
-  _resize() {
-    this.setState({
-      viewState: {
-        ...this.state.viewState,
-        width: window.innerWidth,
-        height: window.innerHeight
-      }
-    });
-  }
-
-  _onViewStateChange({viewState}) {
-    this.setState({viewState});
   }
 
   render() {
-    const {viewState} = this.state;
-
     const {data = layoutGraph(SAMPLE_GRAPH)} = this.props;
 
     const view = new OrthographicView({
-      controller: OrthographicController,
-      viewState
+      controller: OrthographicController
     });
 
     const layers = [
@@ -172,18 +142,16 @@ class App extends Component {
     ];
 
     return (
-      <div style={{pointerEvents: 'all'}}>
-        <DeckGL
-          width="100%"
-          height="100%"
-          views={view}
-          viewState={this.state.viewState}
-          layers={layers}
-          onViewStateChange={this._onViewStateChange}
-        />
-      </div>
+      <DeckGL
+        width="100%"
+        height="100%"
+        views={view}
+        initialViewState={INITIAL_VIEW_STATE}
+        layers={layers}
+      />
     );
   }
 }
 
+/* global document */
 render(<App />, document.body.appendChild(document.createElement('div')));
