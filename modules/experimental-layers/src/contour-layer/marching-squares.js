@@ -38,22 +38,32 @@ export function getCode(params) {
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
   // to create a 2X2 cell grid
 
-  const {cellWeights, thresholdValue, cellIndex, gridSize} = params;
+  const {cellWeights, thresholdValue, x, y, width, height} = params;
 
-  const numRows = gridSize[1];
-  const numCols = gridSize[0];
+  // const numRows = gridSize[1];
+  // const numCols = gridSize[0];
+  //
+  // // TODO: duplicate top row and right column
+  // // We shouldn't process the right column
+  // assert((cellIndex + 1) % numCols);
+  // // We shouldn't process the topmost row
+  // assert(cellIndex + 1 < (numRows - 1) * numCols);
 
-  // TODO: duplicate top row and right column
-  // We shouldn't process the right column
-  assert((cellIndex + 1) % numCols);
-  // We shouldn't process the topmost row
-  assert(cellIndex + 1 < (numRows - 1) * numCols);
+  assert(x >= -1 && x < width);
+  assert(y >= -1 && y < height);
 
-  const top = cellWeights[cellIndex + numCols] - thresholdValue >= 0 ? 1 : 0;
-  const topRight = cellWeights[cellIndex + numCols + 1] - thresholdValue >= 0 ? 1 : 0;
-  const right = cellWeights[cellIndex + 1] - thresholdValue >= 0 ? 1 : 0;
-  const current = cellWeights[cellIndex] - thresholdValue >= 0 ? 1 : 0;
+  const leftBoundary = x < 0;
+  const rightBoundary = x >= width-1;
+  const bottomBoundary = y < 0;
+  const topBoundary = y >= height-1;
 
+  const top = (leftBoundary || topBoundary) ? 0 : ( cellWeights[(y + 1) * width  + x] - thresholdValue >= 0 ? 1 : 0);
+  const topRight = (rightBoundary || topBoundary) ? 0 : (cellWeights[(y + 1) * width  + x + 1] - thresholdValue >= 0 ? 1 : 0);
+  const right = rightBoundary ? 0 : (cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0);
+  const current = (leftBoundary || bottomBoundary) ? 0 : (cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0);
+
+  console.log(`x: ${x} y: ${y} leftBoundary: ${leftBoundary} rightBoundary: ${rightBoundary} bottomBoundary: ${bottomBoundary} topBoundary: ${topBoundary}`);
+  console.log(`Codes: current: ${current} top: ${top} topRight: ${topRight} right: ${right}`);
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
   assert(code >= 0 && code < 16);
@@ -63,26 +73,30 @@ export function getCode(params) {
 
 // Returns intersection vertices for given cellindex
 export function getVertices(params) {
-  const {gridOrigin, cellIndex, cellSize, gridSize, code} = params;
+  const {gridOrigin, cellSize,  x, y, code} = params;
 
   const offsets = CODE_OFFSET_MAP[code];
-  // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
-  const row = Math.floor(cellIndex / gridSize[0]);
-  const col = cellIndex - row * gridSize[0];
+  // // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
+  // const row = Math.floor(cellIndex / gridSize[0]);
+  // const col = cellIndex - row * gridSize[0];
 
   // Move to top-right corner
-  const rX = (col + 1) * cellSize[0];
-  const rY = (row + 1) * cellSize[1];
+  const rX = (x + 1) * cellSize[0];
+  const rY = (y + 1) * cellSize[1];
+
+  console.log(`getVertices: x: ${x} y: ${y} rX: ${rX} rY: ${rY}`);
 
   const refVertexX = gridOrigin[0] + rX;
   const refVertexY = gridOrigin[1] + rY;
+  console.log(`getVertices: window space: refVertexX: ${refVertexX} refVertexY: ${refVertexY}`);
 
   const vertices = [];
   offsets.forEach(xyOffsets => {
     xyOffsets.forEach(offset => {
-      const x = refVertexX + offset[0] * cellSize[0];
-      const y = refVertexY + offset[1] * cellSize[1];
-      vertices.push([x, y]);
+      const vX = refVertexX + offset[0] * cellSize[0];
+      const vY = refVertexY + offset[1] * cellSize[1];
+      console.log(`offset: ${offset[0]} ${offset[1]} => [${vX} ${vY}]`);
+      vertices.push([vX, vY]);
     });
   });
 
