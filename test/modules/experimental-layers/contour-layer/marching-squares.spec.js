@@ -115,7 +115,7 @@ test('MarchingSquares#getCode', t => {
       x: testCase.x || x,
       y: testCase.y || y,
       width: testCase.gridSize ? testCase.gridSize[0] : gridSize[0],
-      height: testCase.gridSize ? testCase.gridSize[1] : gridSize[1],
+      height: testCase.gridSize ? testCase.gridSize[1] : gridSize[1]
     });
     t.equals(code, testCase.code, `Code: expected: ${testCase.code}, actual: ${code}`);
   });

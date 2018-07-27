@@ -35,7 +35,6 @@ class Root extends PureComponent {
       viewMode: VIEW_MODE.WEBGL,
       points
     };
-
   }
 
   componentDidMount() {
@@ -172,13 +171,19 @@ class Root extends PureComponent {
               height={height}
               views={view}
               style={{position: 'absolute', top: '0px', left: '0px'}}
-              layers={[this._renderScatterplotLayer(), renderContours && this._renderContourLayer()]}
+              layers={[
+                this._renderScatterplotLayer(),
+                renderContours && this._renderContourLayer()
+              ]}
             />
           )}
           <button style={{position: 'absolute', top: '8px', left: '8px'}} onClick={this._onClick}>
             switch
           </button>
-          <button style={{position: 'absolute', top: '8px', left: '100px'}} onClick={this._onContourToggle}>
+          <button
+            style={{position: 'absolute', top: '8px', left: '100px'}}
+            onClick={this._onContourToggle}
+          >
             Toggle Contours
           </button>
         </div>

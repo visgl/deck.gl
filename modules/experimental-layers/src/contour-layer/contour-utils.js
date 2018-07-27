@@ -15,9 +15,8 @@ export function generateContours({
   const height = gridSize[1];
 
   thresholds.forEach((threshold, index) => {
-
     for (let x = -1; x < width; x++) {
-      for (let y = -1; y< height; y++) {
+      for (let y = -1; y < height; y++) {
         // Get the MarchingSquares code based on neighbor cell weights.
         const code = MarchingSquares.getCode({
           cellWeights,

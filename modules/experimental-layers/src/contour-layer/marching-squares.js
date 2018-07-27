@@ -45,14 +45,25 @@ export function getCode(params) {
   assert(y >= -1 && y < height);
 
   const leftBoundary = x < 0;
-  const rightBoundary = x >= width-1;
+  const rightBoundary = x >= width - 1;
   const bottomBoundary = y < 0;
-  const topBoundary = y >= height-1;
+  const topBoundary = y >= height - 1;
 
-  const top = (leftBoundary || topBoundary) ? 0 : ( cellWeights[(y + 1) * width  + x] - thresholdValue >= 0 ? 1 : 0);
-  const topRight = (rightBoundary || topBoundary) ? 0 : (cellWeights[(y + 1) * width  + x + 1] - thresholdValue >= 0 ? 1 : 0);
-  const right = rightBoundary ? 0 : (cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0);
-  const current = (leftBoundary || bottomBoundary) ? 0 : (cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0);
+  const top =
+    leftBoundary || topBoundary
+      ? 0
+      : cellWeights[(y + 1) * width + x] - thresholdValue >= 0
+        ? 1
+        : 0;
+  const topRight =
+    rightBoundary || topBoundary
+      ? 0
+      : cellWeights[(y + 1) * width + x + 1] - thresholdValue >= 0
+        ? 1
+        : 0;
+  const right = rightBoundary ? 0 : cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0;
+  const current =
+    leftBoundary || bottomBoundary ? 0 : cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0;
 
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
@@ -64,7 +75,7 @@ export function getCode(params) {
 
 // Returns intersection vertices for given cellindex
 export function getVertices(params) {
-  const {gridOrigin, cellSize,  x, y, code} = params;
+  const {gridOrigin, cellSize, x, y, code} = params;
 
   const offsets = CODE_OFFSET_MAP[code];
   // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)

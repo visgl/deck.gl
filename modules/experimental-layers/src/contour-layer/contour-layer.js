@@ -24,7 +24,6 @@ import {
   _pointToDensityGridData as pointToDensityGridData
 } from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
-import {COORDINATE_SYSTEM} from 'deck.gl';
 
 import {generateContours} from './contour-utils';
 

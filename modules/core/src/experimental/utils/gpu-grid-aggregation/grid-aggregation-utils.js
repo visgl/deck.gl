@@ -33,8 +33,7 @@ export function pointToDensityGridData({
     // Other co-ordiante sytems are not verified yet.
     assert(coordinateSystem === COORDINATE_SYSTEM.IDENTITY);
     const {width, height} = viewport;
-    worldOrigin = [-width/2, -height/2]; // Origin used to define grid cell boundaries
-
+    worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
   }
 
   const opts = _getGPUAggregationParams({gridData, cellSize, worldOrigin});
