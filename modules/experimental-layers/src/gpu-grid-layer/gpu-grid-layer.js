@@ -85,8 +85,7 @@ export default class GPUGridLayer extends CompositeLayer {
       cellSizeMeters,
       getPosition,
       gpuAggregation,
-      gpuGridAggregator: this.state.gpuGridAggregator,
-      alignToCellBoundary: true
+      gpuGridAggregator: this.state.gpuGridAggregator
     });
     this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
   }

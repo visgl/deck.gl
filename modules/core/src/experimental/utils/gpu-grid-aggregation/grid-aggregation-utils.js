@@ -14,11 +14,12 @@ export function pointToDensityGridData({
   gpuGridAggregator,
   gpuAggregation,
   fp64 = false,
-  alignToCellBoundary = false,
-  coordinateSystem = COORDINATE_SYSTEM.LNGLAT
+  coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
+  viewport = null
 }) {
   const gridData = _parseGridData(data, getPosition);
   let cellSize = [cellSizeMeters, cellSizeMeters];
+  let worldOrigin = [0, 0];
   assert(
     coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
   );
@@ -26,9 +27,17 @@ export function pointToDensityGridData({
     // TODO: also for COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL ?
     const gridOffset = _getGridOffset(gridData, cellSizeMeters);
     cellSize = [gridOffset.xOffset, gridOffset.yOffset];
+
+    worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
+  } else {
+    // Other co-ordiante sytems are not verified yet.
+    assert(coordinateSystem === COORDINATE_SYSTEM.IDENTITY);
+    const {width, height} = viewport;
+    worldOrigin = [-width/2, -height/2]; // Origin used to define grid cell boundaries
+
   }
 
-  const opts = _getGPUAggregationParams({gridData, cellSize, align: alignToCellBoundary});
+  const opts = _getGPUAggregationParams({gridData, cellSize, worldOrigin});
 
   const aggregatedData = gpuGridAggregator.run({
     positions: gridData.positions,
@@ -157,24 +166,15 @@ export function _alignToCell(inValue, cellSize) {
 }
 
 // Calculate grid parameters
-function _getGPUAggregationParams({gridData, cellSize, align = false}) {
+function _getGPUAggregationParams({gridData, cellSize, worldOrigin}) {
   const {yMin, yMax, xMin, xMax} = gridData;
 
-  let originX = xMin;
-  let originY = yMin;
-
-  if (align) {
-    // NOTE: this alignment will match grid cell boundaries with existing CPU implementation
-    // this gurantees identical aggregation results between current and new layer.
-    // We align the origin to cellSize in positive space lng:[0 360], lat:[0 180]
-    // After alignment we move it back to original range
-    // Origin = [minX, minY]
-    // Origin = Origin + [180, 90] // moving to +ve space
-    // Origin = Align(Origin, cellSize) //Align to cell boundary
-    // Origin = Origin - [180, 90]
-    originY = _alignToCell(yMin + 90, cellSize[1]) - 90;
-    originX = _alignToCell(xMin + 180, cellSize[0]) - 180;
-  }
+  // NOTE: this alignment will match grid cell boundaries with existing CPU implementation
+  // this gurantees identical aggregation results when switching between CPU and GPU aggregation.
+  // Also gurantees same cell boundaries, when overlapping between two different layers (like ScreenGrid and Contour)
+  // We first move worldOrigin to [0, 0], align the lower bounding box , then move worldOrigin to its original value.
+  const originX = _alignToCell(xMin - worldOrigin[0], cellSize[0]) + worldOrigin[0];
+  const originY = _alignToCell(yMin - worldOrigin[1], cellSize[1]) + worldOrigin[1];
 
   // Setup transformation matrix so that every point is in +ve range
   const gridTransformMatrix = new Matrix4().translate([-1 * originX, -1 * originY, 0]);

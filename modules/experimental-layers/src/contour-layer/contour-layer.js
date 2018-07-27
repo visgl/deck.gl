@@ -114,8 +114,8 @@ export default class ContourLayer extends CompositeLayer {
       gpuAggregation,
       gpuGridAggregator: this.state.gridAggregator,
       fp64,
-      alignToCellBoundary: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
-      coordinateSystem
+      coordinateSystem,
+      viewport: this.context.viewport
     });
 
     this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
