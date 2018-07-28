@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
-import './core-layers';
+export default `\
+#version 300 es
+#define SHADER_NAME gpu-aggregation-all-vs-64
 
-// TODO - React test cases currently only work in browser
-// import './react';
+in vec2 position;
+uniform vec2 gridSize;
 
-// @deck.gl/experimental-layers
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./experimental-layers');
-  require('./react');
-  require('./lite');
-  require('./core/experimental/utils/gpu-grid-aggregator.spec');
-  require('./core/experimental/utils/grid-aggregation-utils.spec');
+out vec2 vTextureCoord;
+void main(void) {
+  // Map each position to single pixel
+  vec2 pos = vec2(-1.0, -1.0);
+
+  // Move to pixel center, pixel-size in screen sapce (2/gridSize) * 0.5 => 1/gridSize
+  vec2 offset = 1.0 / gridSize;
+  pos = pos + offset;
+
+  gl_Position = vec4(pos, 0.0, 1.0);
+
+  float yIndex = floor(float(gl_InstanceID) / gridSize[0]);
+  float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
+
+  vec2 yIndexFP64 = vec2(yIndex, 0.);
+  vec2 xIndexFP64 = vec2(xIndex, 0.);
+  vec2 gridSizeYFP64 = vec2(gridSize[1], 0.);
+  vec2 gridSizeXFP64 = vec2(gridSize[0], 0.);
+
+  vec2 texCoordXFP64 = div_fp64(yIndexFP64, gridSizeYFP64);
+  vec2 texCoordYFP64 = div_fp64(xIndexFP64, gridSizeXFP64);
+
+  vTextureCoord = vec2(texCoordYFP64.x, texCoordXFP64.x);
 }
+`;

@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,19 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
-import './core-layers';
+export default `\
+#define SHADER_NAME gpu-aggregation-to-grid-fs
 
-// TODO - React test cases currently only work in browser
-// import './react';
+precision highp float;
 
-// @deck.gl/experimental-layers
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./experimental-layers');
-  require('./react');
-  require('./lite');
-  require('./core/experimental/utils/gpu-grid-aggregator.spec');
-  require('./core/experimental/utils/grid-aggregation-utils.spec');
+varying float vWeights;
+
+void main(void) {
+  gl_FragColor = vec4(1., vWeights, 0, 0.0);
 }
+`;
