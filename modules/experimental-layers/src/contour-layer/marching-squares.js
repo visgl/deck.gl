@@ -33,37 +33,35 @@ const CODE_OFFSET_MAP = {
 
 // Returns marching square code for given cell
 /* eslint-disable complexity */
-export function getCode(params) {
+export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
   // Assumptions
   // Origin is on bottom-left , and X increase to right, Y to top
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
   // to create a 2X2 cell grid
 
-  const {cellWeights, thresholdValue, x, y, width, height} = params;
-
   assert(x >= -1 && x < width);
   assert(y >= -1 && y < height);
 
-  const leftBoundary = x < 0;
-  const rightBoundary = x >= width - 1;
-  const bottomBoundary = y < 0;
-  const topBoundary = y >= height - 1;
+  const isLeftBoundary = x < 0;
+  const isRightBoundary = x >= width - 1;
+  const isBottomBoundary = y < 0;
+  const isTopBoundary = y >= height - 1;
 
   const top =
-    leftBoundary || topBoundary
+    isLeftBoundary || isTopBoundary
       ? 0
       : cellWeights[(y + 1) * width + x] - thresholdValue >= 0
         ? 1
         : 0;
   const topRight =
-    rightBoundary || topBoundary
+    isRightBoundary || isTopBoundary
       ? 0
       : cellWeights[(y + 1) * width + x + 1] - thresholdValue >= 0
         ? 1
         : 0;
-  const right = rightBoundary ? 0 : cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0;
+  const right = isRightBoundary ? 0 : cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0;
   const current =
-    leftBoundary || bottomBoundary ? 0 : cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0;
+    isLeftBoundary || isBottomBoundary ? 0 : cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0;
 
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
@@ -74,12 +72,15 @@ export function getCode(params) {
 /* eslint-enable complexity */
 
 // Returns intersection vertices for given cellindex
-export function getVertices(params) {
-  const {gridOrigin, cellSize, x, y, code} = params;
+// [x, y] refers current marchng cell, reference vertex is always top-right corner
+export function getVertices({gridOrigin, cellSize, x, y, code}) {
 
   const offsets = CODE_OFFSET_MAP[code];
-  // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
-  // Move to top-right corner
+
+  // Reference vertex is at top-right move to top-right corner
+  assert(x >= -1);
+  assert(y >= -1);
+
   const rX = (x + 1) * cellSize[0];
   const rY = (y + 1) * cellSize[1];
 
