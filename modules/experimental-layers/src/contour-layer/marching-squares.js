@@ -32,27 +32,40 @@ const CODE_OFFSET_MAP = {
 };
 
 // Returns marching square code for given cell
-export function getCode(params) {
+/* eslint-disable complexity */
+export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
   // Assumptions
   // Origin is on bottom-left , and X increase to right, Y to top
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
   // to create a 2X2 cell grid
 
-  const {cellWeights, thresholdValue, cellIndex, gridSize} = params;
+  assert(x >= -1 && x < width);
+  assert(y >= -1 && y < height);
 
-  const numRows = gridSize[1];
-  const numCols = gridSize[0];
+  const isLeftBoundary = x < 0;
+  const isRightBoundary = x >= width - 1;
+  const isBottomBoundary = y < 0;
+  const isTopBoundary = y >= height - 1;
 
-  // TODO: duplicate top row and right column
-  // We shouldn't process the right column
-  assert((cellIndex + 1) % numCols);
-  // We shouldn't process the topmost row
-  assert(cellIndex + 1 < (numRows - 1) * numCols);
-
-  const top = cellWeights[cellIndex + numCols] - thresholdValue >= 0 ? 1 : 0;
-  const topRight = cellWeights[cellIndex + numCols + 1] - thresholdValue >= 0 ? 1 : 0;
-  const right = cellWeights[cellIndex + 1] - thresholdValue >= 0 ? 1 : 0;
-  const current = cellWeights[cellIndex] - thresholdValue >= 0 ? 1 : 0;
+  const top =
+    isLeftBoundary || isTopBoundary
+      ? 0
+      : cellWeights[(y + 1) * width + x] - thresholdValue >= 0
+        ? 1
+        : 0;
+  const topRight =
+    isRightBoundary || isTopBoundary
+      ? 0
+      : cellWeights[(y + 1) * width + x + 1] - thresholdValue >= 0
+        ? 1
+        : 0;
+  const right = isRightBoundary ? 0 : cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0;
+  const current =
+    isLeftBoundary || isBottomBoundary
+      ? 0
+      : cellWeights[y * width + x] - thresholdValue >= 0
+        ? 1
+        : 0;
 
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
@@ -60,19 +73,19 @@ export function getCode(params) {
 
   return code;
 }
+/* eslint-enable complexity */
 
 // Returns intersection vertices for given cellindex
-export function getVertices(params) {
-  const {gridOrigin, cellIndex, cellSize, gridSize, code} = params;
-
+// [x, y] refers current marchng cell, reference vertex is always top-right corner
+export function getVertices({gridOrigin, cellSize, x, y, code}) {
   const offsets = CODE_OFFSET_MAP[code];
-  // Reference vertex is top-right its co-ordinates are stored at index 0(X) and 1(Y)
-  const row = Math.floor(cellIndex / gridSize[0]);
-  const col = cellIndex - row * gridSize[0];
 
-  // Move to top-right corner
-  const rX = (col + 1) * cellSize[0];
-  const rY = (row + 1) * cellSize[1];
+  // Reference vertex is at top-right move to top-right corner
+  assert(x >= -1);
+  assert(y >= -1);
+
+  const rX = (x + 1) * cellSize[0];
+  const rY = (y + 1) * cellSize[1];
 
   const refVertexX = gridOrigin[0] + rX;
   const refVertexY = gridOrigin[1] + rY;
@@ -80,9 +93,9 @@ export function getVertices(params) {
   const vertices = [];
   offsets.forEach(xyOffsets => {
     xyOffsets.forEach(offset => {
-      const x = refVertexX + offset[0] * cellSize[0];
-      const y = refVertexY + offset[1] * cellSize[1];
-      vertices.push([x, y]);
+      const vX = refVertexX + offset[0] * cellSize[0];
+      const vY = refVertexY + offset[1] * cellSize[1];
+      vertices.push([vX, vY]);
     });
   });
 

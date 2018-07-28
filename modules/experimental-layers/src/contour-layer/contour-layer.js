@@ -24,7 +24,6 @@ import {
   _pointToDensityGridData as pointToDensityGridData
 } from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
-import {COORDINATE_SYSTEM} from 'deck.gl';
 
 import {generateContours} from './contour-utils';
 
@@ -114,8 +113,8 @@ export default class ContourLayer extends CompositeLayer {
       gpuAggregation,
       gpuGridAggregator: this.state.gridAggregator,
       fp64,
-      alignToCellBoundary: coordinateSystem === COORDINATE_SYSTEM.LNGLAT,
-      coordinateSystem
+      coordinateSystem,
+      viewport: this.context.viewport
     });
 
     this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});

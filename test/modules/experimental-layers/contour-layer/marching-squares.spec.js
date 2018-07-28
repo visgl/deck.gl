@@ -36,7 +36,8 @@ const GETCODE_TESTS = [
       10
     ],
     gridSize: [3, 3],
-    cellIndex: 4,
+    x: 1,
+    y: 1,
     code: 12
   },
   {
@@ -55,7 +56,8 @@ const GETCODE_TESTS = [
       5
     ],
     gridSize: [3, 3],
-    cellIndex: 3,
+    x: 0,
+    y: 1,
     code: 9
   }
 ];
@@ -86,14 +88,16 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 12,
-    cellIndex: 4,
+    x: 1,
+    y: 1,
     vertices: [[115, 240], [125, 240]],
     gridSize: [3, 3]
   },
   {
     gridOrigin: [100, 200],
     code: 9,
-    cellIndex: 3,
+    x: 0,
+    y: 1,
     vertices: [[110, 250], [110, 230]],
     gridSize: [3, 3]
   }
@@ -101,14 +105,17 @@ const GETVERTEX_TESTS = [
 
 test('MarchingSquares#getCode', t => {
   const thresholdValue = 6;
-  const cellIndex = 0;
+  const x = 0;
+  const y = 0;
   const gridSize = [2, 2];
   GETCODE_TESTS.forEach(testCase => {
     const code = getCode({
       cellWeights: testCase.cellWeights,
       thresholdValue,
-      cellIndex: testCase.cellIndex || cellIndex,
-      gridSize: testCase.gridSize || gridSize
+      x: testCase.x || x,
+      y: testCase.y || y,
+      width: testCase.gridSize ? testCase.gridSize[0] : gridSize[0],
+      height: testCase.gridSize ? testCase.gridSize[1] : gridSize[1]
     });
     t.equals(code, testCase.code, `Code: expected: ${testCase.code}, actual: ${code}`);
   });
@@ -116,15 +123,15 @@ test('MarchingSquares#getCode', t => {
 });
 
 test('MarchingSquares#getVertices', t => {
-  const cellIndex = 0;
+  const x = 0;
+  const y = 0;
   const cellSize = [10, 20];
-  const gridSize = [2, 2];
   GETVERTEX_TESTS.forEach(testCase => {
     const vertices = getVertices({
       gridOrigin: testCase.gridOrigin,
-      cellIndex: testCase.cellIndex || cellIndex,
+      x: testCase.x || x,
+      y: testCase.y || y,
       cellSize,
-      gridSize: testCase.gridSize || gridSize,
       code: testCase.code
     });
     t.deepEquals(

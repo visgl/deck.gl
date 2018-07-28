@@ -11,24 +11,29 @@ export function generateContours({
   cellSize
 }) {
   const contourSegments = [];
+  const width = gridSize[0];
+  const height = gridSize[1];
 
   thresholds.forEach((threshold, index) => {
-    const numCols = gridSize[0];
-    for (let cellIndex = 0; cellIndex < gridSize[0] * (gridSize[1] - 1); cellIndex++) {
-      if (cellIndex === 0 || (cellIndex + 1) % numCols !== 0) {
+    for (let x = -1; x < width; x++) {
+      for (let y = -1; y < height; y++) {
         // Get the MarchingSquares code based on neighbor cell weights.
         const code = MarchingSquares.getCode({
           cellWeights,
           thresholdValue: threshold,
-          cellIndex,
-          gridSize
+          x,
+          y,
+          width,
+          height
         });
         // Get the intersection vertices based on MarchingSquares code.
         const vertices = MarchingSquares.getVertices({
           gridOrigin,
-          cellIndex,
           cellSize,
-          gridSize,
+          x,
+          y,
+          width,
+          height,
           code
         });
         // We should always get even number of vertices
