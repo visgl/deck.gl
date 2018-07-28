@@ -61,7 +61,11 @@ export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
         : 0;
   const right = isRightBoundary ? 0 : cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0;
   const current =
-    isLeftBoundary || isBottomBoundary ? 0 : cellWeights[y * width + x] - thresholdValue >= 0 ? 1 : 0;
+    isLeftBoundary || isBottomBoundary
+      ? 0
+      : cellWeights[y * width + x] - thresholdValue >= 0
+        ? 1
+        : 0;
 
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
@@ -74,7 +78,6 @@ export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
 // Returns intersection vertices for given cellindex
 // [x, y] refers current marchng cell, reference vertex is always top-right corner
 export function getVertices({gridOrigin, cellSize, x, y, code}) {
-
   const offsets = CODE_OFFSET_MAP[code];
 
   // Reference vertex is at top-right move to top-right corner
