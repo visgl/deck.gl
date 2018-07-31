@@ -24,6 +24,7 @@ const geoExample = new deck.DeckGL({
   latitude: 37.78,
   zoom: 11,
   pitch: 30,
+  onViewStateChange: console.log, // eslint-disable-line
   layers: [
     new deck.GeoJsonLayer({
       data: choropleths,
