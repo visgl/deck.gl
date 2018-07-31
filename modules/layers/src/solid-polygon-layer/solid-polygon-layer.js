@@ -256,7 +256,7 @@ export default class SolidPolygonLayer extends Layer {
       props.fp64 !== oldProps.fp64
     ) {
       this.state.polygonTesselator.updatePositions({
-        fp64: props.fp64,
+        fp64: this.use64bitPositions(),
         extruded: props.extruded
       });
     }
