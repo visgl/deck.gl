@@ -12,6 +12,9 @@ mapbox-token.js
 TODO
 _docs
 
+mapbox-gl.js
+mapbox-gl-dev.js
+
 */**/yarn.lock
 yarn-error.log
 package-lock.json
