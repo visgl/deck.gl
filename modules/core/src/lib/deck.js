@@ -412,7 +412,7 @@ export default class Deck {
     }
 
     // if external context...
-    trackContextState(gl, {enable: true, copyState : true});
+    trackContextState(gl, {enable: true, copyState: true});
 
     setParameters(gl, {
       blend: true,
@@ -424,13 +424,15 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
-    // this.eventManager = new EventManager(gl.canvas, {
-    //   events: {
-    //     click: this._onClick,
-    //     pointermove: this._onPointerMove,
-    //     pointerleave: this._onPointerLeave
-    //   }
-    // });
+    if (!this._customRender) {
+      this.eventManager = new EventManager(gl.canvas, {
+        events: {
+          click: this._onClick,
+          pointermove: this._onPointerMove,
+          pointerleave: this._onPointerLeave
+        }
+      });
+    }
 
     this.viewManager = new ViewManager({
       eventManager: this.eventManager,
