@@ -424,7 +424,7 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
-    if (!this._customRender) {
+    if (!this.props._customRender) {
       this.eventManager = new EventManager(gl.canvas, {
         events: {
           click: this._onClick,
@@ -499,11 +499,11 @@ export default class Deck {
   // Callbacks
 
   _onRendererInitialized({gl}) {
-    this.setGLContext(gl);
+    this._setGLContext(gl);
   }
 
   _onRenderFrame({gl}) {
-    this._renderLayers({gl});
+    this._drawLayers({gl});
   }
 
   _onViewStateChange(params) {
