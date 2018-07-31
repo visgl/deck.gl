@@ -1,12 +1,10 @@
 import {Deck} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
-import Map from './mapbox';
+import mapboxgl from 'mapbox-gl';
 
-// source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const GEOJSON =
+// Outlines of US States. Source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
+const US_MAP_GEOJSON =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
   latitude: 40,
@@ -16,11 +14,18 @@ const INITIAL_VIEW_STATE = {
   pitch: 30
 };
 
-const map = new Map({
-  mapboxApiAccessToken: MAPBOX_TOKEN,
+// Set your mapbox token here
+mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
+
+const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/light-v9',
-  viewState: INITIAL_VIEW_STATE
+  // Note: deck.gl will be in charge of interaction and event handling
+  interactive: false,
+  center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+  zoom: INITIAL_VIEW_STATE.zoom,
+  bearing: INITIAL_VIEW_STATE.bearing,
+  pitch: INITIAL_VIEW_STATE.pitch
 });
 
 export const deck = new Deck({
@@ -30,17 +35,22 @@ export const deck = new Deck({
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   onViewStateChange: ({viewState}) => {
-    map.setProps({viewState});
+    map.jumpTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: viewState.zoom,
+      bearing: viewState.bearing,
+      pitch: viewState.pitch
+    });
   },
   layers: [
     new GeoJsonLayer({
-      data: GEOJSON,
+      data: US_MAP_GEOJSON,
       stroked: true,
       filled: true,
       lineWidthMinPixels: 2,
       opacity: 0.4,
-      getLineColor: () => [255, 100, 100],
-      getFillColor: () => [200, 160, 0, 180]
+      getLineColor: [255, 100, 100],
+      getFillColor: [200, 160, 0, 180]
     })
   ]
 });
