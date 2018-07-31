@@ -26,14 +26,14 @@ export default class DeckLayer {
 
     this.map = map;
     this.deck = new Deck({
-      // TODO - is this needed?
+      // TODO - this should not be needed
       canvas: 'deck-canvas',
       width: '100%',
       height: '100%',
       controller: false,
-      customRender: true,
-      viewState: this._getViewState(),
-      views: [new MapView({farZmultiplier: .101})]
+      _customRender: true,
+      viewState: this._getViewState()
+      // views: [new MapView({farZmultiplier: 0.101})]
     });
     this.deck._setGLContext(gl);
     this.deck.setProps({layers: this.layers});
