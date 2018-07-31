@@ -412,7 +412,9 @@ export default class Deck {
     }
 
     // if external context...
-    trackContextState(gl, {enable: true, copyState: true});
+    if (this.props._customRender) {
+      trackContextState(gl, {enable: true, copyState: true});
+    }
 
     setParameters(gl, {
       blend: true,
