@@ -26,7 +26,7 @@ import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
 import GL from 'luma.gl/constants';
-import {AnimationLoop, createGLContext, setParameters} from 'luma.gl';
+import {AnimationLoop, createGLContext, trackContextState, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
@@ -147,11 +147,14 @@ export default class Deck {
 
     // Note: LayerManager creation deferred until gl context available
     this.canvas = this._createCanvas(props);
+
     this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
 
-    this.animationLoop.start();
+    if (!props._customRender) {
+      this.animationLoop.start();
+    }
   }
 
   finalize() {
@@ -397,30 +400,20 @@ export default class Deck {
     }
   }
 
-  // Callbacks
-
-  _onViewStateChange(params) {
-    // Let app know that view state is changing, and give it a chance to change it
-    const viewState = this.props.onViewStateChange(params) || params.viewState;
-
-    // If initialViewState was set on creation, auto track position
-    if (this.viewState) {
-      this.viewState[params.viewId] = viewState;
-      this.viewManager.setProps({viewState});
-    }
-  }
-
-  _onInteractiveStateChange({isDragging = false}) {
-    if (isDragging !== this.interactiveState.isDragging) {
-      this.interactiveState.isDragging = isDragging;
-    }
-  }
-
   _updateCursor() {
     this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
   }
 
-  _onRendererInitialized({gl, canvas}) {
+  // Deep integration (Mapbox styles)
+
+  _setGLContext(gl) {
+    if (this.layerManager) {
+      return;
+    }
+
+    // if external context...
+    trackContextState(gl, {enable: true, copyState : true});
+
     setParameters(gl, {
       blend: true,
       blendFunc: [GL.SRC_ALPHA, GL.ONE_MINUS_SRC_ALPHA, GL.ONE, GL.ONE_MINUS_SRC_ALPHA],
@@ -431,13 +424,13 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
-    this.eventManager = new EventManager(canvas, {
-      events: {
-        click: this._onClick,
-        pointermove: this._onPointerMove,
-        pointerleave: this._onPointerLeave
-      }
-    });
+    // this.eventManager = new EventManager(gl.canvas, {
+    //   events: {
+    //     click: this._onClick,
+    //     pointermove: this._onPointerMove,
+    //     pointerleave: this._onPointerLeave
+    //   }
+    // });
 
     this.viewManager = new ViewManager({
       eventManager: this.eventManager,
@@ -460,7 +453,9 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _onRenderFrame({gl}) {
+  _drawLayers() {
+    const {gl} = this.layerManager.context;
+
     // Log perf stats every second
     if (this.stats.oneSecondPassed()) {
       const table = this.stats.getStatsTable();
@@ -497,6 +492,33 @@ export default class Deck {
     });
 
     this.props.onAfterRender({gl});
+  }
+
+  // Callbacks
+
+  _onRendererInitialized({gl}) {
+    this.setGLContext(gl);
+  }
+
+  _onRenderFrame({gl}) {
+    this._renderLayers({gl});
+  }
+
+  _onViewStateChange(params) {
+    // Let app know that view state is changing, and give it a chance to change it
+    const viewState = this.props.onViewStateChange(params) || params.viewState;
+
+    // If initialViewState was set on creation, auto track position
+    if (this.viewState) {
+      this.viewState[params.viewId] = viewState;
+      this.viewManager.setProps({viewState});
+    }
+  }
+
+  _onInteractiveStateChange({isDragging = false}) {
+    if (isDragging !== this.interactiveState.isDragging) {
+      this.interactiveState.isDragging = isDragging;
+    }
   }
 
   // Route move events to layers. call the `onHover` prop of any picked layer,
