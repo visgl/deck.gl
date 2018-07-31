@@ -59,6 +59,7 @@ export {default as MapController} from './controllers/map-controller';
 // Experimental Controllers
 export {default as _FirstPersonController} from './controllers/first-person-controller';
 export {default as _OrbitController} from './controllers/orbit-controller';
+export {default as _OrthographicController} from './controllers/orthographic-controller';
 
 // EXPERIMENTAL EXPORTS
 
