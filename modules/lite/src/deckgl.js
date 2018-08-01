@@ -12,13 +12,14 @@ const CANVAS_STYLE = {
   height: '100%'
 };
 
-// Add missing props for compatibility
-function normalizeProps(props) {
-  // Support old "geospatial view state as separate props" style
-  if (!props.initialViewState) {
-    const {longitude, latitude, zoom, pitch = 0, bearing = 0} = props;
-    props.initialViewState = props.viewState || {longitude, latitude, zoom, pitch, bearing};
+// Supports old "geospatial view state as separate props" style
+// TODO - this should either be moved into the core or deprecated
+function getViewState(props) {
+  if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
+    const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
+    return {latitude, longitude, zoom, pitch, bearing};
   }
+  return props.viewState;
 }
 
 // Create canvas elements for map and deck
@@ -64,8 +65,8 @@ export default class DeckGL extends Deck {
 
     const {mapCanvas, deckCanvas} = createCanvas(props);
 
-    normalizeProps(props);
-    const isMap = Number.isFinite(props.initialViewState.latitude);
+    const viewState = props.initialViewState || getViewState(props);
+    const isMap = Number.isFinite(viewState.latitude);
     const {map = window.mapboxgl, controller = true} = props;
 
     super(
@@ -74,8 +75,7 @@ export default class DeckGL extends Deck {
         height: '100%',
         canvas: deckCanvas,
         controller,
-        onViewStateChange: ({viewState}) =>
-          this._map && this._map.setProps({viewState}) && viewState
+        initialViewState: viewState
       })
     );
 
@@ -85,6 +85,7 @@ export default class DeckGL extends Deck {
         isMap &&
         new Mapbox(
           Object.assign({}, props, {
+            viewState,
             container: mapCanvas,
             mapboxgl: map
           })
@@ -92,6 +93,16 @@ export default class DeckGL extends Deck {
     } else {
       this._map = map;
     }
+
+    // Callback for the controller
+    this._updateViewState = params => {
+      if (this.onViewStateChange) {
+        this.onViewStateChange(params);
+      }
+      if (this._map) {
+        this._map.setProps(params);
+      }
+    };
   }
 
   getMapboxMap() {
@@ -107,6 +118,19 @@ export default class DeckGL extends Deck {
   }
 
   setProps(props) {
+    const viewState = getViewState(props);
+    if (viewState) {
+      props.viewState = viewState;
+    }
+
+    // this._updateViewState must be bound to `this`
+    // but we don't have access to the current instance before calling super().
+    if ('onViewStateChange' in props && this._updateViewState) {
+      // This is called at least once at _onRendererInitialized
+      this.onViewStateChange = props.onViewStateChange;
+      props.onViewStateChange = this._updateViewState;
+    }
+
     if (this._map) {
       this._map.setProps(props);
     }
