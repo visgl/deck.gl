@@ -1,4 +1,4 @@
-import {Deck, MapView} from '@deck.gl/core';
+import {Deck} from '@deck.gl/core';
 
 export default class DeckLayer {
   constructor({id = 'deck-layer', layers}) {
