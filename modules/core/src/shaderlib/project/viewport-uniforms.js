@@ -135,6 +135,7 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
+  wrapCoordinates = true,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -152,7 +153,13 @@ export function getUniformsFromViewport({
     {
       project_uModelMatrix: modelMatrix || IDENTITY_MATRIX
     },
-    getMemoizedViewportUniforms({viewport, devicePixelRatio, coordinateSystem, coordinateOrigin})
+    getMemoizedViewportUniforms({
+      viewport,
+      devicePixelRatio,
+      coordinateSystem,
+      coordinateOrigin,
+      wrapCoordinates
+    })
   );
 }
 
@@ -160,7 +167,8 @@ function calculateViewportUniforms({
   viewport,
   devicePixelRatio,
   coordinateSystem,
-  coordinateOrigin
+  coordinateOrigin,
+  wrapCoordinates
 }) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
@@ -189,6 +197,10 @@ function calculateViewportUniforms({
     // Projection mode values
     project_uCoordinateSystem: shaderCoordinateSystem,
     project_uCenter: projectionCenter,
+    project_uWrapCoordinates: wrapCoordinates,
+    project_uLngLatCenter: wrapCoordinates
+      ? [viewport.longitude, viewport.latitude]
+      : DEFAULT_COORDINATE_ORIGIN,
 
     // Screen size
     project_uViewportSize: viewportSize,
