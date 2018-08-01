@@ -135,7 +135,7 @@ export function getUniformsFromViewport({
   // Match Layer.defaultProps
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
-  wrapCoordinates = true,
+  wrapLongitude = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -158,7 +158,7 @@ export function getUniformsFromViewport({
       devicePixelRatio,
       coordinateSystem,
       coordinateOrigin,
-      wrapCoordinates
+      wrapLongitude
     })
   );
 }
@@ -168,7 +168,7 @@ function calculateViewportUniforms({
   devicePixelRatio,
   coordinateSystem,
   coordinateOrigin,
-  wrapCoordinates
+  wrapLongitude
 }) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
@@ -197,10 +197,8 @@ function calculateViewportUniforms({
     // Projection mode values
     project_uCoordinateSystem: shaderCoordinateSystem,
     project_uCenter: projectionCenter,
-    project_uWrapCoordinates: wrapCoordinates,
-    project_uLngLatCenter: wrapCoordinates && viewport.isGeospatial
-      ? [viewport.longitude, viewport.latitude]
-      : DEFAULT_COORDINATE_ORIGIN,
+    project_uWrapLongitude: wrapLongitude,
+    project_uAntimeridian: (viewport.longitude || 0) - 180,
 
     // Screen size
     project_uViewportSize: viewportSize,

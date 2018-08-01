@@ -161,11 +161,13 @@ Required when the `coordinateSystem` is set to `COORDINATE_SYSTEM.METER_OFFSETS`
 
 Specifies a longitude and a latitude from which meter offsets are calculated. See the article on Coordinate Systems for details
 
-##### `wrapCoordinates` (Boolean, optional)
+##### `wrapLongitude` (Boolean, optional)
 
-Automatically wraps lnglat coordinates over the 180th meridian for the best placement in the current viewport.
+Automatically wraps longitudes over the 180th antimeridian for the best visibility in the current viewport.
 
-Default `true`.
+This option is applied per vertex by dynamically moving the antimeridian the furthest away from the current center of the viewport. It is useful when viewing local data that cross the 180th meridian. However, path/polygon features that get split by the dynamic antimeridian may still be rendered incorrectly. When viewing at a global zoom level, it is recommended that you disable this option and preprocess the data for their best placement.
+
+Default `false`.
 
 ##### `modelMatrix` (Number[16], optional)
 

@@ -28,8 +28,8 @@ const float COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL = 4.;
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
-uniform bool project_uWrapCoordinates;
-uniform vec2 project_uLngLatCenter;
+uniform bool project_uWrapLongitude;
+uniform float project_uAntimeridian;
 uniform vec3 project_uPixelsPerMeter;
 uniform vec3 project_uPixelsPerDegree;
 uniform vec3 project_uPixelsPerUnit;
@@ -92,9 +92,8 @@ vec4 project_offset_(vec4 offset) {
 //
 vec2 project_mercator_(vec2 lnglat) {
   float x = lnglat.x;
-  if (project_uWrapCoordinates) {
-    float minLng = project_uLngLatCenter.x - 180.0;
-    x = mod(x - minLng, 360.0) + minLng;
+  if (project_uWrapLongitude) {
+    x = mod(x - project_uAntimeridian, 360.0) + project_uAntimeridian;
   }
   return vec2(
     radians(x) + PI,
