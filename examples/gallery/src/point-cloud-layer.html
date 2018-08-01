@@ -71,6 +71,9 @@
           coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
           opacity: 1,
           data: points,
+          getPosition: d => d.position,
+          getNormal: d => d.normal,
+          getColor: d => d.color,
           radiusPixels: 10,
           lightSettings: {
             coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
