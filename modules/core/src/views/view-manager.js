@@ -162,7 +162,7 @@ export default class ViewManager {
     }
 
     // Important: avoid invoking _update() inside itself
-    // Nested updates result in unexpected side effects inside _rebuildViewportsFromViews()
+    // Nested updates result in unexpected side effects inside _rebuildViewports()
     // when using auto control in pure-js
     if (!this._isUpdating) {
       this._update();
@@ -175,14 +175,14 @@ export default class ViewManager {
     // Only rebuild viewports if the update flag is set
     if (this._needsUpdate) {
       this._needsUpdate = false;
-      this._rebuildViewportsFromViews();
+      this._rebuildViewports();
     }
 
     // If viewport transition(s) are triggered during viewports update, controller(s)
     // will immediately call `onViewStateChange` which calls `viewManager.setProps` again.
     if (this._needsUpdate) {
       this._needsUpdate = false;
-      this._rebuildViewportsFromViews();
+      this._rebuildViewports();
     }
 
     this._isUpdating = false;
@@ -255,7 +255,7 @@ export default class ViewManager {
   }
 
   // Rebuilds viewports from descriptors towards a certain window size
-  _rebuildViewportsFromViews() {
+  _rebuildViewports() {
     const {width, height, views} = this;
 
     const oldControllers = this.controllers;
