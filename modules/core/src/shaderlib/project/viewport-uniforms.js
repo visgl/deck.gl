@@ -198,7 +198,7 @@ function calculateViewportUniforms({
     project_uCoordinateSystem: shaderCoordinateSystem,
     project_uCenter: projectionCenter,
     project_uWrapCoordinates: wrapCoordinates,
-    project_uLngLatCenter: wrapCoordinates
+    project_uLngLatCenter: wrapCoordinates && viewport.isGeospatial
       ? [viewport.longitude, viewport.latitude]
       : DEFAULT_COORDINATE_ORIGIN,
 

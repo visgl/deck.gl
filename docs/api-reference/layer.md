@@ -161,6 +161,12 @@ Required when the `coordinateSystem` is set to `COORDINATE_SYSTEM.METER_OFFSETS`
 
 Specifies a longitude and a latitude from which meter offsets are calculated. See the article on Coordinate Systems for details
 
+##### `wrapCoordinates` (Boolean, optional)
+
+Automatically wraps lnglat coordinates over the 180th meridian for the best placement in the current viewport.
+
+Default `true`.
+
 ##### `modelMatrix` (Number[16], optional)
 
 An optional 4x4 matrix that is multiplied into the affine projection matrices used by shader `project` GLSL function and the Viewport's `project` and `unproject` JavaScript function.
