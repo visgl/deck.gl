@@ -49,7 +49,9 @@ const nonGeoExample = new deck.DeckGL({
       coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
       opacity: 1,
       data: points,
-      getNormal: d => [0, 0, 1],
+      getPosition: d => d.position,
+      getColor: d => d.color,
+      getNormal: [0, 0, 1],
       radiusPixels: 10,
       lightSettings: {
         coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,

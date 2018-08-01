@@ -118,11 +118,6 @@ export default class DeckGL extends Deck {
   }
 
   setProps(props) {
-    const viewState = getViewState(props);
-    if (viewState) {
-      props.viewState = viewState;
-    }
-
     // this._updateViewState must be bound to `this`
     // but we don't have access to the current instance before calling super().
     if ('onViewStateChange' in props && this._updateViewState) {

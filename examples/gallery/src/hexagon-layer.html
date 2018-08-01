@@ -100,7 +100,7 @@
       OPTIONS.forEach(key => {
         const value = document.getElementById(key).value;
         document.getElementById(key + '-value').innerHTML = value;
-        options[key] = value;
+        options[key] = Number(value);
       });
 
       const hexagonLayer = new HexagonLayer({
