@@ -36,6 +36,7 @@ export default class ViewManager {
 
     this._viewports = []; // Generated viewports
     this._viewportMap = {};
+    this._isUpdating = false;
     this._needsRedraw = 'Initial render';
     this._needsUpdate = true;
 
@@ -146,7 +147,6 @@ export default class ViewManager {
     return null;
   }
 
-  /* eslint-disable complexity */
   setProps(props) {
     if ('views' in props) {
       this._setViews(props.views);
@@ -161,9 +161,21 @@ export default class ViewManager {
       this._setSize(props.width, props.height);
     }
 
-    this._rebuildViewportsFromViews();
+    if (!this._isUpdating) {
+      this._update();
+    }
   }
-  /* eslint-enable complexity */
+
+  _update() {
+    this._isUpdating = true;
+    while (this._needsUpdate) {
+      // clear the update flag
+      this._needsUpdate = false;
+      // rebuilding viewport may cause view state change (viewport transition)
+      this._rebuildViewportsFromViews();
+    }
+    this._isUpdating = false;
+  }
 
   _setSize(width, height) {
     assert(Number.isFinite(width) && Number.isFinite(height));
@@ -233,52 +245,45 @@ export default class ViewManager {
 
   // Rebuilds viewports from descriptors towards a certain window size
   _rebuildViewportsFromViews() {
-    const updateReason = this._needsUpdate;
-    if (updateReason) {
-      const {width, height, views} = this;
+    const {width, height, views} = this;
 
-      const oldControllers = this.controllers;
-      this.controllers = {};
+    const oldControllers = this.controllers;
+    this.controllers = {};
 
-      this._viewports = views.map(view => {
-        const viewState = this.getViewState(view.id);
-        const viewport = view.makeViewport({width, height, viewState});
+    this._viewports = views.map(view => {
+      const viewState = this.getViewState(view.id);
+      const viewport = view.makeViewport({width, height, viewState});
 
-        // Update the controller
-        if (view.controller) {
-          const controllerProps = Object.assign({}, view.controller, view.defaultState, viewState, {
-            id: view.id,
-            x: viewport.x,
-            y: viewport.y,
-            width: viewport.width,
-            height: viewport.height
-          });
+      // Update the controller
+      if (view.controller) {
+        const controllerProps = Object.assign({}, view.controller, view.defaultState, viewState, {
+          id: view.id,
+          x: viewport.x,
+          y: viewport.y,
+          width: viewport.width,
+          height: viewport.height
+        });
 
-          let controller = oldControllers[view.id];
-          if (controller) {
-            controller.setProps(controllerProps);
-          } else {
-            controller = this._createController(controllerProps);
-          }
-          this.controllers[view.id] = controller;
+        let controller = oldControllers[view.id];
+        if (controller) {
+          controller.setProps(controllerProps);
+        } else {
+          controller = this._createController(controllerProps);
         }
-
-        return viewport;
-      });
-
-      // Remove unused controllers
-      for (const id in oldControllers) {
-        if (!this.controllers[id]) {
-          oldControllers[id].finalize();
-        }
+        this.controllers[view.id] = controller;
       }
 
-      this._buildViewportMap();
+      return viewport;
+    });
 
-      // We've just rebuilt the Viewports to match the View descriptors,
-      // so clear the update flag and set the render flag
-      this._needsUpdate = false;
+    // Remove unused controllers
+    for (const id in oldControllers) {
+      if (!this.controllers[id]) {
+        oldControllers[id].finalize();
+      }
     }
+
+    this._buildViewportMap();
   }
 
   _buildViewportMap() {

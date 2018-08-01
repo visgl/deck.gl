@@ -5,8 +5,7 @@
   },
   "dependencies": {
     "d3-request": "^1.0.5",
-    "deck.gl": ">=6.0.0-beta",
-    "luma.gl": ">=6.0.0-beta",
+    "deck.gl": "^6.0.0",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
     "react-map-gl": "^3.3.0"
