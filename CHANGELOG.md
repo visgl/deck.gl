@@ -19,6 +19,29 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 For Earlier Beta Releases see below
 
+### deck.gl v6.1.0 Pre Releases
+
+#### [6.1.0-alpha.1] - Aug 1
+
+- Remove module specific uniforms setting from Layer (#2124)
+- [POC] Data filter shader module (#2107)
+- Bump luma.gl and math.gl versions to latest alpha (#2146)
+- fix examples (#2143)
+- Fix: transition breaks map interaction (#2141)
+- Fix onViewStateChange callback in standalone bundle (#2140)
+- Minimal example of mapbox custom layers integration (#2134)
+- Orthographic view controller (#2128)
+- Fix solid-polygon-layer to work with new coordinate mode (#2135)
+-  Enable drawing into external gl context, controlled by external software (#2133)
+- Remove mapbox wrapper from pure-js example (#2137)
+- Screen contour (#2130)
+- GPUAggregation: Add support for Orthographic View (#2127)
+- Update roadmaps, dist size doc, JSON Layers RFC (#2125)
+- Upgrade guide improvements (#2118)
+- Upgrade react-map-gl (#2116)
+- JSON layer RFC (#2079)
+- POC: Loading Mapbox vector tile data into DeckGL layer (#2022)
+
 ### deck.gl v6.0.0 Pre Releases
 
 #### [6.0.0-beta.1] - July 4
