@@ -24,6 +24,7 @@ case $MODE in
     break;;
 
   "fast")
+    npm run lint pre-commit
     node test/start.js test
     break;;
 
