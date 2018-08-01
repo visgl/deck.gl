@@ -13,6 +13,7 @@ const CANVAS_STYLE = {
 };
 
 // Supports old "geospatial view state as separate props" style
+// TODO - this should either be moved into the core or deprecated
 function getViewState(props) {
   if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
     const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
@@ -122,6 +123,8 @@ export default class DeckGL extends Deck {
       props.viewState = viewState;
     }
 
+    // this._updateViewState must be bound to `this`
+    // but we don't have access to the current instance before calling super().
     if ('onViewStateChange' in props && this._updateViewState) {
       // This is called at least once at _onRendererInitialized
       this.onViewStateChange = props.onViewStateChange;
