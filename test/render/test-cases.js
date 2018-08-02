@@ -1127,7 +1127,8 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png',
+    ignoreGPUs: [`Intel`]
   },
   {
     name: 'contour-lnglat',
@@ -1155,6 +1156,7 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/contour-lnglat.png'
+    referenceImageUrl: './test/render/golden-images/contour-lnglat.png',
+    ignoreGPUs: [`Intel`]
   }
 ];

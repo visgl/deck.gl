@@ -55,15 +55,24 @@ test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
   };
-  result = sa.run(
-    // NOTE: 64-bit aggregation fails on Intel GPUs.
-    Object.assign({}, fixtureWorldSpace, {useGPU: true, projectPoints: false, fp64: false})
-  );
-  const gpuResults = {
+  const gpuAggregationOptions = Object.assign({}, fixtureWorldSpace, {useGPU: true, projectPoints: false, fp64: false});
+
+  // 32-bit aggregation
+  result = sa.run(gpuAggregationOptions);
+  let gpuResults = {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
   };
+  t.deepEqual(gpuResults, cpuResults, '32bit aggregation: cpu and gpu results should match');
 
-  t.deepEqual(gpuResults, cpuResults, 'cpu and gpu results should match');
+  // 64-bit aggregation
+  gpuAggregationOptions.fp64 = true;
+  result = sa.run(gpuAggregationOptions);
+  gpuResults = {
+    counts: result.countsBuffer.getData(),
+    maxCount: result.maxCountBuffer.getData()
+  };
+  t.deepEqual(gpuResults, cpuResults, '64bit aggregation: cpu and gpu results should match');
+
   t.end();
 });

@@ -21,6 +21,17 @@
 import test from 'tape-catch';
 
 import {_alignToCell as alignToCell} from '@deck.gl/core/experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
+import {
+  _pointToDensityGridData as pointToDensityGridData,
+  _GPUGridAggregator as GPUGridAggregator
+} from '@deck.gl/core';
+import {gl} from '@deck.gl/test-utils';
+import * as FIXTURES from 'deck.gl/test/data';
+
+const getPosition = d => d.COORDINATES;
+const CELLSIZE = 500;
+const gpuGridAggregator = new GPUGridAggregator(gl);
+
 
 test('GridAggregationUtils#alignToCell (CPU)', t => {
   t.equal(alignToCell(-3, 5), -5);
@@ -29,25 +40,13 @@ test('GridAggregationUtils#alignToCell (CPU)', t => {
   t.end();
 });
 
-/*
-// NOTE: Disabling as this fails on Intel GPU with 64 bit on
-// Fails on AMD with 64-bit flag off, disble for now.
-import {
-  _pointToDensityGridData as pointToDensityGridData,
-  _GPUGridAggregator as GPUGridAggregator
-} from '@deck.gl/core'; // experimental/utils/gpu-grid-aggregation/grid-aggregation-utils
-import {gl} from '@deck.gl/test-utils';
-import * as FIXTURES from 'deck.gl/test/data';
-const getPosition = d => d.COORDINATES;
-const CELLSIZE = 500;
-const gpuGridAggregator = new GPUGridAggregator(gl);
-
 test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
   const opts = {
     data: FIXTURES.points,
     getPosition,
     cellSizeMeters: CELLSIZE,
-    gpuGridAggregator
+    gpuGridAggregator,
+    fp64: false
   };
   opts.gpuAggregation = false;
   const cpuResults = pointToDensityGridData(opts);
@@ -65,4 +64,3 @@ test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
 
   t.end();
 });
-*/
