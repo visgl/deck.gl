@@ -21,8 +21,6 @@
 import {global} from '../utils/globals';
 import log from '../utils/log';
 
-import 'luma.gl/webgl1'; // For now, deck.gl always includes WebGL1 browser support
-
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
 /* global __VERSION__ */

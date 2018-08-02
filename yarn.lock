@@ -5927,11 +5927,11 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^6.0.0:
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.0.0.tgz#1df3298d9f0934f5790c89a41daf9b5a30f89f5c"
+luma.gl@^6.1.0i-alpha:
+  version "6.1.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.1.0-alpha.1.tgz#ce94cf8945c6b0fce02e819b2c7412c7a9ad73b3"
   dependencies:
-    math.gl "^2.0.0"
+    math.gl "^2.1.0-alpha"
     probe.gl "^1.0.0"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
@@ -6054,6 +6054,17 @@ math.gl@^1.1.0:
 math.gl@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.0.0.tgz#c41cf8f5cfce820161511c435d3f706eebd7deb0"
+  dependencies:
+    gl-mat3 "^1.0.0"
+    gl-mat4 "^1.1.4"
+    gl-quat "^1.0.0"
+    gl-vec2 "^1.0.0"
+    gl-vec3 "^1.0.3"
+    gl-vec4 "^1.0.1"
+
+math.gl@^2.1.0-alpha:
+  version "2.1.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.1.0-alpha.1.tgz#80866ac74ae3ffadca23a47aec926c9336d4dace"
   dependencies:
     gl-mat3 "^1.0.0"
     gl-mat4 "^1.1.4"
