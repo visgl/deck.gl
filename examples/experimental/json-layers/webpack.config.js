@@ -2,7 +2,6 @@
 // delete the local development overrides at the bottom of this file
 
 // avoid destructuring for older Node version support
-const webpack = require('webpack');
 const resolve = require('path').resolve;
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -28,17 +27,8 @@ const CONFIG = {
     ]
   },
 
-  resolve: {
-    alias: {
-      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
-    }
-  },
-
   plugins: [
-    new HtmlWebpackPlugin({title: 'deck.gl example'}),
-    // Optional: Enables reading mapbox token from environment variable
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
+    new HtmlWebpackPlugin({title: 'deck.gl example'})
   ],
 
   node: {fs: 'empty'}
