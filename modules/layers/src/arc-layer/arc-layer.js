@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer, log} from '@deck.gl/core';
+import {Layer, log} from '@deck.gl/core';
 
 import GL from 'luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
@@ -69,6 +69,11 @@ export default class ArcLayer extends Layer {
         accessor: ['getSourcePosition', 'getTargetPosition'],
         update: this.calculateInstancePositions
       },
+      instancePositions64Low: {
+        size: 4,
+        accessor: ['getSourcePosition', 'getTargetPosition'],
+        update: this.calculateInstancePositions64Low
+      },
       instanceSourceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
@@ -93,25 +98,6 @@ export default class ArcLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.addInstanced({
-          instancePositions64Low: {
-            size: 4,
-            accessor: ['getSourcePosition', 'getTargetPosition'],
-            update: this.calculateInstancePositions64Low
-          }
-        });
-      } else {
-        attributeManager.remove(['instancePositions64Low']);
-      }
-    }
-  }
-
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     // Re-generate model if geometry changed
@@ -121,8 +107,8 @@ export default class ArcLayer extends Layer {
         this.state.model.delete();
       }
       this.setState({model: this._getModel(gl)});
+      this.getAttributeManager().invalidateAll();
     }
-    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   _getModel(gl) {
@@ -175,6 +161,14 @@ export default class ArcLayer extends Layer {
   }
 
   calculateInstancePositions64Low(attribute) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(4);
+      return;
+    }
+
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
