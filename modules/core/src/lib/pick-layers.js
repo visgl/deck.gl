@@ -362,13 +362,9 @@ function processPickInfo({
     const pickingSelectedColor =
       layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
 
-    const pickingParameters = {
+    layer.setModuleParameters({
       pickingSelectedColor
-    };
-
-    for (const model of layer.getModels()) {
-      model.updateModuleSettings(pickingParameters);
-    }
+    });
   });
 
   const unhandledPickInfos = callLayerPickingCallbacks(infos, mode);

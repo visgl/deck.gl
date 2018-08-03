@@ -507,7 +507,6 @@ export default class Layer extends Component {
     // Add any subclass attributes
     this.updateAttributes(this.props);
     this._updateBaseUniforms();
-    this._updateModuleSettings();
 
     // Note: Automatic instance count update only works for single layers
     if (this.state.model) {
@@ -537,9 +536,7 @@ export default class Layer extends Component {
 
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
-      for (const model of this.getModels()) {
-        model.updateModuleSettings(moduleParameters);
-      }
+      this.setModuleParameters(moduleParameters);
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -660,6 +657,12 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     }
 
     return this.setChangeFlags(changeFlags);
+  }
+
+  setModuleParameters(moduleParameters) {
+    for (const model of this.getModels()) {
+      model.updateModuleSettings(moduleParameters);
+    }
   }
 
   // PRIVATE METHODS
@@ -809,15 +812,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     // TODO - set needsRedraw on the model(s)?
     this.setNeedsRedraw();
-  }
-
-  _updateModuleSettings() {
-    const settings = {
-      pickingHighlightColor: this.props.highlightColor
-    };
-    for (const model of this.getModels()) {
-      model.updateModuleSettings(settings);
-    }
   }
 
   // DEPRECATED METHODS

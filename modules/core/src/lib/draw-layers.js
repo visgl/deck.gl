@@ -301,18 +301,16 @@ function getViewportFromDescriptor(viewportOrDescriptor) {
 function getObjectHighlightParameters(layer) {
   // TODO - inefficient to update settings every render?
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
+  const {highlightedObjectIndex, highlightColor} = layer.props;
+  const parameters = {
+    pickingHighlightColor: highlightColor
+  };
 
   // Update picking module settings if highlightedObjectIndex is set.
   // This will overwrite any settings from auto highlighting.
-  if (Number.isInteger(layer.props.highlightedObjectIndex)) {
-    const pickingSelectedColor =
-      layer.props.highlightedObjectIndex >= 0
-        ? layer.encodePickingColor(layer.props.highlightedObjectIndex)
-        : null;
-
-    return {
-      pickingSelectedColor
-    };
+  if (Number.isInteger(highlightedObjectIndex)) {
+    parameters.pickingSelectedColor =
+      highlightedObjectIndex >= 0 ? layer.encodePickingColor(highlightedObjectIndex) : null;
   }
-  return null;
+  return parameters;
 }

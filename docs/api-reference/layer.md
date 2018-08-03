@@ -317,6 +317,9 @@ The state object allows a layer to store persistent information cross rendering 
 
 Used to update the layers [`state`](/docs/api-reference/layer.md#-state-object-) object. Calling this method will also cause the layer to rerender.
 
+##### `setModuleParameters`
+
+Used to update the settings of shader modules.
 
 ### Layer Lifecycle Methods
 

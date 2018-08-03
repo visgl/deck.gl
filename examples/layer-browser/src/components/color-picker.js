@@ -42,7 +42,8 @@ export function getColorArray(str) {
   return [
     parseInt(str.slice(1, 3), 16),
     parseInt(str.slice(3, 5), 16),
-    parseInt(str.slice(5, 7), 16)
+    parseInt(str.slice(5, 7), 16),
+    255
   ];
 }
 
