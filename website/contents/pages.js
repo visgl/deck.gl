@@ -268,6 +268,19 @@ export const docPages = generatePath([
         content: getDocUrl('developer-guide/debugging.md')
       },
       {
+        name: 'JSON',
+        children: [
+          {
+            name: 'Using the JSON API',
+            content: getDocUrl('developer-guide/json/using-json-api.md')
+          },
+          {
+            name: 'Configuring the JSON API',
+            content: getDocUrl('developer-guide/json/configuring-json-layers.md')
+          }
+        ]
+      },
+      {
         name: 'Testing',
         children: [
           {
@@ -497,6 +510,19 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/map-controller.md')
           }
         ]
+      }
+    ]
+  },
+  {
+    name: 'JSON API Reference (Experimental)',
+    children: [
+      {
+        name: 'JSONDeck (Experimental)',
+        content: getDocUrl('api-reference/json/json-deck.md')
+      },
+      {
+        name: 'JSONLayer (Experimental)',
+        content: getDocUrl('api-reference/json/json-layer.md')
       }
     ]
   },

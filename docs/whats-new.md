@@ -2,10 +2,30 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v6.1
+
+Release date: TBD, Target late Aug, 2018
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/attribute-transition.gif" />
+        <p><i>JSON API</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+### JSON API
+
+A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be rendered using JSON specifications.
+
 
 ## deck.gl v6.0
 
-Release date: TBD, target late Q2, 2018
+Release date: July 18, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
