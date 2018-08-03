@@ -534,14 +534,9 @@ export default class Layer extends Component {
       this.updateTransition();
     }
 
-    moduleParameters = Object.assign(
-      // Extending Props object directly will lose inherited keys
-      Object.create(this.props),
-      this._getModuleParameters(),
-      moduleParameters
-    );
-    for (const model of this.getModels()) {
-      model.updateModuleSettings(moduleParameters);
+    // TODO/ib - hack move to luma Model.draw
+    if (moduleParameters) {
+      this.setModuleParameters(moduleParameters);
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -665,10 +660,9 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   }
 
   setModuleParameters(moduleParameters) {
-    if (this.internalState) {
-      Object.assign(this.internalState.moduleParameters, moduleParameters);
+    for (const model of this.getModels()) {
+      model.updateModuleSettings(moduleParameters);
     }
-    this.setNeedsRedraw();
   }
 
   // PRIVATE METHODS
@@ -818,10 +812,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     // TODO - set needsRedraw on the model(s)?
     this.setNeedsRedraw();
-  }
-
-  _getModuleParameters() {
-    return this.internalState && this.internalState.moduleParameters;
   }
 
   // DEPRECATED METHODS

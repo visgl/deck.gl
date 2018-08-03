@@ -236,11 +236,11 @@ function drawLayerInViewport({
   glViewport,
   parameters
 }) {
-  const moduleParameters = {
+  const moduleParameters = Object.assign(Object.create(layer.props), {
     viewport: layer.context.viewport,
     pickingActive: drawPickingColors ? 1 : 0,
     devicePixelRatio: pixelRatio
-  };
+  });
 
   const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
 
@@ -308,8 +308,9 @@ function getObjectHighlightParameters(layer) {
 
   // Update picking module settings if highlightedObjectIndex is set.
   // This will overwrite any settings from auto highlighting.
-  if (Number.isInteger(highlightedObjectIndex) && highlightedObjectIndex >= 0) {
-    parameters.pickingSelectedColor = layer.encodePickingColor(highlightedObjectIndex);
+  if (Number.isInteger(highlightedObjectIndex)) {
+    parameters.pickingSelectedColor =
+      highlightedObjectIndex >= 0 ? layer.encodePickingColor(highlightedObjectIndex) : null;
   }
   return parameters;
 }
