@@ -145,10 +145,13 @@ export default class Deck {
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
 
-    // Note: LayerManager creation deferred until gl context available
-    this.canvas = this._createCanvas(props);
-
-    this.animationLoop = this._createAnimationLoop(props);
+    if (!props._customRender) {
+      // Note: LayerManager creation deferred until gl context available
+      if (typeof document !== 'undefined') {
+        this.canvas = this._createCanvas(props);
+      }
+      this.animationLoop = this._createAnimationLoop(props);
+    }
 
     this.setProps(props);
 
@@ -306,18 +309,21 @@ export default class Deck {
 
   // Updates canvas width and/or height, if provided as props
   _setCanvasSize(props) {
-    const {canvas} = this;
+    if (!this.canvas) {
+      return;
+    }
+
     let {width, height} = props;
     // Set size ONLY if props are being provided, otherwise let canvas be layouted freely
     if (width || width === 0) {
       width = Number.isFinite(width) ? `${width}px` : width;
-      canvas.style.width = width;
+      this.canvas.style.width = width;
     }
     if (height || height === 0) {
       height = Number.isFinite(height) ? `${height}px` : height;
       // Note: position==='absolute' required for height 100% to work
-      canvas.style.position = 'absolute';
-      canvas.style.height = height;
+      this.canvas.style.position = 'absolute';
+      this.canvas.style.height = height;
     }
   }
 
