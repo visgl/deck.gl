@@ -7,7 +7,7 @@
 
 ## Summary
 
-This RFC proposes adding adaptor classes that accept JSON descriptions of views and layers.
+This RFC proposes adding adaptor classes that accept JSON descriptions of views and layers and convert them to deck.gl views and layers. The JSON schema is proposed to be a "minimal" mapping of the current declarative deck.gl API.
 
 
 ## Background
@@ -21,20 +21,24 @@ Also, significant effort was already invested during the deck.gl v5 dev cycle to
 
 ## Proposals
 
-### `JSONLayer` (New Class)
 
-Takes an array of JSON layer descriptors, and a layer catalog.
+### Follow our "One API" Principle
 
-```js
-import {JSONLayer} from '@deck.gl/experimental-layers';
+Ideally, we should view the support for JSON Layers simply as the "fourth incarnation" of the deck.gl API (next to vanilla JS, scripting and React). And as always, the rule that deck.gl fundamentally only has "one API" should still apply here. I.e. we should resist the temptation to define special semantics or props or API variants that work just in JSON:
 
-const layers = [
-  new JSONLayer({
-  	layerCatalog: require('@deck.gl/layers'),
-  	json: require('./us-map.json')
-  })
-];
-```
+* keep mappings between JSON props and JavaScript props and types as natural as possible
+* When making changes and additions to the exposed functionality, consider doing these changes in `@deck.gl/core` or in all APIs.
+
+
+### `@deck.gl/json` (New npm module)
+
+We need to decide where to put JSON functionality and new classes. * Do they deserve their own module `@deck.gl/json`? As a "fourth" API, yes. But is there enough code / expected growth to justify it?
+
+
+* The code is (currently) quite small, but still doesn't quite deserve to be in `@deck.gl/core` or `@deck.gl/layers`. (we need to keep the core small and generic, and the layers module should obviously only contain layers).
+* Should we create a place for experimental code that is not a layer? E.g. `@deck.gl/addons` `@deck.gl/experimental` or `@deck.gl/experimental-layers/addons`?
+* The code has some commonality with the scripting API... compare and make a "symmetric" solution.
+
 
 
 ### `JSONDeck` (New Class)
@@ -58,24 +62,91 @@ export const deckgl = new JSONDeck({
 });
 ```
 
+### `JSONLayer` (New Class)
 
-### Support Declarative Syntax for Accessor-Style functions
+Takes an array of JSON layer descriptors, and a layer catalog. `JSONDeck` builds on this class, however using this class directly allows apps to mix in some JSON layers with programmatically generated layers.
+
+```js
+import {JSONLayer} from '@deck.gl/experimental-layers';
+
+const layers = [
+  new JSONLayer({
+  	layerCatalog: require('@deck.gl/layers'),
+  	json: require('./us-map.json')
+  })
+];
+```
+
+
+### Support for Non-Primitive Data Types
+
+Strings, numbers, booleans, and objects and arrays are all supported natively in JSON. But for other data types, some conversion or support is typically necessary.
+
+
+#### Classes
+
+For classes, a `catalog` concept is being proposed. Maps of layer and view classes are supplied to the proposed `JSONDeck` component, and it uses these catalogs to convert JSON objects in the right places into objects:
+
+```json
+{
+  "layers": {
+  	"type": "ScatterplotLayer",
+  	"data": "..."
+  }
+}
+```
+
+is replaced by the `JSONDeck` component with
+
+```js
+new ScatterplotLayer({data})
+```
+
+When the JSONDeck component finds a "type" it looks into a "layer catalog" provided by the application, and similarly for views. This leaves the choice of what layers and views to bundle with the application, and makes it easy for apps to expose other classes.
+
+> An open question is if other class catalogs should be supported, perhaps in specific or arbitrary positions in the tree.
+
+
+#### Constants/Enumerations
+
+Currently constants, e.g. `"coordinateSystem": "COORDINATE_SYSTEM.IDENTITY"` must be specified with their numeric counterparts: `"coordinateSystem": "0"`.
+
+> A system for registering converter could be considered, but ideally it would be integrated with the prop types system.
+
+
+#### Functions: Support Declarative Syntax for Accessor-Style functions
 
 In most cases, to meaningfully use deck.gl layers, the user must at least be able to configure accessor functions. Currently deck.gl does not support a fully "declarative" syntax for accessors.
 
 Constant accessors are supported by default, function valued accessors are not. JSON cannot contain functions, however it can contain strings that can be parsed and used to generate functions.
 
-While more advanced formats are possible in the future, the initial idea is to treat strings simplh as object access "paths".
+While more advanced formats are possible in the future, the initial idea is to treat strings simply as object access "paths".
 
 Examples:
-* the string `'position'` will generate a function `x => x.position`
+* `'position'` will generate a function `x => x.position`
 * `'props.color'` will generate a function `x => x.props.color`
-* The empty string `''` will generate a function `x => x`
+* `'-'` (a dash, or maybe an equal sign) will generate a function `x => x`
 
-A second key problem is to determine which strings (layer props) should be parsed into functions? Since we have started build out a prop types system, it is suggested we extend this as needed and parse and generate functions based on prop types.
+Another problem is to determine which strings (layer props) should be parsed into functions. The prototype converts any string valued layer props that starts with `get`.  But since we have started build out a prop types system, it is suggested we extend this as needed and parse and generate functions based on prop types.
+
+> Could we also support string accessors in non-JSON APIs? If we did, the JSON API would just leverage the core functionality. The conversion from strings to functions could be built into the prop type system? Better performance characteristics (e.g. shallow string comparison succeeds where shallow function comparison fails)?
 
 
-## Error Handling
+## Future Work
+
+
+### JSON Schemas
+
+It is customary to define and publish a JSON schema, which enables a bunch of existing tooling e.g. for validation.
+
+* Define JSON schema for deck.gl and upload to jsonschemas.org.
+* Automatic generation of JSON schemas from prop types. There is already a base script in the `scripts` folder for traversing layer props. We could have consolidated set of tooling for automatically generating JSON schemas, Flow types, TypeScript types, React PropTypes etc.
+* Publish JSON schemas for each version of deck.gl API, enabling JSON validators etc.
+
+We might want to also look at other existing visualization schemas, such as Vega, Vega-lite, Plotly etc. It may be possible to support such schemas with additional adapter code.
+
+
+### Error Handling
 
 When asking users to provide data in a textual format such as JSON, there are many opportunities for the user to make mistakes tht are simple to solve but hard to find (compare with our support for GeoJSON, where we sometimes get questions from users who fail to render successfully due to some simple formatting issue in their data, where a simple error message from deck.gl could have saved them a lot of time).
 
@@ -93,35 +164,13 @@ We should have a plan for detecting errors and providing the best possible messa
 **Showing Errors** - P2 - It would be really nice if we could show the user in an editor exacly where his problems are, but this would likely require more work. This feature would likely be JSON layer specific.
 
 
-## Open Questions
-
-### Where to put the new classes?
-
-* They are quite small. Don't quite deserve to be in core/layers, and don't quite deserve their own module.
-* Perhaps in a `@deck.gl/addons` `@deck.gl/experimental` or `@deck.gl/experimental-layers/addons`?
-* They are being incubated in a separate infovis repo, but that is not public yet.
-
-Note, there could be changes to e.g. error handling etc that must be done in the `core` and `layers` modules.
-
-
-### Any reason to support string accessors in non-JSON APIs?
-
-* Better performance characteristics? String comparison succeeds where function comparison fails.
-* The conversion from strings to functions could be built into the prop type system?
-
-
-### Future Extensions / Interactivity
+### Declarative Interactivity
 
 As JSON layers get more usage, users will ask for more functionality to be made available declaratively. In particular *interactivity* will be requested.
 
-An example could be **hover tooltips**, which is a common feature in many visualizations.
+While some interactivity requirements are application specific and do not belong in a framework, some features may be small and helpful for other APIs (scripting, React) that they could make sense to build into deck.gl itself, and in fact deck.gl v5 already built in a few cases into the API, removing the need for callbacks for e.g. resize handling, basic viewport interaction, object hightlighting etc.
 
-Some of these requirements should naturally be implemented by applications, but some features may be small and helpful for other APIs (scripting, React) that they could make sense to build into deck.gl itself.
+One of the first additional examples could be **hover tooltips**, which is a common feature in many visualizations. It will likely be needed in the JSON API and we could investigate whether it is something deck.gl should support more generically.
 
-For extensive interactivity support is probably best to implement a system that has already done the hard work to solve interactivity problems in a declarative JSON environment , such as a Vega. Again it is assumed that such an effort should remain separate from this RFC, as the scope will be much bigger, and the API will diverge considerably from the code deck.gl API.
-
-
-## (Philosophical) Final Thoughts
-
-Ideally, we should view the support for JSON Layers simply as the "fourth incarnation" of the deck.gl API (next to vanilla JS, scripting and React). And as always, the rule that deck.gl fundamentally only has "one API" should still apply here.
+For more extensive, "programmable" declarative interactivity support, we would need to define some mechanisms in JSON to e.g. cross-reference values (set one layer prop to be the value of some other element). For this type of more advanced interactivity, it is probably best to implement (or at least closely study) a system that has already done the hard work to solve interactivity problems in a declarative JSON environment, such as a Vega. Again it is assumed that such an effort should remain separate from this RFC, as the scope will be much bigger, and the API will diverge considerably from the code deck.gl API.
 
