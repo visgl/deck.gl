@@ -68,8 +68,8 @@ export default class BinSorter {
     if (!len) {
       return [0, 0];
     }
-    const lowerIdx = Math.ceil((lower / 100) * (len - 1));
-    const upperIdx = Math.floor((upper / 100) * (len - 1));
+    const lowerIdx = Math.ceil(lower / 100 * (len - 1));
+    const upperIdx = Math.floor(upper / 100 * (len - 1));
 
     return [this.sortedBins[lowerIdx].value, this.sortedBins[upperIdx].value];
   }

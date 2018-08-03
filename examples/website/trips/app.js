@@ -61,7 +61,7 @@ export class App extends Component {
     const loopTime = loopLength / animationSpeed;
 
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      time: (timestamp % loopTime) / loopTime * loopLength
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }

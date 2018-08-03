@@ -1,4 +1,4 @@
-# @deck.gl/json
+# @deck.gl/layers
 
 This is the core layer catalog for deck.gl.
 

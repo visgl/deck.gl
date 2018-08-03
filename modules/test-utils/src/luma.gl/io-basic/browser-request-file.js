@@ -54,7 +54,7 @@ class XHR {
     this.req.onabort = e => onAbort(e);
     this.req.onprogress = e => {
       if (e.lengthComputable) {
-        onProgress(e, Math.round((e.loaded / e.total) * 100));
+        onProgress(e, Math.round(e.loaded / e.total * 100));
       } else {
         onProgress(e, -1);
       }

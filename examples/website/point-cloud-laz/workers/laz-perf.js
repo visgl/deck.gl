@@ -317,7 +317,7 @@ var Runtime = {
         var codePoint = ((c1 & 7) << 18) | ((c2 & 63) << 12) | ((c3 & 63) << 6) | (c4 & 63);
         ret = String.fromCharCode(
           (((codePoint - 65536) / 1024) | 0) + 55296,
-          ((codePoint - 65536) % 1024) + 56320
+          (codePoint - 65536) % 1024 + 56320
         );
       }
       buffer.length = 0;
@@ -35247,7 +35247,7 @@ function _strftime(s, maxsize, format, tm) {
       var off = date.tm_gmtoff;
       var ahead = off >= 0;
       off = Math.abs(off) / 60;
-      off = (off / 60) * 100 + (off % 60);
+      off = off / 60 * 100 + off % 60;
       return (ahead ? '+' : '-') + String('0000' + off).slice(-4);
     },
     '%Z': function(date) {
@@ -50437,7 +50437,7 @@ var asm = (function(global, env, buffer) {
       i = h;
       return;
     }
-    c[b >> 2] = (((f | 0) / 12) | 0 | 0) % 7 | 0;
+    c[b >> 2] = ((((f | 0) / 12) | 0 | 0) % 7) | 0;
     i = h;
     return;
   }
@@ -50483,7 +50483,7 @@ var asm = (function(global, env, buffer) {
       i = h;
       return;
     }
-    c[b >> 2] = (((f | 0) / 12) | 0 | 0) % 12 | 0;
+    c[b >> 2] = ((((f | 0) / 12) | 0 | 0) % 12) | 0;
     i = h;
     return;
   }
@@ -62170,7 +62170,7 @@ var asm = (function(global, env, buffer) {
       i = h;
       return;
     }
-    c[b >> 2] = (((f | 0) / 12) | 0 | 0) % 7 | 0;
+    c[b >> 2] = ((((f | 0) / 12) | 0 | 0) % 7) | 0;
     i = h;
     return;
   }
@@ -62216,7 +62216,7 @@ var asm = (function(global, env, buffer) {
       i = h;
       return;
     }
-    c[b >> 2] = (((f | 0) / 12) | 0 | 0) % 12 | 0;
+    c[b >> 2] = ((((f | 0) / 12) | 0 | 0) % 12) | 0;
     i = h;
     return;
   }
@@ -77548,7 +77548,7 @@ var asm = (function(global, env, buffer) {
                 return +O;
               }
               if ((J | 0) < 9) {
-                O = (+(e | 0) * +((c[m >> 2] | 0) >>> 0)) / +(c[(29408 + ((8 - J) << 2)) >> 2] | 0);
+                O = +(e | 0) * +((c[m >> 2] | 0) >>> 0) / +(c[(29408 + ((8 - J) << 2)) >> 2] | 0);
                 i = g;
                 return +O;
               }
@@ -77560,7 +77560,7 @@ var asm = (function(global, env, buffer) {
               return +O;
             }
           while (0);
-          p = (J | 0) % 9 | 0;
+          p = ((J | 0) % 9) | 0;
           if (!p) {
             p = 0;
             b = 0;
@@ -77578,7 +77578,7 @@ var asm = (function(global, env, buffer) {
                 I = c[G >> 2] | 0;
                 L = ((((I >>> 0) / (s >>> 0)) | 0) + b) | 0;
                 c[G >> 2] = L;
-                b = da((I >>> 0) % (s >>> 0) | 0, f) | 0;
+                b = da(((I >>> 0) % (s >>> 0)) | 0, f) | 0;
                 I = r;
                 r = (r + 1) | 0;
                 if (((I | 0) == (p | 0)) & ((L | 0) == 0)) {
@@ -79006,7 +79006,7 @@ var asm = (function(global, env, buffer) {
               if (Va)
                 while (1) {
                   Xa = (Xa + -1) | 0;
-                  a[Xa >> 0] = (Va >>> 0) % 10 | 0 | 48;
+                  a[Xa >> 0] = ((Va >>> 0) % 10) | 0 | 48;
                   if (Va >>> 0 < 10) break;
                   else Va = ((Va >>> 0) / 10) | 0;
                 }
@@ -79273,7 +79273,7 @@ var asm = (function(global, env, buffer) {
               cb = (Ya + 9216) | 0;
               bb = ((cb | 0) / 9) | 0;
               Ya = (Ta + ((bb + -1023) << 2)) | 0;
-              cb = (((cb | 0) % 9 | 0) + 1) | 0;
+              cb = ((((cb | 0) % 9) | 0) + 1) | 0;
               if ((cb | 0) < 9) {
                 ab = 10;
                 do {
@@ -79282,7 +79282,7 @@ var asm = (function(global, env, buffer) {
                 } while ((cb | 0) != 9);
               } else ab = 10;
               db = c[Ya >> 2] | 0;
-              cb = (db >>> 0) % (ab >>> 0) | 0;
+              cb = ((db >>> 0) % (ab >>> 0)) | 0;
               if ((cb | 0) == 0 ? ((Ta + ((bb + -1022) << 2)) | 0) == (Wa | 0) : 0) {
                 va = Xa;
                 wa = Ya;
@@ -79387,7 +79387,7 @@ var asm = (function(global, env, buffer) {
                       cb = 9;
                       break;
                     }
-                    if (!((ab >>> 0) % 10 | 0)) {
+                    if (!(((ab >>> 0) % 10) | 0)) {
                       $a = 10;
                       cb = 0;
                     } else {
@@ -79397,7 +79397,7 @@ var asm = (function(global, env, buffer) {
                     do {
                       $a = ($a * 10) | 0;
                       cb = (cb + 1) | 0;
-                    } while (((ab >>> 0) % ($a >>> 0) | 0 | 0) == 0);
+                    } while ((((ab >>> 0) % ($a >>> 0)) | 0 | 0) == 0);
                   } else cb = 9;
                 while (0);
                 Za = (((((Wa - Za) >> 2) * 9) | 0) + -9) | 0;
@@ -79444,7 +79444,7 @@ var asm = (function(global, env, buffer) {
               if (bb)
                 while (1) {
                   db = (db + -1) | 0;
-                  a[db >> 0] = (bb >>> 0) % 10 | 0 | 48;
+                  a[db >> 0] = ((bb >>> 0) % 10) | 0 | 48;
                   if (bb >>> 0 < 10) break;
                   else bb = ((bb >>> 0) / 10) | 0;
                 }
@@ -79493,7 +79493,7 @@ var asm = (function(global, env, buffer) {
                     Xa = D;
                     while (1) {
                       Xa = (Xa + -1) | 0;
-                      a[Xa >> 0] = (_a >>> 0) % 10 | 0 | 48;
+                      a[Xa >> 0] = ((_a >>> 0) % 10) | 0 | 48;
                       if (_a >>> 0 < 10) break;
                       else _a = ((_a >>> 0) / 10) | 0;
                     }
@@ -79523,7 +79523,7 @@ var asm = (function(global, env, buffer) {
                       Ra = D;
                       while (1) {
                         Ra = (Ra + -1) | 0;
-                        a[Ra >> 0] = (Ta >>> 0) % 10 | 0 | 48;
+                        a[Ra >> 0] = ((Ta >>> 0) % 10) | 0 | 48;
                         if (Ta >>> 0 < 10) break;
                         else Ta = ((Ta >>> 0) / 10) | 0;
                       }
@@ -79567,7 +79567,7 @@ var asm = (function(global, env, buffer) {
                         f = D;
                         while (1) {
                           f = (f + -1) | 0;
-                          a[f >> 0] = (Wa >>> 0) % 10 | 0 | 48;
+                          a[f >> 0] = ((Wa >>> 0) % 10) | 0 | 48;
                           if (Wa >>> 0 < 10) break;
                           else Wa = ((Wa >>> 0) / 10) | 0;
                         }
@@ -79846,7 +79846,7 @@ var asm = (function(global, env, buffer) {
           } else
             while (1) {
               Ja = (Ja + -1) | 0;
-              a[Ja >> 0] = (xa >>> 0) % 10 | 0 | 48;
+              a[Ja >> 0] = ((xa >>> 0) % 10) | 0 | 48;
               if (xa >>> 0 < 10) {
                 xa = fa;
                 Ba = ga;
@@ -81968,7 +81968,7 @@ var i64Math = (function() {
       return goog.math.Long.fromNumber(-value).negate();
     } else {
       return new goog.math.Long(
-        value % goog.math.Long.TWO_PWR_32_DBL_ | 0,
+        (value % goog.math.Long.TWO_PWR_32_DBL_) | 0,
         (value / goog.math.Long.TWO_PWR_32_DBL_) | 0
       );
     }
@@ -82504,7 +82504,7 @@ var i64Math = (function() {
       m = false,
       r = '',
       i = this.t;
-    var p = this.DB - ((i * this.DB) % k);
+    var p = this.DB - (i * this.DB) % k;
     if (i-- > 0) {
       if (p < this.DB && (d = this[i] >> p) > 0) {
         m = true;
@@ -82775,7 +82775,7 @@ var i64Math = (function() {
     y = (y * (2 - (x & 15) * y)) & 15;
     y = (y * (2 - (x & 255) * y)) & 255;
     y = (y * (2 - (((x & 65535) * y) & 65535))) & 65535;
-    y = (y * (2 - ((x * y) % this.DV))) % this.DV;
+    y = (y * (2 - (x * y) % this.DV)) % this.DV;
     return y > 0 ? this.DV - y : -y;
   }
   function Montgomery(m) {
@@ -82908,7 +82908,7 @@ var i64Math = (function() {
     if (mi) BigInteger.ZERO.subTo(this, this);
   }
   function bnpChunkSize(r) {
-    return Math.floor((Math.LN2 * this.DB) / Math.log(r));
+    return Math.floor(Math.LN2 * this.DB / Math.log(r));
   }
   function bnSigNum() {
     if (this.s < 0) return -1;

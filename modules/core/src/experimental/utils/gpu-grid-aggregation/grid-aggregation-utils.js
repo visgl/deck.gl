@@ -138,7 +138,7 @@ function _calculateGridLatLonOffset(cellSize, latitude) {
  * @return {number} - increment in latitude
  */
 function _calculateLatOffset(dy) {
-  return (dy / R_EARTH) * (180 / Math.PI);
+  return dy / R_EARTH * (180 / Math.PI);
 }
 
 /**
@@ -150,7 +150,7 @@ function _calculateLatOffset(dy) {
  * @return {number} - increment in longitude
  */
 function _calculateLonOffset(lat, dx) {
-  return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
+  return dx / R_EARTH * (180 / Math.PI) / Math.cos(lat * Math.PI / 180);
 }
 
 // Aligns `inValue` to given `cellSize`

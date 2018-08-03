@@ -109,6 +109,6 @@ export default class TagMapWrapper {
 
   measureText(label, fontSize) {
     const width = this.textSizes[label];
-    return {width: (width / 10) * fontSize, height: fontSize};
+    return {width: width / 10 * fontSize, height: fontSize};
   }
 }

@@ -44,7 +44,7 @@ export default class DataGenerator {
       const size = random(this.sizeRange);
 
       const vertices = Array.from({length: vertexCount + 1}, (v, i) => {
-        const ai = ((Math.PI * 2) / vertexCount) * i;
+        const ai = Math.PI * 2 / vertexCount * i;
         const p = [center[0] + Math.cos(ai) * r, center[1] + Math.sin(ai) * r];
         this.points.push({color, position: p, radius: size * 2});
         return p;

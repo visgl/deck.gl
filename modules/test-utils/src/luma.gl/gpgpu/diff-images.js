@@ -11,7 +11,7 @@ const getQ = (r, g, b) => r * 0.21147017 - g * 0.52261711 + b * 0.31114694;
 const getESq = (dY, dI, dQ) => 0.5053 * dY * dY + 0.299 * dI * dI + 0.1957 * dQ * dQ;
 
 // Get blended r/g/b value after applying alpha
-const applyAlpha = (c, a) => 255 + ((c - 255) * a) / 255;
+const applyAlpha = (c, a) => 255 + (c - 255) * a / 255;
 
 /**
  * Get dE square at given index from two pixel arrays

@@ -88,7 +88,7 @@ export class App extends Component {
       return [200, 200, 200];
     }
     const key = getKey(f.properties);
-    const fatalitiesPer1KMile = ((fatalities[key] || 0) / f.properties.length) * 1000;
+    const fatalitiesPer1KMile = (fatalities[key] || 0) / f.properties.length * 1000;
     return COLOR_SCALE(fatalitiesPer1KMile);
   }
 
@@ -97,7 +97,7 @@ export class App extends Component {
       return 10;
     }
     const key = getKey(f.properties);
-    const incidentsPer1KMile = ((incidents[key] || 0) / f.properties.length) * 1000;
+    const incidentsPer1KMile = (incidents[key] || 0) / f.properties.length * 1000;
     return WIDTH_SCALE(incidentsPer1KMile);
   }
 

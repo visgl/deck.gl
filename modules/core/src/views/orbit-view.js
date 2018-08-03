@@ -36,7 +36,7 @@ export default class OrbitView extends View {
   // @param {Array} boundingBox - [sizeX, sizeY, sizeZ]], defines the dimensions of bounding box
   static getDistance({boundingBox, fov}) {
     const halfMaxSide = Math.max(boundingBox[0], boundingBox[1], boundingBox[2]) / 2;
-    const distance = halfMaxSide / Math.tan(((fov / 180) * Math.PI) / 2);
+    const distance = halfMaxSide / Math.tan(fov / 180 * Math.PI / 2);
     return distance;
   }
 
@@ -86,11 +86,11 @@ export default class OrbitView extends View {
       zoom = 1
     } = viewState;
 
-    const rotationMatrix = mat4_rotateX([], createMat4(), (-rotationX / 180) * Math.PI);
+    const rotationMatrix = mat4_rotateX([], createMat4(), -rotationX / 180 * Math.PI);
     if (orbitAxis === 'Z') {
-      mat4_rotateZ(rotationMatrix, rotationMatrix, (-rotationOrbit / 180) * Math.PI);
+      mat4_rotateZ(rotationMatrix, rotationMatrix, -rotationOrbit / 180 * Math.PI);
     } else {
-      mat4_rotateY(rotationMatrix, rotationMatrix, (-rotationOrbit / 180) * Math.PI);
+      mat4_rotateY(rotationMatrix, rotationMatrix, -rotationOrbit / 180 * Math.PI);
     }
 
     const translateMatrix = createMat4();

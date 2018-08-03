@@ -75,7 +75,7 @@ export class App extends Component {
           const slice = data[i].map(val => {
             const offset = Math.abs(getSecFloor(now) + (now % 1000) / 1000 - i) / TIME_WINDOW;
             // use non-linear function to achieve smooth animation
-            const opac = Math.cos((offset * Math.PI) / 2);
+            const opac = Math.cos(offset * Math.PI / 2);
             const color = [...TEXT_COLOR, opac * 255];
             return Object.assign({}, val, {color}, {size: 12 * (opac + 1)});
           });

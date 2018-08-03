@@ -116,7 +116,7 @@ export default class SurfaceLayer extends Layer {
     const xIndex = i % uCount;
     const yIndex = (i - xIndex) / uCount;
 
-    return [(xIndex / (uCount - 1)) * 255, (yIndex / (vCount - 1)) * 255, 1];
+    return [xIndex / (uCount - 1) * 255, yIndex / (vCount - 1) * 255, 1];
   }
 
   decodePickingColor([r, g, b]) {

@@ -198,8 +198,8 @@ class FirstPersonState extends ViewState {
     const cx = startZoomPos[0] - width / 2;
     const cy = height / 2 - startZoomPos[1];
     /* eslint-disable no-unused-vars */
-    const newTranslationX = cx - ((cx - translationX) * newZoom) / zoom + deltaX;
-    const newTranslationY = cy - ((cy - translationY) * newZoom) / zoom - deltaY;
+    const newTranslationX = cx - (cx - translationX) * newZoom / zoom + deltaX;
+    const newTranslationY = cy - (cy - translationY) * newZoom / zoom - deltaY;
     /* eslint-enable no-unused-vars */
 
     // return this._getUpdatedState({
