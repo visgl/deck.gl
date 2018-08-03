@@ -24,10 +24,10 @@ export default `\
 precision highp float;
 
 varying vec4 vColor;
-varying float vEnabled;
+varying float isValid;
 
 void main(void) {
-  if (vEnabled < 0.5) {
+  if (isValid < 0.5) {
     discard;
   }
 

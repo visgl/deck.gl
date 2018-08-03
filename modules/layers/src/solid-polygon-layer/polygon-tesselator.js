@@ -67,8 +67,7 @@ export class PolygonTesselator {
     const {attributes, polygons, pointCount} = this;
 
     attributes.positions = attributes.positions || new Float32Array(pointCount * 3);
-    attributes.vertexEnabled =
-      attributes.vertexEnabled || new Uint8ClampedArray(pointCount).fill(1);
+    attributes.vertexValid = attributes.vertexValid || new Uint8ClampedArray(pointCount).fill(1);
 
     if (fp64) {
       // We only need x, y component
@@ -90,8 +89,8 @@ export class PolygonTesselator {
     return this.attributes.positions64xyLow;
   }
 
-  vertexEnabled() {
-    return this.attributes.vertexEnabled;
+  vertexValid() {
+    return this.attributes.vertexValid;
   }
 
   elevations({key = 'elevations', getElevation = x => 100} = {}) {
@@ -156,7 +155,7 @@ function calculateIndices({polygons, IndexType = Uint32Array}) {
 }
 
 function updatePositions({
-  cache: {positions, positions64xyLow, vertexEnabled},
+  cache: {positions, positions64xyLow, vertexValid},
   polygons,
   extruded,
   fp64
@@ -183,13 +182,13 @@ function updatePositions({
       /* We are reusing the some buffer for `nextPositions` by offsetting one vertex
        * to the left. As a result,
        * the last vertex of each loop overlaps with the first vertex of the next loop.
-       * `vertexEnabled` is used to mark the end of each loop so we don't draw these
+       * `vertexValid` is used to mark the end of each loop so we don't draw these
        * segments:
         positions      A0 A1 A2 A3 A4 B0 B1 B2 C0 ...
         nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
-        vertexEnabled   1  1  1  1  0  1  1  0  1 ...
+        vertexValid    1  1  1  1  0  1  1  0  1 ...
        */
-      vertexEnabled[i - 1] = 0;
+      vertexValid[i - 1] = 0;
     });
   });
 }

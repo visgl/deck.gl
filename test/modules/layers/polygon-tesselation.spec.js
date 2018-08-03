@@ -84,7 +84,7 @@ test('PolygonTesselator#constructor', t => {
       tesselator.updatePositions(testCase.params);
 
       t.ok(ArrayBuffer.isView(tesselator.positions()), 'PolygonTesselator.positions');
-      t.ok(ArrayBuffer.isView(tesselator.vertexEnabled()), 'PolygonTesselator.vertexEnabled');
+      t.ok(ArrayBuffer.isView(tesselator.vertexValid()), 'PolygonTesselator.vertexValid');
 
       if (testCase.params.fp64) {
         t.ok(

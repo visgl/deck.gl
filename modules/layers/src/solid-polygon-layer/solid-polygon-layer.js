@@ -88,10 +88,10 @@ export default class SolidPolygonLayer extends Layer {
         noAlloc
       },
       positions64xyLow: {size: 2, update: this.calculatePositionsLow, noAlloc},
-      vertexEnabled: {
+      vertexValid: {
         size: 1,
         type: GL.UNSIGNED_BYTE,
-        update: this.calculateVertexEnabled,
+        update: this.calculateVertexValid,
         noAlloc
       },
       elevations: {
@@ -336,8 +336,8 @@ export default class SolidPolygonLayer extends Layer {
     attribute.value = this.state.polygonTesselator.positions64xyLow();
   }
 
-  calculateVertexEnabled(attribute) {
-    attribute.value = this.state.polygonTesselator.vertexEnabled();
+  calculateVertexValid(attribute) {
+    attribute.value = this.state.polygonTesselator.vertexValid();
   }
 
   calculateElevations(attribute) {
