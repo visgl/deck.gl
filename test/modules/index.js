@@ -21,11 +21,8 @@
 import './imports-spec';
 import './core';
 import './layers';
+import './json';
 
-// TODO - React test cases currently only work in browser
-// import './react';
-
-// @deck.gl/experimental-layers
 // TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
   require('./experimental-layers');

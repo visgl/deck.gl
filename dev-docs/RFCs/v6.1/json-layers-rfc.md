@@ -132,12 +132,19 @@ Another problem is to determine which strings (layer props) should be parsed int
 > Could we also support string accessors in non-JSON APIs? If we did, the JSON API would just leverage the core functionality. The conversion from strings to functions could be built into the prop type system? Better performance characteristics (e.g. shallow string comparison succeeds where shallow function comparison fails)?
 
 
+## Testing
+
+If anything, JSON support should enable new easy ways of testing. Especially existing render tests should be easy to adapt to JSON layers.
+
+
 ## Future Work
+
+The functionality described in this RFC is just an initial implementation, there are a lot of additional capabilities that can be added.
 
 
 ### JSON Schemas
 
-It is customary to define and publish a JSON schema, which enables a bunch of existing tooling e.g. for validation.
+When defining a JSON based format, it is customary to define and publish a JSON schema, which enables a bunch of existing tooling e.g. for validation.
 
 * Define JSON schema for deck.gl and upload to jsonschemas.org.
 * Automatic generation of JSON schemas from prop types. There is already a base script in the `scripts` folder for traversing layer props. We could have consolidated set of tooling for automatically generating JSON schemas, Flow types, TypeScript types, React PropTypes etc.
@@ -163,6 +170,8 @@ We should have a plan for detecting errors and providing the best possible messa
 
 **Showing Errors** - P2 - It would be really nice if we could show the user in an editor exacly where his problems are, but this would likely require more work. This feature would likely be JSON layer specific.
 
+**Showing Errors** - P2 - It would be really nice if we could show the user in an editor exacly where his problems are, but this would likely require more work. This feature would likely be JSON layer specific.
+
 
 ### Declarative Interactivity
 
@@ -173,4 +182,3 @@ While some interactivity requirements are application specific and do not belong
 One of the first additional examples could be **hover tooltips**, which is a common feature in many visualizations. It will likely be needed in the JSON API and we could investigate whether it is something deck.gl should support more generically.
 
 For more extensive, "programmable" declarative interactivity support, we would need to define some mechanisms in JSON to e.g. cross-reference values (set one layer prop to be the value of some other element). For this type of more advanced interactivity, it is probably best to implement (or at least closely study) a system that has already done the hard work to solve interactivity problems in a declarative JSON environment, such as a Vega. Again it is assumed that such an effort should remain separate from this RFC, as the scope will be much bigger, and the API will diverge considerably from the code deck.gl API.
-
