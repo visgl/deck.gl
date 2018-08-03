@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {COORDINATE_SYSTEM, Layer} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from 'luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
@@ -83,6 +83,10 @@ export default class PathLayer extends Layer {
         accessor: 'getPath',
         update: this.calculateEndPositions
       },
+      instanceStartEndPositions64xyLow: {
+        size: 4,
+        update: this.calculateInstanceStartEndPositions64xyLow
+      },
       instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
       instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
       instanceStrokeWidths: {
@@ -106,24 +110,6 @@ export default class PathLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-
-      if (props.fp64 && props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        attributeManager.addInstanced({
-          instanceStartEndPositions64xyLow: {
-            size: 4,
-            update: this.calculateInstanceStartEndPositions64xyLow
-          }
-        });
-      } else {
-        attributeManager.remove(['instanceStartEndPositions64xyLow']);
-      }
-    }
-  }
-
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
@@ -135,8 +121,8 @@ export default class PathLayer extends Layer {
         this.state.model.delete();
       }
       this.setState({model: this._getModel(gl)});
+      attributeManager.invalidateAll();
     }
-    this.updateAttribute({props, oldProps, changeFlags});
 
     const geometryChanged =
       changeFlags.dataChanged ||
@@ -302,6 +288,14 @@ export default class PathLayer extends Layer {
   }
 
   calculateInstanceStartEndPositions64xyLow(attribute) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(4);
+      return;
+    }
+
     const {paths} = this.state;
     const {value} = attribute;
 
