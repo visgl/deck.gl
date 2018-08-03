@@ -25,6 +25,7 @@ attribute vec3 positions;
 
 attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
+attribute vec4 instanceStartEndPositions64xyLow;
 attribute vec3 instanceLeftDeltas;
 attribute vec3 instanceRightDeltas;
 attribute float instanceStrokeWidths;
@@ -201,13 +202,16 @@ void main() {
   float isEnd = positions.x;
 
   vec3 prevPosition = mix(-instanceLeftDeltas, vec3(0.0), isEnd) + instanceStartPositions;
-  prevPosition = project_position(prevPosition);
+  vec2 prevPosition64xyLow = instanceStartEndPositions64xyLow.xy;
+  prevPosition = project_position(prevPosition, prevPosition64xyLow);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  currPosition = project_position(currPosition);
+  vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
+  currPosition = project_position(currPosition, currPosition64xyLow);
 
   vec3 nextPosition = mix(vec3(0.0), instanceRightDeltas, isEnd) + instanceEndPositions;
-  nextPosition = project_position(nextPosition);
+  vec2 nextPosition64xyLow = instanceStartEndPositions64xyLow.zw;
+  nextPosition = project_position(nextPosition, nextPosition64xyLow);
 
   vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);
 

@@ -25,6 +25,7 @@ attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
+attribute vec4 instancePositions64Low;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
 
@@ -71,8 +72,8 @@ vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
 }
 
 void main(void) {
-  vec2 source = project_position(instancePositions.xy);
-  vec2 target = project_position(instancePositions.zw);
+  vec2 source = project_position(vec3(instancePositions.xy, 0.0), instancePositions64Low.xy).xy;
+  vec2 target = project_position(vec3(instancePositions.zw, 0.0), instancePositions64Low.zw).xy;
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
