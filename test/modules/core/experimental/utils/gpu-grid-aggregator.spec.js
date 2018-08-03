@@ -55,7 +55,11 @@ test('GPUGridAggregator worldspace aggregation #CompareCPUandGPU', t => {
     counts: result.countsBuffer.getData(),
     maxCount: result.maxCountBuffer.getData()
   };
-  const gpuAggregationOptions = Object.assign({}, fixtureWorldSpace, {useGPU: true, projectPoints: false, fp64: false});
+  const gpuAggregationOptions = Object.assign({}, fixtureWorldSpace, {
+    useGPU: true,
+    projectPoints: false,
+    fp64: false
+  });
 
   // 32-bit aggregation
   result = sa.run(gpuAggregationOptions);

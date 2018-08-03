@@ -32,7 +32,6 @@ const getPosition = d => d.COORDINATES;
 const CELLSIZE = 500;
 const gpuGridAggregator = new GPUGridAggregator(gl);
 
-
 test('GridAggregationUtils#alignToCell (CPU)', t => {
   t.equal(alignToCell(-3, 5), -5);
   t.equal(alignToCell(3, 5), 0);

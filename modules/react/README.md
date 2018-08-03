@@ -1,4 +1,4 @@
-# deck.gl-react
+# @deck.gl/react
 
 React Components for deck.gl
 

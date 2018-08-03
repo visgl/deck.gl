@@ -29,11 +29,11 @@ switch (mode) {
     // Run a smaller selection of the tests (avoid overwhelming Travis CI)
     require('./modules/imports-spec');
     require('./modules/core');
-    // require('./src/core-layers');
-    require('./modules/core-layers/polygon-tesselation.spec');
-    // require('./core-layers.spec');
+    // require('./src/layers');
+    require('./modules/layers/polygon-tesselation.spec');
+    // require('./layers.spec');
     // require('./polygon-layer.spec');
-    require('./modules/core-layers/geojson.spec');
+    require('./modules/layers/geojson.spec');
     // require('./geojson-layer.spec');
     // require('./hexagon-cell-layer.spec');
     // require('./grid-layer.spec');
