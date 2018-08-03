@@ -49,7 +49,7 @@ const flights = new ArcLayer({
 
 Simple usage of deck.gl is also showcased in the [hello-world examples](./examples/get-started), using both [webpack2](./examples/get-started/react-webpack-2) and [browserify](./examples/get-started/react-browserify), so you can choose which bundler you prefer or are more familiar with.
 
-To learn how to use deck.gl through the many examples that coming with the deck.gl repo, please clone the latest **release** branch. `git clone -b 5.3-release --single-branch https://github.com/uber/deck.gl.git`
+To learn how to use deck.gl through the many examples that coming with the deck.gl repo, please clone the latest **release** branch. `git clone -b 6.0-release --single-branch https://github.com/uber/deck.gl.git`
 
 For the most up-to-date information, see our [docs](http://uber.github.io/deck.gl/#/docs/getting-started/installation?section=running-the-examples)
 
