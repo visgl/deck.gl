@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-import {JSONDeck} from '@deck.gl/experimental-layers';
-import mapboxgl from 'mapbox-gl';
+import {JSONDeck} from '@deck.gl/json';
 
 import AceEditor from 'react-ace';
 import 'brace/mode/json';
@@ -23,8 +22,6 @@ export default class Root extends Component {
 
     this.jsonDeck = new JSONDeck({
       canvas: 'deck-canvas',
-      mapContainer: 'map',
-      mapboxgl,
       layerCatalog: LAYER_CATALOG,
       json
     });
@@ -86,8 +83,14 @@ export default class Root extends Component {
       <div>
         <div>
           <div style={{position: 'absolute', width: '100%', height: '100%', margin: 0}}>
-            <div id="map" style={{position: 'absolute', width: '100%', height: '100%', margin: 0}}/>
-            <canvas id="deck-canvas" style={{position: 'absolute', width: '100%', height: '100%', margin: 0}}/>
+            <div
+              id="map"
+              style={{position: 'absolute', width: '100%', height: '100%', margin: 0}}
+            />
+            <canvas
+              id="deck-canvas"
+              style={{position: 'absolute', width: '100%', height: '100%', margin: 0}}
+            />
           </div>
           <div style={{position: 'absolute', top: '5%', width: '40%', left: '55%', margin: 0}}>
             {this._renderJsonSelector()}
