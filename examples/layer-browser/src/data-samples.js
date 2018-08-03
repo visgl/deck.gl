@@ -79,14 +79,14 @@ export const zigzag = [
       .fill(0)
       .map((d, i) => [
         positionOrigin[0] + i * i * 0.001,
-        positionOrigin[1] + Math.cos(i * Math.PI) * 0.2 / (i + 4)
+        positionOrigin[1] + (Math.cos(i * Math.PI) * 0.2) / (i + 4)
       ])
   },
   {
     path: new Array(6)
       .fill(0)
       .map((d, i) => [
-        positionOrigin[0] + Math.cos(i * Math.PI) * 0.05 / (i + 4),
+        positionOrigin[0] + (Math.cos(i * Math.PI) * 0.05) / (i + 4),
         positionOrigin[1] - i * i * 0.0003
       ])
   },
@@ -120,7 +120,7 @@ export function getPointCloud() {
       const xCount = Math.floor(cosy * RESOLUTION * 2) + 1;
 
       for (let xIndex = 0; xIndex < xCount; xIndex++) {
-        const x = xIndex / xCount * Math.PI * 2;
+        const x = (xIndex / xCount) * Math.PI * 2;
         const cosx = Math.cos(x);
         const sinx = Math.sin(x);
 

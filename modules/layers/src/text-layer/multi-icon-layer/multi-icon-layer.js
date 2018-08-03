@@ -82,8 +82,8 @@ export default class MultiIconLayer extends IconLayer {
       const len = getLengthOfQueue(object);
       const shiftX = getShiftInQueue(object);
 
-      value[i++] = (getAnchorX(object) - 1) * len / 2 + rect.width / 2 + shiftX || 0;
-      value[i++] = rect.height / 2 * getAnchorY(object) || 0;
+      value[i++] = ((getAnchorX(object) - 1) * len) / 2 + rect.width / 2 + shiftX || 0;
+      value[i++] = (rect.height / 2) * getAnchorY(object) || 0;
     }
   }
 }

@@ -22,7 +22,7 @@ import log from './log';
 
 // Linear scale maps continuous domain to continuous range
 export function linearScale(domain, range, value) {
-  return (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
+  return ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
 }
 
 // Quantize scale is similar to linear scales,
@@ -47,5 +47,6 @@ export function getQuantizeScale(domain, range) {
 
 // return a linear scale funciton
 export function getLinearScale(domain, range) {
-  return value => (value - domain[0]) / (domain[1] - domain[0]) * (range[1] - range[0]) + range[0];
+  return value =>
+    ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
 }

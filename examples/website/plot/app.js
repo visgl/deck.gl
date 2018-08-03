@@ -4,7 +4,7 @@ import DeckGL, {OrbitView} from 'deck.gl';
 import PlotLayer from './plot-layer';
 import {scaleLinear} from 'd3-scale';
 
-const EQUATION = (x, y) => Math.sin(x * x + y * y) * x / Math.PI;
+const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],

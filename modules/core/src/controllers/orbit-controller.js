@@ -265,8 +265,8 @@ class OrbitState {
     const cx = startZoomPos[0] - width / 2;
     const cy = height / 2 - startZoomPos[1];
     const center = viewport.project(viewport.lookAt);
-    const newCenterX = center[0] - cx + cx * newZoom / zoom + deltaX;
-    const newCenterY = center[1] + cy - cy * newZoom / zoom - deltaY;
+    const newCenterX = center[0] - cx + (cx * newZoom) / zoom + deltaX;
+    const newCenterY = center[1] + cy - (cy * newZoom) / zoom - deltaY;
 
     const newLookAt = viewport.unproject([newCenterX, newCenterY, center[2]]);
 

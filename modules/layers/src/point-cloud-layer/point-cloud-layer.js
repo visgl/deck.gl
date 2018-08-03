@@ -101,7 +101,7 @@ export default class PointCloudLayer extends Layer {
     // a triangle that minimally cover the unit circle
     const positions = [];
     for (let i = 0; i < 3; i++) {
-      const angle = i / 3 * Math.PI * 2;
+      const angle = (i / 3) * Math.PI * 2;
       positions.push(Math.cos(angle) * 2, Math.sin(angle) * 2, 0);
     }
 

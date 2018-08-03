@@ -162,8 +162,8 @@ export default class ScreenGridLayer extends Layer {
     for (let i = 0; i < numInstances; i++) {
       const x = i % numCol;
       const y = Math.floor(i / numCol);
-      value[i * size + 0] = x * cellSizePixels / width * 2 - 1;
-      value[i * size + 1] = 1 - y * cellSizePixels / height * 2;
+      value[i * size + 0] = ((x * cellSizePixels) / width) * 2 - 1;
+      value[i * size + 1] = 1 - ((y * cellSizePixels) / height) * 2;
       value[i * size + 2] = 0;
     }
   }
@@ -344,8 +344,8 @@ export default class ScreenGridLayer extends Layer {
       const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
 
       newState.cellScale = new Float32Array([
-        (cellSizePixels - margin) / width * 2,
-        -(cellSizePixels - margin) / height * 2,
+        ((cellSizePixels - margin) / width) * 2,
+        (-(cellSizePixels - margin) / height) * 2,
         1
       ]);
     }

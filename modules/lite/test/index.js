@@ -11,7 +11,7 @@ for (let x = 0; x < SAMPLE_SIZE; x++) {
     for (let z = 0; z < SAMPLE_SIZE; z++) {
       points.push({
         position: [x - SAMPLE_SIZE / 2, y - SAMPLE_SIZE / 2, z - SAMPLE_SIZE / 2],
-        color: [x / SAMPLE_SIZE * 255, y / SAMPLE_SIZE * 255, z / SAMPLE_SIZE * 255]
+        color: [(x / SAMPLE_SIZE) * 255, (y / SAMPLE_SIZE) * 255, (z / SAMPLE_SIZE) * 255]
       });
     }
   }

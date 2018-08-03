@@ -15,7 +15,7 @@ const IMAGES = {
 };
 
 function toRadian(degree) {
-  return Math.PI * degree / 180;
+  return (Math.PI * degree) / 180;
 }
 
 function toRadians(degrees) {
