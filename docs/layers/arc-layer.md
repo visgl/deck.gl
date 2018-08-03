@@ -102,7 +102,7 @@ The stroke width of each object, in pixels.
 
 ## Source
 
-[modules/core/src/core-layers/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer)
+[/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer)
 
 <a href="https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer">
 </a>

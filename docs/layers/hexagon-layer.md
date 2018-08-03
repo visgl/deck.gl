@@ -65,7 +65,7 @@ center of the hexagon, and `points` is an array of points that contained by it. 
 
 By default, the `HexagonLayer` uses
 [d3-hexbin](https://github.com/d3/d3-hexbin) as `hexagonAggregator`,
-see `src/core-layers/point-density-hexagon-layer/hexagon-aggregator`
+see `modules/layers/src/point-density-hexagon-layer/hexagon-aggregator`
 
 ##### `colorDomain` (Array, optional)
 
@@ -228,4 +228,4 @@ This callback will be called when bin elevation domain has been calculated.
 
 ## Source
 
-[modules/core/src/core-layers/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/hexagon-layer)
+[modules/layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/hexagon-layer)
