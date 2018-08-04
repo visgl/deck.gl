@@ -22,7 +22,7 @@ import {hexbin} from 'd3-hexbin';
 
 /**
  * Use d3-hexbin to performs hexagonal binning from geo points to hexagons
- * @param {Array} data - array of points
+ * @param {Iterable} data - array of points
  * @param {Number} radius - hexagon radius in meter
  * @param {function} getPosition - get points lon lat
  * @param {Object} viewport - current viewport object
@@ -34,14 +34,17 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   const radiusInPixel = getRadiusInPixel(radius, viewport);
 
   // add world space coordinates to points
-  const screenPoints = data.map(pt =>
-    Object.assign(
-      {
-        screenCoord: viewport.projectFlat(getPosition(pt))
-      },
-      pt
-    )
-  );
+  const screenPoints = [];
+  for (const pt of data) {
+    screenPoints.push(
+      Object.assign(
+        {
+          screenCoord: viewport.projectFlat(getPosition(pt))
+        },
+        pt
+      )
+    );
+  }
 
   const newHexbin = hexbin()
     .radius(radiusInPixel)

@@ -18,14 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-import './grid-cell-layer.spec';
-import './grid-layer.spec';
-import './grid-aggregator.spec';
-import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
+import test from 'tape-catch';
+
+import * as FIXTURES from 'deck.gl/test/data';
+
+import {pointToHexbin} from '@deck.gl/layers/hexagon-layer/hexagon-aggregator';
+
+const getPosition = d => d.COORDINATES;
+const iterableData = new Set(FIXTURES.points);
+const radius = 500;
+const viewport = FIXTURES.sampleViewport;
+
+test('pointToHexbin', t => {
+  t.ok(
+    typeof pointToHexbin({data: iterableData, radius, getPosition}, viewport) === 'object',
+    'should work with iterables'
+  );
+  t.end();
+});

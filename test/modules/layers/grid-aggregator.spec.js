@@ -18,14 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-import './grid-cell-layer.spec';
-import './grid-layer.spec';
-import './grid-aggregator.spec';
-import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
+import test from 'tape-catch';
+
+import * as FIXTURES from 'deck.gl/test/data';
+
+import {pointToDensityGridData} from '@deck.gl/layers/grid-layer/grid-aggregator';
+
+const getPosition = d => d.COORDINATES;
+const iterableData = new Set(FIXTURES.points);
+const cellSize = 500;
+
+test('pointToDensityGridData', t => {
+  t.ok(
+    typeof pointToDensityGridData(iterableData, cellSize, getPosition) === 'object',
+    'should work with iterables'
+  );
+  t.end();
+});
