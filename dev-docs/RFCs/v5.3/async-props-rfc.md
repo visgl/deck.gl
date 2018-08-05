@@ -2,7 +2,7 @@
 
 * **Authors**: Xiaoji Chen and Ib Green
 * **Date**: Aug 2017, updated Jan 2018
-* **Status**: Initial draft, issues need decision
+* **Status**: **Implemented**
 
 Notes:
 * Originally broken out from the [Off-thread Attribute Generation RFC]().

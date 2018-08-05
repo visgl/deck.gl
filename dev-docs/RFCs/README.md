@@ -10,12 +10,14 @@ The core developers will review RFCs (and of course, comments from the community
 
 Documents indicating intent and direction for bigger areas of functionality. Roadmap documents are intended to provide higher level descriptions than the more detailed, topic-focused RFCs.
 
+Also see luma.gl roadmaps, such as the GPGPU roadmap
+
 | Roadmap                                                            | Status       | Description |
 | ---                                                                | ---          | ---         |
-| [**Infovis Roadmap**](../roadmaps/gpgpu-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
 | [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
-| [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
+| [**Infovis Roadmap**](../roadmaps/gpgpu-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
 | [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Ongoing      | Reduce size of distribution and the bundle size of applications using deck.gl |
+| [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
 
 
 ## Longer-Terms RFCs
@@ -46,7 +48,12 @@ RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.c
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
+
+| [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
+| [**Binary Data**](v6.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
+| [**Layer Operations**](v6.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**PropTypes**](v6.x/prop-types-rfc.md) | @ibgreen | **Review** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| [**Property Animation**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | **[Effects Manager](v6.x/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 
 Possible other animation related RFCs:
@@ -58,13 +65,13 @@ Possible other animation related RFCs:
 
 These RFCS are currently targeted for v6.1 Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v61-rfcs)
 
-
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
-| [**Improved 32 bit Projection Mode**](v6.1/improved-lnglat-projection-rfc.md.md) | @ibgreen @georgios-uber | **Draft** | New projection mode for mixed 32/64 bit precision. |
+| [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**View Class Extensions**](v6.1/view-class-extension-rfc.md) | @ibgreen| **Review** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
-| [**Property Animation**](v6.0/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**Contour Layer**](v6.1/contour-layer-rfc.md) | @1chandy | **Preliminary Approval** | Contour detecting aggregating layer. |
+| [**Improved 32 bit Projection Mode**](v6.1/improved-lnglat-projection-rfc.md.md) | @ibgreen @georgios-uber | **Implemented** | New projection mode for mixed 32/64 bit precision. |
 
 
 ## v6.0 RFCs
@@ -76,7 +83,7 @@ These RFCS were implemented in v6.0. Also see [luma.gl RFCs](https://github.com/
 | [**Per-View Controllers**](v6.0/per-view-controllers-rfc.md) | @ibgreen | **Draft** | Support one controller per view in multi-view apps |
 | **[GPU Aggregations](v6.0/gpu-screengrid-aggregation-rfc.md)** | @1chandu | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 | **[Data Filter](v6.0/data-filter-rfc.md)** | @pessimistress | Draft | Add generic support to filter data objects on the GPU.  |
-| **[React API](v6.0/react-api.md)** | @pessimistress | Draft | React API refresh.  |
+| **[React API](v6.0/react-api-rfc.md)** | @pessimistress | Draft | React API refresh.  |
 
 
 ## v5.3 RFCs
