@@ -52,3 +52,11 @@ Can those "installable" functions be integrated into a generic `project`/`unproj
 ### Adjustable Ante-Meridian
 
 Shaders are now able to dynamically adjust the "placement" of the ante-meridian, should JS functions also do this to ensure shader and JS rendered calculations and rendering always align?
+
+Can layers use different ante-meridians? Does it matter, since we already have to deal with different coordinate system.
+
+
+### Model matrix inversion
+
+A lot of model matrices, not exactly cheap to calculate inverted matrices? On demand?
+
