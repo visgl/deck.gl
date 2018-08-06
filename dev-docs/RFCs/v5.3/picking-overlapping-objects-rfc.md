@@ -1,8 +1,8 @@
 # RFC: Picking Overlapping Objects in deck.gl
 
 * **Author**: Ib Green and Georgios Karnas
-* **Status**: Draft
 * **Date**: April 20, 2018
+* **Status**: **Implemented**
 
 References:
 * [luma.gl issue #432](https://github.com/uber/luma.gl/issues/432) - Support for picking overlapping objects.

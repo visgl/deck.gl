@@ -2,7 +2,7 @@
 
 * **Authors**: Xiaoji Chen
 * **Date**: Aug 2017
-* **Status**: Early draft, not ready for formal review.
+* **Status**: **Implemented**
 
 Notes:
 *  This could build on a "GeometryBuilder RFC", @ibgreen has been doing some work in this area.

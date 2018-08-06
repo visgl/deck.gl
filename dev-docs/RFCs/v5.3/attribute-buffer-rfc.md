@@ -2,7 +2,7 @@
 
 * **Authors**: Xiaoji Chen
 * **Date**: Mar 21, 2018
-* **Status**: **Pending Review**
+* **Status**: **Implemnted**
 
 ## OverView
 

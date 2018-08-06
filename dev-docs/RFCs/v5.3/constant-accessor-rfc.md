@@ -2,7 +2,7 @@
 
 * **Authors**: Xiaoji Chen
 * **Date**: Apr 2018
-* **Status**: Initial draft, issues need decision
+* **Status**: **Implemented**
 
 Overview:
 * Allow users to supply constant attributes directly instead of using an accessor.

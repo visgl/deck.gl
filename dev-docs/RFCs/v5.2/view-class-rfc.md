@@ -2,7 +2,7 @@
 
 * **Author**: Ib Green
 * **Date**: January 5, 2018
-* **Status**: **Draft**
+* **Status**: **Implemented**
 
 References:
 * [Multi Viewport RFC](../v5.0/multi-viewport-rfc.md) for deck.gl v5.

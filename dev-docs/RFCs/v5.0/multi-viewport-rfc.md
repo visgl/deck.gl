@@ -2,7 +2,7 @@
 
 * **Author**: Ib Green
 * **Date**: August 10, 2017
-* **Status**: **Implemented as Experimental API**
+* **Status**: **Implemented**
 
 Notes:
 * This functionality is being revised in the new `View Class RFC`.

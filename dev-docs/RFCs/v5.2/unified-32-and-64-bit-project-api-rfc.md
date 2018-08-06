@@ -2,7 +2,7 @@
 
 * **Authors**: Ib Green, Xiaoji Chen
 * **Date**: Feb 2018
-* **Status**: Draft
+* **Status**: **Implemented**
 
 ## Abstract
 
