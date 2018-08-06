@@ -4,7 +4,7 @@ import {GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
 import GL from 'luma.gl/constants';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
-// const ICON_ATLAS = './test/render/icon-atlas.png';
+const ICON_ATLAS = './test/render/icon-atlas.png';
 
 import {
   BezierCurveLayer,
@@ -20,7 +20,7 @@ import {
   PathLayer,
   ArcLayer,
   LineLayer,
-  // IconLayer,
+  IconLayer,
   GeoJsonLayer,
   GridCellLayer,
   GridLayer,
@@ -477,8 +477,7 @@ export const TEST_CASES = [
     referenceImageUrl: './test/render/golden-images/line-lnglat-64.png',
     ignoreGPUs: [`Intel`]
   },
-  // Disable icon layers cause the logic to render layers more than one time is removed
-  /* {
+  {
     name: 'icon-lnglat',
     viewState: {
       latitude: 37.751537058389985,
@@ -536,7 +535,7 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/icon-lnglat.png',
     ignoreGPUs: [`Intel`]
-  }, */
+  },
   {
     name: 'geojson-lnglat',
     viewState: {
