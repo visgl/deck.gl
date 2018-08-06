@@ -65,6 +65,8 @@ export default class SceneRenderer {
     this.running = true;
     this.complete = false;
     this.sceneIndex = 0;
+    this.renderingTimes = 0;
+    this.resultReported = false;
     this._renderNextScene();
   }
 
@@ -75,14 +77,19 @@ export default class SceneRenderer {
   // PRIVATE METHODS
 
   _onAfterRender(promise, scene, {gl}) {
-    getImageFromContext(gl)
-      .then(image => {
-        image.style.mixBlendMode = 'difference';
-        const params = Object.assign({gl, image}, scene);
-        return this.onSceneRendered(params);
-      })
-      .then(x => promise.resolve(x))
-      .catch(error => promise.reject(error));
+    if (this.renderingTimes === 0 && !this.resultReported) {
+      this.resultReported = true;
+      getImageFromContext(gl)
+        .then(image => {
+          image.style.mixBlendMode = 'difference';
+          const params = Object.assign({gl, image}, scene);
+          return this.onSceneRendered(params);
+        })
+        .then(x => promise.resolve(x))
+        .catch(error => promise.reject(error));
+    } else {
+      promise.resolve();
+    }
   }
 
   _onWebGLInitialized(gl) {
@@ -94,10 +101,8 @@ export default class SceneRenderer {
 
   _renderScene(scene) {
     const {viewState, layers, views, viewports} = scene;
-
     const promise = makePromise();
 
-    // Initial render to get layer loading
     this.deckgl.setProps({
       layers,
       views: views || [new MapView()],
@@ -137,8 +142,12 @@ export default class SceneRenderer {
     const scene = this.scenes[this.sceneIndex];
     if (this.sceneIndex >= this.scenes.length) {
       this.running = false;
+    } else if (scene.renderingTimes && scene.renderingTimes > this.renderingTimes) {
+      this.renderingTimes++;
     } else {
       this.sceneIndex++;
+      this.renderingTimes = 0;
+      this.resultReported = false;
     }
 
     if (this.running) {
