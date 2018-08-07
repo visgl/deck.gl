@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import ViewManager from '@deck.gl/core/views/view-manager';
+import ViewManager from '@deck.gl/core/lib/view-manager';
 import {MapView, Viewport} from 'deck.gl';
 
 const INITIAL_VIEW_STATE = {latitude: 0, longitude: 0, zoom: 1};

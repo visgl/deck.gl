@@ -54,7 +54,9 @@ export default class ViewManager {
 
   finalize() {
     for (const key in this.controllers) {
-      this.controllers[key].finalize();
+      if (this.controllers[key]) {
+        this.controllers[key].finalize();
+      }
     }
     this.controllers = {};
   }
@@ -94,13 +96,35 @@ export default class ViewManager {
     return this._viewports;
   }
 
-  getViewport(viewId) {
-    return this._viewportMap[viewId];
+  getViews() {
+    const viewMap = {};
+    this.views.forEach(view => {
+      viewMap[view.id] = view;
+    });
+    return viewMap;
   }
 
+  // Resolves a viewId string to a View, if already a View returns it.
+  getView(viewOrViewId) {
+    return typeof viewOrViewId === 'string'
+      ? this.views.find(view => view.id === viewOrViewId)
+      : viewOrViewId;
+  }
+
+  // Returns the viewState for a specific viewId. Matches the viewState by
+  // 1. view.viewStateId
+  // 2. view.id
+  // 3. root viewState
+  // then applies the view's filter if any
   getViewState(viewId) {
+    const view = this.getView(viewId);
     // Backward compatibility: view state for single view
-    return this.viewState[viewId] || this.viewState;
+    const viewState = this.viewState[view.getViewStateId()] || this.viewState;
+    return view.filterViewState(viewState);
+  }
+
+  getViewport(viewId) {
+    return this._viewportMap[viewId];
   }
 
   /**
@@ -254,6 +278,27 @@ export default class ViewManager {
     return controller;
   }
 
+  _updateController(view, viewState, viewport, controller) {
+    if (view.controller) {
+      const controllerProps = Object.assign({}, view.controller, view.defaultState, viewState, {
+        id: view.id,
+        x: viewport.x,
+        y: viewport.y,
+        width: viewport.width,
+        height: viewport.height
+      });
+
+      // TODO - check if view / controller type has changed, and replace the controller
+      if (controller) {
+        controller.setProps(controllerProps);
+      } else {
+        controller = this._createController(controllerProps);
+      }
+      return controller;
+    }
+    return null;
+  }
+
   // Rebuilds viewports from descriptors towards a certain window size
   _rebuildViewports() {
     const {width, height, views} = this;
@@ -262,34 +307,23 @@ export default class ViewManager {
     this.controllers = {};
 
     this._viewports = views.map(view => {
-      const viewState = this.getViewState(view.id);
+      const viewState = this.getViewState(view);
       const viewport = view.makeViewport({width, height, viewState});
 
       // Update the controller
-      if (view.controller) {
-        const controllerProps = Object.assign({}, view.controller, view.defaultState, viewState, {
-          id: view.id,
-          x: viewport.x,
-          y: viewport.y,
-          width: viewport.width,
-          height: viewport.height
-        });
-
-        let controller = oldControllers[view.id];
-        if (controller) {
-          controller.setProps(controllerProps);
-        } else {
-          controller = this._createController(controllerProps);
-        }
-        this.controllers[view.id] = controller;
-      }
+      this.controllers[view.id] = this._updateController(
+        view,
+        viewState,
+        viewport,
+        oldControllers[view.id]
+      );
 
       return viewport;
     });
 
     // Remove unused controllers
     for (const id in oldControllers) {
-      if (!this.controllers[id]) {
+      if (oldControllers[id] && !this.controllers[id]) {
         oldControllers[id].finalize();
       }
     }

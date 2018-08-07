@@ -76,10 +76,49 @@ export default class View {
       return this.viewportInstance;
     }
 
+    viewState = this.filterViewState(viewState);
+
     // Resolve relative viewport dimensions
     const viewportDimensions = this.getDimensions({width, height});
     const props = Object.assign({viewState}, viewState, this.props, viewportDimensions);
     return this._getViewport(props);
+  }
+
+  getViewStateId() {
+    switch (typeof this.props.viewState) {
+    case 'string':
+      // if View.viewState is a string, return it
+      return this.props.viewState;
+
+    case 'object':
+      // If it is an object, return its id component
+      return this.props.viewState && this.props.viewState.id;
+
+    default:
+      return this.id;
+    }
+  }
+
+  // Allows view to override (or completely define) viewState
+  filterViewState(viewState) {
+    if (this.props.viewState && typeof this.props.viewState === 'object') {
+      // If we have specified an id, then intent is to override,
+      // If not, completely specify the view state
+      if (!this.props.viewState.id) {
+        return this.props.viewState;
+      }
+
+      // Merge in all props from View's viewState, except id
+      const newViewState = Object.assign({}, viewState);
+      for (const key in this.props.viewState) {
+        if (key !== 'id') {
+          newViewState[key] = this.props.viewState[key];
+        }
+      }
+      return newViewState;
+    }
+
+    return viewState;
   }
 
   // Resolve relative viewport dimensions into actual dimensions (y='50%', width=800 => y=400)

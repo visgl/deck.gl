@@ -9,6 +9,13 @@
 
 This RFC proposes adding adaptor classes that accept JSON descriptions of views and layers and convert them to deck.gl views and layers. The JSON schema is proposed to be a "minimal" mapping of the current declarative deck.gl API.
 
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/json-layers.gif" />
+    <p><i>PoC: JSON layer browser built on new @deck.gl/json module.</i></p>
+  </div>
+</div>
+
 
 ## Background
 
