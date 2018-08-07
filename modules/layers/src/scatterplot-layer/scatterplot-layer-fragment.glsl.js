@@ -101,4 +101,5 @@ void main(void) {
   // use highlight color if this fragment belongs to the selected object.  
   // use picking color if rendering to picking FBO.  
   gl_FragColor = picking_filterPickingColor(gl_FragColor);
-}`;
+}
+`;
