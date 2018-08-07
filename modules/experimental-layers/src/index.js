@@ -18,3 +18,5 @@ export {default as GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
 export {default as BitmapLayer} from './bitmap-layer/bitmap-layer';
 
 export {default as ContourLayer} from './contour-layer/contour-layer';
+
+export { default as EnhancedScatterPlotLayer } from './enhanced-scatterplot-layer/enhanced-scatterplot-layer';
