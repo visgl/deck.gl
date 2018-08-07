@@ -45,13 +45,19 @@ mat3 getRotationMatrix(vec3 rotation) {
 }
 
 void main(void) {
-  vec3 instancePos = project_position(instancePositions);
-
   mat3 rotationMatrix = getRotationMatrix(instanceRotations);
 
   vec3 pos = positions;
   pos = project_scale(pos * sizeScale);
   pos = rotationMatrix * pos;
+
+  if (project_uCoordinateSystem != COORDINATE_SYSTEM_LNG_LAT) {
+    // Mercator projection reverses Y but this gets compensated
+    // only for COORDINATE_SYSTEM_LNG_LAT inside the projection logic
+    // TODO - handle this inside the projection module logic
+    pos.y = -pos.y;
+  }
+
   vec4 worldPosition;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
 
