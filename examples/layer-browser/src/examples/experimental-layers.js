@@ -254,6 +254,6 @@ export default {
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    ContourLayer: ContourLayerExample,
+    ContourLayer: ContourLayerExample
   }
 };
