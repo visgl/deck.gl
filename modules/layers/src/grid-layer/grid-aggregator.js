@@ -21,7 +21,7 @@ const R_EARTH = 6378000;
 
 /**
  * Calculate density grid from an array of points
- * @param {array} points
+ * @param {Iterable} points
  * @param {number} cellSize - cell size in meters
  * @param {function} getPosition - position accessor
  * @returns {object} - grid data, cell dimension
@@ -38,7 +38,7 @@ export function pointToDensityGridData(points, cellSize, getPosition) {
 
 /**
  * Project points into each cell, return a hash table of cells
- * @param {array} points
+ * @param {Iterable} points
  * @param {number} cellSize - unit size in meters
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
@@ -49,8 +49,8 @@ function _pointsToGridHashing(points = [], cellSize, getPosition) {
   let latMax = -Infinity;
   let pLat;
 
-  for (let p = 0; p < points.length; p++) {
-    pLat = getPosition(points[p])[1];
+  for (const pt of points) {
+    pLat = getPosition(pt)[1];
     if (Number.isFinite(pLat)) {
       latMin = pLat < latMin ? pLat : latMin;
       latMax = pLat > latMax ? pLat : latMax;
@@ -64,25 +64,23 @@ function _pointsToGridHashing(points = [], cellSize, getPosition) {
   if (gridOffset.xOffset <= 0 || gridOffset.yOffset <= 0) {
     return {gridHash: {}, gridOffset};
   }
+
   // calculate count per cell
-  const gridHash = points.reduce((accu, pt) => {
+  const gridHash = {};
+  for (const pt of points) {
     const lat = getPosition(pt)[1];
     const lng = getPosition(pt)[0];
 
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      return accu;
+    if (Number.isFinite(lat) && Number.isFinite(lng)) {
+      const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);
+      const lonIdx = Math.floor((lng + 180) / gridOffset.xOffset);
+      const key = `${latIdx}-${lonIdx}`;
+
+      gridHash[key] = gridHash[key] || {count: 0, points: []};
+      gridHash[key].count += 1;
+      gridHash[key].points.push(pt);
     }
-
-    const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);
-    const lonIdx = Math.floor((lng + 180) / gridOffset.xOffset);
-    const key = `${latIdx}-${lonIdx}`;
-
-    accu[key] = accu[key] || {count: 0, points: []};
-    accu[key].count += 1;
-    accu[key].points.push(pt);
-
-    return accu;
-  }, {});
+  }
 
   return {gridHash, gridOffset};
 }
