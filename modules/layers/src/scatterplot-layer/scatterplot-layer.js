@@ -27,6 +27,7 @@ import vs from './scatterplot-layer-vertex.glsl';
 import fs from './scatterplot-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_STROKE_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   radiusScale: 1,
@@ -35,10 +36,12 @@ const defaultProps = {
   strokeWidth: 1,
   outline: false,
   fp64: false,
+  stroke: false,
 
   getPosition: x => x.position,
   getRadius: 1,
-  getColor: DEFAULT_COLOR
+  getColor: DEFAULT_COLOR,
+  getStrokeColor: DEFAULT_STROKE_COLOR
 };
 
 export default class ScatterplotLayer extends Layer {
@@ -71,6 +74,13 @@ export default class ScatterplotLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
+      },
+      instanceStrokeColors: {
+        size: 4,
+        transition: true,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getStrokeColor',
+        defaultValue: [255, 255, 255, 255]
       }
     });
   }
@@ -88,10 +98,18 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
+    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth, stroke} = this.props;
+
+    if(!strokeWidth && stroke) {
+      stroke = false;
+      //fix when strokeWidth = 0, the graphic elements will disppear 
+      if(outline) outline = false;
+    }
+
     this.state.model.render(
       Object.assign({}, uniforms, {
-        outline: outline ? 1 : 0,
+        stroke: stroke ? 1 : 0,
+        outline: outline || stroke ? 1 : 0,
         strokeWidth,
         radiusScale,
         radiusMinPixels,

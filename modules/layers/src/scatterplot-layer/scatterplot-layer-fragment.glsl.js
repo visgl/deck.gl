@@ -21,25 +21,84 @@
 export default `\
 #define SHADER_NAME scatterplot-layer-fragment-shader
 
+#ifdef GL_ES
 precision highp float;
+#endif
+
+#ifdef GL_OES_standard_derivatives
+#extension GL_OES_standard_derivatives : enable
+#endif
 
 varying vec4 vColor;
+varying vec4 bColor;
+
 varying vec2 unitPosition;
 varying float innerUnitRadius;
 
-void main(void) {
+uniform float stroke;
+uniform float outline;
+uniform float strokeWidth;
+
+//Calculation of transition color
+vec4 blendRGBColor(vec4 c1, vec4 c2, float p) {
+  float R = c1[0]*255.0,
+    G = c1[1]*255.0,
+    B = c1[2]*255.0,
+    A = c1[3]*255.0;
+  return vec4((c2[0] * 255.0 - R) * p + R, (c2[1] * 255.0 - G) * p + G, (c2[2] * 255.0 - B) * p + B, A)/255.;
+}
+
+void main(void) { 
+
+  //Smooth index
+  float shaderOffset = 0.04; 
 
   float distToCenter = length(unitPosition);
 
-  if (distToCenter > 1.0 || distToCenter < innerUnitRadius) {
-    discard;
+  //Border width(stroke)
+  float borderWidth = (1.0 - innerUnitRadius);
+
+  //Use border
+  if(stroke == 1.0) {
+    
+    //Draw the fill color
+    if (distToCenter < innerUnitRadius) {
+
+      //There is a transitional color between the fill color and the border color.
+      //This can make the lines more smooth
+
+      if(distToCenter >= innerUnitRadius - shaderOffset) { 
+        float alpha = smoothstep(innerUnitRadius - shaderOffset, innerUnitRadius, distToCenter); 
+        gl_FragColor = blendRGBColor(vColor, bColor, alpha); 
+      } else { 
+        gl_FragColor = vColor;
+      }  
+
+    } else { 
+
+      //Draw border color
+      //There is a transitional color between the border color and the outside color.
+      //Transition colors reduce the transparency of border color to varying degrees.
+
+      float alpha = 1.0, 
+            delta = shaderOffset; 
+      alpha = 1.0 - smoothstep(1.0 - delta, 1.0 + delta, distToCenter);
+
+      gl_FragColor = vec4(bColor.rgb, bColor.a * alpha);
+
+    }  
+  } else {
+
+    //Do not use a border
+    if (distToCenter > 1.0 || distToCenter < innerUnitRadius) {
+      discard;
+    }
+    
+    gl_FragColor = vColor;
+
   }
-  gl_FragColor = vColor;
 
-  // use highlight color if this fragment belongs to the selected object.
-  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
-
-  // use picking color if rendering to picking FBO.
+  // use highlight color if this fragment belongs to the selected object.  
+  // use picking color if rendering to picking FBO.  
   gl_FragColor = picking_filterPickingColor(gl_FragColor);
-}
-`;
+}`;

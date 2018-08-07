@@ -219,7 +219,10 @@ const ScatterplotLayerExample = {
     pickable: true,
     radiusScale: 30,
     radiusMinPixels: 1,
-    radiusMaxPixels: 30
+    radiusMaxPixels: 30,
+    stroke: false,
+    outline: false,
+    getStrokeColor: [0, 0, 255]
   }
 };
 

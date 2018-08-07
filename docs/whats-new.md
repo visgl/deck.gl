@@ -22,6 +22,9 @@ Release date: TBD, Target late Aug, 2018
 
 A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be rendered using JSON specifications.
 
+## stroke, strokeColor
+Scatterplot-layer add some new properties, it will both has fill and border with `stroke` property. `strokeColor` property can change border color.
+
 
 ## deck.gl v6.0
 
