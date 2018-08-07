@@ -2,8 +2,7 @@ import {
   MeshLayer,
   PathOutlineLayer,
   PathMarkerLayer,
-  AdvancedTextLayer,
-  EnhancedScatterPlotLayer
+  AdvancedTextLayer
 } from '@deck.gl/experimental-layers';
 import {GPUScreenGridLayer, GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
 import {COORDINATE_SYSTEM} from 'deck.gl';
@@ -239,23 +238,6 @@ const ContourLayerExample = {
   }
 };
 
-const EnhancedScatterPlotLayerExample = {
-  layer: EnhancedScatterPlotLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'enhancedScatterPlotLayer',
-    getPosition: d => d.COORDINATES,
-    getColor: d => [255, 128, 0],
-    getRadius: d => d.SPACES,
-    opacity: 1,
-    outline: 1,
-    pickable: true,
-    radiusScale: 30,
-    radiusMinPixels: 1,
-    radiusMaxPixels: 30
-  }
-};
-
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
@@ -273,7 +255,5 @@ export default {
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
     ContourLayer: ContourLayerExample,
-
-    EnhancedScatterPlotLayer: EnhancedScatterPlotLayerExample,
   }
 };
