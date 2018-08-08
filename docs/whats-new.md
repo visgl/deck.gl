@@ -18,9 +18,9 @@ Release date: TBD, Target late Aug, 2018
 </table>
 
 
-### JSON API
+### JSON API (Experimental)
 
-A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be rendered using JSON specifications.
+A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be rendered using textual JSON specifications.
 
 
 ## deck.gl v6.0
@@ -46,45 +46,45 @@ Release date: July 18, 2018
   </tbody>
 </table>
 
-### React API
 
-The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
+### Attribute Transitions (WebGL2-compatible browsers only)
 
-* Use as a stateful component with automatic interactivity
-* Use render callbacks for rendering children dynamically from view states
-* Specify views in JSX
+Attribute transitions enable applications to simultaneously animate changes in positions, colors and other attributes of all objects in a layer. GPU acceleration to  All core deck.gl layers now support attribute transitions, including `HexagonLayer`, `GridLayer` and `GeoJsonLayer`. GPU Accelerations allow millions of objects to be animated. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/layer.md).
 
-See [Use with React](/docs/get-started/using-with-react.md) for more details.
 
-### Attribute Transition
+### View State Transitions
 
-First introduced in v5.1, attribute transition uses WebGL2's Transform Feedback feature to interpolate layer attributes on the GPU. Starting v6.0, all core layers support attribute transition, including HexagonLayer, GridLayer and GeoJsonLayer. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/layer.md).
+View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](/docs/api-reference/view-state-transitions.md) documentation.
 
-### ViewState Transitions
 
-ViewState Transitions (aka Viewport Transitions) were introduced in v5.0 as experimental are now official in v6.0. Transitions are provided through `DeckGL`'s `ViewState` prop. For more details check [ViewState Transitions](/docs/api-reference/view-state-transitions.md) documentation.
+### Controllers: Simplified Usage
 
-### Prop Types
+deck.gl can now infer appropriate `Controller` types from the types of your `View`. For example, when using the default geospatial view (`MapView`), a `MapController` can now be requested simply by setting the view's `controller` props to `true`. You may also pass an object with additional controller options to this prop, for example `controller={{doubleClickZoom: false}}`. See documentation of [View](/docs/api-reference/view.md).
 
-deck.gl layers can now specify additional type information about properties. When provided, these [prop types](/docs/developer-guide/prop-types.md) will be used to speed up property comparisons in production and to validate `Layer` property values during development, to help catch programming errors. (Prop types will also serve as a foundation for future features such as property transitions/animations and asynchronous properties). Naturally, the core deck.gl layers have been updated with prop type definitions.
 
-> For layer writers: use of prop types is optional, and deck.gl layers will automatically deduce partial prop type information for any properties that lack type information, as long as a default value is specified in the `defaultProps` object.
+### Pixel Sizes aligned with HTML/CSS
 
-### Declaratively set WebGL parameters
-
-It is now possible to globally set WebGL parameters (controlling how the GPU renders) by supplying a `Deck.parameters` prop object. This gives applications a simple declarative way to control things like blend modes and depth testing (`new Deck({..., parameters: {depthTest: false}});`), without having to define an `onWebGLInitialized()` callback. Note that `parameters` supplied to individual layers will of course override any global parameters.
-
-### Pixel Sizes
-
-Pixel sizes in `LineLayer`, `IconLayer` and `TextLayer` now match their HTML/SVG counterparts.
+deck.gl pixel sizes (e.g. in `LineLayer`, `IconLayer` and `TextLayer`) now match their HTML/SVG counterparts.
 
 ### ScreenGridLayer with GPU accelerated aggregation
 
 ScreenGridLayer is updated to support aggregation on GPU. Depending on the data set aggregation on GPU can be 10-12X faster and capable of handling large data sets (MM) where CPU version freezes the UI. Also picking information now contains aggregated details. Two new props `gpuAggregation` for selecting CPU or GPU aggregation and `cellMarginPixels` to control cell margin size are added.
 
-### Simplified controller prop
 
-DeckGL can now infer controller type from the type of the view. For example, when using the default geospatial view, `controller={MapController}` can also be written as `controller={true}`. You may also pass additional controller options to this prop, for example `controller={{doubleClickZoom: false}}`. See documentation of [View](/docs/api-reference/view.md).
+### Declaratively set WebGL parameters
+
+It is now possible to set global WebGL parameters (controlling how the GPU renders) by supplying a `Deck.parameters` property object. This gives applications a simple declarative way to control things like blend modes and depth testing, without having to define an `onWebGLInitialized()` callback. Note that `parameters` can still be supplied to individual layers, overriding any global parameters for that layer only.
+
+
+### React API
+
+The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
+
+* `DeckGL` can be used as a "stateful" component providing automatic interactivity
+* You can now specify deck.gl views (in addition to layers) directly using JSX
+* Adds "render callbacks" for dynamically rendering React children based on deck.gl view states, providing more control over synchronization of positions and sizes between deck.gl's WebGL view layouts and React's DOM components.
+
+See [Use with React](/docs/get-started/using-with-react.md) for more details.
 
 
 ## deck.gl v5.3
