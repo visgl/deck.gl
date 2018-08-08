@@ -6,7 +6,6 @@
   },
   "dependencies": {
     "deck.gl": ">=5.2.0-alpha.7",
-    "luma.gl": ">=5.2.0-alpha.11",
     "math.gl": "^2.0.0-alpha.1",
     "react": "^16.0.0",
     "react-dom": "^16.0.0",
