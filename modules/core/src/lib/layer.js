@@ -711,11 +711,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     let redraw = false;
 
     for (const model of this.getModels()) {
-      // HACK - this should be moved into model)
-      if (model.animated) {
-        redraw = redraw || `animated model ${model.id}`;
-      }
-
       let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
       if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
         modelNeedsRedraw = `model ${model.id}`;

@@ -61,9 +61,6 @@ function getPropTypes(PropTypes) {
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     controller: PropTypes.oneOfType([PropTypes.func, PropTypes.bool, PropTypes.object]),
 
-    // Forces a redraw every animation frame
-    animate: PropTypes.bool,
-
     // GL settings
     gl: PropTypes.object,
     glOptions: PropTypes.object,
@@ -83,7 +80,12 @@ function getPropTypes(PropTypes) {
 
     // Debug settings
     debug: PropTypes.bool,
-    drawPickingColors: PropTypes.bool
+    drawPickingColors: PropTypes.bool,
+
+    // Experimental props
+
+    // Forces a redraw every animation frame
+    _animate: PropTypes.bool
   };
 }
 
@@ -101,7 +103,7 @@ const defaultProps = {
   views: null,
   controller: null, // Rely on external controller, e.g. react-map-gl
   useDevicePixels: true,
-  animate: false,
+  _animate: false,
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -222,8 +224,8 @@ export default class Deck {
   // Check if a redraw is needed
   // Returns `false` or a string summarizing the redraw reason
   needsRedraw({clearRedrawFlags = true} = {}) {
-    if (this.props.animate) {
-      return 'Deck.animate';
+    if (this.props._animate) {
+      return 'Deck._animate';
     }
 
     let redraw = this._needsRedraw;
@@ -421,7 +423,7 @@ export default class Deck {
 
   // Updates animation props on the layer context
   _updateAnimationProps(animationProps) {
-    this.layerManager.context.animationProps = Object.assign({}, animationProps);
+    this.layerManager.context.animationProps = animationProps;
   }
 
   // Deep integration (Mapbox styles)
