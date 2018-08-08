@@ -27,9 +27,7 @@ const CONFIG = {
     ]
   },
 
-  plugins: [
-    new HtmlWebpackPlugin({title: 'deck.gl example'})
-  ],
+  plugins: [new HtmlWebpackPlugin({title: 'deck.gl example'})],
 
   node: {fs: 'empty'}
 };
