@@ -60,6 +60,8 @@ function getPropTypes(PropTypes) {
     viewState: PropTypes.object,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     controller: PropTypes.oneOfType([PropTypes.func, PropTypes.bool, PropTypes.object]),
+
+    // Forces a redraw every animation frame
     animate: PropTypes.bool,
 
     // GL settings
@@ -99,6 +101,7 @@ const defaultProps = {
   views: null,
   controller: null, // Rely on external controller, e.g. react-map-gl
   useDevicePixels: true,
+  animate: false,
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -219,9 +222,9 @@ export default class Deck {
   // Check if a redraw is needed
   // Returns `false` or a string summarizing the redraw reason
   needsRedraw({clearRedrawFlags = true} = {}) {
-    // if (this.props.animate) {
-    //   return 'Deck.animate';
-    // }
+    if (this.props.animate) {
+      return 'Deck.animate';
+    }
 
     let redraw = this._needsRedraw;
 
@@ -418,10 +421,7 @@ export default class Deck {
 
   // Updates animation props on the layer context
   _updateAnimationProps(animationProps) {
-    // Only update the animation props if we are actually animating
-    if (!this.layerManager.context.animationProps) {
-      this.layerManager.context.animationProps = Object.assign({}, animationProps);
-    }
+    this.layerManager.context.animationProps = Object.assign({}, animationProps);
   }
 
   // Deep integration (Mapbox styles)
@@ -497,15 +497,16 @@ export default class Deck {
 
     this.stats.bump('fps');
 
+    // Needs to be done before drawing
+    this._updateAnimationProps(animationProps);
+
     // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-    if (redrawReason) {
+    if (!redrawReason) {
       return;
     }
 
     // Do the redraw
-    this._updateAnimationProps(animationProps);
-
     this.stats.bump('render-fps');
 
     setParameters(gl, this.props.parameters);

@@ -541,8 +541,10 @@ export default class Layer extends Component {
 
     // Hack/ib - define a public luma function
     const {animationProps} = this.context;
-    for (const model of this.getModels()) {
-      model._setAnimationProps(animationProps);
+    if (animationProps) {
+      for (const model of this.getModels()) {
+        model._setAnimationProps(animationProps);
+      }
     }
 
     // Apply polygon offset to avoid z-fighting
