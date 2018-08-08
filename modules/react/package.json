@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "6.1.0-alpha.1",
+  "version": "6.1.0-alpha.2",
   "publishConfig": {
     "access": "public"
   },
@@ -22,7 +22,7 @@
     "src"
   ],
   "dependencies": {
-    "@deck.gl/core": "^6.1.0-alpha.1",
+    "@deck.gl/core": "^6.1.0-alpha.2",
     "prop-types": "^15.6.0"
   },
   "scripts": {
