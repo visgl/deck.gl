@@ -5,19 +5,23 @@
 
 ## Motivation
 
-Most people use deck.gl through the layers that we provide with it and beefing up the layer catalog is always the best way to increase the customer base of deck.gl.
+Most people use deck.gl through the layers that we provide with it and additions to the layer catalog are a good way to increase the use cases supported by deck.gl.
 
 In the next version of deck.gl, we want to add more layers to the layer catalog.
 
 
-## Opportunities
-
-### Layer organization
+## Multiple Layer Catalogs
 
 With more layers in our layer catalog, we should consider reorganizing the layers for easier navigation. We could put our core layers into different folders, such as non-geo and geo. We can also consider moving the entire layer catalog out of core deck.gl repo and ask our users to import new packages.
 
+* Core Catalog - `@deck.gl/layers`
+* 3D Layers - `@deck.gl/3d-layers`
+* Advanced Geospatial Layer Catalog - `@deck.gl/geospatial-layers`
+* Trips Layer Catalog - `@deck.gl/trip-layers`
+* Infovis Layer Catalog - `@deck.gl/infovis-layers`
 
-### Aggregation
+
+## Generalized Aggregation Layers
 
 We have an increasing number of "aggregating" layers. Can the aggregator code be generalized into a reusable "AggregationManager" that can be attached to existing layers without subclassing or with minimal subclassing.
 
@@ -28,6 +32,7 @@ The core deck.gl catalog (@deck.gl/layers) contains mainly 2.5D layers appropria
 
 
 ### BitmapLayer (EXPERIMENTAL)
+
 
 Renders a set of bitmaps on a certain altitude.
 
@@ -138,6 +143,12 @@ The GeoJsonLayer could potentially be moved to this catalog. Although it admitte
 ### TopoJSONLayer
 
 People would like us to support more standard data format so they could simply plug their data in and expect to have something rendered on their screen. TopoJSON has been requested by our users (https://github.com/uber/deck.gl/issues/591)
+
+
+
+## Trips Layer Catalog
+
+One of our most important data items are trips, we could collect the various layers we have built and customized for trips into a separate layer catalog.
 
 
 

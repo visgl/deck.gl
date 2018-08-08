@@ -15,7 +15,10 @@ Also see luma.gl roadmaps, such as the GPGPU roadmap
 | Roadmap                                                            | Status       | Description |
 | ---                                                                | ---          | ---         |
 | [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
-| [**Infovis Roadmap**](../roadmaps/gpgpu-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
+| [**Animation Roadmap**](../roadmaps/animation-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
+| [**Performance Roadmap**](../roadmaps/performance-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
+| [**Infovis Roadmap**](../roadmaps/infovis-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
+| [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
 | [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Ongoing      | Reduce size of distribution and the bundle size of applications using deck.gl |
 | [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
 
@@ -70,6 +73,7 @@ These RFCS are currently targeted for v6.1 Also see [luma.gl RFCs](https://githu
 | [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**View Class Extensions**](v6.1/view-class-extension-rfc.md) | @ibgreen| **Review** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**Property Animation (Phase 1)**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Contour Layer**](v6.1/contour-layer-rfc.md) | @1chandy | **Preliminary Approval** | Contour detecting aggregating layer. |
 | [**Improved 32 bit Projection Mode**](v6.1/improved-lnglat-projection-rfc.md.md) | @ibgreen @georgios-uber | **Implemented** | New projection mode for mixed 32/64 bit precision. |
 

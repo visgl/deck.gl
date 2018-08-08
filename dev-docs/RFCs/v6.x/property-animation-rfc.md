@@ -47,7 +47,7 @@ The following proposals are included in this RFC:
 
 ### Driving the Animation
 
-Animating the props on each frame is part of the problem. The other part is ensuring that we keep animating when any animation is active.
+Animating the props on each frame is one part of the problem. The other part is ensuring that we keep animating when any animation is active.
 
 * layers are only redrawn when the dirty flag of at least one layer is set, or when the viewport changes.
 * layer dirty flags are only set when new layers are actually provided by the application (which typically happens when application state changes).
