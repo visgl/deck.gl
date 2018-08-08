@@ -17,6 +17,7 @@ With more layers in our layer catalog, we should consider reorganizing the layer
 * Core Catalog - `@deck.gl/layers`
 * 3D Layers - `@deck.gl/3d-layers`
 * Advanced Geospatial Layer Catalog - `@deck.gl/geospatial-layers`
+* Trips Layer Catalog - `@deck.gl/trip-layers`
 * Infovis Layer Catalog - `@deck.gl/infovis-layers`
 
 
@@ -142,6 +143,12 @@ The GeoJsonLayer could potentially be moved to this catalog. Although it admitte
 ### TopoJSONLayer
 
 People would like us to support more standard data format so they could simply plug their data in and expect to have something rendered on their screen. TopoJSON has been requested by our users (https://github.com/uber/deck.gl/issues/591)
+
+
+
+## Trips Layer Catalog
+
+One of our most important data items are trips, we could collect the various layers we have built and customized for trips into a separate layer catalog.
 
 
 
