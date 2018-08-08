@@ -80,7 +80,7 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 
 * Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Hexagon color ranges as an array of colors formatted as `[[255, 255, 255, 255]]`. Default is
+Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
 ##### `coverage` (Number, optional)
