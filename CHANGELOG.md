@@ -20,6 +20,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0
+### [6.0.3] - August 8
+- Fix experimental layers: mesh layer Y-reversal issue (#2167)
+- Bump probe.gl version to avoid issues with changed webpack behavior (#2158)
+- Make ArcLayer and PathLayer work with LNGLAT_EXPERIMENTAL mode (#2159)
 
 ### [6.0.1] - July 19
 - fix layerFilter in picking (#2104)
