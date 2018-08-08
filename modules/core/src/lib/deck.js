@@ -60,6 +60,7 @@ function getPropTypes(PropTypes) {
     viewState: PropTypes.object,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     controller: PropTypes.oneOfType([PropTypes.func, PropTypes.bool, PropTypes.object]),
+    animate: PropTypes.bool,
 
     // GL settings
     gl: PropTypes.object,
@@ -216,7 +217,12 @@ export default class Deck {
   // Public API
 
   // Check if a redraw is needed
+  // Returns `false` or a string summarizing the redraw reason
   needsRedraw({clearRedrawFlags = true} = {}) {
+    // if (this.props.animate) {
+    //   return 'Deck.animate';
+    // }
+
     let redraw = this._needsRedraw;
 
     if (clearRedrawFlags) {
@@ -410,6 +416,14 @@ export default class Deck {
     this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
   }
 
+  // Updates animation props on the layer context
+  _updateAnimationProps(animationProps) {
+    // Only update the animation props if we are actually animating
+    if (!this.layerManager.context.animationProps) {
+      this.layerManager.context.animationProps = Object.assign({}, animationProps);
+    }
+  }
+
   // Deep integration (Mapbox styles)
 
   _setGLContext(gl) {
@@ -463,7 +477,7 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers() {
+  _drawLayers(animationProps = {}) {
     const {gl} = this.layerManager.context;
 
     // Log perf stats every second
@@ -478,14 +492,19 @@ export default class Deck {
     this._updateCursor();
 
     // Update layers if needed (e.g. some async prop has loaded)
+    // Note: This can trigger a redraw
     this.layerManager.updateLayers();
 
     this.stats.bump('fps');
 
+    // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-    if (!redrawReason) {
+    if (redrawReason) {
       return;
     }
+
+    // Do the redraw
+    this._updateAnimationProps(animationProps);
 
     this.stats.bump('render-fps');
 
@@ -493,12 +512,11 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
-    const {drawPickingColors} = this.props; // Debug picking, helpful in framebuffered layers
     this.layerManager.drawLayers({
       pass: 'screen',
       viewports: this.getViewports(),
       redrawReason,
-      drawPickingColors
+      drawPickingColors: this.props.drawPickingColors // Debug picking, helps in framebuffered layers
     });
 
     this.props.onAfterRender({gl});
@@ -510,9 +528,11 @@ export default class Deck {
     this._setGLContext(gl);
   }
 
-  _onRenderFrame({gl}) {
-    this._drawLayers({gl});
+  _onRenderFrame(animationProps) {
+    this._drawLayers(animationProps);
   }
+
+  // Callbacks
 
   _onViewStateChange(params) {
     // Let app know that view state is changing, and give it a chance to change it

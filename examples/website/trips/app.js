@@ -1,4 +1,3 @@
-/* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -42,32 +41,13 @@ export class App extends Component {
     };
   }
 
-  componentDidMount() {
-    this._animate();
-  }
-
-  componentWillUnmount() {
-    if (this._animationFrame) {
-      window.cancelAnimationFrame(this._animationFrame);
-    }
-  }
-
-  _animate() {
+  _renderLayers() {
+    const {buildings = DATA_URL.BUILDINGS, trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
     const {
       loopLength = 1800, // unit corresponds to the timestamp in source data
       animationSpeed = 30 // unit time per second
     } = this.props;
-    const timestamp = Date.now() / 1000;
     const loopTime = loopLength / animationSpeed;
-
-    this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
-    });
-    this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
-  }
-
-  _renderLayers() {
-    const {buildings = DATA_URL.BUILDINGS, trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
 
     return [
       new TripsLayer({
@@ -78,7 +58,7 @@ export class App extends Component {
         opacity: 0.3,
         strokeWidth: 2,
         trailLength,
-        currentTime: this.state.time
+        currentTime: () => (((Date.now() / 1000) % loopTime) / loopTime) * loopLength
       }),
       new PolygonLayer({
         id: 'buildings',
@@ -104,6 +84,7 @@ export class App extends Component {
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}
+        animateLayers
       >
         {baseMap && (
           <StaticMap

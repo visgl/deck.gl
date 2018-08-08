@@ -191,7 +191,7 @@ export default class HexagonCellLayer extends Layer {
     const {elevationScale, extruded, coverage} = this.props;
     const {radius, angle} = this.state;
 
-    this.state.model.render(
+    this.state.model.setUniforms(
       Object.assign({}, uniforms, {
         radius,
         angle,
@@ -200,6 +200,8 @@ export default class HexagonCellLayer extends Layer {
         elevationScale
       })
     );
+
+    this.state.model.draw();
   }
 
   calculateInstancePositions64xyLow(attribute) {

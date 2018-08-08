@@ -217,7 +217,7 @@ const ScatterplotLayerExample = {
     getRadius: d => d.SPACES,
     opacity: 1,
     pickable: true,
-    radiusScale: 30,
+    radiusScale: ({tick}) => (1 + 0.5 * Math.sin(tick / 30)) * 30,
     radiusMinPixels: 1,
     radiusMaxPixels: 30
   }
@@ -306,8 +306,8 @@ const HexagonLayerExample = {
     extruded: true,
     pickable: true,
     radius: 1000,
-    opacity: 1,
-    elevationScale: 1,
+    opacity: ({tick}) => 0.6 + 0.4 * Math.sin(tick / 20),
+    elevationScale: ({tick}) => 1.1 + Math.sin(tick / 20),
     elevationRange: [0, 3000],
     coverage: 1,
     getPosition: d => d.COORDINATES,

@@ -10,8 +10,8 @@
   "dependencies": {
     "colorbrewer": "^1.0.0",
     "d3-scale": "^1.0.6",
-    "deck.gl": "^6.0.0",
-    "@deck.gl/experimental-layers": "^6.0.0",
+    "deck.gl": "^6.1.0-alpha.1",
+    "@deck.gl/experimental-layers": "^6.1.0-alpha.1",
     "extrude-polyline": "^1.0.6",
     "react": "^16.3.0",
     "react-autobind": "^1.0.6",
