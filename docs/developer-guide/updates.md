@@ -1,6 +1,6 @@
 # Updates
 
-One of the keys to getting good performance and desired behavior from deck.gl is to understand how and when deck.gl updates data.
+One of the keys to getting good performance and desired behavior from deck.gl is to understand how deck.gl handles updates.
 
 
 ## The Reactive Programming Paradigm
