@@ -60,7 +60,6 @@ function getPropTypes(PropTypes) {
     viewState: PropTypes.object,
     effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     controller: PropTypes.oneOfType([PropTypes.func, PropTypes.bool, PropTypes.object]),
-    animateLayers: PropTypes.bool,
 
     // GL settings
     gl: PropTypes.object,
@@ -505,12 +504,11 @@ export default class Deck {
 
     // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-    if (!this.props.animateLayers && !redrawReason) {
+    if (!redrawReason) {
       return;
     }
 
     // Do the redraw
-
     this.stats.bump('render-fps');
 
     setParameters(gl, this.props.parameters);

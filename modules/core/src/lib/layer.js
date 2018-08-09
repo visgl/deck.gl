@@ -543,7 +543,7 @@ export default class Layer extends Component {
     const {animationProps} = this.context;
     if (animationProps) {
       for (const model of this.getModels()) {
-        model._setAnimationProps(animationProps || {});
+        model._setAnimationProps(animationProps);
       }
     }
 
@@ -711,11 +711,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     let redraw = false;
 
     for (const model of this.getModels()) {
-      // HACK - this should be moved into model)
-      if (model.animated) {
-        redraw = redraw || `animated model ${model.id}`;
-      }
-
       let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
       if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
         modelNeedsRedraw = `model ${model.id}`;
