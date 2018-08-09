@@ -47,36 +47,37 @@ Release date: July 18, 2018
 </table>
 
 
-### Attribute Transitions (WebGL2-compatible browsers only)
+#### Attribute Transitions (WebGL2-compatible browsers only)
 
 Attribute transitions enable applications to simultaneously animate changes in positions, colors and other attributes of all objects in a layer. GPU acceleration to  All core deck.gl layers now support attribute transitions, including `HexagonLayer`, `GridLayer` and `GeoJsonLayer`. GPU Accelerations allow millions of objects to be animated. Transition settings also support `enter` callback to customize instance entrance behavior. See documentation of the [transitions prop](/docs/api-reference/layer.md).
 
 
-### View State Transitions
+#### View State Transitions
 
 View State Transitions (aka Viewport Transitions) are now officially supported. Transitions are provided through the `DeckGL.viewState` prop. For more details check [ViewState Transitions](/docs/api-reference/view-state-transitions.md) documentation.
 
 
-### Controllers: Simplified Usage
+#### ScreenGridLayer: GPU accelerated aggregation
+
+ScreenGridLayer is updated to support aggregation on GPU. GPU aggregation can be 10x faster and is capable of aggregating large data sets (millions of points). Two new props `gpuAggregation` for selecting CPU or GPU aggregation and `cellMarginPixels` to control cell margin size have been added. Finally, picking information now contains aggregated details.
+
+
+#### Controllers: Simplified Usage
 
 deck.gl can now infer appropriate `Controller` types from the types of your `View`. For example, when using the default geospatial view (`MapView`), a `MapController` can now be requested simply by setting the view's `controller` props to `true`. You may also pass an object with additional controller options to this prop, for example `controller={{doubleClickZoom: false}}`. See documentation of [View](/docs/api-reference/view.md).
 
 
-### Pixel Sizes aligned with HTML/CSS
+#### Pixel Sizes aligned with HTML/CSS
 
 deck.gl pixel sizes (e.g. in `LineLayer`, `IconLayer` and `TextLayer`) now match their HTML/SVG counterparts.
 
-### ScreenGridLayer with GPU accelerated aggregation
 
-ScreenGridLayer is updated to support aggregation on GPU. Depending on the data set aggregation on GPU can be 10-12X faster and capable of handling large data sets (MM) where CPU version freezes the UI. Also picking information now contains aggregated details. Two new props `gpuAggregation` for selecting CPU or GPU aggregation and `cellMarginPixels` to control cell margin size are added.
-
-
-### Declaratively set WebGL parameters
+#### WebGL parameters can now be set declaratively
 
 It is now possible to set global WebGL parameters (controlling how the GPU renders) by supplying a `Deck.parameters` property object. This gives applications a simple declarative way to control things like blend modes and depth testing, without having to define an `onWebGLInitialized()` callback. Note that `parameters` can still be supplied to individual layers, overriding any global parameters for that layer only.
 
 
-### React API
+#### React API Enhancements
 
 The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
 
@@ -122,13 +123,16 @@ deck.gl can now pick occluded objects using the new `Deck.pickMultipleObjects` m
 
 The [`View`](/docs/api-reference/view.md) classes can now build an orthographic projection matrix from the same "field of view" parameter it uses to create perspective mode (rather than requiring a separate set of parameters). This makes switching between perspective and orhtographic projection modes easier then ever (simply set the new `View.orthographic` prop to `true` to activate orthographic projection).
 
+
 #### Per-instance stroke width in LineLayer and ArcLayer
 
 LineLayer and ArcLayer added a new accessor `getStrokeWidth` to replace the old `strokeWidth` prop. When specified with a function, you can control the width of each arc/line segment dynamically.
 
+
 #### Constant Accessors
 
 Many layer accessor props now accept constant values. For example, when constructing a ScatterplotLayer, what used to be `getColor: d => [255, 200, 0]` can now be written as `getColor: [255, 200, 0]`. This is not only a convenience: constant values of accessors don't use GPU memory and can be updated very quickly and thus do not require an `updateTrigger`. Consult the documentation for each layer to see which accessors are supported.
+
 
 #### @deck.gl/layers submodule
 
