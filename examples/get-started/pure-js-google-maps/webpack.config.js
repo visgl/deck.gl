@@ -12,12 +12,8 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
-  resolve: {
-    alias: {
-      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
-    }
-  },
+  // Optional: Enables reading Google Maps API Key from environment variable
+  plugins: [new webpack.EnvironmentPlugin(['GOOGLE_MAPS_API_KEY'])]
 };
 
 // This line enables bundling against src in this repo rather than installed module

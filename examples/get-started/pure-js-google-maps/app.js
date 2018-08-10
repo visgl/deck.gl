@@ -13,6 +13,24 @@ const INITIAL_VIEW_STATE = {
   pitch: 0
 };
 
+// Retrieving GOOGLE_MAPS_API_KEY from the environment variable
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY; // eslint-disable-line
+const gmUrl = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=visualization`
+
+function loadScript(url) {
+  const script = document.createElement( 'script' );
+  script.id = 'decoder_script';
+  script.type = 'text/javascript';
+  script.src = url;
+
+  const head = document.getElementsByTagName( 'head' )[ 0 ];
+  head.appendChild( script );
+
+  return new Promise(resolve => {
+    script.onload = resolve;
+  });
+};
+
 function initMap() {
   const map = new google.maps.Map(
     document.getElementById('map'),
@@ -63,4 +81,6 @@ function initMap() {
   });
 }
 
-window.initMap = initMap;
+loadScript(gmUrl).then(() => {
+  initMap()
+})
