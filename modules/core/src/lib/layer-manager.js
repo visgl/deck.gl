@@ -67,6 +67,8 @@ const INITIAL_CONTEXT = Object.seal({
     layerId: null
   },
 
+  animationProps: null,
+
   userData: {} // Place for any custom app `context`
 });
 

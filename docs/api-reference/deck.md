@@ -135,6 +135,11 @@ Notes:
 import 'luma.gl/debug'
 ````
 
+##### `_animate` (Experimental)
+
+Forces deck.gl to redraw layers every animation frame. Normally deck.gl layers are only redrawn if any change is detected.
+
+
 ### Event Callbacks
 
 ##### `onWebGLInitialized` (Function, optional)

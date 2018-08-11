@@ -539,6 +539,14 @@ export default class Layer extends Component {
       this.setModuleParameters(moduleParameters);
     }
 
+    // Hack/ib - define a public luma function
+    const {animationProps} = this.context;
+    if (animationProps) {
+      for (const model of this.getModels()) {
+        model._setAnimationProps(animationProps);
+      }
+    }
+
     // Apply polygon offset to avoid z-fighting
     // TODO - move to draw-layers
     const {getPolygonOffset} = this.props;
@@ -694,6 +702,14 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
     redraw = redraw || attributeManagerNeedsRedraw;
 
+    redraw = redraw || this._modelNeedsRedraw(clearRedrawFlags);
+
+    return redraw;
+  }
+
+  _modelNeedsRedraw(clearRedrawFlags) {
+    let redraw = false;
+
     for (const model of this.getModels()) {
       let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
       if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
@@ -804,7 +820,10 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _updateBaseUniforms() {
     const uniforms = {
       // apply gamma to opacity to make it visually "linear"
-      opacity: Math.pow(this.props.opacity, 1 / 2.2)
+      opacity:
+        typeof this.props.opacity === 'function'
+          ? animationProps => Math.pow(this.props.opacity(animationProps), 1 / 2.2)
+          : Math.pow(this.props.opacity, 1 / 2.2)
     };
     for (const model of this.getModels()) {
       model.setUniforms(uniforms);
