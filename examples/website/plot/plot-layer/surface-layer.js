@@ -209,11 +209,14 @@ export default class SurfaceLayer extends Layer {
 
   calculateColors(attribute) {
     const {vertexCount, attributeManager} = this.state;
-    const {getColor} = this.props;
 
     // reuse the calculated [x, y, z] in positions
     const positions = attributeManager.attributes.positions.value;
     const value = new Uint8ClampedArray(vertexCount * attribute.size);
+
+    // Support constant colors
+    let {getColor} = this.props;
+    getColor = typeof getColor === 'function' ? getColor : () => getColor;
 
     for (let i = 0; i < vertexCount; i++) {
       const index = i * 4;

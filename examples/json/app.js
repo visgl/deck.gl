@@ -7,7 +7,8 @@ import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import {JSON_TEMPLATES, LAYER_CATALOG} from './constants';
+import {LAYER_CATALOG} from './catalog';
+import {JSON_TEMPLATES} from './templates';
 const INITIAL_JSON = Object.values(JSON_TEMPLATES)[0];
 
 export default class Root extends Component {

@@ -1,5 +1,6 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {get} from '../utils/get';
+import {csvParseRows} from 'd3-dsv';
 
 const defaultProps = {
   layerCatalog: []
@@ -28,6 +29,7 @@ export default class JSONLayer extends CompositeLayer {
     return jsonLayers.map(jsonLayer => {
       const Layer = layerCatalog[jsonLayer.type];
       const props = this._getJSONLayerProps(jsonLayer);
+      props.fetch = enhancedFetch;
       return Layer && new Layer(props);
     });
   }
@@ -70,3 +72,20 @@ export default class JSONLayer extends CompositeLayer {
 
 JSONLayer.layerName = 'jsonLayer';
 JSONLayer.defaultProps = defaultProps;
+
+
+function enhancedFetch(url) {
+  /* global fetch */
+  return fetch(url)
+    .then(response => response.text())
+    .then(text => {
+      try {
+        return JSON.parse(text);
+      } catch (error) {
+        const csv = csvParseRows(text);
+        console.log(csv);
+        debugger;
+        return csv;
+      }
+    });
+}

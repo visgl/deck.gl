@@ -1,9 +1,4 @@
 {
-  "width": "100%",
-  "height": "100%",
-  "controller": true,
-  "map": true,
-
   "initialViewState": {
     "latitude": 40,
     "longitude": -100,
@@ -11,6 +6,15 @@
     "bearing": 30,
     "pitch": 30
   },
+
+  "map": true,
+
+  "views": [
+    {
+      "type": "MapView",
+      "controller": "true"
+    }
+  ],
 
   "layers": [
     {
