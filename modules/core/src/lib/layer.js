@@ -822,7 +822,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       // apply gamma to opacity to make it visually "linear"
       opacity:
         typeof this.props.opacity === 'function'
-          ? props => Math.pow(this.props.opacity(props), 1 / 2.2)
+          ? animationProps => Math.pow(this.props.opacity(animationProps), 1 / 2.2)
           : Math.pow(this.props.opacity, 1 / 2.2)
     };
     for (const model of this.getModels()) {
