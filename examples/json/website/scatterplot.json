@@ -7,7 +7,7 @@
     "pitch": 0,
     "bearing": 0
   },
-  "mapStyle=": "mapbox://styles/mapbox/light-v9",
+  "mapStyle": "mapbox://styles/mapbox/light-v9",
   "views": [
     {
       "type": "MapView",

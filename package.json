@@ -20,6 +20,7 @@
     "bootstrap": "scripts/bootstrap.sh",
     "build": "lerna run build",
     "clean": "lerna clean --yes && rm -rf node_modules",
+    "clean-all": "npm run clean && find . -name yarn.lock -exec rm -fr {} \\; && find . -name node_modules -exec rm -fr {} \\;",
     "cover": "NODE_ENV=test nyc --reporter html --reporter cobertura --reporter=lcov npm run test cover",
     "lint": "scripts/lint.sh",
     "lint-docs": "scripts/lint-markdown.sh",
