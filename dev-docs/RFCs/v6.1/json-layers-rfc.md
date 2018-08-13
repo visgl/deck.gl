@@ -36,42 +36,49 @@ We need to decide where to put JSON functionality and new classes. * Do they des
 
 
 * The code is (currently) quite small, but still doesn't quite deserve to be in `@deck.gl/core` or `@deck.gl/layers`. (we need to keep the core small and generic, and the layers module should obviously only contain layers).
-* Should we create a place for experimental code that is not a layer? E.g. `@deck.gl/addons` `@deck.gl/experimental` or `@deck.gl/experimental-layers/addons`?
+* Should we create a place for experimental code that is not a layer? E.g. `@deck.gl/addons` `@deck.gl/experimental` or `@deck.gl/json/addons`?
 * The code has some commonality with the scripting API... compare and make a "symmetric" solution.
 
 
 
-### `JSONDeck` (New Class)
+### `JSONConverter` (New Class)
 
 Takes a JSON object descripting top level deck.gl props, view descriptors, layer descriptors, and layer and view catalogs, and instantiates.
 
 Also supports an optional simple mapbox integration (leaving importing of mapbox-gl to the app!).
 
 ```js
-import {JSONDeck} from '@deck.gl/experimental-layers';
+import {JSONConverter} from '@deck.gl/json';
+import {Deck} from '@deck.gl/core';
 import mapboxgl from 'mapbox-gl';
 
-import json from './us-map.json';
+import JSON from './us-map.json';
 
-export const deckgl = new JSONDeck({
+const jsonConverter = new JSONConverter({
+  configuration: {
+    layers: require('@deck.gl/layers')
+  }
+});
+
+export const deckgl = new Deck({
   canvas: 'deck-canvas',
   mapContainer: 'map',
-  mapboxgl,
-  layerCatalog: require('@deck.gl/layers'),
-  json
+  mapboxgl
 });
+
+deck.gl.setProps(jsonConverter.convertJSONToProps(JSON))
 ```
 
 ### `JSONLayer` (New Class)
 
-Takes an array of JSON layer descriptors, and a layer catalog. `JSONDeck` builds on this class, however using this class directly allows apps to mix in some JSON layers with programmatically generated layers.
+Takes an array of JSON layer descriptors, and a layer catalog. `JSONConverter` builds on this class, however using this class directly allows apps to mix in some JSON layers with programmatically generated layers.
 
 ```js
-import {JSONLayer} from '@deck.gl/experimental-layers';
+import {JSONLayer} from '@deck.gl/json';
 
 const layers = [
   new JSONLayer({
-  	layerCatalog: require('@deck.gl/layers'),
+  	configuration: {layers: require('@deck.gl/layers')},
   	json: require('./us-map.json')
   })
 ];
@@ -85,7 +92,7 @@ Strings, numbers, booleans, and objects and arrays are all supported natively in
 
 #### Classes
 
-For classes, a `catalog` concept is being proposed. Maps of layer and view classes are supplied to the proposed `JSONDeck` component, and it uses these catalogs to convert JSON objects in the right places into objects:
+For classes, a `catalog` concept is being proposed. Maps of layer and view classes are supplied to the proposed `JSONConverter` component, and it uses these catalogs to convert JSON objects in the right places into objects:
 
 ```json
 {
@@ -96,13 +103,13 @@ For classes, a `catalog` concept is being proposed. Maps of layer and view class
 }
 ```
 
-is replaced by the `JSONDeck` component with
+is replaced by the `JSONConverter` component with:
 
 ```js
 new ScatterplotLayer({data})
 ```
 
-When the JSONDeck component finds a "type" it looks into a "layer catalog" provided by the application, and similarly for views. This leaves the choice of what layers and views to bundle with the application, and makes it easy for apps to expose other classes.
+When the JSONConverter component finds a "type" it looks into a "layer catalog" provided by the application, and similarly for views. This leaves the choice of what layers and views to bundle with the application, and makes it easy for apps to expose other classes.
 
 > An open question is if other class catalogs should be supported, perhaps in specific or arbitrary positions in the tree.
 

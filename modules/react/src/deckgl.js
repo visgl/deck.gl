@@ -43,16 +43,23 @@ export default class DeckGL extends React.PureComponent {
   }
 
   componentDidMount() {
-    this.deck = new Deck(
-      Object.assign({}, this.props, {
-        initialViewState: null,
-        canvas: this.deckCanvas,
-        viewState: this._getViewState(this.props),
-        // Note: If Deck event handling change size or view state, it calls onResize to update
-        onViewStateChange: this._onViewStateChange,
-        onResize: this._onResize
-      })
-    );
+    // Allows a subclass of Deck to be used
+    // TODO - update propTypes / defaultProps?
+    const DeckClass = this.props.Deck || Deck;
+
+    // DEVTOOLS can cause this to be called twice
+    this.deck =
+      this.deck ||
+      new DeckClass(
+        Object.assign({}, this.props, {
+          initialViewState: null,
+          canvas: this.deckCanvas,
+          viewState: this._getViewState(this.props),
+          // Note: If Deck event handling change size or view state, it calls onResize to update
+          onViewStateChange: this._onViewStateChange,
+          onResize: this._onResize
+        })
+      );
   }
 
   componentWillUnmount() {
@@ -121,15 +128,19 @@ export default class DeckGL extends React.PureComponent {
     // extract any deck.gl layers masquerading as react elements from props.children
     const {layers, views, children} = extractJSXLayers(nextProps);
 
-    this.deck.setProps(
-      Object.assign({}, nextProps, {
-        onViewStateChange: this._onViewStateChange,
-        onResize: this._onResize,
-        viewState: this._getViewState(nextProps),
-        layers,
-        views
-      })
-    );
+    const deckProps = Object.assign({}, nextProps, {
+      onViewStateChange: this._onViewStateChange,
+      onResize: this._onResize,
+      layers,
+      views
+    });
+
+    const viewState = this._getViewState(nextProps);
+    if (viewState) {
+      deckProps.viewState = viewState;
+    }
+
+    this.deck.setProps(deckProps);
 
     this.children = children;
   }
@@ -200,6 +211,7 @@ export default class DeckGL extends React.PureComponent {
   }
 
   render() {
+    // TODO - expensive to update on every render?
     this._updateFromProps(this.props);
 
     // Render the background elements (typically react-map-gl instances)

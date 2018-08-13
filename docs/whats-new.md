@@ -20,7 +20,7 @@ Release date: TBD, Target late Aug, 2018
 
 ### JSON API (Experimental)
 
-A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be rendered using textual JSON specifications.
+A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files.
 
 
 ## deck.gl v6.0

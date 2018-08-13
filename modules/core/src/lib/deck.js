@@ -196,10 +196,14 @@ export default class Deck {
     // We need to overwrite CSS style width and height with actual, numeric values
     const newProps = Object.assign({}, props, {
       views: this._getViews(props),
-      viewState: this._getViewState(props),
       width: this.width,
       height: this.height
     });
+
+    const viewState = this._getViewState(props);
+    if (viewState) {
+      newProps.viewState = viewState;
+    }
 
     // Update view manager props
     if (this.viewManager) {
@@ -378,7 +382,7 @@ export default class Deck {
   // Get the most relevant view state: props.viewState, if supplied, shadows internal viewState
   // TODO: For backwards compatibility ensure numeric width and height is added to the viewState
   _getViewState(props) {
-    return props.viewState || this.viewState || {};
+    return props.viewState || this.viewState;
   }
 
   // Get the view descriptor list
