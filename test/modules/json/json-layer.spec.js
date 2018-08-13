@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {JSONLayer} from '@deck.gl/json';
+import {_JSONLayer as JSONLayer} from '@deck.gl/json';
 
 const JSON_DATA = [
   {

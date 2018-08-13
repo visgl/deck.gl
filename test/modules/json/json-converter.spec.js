@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {Deck} from '@deck.gl/core';
-import {JSONConverter} from '@deck.gl/json';
+import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {GL} from 'luma.gl/constants';
