@@ -28,6 +28,7 @@ import {LineLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
 
 const DEFAULT_COLOR = [255, 255, 255];
+const DEFAULT_STROKE_WIDTH = 1;
 const DEFAULT_THRESHOLD = 1;
 
 const defaultProps = {
@@ -37,8 +38,7 @@ const defaultProps = {
   // TODO: support for custom weights, defaults to 1
 
   // contour lines
-  contours: [{threshold: DEFAULT_THRESHOLD, color: DEFAULT_COLOR}],
-  getStrokeWidth: 1,
+  contours: [{threshold: DEFAULT_THRESHOLD}],
 
   fp64: false
 };
@@ -76,7 +76,7 @@ export default class ContourLayer extends CompositeLayer {
   }
 
   getSubLayerProps() {
-    const {getStrokeWidth, fp64} = this.props;
+    const {fp64} = this.props;
 
     return super.getSubLayerProps({
       id: 'contour-line-layer',
@@ -85,7 +85,7 @@ export default class ContourLayer extends CompositeLayer {
       getSourcePosition: d => d.start,
       getTargetPosition: d => d.end,
       getColor: this.onGetSublayerColor.bind(this),
-      getStrokeWidth
+      getStrokeWidth: this.onGetSublayerStrokeWidth.bind(this)
     });
   }
 
@@ -147,10 +147,21 @@ export default class ContourLayer extends CompositeLayer {
     let color = DEFAULT_COLOR;
     contours.forEach(data => {
       if (data.threshold === segment.threshold) {
-        color = data.color;
+        color = data.color || DEFAULT_COLOR;
       }
     });
     return color;
+  }
+
+  onGetSublayerStrokeWidth(segment) {
+    const {contours} = this.props;
+    let strokeWidth = DEFAULT_STROKE_WIDTH;
+    contours.forEach(data => {
+      if (data.threshold === segment.threshold) {
+        strokeWidth = data.strokeWidth || DEFAULT_STROKE_WIDTH;
+      }
+    });
+    return strokeWidth;
   }
 
   rebuildContours({oldProps, props}) {

@@ -72,7 +72,7 @@ export class App extends Component {
     const {
       airports = DATA_URL.AIRPORTS,
       flightPaths = DATA_URL.FLIGHT_PATHS,
-      strokeWidth = 3
+      getStrokeWidth = 3
     } = this.props;
 
     return [
@@ -89,11 +89,11 @@ export class App extends Component {
       new LineLayer({
         id: 'flight-paths',
         data: flightPaths,
-        strokeWidth,
         fp64: false,
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,
+        getStrokeWidth,
         pickable: true,
         onHover: this._onHover
       })

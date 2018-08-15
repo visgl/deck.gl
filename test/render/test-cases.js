@@ -210,7 +210,6 @@ export const TEST_CASES = [
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         cellSize: 40,
         opacity: 1,
-        getStrokeWidth: 3,
         contours: [
           {threshold: 1, color: [50, 50, 50]},
           {threshold: 2, color: [100, 100, 100]},
@@ -1146,10 +1145,9 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         lightSettings: LIGHT_SETTINGS,
-        getStrokeWidth: 3,
         contours: [
-          {threshold: 1, color: [255, 0, 0]},
-          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
           {threshold: 15, color: [0, 0, 255]}
         ],
         gpuAggregation: true
