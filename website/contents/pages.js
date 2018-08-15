@@ -16,7 +16,7 @@ function generatePath(tree, parentPath = '', depth = 0) {
 
   tree.depth = depth;
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|API|DeckGL|[A-Z]?[a-z'0-9\.]+|\d+)/g)
+    tree.path = tree.name.match(/(GeoJson|3D|API|DeckGL|JSON|[A-Z]?[a-z'0-9\.]+|\d+)/g)
       .join('-').toLowerCase().replace(/[^\w-]/g, '');
   }
   if (tree.children) {
