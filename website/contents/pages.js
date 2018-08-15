@@ -16,8 +16,11 @@ function generatePath(tree, parentPath = '', depth = 0) {
 
   tree.depth = depth;
   if (tree.name) {
-    tree.path = tree.name.match(/(GeoJson|3D|API|DeckGL|[A-Z]?[a-z'0-9\.]+|\d+)/g)
-      .join('-').toLowerCase().replace(/[^\w-]/g, '');
+    tree.path = tree.name
+      .match(/(GeoJson|3D|API|DeckGL|JSON|[A-Z]?[a-z'0-9\.]+|\d+)/g)
+      .join('-')
+      .toLowerCase()
+      .replace(/[^\w-]/g, '');
   }
   if (tree.children) {
     generatePath(tree.children, `${parentPath}/${tree.path}`, depth + 1);
@@ -174,7 +177,7 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
-        name: 'What\'s New',
+        name: "What's New",
         content: getDocUrl('whats-new.md')
       },
       {
