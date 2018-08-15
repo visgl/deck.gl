@@ -2,7 +2,10 @@
   "env": {
     "es5": {
       "presets": [
-        ["@babel/es2015", {modules: 'commonjs'}]
+        ["@babel/env", {
+          "forceAllTransforms": true,
+          "modules": "commonjs"
+        }]
       ],
       "plugins": [
         "version-inline"
@@ -10,7 +13,7 @@
     },
     "esm": {
       "presets": [
-        ["@babel/es2015", {modules: false}]
+        ["@babel/env", {"modules": false}]
       ],
       "plugins": [
         "version-inline"

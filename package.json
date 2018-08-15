@@ -35,11 +35,10 @@
     "collect-metrics": "./scripts/collect-metrics.sh"
   },
   "devDependencies": {
-    "@babel/cli": "7.0.0-beta.44",
-    "@babel/core": "^7.0.0-beta.44",
-    "@babel/polyfill": "7.0.0-beta.44",
-    "@babel/preset-env": "7.0.0-beta.44",
-    "@babel/preset-es2015": "7.0.0-beta.44",
+    "@babel/cli": "7.0.0-beta.56",
+    "@babel/core": "^7.0.0-beta.56",
+    "@babel/polyfill": "7.0.0-beta.56",
+    "@babel/preset-env": "7.0.0-beta.56",
     "babel-loader": "^7.1.4",
     "babel-plugin-istanbul": "^4.1.1",
     "babel-plugin-version-inline": "^1.0.0",
