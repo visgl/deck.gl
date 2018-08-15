@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {getCode, getVertices} from '@deck.gl/experimental-layers/contour-layer/marching-squares';
+import {getCode, getVertices} from '@deck.gl/layers/contour-layer/marching-squares';
 
 const GETCODE_TESTS = [
   {

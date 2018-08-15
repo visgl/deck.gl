@@ -1,3 +1,10 @@
+<!-- INJECT:"GridLayerDemo" -->
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
+
 # ContourLayer
 
 ## About
@@ -57,8 +64,11 @@ NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregati
 * Default: `[{threshold: 1}]`
 
 Array of objects with following keys
+
 * `threshold` (Number) : Threshold value to be used in contour generation.
+
 * `color` (Array, optional) : RGB color array to be used to render contour lines, if not specified a default value of `[255, 255, 255]` is used.
+
 * `strokeWidth` (Number, optional) : Width of the contour line in pixels, if not specified a default value of `1` is used.
 
 ##### `fp64` (Boolean, optional)

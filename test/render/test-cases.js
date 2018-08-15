@@ -1,6 +1,6 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
+import {GPUGridLayer} from '@deck.gl/experimental-layers';
 import GL from 'luma.gl/constants';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
@@ -30,6 +30,7 @@ import {
   PointCloudLayer,
   TextLayer
 } from 'deck.gl';
+import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],

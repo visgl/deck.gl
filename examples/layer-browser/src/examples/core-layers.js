@@ -14,7 +14,10 @@ import {
   PolygonLayer,
   PathLayer,
   TextLayer
+  //  ContourLayer
 } from 'deck.gl';
+
+import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
@@ -235,6 +238,22 @@ const GridCellLayerExample = {
     getColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000,
     lightSettings: LIGHT_SETTINGS
+  }
+};
+
+const ContourLayerExample = {
+  layer: ContourLayer,
+  getData: () => dataSamples.points,
+  props: {
+    id: 'contourLayer',
+    cellSize: 200,
+    getPosition: d => d.COORDINATES,
+    gpuAggregation: true,
+    contours: [
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
+      {threshold: 15, color: [0, 0, 255]}
+    ]
   }
 };
 
@@ -528,6 +547,7 @@ export default {
     HexagonCellLayer: HexagonCellLayerExample,
     HexagonLayer: HexagonLayerExample,
     TextLayer: TextLayerExample,
+    ContourLayer: ContourLayerExample,
     'TextLayer (100K)': TextLayer100KExample
   },
 

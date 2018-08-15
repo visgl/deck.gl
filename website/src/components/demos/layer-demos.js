@@ -16,6 +16,7 @@ import {
   GeoJsonLayer,
   PointCloudLayer
 } from 'deck.gl';
+import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 import {colorToRGBArray} from '../../utils/format-utils';
 
@@ -208,5 +209,22 @@ export const TextLayerDemo = createLayerDemoClass({
     getAngle: 0,
     getTextAnchor: 'middle',
     getAlignmentBaseline: 'center'
+  }
+});
+
+export const ContourLayerDemo = createLayerDemoClass({
+  Layer: ContourLayer,
+  dataUrl: `${DATA_URI}/sf-bike-parking.json`,
+  formatTooltip: d => `${d.position.join(', ')}\nCount: ${d.count}`,
+  props: {
+    pickable: true,
+    cellSize: 200,
+    elevationScale: 4,
+    getPosition: d => d.COORDINATES,
+    contours: [
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+      {threshold: 15, color: [0, 0, 255]}
+    ]
   }
 });

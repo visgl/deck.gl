@@ -4,7 +4,7 @@ import {
   PathMarkerLayer,
   AdvancedTextLayer
 } from '@deck.gl/experimental-layers';
-import {GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
+import {GPUGridLayer} from '@deck.gl/experimental-layers';
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import GL from 'luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
@@ -196,22 +196,6 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
-const ContourLayerExample = {
-  layer: ContourLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'contourLayer',
-    cellSize: 200,
-    getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
-    contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
-      {threshold: 15, color: [0, 0, 255]}
-    ]
-  }
-};
-
 /* eslint-disable quote-props */
 export default {
   'Experimental Layers': {
@@ -223,7 +207,6 @@ export default {
     AdvancedTextLayer: AdvancedTextLayerExample,
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
-    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    ContourLayer: ContourLayerExample
+    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
   }
 };

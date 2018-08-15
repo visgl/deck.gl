@@ -35,7 +35,6 @@ const defaultProps = {
   // grid aggregation
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   getPosition: x => x.position,
-  // TODO: support for custom weights, defaults to 1
 
   // contour lines
   contours: [{threshold: DEFAULT_THRESHOLD}],

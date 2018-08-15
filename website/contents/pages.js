@@ -367,6 +367,10 @@ export const docPages = generatePath([
             content: getDocUrl('layers/arc-layer.md')
           },
           {
+            name: 'ContourLayer',
+            content: getDocUrl('layers/contour-layer.md')
+          },
+          {
             name: 'GeoJsonLayer',
             content: getDocUrl('layers/geojson-layer.md')
           },

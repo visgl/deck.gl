@@ -3,7 +3,7 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
-import {ContourLayer} from '@deck.gl/experimental-layers';
+import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 const DEGREE_TO_RADIAN = Math.PI / 180;
 const NUM_POINTS = 20000;
