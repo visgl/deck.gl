@@ -121,7 +121,7 @@ export default class HexagonLayer extends CompositeLayer {
   updateState({oldProps, props, changeFlags}) {
     const dimensionChanges = this.getDimensionChanges(oldProps, props);
 
-    if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
+    if (this.needsReProjectPoints(oldProps, props, changeFlags)) {
       // project data into hexagons, and get sortedColorBins
       this.getHexagons();
     } else if (dimensionChanges) {
@@ -129,9 +129,12 @@ export default class HexagonLayer extends CompositeLayer {
     }
   }
 
-  needsReProjectPoints(oldProps, props) {
+  needsReProjectPoints(oldProps, props, changeFlags) {
     return (
-      oldProps.radius !== props.radius || oldProps.hexagonAggregator !== props.hexagonAggregator
+      changeFlags.dataChanged ||
+      changeFlags.viewportChanged ||
+      oldProps.radius !== props.radius ||
+      oldProps.hexagonAggregator !== props.hexagonAggregator
     );
   }
 
