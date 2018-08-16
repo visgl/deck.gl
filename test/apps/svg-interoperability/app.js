@@ -3,7 +3,7 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, OrthographicView} from 'deck.gl';
-import {ContourLayer} from '@deck.gl/experimental-layers';
+import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 const DEGREE_TO_RADIAN = Math.PI / 180;
 const NUM_POINTS = 20000;
@@ -142,11 +142,10 @@ class Root extends PureComponent {
       ],
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       cellSize: 20,
-      getStrokeWidth: 4,
       contours: [
-        {threshold: 2, color: [0, 250, 250]},
-        {threshold: 25, color: [0, 150, 150]},
-        {threshold: 50, color: [0, 100, 100]}
+        {threshold: 2, color: [0, 250, 250], strokeWidth: 6},
+        {threshold: 25, color: [0, 150, 150], strokeWidth: 5},
+        {threshold: 50, color: [0, 100, 100], strokeWidth: 4}
       ],
       gpuAggregation: true
     });

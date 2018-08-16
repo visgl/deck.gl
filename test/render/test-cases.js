@@ -1,6 +1,6 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {GPUGridLayer, ContourLayer} from '@deck.gl/experimental-layers';
+import {GPUGridLayer} from '@deck.gl/experimental-layers';
 import GL from 'luma.gl/constants';
 import {OrbitView, OrthographicView} from 'deck.gl';
 
@@ -30,6 +30,7 @@ import {
   PointCloudLayer,
   TextLayer
 } from 'deck.gl';
+import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 const LIGHT_SETTINGS = {
   lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
@@ -210,7 +211,6 @@ export const TEST_CASES = [
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         cellSize: 40,
         opacity: 1,
-        getStrokeWidth: 3,
         contours: [
           {threshold: 1, color: [50, 50, 50]},
           {threshold: 2, color: [100, 100, 100]},
@@ -1146,10 +1146,9 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         lightSettings: LIGHT_SETTINGS,
-        getStrokeWidth: 3,
         contours: [
-          {threshold: 1, color: [255, 0, 0]},
-          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
           {threshold: 15, color: [0, 0, 255]}
         ],
         gpuAggregation: true

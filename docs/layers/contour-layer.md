@@ -1,3 +1,10 @@
+<!-- INJECT:"GridLayerDemo" -->
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
+
 # ContourLayer
 
 ## About
@@ -20,12 +27,11 @@ const App = ({data, viewport}) => {
     id: 'contourLayer',
     // Three contours are rendered.
     contours: [
-      {threshold: 1, color: [255, 0, 0]},
-      {threshold: 5, color: [0, 255, 0]},
-      {threshold: 10, color: [0, 0, 255]},
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 1},
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
+      {threshold: 10, color: [0, 0, 255], strokeWidth: 5}
     ],
     cellSize: 200,
-    getStrokeWidth: 3
     getPosition: d => d.COORDINATES,
   });
 
@@ -55,17 +61,15 @@ NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregati
 
 ##### `contours` (Array, optional)
 
-* Default: `[{threshold: 1}, color: [255, 255, 255]]`
+* Default: `[{threshold: 1}]`
 
 Array of objects with following keys
+
 * `threshold` (Number) : Threshold value to be used in contour generation.
-* `color` (Array) : RGB color array to be used to render contour lines.
 
-#### `getStrokeWidth` (Number, optional)
+* `color` (Array, optional) : RGB color array to be used to render contour lines, if not specified a default value of `[255, 255, 255]` is used.
 
-* Default: `1`
-
-Width of the contour line in pixels. All contours are rendered with same width, but can have different colors using `contours` prop.
+* `strokeWidth` (Number, optional) : Width of the contour line in pixels, if not specified a default value of `1` is used.
 
 ##### `fp64` (Boolean, optional)
 
