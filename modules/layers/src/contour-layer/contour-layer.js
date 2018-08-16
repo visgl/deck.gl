@@ -155,10 +155,13 @@ export default class ContourLayer extends CompositeLayer {
   onGetSublayerStrokeWidth(segment) {
     const {contours} = this.props;
     let strokeWidth = DEFAULT_STROKE_WIDTH;
-    contours.forEach(data => {
-      if (data.threshold === segment.threshold) {
-        strokeWidth = data.strokeWidth || DEFAULT_STROKE_WIDTH;
+    // Linearly searches the contours, but there should only be few contours
+    contours.some(contour => {
+      if (contour.threshold === segment.threshold) {
+        strokeWidth = contour.strokeWidth || DEFAULT_STROKE_WIDTH;
+        return true;
       }
+      return false;
     });
     return strokeWidth;
   }
