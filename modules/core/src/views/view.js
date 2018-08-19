@@ -86,16 +86,16 @@ export default class View {
 
   getViewStateId() {
     switch (typeof this.props.viewState) {
-    case 'string':
-      // if View.viewState is a string, return it
-      return this.props.viewState;
+      case 'string':
+        // if View.viewState is a string, return it
+        return this.props.viewState;
 
-    case 'object':
-      // If it is an object, return its id component
-      return this.props.viewState && this.props.viewState.id;
+      case 'object':
+        // If it is an object, return its id component
+        return this.props.viewState && this.props.viewState.id;
 
-    default:
-      return this.id;
+      default:
+        return this.id;
     }
   }
 

@@ -33,6 +33,7 @@ const view = View({id, x, y, width, height, ...});
 ```
 
 Parameters:
+
 * `props` : Object - See documentation of props below.
 
 
