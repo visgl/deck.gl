@@ -32,7 +32,9 @@
     "test-render": "webpack-dev-server --config test/webpack.config.js --env.render --progress --hot --open",
     "bench": "scripts/test.sh bench",
     "bench-browser": "webpack-dev-server --config test/webpack.config.js --env.bench --progress --hot --open",
-    "collect-metrics": "./scripts/collect-metrics.sh"
+    "collect-metrics": "./scripts/collect-metrics.sh",
+    "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
+    "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)"
   },
   "devDependencies": {
     "@babel/cli": "7.0.0-rc.1",

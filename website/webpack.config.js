@@ -89,7 +89,10 @@ const addDevConfig = config => {
 
     plugins: config.plugins.concat([
       // new webpack.HotModuleReplacementPlugin(),
-      new webpack.NoEmitOnErrorsPlugin()
+      new webpack.NoEmitOnErrorsPlugin(),
+      new webpack.DefinePlugin({
+        USE_LOCAL_PAGES: true // eslint-disable-line
+      })
     ])
 
   });

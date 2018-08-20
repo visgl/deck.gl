@@ -9,7 +9,7 @@ References:
 
 ## Schema
 
-The valid combinations are essentially defined by the documented deck.gl API
+The valid combinations are essentially defined by the documented deck.gl API.
 
 
 ## Error Handling

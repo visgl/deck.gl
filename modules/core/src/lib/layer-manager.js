@@ -237,7 +237,7 @@ export default class LayerManager {
   //
 
   // Draw all layers in all views
-  drawLayers({pass = 'render to screen', viewports, redrawReason = 'unknown reason'}) {
+  drawLayers({pass = 'render to screen', viewports, views, redrawReason = 'unknown reason'}) {
     const {drawPickingColors} = this;
     const {gl, useDevicePixels} = this.context;
 
@@ -245,6 +245,7 @@ export default class LayerManager {
     drawLayers(gl, {
       layers: this.layers,
       viewports,
+      views,
       onViewportActive: this._activateViewport,
       useDevicePixels,
       drawPickingColors,

@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import LayerManager from '../lib/layer-manager';
-import ViewManager from '../views/view-manager';
+import LayerManager from './layer-manager';
+import ViewManager from './view-manager';
 import MapView from '../views/map-view';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
@@ -521,7 +521,8 @@ export default class Deck {
 
     this.layerManager.drawLayers({
       pass: 'screen',
-      viewports: this.getViewports(),
+      viewports: this.viewManager.getViewports(),
+      views: this.viewManager.getViews(),
       redrawReason,
       drawPickingColors: this.props.drawPickingColors // Debug picking, helps in framebuffered layers
     });

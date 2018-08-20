@@ -1,14 +1,45 @@
 # Views
 
-> View classes are a recent addition to deck.gl. We are still refining the documentation.
+View classes enable applications to specify one or more rectangular viewports and control what should be rendered inside each view.
 
-View classes can be thought of as "descriptors" that specify **where** and **how** deck.gl should draw.
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/docs/minimap.gif" />
+    <p><i>A "minimap" implemented declaratively as an overlapping, partially synchronized view using the deck.gl `View` class API</i></p>
+  </div>
+</div>
 
-However, the view does not specify **what** should be drawn, e.g. the "position" that should be displayed. This information needs to be provided separately to deck.gl in the form of one or more "view state" objects. Also a `View` has no knowledge of the actual size of the deck.gl "canvas". Instead, it contains relative sizes that adapt to the current size of the canvas.
+The view system is designed to be flexible and composable and can handle many different configurations of side-by-side views, overlapping views etc. If you plan to show more than a single standard view of your data, it may be worth spending some time to get familiar with the `View` API.
 
-The particular `View` subclass chosen defines how deck.gl layers will be rendered. The set of view state parameters that will be used varies between Views.
 
-> Note that if no `View` is specified, deck.gl will automatically create a `MapView` that fills the whole canvas, so basic geospatial applications often do not have to specify any `View`s.
+## Types of Views
+
+The first choice an application will typically have to make is what type(s) of `View` classes it should use. Note that if no `View` is specified, deck.gl will automatically create a `MapView` that fills the whole canvas, so basic geospatial applications often do not have to specify any `View`s.
+
+deck.gl offers a set of `View` classes that lets you specify how deck.gl should render your data. Using `View` classes you can visualize your data from different perspectives (top down map view, first person view, etc).
+
+The particular `View` subclass chosen defines how deck.gl layers will be rendered. Note that the set of view state parameters that will be used varies between Views.
+
+| View Class                                                     | View State  | Description |
+| ---                                                            | ---         | ---         |
+| [`View`](/docs/api-reference/view.md)                          |             | The base view has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the `WebVR` API. |
+| [`MapView`](/docs/api-reference/map-view.md)                   | geoposition | While all `View` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
+| [`FirstPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera is positioned in the view state position and looks in the direction provided. Allows the application to precisely control camera position. |
+| [`ThirdPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera looks at the "view state" position from the direction provided. |
+| [`OrthographicView`](/docs/api-reference/orthographic-view.md) | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
+| [`PerspectiveView`](/docs/api-reference/perspective-view.md)   | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
+| [`OrbitView`](/docs/api-reference/perspective-view.md)         | "Orbit"     |  The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
+
+
+
+## What is in a View?
+
+A view specifies
+
+* An `id`, which is used not only for debugging but to e.g. position base components relative to views.
+* Relative extents (`x`, `y`, `width`, `height`). These are typically specified in "CSS-like" percentage strings, e.g. `width: '50%'`.
+* Projection mode parameters (e.g. perspective vs. orthographic)
+
 
 To summarize:
 
@@ -34,61 +65,6 @@ deck.gl allows multiple views to be specified, allowing the application to divid
 Finally, the React version of deck.gl can automatically position other components, such as base maps and labels, relative to `View` instances.
 
 
-## What is in a View?
-
-A view specifies
-
-* An `id`, which is used not only for debugging but to e.g. position base components relative to views.
-* Relative extents (`x`, `y`, `width`, `height`). These are typically specified in "CSS-like" percentage strings, e.g. `width: '50%'`.
-* Projection mode parameters (e.g. perspective vs. orthographic)
-
-
-## Choosing a View
-
-> Normally the application works with subclasses of `View`. However, in cases where the application needs to use "externally" generated view or projection matrices (such as WebVR), the `View` class can be used directly.
-
-deck.gl offers a set of `View` classes that lets you specify how deck.gl should render your data. Using `View` classes you can visualize your data from different perspectives (top down map view, first person view, etc).
-
-| View Class                                                     | View State  | Description |
-| ---                                                            | ---         | ---         |
-| [`View`](/docs/api-reference/view.md)                          |             | The base view has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with views that have been supplied from external sources, such as the `WebVR` API. |
-| [`MapView`](/docs/api-reference/map-view.md)                   | geoposition | While all `View` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
-| [`FirstPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera is positioned in the view state position and looks in the direction provided. Allows the application to precisely control camera position. |
-| [`ThirdPersonView`](/docs/api-reference/first-person-view.md)  |(geo)position| The camera looks at the "view state" position from the direction provided. |
-| [`OrthographicView`](/docs/api-reference/orthographic-view.md) | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
-| [`PerspectiveView`](/docs/api-reference/perspective-view.md)   | ?           | The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
-| [`OrbitView`](/docs/api-reference/perspective-view.md)         | "Orbit"     |  The camera is positioned in the target point and looks in the direction provided. Allows the application to precisely control position and direct a `View`. |
-
-
-## Choosing a Projection Mode
-
-The `View` class allows the application full control of what projection to use through the `projection` prop, which expects a function that can transform view properties into a projection matrix:
-
-* The `projection` function will be called with the `View`s props, merged with `width`, `height`, `aspect` and `distance`.
-* The `projection` function must return a 4x4 matrix (a 16 element array in column-major order).
-
-Applications would typically use matrix creation methods from math libraries like [math.gl](https://uber-web.github.io/math.gl/#/documentation/overview) or [gl-matrix](http://glmatrix.net/). Examples of math.gl functions that can be used are:
-
-| Projection                      | Needs View Parameters | Description    |
-| ---                             | ---                   | ---            |
-| `Matrix4.perspective` (Default) | `fovy`, `near`, `far` | A standard perspective projection. Extracts `aspect` from the current viewport extents. |
-| `Matrix4.orthographic`          | `fovy`, `near`, `far` | An orthographic projection based on same parameters as `perspective`. Uses `distance` in the view state. |
-| `Matrix4.ortho`                 | `top`, `bottom`, `left`, `rignt`, `near`, `far` | Traditional, explicit ortographic projection parameters. Needs the additional parameters to be specified on the `View`. |
-
-While the projections suggested in the table leverage stock methods in the math.gl library, custom projection matrices can be returned.
-
-As an example, a perspective / orthographic mode switch could be implemented as follows:
-
-```js
-import {View} from 'deck.gl';
-import {Matrix4} from 'math.gl';
-// Views with matching perspective and orthographic projections
-new View({projection: props => Matrix4.perspective(props), fovy, near, far, ...});
-new View({projection: props => Matrix4.orthographic(props), fovy, near, far, ...});
-// View with traditional orthographic projection, perhaps for 2D rendering
-new View({projection: props => Matrix4.ortho(props), left, right, top, bottom, ...});
-```
-
 ## Positioning a View on the Screen
 
 Views allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). `View`s are typically specified using relative coordinates and dimensions via "CSS style" percentage strings.
@@ -108,11 +84,6 @@ When it comes time to actually render something, each `View` needs to be know fr
 Note that your `View` instance can be associated with a different "view state" each render.
 
 > Limitation: Currently the `Deck` component only accepts a single `Deck.viewState` prop that is used by all `View` instances. In future releases, it will be possible to specify different view states for different view ids.
-
-
-## Projecting Coordinates Using Views
-
-While a `View` by itself does not contain enough information to support projection and unprojection of coordinates, calling `view.getViewport({viewState, width, height})` with a "view state" and `width` and `height` values for the WebGL canvas, creates a [`Viewport`](/docs/api-reference/viewport.md) that in turn can be used to efficiently project and unproject coordinates.
 
 
 ## Using Multiple Views
@@ -167,13 +138,46 @@ Views can also overlap, (e.g. having a small "mini" map in the bottom middle of 
   ]/>
 ```
 
-
 ### Picking in Multiple Views
 
 deck.gl's built-in picking support extends naturally to multiple viewports. The picking process renders all viewports.
 
 Note that the `pickInfo` object does not contain a viewport reference, so you will not be able to tell which viewport was used to pick an object.
 
+
+## Projecting Coordinates Using Views
+
+While a `View` by itself does not contain enough information to support projection and unprojection of coordinates, calling `view.getViewport({viewState, width, height})` with a "view state" and `width` and `height` values for the WebGL canvas, creates a [`Viewport`](/docs/api-reference/viewport.md) that in turn can be used to efficiently project and unproject coordinates.
+
+
+## Choosing a Projection Mode
+
+The `View` class allows the application full control of what projection to use through the `projection` prop, which expects a function that can transform view properties into a projection matrix:
+
+* The `projection` function will be called with the `View`s props, merged with `width`, `height`, `aspect` and `distance`.
+* The `projection` function must return a 4x4 matrix (a 16 element array in column-major order).
+
+Applications would typically use matrix creation methods from math libraries like [math.gl](https://uber-web.github.io/math.gl/#/documentation/overview) or [gl-matrix](http://glmatrix.net/). Examples of math.gl functions that can be used are:
+
+| Projection                      | Needs View Parameters | Description    |
+| ---                             | ---                   | ---            |
+| `Matrix4.perspective` (Default) | `fovy`, `near`, `far` | A standard perspective projection. Extracts `aspect` from the current viewport extents. |
+| `Matrix4.orthographic`          | `fovy`, `near`, `far` | An orthographic projection based on same parameters as `perspective`. Uses `distance` in the view state. |
+| `Matrix4.ortho`                 | `top`, `bottom`, `left`, `rignt`, `near`, `far` | Traditional, explicit ortographic projection parameters. Needs the additional parameters to be specified on the `View`. |
+
+While the projections suggested in the table leverage stock methods in the math.gl library, custom projection matrices can be returned.
+
+As an example, a perspective / orthographic mode switch could be implemented as follows:
+
+```js
+import {View} from 'deck.gl';
+import {Matrix4} from 'math.gl';
+// Views with matching perspective and orthographic projections
+new View({projection: props => Matrix4.perspective(props), fovy, near, far, ...});
+new View({projection: props => Matrix4.orthographic(props), fovy, near, far, ...});
+// View with traditional orthographic projection, perhaps for 2D rendering
+new View({projection: props => Matrix4.ortho(props), left, right, top, bottom, ...});
+```
 
 ### Auto-Positioning React/HTML Components Behind Views
 
@@ -205,6 +209,13 @@ In this example the `StaticMap` component gets automatically positioned under th
     );
   }
 ```
+
+
+## Additional Information
+
+To look more formally at View classes, they can be thought of as "descriptors" that specify **where** and **how** deck.gl should draw.
+
+However, the view does not specify **what** should be drawn, e.g. the "position" that should be displayed. This information needs to be provided separately to deck.gl in the form of one or more "view state" objects. Also a `View` has no knowledge of the actual size of the deck.gl "canvas". Instead, it contains relative sizes that adapt to the current size of the canvas.
 
 
 ## Remarks

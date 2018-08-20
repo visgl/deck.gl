@@ -71,7 +71,7 @@ These RFCS are currently targeted for v6.1 Also see [luma.gl RFCs](https://githu
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
 | [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
-| [**View Class Extensions**](v6.1/view-class-extension-rfc.md) | @ibgreen| **Review** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**View Class Extensions**](v6.1/view-class-extension-rfc.md) | @ibgreen| **Review** | Additional View Class properties that enable e.g. "nested" maps (minimap on top of main map). |
 | [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Property Animation (Phase 1)**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Contour Layer**](v6.1/contour-layer-rfc.md) | @1chandy | **Preliminary Approval** | Contour detecting aggregating layer. |

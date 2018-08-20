@@ -10,8 +10,14 @@ Release date: TBD, Target late Aug, 2018
   <tbody>
     <tr>
       <td>
-        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/attribute-transition.gif" />
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/json-layers-thumb.gif" />
         <p><i>JSON API</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
+        <p><i>Enhanced Multi-View API</i></p>
       </td>
     </tr>
   </tbody>
@@ -21,6 +27,11 @@ Release date: TBD, Target late Aug, 2018
 ### JSON API (Experimental)
 
 A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files.
+
+
+### Enhanced Multiview Support
+
+deck.gl's multiview support has been significantly enhanced. New `View` properties give applications more control over rendering, making it possible to implement e.g. overlapping views, partially synchronized views (share some but not all view state props), views with different background colors etc.
 
 
 ## deck.gl v6.0
