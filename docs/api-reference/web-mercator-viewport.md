@@ -64,8 +64,7 @@ Inherits all [Viewport methods](/docs/api-reference/viewport.md#methods).
 
 ##### `projectFlat`
 
-Project `[longitude, latitude]` on sphere onto "screen pixel" coordinates `[x, y]` without
-considering any perspective (effectively ignoring pitch, bearing and altitude).
+Project `[longitude, latitude]` on sphere onto "screen pixel" coordinates `[x, y]` without considering any perspective (effectively ignoring pitch, bearing and altitude).
 
 Parameters:
 
@@ -78,8 +77,7 @@ Returns:
 
 ##### `unprojectFlat`
 
-Unprojects a screen coordinate `[x, y]` to `[longitude, latitude]` on sphere without
-considering any perspective (effectively ignoring pitch, bearing and altitude).
+Unprojects a screen coordinate `[x, y]` to `[longitude, latitude]` on sphere without considering any perspective (effectively ignoring pitch, bearing and altitude).
 
 Parameters:
 
@@ -90,27 +88,19 @@ Returns:
 
 * Map or world coordinates in `[longitude, latitude]`.
 
+
 ##### `getDistanceScales`
+
+Returns an object with scale values supporting first order (linear) and second order (quadratic) approximations of the local Web Mercator projection scale around the viewport center. Error increases with distance from viewport center (very roughly 1% per 100km in linear mode, quadratic approximation does signficantly better).
 
 Returns:
 
-* An object with precalculated distance scales allowing conversion between
-  lnglat deltas, meters and pixels.
+* An object with precalculated distance scales allowing conversion between lnglat deltas, meters and pixels.
 
-Remarks:
-
-* The returned scales represent simple linear approximations of the local
-  Web Mercator projection scale around the viewport center. Error increases
-  with distance from viewport center (Very roughly 1% per 100km).
-* When converting numbers to 32 bit floats (e.g. for use in WebGL shaders)
-  distance offsets can sometimes be used to gain additional computational
-  precision, which can greatly outweigh the small linear approximation error
-  mentioned above.
 
 ##### `metersToLngLatDelta`
 
-Converts a meter offset to a lnglat offset using linear approximation.
-For information on numerical precision, see remarks on `getDistanceScales`.
+Converts a meter offset to a lnglat offset using linear approximation. For information on numerical precision, see remarks on `getDistanceScales`.
 
 Parameters:
 
@@ -122,9 +112,7 @@ Returns:
 
 ##### `lngLatDeltaToMeters`
 
-Converts a lnglat offset to a meter offset using linear approximation.
-For information on numerical precision, see remarks on
-[`getDistanceScales`](/docs/api-reference/web-mercator-viewport.md#-getdistancescales-).
+Converts a lnglat offset to a meter offset using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](/docs/api-reference/web-mercator-viewport.md#-getdistancescales-).
 
 Parameters:
 
@@ -136,9 +124,7 @@ Returns:
 
 ##### `addMetersToLngLat`
 
-Add a meter delta to a base lnglat coordinate using linear approximation.
-For information on numerical precision, see remarks on
-[`getDistanceScales`](/docs/api-reference/web-mercator-viewport.md#-getdistancescales-).
+Add a meter delta to a base lnglat coordinate using linear approximation. For information on numerical precision, see remarks on [`getDistanceScales`](/docs/api-reference/web-mercator-viewport.md#-getdistancescales-).
 
 Parameters:
 

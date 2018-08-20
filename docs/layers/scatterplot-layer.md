@@ -79,7 +79,7 @@ The maximum radius in pixels.
 
 * Default: `false`
 
-Whether the layer should be rendered in high-precision 64-bit mode.
+Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
 ### Data Accessors
 

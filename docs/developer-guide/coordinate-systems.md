@@ -1,10 +1,13 @@
 # Coordinate Systems
 
-By default deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) coordinate system, so when working with geospatial data (i.e with longitude and latitude encoded positions) deck.gl will automatically interpret it correctly.
+By default, deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) coordinate system, so when working with geospatial data (i.e with longitude and latitude encoded positions) deck.gl will automatically interpret any positions correctly.
 
-In addition, deck.gl supports "meter offset" based local coordinate systems, which can be extremely convenient when modelling geographical data on small scales (e.g. city block level).
+In addition, deck.gl layers can be configured to use "meter offset" based local coordinate systems, which can be quite convenient when modelling geographical data on small scales (e.g. city block level).
 
-Naturally, non-geospatial coordinates can also be used when working with non-geospatial data sets
+Naturally, non-geospatial coordinates can also be used when working with non-geospatial data sets.
+
+Of note is that each deck.gl layer can define its own coordinate system. Within the data supplied to a single layer, all positions must be specified in the coordinate system, however data supplied to other layers can be specified in other coordinate system.
+
 
 ## Supported Coordinate Systems
 
@@ -13,22 +16,19 @@ Naturally, non-geospatial coordinates can also be used when working with non-geo
 | `COORDINATE_SYSTEM.LNGLAT` (default) | [longitude, latitude, altitude] | Longitude and latitude are specified as **Web Mercator coordinates** in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
 | `COORDINATE_SYSTEM.METER_OFFSETS`    | [Δx, Δy, Δz]   | Positions are given in meter offsets from a reference point that is specified separately (the `coordinateOrigin` prop) |
 | `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
+| `COORDINATE_SYSTEM.LNGLAT_DEPRECATED`| [longitude, latitude, altitude] | A lower precision version of the `COORDINATE_SYSTEM.LNGLAT` mode, that was the default until deck.gl v6.0. Will be removed in a future release. |
 
 
 ## Choosing the Right Coordinate System
 
-The choice of coordinate system is often dictated by your data. If your data is specified in `lng`/`lat`s or meter offsets the natural thing is to just use the corresponding coordinate system mode in deck.gl.
+The choice of coordinate system is often dictated by your data. If your data is specified in `lng`/`lat`s or meter offsets the natural choice is of course to just configure any layers displaying that data top use the corresponding coordinate system mode in deck.gl.
 
-It is however important to be aware that the different coordinate systems come with different trade-offs. Specifying mercator coordinates (lng/lats) will cause every coordinate to be individually projected on the GPU and will yield the most correct results when visualizing data spread out over large distances (e.g. several degrees of longitude or latitude, or hundreds of kilometers/miles).
-
-However, longitude and latitude coordinates tend to run into precision issues at high zoom levels on a map, (around 1 million times, or about the city block level), which can lead to some "jitter" or "wobble". This can be mitigated by activating 64-bit computation, but this in turn can have an impact on rendering performance (for very large data sets). Many visualization apps focus on countries and counties, and at those scale there is no issue, but for other visualizations high-precision operation at city-block level is critical.
-
-The meter offset system on the other hand is very performant, but uses a linearized projection that is only locally correct around an "anchor point". So, if your data spans large scales, you will not get the right results, but within 10km or so from the anchor point, the agreement should be very good indeed.
+The meter offset system is quite performant, but uses a linearized projection that is only locally correct around an "anchor point". So, if your data spans large scales, you will not get the right results, but within 10km or so from the anchor point, the agreement should be quite good.
 
 
 ## Combining Different Coordinate Systems
 
-The choice of coordinate system can be specified per layer, meaning that different layers can have data with positions specified in "different" coordinate systems. If some care is taken, they can all be rendered and drawn at the same time, and correctly overlaid.
+Coordinate systems can be specified per layer, meaning that each layer can have data with positions specified in a "different" coordinate system. If some care is taken, they can all be rendered and drawn (correctly aligned) at the same time.
 
 An example of a use case where different coordinate systems are combined:
 

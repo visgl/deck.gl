@@ -2,7 +2,7 @@
 
 The `project` shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
 
-Note that the `project` module has a `project64` counterpart that enables 64 bit projections, providing a dramatic increase in precision, at the cost of some performance.
+Note that the `project` module has a `project64` counterpart that enables 64 bit projections, providing an increase in precision, at the cost of performance. Note that starting with deck.gl v6.1, the improved default 32 bit projection mode provides sufficient precision for most use cases.
 
 
 ## Usage
