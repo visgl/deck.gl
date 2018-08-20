@@ -1,0 +1,44 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset='UTF-8' />
+    <title>deck.gl example</title>
+    <style>
+    #container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    #container > * {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+    select {
+      margin: 0px;
+      width: 400px;
+      padding: 5px 35px 5px 5px;
+      fontSize: 16;
+      border: 1px solid #ccc;
+      height: 34px;
+      appearance: none;
+    }
+    </style>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css' rel='stylesheet' />
+  </head>
+  <body>
+    <div id="container">
+      <select id="templates" style="width:400px; height: 30px;"></select>
+      <div id="editor" style="width:400px; top:30px;"></div>
+
+      <div id="map" style="pointer-events:none; left: 400px;"></div>
+      <canvas id="deck-canvas" style="left: 400px;"></canvas>
+    </div>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.1/ace.js' ></script>
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.js' ></script>
+  </body>
+</html>
