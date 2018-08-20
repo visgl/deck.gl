@@ -53,7 +53,7 @@ The `viewState` property, while optional, enables a number of use cases:
 
 * `null` (default): Will select a view state based on `view.id`, falling back to using the first view state.
 * `String`: Will attempt to match the indicated 	view state.
-* `Object` (with `id` field): if the object contains an `id` field which matches a dynamic view state, the remaining fields will override fields in that view state.
+* `Object` (with `id` field): if the object contains an `id` field which matches a dynamic view state, the remaining fields will extend the specified dynamic view state.
 * `Object` (with no `id` field): If no `id` is provided, the `View.viewState` object will be used directly as the view state, essentially representing a fixed or constant view state.
 
 Note that specifying both `id` and `viewState` effectively allows the View to modify a view state before using it. This is useful in multiview situations where it enables having one view that fixes some parameters (eg. zoom, pitch and bearing to show an overview map).

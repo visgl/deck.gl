@@ -71,7 +71,7 @@ A relative or absolute extent. Default `'100%'`.
   - `null` or `false`: this view is not interactive.
   - `true`: initiates the default controller with default options.
   - `Controller` class (not instance): initiates the provided controller with default options.
-  - `Object`: controller options. This will be merged with the default controller options. 
+  - `Object`: controller options. This will be merged with the default controller options.
     + `controller.type`: the controller class
     + For other options, consult the documentation of [Controller](/docs/api-reference/controller.md).
 
@@ -86,7 +86,7 @@ The optional `viewState` property enables a `View` to specify, select or select-
 
 * `null` (default): Will select a view state based on `view.id`, falling back to using the first view state.
 * `String`: Will attempt to match the indicated 	view state.
-* `Object` (with `id` field): if the object contains an `id` field which matches a dynamic view state, the remaining fields will override fields in that view state.
+* `Object` (with `id` field): if the object contains an `id` field which matches a dynamic view state, the remaining fields in `View.viewState` will extend (be merged into a copy of) the selected dynamic view state.
 * `Object` (with no `id` field): If no `id` is provided, the `View.viewState` object will be used directly as the view state, essentially representing a fixed or constant view state.
 
 Note that specifying `viewState` as an object with an `id` field effectively allows the View to modify a dynamic view state by overriding some of its fields. This is useful in multiview situations where it enables having one view that fixes some parameters (eg. zoom, pitch and bearing to show an overview map).
