@@ -22,6 +22,11 @@ For Earlier Beta Releases see below
 ## Beta Releases
 
 ### deck.gl v5.3 Pre Releases
+####[5.3.3] - August 20
+- Pass through opts in _createAnimationLoop's onCreateContext (#2203)
+- fix bad code links
+- Make doubleTap and keyboard transitions exlusive to MapController (#2033)
+
 ####[5.3.2] - June 20
 - Fix path-marker-layer property passing, and remove moduleParameters to fix offset coordinates
 - Add transition prop forwarding for composite layers; docs (#1900)
