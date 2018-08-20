@@ -180,13 +180,14 @@ function drawLayersInViewport(
   const glViewport = getGLViewport(gl, {viewport, pixelRatio});
 
   if (view && view.props.clear) {
+    const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
     withParameters(
       gl,
       {
         scissorTest: true,
         scissor: glViewport
       },
-      () => clear(view.props.clear)
+      () => clear(gl, clearOpts)
     );
   }
 

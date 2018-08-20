@@ -119,8 +119,8 @@ export default class ViewManager {
   getViewState(viewId) {
     const view = this.getView(viewId);
     // Backward compatibility: view state for single view
-    const viewState = this.viewState[view.getViewStateId()] || this.viewState;
-    return view.filterViewState(viewState);
+    const viewState = (view && this.viewState[view.getViewStateId()]) || this.viewState;
+    return view ? view.filterViewState(viewState) : viewState;
   }
 
   getViewport(viewId) {
