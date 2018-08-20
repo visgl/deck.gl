@@ -5,11 +5,10 @@
 // import ace from 'ace-builds';
 // import 'ace-builds/webpack-resolver';
 
-
 /* global window */
 import {Deck} from '@deck.gl/core';
 import {_JSONConverter as JSONConverter} from '@deck.gl/json';
-import positionChildrenUnderViews from './children';
+// import positionChildrenUnderViews from './children';
 
 import JSON_TEMPLATES from '../common/templates';
 import JSON_CONFIGURATION from '../common/configuration';
@@ -29,7 +28,7 @@ let map = null;
 
 const oldOnload = window.onload;
 
-document.addEventListener("DOMContentLoaded", event => initializeApp());
+document.addEventListener('DOMContentLoaded', event => initializeApp());
 
 function initializeApp() {
   // WORKAROUND: only one onload is fired, leaving other callers in limbo

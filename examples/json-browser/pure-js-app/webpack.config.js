@@ -48,45 +48,45 @@ const BASE_CONFIG = {
 };
 
 const CONFIGS = {
-
   base: env => BASE_CONFIG,
 
-  dev: env => Object.assign({}, BASE_CONFIG, {
-    mode: 'development',
+  dev: env =>
+    Object.assign({}, BASE_CONFIG, {
+      mode: 'development',
 
-    // devServer: {
-    //   contentBase: resolve(PACKAGE_ROOT, 'test')
-    // },
+      // devServer: {
+      //   contentBase: resolve(PACKAGE_ROOT, 'test')
+      // },
 
-    plugins: [
-      new webpack.DefinePlugin({
-        __MAPBOX_TOKEN__: JSON.stringify(process.env.MapboxAccessToken) // eslint-disable-line
-      })
-    ]
-  }),
+      plugins: [
+        new webpack.DefinePlugin({
+          __MAPBOX_TOKEN__: JSON.stringify(process.env.MapboxAccessToken) // eslint-disable-line
+        })
+      ]
+    }),
 
-  prod: env => Object.assign({}, BASE_CONFIG, {
-    mode: 'production',
+  prod: env =>
+    Object.assign({}, BASE_CONFIG, {
+      mode: 'production',
 
-    output: {
-      libraryTarget: 'umd',
-      path: resolve(PACKAGE_ROOT, 'dist'),
-      filename: 'json-browser.min.js'
-    },
+      output: {
+        libraryTarget: 'umd',
+        path: resolve(PACKAGE_ROOT, 'dist'),
+        filename: 'json-browser.min.js'
+      },
 
-    resolve: {
-      alias: ALIASES
-    },
+      resolve: {
+        alias: ALIASES
+      },
 
-    plugins: [
-      new webpack.DefinePlugin({
-        __VERSION__: JSON.stringify(CORE_VERSION)
-      })
-    ],
+      plugins: [
+        new webpack.DefinePlugin({
+          __VERSION__: JSON.stringify(CORE_VERSION)
+        })
+      ],
 
-    devtool: ''
-  })
-
+      devtool: ''
+    })
 };
 
 // Pick a webpack config based on --env.*** argument to webpack
@@ -101,7 +101,7 @@ function getConfig(env = {}) {
 }
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
-const config =
-  env => (env ? require('../../webpack.config.local')(getConfig(env))(env) : getConfig(env));
+const config = env =>
+  env ? require('../../webpack.config.local')(getConfig(env))(env) : getConfig(env);
 
 module.exports = config;

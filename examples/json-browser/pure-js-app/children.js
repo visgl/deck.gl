@@ -9,7 +9,6 @@ export default function positionChildrenUnderViews(domElement, viewManager) {
   // const defaultViewId = viewManager.views[0].id;
 
   Array.from(domElement).forEach((child, i) => {
-
     const viewId = child.dataset['view-id'];
     if (!viewId) {
       return;
