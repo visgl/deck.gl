@@ -2,7 +2,10 @@
   "env": {
     "es5": {
       "presets": [
-        ["@babel/es2015", {modules: 'commonjs'}]
+        ["@babel/env", {
+          "forceAllTransforms": true,
+          "modules": "commonjs"
+        }]
       ],
       "plugins": [
         "version-inline"
@@ -10,7 +13,18 @@
     },
     "esm": {
       "presets": [
-        ["@babel/es2015", {modules: false}]
+        [ "@babel/env", {
+          "targets": {
+            "chrome": "60",
+            "edge": "15",
+            "firefox": "53",
+            "ios": "9",
+            "safari": "9",
+            "ie": "11",
+            "node": "6"
+          },
+          "modules": false
+        }]
       ],
       "plugins": [
         "version-inline"
