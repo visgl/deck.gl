@@ -29,8 +29,9 @@ A simple lighting package is provided in deck.gl, supporting a single directiona
 
 ### fp64
 
-A core feature of deck.gl is the fp64 shader math library that can be used leveraged by developers to conduct numerical computations that requires high numerical accuracy. This shader math library uses "multiple precision" algorithms to emulate 64-bit double precision floating point numbers, with some limitations, using two 32-bit single precision floating point numbers. To use it, just set the "fp64" key to "true" when calling `assembleShaders`. Please refer to the "64-bit layers" section in the document
-for more information.
+The fp64 shader math library can be used leveraged by developers to conduct numerical computations that requires high numerical accuracy. This shader math library uses "multiple precision" algorithms to emulate 64-bit double precision floating point numbers, with some limitations, using two 32-bit single precision floating point numbers. To use it, just set the "fp64" key to "true" when calling `assembleShaders`. Please refer to the "64-bit layers" section in the document for more information.
+
+Note that for geospatial projection, deck.gl v6.1 introduced a "hybrid" 32-bit projection mode that provides the precision of 64-bit projection with the performance of 32-bit calculations, so it is recommended that any use of `fp64` be used for non-position-projection related use cases.
 
 
 ### picking

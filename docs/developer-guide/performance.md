@@ -58,7 +58,7 @@ It is good to be aware that excessive overdraw (drawing many objects/pixels on t
 
 ## Layer Precision
 
-* 32 bit precision is the default in most layers which means that there is a limit to precision that usually becomes evident at high zoom levels (objects start to "wobble" at around mercator zoom 18). These precision can be worked around by setting the `fp64` prop to true, or by using an offset mode based coordinate system (assumes data is clusted around a local center). Flipping on 64 bit precision affects performance as described above and in the separate chapter about the 64-bit GPU solution in deck.gl.
+UPDATE: Since v6.1, deck.gl uses a hybrid 32 bit projection mode that achieves "64-bit precision" with "32-bit performance" (10x faster). It is no longer required to set the `fp64` prop to true, or top use an "offset mode" based coordinate system (in fact, this automatically done under the hood).
 
 
 ## Layer Picking Performance

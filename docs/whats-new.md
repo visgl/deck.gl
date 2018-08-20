@@ -24,6 +24,11 @@ Release date: TBD, Target late Aug, 2018
 </table>
 
 
+### High-Precision, High-Performance Geospatial Projections
+
+The projection algorithm used for geospatial coordinates (layers with `coordinateSystem: COORDINATE_SYSTEM.LNGLAT`) has been replaced with a "hybrid" projection/offset based implementation that rivals 64-bit precision at 32-bit speeds. This makes the use of the `fp64` mode unnecessary for most applications, and should increase application performance and avoid issues on untested graphics drivers.
+
+
 ### JSON API (Experimental)
 
 A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files.
@@ -32,6 +37,7 @@ A new experimental module `@deck.gl/json` provides a set of classes that allows 
 ### Enhanced Multiview Support
 
 deck.gl's multiview support has been significantly enhanced. New `View` properties give applications more control over rendering, making it possible to implement e.g. overlapping views, partially synchronized views (share some but not all view state props), views with different background colors etc.
+
 
 
 ## deck.gl v6.0
