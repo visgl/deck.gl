@@ -8,15 +8,17 @@
     "start-local-es5": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
+    "@deck.gl/experimental-layers": "^6.0.0",
     "colorbrewer": "^1.0.0",
+    "d3-request": "^1.0.6",
     "d3-scale": "^1.0.6",
     "deck.gl": "^6.0.0",
-    "@deck.gl/experimental-layers": "^6.0.0",
     "extrude-polyline": "^1.0.6",
+    "loaders.gl": "^0.1.0",
     "react": "^16.3.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^3.3.0",
+    "react-map-gl": "^4.0.0-alpha",
     "react-stats-zavatta": "^0.0.6",
     "s2-geometry": "^1.2.9"
   },

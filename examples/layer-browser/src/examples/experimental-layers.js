@@ -2,9 +2,11 @@ import {
   MeshLayer,
   PathOutlineLayer,
   PathMarkerLayer,
-  AdvancedTextLayer
+  AdvancedTextLayer,
+  GPUGridLayer,
+  KMLLayer
 } from '@deck.gl/experimental-layers';
-import {GPUGridLayer} from '@deck.gl/experimental-layers';
+
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import GL from 'luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
@@ -198,12 +200,16 @@ const GPUGridLayerPerfExample = (id, getData) => ({
 
 /* eslint-disable quote-props */
 export default {
-  'Experimental Layers': {
-    MeshLayer: MeshLayerExample,
+  'Experimental 3D Layers': {
+    MeshLayer: MeshLayerExample
+  },
+  'Experimental Trips Layers': {
     PathOutlineLayer: PathOutlineExample,
     PathMarkerLayer: PathMarkerExample,
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
-    'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
+    'PathMarkerLayer (Meter)': PathMarkerExampleMeter
+  },
+  'Experimental Core Layers': {
     AdvancedTextLayer: AdvancedTextLayerExample,
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
