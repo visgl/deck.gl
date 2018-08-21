@@ -1,12 +1,51 @@
-# View State Transitions
+# Animations and Transitions
 
-View state transitions provide smooth and visually appealing transitions when ViewState change from one state to the other. Transitions are supported using `Deck's` `viewState` prop.
+> This document was recently added and is still being finalized
+
+deck.gl provides several ways to implement animation and transitions.
+
+* **Camera Transitions** - (aka View State Transitions) when changing the view state, deck.gl can move the camera smoothly between the initial and final view state.
+* **Layer Transitions** - (aka Attribute Transitions)
+* **Property Animation** -
+
+
+## Animation
+
+### Drawing Constantly vs. When Needed
+
+While some 3D applications such as games often keep drawing to screen at a high frame rate, deck.gl avoids this by default. When not animating, deck.gl is optimized to only render to the screen when something changes (a layer's data or props, the viewState etc). This keeps the GPU and CPU load low and minimizes power consumtion.
+
+However when animating properties, deck.gl needs to update the screen frequently. This does consume more power and can cause fans to spin up etc. However, even when animating deck.gl does not draw to the screen when the application's browser tab is not active.
+
+
+### Property Animation
+
+Layer properties are divided into two categories. Accessors (that control "attributes" and only update when data changes or update triggers fire) and non-accessors that update every time the layer is rendered.
+
+Property animation refers to assigning functions as values to non-accessor layer props. The functions will be called every render frame, potentially generating new values every frame at 60 FPS.
+
+
+### Advantages of Property Animation
+
+While it is certainly possible to implement deck.gl animation by supplying a "freshly minted" list of layers to the deck.gl component every frame, e.g. using `Deck.setProps({layers: [new ...Layer(...), ...]})`, this approach has a performance penalty as both your application logic and deck.gl's layer matching system must kick into gear each render frame.
+
+By setting property animation functions, properties will be evaluated by the underlying render loop system with considerably less overhead, both deck.gl and your application will essentially remain undisturbed as the layer properties are updated inside a tight inner animation loop.
+
+
+## Transitions
+
+Transitions in deck.gl are short animations that are triggered when deck.gl detects a change of some property. Instead of immediately redrawing based on the new view value, deck.gl draws a number of frames, automatically interpolating the value over time.
+
+
+### View State Transitions
+
+View state transitions provide smooth and visually appealing camera transitions when view states change. View state transitions are initiated by updating the `Deck.viewState` prop.
 
 Following fields of `viewState` can be used to achieve viewport transitions.
 
 * `transitionDuration` (Number, optional, default: 0) - Transition duration in milliseconds, default value 0, implies no transition.
 * `transitionEasing` (Function, optional, default: `t => t`) - Easing function that can be used to achieve effects like "Ease-In-Cubic", "Ease-Out-Cubic", etc. Default value performs Linear easing. (list of sample easing functions: <http://easings.net/>)
-* `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two viewports, deck.gl provides `LinearInterpolator` and `FlyToInterpolator`. Default value, `LinearInterpolator`, performs linear interpolation on `ViewState` fields. `FlyToInterpolator` animates `ViewStates` similar to MapBox `flyTo` API and applicable for `MapState`, this is pretty useful when camera center changes by long distance. But a user can provide any custom implementation for this object using `TrasitionInterpolator` base class.    
+* `transitionInterpolator` (Object, optional, default: `LinearInterpolator`) - An interpolator object that defines the transition behavior between two viewports, deck.gl provides `LinearInterpolator` and `FlyToInterpolator`. Default value, `LinearInterpolator`, performs linear interpolation on `ViewState` fields. `FlyToInterpolator` animates `ViewStates` similar to MapBox `flyTo` API and applicable for `MapState`, this is pretty useful when camera center changes by long distance. But a user can provide any custom implementation for this object using `TrasitionInterpolator` base class.
 * `transitionInterruption` (TRANSITION_EVENTS (Number), optional, default: BREAK) - This field controls how to process a new `ViewState` change that occurs while performing an existing transition. This field has no impact once transition is complete. Here is the list of all possible values with resulting behavior.
 
 | TRANSITION_EVENTS | Result |
@@ -20,7 +59,15 @@ Following fields of `viewState` can be used to achieve viewport transitions.
 * `onTransitionEnd` (Functional, optional) - Callback fires when transition ends.
 
 
-## Usage
+### TransitionInterpolators
+
+* **LinearInterpolator** -  Performs linear interpolation between two ViewStates.
+* **FlyToInterpolator** - This class is designed to perform `flyTo` style interpolation between two `MapState` objects.
+* **TransitionInterpolator** - Base interpolator class that provides common functionality required to interpolate between two ViewState props. This class can be subclassed to implement any custom interpolation:
+
+
+
+### Examples
 
 Sample code that provides `flyTo` style transition to move camera from current location to NewYork city.
 
@@ -154,96 +201,3 @@ class App extends Component {
 }
 ```
 
-
-## TransitionInterpolator
-
-Base interpolator class that provides common functionality required to interpolate between two ViewState props. This class can be subclassed to implement any custom interpolation.
-
-### Constructor
-
-Parameters:
-
-* opts (Object | Array) -
-
-* Object with following fields
-* compare: prop names used in equality check.
-* extract: prop names needed for interpolation.
-* required: prop names that must be supplied.
-
-* Array of prop names that are used for all above fields.
-
-### Methods
-
-#### arePropsEqual
-
-Parameters:
-
-* currentProps: Object with ViewState props.
-* nextProps: Object with ViewState props.
-
-Returns:
-
-* `true` if the ViewStates have equal value for all `compare` props.
-
-#### initializeProps
-
-Parameters:
-
-* startProps (Object): Object with staring ViewState props.
-* endProps (Object): Object with ending ViewState props.
-
-Returns:
-
-* {start, end}, transition props are validated and extracted from inputs and returned.
-
-#### interpolateProps
-
-* This method is not implemented, it must be implemented by subclasses.
-
-
-## LinearInterpolator
-
-Interpolator class, inherits from `TransitionInterpolator`. Performs linear interpolation between two ViewStates.
-
-### Constructor
-
-Parameters:
-
-* transitionProps (Array, default: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch']): Array of props that are linearly interpolated.
-
-#### interpolateProps
-
-Parameters:
-
-* startProps (Object): Object with staring ViewState props.
-* endProps (Object): Object with ending ViewState props.
-* t (Number) : Number in [0, 1] range.
-
-Returns:
-
-* Object with interpolated ViewState props.
-
-
-## FlyToInterpolator
-
-Interpolator class, inherits from `TransitionInterpolator`. This class is designed to perform `flyTo` style interpolation between two `MapState` objects.
-
-### Constructor
-
-Initializes super class with an object with following props:
-
-* compare: ['longitude', 'latitude', 'zoom', 'bearing', 'pitch']
-* extract: ['width', 'height', 'longitude', 'latitude', 'zoom', 'bearing', 'pitch']
-* required: ['width', 'height', 'latitude', 'longitude', 'zoom']
-
-#### interpolateProps
-
-Parameters:
-
-* startProps (Object): Object with staring ViewState props.
-* endProps (Object): Object with ending ViewState props.
-* t (Number) : Number in [0, 1] range.
-
-Returns:
-
-* Object with interpolated ViewState props.
