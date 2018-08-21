@@ -20,7 +20,8 @@
 
 import {CompositeLayer} from '@deck.gl/core';
 import TextMultiIconLayer from './text-multi-icon-layer';
-import {fetch} from 'global/window';
+
+/* global fetch */
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 // TODO: support these options...

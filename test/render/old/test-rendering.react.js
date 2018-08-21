@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {window, document} from 'global';
+/* global window, document */
 
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
