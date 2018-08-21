@@ -21,7 +21,7 @@
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
-import {COORDINATE_SYSTEM} from '../../lib/constants';
+import {COORDINATE_SYSTEM, SHADER_COORDINATE_SYSTEM} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
 import log from '../../utils/log';
@@ -40,6 +40,29 @@ const LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
+function getShaderCoordinateSystem(coordinateSystem) {
+  switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+    default:
+      // TODO: this breaks fp64
+      return SHADER_COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL;
+
+    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
+      return SHADER_COORDINATE_SYSTEM.LNGLAT;
+
+    case COORDINATE_SYSTEM.METER_OFFSETS:
+    case COORDINATE_SYSTEM.METERS:
+      return SHADER_COORDINATE_SYSTEM.METER_OFFSETS;
+
+    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      return SHADER_COORDINATE_SYSTEM.LNGLAT_OFFSETS;
+
+    case COORDINATE_SYSTEM.IDENTITY:
+      return SHADER_COORDINATE_SYSTEM.IDENTITY;
+  }
+}
+
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
 // Uncomment when debugging
@@ -57,10 +80,10 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
-  let shaderCoordinateSystem = coordinateSystem;
+  let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
   let shaderCoordinateOrigin = coordinateOrigin;
 
-  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
+  if (shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
     if (coordinateZoom < LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD) {
       shaderCoordinateSystem = COORDINATE_SYSTEM.LNGLAT;
     } else {
@@ -218,21 +241,24 @@ function calculateViewportUniforms({
     project_uCameraPosition: cameraPos
   };
 
-  if (shaderCoordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
-    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
-  }
-  if (
-    shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-    shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
-  ) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
-    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
-  }
-  if (shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
-    uniforms.project_coordinate_origin = shaderCoordinateOrigin;
+  const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
+
+  switch (shaderCoordinateSystem) {
+    case COORDINATE_SYSTEM.METER_OFFSETS:
+      uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
+      uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
+      break;
+
+    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+      uniforms.project_coordinate_origin = shaderCoordinateOrigin;
+    // eslint-disable-line no-fallthrough
+    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
+      uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+      break;
+
+    default:
+      break;
   }
 
   return uniforms;

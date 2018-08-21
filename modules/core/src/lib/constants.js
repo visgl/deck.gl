@@ -28,6 +28,7 @@ export const COORDINATE_SYSTEM = {
   // lng lat are degrees, elevation is meters. distances as meters.
   LNGLAT: 1.0,
   LNGLAT_EXPERIMENTAL: 4.0,
+  LNGLAT_DEPRECATED: 5.0,
 
   // Positions are interpreted as meter offsets, distances as meters
   // Planned to deprecate in later versions
@@ -41,4 +42,14 @@ export const COORDINATE_SYSTEM = {
 
   // Positions and distances are not transformed: [x, y, z] in unit coordinates
   IDENTITY: 0.0
+};
+
+export const SHADER_COORDINATE_SYSTEM = {
+  LNGLAT: COORDINATE_SYSTEM.LNGLAT,
+  LNGLAT_EXPERIMENTAL: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL,
+
+  METER_OFFSETS: COORDINATE_SYSTEM.METER_OFFSETS,
+  LNGLAT_OFFSETS: COORDINATE_SYSTEM.LNGLAT_OFFSETS,
+
+  IDENTITY: COORDINATE_SYSTEM.IDENTITY
 };
