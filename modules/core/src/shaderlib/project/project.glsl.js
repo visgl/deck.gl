@@ -18,13 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PROJECT_COORDINATE_SYSTEM} from './constants';
+
+const CONSTANTS = Object.keys(PROJECT_COORDINATE_SYSTEM)
+  .map(k => `const float COORDINATE_SYSTEM_${k} = ${PROJECT_COORDINATE_SYSTEM[k]}.;`)
+  .join('');
+
 export default `\
-// EXTERNAL CONSTANTS: these must match JavaScript constants in "src/core/lib/constants.js"
-const float COORDINATE_SYSTEM_IDENTITY = 0.;
-const float COORDINATE_SYSTEM_LNG_LAT = 1.;
-const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
-const float COORDINATE_SYSTEM_LNGLAT_OFFSETS = 3.;
-const float COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL = 4.;
+${CONSTANTS}
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
@@ -73,7 +74,7 @@ vec4 project_scale(vec4 meters) {
 // normals in the worldspace
 //
 vec3 project_normal(vec3 vector) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT ||
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_ORIGINAL ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     return normalize(vector * project_uPixelsPerDegree);
   }
@@ -106,7 +107,7 @@ vec2 project_mercator_(vec2 lnglat) {
 //
 vec4 project_position(vec4 position, vec2 position64xyLow) {
   // TODO - why not simply subtract center and fall through?
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_ORIGINAL) {
     return project_uModelMatrix * vec4(
       project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
       project_scale(position.z),
@@ -114,7 +115,7 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
     );
   }
 
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     float X = position.x - project_coordinate_origin.x;
     float Y = position.y - project_coordinate_origin.y;

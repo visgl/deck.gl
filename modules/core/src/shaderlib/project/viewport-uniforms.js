@@ -21,11 +21,13 @@
 import mat4_multiply from 'gl-mat4/multiply';
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 
-import {COORDINATE_SYSTEM, SHADER_COORDINATE_SYSTEM} from '../../lib/constants';
+import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
 import log from '../../utils/log';
 import assert from '../../utils/assert';
+
+import {PROJECT_COORDINATE_SYSTEM} from './constants';
 
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
@@ -35,8 +37,8 @@ const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
-// TODO: Find the best value for this to maximize accuracy
-const LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD = 12;
+// Based on viewport-mercator-project/test/fp32-limits.js
+const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
@@ -46,20 +48,20 @@ function getShaderCoordinateSystem(coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
     default:
       // TODO: this breaks fp64
-      return SHADER_COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL;
+      return PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET;
 
     case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
-      return SHADER_COORDINATE_SYSTEM.LNGLAT;
+      return PROJECT_COORDINATE_SYSTEM.LNGLAT_ORIGINAL;
 
     case COORDINATE_SYSTEM.METER_OFFSETS:
     case COORDINATE_SYSTEM.METERS:
-      return SHADER_COORDINATE_SYSTEM.METER_OFFSETS;
+      return PROJECT_COORDINATE_SYSTEM.METER_OFFSETS;
 
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      return SHADER_COORDINATE_SYSTEM.LNGLAT_OFFSETS;
+      return PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS;
 
     case COORDINATE_SYSTEM.IDENTITY:
-      return SHADER_COORDINATE_SYSTEM.IDENTITY;
+      return PROJECT_COORDINATE_SYSTEM.IDENTITY;
   }
 }
 
@@ -83,9 +85,9 @@ function calculateMatrixAndOffset({
   let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
   let shaderCoordinateOrigin = coordinateOrigin;
 
-  if (shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
-    if (coordinateZoom < LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD) {
-      shaderCoordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET) {
+    if (coordinateZoom < LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD) {
+      shaderCoordinateSystem = PROJECT_COORDINATE_SYSTEM.LNGLAT_ORIGINAL;
     } else {
       const lng = Math.fround(viewport.longitude);
       const lat = Math.fround(viewport.latitude);
@@ -94,15 +96,15 @@ function calculateMatrixAndOffset({
   }
 
   switch (shaderCoordinateSystem) {
-    case COORDINATE_SYSTEM.IDENTITY:
-    case COORDINATE_SYSTEM.LNGLAT:
+    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_ORIGINAL:
       projectionCenter = ZERO_VECTOR;
       break;
 
     // TODO: make lighting work for meter offset mode
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
@@ -244,15 +246,15 @@ function calculateViewportUniforms({
   const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
 
   switch (shaderCoordinateSystem) {
-    case COORDINATE_SYSTEM.METER_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
       uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
       uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
       break;
 
-    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
       uniforms.project_coordinate_origin = shaderCoordinateOrigin;
     // eslint-disable-line no-fallthrough
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
       uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
       break;
