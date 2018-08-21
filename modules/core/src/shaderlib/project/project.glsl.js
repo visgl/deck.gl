@@ -74,7 +74,7 @@ vec4 project_scale(vec4 meters) {
 // normals in the worldspace
 //
 vec3 project_normal(vec3 vector) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_ORIGINAL ||
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     return normalize(vector * project_uPixelsPerDegree);
   }
@@ -107,7 +107,7 @@ vec2 project_mercator_(vec2 lnglat) {
 //
 vec4 project_position(vec4 position, vec2 position64xyLow) {
   // TODO - why not simply subtract center and fall through?
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_ORIGINAL) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return project_uModelMatrix * vec4(
       project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
       project_scale(position.z),
