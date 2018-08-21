@@ -23,3 +23,6 @@ export {default as BezierCurveLayer} from './bezier-curve-layer/bezier-curve-lay
 export {default as TripsLayer} from './trips-layer/trips-layer';
 export {default as PathMarkerLayer} from './path-marker-layer/path-marker-layer';
 export {default as PathOutlineLayer} from './path-outline-layer/path-outline-layer';
+
+// GEOSPATIAL LAYERS
+export {default as KMLLayer} from './kml-layer/kml-layer';

@@ -12,6 +12,8 @@ import GL from 'luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
 import * as dataSamples from '../data-samples';
 
+import {parseColor} from '../utils/color';
+
 const LIGHT_SETTINGS = {
   lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
   ambientRatio: 0.3,
@@ -198,8 +200,41 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
+const KMLLayerExample = {
+  layer: KMLLayer,
+  getData: () => 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/test-data/KML_Samples.kml',
+  propTypes: {
+    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
+    lineDashSizeLine: {
+      type: 'number',
+      max: 20,
+      onUpdate: (newValue, newSettings, change) => {
+        change('getLineDashArray', [newValue, 20 - newValue]);
+      }
+    }
+  },
+  props: {
+    id: 'kmlLayer',
+    getRadius: f => 100,
+    getFillColor: [255, 0, 0, 255], // f => parseColor(f.color),
+    getLineColor: [255, 0, 0, 255], // f => parseColor(f.line),
+    getLineDashArray: f => [20, 0],
+    getLineWidth: 3, // f => parseColor(f.lineWidth) | 1,
+    getElevation: f => 500,
+    lineWidthScale: 1,
+    lineWidthMinPixels: 1,
+    pickable: true,
+    fp64: true,
+    lightSettings: LIGHT_SETTINGS
+  }
+};
+
+
 /* eslint-disable quote-props */
 export default {
+  'Experimental Geospatial Layers': {
+    KMLLayer: KMLLayerExample
+  },
   'Experimental 3D Layers': {
     MeshLayer: MeshLayerExample
   },
@@ -207,7 +242,7 @@ export default {
     PathOutlineLayer: PathOutlineExample,
     PathMarkerLayer: PathMarkerExample,
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
-    'PathMarkerLayer (Meter)': PathMarkerExampleMeter
+    'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
   },
   'Experimental Core Layers': {
     AdvancedTextLayer: AdvancedTextLayerExample,
