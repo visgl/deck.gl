@@ -70,6 +70,7 @@ export default class CompositeLayer extends Layer {
       highlightColor,
       coordinateSystem,
       coordinateOrigin,
+      wrapLongitude,
       modelMatrix
     } = this.props;
     const newProps = {
@@ -83,6 +84,7 @@ export default class CompositeLayer extends Layer {
       highlightColor,
       coordinateSystem,
       coordinateOrigin,
+      wrapLongitude,
       modelMatrix
     };
 

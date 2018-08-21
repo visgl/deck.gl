@@ -131,6 +131,7 @@ export class App extends Component {
     const layerProps = {
       data,
       pickable: true,
+      wrapLongitude: true,
       getPosition: d => d.coordinates,
       iconAtlas,
       iconMapping,

@@ -57,6 +57,7 @@ const defaultProps = {
 
   coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin: [0, 0, 0],
+  wrapLongitude: false,
 
   parameters: {},
   uniforms: {},

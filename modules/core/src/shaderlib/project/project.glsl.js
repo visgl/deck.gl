@@ -28,6 +28,8 @@ const float COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL = 4.;
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
+uniform bool project_uWrapLongitude;
+uniform float project_uAntimeridian;
 uniform vec3 project_uPixelsPerMeter;
 uniform vec3 project_uPixelsPerDegree;
 uniform vec3 project_uPixelsPerUnit;
@@ -89,8 +91,12 @@ vec4 project_offset_(vec4 offset) {
 // Projecting positions - non-linear projection: lnglats => unit tile [0-1, 0-1]
 //
 vec2 project_mercator_(vec2 lnglat) {
+  float x = lnglat.x;
+  if (project_uWrapLongitude) {
+    x = mod(x - project_uAntimeridian, 360.0) + project_uAntimeridian;
+  }
   return vec2(
-    radians(lnglat.x) + PI,
+    radians(x) + PI,
     PI - log(tan_fp32(PI * 0.25 + radians(lnglat.y) * 0.5))
   );
 }
