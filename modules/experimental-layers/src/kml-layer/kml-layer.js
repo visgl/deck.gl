@@ -107,17 +107,17 @@ export default class KMLLayer extends CompositeLayer {
     const {data} = this.props;
     const pointFeatures = data.markers;
     const lineFeatures = data.lines;
-    const polygonFeatures = data.polygons;
+    // const polygonFeatures = data.polygons;
     const polygonOutlineFeatures = data.polygons;
 
     // Layer composition props
     const {
       stroked,
-      filled,
+      // filled,
       extruded,
-      wireframe,
+      // wireframe,
       subLayers,
-      lightSettings,
+      // lightSettings,
       transitions
     } = this.props;
 
@@ -131,7 +131,7 @@ export default class KMLLayer extends CompositeLayer {
       pointRadiusScale,
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
-      elevationScale,
+      // elevationScale,
       lineDashJustified,
       fp64
     } = this.props;
@@ -143,14 +143,14 @@ export default class KMLLayer extends CompositeLayer {
       getRadius,
       getLineWidth,
       getLineDashArray,
-      getElevation,
+      // getElevation,
       updateTriggers
     } = this.props;
 
     const drawPoints = pointFeatures && pointFeatures.length > 0;
     const drawLines = lineFeatures && lineFeatures.length > 0;
     const hasPolygonLines = polygonOutlineFeatures && polygonOutlineFeatures.length > 0;
-    const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
+    // const hasPolygon = polygonFeatures && polygonFeatures.length > 0;
 
     /*
     // Filled Polygon Layer
@@ -295,7 +295,7 @@ export default class KMLLayer extends CompositeLayer {
       // !extruded && polygonFillLayer,
       polygonLineLayer,
       pathLayer,
-      pointLayer,
+      pointLayer
       // If extruded: draw fill layer last for correct blending behavior
       // extruded && polygonFillLayer
     ];

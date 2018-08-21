@@ -13,17 +13,17 @@ export default function smartFetch(url) {
 function smartParse(text, url) {
   const extension = path.extname(url) || url;
   switch (extension) {
-  case '.csv':
-    return csvParseRows(text);
+    case '.csv':
+      return csvParseRows(text);
 
-  case '.kml':
-    const kml = KMLLoader.parseText(text);
-    // TODO - confusing to modify KML?
-    return postProcessKML(kml);
+    case '.kml':
+      const kml = KMLLoader.parseText(text);
+      // TODO - confusing to modify KML?
+      return postProcessKML(kml);
 
-  case '.json':
-  default:
-    return JSON.parse(text);
+    case '.json':
+    default:
+      return JSON.parse(text);
   }
 }
 
@@ -40,12 +40,10 @@ function postProcessKML(kml) {
 function postProcessItem(item) {
   if (item.coordinates && item.coordinates.length) {
     if (Array.isArray(item.coordinates[0])) {
-      item.coordinates = item.coordinates.map(
-        ([lat, lng, z = 0]) => [lng, lat, z]
-      )
+      item.coordinates = item.coordinates.map(([lat, lng, z = 0]) => [lng, lat, z]);
     } else {
       // Marker coordinates are just a single coord (not an array of coords)
-      const  [lat, lng, z = 0] = item.coordinates;
+      const [lat, lng, z = 0] = item.coordinates;
       item.coordinates = [lng, lat, z];
     }
   }

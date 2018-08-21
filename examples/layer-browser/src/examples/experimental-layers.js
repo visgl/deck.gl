@@ -12,8 +12,6 @@ import GL from 'luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
 import * as dataSamples from '../data-samples';
 
-import {parseColor} from '../utils/color';
-
 const LIGHT_SETTINGS = {
   lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
   ambientRatio: 0.3,
@@ -202,7 +200,8 @@ const GPUGridLayerPerfExample = (id, getData) => ({
 
 const KMLLayerExample = {
   layer: KMLLayer,
-  getData: () => 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/test-data/KML_Samples.kml',
+  getData: () =>
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/test-data/KML_Samples.kml',
   propTypes: {
     getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
     lineDashSizeLine: {
@@ -229,7 +228,6 @@ const KMLLayerExample = {
   }
 };
 
-
 /* eslint-disable quote-props */
 export default {
   'Experimental Geospatial Layers': {
@@ -242,7 +240,7 @@ export default {
     PathOutlineLayer: PathOutlineExample,
     PathMarkerLayer: PathMarkerExample,
     'PathMarkerLayer (LngLat Offset)': PathMarkerExampleLngLatOffset,
-    'PathMarkerLayer (Meter)': PathMarkerExampleMeter,
+    'PathMarkerLayer (Meter)': PathMarkerExampleMeter
   },
   'Experimental Core Layers': {
     AdvancedTextLayer: AdvancedTextLayerExample,
