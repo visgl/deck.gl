@@ -33,7 +33,7 @@ const DEFAULT_THRESHOLD = 1;
 
 const defaultProps = {
   // grid aggregation
-  cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
+  cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: x => x.position,
 
   // contour lines
