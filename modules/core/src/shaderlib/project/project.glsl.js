@@ -18,13 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PROJECT_COORDINATE_SYSTEM} from './constants';
+
+// We are generating these from the js code in constants.js
+const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(PROJECT_COORDINATE_SYSTEM)
+  .map(key => `const float COORDINATE_SYSTEM_${key} = ${PROJECT_COORDINATE_SYSTEM[key]}.;`)
+  .join('');
+
 export default `\
-// EXTERNAL CONSTANTS: these must match JavaScript constants in "src/core/lib/constants.js"
-const float COORDINATE_SYSTEM_IDENTITY = 0.;
-const float COORDINATE_SYSTEM_LNG_LAT = 1.;
-const float COORDINATE_SYSTEM_METER_OFFSETS = 2.;
-const float COORDINATE_SYSTEM_LNGLAT_OFFSETS = 3.;
-const float COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL = 4.;
+${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;
@@ -114,7 +116,7 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
     );
   }
 
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_EXPERIMENTAL) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
     float X = position.x - project_coordinate_origin.x;
     float Y = position.y - project_coordinate_origin.y;

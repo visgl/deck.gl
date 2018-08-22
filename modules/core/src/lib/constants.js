@@ -26,19 +26,20 @@
 export const COORDINATE_SYSTEM = {
   // Positions are interpreted as [lng, lat, elevation]
   // lng lat are degrees, elevation is meters. distances as meters.
-  LNGLAT: 1.0,
-  LNGLAT_EXPERIMENTAL: 4.0,
+  LNGLAT: 1,
+  LNGLAT_EXPERIMENTAL: 1,
+  LNGLAT_DEPRECATED: 5,
 
   // Positions are interpreted as meter offsets, distances as meters
-  // Planned to deprecate in later versions
-  METER_OFFSETS: 2.0,
-  METERS: 2.0,
+  METER_OFFSETS: 2,
+  // Planned to deprecate in later versions, in favor of METER_OFFSETS
+  METERS: 2,
 
   // Positions are interpreted as lng lat offsets: [deltaLng, deltaLat, elevation]
   // deltaLng, deltaLat are delta degrees, elevation is meters.
   // distances as meters.
-  LNGLAT_OFFSETS: 3.0,
+  LNGLAT_OFFSETS: 3,
 
   // Positions and distances are not transformed: [x, y, z] in unit coordinates
-  IDENTITY: 0.0
+  IDENTITY: 0
 };

@@ -27,6 +27,8 @@ import memoize from '../../utils/memoize';
 import log from '../../utils/log';
 import assert from '../../utils/assert';
 
+import {PROJECT_COORDINATE_SYSTEM} from './constants';
+
 // To quickly set a vector to zero
 const ZERO_VECTOR = [0, 0, 0, 0];
 // 4x4 matrix that drops 4th component of vector
@@ -35,10 +37,37 @@ const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
 const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
-// TODO: Find the best value for this to maximize accuracy
-const LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD = 12;
+// Based on viewport-mercator-project/test/fp32-limits.js
+const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
+
+function getShaderCoordinateSystem(coordinateSystem, fp64) {
+  if (fp64) {
+    // This is the only mode that works with fp64
+    return PROJECT_COORDINATE_SYSTEM.LNG_LAT;
+  }
+
+  switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+    default:
+      return PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET;
+
+    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
+      return PROJECT_COORDINATE_SYSTEM.LNG_LAT;
+
+    case COORDINATE_SYSTEM.METER_OFFSETS:
+    case COORDINATE_SYSTEM.METERS:
+      return PROJECT_COORDINATE_SYSTEM.METER_OFFSETS;
+
+    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      return PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS;
+
+    case COORDINATE_SYSTEM.IDENTITY:
+      return PROJECT_COORDINATE_SYSTEM.IDENTITY;
+  }
+}
 
 // The code that utilizes Matrix4 does the same calculation as their mat4 counterparts,
 // has lower performance but provides error checking.
@@ -49,7 +78,8 @@ function calculateMatrixAndOffset({
   // NEW PARAMS
   coordinateSystem,
   coordinateOrigin,
-  coordinateZoom
+  coordinateZoom,
+  fp64
 }) {
   const {viewMatrixUncentered} = viewport;
   let {viewMatrix} = viewport;
@@ -57,13 +87,15 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
-  let shaderCoordinateSystem = coordinateSystem;
+  let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem, fp64);
   let shaderCoordinateOrigin = coordinateOrigin;
 
-  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
-    if (coordinateZoom < LNGLAT_EXPERIMENTAL_ZOOM_THRESHOLD) {
-      shaderCoordinateSystem = COORDINATE_SYSTEM.LNGLAT;
+  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET) {
+    if (coordinateZoom < LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD) {
+      // Use LNG_LAT projection if not zooming
+      shaderCoordinateSystem = PROJECT_COORDINATE_SYSTEM.LNG_LAT;
     } else {
+      // Use LNGLAT_AUTO_OFFSET
       const lng = Math.fround(viewport.longitude);
       const lat = Math.fround(viewport.latitude);
       shaderCoordinateOrigin = [lng, lat];
@@ -71,15 +103,15 @@ function calculateMatrixAndOffset({
   }
 
   switch (shaderCoordinateSystem) {
-    case COORDINATE_SYSTEM.IDENTITY:
-    case COORDINATE_SYSTEM.LNGLAT:
+    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
+    case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
       projectionCenter = ZERO_VECTOR;
       break;
 
     // TODO: make lighting work for meter offset mode
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
@@ -136,6 +168,7 @@ export function getUniformsFromViewport({
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   wrapLongitude = false,
+  fp64 = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -158,7 +191,8 @@ export function getUniformsFromViewport({
       devicePixelRatio,
       coordinateSystem,
       coordinateOrigin,
-      wrapLongitude
+      wrapLongitude,
+      fp64
     })
   );
 }
@@ -168,7 +202,8 @@ function calculateViewportUniforms({
   devicePixelRatio,
   coordinateSystem,
   coordinateOrigin,
-  wrapLongitude
+  wrapLongitude,
+  fp64
 }) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
@@ -183,7 +218,8 @@ function calculateViewportUniforms({
     coordinateSystem,
     coordinateOrigin,
     coordinateZoom,
-    viewport
+    viewport,
+    fp64
   });
 
   assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
@@ -218,21 +254,24 @@ function calculateViewportUniforms({
     project_uCameraPosition: cameraPos
   };
 
-  if (shaderCoordinateSystem === COORDINATE_SYSTEM.METER_OFFSETS) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
-    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
-  }
-  if (
-    shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_OFFSETS ||
-    shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
-  ) {
-    const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-    uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
-    uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
-  }
-  if (shaderCoordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL) {
-    uniforms.project_coordinate_origin = shaderCoordinateOrigin;
+  const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
+
+  switch (shaderCoordinateSystem) {
+    case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
+      uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
+      uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
+      break;
+
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
+      uniforms.project_coordinate_origin = shaderCoordinateOrigin;
+    // eslint-disable-line no-fallthrough
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
+      uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+      break;
+
+    default:
+      break;
   }
 
   return uniforms;
