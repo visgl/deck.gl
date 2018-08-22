@@ -20,12 +20,13 @@
 
 import {PROJECT_COORDINATE_SYSTEM} from './constants';
 
-const CONSTANTS = Object.keys(PROJECT_COORDINATE_SYSTEM)
-  .map(k => `const float COORDINATE_SYSTEM_${k} = ${PROJECT_COORDINATE_SYSTEM[k]}.;`)
+// We are generating these from the js code in constants.js
+const COORDINATE_SYSTEM_GLSL_CONSTANTS = Object.keys(PROJECT_COORDINATE_SYSTEM)
+  .map(key => `const float COORDINATE_SYSTEM_${key} = ${PROJECT_COORDINATE_SYSTEM[key]}.;`)
   .join('');
 
 export default `\
-${CONSTANTS}
+${COORDINATE_SYSTEM_GLSL_CONSTANTS}
 
 uniform float project_uCoordinateSystem;
 uniform float project_uScale;

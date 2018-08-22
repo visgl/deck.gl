@@ -31,8 +31,8 @@ export const COORDINATE_SYSTEM = {
   LNGLAT_DEPRECATED: 5,
 
   // Positions are interpreted as meter offsets, distances as meters
-  // Planned to deprecate in later versions
   METER_OFFSETS: 2,
+  // Planned to deprecate in later versions, in favor of METER_OFFSETS
   METERS: 2,
 
   // Positions are interpreted as lng lat offsets: [deltaLng, deltaLat, elevation]
