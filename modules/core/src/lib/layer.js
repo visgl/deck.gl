@@ -197,7 +197,7 @@ export default class Layer extends Component {
   }
 
   use64bitPositions() {
-    return this.props.fp64 || this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT;
+    return this.props.fp64 || this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL;
   }
 
   // TODO - needs to refer to context for devicePixels setting
