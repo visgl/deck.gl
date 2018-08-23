@@ -3,8 +3,7 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   AdvancedTextLayer,
-  GPUGridLayer,
-  KMLLayer
+  GPUGridLayer
 } from '@deck.gl/experimental-layers';
 
 import {COORDINATE_SYSTEM} from 'deck.gl';
