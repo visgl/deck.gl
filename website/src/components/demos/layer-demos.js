@@ -215,16 +215,16 @@ export const TextLayerDemo = createLayerDemoClass({
 export const ContourLayerDemo = createLayerDemoClass({
   Layer: ContourLayer,
   dataUrl: `${DATA_URI}/sf-bike-parking.json`,
-  formatTooltip: d => `${d.position.join(', ')}\nCount: ${d.count}`,
+  formatTooltip: d => `threshold: ${d.threshold}`,
   props: {
     pickable: true,
     cellSize: 200,
     elevationScale: 4,
     getPosition: d => d.COORDINATES,
     contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 2},
       {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
-      {threshold: 15, color: [0, 0, 255]}
+      {threshold: 15, color: [0, 0, 255], strokeWidth: 4}
     ]
   }
 });

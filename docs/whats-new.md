@@ -13,14 +13,10 @@ Release date: TBD, Target late Aug, 2018
         <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
         <p><i>JSON API</i></p>
       </td>
-    </tr>
-    <tr>
       <td>
         <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
         <p><i>Enhanced Multi-View API</i></p>
       </td>
-    </tr>
-    <tr>
       <td>
         <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
         <p><i>ContourLayer</i></p>
