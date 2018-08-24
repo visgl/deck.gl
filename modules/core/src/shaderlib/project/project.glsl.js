@@ -86,7 +86,6 @@ vec3 project_normal(vec3 vector) {
 
 vec4 project_offset_(vec4 offset) {
   vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * offset.y;
-  pixelsPerUnit.y = -pixelsPerUnit.y;
   return vec4(offset.xyz * pixelsPerUnit, offset.w);
 }
 
