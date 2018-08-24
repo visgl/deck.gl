@@ -21,6 +21,63 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.1.0 Pre Releases
 
+#### [6.1.0-beta.1] - Aug 25
+
+- Bump luma to 6.1.0-beta.2
+- Bump luma to 6.1.0-beta.1 (#2232)
+- Undo Y-reversal hack for Mesh-Layer (#2229)
+- Change Back Projection mode to the 6.0 default (#2225)
+- remove hack due to webgl1 constant attribute bug (#2224)
+- Fix lighting module under auto offset (#2231)
+- Hexagon layer change revert (#2228)
+- Clean up layer browser example order (#2219)
+- 6.1 Docs : Misc changes (#2222)
+- HexagonLayer: Aggregate data using valid viewport. (#2196)
+- Docs and whats-new update (#2216)
+- Separate shaderCoordinateSystem, make new projection mode default (#2211)
+- fixed broken link to documentation of TripsLayer (#2214)
+- Wrap longitudes over the 180th meridian (#2147)
+- Doc Updates: FAQ and Animation (#2212)
+- Improve docs around setting parameters (#2210)
+- Remove stray references to global module (#2209)
+- Small fixes (#2207)
+- Update docs for new projection mode (#2206)
+- RFC: JSON examples (#2188)
+- RFC: View Class Extensions (#2161)
+- Update babel (#2189)
+- Pass through opts in _createAnimationLoop's onCreateContext (#2201)
+- Contour stroke width (#2193)
+- Fix pure-js-without-map example (#2197)
+- Fix website build (#2195)
+- RFC: @deck.gl/json module updates (#2187)
+- lighting module initial roadmap (#2183)
+- Add more .json examples (#2184)
+- RFC: Property Animation (Experimental) (#2162)
+- Move TripsLayer to experimental-layers (#2175)
+- Doc fixes: colorRange and Readme.md (#2172)
+- Cleanup What's New (#2176)
+- Roadmap updates (#2164)
+
+#### [6.1.0-alpha.2] - Aug
+
+- Bump dependency (#2174)
+- Fix experimental layers: mesh layer Y-reversal issue (#2167)
+- Fix Transform export, bump luma.gl version (#2170)
+- Support iterables in grid and hexagonal aggregators (#2160)
+- JSON Layers example #2 (of 2) (#2144)
+- fix icon layer rendering test and avoid test report duplication (#2166)
+- RFC/Roadmap Overhaul (#2163)
+- JSON Layers RFC implementation #1 (of 2) (#2106)
+- Make ArcLayer and PathLayer work with LNGLAT_EXPERIMENTAL mode (#2159)
+- Consolidate module parameter handling (#2108)
+- Buffer reuse in SolidPolygonLayer (#1821)
+- Build fixes (#2157)
+- Minor cleanup (#2156)
+- RFC updates (#2153)
+- Improve linting script (#2148)
+- Update unit and render tests (#2149)
+
+
 #### [6.1.0-alpha.1] - Aug 1
 
 - Remove module specific uniforms setting from Layer (#2124)
