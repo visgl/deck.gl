@@ -85,7 +85,6 @@ export function projectPosition(
     case COORDINATE_SYSTEM.METER_OFFSETS:
       const originWorld = lngLatZToWorldPosition(coordinateOrigin, viewport);
       vec3_sub(worldPosition, worldPosition, originWorld);
-      worldPosition[1] = -worldPosition[1];
       break;
 
     default:
