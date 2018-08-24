@@ -422,7 +422,9 @@ export default class Deck {
   }
 
   _updateCursor() {
-    this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+    if (this.canvas) {
+      this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+    }
   }
 
   // Updates animation props on the layer context
