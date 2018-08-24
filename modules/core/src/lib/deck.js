@@ -441,6 +441,7 @@ export default class Deck {
 
     // if external context...
     if (this.props._customRender) {
+      this.canvas = gl.canvas;
       trackContextState(gl, {enable: true, copyState: true});
     }
 
