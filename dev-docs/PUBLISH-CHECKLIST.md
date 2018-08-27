@@ -4,35 +4,35 @@
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-1" />
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image-1.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-2" />
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image-2.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-3" />
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image-3.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-4" />
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image-4.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
 
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-5" />
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image-5.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
