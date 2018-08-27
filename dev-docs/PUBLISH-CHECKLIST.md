@@ -1,42 +1,5 @@
 # Framework publish checklist
 
-
-
-<div align="center">
-  <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image1.png" />
-    <p><i>Image Text</i></p>
-  </div>
-</div>
-
-<div align="center">
-  <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image2.png" />
-    <p><i>Image Text</i></p>
-  </div>
-</div>
-
-<div align="center">
-  <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image3.png" />
-    <p><i>Image Text</i></p>
-  </div>
-</div>
-
-<div align="center">
-  <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image4.png" />
-    <p><i>Image Text</i></p>
-  </div>
-</div>
-
-<div align="center">
-  <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image5.png" />
-    <p><i>Image Text</i></p>
-  </div>
-</div>
-
 ## Prepare publish
 
 1. check all the bug tickets under current github milestone, make sure the PRs are all ported to release branch
@@ -50,14 +13,49 @@
 ### Publish luma.gl lib
 
 4. Update package.json with correct version number (in modules/core/package.json)
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image2.png" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
 5. Update CHANGELOG.md, making sure all commits and PRs merged after release are recorded properly
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image4.png" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
 6. Commit and push the updated package.json and CHANGLOG.md directly with a simple commit message indicating the version (No PR needed) (make changes on master branch if publishing a major revision or alpha/beta, use release branch (like release-4.0) if publishing a minor/bug fix revision (like v4.0.1), commit and push to corresponding origin branch (like origin/master or origin/release-4.0.0).
 7. `git tag` the correct commit with correct tag and push the tag to remote server
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image5.png" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
 
 
 [ ] switch to public profile using npmrc
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image2.png" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
+
 [ ] clean node_modules folder and any dist* folder and rebuild (npm install or yarn)
 [ ] `npm run` appropriate publishing script for beta or production release (e. g. in deck.gl, `publish-beta` for beta and `publish-prod` for production)
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image1.png" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
 
 8. (Patch/Minor release only) Create a new entry and add details (refer existing entries of release) to release section on git-hub. (click on the tag you just created and add details)
 
