@@ -41,7 +41,7 @@
 [ ] switch to public profile using npmrc
 <div align="center">
   <div>
-    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image2.png" />
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guideline/image3.png" />
     <p><i>Image Text</i></p>
   </div>
 </div>
