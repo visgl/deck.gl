@@ -118,10 +118,18 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
+  shouldUpdateState({changeFlags}) {
+    return (
+      changeFlags.propsOrDataChanged ||
+      // if viewport is changed and aggregation to hexbins has not happened yet.
+      (changeFlags.viewportChanged && this.state.hexagons.length === 0)
+    );
+  }
+
   updateState({oldProps, props, changeFlags}) {
     const dimensionChanges = this.getDimensionChanges(oldProps, props);
 
-    if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
+    if (this.needsReProjectPoints(oldProps, props, changeFlags)) {
       // project data into hexagons, and get sortedColorBins
       this.getHexagons();
     } else if (dimensionChanges) {
@@ -129,9 +137,12 @@ export default class HexagonLayer extends CompositeLayer {
     }
   }
 
-  needsReProjectPoints(oldProps, props) {
+  needsReProjectPoints(oldProps, props, changeFlags) {
     return (
-      oldProps.radius !== props.radius || oldProps.hexagonAggregator !== props.hexagonAggregator
+      changeFlags.dataChanged ||
+      this.state.hexagons.length === 0 ||
+      oldProps.radius !== props.radius ||
+      oldProps.hexagonAggregator !== props.hexagonAggregator
     );
   }
 
@@ -198,11 +209,14 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getHexagons() {
-    const {hexagonAggregator} = this.props;
     const {viewport} = this.context;
-    const {hexagons, hexagonVertices} = hexagonAggregator(this.props, viewport);
-    this.setState({hexagons, hexagonVertices});
-    this.getSortedBins();
+    // layer is first initialzed with defautl viewport which could be non geospatial
+    if (viewport.isGeospatial) {
+      const {hexagonAggregator} = this.props;
+      const {hexagons, hexagonVertices} = hexagonAggregator(this.props, viewport);
+      this.setState({hexagons, hexagonVertices});
+      this.getSortedBins();
+    }
   }
 
   getPickingInfo({info}) {
