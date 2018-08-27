@@ -1,5 +1,42 @@
 # Framework publish checklist
 
+
+
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-1" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-2" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-3" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-4" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/dev-docs/publish-guide/image-5" />
+    <p><i>Image Text</i></p>
+  </div>
+</div>
+
 ## Prepare publish
 
 1. check all the bug tickets under current github milestone, make sure the PRs are all ported to release branch
