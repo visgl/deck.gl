@@ -2,9 +2,10 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+
 ## deck.gl v6.1
 
-Release date: TBD, Target late Aug, 2018
+Release date: TBD, Target Aug 31, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
@@ -26,31 +27,35 @@ Release date: TBD, Target late Aug, 2018
 </table>
 
 
-### High-Precision, High-Performance Geospatial Projections
+### High-Precision Geospatial Projection (Experimental)
 
-The projection algorithm used for geospatial coordinates (layers with `coordinateSystem: COORDINATE_SYSTEM.LNGLAT`) has been replaced with a "hybrid" projection/offset based implementation that rivals 64-bit precision at 32-bit speeds. This makes the use of the `fp64` mode unnecessary for most applications, and should increase application performance and avoid issues on untested graphics drivers.
+The projection algorithm used for geospatial coordinates (layers with `coordinateSystem: COORDINATE_SYSTEM.LNGLAT`) has supplemented with a "hybrid" projection/offset based implementation (`COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL`) that rivals 64-bit precision at 32-bit speeds. This mode is expected to make the use of `fp64` precision unnecessary for most applications, which in turn should increase application performance and avoid issues on untested graphics drivers.
 
-#### Dynamic Meridian
 
-LNGLAT projection modes automatically wrap coordinates over the 180th meridian for the best placement in the current viewport. Set the `wrapLongitude` prop in a layer to `true` to enable this behavior.
+### Dynamic Meridian
+
+`LNGLAT` projection modes can automatically wrap coordinates over the 180th meridian for the best placement in the current viewport. Set the `wrapLongitude` prop in a layer to `true` to enable this behavior. This mode will be helpful when visualizing data close to the ante-meridian (e.g. New Zealand, Australia etc).
 
 
 ### JSON API (Experimental)
 
-A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files.
+A new experimental module `@deck.gl/json` provides a set of classes that allows deck.gl layers and views to be specified using JSON-formatted text files. To facilitate experimentation, a JSON layer browser is available on [http://deck.gl/json](http://deck.gl/json).
 
 
 ### Enhanced Multiview Support
 
 deck.gl's multiview support has been significantly enhanced. New `View` properties give applications more control over rendering, making it possible to implement e.g. overlapping views, partially synchronized views (share some but not all view state props), views with different background colors etc.
 
+
 ### ContourLayer
 
 deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can be used to render contours, also called iso-lines for given set of threshold values. `ContourLayer` supports both WebMercator projection (geospatial applications) and Orthographic projection (infovis applications).
 
-### GPU Aggregation enhancements (Experimental)
 
-A few utility methods are added to calculate all aggregation parameters based on co-ordinate system. Layers and application can utilize these methods to achieve aggregation in Layer's coordinate system (either LNGLAT or IDENTITY).  
+### GPU Aggregation Enhancements (Experimental)
+
+For auto-aggregating layers, deck.gl can now calculate all aggregation parameters based on the selected coordinate system. Layers and application can utilize new utility methods to achieve aggregation in Layer's coordinate system (either LNGLAT or IDENTITY).
+
 
 ## deck.gl v6.0
 
