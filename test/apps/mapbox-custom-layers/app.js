@@ -27,18 +27,18 @@ const map = new mapboxgl.Map({
 });
 
 map.on('load', () => {
-  map.addLayer({
-    id: '3d-buildings',
-    source: 'composite',
-    'source-layer': 'building',
-    filter: ['==', 'extrude', 'true'],
-    type: 'fill-extrusion',
-    minzoom: 15,
-    paint: {
-      'fill-extrusion-color': '#ccc',
-      'fill-extrusion-height': ['get', 'height']
-    }
-  });
+  // map.addLayer({
+  //   id: '3d-buildings',
+  //   source: 'composite',
+  //   'source-layer': 'building',
+  //   filter: ['==', 'extrude', 'true'],
+  //   type: 'fill-extrusion',
+  //   minzoom: 15,
+  //   paint: {
+  //     'fill-extrusion-color': '#ccc',
+  //     'fill-extrusion-height': ['get', 'height']
+  //   }
+  // });
 
   map.addLayer(
     new DeckLayer({

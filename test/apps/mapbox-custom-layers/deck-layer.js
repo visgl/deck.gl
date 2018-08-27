@@ -1,4 +1,5 @@
 import {Deck} from '@deck.gl/core';
+import GL from 'luma.gl/constants';
 
 export default class DeckLayer {
   constructor({id = 'deck-layer', layers}) {
@@ -31,8 +32,11 @@ export default class DeckLayer {
       height: '100%',
       controller: false,
       _customRender: true,
-      viewState: this._getViewState()
+      viewState: this._getViewState(),
       // views: [new MapView({farZmultiplier: 0.101})]
+      parameters: {
+        depthTest: false
+      }
     });
     this.deck._setGLContext(gl);
     this.deck.setProps({layers: this.layers});
