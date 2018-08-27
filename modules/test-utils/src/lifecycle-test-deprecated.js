@@ -23,6 +23,9 @@ import gl from './utils/setup-gl';
 
 export function testInitializeLayer({layer, viewport}) {
   const layerManager = new LayerManager(gl);
+  if (viewport) {
+    layerManager.context.viewport = viewport;
+  }
 
   try {
     layerManager.setLayers([layer]);
