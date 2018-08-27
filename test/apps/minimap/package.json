@@ -1,0 +1,25 @@
+{
+  "name": "trips",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "start": "webpack-dev-server --progress --hot --open"
+  },
+  "dependencies": {
+    "@deck.gl/react": "^6.1.0-alpha.2",
+    "@deck.gl/core": "^6.1.0-alpha.2",
+    "@deck.gl/layers": "^6.1.0-alpha.2",
+    "@deck.gl/experimental-layers": "^6.1.0-alpha.2",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^3.3.0"
+  },
+  "devDependencies": {
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
+  }
+}
