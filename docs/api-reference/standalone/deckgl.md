@@ -82,4 +82,4 @@ Returns the mapbox-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instan
 
 ## Source
 
-[modules/lite/src/deckgl.js](https://github.com/uber/deck.gl/blob/master/modules/lite/src/deckgl.js)
+[modules/lite/src/deckgl.js](https://github.com/uber/deck.gl/blob/6.1-release/modules/lite/src/deckgl.js)

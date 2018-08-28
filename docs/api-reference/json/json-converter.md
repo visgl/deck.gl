@@ -1,6 +1,6 @@
 # JSONConverter (Experimental)
 
-> NOTE: This component is only intended to support **official deck.gl API props** via JSON. In particular, it is not intended to evolve an implementation of alternate JSON schemas. Support for such schemas should be developed indenpendently, perhaps using the source code of this component as a base. See the [JSON Layers RFC](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md) for more on this.
+> NOTE: This component is only intended to support **official deck.gl API props** via JSON. In particular, it is not intended to evolve an implementation of alternate JSON schemas. Support for such schemas should be developed indenpendently, perhaps using the source code of this component as a base. See the [JSON Layers RFC](https://github.com/uber/deck.gl/blob/6.1-release/dev-docs/RFCs/v6.1/json-layers-rfc.md) for more on this.
 
 Converts a JSON description of a deck.gl visualization into properties that can be passed to the `Deck` component.
 

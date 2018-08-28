@@ -10,7 +10,7 @@ Note that you once your PR is about to be merged, you will be asked to register 
 
 ## Developer documentation
 
-Developer documentaion is available [here](https://github.com/uber/deck.gl/tree/master/dev-docs). We are ready to prepare additional documentation if requested by contributors.
+Developer documentaion is available [here](https://github.com/uber/deck.gl/tree/6.1-release/dev-docs). We are ready to prepare additional documentation if requested by contributors.
 
 
 ## Developing deck.gl

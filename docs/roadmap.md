@@ -6,7 +6,7 @@ We are currently using the following ways to share information about the directi
 
 * **Roadmap Document** - (this document) A high-level summary of our current direction for future releases.
 * **Blog** - We use the [vis.gl blog](https://medium.com/vis-gl) blog to share information about what we are doing.
-* **RFCs** - A wealth of technical detail around planned features is available in our RFCs (Requests For Comments). RFCs are technical writeups that describe a proposed feature. RFCs are available [here](https://github.com/uber/deck.gl/tree/master/dev-docs/RFCs).
+* **RFCs** - A wealth of technical detail around planned features is available in our RFCs (Requests For Comments). RFCs are technical writeups that describe a proposed feature. RFCs are available [here](https://github.com/uber/deck.gl/tree/6.1-release/dev-docs/RFCs).
 * **Experimental exports** - We are making unfinished features available as experimental exports. This gives users a clear indication about what is coming and even allow early adopters a chance to play with and provide comments on these features.
 * **Experimental Layers** - We are publishing a number of work-in-progress layers to make it easy to experiment with them in applications, see below.
 * **Github issues** - As always, github issues are a good way to see what is being discussed and join the discussions.
@@ -32,7 +32,7 @@ These are some of the big priorities for our next release:
 * **Better Infovis Support** - Better support for non-geospatial visualizations. (Don't worry if you are a geospatial user, deck.gl will remain a "geospatial-first" library since that is the more difficult use case.)
 * **Better GPGPU/WebGL2 Support** - Many stones are still left unturned here. Expect better performance, and new features for WebGL2 capable browsers (such as animations of entire attributes).
 * **Visual Effects** - Shadows, blur, postprocessing etc. This continues to be strong goal that we intend to make progress on.
-* **Transitions and Animations** - 5.0 introduces viewport transitions. Expect to see similar support for layer properties and attributes. Viewport transitions feature is available in the `experimental` namespace, and for additional details check the [RFC](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v5.0/viewport-transition-rfc.md).
+* **Transitions and Animations** - 5.0 introduces viewport transitions. Expect to see similar support for layer properties and attributes. Viewport transitions feature is available in the `experimental` namespace, and for additional details check the [RFC](https://github.com/uber/deck.gl/blob/6.1-release/dev-docs/RFCs/v5.0/viewport-transition-rfc.md).
 
 
 ## deck.gl v5.2
@@ -40,7 +40,7 @@ These are some of the big priorities for our next release:
 These are some of things we tackled in our most recent release
 
 * **Pure JavaScript Support** - the deck.gl npm module currently has a hard dependency on React, however in v5.0 the internal code is effectively 100% independent of React. We intend to split the library into a core module exposing a "pure" JavaScript API and an (optional) module containing the React integration. (Don't worry if you are a React user, deck.gl will continue to be "React-first", designed from the ground up with the "reactive programming paradigm" in mind. We just want non-React users to also be able use deck.gl).
-* **Multi-viewport Support** - Extensive work has been done in v5.0, and we expect to finalize and make much of this functionality official in next release. For now, multiviewport features are available in the `experimental` namespace. For additional details check the [RFCs](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v5.0/multi-viewport-rfc.md).
+* **Multi-viewport Support** - Extensive work has been done in v5.0, and we expect to finalize and make much of this functionality official in next release. For now, multiviewport features are available in the `experimental` namespace. For additional details check the [RFCs](https://github.com/uber/deck.gl/blob/6.1-release/dev-docs/RFCs/v5.0/multi-viewport-rfc.md).
 * **Multiple Modules** - In addition, in the future we plan to publish separate modules with deck.gl layers.
 * **Code Size** - deck.gl has gone through rapid development and we need to overhaul the code and build processes to reduce the size.
 

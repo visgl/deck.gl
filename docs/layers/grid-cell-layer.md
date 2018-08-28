@@ -106,5 +106,5 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 ## Source
 
-[modules/layers/src/grid-cell-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/grid-cell-layer)
+[modules/layers/src/grid-cell-layer](https://github.com/uber/deck.gl/tree/6.1-release/modules/layers/src/grid-cell-layer)
 

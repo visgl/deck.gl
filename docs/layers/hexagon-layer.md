@@ -228,4 +228,4 @@ This callback will be called when bin elevation domain has been calculated.
 
 ## Source
 
-[modules/layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/hexagon-layer)
+[modules/layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/6.1-release/modules/layers/src/hexagon-layer)

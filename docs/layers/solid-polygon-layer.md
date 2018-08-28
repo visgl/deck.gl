@@ -135,5 +135,5 @@ otherwise will be in unit coordinates.
 
 ## Source
 
-[modules/layers/src/solid-polygon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/solid-polygon-layer)
+[modules/layers/src/solid-polygon-layer](https://github.com/uber/deck.gl/tree/6.1-release/modules/layers/src/solid-polygon-layer)
 

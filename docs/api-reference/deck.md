@@ -284,4 +284,4 @@ Notes:
 
 ## Source
 
-[modules/core/src/core/lib/deck.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/deck.js)
+[modules/core/src/core/lib/deck.js](https://github.com/uber/deck.gl/blob/6.1-release/modules/core/src/lib/deck.js)

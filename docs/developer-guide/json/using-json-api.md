@@ -4,7 +4,7 @@ deck.gl supports specification of deck.gl layers and their props using the [JSON
 
 References:
 
-* [JSON Layers RFC](https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md)
+* [JSON Layers RFC](https://github.com/uber/deck.gl/blob/6.1-release/dev-docs/RFCs/v6.1/json-layers-rfc.md)
 
 
 ## Schema

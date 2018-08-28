@@ -44,4 +44,4 @@ Inherits all [Viewport methods](/docs/api-reference/view.md#methods).
 
 ## Source
 
-[modules/core/src/core/views/orthographic-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/orthographic-view.js)
+[modules/core/src/core/views/orthographic-view.js](https://github.com/uber/deck.gl/blob/6.1-release/modules/core/src/views/orthographic-view.js)

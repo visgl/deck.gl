@@ -56,4 +56,4 @@ Inherits all [View methods](/docs/api-reference/viewport.md#methods).
 
 ## Source
 
-[modules/core/src/core/views/first-person-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/first-person-view.js)
+[modules/core/src/core/views/first-person-view.js](https://github.com/uber/deck.gl/blob/6.1-release/modules/core/src/views/first-person-view.js)

@@ -4,7 +4,7 @@ While a deck.gl application could choose to render on top of any JavaScript Map 
 
 ## About react-map-gl
 
-As shown in the [examples](https://github.com/uber/deck.gl/tree/master/examples/), the `DeckGL` React component works especially well as the child of a React component such as react-map-gl that displays a map using parameters similar to the deck.gl Viewport (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
+As shown in the [examples](https://github.com/uber/deck.gl/tree/6.1-release/examples/), the `DeckGL` React component works especially well as the child of a React component such as react-map-gl that displays a map using parameters similar to the deck.gl Viewport (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
 
 ## About Mapbox Tokens
 
