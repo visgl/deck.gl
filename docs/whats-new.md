@@ -54,7 +54,7 @@ deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can
 
 ### GPU Aggregation Enhancements (Experimental)
 
-For auto-aggregating layers, deck.gl can now calculate all aggregation parameters based on the selected coordinate system. Layers and application can utilize new utility methods to achieve aggregation in Layer's coordinate system (either LNGLAT or IDENTITY).
+Several under the hood changes in GPU Aggregation flow to support multiple layer coordinate systems (LNGLAT and IDENTITY).
 
 
 ## deck.gl v6.0
