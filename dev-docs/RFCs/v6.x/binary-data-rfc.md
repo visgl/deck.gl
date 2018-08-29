@@ -1,8 +1,8 @@
 # RFC: Using Binary Data
 
-Authors: Ib Green, ...
-Date: June 13, 2018
-Status: **Implemented**
+* Authors: Ib Green, ...
+* Date: June 13, 2018
+* Status: **Draft**
 
 
 ## Overview
