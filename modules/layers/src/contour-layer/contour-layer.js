@@ -24,6 +24,7 @@ import {
   _pointToDensityGridData as pointToDensityGridData
 } from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
+import assert from 'assert';
 
 import {generateContours} from './contour-utils';
 
@@ -105,7 +106,7 @@ export default class ContourLayer extends CompositeLayer {
       fp64,
       coordinateSystem
     } = this.props;
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData({
+    const {countsData, gridSize, gridOrigin, cellSize} = pointToDensityGridData({
       data,
       cellSizeMeters,
       getPosition,
@@ -116,17 +117,12 @@ export default class ContourLayer extends CompositeLayer {
       viewport: this.context.viewport
     });
 
-    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
+    this.setState({countsData, gridSize, gridOrigin, cellSize});
   }
 
   generateContours() {
-    const {gridSize, gridOrigin, cellSize} = this.state;
-    let {countsData} = this.state;
-    if (!countsData) {
-      const {countsBuffer} = this.state;
-      countsData = countsBuffer.getData();
-      this.setState({countsData});
-    }
+    const {gridSize, gridOrigin, cellSize, countsData} = this.state;
+    assert(countsData);
 
     const {cellWeights} = GPUGridAggregator.getCellData({countsData});
     const thresholds = this.props.contours.map(x => x.threshold);

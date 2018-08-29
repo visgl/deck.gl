@@ -53,6 +53,8 @@ export function pointToDensityGridData({
   return {
     countsBuffer: aggregatedData.countsBuffer,
     maxCountBuffer: aggregatedData.maxCountBuffer,
+    countsData: aggregatedData.countsData,
+    maxCountData: aggregatedData.maxCountData,
     gridSize: opts.gridSize,
     gridOrigin: opts.gridOrigin,
     cellSize

@@ -44,13 +44,21 @@ A new experimental module `@deck.gl/json` provides a set of classes that allows 
 
 deck.gl's multiview support has been significantly enhanced. New `View` properties give applications more control over rendering, making it possible to implement e.g. overlapping views, partially synchronized views (share some but not all view state props), views with different background colors etc.
 
+
 ### ContourLayer
 
 deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can be used to render contours, also called iso-lines for given set of threshold values. `ContourLayer` supports both WebMercator projection (geospatial applications) and Orthographic projection (infovis applications).
 
+
 ### GPU Aggregation enhancements (Experimental)
 
 A few utility methods are added to calculate all aggregation parameters based on co-ordinate system. Layers and application can utilize these methods to achieve aggregation in Layer's coordinate system (either LNGLAT or IDENTITY).  
+
+
+### GPU Aggregation Enhancements (Experimental)
+
+Several under the hood changes in GPU Aggregation flow to support multiple layer coordinate systems (LNGLAT and IDENTITY).
+
 
 ## deck.gl v6.0
 
