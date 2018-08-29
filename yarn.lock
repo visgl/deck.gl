@@ -5932,12 +5932,12 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@>=6.1.0-beta.2:
-  version "6.1.0-beta.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.1.0-beta.2.tgz#d36f3a9e9be43765506a64f7f5e986b6c1a27cb9"
+luma.gl@>=6.1.0-beta.3:
+  version "6.1.0-beta.3"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.1.0-beta.3.tgz#92e82038d254ff0d6abb1c7662d1dfd5cf35810c"
   dependencies:
     math.gl "^2.1.0-alpha"
-    probe.gl "^2.0.0-alpha"
+    probe.gl "^2.0.0-beta"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
 
@@ -7210,7 +7210,7 @@ private@^0.1.6, private@^0.1.8, private@~0.1.5:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@^2.0.0-alpha, probe.gl@^2.0.0-beta:
+probe.gl@^2.0.0-beta:
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.0-beta.1.tgz#7281d63e75d390a081c68fe201552e2e62effb6f"
 
