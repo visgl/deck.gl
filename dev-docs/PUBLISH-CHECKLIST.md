@@ -77,7 +77,9 @@ npm run publish-prod
 If you are publishing new alpha/beta/pro series, ie. when changing from 6.0.2 to 6.1.0-alpha, change version tag manually in deck.gl/lerna.json, for 6.1.0-alpha.1, change this version to 6.1.0-alpha.0, and follow above steps to publish.
 
 
-### Publish Web-site
+## Publish Web-site
+
+Also check "special instructions" below.
 
 * Checkout the luma.gl or deck.gl/luma.gl branch (mostly the latest release, like. 4.1-release)
 * cd to website folder.
@@ -93,3 +95,32 @@ If you are publishing new alpha/beta/pro series, ie. when changing from 6.0.2 to
 Congratulations, you have updated the deck.gl website.
 
 When possible, first test the website on the (uber-internal) staging environment.
+
+
+### Special Instructions
+
+#### JSON Browser
+
+To build the json-browser (available on http://deck.gl/json):
+
+```
+cd deck.gl
+yarn
+cd examples/json-browser/pure-js
+yarn
+yarn build
+```
+
+To copy it into the gh-pages branch
+
+```
+cp build/json-browser.min.js /tmp
+cp index.html /tmp
+cd -
+git checkout gh-pages
+mkdir -p json
+cd json
+cp /tmp/index.html build/json-browser.min.js json
+```
+
+Also, add mapbox token to the index.html file.
