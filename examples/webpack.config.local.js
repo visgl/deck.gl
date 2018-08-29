@@ -109,6 +109,10 @@ module.exports = (config, exampleDir) => env => {
     config = addLocalDevSettings(config, exampleDir);
   }
 
+  if (env && env.production) {
+    config.mode = 'production';
+  }
+
   // console.warn(JSON.stringify(config, null, 2)); // uncomment to debug config
   return config;
 };

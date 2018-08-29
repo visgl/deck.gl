@@ -1,3 +1,5 @@
-examples/point-cloud-laz/worker/laz-perf.js
+workers/
 **/dist*/**/*.js
 *.min.js
+**/mapbox-gl-dev.js
+**/mapbox-gl.js
