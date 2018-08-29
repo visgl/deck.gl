@@ -5,7 +5,8 @@
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.es6 --progress --hot --open",
-    "start-local-es5": "webpack-dev-server --env.local --progress --hot --open"
+    "start-local-es5": "webpack-dev-server --env.local --progress --hot --open",
+    "start-production": "webpack-dev-server --env.local --env.production --progress --hot --open"
   },
   "dependencies": {
     "@deck.gl/experimental-layers": "^6.0.0",

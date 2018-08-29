@@ -23,6 +23,7 @@
     "dist-es6",
     "src"
   ],
+  "sideEffects": false,
   "scripts": {
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
     "build-es6": "rm -fr dist-es6 && BABEL_ENV=es6 babel src --out-dir dist-es6 --source-maps inline",
