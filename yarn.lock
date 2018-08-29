@@ -7194,12 +7194,6 @@ private@^0.1.6, private@^0.1.8, private@~0.1.5:
   version "0.1.8"
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
 
-probe.gl@^1.1.0-alpha.1:
-  version "1.1.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-1.1.0-alpha.1.tgz#0a9e0a6aef96c18e901ebbcaa1d3f30c5e9f7c76"
-  dependencies:
-    asciify-image "^0.1.3"
-
 probe.gl@^2.0.0-alpha:
   version "2.0.0-alpha.1"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.0-alpha.1.tgz#fc9ef3f8f89639b38a4f43afe26c9e52a9c0f4f6"
