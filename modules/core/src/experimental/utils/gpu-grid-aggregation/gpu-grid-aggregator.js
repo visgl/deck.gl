@@ -310,8 +310,12 @@ export default class GPUGridAggregator {
       maxCountBuffer = new Buffer(this.gl, {data: maxCountBufferData});
     }
     return {
+      // Buffer objects
       countsBuffer,
       maxCountBuffer,
+      // ArrayView objects
+      countsData: counts,
+      maxCountData: maxCountBufferData,
       // Return total aggregaton values to avoid UBO setup for WebGL1 cases
       totalCount,
       totalWeight,
