@@ -21,6 +21,12 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.1.0 Pre Releases
 
+#### [6.1.0-beta.2] - Aug 29
+
+- GPUAggregator: Return ArrayBuffer objects when aggregating on CPU (#2243)
+- Safari fixes (#2244)
+- change master in URLs to 6.1-release
+
 #### [6.1.0-beta.1] - Aug 25
 
 - Bump luma to 6.1.0-beta.2
