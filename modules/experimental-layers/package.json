@@ -2,7 +2,7 @@
   "name": "@deck.gl/experimental-layers",
   "description": "Experimental layers for deck.gl",
   "license": "MIT",
-  "version": "6.0.3",
+  "version": "6.0.4",
   "publishConfig": {
     "access": "public"
   },
