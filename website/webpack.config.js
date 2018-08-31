@@ -84,7 +84,7 @@ const addDevConfig = config => {
   });
 
   return Object.assign(config, {
-    mode: 'development',
+    mode: 'production',
     devtool: 'source-maps',
 
     plugins: config.plugins.concat([
