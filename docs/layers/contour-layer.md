@@ -88,4 +88,4 @@ Method called to retrieve the position of each point.
 
 ## Source
 
-[modules/experimental-layers/src/contour-layer](https://github.com/uber/deck.gl/tree/6.1-release/modules/experimental-layers/src/contour-layer)
+[/contour-layer](https://github.com/uber/deck.gl/tree/6.1-release/modules/layers/src/contour-layer)
