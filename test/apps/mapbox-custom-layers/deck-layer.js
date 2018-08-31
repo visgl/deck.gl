@@ -4,9 +4,8 @@ export default class DeckLayer {
   constructor({id = 'deck-layer', layers}) {
     this.id = id;
     this.type = 'custom';
-
+    this.renderingMode = '3d'
     this.deck = null;
-
     this.layers = layers;
   }
 
@@ -39,9 +38,10 @@ export default class DeckLayer {
     this.deck.setProps({layers: this.layers});
   }
 
-  render3D(gl, matrix) {
+  render(gl, matrix) {
     const viewState = this._getViewState();
     // console.log('render3D', viewState, matrix);
+    // gl.depthRange(0.9999, 1.0);
 
     this.deck.setProps({viewState});
     this.deck._drawLayers();
