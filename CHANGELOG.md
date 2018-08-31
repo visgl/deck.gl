@@ -21,6 +21,14 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.1.0 Pre Releases
 
+#### [6.1.0-rc.1] - Aug 31
+
+- Hexagon aggregation with valid viewport (#2239)
+- Doc: remove deuplicate section
+- Website fixes for Safari (#2251)
+- Port #2247 from master
+- Fix wrong closing tag in get-started examples (#2248)
+
 #### [6.1.0-beta.2] - Aug 29
 
 - GPUAggregator: Return ArrayBuffer objects when aggregating on CPU (#2243)
