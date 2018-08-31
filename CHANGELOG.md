@@ -20,6 +20,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0
+
+### [6.0.4] - August 30
+- Undo Y-reversal hack for Mesh-Layer (#2229)
+
 ### [6.0.3] - August 8
 - Fix experimental layers: mesh layer Y-reversal issue (#2167)
 - Bump probe.gl version to avoid issues with changed webpack behavior (#2158)
