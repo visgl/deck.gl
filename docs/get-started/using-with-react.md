@@ -93,7 +93,7 @@ It is possible to use JSX syntax to create deck.gl layers as React children of t
     return (
       <DeckGL {...viewState}>
         <LineLayer id="line-layer" data={data} />
-      <DeckGL />
+      </DeckGL>
     );
   }
 ```
@@ -119,7 +119,7 @@ The following code renders the same set of layers in two viewports, splitting th
           <StaticMap mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN} />
         </MapView>
         <FirstPersonView width="50%" x="50%" fovy={50} />
-      <DeckGL />
+      </DeckGL>
     );
   }
 ```
