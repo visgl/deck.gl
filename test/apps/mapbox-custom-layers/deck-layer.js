@@ -4,7 +4,7 @@ export default class DeckLayer {
   constructor({id = 'deck-layer', layers}) {
     this.id = id;
     this.type = 'custom';
-    this.renderingMode = '3d'
+    this.renderingMode = '3d';
     this.deck = null;
     this.layers = layers;
   }
