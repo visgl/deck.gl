@@ -8,4 +8,4 @@ npm start
 ```
 
 ### Data format
-To use your own data, checkout the [documentation of BezierCurveLayer](../../docs/layers/bezier-curve-layer.md).
+To use your own data, checkout the [documentation of BezierCurveLayer](../../../docs/layers/bezier-curve-layer.md).
