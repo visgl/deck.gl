@@ -33,4 +33,4 @@ npm start
 
 ### Data format
 Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/3d-heatmap). To use your own data, checkout
-the [documentation of HexagonLayer](../../docs/layers/hexagon-layer.md)
+the [documentation of HexagonLayer](../../../docs/layers/hexagon-layer.md)

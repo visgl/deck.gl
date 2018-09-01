@@ -10,4 +10,4 @@ npm start
 
 ### Data format
 Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/scatterplot). To use your own data, checkout
-the [documentation of ScatterplotLayer](../../docs/layers/scatterplot-layer.md).
+the [documentation of ScatterplotLayer](../../../docs/layers/scatterplot-layer.md).
