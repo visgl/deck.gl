@@ -34,9 +34,6 @@ export default class DeckLayer {
       _customRender: true,
       viewState: this._getViewState(),
       // views: [new MapView({farZmultiplier: 0.101})]
-      parameters: {
-        depthTest: false
-      }
     });
     this.deck._setGLContext(gl);
     this.deck.setProps({layers: this.layers});
@@ -45,7 +42,7 @@ export default class DeckLayer {
   render(gl, matrix) {
     const viewState = this._getViewState();
     // console.log('render3D', viewState, matrix);
-    // gl.depthRange(0.9999, 1.0);
+    // gl.depthRange(0.999, 1.000);
 
     this.deck.setProps({viewState});
     this.deck._drawLayers();

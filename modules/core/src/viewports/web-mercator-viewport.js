@@ -25,7 +25,6 @@ import Viewport from './viewport';
 import {
   pixelsToWorld,
   getViewMatrix,
-  getProjectionParameters,
   fitBounds
 } from 'viewport-mercator-project';
 
@@ -70,6 +69,7 @@ export default class WebMercatorViewport extends Viewport {
     const {fov, aspect, focalDistance, near, far} = getProjectionParameters({
       width,
       height,
+      latitude,
       pitch,
       altitude,
       farZMultiplier
@@ -231,3 +231,70 @@ export default class WebMercatorViewport extends Viewport {
 }
 
 WebMercatorViewport.displayName = 'WebMercatorViewport';
+
+// PROJECTION MATRIX PARAMETERS
+// This is a "Mapbox" projection matrix - matches mapbox exactly if farZMultiplier === 1
+// Variable fov (in radians)
+export function getProjectionParameters({
+  width,
+  height,
+  latitude,
+  pitch = 0,
+  altitude = 1.5,
+  farZMultiplier = 1
+}) {
+  // Find the distance from the center point to the center top
+  // in altitude units using law of sines.
+  const pitchRadians = pitch * Math.PI / 180;
+
+
+  const halfFov = Math.atan(0.5 / altitude);
+  const cameraToCenterDistance = 0.5 / Math.tan(halfFov) * height;
+
+  // Find the distance from the center point [width/2, height/2] to the
+  // center top point [width/2, 0] in Z units, using the law of sines.
+  // 1 Z unit is equivalent to 1 horizontal px at the center of the map
+  // (the distance between[width/2, height/2] and [width/2 + 1, height/2])
+  // const halfFov = _fov / 2;
+
+  const groundAngle = Math.PI / 2 + pitchRadians;
+  const topHalfSurfaceDistance = Math.sin(halfFov) *
+    cameraToCenterDistance /
+    Math.sin(Math.PI - groundAngle - halfFov);
+
+  // Calculate z distance of the farthest fragment that should be rendered.
+  const furthestDistance = Math.cos(Math.PI / 2 - pitchRadians) * topHalfSurfaceDistance +
+    cameraToCenterDistance;
+  // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
+
+  const scaleFactor = 1 / (2 * Math.PI * 180 *
+    Math.abs(Math.cos(latitude * (Math.PI / 180))));
+  const nearZ = 1 * scaleFactor;
+  const farZ = furthestDistance * 1.01 * scaleFactor;
+
+
+
+  // const topHalfSurfaceDistance =
+  //   Math.sin(halfFov) * altitude / Math.sin(Math.PI / 2 - pitchRadians - halfFov);
+
+  // const cameraToCenterDistance = 0.5 / Math.tan(halfFov) * height;
+
+
+  // Calculate z value of the farthest fragment that should be rendered.
+  // const farZ = Math.cos(Math.PI / 2 - pitchRadians) * topHalfSurfaceDistance + altitude;
+
+  // Calculate z distance of the farthest fragment that should be rendered.
+  // const furthestDistance = Math.cos(Math.PI / 2 - pitchRadians) * topHalfSurfaceDistance +
+  //   cameraToCenterDistance;
+  // // Add a bit extra to avoid precision problems when a fragment's distance is exactly `furthestDistance`
+  // const farZ = furthestDistance * 1.01;
+
+
+  return {
+    fov: 2 * Math.atan((height / 2) / altitude),
+    aspect: width / height,
+    focalDistance: altitude,
+    near: nearZ,
+    far: farZ // * farZMultiplier
+  };
+}
