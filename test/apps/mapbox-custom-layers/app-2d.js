@@ -1,6 +1,7 @@
 import mapboxgl from './mapbox-gl-dev';
-import DeckLayer from './deck-layer';
 import {GeoJsonLayer} from '@deck.gl/layers';
+
+import DeckLayer from '@deck.gl/mapbox-layers';
 
 // Outlines of US States. Source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
 const US_MAP_GEOJSON =
@@ -27,32 +28,32 @@ const map = new mapboxgl.Map({
 });
 
 map.on('load', () => {
-  map.addLayer({
-    id: '3d-buildings',
-    source: 'composite',
-    'source-layer': 'building',
-    filter: ['==', 'extrude', 'true'],
-    type: 'fill-extrusion',
-    minzoom: 15,
-    paint: {
-      'fill-extrusion-color': '#ccc',
-      'fill-extrusion-height': ['get', 'height']
-    }
+  const deckLayer = new DeckLayer({
+    layers: [
+      new GeoJsonLayer({
+        data: US_MAP_GEOJSON,
+        stroked: true,
+        filled: true,
+        lineWidthMinPixels: 2,
+        opacity: 0.4,
+        getLineColor: () => [255, 100, 100],
+        getFillColor: () => [200, 160, 0, 180]
+      })
+    ]
   });
 
-  map.addLayer(
-    new DeckLayer({
-      layers: [
-        new GeoJsonLayer({
-          data: US_MAP_GEOJSON,
-          stroked: true,
-          filled: true,
-          lineWidthMinPixels: 2,
-          opacity: 0.4,
-          getLineColor: () => [255, 100, 100],
-          getFillColor: () => [200, 160, 0, 180]
-        })
-      ]
-    })
-  );
+  map.addLayer(deckLayer, getFirstTextLayerId(map.getStyle()));
 });
+
+function getFirstTextLayerId(style) {
+  const layers = style.layers;
+  // Find the index of the first symbol (i.e. label) layer in the map style
+  let firstSymbolId;
+  for (let i = 0; i < layers.length; i++) {
+    if (layers[i].type === 'symbol') {
+      firstSymbolId = layers[i].id;
+      break;
+    }
+  }
+  return firstSymbolId;
+}

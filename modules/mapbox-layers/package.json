@@ -1,0 +1,38 @@
+{
+  "name": "@deck.gl/mapbox-layers",
+  "description": "Use deck.gl layers as custom mapbox-gl-js layers",
+  "license": "MIT",
+  "version": "6.1.0-alpha.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "webgl",
+    "visualization",
+    "overlay",
+    "layer"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/uber/deck.gl.git"
+  },
+  "main": "dist/index.js",
+  "module": "dist-es6/index.js",
+  "files": [
+    "dist",
+    "dist-es6",
+    "src"
+  ],
+  "sideEffects": false,
+  "scripts": {
+    "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
+    "build-es6": "rm -fr dist-es6 && BABEL_ENV=es6 babel src --out-dir dist-es6 --source-maps inline",
+    "build-es5": "rm -fr dist && BABEL_ENV=es5 babel src --out-dir dist --source-maps inline",
+    "build": "npm run build-clean && npm run build-es6 && npm run build-es5",
+    "test": "npm run lint && npm run build && npm run test-node",
+    "test-node": "node test/node.js"
+  },
+  "dependencies": {
+    "@deck.gl/core": "^6.1.0-rc.1"
+  }
+}
