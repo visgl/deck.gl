@@ -10,7 +10,7 @@ const US_MAP_GEOJSON =
 const INITIAL_VIEW_STATE = {
   latitude: 40.70708981756565,
   longitude: -74.01194070150844,
-  zoom: 15.2,
+  zoom: 5.2,
   bearing: 20,
   pitch: 60
 };
@@ -35,9 +35,9 @@ map.on('load', () => {
         stroked: true,
         filled: true,
         lineWidthMinPixels: 2,
-        opacity: 0.4,
-        getLineColor: () => [255, 100, 100],
-        getFillColor: () => [200, 160, 0, 180]
+        opacity: 1,
+        getLineColor: () => [255, 0, 0],
+        getFillColor: () => [200, 200, 0, 200]
       })
     ]
   });
