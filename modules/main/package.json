@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "6.1.0-alpha.2",
+  "version": "6.1.0",
   "keywords": [
     "webgl",
     "visualization",
@@ -26,8 +26,8 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.1.0-alpha.2",
-    "@deck.gl/layers": "^6.1.0-alpha.2",
-    "@deck.gl/react": "^6.1.0-alpha.2"
+    "@deck.gl/core": "^6.1.0",
+    "@deck.gl/layers": "^6.1.0",
+    "@deck.gl/react": "^6.1.0"
   }
 }
