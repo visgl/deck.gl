@@ -6056,6 +6056,17 @@ math.gl@^2.0.0:
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
 
+math.gl@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.1.0.tgz#61a0e51cf765b9a11c449655120a6ddc3aa8aa91"
+  dependencies:
+    gl-mat3 "^1.0.0"
+    gl-mat4 "^1.1.4"
+    gl-quat "^1.0.0"
+    gl-vec2 "^1.0.0"
+    gl-vec3 "^1.0.3"
+    gl-vec4 "^1.0.1"
+
 math.gl@^2.1.0-alpha:
   version "2.1.0-alpha.1"
   resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.1.0-alpha.1.tgz#80866ac74ae3ffadca23a47aec926c9336d4dace"
