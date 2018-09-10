@@ -340,9 +340,6 @@ export default class Viewport {
       this.viewMatrix = new Matrix4()
         // Apply the uncentered view matrix
         .multiplyRight(this.viewMatrixUncentered)
-        // The Mercator world coordinate system is upper left,
-        // but GL expects lower left, so we flip it around the center after all transforms are done
-        .scale([1, -1, 1])
         // And center it
         .translate(new Vector3(this.center || ZERO_VECTOR).negate());
     } else {

@@ -81,7 +81,7 @@ const TEST_CASES = [
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
       fromCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
-    result: [-233.01688888831995, 589.7206230699085, 265.13951782419525]
+    result: [-233.01688888831995, -589.7206230699085, 265.13951782419525]
   },
   {
     title: 'LNGLAT to LNGLAT_OFFSETS',
@@ -92,7 +92,7 @@ const TEST_CASES = [
       coordinateOrigin: TEST_COORDINATE_ORIGIN,
       fromCoordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
-    result: [-233.01688888831995, 589.7206230699085, 265.13951782419525]
+    result: [-233.01688888831995, -589.7206230699085, 265.13951782419525]
   }
 ];
 
@@ -105,7 +105,7 @@ vec4 project_offset_(vec4 offset) {
 function projectOffset(offset, pixelsPerUnit, pixelsPerUnit2) {
   return [
     offset[0] * (pixelsPerUnit[0] + pixelsPerUnit2[0] * offset[1]),
-    offset[1] * (pixelsPerUnit[1] + pixelsPerUnit2[1] * offset[1]),
+    -offset[1] * (pixelsPerUnit[1] + pixelsPerUnit2[1] * offset[1]),
     offset[2] * (pixelsPerUnit[2] + pixelsPerUnit2[2] * offset[1])
   ];
 }
