@@ -49,12 +49,12 @@ function getShaderCoordinateSystem(coordinateSystem, fp64) {
   }
 
   switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.LNGLAT:
     case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
+    default:
       return PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET;
 
-    case COORDINATE_SYSTEM.LNGLAT:
     case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
-    default:
       return PROJECT_COORDINATE_SYSTEM.LNG_LAT;
 
     case COORDINATE_SYSTEM.METER_OFFSETS:

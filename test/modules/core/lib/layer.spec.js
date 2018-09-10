@@ -182,10 +182,10 @@ test('Layer#use64bitProjection', t => {
 
 test('Layer#use64bitPositions', t => {
   let layer = new SubLayer({});
-  t.false(layer.use64bitPositions(), 'returns false for default settings');
+  t.true(layer.use64bitPositions(), 'returns true for default settings');
 
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
-  t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.LNGLAT');
+  t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT');
 
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL});
   t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL');
