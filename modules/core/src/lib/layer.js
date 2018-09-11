@@ -363,8 +363,7 @@ export default class Layer extends Component {
   // Sets the specified instanced picking color to null picking color. Used for multi picking.
   _clearInstancePickingColor(color) {
     const {instancePickingColors} = this.getAttributeManager().attributes;
-    const {state: attribute} = instancePickingColors;
-    const {value, size} = attribute;
+    const {value, size} = instancePickingColors;
 
     const i = this.decodePickingColor(color);
     value[i * size + 0] = 0;
@@ -372,17 +371,13 @@ export default class Layer extends Component {
     value[i * size + 2] = 0;
 
     // TODO: Optimize this to use sub-buffer update!
-    const models = this.getModels();
-    if (models) {
-      models.forEach(model => model.setAttributes({instancePickingColors: attribute}));
-    }
+    instancePickingColors.update({value});
   }
 
   // Sets all occurrences of the specified picking color to null picking color. Used for multi picking.
   _clearPickingColor(color) {
     const {pickingColors} = this.getAttributeManager().attributes;
-    const attribute = pickingColors.state;
-    const {value} = attribute;
+    const {value} = pickingColors;
 
     for (let i = 0; i < value.length; i += 3) {
       if (value[i + 0] === color[0] && value[i + 1] === color[1] && value[i + 2] === color[2]) {
@@ -393,10 +388,7 @@ export default class Layer extends Component {
     }
 
     // TODO: Optimize this to use sub-buffer update!
-    const models = this.getModels();
-    if (models) {
-      models.forEach(model => model.setAttributes({pickingColors: attribute}));
-    }
+    pickingColors.update({value});
   }
 
   // This method figures out if we use instance colors or not
@@ -420,9 +412,7 @@ export default class Layer extends Component {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
 
-    colors.value.set(value);
-    colors.setNeedsUpdate();
-    this.updateAttributes(this.props);
+    colors.update({value});
   }
 
   // Deduces numer of instances. Intention is to support:
