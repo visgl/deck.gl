@@ -422,7 +422,9 @@ export default class Deck {
   }
 
   _updateCursor() {
-    this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+    if (this.canvas) {
+      this.canvas.style.cursor = this.props.getCursor(this.interactiveState);
+    }
   }
 
   // Updates animation props on the layer context
@@ -439,6 +441,7 @@ export default class Deck {
 
     // if external context...
     if (this.props._customRender) {
+      this.canvas = gl.canvas;
       trackContextState(gl, {enable: true, copyState: true});
     }
 
@@ -524,7 +527,8 @@ export default class Deck {
       viewports: this.viewManager.getViewports(),
       views: this.viewManager.getViews(),
       redrawReason,
-      drawPickingColors: this.props.drawPickingColors // Debug picking, helps in framebuffered layers
+      drawPickingColors: this.props.drawPickingColors, // Debug picking, helps in framebuffered layers
+      customRender: this.props._customRender
     });
 
     this.props.onAfterRender({gl});

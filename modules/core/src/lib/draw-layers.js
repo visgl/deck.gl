@@ -75,10 +75,13 @@ export function drawLayers(
     layerFilter = null,
     pass = 'draw',
     redrawReason = '',
-    stats
+    stats,
+    customRender
   }
 ) {
-  clearCanvas(gl, {useDevicePixels});
+  if (!customRender) {
+    clearCanvas(gl, {useDevicePixels});
+  }
 
   // effectManager.preDraw();
 

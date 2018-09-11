@@ -45,10 +45,10 @@ map.on('load', () => {
       layers: [
         new GeoJsonLayer({
           data: US_MAP_GEOJSON,
+          opacity: 0.01,
           stroked: true,
           filled: true,
           lineWidthMinPixels: 2,
-          opacity: 0.4,
           getLineColor: () => [255, 100, 100],
           getFillColor: () => [200, 160, 0, 180]
         })
