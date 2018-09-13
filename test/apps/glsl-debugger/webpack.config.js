@@ -5,6 +5,8 @@
 const resolve = require('path').resolve;
 
 const CONFIG = {
+  mode: 'development',
+
   entry: {
     app: resolve('./app.js')
   },

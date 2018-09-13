@@ -5,11 +5,13 @@
   },
   "dependencies": {
     "deck.gl": "^5.3.0",
-    "glsl-transpiler": "^1.5.8"
+    "glsl-transpiler": "1.5.9"
   },
   "devDependencies": {
-    "buble-loader": "^0.4.0",
-    "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "webpack": "^4.3.0",
+    "webpack-cli": "^2.0.13",
+    "webpack-dev-server": "^3.1.1"
   }
 }

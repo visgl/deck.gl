@@ -1,5 +1,5 @@
 /* global document */
-import renderModel, {DrawingContext, COLOR_MODE} from './renderer';
+import renderModel, {DrawingContext, COLOR_MODE} from 'luma.gl-debugger';
 
 const DEFAULT_OPTIONS = {
   enabled: false,
