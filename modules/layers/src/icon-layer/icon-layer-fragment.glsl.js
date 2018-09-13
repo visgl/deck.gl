@@ -38,7 +38,7 @@ void main(void) {
   // if colorMode == 0, use pixel color from the texture
   // if colorMode == 1 or rendering picking buffer, use texture as transparency mask
   vec3 color = mix(texColor.rgb, vColor.rgb, vColorMode);
-  float a = texColor.a * opacity * mix(1.0, vColor.a, vColorMode);
+  float a = texColor.a * opacity * vColor.a;
 
   if (a < MIN_ALPHA) {
     discard;
