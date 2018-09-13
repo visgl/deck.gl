@@ -1023,7 +1023,7 @@ array-flatten@1.1.1:
   version "1.1.1"
   resolved "https://registry.yarnpkg.com/array-flatten/-/array-flatten-1.1.1.tgz#9a5f699051b1e7073328f2a008968b64ea2955d2"
 
-array-flatten@^2.1.0:
+array-flatten@^2.0.0, array-flatten@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/array-flatten/-/array-flatten-2.1.1.tgz#426bb9da84090c1838d812c8150af20a8331e296"
 
@@ -1931,6 +1931,10 @@ babylon@^6.17.3, babylon@^6.18.0:
 babylon@^7.0.0-beta.47:
   version "7.0.0-beta.47"
   resolved "https://registry.yarnpkg.com/babylon/-/babylon-7.0.0-beta.47.tgz#6d1fa44f0abec41ab7c780481e62fd9aafbdea80"
+
+balanced-match@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-0.3.0.tgz#a91cdd1ebef1a86659e70ff4def01625fc2d6756"
 
 balanced-match@^1.0.0:
   version "1.0.0"
@@ -4482,11 +4486,30 @@ globby@^8.0.1:
     pify "^3.0.0"
     slash "^1.0.0"
 
-glsl-tokenizer@^2.0.2:
+glsl-parser@^2.0.0:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/glsl-parser/-/glsl-parser-2.0.1.tgz#3ffac4ee05cc4d8141fd6b1e41e82b3766ff61b9"
+  dependencies:
+    glsl-tokenizer "^2.1.4"
+    through "2.3.4"
+    through2 "^0.6.3"
+
+glsl-tokenizer@^2.0.2, glsl-tokenizer@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/glsl-tokenizer/-/glsl-tokenizer-2.1.4.tgz#aadec0039e68e07a6e591cd0454d97a905797225"
   dependencies:
     through2 "^0.6.3"
+
+glsl-transpiler@1.5.9:
+  version "1.5.9"
+  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.5.9.tgz#cdbf1e438888dd86d6d1e168e98788891a26fd50"
+  dependencies:
+    array-flatten "^2.0.0"
+    glsl-parser "^2.0.0"
+    glsl-tokenizer "^2.0.2"
+    inherits "^2.0.1"
+    prepr "^1.1.0"
+    xtend "^4.0.1"
 
 got@^6.7.1:
   version "6.7.1"
@@ -6947,6 +6970,10 @@ param-case@2.1.x:
   dependencies:
     no-case "^2.2.0"
 
+parenthesis@^3.0.0:
+  version "3.1.5"
+  resolved "https://registry.yarnpkg.com/parenthesis/-/parenthesis-3.1.5.tgz#077d0738bb6f65d951b9f9b7c438f2aabe965c6e"
+
 parse-asn1@^5.0.0:
   version "5.1.1"
   resolved "https://registry.yarnpkg.com/parse-asn1/-/parse-asn1-5.1.1.tgz#f6bf293818332bd0dab54efb16087724745e6ca8"
@@ -7187,6 +7214,14 @@ prepend-http@^1.0.1:
 prepend-http@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-2.0.0.tgz#e92434bfa5ea8c19f41cdfd401d741a3c819d897"
+
+prepr@^1.1.0:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/prepr/-/prepr-1.1.1.tgz#9538e526cf5b3bc616b97a182e03830aac4a7351"
+  dependencies:
+    balanced-match "^0.3.0"
+    parenthesis "^3.0.0"
+    xtend "^4.0.1"
 
 preserve@^0.2.0:
   version "0.2.0"
@@ -8798,6 +8833,10 @@ through@2, "through@>=2.2.7 <3", through@^2.3.4, through@^2.3.6, through@~2.3.4,
   version "2.3.8"
   resolved "https://registry.yarnpkg.com/through/-/through-2.3.8.tgz#0dd4c9ffaabc357960b1b724115d7e0e86a2e1f5"
 
+through@2.3.4:
+  version "2.3.4"
+  resolved "http://registry.npmjs.org/through/-/through-2.3.4.tgz#495e40e8d8a8eaebc7c275ea88c2b8fc14c56455"
+
 thunky@^1.0.2:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/thunky/-/thunky-1.0.2.tgz#a862e018e3fb1ea2ec3fce5d55605cf57f247371"
@@ -9562,7 +9601,7 @@ xregexp@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/xregexp/-/xregexp-4.0.0.tgz#e698189de49dd2a18cc5687b05e17c8e43943020"
 
-"xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@~4.0.0, xtend@~4.0.1:
+"xtend@>=4.0.0 <4.1.0-0", xtend@^4.0.0, xtend@^4.0.1, xtend@~4.0.0, xtend@~4.0.1:
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/xtend/-/xtend-4.0.1.tgz#a5c6d532be656e23db820efb943a1f04998d63af"
 
