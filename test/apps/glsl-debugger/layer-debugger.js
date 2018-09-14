@@ -1,5 +1,4 @@
-/* global document */
-import renderModel, {DrawingContext, COLOR_MODE} from 'luma.gl-debugger';
+import {_DebugContext as DebugContext, COLOR_MODE} from '@luma.gl/debug';
 
 const DEFAULT_OPTIONS = {
   enabled: false,
@@ -15,8 +14,7 @@ export default class LayerDebugger {
       onBeforeRender: this._onRender.bind(this)
     });
 
-    const canvas = this._createCanvas(deck.canvas.offsetParent);
-    this.drawingContext = new DrawingContext(canvas);
+    this.debugContext = new DebugContext(deck.canvas);
   }
 
   setOptions(opts) {
@@ -28,24 +26,10 @@ export default class LayerDebugger {
     });
   }
 
-  _createCanvas(container) {
-    const canvas = document.createElement('canvas');
-    container.append(canvas);
-    Object.assign(canvas.style, {
-      position: 'absolute',
-      left: '0px',
-      top: '0px',
-      pointerEvents: 'none'
-    });
-    return canvas;
-  }
-
   _onRender() {
     const {deck} = this;
 
-    this.drawingContext.resize({width: deck.width, height: deck.height});
-
-    this.drawingContext.clear({
+    this.debugContext.clear({
       strokeStyle: '#000',
       fillStyle: '#000'
     });
@@ -75,9 +59,7 @@ export default class LayerDebugger {
     }
 
     layer.getModels().forEach(model => {
-      renderModel({
-        model,
-        context: this.drawingContext,
+      this.debugContext.drawModel(model, {
         colorMode: this.opts.colorMode
       });
     });
