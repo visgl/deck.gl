@@ -4486,7 +4486,7 @@ globby@^8.0.1:
     pify "^3.0.0"
     slash "^1.0.0"
 
-glsl-parser@^2.0.0:
+glsl-parser@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/glsl-parser/-/glsl-parser-2.0.1.tgz#3ffac4ee05cc4d8141fd6b1e41e82b3766ff61b9"
   dependencies:
@@ -4500,13 +4500,13 @@ glsl-tokenizer@^2.0.2, glsl-tokenizer@^2.1.4:
   dependencies:
     through2 "^0.6.3"
 
-glsl-transpiler@1.5.9:
-  version "1.5.9"
-  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.5.9.tgz#cdbf1e438888dd86d6d1e168e98788891a26fd50"
+glsl-transpiler@^1.7.1:
+  version "1.7.2"
+  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.7.2.tgz#c488a55edaf750ce4fbb502da1e8eb785731851e"
   dependencies:
     array-flatten "^2.0.0"
-    glsl-parser "^2.0.0"
-    glsl-tokenizer "^2.0.2"
+    glsl-parser "^2.0.1"
+    glsl-tokenizer "^2.1.4"
     inherits "^2.0.1"
     prepr "^1.1.0"
     xtend "^4.0.1"
