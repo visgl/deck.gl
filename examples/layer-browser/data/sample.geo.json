@@ -171,5 +171,38 @@
         ]
       ]
     }
+  }, {
+    "type": "Feature",
+    "properties": {},
+    "geometry": {
+      "type": "GeometryCollection",
+      "geometries": [
+        {
+          "type": "LineString",
+          "coordinates": [
+            [-122.493, 37.78],
+            [-122.493, 37.79]
+          ]
+        },
+        {
+          "type": "Polygon",
+          "coordinates": [
+            [
+              [-122.49, 37.79],
+              [-122.49, 37.78],
+              [-122.48, 37.785],
+              [-122.49, 37.79]
+            ]
+          ]
+        }
+      ]
+    }
+  }, {
+      "type": "Feature",
+      "properties": {},
+      "geometry": {
+        "type": "GeometryCollection",
+        "geometries": []
+      }
   }]
 }
