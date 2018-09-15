@@ -126,7 +126,8 @@ export default class Viewport {
     const [x0, y0, z0 = 0] = xyz;
 
     const [X, Y] = this.projectFlat([x0, y0]);
-    const coord = worldToPixels([X, Y, z0], this.pixelProjectionMatrix);
+    const Z = z0 * this.distanceScales.pixelsPerMeter[2];
+    const coord = worldToPixels([X, Y, Z], this.pixelProjectionMatrix);
 
     const [x, y] = coord;
     const y2 = topLeft ? y : this.height - y;
@@ -147,12 +148,14 @@ export default class Viewport {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
-    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZ);
+    const targetZWorld = targetZ && targetZ * this.distanceScales.pixelsPerMeter[2];
+    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
     const [X, Y] = this.unprojectFlat(coord);
 
     if (Number.isFinite(z)) {
       // Has depth component
-      return [X, Y, coord[2]];
+      const Z = coord[2] * this.distanceScales.metersPerPixel[2];
+      return [X, Y, Z];
     }
 
     return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
