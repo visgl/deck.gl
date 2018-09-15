@@ -26,12 +26,7 @@ import {Matrix4, equals, config} from 'math.gl';
 
 import {compileVertexShader} from '../shaderlib-test-utils';
 
-// viewport,
-// devicePixelRatio = 1,
-// modelMatrix = null,
-// coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-// coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
-// wrapLongitude = false,
+const PIXEL_TOLERANCE = 0.01;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122,
@@ -76,30 +71,33 @@ const TEST_CASES = [
     },
     tests: [
       {
-        func: 'project_scale',
-        args: [1],
+        name: 'project_scale(float)',
+        func: ({project_scale}) => project_scale(1),
         output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter[2]
       },
       {
-        func: 'project_scale_vec2',
-        args: [[1, 1]],
+        name: 'project_scale(vec2)',
+        func: ({project_scale_vec2}) => project_scale_vec2([1, 1]),
         output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter.slice(0, 2)
       },
       {
-        func: 'project_scale_vec3',
-        args: [[1, 1, 1]],
+        name: 'project_scale(vec3)',
+        func: ({project_scale_vec3}) => project_scale_vec3([1, 1, 1]),
         output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter
       },
       {
-        func: 'project_position',
-        args: [[-122.45, 37.78, 0, 1], [0, 0]],
+        name: 'project_position',
+        func: ({project_position}) => project_position([-122.45, 37.78, 0, 1], [0, 0]),
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1])
       },
       {
-        func: 'project_to_clipspace',
-        args: [TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1])],
-        postFunc: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
-        output: TEST_VIEWPORT.project([-122.45, 37.78, 0])
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([-122.45, 37.78, 0, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT, coords);
+        },
+        output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   },
@@ -111,24 +109,22 @@ const TEST_CASES = [
     },
     tests: [
       {
-        func: 'project_position',
-        args: [[-122.05, 37.92, 0, 1], [0, 0]],
+        name: 'project_position',
+        func: ({project_position}) => project_position([-122.05, 37.92, 0, 1], [0, 0]),
         output: getPixelOffset(
           TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]),
           TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122, 38])
         ),
-        precision: 0.01
+        precision: PIXEL_TOLERANCE
       },
       {
-        func: 'project_to_clipspace',
-        args: [
-          getPixelOffset(
-            TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]),
-            TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122, 38])
-          )
-        ],
-        postFunc: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
-        output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0])
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([-122.05, 37.92, 0, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords);
+        },
+        output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   },
@@ -141,26 +137,24 @@ const TEST_CASES = [
     },
     tests: [
       {
-        func: 'project_position',
-        args: [[1000, 1000, 0, 1], [0, 0]],
+        name: 'project_position',
+        func: ({project_position}) => project_position([1000, 1000, 0, 1], [0, 0]),
         // @turf/destination
         // destination([-122.05, 37.92], 1 * Math.sqrt(2), 45) -> [ -122.0385984916185, 37.92899265369385 ]
         output: getPixelOffset(
           TEST_VIEWPORT.projectFlat([-122.0385984916185, 37.92899265369385]),
           TEST_VIEWPORT.projectFlat([-122.05, 37.92])
         ),
-        precision: 0.01
+        precision: PIXEL_TOLERANCE
       },
       {
-        func: 'project_to_clipspace',
-        args: [
-          getPixelOffset(
-            TEST_VIEWPORT.projectFlat([-122.0385984916185, 37.92899265369385]),
-            TEST_VIEWPORT.projectFlat([-122.05, 37.92])
-          )
-        ],
-        postFunc: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
-        output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 0])
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([1000, 1000, 0, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT, coords);
+        },
+        output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 0]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   },
@@ -173,24 +167,22 @@ const TEST_CASES = [
     },
     tests: [
       {
-        func: 'project_position',
-        args: [[0.05, 0.08, 0, 1], [0, 0]],
+        name: 'project_position',
+        func: ({project_position}) => project_position([0.05, 0.08, 0, 1], [0, 0]),
         output: getPixelOffset(
           TEST_VIEWPORT.projectFlat([-122, 38]),
           TEST_VIEWPORT.projectFlat([-122.05, 37.92])
         ),
-        precision: 0.01
+        precision: PIXEL_TOLERANCE
       },
       {
-        func: 'project_to_clipspace',
-        args: [
-          getPixelOffset(
-            TEST_VIEWPORT.projectFlat([-122, 38]),
-            TEST_VIEWPORT.projectFlat([-122.05, 37.92])
-          )
-        ],
-        postFunc: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
-        output: TEST_VIEWPORT.project([-122, 38, 0])
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([0.05, 0.08, 0, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT, coords);
+        },
+        output: TEST_VIEWPORT.project([-122, 38, 0]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   },
@@ -203,15 +195,18 @@ const TEST_CASES = [
     },
     tests: [
       {
-        func: 'project_position',
-        args: [[200, 200, 0, 1], [0, 0]],
+        name: 'project_position',
+        func: ({project_position}) => project_position([200, 200, 0, 1], [0, 0]),
         output: [-200, 200, 10, 1]
       },
       {
-        func: 'project_to_clipspace',
-        args: [[-200, 200, 10, 1]],
-        postFunc: coords => clipspaceToScreen(TEST_VIEWPORT_ORTHO, coords),
-        output: TEST_VIEWPORT_ORTHO.project([-200, 200, 10])
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([200, 200, 0, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT_ORTHO, coords);
+        },
+        output: TEST_VIEWPORT_ORTHO.project([-200, 200, 10]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   }
@@ -240,20 +235,17 @@ test('project#vs', t => {
     t.comment(testCase.title);
 
     const uniforms = project.getUniforms(testCase.params);
-    const functions = projectVS(uniforms);
+    const module = projectVS(uniforms);
 
     testCase.tests.forEach(c => {
-      let actual = functions[c.func].apply(null, c.args);
-      if (c.postFunc) {
-        actual = c.postFunc(actual);
-      }
+      const actual = c.func(module);
       const expected = c.output;
       config.EPSILON = c.precision || 1e-7;
 
       if (equals(actual, expected)) {
-        t.pass(`${c.func} returns correct result`);
+        t.pass(`${c.name} returns correct result`);
       } else {
-        t.fail(`${c.func} returns ${actual}, expecting ${expected}`);
+        t.fail(`${c.name} returns ${actual}, expecting ${expected}`);
       }
     });
   });
