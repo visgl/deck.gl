@@ -53,6 +53,7 @@ deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can
 
 
 ### IconLayer
+
 When the `mask` of the icon is `false`, the opacity of the icon can be controlled by `getColor` while still keeping the pixel color from image. When `mask` is `true`, user defined color is applied.
 
 
