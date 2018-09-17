@@ -135,12 +135,12 @@ const TEST_CASES = [
       lineFeaturesLength: 1,
       polygonFeaturesLength: 0,
       polygonOutlineFeaturesLength: 0,
-      pointSourceFeatures: [TEST_DATA.GEOMETRY_COLLECTION.geometries[0]],
-      lineSourceFeatures: [TEST_DATA.GEOMETRY_COLLECTION.geometries[1]],
+      pointSourceFeatures: [TEST_DATA.GEOMETRY_COLLECTION],
+      lineSourceFeatures: [TEST_DATA.GEOMETRY_COLLECTION],
       polygonSourceFeatures: [],
       polygonOutlineSourceFeatures: [],
       pointFeatureIndexes: [0],
-      lineFeatureIndexes: [1],
+      lineFeatureIndexes: [0],
       polygonFeatureIndexes: [],
       polygonOutlineFeatureIndexes: []
     }

@@ -48,9 +48,6 @@ export function getGeojsonFeatures(geojson) {
   assert(geojson.type, 'GeoJSON does not have type');
 
   switch (geojson.type) {
-    case 'GeometryCollection':
-      assert(Array.isArray(geojson.geometries), 'GeoJSON does not have geometries array');
-      return geojson.geometries.map(geometry => ({geometry}));
     case 'Feature':
       // Wrap the feature in a 'Features' array
       return [geojson];
@@ -87,7 +84,8 @@ export function separateGeojsonFeatures(features) {
     };
 
     if (geometry.type === 'GeometryCollection') {
-      const {geometries} = feature.geometry;
+      assert(Array.isArray(geometry.geometries), 'GeoJSON does not have geometries array');
+      const {geometries} = geometry;
       for (let i = 0; i < geometries.length; i++) {
         const subGeometry = geometries[i];
         separateGeometry(subGeometry, separated, sourceFeature);
