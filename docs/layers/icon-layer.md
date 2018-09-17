@@ -73,7 +73,7 @@ Icon names mapped to icon definitions. Each icon is defined with the following v
 * `anchorY`: vertical position of icon anchor. Default: half height.
 * `mask`: whether icon is treated as a transparency mask.
   If `true`, user defined color is applied.
-  If `false`, pixel color from the image is applied.
+  If `false`, pixel color from the image is applied. User still can specify the opacity through getColor.
   Default: `false`
 
 ##### `sizeScale` (Number, optional)
@@ -120,7 +120,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
-
+* If `mask` = false, only the alpha component will be used to control the opacity of the icon.
 
 ##### `getAngle` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

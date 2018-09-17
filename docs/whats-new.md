@@ -52,6 +52,10 @@ deck.gl's multiview support has been significantly enhanced. New `View` properti
 deck.gl's layer catalog is extended by adding new `ContourLayer`, this layer can be used to render contours, also called iso-lines for given set of threshold values. `ContourLayer` supports both WebMercator projection (geospatial applications) and Orthographic projection (infovis applications).
 
 
+### IconLayer
+When the `mask` of the icon is `false`, the opacity of the icon can be controlled by `getColor` while still keeping the pixel color from image. When `mask` is `true`, user defined color is applied.
+
+
 ### GPU Aggregation Enhancements (Experimental)
 
 Several under the hood changes in GPU Aggregation flow to support multiple layer coordinate systems (LNGLAT and IDENTITY).
