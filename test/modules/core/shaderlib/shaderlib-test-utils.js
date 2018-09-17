@@ -1,9 +1,9 @@
 // TODO - move to @luma.gl/debug ?
 import Compiler from 'glsl-transpiler';
 
-const normalize = source =>
+const normalizeSource = source =>
   source
-    // prepr does not like #define without value
+    // prepr (GLSL preprocessor) does not like #define without value
     .replace(/^(#define \w+) *$/gm, ($0, $1) => `${$1} 1`);
 
 const compileVS = Compiler({
@@ -12,17 +12,11 @@ const compileVS = Compiler({
 
 // @returns JavaScript function of the transpiled shader
 export function compileVertexShader(source) {
-  source = normalize(source);
+  source = normalizeSource(source);
 
   const compiledSource = compileVS(source);
   const {compiler} = compileVS;
-
-  const stats = {
-    attributes: compiler.attributes,
-    uniforms: compiler.uniforms,
-    varyings: compiler.varyings,
-    functions: compiler.functions
-  };
+  const {functions} = compiler;
   compiler.reset();
 
   return evalScript(
@@ -31,14 +25,14 @@ export function compileVertexShader(source) {
   ${compiledSource}
 
   return {
-    ${Object.keys(stats.functions).join(',')}
+    ${Object.keys(functions).join(',')}
   };
 }`
   );
 }
 
 /* eslint-disable no-eval */
-function evalScript(value) {
-  const script = `(function() { return ${value}; })()`;
+function evalScript(source) {
+  const script = `(function() { return ${source}; })()`;
   return eval(script);
 }
