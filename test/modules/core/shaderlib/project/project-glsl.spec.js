@@ -23,6 +23,8 @@ import test from 'tape-catch';
 import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, equals, config} from 'math.gl';
+import {gl} from '@deck.gl/test-utils';
+import {isWebGL2, Transform, Buffer} from 'luma.gl';
 
 import {compileVertexShader} from '../shaderlib-test-utils';
 
@@ -62,6 +64,67 @@ const TEST_VIEWPORT_ORTHO = new Viewport({
   })
 });
 
+const DUMMY_SOURCE_BUFFER = new Buffer(gl, 1);
+const OUT_BUFFER = new Buffer(gl, 16);
+
+// used in printing a float into GLSL code, 1 will be 1.0 to avoid GLSL compile errors
+const MAX_FRACTION_DIGITS = 5;
+
+const TRANSFORM_VS = {
+  project_scale: meter => `\
+varying float outValue;
+
+void main()
+{
+  outValue = project_scale(${meter.toFixed(MAX_FRACTION_DIGITS)});
+}
+`,
+  project_scale_vec2: meter => `\
+  varying vec2 outValue;
+
+  void main()
+  {
+    outValue = project_scale(vec2(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
+    MAX_FRACTION_DIGITS
+  )}));
+  }
+  `,
+  project_scale_vec3: meter => `\
+  varying vec3 outValue;
+
+  void main()
+  {
+    outValue = project_scale(vec3(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
+    MAX_FRACTION_DIGITS
+  )}, ${meter[2].toFixed(MAX_FRACTION_DIGITS)}));
+  }
+  `,
+  project_position: pos => `\
+varying vec4 outValue;
+
+void main()
+{
+  outValue = project_position(vec4(${pos[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos[1].toFixed(
+    MAX_FRACTION_DIGITS
+  )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(
+    MAX_FRACTION_DIGITS
+  )}), vec2(0., 0.));
+}
+`,
+  project_to_clipspace: pos => `\
+varying vec4 outValue;
+
+void main()
+{
+  vec4 pos = project_position(vec4(${pos[0].toFixed(MAX_FRACTION_DIGITS)}, ${pos[1].toFixed(
+    MAX_FRACTION_DIGITS
+  )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(
+    MAX_FRACTION_DIGITS
+  )}), vec2(0., 0.));
+  outValue = project_to_clipspace(pos);
+}
+`
+};
 const TEST_CASES = [
   {
     title: 'LNGLAT mode',
@@ -73,40 +136,45 @@ const TEST_CASES = [
       {
         name: 'project_scale(float)',
         func: ({project_scale}) => project_scale(1),
-        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter[2]
+        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter[2],
+        vs: TRANSFORM_VS.project_scale(1)
       },
       {
         name: 'project_scale(vec2)',
         func: ({project_scale_vec2}) => project_scale_vec2([1, 1]),
-        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter.slice(0, 2)
+        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter.slice(0, 2),
+        vs: TRANSFORM_VS.project_scale_vec2([1, 1])
       },
       {
         name: 'project_scale(vec3)',
         func: ({project_scale_vec3}) => project_scale_vec3([1, 1, 1]),
-        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter
+        output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter,
+        vs: TRANSFORM_VS.project_scale_vec3([1, 1, 1])
       },
       {
         name: 'project_position',
         func: ({project_position}) => project_position([-122.45, 37.78, 0, 1], [0, 0]),
-        output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1])
+        output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1]),
+        gpuPrecision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_position([-122.45, 37.78, 0, 1])
       },
       {
         name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([-122.45, 37.78, 0, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT, coords);
-        },
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([-122.45, 37.78, 0, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([-122.45, 37.78, 0, 1])
       },
       {
-        name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([-122.45, 37.78, 100, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT, coords);
-        },
+        name: 'project_to_clipspace (non-zero z)',
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([-122.45, 37.78, 100, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([-122.45, 37.78, 100, 1])
       }
     ]
   },
@@ -124,25 +192,26 @@ const TEST_CASES = [
           TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]),
           TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122, 38])
         ),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_position([-122.05, 37.92, 0, 1])
       },
       {
         name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([-122.05, 37.92, 0, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords);
-        },
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([-122.05, 37.92, 0, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([-122.05, 37.92, 0, 1])
       },
       {
-        name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([-122.05, 37.92, 100, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords);
-        },
+        name: 'project_to_clipspace (non-zero z)',
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([-122.05, 37.92, 100, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 100]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([-122.05, 37.92, 100, 1])
       }
     ]
   },
@@ -165,16 +234,17 @@ const TEST_CASES = [
           TEST_VIEWPORT.projectFlat([-122.05, 37.92]),
           100 * TEST_VIEWPORT.distanceScales.pixelsPerMeter[2]
         ),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_position([1000, 1000, 0, 1])
       },
       {
         name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([1000, 1000, 0, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT, coords);
-        },
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([1000, 1000, 0, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 100]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([1000, 1000, 0, 1])
       }
     ]
   },
@@ -193,16 +263,17 @@ const TEST_CASES = [
           TEST_VIEWPORT.projectFlat([-122, 38]),
           TEST_VIEWPORT.projectFlat([-122.05, 37.92])
         ),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_position([0.05, 0.08, 0, 1])
       },
       {
         name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([0.05, 0.08, 0, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT, coords);
-        },
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([0.05, 0.08, 0, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT.project([-122, 38, 0]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([0.05, 0.08, 0, 1])
       }
     ]
   },
@@ -217,16 +288,17 @@ const TEST_CASES = [
       {
         name: 'project_position',
         func: ({project_position}) => project_position([200, 200, 0, 1], [0, 0]),
-        output: [-200, 200, 10, 1]
+        output: [-200, 200, 10, 1],
+        vs: TRANSFORM_VS.project_position([200, 200, 0, 1])
       },
       {
         name: 'project_to_clipspace',
-        func: ({project_position, project_to_clipspace}) => {
-          const coords = project_to_clipspace(project_position([200, 200, 0, 1], [0, 0]));
-          return clipspaceToScreen(TEST_VIEWPORT_ORTHO, coords);
-        },
+        func: ({project_position, project_to_clipspace}) =>
+          project_to_clipspace(project_position([200, 200, 0, 1], [0, 0])),
+        mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
         output: TEST_VIEWPORT_ORTHO.project([-200, 200, 10]),
-        precision: PIXEL_TOLERANCE
+        precision: PIXEL_TOLERANCE,
+        vs: TRANSFORM_VS.project_to_clipspace([200, 200, 0, 1])
       }
     ]
   }
@@ -244,6 +316,38 @@ function clipspaceToScreen(viewport, coords) {
   ];
 }
 
+function runOnGPU({uniforms, vs, elementCount, usefp64 = true}) {
+  const modules = usefp64 ? ['project64'] : [];
+  const transform = new Transform(gl, {
+    // TODO: remove sourceBuffers after https://github.com/uber/luma.gl/pull/733
+    sourceBuffers: {
+      dummy: DUMMY_SOURCE_BUFFER
+    },
+    feedbackBuffers: {
+      outValue: OUT_BUFFER
+    },
+    vs,
+    varyings: ['outValue'],
+    modules,
+    elementCount: elementCount || 1
+  });
+  transform.run({uniforms});
+  return OUT_BUFFER.getData();
+}
+
+function verifyResult({t, name, actual, expected, sliceActual = false}) {
+  expected = Array.isArray(expected) ? expected : [expected];
+  // Convert TypedArray to regular array
+  // TODO: remove after https://github.com/uber-web/math.gl/pull/29
+  actual = sliceActual ? Array.from(actual.slice(0, expected.length)) : actual;
+
+  if (equals(actual, expected)) {
+    t.pass(`${name} returns correct result`);
+  } else {
+    t.fail(`${name} returns ${actual}, expecting ${expected}`);
+  }
+}
+
 test('project#vs', t => {
   // TODO - resolve dependencies properly
   // luma's assembleShaders require WebGL context to work
@@ -258,14 +362,17 @@ test('project#vs', t => {
     const module = projectVS(uniforms);
 
     testCase.tests.forEach(c => {
-      const actual = c.func(module);
+      let actual = c.func(module);
+      actual = c.mapResult ? c.mapResult(actual) : actual;
       const expected = c.output;
       config.EPSILON = c.precision || 1e-7;
+      verifyResult({t, name: `CPU: ${c.name}`, actual, expected});
 
-      if (equals(actual, expected)) {
-        t.pass(`${c.name} returns correct result`);
-      } else {
-        t.fail(`${c.name} returns ${actual}, expecting ${expected}`);
+      if (isWebGL2(gl) && c.vs) {
+        actual = runOnGPU({uniforms, vs: c.vs});
+        actual = c.mapResult ? c.mapResult(actual) : actual;
+        config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
+        verifyResult({t, name: `GPU: ${c.name}`, actual, expected, sliceActual: true});
       }
     });
   });
