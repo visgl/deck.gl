@@ -115,6 +115,33 @@ Note:
 
 * By default, takes top-left coordinates from JavaScript mouse events.
 
+
+##### `projectPosition`
+
+Projects latitude, longitude (and altitude) to coordinates in the WebMercator world.
+
+Parameters:
+
+* `coordinates` (Array) - `[lng, lat, altitude]` Passing an altitude is optional.
+
+Returns:
+
+* `[x, y, z]` in WebMercator coordinates.
+
+
+##### `unprojectPosition`
+
+Projects a coordinate from the WebMercator world to latitude, longitude and altitude.
+
+Parameters:
+
+* `coordinates` (Array) - `[x, y, z]` in the WebMercator world. `z` is optional.
+
+Returns:
+
+* `[longitude, latitude, altitude]`
+
+
 ## Remarks
 
 * The `Viewport` class and its subclasses are perhaps best thought of as geospatially enabled counterparts of the typical `Camera` classes found in most 3D libraries.

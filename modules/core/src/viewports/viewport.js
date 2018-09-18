@@ -89,6 +89,8 @@ export default class Viewport {
     this.equals = this.equals.bind(this);
     this.project = this.project.bind(this);
     this.unproject = this.unproject.bind(this);
+    this.projectPosition = this.projectPosition.bind(this);
+    this.unprojectPosition = this.unprojectPosition.bind(this);
     this.projectFlat = this.projectFlat.bind(this);
     this.unprojectFlat = this.unprojectFlat.bind(this);
     this.getMatrices = this.getMatrices.bind(this);
@@ -123,10 +125,8 @@ export default class Viewport {
    * @return {Array} - [x, y] or [x, y, z] in top left coords
    */
   project(xyz, {topLeft = true} = {}) {
-    const [x0, y0, z0 = 0] = xyz;
-
-    const [X, Y] = this.projectFlat([x0, y0]);
-    const coord = worldToPixels([X, Y, z0], this.pixelProjectionMatrix);
+    const worldPosition = this.projectPosition(xyz);
+    const coord = worldToPixels(worldPosition, this.pixelProjectionMatrix);
 
     const [x, y] = coord;
     const y2 = topLeft ? y : this.height - y;
@@ -147,19 +147,30 @@ export default class Viewport {
     const [x, y, z] = xyz;
 
     const y2 = topLeft ? y : this.height - y;
-    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZ);
-    const [X, Y] = this.unprojectFlat(coord);
+    const targetZWorld = targetZ && targetZ * this.distanceScales.pixelsPerMeter[2];
+    const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
+    const [X, Y, Z] = this.unprojectPosition(coord);
 
     if (Number.isFinite(z)) {
-      // Has depth component
-      return [X, Y, coord[2]];
+      return [X, Y, Z];
     }
-
     return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
   }
 
   // NON_LINEAR PROJECTION HOOKS
   // Used for web meractor projection
+
+  projectPosition(xyz) {
+    const [X, Y] = this.projectFlat(xyz);
+    const Z = (xyz[2] || 0) * this.distanceScales.pixelsPerMeter[2];
+    return [X, Y, Z];
+  }
+
+  unprojectPosition(xyz) {
+    const [X, Y] = this.unprojectFlat(xyz);
+    const Z = (xyz[2] || 0) * this.distanceScales.metersPerPixel[2];
+    return [X, Y, Z];
+  }
 
   /**
    * Project [lng,lat] on sphere onto [x,y] on 512*512 Mercator Zoom 0 tile.

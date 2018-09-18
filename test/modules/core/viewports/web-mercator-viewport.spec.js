@@ -23,7 +23,8 @@ import {equals, config} from 'math.gl';
 import {WebMercatorViewport} from 'deck.gl';
 
 // Adjust sensitivity of math.gl's equals
-config.EPSILON = 0.000001;
+const LNGLAT_TOLERANCE = 1e-6;
+const ALT_TOLERANCE = 1e-5;
 
 /* eslint-disable */
 const TEST_VIEWPORTS = [
@@ -86,6 +87,8 @@ test('WebMercatorViewport#constructor - 0 width/height', t => {
 });
 
 test('WebMercatorViewport.projectFlat', t => {
+  config.EPSILON = LNGLAT_TOLERANCE;
+
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new WebMercatorViewport(vc.mapState);
     for (const tc of TEST_VIEWPORTS) {
@@ -103,21 +106,21 @@ test('WebMercatorViewport.project#3D', t => {
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new WebMercatorViewport(vc.mapState);
     for (const offset of [0, 0.5, 1.0, 5.0]) {
-      const lnglatIn = [vc.mapState.longitude + offset, vc.mapState.latitude + offset];
-      const xyz = viewport.project(lnglatIn);
-      const lnglat = viewport.unproject(xyz);
-      t.ok(equals(lnglatIn, lnglat), `Project/unproject ${lnglatIn} to ${lnglat}`);
-
       const lnglatIn3 = [vc.mapState.longitude + offset, vc.mapState.latitude + offset, 0];
       const xyz3 = viewport.project(lnglatIn3);
       const lnglat3 = viewport.unproject(xyz3);
-      t.ok(equals(lnglatIn3, lnglat3), `Project/unproject ${lnglatIn3}=>${xyz3}=>${lnglat3}`);
+      t.comment(`Project/unproject ${lnglatIn3} => ${xyz3} => ${lnglat3}`);
+      config.EPSILON = LNGLAT_TOLERANCE;
+      t.ok(equals(lnglatIn3.slice(0, 2), lnglat3.slice(0, 2)), 'LngLat input/output match');
+      config.EPSILON = ALT_TOLERANCE;
+      t.ok(equals(lnglatIn3[2], lnglat3[2]), 'Altitude input/output match');
     }
   }
   t.end();
 });
 
 test('WebMercatorViewport.project#2D', t => {
+  config.EPSILON = LNGLAT_TOLERANCE;
   // Cross check positions
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new WebMercatorViewport(vc.mapState);
@@ -145,6 +148,8 @@ test('WebMercatorViewport.getScales', t => {
 });
 
 test('WebMercatorViewport.meterDeltas', t => {
+  config.EPSILON = LNGLAT_TOLERANCE;
+
   for (const vc of TEST_VIEWPORTS) {
     const viewport = new WebMercatorViewport(vc.mapState);
     for (const tc of TEST_VIEWPORTS) {

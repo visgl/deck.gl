@@ -22,7 +22,7 @@ import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
 import {projectPosition} from '@deck.gl/core/shaderlib/project/project-functions';
-import {equals} from 'math.gl';
+import {equals, config} from 'math.gl';
 
 const TEST_VIEWPORT = new WebMercatorViewport({
   longitude: -122.45,
@@ -111,6 +111,8 @@ function projectOffset(offset, pixelsPerUnit, pixelsPerUnit2) {
 }
 
 test('project#projectPosition', t => {
+  config.EPSILON = 1e-7;
+
   TEST_CASES.forEach(testCase => {
     const result = projectPosition(testCase.position, testCase.params);
     t.comment(result);

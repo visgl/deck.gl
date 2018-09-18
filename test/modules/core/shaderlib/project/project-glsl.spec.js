@@ -98,6 +98,15 @@ const TEST_CASES = [
         },
         output: TEST_VIEWPORT.project([-122.45, 37.78, 0]),
         precision: PIXEL_TOLERANCE
+      },
+      {
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([-122.45, 37.78, 100, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT, coords);
+        },
+        output: TEST_VIEWPORT.project([-122.45, 37.78, 100]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   },
@@ -125,6 +134,15 @@ const TEST_CASES = [
         },
         output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 0]),
         precision: PIXEL_TOLERANCE
+      },
+      {
+        name: 'project_to_clipspace',
+        func: ({project_position, project_to_clipspace}) => {
+          const coords = project_to_clipspace(project_position([-122.05, 37.92, 100, 1], [0, 0]));
+          return clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords);
+        },
+        output: TEST_VIEWPORT_HIGH_ZOOM.project([-122.05, 37.92, 100]),
+        precision: PIXEL_TOLERANCE
       }
     ]
   },
@@ -133,7 +151,8 @@ const TEST_CASES = [
     params: {
       viewport: TEST_VIEWPORT,
       coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-      coordinateOrigin: [-122.05, 37.92]
+      coordinateOrigin: [-122.05, 37.92],
+      modelMatrix: new Matrix4().translate([0, 0, 100])
     },
     tests: [
       {
@@ -143,7 +162,8 @@ const TEST_CASES = [
         // destination([-122.05, 37.92], 1 * Math.sqrt(2), 45) -> [ -122.0385984916185, 37.92899265369385 ]
         output: getPixelOffset(
           TEST_VIEWPORT.projectFlat([-122.0385984916185, 37.92899265369385]),
-          TEST_VIEWPORT.projectFlat([-122.05, 37.92])
+          TEST_VIEWPORT.projectFlat([-122.05, 37.92]),
+          100 * TEST_VIEWPORT.distanceScales.pixelsPerMeter[2]
         ),
         precision: PIXEL_TOLERANCE
       },
@@ -153,7 +173,7 @@ const TEST_CASES = [
           const coords = project_to_clipspace(project_position([1000, 1000, 0, 1], [0, 0]));
           return clipspaceToScreen(TEST_VIEWPORT, coords);
         },
-        output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 0]),
+        output: TEST_VIEWPORT.project([-122.0385984916185, 37.92899265369385, 100]),
         precision: PIXEL_TOLERANCE
       }
     ]
