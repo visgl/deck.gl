@@ -151,7 +151,10 @@ export default class Viewport {
     const coord = pixelsToWorld([x, y2, z], this.pixelUnprojectionMatrix, targetZWorld);
     const [X, Y, Z] = this.unprojectPosition(coord);
 
-    return xyz.length >= 3 || Number.isFinite(targetZ) ? [X, Y, Z] : [X, Y];
+    if (Number.isFinite(z)) {
+      return [X, Y, Z];
+    }
+    return Number.isFinite(targetZ) ? [X, Y, targetZ] : [X, Y];
   }
 
   // NON_LINEAR PROJECTION HOOKS
