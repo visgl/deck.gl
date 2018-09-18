@@ -48,8 +48,10 @@ void main(void) {
   mat3 rotationMatrix = getRotationMatrix(instanceRotations);
 
   vec3 pos = positions;
-  pos = project_scale(pos * sizeScale);
   pos = rotationMatrix * pos;
+  pos = project_scale(pos * sizeScale);
+  // TODO - remove in next major release
+  pos.y = -pos.y;
 
   vec4 worldPosition;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
