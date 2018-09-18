@@ -5,7 +5,7 @@ PRs and bug reports are welcome, and we are actively opening up the deck.gl road
 
 ## Practicalities
 
-Note that you once your PR is about to be merged, you will be asked to register as a contributor by filling in a short form.
+Note that once your PR is about to be merged, you will be asked to register as a contributor by filling in a short form.
 
 
 ## Developer documentation
