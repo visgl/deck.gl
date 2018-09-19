@@ -76,6 +76,14 @@ export default class DeckLayer {
     }
   }
 
+  setProps(props) {
+    if ('layers' in props) {
+      this.layers = props.layers;
+      updateDeck(this.deck);
+      this.map.triggerRepaint();
+    }
+  }
+
   render(gl, matrix) {
     const viewState = this._getViewState();
 
