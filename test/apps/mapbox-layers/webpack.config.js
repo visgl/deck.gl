@@ -9,7 +9,7 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app-3d.js')
+    app: resolve('./app.js')
   },
 
   resolve: {
