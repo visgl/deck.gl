@@ -10,13 +10,16 @@ export default class DeckLayer {
   }
 
   _getViewState() {
-    const {lng, lat} = this.map.getCenter();
+    const {map, deck} = this;
+    const {lng, lat} = map.getCenter();
     return {
       longitude: lng,
       latitude: lat,
-      zoom: this.map.getZoom(),
-      bearing: this.map.getBearing(),
-      pitch: this.map.getPitch()
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch(),
+      nearZMultiplier: deck && deck.height ? 1 / deck.height : 1,
+      farZMultiplier: 1
     };
   }
 
@@ -32,7 +35,6 @@ export default class DeckLayer {
       controller: false,
       _customRender: true,
       viewState: this._getViewState()
-      // views: [new MapView({farZmultiplier: 0.101})]
     });
     this.deck._setGLContext(gl);
     this.deck.setProps({layers: this.layers});
@@ -45,6 +47,7 @@ export default class DeckLayer {
 
     this.deck.setProps({viewState});
     this.deck._drawLayers();
-    this.map.triggerRepaint();
+
+    // this.map.triggerRepaint();
   }
 }

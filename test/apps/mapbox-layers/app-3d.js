@@ -1,19 +1,10 @@
 import mapboxgl from './mapbox-gl-dev';
-import {GeoJsonLayer} from '@deck.gl/layers';
+import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 
 import DeckLayer from '@deck.gl/mapbox-layers';
 
-// Outlines of US States. Source: Natural Earth http://www.naturalearthdata.com/ via geojson.xyz
-const US_MAP_GEOJSON =
-  'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
-
-const INITIAL_VIEW_STATE = {
-  latitude: 40.70708981756565,
-  longitude: -74.01194070150844,
-  zoom: 15.2,
-  bearing: 20,
-  pitch: 60
-};
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; //eslint-disable-line
 
 // Set your mapbox token here
 mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
@@ -21,10 +12,10 @@ mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
 const map = new mapboxgl.Map({
   container: 'map',
   style: 'mapbox://styles/mapbox/light-v9',
-  center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
-  zoom: INITIAL_VIEW_STATE.zoom,
-  bearing: INITIAL_VIEW_STATE.bearing,
-  pitch: INITIAL_VIEW_STATE.pitch
+  center: [-74.012, 40.707],
+  zoom: 15,
+  bearing: 20,
+  pitch: 60
 });
 
 map.on('load', () => {
@@ -43,15 +34,22 @@ map.on('load', () => {
 
   map.addLayer(
     new DeckLayer({
+      id: 'manhattan',
       layers: [
-        new GeoJsonLayer({
-          data: US_MAP_GEOJSON,
-          stroked: true,
-          filled: true,
-          lineWidthMinPixels: 2,
-          opacity: 0.4,
-          getLineColor: () => [255, 100, 100],
-          getFillColor: () => [200, 160, 0, 180]
+        new ScatterplotLayer({
+          data: DATA_URL,
+          radiusMinPixels: 0.25,
+          getPosition: d => [d[0], d[1], 0],
+          getColor: d => (d[2] === 1 ? [0, 128, 255] : [255, 0, 128]),
+          getRadius: 10
+        }),
+        new ArcLayer({
+          data: [{source: [-74.012, 40.707], target: [-74.002, 40.712]}],
+          getSourcePosition: d => d.source,
+          getTargetPosition: d => d.target,
+          getSourceColor: [0, 128, 255],
+          getTargetColor: [255, 0, 128],
+          getStrokeWidth: 3
         })
       ]
     })
