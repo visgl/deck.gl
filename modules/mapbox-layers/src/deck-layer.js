@@ -1,5 +1,15 @@
 import {Deck} from '@deck.gl/core';
 
+const deckInstances = new Map();
+
+function updateDeck(deck) {
+  const layers = [];
+  deck.props._mapboxLayers.forEach(deckLayer => {
+    layers.push(deckLayer.layers);
+  });
+  deck.setProps({layers});
+}
+
 export default class DeckLayer {
   constructor({id = 'deck-layer', layers}) {
     this.id = id;
@@ -23,29 +33,56 @@ export default class DeckLayer {
     };
   }
 
-  onAdd(map, gl) {
-    // console.log('onAdd', map, gl);
+  _getDeckInstance(gl) {
+    // Only create one deck instance per context
+    let deck = deckInstances.get(gl);
 
+    if (!deck) {
+      deck = new Deck({
+        // TODO - this should not be needed
+        canvas: 'deck-canvas',
+        width: '100%',
+        height: '100%',
+        controller: false,
+        _customRender: true,
+        _mapboxLayers: new Set(),
+        viewState: this._getViewState()
+      });
+      deck._setGLContext(gl);
+      deckInstances.set(gl, deck);
+    }
+
+    deck.props._mapboxLayers.add(this);
+
+    return deck;
+  }
+
+  onAdd(map, gl) {
     this.map = map;
-    this.deck = new Deck({
-      // TODO - this should not be needed
-      canvas: 'deck-canvas',
-      width: '100%',
-      height: '100%',
-      controller: false,
-      _customRender: true,
-      viewState: this._getViewState()
-    });
-    this.deck._setGLContext(gl);
-    this.deck.setProps({layers: this.layers});
+    this.deck = this._getDeckInstance(gl);
+    updateDeck(this.deck);
+  }
+
+  onRemove() {
+    const mapboxLayers = this.deck.props._mapboxLayers;
+    mapboxLayers.delete(this);
+
+    if (mapboxLayers.size === 0) {
+      // this deck instance is now empty
+      deckInstances.delete(this.map);
+      this.deck.finalize();
+    } else {
+      updateDeck(this.deck);
+    }
   }
 
   render(gl, matrix) {
     const viewState = this._getViewState();
-    // console.log('render3D', viewState, matrix);
-    // gl.depthRange(0.9999, 1.0);
 
-    this.deck.setProps({viewState});
+    this.deck.setProps({
+      viewState,
+      layerFilter: ({layer}) => this.layers.includes(layer)
+    });
     this.deck._drawLayers();
 
     // this.map.triggerRepaint();
