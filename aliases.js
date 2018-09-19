@@ -42,19 +42,28 @@ function getSubmodules() {
 }
 
 function getAliases(mode = 'src') {
-  const aliases = {};
-  const submodules = getSubmodules();
-
-  for (const moduleName in submodules) {
-    const subPath = mode === 'src' ? 'src' : submodules[moduleName].main.replace('/index.js', '');
-    aliases[moduleName] = resolve(__dirname, 'node_modules', moduleName, subPath);
-  }
-
-  return Object.assign({
+  const aliases = {
     // Important - these must be defined before the alias of `deck.gl`
     // to be resolved correctly
     'deck.gl/test': resolve(__dirname, './test')
-  }, aliases);
+  };
+
+  const submodules = getSubmodules();
+
+  for (const moduleName in submodules) {
+    if (mode === 'src') {
+      let name = moduleName.split('/').length > 1 ? moduleName.split('/')[1] : moduleName;
+      if (name === 'deck.gl') {
+        name = 'main';
+      }
+      aliases[moduleName] = resolve(__dirname, 'modules', name, 'src');
+    } else {
+      const subPath = submodules[moduleName].main.replace('/index.js', '');
+      aliases[moduleName] = resolve(__dirname, 'node_modules', moduleName, subPath);
+    }
+  }
+
+  return aliases;
 }
 
 module.exports = getAliases;
