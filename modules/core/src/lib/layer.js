@@ -30,9 +30,12 @@ import log from '../utils/log';
 import GL from 'luma.gl/constants';
 import {withParameters} from 'luma.gl';
 import assert from '../utils/assert';
+import {projectPosition} from '../shaderlib/project/project-functions';
 
 import Component from '../lifecycle/component';
 import LayerState from './layer-state';
+
+import {worldToPixels} from 'viewport-mercator-project';
 
 const LOG_PRIORITY_UPDATE = 1;
 
@@ -155,27 +158,44 @@ export default class Layer extends Component {
   // PROJECTION METHODS
 
   // Projects a point with current map state (lat, lon, zoom, pitch, bearing)
-  // TODO - need to be extended to work with COORDINATE_SYSTEM.METERS,IDENTITY
-  // TODO - need to be extended to work with multiple `views`
-  project(lngLat) {
+  // From the current layer's coordinate system to screen
+  project(xyz) {
     const {viewport} = this.context;
-    assert(Array.isArray(lngLat));
-    return viewport.project(lngLat);
+    const worldPosition = this.projectPosition(xyz);
+    const coord = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
+    return xyz.length === 2 ? [coord[0], coord[1]] : coord;
   }
 
+  // Note: this does not reverse `project`.
+  // Always unprojects to the viewport's coordinate system
   unproject(xy) {
     const {viewport} = this.context;
     assert(Array.isArray(xy));
     return viewport.unproject(xy);
   }
 
+  projectPosition(xyz) {
+    assert(Array.isArray(xyz));
+
+    return projectPosition(xyz, {
+      viewport: this.context.viewport,
+      modelMatrix: this.props.modelMatrix,
+      coordinateOrigin: this.props.coordinateOrigin,
+      coordinateSystem: this.props.coordinateSystem
+    });
+  }
+
+  // DEPRECATE: This does not handle offset modes
   projectFlat(lngLat) {
+    log.deprecated('layer.projectFlat', 'layer.projectPosition');
     const {viewport} = this.context;
     assert(Array.isArray(lngLat));
     return viewport.projectFlat(lngLat);
   }
 
+  // DEPRECATE: This is not meaningful in offset modes
   unprojectFlat(xy) {
+    log.deprecated('layer.unprojectFlat');
     const {viewport} = this.context;
     assert(Array.isArray(xy));
     return viewport.unprojectFlat(xy);
