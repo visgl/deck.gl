@@ -259,9 +259,7 @@ function calculateViewportUniforms({
   switch (shaderCoordinateSystem) {
     case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
       uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
-      uniforms.project_uPixelsPerUnit[1] *= -1;
       uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
-      uniforms.project_uPixelsPerUnit2[1] *= -1;
       break;
 
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
@@ -269,9 +267,7 @@ function calculateViewportUniforms({
     // eslint-disable-line no-fallthrough
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
-      uniforms.project_uPixelsPerUnit[1] *= -1;
       uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
-      uniforms.project_uPixelsPerUnit2[1] *= -1;
       break;
 
     default:

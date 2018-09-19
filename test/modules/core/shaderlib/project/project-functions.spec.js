@@ -105,7 +105,7 @@ vec4 project_offset_(vec4 offset) {
 function projectOffset(offset, pixelsPerUnit, pixelsPerUnit2) {
   return [
     offset[0] * (pixelsPerUnit[0] + pixelsPerUnit2[0] * offset[1]),
-    -offset[1] * (pixelsPerUnit[1] + pixelsPerUnit2[1] * offset[1]),
+    offset[1] * (pixelsPerUnit[1] + pixelsPerUnit2[1] * offset[1]),
     offset[2] * (pixelsPerUnit[2] + pixelsPerUnit2[2] * offset[1])
   ];
 }
