@@ -25,6 +25,7 @@ import Viewport from './viewport';
 import {
   pixelsToWorld,
   getViewMatrix,
+  addMetersToLngLat,
   getProjectionParameters,
   fitBounds
 } from 'viewport-mercator-project';
@@ -185,11 +186,7 @@ export default class WebMercatorViewport extends Viewport {
    * @return {[Number,Number]|[Number,Number,Number]) array of [lng,lat,z] deltas
    */
   addMetersToLngLat(lngLatZ, xyz) {
-    const [lng, lat, Z = 0] = lngLatZ;
-    const [deltaLng, deltaLat, deltaZ = 0] = this.metersToLngLatDelta(xyz);
-    return lngLatZ.length === 2
-      ? [lng + deltaLng, lat + deltaLat]
-      : [lng + deltaLng, lat + deltaLat, Z + deltaZ];
+    return addMetersToLngLat(lngLatZ, xyz);
   }
 
   /**
