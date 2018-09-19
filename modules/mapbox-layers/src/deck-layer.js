@@ -1,13 +1,60 @@
 import {Deck} from '@deck.gl/core';
 
+function updateDeck(deck) {
+  const layers = [];
+  deck.props.userData.mapboxLayers.forEach(deckLayer => {
+    const LayerType = deckLayer.props.type;
+    const layer = new LayerType(deckLayer.props);
+    layers.push(layer);
+  });
+  deck.setProps({layers});
+}
+
 export default class DeckLayer {
-  constructor({id = 'deck-layer', layers}) {
-    this.id = id;
+  constructor(props) {
+    if (!props.id) {
+      throw new Error('Layer must have an unique id');
+    }
+
+    this.id = props.id;
     this.type = 'custom';
     this.renderingMode = '3d';
     this.deck = null;
-    this.layers = layers;
+    this.props = props;
   }
+
+  onAdd(map, gl) {
+    this.map = map;
+    this.deck = this._getDeckInstance(map, gl);
+    updateDeck(this.deck);
+  }
+
+  onRemove() {
+    const {mapboxLayers} = this.deck.props.userData;
+    mapboxLayers.delete(this);
+    updateDeck(this.deck);
+  }
+
+  setProps(props) {
+    // id cannot be changed
+    Object.assign(this.props, props, {id: this.id});
+    updateDeck(this.deck);
+    this.map.triggerRepaint();
+  }
+
+  render(gl, matrix) {
+    const viewState = this._getViewState();
+
+    this.deck.setProps({
+      viewState,
+      layerFilter: ({layer}) => this.id === layer.id
+    });
+    this.deck._drawLayers();
+
+    // this.map.triggerRepaint();
+  }
+
+  /* Private API */
 
   _getViewState() {
     const {map, deck} = this;
@@ -23,31 +70,29 @@ export default class DeckLayer {
     };
   }
 
-  onAdd(map, gl) {
-    // console.log('onAdd', map, gl);
+  _getDeckInstance(map, gl) {
+    // Only create one deck instance per context
+    let deck = map.__deck;
 
-    this.map = map;
-    this.deck = new Deck({
-      // TODO - this should not be needed
-      canvas: 'deck-canvas',
-      width: '100%',
-      height: '100%',
-      controller: false,
-      _customRender: true,
-      viewState: this._getViewState()
-    });
-    this.deck._setGLContext(gl);
-    this.deck.setProps({layers: this.layers});
-  }
+    if (!deck) {
+      deck = new Deck({
+        // TODO - this should not be needed
+        canvas: 'deck-canvas',
+        width: '100%',
+        height: '100%',
+        controller: false,
+        _customRender: true,
+        userData: {
+          mapboxLayers: new Set()
+        },
+        viewState: this._getViewState()
+      });
+      deck._setGLContext(gl);
+      map.__deck = deck;
+    }
 
-  render(gl, matrix) {
-    const viewState = this._getViewState();
-    // console.log('render3D', viewState, matrix);
-    // gl.depthRange(0.9999, 1.0);
+    deck.props.userData.mapboxLayers.add(this);
 
-    this.deck.setProps({viewState});
-    this.deck._drawLayers();
-
-    // this.map.triggerRepaint();
+    return deck;
   }
 }
