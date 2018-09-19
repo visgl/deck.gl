@@ -24,7 +24,8 @@ import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, equals, config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
-import {isWebGL2, Transform, Buffer} from 'luma.gl';
+import {Transform, Buffer, fp64} from 'luma.gl';
+const {fp64LowPart} = fp64;
 
 import {compileVertexShader} from '../shaderlib-test-utils';
 
@@ -99,7 +100,7 @@ void main()
   )}, ${meter[2].toFixed(MAX_FRACTION_DIGITS)}));
   }
   `,
-  project_position: pos => `\
+  project_position: (pos, xy64LowPos = [0, 0]) => `\
 varying vec4 outValue;
 
 void main()
@@ -108,7 +109,9 @@ void main()
     MAX_FRACTION_DIGITS
   )}, ${pos[2].toFixed(MAX_FRACTION_DIGITS)}, ${pos[3].toFixed(
     MAX_FRACTION_DIGITS
-  )}), vec2(0., 0.));
+  )}), vec2(${xy64LowPos[0].toFixed(MAX_FRACTION_DIGITS)}, ${xy64LowPos[1].toFixed(
+    MAX_FRACTION_DIGITS
+  )}));
 }
 `,
   project_to_clipspace: pos => `\
@@ -156,7 +159,10 @@ const TEST_CASES = [
         func: ({project_position}) => project_position([-122.45, 37.78, 0, 1], [0, 0]),
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1]),
         gpuPrecision: PIXEL_TOLERANCE,
-        vs: TRANSFORM_VS.project_position([-122.45, 37.78, 0, 1])
+        vs: TRANSFORM_VS.project_position(
+          [-122.45, 37.78, 0, 1],
+          [fp64LowPart(-122.45), fp64LowPart(37.78)]
+        )
       },
       {
         name: 'project_to_clipspace',
@@ -362,17 +368,17 @@ test('project#vs', t => {
     const module = projectVS(uniforms);
 
     testCase.tests.forEach(c => {
-      let actual = c.func(module);
-      actual = c.mapResult ? c.mapResult(actual) : actual;
       const expected = c.output;
-      config.EPSILON = c.precision || 1e-7;
-      verifyResult({t, name: `CPU: ${c.name}`, actual, expected});
-
-      if (isWebGL2(gl) && c.vs) {
-        actual = runOnGPU({uniforms, vs: c.vs});
-        actual = c.mapResult ? c.mapResult(actual) : actual;
+      if (Transform.isSupported(gl)) {
         config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
+        let actual = runOnGPU({uniforms, vs: c.vs});
+        actual = c.mapResult ? c.mapResult(actual) : actual;
         verifyResult({t, name: `GPU: ${c.name}`, actual, expected, sliceActual: true});
+      } else {
+        config.EPSILON = c.precision || 1e-7;
+        let actual = c.func(module);
+        actual = c.mapResult ? c.mapResult(actual) : actual;
+        verifyResult({t, name: `CPU: ${c.name}`, actual, expected});
       }
     });
   });
