@@ -64,7 +64,7 @@ export default class View {
     }
 
     // TODO - implement deep equal on view descriptors
-    const viewChanged = deepEqual(this, view);
+    const viewChanged = deepEqual(this.props, view.props);
 
     return viewChanged;
   }

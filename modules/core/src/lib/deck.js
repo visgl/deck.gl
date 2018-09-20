@@ -238,8 +238,9 @@ export default class Deck {
       this._needsRedraw = false;
     }
 
-    redraw = redraw || this.viewManager.needsRedraw({clearRedrawFlags});
-    redraw = redraw || this.layerManager.needsRedraw({clearRedrawFlags});
+    const viewManagerNeedsRedraw = this.viewManager.needsRedraw({clearRedrawFlags});
+    const layerManagerNeedsRedraw = this.layerManager.needsRedraw({clearRedrawFlags});
+    redraw = redraw || viewManagerNeedsRedraw || layerManagerNeedsRedraw;
     return redraw;
   }
 
@@ -486,37 +487,8 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers(animationProps = {}) {
+  _drawLayers(redrawReason, animationProps = {}) {
     const {gl} = this.layerManager.context;
-
-    // Log perf stats every second
-    if (this.stats.oneSecondPassed()) {
-      const table = this.stats.getStatsTable();
-      this.stats.reset();
-      log.table(3, table)();
-    }
-
-    this._updateCanvasSize();
-
-    this._updateCursor();
-
-    // Update layers if needed (e.g. some async prop has loaded)
-    // Note: This can trigger a redraw
-    this.layerManager.updateLayers();
-
-    this.stats.bump('fps');
-
-    // Needs to be done before drawing
-    this._updateAnimationProps(animationProps);
-
-    // Check if we need to redraw
-    const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-    if (!redrawReason) {
-      return;
-    }
-
-    // Do the redraw
-    this.stats.bump('render-fps');
 
     setParameters(gl, this.props.parameters);
 
@@ -541,7 +513,35 @@ export default class Deck {
   }
 
   _onRenderFrame(animationProps) {
-    this._drawLayers(animationProps);
+    // Log perf stats every second
+    if (this.stats.oneSecondPassed()) {
+      const table = this.stats.getStatsTable();
+      this.stats.reset();
+      log.table(3, table)();
+    }
+
+    this._updateCanvasSize();
+
+    this._updateCursor();
+
+    // Update layers if needed (e.g. some async prop has loaded)
+    // Note: This can trigger a redraw
+    this.layerManager.updateLayers();
+
+    this.stats.bump('fps');
+
+    // Needs to be done before drawing
+    this._updateAnimationProps(animationProps);
+
+    // Check if we need to redraw
+    const redrawReason = this.needsRedraw({clearRedrawFlags: true});
+    if (redrawReason) {
+      this.stats.bump('render-fps');
+      this._drawLayers(redrawReason, animationProps);
+      return true;
+    }
+
+    return false;
   }
 
   // Callbacks
