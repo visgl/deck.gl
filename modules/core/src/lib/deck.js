@@ -487,7 +487,7 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers(redrawReason, animationProps = {}) {
+  _drawLayers(redrawReason) {
     const {gl} = this.layerManager.context;
 
     setParameters(gl, this.props.parameters);
@@ -535,13 +535,12 @@ export default class Deck {
 
     // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-    if (redrawReason) {
-      this.stats.bump('render-fps');
-      this._drawLayers(redrawReason, animationProps);
-      return true;
+    if (!redrawReason) {
+      return;
     }
 
-    return false;
+    this.stats.bump('render-fps');
+    this._drawLayers(redrawReason);
   }
 
   // Callbacks
