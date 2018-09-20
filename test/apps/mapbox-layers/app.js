@@ -26,6 +26,8 @@ const deckPoiLayer = new DeckLayer({
   id: 'deckgl-pois',
   type: ScatterplotLayer,
   data: DATA_URL,
+  pickable: true,
+  autoHighlight: true,
   radiusMinPixels: 0.25,
   getPosition: d => d.coordinates,
   getColor: [255, 180],

@@ -1,14 +1,4 @@
-import {Deck} from '@deck.gl/core';
-
-function updateDeck(deck) {
-  const layers = [];
-  deck.props.userData.mapboxLayers.forEach(deckLayer => {
-    const LayerType = deckLayer.props.type;
-    const layer = new LayerType(deckLayer.props);
-    layers.push(layer);
-  });
-  deck.setProps({layers});
-}
+import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
 
 export default class DeckLayer {
   constructor(props) {
@@ -25,33 +15,26 @@ export default class DeckLayer {
 
   onAdd(map, gl) {
     this.map = map;
-    this.deck = this._getDeckInstance(map, gl);
-    updateDeck(this.deck);
+    this.deck = getDeckInstance({map, gl});
+    addLayer(this.deck, this);
   }
 
   onRemove() {
-    const {mapboxLayers} = this.deck.props.userData;
-    mapboxLayers.delete(this);
-    updateDeck(this.deck);
+    removeLayer(this.deck, this);
   }
 
   setProps(props) {
     // id cannot be changed
     Object.assign(this.props, props, {id: this.id});
-    updateDeck(this.deck);
+    updateLayer(this.deck, this);
     this.map.triggerRepaint();
   }
 
   render(gl, matrix) {
-    const viewState = this._getViewState();
-
     this.deck.setProps({
-      viewState,
-      layerFilter: ({layer}) => this.id === layer.id
+      viewState: this._getViewState()
     });
-    this.deck._drawLayers();
-
-    // this.map.triggerRepaint();
+    drawLayer(this.deck, this);
   }
 
   /* Private API */
@@ -65,34 +48,8 @@ export default class DeckLayer {
       zoom: map.getZoom(),
       bearing: map.getBearing(),
       pitch: map.getPitch(),
-      nearZMultiplier: deck && deck.height ? 1 / deck.height : 1,
+      nearZMultiplier: deck.height ? 1 / deck.height : 1,
       farZMultiplier: 1
     };
-  }
-
-  _getDeckInstance(map, gl) {
-    // Only create one deck instance per context
-    let deck = map.__deck;
-
-    if (!deck) {
-      deck = new Deck({
-        // TODO - this should not be needed
-        canvas: 'deck-canvas',
-        width: '100%',
-        height: '100%',
-        controller: false,
-        _customRender: true,
-        userData: {
-          mapboxLayers: new Set()
-        },
-        viewState: this._getViewState()
-      });
-      deck._setGLContext(gl);
-      map.__deck = deck;
-    }
-
-    deck.props.userData.mapboxLayers.add(this);
-
-    return deck;
   }
 }
