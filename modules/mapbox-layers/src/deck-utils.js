@@ -1,5 +1,4 @@
 import {Deck} from '@deck.gl/core';
-/* global window */
 
 export function getDeckInstance({map, gl}) {
   // Only create one deck instance per context
@@ -8,8 +7,7 @@ export function getDeckInstance({map, gl}) {
   }
 
   const deck = new Deck({
-    // TODO - this should not be needed
-    canvas: 'deck-canvas',
+    gl,
     width: '100%',
     height: '100%',
     controller: false,
@@ -18,15 +16,18 @@ export function getDeckInstance({map, gl}) {
     // But calling setProps({layerFilter}) will trigger another rerender which sets off an infinite loop
     // Instead, we use a constant callback here and access the dynamic filter in userData
     layerFilter: ({layer}) => filterLayer(deck, layer),
-    _customRender: true,
+    _customRender: () => map.triggerRepaint(),
     userData: {
       mapboxLayers: new Set()
     }
   });
-  deck._setGLContext(gl);
   map.__deck = deck;
 
-  initAnimationLoop(map, deck);
+  map.on('remove', () => {
+    deck.finalize();
+    map.__deck = null;
+  });
+
   initEvents(map, deck);
 
   return deck;
@@ -69,30 +70,6 @@ function updateLayers(deck) {
     layers.push(layer);
   });
   deck.setProps({layers});
-}
-
-// Create animation loop
-function initAnimationLoop(map, deck) {
-  let animationFrame = null;
-
-  function animate() {
-    deck.props.userData.layerFilter = false;
-    // Nothing's actually drawn yet because of the layer filter
-    // this just runs all the animation/layer updates then check if redraw flag is set
-    // TODO - pass luma-like animationProps
-    if (deck._onRenderFrame()) {
-      map.triggerRepaint();
-    }
-    animationFrame = window.requestAnimationFrame(animate);
-  }
-
-  animate();
-
-  map.on('remove', () => {
-    window.cancelAnimationFrame(animationFrame);
-    deck.finalize();
-    map.__deck = null;
-  });
 }
 
 // Register deck callbacks for pointer events
