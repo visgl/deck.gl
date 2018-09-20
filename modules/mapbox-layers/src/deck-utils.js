@@ -14,6 +14,9 @@ export function getDeckInstance({map, gl}) {
     height: '100%',
     controller: false,
     useDevicePixels: true,
+    // layerFilter needs to be changed inside a rendering/picking cycle
+    // But calling setProps({layerFilter}) will trigger another rerender which sets off an infinite loop
+    // Instead, we use a constant callback here and access the dynamic filter in userData
     layerFilter: ({layer}) => filterLayer(deck, layer),
     _customRender: true,
     userData: {
