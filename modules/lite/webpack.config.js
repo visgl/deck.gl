@@ -14,7 +14,8 @@ const config = {
   resolve: {
     alias: {
       '@deck.gl/core': resolve(ROOT, 'node_modules/@deck.gl/core/src'),
-      '@deck.gl/layers': resolve(ROOT, 'node_modules/@deck.gl/layers/src')
+      '@deck.gl/layers': resolve(ROOT, 'node_modules/@deck.gl/layers/src'),
+      '@deck.gl/mapbox-layers': resolve(ROOT, 'node_modules/@deck.gl/mapbox-layers/src')
     }
   },
 

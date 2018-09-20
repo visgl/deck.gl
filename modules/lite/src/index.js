@@ -7,12 +7,13 @@
 const lumaGL = require('luma.gl');
 const deckGLCore = require('@deck.gl/core');
 const deckGLCoreLayers = require('@deck.gl/layers');
+const DeckLayer = require('@deck.gl/mapbox-layers').DeckLayer;
 
 const DeckGL = require('./deckgl').default;
 
 const _global = typeof window === 'undefined' ? global : window;
 
-_global.deck = Object.assign({}, _global.deck, deckGLCore, deckGLCoreLayers, {DeckGL});
+_global.deck = Object.assign({}, _global.deck, deckGLCore, deckGLCoreLayers, {DeckGL, DeckLayer});
 _global.luma = Object.assign({}, _global.luma, lumaGL);
 
 module.exports = _global.deck;
