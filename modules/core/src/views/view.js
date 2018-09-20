@@ -63,7 +63,6 @@ export default class View {
       return view.viewportInstance && this.viewportInstance.equals(view.viewportInstance);
     }
 
-    // TODO - implement deep equal on view descriptors
     const viewChanged = deepEqual(this.props, view.props);
 
     return viewChanged;
