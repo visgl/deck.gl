@@ -2,26 +2,90 @@
 
 Enables the use deck.gl layers as custom mapbox layers, enabling seamless interleaving of mapbox and deck.gl layers.
 
-See [deck.gl](http://deck.gl) for documentation.
+To create a mapbox-compatible deck.gl layer:
+
+```js
+import DeckLayer from '@deck.gl/mapbox-layers';
+import {ScatterplotLayer} from '@deck.gl/core-layers';
+
+const myDeckLayer = new DeckLayer({
+    id: 'my-scatterplot',
+    type: ScatterplotLayer,
+    data: [
+        {position: [-74.5, 40], size: 100}
+    ],
+    getPosition: d => d.position,
+    getRadius: d => d.size,
+    getColor: [255, 0, 0]
+});
+```
+
+To add the layer to mapbox:
+
+```js
+import mapboxgl from 'mapbox-gl';
+
+mapboxgl.accessToken = '<your access token here>';
+var map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v9',
+    center: [-74.50, 40],
+    zoom: 9
+});
+
+map.addLayer(myDeckLayer);
+```
+
+See [deck.gl](http://deck.gl) for documentations and examples on how to create layers.
 
 
 ## DeckLayer
 
-The `DeckLayer` is a custom mapbox layer class that renders a list of deck.gl layers inside the mapbox canvas / WebGL context. This is in contrast to the typical deck.gl/mapbox integration where the deck.gl layers are rendered separately
+The `DeckLayer` is a custom mapbox layer class that renders a deck.gl layer inside the mapbox canvas / WebGL context. This is in contrast to the typical deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas.
+
+##### constructor
+
+```
+import DeckLayer from '@deck.gl/mapbox-layers';
+
+new DeckLayer(props);
+```
+
+Parameters:
+
+- `props` (Object)
+    + `props.id` (String) - an unique id is required for each layer.
+    + `props.type` (`Layer`) - a class that extends deck.gl's base `Layer` class.
+    + Any other prop needed by this layer, specified by `type`. See deck.gl's [layer catalog](http://deck.gl/#/documentation/deckgl-api-reference/layers/layer) for each layer's props.
+
+##### setProps(props)
+
+```js
+const layer = new DeckLayer({
+    id: 'my-scatterplot',
+    type: ScatterplotLayer,
+    ...
+});
+
+layer.setProps({
+    radiusScale: 2
+});
+```
+
+Update a layer after it's added.
 
 
 ## Advantages and Limitations
 
-Advantages:
+### Advantages
 
-* mapbox and deck.gl layers can be freely "interleaved", enabling a number of important uses cases as described below.
+* mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels; z-occlusion between deck.gl 3D objects and Mapbox buildings; etc.
 * mapbox and deck.gl will share a single canvas and WebGL context, saving system resources.
 
-Disadvantages:
+### Limitations
 
-* deck.gl's multi view system, including controllers and viewport transitions cannot be used
+* deck.gl's multi-view system, including controllers and viewport transitions cannot be used.
 * WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
-* At the moment, 3D layer integration is not yet complete, meaning that using 3D layers from both mapbox and deck.gl typically will not work.
 
 
 
@@ -30,14 +94,14 @@ Disadvantages:
 There is a range of use cases for mixing layers, with increasing complexity.
 
 
-### Adding deck layers to the top of the mapbox layer stack
+### Injecting a 3D layer into an existing mapbox layer stack
 
-In simple cases, the application just wants a mapbox basemap, combined with the ability to interleave useful visualization layers from both the deck.gl and mapbox layer catalogs. In this case, the mapbox [`map.addLayer(layer)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API method can be used to add a mix of deck.gl and mapbox layers to the top of the layer stack from the currently loaded mapbox style.
+In this cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, HexagonLayer, GeoJsonLayer) on top of a mapbox basemap, while seemlessly blend into the z-buffer. This will interleave the useful visualization layers from both the deck.gl and mapbox layer catalogs. In this case, the mapbox [`map.addLayer(layer)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API method can be used to add a mix of deck.gl and mapbox layers to the top of the layer stack from the currently loaded mapbox style.
 
 
 ### Injecting deck layers into an existing mapbox layer stack
 
-A bit more control is provided by the optional `before` parameter of the mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `DeckLayers` instance just before any existing mapbox layer in the layer stack of the currently loaded style.
+A bit more control is provided by the optional `before` parameter of the mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `DeckLayer` instance just before any existing mapbox layer in the layer stack of the currently loaded style.
 
 That sounds good, but which mapbox layer should the application pick as its "injection point", and how does the application get a reference to it?
 
@@ -49,9 +113,3 @@ Mapbox provides an example of [finding the first label layer](https://www.mapbox
 ### Building a mixed mapbox and deck layer stack from scratch
 
 mapbox allows for complete control of the stack of layers, see e.g. [Mapbox GL JS labels on top of radar raster](https://bl.ocks.org/danswick/c19fec2e92e00967458d). In such scenario it is of course easy to control where any `DeckLayer` instances should be added. However, "hand coding" a complete layer stack can require a lot of work and can result in reduced flexibility as it doesn't let the application take advantage of predefined styles.
-
-
-### 3D Layer / Depth Buffer Integration
-
-> 3D (i.e. depth buffer) synchronization between Mapbox and deck.gl is still under development. The current "deep" layer integration between deck.gl and mapbox-gl is focused on 2D layers, as described above.
-
