@@ -37,10 +37,10 @@ The sublayerProps would be a recursive object. A special prop `layer` can be use
 In application:
 ```js
 const customizedGeoJsonLayer = new GeoJsonLayer({
-	...,
+  ...,
   transferAllProps: true,
-	subLayerProps: {
-	  ScatterplotLayer: {
+  subLayerProps: {
+    ScatterplotLayer: {
       layer: ExtendedScatterplotLayer,
       extendedProp: 100
     },
@@ -51,7 +51,7 @@ const customizedGeoJsonLayer = new GeoJsonLayer({
         }
       }
     }
-	}
+  }
 })
 ```
 
