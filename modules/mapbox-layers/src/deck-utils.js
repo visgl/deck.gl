@@ -76,6 +76,7 @@ function initAnimationLoop(map, deck) {
     deck.props.userData.layerFilter = false;
     // Nothing's actually drawn yet because of the layer filter
     // this just runs all the animation/layer updates then check if redraw flag is set
+    // TODO - pass luma-like animationProps
     if (deck._onRenderFrame()) {
       map.triggerRepaint();
     }
