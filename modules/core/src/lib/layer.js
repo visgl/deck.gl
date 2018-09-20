@@ -691,9 +691,8 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     const attributeManager = this.getAttributeManager();
     const attributeManagerNeedsRedraw =
       attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
-    redraw = redraw || attributeManagerNeedsRedraw;
-
-    redraw = redraw || this._modelNeedsRedraw(clearRedrawFlags);
+    const modelNeedsRedraw = this._modelNeedsRedraw(clearRedrawFlags);
+    redraw = redraw || attributeManagerNeedsRedraw || modelNeedsRedraw;
 
     return redraw;
   }

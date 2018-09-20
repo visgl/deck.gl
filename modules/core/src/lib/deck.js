@@ -238,8 +238,9 @@ export default class Deck {
       this._needsRedraw = false;
     }
 
-    redraw = redraw || this.viewManager.needsRedraw({clearRedrawFlags});
-    redraw = redraw || this.layerManager.needsRedraw({clearRedrawFlags});
+    const viewManagerNeedsRedraw = this.viewManager.needsRedraw({clearRedrawFlags});
+    const layerManagerNeedsRedraw = this.layerManager.needsRedraw({clearRedrawFlags});
+    redraw = redraw || viewManagerNeedsRedraw || layerManagerNeedsRedraw;
     return redraw;
   }
 
@@ -486,9 +487,32 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers(animationProps = {}) {
+  _drawLayers(redrawReason) {
     const {gl} = this.layerManager.context;
 
+    setParameters(gl, this.props.parameters);
+
+    this.props.onBeforeRender({gl});
+
+    this.layerManager.drawLayers({
+      pass: 'screen',
+      viewports: this.viewManager.getViewports(),
+      views: this.viewManager.getViews(),
+      redrawReason,
+      drawPickingColors: this.props.drawPickingColors, // Debug picking, helps in framebuffered layers
+      customRender: this.props._customRender
+    });
+
+    this.props.onAfterRender({gl});
+  }
+
+  // Callbacks
+
+  _onRendererInitialized({gl}) {
+    this._setGLContext(gl);
+  }
+
+  _onRenderFrame(animationProps) {
     // Log perf stats every second
     if (this.stats.oneSecondPassed()) {
       const table = this.stats.getStatsTable();
@@ -515,33 +539,8 @@ export default class Deck {
       return;
     }
 
-    // Do the redraw
     this.stats.bump('render-fps');
-
-    setParameters(gl, this.props.parameters);
-
-    this.props.onBeforeRender({gl});
-
-    this.layerManager.drawLayers({
-      pass: 'screen',
-      viewports: this.viewManager.getViewports(),
-      views: this.viewManager.getViews(),
-      redrawReason,
-      drawPickingColors: this.props.drawPickingColors, // Debug picking, helps in framebuffered layers
-      customRender: this.props._customRender
-    });
-
-    this.props.onAfterRender({gl});
-  }
-
-  // Callbacks
-
-  _onRendererInitialized({gl}) {
-    this._setGLContext(gl);
-  }
-
-  _onRenderFrame(animationProps) {
-    this._drawLayers(animationProps);
+    this._drawLayers(redrawReason);
   }
 
   // Callbacks
