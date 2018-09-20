@@ -151,19 +151,17 @@ export default class Deck {
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
 
-    if (!props._customRender) {
+    if (!props.gl) {
       // Note: LayerManager creation deferred until gl context available
       if (typeof document !== 'undefined') {
         this.canvas = this._createCanvas(props);
       }
-      this.animationLoop = this._createAnimationLoop(props);
     }
+    this.animationLoop = this._createAnimationLoop(props);
 
     this.setProps(props);
 
-    if (!props._customRender) {
-      this.animationLoop.start();
-    }
+    this.animationLoop.start();
   }
 
   finalize() {
@@ -441,7 +439,7 @@ export default class Deck {
     }
 
     // if external context...
-    if (this.props._customRender) {
+    if (!this.canvas) {
       this.canvas = gl.canvas;
       trackContextState(gl, {enable: true, copyState: true});
     }
@@ -500,7 +498,7 @@ export default class Deck {
       views: this.viewManager.getViews(),
       redrawReason,
       drawPickingColors: this.props.drawPickingColors, // Debug picking, helps in framebuffered layers
-      customRender: this.props._customRender
+      customRender: Boolean(this.props._customRender)
     });
 
     this.props.onAfterRender({gl});
@@ -540,7 +538,11 @@ export default class Deck {
     }
 
     this.stats.bump('render-fps');
-    this._drawLayers(redrawReason);
+    if (this.props._customRender) {
+      this.props._customRender();
+    } else {
+      this._drawLayers(redrawReason);
+    }
   }
 
   // Callbacks
