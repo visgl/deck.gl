@@ -9,7 +9,7 @@
 
   <script type="text/javascript">
 
-    const {DeckLayer, ScatterplotLayer} = deck;
+    const {MapboxLayer, ScatterplotLayer} = deck;
 
     mapboxgl.accessToken = '<mapbox-access-token>';
 
@@ -24,7 +24,7 @@
     map.on('load', () => {
       const firstTextLayerId = map.getStyle().layers.find(l => l.type === 'symbol').id;;
 
-      map.addLayer(new DeckLayer({
+      map.addLayer(new MapboxLayer({
         id: 'deckgl-circle',
         type: ScatterplotLayer,
         data: [
