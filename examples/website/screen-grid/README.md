@@ -10,4 +10,4 @@ npm start
 
 ### Data format
 Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/screen-grid). To use your own data, checkout
-the [documentation of ScreenGridLayer](../../docs/layers/screen-grid-layer.md).
+the [documentation of ScreenGridLayer](../../../docs/layers/screen-grid-layer.md).
