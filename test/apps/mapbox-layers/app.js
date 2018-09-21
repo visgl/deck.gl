@@ -1,7 +1,7 @@
 import mapboxgl from './mapbox-gl-dev';
 import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 
-import DeckLayer from '@deck.gl/mapbox-layers';
+import {MapboxLayer as DeckMapboxLayer} from '@deck.gl/mapbox';
 
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/pois.json'; //eslint-disable-line
@@ -22,7 +22,7 @@ const mapboxBuildingLayer = {
   }
 };
 
-const deckPoiLayer = new DeckLayer({
+const deckPoiLayer = new DeckMapboxLayer({
   id: 'deckgl-pois',
   type: ScatterplotLayer,
   data: DATA_URL,
@@ -34,7 +34,7 @@ const deckPoiLayer = new DeckLayer({
   getRadius: 10
 });
 
-const deckRouteLayer = new DeckLayer({
+const deckRouteLayer = new DeckMapboxLayer({
   id: 'deckgl-tour-route',
   type: ArcLayer,
   data: [

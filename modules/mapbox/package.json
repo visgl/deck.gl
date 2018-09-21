@@ -1,5 +1,5 @@
 {
-  "name": "@deck.gl/mapbox-layers",
+  "name": "@deck.gl/mapbox",
   "description": "Use deck.gl layers as custom mapbox-gl-js layers",
   "license": "MIT",
   "version": "6.1.0-alpha.2",
