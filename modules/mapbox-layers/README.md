@@ -79,12 +79,13 @@ Update a layer after it's added.
 
 ### Advantages
 
-* mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels; z-occlusion between deck.gl 3D objects and Mapbox buildings; etc.
+* mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc.
 * mapbox and deck.gl will share a single canvas and WebGL context, saving system resources.
 
 ### Limitations
 
 * deck.gl's multi-view system, including controllers and viewport transitions cannot be used.
+* `Deck` options that are shared by all layers, such as `pickingRadius`, cannot be used.
 * WebGL2 based deck.gl features, such as attribute transitions and GPU accelerated aggregation layers cannot be used.
 
 
