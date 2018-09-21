@@ -22,7 +22,7 @@
     });
 
     map.on('load', () => {
-      const firstTextLayerId = map.getStyle().layers.find(l => l.type === 'symbol').id;;
+      const firstTextLayerId = map.getStyle().layers.find(layer => layer.type === 'symbol').id;
 
       map.addLayer(new MapboxLayer({
         id: 'deckgl-circle',
