@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@deck.gl/core": ">=6.1.0-alpha.1",
-    "@deck.gl/layers": ">=6.1.0-alpha.1"
+    "@deck.gl/layers": ">=6.1.0-alpha.1",
+    "@deck.gl/mapbox": ">=6.1.0-alpha.1"
   },
   "devDependencies": {
     "react-map-gl": "^3.3.0-alpha.5"

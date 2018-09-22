@@ -1,14 +1,14 @@
-# @deck.gl/mapbox-layers
+# @deck.gl/mapbox
 
 Enables the use deck.gl layers as custom mapbox layers, enabling seamless interleaving of mapbox and deck.gl layers.
 
 To create a mapbox-compatible deck.gl layer:
 
 ```js
-import DeckLayer from '@deck.gl/mapbox-layers';
+import {MapboxLayer} from '@deck.gl/mapbox';
 import {ScatterplotLayer} from '@deck.gl/core-layers';
 
-const myDeckLayer = new DeckLayer({
+const myDeckLayer = new MapboxLayer({
     id: 'my-scatterplot',
     type: ScatterplotLayer,
     data: [
@@ -39,16 +39,16 @@ map.addLayer(myDeckLayer);
 See [deck.gl](http://deck.gl) for documentations and examples on how to create layers.
 
 
-## DeckLayer
+## MapboxLayer
 
-The `DeckLayer` is a custom mapbox layer class that renders a deck.gl layer inside the mapbox canvas / WebGL context. This is in contrast to the typical deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas.
+The `MapboxLayer` is a custom mapbox layer class that renders a deck.gl layer inside the mapbox canvas / WebGL context. This is in contrast to the typical deck.gl/mapbox integration where the deck.gl layers are rendered into a separate canvas.
 
 ##### constructor
 
-```
-import DeckLayer from '@deck.gl/mapbox-layers';
+```js
+import {MapboxLayer} from '@deck.gl/mapbox';
 
-new DeckLayer(props);
+new MapboxLayer(props);
 ```
 
 Parameters:
@@ -61,7 +61,7 @@ Parameters:
 ##### setProps(props)
 
 ```js
-const layer = new DeckLayer({
+const layer = new MapboxLayer({
     id: 'my-scatterplot',
     type: ScatterplotLayer,
     ...
@@ -102,7 +102,7 @@ In this cases, the application wants to add a deck.gl 3D layer (e.g. ArcLayer, H
 
 ### Injecting deck layers into an existing mapbox layer stack
 
-A bit more control is provided by the optional `before` parameter of the mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `DeckLayer` instance just before any existing mapbox layer in the layer stack of the currently loaded style.
+A bit more control is provided by the optional `before` parameter of the mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `MapboxLayer` instance just before any existing mapbox layer in the layer stack of the currently loaded style.
 
 That sounds good, but which mapbox layer should the application pick as its "injection point", and how does the application get a reference to it?
 
@@ -113,4 +113,4 @@ Mapbox provides an example of [finding the first label layer](https://www.mapbox
 
 ### Building a mixed mapbox and deck layer stack from scratch
 
-mapbox allows for complete control of the stack of layers, see e.g. [Mapbox GL JS labels on top of radar raster](https://bl.ocks.org/danswick/c19fec2e92e00967458d). In such scenario it is of course easy to control where any `DeckLayer` instances should be added. However, "hand coding" a complete layer stack can require a lot of work and can result in reduced flexibility as it doesn't let the application take advantage of predefined styles.
+mapbox allows for complete control of the stack of layers, see e.g. [Mapbox GL JS labels on top of radar raster](https://bl.ocks.org/danswick/c19fec2e92e00967458d). In such scenario it is of course easy to control where any `MapboxLayer` instances should be added. However, "hand coding" a complete layer stack can require a lot of work and can result in reduced flexibility as it doesn't let the application take advantage of predefined styles.
