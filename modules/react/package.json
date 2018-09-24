@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "6.1.0",
+  "version": "6.1.1",
   "publishConfig": {
     "access": "public"
   },
@@ -22,7 +22,7 @@
     "src"
   ],
   "dependencies": {
-    "@deck.gl/core": "^6.1.0-rc.1",
+    "@deck.gl/core": "^6.1.1",
     "prop-types": "^15.6.0"
   },
   "sideEffects": false,
@@ -31,10 +31,6 @@
     "build-es6": "rm -fr dist-es6 && BABEL_ENV=es6 babel src --out-dir dist-es6 --source-maps inline",
     "build-es5": "rm -fr dist && BABEL_ENV=es5 babel src --out-dir dist --source-maps inline",
     "build": "npm run build-clean && npm run build-es5"
-  },
-  "dependencies": {
-    "@deck.gl/core": "^6.1.0",
-    "prop-types": "^15.6.0"
   },
   "peerDependencies": {
     "react": "0.14.x - 16.x",

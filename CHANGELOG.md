@@ -21,6 +21,11 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.1.0 Pre Releases
 
+#### [6.1.1] - Sep. 24
+
+- Fix broken link to documentation on some examples (#2257)
+- Fix Multi-picking runtime error (#2271)
+
 #### [6.1.0-rc.1] - Aug 31
 
 - Hexagon aggregation with valid viewport (#2239)
