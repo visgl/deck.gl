@@ -1,4 +1,4 @@
-# RFC: Lighting
+# RFC: Phong Lighting
 
 * **Authors**: Jian Huang
 * **Date**: Sep. 2018
@@ -35,17 +35,28 @@ intensity(float): strenght of direcitonal light source
 direction(vec3): direction vector of directional light source
 
 ### Light Material
-LightMaterial class specify light material details for each layer
+LightPhongMaterial class specify phong model based light material details for each layer
 * ambient(float): Ambient light reflection ratio
 * diffuse(float): Diffuse light reflection ratio
 * shininess(float): Parameter to control specular highlight radius
 * specularColor(vec3): Color applied to specular lighting
 
+### Light Effect
+LightEffect class holds all the light sources
+
 ### New Deck Prop
-* lightSources(array): input of all the light sources in the scene
+* effects(array): input of all the rendering effects in the scene
 
 ### New Layer Prop
-* lightMaterial(object): input of light material attached to the layer
+* material(class): input of light material attached to the layer
+
+### Outdated Layer Prop
+* lightSettings(object)
 
 ### Lighting Model
 Blinn phong model will be implemented in the shader module to calculate the actual light weight
+
+## Next Step
+
+### PBR Lighting
+Lighting implemented with PBR models
