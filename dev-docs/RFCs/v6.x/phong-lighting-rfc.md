@@ -22,16 +22,16 @@ Lighting is an important rendering effects in deck.gl, the current lighting modu
 
 ### Light Source
 Three light source classes specify light source details for the scene
-* Ambient light
-color (vec3): color of ambient light source
+* Ambient light  
+color (vec3): color of ambient light source  
 intensity (float): strenght of ambient light source
-* Point light
-color (vec3): color of point light source
-intensity(float): strenght of point light source
+* Point light  
+color (vec3): color of point light source  
+intensity(float): strenght of point light source  
 position(vec3): position of point light source in world space coordinate
-* Directional light
-color(vec3): color of directional light source
-intensity(float): strenght of direcitonal light source
+* Directional light  
+color(vec3): color of directional light source  
+intensity(float): strenght of direcitonal light source  
 direction(vec3): direction vector of directional light source
 
 ### Lighting Material
