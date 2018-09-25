@@ -65,12 +65,8 @@ test('JSONConverter#render', t => {
   const deckProps = jsonConverter.convertJsonToDeckProps(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
 
-  const jsonDeck = new Deck(
-    Object.assign(deckProps, {
-      // HACK: Prevent animationLoop from starting
-      _customRender: true
-    })
-  );
+  const jsonDeck = new Deck(deckProps);
   t.ok(jsonDeck, 'JSONConverter created');
+  jsonDeck.finalize();
   t.end();
 });
