@@ -174,7 +174,7 @@ export default class DelaunayInterpolation {
     const lngDiff = Math.abs(bbox.maxLng - bbox.minLng);
     const latDiff = Math.abs(bbox.maxLat - bbox.minLat);
     const width = this.getTextureWidth();
-    const height = Math.ceil(latDiff * width / lngDiff);
+    const height = Math.ceil((latDiff * width) / lngDiff);
     const bounds = [];
     const correctAngles = (angle1, angle2, angle3) => {
       // return [angle1, angle2, angle3];

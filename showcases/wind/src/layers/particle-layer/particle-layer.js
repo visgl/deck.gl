@@ -148,7 +148,7 @@ export default class ParticleLayer extends Layer {
       parameters: pixelStoreParameters
     });
 
-    bufferTo.updateLayout({instanced: 1});
+    bufferTo.setAccessor(Object.assign({}, bufferTo.accessor, {divisor: 1}));
     model.setAttributes({
       posFrom: bufferTo
     });
@@ -182,7 +182,7 @@ export default class ParticleLayer extends Layer {
       varyings: ['gl_Position'],
       elementCount: positions4.length / 4,
       sourceBuffers: {posFrom: bufferFrom},
-      feebackBuffers: {gl_Position: bufferTo},
+      feedbackBuffers: {gl_Position: bufferTo},
       feedbackMap: {posFrom: 'gl_Position'}
     });
 
@@ -251,8 +251,8 @@ export default class ParticleLayer extends Layer {
       delta // TODO: looks to be 0 always , verify.
     };
 
-    bufferFrom.updateLayout({instanced: 0});
-    bufferTo.updateLayout({instanced: 0});
+    bufferFrom.setAccessor(Object.assign({}, bufferFrom.accessor, {divisor: 0}));
+    bufferTo.setAccessor(Object.assign({}, bufferTo.accessor, {divisor: 0}));
 
     transform.run({uniforms});
     transform.swapBuffers();
