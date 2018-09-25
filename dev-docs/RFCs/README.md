@@ -52,6 +52,7 @@ RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.c
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
 
+| [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
 | [**Binary Data**](v6.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
 | [**Layer Operations**](v6.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
@@ -64,15 +65,23 @@ Possible other animation related RFCs:
 
 
 
-## v6.1 RFCs
+## v6.2 RFCs
 
-These RFCS are currently targeted for v6.1 Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v61-rfcs)
+These RFCS are currently targeted for v6.2. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v62-rfcs).
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
-| [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**Mapbox Custom Layer**](v6.2/mapbox-custom-layer-rfc.md) | @pessimistress @ibgreen | **Draft** | Integration of deck.gl API with new mapbox custom layers. |
+
+
+## v6.1 RFCs
+
+These RFCS were implmented in v6.1. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v61-rfcs)
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **Preliminary Approval** | Enable deck.gl layers to be specified as JSON payloads. |
 | [**View Class Extensions**](v6.1/view-class-extension-rfc.md) | @ibgreen| **Review** | Additional View Class properties that enable e.g. "nested" maps (minimap on top of main map). |
-| [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Property Animation (Phase 1)**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | [**Contour Layer**](v6.1/contour-layer-rfc.md) | @1chandy | **Preliminary Approval** | Contour detecting aggregating layer. |
 | [**Improved 32 bit Projection Mode**](v6.1/improved-lnglat-projection-rfc.md.md) | @ibgreen @georgios-uber | **Implemented** | New projection mode for mixed 32/64 bit precision. |
