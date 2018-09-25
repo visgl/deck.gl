@@ -34,21 +34,22 @@ color(vec3): color of directional light source
 intensity(float): strenght of direcitonal light source
 direction(vec3): direction vector of directional light source
 
-### Light Material
-LightPhongMaterial class specify phong model based light material details for each layer
+### Lighting Material
+LightPhongMaterial class specify phong model based lighting material details for each layer
 * ambient(float): Ambient light reflection ratio
 * diffuse(float): Diffuse light reflection ratio
 * shininess(float): Parameter to control specular highlight radius
 * specularColor(vec3): Color applied to specular lighting
 
-### Light Effect
-LightEffect class holds all the light sources
+### Lighting Effect
+LightingEffect class holds and manages all the light sources
+* lightSources(object): all the light sources in the scene
 
 ### New Deck Prop
 * effects(array): input of all the rendering effects in the scene
 
 ### New Layer Prop
-* material(class): input of light material attached to the layer
+* material(object): input of lighting material attached to the layer
 
 ### Outdated Layer Prop
 * lightSettings(object)
@@ -56,6 +57,40 @@ LightEffect class holds all the light sources
 ### Lighting Model
 Blinn phong model will be implemented in the shader module to calculate the actual light weight
 
+## Code Example
+
+Create light sources
+```
+const directionalLight = new DirectionalLight( 0xffffff, 0.5, [1, 0, 0]);
+const pointLight = new PointLight( 0xffffff, 0.5, [0, 0, 0]);
+```
+
+Create lighting effect
+```
+const lightingEffect = new LightingEffect({pointLight, directionalLight}])
+```
+
+Create material
+```
+const phongMeterial = new LightPhongMeterial(0.3, 0.5, 32, [255, 255, 255, 255])
+```
+
+Create deck and layer
+```
+const deck = new Deck({
+effects: [lightingEffect],
+layers: [
+new GeoJsonLayer({
+data: US_MAP_GEOJSON,
+stroked: true,
+filled: true,
+getLineColor: [255, 100, 100],
+getFillColor: [200, 160, 0, 180],
+material:phongMeterial
+}
+})
+]});
+```
 ## Next Step
 
 ### PBR Lighting
