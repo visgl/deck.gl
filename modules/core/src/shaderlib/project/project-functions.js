@@ -56,7 +56,7 @@ function normalizeParameters(opts) {
 
 function getWorldPosition(
   position,
-  {viewport, modelMatrix, fromCoordinateSystem, fromCoordinateOrigin, offsetMode}
+  {viewport, modelMatrix, coordinateSystem, coordinateOrigin, offsetMode}
 ) {
   let [x, y, z] = position;
 
@@ -64,25 +64,21 @@ function getWorldPosition(
     [x, y, z] = vec4_transformMat4([], [x, y, z, 1.0], modelMatrix);
   }
 
-  switch (fromCoordinateSystem) {
+  switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT:
     case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
       return lngLatZToWorldPosition([x, y, z], viewport, offsetMode);
 
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       return lngLatZToWorldPosition(
-        [
-          x + fromCoordinateOrigin[0],
-          y + fromCoordinateOrigin[1],
-          z + (fromCoordinateOrigin[2] || 0)
-        ],
+        [x + coordinateOrigin[0], y + coordinateOrigin[1], z + (coordinateOrigin[2] || 0)],
         viewport,
         offsetMode
       );
 
     case COORDINATE_SYSTEM.METER_OFFSETS:
       return lngLatZToWorldPosition(
-        addMetersToLngLat(fromCoordinateOrigin, [x, y, z]),
+        addMetersToLngLat(coordinateOrigin, [x, y, z]),
         viewport,
         offsetMode
       );
@@ -108,14 +104,27 @@ function getWorldPosition(
  *   supplied position is in. Default to the same as `coordinateOrigin`.
  */
 export function projectPosition(position, params) {
-  params = normalizeParameters(params);
+  const {
+    viewport,
+    coordinateSystem,
+    coordinateOrigin,
+    // optional
+    modelMatrix,
+    fromCoordinateSystem,
+    fromCoordinateOrigin
+  } = normalizeParameters(params);
 
-  switch (params.coordinateSystem) {
+  switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
     case COORDINATE_SYSTEM.METER_OFFSETS: {
-      params.offsetMode = true;
-      const worldPosition = getWorldPosition(position, params);
-      const originWorld = lngLatZToWorldPosition(params.coordinateOrigin, params.viewport, true);
+      const worldPosition = getWorldPosition(position, {
+        viewport,
+        modelMatrix,
+        coordinateSystem: fromCoordinateSystem,
+        coordinateOrigin: fromCoordinateOrigin,
+        offsetMode: true
+      });
+      const originWorld = lngLatZToWorldPosition(coordinateOrigin, viewport, true);
       vec3_sub(worldPosition, worldPosition, originWorld);
 
       return worldPosition;
@@ -125,6 +134,12 @@ export function projectPosition(position, params) {
     case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
     case COORDINATE_SYSTEM.IDENTITY:
     default:
-      return getWorldPosition(position, params);
+      return getWorldPosition(position, {
+        viewport,
+        modelMatrix,
+        coordinateSystem: fromCoordinateSystem,
+        coordinateOrigin: fromCoordinateOrigin,
+        offsetMode: false
+      });
   }
 }
