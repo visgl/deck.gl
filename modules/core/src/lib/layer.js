@@ -30,7 +30,7 @@ import log from '../utils/log';
 import GL from 'luma.gl/constants';
 import {withParameters} from 'luma.gl';
 import assert from '../utils/assert';
-import {projectPosition} from '../shaderlib/project/project-functions';
+import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 
 import Component from '../lifecycle/component';
 import LayerState from './layer-state';
@@ -161,9 +161,16 @@ export default class Layer extends Component {
   // From the current layer's coordinate system to screen
   project(xyz) {
     const {viewport} = this.context;
-    const worldPosition = this.projectPosition(xyz);
-    const coord = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
-    return xyz.length === 2 ? [coord[0], coord[1]] : coord;
+    const worldPosition = getWorldPosition(xyz, {
+      viewport,
+      modelMatrix: this.props.modelMatrix,
+      coordinateOrigin: this.props.coordinateOrigin,
+      coordinateSystem: this.props.coordinateSystem
+    });
+    const coords = worldToPixels(worldPosition, viewport.viewProjectionMatrix);
+    const x = ((coords[0] + 1) * viewport.width) / 2;
+    const y = ((1 - coords[1]) * viewport.height) / 2;
+    return xyz.length === 2 ? [x, y] : [x, y, coords[2]];
   }
 
   // Note: this does not reverse `project`.
