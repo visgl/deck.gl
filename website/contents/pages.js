@@ -538,6 +538,19 @@ export const docPages = generatePath([
     ]
   },
   {
+    name: 'Mapbox API Reference (Experimental)',
+    children: [
+      {
+        name: 'Overview',
+        content: getDocUrl('api-reference/mapbox/overview.md')
+      },
+      {
+        name: 'MapboxLayer',
+        content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
+      }
+    ]
+  },
+  {
     name: 'test-utils API Reference',
     children: [
       {
