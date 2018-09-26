@@ -5,3 +5,7 @@ You need to checkout the `custom-layers` branch in mapbox-gl-js and do a dev-bui
 ```js
 yarn start-local
 ```
+
+This directory contains two independent examples:
+- `app.js`: the pure-js example entry point.
+- `react-app.js`: the React example entry point.
