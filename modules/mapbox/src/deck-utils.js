@@ -93,37 +93,60 @@ function updateLayers(deck) {
   deck.setProps({layers});
 }
 
-// Register deck callbacks for pointer events
-function initEvents(map, deck) {
-  function handleMouseEvent(event, callback) {
-    // draw all layers in picking buffer
-    deck.props.userData.layerFilter = true;
-    // Map from mapbox's MapMouseEvent object to mjolnir.js' Event object
-    callback(
-      event.offsetCenter
-        ? event
-        : {
-            offsetCenter: event.point,
-            srcEvent: event.originalEvent
-          }
-    );
+// Triggers picking on a mouse event
+function handleMouseEvent(deck, event) {
+  // reset layerFilter to allow all layers during picking
+  deck.props.userData.layerFilter = true;
+
+  let callback;
+  switch (event.type) {
+    case 'click':
+      callback = deck._onClick;
+      break;
+
+    case 'mousemove':
+    case 'pointermove':
+      callback = deck._onPointerMove;
+      break;
+
+    case 'mouseleave':
+    case 'pointerleave':
+      callback = deck._onPointerLeave;
+      break;
+
+    default:
+      return;
   }
 
+  if (!event.offsetCenter) {
+    // Map from mapbox's MapMouseEvent object to mjolnir.js' Event object
+    event = {
+      offsetCenter: event.point,
+      srcEvent: event.originalEvent
+    };
+  }
+  callback(event);
+}
+
+// Register deck callbacks for pointer events
+function initEvents(map, deck) {
+  const pickingEventHandler = event => handleMouseEvent(deck, event);
+
   if (deck.eventManager) {
-    // Replace default event handlers with wrapped ones
+    // Replace default event handlers with our own ones
     deck.eventManager.off({
       click: deck._onClick,
       pointermove: deck._onPointerMove,
       pointerleave: deck._onPointerLeave
     });
     deck.eventManager.on({
-      click: event => handleMouseEvent(event, deck._onClick),
-      pointermove: event => handleMouseEvent(event, deck._onPointerMove),
-      pointerleave: event => handleMouseEvent(event, deck._onPointerLeave)
+      click: pickingEventHandler,
+      pointermove: pickingEventHandler,
+      pointerleave: pickingEventHandler
     });
   } else {
-    map.on('click', event => handleMouseEvent(event, deck._onClick));
-    map.on('mousemove', event => handleMouseEvent(event, deck._onPointerMove));
-    map.on('mouseleave', event => handleMouseEvent(event, deck._onPointerLeave));
+    map.on('click', pickingEventHandler);
+    map.on('mousemove', pickingEventHandler);
+    map.on('mouseleave', pickingEventHandler);
   }
 }
