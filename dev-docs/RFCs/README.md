@@ -34,7 +34,6 @@ These RFCs are not yet associated with any specific release.
 | | | | |
 | **WIP/Draft** | | | |
 | [**Projection Mode Improvements**](vNext/projection-mode-improvements-rfc.md) | @ibgreen @pessimistress | **Draft** | Improvements to projection system |
-| [**Composite Layer Customization**](vNext/composite-layer-customization-rfc.md) | @ibgreen | **Draft** | Improvements to customizing composite layers |
 | **[Render Layer to Texture](vNext/render-layer-to-texture-rfc.md)** | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
 | | | | |
 | **Reviewed/Deferred** | | | |
@@ -59,6 +58,7 @@ RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.c
 | [**PropTypes**](v6.x/prop-types-rfc.md) | @ibgreen | **Review** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | [**Property Animation**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | **[Effects Manager](v6.x/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+| [**Composite Layer Customization**](v6.x/composite-layer-customization-rfc.md) | @matthrice @supersonicclay @ibgreen | **Draft** | Improvements to customizing composite layers |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
