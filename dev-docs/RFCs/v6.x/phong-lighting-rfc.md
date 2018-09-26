@@ -60,36 +60,36 @@ Blinn phong model will be implemented in the shader module to calculate the actu
 ## Code Example
 
 Create light sources
-```
+```js
 const directionalLight = new DirectionalLight( 0xffffff, 0.5, [1, 0, 0]);
 const pointLight = new PointLight( 0xffffff, 0.5, [0, 0, 0]);
 ```
 
 Create lighting effect
-```
+```js
 const lightingEffect = new LightingEffect({pointLight, directionalLight}])
 ```
 
 Create material
-```
+```js
 const phongMeterial = new LightPhongMeterial(0.3, 0.5, 32, [255, 255, 255, 255])
 ```
 
 Create deck and layer
-```
+```js
 const deck = new Deck({
-effects: [lightingEffect],
-layers: [
-new GeoJsonLayer({
-data: US_MAP_GEOJSON,
-stroked: true,
-filled: true,
-getLineColor: [255, 100, 100],
-getFillColor: [200, 160, 0, 180],
-material:phongMeterial
-}
-})
-]});
+ effects: [lightingEffect],
+ layers: [
+   new GeoJsonLayer({
+     data: US_MAP_GEOJSON,
+     stroked: true,
+     filled: true,
+     getLineColor: [255, 100, 100],
+     getFillColor: [200, 160, 0, 180],
+     material:phongMeterial
+     }
+   })
+ ]});
 ```
 ## Next Step
 
