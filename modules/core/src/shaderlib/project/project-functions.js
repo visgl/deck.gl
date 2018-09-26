@@ -54,7 +54,7 @@ function normalizeParameters(opts) {
   return normalizedParams;
 }
 
-function getWorldPosition(
+export function getWorldPosition(
   position,
   {viewport, modelMatrix, coordinateSystem, coordinateOrigin, offsetMode}
 ) {
