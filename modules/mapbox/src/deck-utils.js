@@ -10,7 +10,6 @@ export function getDeckInstance({map, gl, deck}) {
     gl,
     width: '100%',
     height: '100%',
-    controller: false,
     useDevicePixels: true,
     // layerFilter needs to be changed inside a rendering/picking cycle
     // But calling setProps({layerFilter}) will trigger another rerender which sets off an infinite loop
