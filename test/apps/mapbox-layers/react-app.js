@@ -6,8 +6,7 @@ import {StaticMap} from 'react-map-gl';
 
 import {MapboxLayer} from '@deck.gl/mapbox';
 
-const DATA_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/pois.json'; //eslint-disable-line
+import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from './layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -18,19 +17,6 @@ const INITIAL_VIEW_STATE = {
   zoom: 15.5,
   bearing: -20,
   pitch: 45
-};
-
-const mapboxBuildingLayer = {
-  id: '3d-buildings',
-  source: 'composite',
-  'source-layer': 'building',
-  filter: ['==', 'extrude', 'true'],
-  type: 'fill-extrusion',
-  minzoom: 14,
-  paint: {
-    'fill-extrusion-color': '#ccc',
-    'fill-extrusion-height': ['get', 'height']
-  }
 };
 
 function getFirstTextLayerId(style) {
@@ -57,37 +43,7 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    return [
-      new ScatterplotLayer({
-        id: 'deckgl-pois',
-        data: DATA_URL,
-        pickable: true,
-        autoHighlight: true,
-        radiusMinPixels: 0.25,
-        getPosition: d => d.coordinates,
-        getColor: [255, 180],
-        getRadius: 10
-      }),
-      new ArcLayer({
-        id: 'deckgl-tour-route',
-        data: [
-          [[-73.9873197, 40.758895], [-73.9808623, 40.7587402]],
-          [[-73.9808623, 40.7587402], [-73.9781814, 40.7584653]],
-          [[-73.9781814, 40.7584653], [-73.982352, 40.7531874]],
-          [[-73.982352, 40.7531874], [-73.9756172, 40.7516171]],
-          [[-73.9756172, 40.7516171], [-73.9775753, 40.7527895]],
-          [[-73.9775753, 40.7527895], [-74.0134401, 40.7115375]],
-          [[-74.0134401, 40.7115375], [-74.0134535, 40.7068758]],
-          [[-74.0134535, 40.7068758], [-74.0156334, 40.7055648]],
-          [[-74.0156334, 40.7055648], [-74.0153384, 40.7013948]]
-        ],
-        getSourcePosition: d => d[0],
-        getTargetPosition: d => d[1],
-        getSourceColor: [0, 128, 255],
-        getTargetColor: [255, 0, 128],
-        getStrokeWidth: 4
-      })
-    ];
+    return [new ScatterplotLayer(deckPoiLayer), new ArcLayer(deckRouteLayer)];
   }
 
   _onWebGLInitialized(gl) {
