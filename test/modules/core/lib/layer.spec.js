@@ -19,9 +19,10 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {Layer, AttributeManager, COORDINATE_SYSTEM} from 'deck.gl';
+import {Layer, AttributeManager, COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
 import {testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from 'probe.gl/test-utils';
+import {equals, Matrix4} from 'math.gl';
 
 const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
@@ -195,6 +196,60 @@ test('Layer#use64bitPositions', t => {
 
   layer = new SubLayer({fp64: true});
   t.true(layer.use64bitPositions(), 'returns true for fp64: true');
+
+  t.end();
+});
+
+test('Layer#project', t => {
+  let layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
+  testInitializeLayer({layer});
+  layer.context.viewport = new MapView().makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {longitude: 0, latitude: 0, zoom: 10}
+  });
+
+  t.ok(equals(layer.project([0, 0, 100]), [200, 150, 0.8788028155547649]), 'returns correct value');
+
+  layer = new SubLayer({
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: [0.01, 0.01]
+  });
+  testInitializeLayer({layer});
+  layer.context.viewport = new MapView().makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {longitude: 0, latitude: 0, zoom: 10}
+  });
+
+  t.ok(
+    equals(layer.project([100, 100, 100]), [
+      215.91962780165122,
+      134.08037212774843,
+      0.8788028155547649
+    ]),
+    'returns correct value'
+  );
+
+  layer = new SubLayer({
+    coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+    modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
+  });
+  testInitializeLayer({layer});
+  layer.context.viewport = new OrbitView().makeViewport({
+    width: 400,
+    height: 300,
+    viewState: {distance: 500, rotationOrbit: 30}
+  });
+
+  t.ok(
+    equals(layer.project([100, 100, 100]), [
+      182.1119902506377,
+      83.24103876909248,
+      0.9996999699969997
+    ]),
+    'returns correct value'
+  );
 
   t.end();
 });

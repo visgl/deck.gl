@@ -3,13 +3,90 @@
  * TODO: move to Viewport class?
  */
 import {COORDINATE_SYSTEM} from '../../lib/constants';
+import {LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD} from './viewport-uniforms';
+
 import vec4_transformMat4 from 'gl-vec4/transformMat4';
 import vec3_sub from 'gl-vec3/subtract';
+import {getDistanceScales, addMetersToLngLat} from 'viewport-mercator-project';
 
-function lngLatZToWorldPosition(lngLatZ, viewport) {
+// In project.glsl, offset modes calculate z differently from LNG_LAT mode.
+// offset modes apply the y adjustment (pixelsPerMeter2) when projecting z
+// LNG_LAT mode only use the linear scale.
+function lngLatZToWorldPosition(lngLatZ, viewport, offsetMode = false) {
+  const [longitude, latitude, z = 0] = lngLatZ;
   const [X, Y] = viewport.projectFlat(lngLatZ);
-  const Z = (lngLatZ[2] || 0) * viewport.distanceScales.pixelsPerMeter[2];
+  const distanceScales = offsetMode
+    ? getDistanceScales({longitude, latitude, scale: viewport.scale})
+    : viewport.getDistanceScales();
+  const Z = z * distanceScales.pixelsPerMeter[2];
   return [X, Y, Z];
+}
+
+function normalizeParameters(opts) {
+  const normalizedParams = Object.assign({}, opts);
+
+  const {
+    viewport,
+    coordinateSystem,
+    coordinateOrigin,
+    fromCoordinateSystem,
+    fromCoordinateOrigin
+  } = opts;
+
+  if (fromCoordinateSystem === undefined) {
+    normalizedParams.fromCoordinateSystem = coordinateSystem;
+  }
+  if (fromCoordinateOrigin === undefined) {
+    normalizedParams.fromCoordinateOrigin = coordinateOrigin;
+  }
+
+  if (
+    coordinateSystem === COORDINATE_SYSTEM.LNGLAT &&
+    viewport.zoom >= LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD
+  ) {
+    normalizedParams.coordinateSystem = COORDINATE_SYSTEM.LNGLAT_OFFSETS;
+    normalizedParams.coordinateOrigin = [
+      Math.fround(viewport.longitude),
+      Math.fround(viewport.latitude)
+    ];
+  }
+
+  return normalizedParams;
+}
+
+export function getWorldPosition(
+  position,
+  {viewport, modelMatrix, coordinateSystem, coordinateOrigin, offsetMode}
+) {
+  let [x, y, z] = position;
+
+  if (modelMatrix) {
+    [x, y, z] = vec4_transformMat4([], [x, y, z, 1.0], modelMatrix);
+  }
+
+  switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
+      return lngLatZToWorldPosition([x, y, z], viewport, offsetMode);
+
+    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
+      return lngLatZToWorldPosition(
+        [x + coordinateOrigin[0], y + coordinateOrigin[1], z + (coordinateOrigin[2] || 0)],
+        viewport,
+        offsetMode
+      );
+
+    case COORDINATE_SYSTEM.METER_OFFSETS:
+      return lngLatZToWorldPosition(
+        addMetersToLngLat(coordinateOrigin, [x, y, z]),
+        viewport,
+        offsetMode
+      );
+
+    case COORDINATE_SYSTEM.IDENTITY:
+    default:
+      return [x, y, z];
+  }
 }
 
 /**
@@ -26,10 +103,8 @@ function lngLatZToWorldPosition(lngLatZ, viewport) {
  * @param {array} [params.fromCoordinateOrigin] - the coordinate origin that the
  *   supplied position is in. Default to the same as `coordinateOrigin`.
  */
-export function projectPosition(
-  position,
-  {
-    // required
+export function projectPosition(position, params) {
+  const {
     viewport,
     coordinateSystem,
     coordinateOrigin,
@@ -37,58 +112,34 @@ export function projectPosition(
     modelMatrix,
     fromCoordinateSystem,
     fromCoordinateOrigin
-  }
-) {
-  let [x, y, z] = position;
-  let worldPosition;
-
-  if (modelMatrix) {
-    [x, y, z] = vec4_transformMat4([], [x, y, z, 1.0], modelMatrix);
-  }
-  if (fromCoordinateSystem === undefined) {
-    fromCoordinateSystem = coordinateSystem;
-  }
-  if (fromCoordinateOrigin === undefined) {
-    fromCoordinateOrigin = coordinateOrigin;
-  }
-
-  // pre-project light coordinates
-  switch (fromCoordinateSystem) {
-    case COORDINATE_SYSTEM.LNGLAT:
-      worldPosition = lngLatZToWorldPosition([x, y, z], viewport);
-      break;
-
-    case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      worldPosition = lngLatZToWorldPosition(
-        [
-          x + fromCoordinateOrigin[0],
-          y + fromCoordinateOrigin[1],
-          z + (fromCoordinateOrigin[2] || 0)
-        ],
-        viewport
-      );
-      break;
-
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-      worldPosition = lngLatZToWorldPosition(
-        viewport.addMetersToLngLat(fromCoordinateOrigin, [x, y, z]),
-        viewport
-      );
-      break;
-
-    default:
-      worldPosition = [x, y, z];
-  }
+  } = normalizeParameters(params);
 
   switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-    case COORDINATE_SYSTEM.METER_OFFSETS:
-      const originWorld = lngLatZToWorldPosition(coordinateOrigin, viewport);
+    case COORDINATE_SYSTEM.METER_OFFSETS: {
+      const worldPosition = getWorldPosition(position, {
+        viewport,
+        modelMatrix,
+        coordinateSystem: fromCoordinateSystem,
+        coordinateOrigin: fromCoordinateOrigin,
+        offsetMode: true
+      });
+      const originWorld = lngLatZToWorldPosition(coordinateOrigin, viewport, true);
       vec3_sub(worldPosition, worldPosition, originWorld);
-      break;
 
+      return worldPosition;
+    }
+
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
+    case COORDINATE_SYSTEM.IDENTITY:
     default:
+      return getWorldPosition(position, {
+        viewport,
+        modelMatrix,
+        coordinateSystem: fromCoordinateSystem,
+        coordinateOrigin: fromCoordinateOrigin,
+        offsetMode: false
+      });
   }
-
-  return worldPosition;
 }

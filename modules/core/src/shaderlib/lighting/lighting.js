@@ -22,7 +22,6 @@ import lightingShader from './lighting.glsl';
 import project from '../project/project';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {projectPosition} from '../project/project-functions';
-import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
 import memoize from '../../utils/memoize';
 
 export default {
@@ -49,7 +48,7 @@ const getMemoizedLightPositions = memoize(preprojectLightPositions);
 
 // TODO: support partial update, e.g.
 // `lightedModel.setModuleParameters({diffuseRatio: 0.3});`
-function getUniforms(opts = INITIAL_MODULE_OPTIONS, context = {}) {
+function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
   if (!opts.lightSettings) {
     return {};
   }
@@ -59,6 +58,8 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS, context = {}) {
 
     lightsPosition = DEFAULT_LIGHTS_POSITION,
     lightsStrength = DEFAULT_LIGHTS_STRENGTH,
+    coordinateSystem,
+    coordinateOrigin,
     coordinateSystem: fromCoordinateSystem = COORDINATE_SYSTEM.LNGLAT,
     coordinateOrigin: fromCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
     modelMatrix = null,
@@ -67,14 +68,6 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS, context = {}) {
     diffuseRatio = DEFAULT_DIFFUSE_RATIO,
     specularRatio = DEFAULT_SPECULAR_RATIO
   } = opts.lightSettings;
-
-  let coordinateSystem = opts.coordinateSystem;
-  let coordinateOrigin = opts.coordinateOrigin;
-
-  if (context.project_uCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET) {
-    coordinateSystem = COORDINATE_SYSTEM.LNGLAT_OFFSETS;
-    coordinateOrigin = context.project_coordinate_origin;
-  }
 
   // Pre-project light positions
   const lightsPositionWorld = getMemoizedLightPositions({
