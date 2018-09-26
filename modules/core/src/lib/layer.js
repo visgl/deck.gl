@@ -167,10 +167,8 @@ export default class Layer extends Component {
       coordinateOrigin: this.props.coordinateOrigin,
       coordinateSystem: this.props.coordinateSystem
     });
-    const coords = worldToPixels(worldPosition, viewport.viewProjectionMatrix);
-    const x = ((coords[0] + 1) * viewport.width) / 2;
-    const y = ((1 - coords[1]) * viewport.height) / 2;
-    return xyz.length === 2 ? [x, y] : [x, y, coords[2]];
+    const [x, y, z] = worldToPixels(worldPosition, viewport.pixelProjectionMatrix);
+    return xyz.length === 2 ? [x, y] : [x, y, z];
   }
 
   // Note: this does not reverse `project`.
