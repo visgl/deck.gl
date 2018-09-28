@@ -7,10 +7,7 @@
 > Note: This RFC Makes a distinction between "animations" and "transitions". This RFC is about "animations", for more information about property transitions, see the complementary RFC about that topic.
 
 References:
-* [Property Animation RFC]()
-* [Property Types RFC]()
-* [Attribute Transition RFC]()
-* [Viewport Transition RFC]()
+* [Animation Roadmap](/dev-docs/roadmaps/animation-roadmap.md)
 
 
 ## Abstract

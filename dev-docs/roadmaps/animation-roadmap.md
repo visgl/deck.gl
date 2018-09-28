@@ -1,11 +1,13 @@
 # Animation Roadmap
 
 References:
-* [Property Animation RFC]()
-* [Property Types RFC]()
-* [Attribute Transition RFC]()
-* [Viewport Transition RFC]()
-
+* [Property Animation RFC](/dev-docs/RFCs/v6.x/property-animation-rfc.md)
+* [Property Transition RFC](/dev-docs/RFCs/v6.x/property-transition-rfc.md)
+* [Property Types RFC](/dev-docs/RFCs/v6.x/property-types-rfc.md)
+* [Attribute Transition RFC](/dev-docs/RFCs/v5.1/attribute-transition-rfc.md)
+* [Viewport Transition RFC](/dev-docs/RFCs/v5.0/viewport-transition-rfc.md)
+* [Transition Interpolator RFC](/dev-docs/RFCs/v5.1/transition-interpolator-rfc.md)
+* [Generic Layer Prop Animation RFC](/dev-docs/RFCs/v6.x/generic-layer-prop-animation-rfc.md)
 
 
 ## Major Initiatives

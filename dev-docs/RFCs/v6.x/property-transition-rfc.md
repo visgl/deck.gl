@@ -8,11 +8,7 @@
 
 
 References
-* [Property Animation RFC]()
-* [Property Types RFC]()
-* [Attribute Transition RFC]()
-* [Viewport Transition RFC]()
-
+* [Animation Roadmap](/dev-docs/roadmaps/animation-roadmap.md)
 
 
 ## Abstract
@@ -37,7 +33,7 @@ The following proposals are included in this RFC:
 
 
 The following types of animations are not included in this RFC.
-- **Interpolation of Attributes** - Due to the significant complications related to the interpolation of attributes (performance, matching two structurally different attribute arrays etc) this topic will be discussed in a separate [Attribute Interpolation RFC]().
+- **Interpolation of Attributes** - Due to the significant complications related to the interpolation of attributes (performance, matching two structurally different attribute arrays etc) this topic will be discussed in a separate [Attribute Interpolation RFC](/dev-docs/RFCs/v5.1/attribute-transition-rfc.md).
 * Declarative configuration of animations
 * Support for "Easings" - interpolate values at non-constant speed
 * Automatic animation as result of user events (i.e. enter/leave type animations)
@@ -95,47 +91,10 @@ A possible design for handling this could be an object similar to updateTriggers
 new Layer({
   elevationScale: 100,
   radiusScale: 20,
-  interpolationParams: {
-    elevationScale: {time: 2000, easing: QUADRATIC, ...}
+  transitions: {
+    elevationScale: {duration: 2000, easing: QUADRATIC, ...}
     radiusScale: false
   },
   ...
 });
 ```
-
-
-## Proposal: Support time-based animation
-
-Animation that is not driven by property updates, but rather the passing of time.
-
-Layers would have the ability to mark themselves as animated. 
-```js
-new Layer({
-  animated: true
-});
-```
-The layers that are marked as animated will be updated every *browser animation frame* (i.e. 60 times per second), even if the application has not rendered (created layers with new props).
-
-
-### Layer props can now be set to "updater functions"
-
-To make time-based animation work, the idea is that individual props could be set to "updater functions" in addition to constant values. The functions would be called every time the layer is updated (whether through a render or a time-based update).
-
-The updated functions would take a context parameter (see the luma.gl [AnimationLoop](https://uber.github.io/luma.gl/#/documentation/api-reference/animation-loop) for a good reference on how this would work).
-
-```js
-const layer = new Layer {
-  radius: ({tick}) => Math.sin(tick * 0.1),
-  color: ({tick}) => [128, 128, tick % 255, 255]
-}
-```
-
-
-
-
-## Questions
-
-* Question: Call `updateState` every frame, or provide a new function life cycle function `animateState` to allow for optimized treatment of the animation case?
-* **Model matrix interpolation** - Animating the `modelMatrix` `prop` could be very powerful:
-    * For time based animations the updater funciton would return updated matrices
-    * For interpolations, is there a reasonable way to automatically interpolate matrices that generally give the right visual results? This could be incredibly neat if it worked, but numeric "instability" might make it impractical.
