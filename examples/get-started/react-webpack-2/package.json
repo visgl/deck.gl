@@ -8,7 +8,7 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "deck.gl": "^6.0.0",
+    "deck.gl": "6.1.1",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^3.3.2"
@@ -17,8 +17,8 @@
     "buble": "^0.19.3",
     "buble-loader": "^0.5.0",
     "html-webpack-plugin": "^3.0.7",
-    "webpack": "^4.3.0",
-    "webpack-cli": "^2.0.13",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.1",
     "webpack-dev-server": "^3.1.1"
   }
 }
