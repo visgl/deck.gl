@@ -14,7 +14,7 @@ const CONFIG = {
   },
 
   output: {
-    library: ['App']
+    library: 'App'
   },
 
   module: {

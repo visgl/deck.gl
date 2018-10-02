@@ -9,7 +9,7 @@
     "start-production": "webpack-dev-server --env.local --env.production --progress --hot --open"
   },
   "dependencies": {
-    "@deck.gl/experimental-layers": "^6.0.0",
+    "@deck.gl/layers": "6.1.1",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^1.0.6",
@@ -26,8 +26,8 @@
   "devDependencies": {
     "buble": "^0.19.3",
     "buble-loader": "^0.5.0",
-    "webpack": "^4.3.0",
-    "webpack-cli": "^2.0.13",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.1",
     "webpack-dev-server": "^3.1.1"
   }
 }
