@@ -22,13 +22,13 @@ import test from 'tape-catch';
 
 import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
-import {Matrix4, equals, config} from 'math.gl';
+import {Matrix4, config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
 
 import {compileVertexShader} from '../shaderlib-test-utils';
-
+import {getPixelOffset, clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
 const PIXEL_TOLERANCE = 0.01;
 
 const TEST_VIEWPORT = new WebMercatorViewport({
@@ -310,50 +310,6 @@ const TEST_CASES = [
   }
 ];
 
-function getPixelOffset(p1, p2, z = 0) {
-  return [p1[0] - p2[0], p1[1] - p2[1], z, 1];
-}
-
-function clipspaceToScreen(viewport, coords) {
-  return [
-    ((coords[0] / coords[3] + 1) / 2) * viewport.width,
-    ((1 - coords[1] / coords[3]) / 2) * viewport.height,
-    coords[2] / coords[3]
-  ];
-}
-
-function runOnGPU({uniforms, vs, elementCount, usefp64 = true}) {
-  const modules = usefp64 ? ['project64'] : [];
-  const transform = new Transform(gl, {
-    // TODO: remove sourceBuffers after https://github.com/uber/luma.gl/pull/733
-    sourceBuffers: {
-      dummy: DUMMY_SOURCE_BUFFER
-    },
-    feedbackBuffers: {
-      outValue: OUT_BUFFER
-    },
-    vs,
-    varyings: ['outValue'],
-    modules,
-    elementCount: elementCount || 1
-  });
-  transform.run({uniforms});
-  return OUT_BUFFER.getData();
-}
-
-function verifyResult({t, name, actual, expected, sliceActual = false}) {
-  expected = Array.isArray(expected) ? expected : [expected];
-  // Convert TypedArray to regular array
-  // TODO: remove after https://github.com/uber-web/math.gl/pull/29
-  actual = sliceActual ? Array.from(actual.slice(0, expected.length)) : actual;
-
-  if (equals(actual, expected)) {
-    t.pass(`${name} returns correct result`);
-  } else {
-    t.fail(`${name} returns ${actual}, expecting ${expected}`);
-  }
-}
-
 test('project#vs', t => {
   // TODO - resolve dependencies properly
   // luma's assembleShaders require WebGL context to work
@@ -371,14 +327,18 @@ test('project#vs', t => {
       const expected = c.output;
       if (Transform.isSupported(gl)) {
         config.EPSILON = c.gpuPrecision || c.precision || 1e-7;
-        let actual = runOnGPU({uniforms, vs: c.vs});
+        const sourceBuffers = {dummy: DUMMY_SOURCE_BUFFER};
+        const feedbackBuffers = {outValue: OUT_BUFFER};
+        let actual = runOnGPU({gl, uniforms, vs: c.vs, sourceBuffers, feedbackBuffers});
         actual = c.mapResult ? c.mapResult(actual) : actual;
-        verifyResult({t, name: `GPU: ${c.name}`, actual, expected, sliceActual: true});
+        const name = `GPU: ${c.name}`;
+        verifyResult({t, name, actual, expected, sliceActual: true});
       } else {
         config.EPSILON = c.precision || 1e-7;
         let actual = c.func(module);
         actual = c.mapResult ? c.mapResult(actual) : actual;
-        verifyResult({t, name: `CPU: ${c.name}`, actual, expected});
+        const name = `CPU: ${c.name}`;
+        verifyResult({t, name, actual, expected});
       }
     });
   });
