@@ -32,7 +32,7 @@ Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of ma
 ### Install from NPM
 
 ```bash
- npm install @deck.gl/mapbox
+npm install @deck.gl/mapbox
 ```
 
 ```js
