@@ -32,7 +32,7 @@ Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of ma
 ### Install from NPM
 
 ```bash
-$ npm install @deck.gl/mapbox
+ npm install @deck.gl/mapbox
 ```
 
 ```js
@@ -170,4 +170,3 @@ One major use case for mixing deck.gl and mapbox layers is that some important i
 A bit more control is provided by the optional `before` parameter of the mapbox [`map.addLayer(layer, before?)`](https://www.mapbox.com/mapbox-gl-js/api/#map#addlayer) API. Using this parameter, it is possible to inject a `MapboxLayer` instance just before any existing mapbox layer in the layer stack of the currently loaded style.
 
 Mapbox provides an example of [finding the first label layer](https://www.mapbox.com/mapbox-gl-js/example/geojson-layer-in-stack/). For more sophisticated injection point lookups, refer to Mapbox' documentation on the format of mapbox style layers, see [Mapbox Style Spec](https://www.mapbox.com/mapbox-gl-js/style-spec/#layers).
-
