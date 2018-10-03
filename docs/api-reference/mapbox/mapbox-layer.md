@@ -117,4 +117,3 @@ layer.setProps({
 ```
 
 Update a layer after it's added. Has no effect if `props.deck` is provided.
-
