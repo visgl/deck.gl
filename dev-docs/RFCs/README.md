@@ -59,6 +59,7 @@ RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.c
 | [**PropTypes**](v6.x/prop-types-rfc.md) | @ibgreen | **Review** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | [**Property Animation**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 | **[Effects Manager](v6.x/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+| [**Advanced Event Handling**](v6.x/event-handling.md) | @pessimistress | Draft | Allow Layer props to accept *on<Event>* style callbacks for events other than hover and click |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
