@@ -34,6 +34,8 @@ const LIB_DIR = path.resolve(__dirname, '..');
 const EXAMPLES_WEBSITE_DIR = path.resolve(LIB_DIR, 'examples/website');
 const EXAMPLES_EXPERIMENTAL_DIR = path.resolve(LIB_DIR, 'examples/experimental');
 const EXAMPLES_GET_STARTED_DIR = path.resolve(LIB_DIR, 'examples/get-started');
+const EXAMPLES_JSON_BROWSER_DIR = path.resolve(LIB_DIR, 'examples/json-browser');
+const EXAMPLES_LAYER_BROWSER_DIR = path.resolve(LIB_DIR, 'examples');
 let exampleDir;
 
 function printResult(diffRatio, threshold) {
@@ -137,8 +139,17 @@ async function runTestExample(folder) {
   exampleDir = EXAMPLES_GET_STARTED_DIR;
   await runTestExample('pure-js');
   await runTestExample('pure-js-without-map');
+  // await runTestExample('react-browserify');
+  await runTestExample('react-webpack-2');
   // await runTestExample('react-webpack');
   await runTestExample('react-without-map');
+
+  exampleDir = EXAMPLES_JSON_BROWSER_DIR;
+  await runTestExample('pure-js-app');
+  await runTestExample('react-app');
+
+  exampleDir = EXAMPLES_LAYER_BROWSER_DIR;
+  await runTestExample('layer-browser');
 
   exampleDir = EXAMPLES_WEBSITE_DIR;
   await runTestExample('3d-heatmap');
