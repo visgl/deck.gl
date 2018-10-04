@@ -38,7 +38,7 @@ const DEFAULT_PIXELS_PER_UNIT2 = [0, 0, 0];
 const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
 // Based on viewport-mercator-project/test/fp32-limits.js
-const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
+export const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 

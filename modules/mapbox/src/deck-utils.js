@@ -1,16 +1,15 @@
 import {Deck} from '@deck.gl/core';
 
-export function getDeckInstance({map, gl}) {
+export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
   if (map.__deck) {
     return map.__deck;
   }
 
-  const deck = new Deck({
+  const deckProps = {
     gl,
     width: '100%',
     height: '100%',
-    controller: false,
     useDevicePixels: true,
     // layerFilter needs to be changed inside a rendering/picking cycle
     // But calling setProps({layerFilter}) will trigger another rerender which sets off an infinite loop
@@ -18,15 +17,24 @@ export function getDeckInstance({map, gl}) {
     layerFilter: ({layer}) => filterLayer(deck, layer),
     _customRender: () => map.triggerRepaint(),
     userData: {
+      layerFilter: '',
+      isExternal: false,
       mapboxLayers: new Set()
     }
-  });
-  map.__deck = deck;
+  };
 
-  map.on('remove', () => {
-    deck.finalize();
-    map.__deck = null;
-  });
+  if (deck) {
+    deck.setProps(deckProps);
+    deck.props.userData.isExternal = true;
+  } else {
+    deck = new Deck(deckProps);
+
+    map.on('remove', () => {
+      deck.finalize();
+      map.__deck = null;
+    });
+  }
+  map.__deck = deck;
 
   initEvents(map, deck);
 
@@ -56,13 +64,25 @@ export function drawLayer(deck, layer) {
 function filterLayer(deck, layer) {
   const {layerFilter} = deck.props.userData;
 
-  if (typeof layerFilter === 'string') {
-    return layer.id === layerFilter;
+  if (typeof layerFilter !== 'string') {
+    return layerFilter;
   }
-  return layerFilter;
+
+  let layerInstance = layer;
+  while (layerInstance) {
+    if (layerInstance.id === layerFilter) {
+      return true;
+    }
+    layerInstance = layerInstance.parent;
+  }
+  return false;
 }
 
 function updateLayers(deck) {
+  if (deck.props.userData.isExternal) {
+    return;
+  }
+
   const layers = [];
   deck.props.userData.mapboxLayers.forEach(deckLayer => {
     const LayerType = deckLayer.props.type;
@@ -72,19 +92,60 @@ function updateLayers(deck) {
   deck.setProps({layers});
 }
 
-// Register deck callbacks for pointer events
-function initEvents(map, deck) {
-  function handleMouseEvent(event, callback) {
-    // draw all layers in picking buffer
-    deck.props.userData.layerFilter = true;
-    // Map from mapbox's MapMouseEvent object to mjolnir.js' Event object
-    callback({
-      offsetCenter: event.point,
-      srcEvent: event.originalEvent
-    });
+// Triggers picking on a mouse event
+function handleMouseEvent(deck, event) {
+  // reset layerFilter to allow all layers during picking
+  deck.props.userData.layerFilter = true;
+
+  let callback;
+  switch (event.type) {
+    case 'click':
+      callback = deck._onClick;
+      break;
+
+    case 'mousemove':
+    case 'pointermove':
+      callback = deck._onPointerMove;
+      break;
+
+    case 'mouseleave':
+    case 'pointerleave':
+      callback = deck._onPointerLeave;
+      break;
+
+    default:
+      return;
   }
 
-  map.on('click', event => handleMouseEvent(event, deck._onClick));
-  map.on('mousemove', event => handleMouseEvent(event, deck._onPointerMove));
-  map.on('mouseleave', event => handleMouseEvent(event, deck._onPointerLeave));
+  if (!event.offsetCenter) {
+    // Map from mapbox's MapMouseEvent object to mjolnir.js' Event object
+    event = {
+      offsetCenter: event.point,
+      srcEvent: event.originalEvent
+    };
+  }
+  callback(event);
+}
+
+// Register deck callbacks for pointer events
+function initEvents(map, deck) {
+  const pickingEventHandler = event => handleMouseEvent(deck, event);
+
+  if (deck.eventManager) {
+    // Replace default event handlers with our own ones
+    deck.eventManager.off({
+      click: deck._onClick,
+      pointermove: deck._onPointerMove,
+      pointerleave: deck._onPointerLeave
+    });
+    deck.eventManager.on({
+      click: pickingEventHandler,
+      pointermove: pickingEventHandler,
+      pointerleave: pickingEventHandler
+    });
+  } else {
+    map.on('click', pickingEventHandler);
+    map.on('mousemove', pickingEventHandler);
+    map.on('mouseleave', pickingEventHandler);
+  }
 }

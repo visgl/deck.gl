@@ -1,6 +1,7 @@
 import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
 
-export default class DeckLayer {
+export default class MapboxLayer {
+  /* eslint-disable no-this-before-super */
   constructor(props) {
     if (!props.id) {
       throw new Error('Layer must have an unique id');
@@ -9,13 +10,16 @@ export default class DeckLayer {
     this.id = props.id;
     this.type = 'custom';
     this.renderingMode = '3d';
+    this.map = null;
     this.deck = null;
     this.props = props;
   }
 
+  /* Mapbox custom layer methods */
+
   onAdd(map, gl) {
     this.map = map;
-    this.deck = getDeckInstance({map, gl});
+    this.deck = getDeckInstance({map, gl, deck: this.props.deck});
     addLayer(this.deck, this);
   }
 
@@ -27,7 +31,6 @@ export default class DeckLayer {
     // id cannot be changed
     Object.assign(this.props, props, {id: this.id});
     updateLayer(this.deck, this);
-    this.map.triggerRepaint();
   }
 
   render(gl, matrix) {

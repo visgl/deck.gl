@@ -158,10 +158,6 @@ test('WebMercatorViewport.meterDeltas', t => {
       const deltaMeters = viewport.lngLatDeltaToMeters(deltaLngLat);
       t.comment(`Comparing [${deltaMeters}] to [${coordinate}]`);
       t.ok(equals(deltaMeters, coordinate), 'deltaLngLat to deltaMeters');
-
-      const offsetCoordinate = viewport.addMetersToLngLat([0, 0, 0], coordinate);
-      t.comment(`Comparing [${deltaLngLat}] to [${offsetCoordinate}]`);
-      t.ok(equals(offsetCoordinate, deltaLngLat), 'addMetersToLngLat');
     }
   }
   t.end();

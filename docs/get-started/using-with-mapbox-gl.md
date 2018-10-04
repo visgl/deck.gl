@@ -17,3 +17,12 @@ While the token will need to be hard-coded into your application in production, 
 * Modify file to specify your Mapbox token,
 * Set an environment variable (MapboxAccessToken) - through the use of a webpack loader or browserify transform, see the hello-world examples for details.
 * Provide a token in the URL. See documentation of react-map-gl.
+
+
+## Mixing deck.gl and mapbox Layers
+
+An experimental module ` @deck.gl/mapbox` enables seamless interleaving of mapbox and deck.gl layers.
+
+<img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
+
+See [module documentation](/docs/api-reference/mapbox/overview.md) for examples and limitations.

@@ -9,14 +9,29 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./react-app.js')
   },
 
   resolve: {
     alias: {
       // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
+      'mapbox-gl$': resolve('./mapbox-gl-dev.js')
     }
+  },
+
+  module: {
+    rules: [
+      {
+        // Compile ES2015 using buble
+        test: /\.js$/,
+        loader: 'buble-loader',
+        include: [resolve('.')],
+        exclude: [/node_modules/],
+        options: {
+          objectAssign: 'Object.assign'
+        }
+      }
+    ]
   },
 
   // Optional: Enables reading mapbox token from environment variable

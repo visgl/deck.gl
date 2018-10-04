@@ -127,7 +127,6 @@ export default class RenderTest {
       const resultString = JSON.stringify(result);
       window.testDone(resultString);
     } else {
-      console.warn('testDone not exposed, waiting 1 second'); // eslint-disable-line
       window.setTimeout(this._reportToTestDriver.bind(this), 1000);
     }
   }

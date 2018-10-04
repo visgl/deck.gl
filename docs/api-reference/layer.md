@@ -446,13 +446,11 @@ While most projection is handled "automatically" in the layers vertex shader, it
 
 ##### `project`
 
-Projects a map coordinate using the current viewport settings.
+Projects a map coordinate to screen coordinate, using the current viewport settings and the current coordinate system.
 
 Parameters:
 
-* `coordinates` (Array) - `[lng, lat, altitude]` Passing an altitude is optional.
-* `opts` (Object)
-  - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
+* `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
 
 Returns:
 
@@ -460,43 +458,28 @@ Returns:
 
 ##### `unproject`
 
-Unprojects a pixel coordinate using the current viewport settings.
+Unprojects a screen coordinate using the current viewport settings.
 
 Parameters:
 
 * `pixels` (Array) - `[x, y, z]` Passing a `z` is optional.
-* `opts` (Object)
-  - `topLeft` (Boolean, optional) - Whether projected coords are top left. Default to `true`.
 
 Returns:
 
 * A map coordinates array `[lng, lat]` or `[lng, lat, altitude]` if a `z` was given.
 
-##### `projectFlat`
+##### `projectPosition`
 
-Projects a map coordinate using the current viewport settings, ignoring any perspective tilt. Can be useful to calculate screen space distances.
-
-Parameters:
-
-* `coordinates` (Array) - `[longitude, latitude]` coordinates.
-* `scale` (Number) - Map zoom scale calculated from `Math.pow(2, zoom)`.
-
-Returns:
-
-* Screen coordinates in `[x, y]`.
-
-##### `unprojectFlat`
-
-Unrojects a pixel coordinate using the current viewport settings, ignoring any perspective tilt (meaning that the pixel was projected).
+Projects a map coordinate to world coordinate using the current viewport settings and the current coordinate system. Can be useful to calculate world space angle and distances.
 
 Parameters:
 
-* `pixels` (Array) - `[x, y]`
-* `scale` (Number) - Map zoom scale calculated from `Math.pow(2, zoom)`.
+* `coordinates` (Array) - `[x, y, z]` in this layer's coordinate system.
 
 Returns:
 
-* Map or world coordinates in `[longitude, latitude]`.
+* World coordinates in `[x, y]`.
+
 
 ##### `screenToDevicePixels`
 

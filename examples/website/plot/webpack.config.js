@@ -13,7 +13,7 @@ const CONFIG = {
   },
 
   output: {
-    library: ['App']
+    library: 'App'
   },
 
   devtool: 'source-map',
