@@ -141,7 +141,6 @@ async function runTestExample(folder) {
   await runTestExample('pure-js-without-map');
   // await runTestExample('react-browserify');
   await runTestExample('react-webpack-2');
-  // await runTestExample('react-webpack');
   await runTestExample('react-without-map');
 
   exampleDir = EXAMPLES_JSON_BROWSER_DIR;
