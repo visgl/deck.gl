@@ -19,13 +19,13 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
   </tbody>
 </table>
 
-### 32-bit High-Precision Projection
-
-First introduced in v6.1 as `COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL`, the new projection system offers high-precision results similar to that of the old `fp64` mode without the compatibility issues or performance hit of running the much heavier 64-bit shader. Starting v6.2, this coordinate system becomes the default for all layers. See [upgrade guide](/docs/upgrade-guide.md) if you still need the old `fp64` mode.
-
 ### Mapbox Custom Layer API
 
 A new experimental module ` @deck.gl/mapbox` makes deck.gl work with the custom layers API in the latest Mapbox release. Using this feature, mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc. For usage and limitations, see [module documentation](/docs/api-reference/mapbox/overview.md).
+
+### 32-bit High-Precision Projection
+
+First introduced in v6.1 as `COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL`, the new projection system offers high-precision results similar to that of the old `fp64` mode without the compatibility issues or performance hit of running the much heavier 64-bit shader. Starting v6.2, this coordinate system becomes the default for all layers. See [upgrade guide](/docs/upgrade-guide.md) if you still need the old `fp64` mode.
 
 ### CPU/GPU Parity in Projection
 
