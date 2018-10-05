@@ -2,6 +2,35 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v6.2
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/new-projection-mode.gif" />
+        <p><i>32-bit High-Precision Projection</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
+        <p><i>Mixing Mapbox and deck.gl Layers</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Mapbox Custom Layer API
+
+A new experimental module ` @deck.gl/mapbox` makes deck.gl work with the custom layers API in the latest Mapbox release. Using this feature, mapbox and deck.gl layers can be freely "interleaved", enabling a number of layer mixing effects, such as drawing behind map labels, z-occlusion between deck.gl 3D objects and Mapbox buildings, etc. For usage and limitations, see [module documentation](/docs/api-reference/mapbox/overview.md).
+
+### 32-bit High-Precision Projection
+
+First introduced in v6.1 as `COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL`, the new projection system offers high-precision results similar to that of the old `fp64` mode without the compatibility issues or performance hit of running the much heavier 64-bit shader. Starting v6.2, this coordinate system becomes the default for all layers. See [upgrade guide](/docs/upgrade-guide.md) if you still need the old `fp64` mode.
+
+### CPU/GPU Parity in Projection
+
+The `layer.project()` method now supports all coordinate systems including METER_OFFSETS, LNGLAT_OFFSETS and IDENTITY.
+
 
 ## deck.gl v6.1
 
@@ -11,15 +40,15 @@ Release date: TBD, Target Aug 31, 2018
   <tbody>
     <tr>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/json-layers-thumb.gif" />
         <p><i>JSON API</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/minimap-thumb.gif" />
         <p><i>Enhanced Multi-View API</i></p>
       </td>
       <td>
-        <img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/contour-layer-cell-resize.gif" />
         <p><i>ContourLayer</i></p>
       </td>
     </tr>
