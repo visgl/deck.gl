@@ -106,6 +106,7 @@ class OrthographicState extends ViewState {
    * Zoom
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
+   * @param {[number, number]} pos - current mouse cursor screen position
    */
   zoom({pos, scale}) {
     const {zoom, width, height, offset} = this._viewportProps;
