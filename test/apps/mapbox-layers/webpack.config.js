@@ -14,7 +14,7 @@ const CONFIG = {
 
   resolve: {
     alias: {
-      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
+      // Force resolve to the newer version of mapbox. Remove when react-map-gl dependency is upgraded
       'mapbox-gl': resolve('./node_modules/mapbox-gl')
     }
   },
