@@ -31,11 +31,8 @@ const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
 
 const LIB_DIR = path.resolve(__dirname, '..');
-const EXAMPLES_WEBSITE_DIR = path.resolve(LIB_DIR, 'examples/website');
-const EXAMPLES_EXPERIMENTAL_DIR = path.resolve(LIB_DIR, 'examples/experimental');
-const EXAMPLES_GET_STARTED_DIR = path.resolve(LIB_DIR, 'examples/get-started');
-const EXAMPLES_JSON_BROWSER_DIR = path.resolve(LIB_DIR, 'examples/json-browser');
-const EXAMPLES_LAYER_BROWSER_DIR = path.resolve(LIB_DIR, 'examples');
+const EXAMPLES_DIR = path.resolve(LIB_DIR, 'examples');
+
 let exampleDir;
 
 function printResult(diffRatio, threshold) {
@@ -44,25 +41,29 @@ function printResult(diffRatio, threshold) {
     : console.log('\x1b[31m%s\x1b[0m', 'Rendering test failed!');
 }
 
-async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
+async function validateWithWaitingTime(child, folder, subfolder, waitingTime, threshold) {
   const browser = await puppeteer.launch({
-    headless: false
+    headless: false,
+    args: [`--window-size=${1000},${800}`]
   });
   const page = await browser.newPage();
   await page.waitFor(2000);
-  await page.goto('http://localhost:8080');
+  await page.goto('http://localhost:8080', {timeout: 50000});
   await page.setViewport({width: 1000, height: 800});
   await page.waitFor(waitingTime);
   await page.screenshot({path: 'new.png'});
 
   const goldImageData = fs.readFileSync(
-    path.resolve(LIB_DIR, 'test/render/golden-images/examples/', `${folder}.png`)
+    path.resolve(
+      LIB_DIR,
+      'test/render/golden-images/examples/',
+      `${subfolder ? `${folder}_${subfolder}` : folder}.png`
+    )
   );
   const goldImage = PNG.sync.read(goldImageData);
   const newImageData = fs.readFileSync('new.png');
   const newImage = PNG.sync.read(newImageData);
   const diffImage = new PNG({width: goldImage.width, height: goldImage.height});
-
   const pixelDiffSize = pixelmatch(
     goldImage.data,
     newImage.data,
@@ -121,10 +122,10 @@ function changeFolder(folder) {
   process.chdir(path.resolve(exampleDir, folder));
 }
 
-async function runTestExample(folder) {
-  changeFolder(folder);
+async function runTestExample(folder, subfolder = undefined) {
+  changeFolder(subfolder ? `${folder}/${subfolder}` : folder);
   const child = await yarnAndLaunchWebpack();
-  const valid = await validateWithWaitingTime(child, folder, 5000, 0.01);
+  const valid = await validateWithWaitingTime(child, folder, subfolder, 5000, 0.01);
   if (!valid) {
     process.exit(1); //eslint-disable-line
   }
@@ -133,32 +134,26 @@ async function runTestExample(folder) {
 (async () => {
   checkMapboxToken();
 
-  exampleDir = EXAMPLES_EXPERIMENTAL_DIR;
-  await runTestExample('bezier');
+  exampleDir = EXAMPLES_DIR;
+  await runTestExample('experimental', 'bezier');
+  await runTestExample('experimental', 'pure-js-app');
 
-  exampleDir = EXAMPLES_GET_STARTED_DIR;
-  await runTestExample('pure-js');
-  await runTestExample('pure-js-without-map');
-  // await runTestExample('react-browserify');
-  await runTestExample('react-webpack-2');
-  await runTestExample('react-without-map');
+  await runTestExample('get-started', 'pure-js');
+  await runTestExample('get-started', 'pure-js-without-map');
+  await runTestExample('get-started', 'react-webpack-2');
+  await runTestExample('get-started', 'react-without-map');
 
-  exampleDir = EXAMPLES_JSON_BROWSER_DIR;
-  await runTestExample('pure-js-app');
-  await runTestExample('react-app');
-
-  exampleDir = EXAMPLES_LAYER_BROWSER_DIR;
   await runTestExample('layer-browser');
 
-  exampleDir = EXAMPLES_WEBSITE_DIR;
-  await runTestExample('3d-heatmap');
-  await runTestExample('arc');
-  await runTestExample('brushing');
-  await runTestExample('geojson');
-  await runTestExample('icon');
-  await runTestExample('line');
-  await runTestExample('plot');
-  await runTestExample('scatterplot');
-  await runTestExample('screen-grid');
-  await runTestExample('tagmap');
+  await runTestExample('website', '3d-heatmap');
+  await runTestExample('website', 'arc');
+  await runTestExample('website', 'brushing');
+  await runTestExample('website', 'geojson');
+  await runTestExample('website', 'highway');
+  await runTestExample('website', 'icon');
+  await runTestExample('website', 'line');
+  await runTestExample('website', 'plot');
+  await runTestExample('website', 'scatterplot');
+  await runTestExample('website', 'screen-grid');
+  await runTestExample('website', 'tagmap');
 })();
