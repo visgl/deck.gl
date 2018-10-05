@@ -131,7 +131,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/39
+        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
+        // FP64 modules uses `out` variables in many methods for
         disableTranspileFor64: true,
         skipGPUs: ['Intel'],
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
@@ -147,7 +148,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/39
+        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
+        // FP64 modules uses `out` variables in many methods for
         disableTranspileFor64: true,
         skipGPUs: ['Intel'],
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
@@ -194,7 +196,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/39
+        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
+        // FP64 modules uses `out` variables in many methods for
         disableTranspileFor64: true,
 
         disableProject64: true, // NOTE: works with project32 but not with project64, is it expected?
@@ -243,7 +246,8 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/39
+        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
+        // FP64 modules uses `out` variables in many methods for
         disableTranspileFor64: true,
 
         disableProject64: true, // NOTE: works with project32 but not with project64, is it expected?
