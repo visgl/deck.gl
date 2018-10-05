@@ -1,5 +1,12 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v6.1 to v6.2
+
+#### fp64
+
+The default coordinate system `COORDINATE_SYSTEM.LNGLAT` is upgraded to offer high-precision results in a way that is much faster and more cross-platform compatible. The `fp64` layer prop is ignored when using this new coordinate system. You can get the old fp64 mode back by using `coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED` with `fp64: true`.
+
+
 ## Upgrading from deck.gl v5.3 to v6.0
 
 
