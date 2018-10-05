@@ -106,12 +106,18 @@ class OrthographicState extends ViewState {
    * Zoom
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
+   * @param {[number, number]} pos - current mouse cursor screen position
    */
-  zoom({scale}) {
-    const {zoom} = this._viewportProps;
+  zoom({pos, scale}) {
+    const {zoom, width, height, offset} = this._viewportProps;
     const newZoom = clamp(zoom * scale, MIN_ZOOM, MAX_ZOOM);
+    const centerX = width / 2 - offset[0];
+    const centerY = height / 2 - offset[1];
+    const dX = (pos[0] - centerX) * (zoom / newZoom - 1);
+    const dY = (pos[1] - centerY) * (zoom / newZoom - 1);
     return this._getUpdatedState({
-      zoom: newZoom
+      zoom: newZoom,
+      offset: [offset[0] + dX, offset[1] + dY]
     });
   }
 
