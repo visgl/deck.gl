@@ -90,4 +90,4 @@ Assert functions, when supplied, are called with the following properties:
 
 ## Source
 
-[modules/test-utils/src/lifecycle-test.js](https://github.com/uber/deck.gl/blob/master/modules/test-utils/src/lifecycle-test.js)
+[modules/test-utils/src/lifecycle-test.js](https://github.com/uber/deck.gl/blob/6.2-release/modules/test-utils/src/lifecycle-test.js)

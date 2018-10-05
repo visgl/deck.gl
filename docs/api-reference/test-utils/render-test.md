@@ -89,4 +89,4 @@ renderTest.run();
 
 ## Source
 
-[modules/test-utils/src/render-test.js](https://github.com/uber/deck.gl/blob/master/modules/test-utils/src/render-test.js)
+[modules/test-utils/src/render-test.js](https://github.com/uber/deck.gl/blob/6.2-release/modules/test-utils/src/render-test.js)

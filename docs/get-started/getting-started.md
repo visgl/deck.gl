@@ -18,7 +18,7 @@ yarn add deck.gl
 
 ## Running the Examples
 
-The deck.gl repository contains an [examples folder](https://github.com/uber/deck.gl/tree/master/examples) with a selection of small, standalone examples that could be good starting points for your application.
+The deck.gl repository contains an [examples folder](https://github.com/uber/deck.gl/tree/6.2-release/examples) with a selection of small, standalone examples that could be good starting points for your application.
 
 You should be able to copy these folders to your preferred locations, and get them running simply as follows:
 

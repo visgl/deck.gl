@@ -2,7 +2,7 @@
 
 The deck.gl core library and layers have no dependencies on React or Mapbox GL and can be used by any JavaScript application.
 
-Our [examples](https://github.com/uber/deck.gl/tree/master/examples/get-started) contains a few "pure JS" templates that serve as a starting point for your application.
+Our [examples](https://github.com/uber/deck.gl/tree/6.2-release/examples/get-started) contains a few "pure JS" templates that serve as a starting point for your application.
 
 
 ## Using @deck.gl/core
