@@ -9,13 +9,13 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./react-app.js')
+    app: resolve('./app.js')
   },
 
   resolve: {
     alias: {
-      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./mapbox-gl-dev.js')
+      // Force resolve to the newer version of mapbox. Remove when react-map-gl dependency is upgraded
+      'mapbox-gl': resolve('./node_modules/mapbox-gl')
     }
   },
 

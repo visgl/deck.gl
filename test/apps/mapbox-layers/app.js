@@ -1,4 +1,4 @@
-import mapboxgl from './mapbox-gl-dev';
+import mapboxgl from 'mapbox-gl';
 import {MapboxLayer} from '@deck.gl/mapbox';
 
 import {mapboxBuildingLayer, deckPoiLayer, deckRouteLayer} from './layers';
