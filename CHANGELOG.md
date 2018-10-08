@@ -15,13 +15,96 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## Latest Beta Releases
+## deck.gl v6.2
 
-For Earlier Beta Releases see below
+### deck.gl v6.2 Prereleases
+
+#### [6.2.0-beta.1] - Oct 5 2018
+
+See what's new for major features additions.
+
+## deck.gl v6.1
+
+#### [6.1.1] - Sep 24 2018
+
+- Fix broken link to documentation on some examples (#2257)
+- Fix Multi-picking runtime error (#2271)
 
 ### deck.gl v6.1.0 Pre Releases
 
-#### [6.1.0-alpha.1] - Aug 1
+For Earlier Beta Releases see below
+
+#### [6.1.0-rc.1] - Aug 31 2018
+
+- Hexagon aggregation with valid viewport (#2239)
+- Doc: remove deuplicate section
+- Website fixes for Safari (#2251)
+- Port #2247 from master
+- Fix wrong closing tag in get-started examples (#2248)
+
+#### [6.1.0-beta.2] - Aug 29 2018
+
+- GPUAggregator: Return ArrayBuffer objects when aggregating on CPU (#2243)
+- Safari fixes (#2244)
+- change master in URLs to 6.1-release
+
+#### [6.1.0-beta.1] - Aug 25 2018
+
+- Bump luma to 6.1.0-beta.2
+- Bump luma to 6.1.0-beta.1 (#2232)
+- Undo Y-reversal hack for Mesh-Layer (#2229)
+- Change Back Projection mode to the 6.0 default (#2225)
+- remove hack due to webgl1 constant attribute bug (#2224)
+- Fix lighting module under auto offset (#2231)
+- Hexagon layer change revert (#2228)
+- Clean up layer browser example order (#2219)
+- 6.1 Docs : Misc changes (#2222)
+- HexagonLayer: Aggregate data using valid viewport. (#2196)
+- Docs and whats-new update (#2216)
+- Separate shaderCoordinateSystem, make new projection mode default (#2211)
+- fixed broken link to documentation of TripsLayer (#2214)
+- Wrap longitudes over the 180th meridian (#2147)
+- Doc Updates: FAQ and Animation (#2212)
+- Improve docs around setting parameters (#2210)
+- Remove stray references to global module (#2209)
+- Small fixes (#2207)
+- Update docs for new projection mode (#2206)
+- RFC: JSON examples (#2188)
+- RFC: View Class Extensions (#2161)
+- Update babel (#2189)
+- Pass through opts in _createAnimationLoop's onCreateContext (#2201)
+- Contour stroke width (#2193)
+- Fix pure-js-without-map example (#2197)
+- Fix website build (#2195)
+- RFC: @deck.gl/json module updates (#2187)
+- lighting module initial roadmap (#2183)
+- Add more .json examples (#2184)
+- RFC: Property Animation (Experimental) (#2162)
+- Move TripsLayer to experimental-layers (#2175)
+- Doc fixes: colorRange and Readme.md (#2172)
+- Cleanup What's New (#2176)
+- Roadmap updates (#2164)
+
+#### [6.1.0-alpha.2] - Aug 2018
+
+- Bump dependency (#2174)
+- Fix experimental layers: mesh layer Y-reversal issue (#2167)
+- Fix Transform export, bump luma.gl version (#2170)
+- Support iterables in grid and hexagonal aggregators (#2160)
+- JSON Layers example #2 (of 2) (#2144)
+- fix icon layer rendering test and avoid test report duplication (#2166)
+- RFC/Roadmap Overhaul (#2163)
+- JSON Layers RFC implementation #1 (of 2) (#2106)
+- Make ArcLayer and PathLayer work with LNGLAT_EXPERIMENTAL mode (#2159)
+- Consolidate module parameter handling (#2108)
+- Buffer reuse in SolidPolygonLayer (#1821)
+- Build fixes (#2157)
+- Minor cleanup (#2156)
+- RFC updates (#2153)
+- Improve linting script (#2148)
+- Update unit and render tests (#2149)
+
+#### [6.1.0-alpha.1] - Aug 1 2018
 
 - Remove module specific uniforms setting from Layer (#2124)
 - [POC] Data filter shader module (#2107)
@@ -42,9 +125,74 @@ For Earlier Beta Releases see below
 - JSON layer RFC (#2079)
 - POC: Loading Mapbox vector tile data into DeckGL layer (#2022)
 
+
+## deck.gl v6.0
+
+#### [6.0.4] - August 30 2018
+- Undo Y-reversal hack for Mesh-Layer (#2229)
+
+#### [6.0.3] - August 8 2018
+- Fix experimental layers: mesh layer Y-reversal issue (#2167)
+- Bump probe.gl version to avoid issues with changed webpack behavior (#2158)
+- Make ArcLayer and PathLayer work with LNGLAT_EXPERIMENTAL mode (#2159)
+
+#### [6.0.1] - July 19 2018
+- fix layerFilter in picking (#2104)
+- Fix website link to github (#2094)
+
+#### [6.0.0] - July 18 2018
+- Avoid mutating source data (#2092)
+- Bump dependency versions (#2093)
+- Use constants for default props (#2091)
+- fix constant accessors in safari (#2088)
+- fix text rendering in FF and Safari (#2087)
+- 3DSurfaceExplorer Demo: fix crash (#2082)
+- Website minor bug fixes (#2064)
+- Fix website in Firefox (#2081)
+- fix ascii example (#2074)
+- Controller upgrade guide (#2073)
+- Fix bug with updating dashed lines for LineStrings (#2066)
+
 ### deck.gl v6.0.0 Pre Releases
 
-#### [6.0.0-beta.1] - July 4
+#### [6.0.0-rc.1] - July 13 2018
+- Update scripting examples (#2063)
+- ScreenGridLayer: deprecate minColor and maxColor props (#2062)
+- Fix crash in get vendor prefix (#2061)
+- Add progress bar to website demos (#2060)
+- Use custom colorRange for ScreenGridDemo (#2059)
+- Update ScreenGrid website demo (#2056)
+- Documentation minor fixes (#2058)
+- Orbit examples clean up (#2054)
+- Make ViewState Transitions API official (#2053)
+- Website demos clean up (#2052)
+- OrbitController: Add support for viewport transitions (#2047)
+- add geojson transition example (#2048)
+- Fix callback error on pointer leave (#2049)
+- Multi-view picking perf: filter viewports by pointer position (#2043)
+- Deck: Add onLoad callback (#2042)
+- another round of link changes
+- change 5.3-release to 6.0-release in readme
+- change code links for docs
+- change code links for showcases
+- change doc and code links to 6.0-release
+- add doc for OrbitView (#2045)
+- Perf: skip draw call for composite layers (#2040)
+- no attribute manager for composite layers (#2037)
+- fix pointer leave callback (#2038)
+
+#### [6.0.0-beta.4] - July 11 2018
+- disable updateTrigger warning (#2036)
+- Make doubleTap and keyboard transitions exlusive to MapController (#2033)
+- fix rendering test (#2035)
+- Fix getCursor bugs (#2034)
+- Upgrade layer browser to v6 API (#2029)
+- React: JSX view bug fixes (#2028)
+- Delete controller when view is removed (#2026)
+- Fix first-person and third-person viewports (#2025)
+- Fix view state comparison (#2024)
+
+#### [6.0.0-beta.1] - July 4 2018
 
 - Attribute Transition bug fix (#1996)
 - Upgrade to luma.gl 6.0.0-beta.1 (#1990)
@@ -58,7 +206,7 @@ For Earlier Beta Releases see below
 - Implement React API RFC (#1971)
 - Add padArray util for attribute transition (#1966)
 
-#### [6.0.0-alpha.2] - June 27
+#### [6.0.0-alpha.2] - June 27 2018
 
 - Remove viewports (#1965)
 - Add needs64bitPositions() to Layer (#1963)
@@ -80,7 +228,7 @@ For Earlier Beta Releases see below
 - Add world-space aggregation support to GPUAggregator (#1923)
 - Expose more internals (as experimental exports) (#1921)
 
-#### [6.0.0-alpha.0] - June 15
+#### [6.0.0-alpha.0] - June 15 2018
 - 6.0.0-alpha.0 (Bump luma version to 6.0.0-apha.1)
 - Bench fixes (#1915)
 - Remove commented functions from layers (#1910)
@@ -102,10 +250,93 @@ For Earlier Beta Releases see below
 - Add Deck.parameters prop to enable declarative setting of initial GL params (#1832)
 - View Manager cleanup (#1864)
 
-## Beta Releases
+
+## deck.gl v5.3
+
+####[5.3.3] - August 20 2018
+- Pass through opts in _createAnimationLoop's onCreateContext (#2203)
+- fix bad code links
+- Make doubleTap and keyboard transitions exlusive to MapController (#2033)
+
+####[5.3.2] - June 20 2018
+- Fix path-marker-layer property passing, and remove moduleParameters to fix offset coordinates
+- Add transition prop forwarding for composite layers; docs (#1900)
+
+####[5.3.1] - June 08 2018
+-  Fix DeckGL 5.3 doesn't fire onHover event for last frame (#1882) (#1895)
+-  Fix mapbox wrapper error when use viewState (#1885)
+-  Fix whats-new layer demo links (#1883)
+-  5.3.0 website update (#1881)
+
 
 ### deck.gl v5.3 Pre Releases
-#### [5.3.0-alpha.2] - April 30
+
+#### [5.3.0-rc.1] - May 29 2018
+-  update whats new (#1859)
+-  Attribute transition bug fix (#1858)
+-  Fix attribute transition manager tests (#1856)
+-  Fix constant attribute transition (#1844)
+-  Reduce React emphasisis in docs. Miminize top README, add congributing.md (#1851)
+-  Use new Cylinder geometry API (#1848)
+-  Attribute: Add support for custom Buffer setup. (#1846)
+-  Rename core-layers to layers (#1845)
+-  Core util exports audit (#1843)
+-  Fix viewportChanged flag (#1841)
+-  Update layer browser (#1834)
+-  AttributeTransitionManager test (#1836)
+-  Add deprecation guide and what's new polish (#1831)
+-  Fix arc/line layer prop override (#1830)
+-  Fix a typo in deck.js (#1827)
+-  Update webpack version for examples (#1824)
+-  Enable example testing for "experimental" and "get-started" folders (#1825)
+-  Async Props #3: The Examples (#1818)
+-  Unblock render tests (#1822)
+-  Constant accessor implementation (#1814)
+-  Implement attribute buffer RFC (#1794)
+-  Async Props #2: Loading and shadowing in new ComponentState base class (#1779)
+-  Async Props #1: Add ability to differentiate between actual and resolved values for async props. (#1777)
+-  Light renaming in props handling code. Start introducing component. Better oldProps handling. (#1815)
+-  GPUGridAggregator: Add position offset to fix Intel specific issue (#1817)
+-  Add Transition class (#1806)
+-  Use auto control in standalone version (#1813)
+-  fix invert pan (#1811)
+-  Add Whats new entry for auto interactivity (#1807)
+-  Fix viewport resize issue (#1812)
+-  debugging and z-fighting docs (#1809)
+-  Remove default attribute updaters (#1582)
+-  Break out ViewManager class from LayerManager. (#1787)
+-  Move developer docs to developer-guide directory (#1790)
+-  Move viewport transition into controller (#1799)
+-  Bump example dependency versions (#1803)
+-  fix assert import (#1804)
+-  RFC catalog reorganization (#1791)
+-  Fix table (#1800)
+-  copy the actual props from the embedded demos to their markdowns (#1774)
+-  bug fixes (#1798)
+-  split core-layers into own module (#1796)
+-  fix index type in webgl 2 context (#1789)
+-  Attribute Buffer RFC (#1786)
+-  Add rendering test for orthographic mode (#1785)
+-  orthographic switch in layer-browser. (#1783)
+-  fix the wrong blog link (#1781)
+-  doc fixes (#1782)
+-  Hook git push with browser based tests (#1778)
+-  Controller cleanup (#1771)
+-  Remove obsolete MapController and OrbitController "proxy" classes (#1769)
+-  Orthographic support in WebMercatorViewport (#1640)
+-  Move deprecated viewports to deprecated folder (#1763)
+-  Deprecate the OrbitViewport class (#1765)
+-  Fix prop name in TextLayer documentation (#1773)
+-  Update deck.gl package.json files with missing BABEL_ENV (#1768)
+-  Generic accessor micro-RFC (#1752)
+-  Fix Deck class doc (#1761)
+-  Reorganize Viewport code (#1766)
+-  Auto Controls: Automatic Event Handling if no callback is specified (#1662)
+-  Fix using default prop in module settings (#1754)
+-  Remove React checks in controller classes (#1758)
+-  bump lite module dependency manually
+
+#### [5.3.0-alpha.2] - April 30 2018
 -  use baseline:hanging if advanced text metrics is not supported (#1753)
 -  Smaller viewState related fixes (#1750)
 -  Picking overlapping objects RFC implementation (#1730)
@@ -121,12 +352,104 @@ For Earlier Beta Releases see below
 -  More website link fixes (#1736)
 -  Fix outdated source links (#1735)
 
-#### [5.3.0-alpha.1] - April 23
+#### [5.3.0-alpha.1] - April 23 2018
 - Bump luma.gl to 5.3.0-alpha.1
+
+## deck.gl v5.2
+
+
+#### [5.2.1] - April 30 2018
+-  use baseline:hanging if advanced text metrics is not supported (#1753)
+-  Update example links in README.md (#1744)
+-  Fix standalone bundle inline version (#1746)
+-  handle right button pan in MapControls (#1745)
+-  update dependency
+-  Update release date in what's new
+-  update lock file
+
+#### [5.2.0] - April 24 2018
+-  Embedded layer demo fixes (#1741)
+-  Update showcases links (#1738)
+-  Make DeckGL doc refer to Deck docs (#1737)
+-  More website link fixes (#1736)
+-  Fix outdated source links (#1735)
+-  remove v6.0 section from whats new document point to 5.2-release docs
+-  Fix bad links on website (#1734)
+-  View documentation updates.  (#1731)
+-  Website fixes and optimizations (#1732)
+-  Update RFC master page
+-  Update RFC catalog (#1721)
+-  fix example test (#1727)
+-  run lint to format code
+-  fix vis academy page on website (#1726)
+-  Upgrade point cloud LAZ to webpack 4 (#1725)
+-  Move wind and graph examples to showcases (#1724)
+-  fix bad yarn lock to handle test regression
+-  Fix multi viewport example (#1723)
+-  Documentation Formats (#1722)
+-  Add AsciiLayer demo (#1715)
+-  Add lint for docs (#1719)
+-  more doc fix for test-utils (#1720)
+-  Update scripting API docs (#1717)
+-  Update test-utils website pages (#1718)
+-  Clean up js examples (#1716)
+-  v5.2 website changes (#1710)
+-  Lighting module fixes (#1714)
+-  Reorganize examples (#1700)
+-  handle review feedback for useDevicePixels (#1713)
+-  fix useDevicePixels bug (#1712)
+
 
 ### deck.gl v5.2 Pre Releases
 
-#### [5.2.0-alpha.8] - April 5
+#### [5.2.0-rc.1] - April 11 2018
+- Bump math.gl (#1708)
+- format code style
+- Fix inverted FirstPersonView (#1707)
+- fix version embedding (#1703)
+- Prettier
+
+#### [5.2.0-beta.3] - April 11 2018
+- Fixes: disable babel-minify, check if stats object is provided (#1701)
+- Fix font bounding box (#1698)
+- remove missing import global (#1697)
+- fix publish script typo (#1692)
+- Support characterSet prop in TextLayer (#1693)
+- update dependency versions
+- update change log
+
+#### [5.2.0-beta.2] - April 11 2018
+-  Support Observable (#1690)
+-  default width and height props (#1688)
+-  fix plot example in website (#1685)
+
+#### [5.2.0-beta.1] - April 11 2018
+-  format changelog
+-  Move "fragile" carto pure JS example to wip folder (#1674)
+-  update whats new (#1682)
+-  Clean up npm scripts (#1657)
+-  replace deck.gl-layers with @deck.gl/experimental-layers (#1681)
+-  Support non-monospace fonts in TextLayer (#1680)
+-  use fetch instead of d3-request/json in examples (#1639)
+-  add text-layer screenshot to what's new (#1678)
+-  Publish standalone bundle with the main package (#1671)
+-  Clean up cell layers code (#1675)
+-  regenerate font atlas when fontFamily changed (#1669)
+-  Expose MapController class and enable it to be used with `Deck.controller` prop (#1666)
+-  ignore standalone module for now (#1670)
+-  Fix auto resize and controller (#1656)
+-  What's new update (#1667)
+-  fix website dependencies (#1665)
+-  fix example tests (#1644)
+-  add linter to ci test (#1664)
+-  fix bootstrap (#1663)
+-  fix(docs): wdith to width typo (#1658)
+-  Add TextLayer demo (#1646)
+-  Module split PR1 (#1651)
+-  Deck Component: auto resize handling (#1389)
+
+
+#### [5.2.0-alpha.8] - April 5 2018
 - Bump examples to 5.2 alpha versions (#1649)
 - Bump example package.json to make it clear these are for future release (#1648)
 - fix bench browser test (#1647)
@@ -183,9 +506,9 @@ For Earlier Beta Releases see below
 - Remove invalid deprecation warning (#1575)
 - Fix MeshLayer texture rendering (#1570)
 
-#### [5.2.0-alpha.7] - Mar 23
-#### [5.2.0-alpha.6] - Mar 23
-#### [5.2.0-alpha.4] - Mar 23
+#### [5.2.0-alpha.7] - Mar 23 2018
+#### [5.2.0-alpha.6] - Mar 23 2018
+#### [5.2.0-alpha.4] - Mar 23 2018
 - Make new colorRange and colorDomain props experimental (#1569)
 - bump probe.gl to 1.0.0-alpha.11
 - fix memory leak by deleting unused models (#1561)
@@ -220,20 +543,68 @@ For Earlier Beta Releases see below
 - Update Attribute transitions to use new luma.gl `Transform` API (#1464)
 - disable path-marker rendering test (#1518)
 
-#### [5.2.0-alpha.3] - Mar 8
+#### [5.2.0-alpha.3] - Mar 8 2018
 - Fix deck.gl-test-utils dependency issues
 - Probe.gl logging
 
-#### [5.2.0-alpha.2] - Mar 8
+#### [5.2.0-alpha.2] - Mar 8 2018
 - Bump luma.gl dependency to v5.2.0-alpha.3
 - deck.gl-test-utils v5.2.0-alpha.1 (#1515)
 - Test documentation improvements (#1512)
 
-#### [5.2.0-alpha.1] - Mar 4
+#### [5.2.0-alpha.1] - Mar 4 2018
 
-## Official Releases
 
-#### [5.1.0]
+## deck.gl v5.1
+
+#### deck.gl v5.1.4 March 23, 2018
+- fix memory leak by deleting unused models (#1561)
+
+#### deck.gl v5.1.3 March 19, 2018
+- fix memory leak via oldProps (#1549)
+
+#### deck.gl v5.1.2 March 13, 2018
+- Add alpha for minColor to fix test (#1494)
+- Fix bug in getMaxCount (#1539)
+- Fix max count issue in bin sorter (#1535)
+- Add validation to geojson layer (#1442)
+
+#### deck.gl v5.1.1 March 01, 2018
+- do not pick when dragging (#1475)
+- [website] redirect to new blog (#1480)
+- [Website] Update documentation hierarchy (#1483)
+- [Website] Render nested categories in side bar (#1482)
+- fix plot demo on website (#1472)
+- fix link rewrite in website (#1469)
+- Update docs for layer transitions.
+- Change default 'extruded'  to be 'false' in hexagon-layer.md (#1463)
+- Fix wrong image links in website (#1462)
+- update yarn lock
+
+#### deck.gl v5.1 Feb 15, 2018
+- change "Attribute Transitions" to "Layer Transitions" (#1446)
+- update using-with-react.md with workable example code (#1445)
+- Shader module uniform cache (#1387) (#1443)
+- Update getting started
+- Update getting-started.md
+- Fix hello-world examples
+
+
+### deck.gl v5.1 Beta Releases
+
+#### [5.1.0-beta.3] - Feb 09, 2018
+- Fix Bezier-Curve layer rendering issues (#1409)
+- Add more screenshots in Whats New (#1408)
+- Fix image links in docs. (#1401)
+- Update docs for 5.1 (#1392)
+- hexagon layer always rerender (#1384)
+- Fix: Workaround for React.Children.forEach (#1378)
+- layers v0.1.0-beta.2
+
+#### [5.1.0-beta.2] - Jan 31, 2018
+- Fix: JSX layer extraction from nextProps (#1373)
+
+#### [5.1.0-beta.1] - Jan 31, 2018
 - Fix crash during pickVisibleObjects (#1365)
 - Experiment: bezier curve layer (#1366)
 - Add JSX support to DeckGL component and remove jsx-layers example (#1362)
@@ -254,7 +625,29 @@ For Earlier Beta Releases see below
 - Attribute Transition: Initial Implementation (#981)
 
 
-### deck.gl v5.0 - Dec 21
+
+## deck.gl v5.0
+
+#### deck.gl v5.0.3 - Feb 08
+- hexagon layer always rerender (#1384)
+- Fix crash during pickVisibleObjects (#1365)
+
+#### deck.gl v5.0.3 - Jan 26
+- allow overriding DeckGL canvas component styles (#1342)
+
+#### deck.gl v5.0.2 - Jan 10
+- Upgrade dependency modules to production versions (#1307)
+- Add generic attribute support to attribute manager (#1298)
+- Update remaining examples to React16 (#1304)
+- Improve fp64ify perf (#1300)
+
+#### deck.gl v5.0.1 - Jan 4
+- fix doc links (#1277)
+- Fix layer-browser missing package (#1287)
+- Some 5.0 doc cleanup (#1274)
+- Fix icon layer warnings.
+
+#### deck.gl v5.0 - Dec 21
 - Add links to new examples. (#1272)
 - Address TODO in docs. (#1270)
 - Use the deprecation support in shader modules (#1271)
@@ -270,27 +663,6 @@ For Earlier Beta Releases see below
 - enable lnglat_offset mode (#1245)
 - Remove deprecated uniforms (#1257)
 
-## Beta Releases
-
-#### [5.1.0-beta.1] - Jan 31
-- Fix crash during pickVisibleObjects (#1365)
-- Experiment: bezier curve layer (#1366)
-- Add JSX support to DeckGL component and remove jsx-layers example (#1362)
-- Update composite layers to use multiple prop objects (#1353)
-- link to remote docs (#1364)
-- Wind demo: update using newest luma.gl TF API (#1346)
-- Prop code preparation/cleanup (#1357)
-- Use latest luma.gl transform feedback features (#1318)
-- Move fp64 viewport uniform generation to project64 module's getUniforms (#1292)
-- Merge react-map-gl's map interaction (#1330)
-- Travis CI fix: Reduced, but working set of test cases (#1355)
-- Property Copy Reduction (#1341)
-- Use Object.prototype to speed up default prop setting (#1336)
-- fix experimental PolygonLayer (#1316)
-- Upgrade react-map-gl and math.gl versions in examples (#1313)
-- Fix text layer redraw flag clearing (#1314)
-- [Doc] Fix of layer attribute typo (#1311)
-- Attribute Transition: Initial Implementation (#981)
 
 ### deck.gl v5.0 Beta Releases
 
@@ -310,6 +682,10 @@ For Earlier Beta Releases see below
 - Add SolidPolygonLayer to experimental layers (#1233)
 - Fix the normal direction of the hexagon layer and additional transform in the lighting module associated with it (#1039)
 - Fix blending parameter (#1241)
+
+## deck.gl v4.2
+
+### deck.gl v4.2 Beta Releases
 
 #### [4.2.0-alpha.31] - Dec 14
 - API Audit: remove initWebGLParameters and move pure-js example  (#1235)
@@ -581,9 +957,7 @@ haders
 - Add: UTM_OFFSETS projection mode
 
 
-## Official Releases
-
-### deck.gl v4.1
+## deck.gl v4.1
 
 #### [4.1.2] - Patch Release
 - FIX: IconLayer texture filter and rotation:
@@ -604,160 +978,7 @@ haders
 For details see [What's New](https://github.com/uber/deck.gl/blob/5.0-release/docs/whats-new.md)
 
 
-### deck.gl v4.0
-
-#### [4.0.0] - 2017-4-6 Major deck.gl Release
-
-For details see What's New
-### deck.gl v3.0
-
-#### [3.1.3] - 2017-1-25
-
-- HOTFIX: Fixed project_fp64 issue under linux + nvidia (#315)
-
-#### [3.1.2] - 2017-1-19
-
-- HOTFIX: Fixed some 64-bit math issue on some Nvidia GPUs (#286)
-- HOTFIX: Fixed an issue in scatterplot64 that NaN got passed to GPU (#287)
-- Disable blending when rendering to picking framebuffer (#288)
-
-#### [3.1.1] - 2016-12-1
-
-- FIX: ExtrudedChoroplethLayer64 - Now updates uniforms when props change
-- HOTFIX ScatterplotLayer: Fix instancePositions regression in 3.1.0
-- HOTFIX DeckGL: Fix PropType warning regression in 3.1.0 (layers/effects props)
-
-#### [3.1.0] - 2016-11-30
-
-- LineLayer: Support elevations (z coords on positions)
-- LineLayer64: Support elevations (z coords on positions)
-- Scatterplot: Enable updateTriggers on instanceRadius, separate from positions.
-- EXPERIMENTAL FEATURE: ReflectionEffect
-- INTERNAL: Target build env moved to Node 6. Travis tests now run on 6 & 7.
-
-#### [3.0.9, 3.0.10] - 2016-11-18
-
-- Bumped viewport-mercator-project version for the unproject fix.
-- Updated dependency versions (#229)
-- Added test code for attribute-manager (#213)
-- Added minMax radius for the scatterplot-layer (#230)
-
-#### [3.0.8] - 2016-11-18
-
-- Performance optimization: remove unnecessary gl.getParameter() calls (#227)
-
-#### [3.0.7] - 2016-11-16
-
-- Fixed precision issue for vec2_mix_fp64 function (#223)
-- Added mouse event object to hover and click event parameter (#255)
-
-#### [3.0.6] - 2016-11-14
-
-- Bug fix for picking not returning x, y coordinates (#220)
-
-#### [3.0.5] - 2016-11-14
-
-- Performance optimization: prevent redundant data calculation (#222)
-
-#### [3.0.3] - 2016-11-14
-
-- Bug fixes for ScatterplotLayer not being updated with new data prop (#215)
-- Performance optimization: prevent fbo from reallocating every time (#217)
-
-#### [3.0.2] - 2016-11-12
-
-- Performance optimization for examples in gh-pages
-
-#### [3.0.1] - 2016-11-11
-
-- Enable blending by default
-- Fix syntax highlighting in gh-pages
-
-#### [3.0.0] - Major deck.gl Release
-
-For details see [What's New](docs/whats-new.md)
-
-### deck.gl v2
-
-#### [2.4.10] - 2016-09-20
-- Added line width support to the choropleth layer.
-
-#### [2.4.9] - FIX: Picking of instanced layers restored
-- Layer.calculateInstancePickingColors now gets correct numInstances argument.
-- Bumps luma.gl to include Linux fix.
-
-#### [2.4.8] - TBD
-- Move glslify to "dependencies" in package.json
-- Fix bool uniform that webgl in certain environment handles it differently
-
-#### [2.4.7] - 2016-09-06
-- Fix issue of mercatorEnabled not working on Linux
-
-#### [2.4.6] - 2016-09-06
-- Fix issue where 0 opacity is interpreted as default opacity
-- Fix issue with printing of layerName in debug messages crashes
-
-#### [2.4.5] - 2016-08-31
-- Fixed picking for the choropleth layer
-
-#### [2.4.4] - 2016-08-17
-- Added deckgl-overlay canvas ID and customize style support
-
-#### [2.4.3] - 2016-08-16
-- Fix document / add customize style support to the canvas (@contra)
-
-#### [2.4.2] - 2016-08-16
-- Added per point radius support for the scatterplot-layer
-
-#### [2.4.1] - 2016-08-15
-- Fixed primitive distortion bug for the scatterplot and hexagon-layer
-
-#### [2.4.0] - 2016-08-12
-- Added non-LatLng coordinate support for
-  - arc-layer
-  - choropleth-layer
-  - line-layer
-  - scatterplot-layer
-
-#### [2.3.0] - 2016-08-06
-- Added line-layer support
-
-#### [2.2.5] - 2016-08-02
-- Added per point color support for the scatterplot-layer
-
-#### [2.2.4] - 2016-07-13
-- Performance improvement
-
-#### [2.2.0] - 2016-07-05
-- Added perspective mode, 3D camera support
-- Added unit tests
-- Tons of refactoring and performance improvement
-
-#### [2.1.0] - 2016-03-30
-- Added precompile support
-- Added data deep comparison support
-- Added better uniform error message support
-- Changed to use the new Luma.gl API
-- Moved babel-related libraries from devDependence to dependency
-- Changed default blending function (ZERO -> ONE_MINUS_SRC_ALPHA)
-- Bug in getNumberInstances
-
-#### [2.0.0] - 2016-02-29
-- Retina display support
-- Performance refactoring
-- Switched the underlying rendering framework to
-  [luma.gl](https://github.com/uber/luma.gl)
-- Fixed picking on retina/regular display
-
-### deck.gl v1
-
-#### [1.0.0] - 2016-01-06
-- Initial commit of the open-source version of deck.gl
-
-
-## Beta Releases
-
-### v4.1 Beta Releases
+### deck.gl v4.1 Beta Releases
 
 #### deck.gl v4.1.0-beta.6
 - Remove 'project' module in layer model creation as it's provided by default (#787)
@@ -902,6 +1123,15 @@ Versions 4.1.0 alpha 1, 2 and 3 have been unpublished due to a wrong tagging.
 - DEMO: Misc fixed form demo site (#548, #549)
 - KNOWN ISSUES: the IconLayer example doesn't work if use with luma.gl v4.0.0-alpha.1
 
+
+## deck.gl v4.0
+
+#### [4.0.0] - 2017-4-6 Major deck.gl Release
+
+For details see What's New
+
+
+
 ### v4.0 Beta Releases
 
 #### [v4.0.0-rc.6]
@@ -1043,6 +1273,33 @@ DOCS
   - Moved docs into 4.0 subfolder to support publishing multiple doc versions
     from a single tree.
 
+
+## deck.gl v3.1
+
+#### [3.1.3] - 2017-1-25
+
+- HOTFIX: Fixed project_fp64 issue under linux + nvidia (#315)
+
+#### [3.1.2] - 2017-1-19
+
+- HOTFIX: Fixed some 64-bit math issue on some Nvidia GPUs (#286)
+- HOTFIX: Fixed an issue in scatterplot64 that NaN got passed to GPU (#287)
+- Disable blending when rendering to picking framebuffer (#288)
+
+#### [3.1.1] - 2016-12-1
+
+- FIX: ExtrudedChoroplethLayer64 - Now updates uniforms when props change
+- HOTFIX ScatterplotLayer: Fix instancePositions regression in 3.1.0
+- HOTFIX DeckGL: Fix PropType warning regression in 3.1.0 (layers/effects props)
+
+#### [3.1.0] - 2016-11-30
+
+- LineLayer: Support elevations (z coords on positions)
+- LineLayer64: Support elevations (z coords on positions)
+- Scatterplot: Enable updateTriggers on instanceRadius, separate from positions.
+- EXPERIMENTAL FEATURE: ReflectionEffect
+- INTERNAL: Target build env moved to Node 6. Travis tests now run on 6 & 7.
+
 ### v3.1 Beta Releases
 
 #### [v3.1.0-beta.16] -
@@ -1134,6 +1391,50 @@ FIX: Model matrix cleanup
 Internal changes:
 - `WebGLViewport` now a wrapper around a supplied `Viewport` rather than a subclass.
 
+
+## deck.gl v3.0
+
+#### [3.0.9, 3.0.10] - 2016-11-18
+
+- Bumped viewport-mercator-project version for the unproject fix.
+- Updated dependency versions (#229)
+- Added test code for attribute-manager (#213)
+- Added minMax radius for the scatterplot-layer (#230)
+
+#### [3.0.8] - 2016-11-18
+
+- Performance optimization: remove unnecessary gl.getParameter() calls (#227)
+
+#### [3.0.7] - 2016-11-16
+
+- Fixed precision issue for vec2_mix_fp64 function (#223)
+- Added mouse event object to hover and click event parameter (#255)
+
+#### [3.0.6] - 2016-11-14
+
+- Bug fix for picking not returning x, y coordinates (#220)
+
+#### [3.0.5] - 2016-11-14
+
+- Performance optimization: prevent redundant data calculation (#222)
+
+#### [3.0.3] - 2016-11-14
+
+- Bug fixes for ScatterplotLayer not being updated with new data prop (#215)
+- Performance optimization: prevent fbo from reallocating every time (#217)
+
+#### [3.0.2] - 2016-11-12
+
+- Performance optimization for examples in gh-pages
+
+#### [3.0.1] - 2016-11-11
+
+- Enable blending by default
+- Fix syntax highlighting in gh-pages
+
+#### [3.0.0] - Major deck.gl Release
+
+For details see [What's New](docs/whats-new.md)
 
 ### v3.0 Beta Releases
 
@@ -1289,3 +1590,82 @@ Internal changes:
 - Breaking Change: Standardize parameters in layers to always expect arrays.
 - Remove separate attribute updater definitions to simplify layer subclass
   creation
+
+
+## deck.gl v2
+
+#### [2.4.10] - 2016-09-20
+- Added line width support to the choropleth layer.
+
+#### [2.4.9] - FIX: Picking of instanced layers restored
+- Layer.calculateInstancePickingColors now gets correct numInstances argument.
+- Bumps luma.gl to include Linux fix.
+
+#### [2.4.8] - TBD
+- Move glslify to "dependencies" in package.json
+- Fix bool uniform that webgl in certain environment handles it differently
+
+#### [2.4.7] - 2016-09-06
+- Fix issue of mercatorEnabled not working on Linux
+
+#### [2.4.6] - 2016-09-06
+- Fix issue where 0 opacity is interpreted as default opacity
+- Fix issue with printing of layerName in debug messages crashes
+
+#### [2.4.5] - 2016-08-31
+- Fixed picking for the choropleth layer
+
+#### [2.4.4] - 2016-08-17
+- Added deckgl-overlay canvas ID and customize style support
+
+#### [2.4.3] - 2016-08-16
+- Fix document / add customize style support to the canvas (@contra)
+
+#### [2.4.2] - 2016-08-16
+- Added per point radius support for the scatterplot-layer
+
+#### [2.4.1] - 2016-08-15
+- Fixed primitive distortion bug for the scatterplot and hexagon-layer
+
+#### [2.4.0] - 2016-08-12
+- Added non-LatLng coordinate support for
+  - arc-layer
+  - choropleth-layer
+  - line-layer
+  - scatterplot-layer
+
+#### [2.3.0] - 2016-08-06
+- Added line-layer support
+
+#### [2.2.5] - 2016-08-02
+- Added per point color support for the scatterplot-layer
+
+#### [2.2.4] - 2016-07-13
+- Performance improvement
+
+#### [2.2.0] - 2016-07-05
+- Added perspective mode, 3D camera support
+- Added unit tests
+- Tons of refactoring and performance improvement
+
+#### [2.1.0] - 2016-03-30
+- Added precompile support
+- Added data deep comparison support
+- Added better uniform error message support
+- Changed to use the new Luma.gl API
+- Moved babel-related libraries from devDependence to dependency
+- Changed default blending function (ZERO -> ONE_MINUS_SRC_ALPHA)
+- Bug in getNumberInstances
+
+#### [2.0.0] - 2016-02-29
+- Retina display support
+- Performance refactoring
+- Switched the underlying rendering framework to
+  [luma.gl](https://github.com/uber/luma.gl)
+- Fixed picking on retina/regular display
+
+## deck.gl v1
+
+#### [1.0.0] - 2016-01-06
+- Initial commit of the open-source version of deck.gl
+
