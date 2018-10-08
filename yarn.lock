@@ -5961,12 +5961,13 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^6.1.0:
-  version "6.1.0"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.1.0.tgz#17e48a21f904f27b3b285d67aa1070ade462e9b7"
+luma.gl@^6.2.0-beta:
+  version "6.2.0-beta.2"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.2.0-beta.2.tgz#ca366bc8733240e63e226e3241c6c477faba5963"
   dependencies:
-    math.gl "^2.1.0-alpha"
-    probe.gl "^2.0.0-beta"
+    "@babel/runtime" "^7.0.0"
+    math.gl "^2.2.0"
+    probe.gl "^2.0.0-beta.4"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
 
@@ -6096,10 +6097,11 @@ math.gl@^2.1.0:
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
 
-math.gl@^2.1.0-alpha:
-  version "2.1.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.1.0-alpha.1.tgz#80866ac74ae3ffadca23a47aec926c9336d4dace"
+math.gl@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.2.0.tgz#301dcda760ae235f5fdf471dd67ef2aa8c74d659"
   dependencies:
+    "@babel/runtime" "^7.0.0"
     gl-mat3 "^1.0.0"
     gl-mat4 "^1.1.4"
     gl-quat "^1.0.0"
@@ -7265,6 +7267,12 @@ private@^0.1.6, private@^0.1.8, private@~0.1.5:
 probe.gl@^2.0.0-beta:
   version "2.0.0-beta.1"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.0-beta.1.tgz#7281d63e75d390a081c68fe201552e2e62effb6f"
+
+probe.gl@^2.0.0-beta.4:
+  version "2.0.0-beta.4"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.0-beta.4.tgz#a6f6b2f4ac38e9a0cb62ad26e20aa31f33f3befc"
+  dependencies:
+    "@babel/runtime" "^7.0.0"
 
 process-nextick-args@^2.0.0, process-nextick-args@~2.0.0:
   version "2.0.0"
