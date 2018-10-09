@@ -265,6 +265,7 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: dataSamples.polygons,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getPolygon: f => f,
         getFillColor: f => [200, 0, 0],
@@ -318,6 +319,7 @@ export const TEST_CASES = [
       new PathLayer({
         id: 'path-lnglat-64',
         data: dataSamples.zigzag,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         opacity: 0.6,
         getPath: f => f.path,
@@ -368,6 +370,7 @@ export const TEST_CASES = [
       new ScatterplotLayer({
         id: 'scatterplot-lnglat-64',
         data: dataSamples.points,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getPosition: d => d.COORDINATES,
         getColor: d => [255, 128, 0],
@@ -419,6 +422,7 @@ export const TEST_CASES = [
         id: 'arc-lnglat-64',
         data: dataSamples.routes,
         strokeWidth: 0.5,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
@@ -467,6 +471,7 @@ export const TEST_CASES = [
         id: 'line-lnglat-64',
         data: dataSamples.routes,
         strokeWidth: 0.5,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
@@ -524,6 +529,7 @@ export const TEST_CASES = [
         iconAtlas: ICON_ATLAS,
         iconMapping: dataSamples.iconAtlas,
         sizeScale: 12,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
@@ -565,6 +571,7 @@ export const TEST_CASES = [
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
         pickable: true,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         lightSettings: LIGHT_SETTINGS
       })
@@ -637,6 +644,7 @@ export const TEST_CASES = [
         data: dataSamples.worldGrid.data,
         cellSize: dataSamples.worldGrid.cellSize,
         extruded: true,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         pickable: true,
         opacity: 1,
@@ -756,6 +764,7 @@ export const TEST_CASES = [
       new HexagonCellLayer({
         id: 'hexagoncell-lnglat-64',
         data: dataSamples.hexagons,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         hexagonVertices: dataSamples.hexagons[0].vertices,
         coverage: 1,
@@ -837,7 +846,7 @@ export const TEST_CASES = [
       new PointCloudLayer({
         id: 'pointcloud-lnglat-64',
         data: dataSamples.getPointCloud(),
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         coordinateOrigin: dataSamples.positionOrigin,
         fp64: true,
         getPosition: d => [
@@ -946,6 +955,7 @@ export const TEST_CASES = [
       new MeshLayer({
         id: 'mesh-lnglat-64',
         data: arrowDataLngLat,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         mesh: new Arrow2DGeometry(),
         sizeScale: 10000
@@ -998,6 +1008,7 @@ export const TEST_CASES = [
       new PathOutlineLayer({
         id: 'path-outline-64',
         data: dataSamples.routes,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         opacity: 0.6,
         getPath: f => [f.START, f.END],
@@ -1090,6 +1101,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer-64',
         data: dataSamples.points.slice(0, 50),
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
