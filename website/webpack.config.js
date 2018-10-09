@@ -57,8 +57,7 @@ const COMMON_CONFIG = {
     modules: [resolve('./node_modules'), resolve('../node_modules')],
     alias: Object.assign({}, ALIASES, {
       'website-examples': resolve('../examples/website'),
-      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
+      'viewport-mercator-project': resolve('../node_modules/viewport-mercator-project')
     })
   },
 
