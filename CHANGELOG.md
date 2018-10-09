@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v6.2 Prereleases
 
+#### [6.2.0-beta.2] - Oct 9 2018
+
+- Fix lighting in LNGLAT_AUTO_OFFSET mode
+- Fix fp64 prop handling
+- Fix MapboxLayer.setProps possible crash
+- Improve orthographic controller zoom
+
 #### [6.2.0-beta.1] - Oct 5 2018
 
 See what's new for major features additions.
