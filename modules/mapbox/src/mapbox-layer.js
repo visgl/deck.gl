@@ -30,7 +30,10 @@ export default class MapboxLayer {
   setProps(props) {
     // id cannot be changed
     Object.assign(this.props, props, {id: this.id});
-    updateLayer(this.deck, this);
+    // safe guard in case setProps is called before onAdd
+    if (this.deck) {
+      updateLayer(this.deck, this);
+    }
   }
 
   render(gl, matrix) {
