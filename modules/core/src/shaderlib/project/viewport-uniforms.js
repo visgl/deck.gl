@@ -42,12 +42,7 @@ export const LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD = 12;
 
 const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 
-function getShaderCoordinateSystem(coordinateSystem, fp64) {
-  if (fp64) {
-    // This is the only mode that works with fp64
-    return PROJECT_COORDINATE_SYSTEM.LNG_LAT;
-  }
-
+function getShaderCoordinateSystem(coordinateSystem) {
   switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT:
     case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
@@ -78,8 +73,7 @@ function calculateMatrixAndOffset({
   // NEW PARAMS
   coordinateSystem,
   coordinateOrigin,
-  coordinateZoom,
-  fp64
+  coordinateZoom
 }) {
   const {viewMatrixUncentered} = viewport;
   let {viewMatrix} = viewport;
@@ -87,7 +81,7 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
-  let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem, fp64);
+  let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
   let shaderCoordinateOrigin = coordinateOrigin;
 
   if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET) {
@@ -168,7 +162,6 @@ export function getUniformsFromViewport({
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
   wrapLongitude = false,
-  fp64 = false,
   // Deprecated
   projectionMode,
   positionOrigin
@@ -191,8 +184,7 @@ export function getUniformsFromViewport({
       devicePixelRatio,
       coordinateSystem,
       coordinateOrigin,
-      wrapLongitude,
-      fp64
+      wrapLongitude
     })
   );
 }
@@ -202,8 +194,7 @@ function calculateViewportUniforms({
   devicePixelRatio,
   coordinateSystem,
   coordinateOrigin,
-  wrapLongitude,
-  fp64
+  wrapLongitude
 }) {
   const coordinateZoom = viewport.zoom;
   assert(coordinateZoom >= 0);
@@ -218,8 +209,7 @@ function calculateViewportUniforms({
     coordinateSystem,
     coordinateOrigin,
     coordinateZoom,
-    viewport,
-    fp64
+    viewport
   });
 
   assert(viewProjectionMatrix, 'Viewport missing modelViewProjectionMatrix');
