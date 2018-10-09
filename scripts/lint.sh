@@ -10,14 +10,16 @@ case $MODE in
 
     # only check changed files
     set +e
-    FILES=`git diff HEAD --name-only | grep .js$`
+    FILES=`git diff HEAD --name-only | grep -E "^(modules|examples|test).*\.js$"`
     set -e
 
     if [ ! -z "${FILES}" ]; then
       for f in $FILES
         do
-          prettier --write $f --loglevel warn
-          eslint $f
+          if [ -e "${f}" ]; then
+            prettier --write $f --loglevel warn
+            eslint $f
+          fi
       done
     fi
 
