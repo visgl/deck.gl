@@ -9240,9 +9240,9 @@ viewport-mercator-project@^5.1.0:
   dependencies:
     math.gl "^2.0.0"
 
-viewport-mercator-project@^6.0.0-alpha.1:
-  version "6.0.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-6.0.0-alpha.1.tgz#1e50edd9fe79371a31e6d3c6387e5b2345ca4c79"
+viewport-mercator-project@^6.0.0:
+  version "6.0.0"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-6.0.0.tgz#33b8bb40bae44978b889e5425f4f5d26f2367ecb"
   dependencies:
     "@babel/runtime" "^7.0.0"
     math.gl "^2.1.0"
