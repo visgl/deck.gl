@@ -20,7 +20,6 @@
 
 import lightingShader from './lighting.glsl';
 import project from '../project/project';
-import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {projectPosition} from '../project/project-functions';
 import memoize from '../../utils/memoize';
 
@@ -42,7 +41,6 @@ const DEFAULT_LIGHTS_STRENGTH = [2.0, 0.0];
 const DEFAULT_AMBIENT_RATIO = 0.4;
 const DEFAULT_DIFFUSE_RATIO = 0.6;
 const DEFAULT_SPECULAR_RATIO = 0.8;
-const DEFAULT_COORDINATE_ORIGIN = [0, 0, 0];
 
 const getMemoizedLightPositions = memoize(preprojectLightPositions);
 
@@ -54,20 +52,22 @@ function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
   }
 
   const {
-    numberOfLights = 1,
-
-    lightsPosition = DEFAULT_LIGHTS_POSITION,
-    lightsStrength = DEFAULT_LIGHTS_STRENGTH,
     coordinateSystem,
     coordinateOrigin,
-    coordinateSystem: fromCoordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-    coordinateOrigin: fromCoordinateOrigin = DEFAULT_COORDINATE_ORIGIN,
-    modelMatrix = null,
+    lightSettings: {
+      numberOfLights = 1,
 
-    ambientRatio = DEFAULT_AMBIENT_RATIO,
-    diffuseRatio = DEFAULT_DIFFUSE_RATIO,
-    specularRatio = DEFAULT_SPECULAR_RATIO
-  } = opts.lightSettings;
+      lightsPosition = DEFAULT_LIGHTS_POSITION,
+      lightsStrength = DEFAULT_LIGHTS_STRENGTH,
+      coordinateSystem: fromCoordinateSystem,
+      coordinateOrigin: fromCoordinateOrigin,
+      modelMatrix = null,
+
+      ambientRatio = DEFAULT_AMBIENT_RATIO,
+      diffuseRatio = DEFAULT_DIFFUSE_RATIO,
+      specularRatio = DEFAULT_SPECULAR_RATIO
+    }
+  } = opts;
 
   // Pre-project light positions
   const lightsPositionWorld = getMemoizedLightPositions({
