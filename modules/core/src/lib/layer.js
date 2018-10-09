@@ -208,7 +208,7 @@ export default class Layer extends Component {
 
   use64bitProjection() {
     if (this.props.fp64) {
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
         return true;
       }
       log.once(
