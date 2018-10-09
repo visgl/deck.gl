@@ -24,7 +24,7 @@
   "dependencies": {
     "deck.gl": "^6.2.0-beta.1",
     "pixelmatch": "^4.0.2",
-    "probe.gl": "^2.0.0-beta"
+    "probe.gl": "^2.0.0"
   },
   "scripts": {
     "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
