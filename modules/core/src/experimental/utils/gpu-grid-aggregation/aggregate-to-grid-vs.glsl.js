@@ -22,7 +22,6 @@ export default `\
 #define SHADER_NAME gpu-aggregation-to-grid-vs
 
 attribute vec2 positions;
-attribute vec2 positions64xyLow;
 attribute float weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
@@ -32,9 +31,8 @@ uniform bool projectPoints;
 
 varying float vWeights;
 
-vec2 project_to_pixel(vec2 pos) {
-  vec4 position = vec4(pos, 0., 1.);
-  vec4 result =  uProjectionMatrix * position;
+vec2 project_to_pixel(vec4 pos) {
+  vec4 result =  uProjectionMatrix * pos;
   return result.xy/result.w;
 }
 
@@ -42,16 +40,15 @@ void main(void) {
 
   vWeights = weights;
 
-  vec2 windowPos = positions;
-  vec2 windowPos64xyLow = positions64xyLow;
+  vec4 windowPos = vec4(positions, 0, 1.);
   if (projectPoints) {
-    windowPos = project_position(windowPos);
+    windowPos = project_position_to_clipspace(vec3(positions, 0), vec2(0, 0), vec3(0, 0, 0));
   }
 
-  windowPos = project_to_pixel(windowPos);
+  vec2 pos = project_to_pixel(windowPos);
 
   // Transform (0,0):windowSize -> (0, 0): gridSize
-  vec2 pos = floor(windowPos / cellSize);
+  pos = floor(pos / cellSize);
 
   // Transform (0,0):gridSize -> (-1, -1):(1,1)
   pos = (pos * (2., 2.) / (gridSize)) - (1., 1.);
