@@ -5961,13 +5961,13 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^6.2.0-beta:
-  version "6.2.0-beta.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.2.0-beta.2.tgz#ca366bc8733240e63e226e3241c6c477faba5963"
+luma.gl@^6.2.0:
+  version "6.2.0"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.2.0.tgz#449760dc735e2e89a55bb78697c8dd1093626b2c"
   dependencies:
     "@babel/runtime" "^7.0.0"
     math.gl "^2.2.0"
-    probe.gl "^2.0.0-beta.4"
+    probe.gl "^2.0.1"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
 
@@ -7270,9 +7270,9 @@ probe.gl@^2.0.0:
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-probe.gl@^2.0.0-beta.4:
-  version "2.0.0-beta.4"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.0-beta.4.tgz#a6f6b2f4ac38e9a0cb62ad26e20aa31f33f3befc"
+probe.gl@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.1.tgz#e42dfe02eca9ef262cdf89a24e1a4c0856e989e0"
   dependencies:
     "@babel/runtime" "^7.0.0"
 
