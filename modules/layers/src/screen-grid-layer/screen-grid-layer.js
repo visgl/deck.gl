@@ -296,18 +296,30 @@ export default class ScreenGridLayer extends Layer {
     const {cellSizePixels, gpuAggregation} = this.props;
 
     const {positions, weights, maxCountBuffer, countsBuffer} = this.state;
+    const {viewport} = this.context;
 
-    const projectPoints = this.context.viewport instanceof WebMercatorViewport;
+    let projectPoints = false;
+    let gridTransformMatrix = null;
+
+    if (this.context.viewport instanceof WebMercatorViewport) {
+      // project points from world space (lng/lat) to viewport (screen) space.
+      projectPoints = true;
+    } else {
+      projectPoints = false;
+      // Use pixelProjectionMatrix to transform points to viewport (screen) space.
+      gridTransformMatrix = viewport.pixelProjectionMatrix;
+    }
     const results = this.state.gpuGridAggregator.run({
       positions,
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
-      viewport: this.context.viewport,
+      viewport,
       countsBuffer,
       maxCountBuffer,
       changeFlags,
       useGPU: gpuAggregation,
-      projectPoints
+      projectPoints,
+      gridTransformMatrix
     });
 
     const {maxWeight = 0} = results;

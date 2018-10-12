@@ -445,11 +445,13 @@ export default class Viewport {
      */
 
     // matrix for conversion from world location to screen (pixel) coordinates
-    const m = createMat4();
-    mat4_scale(m, m, [this.width / 2, -this.height / 2, 1]);
-    mat4_translate(m, m, [1, -1, 0]);
-    mat4_multiply(m, m, this.viewProjectionMatrix);
-    this.pixelProjectionMatrix = m;
+    const viewportMatrix = createMat4(); // matrix from NDC to viewport.
+    const pixelProjectionMatrix = createMat4(); // matrix from world space to viewport.
+    mat4_scale(viewportMatrix, viewportMatrix, [this.width / 2, -this.height / 2, 1]);
+    mat4_translate(viewportMatrix, viewportMatrix, [1, -1, 0]);
+    mat4_multiply(pixelProjectionMatrix, viewportMatrix, this.viewProjectionMatrix);
+    this.pixelProjectionMatrix = pixelProjectionMatrix;
+    this.viewportMatrix = viewportMatrix;
 
     this.pixelUnprojectionMatrix = mat4_invert(createMat4(), this.pixelProjectionMatrix);
     if (!this.pixelUnprojectionMatrix) {
