@@ -1,6 +1,6 @@
 {
   "lerna": "2.0.0",
-  "version": "6.2.0-beta.2",
+  "version": "6.2.0-beta.3",
   "commands": {
     "publish": {
       "ignore": [
@@ -15,8 +15,5 @@
   "useWorkspaces": true,
   "packages": [
     "modules/*"
-  ],
-  "publishConfig": {
-    "access": "public"
-  }
+  ]
 }
