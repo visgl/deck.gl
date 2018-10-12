@@ -13,7 +13,7 @@
     "@deck.gl/layers": "^6.1.1",
     "@deck.gl/react": "^6.1.1",
     "brace": "^0.11.1",
-    "luma.gl": "^6.2.0-beta",
+    "luma.gl": "^6.2.0",
     "react": "~16.2.0",
     "react-ace": "^6.1.4",
     "react-dom": "~16.2.0",
