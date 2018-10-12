@@ -102,8 +102,10 @@ export default class GPUGridAggregator {
       changeFlags = DEFAULT_CHANGE_FLAGS;
     }
     this._setState({useGPU});
+    // when projectPoints is true, shader projects to NDC, use `viewportMatrix` to
+    // transform points to viewport (screen) space for aggregation.
     const transformMatrix =
-      gridTransformMatrix || (viewport && viewport.pixelProjectionMatrix) || IDENTITY_MATRIX;
+      (projectPoints ? viewport.viewportMatrix : gridTransformMatrix) || IDENTITY_MATRIX;
     const aggregationParams = {
       positions,
       positions64xyLow,
@@ -255,16 +257,18 @@ export default class GPUGridAggregator {
   /* eslint-disable max-statements */
   _runAggregationOnCPU(opts) {
     const ELEMENTCOUNT = 4;
-    const {positions, weights, cellSize, projectPoints, gridTransformMatrix} = opts;
+    const {positions, weights, cellSize, projectPoints, gridTransformMatrix, viewport} = opts;
     let {countsBuffer, maxCountBuffer} = opts;
     const {numCol, numRow} = this.state;
     // Each element contains 4 floats to match with GPU ouput
     const counts = new Float32Array(numCol * numRow * ELEMENTCOUNT);
-
+    let transformMatrix = gridTransformMatrix;
     let pos = positions;
     if (projectPoints) {
       this._projectPositions(opts);
       pos = this.state.projectedPositions;
+      // project from world space to viewport (screen) space.
+      transformMatrix = viewport.pixelProjectionMatrix;
     }
 
     counts.fill(0);
@@ -272,7 +276,7 @@ export default class GPUGridAggregator {
     let totalCount = 0;
     let totalWeight = 0;
     for (let index = 0; index < pos.length; index += 2) {
-      const gridPos = worldToPixels([pos[index], pos[index + 1], 0], gridTransformMatrix);
+      const gridPos = worldToPixels([pos[index], pos[index + 1], 0], transformMatrix);
       const x = gridPos[0];
       const y = gridPos[1];
       const weight = weights ? weights[index / 2] : 1;
