@@ -48,7 +48,9 @@ All layer accessors that support constant values have had their default values c
 
 Some previously deprecated `project_` module GLSL functions have now been removed.
 
+#### Attribute
 
+`isGeneric` field of attribute object returned by `AttributeManager`'s update callbacks is replaced by `constant`. For more details check [`attribute manager`](/docs/api-reference/attribute-manager.md).
 
 ## Upgrading from deck.gl v5.2 to v5.3
 
