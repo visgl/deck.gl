@@ -9,10 +9,9 @@
   },
   "dependencies": {
     "deck.gl": "^6.2.0-beta",
-    "mapbox-gl": "~0.50.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^4.0.0-alpha"
+    "react-map-gl": "^4.0.0-beta"
   },
   "devDependencies": {
     "buble": "^0.19.3",

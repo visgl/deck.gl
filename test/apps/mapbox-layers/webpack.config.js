@@ -12,13 +12,6 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
-  resolve: {
-    alias: {
-      // Force resolve to the newer version of mapbox. Remove when react-map-gl dependency is upgraded
-      'mapbox-gl': resolve('./node_modules/mapbox-gl')
-    }
-  },
-
   module: {
     rules: [
       {
