@@ -12,8 +12,8 @@ import DeckGL from '@deck.gl/react';
 
 import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 
-import JSON_CONFIGURATION from '../common/configuration';
-import JSON_TEMPLATES from '../common/templates';
+import JSON_CONFIGURATION from '../json-common/configuration';
+import JSON_TEMPLATES from '../json-common/templates';
 const INITIAL_JSON = Object.values(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
