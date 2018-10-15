@@ -17,6 +17,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.2
 
+#### [6.2.0] - Oct 14 2018
+
 ### deck.gl v6.2 Prereleases
 
 #### [6.2.0-beta.2] - Oct 9 2018
