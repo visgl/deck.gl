@@ -35,7 +35,7 @@ const LIGHT_SETTINGS = {
   ambientRatio: 0.2,
   diffuseRatio: 0.5,
   specularRatio: 0.3,
-  lightsStrength: [1.0, 0.0, 2.0, 0.0],
+  lightsStrength: [2.0, 0.0, 1.0, 0.0],
   numberOfLights: 2
 };
 
