@@ -21,6 +21,9 @@ For Earlier Beta Releases see below
 
 ### deck.gl v6.0.0
 
+### [6.0.5] - Oct 14
+- npm force publish
+
 ### [6.0.5] - Oct 13
 - Fix Multi-picking runtime error (#2271)
 
