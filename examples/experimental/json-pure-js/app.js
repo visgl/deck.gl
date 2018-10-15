@@ -10,8 +10,8 @@ import {Deck} from '@deck.gl/core';
 import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 // import positionChildrenUnderViews from './children';
 
-import JSON_TEMPLATES from '../common/templates';
-import JSON_CONFIGURATION from '../common/configuration';
+import JSON_TEMPLATES from '../json-common/templates';
+import JSON_CONFIGURATION from '../json-common/configuration';
 const INITIAL_JSON = Object.values(JSON_TEMPLATES)[0];
 
 mapboxgl.accessToken = mapboxgl.accessToken || process.env.MapboxAccessToken; // eslint-disable-line

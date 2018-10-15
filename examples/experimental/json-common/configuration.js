@@ -4,7 +4,7 @@ import {GL} from 'luma.gl/constants';
 export default {
   // a map of all layers that should be exposes as JSONLayers
   layers: Object.assign({}, require('@deck.gl/layers'), {
-    BezierGraphLayer: require('../../experimental/bezier/bezier-graph-layer').default
+    BezierGraphLayer: require('../bezier/bezier-graph-layer').default
     // PlotLayer: require('../../website/plot/plot-layer').default
   }),
   // Any non-standard views
