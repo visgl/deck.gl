@@ -3,7 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL from 'deck.gl';
-import TileLayer from '../../../modules/experimental-layers/src/tile-layer/tile-layer';
+import TileLayer from '@deck.gl/experimental-layers/tile-layer/tile-layer';
 
 import {decodeTiles} from './utils/decode';
 
@@ -57,7 +57,7 @@ const MAP_LAYER_STYLES = {
 };
 
 class Root extends Component {
-  fetchData(x, y, z) {
+  getTileData({x, y, z}) {
     const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
     const eventPromise = fetch(mapSource);
     return eventPromise
@@ -78,7 +78,7 @@ class Root extends Component {
           new TileLayer({
             ...MAP_LAYER_STYLES,
             pickable: true,
-            fetchData: this.fetchData
+            getTileData: this.getTileData
           })
         ]}
       />

@@ -6,27 +6,25 @@ import {getTileIndices} from './viewport-util';
  */
 
 export default class TileCache {
-  constructor({fetchData, size = 10, onUpdate}) {
-    this.fetchData = fetchData;
+  // TODO: Instead of hardcode size, we should calculate how much memory left
+  constructor({getTileData, size = 10}) {
+    this.getTileData = getTileData;
     this.size = size;
-    this.onUpdate = onUpdate;
 
     this.cache = [];
   }
 
   finalize() {
     this.cache = null;
-    this.onUpdate = () => {};
   }
 
-  update(viewport, callback) {
-    const {cache, size, fetchData} = this;
-    this.onUpdate = callback;
+  update(viewport, onUpdate) {
+    const {cache, size, getTileData} = this;
     const tiles = getTileIndices(viewport).map(({x, y, z}) => {
       let tile = this._find(x, y, z);
       if (!tile) {
         tile = new Tile({
-          fetchData,
+          getTileData,
           x,
           y,
           z
@@ -36,6 +34,8 @@ export default class TileCache {
       return tile;
     });
 
+    // TODO: implement logic that removes tiles outside the viewport
+    // (or furthest from the view port)
     while (cache.length > size) {
       cache.shift();
     }
@@ -43,7 +43,7 @@ export default class TileCache {
     // Sort by zoom level low - high
     cache.sort((t1, t2) => t1.z - t2.z);
 
-    this.onUpdate(tiles);
+    onUpdate(tiles);
   }
 
   _find(x, y, z) {

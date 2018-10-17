@@ -1,5 +1,5 @@
 export default class Tile {
-  constructor({fetchData, x, y, z}) {
+  constructor({getTileData, x, y, z}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -8,9 +8,9 @@ export default class Tile {
     this._loader = null;
     this.isVisible = false;
 
-    this.fetchData = fetchData;
+    this.getTileData = getTileData;
 
-    this._init();
+    this._loader = this._loadData();
   }
 
   get data() {
@@ -30,21 +30,14 @@ export default class Tile {
     return Math.floor(tile.x / m) === x && Math.floor(tile.y / m) === y;
   }
 
-  _init() {
-    this._loader = this._loadData();
-  }
-
   _loadData() {
     const {x, y, z} = this;
-    return this.fetchData(x, y, z).then(buffers => {
-      return new Promise((resolve, reject) => {
-        try {
-          this._data = buffers;
-          resolve(buffers);
-        } catch (err) {
-          reject(err);
-        }
-      });
-    });
+    return (
+      this.getTileData &&
+      this.getTileData({x, y, z}).then(buffers => {
+        this._data = buffers;
+        return buffers;
+      })
+    );
   }
 }
