@@ -5,7 +5,7 @@ import {vectorTileFeatureToGeoJSON} from './feature';
 
 const TILE_SIZE = 512;
 
-export function decodeTiles(x, y, z, arrayBuffer) {
+export function decodeTile(x, y, z, arrayBuffer) {
   const tile = new VectorTile(new Protobuf(arrayBuffer));
 
   const result = [];

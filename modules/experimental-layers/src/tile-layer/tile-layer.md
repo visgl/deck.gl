@@ -5,31 +5,38 @@ This TileLayer takes in a function `getTileData` that fetches tiles, and renders
 ```js
 import DeckGL from 'deck.gl';
 import TileLayer from '@deck.gl/experimental-layers/tile-layer/tile-layer';
+import {VectorTile} from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
 
-getTileData({x, y, z}) {
+export const App = ({viewport}) => {
+  function getTileData({x, y, z}) {
     const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
     return fetch(mapSource)
-      .then(response => {
-        return response.arrayBuffer();
-      })
-      .then(buffer => {
-        return decodeTiles(x, y, z, buffer);
-      });
+      .then(response => response.arrayBuffer())
+      .then(buffer => vectorTileToGeoJSON(buffer, x, y, z));
   }
 
-  render() {
-    return (
-      <DeckGL
-        layers={[
-          new TileLayer({
-            ...MAP_LAYER_STYLES,
-            getTileData: this.getTileData
-          })
-        ]}
-      />
-    );
+  function vectorTileToGeoJSON(buffer, x, y, z) {
+    const tile = new VectorTile(new Protobuf(buffer));
+    const features = [];
+    for (const layerName in tile.layers) {
+      const vectorTileLayer = tile.layers[layerName];
+      for (let i = 0; i < vectorTileLayer.length; i++) {
+        const vectorTileFeature = vectorTileLayer.feature(i);
+        const feature = vectorTileFeature.toGeoJSON(x, y, z);
+        features.push(feature);
+      }
+    }
+    return features;
   }
-}
+  const layer = new TileLayer({
+    stroked: false,
+    getLineColor: [192, 192, 192],
+    getFillColor: [140, 170, 180],
+    getTileData
+  });
+  return <DeckGL {...viewport} layers={[layer]} />;
+};
 ```
 
 ## Properties

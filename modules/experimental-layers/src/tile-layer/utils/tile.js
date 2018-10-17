@@ -32,12 +32,16 @@ export default class Tile {
 
   _loadData() {
     const {x, y, z} = this;
-    return (
-      this.getTileData &&
-      this.getTileData({x, y, z}).then(buffers => {
+    if (!this.getTileData) {
+      return null;
+    }
+    return this.getTileData({x, y, z})
+      .then(buffers => {
         this._data = buffers;
         return buffers;
       })
-    );
+      .catch(error => {
+        throw new Error(`Could not load tile data with tile ${z}-${x}-${y}: ${error}`);
+      });
   }
 }

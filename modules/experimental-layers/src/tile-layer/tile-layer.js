@@ -1,44 +1,9 @@
 import {GeoJsonLayer, CompositeLayer} from 'deck.gl';
 import TileCache from './utils/tile-cache';
 
-const defaultLineColor = [0, 0, 0, 255];
-const defaultFillColor = [0, 0, 0, 255];
-
 const defaultProps = {
-  stroked: true,
-  filled: true,
-  extruded: false,
-  wireframe: false,
-
-  lineWidthScale: 1,
-  lineWidthMinPixels: 0,
-  lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
-  lineJointRounded: false,
-  lineMiterLimit: 4,
-
-  elevationScale: 1,
-
-  pointRadiusScale: 1,
-  pointRadiusMinPixels: 0, //  min point radius in pixels
-  pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-
-  lineDashJustified: false,
-  fp64: false,
-
-  // Line and polygon outline color
-  getLineColor: defaultLineColor,
-  // Point and polygon fill color
-  getFillColor: defaultFillColor,
-  // Point radius
-  getRadius: 1,
-  // Line and polygon outline accessors
-  getLineWidth: 1,
-  // Line dash array accessor
-  getLineDashArray: null,
-  // Polygon extrusion accessor
-  getElevation: 1000,
-
-  renderSubLayers: props => new GeoJsonLayer(props)
+  renderSubLayers: props => new GeoJsonLayer(props),
+  getTileData: ({x, y, z}) => Promise.resolve(null)
 };
 
 export default class TileLayer extends CompositeLayer {
