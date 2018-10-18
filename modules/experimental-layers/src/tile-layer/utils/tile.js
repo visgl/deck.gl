@@ -41,6 +41,8 @@ export default class Tile {
         return buffers;
       })
       .catch(error => {
+        // TODO: error handling: consider the case when we don't have tiles above MAX_ZOOM,
+        // we should fallback to using data from an available zoom level.
         throw new Error(`Could not load tile data with tile ${z}-${x}-${y}: ${error}`);
       });
   }
