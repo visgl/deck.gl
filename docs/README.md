@@ -57,6 +57,7 @@ deck.gl has been developed in parallel with a number of companion modules, e.g.:
 
 * [luma.gl](https://uber.github.io/luma.gl/#/) - A general purpose WebGL library designed to be interoperable both with the raw WebGL API and (as far as possible) with other WebGL libraries. In particular, luma.gl does not claim ownership of the WebGL context, and can work with any supplied context, including contexts created by the application or other WebGL libraries.
 * [react-map-gl](https://uber.github.io/react-map-gl/#/) - A React wrapper around Mapbox GL which works seamlessly with deck.gl.
+* [nebula.gl](https://uber.github.io/nebula.gl/#/) - A high-performance feature editing framework for deck.gl.
 
 
 ## Learning deck.gl
