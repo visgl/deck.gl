@@ -8,9 +8,10 @@ const defaultProps = {
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
+    const {maxZoom, minZoom, getTileData} = this.props;
     this.state = {
       tiles: [],
-      tileCache: new TileCache({getTileData: this.props.getTileData})
+      tileCache: new TileCache({getTileData, maxZoom, minZoom})
     };
   }
 
@@ -23,13 +24,17 @@ export default class TileLayer extends CompositeLayer {
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData)
     ) {
+      const {getTileData, maxZoom, minZoom} = props;
       this.state.tileCache.finalize();
       this.setState({
-        tileCache: new TileCache({getTileData: this.props.getTileData})
+        tileCache: new TileCache({getTileData, maxZoom, minZoom})
       });
     }
     if (changeFlags.viewportChanged) {
-      this.state.tileCache.update(context.viewport, tiles => this.setState({tiles}));
+      const {viewport} = context;
+      if (viewport.id !== 'DEFAULT-INITIAL-VIEWPORT') {
+        this.state.tileCache.update(viewport, tiles => this.setState({tiles}));
+      }
     }
   }
 
