@@ -427,7 +427,7 @@ export default class LayerManager {
         sublayers = newLayer.isComposite && newLayer.getSubLayers();
         // End layer lifecycle method: render sublayers
       } catch (err) {
-        log.warn(`error during matching of ${layerName(newLayer)}`, err);
+        log.warn(`error during matching of ${layerName(newLayer)}`, err)();
         error = error || err; // Record first exception
       }
 
@@ -531,7 +531,7 @@ export default class LayerManager {
       error = err;
     }
     layer.lifecycle = LIFECYCLE.FINALIZED;
-    log.log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`);
+    log.log(LOG_PRIORITY_LIFECYCLE, `finalizing ${layerName(layer)}`)();
     return error;
   }
 

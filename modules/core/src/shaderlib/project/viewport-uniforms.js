@@ -169,10 +169,10 @@ export function getUniformsFromViewport({
   assert(viewport);
 
   if (projectionMode !== undefined) {
-    log.removed('projectionMode', 'coordinateSystem');
+    log.removed('projectionMode', 'coordinateSystem')();
   }
   if (positionOrigin !== undefined) {
-    log.removed('positionOrigin', 'coordinateOrigin');
+    log.removed('positionOrigin', 'coordinateOrigin')();
   }
 
   return Object.assign(

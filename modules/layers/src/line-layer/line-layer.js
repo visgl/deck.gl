@@ -41,7 +41,7 @@ export default class LineLayer extends Layer {
   constructor(props) {
     let overrideProps = null;
     if (Number.isFinite(props.strokeWidth)) {
-      log.deprecated('LineLayer: `strokeWidth`', '`getStrokeWidth`');
+      log.deprecated('LineLayer: `strokeWidth`', '`getStrokeWidth`')();
       overrideProps = {
         getStrokeWidth: props.strokeWidth
       };

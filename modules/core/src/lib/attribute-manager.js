@@ -304,7 +304,7 @@ export default class AttributeManager {
   // Used to register an attribute
   _add(attributes, updaters, extraProps = {}) {
     if (updaters) {
-      log.removed('AttributeManager.add({updaters}) - updater map no longer supported');
+      log.removed('AttributeManager.add({updaters}) - updater map no longer supported')();
     }
 
     const newAttributes = {};

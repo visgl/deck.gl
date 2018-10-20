@@ -125,7 +125,7 @@ export default class GPUGridAggregator {
       return this._runAggregationOnGPU(aggregationParams);
     }
     if (useGPU) {
-      log.warn('ScreenGridAggregator: GPU Aggregation not supported, falling back to CPU');
+      log.warn('ScreenGridAggregator: GPU Aggregation not supported, falling back to CPU')();
     }
     return this._runAggregationOnCPU(aggregationParams);
   }
