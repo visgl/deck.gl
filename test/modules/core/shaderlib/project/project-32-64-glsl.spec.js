@@ -131,9 +131,6 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
-        // FP64 modules uses `out` variables in many methods for
-        disableTranspileFor64: true,
         skipGPUs: ['Intel'],
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
           project_position_to_clipspace_vec3_vec2_vec3([-122.45, 37.78, 0], [0, 0], [0, 0, 0]),
@@ -148,9 +145,6 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace (non-zero Z)',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
-        // FP64 modules uses `out` variables in many methods for
-        disableTranspileFor64: true,
         skipGPUs: ['Intel'],
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
           project_position_to_clipspace_vec3_vec2_vec3([-122.45, 37.78, 100], [0, 0], [0, 0, 0]),
@@ -166,10 +160,10 @@ const TEST_CASES = [
     ]
   },
   {
-    title: 'LNGLAT_EXPERIMENTAL mode - auto offset',
+    title: 'LNGLAT_DEPRECATED mode',
     params: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED
     },
     tests: [
       {
@@ -177,16 +171,12 @@ const TEST_CASES = [
         // NOTE: disbaling transpilation due to https://github.com/stackgl/glsl-transpiler/issues/38
         disableTranspile: true,
 
-        disableProject64: true, // NOTE: works with project32 but not with project64, is it expected?
         func: ({project_position_to_clipspace}) => {
           const worldPosition = [];
           project_position_to_clipspace([-122.05, 37.92, 0], [0, 0], [0, 0, 0], worldPosition);
           return worldPosition;
         },
-        output: getPixelOffset(
-          TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]),
-          TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122, 38])
-        ),
+        output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
         vs: TRANSFORM_VS.project_position_to_clipspace_world_position(
@@ -200,7 +190,6 @@ const TEST_CASES = [
         // FP64 modules uses `out` variables in many methods for
         disableTranspileFor64: true,
 
-        disableProject64: true, // NOTE: works with project32 but not with project64, is it expected?
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
           project_position_to_clipspace_vec3_vec2_vec3([-122.05, 37.92, 0], [0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT_HIGH_ZOOM, coords),
@@ -226,8 +215,6 @@ const TEST_CASES = [
         name: 'project_position_to_clipspace_world_position',
         // NOTE: disbaling transpilation due to https://github.com/stackgl/glsl-transpiler/issues/38
         disableTranspile: true,
-
-        disableProject64: true, // NOTE: works with project32 but not with project64, is it expected?
         func: ({project_position_to_clipspace}) => {
           const worldPosition = [];
           project_position_to_clipspace([0.05, 0.08, 0], [0, 0], [0, 0, 0], worldPosition);
@@ -246,11 +233,7 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
-        // FP64 modules uses `out` variables in many methods for
-        disableTranspileFor64: true,
 
-        disableProject64: true, // NOTE: works with project32 but not with project64, is it expected?
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
           project_position_to_clipspace_vec3_vec2_vec3([0.05, 0.08, 0], [0, 0], [0, 0, 0]),
         mapResult: coords => clipspaceToScreen(TEST_VIEWPORT, coords),
@@ -272,6 +255,11 @@ test('project32&64#vs', t => {
   [false, true].forEach(usefp64 => {
     /* eslint-disable max-nested-callbacks, complexity */
     TEST_CASES.forEach(testCase => {
+      if (usefp64 && testCase.params.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
+        // Apply 64 bit projection only for LNGLAT_DEPRECATED
+        return;
+      }
+
       t.comment(testCase.title);
 
       let uniforms = project.getUniforms(testCase.params);
@@ -280,8 +268,7 @@ test('project32&64#vs', t => {
       }
       testCase.tests.forEach(c => {
         const expected = c.output;
-        let skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => vendor.indexOf(gpu) >= 0);
-        skipOnGPU = skipOnGPU || (usefp64 && c.disableProject64);
+        const skipOnGPU = c.skipGPUs && c.skipGPUs.some(gpu => vendor.indexOf(gpu) >= 0);
 
         if (Transform.isSupported(gl) && !skipOnGPU) {
           // Reduced precision tolerencewhen using 64 bit project module.
