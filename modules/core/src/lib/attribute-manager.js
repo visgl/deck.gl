@@ -161,12 +161,12 @@ export default class AttributeManager {
   }
 
   // Adds attributes
-  add(attributes, updaters = {}) {
+  add(attributes, updaters) {
     this._add(attributes, updaters);
   }
 
   // Adds attributes
-  addInstanced(attributes, updaters = {}) {
+  addInstanced(attributes, updaters) {
     this._add(attributes, updaters, {instanced: 1});
   }
 
@@ -304,7 +304,7 @@ export default class AttributeManager {
   // Used to register an attribute
   _add(attributes, updaters, extraProps = {}) {
     if (updaters) {
-      log.removed('AttributeManager.add({updaters}) - updater map no longer supported')();
+      log.warn('AttributeManager.add({updaters}) - updater map no longer supported')();
     }
 
     const newAttributes = {};
