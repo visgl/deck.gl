@@ -115,8 +115,9 @@ test('Layer#constructor(multi prop objects)', t => {
 test('SubLayer#constructor', t => {
   const layer = new SubLayer(LAYER_PROPS);
   t.ok(layer, 'SubLayer created');
-  t.equal(layer.props.onHover, Layer.defaultProps.onHover, 'Layer defaultProps found');
-  t.equal(layer.props.getColor, SubLayer.defaultProps.getColor, 'SubLayer defaultProps found');
+  const defaultProps = SubLayer._mergedDefaultProps;
+  t.equal(layer.props.onHover, defaultProps.onHover, 'Layer defaultProps found');
+  t.equal(layer.props.getColor, defaultProps.getColor, 'SubLayer defaultProps found');
   t.end();
 });
 
@@ -144,22 +145,28 @@ test('Layer#diffProps', t => {
   const layer = new SubLayer(LAYER_PROPS);
   t.doesNotThrow(() => testInitializeLayer({layer}), 'Layer initialized OK');
 
-  layer.diffProps(Object.assign({}, LAYER_PROPS), LAYER_PROPS);
+  layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');
 
-  layer.diffProps(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]}), LAYER_PROPS);
+  layer.diffProps(
+    new SubLayer(Object.assign({}, LAYER_PROPS, {data: dataVariants[0]})).props,
+    layer.props
+  );
   t.true(layer.getChangeFlags().dataChanged, 'data changed');
 
-  layer.diffProps(Object.assign({}, LAYER_PROPS, {size: 0}), LAYER_PROPS);
+  layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS, {size: 0})).props, layer.props);
   t.true(layer.getChangeFlags().propsChanged, 'props changed');
 
   // Dummy attribute manager to avoid diffUpdateTriggers failure
-  layer.diffProps(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}}), LAYER_PROPS);
+  layer.diffProps(
+    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 100}})).props,
+    layer.props
+  );
   t.true(layer.getChangeFlags().propsOrDataChanged, 'props changed');
 
   const spy = makeSpy(AttributeManager.prototype, 'invalidate');
   layer.diffProps(
-    Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}}),
+    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: {version: 0}}})).props,
     layer.props
   );
   t.ok(spy.called, 'updateTriggers fired');

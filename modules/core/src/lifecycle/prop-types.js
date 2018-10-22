@@ -1,19 +1,13 @@
-import assert from '../utils/assert';
-
 const TYPE_DEFINITIONS = {
   boolean: {
     validate(value, propType) {
       return true;
+    },
+    equal(value1, value2, propType) {
+      return Boolean(value1) === Boolean(value2);
     }
   },
   number: {
-    validateType(value, propType) {
-      return (
-        'value' in propType &&
-        (!('max' in propType) || Number.isFinite(propType.max)) &&
-        (!('min' in propType) || Number.isFinite(propType.min))
-      );
-    },
     validate(value, propType) {
       return (
         Number.isFinite(value) &&
@@ -21,8 +15,63 @@ const TYPE_DEFINITIONS = {
         (!('min' in propType) || value >= propType.min)
       );
     }
+  },
+  color: {
+    validate(value, propType) {
+      return Array.isArray(value) && (value.length === 3 || value.length === 4);
+    },
+    equal(value1, value2, propType) {
+      return arrayEqual(value1, value2);
+    }
+  },
+  accessor: {
+    validate(value, propType) {
+      const valueType = typeof value;
+      return valueType === 'function' || valueType === typeof propType.value;
+    },
+    equal(value1, value2, propType) {
+      if (typeof value2 === 'function') {
+        return true;
+      }
+      return arrayEqual(value1, value2);
+    }
+  },
+  array: {
+    validate(value, propType) {
+      return typeof value === 'function';
+    },
+    equal(value1, value2, propType) {
+      return propType.compare ? arrayEqual(value1, value2) : value1 === value2;
+    }
+  },
+  function: {
+    validate(value, propType) {
+      return typeof value === 'function';
+    },
+    equal(value1, value2, propType) {
+      return !propType.compare || value1 === value2;
+    }
   }
 };
+
+function arrayEqual(array1, array2) {
+  if (array1 === array2) {
+    return true;
+  }
+  if (!Array.isArray(array1) || !Array.isArray(array2)) {
+    return false;
+  }
+  const len = array1.length;
+  if (len !== array2.length) {
+    return false;
+  }
+  for (let i = 0; i < len; i++) {
+    if (array1[i] !== array2[i]) {
+      return false;
+    }
+  }
+  return true;
+}
 
 export function parsePropTypes(propDefs) {
   const propTypes = {};
@@ -41,32 +90,24 @@ export function parsePropTypes(propDefs) {
 function parsePropType(name, propDef) {
   switch (getTypeOf(propDef)) {
     case 'object':
-      propDef = normalizePropDefinition(name, propDef);
-      return parsePropDefinition(propDef);
+      return normalizePropDefinition(name, propDef);
 
     case 'array':
-      return guessArrayType(name, propDef);
+      return normalizePropDefinition(name, {type: 'array', value: propDef, compare: false});
 
     case 'boolean':
-      return {name, type: 'boolean', value: propDef};
+      return normalizePropDefinition(name, {type: 'boolean', value: propDef});
 
     case 'number':
-      return guessNumberType(name, propDef);
+      return normalizePropDefinition(name, {type: 'number', value: propDef});
 
     case 'function':
-      return {name, type: 'function', value: propDef};
+      return normalizePropDefinition(name, {type: 'function', value: propDef, compare: true});
     // return guessFunctionType(name, propDef);
 
     default:
       return {name, type: 'unknown', value: propDef};
   }
-}
-
-function guessArrayType(name, array) {
-  if (/color/i.test(name) && (array.length === 3 || array.length === 4)) {
-    return {name, type: 'color', value: array};
-  }
-  return {name, type: 'array', value: array};
 }
 
 function normalizePropDefinition(name, propDef) {
@@ -77,32 +118,7 @@ function normalizePropDefinition(name, propDef) {
     }
     return Object.assign({name, type: getTypeOf(propDef.value)}, propDef);
   }
-  return Object.assign({name}, propDef);
-}
-
-function parsePropDefinition(propDef) {
-  const {type} = propDef;
-  const typeDefinition = TYPE_DEFINITIONS[type] || {};
-  const {typeValidator} = typeDefinition;
-  if (typeValidator) {
-    assert(typeValidator(propDef), 'Illegal prop type');
-  }
-
-  return propDef;
-}
-
-function guessNumberType(name, value) {
-  const isKnownProp =
-    /radius|scale|width|height|pixel|size|miter/i.test(name) && /^((?!scale).)*$/.test(name);
-  const max = isKnownProp ? 100 : 1;
-  const min = 0;
-  return {
-    name,
-    type: 'number',
-    max: Math.max(value, max),
-    min: Math.min(value, min),
-    value
-  };
+  return Object.assign({name}, TYPE_DEFINITIONS[propDef.type], propDef);
 }
 
 // improved version of javascript typeof that can distinguish arrays and null values

@@ -33,7 +33,7 @@ export default function extractJSXLayers({children, layers, views}) {
       // For some reason Children.forEach doesn't filter out `null`s
       const ElementType = reactElement.type;
       if (inheritsFrom(ElementType, Layer)) {
-        const layer = new ElementType(reactElement.props);
+        const layer = createLayer(ElementType, reactElement.props);
         jsxLayers.push(layer);
       } else {
         reactChildren.push(reactElement);
@@ -64,4 +64,17 @@ export default function extractJSXLayers({children, layers, views}) {
   layers = jsxLayers.length > 0 ? [...jsxLayers, ...layers] : layers;
 
   return {layers, children: reactChildren, views};
+}
+
+function createLayer(LayerType, reactProps) {
+  const props = {};
+  // Layer.defaultProps is treated as ReactElement.defaultProps and merged into react props
+  // Remove them
+  const defaultProps = LayerType.defaultProps || {};
+  for (const key in reactProps) {
+    if (defaultProps[key] !== reactProps[key]) {
+      props[key] = reactProps[key];
+    }
+  }
+  return new LayerType(props);
 }
