@@ -37,6 +37,7 @@ test('should clear the cache when finalize is called', t => {
   t.equal(testTileCache._cache.size, 1);
   testTileCache.finalize();
   t.equal(testTileCache._cache.size, 0);
+  t.end();
 });
 
 test('should call onUpdate with the expected tiles', t => {

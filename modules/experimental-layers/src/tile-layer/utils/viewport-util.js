@@ -44,3 +44,12 @@ export function getTileIndices(viewport) {
 
   return indices;
 }
+
+export function getAdjustedTileIndex({x, y, z}, adjustedZ) {
+  const m = Math.pow(2, z - adjustedZ);
+  return {
+    x: Math.floor(x / m),
+    y: Math.floor(y / m),
+    z: adjustedZ
+  };
+}

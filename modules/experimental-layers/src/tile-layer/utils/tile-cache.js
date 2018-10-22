@@ -1,5 +1,5 @@
 import Tile from './tile';
-import {getTileIndices} from './viewport-util';
+import {getTileIndices, getAdjustedTileIndex} from './viewport-util';
 
 /**
  * Manages loading and purging of tiles data. This class caches recently visited tiles
@@ -50,15 +50,13 @@ export default class TileCache {
     });
 
     for (let i = 0; i < tileIndices.length; i++) {
-      const x = Math.max(tileIndices[i].x, 0);
-      const y = Math.max(tileIndices[i].y, 0);
-
-      let z = tileIndices[i].z;
-      if (this._maxZoom && z > this._maxZoom) {
-        z = this._maxZoom;
-      } else if (this._minZoom && z < this._minZoom) {
-        z = this._minZoom;
+      let tileIndex = tileIndices[i];
+      if (this._maxZoom && tileIndex.z > this._maxZoom) {
+        tileIndex = getAdjustedTileIndex(tileIndices[i], this._maxZoom);
+      } else if (this._minZoom && tileIndex.z < this._minZoom) {
+        tileIndex = getAdjustedTileIndex(tileIndices[i], this._minZoom);
       }
+      const {x, y, z} = tileIndex;
       let tile = this._getTile(x, y, z);
       if (!tile) {
         tile = new Tile({

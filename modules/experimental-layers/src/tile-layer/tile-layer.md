@@ -41,8 +41,19 @@ export const App = ({viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`
-and `getTileData`
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `maxZoom` and `minZoom`.
+
+##### `maxZoom` (Number)
+
+The maximum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is greater than `maxZoom`, we will fetch data at `maxZoom` instead of the current zoom level.
+
+- Default: `null`
+
+##### `minZoom` (Number)
+
+The minimum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is smaller than `minZoom`, we will fetch data at `minZoom` instead of the current zoom level.
+
+- Default: `null`
 
 ### Render Options
 

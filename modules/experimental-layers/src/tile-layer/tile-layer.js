@@ -3,7 +3,9 @@ import TileCache from './utils/tile-cache';
 
 const defaultProps = {
   renderSubLayers: props => new GeoJsonLayer(props),
-  getTileData: ({x, y, z}) => Promise.resolve(null)
+  getTileData: ({x, y, z}) => Promise.resolve(null),
+  maxZoom: null,
+  minZoom: null
 };
 
 export default class TileLayer extends CompositeLayer {
