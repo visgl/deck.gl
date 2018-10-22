@@ -513,20 +513,20 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle methods
     this.updateState(updateParams);
-
-    // Render or update previously rendered sublayers
-    if (this.isComposite) {
-      this._renderLayers(updateParams);
-    }
     // End subclass lifecycle methods
 
-    // Add any subclass attributes
-    this.updateAttributes(this.props);
-    this._updateBaseUniforms();
+    if (this.isComposite) {
+      // Render or update previously rendered sublayers
+      this._renderLayers(updateParams);
+    } else {
+      // Add any subclass attributes
+      this.updateAttributes(this.props);
+      this._updateBaseUniforms();
 
-    // Note: Automatic instance count update only works for single layers
-    if (this.state.model) {
-      this.state.model.setInstanceCount(this.getNumInstances());
+      // Note: Automatic instance count update only works for single layers
+      if (this.state.model) {
+        this.state.model.setInstanceCount(this.getNumInstances());
+      }
     }
 
     this.clearChangeFlags();
@@ -843,9 +843,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     for (const model of this.getModels()) {
       model.setUniforms(uniforms);
     }
-
-    // TODO - set needsRedraw on the model(s)?
-    this.setNeedsRedraw();
   }
 
   // DEPRECATED METHODS
