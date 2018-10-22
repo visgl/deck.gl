@@ -192,7 +192,7 @@ export default class Layer extends Component {
 
   // DEPRECATE: This does not handle offset modes
   projectFlat(lngLat) {
-    log.deprecated('layer.projectFlat', 'layer.projectPosition');
+    log.deprecated('layer.projectFlat', 'layer.projectPosition')();
     const {viewport} = this.context;
     assert(Array.isArray(lngLat));
     return viewport.projectFlat(lngLat);
@@ -200,7 +200,7 @@ export default class Layer extends Component {
 
   // DEPRECATE: This is not meaningful in offset modes
   unprojectFlat(xy) {
-    log.deprecated('layer.unprojectFlat');
+    log.deprecated('layer.unprojectFlat')();
     const {viewport} = this.context;
     assert(Array.isArray(xy));
     return viewport.unprojectFlat(xy);
@@ -213,9 +213,9 @@ export default class Layer extends Component {
       }
       log.once(
         0,
-        `64-bit mode only works with coordinateSystem set to
-        COORDINATE_SYSTEM.LNGLAT. Rendering in 32-bit mode instead`
-      );
+        `Legacy 64-bit mode only works with coordinateSystem set to
+        COORDINATE_SYSTEM.LNGLAT_DEPRECATED. Rendering in 32-bit mode instead`
+      )();
     }
 
     return false;

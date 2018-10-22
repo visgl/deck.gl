@@ -173,7 +173,7 @@ export default class ComponentState {
     const loadCount = asyncProp.pendingLoadCount;
     promise
       .then(data => this._setAsyncPropValue(propName, data, loadCount))
-      .catch(error => log.error(error));
+      .catch(error => log.error(error)());
   }
 
   // Give the app a chance to post process the loaded data

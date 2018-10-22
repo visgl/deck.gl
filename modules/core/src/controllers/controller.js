@@ -133,7 +133,7 @@ export default class Controller {
   /* eslint-disable complexity, max-statements */
   setProps(props) {
     if ('onViewportChange' in props) {
-      log.removed('onViewportChange');
+      log.removed('onViewportChange')();
     }
     if ('onViewStateChange' in props) {
       this.onViewStateChange = props.onViewStateChange;
