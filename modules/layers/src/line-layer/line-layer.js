@@ -31,10 +31,10 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   fp64: false,
 
-  getSourcePosition: x => x.sourcePosition,
-  getTargetPosition: x => x.targetPosition,
-  getColor: DEFAULT_COLOR,
-  getStrokeWidth: 1
+  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getStrokeWidth: {type: 'accessor', value: 1}
 };
 
 export default class LineLayer extends Layer {

@@ -33,11 +33,11 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   fp64: false,
 
-  getSourcePosition: x => x.sourcePosition,
-  getTargetPosition: x => x.targetPosition,
-  getSourceColor: DEFAULT_COLOR,
-  getTargetColor: DEFAULT_COLOR,
-  getStrokeWidth: 1
+  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getStrokeWidth: {type: 'accessor', value: 1}
 };
 
 export default class ArcLayer extends Layer {

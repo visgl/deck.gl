@@ -39,15 +39,15 @@ const defaultProps = {
   fp64: false,
 
   // elevation multiplier
-  elevationScale: 1,
+  elevationScale: {type: 'number', min: 0, value: 1},
 
   // Accessor for polygon geometry
-  getPolygon: f => f.polygon,
+  getPolygon: {type: 'accessor', value: f => f.polygon},
   // Accessor for extrusion height
-  getElevation: 1000,
+  getElevation: {type: 'accessor', value: 1000},
   // Accessor for colors
-  getFillColor: DEFAULT_COLOR,
-  getLineColor: DEFAULT_COLOR,
+  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}

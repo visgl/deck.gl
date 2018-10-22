@@ -170,7 +170,10 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getPosition: d => d.COORDINATES
+          getPosition: d => d.COORDINATES,
+          updateTriggers: {
+            getPosition: 1
+          }
         },
         assert({layer, oldState}) {
           t.ok(
@@ -211,19 +214,22 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getColorValue
+          getColorValue,
+          updateTriggers: {
+            getColorValue: 1
+          }
         },
         assert({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
             oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should not update sortedColorBins'
+            'should update sortedColorBins'
           );
 
           t.ok(
             oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
+            'should not update sortedElevationBins'
           );
 
           t.ok(
@@ -325,7 +331,10 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getElevationValue
+          getElevationValue,
+          updateTriggers: {
+            getElevationValue: 1
+          }
         },
         assert({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
@@ -487,7 +496,10 @@ test('GridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          getColorValue
+          getColorValue,
+          updateTriggers: {
+            getColorValue: 1
+          }
         },
         assert({subLayer, spies}) {
           t.ok(
@@ -517,7 +529,10 @@ test('GridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          getElevationValue
+          getElevationValue,
+          updateTriggers: {
+            getElevationValue: 1
+          }
         },
         assert({subLayer, spies}) {
           t.ok(

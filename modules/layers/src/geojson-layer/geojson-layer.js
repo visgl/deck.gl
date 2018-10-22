@@ -56,17 +56,17 @@ const defaultProps = {
   fp64: false,
 
   // Line and polygon outline color
-  getLineColor: defaultLineColor,
+  getLineColor: {type: 'accessor', value: defaultLineColor},
   // Point and polygon fill color
-  getFillColor: defaultFillColor,
+  getFillColor: {type: 'accessor', value: defaultFillColor},
   // Point radius
-  getRadius: 1,
+  getRadius: {type: 'accessor', value: 1},
   // Line and polygon outline accessors
-  getLineWidth: 1,
+  getLineWidth: {type: 'accessor', value: 1},
   // Line dash array accessor
-  getLineDashArray: null,
+  getLineDashArray: {type: 'accessor', value: [0, 0]},
   // Polygon extrusion accessor
-  getElevation: 1000,
+  getElevation: {type: 'accessor', value: 1000},
 
   subLayers: {
     PointLayer: ScatterplotLayer,

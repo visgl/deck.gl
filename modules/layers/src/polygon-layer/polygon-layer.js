@@ -41,17 +41,17 @@ const defaultProps = {
   lineDashJustified: false,
   fp64: false,
 
-  getPolygon: f => f.polygon,
+  getPolygon: {type: 'accessor', value: f => f.polygon},
   // Polygon fill color
-  getFillColor: defaultFillColor,
+  getFillColor: {type: 'accessor', value: defaultFillColor},
   // Point, line and polygon outline color
-  getLineColor: defaultLineColor,
+  getLineColor: {type: 'accessor', value: defaultLineColor},
   // Line and polygon outline accessors
-  getLineWidth: 1,
+  getLineWidth: {type: 'accessor', value: 1},
   // Line dash array accessor
-  getLineDashArray: null,
+  getLineDashArray: {type: 'accessor', value: [0, 0]},
   // Polygon extrusion accessor
-  getElevation: 1000,
+  getElevation: {type: 'accessor', value: 1000},
 
   // Optional settings for 'lighting' shader module
   lightSettings: {}

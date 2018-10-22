@@ -31,7 +31,7 @@ const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: points => points.length,
+  getColorValue: {type: 'accessor', value: points => points.length},
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   onSetColorDomain: nop,
@@ -39,7 +39,7 @@ const defaultProps = {
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: points => points.length,
+  getElevationValue: {type: 'accessor', value: points => points.length},
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   elevationScale: 1,
@@ -48,7 +48,7 @@ const defaultProps = {
   // grid
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: x => x.position,
+  getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
   fp64: false,
 

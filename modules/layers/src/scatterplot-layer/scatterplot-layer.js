@@ -29,16 +29,16 @@ import fs from './scatterplot-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  radiusScale: 1,
-  radiusMinPixels: 0, //  min point radius in pixels
-  radiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
-  strokeWidth: 1,
+  radiusScale: {type: 'number', min: 0, value: 1},
+  radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
+  radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
+  strokeWidth: {type: 'number', min: 0, value: 1},
   outline: false,
   fp64: false,
 
-  getPosition: x => x.position,
-  getRadius: 1,
-  getColor: DEFAULT_COLOR
+  getPosition: {type: 'accessor', value: x => x.position},
+  getRadius: {type: 'accessor', value: 1},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR}
 };
 
 export default class ScatterplotLayer extends Layer {

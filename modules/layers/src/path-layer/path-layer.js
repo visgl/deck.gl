@@ -30,18 +30,18 @@ import fs from './path-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  widthScale: 1, // stroke width in meters
-  widthMinPixels: 0, //  min stroke width in pixels
-  widthMaxPixels: Number.MAX_SAFE_INTEGER, // max stroke width in pixels
+  widthScale: {type: 'number', min: 0, value: 1}, // stroke width in meters
+  widthMinPixels: {type: 'number', min: 0, value: 0}, //  min stroke width in pixels
+  widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max stroke width in pixels
   rounded: false,
-  miterLimit: 4,
+  miterLimit: {type: 'number', min: 0, value: 4},
   fp64: false,
   dashJustified: false,
 
-  getPath: object => object.path,
-  getColor: DEFAULT_COLOR,
-  getWidth: 1,
-  getDashArray: null
+  getPath: {type: 'accessor', value: object => object.path},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getWidth: {type: 'accessor', value: 1},
+  getDashArray: {type: 'accessor', value: [0, 0]}
 };
 
 const isClosed = path => {
