@@ -44,7 +44,7 @@ export default class ArcLayer extends Layer {
   constructor(props) {
     let overrideProps = null;
     if (Number.isFinite(props.strokeWidth)) {
-      log.deprecated('ArcLayer: `strokeWidth`', '`getStrokeWidth`');
+      log.deprecated('ArcLayer: `strokeWidth`', '`getStrokeWidth`')();
       overrideProps = {
         getStrokeWidth: props.strokeWidth
       };

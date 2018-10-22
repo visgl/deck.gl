@@ -30,7 +30,7 @@ export function linearScale(domain, range, value) {
 export function quantizeScale(domain, range, value) {
   const domainRange = domain[1] - domain[0];
   if (domainRange <= 0) {
-    log.warn('quantizeScale: invalid domain, returning range[0]');
+    log.warn('quantizeScale: invalid domain, returning range[0]')();
     return range[0];
   }
   const step = domainRange / range.length;
