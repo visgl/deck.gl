@@ -54,7 +54,7 @@ const INITIAL_CONTEXT = Object.seal({
   stats: null, // for tracking lifecycle performance
 
   // Make sure context.viewport is not empty on the first layer initialization
-  viewport: new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
+  viewport: new Viewport(), // Current viewport, exposed to layers for project* function
 
   // GL Resources
   shaderCache: null,
