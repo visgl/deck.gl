@@ -41,8 +41,25 @@ export const App = ({viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`
-and `getTileData`
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `maxZoom`, `minZoom` and `maxCacheSize`.
+
+##### `maxZoom` (Number)
+
+The maximum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is greater than `maxZoom`, we will fetch data at `maxZoom` instead of the current zoom level.
+
+- Default: `null`
+
+##### `minZoom` (Number)
+
+The minimum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is smaller than `minZoom`, we will fetch data at `minZoom` instead of the current zoom level.
+
+- Default: `null`
+
+##### `maxCacheSize` (Number)
+
+The maximum cache size for a tile layer. If not defined, it is calculated using the number of tiles in the current viewport times constant 5 (5 is picked because it's a common zoom range).
+
+- Default: `null`
 
 ### Render Options
 
