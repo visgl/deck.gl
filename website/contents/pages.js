@@ -332,6 +332,10 @@ export const docPages = generatePath([
             content: getDocUrl('developer-guide/primitive-layers.md')
           },
           {
+            name: 'Layer Prop Types',
+            content: getDocUrl('developer-guide/prop-types.md')
+          },
+          {
             name: 'Attribute Management',
             content: getDocUrl('developer-guide/attribute-management.md')
           },

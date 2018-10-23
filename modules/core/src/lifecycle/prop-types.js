@@ -26,8 +26,8 @@ const TYPE_DEFINITIONS = {
   },
   accessor: {
     validate(value, propType) {
-      const valueType = typeof value;
-      return valueType === 'function' || valueType === typeof propType.value;
+      const valueType = getTypeOf(value);
+      return valueType === 'function' || valueType === getTypeOf(propType.value);
     },
     equal(value1, value2, propType) {
       if (typeof value2 === 'function') {
@@ -38,7 +38,7 @@ const TYPE_DEFINITIONS = {
   },
   array: {
     validate(value, propType) {
-      return typeof value === 'function';
+      return Array.isArray(value);
     },
     equal(value1, value2, propType) {
       return propType.compare ? arrayEqual(value1, value2) : value1 === value2;
