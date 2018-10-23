@@ -22,8 +22,17 @@ function pixelsToTileIndex(a) {
   return Math.floor(a / TILE_SIZE);
 }
 
-export function getTileIndices(viewport) {
+/**
+ * Returns all tile indices in the current viewport. If the current zoom level is smaller
+ * than minZoom, return an empty array. If the current zoom level is greater than maxZoom,
+ * return tiles that are on maxZoom.
+ */
+export function getTileIndices(viewport, maxZoom, minZoom) {
   const z = Math.floor(viewport.zoom);
+  if (minZoom && z < minZoom) {
+    return [];
+  }
+
   viewport = new viewport.constructor({
     ...viewport,
     zoom: z
@@ -38,14 +47,20 @@ export function getTileIndices(viewport) {
 
   for (let x = minX; x <= maxX; x++) {
     for (let y = minY; y <= maxY; y++) {
-      indices.push({x, y, z});
+      if (maxZoom && z > maxZoom) {
+        indices.push(getAdjustedTileIndex({x, y, z}, maxZoom));
+      } else {
+        indices.push({x, y, z});
+      }
     }
   }
-
   return indices;
 }
 
-export function getAdjustedTileIndex({x, y, z}, adjustedZ) {
+/**
+ * Calculates and returns a new tile index {x, y, z}, with z being the given adjustedZ.
+ */
+function getAdjustedTileIndex({x, y, z}, adjustedZ) {
   const m = Math.pow(2, z - adjustedZ);
   return {
     x: Math.floor(x / m),

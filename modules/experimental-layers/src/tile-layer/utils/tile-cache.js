@@ -1,5 +1,5 @@
 import Tile from './tile';
-import {getTileIndices, getAdjustedTileIndex} from './viewport-util';
+import {getTileIndices} from './viewport-util';
 
 /**
  * Manages loading and purging of tiles data. This class caches recently visited tiles
@@ -19,8 +19,12 @@ export default class TileCache {
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
 
-    this._maxZoom = maxZoom;
-    this._minZoom = minZoom;
+    if (maxZoom && parseInt(maxZoom, 10) === maxZoom) {
+      this._maxZoom = maxZoom;
+    }
+    if (minZoom && parseInt(minZoom, 10) === minZoom) {
+      this._minZoom = minZoom;
+    }
   }
 
   /**
@@ -36,19 +40,11 @@ export default class TileCache {
    * @param {*} onUpdate
    */
   update(viewport, onUpdate) {
-    const {_cache, _getTileData, _maxSize} = this;
+    const {_cache, _getTileData, _maxSize, _maxZoom, _minZoom} = this;
     this._markOldTiles();
-    const tileIndices = getTileIndices(viewport);
+    const tileIndices = getTileIndices(viewport, _maxZoom, _minZoom);
     if (!tileIndices || tileIndices.length === 0) {
       onUpdate(tileIndices);
-      return;
-    } else if (
-      this._minZoom &&
-      this._minZoom === parseInt(this._minZoom, 10) &&
-      tileIndices[0].z < this._minZoom
-    ) {
-      // Do not show anything if zoom level is too small (avoid loading too many tiles)
-      onUpdate([]);
       return;
     }
     const viewportTiles = new Set();
@@ -60,14 +56,8 @@ export default class TileCache {
     });
 
     for (let i = 0; i < tileIndices.length; i++) {
-      let tileIndex = tileIndices[i];
-      if (
-        this._maxZoom &&
-        this._maxZoom === parseInt(this._maxZoom, 10) &&
-        tileIndex.z > this._maxZoom
-      ) {
-        tileIndex = getAdjustedTileIndex(tileIndices[i], this._maxZoom);
-      }
+      const tileIndex = tileIndices[i];
+
       const {x, y, z} = tileIndex;
       let tile = this._getTile(x, y, z);
       if (!tile) {
