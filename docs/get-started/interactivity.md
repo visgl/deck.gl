@@ -31,7 +31,7 @@ The picking engine returns "picking info" objects which contains a variety of fi
 
 ## Calling the Picking Engine Directly
 
-The picking engine is exposed through the [`DeckGL.pickObject`]((/docs/api-reference/react/deckgl.md) and [`DeckGL.pickObjects`]((/docs/api-reference/react/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
+The picking engine is exposed through the [`DeckGL.pickObject`](/docs/api-reference/react/deckgl.md) and [`DeckGL.pickObjects`](/docs/api-reference/react/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
 
 `pickObject` allows an application to define its own event handling. When it comes to how to actually do event handling in a browser, there are many options. In a React application, perhaps the simplest is to just use React's "synthetic" event handling together with `pickObject`:
 
