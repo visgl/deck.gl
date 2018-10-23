@@ -396,20 +396,6 @@ export default class Deck {
     return views;
   }
 
-  // Returns default viewport based on initialViewState/viewState.
-  _getDefaultViewport(props) {
-    const viewState = this._getViewState(props);
-    const views = this._getViews(props);
-    const viewport =
-      views[0] &&
-      views[0].makeViewport({
-        width: this.width,
-        height: this.height,
-        viewState
-      });
-    return viewport;
-  }
-
   _pickAndCallback(options) {
     const pos = options.event.offsetCenter;
     // Do not trigger callbacks when click/hover position is invalid. Doing so will cause a
@@ -481,14 +467,22 @@ export default class Deck {
     this.viewManager = new ViewManager({
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
-      onInteractiveStateChange: this._onInteractiveStateChange
+      onInteractiveStateChange: this._onInteractiveStateChange,
+      views: this._getViews(this.props),
+      viewState: this._getViewState(this.props),
+      width: this.width,
+      height: this.height
     });
 
+    // viewManager must be initialized before layerManager
+    // layerManager depends on viewport created by viewManager.
+    assert(this.viewManager);
+    const viewports = this.viewManager.getViewports();
+    const viewport = viewports.length > 0 ? viewports[0] : null;
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
       stats: this.stats,
-      // Valid viewport must be set, so layers can use viewport.project* methods
-      viewport: this._getDefaultViewport(this.props)
+      viewport
     });
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});

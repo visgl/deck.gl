@@ -69,7 +69,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {stats, viewport} = {}) {
+  constructor(gl, {stats, viewport = null} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
