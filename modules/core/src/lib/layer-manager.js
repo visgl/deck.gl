@@ -95,7 +95,7 @@ export default class LayerManager {
         layerId: null
       },
       // Make sure context.viewport is not empty on the first layer initialization
-      viewport: viewport || new Viewport() // Current viewport, exposed to layers for project* function
+      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
     });
 
     this.layerFilter = null;
