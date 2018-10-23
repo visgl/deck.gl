@@ -2,6 +2,13 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v6.3
+
+### Prop Types System
+
+Layers can now supply rich definitions to their default props. This enables prop validation in debug mode and performance improvements for all core layers.
+
+
 ## deck.gl v6.2
 
 <table style="border: 0;" align="center">

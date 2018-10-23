@@ -45,14 +45,14 @@ const defaultProps = {
   fontFamily: DEFAULT_FONT_FAMILY,
   characterSet: DEFAULT_CHAR_SET,
 
-  getText: x => x.text,
-  getPosition: x => x.position,
-  getColor: DEFAULT_COLOR,
-  getSize: 32,
-  getAngle: 0,
-  getTextAnchor: 'middle',
-  getAlignmentBaseline: 'center',
-  getPixelOffset: [0, 0]
+  getText: {type: 'accessor', value: x => x.text},
+  getPosition: {type: 'accessor', value: x => x.position},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getSize: {type: 'accessor', value: 32},
+  getAngle: {type: 'accessor', value: 0},
+  getTextAnchor: {type: 'accessor', value: 'middle'},
+  getAlignmentBaseline: {type: 'accessor', value: 'center'},
+  getPixelOffset: {type: 'accessor', value: [0, 0]}
 };
 
 export default class TextLayer extends CompositeLayer {

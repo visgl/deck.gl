@@ -88,7 +88,10 @@ test('HexagonLayer#updateLayer', t => {
       {
         title: 'Update getColorValue accessor',
         updateProps: {
-          getColorValue
+          getColorValue,
+          updateTriggers: {
+            getColorValue: 1
+          }
         },
         assert({layer, oldState, userData}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
@@ -205,7 +208,10 @@ test('HexagonLayer#updateLayer', t => {
       {
         title: 'Update getElevationValue accessor',
         updateProps: {
-          getElevationValue
+          getElevationValue,
+          updateTriggers: {
+            getElevationValue: 1
+          }
         },
         assert({layer, oldState, userData}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
@@ -373,7 +379,10 @@ test('HexagonLayer#updateTriggers', t => {
       {
         title: 'Update getColorValue prop',
         updateProps: {
-          getColorValue
+          getColorValue,
+          updateTriggers: {
+            getColorValue: 1
+          }
         },
         assert({subLayer, spies, userData}) {
           t.ok(
@@ -405,7 +414,10 @@ test('HexagonLayer#updateTriggers', t => {
       {
         title: 'Update getElevationValue prop',
         updateProps: {
-          getElevationValue
+          getElevationValue,
+          updateTriggers: {
+            getElevationValue: 1
+          }
         },
         assert({subLayer, spies, userData}) {
           t.ok(

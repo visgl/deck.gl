@@ -1,5 +1,12 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v6.2 to v6.3
+
+#### GridLayer and HexagonLayer
+
+Shallow changes in `getColorValue` and `getElevationValue` props are now ignored by default. To trigger an update, use the `updateTriggers` prop. This new behavior is aligned with other core layers and improves runtime performance.
+
+
 ## Upgrading from deck.gl v6.1 to v6.2
 
 #### fp64

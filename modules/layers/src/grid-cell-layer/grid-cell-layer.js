@@ -35,9 +35,9 @@ const defaultProps = {
   extruded: true,
   fp64: false,
 
-  getPosition: x => x.position,
-  getElevation: 1000,
-  getColor: DEFAULT_COLOR,
+  getPosition: {type: 'accessor', value: x => x.position},
+  getElevation: {type: 'accessor', value: 1000},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   lightSettings: {}
 };

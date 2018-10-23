@@ -30,12 +30,12 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_NORMAL = [0, 0, 1];
 
 const defaultProps = {
-  radiusPixels: 10, //  point radius in pixels
+  radiusPixels: {type: 'number', min: 0, value: 10}, //  point radius in pixels
   fp64: false,
 
-  getPosition: x => x.position,
-  getNormal: DEFAULT_NORMAL,
-  getColor: DEFAULT_COLOR,
+  getPosition: {type: 'accessor', value: x => x.position},
+  getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   lightSettings: {}
 };

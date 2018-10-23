@@ -37,9 +37,9 @@ const defaultProps = {
   extruded: true,
   fp64: false,
 
-  getCentroid: x => x.centroid,
-  getColor: DEFAULT_COLOR,
-  getElevation: 1000,
+  getCentroid: {type: 'accessor', value: x => x.centroid},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getElevation: {type: 'accessor', value: 1000},
 
   lightSettings: {}
 };

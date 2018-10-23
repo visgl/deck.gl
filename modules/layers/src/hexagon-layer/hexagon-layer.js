@@ -31,25 +31,25 @@ const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: points => points.length,
-  lowerPercentile: 0,
-  upperPercentile: 100,
+  getColorValue: {type: 'accessor', value: points => points.length},
+  lowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
+  upperPercentile: {type: 'number', value: 100, min: 0, max: 100},
   onSetColorDomain: nop,
 
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: points => points.length,
-  elevationLowerPercentile: 0,
-  elevationUpperPercentile: 100,
+  getElevationValue: {type: 'accessor', value: points => points.length},
+  elevationLowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
+  elevationUpperPercentile: {type: 'number', value: 100, min: 0, max: 100},
   elevationScale: {type: 'number', min: 0, value: 1},
   onSetElevationDomain: nop,
 
-  radius: 1000,
+  radius: {type: 'number', value: 1000, min: 1},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   extruded: false,
   hexagonAggregator: pointToHexbin,
-  getPosition: x => x.position,
+  getPosition: {type: 'accessor', value: x => x.position},
   fp64: false,
   // Optional settings for 'lighting' shader module
   lightSettings: {}
@@ -64,7 +64,7 @@ export default class HexagonLayer extends CompositeLayer {
           'Now using 1000 meter as default'
       )();
 
-      props.radius = defaultProps.radius;
+      props.radius = defaultProps.radius.value;
     }
 
     if (
@@ -76,7 +76,7 @@ export default class HexagonLayer extends CompositeLayer {
         'HexagonLayer: upperPercentile should be between 0 and 100. ' + 'Assign to 100 by default'
       )();
 
-      props.upperPercentile = defaultProps.upperPercentile;
+      props.upperPercentile = defaultProps.upperPercentile.value;
     }
 
     if (
@@ -88,7 +88,7 @@ export default class HexagonLayer extends CompositeLayer {
         'HexagonLayer: lowerPercentile should be between 0 and 100. ' + 'Assign to 0 by default'
       )();
 
-      props.lowerPercentile = defaultProps.upperPercentile;
+      props.lowerPercentile = defaultProps.upperPercentile.value;
     }
 
     if (props.lowerPercentile >= props.upperPercentile) {
@@ -98,7 +98,7 @@ export default class HexagonLayer extends CompositeLayer {
           'upperPercentile. Assign to 0 by default'
       )();
 
-      props.lowerPercentile = defaultProps.lowerPercentile;
+      props.lowerPercentile = defaultProps.lowerPercentile.value;
     }
 
     super(props);

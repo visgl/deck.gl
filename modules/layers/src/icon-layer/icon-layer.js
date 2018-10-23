@@ -56,14 +56,14 @@ const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR;
 const defaultProps = {
   iconAtlas: null,
   iconMapping: {type: 'object', value: {}, async: true},
-  sizeScale: 1,
+  sizeScale: {type: 'number', value: 1, min: 0},
   fp64: false,
 
-  getPosition: x => x.position,
-  getIcon: x => x.icon,
-  getColor: DEFAULT_COLOR,
-  getSize: 1,
-  getAngle: 0
+  getPosition: {type: 'accessor', value: x => x.position},
+  getIcon: {type: 'accessor', value: x => x.icon},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getSize: {type: 'accessor', value: 1},
+  getAngle: {type: 'accessor', value: 0}
 };
 
 export default class IconLayer extends Layer {

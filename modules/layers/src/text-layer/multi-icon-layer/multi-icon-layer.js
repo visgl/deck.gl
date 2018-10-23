@@ -23,13 +23,13 @@ import IconLayer from '../../icon-layer/icon-layer';
 import vs from './multi-icon-layer-vertex.glsl';
 
 const defaultProps = {
-  getShiftInQueue: x => x.shift || 0,
-  getLengthOfQueue: x => x.len || 1,
+  getShiftInQueue: {type: 'accessor', value: x => x.shift || 0},
+  getLengthOfQueue: {type: 'accessor', value: x => x.len || 1},
   // 1: left, 0: middle, -1: right
-  getAnchorX: x => x.anchorX || 0,
+  getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
   // 1: top, 0: center, -1: bottom
-  getAnchorY: x => x.anchorY || 0,
-  getPixelOffset: [0, 0]
+  getAnchorY: {type: 'accessor', value: x => x.anchorY || 0},
+  getPixelOffset: {type: 'accessor', value: [0, 0]}
 };
 
 export default class MultiIconLayer extends IconLayer {
