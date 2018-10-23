@@ -22,7 +22,7 @@ export default class TripsLayer extends Layer {
     attributeManager.add({
       indices: {size: 1, update: this.calculateIndices, isIndexed: true},
       positions: {size: 3, update: this.calculatePositions},
-      colors: {size: 3, update: this.calculateColors}
+      colors: {size: 3, accessor: 'getColor', update: this.calculateColors}
     });
 
     gl.getExtension('OES_element_index_uint');
