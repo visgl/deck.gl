@@ -6,6 +6,7 @@ export function diffProps(props, oldProps) {
   const propsChangedReason = compareProps({
     newProps: props,
     oldProps,
+    propTypes: props._component.constructor._propTypes,
     ignoreProps: {data: null, updateTriggers: null}
   });
 
@@ -40,7 +41,7 @@ export function compareProps({
   newProps,
   oldProps,
   ignoreProps = {},
-  shallowCompareProps = {},
+  propTypes = {},
   triggerName = 'props'
 } = {}) {
   assert(oldProps !== undefined && newProps !== undefined, 'compareProps args');
@@ -65,23 +66,26 @@ export function compareProps({
       if (!(key in newProps)) {
         return `${triggerName}.${key} dropped: ${oldProps[key]} -> undefined`;
       }
+      const newProp = newProps[key];
+      const oldProp = oldProps[key];
+      const propType = propTypes[key];
 
-      // If object has an equals function, invoke it
-      let equals = newProps[key] && oldProps[key] && newProps[key].equals;
-      if (equals && !equals.call(newProps[key], oldProps[key])) {
-        return `${triggerName}.${key} changed deeply: ${oldProps[key]} -> ${newProps[key]}`;
+      // If prop type has an equal function, invoke it
+      let equal = propType && propType.equal;
+      if (equal && !equal(newProp, oldProp, propType)) {
+        return `${triggerName}.${key} changed deeply: ${oldProp} -> ${newProp}`;
       }
 
-      // If both new and old value are functions, ignore differences
-      if (key in shallowCompareProps) {
-        const type = typeof newProps[key];
-        if (type === 'function' && typeof oldProps[key] === 'function') {
-          equals = true;
+      if (!equal) {
+        // If object has an equals function, invoke it
+        equal = newProp && oldProp && newProp.equals;
+        if (equal && !equal.call(newProp, oldProp)) {
+          return `${triggerName}.${key} changed deeply: ${oldProp} -> ${newProp}`;
         }
       }
 
-      if (!equals && oldProps[key] !== newProps[key]) {
-        return `${triggerName}.${key} changed shallowly: ${oldProps[key]} -> ${newProps[key]}`;
+      if (!equal && oldProp !== newProp) {
+        return `${triggerName}.${key} changed shallowly: ${oldProp} -> ${newProp}`;
       }
     }
   }

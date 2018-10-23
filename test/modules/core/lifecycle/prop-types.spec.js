@@ -7,6 +7,8 @@ const TYPED_ARRAY = new Float32Array(3);
 const OBJECT = {a: 1, b: 2};
 const FUNCTION = x => x.position;
 
+const KNOWN_TYPES = ['boolean', 'color', 'accessor', 'array', 'function'];
+
 const TEST_CASES = [
   {
     title: 'boolean default prop',
@@ -17,7 +19,7 @@ const TEST_CASES = [
   {
     title: 'numeric default prop',
     props: {prop: 1},
-    propTypes: {prop: {name: 'prop', type: 'number', value: 1, min: 0, max: 1}},
+    propTypes: {prop: {name: 'prop', type: 'number', value: 1}},
     defaultProps: {prop: 1}
   },
   {
@@ -43,8 +45,35 @@ const TEST_CASES = [
     props: {prop: FUNCTION},
     propTypes: {prop: {name: 'prop', type: 'function', value: FUNCTION}},
     defaultProps: {prop: FUNCTION}
+  },
+  {
+    title: 'color prop',
+    props: {prop: {type: 'color', value: ARRAY}},
+    propTypes: {prop: {name: 'prop', type: 'color', value: ARRAY}},
+    defaultProps: {prop: ARRAY}
+  },
+  {
+    title: 'accessor prop',
+    props: {prop: {type: 'accessor', value: FUNCTION}},
+    propTypes: {prop: {name: 'prop', type: 'accessor', value: FUNCTION}},
+    defaultProps: {prop: FUNCTION}
   }
 ];
+
+function validatePropType(result, expected) {
+  for (const propName in expected) {
+    const propType = result[propName];
+    const expectedPropType = expected[propName];
+    const key = Object.keys(expectedPropType).find(k => propType[k] !== expectedPropType[k]);
+    if (key) {
+      return `${key}: ${propType[key]}, expected ${expectedPropType[key]}`;
+    }
+    if (KNOWN_TYPES.includes(propType.type) && typeof propType.equal !== 'function') {
+      return `equal is not a function`;
+    }
+  }
+  return null;
+}
 
 test('parsePropTypes#import', t => {
   t.ok(parsePropTypes, 'parsePropTypes imported OK');
@@ -54,7 +83,12 @@ test('parsePropTypes#import', t => {
 test('parsePropTypes#tests', t => {
   for (const tc of TEST_CASES) {
     const {propTypes, defaultProps} = parsePropTypes(tc.props);
-    t.deepEqual(propTypes, tc.propTypes, `parsePropTypes ${tc.title} returned expected prop types`);
+    const invalidMessage = validatePropType(propTypes, tc.propTypes);
+    if (invalidMessage) {
+      t.fail(`parsePropTypes ${tc.title}: ${invalidMessage}`);
+    } else {
+      t.pass(`parsePropTypes ${tc.title} returned expected prop types`);
+    }
     t.deepEqual(
       defaultProps,
       tc.defaultProps,

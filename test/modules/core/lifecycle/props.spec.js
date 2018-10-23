@@ -119,7 +119,7 @@ const TEST_CASES = [
     title: 'not equal functions, with hints',
     object1: {prop: x => x},
     object2: {prop: x => x * 2},
-    shallowCompareProps: {prop: true},
+    propTypes: {prop: {equal: () => true}},
     result: SAME
   },
   {
@@ -140,7 +140,7 @@ test('compareProps#tests', t => {
     const result = compareProps({
       oldProps: tc.object1,
       newProps: tc.object2,
-      shallowCompareProps: tc.shallowCompareProps || {}
+      propTypes: tc.propTypes
     });
     t.ok(
       result === null || typeof result === 'string',

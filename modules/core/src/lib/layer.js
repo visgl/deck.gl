@@ -46,8 +46,12 @@ const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
-  dataTransform: data => data,
-  fetch: url => fetch(url).then(response => response.json()),
+  dataTransform: {type: 'function', value: data => data, compare: false},
+  fetch: {
+    type: 'function',
+    value: url => fetch(url).then(response => response.json()),
+    compare: false
+  },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
   numInstances: undefined,
 
@@ -55,11 +59,12 @@ const defaultProps = {
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 0.8},
 
-  onHover: noop,
-  onClick: noop,
+  onHover: {type: 'function', value: noop, compare: false},
+  onClick: {type: 'function', value: noop, compare: false},
 
   coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
-  coordinateOrigin: [0, 0, 0],
+  coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
+  modelMatrix: {type: 'array', value: null, compare: true},
   wrapLongitude: false,
 
   parameters: {},
@@ -71,12 +76,16 @@ const defaultProps = {
   // Offset depth based on layer index to avoid z-fighting.
   // Negative values pull layer towards the camera
   // https://www.opengl.org/archives/resources/faq/technical/polygonoffset.htm
-  getPolygonOffset: ({layerIndex}) => [0, -layerIndex * 100],
+  getPolygonOffset: {
+    type: 'function',
+    value: ({layerIndex}) => [0, -layerIndex * 100],
+    compare: false
+  },
 
   // Selection/Highlighting
   highlightedObjectIndex: null,
   autoHighlight: false,
-  highlightColor: [0, 0, 128, 128]
+  highlightColor: {type: 'color', value: [0, 0, 128, 128]}
 };
 
 export default class Layer extends Component {
