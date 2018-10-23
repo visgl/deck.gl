@@ -53,9 +53,6 @@ const INITIAL_CONTEXT = Object.seal({
   // General resources
   stats: null, // for tracking lifecycle performance
 
-  // Make sure context.viewport is not empty on the first layer initialization
-  viewport: new Viewport(), // Current viewport, exposed to layers for project* function
-
   // GL Resources
   shaderCache: null,
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
@@ -72,7 +69,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {stats} = {}) {
+  constructor(gl, {stats, viewport} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -96,7 +93,9 @@ export default class LayerManager {
         // For callback tracking and autohighlight
         index: -1,
         layerId: null
-      }
+      },
+      // Make sure context.viewport is not empty on the first layer initialization
+      viewport: viewport || new Viewport() // Current viewport, exposed to layers for project* function
     });
 
     this.layerFilter = null;
