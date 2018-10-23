@@ -110,16 +110,14 @@ test('should try to load the existing zoom levels if we zoom in too far', t => {
   testTileCache.finalize();
 });
 
-test('should try to load the existing zoom levels if we zoom out too far', t => {
+test('should not display anything if we zoom out too far', t => {
   const zoomedOutViewport = new WebMercatorViewport({
     ...testViewState,
     zoom: 1
   });
 
   testTileCache.update(zoomedOutViewport, tiles => {
-    tiles.forEach(tile => {
-      t.equal(tile.z, minZoom);
-    });
+    t.equal(tiles.length, 0);
     t.end();
   });
   testTileCache.finalize();

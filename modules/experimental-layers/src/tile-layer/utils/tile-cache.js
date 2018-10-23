@@ -37,10 +37,20 @@ export default class TileCache {
    */
   update(viewport, onUpdate) {
     const {_cache, _getTileData, _maxSize} = this;
-    _cache.forEach(cachedTile => {
-      cachedTile.isVisible = false;
-    });
+    this._markOldTiles();
     const tileIndices = getTileIndices(viewport);
+    if (!tileIndices || tileIndices.length === 0) {
+      onUpdate(tileIndices);
+      return;
+    } else if (
+      this._minZoom &&
+      this._minZoom === parseInt(this._minZoom, 10) &&
+      tileIndices[0].z < this._minZoom
+    ) {
+      // Do not show anything if zoom level is too small (avoid loading too many tiles)
+      onUpdate([]);
+      return;
+    }
     const viewportTiles = new Set();
     _cache.forEach(cachedTile => {
       if (tileIndices.some(tile => cachedTile.isOverlapped(tile))) {
@@ -51,10 +61,12 @@ export default class TileCache {
 
     for (let i = 0; i < tileIndices.length; i++) {
       let tileIndex = tileIndices[i];
-      if (this._maxZoom && tileIndex.z > this._maxZoom) {
+      if (
+        this._maxZoom &&
+        this._maxZoom === parseInt(this._maxZoom, 10) &&
+        tileIndex.z > this._maxZoom
+      ) {
         tileIndex = getAdjustedTileIndex(tileIndices[i], this._maxZoom);
-      } else if (this._minZoom && tileIndex.z < this._minZoom) {
-        tileIndex = getAdjustedTileIndex(tileIndices[i], this._minZoom);
       }
       const {x, y, z} = tileIndex;
       let tile = this._getTile(x, y, z);
@@ -70,6 +82,7 @@ export default class TileCache {
       _cache.set(tileId, tile);
       viewportTiles.add(tile);
     }
+
     // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
     const commonZoomRange = 5;
     this._resizeCache(_maxSize || commonZoomRange * tileIndices.length);
@@ -96,6 +109,12 @@ export default class TileCache {
         }
       }
     }
+  }
+
+  _markOldTiles() {
+    this._cache.forEach(cachedTile => {
+      cachedTile.isVisible = false;
+    });
   }
 
   _getTile(x, y, z) {

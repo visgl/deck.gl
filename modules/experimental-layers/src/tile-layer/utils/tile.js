@@ -18,6 +18,10 @@ export default class Tile {
     return this._loader;
   }
 
+  get isLoaded() {
+    return Boolean(this._data);
+  }
+
   _loadData() {
     const {x, y, z} = this;
     if (!this.getTileData) {
