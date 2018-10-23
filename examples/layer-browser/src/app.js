@@ -20,6 +20,7 @@ import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';
 
 import LAYER_CATEGORIES from './examples';
+import 'luma.gl/debug';
 
 /* eslint-disable no-process-env */
 const MapboxAccessToken =
@@ -292,7 +293,7 @@ export default class App extends PureComponent {
           onLayerHover={this._onHover}
           onLayerClick={this._onClick}
           useDevicePixels={useDevicePixels}
-          debug={false}
+          debug={true}
           drawPickingColors={drawPickingColors}
         >
           <View id="basemap">

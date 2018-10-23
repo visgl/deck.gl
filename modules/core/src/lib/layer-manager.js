@@ -104,6 +104,7 @@ export default class LayerManager {
 
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
+    this._debug = false;
 
     this._activateViewport = this._activateViewport.bind(this);
 
@@ -161,6 +162,10 @@ export default class LayerManager {
    */
   /* eslint-disable complexity, max-statements */
   setProps(props) {
+    if ('debug' in props) {
+      this._debug = props.debug;
+    }
+
     // TODO - For now we set layers before viewports to preserve changeFlags
     if ('layers' in props) {
       this.setLayers(props.layers);
@@ -413,6 +418,10 @@ export default class LayerManager {
 
       // We must not generate exceptions until after layer matching is complete
       try {
+        if (this._debug && oldLayer !== newLayer) {
+          newLayer.validateProps();
+        }
+
         if (!oldLayer) {
           this._initializeLayer(newLayer);
           initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)

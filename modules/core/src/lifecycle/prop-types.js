@@ -18,7 +18,7 @@ const TYPE_DEFINITIONS = {
   },
   color: {
     validate(value, propType) {
-      return Array.isArray(value) && (value.length === 3 || value.length === 4);
+      return isArray(value) && (value.length === 3 || value.length === 4);
     },
     equal(value1, value2, propType) {
       return arrayEqual(value1, value2);
@@ -38,7 +38,7 @@ const TYPE_DEFINITIONS = {
   },
   array: {
     validate(value, propType) {
-      return Array.isArray(value);
+      return (propType.optional && !value) || isArray(value);
     },
     equal(value1, value2, propType) {
       return propType.compare ? arrayEqual(value1, value2) : value1 === value2;
@@ -46,7 +46,7 @@ const TYPE_DEFINITIONS = {
   },
   function: {
     validate(value, propType) {
-      return typeof value === 'function';
+      return (propType.optional && !value) || typeof value === 'function';
     },
     equal(value1, value2, propType) {
       return !propType.compare || value1 === value2;
@@ -58,7 +58,7 @@ function arrayEqual(array1, array2) {
   if (array1 === array2) {
     return true;
   }
-  if (!Array.isArray(array1) || !Array.isArray(array2)) {
+  if (!isArray(array1) || !isArray(array2)) {
     return false;
   }
   const len = array1.length;
@@ -121,9 +121,13 @@ function normalizePropDefinition(name, propDef) {
   return Object.assign({name}, TYPE_DEFINITIONS[propDef.type], propDef);
 }
 
+function isArray(value) {
+  return Array.isArray(value) || ArrayBuffer.isView(value);
+}
+
 // improved version of javascript typeof that can distinguish arrays and null values
 function getTypeOf(value) {
-  if (Array.isArray(value) || ArrayBuffer.isView(value)) {
+  if (isArray(value)) {
     return 'array';
   }
   if (value === null) {

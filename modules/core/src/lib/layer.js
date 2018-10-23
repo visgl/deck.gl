@@ -24,7 +24,7 @@
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
-import {diffProps} from '../lifecycle/props';
+import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import GL from 'luma.gl/constants';
@@ -64,7 +64,7 @@ const defaultProps = {
 
   coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
-  modelMatrix: {type: 'array', value: null, compare: true},
+  modelMatrix: {type: 'array', value: null, compare: true, optional: true},
   wrapLongitude: false,
 
   parameters: {},
@@ -692,6 +692,11 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     return this.setChangeFlags(changeFlags);
   }
 
+  // Called by layer manager to validate props (in development)
+  validateProps() {
+    validateProps(this.props);
+  }
+
   setModuleParameters(moduleParameters) {
     for (const model of this.getModels()) {
       model.updateModuleSettings(moduleParameters);
@@ -828,17 +833,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // Operate on each changed triggers, will be called when an updateTrigger changes
   _activeUpdateTrigger(propName) {
     this.invalidateAttribute(propName);
-  }
-
-  //  Helper to check that required props are supplied
-  _checkRequiredProp(propertyName, condition) {
-    const value = this.props[propertyName];
-    if (value === undefined) {
-      throw new Error(`Property ${propertyName} undefined in layer ${this}`);
-    }
-    if (condition && !condition(value)) {
-      throw new Error(`Bad property ${propertyName} in layer ${this}`);
-    }
   }
 
   _updateBaseUniforms() {
