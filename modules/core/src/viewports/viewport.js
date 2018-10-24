@@ -341,11 +341,12 @@ export default class Viewport {
       this.meterOffset = modelMatrix ? modelMatrix.transformVector(position) : position;
     }
 
-    this.viewMatrixUncentered = viewMatrix;
-
     if (this.isGeospatial) {
       // Determine camera center
       this.center = this._getCenterInWorld({longitude, latitude});
+
+      // Flip Y to match the orientation of the Mercator plane
+      this.viewMatrixUncentered = mat4_scale([], viewMatrix, [1, -1, 1]);
 
       // Make a centered version of the matrix for projection modes without an offset
       this.viewMatrix = new Matrix4()
@@ -355,6 +356,7 @@ export default class Viewport {
         .translate(new Vector3(this.center || ZERO_VECTOR).negate());
     } else {
       this.center = position;
+      this.viewMatrixUncentered = viewMatrix;
       this.viewMatrix = viewMatrix;
     }
   }
