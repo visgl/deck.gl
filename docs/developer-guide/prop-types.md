@@ -35,4 +35,3 @@ const defaultProps = {
 Tips:
 
 * **Open Ranges** - It's unnecessary use `Math.MAX_` constants for open numeric ranges, just leave the max or min out to specify an open range.
-

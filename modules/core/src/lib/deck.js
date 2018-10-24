@@ -467,11 +467,22 @@ export default class Deck {
     this.viewManager = new ViewManager({
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
-      onInteractiveStateChange: this._onInteractiveStateChange
+      onInteractiveStateChange: this._onInteractiveStateChange,
+      views: this._getViews(this.props),
+      viewState: this._getViewState(this.props),
+      width: this.width,
+      height: this.height
     });
 
+    // viewManager must be initialized before layerManager
+    // layerManager depends on viewport created by viewManager.
+    assert(this.viewManager);
+    const viewport = this.viewManager.getViewports()[0];
     // Note: avoid React setState due GL animation loop / setState timing issue
-    this.layerManager = new LayerManager(gl, {stats: this.stats});
+    this.layerManager = new LayerManager(gl, {
+      stats: this.stats,
+      viewport
+    });
 
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
