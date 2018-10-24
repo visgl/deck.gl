@@ -614,30 +614,6 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@deck.gl/core@>=6.1.0-alpha.1", "@deck.gl/core@^6.1.1":
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-6.1.1.tgz#e599f5ddfa7d401ad59a409fba30e3120e15d48e"
-  dependencies:
-    luma.gl "^6.1.0"
-    math.gl "^2.1.0"
-    mjolnir.js "^1.0.0"
-    probe.gl "^2.0.0-beta"
-    seer "^0.2.4"
-    viewport-mercator-project "^5.2.0"
-
-"@deck.gl/layers@>=6.1.0-alpha.1":
-  version "6.1.1"
-  resolved "https://registry.yarnpkg.com/@deck.gl/layers/-/layers-6.1.1.tgz#02520e45b40651641765c980045666fba44f516d"
-  dependencies:
-    "@deck.gl/core" "^6.1.1"
-    d3-hexbin "^0.2.1"
-    earcut "^2.0.6"
-
-"@deck.gl/mapbox@>=6.1.0-alpha.1":
-  version "6.2.0-beta.2"
-  dependencies:
-    "@deck.gl/core" "^6.2.0-beta.2"
-
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-area/-/geojson-area-0.2.2.tgz#18d7814aa36bf23fbbcc379f8e26a22927debf10"
@@ -5985,7 +5961,7 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^6.1.0, luma.gl@^6.2.0:
+luma.gl@^6.2.0:
   version "6.2.0"
   resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.2.0.tgz#449760dc735e2e89a55bb78697c8dd1093626b2c"
   dependencies:
@@ -7294,7 +7270,7 @@ probe.gl@^2.0.0:
   dependencies:
     "@babel/runtime" "^7.0.0"
 
-probe.gl@^2.0.0-beta, probe.gl@^2.0.1:
+probe.gl@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.1.tgz#e42dfe02eca9ef262cdf89a24e1a4c0856e989e0"
   dependencies:
@@ -9265,13 +9241,6 @@ viewport-mercator-project@^5.1.0:
   resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.2.0.tgz#2c50bc624a085d01a3a486f22ec329c0511fe4bd"
   dependencies:
     math.gl "^2.0.0"
-
-viewport-mercator-project@^5.2.0:
-  version "5.3.0"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.3.0.tgz#16b7c99813495ef951480893a5b7d82d9c49034b"
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    math.gl "^2.1.0"
 
 viewport-mercator-project@^6.0.0:
   version "6.0.0"

@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.2
 
+#### [6.2.1] - Oct 24 2018
+
+- Fix bug where some errors are not logged to console (#2365)
+- Fix invalid initial viewport (#2376)
+- Fix FirstPersonView flip bug (#2380)
+
 #### [6.2.0] - Oct 14 2018
 
 ### deck.gl v6.2 Prereleases
