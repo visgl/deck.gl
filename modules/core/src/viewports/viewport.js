@@ -343,6 +343,8 @@ export default class Viewport {
 
     if (this.isGeospatial) {
       // Determine camera center
+      this.longitude = longitude;
+      this.latitude = latitude;
       this.center = this._getCenterInWorld({longitude, latitude});
 
       // Flip Y to match the orientation of the Mercator plane
