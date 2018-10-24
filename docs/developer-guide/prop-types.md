@@ -82,8 +82,8 @@ MyLayerClass.defaultProps = {
 A numeric value.
 
 - Options:
-    + `min` (number, optional) - the minimum allowed value
-    + `max` (number, optional) - the maximum allowed value
+  + `min` (number, optional) - the minimum allowed value
+  + `max` (number, optional) - the maximum allowed value
 - Default `validate`: value is finite and within bounds (if specified)
 - Default `equal`: strict equal
 
@@ -115,7 +115,7 @@ MyLayerClass.defaultProps = {
 An array of objects.
 
 - Options:
-    + `compare` (boolean, optional) - compare deeply during prop comparison. Default `false`.
+  + `compare` (boolean, optional) - compare deeply during prop comparison. Default `false`.
 - Default `validate`: value is an array of 3 or 4 elements
 - Default `equal`: shallow equal if `compare: false`, otherwise deep equal
 
@@ -147,7 +147,7 @@ MyLayerClass.defaultProps = {
 A function.
 
 - Options:
-    + `compare` (boolean, optional) - compare strictly during prop comparison. Default `true`.
+  + `compare` (boolean, optional) - compare strictly during prop comparison. Default `true`.
 - Default `validate`: value is a function
 - Default `equal`: `true` if `compare: false`, otherwise strict equal
 
@@ -217,4 +217,3 @@ const defaultProps = {
 ```
 
 The default comparator of the `access` prop type ignores shallow changes in functions. As a result, deck.gl decides that no props have changed between the two renders, and the GeoJsonLayer does not need to be updated.
-
