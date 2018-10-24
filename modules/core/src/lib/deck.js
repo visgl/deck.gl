@@ -477,8 +477,7 @@ export default class Deck {
     // viewManager must be initialized before layerManager
     // layerManager depends on viewport created by viewManager.
     assert(this.viewManager);
-    const viewports = this.viewManager.getViewports();
-    const viewport = viewports.length > 0 ? viewports[0] : null;
+    const viewport = this.viewManager.getViewports()[0];
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
       stats: this.stats,
