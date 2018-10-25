@@ -3,7 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL from 'deck.gl';
-import TileLayer from '@deck.gl/experimental-layers/tile-layer/tile-layer';
+import {TileLayer} from '@deck.gl/experimental-layers';
 
 import {decodeTile} from './utils/decode';
 
