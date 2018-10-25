@@ -146,7 +146,7 @@ Notes:
 
 ```js
 import 'luma.gl/debug'
-````
+```
 
 ##### `_animate` (Experimental)
 

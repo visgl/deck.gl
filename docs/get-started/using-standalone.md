@@ -50,7 +50,7 @@ To use deck.gl in a scripting environment, include the standalone version in a `
 <!-- optional if mapbox base map is needed -->
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
 <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
-````
+```
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
 
