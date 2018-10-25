@@ -71,10 +71,10 @@ A relative or absolute extent. Default `'100%'`.
 
 Options for viewport interactivity.
 
-- `null` or `false`: this view is not interactive.
-- `true`: initiates the default controller with default options.
-- `Controller` class (not instance): initiates the provided controller with default options.
-- `Object`: controller options. This will be merged with the default controller options.
+* `null` or `false`: this view is not interactive.
+* `true`: initiates the default controller with default options.
+* `Controller` class (not instance): initiates the provided controller with default options.
+* `Object`: controller options. This will be merged with the default controller options.
   + `controller.type`: the controller class
   + For other options, consult the documentation of [Controller](/docs/api-reference/controller.md).
 
