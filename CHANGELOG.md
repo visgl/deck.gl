@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.2
 
+#### [6.2.2] - Oct 25 2018
+
+- Fix primitive layers not redrawing bug (#2382)
+
 #### [6.2.1] - Oct 24 2018
 
 - Fix bug where some errors are not logged to console (#2365)
