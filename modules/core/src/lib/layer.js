@@ -519,6 +519,7 @@ export default class Layer extends Component {
       // Render or update previously rendered sublayers
       this._renderLayers(updateParams);
     } else {
+      this.setNeedsRedraw();
       // Add any subclass attributes
       this.updateAttributes(this.props);
       this._updateBaseUniforms();
