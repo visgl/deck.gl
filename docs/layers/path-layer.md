@@ -93,7 +93,7 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 ##### `getPath` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.paths`
+* Default: `object => object.path`
 
 Returns the specified path for the object.
 
