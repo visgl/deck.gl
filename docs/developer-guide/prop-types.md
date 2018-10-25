@@ -219,4 +219,3 @@ const defaultProps = {
 ```
 
 The default comparator of the `access` prop type ignores shallow changes in functions. As a result, deck.gl decides that no props have changed between the two renders, and the GeoJsonLayer does not need to be updated.
-

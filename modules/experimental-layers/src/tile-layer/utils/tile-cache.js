@@ -8,20 +8,30 @@ import {getTileIndices} from './viewport-util';
 
 export default class TileCache {
   /**
-   * Takes in a function that returns tile data, and a cache size (default to 10).
+   * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
+   * Cache size defaults to 5 * number of tiles in the current viewport
    */
-  constructor({getTileData, size = 10}) {
+  constructor({getTileData, maxSize, maxZoom, minZoom}) {
     // TODO: Instead of hardcode size, we should calculate how much memory left
-    this.getTileData = getTileData;
-    this.size = size;
-    this.cache = [];
+    this._getTileData = getTileData;
+    this._maxSize = maxSize;
+
+    // Maps tile id in string {z}-{x}-{y} to a Tile object
+    this._cache = new Map();
+
+    if (maxZoom && parseInt(maxZoom, 10) === maxZoom) {
+      this._maxZoom = maxZoom;
+    }
+    if (minZoom && parseInt(minZoom, 10) === minZoom) {
+      this._minZoom = minZoom;
+    }
   }
 
   /**
    * Clear the current cache
    */
   finalize() {
-    this.cache = null;
+    this._cache.clear();
   }
 
   /**
@@ -30,48 +40,79 @@ export default class TileCache {
    * @param {*} onUpdate
    */
   update(viewport, onUpdate) {
-    const {cache, size, getTileData} = this;
-    const tiles = getTileIndices(viewport).map(({x, y, z}) => {
-      let tile = this._find(x, y, z);
+    const {_cache, _getTileData, _maxSize, _maxZoom, _minZoom} = this;
+    this._markOldTiles();
+    const tileIndices = getTileIndices(viewport, _maxZoom, _minZoom);
+    if (!tileIndices || tileIndices.length === 0) {
+      onUpdate(tileIndices);
+      return;
+    }
+    const viewportTiles = new Set();
+    _cache.forEach(cachedTile => {
+      if (tileIndices.some(tile => cachedTile.isOverlapped(tile))) {
+        cachedTile.isVisible = true;
+        viewportTiles.add(cachedTile);
+      }
+    });
+
+    for (let i = 0; i < tileIndices.length; i++) {
+      const tileIndex = tileIndices[i];
+
+      const {x, y, z} = tileIndex;
+      let tile = this._getTile(x, y, z);
       if (!tile) {
         tile = new Tile({
-          getTileData,
+          getTileData: _getTileData,
           x,
           y,
           z
         });
-        this._push(tile);
       }
-      return tile;
-    });
-
-    // TODO: implement logic that removes tiles outside the viewport
-    // (or furthest from the view port)
-    while (cache.length > size) {
-      cache.shift();
+      const tileId = this._getTileId(x, y, z);
+      _cache.set(tileId, tile);
+      viewportTiles.add(tile);
     }
 
-    // Sort by zoom level low - high
-    cache.sort((t1, t2) => t1.z - t2.z);
-
-    onUpdate(tiles);
+    // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
+    const commonZoomRange = 5;
+    this._resizeCache(_maxSize || commonZoomRange * tileIndices.length);
+    // sort by zoom level so parents tiles don't show up when children tiles are rendered
+    const viewportTilesArray = Array.from(viewportTiles).sort((t1, t2) => t1.z - t2.z);
+    onUpdate(viewportTilesArray);
   }
 
   /**
-   * Return whether a tile with x, y, z exists in the cache.
-   * @param {*} x
-   * @param {*} y
-   * @param {*} z
+   * Clear tiles that are not visible when the cache is full
    */
-  _find(x, y, z) {
-    return this.cache.find(t => t.x === x && t.y === y && t.z === z);
+  _resizeCache(maxSize) {
+    const {_cache} = this;
+    if (_cache.size > maxSize) {
+      const iterator = _cache[Symbol.iterator]();
+      for (const cachedTile of iterator) {
+        if (_cache.size <= maxSize) {
+          break;
+        }
+        const tileId = cachedTile[0];
+        const tile = cachedTile[1];
+        if (!tile.isVisible) {
+          _cache.delete(tileId);
+        }
+      }
+    }
   }
 
-  /**
-   * Add tile to cache
-   * @param {*} tile
-   */
-  _push(tile) {
-    this.cache.push(tile);
+  _markOldTiles() {
+    this._cache.forEach(cachedTile => {
+      cachedTile.isVisible = false;
+    });
+  }
+
+  _getTile(x, y, z) {
+    const tileId = this._getTileId(x, y, z);
+    return this._cache.get(tileId);
+  }
+
+  _getTileId(x, y, z) {
+    return `${z}-${x}-${y}`;
   }
 }

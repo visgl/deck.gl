@@ -2,7 +2,7 @@ import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {GPUGridLayer} from '@deck.gl/experimental-layers';
 import GL from 'luma.gl/constants';
-import {OrbitView, OrthographicView} from 'deck.gl';
+import {OrbitView, OrthographicView, FirstPersonView} from 'deck.gl';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
@@ -88,6 +88,40 @@ export const COLOR_DELTA_THRESHOLD = 255 * 0.05;
 export const TEST_PASS_THRESHOLD = 0.99;
 
 export const TEST_CASES = [
+  // First person
+  {
+    name: 'first-person',
+    views: [
+      new FirstPersonView({
+        fovy: 75,
+        near: 10,
+        far: 100000,
+        focalDistance: 10
+      })
+    ],
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      altitude: 20,
+      bearing: 270
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'geojson-lnglat',
+        data: dataSamples.geojson,
+        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getFillColor: f => parseColor(f.properties.fill || f.properties['marker-color']),
+        getLineColor: f => parseColor(f.properties.stroke),
+        extruded: true,
+        wireframe: true,
+        getElevation: 500,
+        lineWidthScale: 10,
+        lineWidthMinPixels: 1,
+        lightSettings: LIGHT_SETTINGS
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/first-person.png'
+  },
   // INFOVIS
   {
     name: 'bezier-curve-2d',

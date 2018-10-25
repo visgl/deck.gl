@@ -86,8 +86,7 @@ export default class WebMercatorViewport extends Viewport {
       height,
       pitch,
       bearing,
-      altitude,
-      flipY: true
+      altitude
     });
 
     // TODO / hack - prevent vertical offsets if not FirstPersonViewport

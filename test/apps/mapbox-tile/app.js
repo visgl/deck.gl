@@ -5,12 +5,14 @@ import {render} from 'react-dom';
 import DeckGL from 'deck.gl';
 import TileLayer from '@deck.gl/experimental-layers/tile-layer/tile-layer';
 
-import {decodeTiles} from './utils/decode';
+import {decodeTile} from './utils/decode';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
+  bearing: 0,
+  pitch: 0,
   longitude: -122.45,
   latitude: 37.78,
   zoom: 12,
@@ -59,13 +61,12 @@ const MAP_LAYER_STYLES = {
 class Root extends Component {
   getTileData({x, y, z}) {
     const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
-    const eventPromise = fetch(mapSource);
-    return eventPromise
+    return fetch(mapSource)
       .then(response => {
         return response.arrayBuffer();
       })
       .then(buffer => {
-        return decodeTiles(x, y, z, buffer);
+        return decodeTile(x, y, z, buffer);
       });
   }
 

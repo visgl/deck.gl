@@ -24,7 +24,7 @@ import {makeSpy} from 'probe.gl/test-utils';
 import * as data from 'deck.gl/test/data';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
-import {HexagonLayer, HexagonCellLayer, WebMercatorViewport} from 'deck.gl';
+import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
 
 const getColorValue = points => points.length;
 const getElevationValue = points => points.length;
@@ -517,7 +517,7 @@ test('HexagonLayer#renderSubLayer', t => {
     pickable: true
   });
 
-  testInitializeLayer({layer, viewport: new WebMercatorViewport()});
+  testInitializeLayer({layer});
 
   // render sublayer
   const subLayer = layer.renderLayers();

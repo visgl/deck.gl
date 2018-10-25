@@ -40,3 +40,4 @@ test('Top-level imports', t => {
 });
 
 import './contour-layer/marching-squares.spec';
+import './tile-layer/tile-cache.spec';
