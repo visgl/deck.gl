@@ -1,12 +1,24 @@
 import assert from '../utils/assert';
 
+export function validateProps(props) {
+  const propTypes = getPropTypes(props);
+
+  for (const propName in propTypes) {
+    const propType = propTypes[propName];
+    const {validate} = propType;
+    if (validate && !validate(props[propName], propType)) {
+      throw new Error(`Invalid prop ${propName}: ${props[propName]}`);
+    }
+  }
+}
+
 // Returns an object with "change flags", either false or strings indicating reason for change
 export function diffProps(props, oldProps) {
   // First check if any props have changed (ignore props that will be examined separately)
   const propsChangedReason = compareProps({
     newProps: props,
     oldProps,
-    propTypes: props._component.constructor._propTypes,
+    propTypes: getPropTypes(props),
     ignoreProps: {data: null, updateTriggers: null}
   });
 
@@ -166,4 +178,10 @@ function diffUpdateTrigger(props, oldProps, triggerName) {
     triggerName
   });
   return diffReason;
+}
+
+function getPropTypes(props) {
+  const layer = props._component;
+  const LayerType = layer && layer.constructor;
+  return LayerType ? LayerType._propTypes : {};
 }

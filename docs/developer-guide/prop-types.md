@@ -115,6 +115,7 @@ MyLayerClass.defaultProps = {
 An array of objects.
 
 - Options:
+  + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
   + `compare` (boolean, optional) - compare deeply during prop comparison. Default `false`.
 - Default `validate`: value is an array of 3 or 4 elements
 - Default `equal`: shallow equal if `compare: false`, otherwise deep equal
@@ -147,6 +148,7 @@ MyLayerClass.defaultProps = {
 A function.
 
 - Options:
+  + `optional` (boolean, optional) - accept `null` or `undefined`. Default `false`.
   + `compare` (boolean, optional) - compare strictly during prop comparison. Default `true`.
 - Default `validate`: value is a function
 - Default `equal`: `true` if `compare: false`, otherwise strict equal

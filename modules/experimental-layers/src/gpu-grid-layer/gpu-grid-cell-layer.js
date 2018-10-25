@@ -31,7 +31,7 @@ const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const AGGREGATION_DATA_UBO_INDEX = 0;
 
 const defaultProps = {
-  cellSize: {type: 'number', min: 0, max: 20, value: 20},
+  cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,

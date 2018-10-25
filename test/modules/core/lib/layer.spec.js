@@ -73,7 +73,9 @@ class SubLayer extends Layer {
 
 SubLayer.layerName = 'SubLayer';
 SubLayer.defaultProps = {
-  getTime: x => x.time
+  getTime: {type: 'accessor', value: x => x.time},
+  getColor: {type: 'accessor', value: [0, 0, 0, 255]},
+  sizeScale: {type: 'function', value: x => 1, optional: true}
 };
 
 class SubLayer2 extends Layer {
@@ -138,6 +140,41 @@ test('Layer#getNumInstances', t => {
     const layer = new Layer(Object.assign({}, LAYER_PROPS, {data: dataVariant.data}));
     t.equal(layer.getNumInstances(), dataVariant.size);
   }
+  t.end();
+});
+
+test('Layer#validateProps', t => {
+  let layer = new SubLayer(LAYER_PROPS);
+  layer.validateProps();
+  t.pass('Layer props are valid');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {sizeScale: 1}));
+  t.throws(() => layer.validateProps(), /sizeScale/, 'throws on invalid function prop');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {opacity: 'transparent'}));
+  t.throws(() => layer.validateProps(), /opacity/, 'throws on invalid numberic prop');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {opacity: 2}));
+  t.throws(() => layer.validateProps(), /opacity/, 'throws on numberic prop out of range');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {getColor: [255, 0, 0]}));
+  layer.validateProps();
+  t.pass('Layer props are valid');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {getColor: d => d.color}));
+  layer.validateProps();
+  t.pass('Layer props are valid');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {getColor: 3}));
+  t.throws(() => layer.validateProps(), /getColor/, 'throws on invalid accessor prop');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {sizeScale: null}));
+  layer.validateProps();
+  t.pass('Layer props are valid');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {sizeScale: [1, 10]}));
+  t.throws(() => layer.validateProps(), /sizeScale/, 'throws on invalid function prop');
+
   t.end();
 });
 
