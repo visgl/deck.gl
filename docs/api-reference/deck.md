@@ -47,11 +47,17 @@ Height of the canvas.
 
 The array of deck.gl layers to be rendered. This array is expected to be an array of newly allocated instances of your deck.gl layers, created with updated properties derived from the current application state.
 
-##### `layerFilter`
+##### `layerFilter` (Function)
 
 Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering. All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
 
-##### `views`
+##### `getCursor` (Function)
+
+A custom callback to retrieve the cursor type. Receives an `interactionState` object and returns a string that is a [CSS cursor](https://developer.mozilla.org/en-US/docs/Web/CSS/cursor).
+
+Default: `({isDragging}) => isDragging ? 'grabbing' : 'grab'`
+
+##### `views` (Array)
 
 A single `View`, or an array of [`View`](/docs/api-reference/view.md) instances (optionally mixed with [`Viewport`](/docs/api-reference/viewport.md) instances, although the latter is deprecated). If not supplied, a single `MapView` will be created. If an empty array is supplied, no `View` will be shown.
 
@@ -111,6 +117,10 @@ Note:
 ##### `gl` (Object, optional)
 
 gl context, will be autocreated if not supplied.
+
+##### `glOptions` (Object, optional)
+
+Additional options used when creating the WebGLContext. See [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext).
 
 ##### `parameters` (Object, optional)
 
