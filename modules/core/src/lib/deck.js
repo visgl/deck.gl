@@ -457,15 +457,16 @@ export default class Deck {
     this.props.onWebGLInitialized(gl);
 
     if (!this.props._customRender) {
-      const events = {
-        click: this._onClick,
-        pointermove: this._onPointerMove,
-        pointerleave: this._onPointerLeave
-      };
+      this.eventManager = new EventManager(gl.canvas, {
+        events: {
+          click: this._onClick,
+          pointermove: this._onPointerMove,
+          pointerleave: this._onPointerLeave
+        }
+      });
       for (const eventType in EVENTS) {
-        events[eventType] = this._onEvent;
+        this.eventManager.on(eventType, this._onEvent);
       }
-      this.eventManager = new EventManager(gl.canvas, {events});
     }
 
     this.viewManager = new ViewManager({
@@ -592,9 +593,6 @@ export default class Deck {
 
   _onEvent(event) {
     const eventOptions = EVENTS[event.type];
-    if (!eventOptions) {
-      return;
-    }
     const rootHandler = this.props[eventOptions.handler];
 
     // Reuse last picked object
