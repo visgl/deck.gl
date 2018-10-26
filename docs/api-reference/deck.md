@@ -201,8 +201,7 @@ Callback - called when the user starts dragging on the canvas.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
-* `pickedInfos` - an array of info objects for all pickable layers that are affected.
+* `info` - the [picking info](/docs/get-started/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 ##### `onDrag` (Function, optional)
@@ -211,8 +210,7 @@ Callback - called when dragging the canvas.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
-* `pickedInfos` - an array of info objects for all pickable layers that are affected.
+* `info` - the [picking info](/docs/get-started/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 ##### `onDragEnd` (Function, optional)
@@ -221,8 +219,7 @@ Callback - called when the user releases from dragging the canvas.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
-* `pickedInfos` - an array of info objects for all pickable layers that are affected.
+* `info` - the [picking info](/docs/get-started/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 

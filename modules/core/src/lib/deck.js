@@ -593,21 +593,28 @@ export default class Deck {
 
   _onEvent(event) {
     const eventOptions = EVENTS[event.type];
-    const rootHandler = this.props[eventOptions.handler];
+    const pos = event.offsetCenter;
+
+    if (!eventOptions || !pos) {
+      return;
+    }
 
     // Reuse last picked object
-    const {info} = this.layerManager.context.lastPickedInfo;
-    const layer = info ? this.layerManager.layers.find(l => l.id === info.layer.id) : null;
+    const info = this.layerManager.getLastPickedObject({
+      x: pos.x,
+      y: pos.y,
+      viewports: this.getViewports(pos)
+    });
+
+    const {layer} = info;
+    const rootHandler = this.props[eventOptions.handler];
     let handled = false;
 
-    if (layer) {
-      info.layer = layer;
-    }
     if (layer && layer.props[eventOptions.handler]) {
       handled = layer.props[eventOptions.handler](info, event);
     }
     if (!handled && rootHandler) {
-      rootHandler(info, info ? [info] : [], event);
+      rootHandler(info, event);
     }
   }
 
