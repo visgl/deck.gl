@@ -36,7 +36,6 @@ const App = ({data, viewport}) => {
     data,
     pickable: true,
     getStrokeWidth: 12,
-    widthScale: Math.pow(viewport.zoom, 2) / 4096,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -64,7 +63,7 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 * Default: 1
 
-The scaling factor for the width of each arc. Usually `Math.pow(viewport.zoom, 2) / Math.pow(2, 12)`, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can limit the minimum size of the arc with this property.
+The scaling factor for the width of each arc. If you set the property to `Math.pow(2, viewport.zoom - 12)` it will keep the width constant, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can also limit the minimum size of the arc with this property.
 
 ### Data Accessors
 
