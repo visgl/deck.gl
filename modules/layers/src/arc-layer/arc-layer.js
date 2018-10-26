@@ -37,7 +37,8 @@ const defaultProps = {
   getTargetPosition: x => x.targetPosition,
   getSourceColor: DEFAULT_COLOR,
   getTargetColor: DEFAULT_COLOR,
-  getStrokeWidth: 1
+  getStrokeWidth: 1,
+  widthScale: 1
 };
 
 export default class ArcLayer extends Layer {
@@ -109,6 +110,10 @@ export default class ArcLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
+
+    this.state.model.setUniforms({
+      widthScale: props.widthScale
+    });
   }
 
   _getModel(gl) {
