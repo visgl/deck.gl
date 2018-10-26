@@ -36,6 +36,7 @@ const App = ({data, viewport}) => {
     data,
     pickable: true,
     getStrokeWidth: 12,
+    widthScale: Math.pow(viewport.zoom, 2) / 4096,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -58,6 +59,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 * Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
+
+##### `widthScale` (number, optional)
+
+* Default: 1
+
+The scaling factor for the width of each arc. Usually `Math.pow(viewport.zoom, 2) / Math.pow(2, 12)`, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can limit the minimum size of the arc with this property.
 
 ### Data Accessors
 
