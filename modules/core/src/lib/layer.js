@@ -60,7 +60,7 @@ const defaultProps = {
   opacity: {type: 'number', min: 0, max: 1, value: 0.8},
 
   onHover: {type: 'function', value: noop, compare: false},
-  onClick: {type: 'function', value: null, compare: false, optional: true},
+  onClick: {type: 'function', value: noop, compare: false},
   onDragStart: {type: 'function', value: null, compare: false, optional: true},
   onDrag: {type: 'function', value: null, compare: false, optional: true},
   onDragEnd: {type: 'function', value: null, compare: false, optional: true},
