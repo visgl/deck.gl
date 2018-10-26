@@ -59,6 +59,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
+##### `widthScale` (number, optional)
+
+* Default: 1
+
+The scaling factor for the width of each arc. If you set the property to `Math.pow(2, viewport.zoom - 12)` it will keep the width constant, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can also limit the minimum size of the arc with this property.
+
 ### Data Accessors
 
 ##### `getSourcePosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
