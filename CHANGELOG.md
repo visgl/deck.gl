@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.2
 
+#### [6.2.3] - Oct 26 2018
+
+- Fix @deck.gl/mapbox es5 build (#2391)
+- Add `widthScale` to ArcLayer (#2389)
+- Fix FirstPersonView offset (#2393)
+
 #### [6.2.2] - Oct 25 2018
 
 - Fix primitive layers not redrawing bug (#2382)
