@@ -32,6 +32,7 @@ import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 import VENDOR_PREFIX from '../utils/css-vendor-prefix';
+import {EVENTS} from './constants';
 /* global document */
 
 function noop() {}
@@ -142,6 +143,7 @@ export default class Deck {
     };
 
     // Bind methods
+    this._onEvent = this._onEvent.bind(this);
     this._onClick = this._onClick.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerLeave = this._onPointerLeave.bind(this);
@@ -455,13 +457,15 @@ export default class Deck {
     this.props.onWebGLInitialized(gl);
 
     if (!this.props._customRender) {
-      this.eventManager = new EventManager(gl.canvas, {
-        events: {
-          click: this._onClick,
-          pointermove: this._onPointerMove,
-          pointerleave: this._onPointerLeave
-        }
-      });
+      const events = {
+        click: this._onClick,
+        pointermove: this._onPointerMove,
+        pointerleave: this._onPointerLeave
+      };
+      for (const eventType in EVENTS) {
+        events[eventType] = this._onEvent;
+      }
+      this.eventManager = new EventManager(gl.canvas, {events});
     }
 
     this.viewManager = new ViewManager({
@@ -584,6 +588,29 @@ export default class Deck {
       event,
       mode: 'click'
     });
+  }
+
+  _onEvent(event) {
+    const eventOptions = EVENTS[event.type];
+    if (!eventOptions) {
+      return;
+    }
+    const rootHandler = this.props[eventOptions.handler];
+
+    // Reuse last picked object
+    const {info} = this.layerManager.context.lastPickedInfo;
+    const layer = info ? this.layerManager.layers.find(l => l.id === info.layer.id) : null;
+    let handled = false;
+
+    if (layer) {
+      info.layer = layer;
+    }
+    if (layer && layer.props[eventOptions.handler]) {
+      handled = layer.props[eventOptions.handler](info, event);
+    }
+    if (!handled && rootHandler) {
+      rootHandler(info, info ? [info] : [], event);
+    }
   }
 
   _onPointerMove(event) {

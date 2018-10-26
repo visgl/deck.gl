@@ -118,7 +118,40 @@ Requires `pickable` to be true.
 
 This callback will be called when the mouse clicks over an object of this deck.gl layer with a single parameter [`info`](/docs/get-started/interactivity.md#the-picking-info-object).
 
-If this callback returns a truthy value, the `hover` event is marked as handled and will not bubble up to the [`onLayerClick`](/docs/api-reference/react/deckgl.md#-onlayerclick-function-optional-) callback of the `DeckGL` canvas.
+If this callback returns a truthy value, the `click` event is marked as handled and will not bubble up to the [`onLayerClick`](/docs/api-reference/react/deckgl.md#-onlayerclick-function-optional-) callback of the `DeckGL` canvas.
+
+Requires `pickable` to be true.
+
+##### `onDragStart` (Function, optional)
+
+This callback will be called when the mouse starts dragging an object of this deck.gl layer with the following parameters:
+
+* [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
+* `event` - the source event
+
+If this callback returns a truthy value, the `dragstart` event is marked as handled and will not bubble up to the [`onDragStart`](/docs/api-reference/react/deckgl.md#-ondragstart-function-optional-) callback of the `DeckGL` canvas.
+
+Requires `pickable` to be true.
+
+##### `onDrag` (Function, optional)
+
+This callback will be called when the mouse drags an object of this deck.gl layer with the following parameters:
+
+* [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
+* `event` - the source event
+
+If this callback returns a truthy value, the `drag` event is marked as handled and will not bubble up to the [`onDrag`](/docs/api-reference/react/deckgl.md#-ondrag-function-optional-) callback of the `DeckGL` canvas.
+
+Requires `pickable` to be true.
+
+##### `onDragEnd` (Function, optional)
+
+This callback will be called when the mouse releases an object of this deck.gl layer with the following parameters:
+
+* [`info`](/docs/get-started/interactivity.md#the-picking-info-object)
+* `event` - the source event
+
+If this callback returns a truthy value, the `dragend` event is marked as handled and will not bubble up to the [`onDragEnd`](/docs/api-reference/react/deckgl.md#-ondragend-function-optional-) callback of the `DeckGL` canvas.
 
 Requires `pickable` to be true.
 

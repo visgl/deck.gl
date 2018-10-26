@@ -92,7 +92,8 @@ export default class LayerManager {
       lastPickedInfo: {
         // For callback tracking and autohighlight
         index: -1,
-        layerId: null
+        layerId: null,
+        info: null
       },
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function

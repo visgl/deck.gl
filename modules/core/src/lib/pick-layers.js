@@ -318,6 +318,7 @@ function processPickInfo({
       // Update layer manager context
       lastPickedInfo.layerId = pickedLayerId;
       lastPickedInfo.index = pickedObjectIndex;
+      lastPickedInfo.info = null;
     }
   }
 
@@ -352,6 +353,10 @@ function processPickInfo({
     }
 
     info = getLayerPickingInfo({layer, info, mode});
+
+    if (layer === pickedLayer && mode === 'hover') {
+      lastPickedInfo.info = info;
+    }
 
     // This guarantees that there will be only one copy of info for
     // one composite layer

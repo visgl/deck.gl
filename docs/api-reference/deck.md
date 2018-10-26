@@ -187,13 +187,44 @@ Callback Arguments:
 
 ##### `onLayerClick` (Function, optional)
 
-Callback - called when clicking on the layer.
+Callback - called when clicking on the canvas.
 
 Callback Arguments:
 
 * `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
 * `pickedInfos` - an array of info objects for all pickable layers that are affected.
 * `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
+
+##### `onDragStart` (Function, optional)
+
+Callback - called when the user starts dragging on the canvas.
+
+Callback Arguments:
+
+* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
+* `pickedInfos` - an array of info objects for all pickable layers that are affected.
+* `event` - the original gesture event
+
+##### `onDrag` (Function, optional)
+
+Callback - called when dragging the canvas.
+
+Callback Arguments:
+
+* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
+* `pickedInfos` - an array of info objects for all pickable layers that are affected.
+* `event` - the original gesture event
+
+##### `onDragEnd` (Function, optional)
+
+Callback - called when the user releases from dragging the canvas.
+
+Callback Arguments:
+
+* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
+* `pickedInfos` - an array of info objects for all pickable layers that are affected.
+* `event` - the original gesture event
+
 
 ##### `onLoad` (Function, optional)
 
