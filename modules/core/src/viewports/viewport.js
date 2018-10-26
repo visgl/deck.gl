@@ -374,10 +374,7 @@ export default class Viewport {
     if (meterOffset) {
       const pixelPosition = new Vector3(meterOffset)
         // Convert to pixels in current zoom
-        .scale(distanceScales.pixelsPerMeter)
-        // We want positive Y to represent an offset towards north,
-        // but web mercator world coordinates is top-left
-        .scale([1, -1, 1]);
+        .scale(distanceScales.pixelsPerMeter);
       center.add(pixelPosition);
     }
 
