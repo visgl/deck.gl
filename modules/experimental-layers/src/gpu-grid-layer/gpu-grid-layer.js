@@ -61,33 +61,48 @@ export default class GPUGridLayer extends CompositeLayer {
     };
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    const reprojectNeeded = this.needsReProjectPoints(oldProps, props);
-
-    if (changeFlags.dataChanged || reprojectNeeded) {
-      // project data into hexagons, and get sortedBins
-      this.getLayerData();
+  updateState(opts) {
+    const aggregationFlags = this.getAggregationFlags(opts);
+    if (aggregationFlags) {
+      // project data into grid cells
+      this.getLayerData(aggregationFlags);
     }
   }
 
-  needsReProjectPoints(oldProps, props) {
-    return (
-      oldProps.cellSize !== props.cellSize ||
-      oldProps.gpuAggregation !== props.gpuAggregation ||
-      oldProps.getPosition !== props.getPosition
-    );
+  getAggregationFlags({oldProps, props, changeFlags}) {
+    let aggregationFlags = null;
+    if (
+      changeFlags.dataChanged ||
+      oldProps.getPosition !== props.getPosition ||
+      oldProps.gpuAggregation !== props.gpuAggregation
+    ) {
+      aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
+    }
+    if (oldProps.cellSize !== props.cellSize) {
+      aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
+    }
+    return aggregationFlags;
   }
 
-  getLayerData() {
+  getLayerData(aggregationFlags) {
     const {data, cellSize: cellSizeMeters, getPosition, gpuAggregation} = this.props;
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData({
+    const {
+      countsBuffer,
+      maxCountBuffer,
+      gridSize,
+      gridOrigin,
+      cellSize,
+      boundingBox
+    } = pointToDensityGridData({
       data,
       cellSizeMeters,
       getPosition,
       gpuAggregation,
-      gpuGridAggregator: this.state.gpuGridAggregator
+      gpuGridAggregator: this.state.gpuGridAggregator,
+      boundingBox: this.state.boundingBox, // avoid parsing data when it is not changed.
+      aggregationFlags
     });
-    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize});
+    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize, boundingBox});
   }
 
   // for subclassing, override this method to return
