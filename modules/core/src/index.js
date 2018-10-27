@@ -82,7 +82,8 @@ import {defaultColorRange} from './utils/color-utils';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
 
 export {
-  default as _GPUGridAggregator
+  default as _GPUGridAggregator,
+  AGGREGATION_OPERATION
 } from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator';
 export {
   pointToDensityGridData as _pointToDensityGridData

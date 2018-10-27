@@ -26,10 +26,15 @@ precision highp float;
 
 in vec2 vTextureCoord;
 uniform sampler2D uSampler;
+uniform bool combineMaxMin;
 out vec4 fragColor;
 void main(void) {
   vec4 textureColor = texture(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-  // Red: total count, Green: total weight, Alpha: maximum wieght
-  fragColor = vec4(textureColor.r, textureColor.g, 0., textureColor.g);
+  if (textureColor.a == 0.) {
+    discard;
+  }
+  fragColor.rgb = textureColor.rgb;
+  // if combineMinMax is true, use Alpha channel for first weights min value.
+  fragColor.a = mix(textureColor.a, textureColor.r, float(combineMaxMin));
 }
 `;

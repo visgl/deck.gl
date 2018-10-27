@@ -22,14 +22,14 @@ export default `\
 #define SHADER_NAME gpu-aggregation-to-grid-vs
 
 attribute vec2 positions;
-attribute float weights;
+attribute vec3 weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
 uniform mat4 uProjectionMatrix;
 uniform bool projectPoints;
 
-varying float vWeights;
+varying vec3 vWeights;
 
 vec2 project_to_pixel(vec4 pos) {
   vec4 result =  uProjectionMatrix * pos;
