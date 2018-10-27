@@ -27,7 +27,7 @@ import {isWebGL2} from 'luma.gl';
 
 const {fixture, generateRandomGridPoints} = GridAggregationData;
 const aggregator = new GPUGridAggregator(gl);
-const changeFlags = {dataChanged: true};
+const changeFlags = {cellSizeChanged: true};
 const points1K = generateRandomGridPoints(1000);
 const points100K = generateRandomGridPoints(100000);
 const points1M = generateRandomGridPoints(1000000);
@@ -80,7 +80,8 @@ function runAggregation(opts) {
   const results = aggregator.run(Object.assign({}, fixture, {changeFlags}, opts));
   if (opts.useGPU) {
     // Call getData to sync GPU and CPU.
-    results.countsBuffer.getData();
-    results.maxCountBuffer.getData();
+    results.weight1.aggregationBuffer.getData();
+    results.weight1.minBuffer.getData();
+    results.weight1.maxBuffer.getData();
   }
 }

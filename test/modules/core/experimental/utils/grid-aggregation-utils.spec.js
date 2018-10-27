@@ -45,6 +45,7 @@ test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
     getPosition,
     cellSizeMeters: CELLSIZE,
     gpuGridAggregator,
+    aggregationFlags: {dataChanged: true},
     fp64: false
   };
   opts.gpuAggregation = false;
@@ -55,11 +56,12 @@ test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
 
   const cpuCountsData = cpuResults.countsBuffer.getData();
   const gpuCountsData = gpuResults.countsBuffer.getData();
-  t.deepEqual(cpuCountsData, gpuCountsData, 'Aggregated data should match');
+  t.deepEqual(cpuCountsData, gpuCountsData, 'Cell aggregation data should match');
 
   const cpuMaxCountsData = cpuResults.maxCountBuffer.getData();
   const gpuMaxCountData = gpuResults.maxCountBuffer.getData();
-  t.deepEqual(cpuMaxCountsData, gpuMaxCountData, 'Aggregated data should match');
+  t.deepEqual(cpuMaxCountsData[0], gpuMaxCountData[0], 'Max data should match');
+  t.deepEqual(cpuMaxCountsData[3], gpuMaxCountData[3], 'Total count should match');
 
   t.end();
 });
