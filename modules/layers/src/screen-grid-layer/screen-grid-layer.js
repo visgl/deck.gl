@@ -23,6 +23,7 @@ import {
   experimental,
   WebMercatorViewport,
   _GPUGridAggregator as GPUGridAggregator,
+  AGGREGATION_OPERATION,
   log
 } from '@deck.gl/core';
 const {defaultColorRange} = experimental;
@@ -50,7 +51,7 @@ const defaultProps = {
   colorRange: defaultColorRange,
 
   getPosition: {type: 'accessor', value: d => d.position},
-  getWeight: {type: 'accessor', value: d => 1},
+  getWeight: {type: 'accessor', value: d => [1, 0, 0]},
 
   gpuAggregation: true
 };
@@ -83,10 +84,20 @@ export default class ScreenGridLayer extends Layer {
       id: `${this.id}-aggregator`,
       shaderCache: this.context.shaderCache
     };
+    const maxCountBuffer = this._getMaxCountBuffer(gl);
+    const weights = {
+      color: {
+        size: 1,
+        operation: AGGREGATION_OPERATION.SUM,
+        needMax: true,
+        maxBuffer: maxCountBuffer
+      }
+    };
     this.setState({
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
-      maxCountBuffer: this._getMaxCountBuffer(gl),
+      maxCountBuffer,
+      weights,
       aggregationData: null
     });
 
@@ -242,20 +253,31 @@ export default class ScreenGridLayer extends Layer {
     });
   }
 
+  _getWeight(point) {
+    const {getWeight} = this.props;
+    const weight = getWeight(point);
+    if (!Array.isArray(weight)) {
+      // backward compitability
+      return [weight, 0, 0];
+    }
+    assert(weight.length === 3);
+    return weight;
+  }
   // Process 'data' and build positions and weights Arrays.
   _processData() {
-    const {data, getPosition, getWeight} = this.props;
+    const {data, getPosition} = this.props;
     const positions = [];
-    const weights = [];
+    const colorWeights = [];
+    const {weights} = this.state;
 
     for (const point of data) {
       const position = getPosition(point);
       positions.push(position[0]);
       positions.push(position[1]);
-      weights.push(getWeight(point));
+      colorWeights.push(...this._getWeight(point));
     }
-
-    this.setState({positions, weights});
+    weights.color.values = colorWeights;
+    this.setState({positions});
   }
 
   // Set a binding point for the aggregation uniform block index
@@ -322,7 +344,8 @@ export default class ScreenGridLayer extends Layer {
       gridTransformMatrix
     });
 
-    const {maxWeight = 0} = results;
+    const maxWeight =
+      results.color.maxData && results.color.maxData[0] > -Infinity ? results.color.maxData[0] : 0;
     this.setState({
       aggregationData: null, // Aggregation changed, enforce reading buffer data for picking.
       maxWeight // uniform to use under WebGL1
@@ -384,7 +407,7 @@ export default class ScreenGridLayer extends Layer {
       type: GL.FLOAT,
       instanced: 1
     });
-
+    this.state.weights.color.aggregationBuffer = countsBuffer;
     this.setState({
       numCol,
       numRow,
