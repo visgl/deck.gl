@@ -614,6 +614,31 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@deck.gl/core@>=6.1.0-alpha.1", "@deck.gl/core@^6.2.3":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-6.2.3.tgz#ee32697271a60fd252307ca685a89db138174a66"
+  dependencies:
+    luma.gl "^6.2.0"
+    math.gl "^2.1.0"
+    mjolnir.js "^1.0.0"
+    probe.gl "^2.0.1"
+    seer "^0.2.4"
+    viewport-mercator-project "^6.0.0"
+
+"@deck.gl/layers@>=6.1.0-alpha.1":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/@deck.gl/layers/-/layers-6.2.3.tgz#e2c4142c50400a60ae045039af1c60b880c6f9f9"
+  dependencies:
+    "@deck.gl/core" "^6.2.3"
+    d3-hexbin "^0.2.1"
+    earcut "^2.0.6"
+
+"@deck.gl/mapbox@>=6.1.0-alpha.1":
+  version "6.2.3"
+  resolved "https://registry.yarnpkg.com/@deck.gl/mapbox/-/mapbox-6.2.3.tgz#4a40dae21e58b38e37df8f286bb386893c0fcc4d"
+  dependencies:
+    "@deck.gl/core" "^6.2.3"
+
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-area/-/geojson-area-0.2.2.tgz#18d7814aa36bf23fbbcc379f8e26a22927debf10"
@@ -5971,6 +5996,16 @@ luma.gl@^6.2.0:
     seer "^0.2.4"
     webgl-debug "^2.0.0"
 
+luma.gl@^6.3.0-alpha:
+  version "6.3.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.3.0-alpha.1.tgz#2dcb92ce57c83c9e8a6ef4f8ecf32c3cdbbb41f2"
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    math.gl "^2.2.0"
+    probe.gl "^2.0.1"
+    seer "^0.2.4"
+    webgl-debug "^2.0.0"
+
 magic-string@^0.22.4:
   version "0.22.5"
   resolved "https://registry.yarnpkg.com/magic-string/-/magic-string-0.22.5.tgz#8e9cf5afddf44385c1da5bc2a6a0dbd10b03657e"
@@ -6379,6 +6414,13 @@ mjolnir.js@^1.0.0, mjolnir.js@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-1.2.1.tgz#ab3237afc5fbbc8aa4bafc965b10735c4bf8328c"
   dependencies:
+    hammerjs "^2.0.8"
+
+mjolnir.js@^2.0.0-alpha:
+  version "2.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.0.0-alpha.3.tgz#cc9c0575b0780363894e298ff26c8ac19ebcd8e1"
+  dependencies:
+    "@babel/runtime" "^7.0.0"
     hammerjs "^2.0.8"
 
 mkdirp@0.5.1, mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0:
