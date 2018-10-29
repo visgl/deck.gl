@@ -22,37 +22,44 @@ The public API that needs to change is `run()` method. We change input arguments
 
 #### weights arguments
 
-Update `run` method to accept weights as an array of objects with following values. Each object will result in one aggregation cycle.
+Update `run` method to accept weights object, that contains one keyed object for each weight. Each such object will result in one aggregation cycle. `key` of the object works as an identifier and value object contains following values.
 
-  * `id` (String) : used to identify the corresponding aggregation buffer and texture in return object. Must be unique for each weights object.
-  * `values` (Array) : ArrayBufferView with weight values.
+  * `values` (Array, Float32Array or Buffer) : Contains weight values for all points, there should be 3 floats for each point, un-used values can be 0.
   * `size` (Number, default: 1, minValue: 1, maxValue: 3) : Size of a single weight instance. Determines how many distinct weights exist in the array.
   * `operation` (Enum {SUM, MEAN, MIN or MAX}, default: SUM) : Defines aggregation operation.
-  * `needMinMax` (Boolean, default: false) : when true additional aggregation steps are performed to calculate total min and max aggregation values.
-  * `combineMinMax` (Boolean, default: false) : Applicable only when `needMinMax` is set. When true, both min and max values are calculated in single aggregation step using `blendEquationSeparate` WebGL API. But since Alpha channel can only contain one float, it will perform both min and max on first weight only, i.e. recommend to set this option to true, only when `size` equal 1.
+  * `needMin` (Boolean, default: false) : when true additional aggregation steps are performed to calculate minimum of all aggregation values and total count, result object will contain minBuffer.
+  * `needMax` (Boolean, default: false) : when true additional aggregation steps are performed to calculate maximum of all aggregation values and total count, result object will contain maxBuffer.
+  * `combineMaxMin` (Boolean, default: false) : Applicable only when `needMin` and `needMax` are set. When true, both min and max values are calculated in single aggregation step using `blendEquationSeparate` WebGL API. But since Alpha channel can only contain one float, it will only provide minimum value for first weight in Alpha channel and RGB channels store maximum value upto 3 weights. Also when selected total count is not availabe. Result object will contain maxMinBuffer.
 
-Existing single weight array can be supported as deprecated by internally converting it into an array with single object, {id: 'weights', values: weights, needMinMax: true, combineMinMax: true}.
+NOTE: Existing array support for `weights` is no longer supported, note this doesn't effect any public API, just the internal/experimental API change only.
 
 Other than `weights` all other arguments to `run` remain same.
 
 #### return object
 
-Result of `run` is an array of objects with one object corresponds to an object in `weights` array parameter. Each object contains following values
+Result of `run` is an object, where key represents `id` of the weight and value contains following aggregated data.
 
-  * `aggregationBuffer` (Buffer) : Aggregated values per grid cell, aggregation is performed as per specified `operation`. Size of the buffer is 4, with R, G and B channel corresponds to aggregated weights. When input `size` is < 3, G or B channels contain undefined values. A channel contains count of points aggregated into this cell.
+  * `aggregationBuffer` (Buffer) : Aggregated values per grid cell, aggregation is performed as per specified `operation`. Size of the buffer is 4, with R, G and B channel corresponds to aggregated weights. When input `size` is < 3, G or B channels contain undefined values. Alpha channel contains count of points aggregated into this cell. (R: weight#1 G: weight#2 B: weight#3 A: count)
 
   * `aggregationTexture` (Texture) : When aggregation is performed on GPU, contains above data as form of texture, useful for applications that want to consume the texture instead of buffer. This value is `null` when aggregation is performed on CPU.
 
-  * `minBuffer` (Buffer, optional) : Contains data for one pixel with R, G, B and A channels contain min value of all aggregated grid cells. When aggregation is performed on CPU, `minBuffer` is `null` but `minData` Array is returned with same data. This value is `null` when `needMinMax` is false.
+  * `minBuffer` (Buffer, optional) : Contains data for one pixel with R, G, B and A channels contain min value of all aggregated grid cells. When aggregation is performed on CPU, `minBuffer` is `null` but `minData` Array is returned with same data. This value is `null` when `needMin` is false. (R: weight#1 min value G: weight#2 min value B: weight#3 min value A: total count)
 
-  * `maxBuffer` (Buffer, optional) : Contains data for one pixel with R, G, B and A channels contain max value of all aggregated grid cells. When aggregation is performed on CPU, `maxBuffer` is `null` but `maxData` Array is returned with same data. This value is `null` when `needMinMax` is false.
+  * `maxBuffer` (Buffer, optional) : Contains data for one pixel with R, G, B and A channels contain max value of all aggregated grid cells. When aggregation is performed on CPU, `maxBuffer` is `null` but `maxData` Array is returned with same data. This value is `null` when `needMax` is false. (R: weight#1 max value G: weight#2 max value B: weight#3 max value A: total count)
 
-  * `minMaxBuffer` (Buffer, optional) : Contains data for one pixel, with R channel contains min value of all aggregated grid cells and A channel contains max value of all aggregated grid cells. When `combineMinMax` is `false` this value will be `null`.
+  * `maxMinBuffer` (Buffer, optional) : Contains data for one pixel, with RGB channels contains max value of all aggregated grid cells and A channel contains minimum value of all aggregated grid cells. When `combineMaxMin` is `false` this value will be `null`. (R: weight#1 max value G: weight#2 max value B: weight#3 max value A: weight#1 min value)
 
-  NOTE: `minBuffer`, `maxBuffer` and `minMaxBuffer` are usually consumed by setting them as uniform buffer object or read by the CPU.
+  NOTE: `minBuffer`, `maxBuffer` and `maxMinBuffer` are usually consumed by setting them as uniform buffer object or read by the CPU.
 
-  NOTE: Aggregation result is always in `Buffer` objects to provide common API irrespective of whether aggregation is performed on CPU or GPU. `Texture` objects are provided when aggregation is done on GPU.
+  NOTE: Aggregation result is always in `Buffer` objects to provide common API irrespective of whether aggregation is performed on CPU or GPU. `Texture` objects are provided when aggregation is done on GPU, and `Array` objects are provided when aggregation is performed on CPU.
 
+### Other options
+
+Following new field will be added for additional customization
+
+#### createBufferObjects (Boolean, default: true)
+
+Only applicable when aggregation is performed on CPU. When set to false, aggregated data is not uploaded into Buffer objects. In a typical use case, Applications need data in `Buffer` objects to use them in next rendering cycle, hence by default its value is true, but if needed this step can be avoided by setting this flag to false.
 
 ### Implementation
 
@@ -60,7 +67,7 @@ Result of `run` is an array of objects with one object corresponds to an object 
 
 Aggregator internally maintains one texture for each weights object and performs one aggregation loop for each weights object. One aggregation loop (involves setting up `Framebuffer` object and one draw). Weight values are written into R, G and B channels and a value 1.0 into A channel for count. `blendEquation` is set to [`op`, `gl.SUM`], where `op` is `gl.SUM`, `gl.MIN` or `gl.MAX` based on user provided `operation` parameter.
 
-If `needMinMax` is set another aggregation loop is performed on above results, more details discussed below.
+If `needMin` or `needMax` are set additional aggregation loops are performed on above results, more details discussed below.
 
 Once aggregation is performed this data is asynchronously read into corresponding buffers before proceeding to the next weights object.
 
@@ -102,11 +109,11 @@ void main()
 Applications can also avoid this step by using `SUM` as operation and then calculating mean as above in applications shader. But this option is provide as convenience.
 
 
-### needMinMax and combineMinMax
+### Total maximum and minimum values
 
-When `needMinMax` set to true, data is aggregated into single pixel to calculate min and max values of weights. Two separate rendering operations are performed, one with setting `blendEquation = gl.MIN` and the other with `blendEquation = gl.MAX`. Resulting data is stored in two separate buffers `minBuffer` and `maxBuffer`. If the `size` was set to 3, each channel in these buffer corresponds to min and max values of these weights. Alpha channel is always used for count.
+When `needMin` or `needMax` set to true, data is aggregated into single pixel to calculate min and max values of weights. Two separate rendering operations are performed, one with setting `blendEquation = gl.MIN` and the other with `blendEquation = gl.MAX`. Resulting data is stored in two separate buffers `minBuffer` and `maxBuffer`. If the `size` was set to 3, each channel in these buffer corresponds to min and max values of these weights. Alpha channel is always used for count.
 
-When `combineMinMax` is set to true, we avoid second render operation by setting `blendEquation = [gl.MAX, gl.MIN]`.
+When `combineMaxMin` is set to true, we avoid second render operation by setting `blendEquation = [gl.MAX, gl.MIN]`.
 
 
 ## conclusion
