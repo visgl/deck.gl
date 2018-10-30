@@ -2,7 +2,7 @@ import assert from 'assert';
 import {Matrix4} from 'math.gl';
 import {fp64 as fp64Utils} from 'luma.gl';
 import {COORDINATE_SYSTEM} from '../../../lib/constants';
-import {AGGREGATION_OPERATION} from './gpu-grid-aggregator.js';
+import {AGGREGATION_OPERATION} from './gpu-grid-aggregator-constants';
 const {fp64LowPart} = fp64Utils;
 
 const R_EARTH = 6378000;

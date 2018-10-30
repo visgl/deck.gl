@@ -1,59 +1,38 @@
 import GL from 'luma.gl/constants';
-import {Buffer, Model, Framebuffer, Texture2D, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
+import {Buffer, Model, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
 import {log} from '@deck.gl/core';
 import assert from 'assert';
 import {fp64 as fp64Utils, withParameters} from 'luma.gl';
 import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64Utils;
-const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
-const PIXEL_SIZE = 4; // RGBA32F
-const WEIGHT_SIZE = 3;
+
+import {
+  AGGREGATION_OPERATION,
+  DEFAULT_CHANGE_FLAGS,
+  DEFAULT_RUN_PARAMS,
+  MAX_32_BIT_FLOAT,
+  MIN_BLEND_EQUATION,
+  MAX_BLEND_EQUATION,
+  MAX_MIN_BLEND_EQUATION,
+  EQUATION_MAP,
+  ELEMENTCOUNT,
+  DEFAULT_WEIGHT_PARAMS,
+  IDENTITY_MATRIX,
+  PIXEL_SIZE,
+  WEIGHT_SIZE
+} from './gpu-grid-aggregator-constants';
 
 import AGGREGATE_TO_GRID_VS from './aggregate-to-grid-vs.glsl';
 import AGGREGATE_TO_GRID_VS_FP64 from './aggregate-to-grid-vs-64.glsl';
 import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
-
-const DEFAULT_CHANGE_FLAGS = {
-  dataChanged: true,
-  viewportChanged: true,
-  cellSizeChanged: true
-};
-const DEFAULT_RUN_PARAMS = {
-  changeFlags: DEFAULT_CHANGE_FLAGS,
-  projectPoints: false,
-  useGPU: true,
-  fp64: false,
-  viewport: null,
-  gridTransformMatrix: null,
-  createBufferObjects: true
-};
-export const AGGREGATION_OPERATION = {
-  SUM: 1,
-  MEAN: 2,
-  MIN: 3,
-  MAX: 4
-};
-const MAX_32_BIT_FLOAT = 2147483647;
-const MIN_BLEND_EQUATION = [GL.MIN, GL.FUNC_ADD];
-const MAX_BLEND_EQUATION = [GL.MAX, GL.FUNC_ADD];
-const MAX_MIN_BLEND_EQUATION = [GL.MAX, GL.MIN];
-
-export const EQUATION_MAP = {
-  [AGGREGATION_OPERATION.SUM]: GL.FUNC_ADD,
-  [AGGREGATION_OPERATION.MEAN]: GL.FUNC_ADD,
-  [AGGREGATION_OPERATION.MIN]: MIN_BLEND_EQUATION,
-  [AGGREGATION_OPERATION.MAX]: MAX_BLEND_EQUATION
-};
-const ELEMENTCOUNT = 4;
-const DEFAULT_WEIGHT_PARAMS = {
-  size: 1,
-  operation: AGGREGATION_OPERATION.SUM,
-  needMin: false,
-  needMax: false,
-  combineMaxMin: false
-};
+import {
+  getFloatTexture,
+  getFramebuffer,
+  getFloatArray,
+  updateBuffer
+} from './gpu-grid-aggregator-utils.js';
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
@@ -374,10 +353,6 @@ export default class GPUGridAggregator {
     return results;
   }
   /* eslint-enable complexity */
-
-  _isOldStyleWeights(weights) {
-    return !weights || Array.isArray(weights);
-  }
 
   _shouldTransformToGrid(opts) {
     const {projectPoints, changeFlags} = opts;
@@ -850,56 +825,5 @@ export default class GPUGridAggregator {
     const numCol = Math.ceil(width / cellSize[0]);
     const numRow = Math.ceil(height / cellSize[1]);
     this._setState({numCol, numRow, windowSize: [width, height]});
-  }
-}
-
-// Helper methods.
-
-function getFloatTexture(gl, opts) {
-  const {width = 1, height = 1} = opts;
-  const texture = new Texture2D(gl, {
-    data: null,
-    format: GL.RGBA32F,
-    type: GL.FLOAT,
-    border: 0,
-    mipmaps: false,
-    parameters: {
-      [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
-      [GL.TEXTURE_MIN_FILTER]: GL.NEAREST
-    },
-    dataFormat: GL.RGBA,
-    width,
-    height
-  });
-  return texture;
-}
-
-function getFramebuffer(gl, opts) {
-  const {id, width = 1, height = 1} = opts;
-  const texture = opts.texture || getFloatTexture(gl, opts);
-  const fb = new Framebuffer(gl, {
-    id,
-    width,
-    height,
-    attachments: {
-      [GL.COLOR_ATTACHMENT0]: texture
-    }
-  });
-
-  return fb;
-}
-
-function getFloatArray(array, size, fillValue = 0) {
-  if (!array || array.length < size) {
-    return new Float32Array(size).fill(fillValue);
-  }
-  return array;
-}
-
-function updateBuffer({gl, bufferName, data, result}) {
-  if (result[bufferName]) {
-    result[bufferName].subData({data});
-  } else {
-    result[bufferName] = new Buffer(gl, data);
   }
 }
