@@ -35,6 +35,6 @@ void main(void) {
   }
   fragColor.rgb = textureColor.rgb;
   // if combineMinMax is true, use Alpha channel for first weights min value.
-  fragColor.a = mix(textureColor.a, textureColor.r, float(combineMaxMin));
+  fragColor.a = combineMaxMin ? textureColor.r : textureColor.a;
 }
 `;
