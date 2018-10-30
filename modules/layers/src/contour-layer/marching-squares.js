@@ -1,6 +1,8 @@
 // All utility mehtods needed to implement Marching Squres algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 
+import {log} from '@deck.gl/core';
+
 // Table to map code to the intersection offsets
 // All offsets are relative to the center of marching cell (which is top right corner of grid-cell)
 const OFFSET = {
@@ -32,11 +34,17 @@ const CODE_OFFSET_MAP = {
 
 // Returns marching square code for given cell
 /* eslint-disable complexity */
-export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
+export function getCode(opts) {
   // Assumptions
   // Origin is on bottom-left , and X increase to right, Y to top
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
   // to create a 2X2 cell grid
+  const {cellWeights, x, y, width, height} = opts;
+  let threshold = opts.threshold;
+  if (opts.thresholdValue) {
+    log.deprecated('thresholdValue', 'threshold')();
+    threshold = opts.thresholdValue;
+  }
 
   const isLeftBoundary = x < 0;
   const isRightBoundary = x >= width - 1;
@@ -44,24 +52,16 @@ export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
   const isTopBoundary = y >= height - 1;
 
   const top =
-    isLeftBoundary || isTopBoundary
-      ? 0
-      : cellWeights[(y + 1) * width + x] - thresholdValue >= 0
-        ? 1
-        : 0;
+    isLeftBoundary || isTopBoundary ? 0 : cellWeights[(y + 1) * width + x] - threshold >= 0 ? 1 : 0;
   const topRight =
     isRightBoundary || isTopBoundary
       ? 0
-      : cellWeights[(y + 1) * width + x + 1] - thresholdValue >= 0
+      : cellWeights[(y + 1) * width + x + 1] - threshold >= 0
         ? 1
         : 0;
-  const right = isRightBoundary ? 0 : cellWeights[y * width + x + 1] - thresholdValue >= 0 ? 1 : 0;
+  const right = isRightBoundary ? 0 : cellWeights[y * width + x + 1] - threshold >= 0 ? 1 : 0;
   const current =
-    isLeftBoundary || isBottomBoundary
-      ? 0
-      : cellWeights[y * width + x] - thresholdValue >= 0
-        ? 1
-        : 0;
+    isLeftBoundary || isBottomBoundary ? 0 : cellWeights[y * width + x] - threshold >= 0 ? 1 : 0;
 
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 

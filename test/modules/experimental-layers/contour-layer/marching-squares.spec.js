@@ -104,14 +104,14 @@ const GETVERTEX_TESTS = [
 ];
 
 test('MarchingSquares#getCode', t => {
-  const thresholdValue = 6;
+  const threshold = 6;
   const x = 0;
   const y = 0;
   const gridSize = [2, 2];
   GETCODE_TESTS.forEach(testCase => {
     const code = getCode({
       cellWeights: testCase.cellWeights,
-      thresholdValue,
+      threshold,
       x: testCase.x || x,
       y: testCase.y || y,
       width: testCase.gridSize ? testCase.gridSize[0] : gridSize[0],

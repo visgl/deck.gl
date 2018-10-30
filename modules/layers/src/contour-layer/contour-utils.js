@@ -19,7 +19,7 @@ export function generateContours({
         // Get the MarchingSquares code based on neighbor cell weights.
         const code = MarchingSquares.getCode({
           cellWeights,
-          thresholdValue: threshold,
+          threshold,
           x,
           y,
           width,
