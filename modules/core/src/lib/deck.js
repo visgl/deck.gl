@@ -32,6 +32,7 @@ import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 import VENDOR_PREFIX from '../utils/css-vendor-prefix';
+import {EVENTS} from './constants';
 /* global document */
 
 function noop() {}
@@ -142,6 +143,7 @@ export default class Deck {
     };
 
     // Bind methods
+    this._onEvent = this._onEvent.bind(this);
     this._onClick = this._onClick.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerLeave = this._onPointerLeave.bind(this);
@@ -462,6 +464,9 @@ export default class Deck {
           pointerleave: this._onPointerLeave
         }
       });
+      for (const eventType in EVENTS) {
+        this.eventManager.on(eventType, this._onEvent);
+      }
     }
 
     this.viewManager = new ViewManager({
@@ -584,6 +589,34 @@ export default class Deck {
       event,
       mode: 'click'
     });
+  }
+
+  _onEvent(event) {
+    const eventOptions = EVENTS[event.type];
+    const pos = event.offsetCenter;
+
+    if (!eventOptions || !pos) {
+      return;
+    }
+
+    // Reuse last picked object
+    const info = this.layerManager.getLastPickedObject({
+      x: pos.x,
+      y: pos.y,
+      viewports: this.getViewports(pos)
+    });
+
+    const {layer} = info;
+    const layerHandler = layer && layer.props[eventOptions.handler];
+    const rootHandler = this.props[eventOptions.handler];
+    let handled = false;
+
+    if (layerHandler) {
+      handled = layerHandler(info, event);
+    }
+    if (!handled && rootHandler) {
+      rootHandler(info, event);
+    }
   }
 
   _onPointerMove(event) {

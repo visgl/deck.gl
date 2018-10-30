@@ -43,3 +43,9 @@ export const COORDINATE_SYSTEM = {
   // Positions and distances are not transformed: [x, y, z] in unit coordinates
   IDENTITY: 0
 };
+
+export const EVENTS = {
+  panstart: {handler: 'onDragStart'},
+  panmove: {handler: 'onDrag'},
+  panend: {handler: 'onDragEnd'}
+};

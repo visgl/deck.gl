@@ -61,6 +61,9 @@ const defaultProps = {
 
   onHover: {type: 'function', value: noop, compare: false},
   onClick: {type: 'function', value: noop, compare: false},
+  onDragStart: {type: 'function', value: null, compare: false, optional: true},
+  onDrag: {type: 'function', value: null, compare: false, optional: true},
+  onDragEnd: {type: 'function', value: null, compare: false, optional: true},
 
   coordinateSystem: COORDINATE_SYSTEM.LNGLAT,
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},

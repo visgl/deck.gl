@@ -92,7 +92,8 @@ export default class LayerManager {
       lastPickedInfo: {
         // For callback tracking and autohighlight
         index: -1,
-        layerId: null
+        layerId: null,
+        info: null
       },
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
@@ -265,6 +266,25 @@ export default class LayerManager {
       redrawReason,
       customRender
     });
+  }
+
+  // Returns a new picking info object by assuming the last picked object is still picked
+  getLastPickedObject({x, y, viewports}) {
+    const lastPickedInfo = this.context.lastPickedInfo.info;
+    const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
+    const layer = lastPickedLayerId ? this.layers.find(l => l.id === lastPickedLayerId) : null;
+
+    const info = {
+      x,
+      y,
+      lngLat: viewports[0] && viewports[0].unproject([x, y]),
+      layer
+    };
+
+    if (layer) {
+      return Object.assign({}, lastPickedInfo, info);
+    }
+    return Object.assign(info, {color: null, object: null, index: -1});
   }
 
   // Pick the closest info at given coordinate
