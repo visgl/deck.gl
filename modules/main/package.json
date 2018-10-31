@@ -19,7 +19,8 @@
   "files": [
     "dist",
     "deckgl.min.js",
-    "src"
+    "src",
+    "README.md"
   ],
   "scripts": {
     "build": "./build.sh",

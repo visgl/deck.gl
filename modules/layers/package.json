@@ -21,7 +21,8 @@
   "esnext": "dist/es6/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "README.md"
   ],
   "sideEffects": false,
   "scripts": {
