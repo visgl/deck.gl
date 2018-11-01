@@ -139,36 +139,36 @@ export default class GPUGridAggregator {
     if (position64Buffer) {
       position64Buffer.delete();
     }
-    this._deleteResources(framebuffers);
-    this._deleteResources(maxMinFramebuffers);
-    this._deleteResources(minFramebuffers);
-    this._deleteResources(maxFramebuffers);
+    this.deleteResources(framebuffers);
+    this.deleteResources(maxMinFramebuffers);
+    this.deleteResources(minFramebuffers);
+    this.deleteResources(maxFramebuffers);
   }
 
   // Perform aggregation and retun the results
   run(opts = {}) {
-    const aggregationParams = this._getAggregationParams(opts);
+    const aggregationParams = this.getAggregationParams(opts);
     assert(aggregationParams);
-    this._updateGridSize(aggregationParams);
+    this.updateGridSize(aggregationParams);
     const {useGPU} = aggregationParams;
     if (this._hasGPUSupport && useGPU) {
-      return this._runAggregationOnGPU(aggregationParams);
+      return this.runAggregationOnGPU(aggregationParams);
     }
     if (useGPU) {
       log.warn('ScreenGridAggregator: GPU Aggregation not supported, falling back to CPU')();
     }
-    return this._runAggregationOnCPU(aggregationParams);
+    return this.runAggregationOnCPU(aggregationParams);
   }
 
   // PRIVATE
 
-  _deleteResources(obj) {
+  deleteResources(obj) {
     for (const name in obj) {
       obj[name].delete();
     }
   }
 
-  _getAggregateData(opts) {
+  getAggregateData(opts) {
     const results = {};
     const {
       textures,
@@ -210,7 +210,7 @@ export default class GPUGridAggregator {
     return results;
   }
 
-  _getAggregationModel(fp64 = false) {
+  getAggregationModel(fp64 = false) {
     const {gl, shaderCache} = this;
     return new Model(gl, {
       id: 'Gird-Aggregation-Model',
@@ -223,7 +223,7 @@ export default class GPUGridAggregator {
     });
   }
 
-  _getAllAggregationModel(fp64 = false) {
+  getAllAggregationModel(fp64 = false) {
     const {gl, shaderCache} = this;
     return new Model(gl, {
       id: 'All-Aggregation-Model',
@@ -239,8 +239,7 @@ export default class GPUGridAggregator {
     });
   }
 
-  /* eslint-disable complexity */
-  _getAggregationParams(opts) {
+  getAggregationParams(opts) {
     const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
     const {
       useGPU,
@@ -267,45 +266,27 @@ export default class GPUGridAggregator {
       aggregationParams.changeFlags.cellSizeChanged = true;
       // For GridLayer aggregation, cellSize is calculated by parsing all input data as it depends
       // on bounding box, cache cellSize
-      this._setState({cellSize});
+      this.setState({cellSize});
     }
-    const changeFlags = aggregationParams.changeFlags;
-    assert(changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged);
 
-    // assert for required options
-    assert(
-      !changeFlags.dataChanged ||
-        (opts.positions &&
-          opts.weights &&
-          (!opts.projectPositions || opts.viewport) &&
-          opts.cellSize)
-    );
-    assert(!changeFlags.cellSizeChanged || opts.cellSize);
+    this.validateProps(aggregationParams, opts);
 
-    // viewport need only when performing screen space aggregation (projectPoints is true)
-    assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
-
-    this._setState({useGPU});
-
-    if (projectPoints && gridTransformMatrix) {
-      log.warn('projectPoints is true, gridTransformMatrix is ignored');
-    }
+    this.setState({useGPU});
     aggregationParams.gridTransformMatrix =
       (projectPoints ? viewport.viewportMatrix : gridTransformMatrix) || IDENTITY_MATRIX;
 
     if (weights) {
-      aggregationParams.weights = this._normalizeWeightParams(weights);
+      aggregationParams.weights = this.normalizeWeightParams(weights);
 
       // cache weights to process when only cellSize or viewport is changed.
       // position data is cached in Buffers for GPU case and in 'gridPositions' for CPU case.
-      this._setState({weights: aggregationParams.weights});
+      this.setState({weights: aggregationParams.weights});
     }
     return aggregationParams;
   }
-  /* eslint-enable complexity */
 
   // converts old style number array to new style array of objects with matching fields
-  _normalizeWeightParams(weights) {
+  normalizeWeightParams(weights) {
     const result = {};
     for (const id in weights) {
       result[id] = Object.assign({}, DEFAULT_WEIGHT_PARAMS, weights[id]);
@@ -313,7 +294,7 @@ export default class GPUGridAggregator {
     return result;
   }
 
-  _initCPUResults(opts) {
+  initCPUResults(opts) {
     const weights = opts.weights || this.state.weights;
     const {numCol, numRow} = this.state;
     const results = {};
@@ -343,7 +324,6 @@ export default class GPUGridAggregator {
       const aggregationSize = numCol * numRow * ELEMENTCOUNT;
       aggregationData = getFloatArray(aggregationData, aggregationSize, fillValue);
       if (combineMaxMin) {
-        // TODO switch to maxMinBuffer and maxMinData
         maxMinData = getFloatArray(maxMinData, ELEMENTCOUNT);
         // RGB for max value
         maxMinData.fill(-Infinity, 0, ELEMENTCOUNT - 1);
@@ -371,7 +351,7 @@ export default class GPUGridAggregator {
     return results;
   }
 
-  _shouldTransformToGrid(opts) {
+  shouldTransformToGrid(opts) {
     const {projectPoints, changeFlags} = opts;
     if (
       !this.state.gridPositions ||
@@ -383,22 +363,17 @@ export default class GPUGridAggregator {
     return false;
   }
 
-  /* eslint-disable max-statements */
-  _renderAggregateData(opts) {
+  renderAggregateData(opts) {
     const {cellSize, viewport, gridTransformMatrix, projectPoints} = opts;
     const {
       numCol,
       numRow,
       windowSize,
-      framebuffers,
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      equations,
-      weightAttributes,
       weights
     } = this.state;
-    const {gl, gridAggregationModel, allAggregationModel} = this;
 
     const uProjectionMatrixFP64 = fp64ifyMatrix4(gridTransformMatrix);
     const gridSize = [numCol, numRow];
@@ -420,93 +395,96 @@ export default class GPUGridAggregator {
     for (const id in weights) {
       const {needMin, needMax} = weights[id];
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      framebuffers[id].bind();
-      gl.viewport(0, 0, gridSize[0], gridSize[1]);
-      gl.clear(gl.COLOR_BUFFER_BIT);
-      parameters.blendEquation = equations[id];
-      const attributes = {weights: weightAttributes[id]};
-      gridAggregationModel.draw({
-        parameters,
-        moduleSettings,
-        uniforms,
-        attributes
-      });
-      framebuffers[id].unbind();
+      this.renderToWeightsTexture({id, parameters, moduleSettings, uniforms, gridSize});
       if (combineMaxMin) {
-        maxMinFramebuffers[id].bind();
-        gl.viewport(0, 0, gridSize[0], gridSize[1]);
-        const maxMinParameters = {
-          clearColor: [0, 0, 0, MAX_32_BIT_FLOAT]
-        };
-        withParameters(gl, maxMinParameters, () => {
-          gl.clear(gl.COLOR_BUFFER_BIT);
+        this.renderToMaxMinTexture({
+          id,
+          parameters: Object.assign({}, parameters, {blendEquation: MAX_MIN_BLEND_EQUATION}),
+          gridSize,
+          minOrMaxFb: maxMinFramebuffers[id],
+          clearParams: {clearColor: [0, 0, 0, MAX_32_BIT_FLOAT]},
+          combineMaxMin
         });
-        parameters.blendEquation = MAX_MIN_BLEND_EQUATION;
-        allAggregationModel.draw({
-          parameters,
-          uniforms: {
-            uSampler: framebuffers[id].texture,
-            gridSize,
-            combineMaxMin
-          }
-        });
-        maxMinFramebuffers[id].unbind();
       } else {
         if (needMin) {
-          minFramebuffers[id].bind();
-          gl.viewport(0, 0, gridSize[0], gridSize[1]);
-          const minParameters = {
-            clearColor: [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
-          };
-          withParameters(gl, minParameters, () => {
-            gl.clear(gl.COLOR_BUFFER_BIT);
+          this.renderToMaxMinTexture({
+            id,
+            parameters: Object.assign({}, parameters, {blendEquation: MIN_BLEND_EQUATION}),
+            gridSize,
+            minOrMaxFb: minFramebuffers[id],
+            clearParams: {clearColor: [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]},
+            combineMaxMin
           });
-          parameters.blendEquation = MIN_BLEND_EQUATION;
-          allAggregationModel.draw({
-            parameters,
-            uniforms: {
-              uSampler: framebuffers[id].texture,
-              gridSize,
-              combineMaxMin
-            }
-          });
-          minFramebuffers[id].unbind();
         }
         if (needMax) {
-          maxFramebuffers[id].bind();
-          gl.viewport(0, 0, gridSize[0], gridSize[1]);
-          gl.clear(gl.COLOR_BUFFER_BIT);
-          parameters.blendEquation = MAX_BLEND_EQUATION;
-          allAggregationModel.draw({
-            parameters,
-            uniforms: {
-              uSampler: framebuffers[id].texture,
-              gridSize,
-              combineMaxMin
-            }
+          this.renderToMaxMinTexture({
+            id,
+            parameters: Object.assign({}, parameters, {blendEquation: MAX_BLEND_EQUATION}),
+            gridSize,
+            minOrMaxFb: maxFramebuffers[id],
+            combineMaxMin
           });
-          maxFramebuffers[id].unbind();
         }
       }
     }
   }
-  /* eslint-disable max-statements */
+
+  // render all aggregated grid-cells to generate Min, Max or MaxMin data texture
+  renderToMaxMinTexture(opts) {
+    const {id, parameters, gridSize, minOrMaxFb, combineMaxMin, clearParams = {}} = opts;
+    const {framebuffers} = this.state;
+    const {gl, allAggregationModel} = this;
+
+    minOrMaxFb.bind();
+    gl.viewport(0, 0, gridSize[0], gridSize[1]);
+    withParameters(gl, clearParams, () => {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    });
+    allAggregationModel.draw({
+      parameters,
+      uniforms: {
+        uSampler: framebuffers[id].texture,
+        gridSize,
+        combineMaxMin
+      }
+    });
+    minOrMaxFb.unbind();
+  }
+
+  // render all data points to aggregate weights
+  renderToWeightsTexture(opts) {
+    const {id, parameters, moduleSettings, uniforms, gridSize} = opts;
+    const {framebuffers, equations, weightAttributes} = this.state;
+    const {gl, gridAggregationModel} = this;
+
+    framebuffers[id].bind();
+    gl.viewport(0, 0, gridSize[0], gridSize[1]);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    const attributes = {weights: weightAttributes[id]};
+    gridAggregationModel.draw({
+      parameters: Object.assign({}, parameters, {blendEquation: equations[id]}),
+      moduleSettings,
+      uniforms,
+      attributes
+    });
+    framebuffers[id].unbind();
+  }
 
   /* eslint-disable complexity, max-depth */
-  _runAggregationOnCPU(opts) {
+  runAggregationOnCPU(opts) {
     const {positions, cellSize, gridTransformMatrix, viewport, projectPoints} = opts;
     let {weights} = opts;
     const {numCol, numRow} = this.state;
-    const results = this._initCPUResults(opts);
+    const results = this.initCPUResults(opts);
     // screen space or world space projection required
-    const gridTransformRequired = this._shouldTransformToGrid(opts);
+    const gridTransformRequired = this.shouldTransformToGrid(opts);
     let gridPositions = [];
 
     assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
 
     let posCount;
     if (gridTransformRequired) {
-      this._setState({gridPositions});
+      this.setState({gridPositions});
       posCount = positions.length / 2;
     } else {
       gridPositions = this.state.gridPositions;
@@ -620,26 +598,26 @@ export default class GPUGridAggregator {
     });
 
     // Update buffer objects.
-    this._updateAggregationBuffers(opts, results);
+    this.updateAggregationBuffers(opts, results);
     return results;
   }
   /* eslint-disable complexity, max-depth */
 
-  _runAggregationOnGPU(opts) {
-    this._updateModels(opts);
-    this._setupFramebuffers(opts);
-    this._renderAggregateData(opts);
-    return this._getAggregateData(opts);
+  runAggregationOnGPU(opts) {
+    this.updateModels(opts);
+    this.setupFramebuffers(opts);
+    this.renderAggregateData(opts);
+    return this.getAggregateData(opts);
   }
 
   // Update priveate state
-  _setState(updateObject) {
+  setState(updateObject) {
     Object.assign(this.state, updateObject);
   }
 
   // set up framebuffer for each weight
   /* eslint-disable complexity */
-  _setupFramebuffers(opts) {
+  setupFramebuffers(opts) {
     const {
       numCol,
       numRow,
@@ -688,18 +666,18 @@ export default class GPUGridAggregator {
   }
   /* eslint-enable complexity */
 
-  _setupModels(fp64 = false) {
+  setupModels(fp64 = false) {
     if (this.gridAggregationModel) {
       this.gridAggregationModel.delete();
     }
-    this.gridAggregationModel = this._getAggregationModel(fp64);
+    this.gridAggregationModel = this.getAggregationModel(fp64);
     if (this.allAggregationModel) {
       this.allAggregationModel.delete();
     }
-    this.allAggregationModel = this._getAllAggregationModel(fp64);
+    this.allAggregationModel = this.getAllAggregationModel(fp64);
   }
 
-  _updateAggregationBuffers(opts, results) {
+  updateAggregationBuffers(opts, results) {
     if (!opts.createBufferObjects) {
       return;
     }
@@ -745,8 +723,31 @@ export default class GPUGridAggregator {
     }
   }
 
+  // validate and assert
+  validateProps(aggregationParams, opts) {
+    const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
+    assert(changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged);
+
+    // assert for required options
+    assert(
+      !changeFlags.dataChanged ||
+        (opts.positions &&
+          opts.weights &&
+          (!opts.projectPositions || opts.viewport) &&
+          opts.cellSize)
+    );
+    assert(!changeFlags.cellSizeChanged || opts.cellSize);
+
+    // viewport need only when performing screen space aggregation (projectPoints is true)
+    assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
+
+    if (projectPoints && gridTransformMatrix) {
+      log.warn('projectPoints is true, gridTransformMatrix is ignored')();
+    }
+  }
+
   // set up buffers for all weights
-  _setupWeightAttributes(opts) {
+  setupWeightAttributes(opts) {
     const {weightAttributes, vertexCount, weights} = this.state;
     for (const id in weights) {
       const {values} = weights[id];
@@ -768,7 +769,7 @@ export default class GPUGridAggregator {
   }
 
   /* eslint-disable max-statements */
-  _updateModels(opts) {
+  updateModels(opts) {
     const {gl} = this;
     const {positions, positions64xyLow, changeFlags} = opts;
     const {numCol, numRow} = this.state;
@@ -779,8 +780,8 @@ export default class GPUGridAggregator {
 
     let createPos64xyLow = false;
     if (opts.fp64 !== this.state.fp64) {
-      this._setupModels(opts.fp64);
-      this._setState({fp64: opts.fp64});
+      this.setupModels(opts.fp64);
+      this.setState({fp64: opts.fp64});
       if (opts.fp64) {
         createPos64xyLow = true;
       }
@@ -797,9 +798,9 @@ export default class GPUGridAggregator {
       Object.assign(aggregationModelAttributes, {
         positions: positionsBuffer
       });
-      this._setState({positionsBuffer, vertexCount});
+      this.setState({positionsBuffer, vertexCount});
 
-      this._setupWeightAttributes(opts);
+      this.setupWeightAttributes(opts);
       this.gridAggregationModel.setVertexCount(vertexCount);
     }
 
@@ -812,7 +813,7 @@ export default class GPUGridAggregator {
       Object.assign(aggregationModelAttributes, {
         positions64xyLow: positions64xyLowBuffer
       });
-      this._setState({positions64xyLowBuffer});
+      this.setState({positions64xyLowBuffer});
     }
 
     this.gridAggregationModel.setAttributes(aggregationModelAttributes);
@@ -823,12 +824,12 @@ export default class GPUGridAggregator {
   }
   /* eslint-enable max-statements */
 
-  _updateGridSize(opts) {
+  updateGridSize(opts) {
     const {viewport, cellSize} = opts;
     const width = opts.width || viewport.width;
     const height = opts.height || viewport.height;
     const numCol = Math.ceil(width / cellSize[0]);
     const numRow = Math.ceil(height / cellSize[1]);
-    this._setState({numCol, numRow, windowSize: [width, height]});
+    this.setState({numCol, numRow, windowSize: [width, height]});
   }
 }
