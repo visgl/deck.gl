@@ -162,6 +162,97 @@ export default class GPUGridAggregator {
 
   // PRIVATE
 
+  // aggregated weight value to a cell
+  calculateAggregationData(opts) {
+    const {weights, results, cellIndex, posIndex} = opts;
+    for (const id in weights) {
+      const {values, size, operation} = weights[id];
+      const {aggregationData} = results[id];
+      assert(size >= 1 && size <= 3);
+
+      // Fill RGB with weights
+      for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
+        const cellElementIndex = cellIndex + sizeIndex;
+        const weightComponent = values[posIndex * WEIGHT_SIZE + sizeIndex];
+        assert(Number.isFinite(weightComponent));
+        switch (operation) {
+          case AGGREGATION_OPERATION.SUM:
+          case AGGREGATION_OPERATION.MEAN:
+            aggregationData[cellElementIndex] += weightComponent;
+            break;
+          case AGGREGATION_OPERATION.MIN:
+            aggregationData[cellElementIndex] = Math.min(
+              aggregationData[cellElementIndex],
+              weightComponent
+            );
+            break;
+          case AGGREGATION_OPERATION.MAX:
+            aggregationData[cellElementIndex] = Math.max(
+              aggregationData[cellElementIndex],
+              weightComponent
+            );
+            break;
+          default:
+            // Not a valid operation enum.
+            assert(false);
+            break;
+        }
+      }
+
+      // Track the count per grid-cell
+      aggregationData[cellIndex + 3]++;
+    }
+  }
+
+  /* eslint-disable max-depth */
+  calculateMaxMinData(opts) {
+    const {validCellIndices, results, weights} = opts;
+
+    // collect max/min values
+    validCellIndices.forEach(cellIndex => {
+      for (const id in results) {
+        const {size, needMin, needMax} = weights[id];
+        const {aggregationData, minData, maxData, maxMinData} = results[id];
+        const calculateMinMax = needMin || needMax;
+        const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
+        for (let sizeIndex = 0; sizeIndex < size && calculateMinMax; sizeIndex++) {
+          const cellElementIndex = cellIndex + sizeIndex;
+          if (combineMaxMin) {
+            // use RGB for max values for 3 weights.
+            maxMinData[sizeIndex] = Math.max(
+              maxMinData[sizeIndex],
+              aggregationData[cellElementIndex]
+            );
+          } else {
+            if (needMin) {
+              minData[sizeIndex] = Math.min(minData[sizeIndex], aggregationData[cellElementIndex]);
+            }
+            if (needMax) {
+              maxData[sizeIndex] = Math.max(maxData[sizeIndex], aggregationData[cellElementIndex]);
+            }
+          }
+        }
+        // update total aggregation values.
+        if (combineMaxMin) {
+          // Use Alpha channel to store total min value for weight#0
+          maxMinData[ELEMENTCOUNT - 1] = Math.min(
+            maxMinData[ELEMENTCOUNT - 1],
+            aggregationData[cellIndex + 0]
+          );
+        } else {
+          // Use Alpha channel to store total counts.
+          if (needMin) {
+            minData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+          }
+          if (needMax) {
+            maxData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+          }
+        }
+      }
+    });
+  }
+  /* eslint-enable max-depth */
+
   deleteResources(obj) {
     for (const name in obj) {
       obj[name].delete();
@@ -470,7 +561,7 @@ export default class GPUGridAggregator {
     framebuffers[id].unbind();
   }
 
-  /* eslint-disable complexity, max-depth */
+  /* eslint-disable max-statements */
   runAggregationOnCPU(opts) {
     const {positions, cellSize, gridTransformMatrix, viewport, projectPoints} = opts;
     let {weights} = opts;
@@ -493,10 +584,10 @@ export default class GPUGridAggregator {
     }
 
     const validCellIndices = new Set();
-    for (let index = 0; index < posCount; index++) {
+    for (let posIndex = 0; posIndex < posCount; posIndex++) {
       let gridPos;
       if (gridTransformRequired) {
-        const pos = [positions[index * 2], positions[index * 2 + 1]];
+        const pos = [positions[posIndex * 2], positions[posIndex * 2 + 1]];
         if (projectPoints) {
           gridPos = viewport.project([pos[0], pos[1]]);
         } else {
@@ -504,7 +595,7 @@ export default class GPUGridAggregator {
         }
         gridPositions.push(...gridPos);
       } else {
-        gridPos = [gridPositions[index * 2], gridPositions[index * 2 + 1]];
+        gridPos = [gridPositions[posIndex * 2], gridPositions[posIndex * 2 + 1]];
       }
 
       const x = gridPos[0];
@@ -514,94 +605,17 @@ export default class GPUGridAggregator {
       if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
         const cellIndex = (colId + rowId * numCol) * ELEMENTCOUNT;
         validCellIndices.add(cellIndex);
-        for (const id in weights) {
-          const {values, size, operation} = weights[id];
-          const {aggregationData} = results[id];
-          assert(size >= 1 && size <= 3);
-
-          // Fill RGB with weights
-          for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
-            const cellElementIndex = cellIndex + sizeIndex;
-            const weightComponent = values[index * WEIGHT_SIZE + sizeIndex];
-            assert(Number.isFinite(weightComponent));
-            switch (operation) {
-              case AGGREGATION_OPERATION.SUM:
-              case AGGREGATION_OPERATION.MEAN:
-                aggregationData[cellElementIndex] += weightComponent;
-                break;
-              case AGGREGATION_OPERATION.MIN:
-                aggregationData[cellElementIndex] = Math.min(
-                  aggregationData[cellElementIndex],
-                  weightComponent
-                );
-                break;
-              case AGGREGATION_OPERATION.MAX:
-                aggregationData[cellElementIndex] = Math.max(
-                  aggregationData[cellElementIndex],
-                  weightComponent
-                );
-                break;
-              default:
-                // Not a valid operation enum.
-                assert(false);
-                break;
-            }
-          }
-
-          // Track the count per grid-cell
-          aggregationData[cellIndex + 3]++;
-        }
+        this.calculateAggregationData({weights, results, cellIndex, posIndex});
       }
     }
 
-    // collect max/min values
-    validCellIndices.forEach(cellIndex => {
-      for (const id in results) {
-        const {size, needMin, needMax} = weights[id];
-        const {aggregationData, minData, maxData, maxMinData} = results[id];
-        const calculateMinMax = needMin || needMax;
-        const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-        for (let sizeIndex = 0; sizeIndex < size && calculateMinMax; sizeIndex++) {
-          const cellElementIndex = cellIndex + sizeIndex;
-          if (combineMaxMin) {
-            // use RGB for max values for 3 weights.
-            maxMinData[sizeIndex] = Math.max(
-              maxMinData[sizeIndex],
-              aggregationData[cellElementIndex]
-            );
-          } else {
-            if (needMin) {
-              minData[sizeIndex] = Math.min(minData[sizeIndex], aggregationData[cellElementIndex]);
-            }
-            if (needMax) {
-              maxData[sizeIndex] = Math.max(maxData[sizeIndex], aggregationData[cellElementIndex]);
-            }
-          }
-        }
-        // update total aggregation values.
-        if (combineMaxMin) {
-          // Use Alpha channel to store total min value for weight#0
-          maxMinData[ELEMENTCOUNT - 1] = Math.min(
-            maxMinData[ELEMENTCOUNT - 1],
-            aggregationData[cellIndex + 0]
-          );
-        } else {
-          // Use Alpha channel to store total counts.
-          if (needMin) {
-            minData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
-          }
-          if (needMax) {
-            maxData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
-          }
-        }
-      }
-    });
+    this.calculateMaxMinData({validCellIndices, results, weights});
 
     // Update buffer objects.
     this.updateAggregationBuffers(opts, results);
     return results;
   }
-  /* eslint-disable complexity, max-depth */
+  /* eslint-disable max-statements */
 
   runAggregationOnGPU(opts) {
     this.updateModels(opts);
@@ -616,7 +630,7 @@ export default class GPUGridAggregator {
   }
 
   // set up framebuffer for each weight
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-depth */
   setupFramebuffers(opts) {
     const {
       numCol,
@@ -664,7 +678,7 @@ export default class GPUGridAggregator {
       }
     }
   }
-  /* eslint-enable complexity */
+  /* eslint-enable complexity, max-depth */
 
   setupModels(fp64 = false) {
     if (this.gridAggregationModel) {
