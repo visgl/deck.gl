@@ -167,7 +167,7 @@ export default class GPUGridAggregator {
       obj[name].delete();
     }
   }
-  /* eslint-disable max-depth */
+
   _getAggregateData(opts) {
     const results = {};
     const {
@@ -187,31 +187,28 @@ export default class GPUGridAggregator {
         buffer: weights[id].aggregationBuffer, // update if a buffer is provided
         type: GL.FLOAT
       });
-      if (needMin || needMax) {
-        if (needMin && needMax && combineMaxMin) {
-          results[id].maxMinBuffer = maxMinFramebuffers[id].readPixelsToBuffer({
-            buffer: weights[id].maxMinBuffer, // update if a buffer is provided
+      if (needMin && needMax && combineMaxMin) {
+        results[id].maxMinBuffer = maxMinFramebuffers[id].readPixelsToBuffer({
+          buffer: weights[id].maxMinBuffer, // update if a buffer is provided
+          type: GL.FLOAT
+        });
+      } else {
+        if (needMin) {
+          results[id].minBuffer = minFramebuffers[id].readPixelsToBuffer({
+            buffer: weights[id].minBuffer, // update if a buffer is provided
             type: GL.FLOAT
           });
-        } else {
-          if (needMin) {
-            results[id].minBuffer = minFramebuffers[id].readPixelsToBuffer({
-              buffer: weights[id].minBuffer, // update if a buffer is provided
-              type: GL.FLOAT
-            });
-          }
-          if (needMax) {
-            results[id].maxBuffer = maxFramebuffers[id].readPixelsToBuffer({
-              buffer: weights[id].maxBuffer, // update if a buffer is provided
-              type: GL.FLOAT
-            });
-          }
+        }
+        if (needMax) {
+          results[id].maxBuffer = maxFramebuffers[id].readPixelsToBuffer({
+            buffer: weights[id].maxBuffer, // update if a buffer is provided
+            type: GL.FLOAT
+          });
         }
       }
     }
     return results;
   }
-  /* eslint-disable min-depth */
 
   _getAggregationModel(fp64 = false) {
     const {gl, shaderCache} = this;
@@ -316,7 +313,6 @@ export default class GPUGridAggregator {
     return result;
   }
 
-  /* eslint-disable complexity */
   _initCPUResults(opts) {
     const weights = opts.weights || this.state.weights;
     const {numCol, numRow} = this.state;
@@ -325,7 +321,6 @@ export default class GPUGridAggregator {
     for (const id in weights) {
       let {aggregationData, minData, maxData, maxMinData} = weights[id];
       const {operation, needMin, needMax} = weights[id];
-      const calculateMinMax = needMin || needMax;
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
       let fillValue = 0;
       switch (operation) {
@@ -347,25 +342,23 @@ export default class GPUGridAggregator {
 
       const aggregationSize = numCol * numRow * ELEMENTCOUNT;
       aggregationData = getFloatArray(aggregationData, aggregationSize, fillValue);
-      if (calculateMinMax) {
-        if (combineMaxMin) {
-          // TODO switch to maxMinBuffer and maxMinData
-          maxMinData = getFloatArray(maxMinData, ELEMENTCOUNT);
-          // RGB for max value
-          maxMinData.fill(-Infinity, 0, ELEMENTCOUNT - 1);
-          // Alpha for min value
-          maxMinData[ELEMENTCOUNT - 1] = Infinity;
-        } else {
-          // RGB for min/max values
-          // Alpha for total count
-          if (needMin) {
-            minData = getFloatArray(minData, ELEMENTCOUNT, Infinity);
-            minData[ELEMENTCOUNT - 1] = 0;
-          }
-          if (needMax) {
-            maxData = getFloatArray(maxData, ELEMENTCOUNT, -Infinity);
-            maxData[ELEMENTCOUNT - 1] = 0;
-          }
+      if (combineMaxMin) {
+        // TODO switch to maxMinBuffer and maxMinData
+        maxMinData = getFloatArray(maxMinData, ELEMENTCOUNT);
+        // RGB for max value
+        maxMinData.fill(-Infinity, 0, ELEMENTCOUNT - 1);
+        // Alpha for min value
+        maxMinData[ELEMENTCOUNT - 1] = Infinity;
+      } else {
+        // RGB for min/max values
+        // Alpha for total count
+        if (needMin) {
+          minData = getFloatArray(minData, ELEMENTCOUNT, Infinity);
+          minData[ELEMENTCOUNT - 1] = 0;
+        }
+        if (needMax) {
+          maxData = getFloatArray(maxData, ELEMENTCOUNT, -Infinity);
+          maxData[ELEMENTCOUNT - 1] = 0;
         }
       }
       results[id] = Object.assign({}, weights[id], {
@@ -377,7 +370,6 @@ export default class GPUGridAggregator {
     }
     return results;
   }
-  /* eslint-enable complexity */
 
   _shouldTransformToGrid(opts) {
     const {projectPoints, changeFlags} = opts;
@@ -391,7 +383,7 @@ export default class GPUGridAggregator {
     return false;
   }
 
-  /* eslint-disable max-statements, max-depth */
+  /* eslint-disable max-statements */
   _renderAggregateData(opts) {
     const {cellSize, viewport, gridTransformMatrix, projectPoints} = opts;
     const {
@@ -440,19 +432,36 @@ export default class GPUGridAggregator {
         attributes
       });
       framebuffers[id].unbind();
-      if (needMin || needMax) {
-        if (combineMaxMin) {
-          maxMinFramebuffers[id].bind();
+      if (combineMaxMin) {
+        maxMinFramebuffers[id].bind();
+        gl.viewport(0, 0, gridSize[0], gridSize[1]);
+        const maxMinParameters = {
+          clearColor: [0, 0, 0, MAX_32_BIT_FLOAT]
+        };
+        withParameters(gl, maxMinParameters, () => {
+          gl.clear(gl.COLOR_BUFFER_BIT);
+        });
+        parameters.blendEquation = MAX_MIN_BLEND_EQUATION;
+        allAggregationModel.draw({
+          parameters,
+          uniforms: {
+            uSampler: framebuffers[id].texture,
+            gridSize,
+            combineMaxMin
+          }
+        });
+        maxMinFramebuffers[id].unbind();
+      } else {
+        if (needMin) {
+          minFramebuffers[id].bind();
           gl.viewport(0, 0, gridSize[0], gridSize[1]);
-          const maxMinParameters = {
-            clearColor: [0, 0, 0, MAX_32_BIT_FLOAT]
+          const minParameters = {
+            clearColor: [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
           };
-          withParameters(gl, maxMinParameters, () => {
-            // this.draw({moduleParameters, uniforms, parameters, context: this.context});
+          withParameters(gl, minParameters, () => {
             gl.clear(gl.COLOR_BUFFER_BIT);
           });
-          // gl.clear(gl.COLOR_BUFFER_BIT);
-          parameters.blendEquation = MAX_MIN_BLEND_EQUATION;
+          parameters.blendEquation = MIN_BLEND_EQUATION;
           allAggregationModel.draw({
             parameters,
             uniforms: {
@@ -461,51 +470,29 @@ export default class GPUGridAggregator {
               combineMaxMin
             }
           });
-          maxMinFramebuffers[id].unbind();
-        } else {
-          if (needMin) {
-            minFramebuffers[id].bind();
-            gl.viewport(0, 0, gridSize[0], gridSize[1]);
-            const minParameters = {
-              clearColor: [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
-            };
-            withParameters(gl, minParameters, () => {
-              // this.draw({moduleParameters, uniforms, parameters, context: this.context});
-              gl.clear(gl.COLOR_BUFFER_BIT);
-            });
-            parameters.blendEquation = MIN_BLEND_EQUATION;
-            allAggregationModel.draw({
-              parameters,
-              uniforms: {
-                uSampler: framebuffers[id].texture,
-                gridSize,
-                combineMaxMin
-              }
-            });
-            minFramebuffers[id].unbind();
-          }
-          if (needMax) {
-            maxFramebuffers[id].bind();
-            gl.viewport(0, 0, gridSize[0], gridSize[1]);
-            gl.clear(gl.COLOR_BUFFER_BIT);
-            parameters.blendEquation = MAX_BLEND_EQUATION;
-            allAggregationModel.draw({
-              parameters,
-              uniforms: {
-                uSampler: framebuffers[id].texture,
-                gridSize,
-                combineMaxMin
-              }
-            });
-            maxFramebuffers[id].unbind();
-          }
+          minFramebuffers[id].unbind();
+        }
+        if (needMax) {
+          maxFramebuffers[id].bind();
+          gl.viewport(0, 0, gridSize[0], gridSize[1]);
+          gl.clear(gl.COLOR_BUFFER_BIT);
+          parameters.blendEquation = MAX_BLEND_EQUATION;
+          allAggregationModel.draw({
+            parameters,
+            uniforms: {
+              uSampler: framebuffers[id].texture,
+              gridSize,
+              combineMaxMin
+            }
+          });
+          maxFramebuffers[id].unbind();
         }
       }
     }
   }
-  /* eslint-disable max-statements, max-depth */
+  /* eslint-disable max-statements */
 
-  /* eslint-disable max-statements, complexity, max-depth */
+  /* eslint-disable complexity, max-depth */
   _runAggregationOnCPU(opts) {
     const {positions, cellSize, gridTransformMatrix, viewport, projectPoints} = opts;
     let {weights} = opts;
@@ -596,45 +583,37 @@ export default class GPUGridAggregator {
         const {aggregationData, minData, maxData, maxMinData} = results[id];
         const calculateMinMax = needMin || needMax;
         const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-        if (calculateMinMax) {
-          for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
-            const cellElementIndex = cellIndex + sizeIndex;
-            if (combineMaxMin) {
-              // use RGB for max values for 3 weights.
-              maxMinData[sizeIndex] = Math.max(
-                maxMinData[sizeIndex],
-                aggregationData[cellElementIndex]
-              );
-            } else {
-              if (needMin) {
-                minData[sizeIndex] = Math.min(
-                  minData[sizeIndex],
-                  aggregationData[cellElementIndex]
-                );
-              }
-              if (needMax) {
-                maxData[sizeIndex] = Math.max(
-                  maxData[sizeIndex],
-                  aggregationData[cellElementIndex]
-                );
-              }
-            }
-          }
-          // update total aggregation values.
+        for (let sizeIndex = 0; sizeIndex < size && calculateMinMax; sizeIndex++) {
+          const cellElementIndex = cellIndex + sizeIndex;
           if (combineMaxMin) {
-            // Use Alpha channel to store total min value for weight#0
-            maxMinData[ELEMENTCOUNT - 1] = Math.min(
-              maxMinData[ELEMENTCOUNT - 1],
-              aggregationData[cellIndex + 0]
+            // use RGB for max values for 3 weights.
+            maxMinData[sizeIndex] = Math.max(
+              maxMinData[sizeIndex],
+              aggregationData[cellElementIndex]
             );
           } else {
-            // Use Alpha channel to store total counts.
             if (needMin) {
-              minData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+              minData[sizeIndex] = Math.min(minData[sizeIndex], aggregationData[cellElementIndex]);
             }
             if (needMax) {
-              maxData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+              maxData[sizeIndex] = Math.max(maxData[sizeIndex], aggregationData[cellElementIndex]);
             }
+          }
+        }
+        // update total aggregation values.
+        if (combineMaxMin) {
+          // Use Alpha channel to store total min value for weight#0
+          maxMinData[ELEMENTCOUNT - 1] = Math.min(
+            maxMinData[ELEMENTCOUNT - 1],
+            aggregationData[cellIndex + 0]
+          );
+        } else {
+          // Use Alpha channel to store total counts.
+          if (needMin) {
+            minData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+          }
+          if (needMax) {
+            maxData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
           }
         }
       }
@@ -644,8 +623,7 @@ export default class GPUGridAggregator {
     this._updateAggregationBuffers(opts, results);
     return results;
   }
-
-  /* eslint-enable max-statements */
+  /* eslint-disable complexity, max-depth */
 
   _runAggregationOnGPU(opts) {
     this._updateModels(opts);
@@ -660,6 +638,7 @@ export default class GPUGridAggregator {
   }
 
   // set up framebuffer for each weight
+  /* eslint-disable complexity */
   _setupFramebuffers(opts) {
     const {
       numCol,
@@ -707,6 +686,7 @@ export default class GPUGridAggregator {
       }
     }
   }
+  /* eslint-enable complexity */
 
   _setupModels(fp64 = false) {
     if (this.gridAggregationModel) {
