@@ -162,6 +162,119 @@ export default class GPUGridAggregator {
 
   // PRIVATE
 
+  // Common methods
+
+  deleteResources(obj) {
+    for (const name in obj) {
+      obj[name].delete();
+    }
+  }
+
+  getAggregationParams(opts) {
+    const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
+    const {
+      useGPU,
+      gridTransformMatrix,
+      viewport,
+      weights,
+      projectPoints,
+      cellSize
+    } = aggregationParams;
+    if (this.state.useGPU !== useGPU) {
+      // CPU/GPU resources need to reinitialized, force set the change flags.
+      aggregationParams.changeFlags = Object.assign(
+        {},
+        aggregationParams.changeFlags,
+        DEFAULT_CHANGE_FLAGS
+      );
+    }
+    if (
+      cellSize &&
+      (!this.state.cellSize ||
+        this.state.cellSize[0] !== cellSize[0] ||
+        this.state.cellSize[1] !== cellSize[1])
+    ) {
+      aggregationParams.changeFlags.cellSizeChanged = true;
+      // For GridLayer aggregation, cellSize is calculated by parsing all input data as it depends
+      // on bounding box, cache cellSize
+      this.setState({cellSize});
+    }
+
+    this.validateProps(aggregationParams, opts);
+
+    this.setState({useGPU});
+    aggregationParams.gridTransformMatrix =
+      (projectPoints ? viewport.viewportMatrix : gridTransformMatrix) || IDENTITY_MATRIX;
+
+    if (weights) {
+      aggregationParams.weights = this.normalizeWeightParams(weights);
+
+      // cache weights to process when only cellSize or viewport is changed.
+      // position data is cached in Buffers for GPU case and in 'gridPositions' for CPU case.
+      this.setState({weights: aggregationParams.weights});
+    }
+    return aggregationParams;
+  }
+
+  normalizeWeightParams(weights) {
+    const result = {};
+    for (const id in weights) {
+      result[id] = Object.assign({}, DEFAULT_WEIGHT_PARAMS, weights[id]);
+    }
+    return result;
+  }
+
+  // Update priveate state
+  setState(updateObject) {
+    Object.assign(this.state, updateObject);
+  }
+
+  shouldTransformToGrid(opts) {
+    const {projectPoints, changeFlags} = opts;
+    if (
+      !this.state.gridPositions ||
+      changeFlags.dataChanged ||
+      (projectPoints && changeFlags.viewportChanged) // world space aggregation (GridLayer) doesn't change when viewport is changed.
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  updateGridSize(opts) {
+    const {viewport, cellSize} = opts;
+    const width = opts.width || viewport.width;
+    const height = opts.height || viewport.height;
+    const numCol = Math.ceil(width / cellSize[0]);
+    const numRow = Math.ceil(height / cellSize[1]);
+    this.setState({numCol, numRow, windowSize: [width, height]});
+  }
+
+  // validate and assert
+  validateProps(aggregationParams, opts) {
+    const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
+    assert(changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged);
+
+    // assert for required options
+    assert(
+      !changeFlags.dataChanged ||
+        (opts.positions &&
+          opts.weights &&
+          (!opts.projectPositions || opts.viewport) &&
+          opts.cellSize)
+    );
+    assert(!changeFlags.cellSizeChanged || opts.cellSize);
+
+    // viewport need only when performing screen space aggregation (projectPoints is true)
+    assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
+
+    if (projectPoints && gridTransformMatrix) {
+      log.warn('projectPoints is true, gridTransformMatrix is ignored')();
+    }
+  }
+
+  // CPU Aggregation methods
+
   // aggregated weight value to a cell
   calculateAggregationData(opts) {
     const {weights, results, cellIndex, posIndex} = opts;
@@ -253,11 +366,163 @@ export default class GPUGridAggregator {
   }
   /* eslint-enable max-depth */
 
-  deleteResources(obj) {
-    for (const name in obj) {
-      obj[name].delete();
+  initCPUResults(opts) {
+    const weights = opts.weights || this.state.weights;
+    const {numCol, numRow} = this.state;
+    const results = {};
+    // setup results object
+    for (const id in weights) {
+      let {aggregationData, minData, maxData, maxMinData} = weights[id];
+      const {operation, needMin, needMax} = weights[id];
+      const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
+      let fillValue = 0;
+      switch (operation) {
+        case AGGREGATION_OPERATION.SUM:
+        case AGGREGATION_OPERATION.MEAN:
+          fillValue = 0;
+          break;
+        case AGGREGATION_OPERATION.MIN:
+          fillValue = Infinity;
+          break;
+        case AGGREGATION_OPERATION.MAX:
+          fillValue = -Infinity;
+          break;
+        default:
+          // Not a valid operation enum.
+          assert(false);
+          break;
+      }
+
+      const aggregationSize = numCol * numRow * ELEMENTCOUNT;
+      aggregationData = getFloatArray(aggregationData, aggregationSize, fillValue);
+      if (combineMaxMin) {
+        maxMinData = getFloatArray(maxMinData, ELEMENTCOUNT);
+        // RGB for max value
+        maxMinData.fill(-Infinity, 0, ELEMENTCOUNT - 1);
+        // Alpha for min value
+        maxMinData[ELEMENTCOUNT - 1] = Infinity;
+      } else {
+        // RGB for min/max values
+        // Alpha for total count
+        if (needMin) {
+          minData = getFloatArray(minData, ELEMENTCOUNT, Infinity);
+          minData[ELEMENTCOUNT - 1] = 0;
+        }
+        if (needMax) {
+          maxData = getFloatArray(maxData, ELEMENTCOUNT, -Infinity);
+          maxData[ELEMENTCOUNT - 1] = 0;
+        }
+      }
+      results[id] = Object.assign({}, weights[id], {
+        aggregationData,
+        minData,
+        maxData,
+        maxMinData
+      });
+    }
+    return results;
+  }
+
+  /* eslint-disable max-statements */
+  runAggregationOnCPU(opts) {
+    const {positions, cellSize, gridTransformMatrix, viewport, projectPoints} = opts;
+    let {weights} = opts;
+    const {numCol, numRow} = this.state;
+    const results = this.initCPUResults(opts);
+    // screen space or world space projection required
+    const gridTransformRequired = this.shouldTransformToGrid(opts);
+    let gridPositions = [];
+
+    assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
+
+    let posCount;
+    if (gridTransformRequired) {
+      this.setState({gridPositions});
+      posCount = positions.length / 2;
+    } else {
+      gridPositions = this.state.gridPositions;
+      weights = this.state.weights;
+      posCount = gridPositions.length / 2;
+    }
+
+    const validCellIndices = new Set();
+    for (let posIndex = 0; posIndex < posCount; posIndex++) {
+      let gridPos;
+      if (gridTransformRequired) {
+        const pos = [positions[posIndex * 2], positions[posIndex * 2 + 1]];
+        if (projectPoints) {
+          gridPos = viewport.project([pos[0], pos[1]]);
+        } else {
+          gridPos = worldToPixels([pos[0], pos[1], 0], gridTransformMatrix).slice(0, 2);
+        }
+        gridPositions.push(...gridPos);
+      } else {
+        gridPos = [gridPositions[posIndex * 2], gridPositions[posIndex * 2 + 1]];
+      }
+
+      const x = gridPos[0];
+      const y = gridPos[1];
+      const colId = Math.floor(x / cellSize[0]);
+      const rowId = Math.floor(y / cellSize[1]);
+      if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
+        const cellIndex = (colId + rowId * numCol) * ELEMENTCOUNT;
+        validCellIndices.add(cellIndex);
+        this.calculateAggregationData({weights, results, cellIndex, posIndex});
+      }
+    }
+
+    this.calculateMaxMinData({validCellIndices, results, weights});
+
+    // Update buffer objects.
+    this.updateAggregationBuffers(opts, results);
+    return results;
+  }
+  /* eslint-disable max-statements */
+
+  updateAggregationBuffers(opts, results) {
+    if (!opts.createBufferObjects) {
+      return;
+    }
+    const weights = opts.weights || this.state.weights;
+    for (const id in results) {
+      const {aggregationData, minData, maxData, maxMinData} = results[id];
+      const {needMin, needMax} = weights[id];
+      const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
+      updateBuffer({
+        gl: this.gl,
+        bufferName: 'aggregationBuffer',
+        data: aggregationData,
+        result: results[id]
+      });
+      if (combineMaxMin) {
+        updateBuffer({
+          gl: this.gl,
+          bufferName: 'maxMinBuffer',
+          data: maxMinData,
+          result: results[id]
+        });
+      } else {
+        if (needMin) {
+          updateBuffer({
+            gl: this.gl,
+            bufferName: 'minBuffer',
+            data: minData,
+            result: results[id]
+          });
+        }
+        if (needMax) {
+          updateBuffer({
+            gl: this.gl,
+            bufferName: 'maxBuffer',
+            data: maxData,
+            result: results[id]
+          });
+        }
+      }
     }
   }
+
+  // GPU Aggregation methods
 
   getAggregateData(opts) {
     const results = {};
@@ -328,130 +593,6 @@ export default class GPUGridAggregator {
       instanceCount: 0,
       attributes: {position: new Buffer(gl, {size: 2, data: new Float32Array([0, 0])})}
     });
-  }
-
-  getAggregationParams(opts) {
-    const aggregationParams = Object.assign({}, DEFAULT_RUN_PARAMS, opts);
-    const {
-      useGPU,
-      gridTransformMatrix,
-      viewport,
-      weights,
-      projectPoints,
-      cellSize
-    } = aggregationParams;
-    if (this.state.useGPU !== useGPU) {
-      // CPU/GPU resources need to reinitialized, force set the change flags.
-      aggregationParams.changeFlags = Object.assign(
-        {},
-        aggregationParams.changeFlags,
-        DEFAULT_CHANGE_FLAGS
-      );
-    }
-    if (
-      cellSize &&
-      (!this.state.cellSize ||
-        this.state.cellSize[0] !== cellSize[0] ||
-        this.state.cellSize[1] !== cellSize[1])
-    ) {
-      aggregationParams.changeFlags.cellSizeChanged = true;
-      // For GridLayer aggregation, cellSize is calculated by parsing all input data as it depends
-      // on bounding box, cache cellSize
-      this.setState({cellSize});
-    }
-
-    this.validateProps(aggregationParams, opts);
-
-    this.setState({useGPU});
-    aggregationParams.gridTransformMatrix =
-      (projectPoints ? viewport.viewportMatrix : gridTransformMatrix) || IDENTITY_MATRIX;
-
-    if (weights) {
-      aggregationParams.weights = this.normalizeWeightParams(weights);
-
-      // cache weights to process when only cellSize or viewport is changed.
-      // position data is cached in Buffers for GPU case and in 'gridPositions' for CPU case.
-      this.setState({weights: aggregationParams.weights});
-    }
-    return aggregationParams;
-  }
-
-  // converts old style number array to new style array of objects with matching fields
-  normalizeWeightParams(weights) {
-    const result = {};
-    for (const id in weights) {
-      result[id] = Object.assign({}, DEFAULT_WEIGHT_PARAMS, weights[id]);
-    }
-    return result;
-  }
-
-  initCPUResults(opts) {
-    const weights = opts.weights || this.state.weights;
-    const {numCol, numRow} = this.state;
-    const results = {};
-    // setup results object
-    for (const id in weights) {
-      let {aggregationData, minData, maxData, maxMinData} = weights[id];
-      const {operation, needMin, needMax} = weights[id];
-      const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      let fillValue = 0;
-      switch (operation) {
-        case AGGREGATION_OPERATION.SUM:
-        case AGGREGATION_OPERATION.MEAN:
-          fillValue = 0;
-          break;
-        case AGGREGATION_OPERATION.MIN:
-          fillValue = Infinity;
-          break;
-        case AGGREGATION_OPERATION.MAX:
-          fillValue = -Infinity;
-          break;
-        default:
-          // Not a valid operation enum.
-          assert(false);
-          break;
-      }
-
-      const aggregationSize = numCol * numRow * ELEMENTCOUNT;
-      aggregationData = getFloatArray(aggregationData, aggregationSize, fillValue);
-      if (combineMaxMin) {
-        maxMinData = getFloatArray(maxMinData, ELEMENTCOUNT);
-        // RGB for max value
-        maxMinData.fill(-Infinity, 0, ELEMENTCOUNT - 1);
-        // Alpha for min value
-        maxMinData[ELEMENTCOUNT - 1] = Infinity;
-      } else {
-        // RGB for min/max values
-        // Alpha for total count
-        if (needMin) {
-          minData = getFloatArray(minData, ELEMENTCOUNT, Infinity);
-          minData[ELEMENTCOUNT - 1] = 0;
-        }
-        if (needMax) {
-          maxData = getFloatArray(maxData, ELEMENTCOUNT, -Infinity);
-          maxData[ELEMENTCOUNT - 1] = 0;
-        }
-      }
-      results[id] = Object.assign({}, weights[id], {
-        aggregationData,
-        minData,
-        maxData,
-        maxMinData
-      });
-    }
-    return results;
-  }
-
-  shouldTransformToGrid(opts) {
-    const {projectPoints, changeFlags} = opts;
-    if (
-      !this.state.gridPositions ||
-      changeFlags.dataChanged ||
-      (projectPoints && changeFlags.viewportChanged) // world space aggregation (GridLayer) doesn't change when viewport is changed.
-    ) {
-      return true;
-    }
-    return false;
   }
 
   renderAggregateData(opts) {
@@ -561,72 +702,11 @@ export default class GPUGridAggregator {
     framebuffers[id].unbind();
   }
 
-  /* eslint-disable max-statements */
-  runAggregationOnCPU(opts) {
-    const {positions, cellSize, gridTransformMatrix, viewport, projectPoints} = opts;
-    let {weights} = opts;
-    const {numCol, numRow} = this.state;
-    const results = this.initCPUResults(opts);
-    // screen space or world space projection required
-    const gridTransformRequired = this.shouldTransformToGrid(opts);
-    let gridPositions = [];
-
-    assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
-
-    let posCount;
-    if (gridTransformRequired) {
-      this.setState({gridPositions});
-      posCount = positions.length / 2;
-    } else {
-      gridPositions = this.state.gridPositions;
-      weights = this.state.weights;
-      posCount = gridPositions.length / 2;
-    }
-
-    const validCellIndices = new Set();
-    for (let posIndex = 0; posIndex < posCount; posIndex++) {
-      let gridPos;
-      if (gridTransformRequired) {
-        const pos = [positions[posIndex * 2], positions[posIndex * 2 + 1]];
-        if (projectPoints) {
-          gridPos = viewport.project([pos[0], pos[1]]);
-        } else {
-          gridPos = worldToPixels([pos[0], pos[1], 0], gridTransformMatrix).slice(0, 2);
-        }
-        gridPositions.push(...gridPos);
-      } else {
-        gridPos = [gridPositions[posIndex * 2], gridPositions[posIndex * 2 + 1]];
-      }
-
-      const x = gridPos[0];
-      const y = gridPos[1];
-      const colId = Math.floor(x / cellSize[0]);
-      const rowId = Math.floor(y / cellSize[1]);
-      if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
-        const cellIndex = (colId + rowId * numCol) * ELEMENTCOUNT;
-        validCellIndices.add(cellIndex);
-        this.calculateAggregationData({weights, results, cellIndex, posIndex});
-      }
-    }
-
-    this.calculateMaxMinData({validCellIndices, results, weights});
-
-    // Update buffer objects.
-    this.updateAggregationBuffers(opts, results);
-    return results;
-  }
-  /* eslint-disable max-statements */
-
   runAggregationOnGPU(opts) {
     this.updateModels(opts);
     this.setupFramebuffers(opts);
     this.renderAggregateData(opts);
     return this.getAggregateData(opts);
-  }
-
-  // Update priveate state
-  setState(updateObject) {
-    Object.assign(this.state, updateObject);
   }
 
   // set up framebuffer for each weight
@@ -689,72 +769,6 @@ export default class GPUGridAggregator {
       this.allAggregationModel.delete();
     }
     this.allAggregationModel = this.getAllAggregationModel(fp64);
-  }
-
-  updateAggregationBuffers(opts, results) {
-    if (!opts.createBufferObjects) {
-      return;
-    }
-    const weights = opts.weights || this.state.weights;
-    for (const id in results) {
-      const {aggregationData, minData, maxData, maxMinData} = results[id];
-      const {needMin, needMax} = weights[id];
-      const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      updateBuffer({
-        gl: this.gl,
-        bufferName: 'aggregationBuffer',
-        data: aggregationData,
-        result: results[id]
-      });
-      if (combineMaxMin) {
-        updateBuffer({
-          gl: this.gl,
-          bufferName: 'maxMinBuffer',
-          data: maxMinData,
-          result: results[id]
-        });
-      } else {
-        if (needMin) {
-          updateBuffer({
-            gl: this.gl,
-            bufferName: 'minBuffer',
-            data: minData,
-            result: results[id]
-          });
-        }
-        if (needMax) {
-          updateBuffer({
-            gl: this.gl,
-            bufferName: 'maxBuffer',
-            data: maxData,
-            result: results[id]
-          });
-        }
-      }
-    }
-  }
-
-  // validate and assert
-  validateProps(aggregationParams, opts) {
-    const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
-    assert(changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged);
-
-    // assert for required options
-    assert(
-      !changeFlags.dataChanged ||
-        (opts.positions &&
-          opts.weights &&
-          (!opts.projectPositions || opts.viewport) &&
-          opts.cellSize)
-    );
-    assert(!changeFlags.cellSizeChanged || opts.cellSize);
-
-    // viewport need only when performing screen space aggregation (projectPoints is true)
-    assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
-
-    if (projectPoints && gridTransformMatrix) {
-      log.warn('projectPoints is true, gridTransformMatrix is ignored')();
-    }
   }
 
   // set up buffers for all weights
@@ -834,13 +848,4 @@ export default class GPUGridAggregator {
     }
   }
   /* eslint-enable max-statements */
-
-  updateGridSize(opts) {
-    const {viewport, cellSize} = opts;
-    const width = opts.width || viewport.width;
-    const height = opts.height || viewport.height;
-    const numCol = Math.ceil(width / cellSize[0]);
-    const numRow = Math.ceil(height / cellSize[1]);
-    this.setState({numCol, numRow, windowSize: [width, height]});
-  }
 }
