@@ -699,7 +699,6 @@ export default class GPUGridAggregator {
     for (const id in results) {
       const {aggregationData, minData, maxData, maxMinData} = results[id];
       const {needMin, needMax} = weights[id];
-      const calculateMinMax = needMin || needMax;
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
       updateBuffer({
         gl: this.gl,
@@ -707,31 +706,29 @@ export default class GPUGridAggregator {
         data: aggregationData,
         result: results[id]
       });
-      if (calculateMinMax) {
-        if (combineMaxMin) {
+      if (combineMaxMin) {
+        updateBuffer({
+          gl: this.gl,
+          bufferName: 'maxMinBuffer',
+          data: maxMinData,
+          result: results[id]
+        });
+      } else {
+        if (needMin) {
           updateBuffer({
             gl: this.gl,
-            bufferName: 'maxMinBuffer',
-            data: maxMinData,
+            bufferName: 'minBuffer',
+            data: minData,
             result: results[id]
           });
-        } else {
-          if (needMin) {
-            updateBuffer({
-              gl: this.gl,
-              bufferName: 'minBuffer',
-              data: minData,
-              result: results[id]
-            });
-          }
-          if (needMax) {
-            updateBuffer({
-              gl: this.gl,
-              bufferName: 'maxBuffer',
-              data: maxData,
-              result: results[id]
-            });
-          }
+        }
+        if (needMax) {
+          updateBuffer({
+            gl: this.gl,
+            bufferName: 'maxBuffer',
+            data: maxData,
+            result: results[id]
+          });
         }
       }
     }
