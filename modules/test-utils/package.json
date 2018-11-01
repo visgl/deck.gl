@@ -16,10 +16,13 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/index.js",
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "esnext": "dist/es6/index.js",
   "files": [
     "dist",
-    "src"
+    "src",
+    "README.md"
   ],
   "dependencies": {
     "deck.gl": "^6.3.0-alpha.1",
@@ -27,12 +30,10 @@
     "probe.gl": "^2.0.0"
   },
   "scripts": {
-    "build-clean": "rm -fr dist dist-es6 && mkdir -p dist dist-es6",
-    "build-es6": "rm -fr dist-es6 && BABEL_ENV=es6 babel src --out-dir dist-es6 --source-maps inline",
-    "build-es5": "rm -fr dist && BABEL_ENV=es5 babel src --out-dir dist --source-maps inline",
-    "build": "npm run build-clean && npm run build-es5",
-    "test": "npm run test-node && npm run build",
-    "test-node": "node test/start.js test",
-    "test-dist": "node test/start.js test-dist"
+    "clean": "rm -fr dist dist-es6 && mkdir -p dist/es5 dist/esm dist/es6",
+    "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
+    "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
+    "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
+    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   }
 }
