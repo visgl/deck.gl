@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 
-import {_alignToCell as alignToCell} from '@deck.gl/core/experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
+import {alignToCell} from '@deck.gl/core/experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
 import {
   _pointToDensityGridData as pointToDensityGridData,
   _GPUGridAggregator as GPUGridAggregator

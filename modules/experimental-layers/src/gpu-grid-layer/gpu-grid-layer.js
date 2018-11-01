@@ -73,8 +73,9 @@ export default class GPUGridLayer extends CompositeLayer {
     let aggregationFlags = null;
     if (
       changeFlags.dataChanged ||
-      oldProps.getPosition !== props.getPosition ||
-      oldProps.gpuAggregation !== props.gpuAggregation
+      oldProps.gpuAggregation !== props.gpuAggregation ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
     ) {
       aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
     }

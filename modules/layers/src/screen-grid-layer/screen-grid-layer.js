@@ -345,7 +345,9 @@ export default class ScreenGridLayer extends Layer {
     });
 
     const maxWeight =
-      results.color.maxData && results.color.maxData[0] > -Infinity ? results.color.maxData[0] : 0;
+      results.color.maxData && Number.isFinite(results.color.maxData[0])
+        ? results.color.maxData[0]
+        : 0;
     this.setState({
       aggregationData: null, // Aggregation changed, enforce reading buffer data for picking.
       maxWeight // uniform to use under WebGL1
