@@ -88,6 +88,21 @@ export default class GPUGridAggregator {
     this.shaderCache = opts.shaderCache || null;
     this.gl = gl;
     this.state = {
+      // cache weights and position data to process when data is not changed
+      weights: null,
+      gridPositions: null,
+      positionsBuffer: null,
+      positions64xyLowBuffer: null,
+      vertexCount: 0,
+
+      // flags/variables that affect the aggregation
+      fp64: null,
+      useGPU: null,
+      numCol: 0,
+      numRow: 0,
+      windowSize: null,
+      cellSize: null,
+
       // per weight GPU resources
       weightAttributes: {},
       textures: {},
@@ -239,9 +254,19 @@ export default class GPUGridAggregator {
       cellSize
     } = aggregationParams;
     if (this.state.useGPU !== useGPU) {
-      aggregationParams.changeFlags = DEFAULT_CHANGE_FLAGS;
+      // CPU/GPU resources need to reinitialized, force set the change flags.
+      aggregationParams.changeFlags = Object.assign(
+        {},
+        aggregationParams.changeFlags,
+        DEFAULT_CHANGE_FLAGS
+      );
     }
-    if (cellSize && this.state.cellSize !== cellSize) {
+    if (
+      cellSize &&
+      (!this.state.cellSize ||
+        this.state.cellSize[0] !== cellSize[0] ||
+        this.state.cellSize[1] !== cellSize[1])
+    ) {
       aggregationParams.changeFlags.cellSizeChanged = true;
       // For GridLayer aggregation, cellSize is calculated by parsing all input data as it depends
       // on bounding box, cache cellSize
