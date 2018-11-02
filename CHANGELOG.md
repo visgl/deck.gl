@@ -15,6 +15,20 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v6.3
+
+### deck.gl v6.3 Prereleases
+
+#### [6.3.0-alpha.2] - Nov 2 2018
+
+- New event handling props
+- Align build systems of all submodules
+- GPUAggregator improvements
+
+#### [6.3.0-alpha.1] - Oct 25 2018
+
+- Prop types system
+
 ## deck.gl v6.2
 
 ### deck.gl v6.2 Prereleases
