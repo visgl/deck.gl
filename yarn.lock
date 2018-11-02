@@ -620,7 +620,11 @@
   dependencies:
     wgs84 "0.0.0"
 
-"@mapbox/jsonlint-lines-primitives@^2.0.1":
+"@mapbox/geojson-types@^1.0.2":
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/@mapbox/geojson-types/-/geojson-types-1.0.2.tgz#9aecf642cb00eab1080a57c4f949a65b4a5846d6"
+
+"@mapbox/jsonlint-lines-primitives@^2.0.2":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@mapbox/jsonlint-lines-primitives/-/jsonlint-lines-primitives-2.0.2.tgz#ce56e539f83552b58d10d672ea4d6fc9adc7b234"
 
@@ -631,10 +635,6 @@
 "@mapbox/point-geometry@0.1.0", "@mapbox/point-geometry@^0.1.0", "@mapbox/point-geometry@~0.1.0":
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/@mapbox/point-geometry/-/point-geometry-0.1.0.tgz#8a83f9335c7860effa2eeeca254332aa0aeed8f2"
-
-"@mapbox/shelf-pack@^3.1.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@mapbox/shelf-pack/-/shelf-pack-3.2.0.tgz#df3630ecce8c042817c9a365b88078412963de64"
 
 "@mapbox/tiny-sdf@^1.1.0":
   version "1.1.0"
@@ -650,7 +650,7 @@
   dependencies:
     "@mapbox/point-geometry" "~0.1.0"
 
-"@mapbox/whoots-js@^3.0.0":
+"@mapbox/whoots-js@^3.1.0":
   version "3.1.0"
   resolved "https://registry.yarnpkg.com/@mapbox/whoots-js/-/whoots-js-3.1.0.tgz#497c67a1cef50d1a2459ba60f315e448d2ad87fe"
 
@@ -2056,10 +2056,6 @@ boom@2.x.x:
   resolved "https://registry.yarnpkg.com/boom/-/boom-2.10.1.tgz#39c8918ceff5799f83f9492a848f625add0c766f"
   dependencies:
     hoek "2.x.x"
-
-bowser@^1.2.0:
-  version "1.9.4"
-  resolved "https://registry.yarnpkg.com/bowser/-/bowser-1.9.4.tgz#890c58a2813a9d3243704334fa81b96a5c150c9a"
 
 brace-expansion@^1.1.7:
   version "1.1.11"
@@ -4228,9 +4224,9 @@ geojson-rewind@^0.3.0:
     minimist "1.2.0"
     sharkdown "^0.1.0"
 
-geojson-vt@^3.1.4:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/geojson-vt/-/geojson-vt-3.2.0.tgz#039cea549df5f892c48cff8eb66c2e217d61c241"
+geojson-vt@^3.2.0:
+  version "3.2.1"
+  resolved "https://registry.yarnpkg.com/geojson-vt/-/geojson-vt-3.2.1.tgz#f8adb614d2c1d3f6ee7c4265cad4bbf3ad60c8b7"
 
 get-caller-file@^1.0.1:
   version "1.0.3"
@@ -4581,15 +4577,6 @@ graceful-fs@^4.1.11, graceful-fs@^4.1.2, graceful-fs@^4.1.6:
 "graceful-readlink@>= 1.0.0":
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/graceful-readlink/-/graceful-readlink-1.0.1.tgz#4cafad76bc62f02fa039b2f94e9a3dd3a391a725"
-
-gray-matter@^3.0.8:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/gray-matter/-/gray-matter-3.1.1.tgz#101f80d9e69eeca6765cdce437705b18f40876ac"
-  dependencies:
-    extend-shallow "^2.0.1"
-    js-yaml "^3.10.0"
-    kind-of "^5.0.2"
-    strip-bom-string "^1.0.0"
 
 grid-index@^1.0.0:
   version "1.0.0"
@@ -5478,7 +5465,7 @@ js-yaml@3.6.1:
     argparse "^1.0.7"
     esprima "^2.6.0"
 
-js-yaml@^3.10.0, js-yaml@^3.9.1:
+js-yaml@^3.9.1:
   version "3.12.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-3.12.0.tgz#eaed656ec8344f10f527c6bfa1b6e2244de167d1"
   dependencies:
@@ -5660,7 +5647,7 @@ kind-of@^4.0.0:
   dependencies:
     is-buffer "^1.1.5"
 
-kind-of@^5.0.0, kind-of@^5.0.2:
+kind-of@^5.0.0:
   version "5.1.0"
   resolved "https://registry.yarnpkg.com/kind-of/-/kind-of-5.1.0.tgz#729c91e2d857b7a419a1f9aa65685c4c33f5845d"
 
@@ -6011,34 +5998,32 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mapbox-gl@0.47.0:
-  version "0.47.0"
-  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-0.47.0.tgz#c72f1d3462037f0bb5b8dc25cc8a029513f2b7cd"
+mapbox-gl@~0.50.0:
+  version "0.50.0"
+  resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-0.50.0.tgz#49f44149f02fdd25ab64a2ec4efc7a11a5c96f55"
   dependencies:
-    "@mapbox/jsonlint-lines-primitives" "^2.0.1"
+    "@mapbox/geojson-types" "^1.0.2"
+    "@mapbox/jsonlint-lines-primitives" "^2.0.2"
     "@mapbox/mapbox-gl-supported" "^1.4.0"
     "@mapbox/point-geometry" "^0.1.0"
-    "@mapbox/shelf-pack" "^3.1.0"
     "@mapbox/tiny-sdf" "^1.1.0"
     "@mapbox/unitbezier" "^0.0.0"
     "@mapbox/vector-tile" "^1.3.1"
-    "@mapbox/whoots-js" "^3.0.0"
+    "@mapbox/whoots-js" "^3.1.0"
     brfs "^1.4.4"
     csscolorparser "~1.0.2"
     earcut "^2.1.3"
     geojson-rewind "^0.3.0"
-    geojson-vt "^3.1.4"
+    geojson-vt "^3.2.0"
     gl-matrix "^2.6.1"
-    gray-matter "^3.0.8"
     grid-index "^1.0.0"
     minimist "0.0.8"
+    murmurhash-js "^1.0.0"
     pbf "^3.0.5"
+    potpack "^1.0.1"
     quickselect "^1.0.0"
     rw "^1.3.3"
-    shuffle-seed "^1.1.6"
-    sort-object "^0.3.2"
-    supercluster "^4.0.1"
-    through2 "^2.0.3"
+    supercluster "^4.1.1"
     tinyqueue "^1.1.0"
     vt-pbf "^3.0.1"
 
@@ -6440,6 +6425,10 @@ multimatch@^2.0.0:
     array-union "^1.0.1"
     arrify "^1.0.0"
     minimatch "^3.0.0"
+
+murmurhash-js@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/murmurhash-js/-/murmurhash-js-1.0.0.tgz#b06278e21fc6c37fa5313732b0412bcb6ae15f51"
 
 mute-stream@0.0.7:
   version "0.0.7"
@@ -7184,6 +7173,10 @@ posix-character-classes@^0.1.0:
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
 
+potpack@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/potpack/-/potpack-1.0.1.tgz#d1b1afd89e4c8f7762865ec30bd112ab767e2ebf"
+
 pre-commit@^1.2.2:
   version "1.2.2"
   resolved "https://registry.yarnpkg.com/pre-commit/-/pre-commit-1.2.2.tgz#dbcee0ee9de7235e57f79c56d7ce94641a69eec6"
@@ -7508,18 +7501,17 @@ react-dom@^16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react-map-gl@^3.3.0-alpha.5:
-  version "3.3.4"
-  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-3.3.4.tgz#d1d9c971480501e5821f349e38b4a4f250cd2a51"
+react-map-gl@^3.3.7:
+  version "3.3.8"
+  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-3.3.8.tgz#59df5c9a852cf1720d42cd3260202841258bc2ec"
   dependencies:
     babel-runtime "^6.23.0"
-    bowser "^1.2.0"
     immutable "^3.8.2"
-    mapbox-gl "0.47.0"
+    mapbox-gl "~0.50.0"
     math.gl "^2.0.0"
     mjolnir.js "^1.2.1"
     prop-types "^15.5.7"
-    viewport-mercator-project "^5.1.0"
+    viewport-mercator-project "^6.0.0"
 
 react@^16.2.0:
   version "16.4.2"
@@ -8066,10 +8058,6 @@ scoped-regex@^1.0.0:
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/scoped-regex/-/scoped-regex-1.0.0.tgz#a346bb1acd4207ae70bd7c0c7ca9e566b6baddb8"
 
-seedrandom@^2.4.2:
-  version "2.4.4"
-  resolved "https://registry.yarnpkg.com/seedrandom/-/seedrandom-2.4.4.tgz#b25ea98632c73e45f58b77cfaa931678df01f9ba"
-
 seer@^0.2.4:
   version "0.2.4"
   resolved "https://registry.yarnpkg.com/seer/-/seer-0.2.4.tgz#6b8a81d09bfe6b3b3ad0268971a65e7f7405135c"
@@ -8217,12 +8205,6 @@ shelljs@^0.8.0:
     interpret "^1.0.0"
     rechoir "^0.6.2"
 
-shuffle-seed@^1.1.6:
-  version "1.1.6"
-  resolved "https://registry.yarnpkg.com/shuffle-seed/-/shuffle-seed-1.1.6.tgz#533c12683bab3b4fa3e8751fc4e562146744260b"
-  dependencies:
-    seedrandom "^2.4.2"
-
 signal-exit@^2.0.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/signal-exit/-/signal-exit-2.1.2.tgz#375879b1f92ebc3b334480d038dc546a6d558564"
@@ -8312,26 +8294,11 @@ sockjs@0.3.19:
     faye-websocket "^0.10.0"
     uuid "^3.0.1"
 
-sort-asc@^0.1.0:
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/sort-asc/-/sort-asc-0.1.0.tgz#ab799df61fc73ea0956c79c4b531ed1e9e7727e9"
-
-sort-desc@^0.1.1:
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/sort-desc/-/sort-desc-0.1.1.tgz#198b8c0cdeb095c463341861e3925d4ee359a9ee"
-
 sort-keys@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/sort-keys/-/sort-keys-2.0.0.tgz#658535584861ec97d730d6cf41822e1f56684128"
   dependencies:
     is-plain-obj "^1.0.0"
-
-sort-object@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/sort-object/-/sort-object-0.3.2.tgz#98e0d199ede40e07c61a84403c61d6c3b290f9e2"
-  dependencies:
-    sort-asc "^0.1.0"
-    sort-desc "^0.1.1"
 
 source-list-map@^2.0.0:
   version "2.0.0"
@@ -8632,10 +8599,6 @@ strip-bom-stream@^2.0.0:
     first-chunk-stream "^2.0.0"
     strip-bom "^2.0.0"
 
-strip-bom-string@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/strip-bom-string/-/strip-bom-string-1.0.0.tgz#e5211e9224369fbb81d633a2f00044dc8cedad92"
-
 strip-bom@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/strip-bom/-/strip-bom-2.0.0.tgz#6219a85616520491f35788bdbf1447a99c7e6b0e"
@@ -8674,7 +8637,7 @@ strong-log-transformer@^1.0.6:
     moment "^2.6.0"
     through "^2.3.4"
 
-supercluster@^4.0.1:
+supercluster@^4.1.1:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/supercluster/-/supercluster-4.1.1.tgz#cf13c3b28a3fb3db5290bfad7f524e244bd4ce78"
   dependencies:
@@ -8849,7 +8812,7 @@ through2@^0.6.3:
     readable-stream ">=1.0.33-1 <1.1.0-0"
     xtend ">=4.0.0 <4.1.0-0"
 
-through2@^2.0.0, through2@^2.0.2, through2@^2.0.3, through2@~2.0.3:
+through2@^2.0.0, through2@^2.0.2, through2@~2.0.3:
   version "2.0.3"
   resolved "https://registry.yarnpkg.com/through2/-/through2-2.0.3.tgz#0004569b37c7c74ba39c43f3ced78d1ad94140be"
   dependencies:
@@ -9242,12 +9205,6 @@ verror@1.10.0:
     assert-plus "^1.0.0"
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
-
-viewport-mercator-project@^5.1.0:
-  version "5.2.0"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-5.2.0.tgz#2c50bc624a085d01a3a486f22ec329c0511fe4bd"
-  dependencies:
-    math.gl "^2.0.0"
 
 viewport-mercator-project@^6.0.0:
   version "6.0.0"
