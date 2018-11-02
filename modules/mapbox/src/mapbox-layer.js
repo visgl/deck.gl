@@ -9,7 +9,7 @@ export default class MapboxLayer {
 
     this.id = props.id;
     this.type = 'custom';
-    this.renderingMode = '3d';
+    this.renderingMode = props.renderingMode || '3d';
     this.map = null;
     this.deck = null;
     this.props = props;
