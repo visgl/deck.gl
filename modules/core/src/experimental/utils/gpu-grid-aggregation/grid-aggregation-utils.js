@@ -2,6 +2,7 @@ import assert from 'assert';
 import {Matrix4} from 'math.gl';
 import {fp64 as fp64Utils} from 'luma.gl';
 import {COORDINATE_SYSTEM} from '../../../lib/constants';
+import {AGGREGATION_OPERATION} from './gpu-grid-aggregator-constants';
 const {fp64LowPart} = fp64Utils;
 
 const R_EARTH = 6378000;
@@ -13,30 +14,46 @@ export function pointToDensityGridData({
   cellSizeMeters,
   gpuGridAggregator,
   gpuAggregation,
+  aggregationFlags,
   fp64 = false,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
-  viewport = null
+  viewport = null,
+  boundingBox = null
 }) {
-  const gridData = _parseGridData(data, getPosition);
+  let gridData = {};
+  assert(
+    aggregationFlags.dataChanged ||
+      aggregationFlags.cellSizeChanged ||
+      aggregationFlags.viewportChanged
+  );
+  if (aggregationFlags.dataChanged) {
+    gridData = parseGridData(data, getPosition);
+    boundingBox = gridData.boundingBox;
+  }
   let cellSize = [cellSizeMeters, cellSizeMeters];
   let worldOrigin = [0, 0];
   assert(
     coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
   );
-  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-    // TODO: also for COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL ?
-    const gridOffset = _getGridOffset(gridData, cellSizeMeters);
-    cellSize = [gridOffset.xOffset, gridOffset.yOffset];
+  assert(boundingBox);
 
-    worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
-  } else {
-    // Other co-ordiante sytems are not verified yet.
-    assert(coordinateSystem === COORDINATE_SYSTEM.IDENTITY);
-    const {width, height} = viewport;
-    worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
+  switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
+      const gridOffset = getGridOffset(boundingBox, cellSizeMeters);
+      cellSize = [gridOffset.xOffset, gridOffset.yOffset];
+      worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
+      break;
+    case COORDINATE_SYSTEM.IDENTITY:
+      const {width, height} = viewport;
+      worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
+      break;
+    default:
+      // Currently other coodinate systems not supported/verified.
+      assert(false);
   }
 
-  const opts = _getGPUAggregationParams({gridData, cellSize, worldOrigin});
+  const opts = getGPUAggregationParams({boundingBox, cellSize, worldOrigin});
 
   const aggregatedData = gpuGridAggregator.run({
     positions: gridData.positions,
@@ -47,26 +64,29 @@ export function pointToDensityGridData({
     height: opts.height,
     gridTransformMatrix: opts.gridTransformMatrix,
     useGPU: gpuAggregation,
+    changeFlags: aggregationFlags,
     fp64
   });
 
   return {
-    countsBuffer: aggregatedData.countsBuffer,
-    maxCountBuffer: aggregatedData.maxCountBuffer,
-    countsData: aggregatedData.countsData,
-    maxCountData: aggregatedData.maxCountData,
+    countsBuffer: aggregatedData.weight1.aggregationBuffer,
+    maxCountBuffer: aggregatedData.weight1.maxBuffer,
+    countsData: aggregatedData.weight1.aggregationData,
+    maxCountData: aggregatedData.weight1.maxData,
     gridSize: opts.gridSize,
     gridOrigin: opts.gridOrigin,
-    cellSize
+    cellSize,
+    boundingBox
   };
 }
 
 // Parse input data to build positions, wights and bounding box.
-function _parseGridData(data, getPosition, getWeight = null) {
+/* eslint-disable max-statements */
+function parseGridData(data, getPosition, getWeight = null) {
   assert(data && getPosition);
   const positions = [];
   const positions64xyLow = [];
-  const weights = [];
+  const weightValues = [];
 
   let yMin = Infinity;
   let yMax = -Infinity;
@@ -81,8 +101,10 @@ function _parseGridData(data, getPosition, getWeight = null) {
     positions.push(x, y);
     positions64xyLow.push(fp64LowPart(x), fp64LowPart(y));
 
-    const weight = getWeight ? getWeight(data[p]) : 1.0;
-    weights.push(weight);
+    const weight = getWeight ? getWeight(data[p]) : [1.0, 0, 0];
+    // Aggregator expects each weight is an array of size 3
+    assert(Array.isArray(weight) && weight.length === 3);
+    weightValues.push(...weight);
 
     if (Number.isFinite(y) && Number.isFinite(x)) {
       yMin = y < yMin ? y : yMin;
@@ -92,17 +114,23 @@ function _parseGridData(data, getPosition, getWeight = null) {
       xMax = x > xMax ? x : xMax;
     }
   }
-
+  const weights = {
+    weight1: {
+      size: 1,
+      operation: AGGREGATION_OPERATION.SUM,
+      needMax: true,
+      values: weightValues
+    }
+  };
+  const boundingBox = {xMin, xMax, yMin, yMax};
   return {
     positions,
     positions64xyLow,
     weights,
-    yMin,
-    yMax,
-    xMin,
-    xMax
+    boundingBox
   };
 }
+/* eslint-enable max-statements */
 
 /**
  * Based on geometric center of sample points, calculate cellSize in lng/lat (degree) space
@@ -111,13 +139,13 @@ function _parseGridData(data, getPosition, getWeight = null) {
  * @returns {yOffset, xOffset} - cellSize size lng/lat (degree) space.
  */
 
-function _getGridOffset(gridData, cellSize) {
-  const {yMin, yMax} = gridData;
+function getGridOffset(boundingBox, cellSize) {
+  const {yMin, yMax} = boundingBox;
   const latMin = yMin;
   const latMax = yMax;
   const centerLat = (latMin + latMax) / 2;
 
-  return _calculateGridLatLonOffset(cellSize, centerLat);
+  return calculateGridLatLonOffset(cellSize, centerLat);
 }
 
 /**
@@ -127,9 +155,9 @@ function _getGridOffset(gridData, cellSize) {
  * @param {number} latitude
  * @returns {object} - lat delta and lon delta
  */
-function _calculateGridLatLonOffset(cellSize, latitude) {
-  const yOffset = _calculateLatOffset(cellSize);
-  const xOffset = _calculateLonOffset(latitude, cellSize);
+function calculateGridLatLonOffset(cellSize, latitude) {
+  const yOffset = calculateLatOffset(cellSize);
+  const xOffset = calculateLonOffset(latitude, cellSize);
   return {yOffset, xOffset};
 }
 
@@ -139,7 +167,7 @@ function _calculateGridLatLonOffset(cellSize, latitude) {
  * @param {number} dy - change in km
  * @return {number} - increment in latitude
  */
-function _calculateLatOffset(dy) {
+function calculateLatOffset(dy) {
   return (dy / R_EARTH) * (180 / Math.PI);
 }
 
@@ -151,12 +179,12 @@ function _calculateLatOffset(dy) {
  * @param {number} dx - change in km
  * @return {number} - increment in longitude
  */
-function _calculateLonOffset(lat, dx) {
+function calculateLonOffset(lat, dx) {
   return ((dx / R_EARTH) * (180 / Math.PI)) / Math.cos((lat * Math.PI) / 180);
 }
 
 // Aligns `inValue` to given `cellSize`
-export function _alignToCell(inValue, cellSize) {
+export function alignToCell(inValue, cellSize) {
   const sign = inValue < 0 ? -1 : 1;
 
   let value = sign < 0 ? Math.abs(inValue) + cellSize : Math.abs(inValue);
@@ -167,15 +195,15 @@ export function _alignToCell(inValue, cellSize) {
 }
 
 // Calculate grid parameters
-function _getGPUAggregationParams({gridData, cellSize, worldOrigin}) {
-  const {yMin, yMax, xMin, xMax} = gridData;
+function getGPUAggregationParams({boundingBox, cellSize, worldOrigin}) {
+  const {yMin, yMax, xMin, xMax} = boundingBox;
 
   // NOTE: this alignment will match grid cell boundaries with existing CPU implementation
   // this gurantees identical aggregation results when switching between CPU and GPU aggregation.
   // Also gurantees same cell boundaries, when overlapping between two different layers (like ScreenGrid and Contour)
   // We first move worldOrigin to [0, 0], align the lower bounding box , then move worldOrigin to its original value.
-  const originX = _alignToCell(xMin - worldOrigin[0], cellSize[0]) + worldOrigin[0];
-  const originY = _alignToCell(yMin - worldOrigin[1], cellSize[1]) + worldOrigin[1];
+  const originX = alignToCell(xMin - worldOrigin[0], cellSize[0]) + worldOrigin[0];
+  const originY = alignToCell(yMin - worldOrigin[1], cellSize[1]) + worldOrigin[1];
 
   // Setup transformation matrix so that every point is in +ve range
   const gridTransformMatrix = new Matrix4().translate([-1 * originX, -1 * originY, 0]);

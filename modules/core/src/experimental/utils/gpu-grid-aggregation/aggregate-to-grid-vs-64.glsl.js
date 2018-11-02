@@ -23,14 +23,14 @@ export default `\
 
 attribute vec2 positions;
 attribute vec2 positions64xyLow;
-attribute float weights;
+attribute vec3 weights;
 uniform vec2 windowSize;
 uniform vec2 cellSize;
 uniform vec2 gridSize;
 uniform vec2 uProjectionMatrixFP64[16];
 uniform bool projectPoints;
 
-varying float vWeights;
+varying vec3 vWeights;
 
 void project_to_pixel(vec2 pos, vec2 pos64xyLow, out vec2 pixelXY64[2]) {
 

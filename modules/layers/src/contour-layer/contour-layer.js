@@ -57,11 +57,12 @@ export default class ContourLayer extends CompositeLayer {
 
   updateState({oldProps, props, changeFlags}) {
     let contoursDirty = false;
-    if (changeFlags.dataChanged || oldProps.cellSize !== props.cellSize) {
+    const aggregationFlags = this.getAggregationFlags({oldProps, props, changeFlags});
+    if (aggregationFlags) {
       contoursDirty = true;
       // Clear countsData cache
       this.setState({countsData: null});
-      this.aggregateData();
+      this.aggregateData(aggregationFlags);
     }
 
     contoursDirty = contoursDirty || this.rebuildContours({oldProps, props});
@@ -96,7 +97,7 @@ export default class ContourLayer extends CompositeLayer {
 
   // Private
 
-  aggregateData() {
+  aggregateData(aggregationFlags) {
     const {
       data,
       cellSize: cellSizeMeters,
@@ -105,7 +106,14 @@ export default class ContourLayer extends CompositeLayer {
       fp64,
       coordinateSystem
     } = this.props;
-    const {countsData, countsBuffer, gridSize, gridOrigin, cellSize} = pointToDensityGridData({
+    const {
+      countsData,
+      countsBuffer,
+      gridSize,
+      gridOrigin,
+      cellSize,
+      boundingBox
+    } = pointToDensityGridData({
       data,
       cellSizeMeters,
       getPosition,
@@ -113,10 +121,12 @@ export default class ContourLayer extends CompositeLayer {
       gpuGridAggregator: this.state.gridAggregator,
       fp64,
       coordinateSystem,
-      viewport: this.context.viewport
+      viewport: this.context.viewport,
+      boundingBox: this.state.boundingBox, // avoid parsing data when it is not changed.
+      aggregationFlags
     });
 
-    this.setState({countsData, countsBuffer, gridSize, gridOrigin, cellSize});
+    this.setState({countsData, countsBuffer, gridSize, gridOrigin, cellSize, boundingBox});
   }
 
   generateContours() {
@@ -139,6 +149,21 @@ export default class ContourLayer extends CompositeLayer {
     });
 
     this.setState({contourData});
+  }
+
+  getAggregationFlags({oldProps, props, changeFlags}) {
+    let aggregationFlags = null;
+    if (
+      changeFlags.dataChanged ||
+      oldProps.getPosition !== props.getPosition ||
+      oldProps.gpuAggregation !== props.gpuAggregation
+    ) {
+      aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
+    }
+    if (oldProps.cellSize !== props.cellSize) {
+      aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
+    }
+    return aggregationFlags;
   }
 
   onGetSublayerColor(segment) {

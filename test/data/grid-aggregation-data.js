@@ -3,8 +3,7 @@ import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {fp64} from 'luma.gl';
 
 const {fp64LowPart} = fp64;
-
-const viewport = new WebMercatorViewport({
+const viewportProps = {
   longitude: -119.3,
   latitude: 35.6,
   zoom: 4,
@@ -13,7 +12,11 @@ const viewport = new WebMercatorViewport({
   bearing: 0,
   width: 500,
   height: 500
-});
+};
+const viewport = new WebMercatorViewport(viewportProps);
+const viewportUpdated = new WebMercatorViewport(
+  Object.assign({}, viewportProps, {zoom: viewportProps.zoom - 3})
+);
 
 let positions = [
   // Inside the current viewport bounds
@@ -36,25 +39,111 @@ let positions64xyLow = positions.map(pos => fp64LowPart(pos));
 const fixture = {
   positions,
   positions64xyLow,
-  weights: [
-    // Inside the current viewport bounds
-    1,
+  weights: {
+    weight1: {
+      values: [
+        // Inside the current viewport bounds
+        2,
+        11,
+        101,
 
-    // Merged to same grid
-    1,
-    3,
+        // Merged to same grid
+        1,
+        22,
+        303,
+        3,
+        31,
+        401,
 
-    // Outside the current viewport bounds
-    10
-  ],
+        // Outside the current viewport bounds
+        33,
+        1,
+        500 // gets aggregated when viewport is zoomed out
+      ],
+      size: 3,
+      needMin: true,
+      needMax: true
+    }
+  },
   windowSize: [500, 500],
   cellSize: [25, 25],
   gridSize: [20, 20],
   changeFlags: {
     dataChanged: true
   },
-  viewport
+  viewport,
+  projectPoints: true
 };
+
+const positionsUpdated = [
+  // Outside the current viewport bounds
+  -125.4193,
+  3,
+
+  // Inside the current viewport bounds, merged to same grid cell
+  -120.5, // -120.4193,
+  34.9, // 34.7751,
+
+  -120.5, // -120.4193,
+  34.9, // 34.7751,
+
+  // inside the viewport bounds
+  -118.67079,
+  34.03948,
+
+  // inside the viewport bounds
+  -117,
+  32,
+
+  // Outside the viewport bounds
+  -122.5,
+  10
+];
+
+const weightsUpdated = {
+  weight1: {
+    values: [
+      // Outside the current viewport bounds
+      1,
+      11,
+      101,
+
+      // Inside the current viewport bounds, merged to same grid cell
+      4,
+      20,
+      201,
+      2,
+      30,
+      300,
+
+      // inside the viewport bounds
+      9,
+      55,
+      701,
+
+      // inside the viewport bounds
+      1,
+      99,
+      22,
+
+      // Outside the viewport bounds
+      10,
+      51,
+      500
+    ],
+    size: 3,
+    needMin: true,
+    needMax: true
+  }
+};
+
+// data updated relative to `fixture`
+const fixtureUpdated = Object.assign({}, fixture, {
+  positions: positionsUpdated,
+  weights: weightsUpdated,
+  viewport: viewportUpdated
+});
+
 function generateRandomGridPoints(pointCount) {
   const topLeft = {
     lng: -128.0, // -124.506026,
@@ -74,13 +163,24 @@ function generateRandomGridPoints(pointCount) {
   };
   const pos = new Array(opts.count * 2);
   const posLow = new Array(opts.count * 2);
-  const weights = new Array(opts.count).fill(2);
+  const weightValues = [];
   for (let i = 0; i < opts.count; i++) {
     pos[i * 2] = Math.floor(Math.random() * opts.width) + opts.x;
     pos[i * 2 + 1] = Math.floor(Math.random() * opts.height) + opts.y;
     posLow[i * 2] = fp64LowPart(pos[i * 2]);
     posLow[i * 2 + 1] = fp64LowPart(pos[i * 2 + 1]);
+    // floor to avoid gpu precession issues
+    const weights = [Math.random(), Math.random(), Math.random()].map(x => Math.floor(x * 10));
+    weightValues.push(...weights);
   }
+  const weights = {
+    weight1: {
+      values: weightValues,
+      size: 3,
+      needMin: true,
+      needMax: true
+    }
+  };
   return {positions: pos, positions64xyLow: posLow, weights};
 }
 
@@ -166,12 +266,56 @@ const fixtureWorldSpace = {
   cellSize: [DX, DY],
   width: DX * 5,
   height: DY * 5,
-  weights: [10, 0.1, 1, 4, 5, 6, 2, 3, 111, 44, 123]
+  projectPoints: false,
+  weights: {
+    weight1: {
+      values: [
+        10,
+        0,
+        0,
+        0.1,
+        0,
+        0,
+        1,
+        0,
+        0,
+        4,
+        0,
+        0,
+        5,
+        0,
+        0,
+        6,
+        0,
+        0,
+        2,
+        0,
+        0,
+        3,
+        0,
+        0,
+        111,
+        0,
+        0,
+        44,
+        0,
+        0,
+        123,
+        0,
+        0
+      ],
+      size: 3,
+      needMin: true,
+      needMax: true
+    }
+  }
 };
+
 export const GridAggregationData = {
   viewport,
   fixture,
   fixture2,
+  fixtureUpdated,
   generateRandomGridPoints,
   fixtureWorldSpace
 };

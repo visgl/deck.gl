@@ -739,6 +739,29 @@ export const TEST_CASES = [
     referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
   },
   {
+    name: 'screengrid-lnglat-cpu-aggregation',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScreenGridLayer({
+        id: 'screengrid-lnglat-cpu-aggregation',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        cellSizePixels: 40,
+        minColor: [0, 0, 80, 0],
+        maxColor: [100, 255, 0, 128],
+        pickable: false,
+        gpuAggregation: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
+  },
+  {
     name: 'screengrid-lnglat-colorRange',
     viewState: {
       latitude: 37.751537058389985,
@@ -1173,6 +1196,59 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png',
+    ignoreGPUs: [`Intel`]
+  },
+  {
+    name: 'gpu-grid-lnglat-cpu-aggregation',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new GPUGridLayer({
+        id: 'gpu-grid-lnglat-cpu-aggregation',
+        data: dataSamples.points,
+        cellSize: 200,
+        opacity: 1,
+        extruded: true,
+        pickable: true,
+        getPosition: d => d.COORDINATES,
+        lightSettings: LIGHT_SETTINGS,
+        gpuAggregation: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png',
+    ignoreGPUs: [`Intel`]
+  },
+  {
+    name: 'contour-lnglat-cpu-aggregation',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-lnglat-cpu-aggregation',
+        data: dataSamples.points,
+        cellSize: 200,
+        opacity: 1,
+        getPosition: d => d.COORDINATES,
+        lightSettings: LIGHT_SETTINGS,
+        contours: [
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 15, color: [0, 0, 255]}
+        ],
+        gpuAggregation: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/contour-lnglat.png',
     ignoreGPUs: [`Intel`]
   },
   {

@@ -23,9 +23,9 @@ export default `\
 
 precision highp float;
 
-varying float vWeights;
+varying vec3 vWeights;
 
 void main(void) {
-  gl_FragColor = vec4(1., vWeights, 0, 0.0);
+  gl_FragColor = vec4(vWeights, 1.0);
 }
 `;

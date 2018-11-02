@@ -56,20 +56,19 @@ out vec4 vColor;
 
 void main(void) {
 
-  float noRender = float(instanceCounts.g <= 0.0);
+  bool noRender = instanceCounts.r <= 0.0;
 
-  float step = instanceCounts.g / aggregationData.maxCount.w;
+  float step = instanceCounts.r / aggregationData.maxCount.r;
   vec4 color = mix(minColor, maxColor, step) / 255.;
 
   // TODO: discard when noRender is true
-  float finalCellSize = project_scale(cellSize) * mix(1.0, 0.0, noRender);
-  // float finalCellSize = project_scale(cellSize);
+  float finalCellSize = noRender ? 0.0 : project_scale(cellSize);
 
 
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = instanceCounts.g  * (positions.z + 1.0) *
+    elevation = instanceCounts.r  * (positions.z + 1.0) *
       ELEVATION_SCALE * elevationScale;
   }
 
