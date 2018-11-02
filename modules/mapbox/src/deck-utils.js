@@ -11,13 +11,8 @@ export function getDeckInstance({map, gl, deck}) {
     width: '100%',
     height: '100%',
     useDevicePixels: true,
-    // layerFilter needs to be changed inside a rendering/picking cycle
-    // But calling setProps({layerFilter}) will trigger another rerender which sets off an infinite loop
-    // Instead, we use a constant callback here and access the dynamic filter in userData
-    layerFilter: ({layer}) => filterLayer(deck, layer),
     _customRender: () => map.triggerRepaint(),
     userData: {
-      layerFilter: '',
       isExternal: false,
       mapboxLayers: new Set()
     }
@@ -35,6 +30,7 @@ export function getDeckInstance({map, gl, deck}) {
     });
   }
   map.__deck = deck;
+  map.on('render', () => afterRender(deck));
 
   initEvents(map, deck);
 
@@ -56,21 +52,35 @@ export function updateLayer(deck, layer) {
 }
 
 export function drawLayer(deck, layer) {
-  deck.props.userData.layerFilter = layer.id;
+  // set layerFilter to only allow the current layer
+  deck.layerManager.layerFilter = params => shouldDrawLayer(layer.id, params.layer);
   deck._drawLayers('mapbox-repaint');
+}
+
+function afterRender(deck) {
+  const {mapboxLayers, isExternal} = deck.props.userData;
+
+  if (isExternal) {
+    // Draw non-Mapbox layers
+    const mapboxLayerIds = Array.from(mapboxLayers).map(layer => layer.id);
+    deck.layerManager.layerFilter = params => {
+      for (const id of mapboxLayerIds) {
+        if (shouldDrawLayer(id, params.layer)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    deck._drawLayers('mapbox-repaint');
+  }
+
   deck.needsRedraw({clearRedrawFlags: true});
 }
 
-function filterLayer(deck, layer) {
-  const {layerFilter} = deck.props.userData;
-
-  if (typeof layerFilter !== 'string') {
-    return layerFilter;
-  }
-
+function shouldDrawLayer(id, layer) {
   let layerInstance = layer;
   while (layerInstance) {
-    if (layerInstance.id === layerFilter) {
+    if (layerInstance.id === id) {
       return true;
     }
     layerInstance = layerInstance.parent;
@@ -95,7 +105,7 @@ function updateLayers(deck) {
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, event) {
   // reset layerFilter to allow all layers during picking
-  deck.props.userData.layerFilter = true;
+  deck.layerManager.layerFilter = null;
 
   let callback;
   switch (event.type) {
