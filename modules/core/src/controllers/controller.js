@@ -320,6 +320,7 @@ export default class Controller {
     if (!this.scrollZoom) {
       return false;
     }
+    event.preventDefault();
 
     const pos = this.getCenter(event);
     if (!this.isPointInBounds(pos)) {
