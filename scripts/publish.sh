@@ -9,10 +9,10 @@ MODE=$1
 # Check permission
 ACCOUNT=`npm whoami`
 
-if [[ $ACCOUNT != 'deck.gl' ]]; then
-  echo "Must sign in to deck.gl account to publish"
-  exit 1
-fi
+# if [[ $ACCOUNT != 'deck.gl' ]]; then
+#  echo "Must sign in to deck.gl account to publish"
+#  exit 1
+# fi
 
 case $MODE in
   "beta")

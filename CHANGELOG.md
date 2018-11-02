@@ -22,6 +22,13 @@ For Earlier Beta Releases see below
 ## Beta Releases
 
 ### deck.gl v5.3 Pre Releases
+
+#### [5.3.5] - November 2
+- Upgrade luma.gl to v5.3.1 (#2396)
+
+#### [5.3.4] - August 21
+- Expose more internals (as experimental exports) (#1921) (#2213)
+
 ####[5.3.3] - August 20
 - Pass through opts in _createAnimationLoop's onCreateContext (#2203)
 - fix bad code links
