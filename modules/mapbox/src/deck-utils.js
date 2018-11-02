@@ -62,7 +62,7 @@ function afterRender(deck) {
 
   if (isExternal) {
     // Draw non-Mapbox layers
-    const mapboxLayerIds = Array.from(mapboxLayers).map(layer => layer.id);
+    const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
     deck.layerManager.layerFilter = params => {
       for (const id of mapboxLayerIds) {
         if (shouldDrawLayer(id, params.layer)) {
