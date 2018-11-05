@@ -1,9 +1,9 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {ScatterplotLayer, OrbitView} from 'deck.gl';
-import BezierGraphLayer from './bezier-graph-layer';
+import BezierGraphLayer from './bezier-layer/bezier-graph-layer';
 import {OrthographicView} from '@deck.gl/core';
-import SAMPLE_GRAPH from './sample-graph.json';
+import SAMPLE_GRAPH from './bezier-layer/sample-graph.json';
 import PlotLayer from './plot-layer';
 import {scaleLinear} from 'd3-scale';
 
