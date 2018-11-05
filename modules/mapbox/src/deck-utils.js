@@ -12,6 +12,10 @@ export function getDeckInstance({map, gl, deck}) {
     height: '100%',
     useDevicePixels: true,
     _customRender: () => map.triggerRepaint(),
+    parameters: {
+      depthMask: true,
+      depthTest: true
+    },
     userData: {
       isExternal: false,
       mapboxLayers: new Set()
@@ -30,7 +34,7 @@ export function getDeckInstance({map, gl, deck}) {
     });
   }
   map.__deck = deck;
-  map.on('render', () => afterRender(deck));
+  map.on('render', () => afterRender(deck, map));
 
   initEvents(map, deck);
 
@@ -57,10 +61,31 @@ export function drawLayer(deck, layer) {
   deck._drawLayers('mapbox-repaint');
 }
 
-function afterRender(deck) {
+export function getViewState(map, extraProps) {
+  const {lng, lat} = map.getCenter();
+  return Object.assign(
+    {
+      longitude: lng,
+      latitude: lat,
+      zoom: map.getZoom(),
+      bearing: map.getBearing(),
+      pitch: map.getPitch()
+    },
+    extraProps
+  );
+}
+
+function afterRender(deck, map) {
   const {mapboxLayers, isExternal} = deck.props.userData;
 
   if (isExternal) {
+    // Update viewState
+    const viewState = getViewState(map, {
+      nearZMultiplier: 0.1,
+      farZMultiplier: 10
+    });
+    deck.setProps({viewState});
+
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
     deck.layerManager.layerFilter = params => {
