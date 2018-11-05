@@ -8,8 +8,6 @@
   },
   "dependencies": {
     "d3-scale": "^1.0.6",
-    "deck.gl": "^6.2.0",
-    "@deck.gl/experimental-layers": "^6.2.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^3.3.0"
