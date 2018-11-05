@@ -1,4 +1,11 @@
-import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
+import {
+  getDeckInstance,
+  addLayer,
+  removeLayer,
+  updateLayer,
+  drawLayer,
+  getViewState
+} from './deck-utils';
 
 export default class MapboxLayer {
   /* eslint-disable no-this-before-super */
@@ -47,15 +54,9 @@ export default class MapboxLayer {
 
   _getViewState() {
     const {map, deck} = this;
-    const {lng, lat} = map.getCenter();
-    return {
-      longitude: lng,
-      latitude: lat,
-      zoom: map.getZoom(),
-      bearing: map.getBearing(),
-      pitch: map.getPitch(),
+    return getViewState(map, {
       nearZMultiplier: deck.height ? 1 / deck.height : 1,
       farZMultiplier: 1
-    };
+    });
   }
 }
