@@ -2,7 +2,7 @@
   "name": "@deck.gl/test-utils",
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
-  "version": "6.3.0-alpha.2",
+  "version": "6.3.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
@@ -25,7 +25,7 @@
     "README.md"
   ],
   "dependencies": {
-    "deck.gl": "^6.3.0-alpha.2",
+    "deck.gl": "^6.3.0-alpha.3",
     "pixelmatch": "^4.0.2",
     "probe.gl": "^2.0.0"
   },
