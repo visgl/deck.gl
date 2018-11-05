@@ -54,6 +54,10 @@ case $MODE in
     node test/node-examples.js
     break;;
 
+  "interaction")
+    node test/node-interaction.js
+    break;;
+
   "lint")
     run_lint
     break;;
