@@ -249,8 +249,9 @@ async function launchPage() {
 
 async function validateWithWaitingTime(child, folder, waitingTime, threshold, compare = true) {
   const [browser, page] = await launchPage();
-  const examples = ['plot', 'bezier', 'scatterplot'];
+  const examples = ['pointcloud', 'bezier', 'scatterplot'];
   for (let i = 0; i < 3; i++) {
+    console.log(`Begin the ${examples[i]} example`);
     await page.evaluate(() => App.renderToDOM(document.getElementById('app'))); //eslint-disable-line
     await allEvents(page, 1000, threshold, examples[i]); //eslint-disable-line
     await page.evaluate(() => App.nextTestCase()); //eslint-disable-line
@@ -286,7 +287,7 @@ async function yarnAndLaunchWebpack() {
 
 function changeFolder(folder) {
   console.log('--------------------------');
-  console.log(`Begin to test ${folder}`);
+  console.log(`Begin yarn`);
   process.chdir(path.resolve(exampleDir, folder));
 }
 

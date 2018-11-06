@@ -1,11 +1,10 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {ScatterplotLayer, OrbitView} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, ScatterplotLayer, OrbitView} from 'deck.gl';
 import BezierGraphLayer from './bezier-layer/bezier-graph-layer';
 import {OrthographicView} from '@deck.gl/core';
 import SAMPLE_GRAPH from './bezier-layer/sample-graph.json';
-import PlotLayer from './plot-layer';
-import {scaleLinear} from 'd3-scale';
+import loadPLY from './point-cloud-layer/ply-loader';
 
 let index = 0;
 
@@ -14,19 +13,20 @@ export function nextTestCase() {
 }
 
 const INITIAL_VIEW_STATE = {
+  POINTCLOUD: {
+    lookAt: [0, 0, 0],
+    distance: OrbitView.getDistance({boundingBox: [1, 1, 1], fov: 30}),
+    rotationX: 0,
+    rotationOrbit: 0,
+    orbitAxis: 'Y',
+    fov: 30,
+    minDistance: 1.5,
+    maxDistance: 10,
+    zoom: 0.5
+  },
   BEZIER: {
     offset: [0, 0],
     zoom: 1
-  },
-  PLOT: {
-    lookAt: [0, 0, 0],
-    distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov: 50}),
-    rotationX: -30,
-    rotationOrbit: 30,
-    orbitAxis: 'Y',
-    fov: 50,
-    minDistance: 1,
-    maxDistance: 20
   },
   SCATTERPLOT: {
     longitude: -74,
@@ -43,46 +43,14 @@ const MALE_COLOR = [0, 128, 255];
 const FEMALE_COLOR = [255, 0, 128];
 
 // Source data CSV for scatterplot
-const DATA_URL =
+const DATA_URL_SCATTERPLOT =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/scatterplot/manhattan.json'; // eslint-disable-line
-
-const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
-
-function getScale({min, max}) {
-  return scaleLinear()
-    .domain([min, max])
-    .range([0, 1]);
-}
 
 const TEST_CASES = [
   {
-    name: 'plot',
-    layers: [
-      EQUATION &&
-        200 &&
-        new PlotLayer({
-          getPosition: (u, v) => {
-            const x = (u - 1 / 2) * Math.PI * 2;
-            const y = (v - 1 / 2) * Math.PI * 2;
-            return [x, y, EQUATION(x, y)];
-          },
-          getColor: (x, y, z) => [40, z * 128 + 128, 160],
-          getXScale: getScale,
-          getYScale: getScale,
-          getZScale: getScale,
-          uCount: 200,
-          vCount: 200,
-          drawAxes: true,
-          axesPadding: 0.25,
-          axesColor: [0, 0, 0, 128],
-          opacity: 1,
-          updateTriggers: {
-            getPosition: EQUATION
-          }
-        })
-    ],
+    name: 'pointcloud',
     views: new OrbitView(),
-    initialViewState: INITIAL_VIEW_STATE.PLOT,
+    initialViewState: INITIAL_VIEW_STATE.POINTCLOUD,
     controller: true
   },
   {
@@ -98,7 +66,7 @@ const TEST_CASES = [
     layers: [
       new ScatterplotLayer({
         id: 'scatter-plot',
-        data: DATA_URL,
+        data: DATA_URL_SCATTERPLOT,
         radiusScale: 30,
         radiusMinPixels: 0.25,
         getPosition: d => [d[0], d[1], 0],
@@ -114,34 +82,62 @@ const TEST_CASES = [
   }
 ];
 
+const DATA_URL_POINTCLOUD =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy100k.ply'; // eslint-disable-line
+
 export class App extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      hoveredObject: null
+      viewState: INITIAL_VIEW_STATE.POINTCLOUD,
+      points: []
     };
-    this._onHover = this._onHover.bind(this);
+
     this._onViewStateChange = this._onViewStateChange.bind(this);
+    this._loadData();
   }
 
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
+  _loadData() {
+    loadPLY(DATA_URL_POINTCLOUD).then(({vertex}) => {
+      const points = [];
+      vertex.x.forEach((_, i) => {
+        points.push({
+          color: [(0.5 - vertex.x[i]) * 255, (vertex.y[i] + 0.5) * 255, 255, 255],
+          normal: [vertex.nx[i], vertex.ny[i], vertex.nz[i]],
+          position: [vertex.x[i], vertex.y[i], vertex.z[i]]
+        });
+      });
+      this.setState({points});
+    });
   }
 
   _onViewStateChange({viewState}) {
     this.setState({viewState});
   }
 
+  _renderLayers() {
+    const points = this.state.points;
+    return [
+      new PointCloudLayer({
+        id: 'point-cloud-layer',
+        data: points,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        getPosition: d => d.position,
+        getNormal: d => d.normal,
+        radiusPixels: 1
+      })
+    ];
+  }
   render() {
     const options = {onViewStateChange: this._onViewStateChange};
+    options.viewState = this.state.viewState;
     if (index === 0) {
-      this.initialViewState = TEST_CASES[index].initialViewState;
-    } else {
-      options.viewState = this.state.viewState;
-      if (this.initialViewState !== TEST_CASES[index].initialViewState) {
-        this.initialViewState = TEST_CASES[index].initialViewState;
-        options.viewState = TEST_CASES[index].initialViewState;
-      }
+      this.name = TEST_CASES[index].name;
+      options.layers = this._renderLayers();
+    } else if (this.name !== TEST_CASES[index].name) {
+      this.name = TEST_CASES[index].name;
+      options.viewState = TEST_CASES[index].initialViewState;
     }
     const props = Object.assign({}, TEST_CASES[index], options);
     return <DeckGL {...props} />;
