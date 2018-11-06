@@ -22,10 +22,6 @@ import log from '../utils/log';
 import {flatten} from '../utils/flatten';
 
 export default class CompositeLayer extends Layer {
-  constructor(props) {
-    super(props);
-  }
-
   get isComposite() {
     return true;
   }
