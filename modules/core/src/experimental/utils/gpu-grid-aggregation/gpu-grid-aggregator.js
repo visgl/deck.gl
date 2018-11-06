@@ -318,30 +318,33 @@ export default class GPUGridAggregator {
   }
 
   /* eslint-disable max-depth */
-  calculateMaxMinData(opts) {
+  calculateMeanMaxMinData(opts) {
     const {validCellIndices, results, weights} = opts;
 
     // collect max/min values
     validCellIndices.forEach(cellIndex => {
       for (const id in results) {
-        const {size, needMin, needMax} = weights[id];
+        const {size, needMin, needMax, operation} = weights[id];
         const {aggregationData, minData, maxData, maxMinData} = results[id];
         const calculateMinMax = needMin || needMax;
         const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
+        const count = aggregationData[cellIndex + ELEMENTCOUNT - 1];
         for (let sizeIndex = 0; sizeIndex < size && calculateMinMax; sizeIndex++) {
           const cellElementIndex = cellIndex + sizeIndex;
+          let weight = aggregationData[cellElementIndex];
+          if (operation === AGGREGATION_OPERATION.MEAN) {
+            aggregationData[cellElementIndex] /= count;
+            weight = aggregationData[cellElementIndex];
+          }
           if (combineMaxMin) {
             // use RGB for max values for 3 weights.
-            maxMinData[sizeIndex] = Math.max(
-              maxMinData[sizeIndex],
-              aggregationData[cellElementIndex]
-            );
+            maxMinData[sizeIndex] = Math.max(maxMinData[sizeIndex], weight);
           } else {
             if (needMin) {
-              minData[sizeIndex] = Math.min(minData[sizeIndex], aggregationData[cellElementIndex]);
+              minData[sizeIndex] = Math.min(minData[sizeIndex], weight);
             }
             if (needMax) {
-              maxData[sizeIndex] = Math.max(maxData[sizeIndex], aggregationData[cellElementIndex]);
+              maxData[sizeIndex] = Math.max(maxData[sizeIndex], weight);
             }
           }
         }
@@ -355,10 +358,10 @@ export default class GPUGridAggregator {
         } else {
           // Use Alpha channel to store total counts.
           if (needMin) {
-            minData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+            minData[ELEMENTCOUNT - 1] += count;
           }
           if (needMax) {
-            maxData[ELEMENTCOUNT - 1] += aggregationData[cellIndex + ELEMENTCOUNT - 1];
+            maxData[ELEMENTCOUNT - 1] += count;
           }
         }
       }
@@ -373,28 +376,11 @@ export default class GPUGridAggregator {
     // setup results object
     for (const id in weights) {
       let {aggregationData, minData, maxData, maxMinData} = weights[id];
-      const {operation, needMin, needMax} = weights[id];
+      const {needMin, needMax} = weights[id];
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      let fillValue = 0;
-      switch (operation) {
-        case AGGREGATION_OPERATION.SUM:
-        case AGGREGATION_OPERATION.MEAN:
-          fillValue = 0;
-          break;
-        case AGGREGATION_OPERATION.MIN:
-          fillValue = Infinity;
-          break;
-        case AGGREGATION_OPERATION.MAX:
-          fillValue = -Infinity;
-          break;
-        default:
-          // Not a valid operation enum.
-          assert(false);
-          break;
-      }
 
       const aggregationSize = numCol * numRow * ELEMENTCOUNT;
-      aggregationData = getFloatArray(aggregationData, aggregationSize, fillValue);
+      aggregationData = getFloatArray(aggregationData, aggregationSize);
       if (combineMaxMin) {
         maxMinData = getFloatArray(maxMinData, ELEMENTCOUNT);
         // RGB for max value
@@ -471,7 +457,7 @@ export default class GPUGridAggregator {
       }
     }
 
-    this.calculateMaxMinData({validCellIndices, results, weights});
+    this.calculateMeanMaxMinData({validCellIndices, results, weights});
 
     // Update buffer objects.
     this.updateAggregationBuffers(opts, results);
