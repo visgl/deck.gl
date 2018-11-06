@@ -323,6 +323,7 @@ function processPickInfo({
   }
 
   const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
+  const coordinate = viewport && viewport.unproject([x, y]);
 
   const baseInfo = {
     color: null,
@@ -332,7 +333,9 @@ function processPickInfo({
     x,
     y,
     pixel: [x, y],
-    lngLat: viewport && viewport.unproject([x, y]),
+    coordinate,
+    // TODO remove the lngLat prop after compatibility check
+    lngLat: coordinate,
     devicePixel: [deviceX, deviceY],
     pixelRatio
   };

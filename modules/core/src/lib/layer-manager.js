@@ -273,11 +273,14 @@ export default class LayerManager {
     const lastPickedInfo = this.context.lastPickedInfo.info;
     const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
     const layer = lastPickedLayerId ? this.layers.find(l => l.id === lastPickedLayerId) : null;
+    const coordinate = viewports[0] && viewports[0].unproject([x, y]);
 
     const info = {
       x,
       y,
-      lngLat: viewports[0] && viewports[0].unproject([x, y]),
+      coordinate,
+      // TODO remove the lngLat prop after compatibility check
+      lngLat: coordinate,
       layer
     };
 
