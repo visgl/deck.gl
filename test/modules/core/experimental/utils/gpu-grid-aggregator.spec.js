@@ -1,7 +1,8 @@
 import test from 'tape-catch';
-import {_GPUGridAggregator as GPUGridAggregator} from '@deck.gl/core';
+import {_GPUGridAggregator as GPUGridAggregator, AGGREGATION_OPERATION} from '@deck.gl/core';
 import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl/test/data';
+import {equals, config} from 'math.gl';
 
 const {fixture, fixtureUpdated, fixtureWorldSpace} = GridAggregationData;
 
@@ -15,6 +16,20 @@ function getGPUResults({aggregationBuffer, minBuffer, maxBuffer}) {
     minData: minBuffer.getData(),
     maxData: maxBuffer.getData()
   };
+}
+
+function verifyResults({t, cpuResults, gpuResults, testName}) {
+  for (const name in cpuResults) {
+    if (equals(cpuResults[name], gpuResults[name])) {
+      t.pass(`${testName}: ${name} CPU and GPU results matched`);
+    } else {
+      t.fail(
+        `${testName}: ${name}: results didn't match cpu: ${cpuResults[name]} gpu: ${
+          gpuResults[name]
+        }`
+      );
+    }
+  }
 }
 
 /* eslint-disable max-statements */
@@ -76,14 +91,22 @@ test('GPUGridAggregator#CPU', t => {
   t.end();
 });
 
-test('GPUGridAggregator#CompareCPUandGPU', t => {
+function testAggregationOperations(opts) {
+  const {t, op, testName, pointsData} = opts;
+  const oldEpsilon = config.EPSILON;
+  if (op === AGGREGATION_OPERATION.MEAN) {
+    // cpu: 4.692307472229004 VS gpu: 4.692307949066162
+    // cpu: 4.21212100982666 VS gpu: 4.212121486663818
+    config.EPSILON = 1e-6;
+  }
+
   const aggregator = new GPUGridAggregator(gl);
 
-  const pointsData = generateRandomGridPoints(5000);
-  const maxMinweight = Object.assign({}, pointsData.weights.weight1, {combineMaxMin: true});
-  let results = aggregator.run(Object.assign({}, fixture, {useGPU: false}, pointsData));
-  // console.log('CPU:');
-  // GPUGridAggregator.logData(results.weight1);
+  const weight = Object.assign({}, pointsData.weights.weight1, {operation: op});
+  const maxMinweight = Object.assign({}, weight, {combineMaxMin: true});
+  let results = aggregator.run(
+    Object.assign({}, fixture, {useGPU: false}, pointsData, {weights: {weight1: weight}})
+  );
   const cpuResults = {
     aggregationData: results.weight1.aggregationBuffer.getData(),
     minData: results.weight1.minBuffer.getData(),
@@ -94,9 +117,9 @@ test('GPUGridAggregator#CompareCPUandGPU', t => {
   );
   cpuResults.maxMinData = results.weight1.maxMinBuffer.getData();
 
-  results = aggregator.run(Object.assign({}, fixture, {useGPU: true}, pointsData));
-  // console.log('GPU:');
-  // GPUGridAggregator.logData(results.weight1);
+  results = aggregator.run(
+    Object.assign({}, fixture, {useGPU: true}, pointsData, {weights: {weight1: weight}})
+  );
   const gpuResults = {
     aggregationData: results.weight1.aggregationBuffer.getData(),
     minData: results.weight1.minBuffer.getData(),
@@ -108,7 +131,15 @@ test('GPUGridAggregator#CompareCPUandGPU', t => {
   gpuResults.maxMinData = results.weight1.maxMinBuffer.getData();
 
   // Compare aggregation details for each grid-cell, total count and max count.
-  t.deepEqual(gpuResults, cpuResults, 'cpu and gpu results should match');
+  verifyResults({t, cpuResults, gpuResults, testName});
+  config.EPSILON = oldEpsilon;
+}
+
+test('GPUGridAggregator#CompareCPUandGPU', t => {
+  const pointsData = generateRandomGridPoints(5000);
+  for (const opName in AGGREGATION_OPERATION) {
+    testAggregationOperations({t, testName: opName, op: AGGREGATION_OPERATION[opName], pointsData});
+  }
   t.end();
 });
 
