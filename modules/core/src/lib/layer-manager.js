@@ -166,6 +166,15 @@ export default class LayerManager {
       this._debug = props.debug;
     }
 
+    // A way for apps to add data to context that can be accessed in layers
+    if ('userData' in props) {
+      this.context.userData = props.userData;
+    }
+
+    if ('useDevicePixels' in props) {
+      this.context.useDevicePixels = props.useDevicePixels;
+    }
+
     // TODO - For now we set layers before viewports to preserve changeFlags
     if ('layers' in props) {
       this.setLayers(props.layers);
@@ -183,15 +192,6 @@ export default class LayerManager {
         this.drawPickingColors = props.drawPickingColors;
         this.setNeedsRedraw('drawPickingColors changed');
       }
-    }
-
-    // A way for apps to add data to context that can be accessed in layers
-    if ('userData' in props) {
-      this.context.userData = props.userData;
-    }
-
-    if ('useDevicePixels' in props) {
-      this.context.useDevicePixels = props.useDevicePixels;
     }
   }
   /* eslint-enable complexity, max-statements */
