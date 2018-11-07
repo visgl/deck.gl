@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.2
 
+#### [6.2.4] - Nov 7 2018
+
+- Support multiple arguments in CompositeLayer constructor (#2410)
+- Fix userdata is not present on initial render (#2418)
+
 #### [6.2.3] - Oct 26 2018
 
 - Fix @deck.gl/mapbox es5 build (#2391)
