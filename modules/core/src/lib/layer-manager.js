@@ -171,6 +171,10 @@ export default class LayerManager {
       this.context.userData = props.userData;
     }
 
+    if ('useDevicePixels' in props) {
+      this.context.useDevicePixels = props.useDevicePixels;
+    }
+
     // TODO - For now we set layers before viewports to preserve changeFlags
     if ('layers' in props) {
       this.setLayers(props.layers);
@@ -188,10 +192,6 @@ export default class LayerManager {
         this.drawPickingColors = props.drawPickingColors;
         this.setNeedsRedraw('drawPickingColors changed');
       }
-    }
-
-    if ('useDevicePixels' in props) {
-      this.context.useDevicePixels = props.useDevicePixels;
     }
   }
   /* eslint-enable complexity, max-statements */
