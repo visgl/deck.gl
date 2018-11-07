@@ -23,7 +23,11 @@ function verifyResults({t, cpuResults, gpuResults, testName}) {
     if (equals(cpuResults[name], gpuResults[name])) {
       t.pass(`${testName}: ${name} CPU and GPU results matched`);
     } else {
-      t.fail(`${testName}: ${name}: results didn't match cpu: ${cpuResults[name]} gpu: ${gpuResults[name]}`);
+      t.fail(
+        `${testName}: ${name}: results didn't match cpu: ${cpuResults[name]} gpu: ${
+          gpuResults[name]
+        }`
+      );
     }
   }
 }
@@ -130,7 +134,6 @@ function testAggregationOperations(opts) {
   verifyResults({t, cpuResults, gpuResults, testName});
   config.EPSILON = oldEpsilon;
 }
-
 
 test('GPUGridAggregator#CompareCPUandGPU', t => {
   const pointsData = generateRandomGridPoints(5000);
