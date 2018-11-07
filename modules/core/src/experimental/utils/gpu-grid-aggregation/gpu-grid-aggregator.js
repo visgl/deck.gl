@@ -1,5 +1,5 @@
 import GL from 'luma.gl/constants';
-import {Buffer, Model, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
+import {Buffer, Model, Transform, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
 import {log} from '@deck.gl/core';
 import assert from 'assert';
 import {fp64 as fp64Utils, withParameters} from 'luma.gl';
@@ -27,6 +27,7 @@ import AGGREGATE_TO_GRID_VS_FP64 from './aggregate-to-grid-vs-64.glsl';
 import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
+import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
 import {
   getFloatTexture,
   getFramebuffer,
@@ -106,6 +107,7 @@ export default class GPUGridAggregator {
       // per weight GPU resources
       weightAttributes: {},
       textures: {},
+      meanTextures: {},
       buffers: {},
       framebuffers: {},
       maxMinFramebuffers: {},
@@ -124,25 +126,30 @@ export default class GPUGridAggregator {
   }
 
   // Delete owned resources.
+  /* eslint no-unused-expressions: ["error", { "allowShortCircuit": true }] */
   delete() {
+    const {gridAggregationModel, allAggregationModel, meanTransform} = this;
     const {
       positionsBuffer,
       position64Buffer,
       framebuffers,
       maxMinFramebuffers,
       minFramebuffers,
-      maxFramebuffers
+      maxFramebuffers,
+      meanTextures
     } = this.state;
-    if (positionsBuffer) {
-      positionsBuffer.delete();
-    }
-    if (position64Buffer) {
-      position64Buffer.delete();
-    }
+
+    gridAggregationModel && gridAggregationModel.delete();
+    allAggregationModel && allAggregationModel.delete();
+    meanTransform && meanTransform.delete();
+
+    positionsBuffer && positionsBuffer.delete();
+    position64Buffer && position64Buffer.delete();
     this.deleteResources(framebuffers);
     this.deleteResources(maxMinFramebuffers);
     this.deleteResources(minFramebuffers);
     this.deleteResources(maxFramebuffers);
+    this.deleteResources(meanTextures);
   }
 
   // Perform aggregation and retun the results
@@ -581,6 +588,25 @@ export default class GPUGridAggregator {
     });
   }
 
+  getMeanTransform(opts) {
+    if (this.meanTransform) {
+      this.meanTransform.update(opts);
+    } else {
+      this.meanTransform = new Transform(
+        this.gl,
+        Object.assign(
+          {},
+          {
+            vs: TRANSFORM_MEAN_VS,
+            _targetTextureVarying: 'meanValues'
+          },
+          opts
+        )
+      );
+    }
+    return this.meanTransform;
+  }
+
   renderAggregateData(opts) {
     const {cellSize, viewport, gridTransformMatrix, projectPoints} = opts;
     const {
@@ -672,8 +698,9 @@ export default class GPUGridAggregator {
   // render all data points to aggregate weights
   renderToWeightsTexture(opts) {
     const {id, parameters, moduleSettings, uniforms, gridSize} = opts;
-    const {framebuffers, equations, weightAttributes} = this.state;
+    const {framebuffers, equations, weightAttributes, weights} = this.state;
     const {gl, gridAggregationModel} = this;
+    const {operation} = weights[id];
 
     framebuffers[id].bind();
     gl.viewport(0, 0, gridSize[0], gridSize[1]);
@@ -686,6 +713,19 @@ export default class GPUGridAggregator {
       attributes
     });
     framebuffers[id].unbind();
+
+    if (operation === AGGREGATION_OPERATION.MEAN) {
+      const {meanTextures, textures} = this.state;
+      const transformOptions = {
+        _sourceTextures: {aggregationValues: meanTextures[id]}, // contains aggregated data
+        _targetTexture: textures[id], // store mean values,
+        elementCount: textures[id].width * textures[id].height
+      };
+      const meanTransform = this.getMeanTransform(transformOptions);
+      meanTransform.run();
+      // update framebuffer with mean results so readPixelsToBuffer returns mean values
+      framebuffers[id].attach({[GL.COLOR_ATTACHMENT0]: textures[id]});
+    }
   }
 
   runAggregationOnGPU(opts) {
@@ -706,6 +746,7 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
+      meanTextures,
       equations,
       weights
     } = this.state;
@@ -716,13 +757,23 @@ export default class GPUGridAggregator {
         weights[id].aggregationTexture ||
         textures[id] ||
         getFloatTexture(this.gl, {id: `${id}-texture`, width: numCol, height: numRow});
+      textures[id].resize(framebufferSize);
+      let texture = textures[id];
+      if (operation === AGGREGATION_OPERATION.MEAN) {
+        // For MEAN, we first aggregatet into a temp texture
+        meanTextures[id] =
+          meanTextures[id] ||
+          getFloatTexture(this.gl, {id: `${id}-mean-texture`, width: numCol, height: numRow});
+        meanTextures[id].resize(framebufferSize);
+        texture = meanTextures[id];
+      }
       framebuffers[id] =
         framebuffers[id] ||
         getFramebuffer(this.gl, {
           id: `${id}-fb`,
           width: numCol,
           height: numRow,
-          texture: textures[id]
+          texture
         });
       framebuffers[id].resize(framebufferSize);
       equations[id] = EQUATION_MAP[operation];
