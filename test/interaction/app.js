@@ -11,9 +11,36 @@ import {OrthographicView} from '@deck.gl/core';
 import DATA from './data.json';
 
 let index = 0;
-
 export function nextTestCase() {
   return ++index;
+}
+
+function getPointCloud() {
+  const pointCloud = [];
+  const RESOLUTION = 100;
+  const R = 1;
+  // x is longitude, from 0 to 360
+  // y is latitude, from -90 to 90
+  for (let yIndex = 0; yIndex <= RESOLUTION; yIndex++) {
+    const y = (yIndex / RESOLUTION - 1 / 2) * Math.PI;
+    const cosy = Math.cos(y);
+    const siny = Math.sin(y);
+    // need less samples at high latitude
+    const xCount = Math.floor(cosy * RESOLUTION * 2) + 1;
+
+    for (let xIndex = 0; xIndex < xCount; xIndex++) {
+      const x = (xIndex / xCount) * Math.PI * 2;
+      const cosx = Math.cos(x);
+      const sinx = Math.sin(x);
+
+      pointCloud.push({
+        position: [cosx * R * cosy, sinx * R * cosy, (siny + 1) * R],
+        normal: [cosx * cosy, sinx * cosy, siny],
+        color: [(siny + 1) * 128, (cosy + 1) * 128, 0]
+      });
+    }
+  }
+  return pointCloud;
 }
 
 const INITIAL_VIEW_STATE = {
@@ -47,7 +74,7 @@ const TEST_CASES = [
     layers: [
       new PointCloudLayer({
         id: 'point-cloud-layer',
-        data: DATA.PointCloud,
+        data: getPointCloud(),
         pickable: false,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         radiusPixels: 4,
@@ -68,10 +95,10 @@ const TEST_CASES = [
     layers: [
       new ScatterplotLayer({
         id: 'nodes',
-        data: DATA.Scatterplot,
+        data: DATA.SCATTERPLOT,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
-        getRadius: d => 1,
+        getRadius: d => d.radius * 3,
         getColor: d => [0, 0, 150, 255]
       })
     ],
@@ -82,7 +109,7 @@ const TEST_CASES = [
     layers: [
       new PolygonLayer({
         id: 'polygon-layer',
-        data: DATA.Polygon,
+        data: DATA.POLYGON,
         wireframe: true,
         lineWidthMinPixels: 1,
         getPolygon: d => d.contour,
