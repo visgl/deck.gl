@@ -170,6 +170,7 @@ const TEST_CASES = [
         name: 'project_position_to_clipspace_world_position',
         // NOTE: disbaling transpilation due to https://github.com/stackgl/glsl-transpiler/issues/38
         disableTranspile: true,
+        skipGPUs: ['Intel'],
 
         func: ({project_position_to_clipspace}) => {
           const worldPosition = [];
@@ -189,6 +190,7 @@ const TEST_CASES = [
         // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
         // FP64 modules uses `out` variables in many methods for
         disableTranspileFor64: true,
+        skipGPUs: ['Intel'],
 
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
           project_position_to_clipspace_vec3_vec2_vec3([-122.05, 37.92, 0], [0, 0], [0, 0, 0]),
