@@ -18,7 +18,7 @@ export function nextTestCase() {
 function getPointCloud() {
   const pointCloud = [];
   const RESOLUTION = 100;
-  const R = 1;
+  const R = 0.7;
   // x is longitude, from 0 to 360
   // y is latitude, from -90 to 90
   for (let yIndex = 0; yIndex <= RESOLUTION; yIndex++) {
@@ -64,7 +64,7 @@ const INITIAL_VIEW_STATE = {
     longitude: -122.4194155,
     zoom: 11,
     bearing: 0,
-    pitch: 0
+    pitch: 45
   }
 };
 
