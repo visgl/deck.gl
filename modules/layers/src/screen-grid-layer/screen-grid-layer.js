@@ -317,7 +317,7 @@ export default class ScreenGridLayer extends Layer {
     }
     const {cellSizePixels, gpuAggregation} = this.props;
 
-    const {positions, weights, maxBuffer, aggregationBuffer} = this.state;
+    const {positions, weights} = this.state;
     const {viewport} = this.context;
 
     let projectPoints = false;
