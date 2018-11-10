@@ -37,20 +37,18 @@ import {
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
-  static getAggregationData({countsData, maxCountData, pixelIndex}) {
-    assert(countsData.length >= (pixelIndex + 1) * PIXEL_SIZE);
-    assert(maxCountData.length === PIXEL_SIZE);
+  static getAggregationData({aggregationData, maxData, pixelIndex}) {
+    assert(aggregationData.length >= (pixelIndex + 1) * PIXEL_SIZE);
+    assert(maxData.length === PIXEL_SIZE);
     const index = pixelIndex * PIXEL_SIZE;
-    const cellCount = countsData[index];
-    const cellWeight = countsData[index + 1];
-    const totalCount = maxCountData[0];
-    const totalWeight = maxCountData[1];
-    const maxCellWieght = maxCountData[3];
+    const cellCount = aggregationData[index + 3];
+    const cellWeight = aggregationData[index];
+    const totalCount = maxData[3];
+    const maxCellWieght = maxData[0];
     return {
       cellCount,
       cellWeight,
       totalCount,
-      totalWeight,
       maxCellWieght
     };
   }
@@ -116,12 +114,12 @@ export default class GPUGridAggregator {
       equations: {}
     };
     this._hasGPUSupport =
-      isWebGL2(gl) &&
+      isWebGL2(gl) && // gl_InstanceID usage in min/max calculation shaders
       hasFeatures(
         this.gl,
-        FEATURES.BLEND_EQUATION_MINMAX,
-        FEATURES.COLOR_ATTACHMENT_RGBA32F,
-        FEATURES.TEXTURE_FILTER_LINEAR_FLOAT
+        FEATURES.BLEND_EQUATION_MINMAX, // set min/max blend modes
+        FEATURES.COLOR_ATTACHMENT_RGBA32F, // render to float texture
+        FEATURES.TEXTURE_FLOAT // sample from a float texture
       );
   }
 

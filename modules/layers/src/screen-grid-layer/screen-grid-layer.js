@@ -84,21 +84,21 @@ export default class ScreenGridLayer extends Layer {
       id: `${this.id}-aggregator`,
       shaderCache: this.context.shaderCache
     };
-    const maxCountBuffer = this._getMaxCountBuffer(gl);
+    const maxBuffer = this._getMaxCountBuffer(gl);
     const weights = {
       color: {
         size: 1,
         operation: AGGREGATION_OPERATION.SUM,
         needMax: true,
-        maxBuffer: maxCountBuffer
+        maxBuffer
       }
     };
     this.setState({
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
-      maxCountBuffer,
+      maxBuffer,
       weights,
-      aggregationData: null
+      aggregationResults: null
     });
 
     this._setupUniformBuffer();
@@ -133,7 +133,7 @@ export default class ScreenGridLayer extends Layer {
     // If colorDomain not specified we use default domain [1, maxCount]
     // maxCount value will be deduced from aggregated buffer in the vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model, maxCountBuffer, cellScale, shouldUseMinMax, colorRange, maxWeight} = this.state;
+    const {model, maxBuffer, cellScale, shouldUseMinMax, colorRange, maxWeight} = this.state;
     const layerUniforms = {
       minColor,
       maxColor,
@@ -144,7 +144,7 @@ export default class ScreenGridLayer extends Layer {
     };
 
     if (isWebGL2(gl)) {
-      maxCountBuffer.bind({target: GL.UNIFORM_BUFFER});
+      maxBuffer.bind({target: GL.UNIFORM_BUFFER});
     } else {
       layerUniforms.maxWeight = maxWeight;
     }
@@ -160,7 +160,7 @@ export default class ScreenGridLayer extends Layer {
       )
     });
     if (isWebGL2(gl)) {
-      maxCountBuffer.unbind();
+      maxBuffer.unbind();
     }
   }
 
@@ -180,30 +180,30 @@ export default class ScreenGridLayer extends Layer {
   }
 
   calculateInstanceCounts(attribute, {numInstances}) {
-    const {countsBuffer} = this.state;
+    const {aggregationBuffer} = this.state;
     attribute.update({
-      buffer: countsBuffer
+      buffer: aggregationBuffer
     });
   }
 
   getPickingInfo({info, mode}) {
     const {index} = info;
     if (index >= 0) {
-      let {aggregationData} = this.state;
-      if (!aggregationData) {
-        aggregationData = {
-          countsData: this.state.countsBuffer.getData(),
-          maxCountData: this.state.maxCountBuffer.getData()
+      let {aggregationResults} = this.state;
+      if (!aggregationResults) {
+        aggregationResults = {
+          aggregationData: this.state.aggregationBuffer.getData(),
+          maxData: this.state.maxBuffer.getData()
         };
-        // Cache aggregationData to avoid multiple buffer reads.
-        this.setState({aggregationData});
+        // Cache aggregationResults to avoid multiple buffer reads.
+        this.setState({aggregationResults});
       }
-      const {countsData, maxCountData} = aggregationData;
+      const {aggregationData, maxData} = aggregationResults;
       // Each instance (one cell) is aggregated into single pixel,
       // Get current instance's aggregation details.
       info.object = GPUGridAggregator.getAggregationData({
-        countsData,
-        maxCountData,
+        aggregationData,
+        maxData,
         pixelIndex: index
       });
     }
@@ -317,7 +317,7 @@ export default class ScreenGridLayer extends Layer {
     }
     const {cellSizePixels, gpuAggregation} = this.props;
 
-    const {positions, weights, maxCountBuffer, countsBuffer} = this.state;
+    const {positions, weights, maxBuffer, aggregationBuffer} = this.state;
     const {viewport} = this.context;
 
     let projectPoints = false;
@@ -336,8 +336,6 @@ export default class ScreenGridLayer extends Layer {
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
       viewport,
-      countsBuffer,
-      maxCountBuffer,
       changeFlags,
       useGPU: gpuAggregation,
       projectPoints,
@@ -349,7 +347,7 @@ export default class ScreenGridLayer extends Layer {
         ? results.color.maxData[0]
         : 0;
     this.setState({
-      aggregationData: null, // Aggregation changed, enforce reading buffer data for picking.
+      aggregationResults: null, // Aggregation changed, enforce reading buffer data for picking.
       maxWeight // uniform to use under WebGL1
     });
 
@@ -398,23 +396,23 @@ export default class ScreenGridLayer extends Layer {
     const numRow = Math.ceil(height / cellSizePixels);
     const numInstances = numCol * numRow;
     const dataBytes = numInstances * 4 * 4;
-    let countsBuffer = this.state.countsBuffer;
-    if (countsBuffer) {
-      countsBuffer.delete();
+    let aggregationBuffer = this.state.aggregationBuffer;
+    if (aggregationBuffer) {
+      aggregationBuffer.delete();
     }
 
-    countsBuffer = new Buffer(gl, {
+    aggregationBuffer = new Buffer(gl, {
       size: 4,
       bytes: dataBytes,
       type: GL.FLOAT,
       instanced: 1
     });
-    this.state.weights.color.aggregationBuffer = countsBuffer;
+    this.state.weights.color.aggregationBuffer = aggregationBuffer;
     this.setState({
       numCol,
       numRow,
       numInstances,
-      countsBuffer
+      aggregationBuffer
     });
   }
 }
