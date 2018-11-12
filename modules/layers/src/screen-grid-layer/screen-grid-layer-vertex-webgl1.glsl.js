@@ -58,7 +58,7 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
 }
 
 void main(void) {
-  float weight = instanceCounts.g ;
+  float weight = instanceCounts.r;
   float step = weight / maxWeight;
   vec4 minMaxColor = mix(minColor, maxColor, step) / 255.;
 
