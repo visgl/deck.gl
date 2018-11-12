@@ -55,8 +55,6 @@ const results = aggregator.run({
 
 ```
 
-## Static Methods
-
 ### constructor()
 
 ‘ScreenGridAggregator’ constructor takes following arguments and constructs an object.
@@ -69,7 +67,7 @@ const results = aggregator.run({
 
 Performs aggregation either on CPU or GPU based on the provided options and browser’s WebGL capabilities.
 
-Input:
+#### Input:
 * positions (Array) : Array of points in world space (lng, lat).
 * positions64xyLow (Array) : Array of low precision values of points in world space (lng, lat).
 * weights  (Object) : Object contains one or more weights. Key represents id and corresponding object represents the weight. Each weight object contains following values:
@@ -96,7 +94,7 @@ Input:
 * gridTransformMatrix (Mat4) : used to transform input positions before aggregating them (for example, lng/lat can be moved to +ve range, when doing world space aggregation, projectPoints=false).
 * createBufferObjects (Bool, options, default: true) : Only applicable when aggregation is performed on CPU. When set to false, aggregated data is not uploaded into Buffer objects. In a typical use case, Applications need data in `Buffer` objects to use them in next rendering cycle, hence by default its value is true, but if needed this step can be avoided by setting this flag to false.
 
-### Output
+#### Output
 * results(Object): An object, where key represents `id` of the weight and value contains following aggregated data.
 
   * `aggregationBuffer` (Buffer) : Aggregated values per grid cell, aggregation is performed as per specified `operation`. Size of the buffer is 4, with R, G and B channel corresponds to aggregated weights. When input `size` is < 3, G or B channels contain undefined values. Alpha channel contains count of points aggregated into this cell. (R: weight#1 G: weight#2 B: weight#3 A: count)
