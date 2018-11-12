@@ -19,6 +19,22 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v6.3 Prereleases
 
+#### [6.3.0-beta.1] - Nov 11 2018
+
+- Bump luma.gl to 6.3-beta (#2423)
+- ScreenGridLayer fixes (#2422)
+- Disable randomly failing tests on Intel GPUs (#2420)
+- fix userdata is not present on initial render (#2418)
+- GPUGridAggregator: Add support for MEAN operations (#2417)
+- rename lngLat to coordinate in pickInfo for non-geo use cases (#2416)
+- Bump math.gl version to 2.2.0 (#2415)
+- Support multiple arguments in CompositeLayer constructor (#2410)
+
+#### [6.3.0-alpha.3]
+
+- [@deck.gl/mapbox] Reset context state before drawing non-mapbox layers (#2409)
+- Fallback to canvas.width/height when clientWidth/clientHeight are not available (#2405)
+
 #### [6.3.0-alpha.2] - Nov 2 2018
 
 - New event handling props
@@ -1682,4 +1698,3 @@ For details see [What's New](docs/whats-new.md)
 
 #### [1.0.0] - 2016-01-06
 - Initial commit of the open-source version of deck.gl
-
