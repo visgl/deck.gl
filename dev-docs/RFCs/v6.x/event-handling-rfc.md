@@ -13,6 +13,8 @@ This RFC proposes an extensible system where layers can specify callbacks to add
 
 In the context of creating "editable" layers, it is desirable to package event listeners inside a custom layer. In the current system, where old layer instances are disposed each rendering cycle, event listeners created inside a layer must be unbound and bound every time the layer updates. See [example in nebula](https://github.com/uber/nebula.gl/blob/989c56ef647af374e85c7cb2360b567c69676f7b/modules/core/src/lib/layers/editable-layer.js).
 
+Another issue in editable layers is that in the current system, event handlers can only be supplied to the `props` object at layer construction. This makes it difficult for a custom layer to encapsulate event handling code as part of the class.
+
 The goal of this proposal is to support callback for any of the [mjolnir.js events](https://github.com/uber-web/mjolnir.js/blob/master/docs/api-reference/event-manager.md#supported-events-and-gestures).
 
 ## Proposal
@@ -48,6 +50,29 @@ new Deck({
 ```
 
 Each callback will be invoked with a [`PickingInfo`](/docs/get-started/interactivity.md) object if the specified event is fired on the canvas.
+
+### Packaged Event Handling in CompositeLayer
+
+Allow layers to override default event handling using `on*` methods:
+
+```js
+class MyLayer extends CompositeLayer {
+
+    onClick(...args) {
+        // do something
+        if (this.props.onClick) {
+            this.props.onClick(...args);
+        }
+    }
+
+    onDrag(...args) {
+        // do something
+        if (this.props.onDrag) {
+            this.props.onDrag(...args);
+        }
+    }
+}
+```
 
 
 ### Event Handling in Deck
