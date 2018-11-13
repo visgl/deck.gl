@@ -15,6 +15,7 @@ export function pointToDensityGridData({
   gpuGridAggregator,
   gpuAggregation,
   aggregationFlags,
+  getWeight = null,
   fp64 = false,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   viewport = null,
@@ -27,7 +28,7 @@ export function pointToDensityGridData({
       aggregationFlags.viewportChanged
   );
   if (aggregationFlags.dataChanged) {
-    gridData = parseGridData(data, getPosition);
+    gridData = parseGridData(data, getPosition, getWeight);
     boundingBox = gridData.boundingBox;
   }
   let cellSize = [cellSizeMeters, cellSizeMeters];
@@ -101,9 +102,13 @@ function parseGridData(data, getPosition, getWeight = null) {
     positions.push(x, y);
     positions64xyLow.push(fp64LowPart(x), fp64LowPart(y));
 
-    const weight = getWeight ? getWeight(data[p]) : [1.0, 0, 0];
+    let weight = getWeight ? getWeight(data[p]) : [1.0, 0, 0];
     // Aggregator expects each weight is an array of size 3
-    assert(Array.isArray(weight) && weight.length === 3);
+    if (!Array.isArray(weight)) {
+      // backward compitability
+      weight = [weight, 0, 0];
+    }
+    assert(weight.length === 3);
     weightValues.push(...weight);
 
     if (Number.isFinite(y) && Number.isFinite(x)) {

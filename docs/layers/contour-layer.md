@@ -9,7 +9,9 @@
 
 ## About
 
-`ContourLayer` renders contour lines for a given threshold and cell size. Internally it implements [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm to generate contour line segments and feeds them into `LineLayer` to render lines.
+`ContourLayer` renders `Isoline`s or `Isoband`s for a given threshold and cell size. Isoline represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled area) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
+
+## Usage
 
 ```js
 import DeckGL, {GridLayer} from 'deck.gl';
@@ -27,9 +29,9 @@ const App = ({data, viewport}) => {
     id: 'contourLayer',
     // Three contours are rendered.
     contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 1},
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
-      {threshold: 10, color: [0, 0, 255], strokeWidth: 5}
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 1}, // => Isoline for threshold 1
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
+      {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
     ],
     cellSize: 200,
     getPosition: d => d.COORDINATES,
@@ -65,11 +67,22 @@ NOTE: GPU Aggregation requires WebGL2 support by the browser. When `gpuAggregati
 
 Array of objects with following keys
 
-* `threshold` (Number) : Threshold value to be used in contour generation.
+* `threshold` (Number or Array) :
 
-* `color` (Array, optional) : RGB color array to be used to render contour lines, if not specified a default value of `[255, 255, 255]` is used.
+  - Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
+  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive when checking the range.
 
-* `strokeWidth` (Number, optional) : Width of the contour line in pixels, if not specified a default value of `1` is used.
+* `color` (Array, optional) : RGB color array to be used to render the contour, if not specified a default value of `[255, 255, 255]` is used.
+
+* `strokeWidth` (Number, optional) : Applicable for Isolines only, width of the Isoline in pixels, if not specified a default value of `1` is used.
+
+* `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffsetScale` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
+
+##### `zOffsetScale`: (Number, optional)
+
+* Default: `1`
+
+A very small z offset is added for each vertex of a contour (Isoline or Isoband). This is needed to control the layout of contours, especially when rendering overlapping contours. Imagine a case where an Isoline is specified which is overlapped with an Isoband. To make sure the Isoline is visible we need to render this above the Isoband. `zOffsetScale` can be used to scale (reduce or increase) the z offset that gets added to each vertex.
 
 ##### `fp64` (Boolean, optional)
 
@@ -85,6 +98,11 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 Method called to retrieve the position of each point.
 
+##### `getWeight` (Function, optional)
+
+* Default: `object => 1`
+
+Method called to retrieve weight of each point. By default each point will use a weight of `1`.
 
 ## Source
 

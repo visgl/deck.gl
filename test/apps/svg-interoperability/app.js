@@ -21,6 +21,8 @@ class Root extends PureComponent {
     this._onClick = this._onClick.bind(this);
     this._update = this._update.bind(this);
     this._onContourToggle = this._onContourToggle.bind(this);
+    this._onBandsToggle = this._onBandsToggle.bind(this);
+    this._onRotationToggle = this._onRotationToggle.bind(this);
 
     const points = Array.from(Array(NUM_POINTS)).map((_, i) => {
       return {
@@ -77,13 +79,25 @@ class Root extends PureComponent {
     this.setState({renderContours});
   }
 
+  _onBandsToggle() {
+    const bandsOn = !this.state.bandsOn;
+    this.setState({bandsOn});
+  }
+
+  _onRotationToggle() {
+    const rotationOn = !this.state.rotationOn;
+    this.setState({rotationOn});
+  }
+
   _update() {
-    const {points} = this.state;
-    const newPoints = points.map(point => {
-      point.theta += Math.sqrt(point.radius);
-      return point;
-    });
-    this.setState({points: newPoints});
+    const {points, rotationOn} = this.state;
+    if (rotationOn) {
+      const newPoints = points.map(point => {
+        point.theta += Math.sqrt(point.radius);
+        return point;
+      });
+      this.setState({points: newPoints});
+    }
 
     this.forceUpdate();
     window.requestAnimationFrame(this._update);
@@ -121,7 +135,7 @@ class Root extends PureComponent {
         p.radius * Math.cos(p.theta * DEGREE_TO_RADIAN) * size,
         p.radius * Math.sin(p.theta * DEGREE_TO_RADIAN) * size
       ],
-      getRadius: p => 2,
+      getRadius: p => 0.25,
       getColor: p => [255, 0, 128, 196],
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       // there's a bug that the radius calculated with project_scale
@@ -129,7 +143,21 @@ class Root extends PureComponent {
     });
   }
 
-  _renderContourLayer() {
+  _getContours(bandsOn) {
+    if (bandsOn) {
+      return [
+        {threshold: [1, 25], color: [250, 0, 0], strokeWidth: 6},
+        {threshold: [25, 50], color: [0, 250, 0], strokeWidth: 5},
+        {threshold: [50, 1000], color: [0, 0, 250], strokeWidth: 4}
+      ];
+    }
+    return [
+      {threshold: 1, color: [250, 0, 0], strokeWidth: 6},
+      {threshold: 25, color: [0, 250, 0], strokeWidth: 5},
+      {threshold: 50, color: [0, 0, 250], strokeWidth: 4}
+    ];
+  }
+  _renderContourLayer(bandsOn) {
     const {width, height, points} = this.state;
     const size = Math.min(width, height) / 2;
 
@@ -142,17 +170,13 @@ class Root extends PureComponent {
       ],
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       cellSize: 20,
-      contours: [
-        {threshold: 2, color: [0, 250, 250], strokeWidth: 6},
-        {threshold: 25, color: [0, 150, 150], strokeWidth: 5},
-        {threshold: 50, color: [0, 100, 100], strokeWidth: 4}
-      ],
+      contours: this._getContours(bandsOn),
       gpuAggregation: true
     });
   }
 
   render() {
-    const {width, height, viewMode, renderContours} = this.state;
+    const {width, height, viewMode, renderContours, bandsOn} = this.state;
     const left = -Math.min(width, height) / 2;
     const top = -Math.min(width, height) / 2;
     const view = new OrthographicView({width, height, left, top});
@@ -172,7 +196,8 @@ class Root extends PureComponent {
               style={{position: 'absolute', top: '0px', left: '0px'}}
               layers={[
                 this._renderScatterplotLayer(),
-                renderContours && this._renderContourLayer()
+                bandsOn && this._renderContourLayer(true),
+                renderContours && this._renderContourLayer(false)
               ]}
             />
           )}
@@ -180,10 +205,22 @@ class Root extends PureComponent {
             switch
           </button>
           <button
-            style={{position: 'absolute', top: '8px', left: '100px'}}
+            style={{position: 'absolute', top: '8px', left: '80px'}}
             onClick={this._onContourToggle}
           >
             Toggle Contours
+          </button>
+          <button
+            style={{position: 'absolute', top: '8px', left: '220px'}}
+            onClick={this._onBandsToggle}
+          >
+            Toggle ISO-BANDS
+          </button>
+          <button
+            style={{position: 'absolute', top: '8px', left: '360px'}}
+            onClick={this._onRotationToggle}
+          >
+            Toggle Rotation
           </button>
         </div>
       )

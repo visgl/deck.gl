@@ -24,6 +24,7 @@ import {
   _pointToDensityGridData as pointToDensityGridData
 } from '@deck.gl/core';
 import {LineLayer} from '@deck.gl/layers';
+import {_SolidPolygonLayer as SolidPolygonLayer} from '@deck.gl/layers';
 
 import {generateContours} from './contour-utils';
 
@@ -35,11 +36,13 @@ const defaultProps = {
   // grid aggregation
   cellSize: {type: 'number', min: 1, max: 1000, value: 1000},
   getPosition: {type: 'accessor', value: x => x.position},
+  getWeight: {type: 'accessor', value: x => 1},
 
   // contour lines
   contours: [{threshold: DEFAULT_THRESHOLD}],
 
-  fp64: false
+  fp64: false,
+  zOffsetScale: 1
 };
 
 export default class ContourLayer extends CompositeLayer {
@@ -50,49 +53,41 @@ export default class ContourLayer extends CompositeLayer {
       shaderCache: this.context.shaderCache
     };
     this.state = {
-      contourData: [],
+      contourData: {},
       gridAggregator: new GPUGridAggregator(gl, options)
     };
   }
 
   updateState({oldProps, props, changeFlags}) {
-    let contoursDirty = false;
+    let dataChanged = false;
+    let contoursChanged = false;
     const aggregationFlags = this.getAggregationFlags({oldProps, props, changeFlags});
     if (aggregationFlags) {
-      contoursDirty = true;
+      dataChanged = true;
       // Clear countsData cache
       this.setState({countsData: null});
       this.aggregateData(aggregationFlags);
     }
 
-    contoursDirty = contoursDirty || this.rebuildContours({oldProps, props});
-    if (contoursDirty) {
+    if (this.shouldRebuildContours({oldProps, props})) {
+      contoursChanged = true;
+      this.updateThresholdData(props);
+    }
+
+    if (dataChanged || contoursChanged) {
       this.generateContours();
     }
   }
 
-  getSubLayerClass() {
-    return LineLayer;
-  }
-
-  getSubLayerProps() {
-    const {fp64} = this.props;
-
-    return super.getSubLayerProps({
-      id: 'contour-line-layer',
-      data: this.state.contourData,
-      fp64,
-      getSourcePosition: d => d.start,
-      getTargetPosition: d => d.end,
-      getColor: this.onGetSublayerColor.bind(this),
-      getStrokeWidth: this.onGetSublayerStrokeWidth.bind(this)
-    });
-  }
-
   renderLayers() {
-    const SubLayerClass = this.getSubLayerClass();
+    const {contourSegments, contourPolygons} = this.state.contourData;
+    const hasIsolines = contourSegments && contourSegments.length > 0;
+    const hasIsobands = contourPolygons && contourPolygons.length > 0;
 
-    return new SubLayerClass(this.getSubLayerProps());
+    const lineLayer = hasIsolines && new LineLayer(this.getLineLayerProps());
+    const solidPolygonLayer =
+      hasIsobands && new SolidPolygonLayer(this.getSolidPolygonLayerProps());
+    return [lineLayer, solidPolygonLayer];
   }
 
   // Private
@@ -102,6 +97,7 @@ export default class ContourLayer extends CompositeLayer {
       data,
       cellSize: cellSizeMeters,
       getPosition,
+      getWeight,
       gpuAggregation,
       fp64,
       coordinateSystem
@@ -117,6 +113,7 @@ export default class ContourLayer extends CompositeLayer {
       data,
       cellSizeMeters,
       getPosition,
+      getWeight,
       gpuAggregation,
       gpuGridAggregator: this.state.gridAggregator,
       fp64,
@@ -130,7 +127,7 @@ export default class ContourLayer extends CompositeLayer {
   }
 
   generateContours() {
-    const {gridSize, gridOrigin, cellSize} = this.state;
+    const {gridSize, gridOrigin, cellSize, thresholdData} = this.state;
     let {countsData} = this.state;
     if (!countsData) {
       const {countsBuffer} = this.state;
@@ -139,15 +136,16 @@ export default class ContourLayer extends CompositeLayer {
     }
 
     const {cellWeights} = GPUGridAggregator.getCellData({countsData});
-    const thresholds = this.props.contours.map(x => x.threshold);
+    // const thresholds = this.props.contours.map(x => x.threshold);
     const contourData = generateContours({
-      thresholds,
+      thresholdData,
       cellWeights,
       gridSize,
       gridOrigin,
       cellSize
     });
 
+    // contourData contains both iso-lines and iso-bands if requested.
     this.setState({contourData});
   }
 
@@ -167,11 +165,38 @@ export default class ContourLayer extends CompositeLayer {
     return aggregationFlags;
   }
 
-  onGetSublayerColor(segment) {
+  getLineLayerProps() {
+    const {fp64} = this.props;
+
+    return super.getSubLayerProps({
+      id: 'contour-line-layer',
+      data: this.state.contourData.contourSegments,
+      fp64,
+      getSourcePosition: d => d.start,
+      getTargetPosition: d => d.end,
+      getColor: this.onGetSublayerColor.bind(this),
+      getStrokeWidth: this.onGetSublayerStrokeWidth.bind(this)
+    });
+  }
+
+  getSolidPolygonLayerProps() {
+    const {fp64} = this.props;
+
+    return super.getSubLayerProps({
+      id: 'contour-solid-polygon-layer',
+      data: this.state.contourData.contourPolygons,
+      fp64,
+      getPolygon: d => d.vertices,
+      getFillColor: this.onGetSublayerColor.bind(this)
+    });
+  }
+
+  onGetSublayerColor(element) {
+    // element is either a line segment or polygon
     const {contours} = this.props;
     let color = DEFAULT_COLOR;
     contours.forEach(data => {
-      if (data.threshold === segment.threshold) {
+      if (data.threshold === element.threshold) {
         color = data.color || DEFAULT_COLOR;
       }
     });
@@ -192,14 +217,30 @@ export default class ContourLayer extends CompositeLayer {
     return strokeWidth;
   }
 
-  rebuildContours({oldProps, props}) {
-    if (oldProps.contours.length !== props.contours.length) {
+  shouldRebuildContours({oldProps, props}) {
+    if (
+      !oldProps.contours ||
+      !oldProps.zOffsetScale ||
+      oldProps.contours.length !== props.contours.length ||
+      oldProps.zOffsetScale !== props.zOffsetScale
+    ) {
       return true;
     }
     const oldThresholds = oldProps.contours.map(x => x.threshold);
     const thresholds = props.contours.map(x => x.threshold);
 
     return thresholds.some((_, i) => thresholds[i] !== oldThresholds[i]);
+  }
+
+  updateThresholdData(props) {
+    const thresholdData = props.contours.map((x, index) => {
+      return {
+        threshold: x.threshold,
+        zIndex: x.zIndex || index,
+        zOffsetScale: props.zOffsetScale
+      };
+    });
+    this.setState({thresholdData});
   }
 }
 

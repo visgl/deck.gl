@@ -221,10 +221,12 @@ export const ContourLayerDemo = createLayerDemoClass({
     cellSize: 200,
     elevationScale: 4,
     getPosition: d => d.COORDINATES,
+    zOffsetScale: 5,
     contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 2},
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
-      {threshold: 15, color: [0, 0, 255], strokeWidth: 4}
+      {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
+      {threshold: [3, 10], color: [55, 0, 55], zIndex: 0},
+      {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
+      {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
     ]
   }
 });
