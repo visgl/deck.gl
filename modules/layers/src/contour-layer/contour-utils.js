@@ -17,7 +17,7 @@ export function generateContours({
     for (let x = -1; x < width; x++) {
       for (let y = -1; y < height; y++) {
         // Get the MarchingSquares code based on neighbor cell weights.
-        const code = MarchingSquares.getCode({
+        const {code, meanCode} = MarchingSquares.getCode({
           cellWeights,
           threshold,
           x,
@@ -33,7 +33,8 @@ export function generateContours({
           y,
           width,
           height,
-          code
+          code,
+          meanCode
         });
         // We should always get even number of vertices
         for (let i = 0; i < vertices.length; i += 2) {
