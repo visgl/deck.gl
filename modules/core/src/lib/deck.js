@@ -613,7 +613,8 @@ export default class Deck {
     });
 
     const {layer} = info;
-    const layerHandler = layer && layer.props[eventOptions.handler];
+    const layerHandler =
+      layer && (layer[eventOptions.handler] || layer.props[eventOptions.handler]);
     const rootHandler = this.props[eventOptions.handler];
     let handled = false;
 

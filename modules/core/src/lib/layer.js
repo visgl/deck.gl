@@ -40,7 +40,6 @@ import {worldToPixels} from 'viewport-mercator-project';
 const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = Object.freeze([]);
-const noop = () => {};
 
 const defaultProps = {
   // data: Special handling for null, see below
@@ -59,8 +58,8 @@ const defaultProps = {
   pickable: false,
   opacity: {type: 'number', min: 0, max: 1, value: 0.8},
 
-  onHover: {type: 'function', value: noop, compare: false},
-  onClick: {type: 'function', value: noop, compare: false},
+  onHover: {type: 'function', value: null, compare: false, optional: true},
+  onClick: {type: 'function', value: null, compare: false, optional: true},
   onDragStart: {type: 'function', value: null, compare: false, optional: true},
   onDrag: {type: 'function', value: null, compare: false, optional: true},
   onDragEnd: {type: 'function', value: null, compare: false, optional: true},
@@ -242,6 +241,19 @@ export default class Layer extends Component {
     log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion')();
     const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
     return screenPixels * devicePixelRatio;
+  }
+
+  // Event handling
+  onHover(info) {
+    if (this.props.onHover) {
+      this.props.onHover(info);
+    }
+  }
+
+  onClick(info) {
+    if (this.props.onClick) {
+      this.props.onClick(info);
+    }
   }
 
   // Returns the picking color that doesn't match any subfeature
