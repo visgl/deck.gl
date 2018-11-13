@@ -35,7 +35,8 @@
     "bench-browser": "webpack-dev-server --config test/webpack.config.js --env.bench --progress --hot --open",
     "collect-metrics": "./scripts/collect-metrics.sh",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
-    "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)"
+    "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
+    "update-release-branch": "scripts/update-release-branch.sh"
   },
   "devDependencies": {
     "@babel/cli": "7.0.0-rc.1",
