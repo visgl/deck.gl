@@ -177,7 +177,7 @@ The `assembleShaders` function was moved to luma.gl in v4.1 and is no longer re-
 
 ### Removed Immutable support
 
-`ScatterplotLayer` and `PolygonLayer` supported immutable/ES6 containers using [`get`](https://github.com/uber/deck.gl/blob/master/src/core/utils/get.js) method, due to performance reasons this support has been dropped.
+`ScatterplotLayer` and `PolygonLayer` supported immutable/ES6 containers using [`get`](https://github.com/uber/deck.gl/blob/5.0-release/src/core/utils/get.js) method, due to performance reasons this support has been dropped.
 
 
 ## Upgrading from deck.gl v4 to v4.1
