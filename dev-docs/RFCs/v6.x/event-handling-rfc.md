@@ -59,14 +59,14 @@ Allow layers to override default event handling using `on*` methods:
 class MyLayer extends CompositeLayer {
 
     onClick(...args) {
-        // default
+        // do something
         if (this.props.onClick) {
             this.props.onClick(...args);
         }
     }
 
     onDrag(...args) {
-        // default
+        // do something
         if (this.props.onDrag) {
             this.props.onDrag(...args);
         }

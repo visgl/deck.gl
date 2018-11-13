@@ -397,10 +397,10 @@ function callLayerPickingCallbacks(infos, mode) {
     let handled = false;
     switch (mode) {
       case 'click':
-        handled = info.layer.props.onClick(info);
+        handled = info.layer.onClick(info);
         break;
       case 'hover':
-        handled = info.layer.props.onHover(info);
+        handled = info.layer.onHover(info);
         break;
       case 'query':
         break;
