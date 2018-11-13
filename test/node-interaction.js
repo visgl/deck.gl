@@ -20,7 +20,7 @@
 
 // Enables ES2015 import/export in Node.js
 
-const {execFile, execFileSync} = require('child_process');
+const {execFile} = require('child_process');
 const puppeteer = require('puppeteer');
 const console = require('console');
 const process = require('process');
@@ -30,9 +30,7 @@ const path = require('path');
 const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
 
-const EXAMPLES_WEBSITE_DIR = path.resolve(__dirname, 'interaction');
-
-let exampleDir;
+const LIB_DIR = path.resolve(__dirname, './interaction');
 
 function printResult(diffRatio, threshold) {
   return diffRatio <= threshold
@@ -186,10 +184,14 @@ async function createGoldenImage(example) {
   const len = EVENTS.length;
   console.log(`in createGoldenImage: ${example}`);
   for (let i = 0; i < len; i++) {
-    fs.rename(`${example}${EVENTS[i]}.png`, `golden-images/${example}${EVENTS[i]}.png`, err => {
-      if (err) throw err;
-      console.log('Rename complete!');
-    });
+    await fs.rename(
+      `${example}${EVENTS[i]}.png`,
+      `golden-images/${example}${EVENTS[i]}.png`,
+      err => {
+        if (err) throw err;
+        console.log('Rename complete!');
+      }
+    );
   }
 }
 
@@ -252,14 +254,16 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold, co
   const examples = ['pointcloud', 'scatterplot', 'polygon'];
   for (let i = 0; i < 3; i++) {
     console.log(`Begin the ${examples[i]} example`);
-    await page.evaluate(() => App.renderToDOM(document.getElementById('app'))); //eslint-disable-line
     await allEvents(page, 1000, threshold, examples[i]); //eslint-disable-line
-    await page.evaluate(() => App.nextTestCase()); //eslint-disable-line
+    console.log('After all events');
     if (compare) {
       await compareAllImages(examples[i], 0.05);
     } else {
       await createGoldenImage(examples[i]);
     }
+    await page.evaluate(() => window.nextTestCase()); //eslint-disable-line
+    await page.waitFor(2000);
+    await pan(page, 1, 0);
   }
 
   child.kill();
@@ -268,10 +272,10 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold, co
 }
 
 async function yarnAndLaunchWebpack() {
-  const output = execFileSync('yarn'); //eslint-disable-line
+  // const output = execFileSync('yarn'); //eslint-disable-line
   const child = execFile(
-    './node_modules/.bin/webpack-dev-server',
-    ['--env.local', '--config', 'webpack.config.js', '--progress', '--hot'],
+    '../../node_modules/.bin/webpack-dev-server',
+    ['--env.interaction', '--config', '../webpack.config.js', '--progress', '--hot'],
     {
       maxBuffer: 5000 * 1024
     },
@@ -282,13 +286,15 @@ async function yarnAndLaunchWebpack() {
       }
     }
   );
+  console.log('finish yarnAndLaunchWebpack');
   return child;
 }
 
 function changeFolder(folder) {
   console.log('--------------------------');
-  console.log(`Begin yarn`);
-  process.chdir(path.resolve(exampleDir, folder));
+  console.log(`Begin to test ${folder}`);
+  console.log(folder);
+  process.chdir(folder);
 }
 
 async function runTestExample(folder) {
@@ -299,9 +305,7 @@ async function runTestExample(folder) {
     process.exit(1); //eslint-disable-line
   }
 }
-
 (async () => {
   // checkMapboxToken();
-  exampleDir = EXAMPLES_WEBSITE_DIR;
-  await runTestExample('.');
+  await runTestExample(LIB_DIR);
 })();

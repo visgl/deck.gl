@@ -1,3 +1,5 @@
+/* global document, window */
+
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {
@@ -8,12 +10,14 @@ import DeckGL, {
   OrbitView
 } from 'deck.gl';
 import {OrthographicView} from '@deck.gl/core';
-import DATA from './data.json';
+import {default as choropleths} from '../../examples/layer-browser/data/sf.zip.geo';
+
+const POLYGONS = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
 
 let index = 0;
-export function nextTestCase() {
+window.nextTestCase = function nextTestCase() {
   return ++index;
-}
+};
 
 function getPointCloud() {
   const pointCloud = [];
@@ -41,6 +45,20 @@ function getPointCloud() {
     }
   }
   return pointCloud;
+}
+
+function getScatterPlot() {
+  const data = [];
+  const RESOLUTION = 10;
+  for (let x = -RESOLUTION; x < RESOLUTION; x += 2) {
+    for (let y = -RESOLUTION; y < RESOLUTION; y += 2) {
+      data.push({
+        radius: (Math.abs(x * y + x + y) % 4) + 1,
+        position: [x * 10, y * 10]
+      });
+    }
+  }
+  return data;
 }
 
 const INITIAL_VIEW_STATE = {
@@ -95,7 +113,7 @@ const TEST_CASES = [
     layers: [
       new ScatterplotLayer({
         id: 'nodes',
-        data: DATA.SCATTERPLOT,
+        data: getScatterPlot(),
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
         getRadius: d => d.radius * 3,
@@ -109,12 +127,12 @@ const TEST_CASES = [
     layers: [
       new PolygonLayer({
         id: 'polygon-layer',
-        data: DATA.POLYGON,
+        data: POLYGONS,
         wireframe: true,
         lineWidthMinPixels: 1,
-        getPolygon: d => d.contour,
-        getElevation: d => d.population / d.area / 10,
-        getFillColor: d => [d.population / d.area / 60, 140, 0]
+        getPolygon: d => d,
+        getElevation: d => 1,
+        getFillColor: d => [1, 140, 0]
       })
     ],
     initialViewState: INITIAL_VIEW_STATE.POLYGON,
@@ -151,6 +169,4 @@ export class App extends Component {
   }
 }
 
-export function renderToDOM(container) {
-  render(<App />, container);
-}
+render(<App />, document.body.appendChild(document.createElement('div')));
