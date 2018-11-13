@@ -99,4 +99,4 @@ Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
 
 ## Source
 
-[modules/core/src/core/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/composite-layer.js)
+[modules/core/src/core/lib/composite-layer.js](https://github.com/uber/deck.gl/tree/6.3-release/modules/core/src/lib/composite-layer.js)
