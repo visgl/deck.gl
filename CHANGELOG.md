@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v6.3 Prereleases
 
+#### [6.3.0-beta.2] - Nov 13 2018
+
+- Export TileLayer from experimental layers (#2388)
+- Allow layers to implement event handling via class methods (#2427)
+
 #### [6.3.0-beta.1] - Nov 11 2018
 
 - Bump luma.gl to 6.3-beta (#2423)
