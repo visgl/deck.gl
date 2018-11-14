@@ -135,7 +135,7 @@ class Root extends PureComponent {
         p.radius * Math.cos(p.theta * DEGREE_TO_RADIAN) * size,
         p.radius * Math.sin(p.theta * DEGREE_TO_RADIAN) * size
       ],
-      getRadius: p => 0.25,
+      getRadius: p => 2,
       getColor: p => [255, 0, 128, 196],
       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
       // there's a bug that the radius calculated with project_scale

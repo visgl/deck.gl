@@ -9,12 +9,12 @@
 
 ## About
 
-`ContourLayer` renders `Isoline`s or `Isoband`s for a given threshold and cell size. Isoline represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled area) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
+`ContourLayer` renders `Isoline`s or `Isoband`s for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
 ## Usage
 
 ```js
-import DeckGL, {GridLayer} from 'deck.gl';
+import DeckGL, {ContourLayer} from 'deck.gl';
 
 const App = ({data, viewport}) => {
 
@@ -70,11 +70,11 @@ Array of objects with following keys
 * `threshold` (Number or Array) :
 
   - Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
-  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive when checking the range.
+  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
 
 * `color` (Array, optional) : RGB color array to be used to render the contour, if not specified a default value of `[255, 255, 255]` is used.
 
-* `strokeWidth` (Number, optional) : Applicable for Isolines only, width of the Isoline in pixels, if not specified a default value of `1` is used.
+* `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
 
 * `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffsetScale` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
