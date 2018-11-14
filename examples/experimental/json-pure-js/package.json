@@ -8,10 +8,10 @@
     "build": "NODE_ENV=production webpack --env.prod"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.2.0",
-    "@deck.gl/experimental-layers": "^6.2.0",
-    "@deck.gl/json": "^6.2.0",
-    "@deck.gl/layers": "^6.2.0"
+    "@deck.gl/core": "^6.3.0",
+    "@deck.gl/experimental-layers": "^6.3.0",
+    "@deck.gl/json": "^6.3.0",
+    "@deck.gl/layers": "^6.3.0"
   },
   "devDependencies": {
     "buble": "^0.19.3",
