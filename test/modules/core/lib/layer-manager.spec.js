@@ -62,3 +62,106 @@ test('LayerManager#getLayers', t => {
   t.equal(layers.length, 0, 'LayerManager.getLayers()');
   t.end();
 });
+
+test('LayerManager#setLayers', t => {
+  const stats = {
+    initializeCalled: 0,
+    updateCalled: 0,
+    dataChanged: false,
+    propsChanged: false,
+    finalizeCalled: 0
+  };
+
+  class SubLayer extends Layer {
+    initializeState() {
+      stats.initializeCalled++;
+    }
+
+    updateState({changeFlags}) {
+      stats.updateCalled++;
+      stats.dataChanged = changeFlags.dataChanged;
+      stats.propsChanged = changeFlags.propsChanged;
+    }
+
+    finalizeState() {
+      stats.finalizeCalled++;
+    }
+  }
+
+  const DATA = [];
+  const ALT_DATA = [1];
+  const TEST_CASES = [
+    {
+      layers: [new SubLayer({id: 'primitive'})],
+      initialize: true,
+      update: true,
+      finalize: false,
+      dataChanged: true,
+      propsChanged: true
+    },
+    {
+      layers: [new SubLayer({id: 'primitive', data: DATA})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: true,
+      propsChanged: false
+    },
+    {
+      layers: [new SubLayer({id: 'primitive', data: DATA, size: 1})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: false,
+      propsChanged: true
+    },
+    {
+      layers: [new SubLayer({id: 'primitive', data: DATA, size: 1})],
+      initialize: false,
+      update: false,
+      propsChanged: false
+    },
+    {
+      layers: [new SubLayer({id: 'primitive', data: ALT_DATA, size: 1})],
+      initialize: false,
+      update: true,
+      finalize: false,
+      dataChanged: true,
+      propsChanged: false
+    },
+    {
+      layers: [],
+      initialize: false,
+      update: false,
+      finalize: true
+    }
+  ];
+
+  const layerManager = new LayerManager(gl);
+
+  TEST_CASES.forEach(testCase => {
+    const oldStats = Object.assign({}, stats);
+    layerManager.setLayers(testCase.layers);
+    t.is(
+      stats.initializeCalled - oldStats.initializeCalled,
+      testCase.initialize ? 1 : 0,
+      `${testCase.initialize ? 'should' : 'shoudl not'} initialize layer`
+    );
+    t.is(
+      stats.updateCalled - oldStats.updateCalled,
+      testCase.update ? 1 : 0,
+      `${testCase.update ? 'should' : 'shoudl not'} update layer`
+    );
+    if (testCase.update) {
+      t.is(Boolean(stats.dataChanged), testCase.dataChanged, 'set dataChanged flag correctly');
+      t.is(Boolean(stats.propsChanged), testCase.propsChanged, 'set propsChanged flag correctly');
+    }
+    t.is(
+      stats.finalizeCalled - oldStats.finalizeCalled,
+      testCase.finalize ? 1 : 0,
+      `${testCase.finalize ? 'should' : 'shoudl not'} finalize layer`
+    );
+  });
+
+  t.end();
+});
