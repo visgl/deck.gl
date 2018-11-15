@@ -329,10 +329,8 @@ export default class Layer extends Component {
     const {index} = info;
 
     if (index >= 0) {
-      // If props.data is an indexable array, get the object
-      if (Array.isArray(this.props.data)) {
-        info.object = this.props.data[index];
-      }
+      // Try get the indexed object from data
+      info.object = this.props.data[index];
     }
 
     return info;
