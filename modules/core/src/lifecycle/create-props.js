@@ -183,13 +183,16 @@ function getDescriptorForAsyncProp(name) {
           return value;
         }
 
-        // It's an async prop value: look into component state
-        const state = this._component && this._component.internalState;
-        if (state && state.hasAsyncProp(name)) {
-          return state.getAsyncProp(name);
+        if (name in this._asyncPropOriginalValues) {
+          // It's an async prop value: look into component state
+          const state = this._component && this._component.internalState;
+          if (state && state.hasAsyncProp(name)) {
+            return state.getAsyncProp(name);
+          }
         }
       }
 
+      // the prop is not supplied, or
       // component not yet initialized/matched, return the component's default value for the prop
       return this._asyncPropDefaultValues[name];
     }

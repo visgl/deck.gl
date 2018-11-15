@@ -835,9 +835,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       model.userData.layer = this;
     }
 
-    // Ensure any async props are updated
-    this.internalState.setAsyncProps(this.props);
-
     this.diffProps(this.props, this.internalState.getOldProps());
   }
 
