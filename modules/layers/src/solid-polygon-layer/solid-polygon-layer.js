@@ -185,7 +185,10 @@ export default class SolidPolygonLayer extends Layer {
     // tessellator needs to be invoked
     if (geometryConfigChanged) {
       // TODO - avoid creating a temporary array here: let the tesselator iterate
-      const polygons = props.data.map(props.getPolygon);
+      const polygons = [];
+      for (const object of props.data) {
+        polygons.push(props.getPolygon(object));
+      }
       const polygonTesselator = this._getPolygonTesselator(polygons, this.state.IndexType);
 
       this.setState({
