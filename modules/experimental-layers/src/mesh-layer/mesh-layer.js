@@ -30,9 +30,14 @@ const {fp64LowPart} = fp64;
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
 
-import assert from 'assert';
-
 const RADIAN_PER_DEGREE = Math.PI / 180;
+
+// Replacement for the external assert method to reduce bundle size
+function assert(condition, message) {
+  if (!condition) {
+    throw new Error(`deck.gl: ${message}`);
+  }
+}
 
 /*
  * Load image data into luma.gl Texture2D objects

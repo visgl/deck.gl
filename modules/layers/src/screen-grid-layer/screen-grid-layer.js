@@ -35,13 +35,11 @@ import vs from './screen-grid-layer-vertex.glsl';
 import vs_WebGL1 from './screen-grid-layer-vertex-webgl1.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
 import fs_WebGL1 from './screen-grid-layer-fragment-webgl1.glsl';
-import assert from 'assert';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const AGGREGATION_DATA_UBO_INDEX = 0;
 const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
-const COLOR_RANGE_LENGTH = 6;
 
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
@@ -260,7 +258,6 @@ export default class ScreenGridLayer extends Layer {
       // backward compitability
       return [weight, 0, 0];
     }
-    assert(weight.length === 3);
     return weight;
   }
   // Process 'data' and build positions and weights Arrays.
@@ -362,7 +359,6 @@ export default class ScreenGridLayer extends Layer {
 
     if (oldProps.colorRange !== props.colorRange) {
       const colorRangeUniform = [];
-      assert(props.colorRange && props.colorRange.length === COLOR_RANGE_LENGTH);
       props.colorRange.forEach(color => {
         colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
       });

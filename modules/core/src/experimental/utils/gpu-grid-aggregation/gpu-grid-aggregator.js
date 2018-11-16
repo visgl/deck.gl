@@ -1,7 +1,7 @@
 import GL from 'luma.gl/constants';
 import {Buffer, Model, Transform, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
 import {log} from '@deck.gl/core';
-import assert from 'assert';
+import assert from '../../../utils/assert';
 import {fp64 as fp64Utils, withParameters} from 'luma.gl';
 import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64Utils;
