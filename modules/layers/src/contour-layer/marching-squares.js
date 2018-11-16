@@ -1,6 +1,5 @@
 // All utility mehtods needed to implement Marching Squres algorithm
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
-import assert from 'assert';
 
 // Table to map code to the intersection offsets
 // All offsets are relative to the center of marching cell (which is top right corner of grid-cell)
@@ -39,9 +38,6 @@ export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
   // When processing one cell, we process 4 cells, by extending row to top and on column to right
   // to create a 2X2 cell grid
 
-  assert(x >= -1 && x < width);
-  assert(y >= -1 && y < height);
-
   const isLeftBoundary = x < 0;
   const isRightBoundary = x >= width - 1;
   const isBottomBoundary = y < 0;
@@ -69,8 +65,6 @@ export function getCode({cellWeights, thresholdValue, x, y, width, height}) {
 
   const code = (top << 3) | (topRight << 2) | (right << 1) | current;
 
-  assert(code >= 0 && code < 16);
-
   return code;
 }
 /* eslint-enable complexity */
@@ -81,8 +75,6 @@ export function getVertices({gridOrigin, cellSize, x, y, code}) {
   const offsets = CODE_OFFSET_MAP[code];
 
   // Reference vertex is at top-right move to top-right corner
-  assert(x >= -1);
-  assert(y >= -1);
 
   const rX = (x + 1) * cellSize[0];
   const rY = (y + 1) * cellSize[1];

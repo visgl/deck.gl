@@ -1,4 +1,4 @@
-import assert from 'assert';
+import assert from '../../../utils/assert';
 import {Matrix4} from 'math.gl';
 import {fp64 as fp64Utils} from 'luma.gl';
 import {COORDINATE_SYSTEM} from '../../../lib/constants';

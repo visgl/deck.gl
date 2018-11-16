@@ -1,5 +1,4 @@
 import * as MarchingSquares from './marching-squares';
-import assert from 'assert';
 
 // Given all the cell weights, generates contours for each threshold.
 export function generateContours({
@@ -37,7 +36,6 @@ export function generateContours({
           code
         });
         // We should always get even number of vertices
-        assert(vertices.length % 2 === 0);
         for (let i = 0; i < vertices.length; i += 2) {
           contourSegments.push({
             start: vertices[i],
