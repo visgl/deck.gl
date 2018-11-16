@@ -71,7 +71,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const reprojectNeeded = this.needsReProjectPoints(oldProps, props);
+    const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
 
     if (changeFlags.dataChanged || reprojectNeeded) {
       // project data into hexagons, and get sortedBins
@@ -82,8 +82,12 @@ export default class GridLayer extends CompositeLayer {
     }
   }
 
-  needsReProjectPoints(oldProps, props) {
-    return oldProps.cellSize !== props.cellSize || oldProps.getPosition !== props.getPosition;
+  needsReProjectPoints(oldProps, props, changeFlags) {
+    return (
+      oldProps.cellSize !== props.cellSize ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
+    );
   }
 
   getDimensionUpdaters() {
