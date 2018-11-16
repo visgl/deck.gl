@@ -59,6 +59,9 @@ async function pan(page, distance, direction) {
   await mouse.move(centerx, centery);
   await mouse.down();
   await page.waitFor(2000);
+  // when mouse.move and mouse.down events are triggered by Puppeteer,
+  // the starting position is off by several pixels, 2 seconds waiting time
+  // is needed remove it.
   switch (direction) {
     case DIRECTION.UP:
       await mouse.move(centerx, centery - distance, {steps: distance});
@@ -101,6 +104,9 @@ async function tilt(page, angle, direction) {
   await mouse.move(centerx, centery);
   await mouse.down();
   await page.waitFor(2000);
+  // when mouse.move and mouse.down events are triggered by Puppeteer,
+  // the starting position is off by several pixels, 2 seconds waiting time
+  // is needed remove it.
   await page.keyboard.down('Shift');
   switch (direction) {
     case DIRECTION.UP:
