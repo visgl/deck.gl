@@ -1,5 +1,35 @@
 <div>
   <div class="thumb">
+    <div class="bg-black" data-title="Autonomous Visuaization System" >
+      <a href="http://streetscape.gl/">
+        <img src="images/showcase-avs.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="http://streetscape.gl/"><h2>Autonomous Visuaization System</h2></a>
+      <p>A visualization protocol and toolkit for robotics data in the browser.</p>
+    </div>
+  </div>
+
+  <div class="thumb">
+    <div class="bg-black" data-title="FlightMapper" >
+      <a href="https://flightmapper.io/">
+        <img src="images/showcase-flightmapper.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="https://flightmapper.io/"><h2>FlightMapper</h2></a>
+      <p><small><i>by Dylan Babbs</i></small></p>
+      <p>Map and explore your flight history with interactive visualizations and analytics.</p>
+      <p class="credit"><a href="https://flightmapper.io/maps/dbabbs">Example Map</a><p>
+    </div>
+  </div>
+
+  <div class="thumb">
     <div class="bg-black" data-title="Kepler.gl" >
       <a href="https://uber.github.io/kepler.gl/">
         <img src="images/showcase-kepler-gl.jpg" />
@@ -10,7 +40,7 @@
     <div>
       <a href="https://uber.github.io/kepler.gl/"><h2>Kepler.gl</h2></a>
       <p>Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets.</p>
-      <p class="credit"><a href="">GitHub</a><p>
+      <p class="credit"><a href="https://github.com/uber/kepler.gl">GitHub</a><p>
     </div>
   </div>
 

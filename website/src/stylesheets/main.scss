@@ -251,6 +251,23 @@ hr.short {
 .overlays {
   cursor: crosshair;
 }
+.floater {
+  position: fixed;
+  bottom: 0;
+  right: 8px;
+  font-weight: 700;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  padding: 8px 12px;
+  background: red;
+  color: #fff !important;
+  cursor: pointer;
+  transition: padding 0.3s;
+
+  &:hover {
+    padding-bottom: 24px;
+  }
+}
 
 @media screen and (max-width: 768px) {
   .container {
