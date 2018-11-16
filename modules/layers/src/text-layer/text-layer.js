@@ -163,10 +163,6 @@ export default class TextLayer extends CompositeLayer {
   renderLayers() {
     const {data, scale, iconAtlas, iconMapping} = this.state;
 
-    if (!iconMapping || !iconAtlas || !data.length) {
-      return null;
-    }
-
     const {
       getPosition,
       getColor,
