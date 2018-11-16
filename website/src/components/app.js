@@ -43,6 +43,9 @@ class App extends Component {
           </Route>
           <Redirect to="/" />
         </Switch>
+
+        <a href="https://docs.google.com/forms/d/1wWtNqKs6ry9u0iuDjezFv6h7xZ40fEPzt0C_CMUOnBQ"
+          target="_new" className="floater">Take our developer survey</a>
       </div>
     );
   }

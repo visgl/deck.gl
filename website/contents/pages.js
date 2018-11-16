@@ -151,6 +151,14 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'Autonomous Visualization System',
+    external: 'http://streetscape.gl'
+  },
+  {
+    name: 'FlightMapper',
+    external: 'https://flightmapper.io/'
+  },
+  {
     name: 'Kepler.gl',
     external: 'https://uber.github.io/kepler.gl/'
   },
