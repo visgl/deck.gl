@@ -6,7 +6,15 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ### Prop Types System
 
-Layers can now supply rich definitions to their default props. This enables prop validation in debug mode and performance improvements for all core layers.
+Layers can now supply rich definitions to their default props. This enables prop validation in debug mode and aggressively blocks unnecessary layer update to boost rendering performance. Complex composite layers such as the GeoJsonLayer can be up to 2x faster in certain React applications. See [upgrade guide](/docs/upgrade-guide.md) if you are an author of custom layers.
+
+### New Interaction Callbacks
+
+`onDragStart`, `onDrag` and `onDragEnd` callback props are added to `Deck` and base `Layer` class.
+
+### GPUAggregator Improvements
+
+The experimental `GPUAggregator` class now supports Min/Max/Mean in addition to Sum. Also added the ability to specify multiple weights with custom aggregation operation.
 
 
 ## deck.gl v6.2
