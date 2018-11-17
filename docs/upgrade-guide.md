@@ -6,6 +6,24 @@
 
 Shallow changes in `getColorValue` and `getElevationValue` props are now ignored by default. To trigger an update, use the `updateTriggers` prop. This new behavior is aligned with other core layers and improves runtime performance.
 
+#### Prop Types in Custom Layers
+
+Although the [prop types system](/docs/developer-guide/prop-types.md) is largely backward-compatible, it is possible that some custom layers may stop updating when a certain prop changes. This is because the automatically deduced prop type from `defaultProps` does not match its desired usage. Switch to explicit descriptors will fix the issue, e.g. from:
+
+```js
+MyLayer.defaultProps = {
+  prop: 0
+};
+```
+
+To:
+
+```js
+MyLayer.defaultProps = {
+  prop: {type: 'number', value: 0, min: 0}
+};
+```
+
 
 ## Upgrading from deck.gl v6.1 to v6.2
 
