@@ -6,7 +6,17 @@
 
 The [`MapView`] class is a subclass of [View](/docs/api-reference/view.md). This viewport creates a geospatial "camera" that looks at a position on a map from a certain direction.
 
-To render, `MapView` requires the application to use a `viewState` that contains at least `longitude`, `latitude` and `zoom` parameters. `MapView` will also consider the `pitch` and `bearing` parameters.
+To render, `MapView` needs to be used together with a `viewState` with the following parameters:
+
+- `longitude` (`Number`) - longitude at the map center
+- `latitude` (`Number`) - latitude at the map center
+- `zoom` (`Number`) - zoom level
+- `pitch` (`Number`, optional) - pitch angle in degrees. Default `0`.
+- `bearing` (`Number`, optional) - bearing angle in degrees. Default `0`.
+- `maxZoom` (`Number`, optional) - max zoom level. Default `20`.
+- `minZoom` (`Number`, optional) - min zoom level. Default `0`.
+- `maxPitch` (`Number`, optional) - max pitch angle. Default `60`.
+- `minPitch` (`Number`, optional) - min pitch angle. Default `0`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
