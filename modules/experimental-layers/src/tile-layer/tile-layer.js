@@ -52,7 +52,9 @@ export default class TileLayer extends CompositeLayer {
     }
   }
 
-  getPickingInfo({info}) {
+  getPickingInfo({info, sourceLayer}) {
+    info.sourceLayer = sourceLayer;
+    info.tiles = this.state.tiles;
     return info;
   }
 
@@ -76,7 +78,8 @@ export default class TileLayer extends CompositeLayer {
         ...geoProps,
         id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
         data: tile.data,
-        visible: !this.state.isLoaded || tile.z === z
+        visible: !this.state.isLoaded || tile.z === z,
+        tile
       });
     });
   }
