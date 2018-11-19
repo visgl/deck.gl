@@ -246,13 +246,13 @@ export default class Layer extends Component {
   // Event handling
   onHover(info) {
     if (this.props.onHover) {
-      this.props.onHover(info);
+      this.props.onHover(info, this.context.pickingEvent);
     }
   }
 
   onClick(info) {
     if (this.props.onClick) {
-      this.props.onClick(info);
+      this.props.onClick(info, this.context.pickingEvent);
     }
   }
 
