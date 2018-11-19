@@ -3,11 +3,10 @@ import ViewState from './view-state';
 
 import {Vector2, clamp} from 'math.gl';
 
-// TODO: not sure whether we should have these constants
-// as part of viewport props
 const MOVEMENT_SPEED = 10; // per keyboard click
-const MIN_ZOOM = 0.1;
-const MAX_ZOOM = 10;
+// TODO - make default unlimited in the next major version
+const DEFAULT_MIN_ZOOM = 0.1;
+const DEFAULT_MAX_ZOOM = 10;
 
 class OrthographicState extends ViewState {
   constructor({
@@ -16,6 +15,8 @@ class OrthographicState extends ViewState {
     height, // Height of viewport
     offset, // Offset to the origin
     zoom, // Zoom level of the view
+    minZoom = DEFAULT_MIN_ZOOM,
+    maxZoom = DEFAULT_MAX_ZOOM,
 
     /** Interaction states */
     startPanPosition,
@@ -27,7 +28,9 @@ class OrthographicState extends ViewState {
       width,
       height,
       offset,
-      zoom
+      zoom,
+      minZoom,
+      maxZoom
     });
     this._interactiveState = {
       startPanPosition,
@@ -109,8 +112,8 @@ class OrthographicState extends ViewState {
    * @param {[number, number]} pos - current mouse cursor screen position
    */
   zoom({pos, scale}) {
-    const {zoom, width, height, offset} = this._viewportProps;
-    const newZoom = clamp(zoom * scale, MIN_ZOOM, MAX_ZOOM);
+    const {zoom, width, height, offset, minZoom, maxZoom} = this._viewportProps;
+    const newZoom = clamp(zoom * scale, minZoom, maxZoom);
     const centerX = width / 2 - offset[0];
     const centerY = height / 2 - offset[1];
     const dX = (pos[0] - centerX) * (zoom / newZoom - 1);

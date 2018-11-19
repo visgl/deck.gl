@@ -8,9 +8,13 @@ The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.
 
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
-* `eye` (`Number[3]`) - The eye position in world coordinates.
-* `lookAt` (`Number[3]`) - The position being looked at.
-* `up` (`Number[3]`) - The up direction.
+* `eye` (`Number[3]`, optional) - The eye position in world coordinates. Default `[0, 0, 1]`.
+* `lookAt` (`Number[3]`, optional) - The position being looked at. Default `[0, 0, 0]`.
+* `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
+* `offset` (`Number[2]`, optional) - The offset of the viewport. Default `[0, 1]`.
+* `zoom` (`Number`, optional) - The scale of the viewport. Default `1`.
+* `minZoom` (`Number`, optional) - The min scale of the viewport. Default `0.1`.
+* `maxZoom` (`Number`, optional) - The max scale of the viewport. Default `10`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
@@ -25,8 +29,8 @@ The `OrthographicView` constructor takes the same parameters as the [View](/docs
 
 * `near` (`Number`, optional) - Distance of near clipping plane. Default to `1`.
 * `far` (`Number`, optional) - Distance of far clipping plane. Default to `100`.
-* `left` (`Number`) - Left bound of the frustum
-* `top` (`Number`) - Top bound of the frustum
+* `left` (`Number`, optional) - Left bound of the frustum. Automatically calculated if not provided.
+* `top` (`Number`, optional) - Top bound of the frustum. Automatically calculated if not provided.
 * `right` (`Number`, optional) - Right bound of the frustum. Automatically calculated if not provided.
 * `bottom` (`Number`, optional) - Bottom bound of the frustum. Automatically calculated if not provided.
 
