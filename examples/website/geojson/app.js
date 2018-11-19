@@ -4,8 +4,8 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL, {GeoJsonLayer} from 'deck.gl';
 import {scaleThreshold} from 'd3-scale';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+// Set your mapbox token here. 
+const MAPBOX_TOKEN = process.env.MapboxAccessToken || 'your_mapbox_token'; // eslint-disable-line
 
 // Source data GeoJSON
 const DATA_URL =
