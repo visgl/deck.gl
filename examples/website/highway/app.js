@@ -1,4 +1,3 @@
-/* global document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -201,7 +200,7 @@ export class App extends Component {
   }
 }
 
-function renderToDOM(container) {
+export function renderToDOM(container) {
   render(<App />, container);
 
   const formatRow = d => ({
@@ -216,5 +215,3 @@ function renderToDOM(container) {
     }
   });
 }
-
-renderToDOM(document.body.appendChild(document.createElement('div')));
