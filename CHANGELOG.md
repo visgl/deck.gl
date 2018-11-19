@@ -17,6 +17,17 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.0] - Nov 19 2018
+
+- Fix async prop comparison bug (#2437)
+- Remove assert dependency from modules (#2438)
+- fixed invalid accessor comparisons in contour layer and grid layer (#2442)
+- Give TileLayer event callbacks access to source layer and tile (#2445)
+- Support generic iterables in `data` prop (#2444)
+- Allow user to change min/max zoom of orthographic controller (#2448)
+- Align parameters passed to all layer callbacks (#2452)
+- Bump luma.gl dependency to 6.3.0 prod version
+
 ### deck.gl v6.3 Prereleases
 
 #### [6.3.0-beta.2] - Nov 13 2018
