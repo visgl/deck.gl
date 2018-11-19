@@ -1,4 +1,4 @@
-/* global window */
+/* global window, document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -144,7 +144,7 @@ export class App extends Component {
   }
 }
 
-export function renderToDOM(container) {
+function renderToDOM(container) {
   render(<App />, container);
 
   require('d3-request').csv(DATA_URL, (error, response) => {
@@ -154,3 +154,5 @@ export function renderToDOM(container) {
     }
   });
 }
+
+renderToDOM(document.body.appendChild(document.createElement('div')));
