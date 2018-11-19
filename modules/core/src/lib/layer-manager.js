@@ -58,6 +58,7 @@ const INITIAL_CONTEXT = Object.seal({
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
   // State
+  pickingEvent: null,
   lastPickedInfo: null,
 
   animationProps: null,
@@ -291,12 +292,14 @@ export default class LayerManager {
   }
 
   // Pick the closest info at given coordinate
-  pickObject({x, y, mode, radius = 0, layerIds, viewports, depth = 1}) {
+  pickObject({x, y, mode, radius = 0, layerIds, viewports, depth = 1, event = null}) {
     const {gl, useDevicePixels} = this.context;
+    // Allow layers to access the event
+    this.context.pickingEvent = event;
 
     const layers = this.getLayers({layerIds});
 
-    return pickObject(gl, {
+    const result = pickObject(gl, {
       // User params
       x,
       y,
@@ -312,6 +315,10 @@ export default class LayerManager {
       lastPickedInfo: this.context.lastPickedInfo,
       useDevicePixels
     });
+
+    // Clear the current event
+    this.context.pickingEvent = null;
+    return result;
   }
 
   // Get all unique infos within a bounding box
