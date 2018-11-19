@@ -94,11 +94,9 @@ export default class TextLayer extends CompositeLayer {
   transformStringToLetters() {
     const {data, getText} = this.props;
     const {iconMapping} = this.state;
-    if (!data || data.length === 0) {
-      return;
-    }
+
     const transformedData = [];
-    data.forEach(val => {
+    for (const val of data) {
       const text = getText(val);
       if (text) {
         const letters = Array.from(text);
@@ -118,7 +116,7 @@ export default class TextLayer extends CompositeLayer {
           transformedData.push(datum);
         });
       }
-    });
+    }
 
     this.setState({data: transformedData});
   }
@@ -164,10 +162,6 @@ export default class TextLayer extends CompositeLayer {
 
   renderLayers() {
     const {data, scale, iconAtlas, iconMapping} = this.state;
-
-    if (!iconMapping || !iconAtlas || !data) {
-      return null;
-    }
 
     const {
       getPosition,

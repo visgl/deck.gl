@@ -131,7 +131,10 @@ export default class PathLayer extends Layer {
 
     if (geometryChanged) {
       // this.state.paths only stores point positions in each path
-      const paths = props.data.map(getPath);
+      const paths = [];
+      for (const object of props.data) {
+        paths.push(getPath(object));
+      }
       const bufferLayout = paths.map(path => path.length - 1);
       const numInstances = bufferLayout.reduce((count, segments) => count + segments, 0);
 
