@@ -73,7 +73,7 @@ export default class PolygonLayer extends CompositeLayer {
     if (geometryChanged) {
       const {data, getPolygon} = this.props;
       this.state.paths = [];
-      data.forEach(object => {
+      for (const object of data) {
         const complexPolygon = Polygon.normalize(getPolygon(object));
         complexPolygon.forEach(polygon =>
           this.state.paths.push({
@@ -81,7 +81,7 @@ export default class PolygonLayer extends CompositeLayer {
             object
           })
         );
-      });
+      }
     }
   }
 
@@ -129,7 +129,7 @@ export default class PolygonLayer extends CompositeLayer {
 
     const {paths} = this.state;
 
-    const hasData = data && data.length > 0;
+    const hasData = paths.length > 0;
 
     // Filled Polygon Layer
     const polygonLayer =
