@@ -40,4 +40,4 @@ Creates a new `MapView` instance.
 
 ## Remarks
 
-* In the React library, `MapView` support automatic synchronization with base maps components. See [DeckGL](/docs/api-reference/react/deckgl.md)
+- In the React library, `MapView` support automatic synchronization with base maps components. See [DeckGL](/docs/api-reference/react/deckgl.md)

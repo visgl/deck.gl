@@ -32,7 +32,7 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
-    "luma.gl": "^6.3.0-beta",
+    "luma.gl": "^6.3.0",
     "math.gl": "^2.2.0",
     "mjolnir.js": "^2.0.0",
     "probe.gl": "^2.0.1",
