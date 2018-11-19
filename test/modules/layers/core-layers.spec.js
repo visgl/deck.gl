@@ -64,8 +64,9 @@ test('ScreenGridLayer#constructor', t => {
         assert({layer, oldState}) {
           t.ok(layer.state !== oldState, 'should update layer state');
           t.ok(layer.state.cellScale !== oldState.cellScale, 'should update cellScale');
-          t.ok(
-            layer.state.cellScale === layer.state.model.program.uniforms.cellScale,
+          t.deepEquals(
+            layer.state.cellScale,
+            layer.state.model.program.uniforms.cellScale,
             'should update uniform cellScale'
           );
         }
