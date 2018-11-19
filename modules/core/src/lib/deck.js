@@ -419,7 +419,8 @@ export default class Deck {
       radius,
       viewports: this.getViewports(pos),
       mode: options.mode,
-      depth: 1
+      depth: 1,
+      event: options.event
     });
     if (options.callback && selectedInfos) {
       const firstInfo = selectedInfos.find(info => info.index >= 0) || null;
