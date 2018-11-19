@@ -12,8 +12,6 @@ import DeckGL, {
 import {OrthographicView} from '@deck.gl/core';
 import {default as choropleths} from '../../examples/layer-browser/data/sf.zip.geo';
 
-const POLYGONS = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
-
 let index = 0;
 window.nextTestCase = function nextTestCase() {
   return ++index;
@@ -102,14 +100,11 @@ const TEST_CASES = [
       })
     ],
     views: new OrbitView(),
-    controller: true,
-    initialViewState: INITIAL_VIEW_STATE.POINTCLOUD
+    initialViewState: INITIAL_VIEW_STATE.POINTCLOUD,
+    controller: true
   },
   {
     name: 'Scatterplot',
-    width: '100%',
-    height: '100%',
-    initialViewState: INITIAL_VIEW_STATE.SCATTERPLOT,
     layers: [
       new ScatterplotLayer({
         id: 'nodes',
@@ -117,22 +112,24 @@ const TEST_CASES = [
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
         getRadius: d => d.radius * 3,
-        getColor: d => [0, 0, 150, 255]
+        getColor: [0, 0, 150, 255]
       })
     ],
-    views: [new OrthographicView({controller: true})]
+    views: new OrthographicView(),
+    initialViewState: INITIAL_VIEW_STATE.SCATTERPLOT,
+    controller: true
   },
   {
     name: 'polygon',
     layers: [
       new PolygonLayer({
         id: 'polygon-layer',
-        data: POLYGONS,
+        data: choropleths.features,
         wireframe: true,
         lineWidthMinPixels: 1,
-        getPolygon: d => d,
-        getElevation: d => 1,
-        getFillColor: d => [1, 140, 0]
+        getPolygon: d => d.geometry.coordinates,
+        getElevation: 1,
+        getFillColor: [1, 140, 0]
       })
     ],
     initialViewState: INITIAL_VIEW_STATE.POLYGON,
@@ -145,7 +142,7 @@ export class App extends Component {
     super(props);
 
     this.state = {
-      viewState: TEST_CASES[index].initialViewState
+      viewState: props.testCases[index].initialViewState
     };
 
     this._onViewStateChange = this._onViewStateChange.bind(this);
@@ -159,14 +156,14 @@ export class App extends Component {
     const options = {onViewStateChange: this._onViewStateChange};
     options.viewState = this.state.viewState;
     if (index === 0) {
-      this.name = TEST_CASES[index].name;
-    } else if (this.name !== TEST_CASES[index].name) {
-      this.name = TEST_CASES[index].name;
-      options.viewState = TEST_CASES[index].initialViewState;
+      this.name = this.props.testCases[index].name;
+    } else if (this.name !== this.props.testCases[index].name) {
+      this.name = this.props.testCases[index].name;
+      options.viewState = this.props.testCases[index].initialViewState;
     }
-    const props = Object.assign({}, TEST_CASES[index], options);
+    const props = Object.assign({}, this.props.testCases[index], options);
     return <DeckGL {...props} />;
   }
 }
 
-render(<App />, document.body.appendChild(document.createElement('div')));
+render(<App testCases={TEST_CASES} />, document.body.appendChild(document.createElement('div')));

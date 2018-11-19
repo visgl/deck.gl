@@ -41,6 +41,7 @@ function printResult(diffRatio, threshold) {
 const innerWidth = 1000;
 const innerHeight = 800;
 
+const WAIT_TIME = 2000;
 const EVENTS = ['', '-pan-ur', '-pan-dl', '-tilt-ur', '-tilt-dl', '-zoom-in', '-zoom-out'];
 
 const DIRECTION = {
@@ -54,32 +55,32 @@ const DIRECTION = {
 
 async function pan(page, distance, direction) {
   const mouse = page.mouse;
-  const centerx = innerWidth / 2;
-  const centery = innerHeight / 2;
-  await mouse.move(centerx, centery);
+  const centerX = innerWidth / 2;
+  const centerY = innerHeight / 2;
+  await mouse.move(centerX, centerY);
   await mouse.down();
-  await page.waitFor(2000);
+  await page.waitFor(WAIT_TIME);
   // when mouse.move and mouse.down events are triggered by Puppeteer,
   // the starting position is off by several pixels, 2 seconds waiting time
-  // is needed remove it.
+  // is needed remove the offset.
   switch (direction) {
     case DIRECTION.UP:
-      await mouse.move(centerx, centery - distance, {steps: distance});
+      await mouse.move(centerX, centerY - distance, {steps: distance});
       break;
     case DIRECTION.RIGHT:
-      await mouse.move(centerx + distance, centery, {steps: distance});
+      await mouse.move(centerX + distance, centerY, {steps: distance});
       break;
     case DIRECTION.DOWN:
-      await mouse.move(centerx, centery + distance, {steps: distance});
+      await mouse.move(centerX, centerY + distance, {steps: distance});
       break;
     case DIRECTION.LEFT:
-      await mouse.move(centerx - distance, centery, {steps: distance});
+      await mouse.move(centerX - distance, centerY, {steps: distance});
       break;
     case DIRECTION.UPRIGHT:
-      await mouse.move(centerx + distance, centery - distance, {steps: distance});
+      await mouse.move(centerX + distance, centerY - distance, {steps: distance});
       break;
     case DIRECTION.DOWNLEFT:
-      await mouse.move(centerx - distance, centery + distance, {steps: distance});
+      await mouse.move(centerX - distance, centerY + distance, {steps: distance});
       break;
     default:
       console.log('Please input a number between 0 and 5!');
@@ -88,7 +89,7 @@ async function pan(page, distance, direction) {
   await mouse.up();
 }
 
-async function panAll(page, distance, waitingTime, threshold, folder) {
+async function panAll(page, distance, threshold, folder) {
   await pan(page, distance, DIRECTION.UPRIGHT);
   await page.screenshot({path: `${folder}${EVENTS[1]}.png`});
   await pan(page, distance, DIRECTION.DOWNLEFT);
@@ -99,33 +100,33 @@ async function panAll(page, distance, waitingTime, threshold, folder) {
 
 async function tilt(page, angle, direction) {
   const mouse = page.mouse;
-  const centerx = innerWidth / 2;
-  const centery = innerHeight / 2;
-  await mouse.move(centerx, centery);
+  const centerX = innerWidth / 2;
+  const centerY = innerHeight / 2;
+  await mouse.move(centerX, centerY);
   await mouse.down();
-  await page.waitFor(2000);
+  await page.waitFor(WAIT_TIME);
   // when mouse.move and mouse.down events are triggered by Puppeteer,
   // the starting position is off by several pixels, 2 seconds waiting time
-  // is needed remove it.
+  // is needed remove the offset.
   await page.keyboard.down('Shift');
   switch (direction) {
     case DIRECTION.UP:
-      await mouse.move(centerx, centery - angle, {steps: angle});
+      await mouse.move(centerX, centerY - angle, {steps: angle});
       break;
     case DIRECTION.RIGHT:
-      await mouse.move(centerx + angle, centery, {steps: angle});
+      await mouse.move(centerX + angle, centerY, {steps: angle});
       break;
     case DIRECTION.DOWN:
-      await mouse.move(centerx, centery + angle, {steps: angle});
+      await mouse.move(centerX, centerY + angle, {steps: angle});
       break;
     case DIRECTION.LEFT:
-      await mouse.move(centerx - angle, centery, {steps: angle});
+      await mouse.move(centerX - angle, centerY, {steps: angle});
       break;
     case DIRECTION.UPRIGHT:
-      await mouse.move(centerx + angle, centery - angle, {steps: angle});
+      await mouse.move(centerX + angle, centerY - angle, {steps: angle});
       break;
     case DIRECTION.DOWNLEFT:
-      await mouse.move(centerx - angle, centery + angle, {steps: angle});
+      await mouse.move(centerX - angle, centerY + angle, {steps: angle});
       break;
     default:
       console.log('Please input a number between 0 and 5');
@@ -135,7 +136,7 @@ async function tilt(page, angle, direction) {
   await mouse.up();
 }
 
-async function tiltAll(page, angle, waitingTime, threshold, folder) {
+async function tiltAll(page, angle, threshold, folder) {
   await tilt(page, angle, DIRECTION.UPRIGHT);
   await page.screenshot({path: `${folder}${EVENTS[3]}.png`});
   await tilt(page, angle, DIRECTION.DOWNLEFT);
@@ -144,45 +145,45 @@ async function tiltAll(page, angle, waitingTime, threshold, folder) {
   await tilt(page, angle, DIRECTION.UPRIGHT);
 }
 
-async function zoomin(page, waitingTime) {
+async function zoomin(page) {
   const mouse = page.mouse;
-  const centerx = innerWidth / 2;
-  const centery = innerHeight / 2;
-  await mouse.move(centerx, centery);
+  const centerX = innerWidth / 2;
+  const centerY = innerHeight / 2;
+  await mouse.move(centerX, centerY);
   await page.mouse.down();
   await page.mouse.up();
   await page.mouse.down();
   await page.mouse.up();
-  await page.waitFor(waitingTime);
+  await page.waitFor(WAIT_TIME);
 }
 
-async function zoomout(page, waitingTime) {
+async function zoomout(page) {
   const mouse = page.mouse;
-  const centerx = innerWidth / 2;
-  const centery = innerHeight / 2;
-  await mouse.move(centerx, centery);
+  const centerX = innerWidth / 2;
+  const centerY = innerHeight / 2;
+  await mouse.move(centerX, centerY);
   await page.keyboard.down('Shift');
   await page.mouse.down();
   await page.mouse.up();
   await page.mouse.down();
   await page.mouse.up();
   await page.keyboard.up('Shift');
-  await page.waitFor(waitingTime);
+  await page.waitFor(WAIT_TIME);
 }
 
-async function zoom(page, waitingTime, threshold, folder) {
-  await zoomin(page, waitingTime);
+async function zoom(page, threshold, folder) {
+  await zoomin(page);
   await page.screenshot({path: `${folder}${EVENTS[5]}.png`});
-  await zoomout(page, waitingTime);
-  await zoomout(page, waitingTime);
+  await zoomout(page);
+  await zoomout(page);
   await page.screenshot({path: `${folder}${EVENTS[6]}.png`});
-  await zoomin(page, waitingTime);
+  await zoomin(page);
 }
 
-async function allEvents(page, waitingTime, threshold, folder) {
-  await panAll(page, 100, waitingTime, threshold, folder);
-  await tiltAll(page, 200, waitingTime, threshold, folder);
-  await zoom(page, waitingTime, threshold, folder);
+async function allEvents(page, threshold, folder) {
+  await panAll(page, 100, threshold, folder);
+  await tiltAll(page, 200, threshold, folder);
+  await zoom(page, threshold, folder);
   await page.screenshot({path: `${folder}.png`});
 }
 
@@ -255,12 +256,12 @@ async function launchPage() {
   return [browser, page];
 }
 
-async function validateWithWaitingTime(child, folder, waitingTime, threshold, compare = true) {
+async function validateWithWaitingTime(child, folder, threshold, compare = true) {
   const [browser, page] = await launchPage();
   const examples = ['pointcloud', 'scatterplot', 'polygon'];
   for (let i = 0; i < 3; i++) {
     console.log(`Begin the ${examples[i]} example`);
-    await allEvents(page, 1000, threshold, examples[i]); //eslint-disable-line
+    await allEvents(page, threshold, examples[i]); //eslint-disable-line
     console.log('After all events');
     if (compare) {
       await compareAllImages(examples[i], 0.05);
@@ -268,7 +269,7 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold, co
       await createGoldenImage(examples[i]);
     }
     await page.evaluate(() => window.nextTestCase()); //eslint-disable-line
-    await page.waitFor(2000);
+    await page.waitFor(WAIT_TIME);
     await pan(page, 1, 0);
   }
 
@@ -306,7 +307,7 @@ function changeFolder(folder) {
 async function runTestExample(folder) {
   changeFolder(folder);
   const child = await yarnAndLaunchWebpack();
-  const valid = await validateWithWaitingTime(child, 'geojson', 1000, 0.01);
+  const valid = await validateWithWaitingTime(child, 'geojson', 0.01);
   if (!valid) {
     process.exit(1); //eslint-disable-line
   }
