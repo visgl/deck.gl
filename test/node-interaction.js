@@ -248,10 +248,10 @@ async function launchPage() {
     args: [`--window-size=${1000},${800}`]
   });
   const page = await browser.newPage();
-  await page.waitFor(2000);
+  await page.waitFor(WAIT_TIME);
   await page.goto('http://localhost:8080');
   await page.setViewport({width: 1000, height: 800});
-  await page.waitFor(2000);
+  await page.waitFor(WAIT_TIME);
 
   return [browser, page];
 }
