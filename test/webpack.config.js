@@ -112,16 +112,12 @@ const CONFIGS = {
       module: {
         rules: [
           {
-            // Compile ES2015 using buble
             test: /\.js$/,
-            loader: 'buble-loader',
-            include: [resolve('.')],
             exclude: [/node_modules/],
-            options: {
-              objectAssign: 'Object.assign',
-              transforms: {
-                dangerousForOf: true,
-                modules: false
+            use: {
+              loader: 'babel-loader',
+              options: {
+                presets: ['@babel/preset-env', '@babel/preset-react']
               }
             }
           }

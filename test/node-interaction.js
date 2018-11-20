@@ -264,7 +264,7 @@ async function validateWithWaitingTime(child, folder, threshold, compare = true)
     await allEvents(page, threshold, examples[i]); //eslint-disable-line
     console.log('After all events');
     if (compare) {
-      await compareAllImages(examples[i], 0.05);
+      await compareAllImages(examples[i], 0.01);
     } else {
       await createGoldenImage(examples[i]);
     }
