@@ -4,7 +4,6 @@
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
 const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CONFIG = {
   mode: 'development',
@@ -33,10 +32,7 @@ const CONFIG = {
   },
 
   // Optional: Enables reading mapbox token from environment variable
-  plugins: [
-    new HtmlWebpackPlugin({template: 'index.html'}),
-    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
-  ]
+  plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
 };
 
 // This line enables bundling against src in this repo rather than installed module
