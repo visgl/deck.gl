@@ -55,7 +55,7 @@ case $MODE in
     break;;
 
   "interaction")
-    node test/node-interaction.js
+    node test/interaction/node-interaction.js
     break;;
 
   "lint")

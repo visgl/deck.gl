@@ -26,11 +26,8 @@ const console = require('console');
 const process = require('process');
 
 const fs = require('fs');
-const path = require('path');
 const PNG = require('pngjs').PNG;
 const pixelmatch = require('pixelmatch');
-
-const LIB_DIR = path.resolve(__dirname, './interaction');
 
 function printResult(diffRatio, threshold) {
   return diffRatio <= threshold
@@ -297,22 +294,15 @@ async function yarnAndLaunchWebpack() {
   return child;
 }
 
-function changeFolder(folder) {
-  console.log('--------------------------');
-  console.log(`Begin to test ${folder}`);
-  console.log(folder);
-  process.chdir(folder);
-}
-
-async function runTestExample(folder) {
-  changeFolder(folder);
+async function runInteractionTest() {
+  process.chdir(__dirname);
   const child = await yarnAndLaunchWebpack();
-  const valid = await validateWithWaitingTime(child, 'geojson', 0.01);
+  const valid = await validateWithWaitingTime(child, 'interaction', 0.01);
   if (!valid) {
     process.exit(1); //eslint-disable-line
   }
 }
 (async () => {
   // checkMapboxToken();
-  await runTestExample(LIB_DIR);
+  await runInteractionTest();
 })();
