@@ -20,7 +20,6 @@ const DEFAULT_THRESHOLD_DATA = {
 
 function getVertexCode({weight, threshold}) {
   // threshold must be a single value or a range (array of size 2)
-  assert(Number.isFinite(threshold) || (Array.isArray(threshold) && threshold.length > 1));
 
   // Iso-bands
   if (Array.isArray(threshold)) {
@@ -96,19 +95,12 @@ export function getCode(opts) {
   if (Array.isArray(threshold)) {
     code = (top << 6) | (topRight << 4) | (right << 2) | current;
   }
-  assert(code >= 0);
 
   let meanCode = 0;
   // meanCode is only needed for saddle cases, and they should
   // only occur when we are not processing a cell on boundary
   // because when on a boundary either, bottom-row, top-row, left-column or right-column will have both 0 codes
   if (!isBoundary) {
-    assert(
-      Number.isFinite(weights.top) &&
-        Number.isFinite(weights.topRight) &&
-        Number.isFinite(weights.right) &&
-        Number.isFinite(weights.current)
-    );
     meanCode = getVertexCode({
       weight: (weights.top + weights.topRight + weights.right + weights.current) / 4,
       threshold
@@ -123,27 +115,16 @@ export function getCode(opts) {
 export function getVertices(opts) {
   const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES} = opts;
   const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);
-  let offsets;
+  let offsets =
+    type === CONTOUR_TYPE.ISO_BANDS
+      ? ISOBANDS_CODE_OFFSET_MAP[code]
+      : ISOLINES_CODE_OFFSET_MAP[code];
 
-  switch (type) {
-    case CONTOUR_TYPE.ISO_LINES:
-      offsets = ISOLINES_CODE_OFFSET_MAP[code];
-      break;
-    case CONTOUR_TYPE.ISO_BANDS:
-      offsets = ISOBANDS_CODE_OFFSET_MAP[code];
-      break;
-    default:
-      assert(false);
-  }
-
-  assert(offsets);
   // handle saddle cases
   if (!Array.isArray(offsets)) {
     offsets = offsets[meanCode];
   }
 
-  assert(Array.isArray(offsets));
-  // console.log(`offsets: ${offsets}`);
   // Reference vertex is at top-right move to top-right corner
 
   const vZ = thresholdData.zIndex * Z_OFFSET * thresholdData.zOffsetScale;
@@ -167,36 +148,28 @@ export function getVertices(opts) {
   //        ...
   //      ]
 
-  let results;
-  switch (type) {
-    case CONTOUR_TYPE.ISO_LINES:
-      const vertices = [];
-      offsets.forEach(xyOffsets => {
-        xyOffsets.forEach(offset => {
-          const vX = refVertexX + offset[0] * cellSize[0];
-          const vY = refVertexY + offset[1] * cellSize[1];
-          vertices.push([vX, vY, vZ]);
-        });
+  if (type === CONTOUR_TYPE.ISO_BANDS) {
+    const polygons = [];
+    offsets.forEach(polygonOffsets => {
+      const polygon = [];
+      polygonOffsets.forEach(xyOffset => {
+        const vX = refVertexX + xyOffset[0] * cellSize[0];
+        const vY = refVertexY + xyOffset[1] * cellSize[1];
+        polygon.push([vX, vY, vZ]);
       });
-      results = vertices;
-      break;
-    case CONTOUR_TYPE.ISO_BANDS:
-      const polygons = [];
-      offsets.forEach(polygonOffsets => {
-        const polygon = [];
-        polygonOffsets.forEach(xyOffset => {
-          const vX = refVertexX + xyOffset[0] * cellSize[0];
-          const vY = refVertexY + xyOffset[1] * cellSize[1];
-          polygon.push([vX, vY, vZ]);
-        });
-        polygons.push(polygon);
-      });
-      results = polygons;
-      break;
-    default:
-      assert(false);
-      break;
+      polygons.push(polygon);
+    });
+    return polygons;
   }
 
-  return results;
+  // default case is ISO_LINES
+  const lines = [];
+  offsets.forEach(xyOffsets => {
+    xyOffsets.forEach(offset => {
+      const vX = refVertexX + offset[0] * cellSize[0];
+      const vY = refVertexY + offset[1] * cellSize[1];
+      lines.push([vX, vY, vZ]);
+    });
+  });
+  return lines;
 }
