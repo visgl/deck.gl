@@ -149,6 +149,10 @@ export const ISOLINES_CODE_OFFSET_MAP = {
   15: []
 };
 
+function ternaryToIndex(ternary) {
+  return parseInt(ternary, 4);
+}
+
 export const ISOBANDS_CODE_OFFSET_MAP = {
   // Below list of cases, follow the same order as in above mentioned wiki page.
   // Each case has its code on first commented line // T,TR,R,C
@@ -157,286 +161,159 @@ export const ISOBANDS_CODE_OFFSET_MAP = {
   // for example:  code 2-2-2-1 => 10-10-10-01 => 10101001 => 169
 
   // no contours
-
-  // 0000
-  0: [],
-  // 2222
-  170: [],
+  [ternaryToIndex('0000')]: [],
+  [ternaryToIndex('2222')]: [],
 
   // single triangle
-
-  // 2221
-  169: [SW_TRIANGLE],
-  // 2212
-  166: [SE_TRIANGLE],
-  // 2122
-  154: [NE_TRIANGLE],
-  // 1222
-  106: [NW_TRIANGLE],
-  // 0001
-  1: [SW_TRIANGLE],
-  // 0010
-  4: [SE_TRIANGLE],
-  // 0100
-  16: [NE_TRIANGLE],
-  // 1000
-  64: [NW_TRIANGLE],
+  [ternaryToIndex('2221')]: [SW_TRIANGLE],
+  [ternaryToIndex('2212')]: [SE_TRIANGLE],
+  [ternaryToIndex('2122')]: [NE_TRIANGLE],
+  [ternaryToIndex('1222')]: [NW_TRIANGLE],
+  [ternaryToIndex('0001')]: [SW_TRIANGLE],
+  [ternaryToIndex('0010')]: [SE_TRIANGLE],
+  [ternaryToIndex('0100')]: [NE_TRIANGLE],
+  [ternaryToIndex('1000')]: [NW_TRIANGLE],
 
   // single trapezoid
-  // 2220
-  168: [SW_TRAPEZOID],
-  // 2202
-  162: [SE_TRAPEZOID],
-  // 2022
-  138: [NE_TRAPEZOID],
-  // 0222
-  42: [NW_TRAPEZOID],
-  // 0002
-  2: [SW_TRAPEZOID],
-  // 0020
-  8: [SE_TRAPEZOID],
-  // 0200
-  32: [NE_TRAPEZOID],
-  // 2000
-  128: [NW_TRAPEZOID],
+  [ternaryToIndex('2220')]: [SW_TRAPEZOID],
+  [ternaryToIndex('2202')]: [SE_TRAPEZOID],
+  [ternaryToIndex('2022')]: [NE_TRAPEZOID],
+  [ternaryToIndex('0222')]: [NW_TRAPEZOID],
+  [ternaryToIndex('0002')]: [SW_TRAPEZOID],
+  [ternaryToIndex('0020')]: [SE_TRAPEZOID],
+  [ternaryToIndex('0200')]: [NE_TRAPEZOID],
+  [ternaryToIndex('2000')]: [NW_TRAPEZOID],
 
   // single rectangle
-  // 0011
-  5: [S_RECTANGLE],
-  // 0110
-  20: [E_RECTANGLE],
-  // 1100
-  80: [N_RECTANGLE],
-  // 1001
-  65: [W_RECTANGLE],
-  // 2211
-  165: [S_RECTANGLE],
-  // 2112
-  150: [E_RECTANGLE],
-  // 1122
-  90: [N_RECTANGLE],
-  // 1221
-  105: [W_RECTANGLE],
-  // 2200
-  160: [EW_RECTANGEL],
-  // 2002
-  130: [SN_RECTANGEL],
-  // 0022
-  10: [EW_RECTANGEL],
-  // 0220
-  40: [SN_RECTANGEL],
+  [ternaryToIndex('0011')]: [S_RECTANGLE],
+  [ternaryToIndex('0110')]: [E_RECTANGLE],
+  [ternaryToIndex('1100')]: [N_RECTANGLE],
+  [ternaryToIndex('1001')]: [W_RECTANGLE],
+  [ternaryToIndex('2211')]: [S_RECTANGLE],
+  [ternaryToIndex('2112')]: [E_RECTANGLE],
+  [ternaryToIndex('1122')]: [N_RECTANGLE],
+  [ternaryToIndex('1221')]: [W_RECTANGLE],
+  [ternaryToIndex('2200')]: [EW_RECTANGEL],
+  [ternaryToIndex('2002')]: [SN_RECTANGEL],
+  [ternaryToIndex('0022')]: [EW_RECTANGEL],
+  [ternaryToIndex('0220')]: [SN_RECTANGEL],
 
   // single square
   // 1111
-  85: [SQUARE],
+  [ternaryToIndex('1111')]: [SQUARE],
 
   // single pentagon
-  // 1211
-  101: [SW_PENTAGON],
-
-  // 2111
-  149: [SE_PENTAGON],
-
-  // 1112
-  86: [NE_PENTAGON],
-
-  // 1121
-  89: [NW_PENTAGON],
-
-  // 1011
-  69: [SW_PENTAGON],
-
-  // 0111
-  21: [SE_PENTAGON],
-
-  // 1110
-  84: [NE_PENTAGON],
-
-  // 1101
-  81: [NW_PENTAGON],
-
-  // 1200
-  96: [NW_N_PENTAGON],
-
-  // 0120
-  24: [NE_E_PENTAGON],
-
-  // 0012
-  6: [SE_S_PENTAGON],
-
-  // 2001
-  129: [SW_W_PENTAGON],
-
-  // 1022
-  74: [NW_N_PENTAGON],
-
-  // 2102
-  146: [NE_E_PENTAGON],
-
-  // 2210
-  164: [SE_S_PENTAGON],
-
-  // 0221
-  41: [SW_W_PENTAGON],
-
-  // 1002
-  66: [NW_W_PENTAGON],
-
-  // 2100
-  144: [NE_N_PENTAGON],
-
-  // 0210
-  36: [SE_E_PENTAGON],
-
-  // 0021
-  9: [SW_S_PENTAGON],
-
-  // 1220
-  104: [NW_W_PENTAGON],
-
-  // 0122
-  26: [NE_N_PENTAGON],
-
-  // 2012
-  134: [SE_E_PENTAGON],
-
-  // 2201
-  161: [SW_S_PENTAGON],
+  [ternaryToIndex('1211')]: [SW_PENTAGON],
+  [ternaryToIndex('2111')]: [SE_PENTAGON],
+  [ternaryToIndex('1112')]: [NE_PENTAGON],
+  [ternaryToIndex('1121')]: [NW_PENTAGON],
+  [ternaryToIndex('1011')]: [SW_PENTAGON],
+  [ternaryToIndex('0111')]: [SE_PENTAGON],
+  [ternaryToIndex('1110')]: [NE_PENTAGON],
+  [ternaryToIndex('1101')]: [NW_PENTAGON],
+  [ternaryToIndex('1200')]: [NW_N_PENTAGON],
+  [ternaryToIndex('0120')]: [NE_E_PENTAGON],
+  [ternaryToIndex('0012')]: [SE_S_PENTAGON],
+  [ternaryToIndex('2001')]: [SW_W_PENTAGON],
+  [ternaryToIndex('1022')]: [NW_N_PENTAGON],
+  [ternaryToIndex('2102')]: [NE_E_PENTAGON],
+  [ternaryToIndex('2210')]: [SE_S_PENTAGON],
+  [ternaryToIndex('0221')]: [SW_W_PENTAGON],
+  [ternaryToIndex('1002')]: [NW_W_PENTAGON],
+  [ternaryToIndex('2100')]: [NE_N_PENTAGON],
+  [ternaryToIndex('0210')]: [SE_E_PENTAGON],
+  [ternaryToIndex('0021')]: [SW_S_PENTAGON],
+  [ternaryToIndex('1220')]: [NW_W_PENTAGON],
+  [ternaryToIndex('0122')]: [NE_N_PENTAGON],
+  [ternaryToIndex('2012')]: [SE_E_PENTAGON],
+  [ternaryToIndex('2201')]: [SW_S_PENTAGON],
 
   // single hexagon
-  // 0211
-  37: [S_HEXAGON],
-
-  // 2110
-  148: [E_HEXAGON],
-
-  // 1102
-  82: [N_HEXAGON],
-
-  // 1021
-  73: [W_HEXAGON],
-
-  // 2011
-  133: [S_HEXAGON],
-
-  // 0112
-  22: [E_HEXAGON],
-
-  // 1120
-  88: [N_HEXAGON],
-
-  // 1201
-  97: [W_HEXAGON],
-
-  // 2101
-  145: [SW_NE_HEXAGON],
-
-  // 0121
-  25: [SW_NE_HEXAGON],
-
-  // 1012
-  70: [NW_SE_HEXAGON],
-
-  // 1210
-  100: [NW_SE_HEXAGON],
+  [ternaryToIndex('0211')]: [S_HEXAGON],
+  [ternaryToIndex('2110')]: [E_HEXAGON],
+  [ternaryToIndex('1102')]: [N_HEXAGON],
+  [ternaryToIndex('1021')]: [W_HEXAGON],
+  [ternaryToIndex('2011')]: [S_HEXAGON],
+  [ternaryToIndex('0112')]: [E_HEXAGON],
+  [ternaryToIndex('1120')]: [N_HEXAGON],
+  [ternaryToIndex('1201')]: [W_HEXAGON],
+  [ternaryToIndex('2101')]: [SW_NE_HEXAGON],
+  [ternaryToIndex('0121')]: [SW_NE_HEXAGON],
+  [ternaryToIndex('1012')]: [NW_SE_HEXAGON],
+  [ternaryToIndex('1210')]: [NW_SE_HEXAGON],
 
   // 6-sided polygons based on mean weight
   // NOTE: merges mean value codes for extreme changes (as per above Wiki doc)
-  // 0101
-  17: {
+  [ternaryToIndex('0101')]: {
     0: [SW_TRIANGLE, NE_TRIANGLE],
     1: [SW_NE_HEXAGON],
     2: [SW_NE_HEXAGON]
   },
-
-  // 1010
-  68: {
+  [ternaryToIndex('1010')]: {
     0: [NW_TRIANGLE, SE_TRIANGLE],
     1: [NW_SE_HEXAGON],
     2: [NW_SE_HEXAGON]
   },
-
-  // 2121
-  153: {
+  [ternaryToIndex('2121')]: {
     0: [SW_NE_HEXAGON],
     1: [SW_NE_HEXAGON],
     2: [SW_TRIANGLE, NE_TRIANGLE]
   },
-
-  // 1212
-  102: {
+  [ternaryToIndex('1212')]: {
     0: [NW_SE_HEXAGON],
     1: [NW_SE_HEXAGON],
     2: [NW_TRIANGLE, SE_TRIANGLE]
   },
 
   // 7-sided polygons based on mean weight
-  // 2120
-  152: {
+  [ternaryToIndex('2120')]: {
     0: [NE_HEPTAGON],
     1: [NE_HEPTAGON],
     2: [SW_TRAPEZOID, NE_TRIANGLE]
   },
-
-  // 2021
-  137: {
+  [ternaryToIndex('2021')]: {
     0: [SW_HEPTAGON],
     1: [SW_HEPTAGON],
     2: [SW_TRIANGLE, NE_TRAPEZOID]
   },
-
-  // 1202
-  98: {
+  [ternaryToIndex('1202')]: {
     0: [NW_HEPTAGON],
     1: [NW_HEPTAGON],
     2: [NW_TRIANGLE, SE_TRAPEZOID]
   },
-
-  // 0212
-  38: {
+  [ternaryToIndex('0212')]: {
     0: [SE_HEPTAGON],
     1: [SE_HEPTAGON],
     2: [SE_TRIANGLE, NW_TRAPEZOID]
   },
-
-  // 0102
-  18: {
+  [ternaryToIndex('0102')]: {
     0: [SW_TRAPEZOID, NE_TRIANGLE],
     1: [NE_HEPTAGON],
     2: [NE_HEPTAGON]
   },
-
-  // 0201
-  33: {
+  [ternaryToIndex('0201')]: {
     0: [SW_TRIANGLE, NE_TRAPEZOID],
     1: [SW_HEPTAGON],
     2: [SW_HEPTAGON]
   },
-
-  // 1020
-  72: {
+  [ternaryToIndex('1020')]: {
     0: [NW_TRIANGLE, SE_TRAPEZOID],
     1: [NW_HEPTAGON],
     2: [NW_HEPTAGON]
   },
-
-  // 2010
-  132: {
+  [ternaryToIndex('2010')]: {
     0: [SE_TRIANGLE, NW_TRAPEZOID],
     1: [SE_HEPTAGON],
     2: [SE_HEPTAGON]
   },
 
   // 8-sided polygons based on mean weight
-  // 2020
-  136: {
+  [ternaryToIndex('2020')]: {
     0: [NW_TRAPEZOID, SE_TRAPEZOID],
     1: [OCTAGON],
     2: [SW_TRAPEZOID, NE_TRAPEZOID]
   },
-
-  // 0202
-  34: {
+  [ternaryToIndex('0202')]: {
     0: [NE_TRAPEZOID, SW_TRAPEZOID],
     1: [OCTAGON],
     2: [NW_TRAPEZOID, SE_TRAPEZOID]
