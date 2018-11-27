@@ -162,8 +162,11 @@ export class App extends Component {
       options.viewState = this.props.testCases[index].initialViewState;
     }
     const props = Object.assign({}, this.props.testCases[index], options);
-    return <DeckGL {...props} />;
+    return React.createElement(DeckGL, props, null);
   }
 }
 
-render(<App testCases={TEST_CASES} />, document.body.appendChild(document.createElement('div')));
+render(
+  React.createElement(App, {testCases: TEST_CASES}, null),
+  document.body.appendChild(document.createElement('div'))
+);
