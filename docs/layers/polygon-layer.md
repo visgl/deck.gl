@@ -25,7 +25,7 @@ const App = ({data, viewport}) => {
    *     area: 6.11
    *   },
    *   {
-   *     // Complex polygon with holes (array of coords)
+   *     // Complex polygon with holes (array of rings)
    *     contour: [
    *       [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
    *       [[-122.45, 37.73], [-122.47, 37.76], [-122.47, 37.71], [-122.45, 37.73]]
@@ -171,7 +171,12 @@ Like any deck.gl layer, the polygon accepts a data prop which is expected to
 be an iterable container of objects, and an accessor
 that extracts a polygon (simple or complex) from each object.
 
-This accessor returns the polygon corresponding to an object in the `data` stream.
+This accessor returns the polygon corresponding to an object in the `data` stream. A polygon is expected to be an array of coordinates following either the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) ("simple polygon") or [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) (polygon with holes) specification. Each vertex can optionally supply a third component `z` which specifies the altitude of the vertex.
+
+<div>
+  <img src="https://user-images.githubusercontent.com/18344164/48512983-cca32e80-e8ae-11e8-9107-c380925cf861.gif" />
+  <p><i>Polygons with 3D positions, courtesy of <a href="https://github.com/SymbolixAU">@SymbolixAU</a> and <a href="https://github.com/mdsumner">@mdsumner</a></i></p>
+</div>
 
 ##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -209,6 +214,8 @@ The elevation to extrude each polygon with, in meters. Only applies if `extruded
 
 * If a number is provided, it is used as the elevation for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its elevation.
+
+**Note:** If 3D positions are returned by `getPolygon`, the extrusion returned by `getElevation` is added to the base altitude of each vertex.
 
 ##### `getLineDashArray` (Function|Array, optional)
 
