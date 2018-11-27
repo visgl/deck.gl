@@ -18,7 +18,7 @@ const DEFAULT_THRESHOLD_DATA = {
 
 // Utility methods
 
-function getVertexCode({weight, threshold}) {
+function getVertexCode(weight, threshold) {
   // threshold must be a single value or a range (array of size 2)
 
   // Iso-bands
@@ -60,7 +60,7 @@ export function getCode(opts) {
     codes.top = 0;
   } else {
     weights.top = cellWeights[(y + 1) * width + x];
-    codes.top = getVertexCode({weight: weights.top, threshold});
+    codes.top = getVertexCode(weights.top, threshold);
   }
 
   // TOP-RIGHT
@@ -68,7 +68,7 @@ export function getCode(opts) {
     codes.topRight = 0;
   } else {
     weights.topRight = cellWeights[(y + 1) * width + x + 1];
-    codes.topRight = getVertexCode({weight: weights.topRight, threshold});
+    codes.topRight = getVertexCode(weights.topRight, threshold);
   }
 
   // RIGHT
@@ -76,7 +76,7 @@ export function getCode(opts) {
     codes.right = 0;
   } else {
     weights.right = cellWeights[y * width + x + 1];
-    codes.right = getVertexCode({weight: weights.right, threshold});
+    codes.right = getVertexCode(weights.right, threshold);
   }
 
   // CURRENT
@@ -84,7 +84,7 @@ export function getCode(opts) {
     codes.current = 0;
   } else {
     weights.current = cellWeights[y * width + x];
-    codes.current = getVertexCode({weight: weights.current, threshold});
+    codes.current = getVertexCode(weights.current, threshold);
   }
 
   const {top, topRight, right, current} = codes;
@@ -101,10 +101,10 @@ export function getCode(opts) {
   // only occur when we are not processing a cell on boundary
   // because when on a boundary either, bottom-row, top-row, left-column or right-column will have both 0 codes
   if (!isBoundary) {
-    meanCode = getVertexCode({
-      weight: (weights.top + weights.topRight + weights.right + weights.current) / 4,
+    meanCode = getVertexCode(
+      (weights.top + weights.topRight + weights.right + weights.current) / 4,
       threshold
-    });
+    );
   }
   return {code, meanCode};
 }
