@@ -30,10 +30,10 @@ export default class OrthographicView extends View {
     // NOTE: automatically calculated from width and height if not provided
     const {
       // projection matrix arguments
-      left = (-width / 2 + offset[0]) * zoom, // Left bound of the frustum
-      top = (-height / 2 + offset[1]) * zoom, // Top bound of the frustum
-      right = (width / 2 + offset[0]) * zoom, // Right bound of the frustum
-      bottom = (height / 2 + offset[1]) * zoom, // Bottom bound of the frustum
+      left = (-width / 2 + offset[0]) / zoom, // Left bound of the frustum
+      top = (-height / 2 + offset[1]) / zoom, // Top bound of the frustum
+      right = (width / 2 + offset[0]) / zoom, // Right bound of the frustum
+      bottom = (height / 2 + offset[1]) / zoom, // Bottom bound of the frustum
 
       near = 1, // Distance of near clipping plane
       far = 100 // Distance of far clipping plane
