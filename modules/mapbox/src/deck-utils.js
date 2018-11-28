@@ -7,9 +7,6 @@ export function getDeckInstance({map, gl, deck}) {
   }
 
   const deckProps = {
-    gl,
-    width: '100%',
-    height: '100%',
     useDevicePixels: true,
     _customRender: () => map.triggerRepaint(),
     parameters: {
@@ -26,6 +23,12 @@ export function getDeckInstance({map, gl, deck}) {
     deck.setProps(deckProps);
     deck.props.userData.isExternal = true;
   } else {
+    // Using external gl context - do not set css size
+    Object.assign(deckProps, {
+      gl,
+      width: false,
+      height: false
+    });
     deck = new Deck(deckProps);
 
     map.on('remove', () => {
