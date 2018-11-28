@@ -105,25 +105,25 @@ async function runTestExample(folder) {
   checkMapboxToken();
 
   exampleDir = EXAMPLES_DIR;
-  // await runTestExample('experimental/bezier');
-  // await runTestExample('experimental/json-pure-js');
-  //
-  // await runTestExample('get-started/pure-js');
-  // await runTestExample('get-started/pure-js-without-map');
-  // await runTestExample('get-started/react-webpack-2');
-  // await runTestExample('get-started/react-without-map');
-  //
-  // await runTestExample('layer-browser');
-  //
-  // await runTestExample('website/3d-heatmap');
-  // await runTestExample('website/arc');
-  // await runTestExample('website/brushing');
+  await runTestExample('experimental/bezier');
+  await runTestExample('experimental/json-pure-js');
+
+  await runTestExample('get-started/pure-js');
+  await runTestExample('get-started/pure-js-without-map');
+  await runTestExample('get-started/react-webpack-2');
+  await runTestExample('get-started/react-without-map');
+
+  await runTestExample('layer-browser');
+
+  await runTestExample('website/3d-heatmap');
+  await runTestExample('website/arc');
+  await runTestExample('website/brushing');
   await runTestExample('website/geojson');
-  // await runTestExample('website/highway');
-  // await runTestExample('website/icon');
-  // await runTestExample('website/line');
-  // await runTestExample('website/plot');
-  // await runTestExample('website/scatterplot');
-  // await runTestExample('website/screen-grid');
-  // await runTestExample('website/tagmap');
+  await runTestExample('website/highway');
+  await runTestExample('website/icon');
+  await runTestExample('website/line');
+  await runTestExample('website/plot');
+  await runTestExample('website/scatterplot');
+  await runTestExample('website/screen-grid');
+  await runTestExample('website/tagmap');
 })();
