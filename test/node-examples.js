@@ -25,10 +25,8 @@ const puppeteer = require('puppeteer');
 const console = require('console');
 const process = require('process');
 
-// const fs = require('fs');
 const path = require('path');
-// const PNG = require('pngjs').PNG;
-// const pixelmatch = require('pixelmatch');
+
 const compareImage = require('./compare-image');
 
 const LIB_DIR = path.resolve(__dirname, '..');
