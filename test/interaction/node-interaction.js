@@ -173,17 +173,21 @@ async function launchPage() {
 
 async function validateWithWaitingTime(child, folder, threshold, compare = true) {
   const [browser, page] = await launchPage();
-  const examples = ['pointcloud', 'scatterplot', 'polygon'];
+  let example = '';
+
   for (let i = 0; i < 3; i++) {
-    console.log(`Begin the ${examples[i]} example`);
-    await allEvents(page, threshold, examples[i]); //eslint-disable-line
+    example = `testcase${i}`;
+    console.log(`Begin the ${example}`);
+
+    await allEvents(page, threshold, example); //eslint-disable-line
     console.log('After all events');
     if (compare) {
-      await compareAllImages(examples[i], 0.01);
+      await compareAllImages(example, 0.01);
     } else {
-      await createGoldenImage(examples[i]);
+      await createGoldenImage(example);
     }
-    await page.evaluate(() => window.nextTestCase()); //eslint-disable-line
+    await page.evaluate(() => (example = App.nextTestCase())); //eslint-disable-line
+
     await page.waitFor(WAIT_TIME);
     await sendMouseMoveEvent(page, 1, 0, false);
   }

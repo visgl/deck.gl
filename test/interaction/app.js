@@ -1,4 +1,4 @@
-/* global document, window */
+/* global document */
 
 import React, {Component} from 'react';
 import {render} from 'react-dom';
@@ -13,9 +13,9 @@ import {OrthographicView} from 'deck.gl';
 import {default as choropleths} from '../../examples/layer-browser/data/sf.zip.geo';
 
 let index = 0;
-window.nextTestCase = function nextTestCase() {
+export function nextTestCase() {
   return ++index;
-};
+}
 
 function getPointCloud() {
   const pointCloud = [];
