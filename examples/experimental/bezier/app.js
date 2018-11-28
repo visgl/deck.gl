@@ -1,8 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL from '@deck.gl/react';
-// import {OrthographicView} from '@deck.gl/core';
-import OrthographicView from '../../../modules/core/src/views/orthographic-view';
+import {OrthographicView} from '@deck.gl/core';
 import BezierGraphLayer from './bezier-graph-layer';
 
 import SAMPLE_GRAPH from './sample-graph.json';
