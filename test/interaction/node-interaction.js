@@ -26,19 +26,16 @@ const console = require('console');
 const process = require('process');
 
 const fs = require('fs');
-const PNG = require('pngjs').PNG;
-const pixelmatch = require('pixelmatch');
-
-function printResult(diffRatio, threshold) {
-  return diffRatio <= threshold
-    ? console.log('\x1b[32m%s\x1b[0m', 'Rendering test Passed!')
-    : console.log('\x1b[31m%s\x1b[0m', 'Rendering test failed!');
-}
+const compareImage = require('../compare-image');
 
 const innerWidth = 1000;
 const innerHeight = 800;
 
 const WAIT_TIME = 2000;
+// when mouse.move and mouse.down events are triggered by Puppeteer,
+// the starting position is off by several pixels, 2 seconds waiting time
+// is needed remove the offset.
+
 const EVENTS = ['', '-pan-ur', '-pan-dl', '-tilt-ur', '-tilt-dl', '-zoom-in', '-zoom-out'];
 
 const DIRECTION = {
@@ -50,7 +47,7 @@ const DIRECTION = {
   DOWNLEFT: 5
 };
 
-async function pan(page, distance, direction) {
+async function sendMouseMoveEvent(page, distance, direction, isTilt) {
   const mouse = page.mouse;
   const centerX = innerWidth / 2;
   const centerY = innerHeight / 2;
@@ -60,6 +57,9 @@ async function pan(page, distance, direction) {
   // when mouse.move and mouse.down events are triggered by Puppeteer,
   // the starting position is off by several pixels, 2 seconds waiting time
   // is needed remove the offset.
+  if (isTilt) {
+    await page.keyboard.down('Shift');
+  }
   switch (direction) {
     case DIRECTION.UP:
       await mouse.move(centerX, centerY - distance, {steps: distance});
@@ -80,106 +80,54 @@ async function pan(page, distance, direction) {
       await mouse.move(centerX - distance, centerY + distance, {steps: distance});
       break;
     default:
-      console.log('Please input a number between 0 and 5!');
-      break;
-  }
-  await mouse.up();
-}
-
-async function panAll(page, distance, threshold, folder) {
-  await pan(page, distance, DIRECTION.UPRIGHT);
-  await page.screenshot({path: `${folder}${EVENTS[1]}.png`});
-  await pan(page, distance, DIRECTION.DOWNLEFT);
-  await pan(page, distance, DIRECTION.DOWNLEFT);
-  await page.screenshot({path: `${folder}${EVENTS[2]}.png`});
-  await pan(page, distance, DIRECTION.UPRIGHT);
-}
-
-async function tilt(page, angle, direction) {
-  const mouse = page.mouse;
-  const centerX = innerWidth / 2;
-  const centerY = innerHeight / 2;
-  await mouse.move(centerX, centerY);
-  await mouse.down();
-  await page.waitFor(WAIT_TIME);
-  // when mouse.move and mouse.down events are triggered by Puppeteer,
-  // the starting position is off by several pixels, 2 seconds waiting time
-  // is needed remove the offset.
-  await page.keyboard.down('Shift');
-  switch (direction) {
-    case DIRECTION.UP:
-      await mouse.move(centerX, centerY - angle, {steps: angle});
-      break;
-    case DIRECTION.RIGHT:
-      await mouse.move(centerX + angle, centerY, {steps: angle});
-      break;
-    case DIRECTION.DOWN:
-      await mouse.move(centerX, centerY + angle, {steps: angle});
-      break;
-    case DIRECTION.LEFT:
-      await mouse.move(centerX - angle, centerY, {steps: angle});
-      break;
-    case DIRECTION.UPRIGHT:
-      await mouse.move(centerX + angle, centerY - angle, {steps: angle});
-      break;
-    case DIRECTION.DOWNLEFT:
-      await mouse.move(centerX - angle, centerY + angle, {steps: angle});
-      break;
-    default:
       console.log('Please input a number between 0 and 5');
       break;
   }
-  await page.keyboard.up('Shift');
+  if (isTilt) {
+    await page.keyboard.up('Shift');
+  }
   await mouse.up();
 }
 
-async function tiltAll(page, angle, threshold, folder) {
-  await tilt(page, angle, DIRECTION.UPRIGHT);
-  await page.screenshot({path: `${folder}${EVENTS[3]}.png`});
-  await tilt(page, angle, DIRECTION.DOWNLEFT);
-  await tilt(page, angle, DIRECTION.DOWNLEFT);
-  await page.screenshot({path: `${folder}${EVENTS[4]}.png`});
-  await tilt(page, angle, DIRECTION.UPRIGHT);
+async function sendMouseEvents(page, distance, threshold, testCaseName, isTilt) {
+  await sendMouseMoveEvent(page, distance, DIRECTION.UPRIGHT, isTilt);
+  await page.screenshot({path: `${testCaseName}${EVENTS[1 + isTilt * 2]}.png`});
+  await sendMouseMoveEvent(page, distance, DIRECTION.DOWNLEFT, isTilt);
+  await sendMouseMoveEvent(page, distance, DIRECTION.DOWNLEFT, isTilt);
+  await page.screenshot({path: `${testCaseName}${EVENTS[2 + isTilt * 2]}.png`});
+  await sendMouseMoveEvent(page, distance, DIRECTION.UPRIGHT, isTilt);
 }
 
-async function zoomin(page) {
+async function sendDoubleClickEvent(page, isZoomout) {
   const mouse = page.mouse;
   const centerX = innerWidth / 2;
   const centerY = innerHeight / 2;
   await mouse.move(centerX, centerY);
+  if (isZoomout) {
+    await page.keyboard.down('Shift');
+  }
   await page.mouse.down();
   await page.mouse.up();
   await page.mouse.down();
   await page.mouse.up();
-  await page.waitFor(WAIT_TIME);
-}
-
-async function zoomout(page) {
-  const mouse = page.mouse;
-  const centerX = innerWidth / 2;
-  const centerY = innerHeight / 2;
-  await mouse.move(centerX, centerY);
-  await page.keyboard.down('Shift');
-  await page.mouse.down();
-  await page.mouse.up();
-  await page.mouse.down();
-  await page.mouse.up();
-  await page.keyboard.up('Shift');
+  if (isZoomout) {
+    await page.keyboard.up('Shift');
+  }
   await page.waitFor(WAIT_TIME);
 }
 
 async function zoom(page, threshold, folder) {
-  await zoomin(page);
+  await sendDoubleClickEvent(page, false);
   await page.screenshot({path: `${folder}${EVENTS[5]}.png`});
-  await zoomout(page);
-  await zoomout(page);
+  await sendDoubleClickEvent(page, true);
+  await sendDoubleClickEvent(page, true);
   await page.screenshot({path: `${folder}${EVENTS[6]}.png`});
-  await zoomin(page);
+  await sendDoubleClickEvent(page, false);
 }
 
 async function allEvents(page, threshold, folder) {
-  await panAll(page, 100, threshold, folder);
-  await tiltAll(page, 200, threshold, folder);
+  await sendMouseEvents(page, 100, threshold, folder, false);
+  await sendMouseEvents(page, 200, threshold, folder, true);
   await zoom(page, threshold, folder);
   await page.screenshot({path: `${folder}.png`});
 }
@@ -197,36 +145,6 @@ async function createGoldenImage(example) {
       }
     );
   }
-}
-
-function compareImage(newImageName, goldenImageName, threshold) {
-  const newImageData = fs.readFileSync(newImageName);
-  const goldenImageData = fs.readFileSync(goldenImageName);
-  const newImage = PNG.sync.read(newImageData);
-  const goldenImage = PNG.sync.read(goldenImageData);
-  const diffImage = new PNG({width: goldenImage.width, height: goldenImage.height});
-  const pixelDiffSize = pixelmatch(
-    goldenImage.data,
-    newImage.data,
-    diffImage.data,
-    goldenImage.width,
-    goldenImage.height,
-    {threshold: 0.105, includeAA: true}
-  );
-
-  const pixelDiffRatio = pixelDiffSize / (goldenImage.width * goldenImage.height);
-  console.log(`Testing ${newImageName}`);
-  console.log(`Mismatched pixel number: ${pixelDiffSize}`);
-  console.log(`Mismatched pixel ratio: ${pixelDiffRatio}`);
-
-  const diffImageData = PNG.sync.write(diffImage, {colorType: 6});
-  const diffImageName = `${newImageName.split('.')[0]}_diff.png`;
-  fs.writeFileSync(diffImageName, diffImageData);
-
-  fs.unlinkSync(newImageName);
-  fs.unlinkSync(diffImageName);
-  printResult(pixelDiffRatio, threshold);
-  return pixelDiffRatio <= threshold;
 }
 
 function compareAllImages(example, threshold) {
@@ -267,7 +185,7 @@ async function validateWithWaitingTime(child, folder, threshold, compare = true)
     }
     await page.evaluate(() => window.nextTestCase()); //eslint-disable-line
     await page.waitFor(WAIT_TIME);
-    await pan(page, 1, 0);
+    await sendMouseMoveEvent(page, 1, 0, false);
   }
 
   child.kill();
@@ -275,7 +193,7 @@ async function validateWithWaitingTime(child, folder, threshold, compare = true)
   return true;
 }
 
-async function yarnAndLaunchWebpack() {
+async function launchWebpack() {
   // const output = execFileSync('yarn'); //eslint-disable-line
   const child = execFile(
     '../../node_modules/.bin/webpack-dev-server',
@@ -290,13 +208,13 @@ async function yarnAndLaunchWebpack() {
       }
     }
   );
-  console.log('finish yarnAndLaunchWebpack');
+  console.log('finish launchWebpack');
   return child;
 }
 
 async function runInteractionTest() {
   process.chdir(__dirname);
-  const child = await yarnAndLaunchWebpack();
+  const child = await launchWebpack();
   const valid = await validateWithWaitingTime(child, 'interaction', 0.01);
   if (!valid) {
     process.exit(1); //eslint-disable-line

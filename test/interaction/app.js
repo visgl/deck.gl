@@ -9,7 +9,7 @@ import DeckGL, {
   ScatterplotLayer,
   OrbitView
 } from 'deck.gl';
-import {OrthographicView} from '@deck.gl/core';
+import {OrthographicView} from 'deck.gl';
 import {default as choropleths} from '../../examples/layer-browser/data/sf.zip.geo';
 
 let index = 0;
@@ -59,31 +59,6 @@ function getScatterPlot() {
   return data;
 }
 
-const INITIAL_VIEW_STATE = {
-  POINTCLOUD: {
-    lookAt: [0, 0, 0],
-    eye: [0, 0, -15],
-    distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov: 50}),
-    rotationX: -30,
-    rotationOrbit: 30,
-    orbitAxis: 'Y',
-    fov: 100,
-    minDistance: 1,
-    maxDistance: 20
-  },
-  SCATTERPLOT: {
-    offset: [0, 0],
-    zoom: 1
-  },
-  POLYGON: {
-    latitude: 37.7749295,
-    longitude: -122.4194155,
-    zoom: 11,
-    bearing: 0,
-    pitch: 45
-  }
-};
-
 const TEST_CASES = [
   {
     name: 'pointcloud',
@@ -100,7 +75,17 @@ const TEST_CASES = [
       })
     ],
     views: new OrbitView(),
-    initialViewState: INITIAL_VIEW_STATE.POINTCLOUD,
+    initialViewState: {
+      lookAt: [0, 0, 0],
+      eye: [0, 0, -15],
+      distance: OrbitView.getDistance({boundingBox: [3, 3, 3], fov: 50}),
+      rotationX: -30,
+      rotationOrbit: 30,
+      orbitAxis: 'Y',
+      fov: 100,
+      minDistance: 1,
+      maxDistance: 20
+    },
     controller: true
   },
   {
@@ -116,7 +101,10 @@ const TEST_CASES = [
       })
     ],
     views: new OrthographicView(),
-    initialViewState: INITIAL_VIEW_STATE.SCATTERPLOT,
+    initialViewState: {
+      offset: [0, 0],
+      zoom: 1
+    },
     controller: true
   },
   {
@@ -132,7 +120,13 @@ const TEST_CASES = [
         getFillColor: [1, 140, 0]
       })
     ],
-    initialViewState: INITIAL_VIEW_STATE.POLYGON,
+    initialViewState: {
+      latitude: 37.7749295,
+      longitude: -122.4194155,
+      zoom: 11,
+      bearing: 0,
+      pitch: 45
+    },
     controller: true
   }
 ];
@@ -155,9 +149,7 @@ export class App extends Component {
   render() {
     const options = {onViewStateChange: this._onViewStateChange};
     options.viewState = this.state.viewState;
-    if (index === 0) {
-      this.name = this.props.testCases[index].name;
-    } else if (this.name !== this.props.testCases[index].name) {
+    if (!this.name || this.name !== this.props.testCases[index].name) {
       this.name = this.props.testCases[index].name;
       options.viewState = this.props.testCases[index].initialViewState;
     }
