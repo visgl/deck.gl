@@ -39,5 +39,4 @@ test('Top-level imports', t => {
   t.end();
 });
 
-import './contour-layer/marching-squares.spec';
 import './tile-layer/tile-cache.spec';
