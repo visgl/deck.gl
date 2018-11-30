@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,107 +18,79 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import LightingEffect from '../../experimental/lighting-effect/lighting-effect';
 import lightingShader from './lighting.glsl';
-import project from '../project/project';
-import {projectPosition} from '../project/project-functions';
-import memoize from '../../utils/memoize';
 
 export default {
   name: 'lighting',
-  dependencies: [project],
   vs: lightingShader,
-  getUniforms,
-  deprecations: [
-    // Deprecated lighting functions
-    {type: 'function', old: 'getLightWeight', new: 'lighting_getLightWeight', deprecated: true}
-  ]
+  getUniforms
 };
 
 const INITIAL_MODULE_OPTIONS = {};
 
-const DEFAULT_LIGHTS_POSITION = [-122.45, 37.75, 8000];
-const DEFAULT_LIGHTS_STRENGTH = [2.0, 0.0];
-const DEFAULT_AMBIENT_RATIO = 0.4;
-const DEFAULT_DIFFUSE_RATIO = 0.6;
-const DEFAULT_SPECULAR_RATIO = 0.8;
+function getLightSourceUniforms(lightEffect) {
+  const lightSourceUniforms = {};
 
-const getMemoizedLightPositions = memoize(preprojectLightPositions);
+  if (lightEffect.ambientLight) {
+    lightSourceUniforms['lighting_ambientLight.color'] = lightEffect.ambientLight.color;
+    lightSourceUniforms['lighting_ambientLight.intensity'] = lightEffect.ambientLight.intensity;
+  }
 
-// TODO: support partial update, e.g.
-// `lightedModel.setModuleParameters({diffuseRatio: 0.3});`
+  let index = 0;
+  for (const i in lightEffect.pointLights) {
+    const pointLight = lightEffect.pointLights[i];
+    lightSourceUniforms[`lighting_pointLight[${index}].color`] = pointLight.color;
+    lightSourceUniforms[`lighting_pointLight[${index}].intensity`] = pointLight.intensity;
+    lightSourceUniforms[`lighting_pointLight[${index}].position`] = pointLight.position;
+    index++;
+  }
+  lightSourceUniforms.lighting_pointLightNumber = index;
+
+  for (const i in lightEffect.directionalLights) {
+    const directionalLight = lightEffect.directionalLights[i];
+    lightSourceUniforms[`lighting_directionalLight[${index}].color`] = directionalLight.color;
+    lightSourceUniforms[`lighting_directionalLight[${index}].intensity`] =
+      directionalLight.intensity;
+    lightSourceUniforms[`lighting_directionalLight[${index}].direction`] =
+      directionalLight.direction;
+    index++;
+  }
+  lightSourceUniforms.lighting_directionalLightNumber = lightEffect.directionalLights.length;
+
+  return lightSourceUniforms;
+}
+
+function getMaterialUniforms(material) {
+  const materialUniforms = {};
+  materialUniforms.lighting_ambient = material.ambient;
+  materialUniforms.lighting_diffuse = material.diffuse;
+  materialUniforms.lighting_shininess = material.shininess;
+  materialUniforms.lighting_specularColor = material.specularColor;
+  return materialUniforms;
+}
+
 function getUniforms(opts = INITIAL_MODULE_OPTIONS) {
-  if (!opts.lightSettings) {
+  let lightEffect;
+  if (opts.effects && Array.isArray(opts.effects)) {
+    for (const i in opts.effects) {
+      const effect = opts.effects[i];
+      if (effect instanceof LightingEffect) {
+        lightEffect = effect;
+        break;
+      }
+    }
+  }
+
+  if (!lightEffect || !opts.material) {
     return {};
   }
 
-  const {
-    coordinateSystem,
-    coordinateOrigin,
-    lightSettings: {
-      numberOfLights = 1,
+  const lightUniforms = Object.assign(
+    {},
+    getLightSourceUniforms(lightEffect),
+    getMaterialUniforms(opts.material)
+  );
 
-      lightsPosition = DEFAULT_LIGHTS_POSITION,
-      lightsStrength = DEFAULT_LIGHTS_STRENGTH,
-      coordinateSystem: fromCoordinateSystem,
-      coordinateOrigin: fromCoordinateOrigin,
-      modelMatrix = null,
-
-      ambientRatio = DEFAULT_AMBIENT_RATIO,
-      diffuseRatio = DEFAULT_DIFFUSE_RATIO,
-      specularRatio = DEFAULT_SPECULAR_RATIO
-    }
-  } = opts;
-
-  // Pre-project light positions
-  const lightsPositionWorld = getMemoizedLightPositions({
-    lightsPosition,
-    numberOfLights,
-    viewport: opts.viewport,
-    modelMatrix,
-    coordinateSystem,
-    coordinateOrigin,
-    fromCoordinateSystem,
-    fromCoordinateOrigin
-  });
-
-  return {
-    lighting_lightPositions: lightsPositionWorld,
-    lighting_lightStrengths: lightsStrength,
-    lighting_ambientRatio: ambientRatio,
-    lighting_diffuseRatio: diffuseRatio,
-    lighting_specularRatio: specularRatio,
-    lighting_numberOfLights: numberOfLights
-  };
-}
-
-// Pre-project light positions
-function preprojectLightPositions({
-  lightsPosition,
-  numberOfLights,
-  viewport,
-  modelMatrix,
-  coordinateSystem,
-  coordinateOrigin,
-  fromCoordinateSystem,
-  fromCoordinateOrigin
-}) {
-  const projectionParameters = {
-    viewport,
-    modelMatrix,
-    coordinateSystem,
-    coordinateOrigin,
-    fromCoordinateSystem,
-    fromCoordinateOrigin
-  };
-
-  const lightsPositionWorld = [];
-  for (let i = 0; i < numberOfLights; i++) {
-    const position = projectPosition(lightsPosition.slice(i * 3, i * 3 + 3), projectionParameters);
-
-    lightsPositionWorld[i * 3] = position[0];
-    lightsPositionWorld[i * 3 + 1] = position[1];
-    lightsPositionWorld[i * 3 + 2] = position[2];
-  }
-
-  return lightsPositionWorld;
+  return lightUniforms;
 }

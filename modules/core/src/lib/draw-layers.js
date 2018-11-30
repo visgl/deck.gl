@@ -76,7 +76,8 @@ export function drawLayers(
     pass = 'draw',
     redrawReason = '',
     stats,
-    customRender
+    customRender,
+    effects
   }
 ) {
   if (!customRender) {
@@ -104,7 +105,8 @@ export function drawLayers(
       layerFilter,
       pass,
       redrawReason,
-      stats
+      stats,
+      effects
     });
   });
 
@@ -176,7 +178,8 @@ function drawLayersInViewport(
     layerFilter,
     pass = 'draw',
     redrawReason = '',
-    stats
+    stats,
+    effects
   }
 ) {
   const pixelRatio = getPixelRatio({useDevicePixels});
@@ -236,7 +239,8 @@ function drawLayersInViewport(
         drawPickingColors,
         pixelRatio,
         glViewport,
-        parameters
+        parameters,
+        effects
       });
     }
   });
@@ -253,12 +257,14 @@ function drawLayerInViewport({
   drawPickingColors,
   pixelRatio,
   glViewport,
-  parameters
+  parameters,
+  effects
 }) {
   const moduleParameters = Object.assign(Object.create(layer.props), {
     viewport: layer.context.viewport,
     pickingActive: drawPickingColors ? 1 : 0,
-    devicePixelRatio: pixelRatio
+    devicePixelRatio: pixelRatio,
+    effects
   });
 
   const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});

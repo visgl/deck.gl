@@ -521,7 +521,8 @@ export default class Deck {
       views: this.viewManager.getViews(),
       redrawReason,
       drawPickingColors: this.props.drawPickingColors, // Debug picking, helps in framebuffered layers
-      customRender: Boolean(this.props._customRender)
+      customRender: Boolean(this.props._customRender),
+      effects: this.props.effects
     });
 
     this.props.onAfterRender({gl});

@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,31 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// lighting
-
-export default `\
-#define MAX_LIGHTS 5
-
-struct AmbientLight {
- vec3 color;
- float intensity;
+const defaultProps = {
+  ambient: 0.4,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [255, 255, 255]
 };
 
-struct PointLight {
- vec3 color;
- float intensity;
- vec3 position;
-};
+export default class PhongMaterial {
+  /**
+   * @classdesc
+   * PhongMaterial
+   *
+   * @class
+   * @param color {array} - emitted light color from this source
+   * @param intensity {float} - strength of emitted light, in the range of [0, 1]
+   */
 
-struct DirectionalLight {
-  vec3 color;
-  float intensity;
-  vec3 direction;
-};
- 
-uniform AmbientLight lighting_ambientLight;
-uniform PointLight lighting_pointLight[MAX_LIGHTS];
-uniform DirectionalLight lighting_directionalLight[MAX_LIGHTS];
-uniform int lighting_pointLightNumber;
-uniform int lighting_directionalLightNumber;
-`;
+  constructor(props) {
+    props = Object.assign({}, defaultProps, props);
+    Object.assign(this, props);
+  }
+}

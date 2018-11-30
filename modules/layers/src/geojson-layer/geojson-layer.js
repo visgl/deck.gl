@@ -123,15 +123,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
-    const {
-      stroked,
-      filled,
-      extruded,
-      wireframe,
-      subLayers,
-      lightSettings,
-      transitions
-    } = this.props;
+    const {stroked, filled, extruded, wireframe, subLayers, material, transitions} = this.props;
 
     // Rendering props underlying layer
     const {
@@ -183,7 +175,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           elevationScale,
           filled,
           wireframe,
-          lightSettings,
+          material,
           getPolygon: getCoordinates,
           getElevation: unwrappingAccessor(getElevation),
           getFillColor: unwrappingAccessor(getFillColor),

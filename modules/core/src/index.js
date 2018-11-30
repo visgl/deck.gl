@@ -67,6 +67,13 @@ export {default as _OrthographicController} from './controllers/orthographic-con
 export {default as _EffectManager} from './experimental/lib/effect-manager';
 export {default as _Effect} from './experimental/lib/effect';
 export {default as _ReflectionEffect} from './experimental/reflection-effect/reflection-effect';
+export {
+  AmbientLight,
+  DirectionalLight,
+  PointLight
+} from './experimental/lighting-effect/light-source';
+export {default as LightingEffect} from './experimental/lighting-effect/lighting-effect';
+export {default as PhongMaterial} from './experimental/lighting-material/phong-material';
 
 // Eperimental Transitions
 export {TRANSITION_EVENTS} from './controllers/transition-manager';

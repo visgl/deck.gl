@@ -1,7 +1,13 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL, {
+  GeoJsonLayer,
+  AmbientLight,
+  DirectionalLight,
+  PhongMaterial,
+  LightingEffect
+} from 'deck.gl';
 import {scaleThreshold} from 'd3-scale';
 
 // Set your mapbox token here
@@ -30,14 +36,18 @@ export const COLOR_SCALE = scaleThreshold()
     [128, 0, 38]
   ]);
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-125, 50.5, 5000, -122.8, 48.5, 8000],
-  ambientRatio: 0.2,
-  diffuseRatio: 0.5,
-  specularRatio: 0.3,
-  lightsStrength: [2.0, 0.0, 1.0, 0.0],
-  numberOfLights: 2
-};
+const ambientLight = new AmbientLight({color: [255, 255, 255], intensity: 1.0});
+const pointLight = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 2.0,
+  direction: [5446, 6114, -200]
+});
+const directionalLight = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 1.0,
+  direction: [-962, -2858, -321]
+});
+const lightingEffect = new LightingEffect({ambientLight, pointLight, directionalLight});
 
 export const INITIAL_VIEW_STATE = {
   latitude: 49.254,
@@ -79,7 +89,12 @@ export class App extends Component {
         getElevation: f => Math.sqrt(f.properties.valuePerSqm) * 10,
         getFillColor: f => COLOR_SCALE(f.properties.growth),
         getLineColor: [255, 255, 255],
-        lightSettings: LIGHT_SETTINGS,
+        material: new PhongMaterial({
+          ambient: 0.2,
+          diffuse: 0.5,
+          shininess: 32,
+          specularColor: [255, 255, 255]
+        }),
         pickable: true,
         onHover: this._onHover
       })
@@ -114,6 +129,7 @@ export class App extends Component {
 
     return (
       <DeckGL
+        effects={[lightingEffect]}
         layers={this._renderLayers()}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
