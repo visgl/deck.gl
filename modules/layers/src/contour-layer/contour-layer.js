@@ -18,14 +18,14 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {equals} from 'math.gl';
 import {
   CompositeLayer,
   _GPUGridAggregator as GPUGridAggregator,
   _pointToDensityGridData as pointToDensityGridData
 } from '@deck.gl/core';
-import {LineLayer} from '@deck.gl/layers';
-import {_SolidPolygonLayer as SolidPolygonLayer} from '@deck.gl/layers';
-
+import {default as LineLayer} from '../line-layer/line-layer';
+import {default as SolidPolygonLayer} from '../solid-polygon-layer/solid-polygon-layer';
 import {generateContours} from './contour-utils';
 
 const DEFAULT_COLOR = [255, 255, 255];
@@ -54,28 +54,33 @@ export default class ContourLayer extends CompositeLayer {
     };
     this.state = {
       contourData: {},
-      gridAggregator: new GPUGridAggregator(gl, options)
+      gridAggregator: new GPUGridAggregator(gl, options),
+      colorTrigger: 0,
+      strokeWidthTrigger: 0
     };
   }
 
   updateState({oldProps, props, changeFlags}) {
     let dataChanged = false;
     let contoursChanged = false;
-    const aggregationFlags = this.getAggregationFlags({oldProps, props, changeFlags});
+    const aggregationFlags = this._getAggregationFlags({oldProps, props, changeFlags});
     if (aggregationFlags) {
       dataChanged = true;
       // Clear countsData cache
       this.setState({countsData: null});
-      this.aggregateData(aggregationFlags);
+      this._aggregateData(aggregationFlags);
     }
 
-    if (this.shouldRebuildContours({oldProps, props})) {
+    if (this._shouldRebuildContours({oldProps, props})) {
       contoursChanged = true;
-      this.updateThresholdData(props);
+      this._updateThresholdData(props);
     }
 
     if (dataChanged || contoursChanged) {
-      this.generateContours();
+      this._generateContours();
+    } else {
+      // data for sublayers not changed check if color or strokeWidth need to be updated
+      this._updateSubLayerTriggers(oldProps, props);
     }
   }
 
@@ -84,15 +89,15 @@ export default class ContourLayer extends CompositeLayer {
     const hasIsolines = contourSegments && contourSegments.length > 0;
     const hasIsobands = contourPolygons && contourPolygons.length > 0;
 
-    const lineLayer = hasIsolines && new LineLayer(this.getLineLayerProps());
+    const lineLayer = hasIsolines && new LineLayer(this._getLineLayerProps());
     const solidPolygonLayer =
-      hasIsobands && new SolidPolygonLayer(this.getSolidPolygonLayerProps());
+      hasIsobands && new SolidPolygonLayer(this._getSolidPolygonLayerProps());
     return [lineLayer, solidPolygonLayer];
   }
 
   // Private
 
-  aggregateData(aggregationFlags) {
+  _aggregateData(aggregationFlags) {
     const {
       data,
       cellSize: cellSizeMeters,
@@ -126,7 +131,7 @@ export default class ContourLayer extends CompositeLayer {
     this.setState({countsData, countsBuffer, gridSize, gridOrigin, cellSize, boundingBox});
   }
 
-  generateContours() {
+  _generateContours() {
     const {gridSize, gridOrigin, cellSize, thresholdData} = this.state;
     let {countsData} = this.state;
     if (!countsData) {
@@ -149,7 +154,7 @@ export default class ContourLayer extends CompositeLayer {
     this.setState({contourData});
   }
 
-  getAggregationFlags({oldProps, props, changeFlags}) {
+  _getAggregationFlags({oldProps, props, changeFlags}) {
     let aggregationFlags = null;
     if (
       changeFlags.dataChanged ||
@@ -165,8 +170,9 @@ export default class ContourLayer extends CompositeLayer {
     return aggregationFlags;
   }
 
-  getLineLayerProps() {
+  _getLineLayerProps() {
     const {fp64} = this.props;
+    const {colorTrigger, strokeWidthTrigger} = this.state;
 
     return super.getSubLayerProps({
       id: 'contour-line-layer',
@@ -174,24 +180,35 @@ export default class ContourLayer extends CompositeLayer {
       fp64,
       getSourcePosition: d => d.start,
       getTargetPosition: d => d.end,
-      getColor: this.onGetSublayerColor.bind(this),
-      getStrokeWidth: this.onGetSublayerStrokeWidth.bind(this)
+      getColor: this._onGetSublayerColor.bind(this),
+      getStrokeWidth: this._onGetSublayerStrokeWidth.bind(this),
+      colorTrigger,
+      strokeWidthTrigger,
+      updateTriggers: {
+        getColor: colorTrigger,
+        getStrokeWidth: strokeWidthTrigger
+      }
     });
   }
 
-  getSolidPolygonLayerProps() {
+  _getSolidPolygonLayerProps() {
     const {fp64} = this.props;
+    const {colorTrigger} = this.state;
 
     return super.getSubLayerProps({
       id: 'contour-solid-polygon-layer',
       data: this.state.contourData.contourPolygons,
       fp64,
       getPolygon: d => d.vertices,
-      getFillColor: this.onGetSublayerColor.bind(this)
+      getFillColor: this._onGetSublayerColor.bind(this),
+      colorTrigger,
+      updateTriggers: {
+        getFillColor: colorTrigger
+      }
     });
   }
 
-  onGetSublayerColor(element) {
+  _onGetSublayerColor(element) {
     // element is either a line segment or polygon
     const {contours} = this.props;
     let color = DEFAULT_COLOR;
@@ -203,7 +220,7 @@ export default class ContourLayer extends CompositeLayer {
     return color;
   }
 
-  onGetSublayerStrokeWidth(segment) {
+  _onGetSublayerStrokeWidth(segment) {
     const {contours} = this.props;
     let strokeWidth = DEFAULT_STROKE_WIDTH;
     // Linearly searches the contours, but there should only be few contours
@@ -217,7 +234,7 @@ export default class ContourLayer extends CompositeLayer {
     return strokeWidth;
   }
 
-  shouldRebuildContours({oldProps, props}) {
+  _shouldRebuildContours({oldProps, props}) {
     if (
       !oldProps.contours ||
       !oldProps.zOffsetScale ||
@@ -229,10 +246,36 @@ export default class ContourLayer extends CompositeLayer {
     const oldThresholds = oldProps.contours.map(x => x.threshold);
     const thresholds = props.contours.map(x => x.threshold);
 
-    return thresholds.some((_, i) => thresholds[i] !== oldThresholds[i]);
+    return thresholds.some((_, i) => !equals(thresholds[i], oldThresholds[i]));
   }
 
-  updateThresholdData(props) {
+  _updateSubLayerTriggers(oldProps, props) {
+    if (oldProps && oldProps.contours && props && props.contours) {
+      // threshold value change or count change will trigger data change for sublayers
+      // those cases are not handled here.
+      let oldColors = [];
+      let newColors = [];
+      const oldStrokeWidths = [];
+      const newStrokeWidths = [];
+      oldProps.contours.forEach(contour => {
+        oldColors = oldColors.concat(contour.color);
+        oldStrokeWidths.push(contour.strokeWidth || DEFAULT_STROKE_WIDTH);
+      });
+      props.contours.forEach(contour => {
+        newColors = newColors.concat(contour.color);
+        newStrokeWidths.push(contour.strokeWidth || DEFAULT_STROKE_WIDTH);
+      });
+
+      if (!equals(oldColors, newColors)) {
+        this.state.colorTrigger++;
+      }
+      if (!equals(oldStrokeWidths, newStrokeWidths)) {
+        this.state.strokeWidthTrigger++;
+      }
+    }
+  }
+
+  _updateThresholdData(props) {
     const thresholdData = props.contours.map((x, index) => {
       return {
         threshold: x.threshold,
