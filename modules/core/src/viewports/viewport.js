@@ -22,10 +22,7 @@ import log from '../utils/log';
 import {createMat4, extractCameraVectors} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
-import mat4_scale from 'gl-mat4/scale';
-import mat4_translate from 'gl-mat4/translate';
-import mat4_multiply from 'gl-mat4/multiply';
-import mat4_invert from 'gl-mat4/invert';
+import * as mat4 from 'gl-matrix/mat4';
 
 import {
   getDistanceScales,
@@ -221,9 +218,9 @@ export default class Viewport {
     let pixelUnprojectionMatrix = this.pixelUnprojectionMatrix;
 
     if (modelMatrix) {
-      modelViewProjectionMatrix = mat4_multiply([], this.viewProjectionMatrix, modelMatrix);
-      pixelProjectionMatrix = mat4_multiply([], this.pixelProjectionMatrix, modelMatrix);
-      pixelUnprojectionMatrix = mat4_invert([], pixelProjectionMatrix);
+      modelViewProjectionMatrix = mat4.multiply([], this.viewProjectionMatrix, modelMatrix);
+      pixelProjectionMatrix = mat4.multiply([], this.pixelProjectionMatrix, modelMatrix);
+      pixelUnprojectionMatrix = mat4.invert([], pixelProjectionMatrix);
     }
 
     const matrices = Object.assign({
@@ -348,7 +345,7 @@ export default class Viewport {
       this.center = this._getCenterInWorld({longitude, latitude});
 
       // Flip Y to match the orientation of the Mercator plane
-      this.viewMatrixUncentered = mat4_scale([], viewMatrix, [1, -1, 1]);
+      this.viewMatrixUncentered = mat4.scale([], viewMatrix, [1, -1, 1]);
 
       // Make a centered version of the matrix for projection modes without an offset
       this.viewMatrix = new Matrix4()
@@ -415,14 +412,14 @@ export default class Viewport {
     // Note: As usual, matrix operations should be applied in "reverse" order
     // since vectors will be multiplied in from the right during transformation
     const vpm = createMat4();
-    mat4_multiply(vpm, vpm, this.projectionMatrix);
-    mat4_multiply(vpm, vpm, this.viewMatrix);
+    mat4.multiply(vpm, vpm, this.projectionMatrix);
+    mat4.multiply(vpm, vpm, this.viewMatrix);
     this.viewProjectionMatrix = vpm;
 
     // console.log('VPM', this.viewMatrix, this.projectionMatrix, this.viewProjectionMatrix);
 
     // Calculate inverse view matrix
-    this.viewMatrixInverse = mat4_invert([], this.viewMatrix) || this.viewMatrix;
+    this.viewMatrixInverse = mat4.invert([], this.viewMatrix) || this.viewMatrix;
 
     // Decompose camera directions
     const {eye, direction, up} = extractCameraVectors({
@@ -448,13 +445,13 @@ export default class Viewport {
     // matrix for conversion from world location to screen (pixel) coordinates
     const viewportMatrix = createMat4(); // matrix from NDC to viewport.
     const pixelProjectionMatrix = createMat4(); // matrix from world space to viewport.
-    mat4_scale(viewportMatrix, viewportMatrix, [this.width / 2, -this.height / 2, 1]);
-    mat4_translate(viewportMatrix, viewportMatrix, [1, -1, 0]);
-    mat4_multiply(pixelProjectionMatrix, viewportMatrix, this.viewProjectionMatrix);
+    mat4.scale(viewportMatrix, viewportMatrix, [this.width / 2, -this.height / 2, 1]);
+    mat4.translate(viewportMatrix, viewportMatrix, [1, -1, 0]);
+    mat4.multiply(pixelProjectionMatrix, viewportMatrix, this.viewProjectionMatrix);
     this.pixelProjectionMatrix = pixelProjectionMatrix;
     this.viewportMatrix = viewportMatrix;
 
-    this.pixelUnprojectionMatrix = mat4_invert(createMat4(), this.pixelProjectionMatrix);
+    this.pixelUnprojectionMatrix = mat4.invert(createMat4(), this.pixelProjectionMatrix);
     if (!this.pixelUnprojectionMatrix) {
       log.warn('Pixel project matrix not invertible')();
       // throw new Error('Pixel project matrix not invertible');

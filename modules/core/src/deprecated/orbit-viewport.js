@@ -3,14 +3,7 @@ import Viewport from '../viewports/viewport';
 
 import {createMat4, transformVector} from '../utils/math-utils';
 
-import mat4_multiply from 'gl-mat4/multiply';
-import mat4_lookAt from 'gl-mat4/lookAt';
-import mat4_scale from 'gl-mat4/scale';
-import mat4_perspective from 'gl-mat4/perspective';
-import mat4_translate from 'gl-mat4/translate';
-import mat4_rotateX from 'gl-mat4/rotateX';
-import mat4_rotateY from 'gl-mat4/rotateY';
-import mat4_rotateZ from 'gl-mat4/rotateZ';
+import * as mat4 from 'gl-matrix/mat4';
 
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
@@ -40,28 +33,28 @@ export default class OrbitViewport extends Viewport {
     // TODO - Once OrbitViewport is aligned with the View system, deprecated it
     // log.deprecated('OrbitViewport', 'OrbitView')();
 
-    const rotationMatrix = mat4_rotateX([], createMat4(), (-rotationX / 180) * Math.PI);
+    const rotationMatrix = mat4.rotateX([], createMat4(), (-rotationX / 180) * Math.PI);
     if (orbitAxis === 'Z') {
-      mat4_rotateZ(rotationMatrix, rotationMatrix, (-rotationOrbit / 180) * Math.PI);
+      mat4.rotateZ(rotationMatrix, rotationMatrix, (-rotationOrbit / 180) * Math.PI);
     } else {
-      mat4_rotateY(rotationMatrix, rotationMatrix, (-rotationOrbit / 180) * Math.PI);
+      mat4.rotateY(rotationMatrix, rotationMatrix, (-rotationOrbit / 180) * Math.PI);
     }
 
     const translateMatrix = createMat4();
-    mat4_scale(translateMatrix, translateMatrix, [zoom, zoom, zoom]);
-    mat4_translate(translateMatrix, translateMatrix, [-lookAt[0], -lookAt[1], -lookAt[2]]);
+    mat4.scale(translateMatrix, translateMatrix, [zoom, zoom, zoom]);
+    mat4.translate(translateMatrix, translateMatrix, [-lookAt[0], -lookAt[1], -lookAt[2]]);
 
-    const viewMatrix = mat4_lookAt([], [0, 0, distance], [0, 0, 0], up);
+    const viewMatrix = mat4.lookAt([], [0, 0, distance], [0, 0, 0], up);
     const fovRadians = fov * DEGREES_TO_RADIANS;
     const aspect = width / height;
-    const perspectiveMatrix = mat4_perspective([], fovRadians, aspect, near, far);
+    const perspectiveMatrix = mat4.perspective([], fovRadians, aspect, near, far);
 
     super({
       id,
-      viewMatrix: mat4_multiply(
+      viewMatrix: mat4.multiply(
         viewMatrix,
         viewMatrix,
-        mat4_multiply(rotationMatrix, rotationMatrix, translateMatrix)
+        mat4.multiply(rotationMatrix, rotationMatrix, translateMatrix)
       ),
       projectionMatrix: perspectiveMatrix,
       width,
