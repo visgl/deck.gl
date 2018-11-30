@@ -85,7 +85,6 @@ vec3 lighting_getLightColor(vec3 surfaceColor, vec3 light_direction, vec3 view_d
 }
 
 vec3 lighting_getLightColor(vec3 surfaceColor, vec3 position_worldspace_vec3, vec3 normals_worldspace) {
-  float lightWeight = 0.0;
   vec3 normals_worldspace_vec3 = normals_worldspace.xyz;
   vec3 camera_pos_worldspace = project_uCameraPosition;
   vec3 view_direction = normalize(camera_pos_worldspace - position_worldspace_vec3);
