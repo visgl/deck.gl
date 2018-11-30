@@ -109,10 +109,6 @@ const CONFIGS = {
       entry: {
         app: resolve('./app.js')
       },
-      output: {
-        library: 'App',
-        filename: 'app.js'
-      },
       plugins: [new HtmlWebpackPlugin()]
     }),
 

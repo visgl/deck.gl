@@ -176,9 +176,16 @@ async function validateWithWaitingTime(child, folder, threshold, compare = true)
   let example = '';
 
   for (let i = 0; i < 3; i++) {
-    example = `testcase${i}`;
+    // eslint-disable-next-line no-loop-func
+    example = await page.evaluate(() => {
+      return window.nextTestCase(); //eslint-disable-line
+    });
+
     console.log(`Begin the ${example}`);
 
+    if (i) {
+      await sendMouseMoveEvent(page, 1, 0, false);
+    }
     await allEvents(page, threshold, example); //eslint-disable-line
     console.log('After all events');
     if (compare) {
@@ -186,10 +193,6 @@ async function validateWithWaitingTime(child, folder, threshold, compare = true)
     } else {
       await createGoldenImage(example);
     }
-    await page.evaluate(() => (example = App.nextTestCase())); //eslint-disable-line
-
-    await page.waitFor(WAIT_TIME);
-    await sendMouseMoveEvent(page, 1, 0, false);
   }
 
   child.kill();

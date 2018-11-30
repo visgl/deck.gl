@@ -12,11 +12,6 @@ import DeckGL, {
 import {OrthographicView} from 'deck.gl';
 import {default as choropleths} from '../../examples/layer-browser/data/sf.zip.geo';
 
-let index = 0;
-export function nextTestCase() {
-  return ++index;
-}
-
 function getPointCloud() {
   const pointCloud = [];
   const RESOLUTION = 100;
@@ -89,7 +84,7 @@ const TEST_CASES = [
     controller: true
   },
   {
-    name: 'Scatterplot',
+    name: 'scatterplot',
     layers: [
       new ScatterplotLayer({
         id: 'nodes',
@@ -136,18 +131,28 @@ export class App extends Component {
     super(props);
 
     this.state = {
-      viewState: props.testCases[index].initialViewState
+      viewState: props.testCases[0].initialViewState
     };
 
     this._onViewStateChange = this._onViewStateChange.bind(this);
+    this._nextTestCase = this._nextTestCase.bind(this);
+    window.nextTestCase = this._nextTestCase; //eslint-disable-line
+    this.index = -1;
+    this.name = null;
   }
 
   _onViewStateChange({viewState}) {
     this.setState({viewState});
   }
 
+  _nextTestCase() {
+    ++this.index;
+    return this.props.testCases[this.index].name;
+  }
+
   render() {
     const options = {onViewStateChange: this._onViewStateChange};
+    const index = this.index < 0 ? 0 : this.index;
     options.viewState = this.state.viewState;
     if (!this.name || this.name !== this.props.testCases[index].name) {
       this.name = this.props.testCases[index].name;
