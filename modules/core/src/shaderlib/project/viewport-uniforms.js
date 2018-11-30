@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import mat4_multiply from 'gl-mat4/multiply';
-import vec4_transformMat4 from 'gl-vec4/transformMat4';
+import * as mat4 from 'gl-matrix/mat4';
+import * as vec4 from 'gl-matrix/vec4';
 
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
@@ -115,7 +115,7 @@ function calculateMatrixAndOffset({
       );
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-      projectionCenter = vec4_transformMat4(
+      projectionCenter = vec4.transformMat4(
         [],
         [positionPixels[0], positionPixels[1], 0.0, 1.0],
         viewProjectionMatrix
@@ -127,8 +127,8 @@ function calculateMatrixAndOffset({
       // Zero out 4th coordinate ("after" model matrix) - avoids further translations
       // viewMatrix = new Matrix4(viewMatrixUncentered || viewMatrix)
       //   .multiplyRight(VECTOR_TO_POINT_MATRIX);
-      viewProjectionMatrix = mat4_multiply([], projectionMatrix, viewMatrix);
-      viewProjectionMatrix = mat4_multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
+      viewProjectionMatrix = mat4.multiply([], projectionMatrix, viewMatrix);
+      viewProjectionMatrix = mat4.multiply([], viewProjectionMatrix, VECTOR_TO_POINT_MATRIX);
       break;
 
     default:

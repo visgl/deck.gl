@@ -5,8 +5,8 @@
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 import {LNGLAT_AUTO_OFFSET_ZOOM_THRESHOLD} from './viewport-uniforms';
 
-import vec4_transformMat4 from 'gl-vec4/transformMat4';
-import vec3_sub from 'gl-vec3/subtract';
+import * as vec4 from 'gl-matrix/vec4';
+import * as vec3 from 'gl-matrix/vec3';
 import {getDistanceScales, addMetersToLngLat} from 'viewport-mercator-project';
 
 // In project.glsl, offset modes calculate z differently from LNG_LAT mode.
@@ -61,7 +61,7 @@ export function getWorldPosition(
   let [x, y, z] = position;
 
   if (modelMatrix) {
-    [x, y, z] = vec4_transformMat4([], [x, y, z, 1.0], modelMatrix);
+    [x, y, z] = vec4.transformMat4([], [x, y, z, 1.0], modelMatrix);
   }
 
   switch (coordinateSystem) {
@@ -125,7 +125,7 @@ export function projectPosition(position, params) {
         offsetMode: true
       });
       const originWorld = lngLatZToWorldPosition(coordinateOrigin, viewport, true);
-      vec3_sub(worldPosition, worldPosition, originWorld);
+      vec3.sub(worldPosition, worldPosition, originWorld);
 
       return worldPosition;
     }

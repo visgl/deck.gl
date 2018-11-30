@@ -31,9 +31,7 @@ import {
 } from 'viewport-mercator-project';
 
 // TODO - import from math.gl
-/* eslint-disable camelcase */
-import vec2_add from 'gl-vec2/add';
-import vec2_negate from 'gl-vec2/negate';
+import * as vec2 from 'gl-matrix/vec2';
 
 import assert from '../utils/assert';
 
@@ -202,8 +200,8 @@ export default class WebMercatorViewport extends Viewport {
     const fromLocation = pixelsToWorld(pos, this.pixelUnprojectionMatrix);
     const toLocation = this.projectFlat(lngLat);
 
-    const translate = vec2_add([], toLocation, vec2_negate([], fromLocation));
-    const newCenter = vec2_add([], this.center, translate);
+    const translate = vec2.add([], toLocation, vec2.negate([], fromLocation));
+    const newCenter = vec2.add([], this.center, translate);
 
     return this.unprojectFlat(newCenter);
   }

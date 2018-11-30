@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 import {Viewport} from 'deck.gl';
-import mat4 from 'gl-mat4';
+import * as mat4 from 'gl-matrix/mat4';
 
 const TEST_DATA = {
   viewport: {
