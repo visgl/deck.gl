@@ -34,7 +34,7 @@ The picking engine returns "picking info" objects which contains a variety of fi
 
 ### Using Pure JS
 
-```
+```js
 <canvas id="deck-canvas"></canvas>
 <div id="tooltip" style="position: absolute; z-index: 1, pointer-events: none;"></div>
 ```
