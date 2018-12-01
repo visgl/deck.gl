@@ -21,20 +21,23 @@ const App = ({data, viewport}) => {
    * ]
    */
 
-  const layers = [
-    new TextLayer({
-      id: 'text-layer',
-      data,
-      pickable: true,
-      getPosition: d => d.coordinates,
-      getText: d => d.name,
-      getSize: 32,
-      getAngle: 0,
-      getTextAnchor: 'middle',
-      getAlignmentBaseline: 'center',
-      onHover: ({object}) => setTooltip(`${object.name}\n${object.address}`)
-    })
-  ];
+  const layer = new TextLayer({
+    id: 'text-layer',
+    data,
+    pickable: true,
+    getPosition: d => d.coordinates,
+    getText: d => d.name,
+    getSize: 32,
+    getAngle: 0,
+    getTextAnchor: 'middle',
+    getAlignmentBaseline: 'center',
+    onHover: ({object, x, y}) => {
+      const tooltip = `${object.name}\n${object.address}`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
+  });
 
   return <DeckGL {...viewport} layers={[layer]} />;
 };

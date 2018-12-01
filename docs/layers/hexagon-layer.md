@@ -33,7 +33,12 @@ const App = ({data, viewport}) => {
     radius: 200,
     elevationScale: 4,
     getPosition: d => d.COORDINATES,
-    onHover: ({object}) => setTooltip(`${object.centroid.join(', ')}\nCount: ${object.points.length}`)
+    onHover: ({object, x, y}) => {
+      const tooltip = `${object.centroid.join(', ')}\nCount: ${object.points.length}`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

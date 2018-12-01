@@ -34,7 +34,12 @@ const App = ({data, viewport}) => {
     getRadius: 100,
     getLineWidth: 1,
     getElevation: 30,
-    onHover: ({object}) => setTooltip(object.properties.name || object.properties.station)
+    onHover: ({object, x, y}) => {
+      const tooltip = object.properties.name || object.properties.station;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

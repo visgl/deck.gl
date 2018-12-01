@@ -40,7 +40,12 @@ const App = ({data, viewport}) => {
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
     getTargetColor: d => [Math.sqrt(d.outbound), 140, 0],
-    onHover: ({object}) => setTooltip(`${object.from.name} to ${object.to.name}`)
+    onHover: ({object, x, y}) => {
+      const tooltip = `${object.from.name} to ${object.to.name}`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
