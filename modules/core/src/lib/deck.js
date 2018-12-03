@@ -620,7 +620,7 @@ export default class Deck {
     let handled = false;
 
     if (layerHandler) {
-      handled = layerHandler(info, event);
+      handled = layerHandler.call(layer, info, event);
     }
     if (!handled && rootHandler) {
       rootHandler(info, event);
