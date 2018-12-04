@@ -28,7 +28,12 @@ const App = ({data, viewport}) => {
     maxColor: [0, 180, 0, 255],
     getPosition: d => d.COORDINATES,
     getWeight: d => d.SPACES,
-    onHover: ({object}) => setTooltip('aggregated cell')
+    onHover: ({object, x, y}) => {
+      const tooltip = 'aggregated cell';
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

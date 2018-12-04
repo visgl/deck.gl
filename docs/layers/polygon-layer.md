@@ -50,7 +50,12 @@ const App = ({data, viewport}) => {
     getFillColor: d => [d.population / d.area / 60, 140, 0],
     getLineColor: [80, 80, 80],
     getLineWidth: 1,
-    onHover: ({object}) => setTooltip(`${object.zipcode}\nPopulation: ${object.population}`)
+    onHover: ({object, x, y}) => {
+      const tooltip = `${object.zipcode}\nPopulation: ${object.population}`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

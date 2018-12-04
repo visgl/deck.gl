@@ -33,7 +33,12 @@ const App = ({data, viewport}) => {
     getPath: d => d.path,
     getColor: d => colorToRGBArray(d.color),
     getWidth: d => 5,
-    onHover: ({object}) => setTooltip(object.name)
+    onHover: ({object, x, y}) => {
+      const tooltip = object.name;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
