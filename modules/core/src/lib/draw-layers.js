@@ -23,6 +23,7 @@ import GL from 'luma.gl/constants';
 import {withParameters, setParameters, clear} from 'luma.gl';
 import log from '../utils/log';
 import assert from '../utils/assert';
+import {DEFAULT_HIGHLIGHT_COLOR} from './constants';
 
 const LOG_PRIORITY_DRAW = 2;
 
@@ -322,7 +323,12 @@ function getObjectHighlightParameters(layer) {
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
   const {highlightedObjectIndex, highlightColor} = layer.props;
   const parameters = {
-    pickingHighlightColor: highlightColor
+    pickingHighlightColor: [
+      highlightColor[0],
+      highlightColor[1],
+      highlightColor[2],
+      highlightColor[3] || DEFAULT_HIGHLIGHT_COLOR[3]
+    ]
   };
 
   // Update picking module settings if highlightedObjectIndex is set.

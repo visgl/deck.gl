@@ -167,7 +167,7 @@ Requires `pickable` to be true.
 
 * Default: `[0, 0, 128, 128]`
 
-RGBA color to be used to render highlighted object.
+RGBA color to be used to render highlighted object. When 3 component (RGB) array is specified, a default value of 128 is used for alpha.
 
 ##### `highlightedObjectIndex` (Integer, optional)
 
