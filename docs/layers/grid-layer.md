@@ -33,7 +33,12 @@ const App = ({data, viewport}) => {
     cellSize: 200,
     elevationScale: 4,
     getPosition: d => d.COORDINATES,
-    onHover: ({object}) => setTooltip(`${object.position.join(', ')}\nCount: ${object.count}`)
+    onHover: ({object, x, y}) => {
+      const tooltip = `${object.position.join(', ')}\nCount: ${object.count}`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

@@ -29,6 +29,101 @@ The picking engine returns "picking info" objects which contains a variety of fi
 
 > Specific deck.gl Layers may add additional fields to the picking `info` object. Check the documentation of each layer.
 
+
+## Example: Display a Tooltip for Hovered Object
+
+### Using Pure JS
+
+```js
+<canvas id="deck-canvas"></canvas>
+<div id="tooltip" style="position: absolute; z-index: 1, pointer-events: none;"></div>
+```
+
+```js
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+
+const deck = new Deck({
+  canvas: 'deck-canvas',
+  initialViewState: {longitude: -122.45, latitude: 37.78, zoom: 12},
+  controller: true,
+  layers: [
+    new ScatterplotLayer({
+      data: [
+        {position: [-122.45, 37.78], message: 'Hover over me'}
+      ],
+      getPosition: d => d.position,
+      getRadius: 1000,
+      getColor: [255, 255, 0],
+      // Enable picking
+      pickable: true,
+      // Update tooltip
+      onHover: info => setTooltip(info.object, info.x, info.y)
+    })
+  ]
+});
+
+function setTooltip(object, x, y) {
+  const el = document.getElementById('tooltip');
+  if (object) {
+    el.innerHTML = object.message;
+    el.style.display = 'block';
+    el.style.left = x;
+    el.style.top = y;
+  } else {
+    el.style.display = 'none';
+  }
+}
+```
+
+### Using React
+
+```js
+import React from 'react';
+import {DeckGL, ScatterplotLayer} from 'deck.gl';
+
+class App extends React.Component {
+
+  _renderTooltip() {
+    const {hoveredObject, pointerX, pointerY} = this.state || {};
+    return hoveredObject && (
+      <div style={{position: 'absolute', zIndex: 1, pointerEvents: 'none', left: pointerX, top: pointerY}}>
+        { hoveredObject.message }
+      </div>
+    );
+  }
+
+  render() {
+    const layers = [
+      new ScatterplotLayer({
+        data: [
+          {position: [-122.45, 37.78], message: 'Hover over me'}
+        ],
+        getPosition: d => d.position,
+        getRadius: 1000,
+        getColor: [255, 255, 0],
+        // Enable picking
+        pickable: true,
+        // Update app state
+        onHover: info => this.setState({
+          hoveredObject: info.object,
+          pointerX: info.x,
+          pointerY: info.y
+        })
+      })
+    ];
+
+    return (
+      <DeckGL initialViewState={{longitude: -122.45, latitude: 27.78, zoom: 12}}
+          controller={true}
+          layers={layers} >
+        { this._renderTooltip() }
+      </DeckGL>
+    );
+  }
+}
+```
+
 ## Calling the Picking Engine Directly
 
 The picking engine is exposed through the [`DeckGL.pickObject`](/docs/api-reference/react/deckgl.md) and [`DeckGL.pickObjects`](/docs/api-reference/react/deckgl.md) methods. These methods allow you to query what layers and objects within those layers are under a specific point or within a specified rectangle. They return `Picking Info` objects as described below.
