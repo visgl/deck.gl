@@ -14,7 +14,7 @@ case $MODE in
     break;;
 
   "prod")
-    lerna publish --cd-version minor
+    lerna publish --cd-version patch
     break;;
 
   *) ;;

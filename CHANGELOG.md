@@ -17,6 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.1] - Dec 4 2018
+
+- Fix auto-offset mode bug (#2464)
+- Fix PolygonLayer bug: getPolygon update trigger not working (#2473)
+- Fix Mapbox integration bug - do not override canvas size if using external gl context (#2465)
+- Fix event callbacks `this` ref (#2471)
+
 #### [6.3.0] - Nov 19 2018
 
 - Fix async prop comparison bug (#2437)
