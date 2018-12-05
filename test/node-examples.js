@@ -25,21 +25,14 @@ const puppeteer = require('puppeteer');
 const console = require('console');
 const process = require('process');
 
-const fs = require('fs');
 const path = require('path');
-const PNG = require('pngjs').PNG;
-const pixelmatch = require('pixelmatch');
+
+const compareImage = require('./compare-image');
 
 const LIB_DIR = path.resolve(__dirname, '..');
 const EXAMPLES_DIR = path.resolve(LIB_DIR, 'examples');
 
 let exampleDir;
-
-function printResult(diffRatio, threshold) {
-  return diffRatio <= threshold
-    ? console.log('\x1b[32m%s\x1b[0m', 'Rendering test Passed!')
-    : console.log('\x1b[31m%s\x1b[0m', 'Rendering test failed!');
-}
 
 async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
   const browser = await puppeteer.launch({
@@ -53,40 +46,17 @@ async function validateWithWaitingTime(child, folder, waitingTime, threshold) {
   await page.waitFor(waitingTime);
   await page.screenshot({path: 'new.png'});
 
-  const goldImageData = fs.readFileSync(
-    path.resolve(
-      LIB_DIR,
-      'test/render/golden-images/examples/',
-      `${folder.replace(/\//g, '_')}.png`
-    )
-  );
-  const goldImage = PNG.sync.read(goldImageData);
-  const newImageData = fs.readFileSync('new.png');
-  const newImage = PNG.sync.read(newImageData);
-  const diffImage = new PNG({width: goldImage.width, height: goldImage.height});
-  const pixelDiffSize = pixelmatch(
-    goldImage.data,
-    newImage.data,
-    diffImage.data,
-    goldImage.width,
-    goldImage.height,
-    {threshold: 0.105, includeAA: true}
-  );
-  const pixelDiffRatio = pixelDiffSize / (goldImage.width * goldImage.height);
-
-  console.log(`Mismatched pixel number: ${pixelDiffSize}`);
-  console.log(`Mismatched pixel ratio: ${pixelDiffRatio}`);
-
-  const diffImageData = PNG.sync.write(diffImage, {colorType: 6});
-  fs.writeFileSync('diff.png', diffImageData);
-  fs.unlinkSync('new.png');
-  fs.unlinkSync('diff.png');
+  const golderImageName = `${LIB_DIR}/test/render/golden-images/examples/${folder.replace(
+    /\//g,
+    '_'
+  )}.png`;
+  const result = compareImage('new.png', golderImageName, threshold);
 
   child.kill();
   await page.waitFor(1000);
   await browser.close();
-  printResult(pixelDiffRatio, threshold);
-  return pixelDiffRatio <= threshold;
+
+  return result;
 }
 
 async function yarnAndLaunchWebpack() {

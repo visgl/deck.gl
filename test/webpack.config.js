@@ -83,7 +83,6 @@ const CONFIGS = {
       entry: {
         'test-browser': resolve('./test/bench/browser.js')
       },
-
       plugins: [new HtmlWebpackPlugin()]
     }),
 
@@ -101,6 +100,14 @@ const CONFIGS = {
       // Bundle the tests for running in the browser
       entry: {
         'test-browser': resolve('./test/render/old/test-rendering.react.js')
+      },
+      plugins: [new HtmlWebpackPlugin()]
+    }),
+
+  interaction: env =>
+    Object.assign({}, TEST_CONFIG, {
+      entry: {
+        app: resolve('./app.js')
       },
       plugins: [new HtmlWebpackPlugin()]
     }),
@@ -185,7 +192,9 @@ function getConfig(env) {
   if (env.analyze) {
     return CONFIGS.analyze(env);
   }
-
+  if (env.interaction) {
+    return CONFIGS.interaction(env);
+  }
   return CONFIGS.bundle(env);
 }
 
