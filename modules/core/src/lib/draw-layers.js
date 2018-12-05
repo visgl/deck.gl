@@ -322,7 +322,12 @@ function getObjectHighlightParameters(layer) {
   // TODO: Add warning if 'highlightedObjectIndex' is > numberOfInstances of the model.
   const {highlightedObjectIndex, highlightColor} = layer.props;
   const parameters = {
-    pickingHighlightColor: highlightColor
+    pickingHighlightColor: [
+      highlightColor[0],
+      highlightColor[1],
+      highlightColor[2],
+      highlightColor[3] || 255
+    ]
   };
 
   // Update picking module settings if highlightedObjectIndex is set.
