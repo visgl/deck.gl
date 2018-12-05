@@ -21,7 +21,7 @@
 /* eslint-disable react/no-direct-mutation-state */
 /* global fetch */
 /* global window */
-import {COORDINATE_SYSTEM, DEFAULT_HIGHLIGHT_COLOR} from './constants';
+import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
 import {diffProps, validateProps} from '../lifecycle/props';
@@ -87,7 +87,7 @@ const defaultProps = {
   // Selection/Highlighting
   highlightedObjectIndex: null,
   autoHighlight: false,
-  highlightColor: {type: 'color', value: DEFAULT_HIGHLIGHT_COLOR.slice()}
+  highlightColor: {type: 'color', value: [0, 0, 128, 128]}
 };
 
 export default class Layer extends Component {

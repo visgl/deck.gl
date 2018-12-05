@@ -23,7 +23,6 @@ import GL from 'luma.gl/constants';
 import {withParameters, setParameters, clear} from 'luma.gl';
 import log from '../utils/log';
 import assert from '../utils/assert';
-import {DEFAULT_HIGHLIGHT_COLOR} from './constants';
 
 const LOG_PRIORITY_DRAW = 2;
 
@@ -327,7 +326,7 @@ function getObjectHighlightParameters(layer) {
       highlightColor[0],
       highlightColor[1],
       highlightColor[2],
-      highlightColor[3] || DEFAULT_HIGHLIGHT_COLOR[3]
+      highlightColor[3] || 255
     ]
   };
 

@@ -49,5 +49,3 @@ export const EVENTS = {
   panmove: {handler: 'onDrag'},
   panend: {handler: 'onDragEnd'}
 };
-
-export const DEFAULT_HIGHLIGHT_COLOR = [0, 0, 128, 128];
