@@ -147,7 +147,7 @@ function diffUpdateTriggers(props, oldProps) {
 
   // If the 'all' updateTrigger fires, ignore testing others
   if ('all' in props.updateTriggers) {
-    const diffReason = diffUpdateTrigger(oldProps, props, 'all');
+    const diffReason = diffUpdateTrigger(props, oldProps, 'all');
     if (diffReason) {
       return {all: true};
     }
@@ -158,7 +158,7 @@ function diffUpdateTriggers(props, oldProps) {
   // If the 'all' updateTrigger didn't fire, need to check all others
   for (const triggerName in props.updateTriggers) {
     if (triggerName !== 'all') {
-      const diffReason = diffUpdateTrigger(oldProps, props, triggerName);
+      const diffReason = diffUpdateTrigger(props, oldProps, triggerName);
       if (diffReason) {
         triggerChanged[triggerName] = true;
         reason = triggerChanged;
@@ -170,8 +170,10 @@ function diffUpdateTriggers(props, oldProps) {
 }
 
 function diffUpdateTrigger(props, oldProps, triggerName) {
-  const newTriggers = props.updateTriggers[triggerName] || {};
-  const oldTriggers = oldProps.updateTriggers[triggerName] || {};
+  let newTriggers = props.updateTriggers[triggerName];
+  newTriggers = newTriggers === undefined || newTriggers === null ? {} : newTriggers;
+  let oldTriggers = oldProps.updateTriggers[triggerName];
+  oldTriggers = oldTriggers === undefined || oldTriggers === null ? {} : oldTriggers;
   const diffReason = compareProps({
     oldProps: oldTriggers,
     newProps: newTriggers,
