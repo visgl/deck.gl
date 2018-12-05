@@ -178,8 +178,9 @@ test('Layer#validateProps', t => {
   t.end();
 });
 
+// eslint-disable-next-line max-statements
 test('Layer#diffProps', t => {
-  const layer = new SubLayer(LAYER_PROPS);
+  let layer = new SubLayer(LAYER_PROPS);
   t.doesNotThrow(() => testInitializeLayer({layer}), 'Layer initialized OK');
 
   layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
@@ -208,6 +209,38 @@ test('Layer#diffProps', t => {
   );
   t.ok(spy.called, 'updateTriggers fired');
   spy.restore();
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+  testInitializeLayer({layer});
+  layer.diffProps(
+    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}})).props,
+    layer.props
+  );
+  t.false(layer.getChangeFlags().updateTriggersChanged, 'updateTriggers not fired');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+  testInitializeLayer({layer});
+  layer.diffProps(
+    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 1}})).props,
+    layer.props
+  );
+  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+  testInitializeLayer({layer});
+  layer.diffProps(
+    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: null}})).props,
+    layer.props
+  );
+  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
+
+  layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
+  testInitializeLayer({layer});
+  layer.diffProps(
+    new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: undefined}})).props,
+    layer.props
+  );
+  t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
 
   t.end();
 });
