@@ -15,7 +15,7 @@ export function pointToDensityGridData({
   gpuGridAggregator,
   gpuAggregation,
   aggregationFlags,
-  getWeight = null,
+  getWeight = d => [1.0, 0, 0],
   fp64 = false,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   viewport = null,

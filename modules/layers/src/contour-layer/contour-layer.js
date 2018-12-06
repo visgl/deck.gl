@@ -28,7 +28,7 @@ import {default as LineLayer} from '../line-layer/line-layer';
 import {default as SolidPolygonLayer} from '../solid-polygon-layer/solid-polygon-layer';
 import {generateContours} from './contour-utils';
 
-const DEFAULT_COLOR = [255, 255, 255];
+const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;
 const DEFAULT_THRESHOLD = 1;
 

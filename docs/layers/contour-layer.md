@@ -29,9 +29,9 @@ const App = ({data, viewport}) => {
     id: 'contourLayer',
     // Three contours are rendered.
     contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 1}, // => Isoline for threshold 1
+      {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
       {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
-      {threshold: [6, 10], color: [0, 0, 255]} // => Isoband for threshold range [6, 10)
+      {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
     ],
     cellSize: 200,
     getPosition: d => d.COORDINATES,
@@ -72,7 +72,7 @@ Array of objects with following keys
   - Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
   - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
 
-* `color` (Array, optional) : RGB color array to be used to render the contour, if not specified a default value of `[255, 255, 255]` is used.
+* `color` (Array, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
 
 * `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
 
