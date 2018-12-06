@@ -257,6 +257,23 @@ const ContourLayerExample = {
   }
 };
 
+const ContourLayerBandsExample = {
+  layer: ContourLayer,
+  getData: () => dataSamples.points,
+  props: {
+    id: 'contourLayer',
+    cellSize: 200,
+    getPosition: d => d.COORDINATES,
+    gpuAggregation: true,
+    zOffsetScale: 5,
+    contours: [
+      {threshold: [1, 5], color: [255, 0, 0]},
+      {threshold: [5, 15], color: [0, 255, 0]},
+      {threshold: [15, 1000], color: [0, 0, 255]}
+    ]
+  }
+};
+
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
@@ -378,6 +395,7 @@ export default {
     HexagonCellLayer: HexagonCellLayerExample,
     HexagonLayer: HexagonLayerExample,
     TextLayer: TextLayerExample,
-    ContourLayer: ContourLayerExample
+    ContourLayer: ContourLayerExample,
+    'ContourLayer (Bands)': ContourLayerBandsExample
   }
 };
