@@ -29,3 +29,4 @@ import './grid-aggregator.spec';
 import './hexagon-cell-layer.spec';
 import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';
+import './contour-layer/marching-squares.spec';

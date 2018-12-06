@@ -85,7 +85,11 @@ vec3 project_normal(vec3 vector) {
 }
 
 vec4 project_offset_(vec4 offset) {
-  vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * offset.y;
+  float dy = offset.y;
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
+    dy = clamp(dy, -1., 1.);
+  }
+  vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * dy;
   return vec4(offset.xyz * pixelsPerUnit, offset.w);
 }
 
