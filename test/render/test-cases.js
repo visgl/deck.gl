@@ -86,6 +86,20 @@ export const HEIGHT = 450;
 export const COLOR_DELTA_THRESHOLD = 255 * 0.05;
 // Percentage of pixels that must be the same for the test to pass
 export const TEST_PASS_THRESHOLD = 0.99;
+const screenSpaceData = [
+  [0, -100],
+  [0, -110],
+  [0, -115],
+  [10, -100],
+  [0, 100],
+  [0, 105],
+  [-100, -100],
+  [-100, -100],
+  [100, 10],
+  [100, 12],
+  [100, 100],
+  [110, 90]
+];
 
 export const TEST_CASES = [
   // First person
@@ -191,20 +205,7 @@ export const TEST_CASES = [
     layers: [
       new ScreenGridLayer({
         id: 'screengrid-infoviz',
-        data: [
-          [0, -100],
-          [0, -110],
-          [0, -115],
-          [10, -100],
-          [0, 100],
-          [0, 105],
-          [-100, -100],
-          [-100, -100],
-          [100, 10],
-          [100, 12],
-          [100, 100],
-          [110, 90]
-        ],
+        data: screenSpaceData,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d,
         cellSizePixels: 40,
@@ -227,20 +228,7 @@ export const TEST_CASES = [
     layers: [
       new ContourLayer({
         id: 'contour-infoviz',
-        data: [
-          [0, -100],
-          [0, -110],
-          [0, -115],
-          [10, -100],
-          [0, 100],
-          [0, 105],
-          [-100, -100],
-          [-100, -100],
-          [100, 10],
-          [100, 12],
-          [100, 100],
-          [110, 90]
-        ],
+        data: screenSpaceData,
         getPosition: d => d,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         cellSize: 40,
@@ -255,9 +243,34 @@ export const TEST_CASES = [
     ],
     referenceImageUrl: './test/render/golden-images/contour-infoviz.png'
   },
+  {
+    name: 'contour-isobands-infoviz',
+    views: [new OrthographicView()],
+    viewState: {
+      left: -WIDTH / 2,
+      top: -HEIGHT / 2,
+      right: WIDTH / 2,
+      bottom: HEIGHT / 2
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-isobands-infoviz',
+        data: screenSpaceData,
+        getPosition: d => d,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        cellSize: 40,
+        opacity: 1,
+        contours: [
+          {threshold: [1, 2], color: [150, 0, 0]},
+          {threshold: [2, 5], color: [0, 150, 0]}
+        ],
+        gpuAggregation: false
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/contour-infoviz_border_ref.png'
+  },
 
   // GEOSPATIAL
-
   {
     name: 'polygon-lnglat',
     viewState: {
@@ -1277,6 +1290,34 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/contour-lnglat.png',
+    ignoreGPUs: [`Intel`]
+  },
+  {
+    name: 'contour-isobands-lnglat',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-isobands-lnglat',
+        data: dataSamples.points,
+        cellSize: 200,
+        opacity: 1,
+        getPosition: d => d.COORDINATES,
+        lightSettings: LIGHT_SETTINGS,
+        contours: [
+          {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
+          {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},
+          {threshold: [15, 1000], color: [0, 0, 255]}
+        ],
+        gpuAggregation: true
+      })
+    ],
+    referenceImageUrl: './test/render/golden-images/contour-isobands-lnglat.png',
     ignoreGPUs: [`Intel`]
   }
 ];
