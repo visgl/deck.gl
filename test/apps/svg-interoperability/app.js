@@ -146,8 +146,8 @@ class Root extends PureComponent {
   _getContours(bandsOn) {
     if (bandsOn) {
       return [
-        {threshold: [1, 25], color: [250, 0, 0], strokeWidth: 6},
-        {threshold: [25, 50], color: [0, 250, 0], strokeWidth: 5},
+        {threshold: [1, 25], color: [250, 0, 0, 128], strokeWidth: 6},
+        {threshold: [25, 50], color: [0, 250, 0, 200], strokeWidth: 5},
         {threshold: [50, 1000], color: [0, 0, 250], strokeWidth: 4}
       ];
     }

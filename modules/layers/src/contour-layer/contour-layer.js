@@ -213,7 +213,7 @@ export default class ContourLayer extends CompositeLayer {
     const {contours} = this.props;
     let color = DEFAULT_COLOR;
     contours.forEach(data => {
-      if (data.threshold === element.threshold) {
+      if (equals(data.threshold, element.threshold)) {
         color = data.color || DEFAULT_COLOR;
       }
     });
