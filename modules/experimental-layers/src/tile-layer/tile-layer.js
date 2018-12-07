@@ -4,7 +4,9 @@ import TileCache from './utils/tile-cache';
 const defaultProps = {
   renderSubLayers: props => new GeoJsonLayer(props),
   getTileData: ({x, y, z}) => Promise.resolve(null),
-  onDataLoaded: data => null,
+  onDataLoaded: () => {},
+  // eslint-disable-next-line
+  onGetTileDataError: err => console.err(err),
   maxZoom: null,
   minZoom: null,
   maxCacheSize: null
@@ -12,10 +14,10 @@ const defaultProps = {
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
-    const {maxZoom, minZoom, getTileData} = this.props;
+    const {maxZoom, minZoom, getTileData, onGetTileDataError} = this.props;
     this.state = {
       tiles: [],
-      tileCache: new TileCache({getTileData, maxZoom, minZoom}),
+      tileCache: new TileCache({getTileData, maxZoom, minZoom, onGetTileDataError}),
       isLoaded: false
     };
   }

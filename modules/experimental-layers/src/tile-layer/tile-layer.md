@@ -41,7 +41,7 @@ export const App = ({viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `onDataLoaded`,`maxZoom`, `minZoom` and `maxCacheSize`.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `onGetTileDataError`, `onDataLoaded`, `maxZoom`, `minZoom` and `maxCacheSize`.
 
 ##### `maxZoom` (Number)
 
@@ -73,6 +73,11 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 `getTileData` is a function that takes `{x, y, z}` as parameters, and returns a promise, which resolves to data in tile z-x-y.
 
 - Default: `getTileData: ({x, y, z}) => Promise.resolve(null)`
+
+##### `onGetTileDataError` (Function)
+`onGetTileDataError` called when a tile failed to load.
+
+- Default: `(err) => console.err(err)`
 
 ##### `renderSubLayer` (Function)
 

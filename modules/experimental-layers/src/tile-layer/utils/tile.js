@@ -1,15 +1,13 @@
-/* global console */
 export default class Tile {
-  constructor({getTileData, x, y, z}) {
+  constructor({getTileData, x, y, z, onGetTileDataError}) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.isVisible = true;
     this.getTileData = getTileData;
-
     this._data = null;
-    this._loader = null;
     this._loader = this._loadData();
+    this.onGetTileDataError = onGetTileDataError;
   }
 
   get data() {
@@ -29,16 +27,12 @@ export default class Tile {
       return null;
     }
     const getTileDataPromise = this.getTileData({x, y, z});
-    getTileDataPromise
+    return getTileDataPromise
       .then(buffers => {
         this._data = buffers;
         return buffers;
       })
-      .catch(err => {
-        // eslint-disable-next-line
-        console.warn(err);
-      });
-    return getTileDataPromise;
+      .catch(err => this.onGetTileDataError(err));
   }
 
   isOverlapped(tile) {
