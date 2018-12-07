@@ -11,10 +11,11 @@ export default class TileCache {
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
    * Cache size defaults to 5 * number of tiles in the current viewport
    */
-  constructor({getTileData, maxSize, maxZoom, minZoom}) {
+  constructor({getTileData, maxSize, maxZoom, minZoom, onGetTileDataError}) {
     // TODO: Instead of hardcode size, we should calculate how much memory left
     this._getTileData = getTileData;
     this._maxSize = maxSize;
+    this.onGetTileDataError = onGetTileDataError;
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
@@ -65,7 +66,8 @@ export default class TileCache {
           getTileData: _getTileData,
           x,
           y,
-          z
+          z,
+          onGetTileDataError: this.onGetTileDataError
         });
       }
       const tileId = this._getTileId(x, y, z);
