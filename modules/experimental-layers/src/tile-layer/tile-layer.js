@@ -4,6 +4,9 @@ import TileCache from './utils/tile-cache';
 const defaultProps = {
   renderSubLayers: props => new GeoJsonLayer(props),
   getTileData: ({x, y, z}) => Promise.resolve(null),
+  onDataLoaded: () => {},
+  // eslint-disable-next-line
+  onGetTileDataError: err => console.error(err),
   maxZoom: null,
   minZoom: null,
   maxCacheSize: null
@@ -11,10 +14,10 @@ const defaultProps = {
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
-    const {maxZoom, minZoom, getTileData} = this.props;
+    const {maxZoom, minZoom, getTileData, onGetTileDataError} = this.props;
     this.state = {
       tiles: [],
-      tileCache: new TileCache({getTileData, maxZoom, minZoom}),
+      tileCache: new TileCache({getTileData, maxZoom, minZoom, onGetTileDataError}),
       isLoaded: false
     };
   }
@@ -24,6 +27,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
+    const {onDataLoaded, onGetTileDataError} = props;
     if (
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData)
@@ -31,7 +35,13 @@ export default class TileLayer extends CompositeLayer {
       const {getTileData, maxZoom, minZoom, maxCacheSize} = props;
       this.state.tileCache.finalize();
       this.setState({
-        tileCache: new TileCache({getTileData, maxSize: maxCacheSize, maxZoom, minZoom})
+        tileCache: new TileCache({
+          getTileData,
+          maxSize: maxCacheSize,
+          maxZoom,
+          minZoom,
+          onGetTileDataError
+        })
       });
     }
     if (changeFlags.viewportChanged) {
@@ -43,9 +53,12 @@ export default class TileLayer extends CompositeLayer {
           const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
           this.setState({tiles, isLoaded: allCurrTilesLoaded});
           if (!allCurrTilesLoaded) {
-            Promise.all(currTiles.map(tile => tile.data)).then(() =>
-              this.setState({isLoaded: true})
-            );
+            Promise.all(currTiles.map(tile => tile.data)).then(() => {
+              this.setState({isLoaded: true});
+              onDataLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+            });
+          } else {
+            onDataLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
           }
         });
       }

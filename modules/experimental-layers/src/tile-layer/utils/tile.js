@@ -1,14 +1,14 @@
 export default class Tile {
-  constructor({getTileData, x, y, z}) {
+  constructor({getTileData, x, y, z, onGetTileDataError}) {
     this.x = x;
     this.y = y;
     this.z = z;
     this.isVisible = true;
     this.getTileData = getTileData;
-
     this._data = null;
-    this._loader = null;
+    this._isLoaded = false;
     this._loader = this._loadData();
+    this.onGetTileDataError = onGetTileDataError;
   }
 
   get data() {
@@ -19,7 +19,7 @@ export default class Tile {
   }
 
   get isLoaded() {
-    return Boolean(this._data);
+    return this._isLoaded;
   }
 
   _loadData() {
@@ -28,11 +28,16 @@ export default class Tile {
       return null;
     }
     const getTileDataPromise = this.getTileData({x, y, z});
-    getTileDataPromise.then(buffers => {
-      this._data = buffers;
-      return buffers;
-    });
-    return getTileDataPromise;
+    return getTileDataPromise
+      .then(buffers => {
+        this._data = buffers;
+        this._isLoaded = true;
+        return buffers;
+      })
+      .catch(err => {
+        this._isLoaded = true;
+        this.onGetTileDataError(err);
+      });
   }
 
   isOverlapped(tile) {
