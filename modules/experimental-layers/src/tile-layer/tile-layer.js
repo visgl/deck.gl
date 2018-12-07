@@ -4,6 +4,7 @@ import TileCache from './utils/tile-cache';
 const defaultProps = {
   renderSubLayers: props => new GeoJsonLayer(props),
   getTileData: ({x, y, z}) => Promise.resolve(null),
+  onDataLoaded: data => null,
   maxZoom: null,
   minZoom: null,
   maxCacheSize: null
@@ -24,6 +25,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
+    const {onDataLoaded} = props;
     if (
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData)
@@ -43,9 +45,12 @@ export default class TileLayer extends CompositeLayer {
           const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
           this.setState({tiles, isLoaded: allCurrTilesLoaded});
           if (!allCurrTilesLoaded) {
-            Promise.all(currTiles.map(tile => tile.data)).then(() =>
-              this.setState({isLoaded: true})
-            );
+            Promise.all(currTiles.map(tile => tile.data)).then(() => {
+              this.setState({isLoaded: true});
+              onDataLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+            });
+          } else {
+            onDataLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
           }
         });
       }

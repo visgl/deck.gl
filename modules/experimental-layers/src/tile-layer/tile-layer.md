@@ -41,7 +41,7 @@ export const App = ({viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `maxZoom`, `minZoom` and `maxCacheSize`.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `onDataLoaded`,`maxZoom`, `minZoom` and `maxCacheSize`.
 
 ##### `maxZoom` (Number)
 
@@ -62,6 +62,11 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 - Default: `null`
 
 ### Render Options
+
+##### `onDataLoaded` (Function)
+`onDataLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
+
+- Default: `onDataLoaded: (data) => null`
 
 ##### `getTileData` (Function)
 

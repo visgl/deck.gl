@@ -1,3 +1,4 @@
+/* global console */
 export default class Tile {
   constructor({getTileData, x, y, z}) {
     this.x = x;
@@ -28,10 +29,15 @@ export default class Tile {
       return null;
     }
     const getTileDataPromise = this.getTileData({x, y, z});
-    getTileDataPromise.then(buffers => {
-      this._data = buffers;
-      return buffers;
-    });
+    getTileDataPromise
+      .then(buffers => {
+        this._data = buffers;
+        return buffers;
+      })
+      .catch(err => {
+        // eslint-disable-next-line
+        console.warn(err);
+      });
     return getTileDataPromise;
   }
 
