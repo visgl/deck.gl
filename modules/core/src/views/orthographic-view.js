@@ -46,7 +46,8 @@ export default class OrthographicView extends View {
       width,
       height,
       viewMatrix: new Matrix4().lookAt({eye, lookAt, up}),
-      projectionMatrix: new Matrix4().ortho({left, right, bottom, top, near, far})
+      projectionMatrix: new Matrix4().ortho({left, right, bottom, top, near, far}),
+      zoom
     });
   }
 }

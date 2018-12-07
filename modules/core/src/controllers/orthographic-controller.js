@@ -23,6 +23,8 @@ class OrthographicState extends ViewState {
     startPanPosition,
     /* The offset on the view being grabbed when the operation first started */
     startPanOffset,
+    /* The point on the view being zoomed when the operation first started */
+    startZoomPosition,
     /** The zoom level when the first zoom operation started */
     startZoom
   }) {
@@ -119,6 +121,7 @@ class OrthographicState extends ViewState {
    */
   zoomStart({pos}) {
     return this._getUpdatedState({
+      startZoomPosition: pos,
       startZoom: this._viewportProps.zoom
     });
   }
@@ -129,9 +132,9 @@ class OrthographicState extends ViewState {
    *   relative scale.
    * @param {[number, number]} pos - current mouse cursor screen position
    */
-  zoom({pos, scale}) {
+  zoom({pos, startPos, scale}) {
     const {zoom, width, height, offset} = this._viewportProps;
-    let {startZoom} = this._interactiveState;
+    let {startZoom, startZoomPosition} = this._interactiveState;
     if (!Number.isFinite(startZoom)) {
       // We have two modes of zoom:
       // scroll zoom that are discrete events (transform from the current zoom level),
@@ -140,16 +143,17 @@ class OrthographicState extends ViewState {
       // If startZoom state is defined, then use the startZoom state;
       // otherwise assume discrete zooming
       startZoom = this._viewportProps.zoom;
+      startZoomPosition = startPos || pos;
     }
 
     const newZoom = this._calculateNewZoom({scale, startZoom});
     const centerX = width / 2 - offset[0];
     const centerY = height / 2 - offset[1];
-    const dX = (pos[0] - centerX) * (zoom / newZoom - 1);
-    const dY = (pos[1] - centerY) * (zoom / newZoom - 1);
+    const dX = (startZoomPosition[0] - centerX) * (zoom / newZoom - 1);
+    const dY = (startZoomPosition[1] - centerY) * (zoom / newZoom - 1);
     return this._getUpdatedState({
       zoom: newZoom,
-      offset: [offset[0] + dX, offset[1] + dY]
+      offset: [offset[0] - dX, offset[1] - dY]
     });
   }
 
@@ -159,6 +163,7 @@ class OrthographicState extends ViewState {
    */
   zoomEnd() {
     return this._getUpdatedState({
+      startZoomPosition: null,
       startZoom: null
     });
   }
