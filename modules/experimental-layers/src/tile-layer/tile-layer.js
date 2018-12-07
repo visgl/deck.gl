@@ -6,7 +6,7 @@ const defaultProps = {
   getTileData: ({x, y, z}) => Promise.resolve(null),
   onDataLoaded: () => {},
   // eslint-disable-next-line
-  onGetTileDataError: err => console.err(err),
+  onGetTileDataError: err => console.error(err),
   maxZoom: null,
   minZoom: null,
   maxCacheSize: null

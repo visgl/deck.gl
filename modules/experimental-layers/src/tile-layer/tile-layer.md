@@ -77,7 +77,7 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 ##### `onGetTileDataError` (Function)
 `onGetTileDataError` called when a tile failed to load.
 
-- Default: `(err) => console.err(err)`
+- Default: `(err) => console.error(err)`
 
 ##### `renderSubLayer` (Function)
 
