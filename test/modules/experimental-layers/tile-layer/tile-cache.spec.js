@@ -122,3 +122,21 @@ test('should not display anything if we zoom out too far', t => {
   });
   testTileCache.finalize();
 });
+
+test('should set isLoaded to true even when loading the tile throws an error', t => {
+  const errorTileCache = new TileCache({
+    getTileData: () => Promise.reject(null),
+    maxSize: cacheMaxSize,
+    minZoom,
+    maxZoom
+  });
+
+  errorTileCache.update(testViewport, tiles => {
+    // eslint-disable-next-line
+    window.setTimeout(() => {
+      t.equal(tiles[0].isLoaded, true);
+      t.end();
+    });
+  });
+  errorTileCache.finalize();
+});

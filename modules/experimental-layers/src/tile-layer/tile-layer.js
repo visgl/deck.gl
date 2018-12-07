@@ -27,7 +27,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
-    const {onDataLoaded} = props;
+    const {onDataLoaded, onGetTileDataError} = props;
     if (
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData)
@@ -35,7 +35,13 @@ export default class TileLayer extends CompositeLayer {
       const {getTileData, maxZoom, minZoom, maxCacheSize} = props;
       this.state.tileCache.finalize();
       this.setState({
-        tileCache: new TileCache({getTileData, maxSize: maxCacheSize, maxZoom, minZoom})
+        tileCache: new TileCache({
+          getTileData,
+          maxSize: maxCacheSize,
+          maxZoom,
+          minZoom,
+          onGetTileDataError
+        })
       });
     }
     if (changeFlags.viewportChanged) {
