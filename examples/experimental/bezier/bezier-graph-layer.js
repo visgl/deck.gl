@@ -31,10 +31,6 @@ export default class BezierGraphLayer extends CompositeLayer {
         id: 'nodes',
         data: nodes,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        parameters: {
-          // the scatterplot will always show on top of all layers
-          depthTest: false
-        },
         getPosition: d => d.position,
         getRadius: d => 5,
         getColor: d => [0, 0, 150, 255],
