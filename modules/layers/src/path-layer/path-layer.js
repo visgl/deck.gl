@@ -20,8 +20,9 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from 'luma.gl/constants';
-import {Model, Geometry, fp64} from 'luma.gl';
-const {fp64LowPart} = fp64;
+import {Model, Geometry} from 'luma.gl';
+
+import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
 import vs64 from './path-layer-vertex-64.glsl';
@@ -44,16 +45,6 @@ const defaultProps = {
   getDashArray: {type: 'accessor', value: [0, 0]}
 };
 
-const isClosed = path => {
-  const firstPoint = path[0];
-  const lastPoint = path[path.length - 1];
-  return (
-    firstPoint[0] === lastPoint[0] &&
-    firstPoint[1] === lastPoint[1] &&
-    firstPoint[2] === lastPoint[2]
-  );
-};
-
 const ATTRIBUTE_TRANSITION = {
   enter: (value, chunk) => {
     return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
@@ -68,6 +59,7 @@ export default class PathLayer extends Layer {
   }
 
   initializeState() {
+    const noAlloc = true;
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
@@ -75,20 +67,23 @@ export default class PathLayer extends Layer {
         size: 3,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
-        update: this.calculateStartPositions
+        update: this.calculateStartPositions,
+        noAlloc
       },
       instanceEndPositions: {
         size: 3,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
-        update: this.calculateEndPositions
+        update: this.calculateEndPositions,
+        noAlloc
       },
       instanceStartEndPositions64xyLow: {
         size: 4,
-        update: this.calculateInstanceStartEndPositions64xyLow
+        update: this.calculateInstanceStartEndPositions64xyLow,
+        noAlloc
       },
-      instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas},
-      instanceRightDeltas: {size: 3, update: this.calculateRightDeltas},
+      instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas, noAlloc},
+      instanceRightDeltas: {size: 3, update: this.calculateRightDeltas, noAlloc},
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
@@ -113,7 +108,6 @@ export default class PathLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const {getPath} = this.props;
     const attributeManager = this.getAttributeManager();
     if (props.fp64 !== oldProps.fp64) {
       const {gl} = this.context;
@@ -130,20 +124,18 @@ export default class PathLayer extends Layer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
 
     if (geometryChanged) {
-      // this.state.paths only stores point positions in each path
-      const paths = [];
-      for (const object of props.data) {
-        paths.push(getPath(object));
-      }
-      const bufferLayout = paths.map(path => path.length - 1);
-      const numInstances = bufferLayout.reduce((count, segments) => count + segments, 0);
-
+      const pathTesselator = new PathTesselator({data: props.data, getPath: props.getPath});
       this.setState({
-        paths,
-        numInstances,
-        bufferLayout
+        pathTesselator,
+        numInstances: pathTesselator.instanceCount
       });
       attributeManager.invalidateAll();
+    }
+
+    if (geometryChanged || props.fp64 !== oldProps.fp64) {
+      this.state.pathTesselator.updatePositions({
+        fp64: this.use64bitPositions()
+      });
     }
   }
 
@@ -250,188 +242,70 @@ export default class PathLayer extends Layer {
     );
   }
 
-  // "Experimental" method indended to make it easier to support non-nested arrays in subclasses
-  _getPathLength(path) {
-    return path.length;
-  }
-
   calculateStartPositions(attribute) {
-    const {paths, bufferLayout} = this.state;
-    const {value} = attribute;
+    const {pathTesselator} = this.state;
 
-    attribute.bufferLayout = bufferLayout;
-
-    let i = 0;
-    paths.forEach(path => {
-      const numSegments = path.length - 1;
-      for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
-        const point = path[ptIndex];
-        value[i++] = point[0];
-        value[i++] = point[1];
-        value[i++] = point[2] || 0;
-      }
-    });
+    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.value = pathTesselator.startPositions();
   }
 
   calculateEndPositions(attribute) {
-    const {paths, bufferLayout} = this.state;
-    const {value} = attribute;
+    const {pathTesselator} = this.state;
 
-    attribute.bufferLayout = bufferLayout;
-
-    let i = 0;
-    paths.forEach(path => {
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
-        const point = path[ptIndex];
-        value[i++] = point[0];
-        value[i++] = point[1];
-        value[i++] = point[2] || 0;
-      }
-    });
+    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.value = pathTesselator.endPositions();
   }
 
   calculateInstanceStartEndPositions64xyLow(attribute) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
-    if (!isFP64) {
+    if (isFP64) {
+      attribute.value = this.state.pathTesselator.startEndPositions64XyLow();
+    } else {
       attribute.value = new Float32Array(4);
-      return;
     }
-
-    const {paths} = this.state;
-    const {value} = attribute;
-
-    let i = 0;
-    paths.forEach(path => {
-      const numSegments = path.length - 1;
-      for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
-        const startPoint = path[ptIndex];
-        const endPoint = path[ptIndex + 1];
-        value[i++] = fp64LowPart(startPoint[0]);
-        value[i++] = fp64LowPart(startPoint[1]);
-        value[i++] = fp64LowPart(endPoint[0]);
-        value[i++] = fp64LowPart(endPoint[1]);
-      }
-    });
   }
 
   calculateLeftDeltas(attribute) {
-    const {paths} = this.state;
-    const {value} = attribute;
-
-    let i = 0;
-    paths.forEach(path => {
-      const numSegments = path.length - 1;
-      let prevPoint = isClosed(path) ? path[path.length - 2] : path[0];
-
-      for (let ptIndex = 0; ptIndex < numSegments; ptIndex++) {
-        const point = path[ptIndex];
-        value[i++] = point[0] - prevPoint[0];
-        value[i++] = point[1] - prevPoint[1];
-        value[i++] = point[2] - prevPoint[2] || 0;
-        prevPoint = point;
-      }
-    });
+    const {pathTesselator} = this.state;
+    attribute.value = pathTesselator.leftDeltas();
   }
 
   calculateRightDeltas(attribute) {
-    const {paths} = this.state;
-    const {value} = attribute;
-
-    let i = 0;
-    paths.forEach(path => {
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
-        const point = path[ptIndex];
-        let nextPoint = path[ptIndex + 1];
-        if (!nextPoint) {
-          nextPoint = isClosed(path) ? path[1] : point;
-        }
-
-        value[i++] = nextPoint[0] - point[0];
-        value[i++] = nextPoint[1] - point[1];
-        value[i++] = nextPoint[2] - point[2] || 0;
-      }
-    });
+    const {pathTesselator} = this.state;
+    attribute.value = pathTesselator.rightDeltas();
   }
 
   calculateStrokeWidths(attribute) {
-    const {data, getWidth} = this.props;
-    const {paths, bufferLayout} = this.state;
-    const {value} = attribute;
+    const {getWidth} = this.props;
+    const {pathTesselator} = this.state;
 
-    attribute.bufferLayout = bufferLayout;
-
-    let i = 0;
-    paths.forEach((path, index) => {
-      const width = getWidth(data[index], index);
-
-      const pathLength = this._getPathLength(path);
-      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
-        value[i++] = width;
-      }
-    });
+    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.value = pathTesselator.strokeWidths({target: attribute.value, getWidth});
   }
 
   calculateDashArrays(attribute) {
-    const {data, getDashArray} = this.props;
-    if (!getDashArray) {
-      return;
-    }
+    const {getDashArray} = this.props;
+    const {pathTesselator} = this.state;
 
-    const {paths} = this.state;
-    const {value} = attribute;
-    let i = 0;
-    paths.forEach((path, index) => {
-      const dashArray = getDashArray(data[index], index);
-
-      const pathLength = this._getPathLength(path);
-      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
-        value[i++] = dashArray[0];
-        value[i++] = dashArray[1];
-      }
-    });
+    attribute.value = pathTesselator.dashArrays({target: attribute.value, getDashArray});
   }
 
   calculateColors(attribute) {
-    const {data, getColor} = this.props;
-    const {paths, bufferLayout} = this.state;
-    const {value} = attribute;
+    const {getColor} = this.props;
+    const {pathTesselator} = this.state;
 
-    attribute.bufferLayout = bufferLayout;
-
-    let i = 0;
-    paths.forEach((path, index) => {
-      const pointColor = getColor(data[index], index);
-      if (isNaN(pointColor[3])) {
-        pointColor[3] = 255;
-      }
-
-      const pathLength = this._getPathLength(path);
-      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
-        value[i++] = pointColor[0];
-        value[i++] = pointColor[1];
-        value[i++] = pointColor[2];
-        value[i++] = pointColor[3];
-      }
-    });
+    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.value = pathTesselator.colors({target: attribute.value, getColor});
   }
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-    const {paths} = this.state;
-    const {value} = attribute;
-
-    let i = 0;
-    paths.forEach((path, index) => {
-      const pickingColor = this.encodePickingColor(index);
-
-      const pathLength = this._getPathLength(path);
-      for (let ptIndex = 1; ptIndex < pathLength; ptIndex++) {
-        value[i++] = pickingColor[0];
-        value[i++] = pickingColor[1];
-        value[i++] = pickingColor[2];
-      }
+    const {pathTesselator} = this.state;
+    attribute.value = pathTesselator.pickingColors({
+      target: attribute.value,
+      getPickingColor: this.encodePickingColor
     });
   }
 }
