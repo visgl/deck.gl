@@ -130,17 +130,13 @@ export default class PathOutlineLayer extends PathLayer {
   }
 
   calculateZLevels(attribute) {
-    const {data, getZLevel} = this.props;
-    const {paths} = this.state;
-    const {value} = attribute;
+    const {getZLevel} = this.props;
+    const {pathTesselator} = this.state;
 
-    let i = 0;
-    paths.forEach((path, index) => {
-      let zLevel = getZLevel(data[index], index);
-      zLevel = isNaN(zLevel) ? 0 : zLevel;
-      for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
-        value[i++] = zLevel;
-      }
+    attribute.value = pathTesselator.updateValues({
+      target: attribute.value,
+      size: 1,
+      getValue: (object, index) => getZLevel(object, index) || 0
     });
   }
 }
