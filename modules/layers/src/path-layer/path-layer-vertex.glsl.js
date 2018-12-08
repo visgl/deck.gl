@@ -49,7 +49,7 @@ varying float vPathPosition;
 varying float vPathLength;
 
 const float EPSILON = 0.001;
-const float PIXEL_EPSILON = 0.1;
+const float PIXEL_EPSILON = 0.001;
 
 float flipIfTrue(bool flag) {
   return -(float(flag) * 2. - 1.);
@@ -69,8 +69,8 @@ vec3 lineJoin(
 
   // when two points are closer than PIXEL_EPSILON in pixels,
   // assume they are the same point to avoid precision issue
-  lenA = lenA > PIXEL_EPSILON ? lenA : 0.0;
-  lenB = lenB > PIXEL_EPSILON ? lenB : 0.0;
+  lenA = lenA / width > PIXEL_EPSILON ? lenA : 0.0;
+  lenB = lenB / width > PIXEL_EPSILON ? lenB : 0.0;
 
   vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(0.0, 0.0);
   vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(0.0, 0.0);
@@ -201,16 +201,26 @@ void main() {
 
   float isEnd = positions.x;
 
-  vec3 prevPosition = mix(-instanceLeftDeltas, vec3(0.0), isEnd) + instanceStartPositions;
+  vec3 prevPosition = instanceStartPositions;
   vec2 prevPosition64xyLow = instanceStartEndPositions64xyLow.xy;
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
+    prevPosition64xyLow += mix(-instanceLeftDeltas, vec3(0.0), isEnd).xy;
+  } else {
+    prevPosition += mix(-instanceLeftDeltas, vec3(0.0), isEnd);
+  }
   prevPosition = project_position(prevPosition, prevPosition64xyLow);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
   vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
   currPosition = project_position(currPosition, currPosition64xyLow);
 
-  vec3 nextPosition = mix(vec3(0.0), instanceRightDeltas, isEnd) + instanceEndPositions;
+  vec3 nextPosition = instanceEndPositions;
   vec2 nextPosition64xyLow = instanceStartEndPositions64xyLow.zw;
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
+    nextPosition64xyLow += mix(vec3(0.0), instanceRightDeltas, isEnd).xy;
+  } else {
+    nextPosition += mix(vec3(0.0), instanceRightDeltas, isEnd);
+  }
   nextPosition = project_position(nextPosition, nextPosition64xyLow);
 
   vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);
