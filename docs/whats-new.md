@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v6.3
 
+Release Date: Nov 19, 2018
+
 ### Prop Types System
 
 Layers can now supply rich definitions to their default props. This enables prop validation in debug mode and aggressively blocks unnecessary layer update to boost rendering performance. Complex composite layers such as the GeoJsonLayer can be up to 2x faster in certain React applications. See [upgrade guide](/docs/upgrade-guide.md) if you are an author of custom layers.
@@ -18,6 +20,8 @@ The experimental `GPUAggregator` class now supports Min/Max/Mean in addition to 
 
 
 ## deck.gl v6.2
+
+Release Date: Oct 15, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
@@ -49,7 +53,7 @@ The `layer.project()` method now supports all coordinate systems including METER
 
 ## deck.gl v6.1
 
-Release date: TBD, Target Aug 31, 2018
+Release date: Sep 7, 2018
 
 <table style="border: 0;" align="center">
   <tbody>
