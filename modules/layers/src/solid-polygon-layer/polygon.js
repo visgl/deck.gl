@@ -34,23 +34,27 @@ import earcut from 'earcut';
  * @param {Array} polygon - either a complex or simple polygon
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
-export function isSimple(polygon) {
+function isSimple(polygon) {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
+}
+
+function isClosed(simplePolygon) {
+  // check if first and last vertex are the same
+  const p0 = simplePolygon[0];
+  const p1 = simplePolygon[simplePolygon.length - 1];
+
+  return p0[0] === p1[0] && p0[1] === p1[1] && p0[2] === p1[2];
 }
 
 /**
  * Ensure that all simple polygons have the same start and end vertex
  */
 function closeLoop(simplePolygon) {
-  // check if first and last vertex are the same
-  const p0 = simplePolygon[0];
-  const p1 = simplePolygon[simplePolygon.length - 1];
-
-  if (p0[0] === p1[0] && p0[1] === p1[1] && p0[2] === p1[2]) {
+  if (isClosed(simplePolygon)) {
     return simplePolygon;
   }
   // duplicate the starting vertex at end
-  return simplePolygon.concat([p0]);
+  return simplePolygon.concat([simplePolygon[0]]);
 }
 
 /**
@@ -64,6 +68,10 @@ export function normalize(polygon, {dimensions = 3} = {}) {
   return isSimple(polygon) ? [closeLoop(polygon)] : polygon.map(closeLoop);
 }
 
+function _getVertexCount(simplePolygon) {
+  return (isClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
+}
+
 /**
  * Check if this is a non-nested polygon (i.e. the first element of the first element is a number)
  * @param {Array} polygon - either a complex or simple polygon
@@ -71,24 +79,8 @@ export function normalize(polygon, {dimensions = 3} = {}) {
  */
 export function getVertexCount(polygon) {
   return isSimple(polygon)
-    ? polygon.length
-    : polygon.reduce((length, simplePolygon) => length + simplePolygon.length, 0);
-}
-
-// Return number of triangles needed to tesselate the polygon
-export function getTriangleCount(polygon) {
-  let triangleCount = 0;
-  let first = true;
-  for (const simplePolygon of normalize(polygon)) {
-    const size = simplePolygon.length;
-    if (first) {
-      triangleCount += size >= 3 ? size - 2 : 0;
-    } else {
-      triangleCount += size + 1;
-    }
-    first = false;
-  }
-  return triangleCount;
+    ? _getVertexCount(polygon)
+    : polygon.reduce((length, simplePolygon) => length + _getVertexCount(simplePolygon), 0);
 }
 
 // Returns the offset of each hole polygon in the flattened array for that polygon
