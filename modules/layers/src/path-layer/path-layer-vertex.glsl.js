@@ -203,6 +203,7 @@ void main() {
   vec3 prevPosition = instanceStartPositions;
   vec2 prevPosition64xyLow = instanceStartEndPositions64xyLow.xy;
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
+    // In auto offset mode, add delta to low part of the positions for better precision
     prevPosition64xyLow += mix(-instanceLeftDeltas, vec3(0.0), isEnd).xy;
   } else {
     prevPosition += mix(-instanceLeftDeltas, vec3(0.0), isEnd);
@@ -216,6 +217,7 @@ void main() {
   vec3 nextPosition = instanceEndPositions;
   vec2 nextPosition64xyLow = instanceStartEndPositions64xyLow.zw;
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
+    // In auto offset mode, add delta to low part of the positions for better precision
     nextPosition64xyLow += mix(vec3(0.0), instanceRightDeltas, isEnd).xy;
   } else {
     nextPosition += mix(vec3(0.0), instanceRightDeltas, isEnd);
