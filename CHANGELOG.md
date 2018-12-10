@@ -17,6 +17,30 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+### deck.gl v7.0 Prereleases
+
+#### deck.gl [v7.0.0-alpha.1] - Dec 10 2018
+
+- PathLayer: fix various precision issues (#2495)
+- Docs/RFC directory minor cleanup (#2491)
+- Add callback function onDataLoaded in TileLayer (#2487)
+- IsoBands Part-2: Add support in Contour Layer. (#2434)
+- Swap base map Mapbox style from custom uber style to default mapbox light style in layer-browser and attribute-transition test app. (#2481)
+fe8bb099 fix updateTriggers not being called issue when transitioning between 0 and null (#2475)
+- Use default Alpha for picking highlight color (#2479)
+- Add bootstrap to publish script (#2476)
+- (origin/tgorkin/test-branch) Add interaction test (#2407)
+- Update layer docs regarding tooltip display (#2472)
+- Call layer handler by the layer itself (#2471)
+- do not override canvas size if using external gl context (#2465)
+- [PolygonLayer] Pass getPolygon update trigger to sublayer (#2473)
+- Replace gl packages with original gl-matrix (#2463)
+- IsoBands Part-1: Add Marching Squares utility methods (#2429)
+- Fix offset mode bug (#2464)
+- Update PolygonLayer documentation (#2462)
+- enable website examples to be copied out and run standalone (#2450)
+- Give TileLayer GetPickingInfo Access Only to Its Relevant Tile (#2453)
+
 ### deck.gl v6.3 Prereleases
 
 #### [6.3.0-alpha.2] - Nov 2 2018
@@ -1682,4 +1706,3 @@ For details see [What's New](docs/whats-new.md)
 
 #### [1.0.0] - 2016-01-06
 - Initial commit of the open-source version of deck.gl
-
