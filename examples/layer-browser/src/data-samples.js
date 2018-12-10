@@ -75,6 +75,7 @@ export const worldGrid = pointsToWorldGrid(points, 500);
 
 export const zigzag = [
   {
+    // Big zigzag
     path: new Array(12)
       .fill(0)
       .map((d, i) => [
@@ -83,11 +84,21 @@ export const zigzag = [
       ])
   },
   {
-    path: new Array(6)
+    // Tiny zigzag
+    path: new Array(12)
       .fill(0)
       .map((d, i) => [
-        positionOrigin[0] + (Math.cos(i * Math.PI) * 0.05) / (i + 4),
-        positionOrigin[1] - i * i * 0.0003
+        positionOrigin[0] - 0.001 - i * i * 1e-5,
+        positionOrigin[1] + (Math.cos(i * Math.PI) * 2e-3) / (i + 4)
+      ])
+  },
+  {
+    // Tiny circle
+    path: new Array(25)
+      .fill(0)
+      .map((d, i) => [
+        positionOrigin[0] + Math.cos((i / 12) * Math.PI) * 2e-5,
+        positionOrigin[1] + Math.sin((i / 12) * Math.PI) * 2e-5
       ])
   },
   {

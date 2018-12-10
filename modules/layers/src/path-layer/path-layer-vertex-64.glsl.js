@@ -50,7 +50,6 @@ varying float vPathPosition;
 varying float vPathLength;
 
 const float EPSILON = 0.001;
-const float PIXEL_EPSILON = 0.1;
 
 float flipIfTrue(bool flag) {
   return -(float(flag) * 2. - 1.);
@@ -82,8 +81,8 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
 
   // when two points are closer than PIXEL_EPSILON in pixels,
   // assume they are the same point to avoid precision issue
-  lenA = lenA > PIXEL_EPSILON ? lenA : 0.0;
-  lenB = lenB > PIXEL_EPSILON ? lenB : 0.0;
+  lenA = lenA / width > EPSILON ? lenA : 0.0;
+  lenB = lenB / width > EPSILON ? lenB : 0.0;
   vec2 dirA = lenA > 0. ? deltaA / lenA : vec2(0.0, 0.0);
   vec2 dirB = lenB > 0. ? deltaB / lenB : vec2(0.0, 0.0);
 
