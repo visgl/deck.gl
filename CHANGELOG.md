@@ -17,6 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.2] - Dec 10 2018
+
+- Use default Alpha for picking highlight color (#2479)
+- Fix updateTriggers not being called issue when transitioning between 0 and null (#2475)
+- Add callback function onDataLoaded in TileLayer (#2487)
+- PathLayer: fix various precision issues (#2495)
+
 #### [6.3.1] - Dec 4 2018
 
 - Fix auto-offset mode bug (#2464)
