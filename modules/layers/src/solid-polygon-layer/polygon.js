@@ -83,6 +83,23 @@ export function getVertexCount(polygon) {
     : polygon.reduce((length, simplePolygon) => length + _getVertexCount(simplePolygon), 0);
 }
 
+// Roughly estimate the number of triangles needed to tesselate the polygon
+// For allocating the index buffer - the number returned might be excessive
+export function getTriangleCount(complexPolygon) {
+  let triangleCount = 0;
+  let first = true;
+  for (const simplePolygon of complexPolygon) {
+    const size = simplePolygon.length;
+    if (first) {
+      triangleCount += size >= 3 ? size - 2 : 0;
+    } else {
+      triangleCount += size + 1;
+    }
+    first = false;
+  }
+  return triangleCount;
+}
+
 // Returns the offset of each hole polygon in the flattened array for that polygon
 function getHoleIndices(complexPolygon) {
   let holeIndices = null;

@@ -69,16 +69,8 @@ const TEST_CASES = [
     params: {}
   },
   {
-    title: 'Tesselation(extruded)',
-    params: {extruded: true}
-  },
-  {
-    title: 'Tesselation(flat,fp64)',
+    title: 'Tesselation(fp64)',
     params: {fp64: true}
-  },
-  {
-    title: 'Tesselation(extruded,fp64)',
-    params: {extruded: true, fp64: true}
   }
 ];
 
@@ -86,6 +78,7 @@ test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
   t.ok(typeof Polygon.getVertexCount === 'function', 'Polygon.getVertexCount imported');
   t.ok(typeof Polygon.getSurfaceIndices === 'function', 'Polygon.getSurfaceIndices imported');
+  t.ok(typeof Polygon.getTriangleCount === 'function', 'Polygon.getTriangleCount imported');
   t.end();
 });
 
@@ -112,6 +105,9 @@ test('polygon#fuctions', t => {
 
     const indices = Polygon.getSurfaceIndices(complexPolygon);
     t.ok(Array.isArray(indices), 'Polygon.getSurfaceIndices');
+
+    const indexCount = Polygon.getTriangleCount(complexPolygon) * 3;
+    t.ok(indices.length <= indexCount, 'Polygon.getTriangleCount returns sufficient space');
   }
 
   t.end();

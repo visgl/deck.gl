@@ -195,14 +195,9 @@ export default class SolidPolygonLayer extends Layer {
       this.getAttributeManager().invalidateAll();
     }
 
-    if (
-      geometryConfigChanged ||
-      props.extruded !== oldProps.extruded ||
-      props.fp64 !== oldProps.fp64
-    ) {
+    if (geometryConfigChanged || props.fp64 !== oldProps.fp64) {
       this.state.polygonTesselator.updatePositions({
-        fp64: this.use64bitPositions(),
-        extruded: props.extruded
+        fp64: this.use64bitPositions()
       });
     }
   }

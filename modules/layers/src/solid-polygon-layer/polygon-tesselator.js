@@ -105,7 +105,7 @@ export default class PolygonTesselator {
   }
 
   /* Updaters */
-  updatePositions({fp64, extruded}) {
+  updatePositions({fp64}) {
     const {attributes, data, getPolygon, pointCount, bufferLayout, IndexType} = this;
 
     attributes.positions = attributes.positions || new Float32Array(pointCount * 3);
@@ -117,17 +117,15 @@ export default class PolygonTesselator {
     }
 
     const polygons = [];
-    const indices = [];
 
     for (const object of data) {
       const polygon = Polygon.normalize(getPolygon(object));
       polygons.push(polygon);
-      indices.push(Polygon.getSurfaceIndices(polygon));
     }
 
-    updatePositions({cache: attributes, polygons, extruded, fp64});
+    updatePositions({cache: attributes, polygons, fp64});
 
-    attributes.indices = calculateIndices({indices, bufferLayout, IndexType});
+    attributes.indices = calculateIndices({polygons, bufferLayout, IndexType});
   }
 
   updateValues({target, size, getValue}) {
@@ -144,32 +142,33 @@ export default class PolygonTesselator {
   }
 }
 
+function getTriangleCount(polygons) {
+  return polygons.reduce((triangles, polygon) => triangles + Polygon.getTriangleCount(polygon), 0);
+}
+
 // Flatten the indices array
-function calculateIndices({indices, bufferLayout, IndexType}) {
-  const indexCount = indices.reduce((total, array) => total + array.length, 0);
+function calculateIndices({polygons, bufferLayout, IndexType}) {
+  // Calculate length of index array (3 * number of triangles)
+  const estimatedIndexCount = 3 * getTriangleCount(polygons);
   // Allocate the indices array
-  const attribute = new IndexType(indexCount);
+  const attribute = new IndexType(estimatedIndexCount);
 
   // 1. get triangulated indices for the internal areas
   // 2. offset them by the number of indices in previous polygons
   let i = 0;
   let offset = 0;
-  indices.forEach((array, polygonIndex) => {
-    for (let j = 0; j < array.length; j++) {
-      attribute[i++] = array[j] + offset;
+  polygons.forEach((polygon, polygonIndex) => {
+    const indices = Polygon.getSurfaceIndices(polygon);
+    for (let j = 0; j < indices.length; j++) {
+      attribute[i++] = indices[j] + offset;
     }
     offset += bufferLayout[polygonIndex];
   });
 
-  return attribute;
+  return attribute.subarray(0, i);
 }
 
-function updatePositions({
-  cache: {positions, positions64xyLow, vertexValid},
-  polygons,
-  extruded,
-  fp64
-}) {
+function updatePositions({cache: {positions, positions64xyLow, vertexValid}, polygons, fp64}) {
   // Flatten out all the vertices of all the sub subPolygons
   let i = 0;
   polygons.forEach((polygon, polygonIndex) => {
