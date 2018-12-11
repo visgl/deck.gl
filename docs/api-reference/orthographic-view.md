@@ -12,9 +12,9 @@ To render, `OrthographicView` needs to be used together with a `viewState` with 
 * `lookAt` (`Number[3]`, optional) - The position being looked at. Default `[0, 0, 0]`.
 * `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
 * `offset` (`Number[2]`, optional) - The offset of the viewport. Default `[0, 1]`.
-* `zoom` (`Number`, optional) - The scale of the viewport. Default `1`.
-* `minZoom` (`Number`, optional) - The min scale of the viewport. Default `0.1`.
-* `maxZoom` (`Number`, optional) - The max scale of the viewport. Default `10`.
+* `zoom` (`Number`, optional) - The zoom level of the viewport. Default `1`.
+* `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `0`.
+* `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `10`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
