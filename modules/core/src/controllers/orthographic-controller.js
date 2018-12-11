@@ -5,8 +5,10 @@ import {Vector2, clamp} from 'math.gl';
 
 const MOVEMENT_SPEED = 10; // per keyboard click
 // TODO - make default unlimited in the next major version
-const DEFAULT_MIN_ZOOM = 0.1;
+const DEFAULT_MIN_ZOOM = 0;
 const DEFAULT_MAX_ZOOM = 10;
+
+const zoom2Scale = zoom => Math.pow(2, zoom);
 
 class OrthographicState extends ViewState {
   constructor({
@@ -19,10 +21,14 @@ class OrthographicState extends ViewState {
     maxZoom = DEFAULT_MAX_ZOOM,
 
     /** Interaction states */
+    /* The point on the view being grabbed when the operation first started */
     startPanPosition,
+    /* The offset on the view being grabbed when the operation first started */
     startPanOffset,
-    startRotatePosition,
-    startRotateOffset
+    /* The point on the view being zoomed when the operation first started */
+    startZoomPosition,
+    /** The zoom level when the first zoom operation started */
+    startZoom
   }) {
     super({
       width,
@@ -35,8 +41,7 @@ class OrthographicState extends ViewState {
     this._interactiveState = {
       startPanPosition,
       startPanOffset,
-      startRotatePosition,
-      startRotateOffset
+      startZoom
     };
   }
 
@@ -105,23 +110,83 @@ class OrthographicState extends ViewState {
     return this;
   }
 
+  // Calculates new zoom
+  _calculateNewZoom({scale, startZoom}) {
+    const {maxZoom, minZoom} = this._viewportProps;
+    const zoom = startZoom + Math.log2(scale);
+    return clamp(zoom, minZoom, maxZoom);
+  }
+
+  /**
+   * Start zooming
+   * @param {[Number, Number]} pos - position on screen where the center is
+   */
+  zoomStart({pos}) {
+    return this._getUpdatedState({
+      startZoomPosition: pos,
+      startZoom: this._viewportProps.zoom
+    });
+  }
+
   /**
    * Zoom
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    * @param {[number, number]} pos - current mouse cursor screen position
    */
-  zoom({pos, scale}) {
-    const {zoom, width, height, offset, minZoom, maxZoom} = this._viewportProps;
-    const newZoom = clamp(zoom * scale, minZoom, maxZoom);
+  zoom({pos, startPos, scale}) {
+    const {zoom, width, height, offset} = this._viewportProps;
+    let {startZoom, startZoomPosition} = this._interactiveState;
+    if (!Number.isFinite(startZoom)) {
+      // We have two modes of zoom:
+      // scroll zoom that are discrete events (transform from the current zoom level),
+      // and pinch zoom that are continuous events (transform from the zoom level when
+      // pinch started).
+      // If startZoom state is defined, then use the startZoom state;
+      // otherwise assume discrete zooming
+      startZoom = zoom;
+      startZoomPosition = startPos || pos;
+    }
+
+    const newZoom = this._calculateNewZoom({scale, startZoom});
+    const startScale = zoom2Scale(startZoom);
+    const newScale = zoom2Scale(newZoom);
+
     const centerX = width / 2 - offset[0];
     const centerY = height / 2 - offset[1];
-    const dX = (pos[0] - centerX) * (zoom / newZoom - 1);
-    const dY = (pos[1] - centerY) * (zoom / newZoom - 1);
+    const dX = (startZoomPosition[0] - centerX) * (startScale / newScale - 1);
+    const dY = (startZoomPosition[1] - centerY) * (startScale / newScale - 1);
     return this._getUpdatedState({
       zoom: newZoom,
-      offset: [offset[0] + dX, offset[1] + dY]
+      offset: [offset[0] - dX, offset[1] - dY]
     });
+  }
+
+  /**
+   * End zooming
+   * Must call if `zoomStart()` was called
+   */
+  zoomEnd() {
+    return this._getUpdatedState({
+      startZoomPosition: null,
+      startZoom: null
+    });
+  }
+
+  _zoomFromCenter(scale) {
+    const {width, height, offset} = this._viewportProps;
+    return this.zoom({
+      pos: [width / 2 - offset[0], height / 2 - offset[1]],
+      scale
+    });
+  }
+
+  zoomIn() {
+    return this._zoomFromCenter(2);
+  }
+
+  zoomOut() {
+    return this._zoomFromCenter(0.5);
   }
 
   moveLeft() {
