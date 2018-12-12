@@ -37,7 +37,8 @@ export const getPixelRatio = ({useDevicePixels}) => {
 // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
 const getGLViewport = (gl, {viewport, pixelRatio}) => {
   // TODO - dummy default for node
-  const height = gl.canvas ? gl.canvas.clientHeight : 100;
+  // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
+  const height = gl.canvas ? (gl.canvas.clientHeight || gl.canvas.height) : 100;
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
   const dimensions = viewport;
   return [
