@@ -105,14 +105,14 @@ const defaultProps = {
   // Optional settings for 'lighting' shader module
   lightSettings: {},
 
-  getPosition: x => x.position,
-  getColor: x => x.color || DEFAULT_COLOR,
+  getPosition: {type: 'accessor', value: x => x.position},
+  getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: x => x.yaw || x.angle || 0,
-  getPitch: x => x.pitch || 0,
-  getRoll: x => x.roll || 0
+  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
+  getPitch: {type: 'accessor', value: x => x.pitch || 0},
+  getRoll: {type: 'accessor', value: x => x.roll || 0}
 };
 
 export default class MeshLayer extends Layer {

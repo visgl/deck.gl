@@ -28,12 +28,15 @@ const defaultProps = Object.assign({}, PathOutlineLayer.defaultProps, {
   hightlightIndex: -1,
   highlightPoint: null,
 
-  getPath: x => x.path,
-  getColor: x => x.color,
-  getMarkerColor: x => [0, 0, 0, 255],
-  getDirection: x => x.direction,
-  getMarkerPercentages: (object, {lineLength}) =>
-    lineLength > DISTANCE_FOR_MULTI_ARROWS ? [0.25, 0.5, 0.75] : [0.5]
+  getPath: {type: 'accessor', value: x => x.path},
+  getColor: {type: 'accessor', value: x => x.color},
+  getMarkerColor: {type: 'accessor', value: x => [0, 0, 0, 255]},
+  getDirection: {type: 'accessor', value: x => x.direction},
+  getMarkerPercentages: {
+    type: 'accessor',
+    value: (object, {lineLength}) =>
+      lineLength > DISTANCE_FOR_MULTI_ARROWS ? [0.25, 0.5, 0.75] : [0.5]
+  }
 });
 
 export default class PathMarkerLayer extends CompositeLayer {

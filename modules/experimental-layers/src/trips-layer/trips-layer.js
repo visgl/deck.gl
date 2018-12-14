@@ -8,8 +8,8 @@ import tripsFragment from './trips-layer-fragment.glsl';
 const defaultProps = {
   trailLength: 120,
   currentTime: 0,
-  getPath: d => d.path,
-  getColor: d => d.color
+  getPath: {type: 'accessor', value: d => d.path},
+  getColor: {type: 'accessor', value: d => d.color}
 };
 
 export default class TripsLayer extends Layer {

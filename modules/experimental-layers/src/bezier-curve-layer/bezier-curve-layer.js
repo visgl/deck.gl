@@ -32,10 +32,10 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   strokeWidth: 1,
   fp64: false,
-  getSourcePosition: x => x.sourcePosition,
-  getTargetPosition: x => x.targetPosition,
-  getControlPoint: x => x.controlPoint,
-  getColor: x => x.color || DEFAULT_COLOR
+  getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
+  getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
+  getControlPoint: {type: 'accessor', value: x => x.controlPoint},
+  getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR}
 };
 
 export default class BezierCurveLayer extends Layer {

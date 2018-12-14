@@ -37,14 +37,14 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 // };
 
 const defaultProps = {
-  getText: x => x.text,
-  getPosition: x => x.coordinates,
-  getColor: x => x.color || DEFAULT_COLOR,
-  getSize: x => x.size || 32,
-  getAngle: x => x.angle || 0,
-  getTextAnchor: x => x.textAnchor || 'middle',
-  getAlignmentBaseline: x => x.alignmentBaseline || 'center',
-  getPixelOffset: x => x.pixelOffset || [0, 0],
+  getText: {type: 'accessor', value: x => x.text},
+  getPosition: {type: 'accessor', value: x => x.coordinates},
+  getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
+  getSize: {type: 'accessor', value: x => x.size || 32},
+  getAngle: {type: 'accessor', value: x => x.angle || 0},
+  getTextAnchor: {type: 'accessor', value: x => x.textAnchor || 'middle'},
+  getAlignmentBaseline: {type: 'accessor', value: x => x.alignmentBaseline || 'center'},
+  getPixelOffset: {type: 'accessor', value: x => x.pixelOffset || [0, 0]},
   fp64: false,
   fontTexture: null,
   fontInfo: null,
