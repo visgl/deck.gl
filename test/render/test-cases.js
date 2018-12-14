@@ -224,7 +224,8 @@ export const TEST_CASES = [
       left: -WIDTH / 2,
       top: -HEIGHT / 2,
       right: WIDTH / 2,
-      bottom: HEIGHT / 2
+      bottom: HEIGHT / 2,
+      zoom: 0.1
     },
     layers: [
       new ContourLayer({
