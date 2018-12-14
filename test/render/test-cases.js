@@ -162,8 +162,7 @@ export const TEST_CASES = [
         strokeWidth: 5
       })
     ],
-    referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png',
-    ignoreGPUs: [`Intel`]
+    referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png'
   },
   {
     name: 'pointcloud-identity',
