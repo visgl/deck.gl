@@ -162,8 +162,7 @@ export const TEST_CASES = [
         strokeWidth: 5
       })
     ],
-    referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png',
-    ignoreGPUs: [`Intel`]
+    referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png'
   },
   {
     name: 'pointcloud-identity',
@@ -224,7 +223,8 @@ export const TEST_CASES = [
       left: -WIDTH / 2,
       top: -HEIGHT / 2,
       right: WIDTH / 2,
-      bottom: HEIGHT / 2
+      bottom: HEIGHT / 2,
+      zoom: 0.1
     },
     layers: [
       new ContourLayer({
