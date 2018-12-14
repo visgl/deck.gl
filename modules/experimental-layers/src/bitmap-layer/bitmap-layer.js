@@ -39,8 +39,8 @@ const defaultProps = {
   transparentColor: [0, 0, 0, 0],
   tintColor: [255, 255, 255],
   // accessors
-  getCenter: x => x.center,
-  getRotation: x => x.rotation
+  getCenter: {type: 'accessor', value: x => x.center},
+  getRotation: {type: 'accessor', value: x => x.rotation}
 };
 
 /*
