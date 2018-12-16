@@ -114,11 +114,10 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position_to_clipspace_world_position',
-        // NOTE: disbaling transpilation due to https://github.com/stackgl/glsl-transpiler/issues/38
-        disableTranspile: true,
         func: ({project_position_to_clipspace}) => {
-          const worldPosition = [];
+          let worldPosition = [];
           project_position_to_clipspace([-122.45, 37.78, 0], [0, 0], [0, 0, 0], worldPosition);
+          [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
         output: TEST_VIEWPORT.projectFlat([-122.45, 37.78]).concat([0, 1]),
@@ -168,13 +167,13 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position_to_clipspace_world_position',
-        // NOTE: disbaling transpilation due to https://github.com/stackgl/glsl-transpiler/issues/38
-        disableTranspile: true,
+        // disableTranspileFor64: true,
         skipGPUs: ['Intel'],
 
         func: ({project_position_to_clipspace}) => {
-          const worldPosition = [];
+          let worldPosition = [];
           project_position_to_clipspace([-122.05, 37.92, 0], [0, 0], [0, 0, 0], worldPosition);
+          [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
         output: TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]).concat([0, 1]),
@@ -187,9 +186,6 @@ const TEST_CASES = [
       },
       {
         name: 'project_position_to_clipspace',
-        // NOTE: disbaling transpilation due to: https://github.com/stackgl/glsl-transpiler/issues/38
-        // FP64 modules uses `out` variables in many methods for
-        disableTranspileFor64: true,
         skipGPUs: ['Intel'],
 
         func: ({project_position_to_clipspace_vec3_vec2_vec3}) =>
@@ -215,11 +211,10 @@ const TEST_CASES = [
     tests: [
       {
         name: 'project_position_to_clipspace_world_position',
-        // NOTE: disbaling transpilation due to https://github.com/stackgl/glsl-transpiler/issues/38
-        disableTranspile: true,
         func: ({project_position_to_clipspace}) => {
-          const worldPosition = [];
+          let worldPosition = [];
           project_position_to_clipspace([0.05, 0.08, 0], [0, 0], [0, 0, 0], worldPosition);
+          [worldPosition] = project_position_to_clipspace.__out__;
           return worldPosition;
         },
         output: getPixelOffset(
@@ -262,7 +257,7 @@ test('project32&64#vs', t => {
         return;
       }
 
-      t.comment(testCase.title);
+      t.comment(`${testCase.title}: ${usefp64 ? 'fp64' : 'fp32'}`);
 
       let uniforms = project.getUniforms(testCase.params);
       if (usefp64) {
@@ -288,7 +283,7 @@ test('project32&64#vs', t => {
           actual = c.mapResult ? c.mapResult(actual) : actual;
           const name = `GPU: ${usefp64 ? 'project64' : 'project32'} ${c.name}`;
           verifyResult({t, actual, expected, name, sliceActual: true});
-        } else if (!c.disableTranspile && (!usefp64 || !c.disableTranspileFor64)) {
+        } else {
           // TODO - resolve dependencies properly
           // luma's assembleShaders require WebGL context to work
           const vsSource =
@@ -301,6 +296,16 @@ test('project32&64#vs', t => {
               .join('') + (usefp64 ? project64.vs : project32.vs);
 
           const projectVS = compileVertexShader(vsSource);
+
+          // This is a work around for the transpiled shader code not able to handle type conversion
+          // It expects project_uViewProjectionMatrixFP64 to be vec2[16], not float[32]
+          const projectMatrix64 = uniforms.project_uViewProjectionMatrixFP64;
+          if (projectMatrix64 && projectMatrix64 instanceof Float32Array) {
+            const normalizedProjectMatrix64 = Array.from({length: 16}, (d, i) => {
+              return [projectMatrix64[i * 2], projectMatrix64[i * 2 + 1]];
+            });
+            uniforms.project_uViewProjectionMatrixFP64 = normalizedProjectMatrix64;
+          }
 
           const module = projectVS(uniforms);
           config.EPSILON = c.precision || 1e-7;
