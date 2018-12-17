@@ -51,7 +51,6 @@ RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.c
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
-
 | [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
 | [**Binary Data**](v6.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
