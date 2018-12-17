@@ -4029,6 +4029,11 @@ escape-string-regexp@^1.0.2, escape-string-regexp@^1.0.5:
   resolved "https://registry.yarnpkg.com/escape-string-regexp/-/escape-string-regexp-1.0.5.tgz#1b61c0562190a8dff6ae3bb2cf0200ca130b86d4"
   integrity sha1-G2HAViGQqN/2rjuyzwIAyhMLhtQ=
 
+escaper@^2.5.3:
+  version "2.5.3"
+  resolved "https://registry.yarnpkg.com/escaper/-/escaper-2.5.3.tgz#8b8fe90ba364054151ab7eff18b4ce43b1e13ab5"
+  integrity sha512-QGb9sFxBVpbzMggrKTX0ry1oiI4CSDAl9vIL702hzl1jGW8VZs7qfqTRX7WDOjoNDoEVGcEtu1ZOQgReSfT2kQ==
+
 escodegen@^1.6.1, escodegen@^1.8.1:
   version "1.11.0"
   resolved "https://registry.yarnpkg.com/escodegen/-/escodegen-1.11.0.tgz#b27a9389481d5bfd5bec76f7bb1eb3f8f4556589"
@@ -4659,6 +4664,11 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
+float-regex@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/float-regex/-/float-regex-1.0.0.tgz#f80fa91d672c6b924842034bd87a0dd72069d2ef"
+  integrity sha1-+A+pHWcsa5JIQgNL2HoN1yBp0u8=
+
 flow-parser@^0.*:
   version "0.79.1"
   resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.79.1.tgz#bd556bf1b0416e6a3ada6398df360c3747cecf3f"
@@ -5189,16 +5199,25 @@ glsl-tokenizer@^2.0.2, glsl-tokenizer@^2.1.4:
   dependencies:
     through2 "^0.6.3"
 
-glsl-transpiler@^1.7.1:
-  version "1.7.2"
-  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.7.2.tgz#c488a55edaf750ce4fbb502da1e8eb785731851e"
-  integrity sha512-mm/bkZr3oqU5ZWkQHvlbFvcVTyrmovaizpabHk/aSuqKszjkUmcO4Tp4adf9qHjGsbJsH6SevoIvinVOtDXqDg==
+glsl-tokenizer@^2.1.5:
+  version "2.1.5"
+  resolved "https://registry.yarnpkg.com/glsl-tokenizer/-/glsl-tokenizer-2.1.5.tgz#1c2e78c16589933c274ba278d0a63b370c5fee1a"
+  integrity sha512-XSZEJ/i4dmz3Pmbnpsy3cKh7cotvFlBiZnDOwnj/05EwNp2XrhQ4XKJxT7/pDt4kp4YcpRSKz8eTV7S+mwV6MA==
+  dependencies:
+    through2 "^0.6.3"
+
+glsl-transpiler@^1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.8.3.tgz#e5026d5e769f8254384b2ff652b9e83fc40b470b"
+  integrity sha512-xDushWEmG6GPU0ErHJkNRYCqYazOj2Bx7nbYSyK7AeFQJygVqmR8KTS3xPvb8K2uh11lAV5tjv97GiFN02OKEA==
   dependencies:
     array-flatten "^2.0.0"
+    float-regex "^1.0.0"
     glsl-parser "^2.0.1"
-    glsl-tokenizer "^2.1.4"
+    glsl-tokenizer "^2.1.5"
     inherits "^2.0.1"
-    prepr "^1.1.0"
+    pick-by-alias "^1.2.0"
+    prepr "^1.1.2"
     xtend "^4.0.1"
 
 got@^6.7.1:
@@ -8206,6 +8225,11 @@ performance-now@^2.1.0:
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
 
+pick-by-alias@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/pick-by-alias/-/pick-by-alias-1.2.0.tgz#5f7cb2b1f21a6e1e884a0c87855aa4a37361107b"
+  integrity sha1-X3yysfIabh6ISgyHhVqko3NhEHs=
+
 pify@^2.0.0, pify@^2.3.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/pify/-/pify-2.3.0.tgz#ed141a6ac043a849ea588498e7dca8b15330e90c"
@@ -8335,12 +8359,13 @@ prepend-http@^2.0.0:
   resolved "https://registry.yarnpkg.com/prepend-http/-/prepend-http-2.0.0.tgz#e92434bfa5ea8c19f41cdfd401d741a3c819d897"
   integrity sha1-6SQ0v6XqjBn0HN/UAddBo8gZ2Jc=
 
-prepr@^1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/prepr/-/prepr-1.1.1.tgz#9538e526cf5b3bc616b97a182e03830aac4a7351"
-  integrity sha1-lTjlJs9bO8YWuXoYLgODCqxKc1E=
+prepr@^1.1.2:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/prepr/-/prepr-1.2.0.tgz#176c09e3f773b8c7968435d4faaf3b72bbe4ca5b"
+  integrity sha512-/8pI8Df8kpUYxwmI1ql+jl4e3KGqeT6qHjl7zAEcFXr6cm9rxFTQq92xtYEnfmagsst+cOVNuNGXdi8b1MPKyQ==
   dependencies:
     balanced-match "^0.3.0"
+    escaper "^2.5.3"
     parenthesis "^3.0.0"
     xtend "^4.0.1"
 
