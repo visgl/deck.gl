@@ -44,7 +44,6 @@ export class TypedArrayManager {
 
   release(typedArray) {
     // TODO - add to pool
-
     // logFunctions.onUpdate({
     //   level: LOG_DETAIL_PRIORITY,
     //   message: `${attributeName} allocated ${allocCount}`,
@@ -80,11 +79,7 @@ export class TypedArrayManager {
 
 export default class Tesselator {
   constructor(opts) {
-    const {
-      isIndexed = false,
-      attributes = {},
-      getGeometrySize
-    } = opts;
+    const {isIndexed = false, attributes = {}, getGeometrySize} = opts;
 
     assert(getGeometrySize);
 
@@ -262,7 +257,6 @@ function getColorValue(color) {
 }
 
 export class AttributeTesselator extends Tesselator {
-
   // Get the positions array
   positions() {
     return this.positions;
@@ -280,15 +274,18 @@ export class AttributeTesselator extends Tesselator {
 
   // Allocate a colors array
   colors({getColor = [0, 0, 0, 255]} = {}) {
-    return this.getAttribute({Type: Uint8ClampedArray, size: 4, accessor: getColor,
+    return this.getAttribute({
+      Type: Uint8ClampedArray,
+      size: 4,
+      accessor: getColor,
       getValue: getColorValue
     });
   }
 
   // Allocate a picking colors array
   pickingColors({getPickingIndex = (x, i) => i}) {
-    const getPickingColor =
-      (object, index) => getPickingColorFromIndex(getPickingIndex(object, index));
+    const getPickingColor = (object, index) =>
+      getPickingColorFromIndex(getPickingIndex(object, index));
     return this.getAttribute({Type: Uint8ClampedArray, size: 3, accessor: getPickingColor});
   }
 
