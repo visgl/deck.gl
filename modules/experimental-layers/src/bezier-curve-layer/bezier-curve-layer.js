@@ -27,15 +27,14 @@ import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';
 
 const NUM_SEGMENTS = 40;
-const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  strokeWidth: 1,
+  strokeWidth: {type: 'number', min: 0, value: 1},
   fp64: false,
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getControlPoint: {type: 'accessor', value: x => x.controlPoint},
-  getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR}
+  getColor: {type: 'accessor', value: x => x.color || [0, 0, 0, 255]}
 };
 
 export default class BezierCurveLayer extends Layer {
