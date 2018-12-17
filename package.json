@@ -54,7 +54,7 @@
     "eslint-config-uber-jsx": "^3.3.3",
     "eslint-plugin-react": "^7.10",
     "gl": "^4.0.3",
-    "glsl-transpiler": "^1.8.0",
+    "glsl-transpiler": "^1.8.3",
     "html-webpack-plugin": "^3.2.0",
     "jsdom": "^9.11.0",
     "lerna": "^2.9.1",

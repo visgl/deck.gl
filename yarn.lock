@@ -4664,6 +4664,11 @@ flat-cache@^1.2.1:
     graceful-fs "^4.1.2"
     write "^0.2.1"
 
+float-regex@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/float-regex/-/float-regex-1.0.0.tgz#f80fa91d672c6b924842034bd87a0dd72069d2ef"
+  integrity sha1-+A+pHWcsa5JIQgNL2HoN1yBp0u8=
+
 flow-parser@^0.*:
   version "0.79.1"
   resolved "https://registry.yarnpkg.com/flow-parser/-/flow-parser-0.79.1.tgz#bd556bf1b0416e6a3ada6398df360c3747cecf3f"
@@ -5201,15 +5206,17 @@ glsl-tokenizer@^2.1.5:
   dependencies:
     through2 "^0.6.3"
 
-glsl-transpiler@^1.8.0:
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.8.0.tgz#379f1101bfa7c47ac94139be52d9e0631800c945"
-  integrity sha512-lNzgCnazi9pGmYCbAqcpe+2h8ncvwORNLVaRW0C7DaZTsdcbXKLAriKk8Zm4VZtmest4lEqFr1NQuFxrLTDl9A==
+glsl-transpiler@^1.8.3:
+  version "1.8.3"
+  resolved "https://registry.yarnpkg.com/glsl-transpiler/-/glsl-transpiler-1.8.3.tgz#e5026d5e769f8254384b2ff652b9e83fc40b470b"
+  integrity sha512-xDushWEmG6GPU0ErHJkNRYCqYazOj2Bx7nbYSyK7AeFQJygVqmR8KTS3xPvb8K2uh11lAV5tjv97GiFN02OKEA==
   dependencies:
     array-flatten "^2.0.0"
+    float-regex "^1.0.0"
     glsl-parser "^2.0.1"
     glsl-tokenizer "^2.1.5"
     inherits "^2.0.1"
+    pick-by-alias "^1.2.0"
     prepr "^1.1.2"
     xtend "^4.0.1"
 
@@ -8217,6 +8224,11 @@ performance-now@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/performance-now/-/performance-now-2.1.0.tgz#6309f4e0e5fa913ec1c69307ae364b4b377c9e7b"
   integrity sha1-Ywn04OX6kT7BxpMHrjZLSzd8nns=
+
+pick-by-alias@^1.2.0:
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/pick-by-alias/-/pick-by-alias-1.2.0.tgz#5f7cb2b1f21a6e1e884a0c87855aa4a37361107b"
+  integrity sha1-X3yysfIabh6ISgyHhVqko3NhEHs=
 
 pify@^2.0.0, pify@^2.3.0:
   version "2.3.0"
