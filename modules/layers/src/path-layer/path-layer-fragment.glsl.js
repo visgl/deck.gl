@@ -31,7 +31,7 @@ varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
 varying vec2 vDashArray;
-varying float vPathPosition;
+varying vec2 vPathPosition;
 varying float vPathLength;
 
 // mod doesn't work correctly for negative numbers
@@ -70,9 +70,9 @@ bool dash_isFragInGap() {
   float offset = alignMode * solidLength / 2.0;
 
   return gapLength > 0.0 &&
-    vPathPosition >= 0.0 &&
-    vPathPosition <= vPathLength &&
-    mod2(vPathPosition + offset, unitLength) > solidLength;
+    vPathPosition.y >= 0.0 &&
+    vPathPosition.y <= vPathLength &&
+    mod2(vPathPosition.y + offset, unitLength) > solidLength;
 }
 
 void main(void) {
