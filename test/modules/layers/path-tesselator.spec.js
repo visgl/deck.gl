@@ -34,12 +34,12 @@ const TEST_DATA = [
   {
     title: 'Plain array',
     data: SAMPLE_DATA,
-    getPath: d => d.path
+    getGeometry: d => d.path
   },
   {
     title: 'Iterable',
     data: new Set(SAMPLE_DATA),
-    getPath: d => d.path
+    getGeometry: d => d.path
   }
 ];
 
@@ -73,11 +73,10 @@ test('PathTesselator#constructor', t => {
 test('PathTesselator#constructor', t => {
   TEST_DATA.forEach(testData => {
     t.comment(`Path data: ${testData.title}`);
-    const tesselator = new PathTesselator(testData);
 
     TEST_CASES.forEach(testCase => {
       t.comment(`  ${testCase.title}`);
-      tesselator.updatePositions(testCase.params);
+      const tesselator = new PathTesselator(Object.assign({}, testData, testCase.params));
 
       t.ok(ArrayBuffer.isView(tesselator.startPositions()), 'PathTesselator.startPositions');
       t.deepEquals(

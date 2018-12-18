@@ -17,43 +17,26 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {experimental} from '@deck.gl/core';
-const {fillArray} = experimental;
+import Tesselator from './tesselator';
 import {fp64 as fp64Module} from 'luma.gl';
 const {fp64LowPart} = fp64Module;
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
-export default class PathTesselator {
-  constructor({data, getPath}) {
-    this.data = data;
-    this.getPath = getPath;
-    this.bufferLayout = [];
-
-    for (const object of data) {
-      const path = getPath(object);
-      const pathLength = this.getPathLength(path);
-      this.bufferLayout.push(Math.max(pathLength - 1, 0));
-    }
-
-    this.instanceCount = this.bufferLayout.reduce((count, segments) => count + segments, 0);
-
-    this.attributes = {};
-  }
-
-  /* Utilities */
-  getPathLength(path) {
-    return path.length;
-  }
-
-  isClosed(path) {
-    const firstPoint = path[0];
-    const lastPoint = path[path.length - 1];
-    return (
-      firstPoint[0] === lastPoint[0] &&
-      firstPoint[1] === lastPoint[1] &&
-      firstPoint[2] === lastPoint[2]
-    );
+export default class PathTesselator extends Tesselator {
+  constructor({data, getGeometry, fp64}) {
+    super({
+      data,
+      getGeometry,
+      fp64,
+      attributes: {
+        startPositions: {size: 3},
+        endPositions: {size: 3},
+        leftDeltas: {size: 3},
+        rightDeltas: {size: 3},
+        startEndPositions64XyLow: {size: 4, fp64: true}
+      }
+    });
   }
 
   /* Getters */
@@ -78,7 +61,7 @@ export default class PathTesselator {
   }
 
   strokeWidths({target, getWidth}) {
-    return this.updateValues({
+    return this._updateAttribute({
       target,
       size: 1,
       getValue: object => [getWidth(object)]
@@ -86,11 +69,11 @@ export default class PathTesselator {
   }
 
   dashArrays({target, getDashArray}) {
-    return this.updateValues({target, size: 2, getValue: getDashArray});
+    return this._updateAttribute({target, size: 2, getValue: getDashArray});
   }
 
   colors({target, getColor}) {
-    return this.updateValues({
+    return this._updateAttribute({
       target,
       size: 4,
       getValue: object => {
@@ -104,55 +87,64 @@ export default class PathTesselator {
   }
 
   pickingColors({target, getPickingColor}) {
-    return this.updateValues({
+    return this._updateAttribute({
       target,
       size: 3,
       getValue: (object, index) => getPickingColor(index)
     });
   }
 
+  /* Utilities */
+  getPathLength(path) {
+    return path.length;
+  }
+
+  getPointOnPath(path, index) {
+    return path[index];
+  }
+
+  countInstancesInGeometry(path) {
+    return Math.max(0, this.getPathLength(path) - 1);
+  }
+
+  isClosed(path) {
+    const numPoints = this.getPathLength(path);
+    const firstPoint = this.getPointOnPath(path, 0);
+    const lastPoint = this.getPointOnPath(path, numPoints - 1);
+    return (
+      firstPoint[0] === lastPoint[0] &&
+      firstPoint[1] === lastPoint[1] &&
+      firstPoint[2] === lastPoint[2]
+    );
+  }
+
   /* Updaters */
   /* eslint-disable max-statements, complexity */
-  updatePositions({fp64}) {
-    const {attributes, data, getPath, instanceCount} = this;
-
-    attributes.startPositions = attributes.startPositions || new Float32Array(instanceCount * 3);
-    attributes.endPositions = attributes.endPositions || new Float32Array(instanceCount * 3);
-    attributes.leftDeltas = attributes.leftDeltas || new Float32Array(instanceCount * 3);
-    attributes.rightDeltas = attributes.rightDeltas || new Float32Array(instanceCount * 3);
-    if (fp64) {
-      attributes.startEndPositions64XyLow =
-        attributes.startEndPositions64XyLow || new Float32Array(instanceCount * 4);
-    }
-
+  updateGeometryAttributes() {
     const {
-      startPositions,
-      endPositions,
-      leftDeltas,
-      rightDeltas,
-      startEndPositions64XyLow
-    } = attributes;
+      attributes: {startPositions, endPositions, leftDeltas, rightDeltas, startEndPositions64XyLow},
+      fp64
+    } = this;
 
     let i = 0;
-    for (const object of data) {
-      const path = getPath(object);
+    this._forEachGeometry(path => {
       const numPoints = this.getPathLength(path);
 
       if (numPoints < 2) {
         // ignore invalid path
-        continue; // eslint-disable-line
+        return;
       }
       const isPathClosed = this.isClosed(path);
 
-      let prevPoint = isPathClosed ? path[numPoints - 2] : path[0];
-      let startPoint = path[0];
-      let endPoint = path[1];
+      let startPoint = this.getPointOnPath(path, 0);
+      let endPoint = this.getPointOnPath(path, 1);
+      let prevPoint = isPathClosed ? this.getPointOnPath(path, numPoints - 2) : startPoint;
       let nextPoint;
 
       for (let ptIndex = 1; ptIndex < numPoints; ptIndex++) {
-        nextPoint = path[ptIndex + 1];
+        nextPoint = this.getPointOnPath(path, ptIndex + 1);
         if (!nextPoint) {
-          nextPoint = isPathClosed ? path[1] : endPoint;
+          nextPoint = isPathClosed ? this.getPointOnPath(path, 1) : endPoint;
         }
 
         startPositions[i * 3] = startPoint[0];
@@ -171,34 +163,20 @@ export default class PathTesselator {
         rightDeltas[i * 3 + 1] = nextPoint[1] - endPoint[1];
         rightDeltas[i * 3 + 2] = nextPoint[2] - endPoint[2] || 0;
 
-        prevPoint = startPoint;
-        startPoint = endPoint;
-        endPoint = nextPoint;
-
         if (fp64) {
           startEndPositions64XyLow[i * 4] = fp64LowPart(startPoint[0]);
           startEndPositions64XyLow[i * 4 + 1] = fp64LowPart(startPoint[1]);
           startEndPositions64XyLow[i * 4 + 2] = fp64LowPart(endPoint[0]);
           startEndPositions64XyLow[i * 4 + 3] = fp64LowPart(endPoint[1]);
         }
+
+        prevPoint = startPoint;
+        startPoint = endPoint;
+        endPoint = nextPoint;
+
         i++;
       }
-    }
+    });
   }
   /* eslint-enable max-statements, complexity */
-
-  updateValues({target, size, getValue}) {
-    const {data, bufferLayout} = this;
-
-    let i = 0;
-    let dataIndex = 0;
-    for (const object of data) {
-      const value = getValue(object, dataIndex);
-      const numSegments = bufferLayout[dataIndex++];
-
-      fillArray({target, source: value, start: i, count: numSegments});
-      i += numSegments * size;
-    }
-    return target;
-  }
 }

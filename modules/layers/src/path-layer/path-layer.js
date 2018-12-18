@@ -103,6 +103,10 @@ export default class PathLayer extends Layer {
       instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
     });
     /* eslint-enable max-len */
+
+    this.setState({
+      pathTesselator: new PathTesselator({})
+    });
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -120,22 +124,20 @@ export default class PathLayer extends Layer {
 
     const geometryChanged =
       changeFlags.dataChanged ||
+      props.fp64 !== oldProps.fp64 ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
 
     if (geometryChanged) {
-      const pathTesselator = new PathTesselator({data: props.data, getPath: props.getPath});
-      this.setState({
-        pathTesselator,
-        numInstances: pathTesselator.instanceCount
-      });
-      attributeManager.invalidateAll();
-    }
-
-    if (geometryChanged || props.fp64 !== oldProps.fp64) {
-      this.state.pathTesselator.updatePositions({
+      this.state.pathTesselator.updateGeometry({
+        data: props.data,
+        getGeometry: props.getPath,
         fp64: this.use64bitPositions()
       });
+      this.setState({
+        numInstances: this.state.pathTesselator.instanceCount
+      });
+      attributeManager.invalidateAll();
     }
   }
 
