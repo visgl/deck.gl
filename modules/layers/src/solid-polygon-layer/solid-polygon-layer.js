@@ -69,7 +69,9 @@ export default class SolidPolygonLayer extends Layer {
     const {gl} = this.context;
     this.setState({
       numInstances: 0,
-      IndexType: hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+      polygonTesselator: new PolygonTesselator({
+        IndexType: hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+      })
     });
 
     const attributeManager = this.getAttributeManager();
@@ -175,30 +177,24 @@ export default class SolidPolygonLayer extends Layer {
   updateGeometry({props, oldProps, changeFlags}) {
     const geometryConfigChanged =
       changeFlags.dataChanged ||
+      props.fp64 !== oldProps.fp64 ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     // When the geometry config  or the data is changed,
     // tessellator needs to be invoked
     if (geometryConfigChanged) {
-      const polygonTesselator = new PolygonTesselator({
+      this.state.polygonTesselator.updateGeometry({
         data: props.data,
-        getPolygon: props.getPolygon,
-        IndexType: this.state.IndexType
+        getGeometry: props.getPolygon,
+        fp64: this.use64bitPositions()
       });
 
       this.setState({
-        polygonTesselator,
-        numInstances: polygonTesselator.pointCount
+        numInstances: this.state.polygonTesselator.instanceCount
       });
 
       this.getAttributeManager().invalidateAll();
-    }
-
-    if (geometryConfigChanged || props.fp64 !== oldProps.fp64) {
-      this.state.polygonTesselator.updatePositions({
-        fp64: this.use64bitPositions()
-      });
     }
   }
 

@@ -54,12 +54,12 @@ const TEST_DATA = [
   {
     title: 'Plain array',
     data: SAMPLE_DATA,
-    getPolygon: d => d.polygon
+    getGeometry: d => d.polygon
   },
   {
     title: 'Iterable',
     data: new Set(SAMPLE_DATA),
-    getPolygon: d => d.polygon
+    getGeometry: d => d.polygon
   }
 ];
 
@@ -121,14 +121,14 @@ test('polygonTesselator#imports', t => {
 test('PolygonTesselator#constructor', t => {
   TEST_DATA.forEach(testData => {
     t.comment(`Polygon data: ${testData.title}`);
-    const tesselator = new PolygonTesselator(testData);
-    t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
 
     TEST_CASES.forEach(testCase => {
       t.comment(`  ${testCase.title}`);
-      tesselator.updatePositions(testCase.params);
 
-      t.is(tesselator.pointCount, 52, 'PolygonTesselator counts points correctly');
+      const tesselator = new PolygonTesselator(Object.assign({}, testData, testCase.params));
+      t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
+
+      t.is(tesselator.instanceCount, 52, 'PolygonTesselator counts points correctly');
       t.ok(Array.isArray(tesselator.bufferLayout), 'PolygonTesselator.bufferLayout');
 
       t.ok(ArrayBuffer.isView(tesselator.indices()), 'PolygonTesselator.indices');
@@ -153,7 +153,7 @@ test('PolygonTesselator#methods', t => {
     const tesselator = new PolygonTesselator(testData);
 
     const elevations = tesselator.elevations({
-      target: new Float32Array(tesselator.pointCount),
+      target: new Float32Array(tesselator.instanceCount),
       getElevation: d => d.height || 0
     });
     t.ok(ArrayBuffer.isView(elevations), 'PolygonTesselator.elevations');
@@ -164,7 +164,7 @@ test('PolygonTesselator#methods', t => {
     );
 
     const colors = tesselator.colors({
-      target: new Uint8ClampedArray(tesselator.pointCount * 4),
+      target: new Uint8ClampedArray(tesselator.instanceCount * 4),
       getColor: d => [255, 0, 0]
     });
     t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.colors');
@@ -175,7 +175,7 @@ test('PolygonTesselator#methods', t => {
     );
 
     const pickingColors = tesselator.pickingColors({
-      target: new Uint8ClampedArray(tesselator.pointCount * 3),
+      target: new Uint8ClampedArray(tesselator.instanceCount * 3),
       getPickingColor: index => [0, 0, index]
     });
     t.ok(ArrayBuffer.isView(pickingColors), 'PolygonTesselator.pickingColors');
