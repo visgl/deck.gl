@@ -133,7 +133,7 @@ export default class PathOutlineLayer extends PathLayer {
     const {getZLevel} = this.props;
     const {pathTesselator} = this.state;
 
-    attribute.value = pathTesselator.updateValues({
+    attribute.value = pathTesselator._updateAttribute({
       target: attribute.value,
       size: 1,
       getValue: (object, index) => getZLevel(object, index) || 0
