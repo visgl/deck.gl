@@ -37,7 +37,7 @@ const defaultProps = {
   // grid
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
-  getPosition: {type: 'accessor', value: x => x.position},
+  getPosition: x => x.position,
   extruded: false,
   fp64: false,
   pickable: false, // TODO: Enable picking with GPU Aggregation

@@ -27,6 +27,7 @@ import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';
 
 const NUM_SEGMENTS = 40;
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   strokeWidth: {type: 'number', min: 0, value: 1},
@@ -34,7 +35,7 @@ const defaultProps = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getControlPoint: {type: 'accessor', value: x => x.controlPoint},
-  getColor: {type: 'accessor', value: x => x.color || [0, 0, 0, 255]}
+  getColor: {type: 'accessor', value: DEFAULT_COLOR}
 };
 
 export default class BezierCurveLayer extends Layer {
@@ -50,27 +51,24 @@ export default class BezierCurveLayer extends Layer {
       instanceSourcePositions: {
         size: 3,
         transition: true,
-        accessor: 'getSourcePosition',
-        update: this.calculateInstanceSourcePositions
+        accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
         transition: true,
-        accessor: 'getTargetPosition',
-        update: this.calculateInstanceTargetPositions
+        accessor: 'getTargetPosition'
       },
       instanceControlPoints: {
         size: 3,
         transition: false,
-        accessor: 'getControlPoint',
-        update: this.calculateInstanceControlPoints
+        accessor: 'getControlPoint'
       },
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
-        update: this.calculateInstanceColors
+        defaultValue: [0, 0, 0, 255]
       }
     });
     /* eslint-enable max-len */
@@ -134,45 +132,6 @@ export default class BezierCurveLayer extends Layer {
     return model;
   }
 
-  calculateInstanceSourcePositions(attribute) {
-    const {data, getSourcePosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    data.forEach(object => {
-      const sourcePosition = getSourcePosition(object);
-      value[i + 0] = sourcePosition[0];
-      value[i + 1] = sourcePosition[1];
-      value[i + 2] = isNaN(sourcePosition[2]) ? 0 : sourcePosition[2];
-      i += size;
-    });
-  }
-
-  calculateInstanceTargetPositions(attribute) {
-    const {data, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    data.forEach(object => {
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = targetPosition[0];
-      value[i + 1] = targetPosition[1];
-      value[i + 2] = isNaN(targetPosition[2]) ? 0 : targetPosition[2];
-      i += size;
-    });
-  }
-
-  calculateInstanceControlPoints(attribute) {
-    const {data, getControlPoint} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    data.forEach(object => {
-      const controlPoint = getControlPoint(object);
-      value[i + 0] = controlPoint[0];
-      value[i + 1] = controlPoint[1];
-      value[i + 2] = isNaN(controlPoint[2]) ? 0 : controlPoint[2];
-      i += size;
-    });
-  }
-
   calculateInstanceSourceTargetPositions64xyLow(attribute) {
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
@@ -184,20 +143,6 @@ export default class BezierCurveLayer extends Layer {
       value[i + 1] = fp64LowPart(sourcePosition[1]);
       value[i + 2] = fp64LowPart(targetPosition[0]);
       value[i + 3] = fp64LowPart(targetPosition[1]);
-      i += size;
-    });
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    data.forEach(object => {
-      const color = getColor(object);
-      value[i + 0] = color[0];
-      value[i + 1] = color[1];
-      value[i + 2] = color[2];
-      value[i + 3] = isNaN(color[3]) ? 255 : color[3];
       i += size;
     });
   }

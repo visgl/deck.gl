@@ -2,11 +2,11 @@ import {GeoJsonLayer, CompositeLayer} from 'deck.gl';
 import TileCache from './utils/tile-cache';
 
 const defaultProps = {
-  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
-  getTileData: {type: 'accessor', value: ({x, y, z}) => Promise.resolve(null)},
-  onDataLoaded: {type: 'function', value: () => {}},
+  renderSubLayers: props => new GeoJsonLayer(props),
+  getTileData: ({x, y, z}) => Promise.resolve(null),
+  onDataLoaded: () => {},
   // eslint-disable-next-line
-  onGetTileDataError: {type: 'function', value: err => console.error(err)},
+  onGetTileDataError: err => console.error(err),
   maxZoom: null,
   minZoom: null,
   maxCacheSize: null
