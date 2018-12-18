@@ -29,18 +29,18 @@ import BITMAP_FRAGMENT_SHADER from './bitmap-layer-fragment';
 const MAX_BITMAPS = 11;
 
 const defaultProps = {
-  images: [],
+  images: {type: 'array', value: []},
 
-  desaturate: 0,
+  desaturate: {type: 'number', min: 0, max: 1, value: 0},
   blendMode: null,
   // More context: because of the blending mode we're using for ground imagery,
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
-  transparentColor: [0, 0, 0, 0],
-  tintColor: [255, 255, 255],
+  transparentColor: {type: 'color', value: [0, 0, 0, 0]},
+  tintColor: {type: 'color', value: [255, 255, 255]},
   // accessors
-  getCenter: x => x.center,
-  getRotation: x => x.rotation
+  getCenter: {type: 'accessor', value: x => x.center},
+  getRotation: {type: 'accessor', value: x => x.rotation}
 };
 
 /*
@@ -56,8 +56,8 @@ export default class BitmapLayer extends Layer {
 
     const {attributeManager} = this.state;
     attributeManager.addInstanced({
-      instanceCenter: {size: 3, update: this.calculateInstanceCenters},
-      instanceRotation: {size: 3, update: this.calculateInstanceRotations},
+      instanceCenter: {size: 3, accessor: 'getCenter'},
+      instanceRotation: {size: 3, accessor: 'getRotation'},
       instanceBitmapIndex: {size: 1, update: this.calculateInstanceBitmapIndex}
     });
   }
@@ -139,36 +139,6 @@ export default class BitmapLayer extends Layer {
     const url = point.imageUrl;
     const idx = Math.max(this.props.images.indexOf(url), 0);
     return idx >= MAX_BITMAPS ? 0 : idx;
-  }
-
-  calculateInstanceCenters(attribute, props) {
-    const {data, getCenter} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const center = getCenter(point);
-
-      value[i + 0] = center[0] || 0;
-      value[i + 1] = center[1] || 0;
-      value[i + 2] = center[2] || 0;
-
-      i += size;
-    }
-  }
-
-  calculateInstanceRotations(attribute, props) {
-    const {data, getRotation} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const rotation = getRotation(point);
-
-      value[i + 0] = rotation[0] || 0;
-      value[i + 1] = rotation[1] || 0;
-      value[i + 2] = rotation[2] || 0;
-
-      i += size;
-    }
   }
 
   calculateInstanceBitmapIndex(attribute) {
