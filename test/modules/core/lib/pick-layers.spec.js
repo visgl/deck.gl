@@ -42,9 +42,7 @@ const TEST_CASES = [
         new ScatterplotLayer({
           data: DATA.points,
           getPosition: d => d.COORDINATES,
-          getColor: [255, 128, 0],
           getRadius: d => d.SPACES,
-          opacity: 0.3,
           pickable: true,
           radiusScale: 30,
           radiusMinPixels: 1,
@@ -131,15 +129,7 @@ const TEST_CASES = [
         new PolygonLayer({
           data: DATA.polygons,
           getPolygon: f => f,
-          getFillColor: () => [255 * Math.random(), 0, 0],
-          getLineColor: [0, 0, 0, 255],
-          getLineDashArray: [20, 0],
-          getWidth: 20,
-          getElevation: () => Math.random() * 1000,
-          opacity: 0.3,
-          pickable: true,
-          lineDashJustified: true,
-          elevationScale: 0.6
+          pickable: true
         })
       ],
       views: [new MapView()],
@@ -221,11 +211,8 @@ const TEST_CASES = [
       layers: [
         new PathLayer({
           data: DATA.zigzag,
-          opacity: 0.6,
           getPath: f => f.path,
-          getColor: [128, 0, 0],
           getWidth: 10,
-          getDashArray: [20, 0],
           widthMinPixels: 1,
           pickable: true
         })
@@ -310,9 +297,7 @@ const TEST_CASES = [
         new ScatterplotLayer({
           data: DATA.points,
           getPosition: d => d.COORDINATES,
-          getColor: [255, 128, 0],
           getRadius: d => d.SPACES,
-          opacity: 0.1,
           pickable: true,
           radiusScale: 30,
           radiusMinPixels: 1,
@@ -321,23 +306,12 @@ const TEST_CASES = [
         new PolygonLayer({
           data: DATA.polygons,
           getPolygon: f => f,
-          getFillColor: () => [255 * Math.random(), 0, 0],
-          getLineColor: [0, 0, 0, 255],
-          getLineDashArray: [20, 0],
-          getWidth: 20,
-          getElevation: () => Math.random() * 1000,
-          opacity: 0.1,
-          pickable: true,
-          lineDashJustified: true,
-          elevationScale: 0.6
+          pickable: true
         }),
         new PathLayer({
           data: DATA.zigzag,
-          opacity: 0.6,
           getPath: f => f.path,
-          getColor: [128, 0, 0],
           getWidth: 10,
-          getDashArray: [20, 0],
           widthMinPixels: 1,
           pickable: true
         })
@@ -439,7 +413,7 @@ test(`pickingTest`, t => {
       }
     }
     if (index === len) {
-      deck.animationLoop.stop();
+      deck.finalize();
       t.end();
     } else {
       deck.setProps(TEST_CASES[index].props);
