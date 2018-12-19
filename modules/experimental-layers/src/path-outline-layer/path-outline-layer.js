@@ -33,7 +33,7 @@ const FS_CODE = `\
 `;
 
 const defaultProps = {
-  getZLevel: object => object.zLevel | 0
+  getZLevel: {type: 'accessor', value: 0}
 };
 
 export default class PathOutlineLayer extends PathLayer {
@@ -62,8 +62,8 @@ export default class PathOutlineLayer extends PathLayer {
       instanceZLevel: {
         size: 1,
         type: GL.UNSIGNED_BYTE,
-        update: this.calculateZLevels,
-        accessor: 'getZLevel'
+        accessor: 'getZLevel',
+        defaultValue: 0
       }
     });
   }
