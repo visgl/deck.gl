@@ -25,9 +25,11 @@
     "README.md"
   ],
   "dependencies": {
-    "deck.gl": "^7.0.0-alpha.1",
     "pixelmatch": "^4.0.2",
     "probe.gl": "^2.0.0"
+  },
+  "peerDependencies": {
+    "deck.gl": "^7.0.0-alpha.1"
   },
   "scripts": {
     "clean": "rm -fr dist dist-es6 && mkdir -p dist/es5 dist/esm dist/es6",

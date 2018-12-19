@@ -33,8 +33,10 @@
     "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.0.0-alpha.1",
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^7.0.0-alpha.1"
   }
 }

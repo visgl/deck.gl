@@ -32,7 +32,7 @@
     "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
     "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   },
-  "dependencies": {
+  "peerDependencies": {
     "@deck.gl/core": "^7.0.0-alpha.1"
   }
 }
