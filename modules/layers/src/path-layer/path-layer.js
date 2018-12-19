@@ -248,14 +248,14 @@ export default class PathLayer extends Layer {
     const {pathTesselator} = this.state;
 
     attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.startPositions();
+    attribute.value = pathTesselator.get('startPositions');
   }
 
   calculateEndPositions(attribute) {
     const {pathTesselator} = this.state;
 
     attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.endPositions();
+    attribute.value = pathTesselator.get('endPositions');
   }
 
   calculateInstanceStartEndPositions64xyLow(attribute) {
@@ -263,7 +263,7 @@ export default class PathLayer extends Layer {
     attribute.constant = !isFP64;
 
     if (isFP64) {
-      attribute.value = this.state.pathTesselator.startEndPositions64XyLow();
+      attribute.value = this.state.pathTesselator.get('startEndPositions64XyLow');
     } else {
       attribute.value = new Float32Array(4);
     }
@@ -271,12 +271,12 @@ export default class PathLayer extends Layer {
 
   calculateLeftDeltas(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.leftDeltas();
+    attribute.value = pathTesselator.get('leftDeltas');
   }
 
   calculateRightDeltas(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.rightDeltas();
+    attribute.value = pathTesselator.get('rightDeltas');
   }
 
   calculateStrokeWidths(attribute) {
@@ -284,14 +284,14 @@ export default class PathLayer extends Layer {
     const {pathTesselator} = this.state;
 
     attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.strokeWidths({target: attribute.value, getWidth});
+    attribute.value = pathTesselator.get('strokeWidths', attribute.value, getWidth);
   }
 
   calculateDashArrays(attribute) {
     const {getDashArray} = this.props;
     const {pathTesselator} = this.state;
 
-    attribute.value = pathTesselator.dashArrays({target: attribute.value, getDashArray});
+    attribute.value = pathTesselator.get('dashArrays', attribute.value, getDashArray);
   }
 
   calculateColors(attribute) {
@@ -299,16 +299,13 @@ export default class PathLayer extends Layer {
     const {pathTesselator} = this.state;
 
     attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.colors({target: attribute.value, getColor});
+    attribute.value = pathTesselator.get('colors', attribute.value, getColor);
   }
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.pickingColors({
-      target: attribute.value,
-      getPickingColor: this.encodePickingColor
-    });
+    attribute.value = pathTesselator.get('pickingColors', attribute.value, this.encodePickingColor);
   }
 }
 

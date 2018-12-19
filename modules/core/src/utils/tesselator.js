@@ -17,15 +17,32 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {experimental} from '@deck.gl/core';
-const {fillArray} = experimental;
+import {fillArray} from './flatten';
 
-export class TypedArrayManager {
+class TypedArrayManager {
   constructor({overAlloc = 1} = {}) {
     this.overAlloc = overAlloc;
   }
 
-  allocate(Type, size) {
+  allocate(typedArray, count, {size, Type, copy = false}) {
+    const newSize = count * size;
+    if (typedArray && newSize <= typedArray.length) {
+      return typedArray;
+    }
+
+    // Allocate at least one element to ensure a valid buffer
+    const allocSize = Math.max(Math.ceil(newSize * this.overAlloc), 1);
+    const newArray = this._allocate(Type, allocSize);
+
+    if (typedArray && copy) {
+      newArray.set(typedArray);
+    }
+
+    this._release(typedArray);
+    return newArray;
+  }
+
+  _allocate(Type = Float32Array, size) {
     if (Type === Uint16Array && size > 65535) {
       throw new Error('Vertex count exceeds browser index limit');
     }
@@ -33,24 +50,7 @@ export class TypedArrayManager {
     return new Type(size);
   }
 
-  reallocate(typedArray, newSize, copy = false) {
-    if (newSize <= typedArray.length) {
-      return typedArray;
-    }
-
-    // Allocate at least one element to ensure a valid buffer
-    const allocSize = Math.max(Math.ceil(newSize * this.overAlloc), 1);
-    const newArray = this.allocate(typedArray.constructor, allocSize);
-
-    if (copy) {
-      newArray.set(typedArray);
-    }
-
-    this.release(typedArray);
-    return newArray;
-  }
-
-  release(typedArray) {
+  _release(typedArray) {
     // TODO - add to pool
     // logFunctions.onUpdate({
     //   level: LOG_DETAIL_PRIORITY,
@@ -83,15 +83,19 @@ export default class Tesselator {
     this._rebuildGeometry();
   }
 
+  updatePartialGeometry({start, count, objects}) {
+    // TODO
+  }
+
   /* Subclass interface */
 
-  // Fill the typed arrays for geometry attributes
-  updateGeometryAttributes() {
+  // Update the positions of a single geometry
+  updateGeometryAttributes(geometry, startIndex, size) {
     throw new Error('Not implemented');
   }
 
   // Returns the number of vertices in a geometry
-  countInstancesInGeometry(geometry) {
+  getGeometrySize(geometry) {
     throw new Error('Not implemented');
   }
 
@@ -134,7 +138,7 @@ export default class Tesselator {
     const bufferLayout = [];
     let instanceCount = 0;
     this._forEachGeometry((geometry, dataIndex) => {
-      const count = this.countInstancesInGeometry(geometry);
+      const count = this.getGeometrySize(geometry);
       instanceCount += count;
       bufferLayout[dataIndex] = count;
     });
@@ -144,16 +148,20 @@ export default class Tesselator {
     for (const name in _attributeDefs) {
       const def = _attributeDefs[name];
 
-      if (!def.fp64 || fp64) {
-        attributes[name] = attributes[name]
-          ? typedArrayManager.reallocate(attributes[name], def.size * instanceCount)
-          : typedArrayManager.allocate(def.type || Float32Array, def.size * instanceCount);
+      // do not create fp64-only attributes unless in fp64 mode
+      if (!def.fp64Only || fp64) {
+        attributes[name] = typedArrayManager.allocate(attributes[name], instanceCount, def);
       }
     }
 
     this.bufferLayout = bufferLayout;
     this.instanceCount = instanceCount;
 
-    this.updateGeometryAttributes();
+    let vertexIndex = 0;
+    this._forEachGeometry((geometry, dataIndex) => {
+      const geometrySize = bufferLayout[dataIndex];
+      this.updateGeometryAttributes(geometry, vertexIndex, geometrySize);
+      vertexIndex += geometrySize;
+    });
   }
 }

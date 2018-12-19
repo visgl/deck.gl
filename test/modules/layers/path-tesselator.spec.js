@@ -78,48 +78,51 @@ test('PathTesselator#constructor', t => {
       t.comment(`  ${testCase.title}`);
       const tesselator = new PathTesselator(Object.assign({}, testData, testCase.params));
 
-      t.ok(ArrayBuffer.isView(tesselator.startPositions()), 'PathTesselator.startPositions');
+      t.ok(
+        ArrayBuffer.isView(tesselator.get('startPositions')),
+        'PathTesselator.get startPositions'
+      );
       t.deepEquals(
-        tesselator.startPositions().slice(0, 6),
+        tesselator.get('startPositions').slice(0, 6),
         [1, 1, 0, 2, 2, 0],
         'startPositions are filled'
       );
 
-      t.ok(ArrayBuffer.isView(tesselator.endPositions()), 'PathTesselator.endPositions');
+      t.ok(ArrayBuffer.isView(tesselator.get('endPositions')), 'PathTesselator.get endPositions');
       t.deepEquals(
-        tesselator.endPositions().slice(0, 6),
+        tesselator.get('endPositions').slice(0, 6),
         [2, 2, 0, 3, 3, 0],
         'endPositions are filled'
       );
       t.deepEquals(
-        tesselator.endPositions().slice(-3),
+        tesselator.get('endPositions').slice(-3),
         [1, 1, 0],
         'endPositions is handling loop correctly'
       );
 
-      t.ok(ArrayBuffer.isView(tesselator.leftDeltas()), 'PathTesselator.leftDeltas');
+      t.ok(ArrayBuffer.isView(tesselator.get('leftDeltas')), 'PathTesselator.get leftDeltas');
       t.deepEquals(
-        tesselator.leftDeltas().slice(0, 6),
+        tesselator.get('leftDeltas').slice(0, 6),
         [0, 0, 0, 1, 1, 0],
         'leftDeltas are filled'
       );
 
-      t.ok(ArrayBuffer.isView(tesselator.rightDeltas()), 'PathTesselator.rightDeltas');
+      t.ok(ArrayBuffer.isView(tesselator.get('rightDeltas')), 'PathTesselator.get rightDeltas');
       t.deepEquals(
-        tesselator.rightDeltas().slice(0, 6),
+        tesselator.get('rightDeltas').slice(0, 6),
         [1, 1, 0, 0, 0, 0],
         'rightDeltas are filled'
       );
       t.deepEquals(
-        tesselator.rightDeltas().slice(-3),
+        tesselator.get('rightDeltas').slice(-3),
         [1, 1, 0],
         'rightDeltas is handling loop correctly'
       );
 
       if (testCase.params.fp64) {
         t.ok(
-          ArrayBuffer.isView(tesselator.startEndPositions64XyLow()),
-          'PathTesselator.startEndPositions64XyLow'
+          ArrayBuffer.isView(tesselator.get('startEndPositions64XyLow')),
+          'PathTesselator.get startEndPositions64XyLow'
         );
       }
     });
@@ -133,32 +136,36 @@ test('PolygonTesselator#methods', t => {
     t.comment(`Path data: ${testData.title}`);
     const tesselator = new PathTesselator(testData);
 
-    const strokeWidths = tesselator.strokeWidths({
-      target: new Float32Array(INSTANCE_COUNT),
-      getWidth: d => d.width
-    });
-    t.ok(ArrayBuffer.isView(strokeWidths), 'PathTesselator.strokeWidths');
+    const strokeWidths = tesselator.get(
+      'strokeWidths',
+      new Float32Array(INSTANCE_COUNT),
+      d => d.width
+    );
+    t.ok(ArrayBuffer.isView(strokeWidths), 'PathTesselator.get strokeWidths');
     t.deepEquals(strokeWidths, [2, 2, 3, 3, 3], 'strokeWidths are filled');
 
-    const dashArrays = tesselator.dashArrays({
-      target: new Float32Array(INSTANCE_COUNT * 2),
-      getDashArray: d => d.dashArray
-    });
-    t.ok(ArrayBuffer.isView(dashArrays), 'PathTesselator.dashArrays');
+    const dashArrays = tesselator.get(
+      'dashArrays',
+      new Float32Array(INSTANCE_COUNT * 2),
+      d => d.dashArray
+    );
+    t.ok(ArrayBuffer.isView(dashArrays), 'PathTesselator.get dashArrays');
     t.deepEquals(dashArrays, [0, 0, 0, 0, 2, 1, 2, 1, 2, 1], 'dashArrays are filled');
 
-    const colors = tesselator.colors({
-      target: new Uint8ClampedArray(INSTANCE_COUNT * 4),
-      getColor: d => d.color
-    });
-    t.ok(ArrayBuffer.isView(colors), 'PathTesselator.colors');
+    const colors = tesselator.get(
+      'colors',
+      new Uint8ClampedArray(INSTANCE_COUNT * 4),
+      d => d.color
+    );
+    t.ok(ArrayBuffer.isView(colors), 'PathTesselator.get colors');
     t.deepEquals(colors.slice(0, 4), [255, 0, 0, 255], 'colors are filled');
 
-    const pickingColors = tesselator.pickingColors({
-      target: new Uint8ClampedArray(INSTANCE_COUNT * 3),
-      getPickingColor: index => [0, 0, index]
-    });
-    t.ok(ArrayBuffer.isView(pickingColors), 'PathTesselator.pickingColors');
+    const pickingColors = tesselator.get(
+      'pickingColors',
+      new Uint8ClampedArray(INSTANCE_COUNT * 3),
+      index => [0, 0, index]
+    );
+    t.ok(ArrayBuffer.isView(pickingColors), 'PathTesselator.get pickingColors');
     t.deepEquals(pickingColors.slice(0, 6), [0, 0, 2, 0, 0, 2], 'pickingColors are filled');
   });
 
