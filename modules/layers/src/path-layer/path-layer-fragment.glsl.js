@@ -31,6 +31,11 @@ varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
 varying vec2 vDashArray;
+/*
+ * vPathPosition represents the relative coordinates of the current fragment on the path segment.
+ * vPathPosition.x - position along the width of the path, between [-1, 1]. 0 is the center line.
+ * vPathPosition.y - position along the length of the path, between [0, L / width].
+ */
 varying vec2 vPathPosition;
 varying float vPathLength;
 
