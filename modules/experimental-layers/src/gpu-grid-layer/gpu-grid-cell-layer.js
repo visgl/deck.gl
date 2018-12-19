@@ -38,8 +38,8 @@ const defaultProps = {
   fp64: false,
   pickable: false, // TODO: add picking support (read from aggregated texture)
 
-  minColor: DEFAULT_MINCOLOR,
-  maxColor: DEFAULT_MAXCOLOR,
+  minColor: {type: 'color', value: DEFAULT_MINCOLOR},
+  maxColor: {type: 'color', value: DEFAULT_MAXCOLOR},
 
   lightSettings: {}
 };
