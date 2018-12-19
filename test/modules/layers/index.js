@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import './path-tesselator.spec';
 import './polygon-tesselation.spec';
 import './core-layers.spec';
 import './polygon-layer.spec';
