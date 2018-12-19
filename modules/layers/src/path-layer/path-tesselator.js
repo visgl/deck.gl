@@ -82,15 +82,19 @@ export default class PathTesselator extends Tesselator {
     }
   }
 
-  /* Update the positions of a single geometry */
+  /* Implement base Tesselator interface */
+  getGeometrySize(path) {
+    return Math.max(0, this.getPathLength(path) - 1);
+  }
+
   /* eslint-disable max-statements, complexity */
-  updateGeometryAttributes(path, startIndex, size) {
+  updateGeometryAttributes(path, context) {
     const {
       attributes: {startPositions, endPositions, leftDeltas, rightDeltas, startEndPositions64XyLow},
       fp64
     } = this;
 
-    const numPoints = size + 1;
+    const numPoints = context.geometrySize + 1;
     if (numPoints < 2) {
       // ignore invalid path
       return;
@@ -102,7 +106,7 @@ export default class PathTesselator extends Tesselator {
     let prevPoint = isPathClosed ? this.getPointOnPath(path, numPoints - 2) : startPoint;
     let nextPoint;
 
-    for (let i = startIndex, ptIndex = 1; ptIndex < numPoints; i++, ptIndex++) {
+    for (let i = context.vertexStart, ptIndex = 1; ptIndex < numPoints; i++, ptIndex++) {
       nextPoint = this.getPointOnPath(path, ptIndex + 1);
       if (!nextPoint) {
         nextPoint = isPathClosed ? this.getPointOnPath(path, 1) : endPoint;
@@ -145,10 +149,6 @@ export default class PathTesselator extends Tesselator {
 
   getPointOnPath(path, index) {
     return path[index];
-  }
-
-  getGeometrySize(path) {
-    return Math.max(0, this.getPathLength(path) - 1);
   }
 
   isClosed(path) {
