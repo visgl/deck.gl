@@ -45,6 +45,7 @@
     "@babel/preset-env": "7.0.0-rc.1",
     "babel-loader": "8.0.0-beta.4",
     "babel-plugin-istanbul": "^4.1.1",
+    "babel-plugin-remove-glsl-comments": "^0.1.0",
     "babel-plugin-version-inline": "^1.0.0",
     "babel-preset-minify": "^0.4.0-alpha.caaefb4c",
     "coveralls": "^2.13.0",
