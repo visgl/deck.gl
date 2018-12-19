@@ -56,62 +56,68 @@ const TEST_CASES = [
       useDevicePixels: false
     },
     pickingMethods: {
-      singlePixel: [
+      pickObject: [
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 60,
             y: 160
           },
-          count: 1
+          results: {
+            count: 1
+          }
         },
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 90,
             y: 350
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      rectangle: [
+      pickObjects: [
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 300,
             y: 300,
             width: 100,
             height: 100
           },
-          count: 33
+          results: {
+            count: 33
+          }
         },
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 50,
             y: 50,
             width: 10,
             height: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      multiDepth: [
+      pickMultipleObjects: [
         {
-          funcName: 'pickMultipleObjects',
-          positions: {
+          parameters: {
             x: 250,
             y: 273
           },
-          count: 2
+          results: {
+            count: 2
+          }
         },
         {
-          funcName: 'pickMultipleObjects',
-          positions: {
+          parameters: {
             x: 300,
             y: 300
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ]
     }
@@ -141,62 +147,68 @@ const TEST_CASES = [
       useDevicePixels: false
     },
     pickingMethods: {
-      singlePixel: [
+      pickObject: [
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 60,
             y: 160
           },
-          count: 1
+          results: {
+            count: 1
+          }
         },
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 10,
             y: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      rectangle: [
+      pickObjects: [
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 300,
             y: 300,
             width: 100,
             height: 100
           },
-          count: 3
+          results: {
+            count: 3
+          }
         },
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 10,
             y: 10,
             width: 10,
             height: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      multiDepth: [
+      pickMultipleObjects: [
         {
-          funcName: 'pickMultipleObjects',
-          positions: {
+          parameters: {
             x: 250,
             y: 273
           },
-          count: 1
+          results: {
+            count: 1
+          }
         },
         {
-          funcName: 'pickMultipleObjects',
-          positions: {
+          parameters: {
             x: 10,
             y: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ]
     }
@@ -223,62 +235,68 @@ const TEST_CASES = [
       useDevicePixels: false
     },
     pickingMethods: {
-      singlePixel: [
+      pickObject: [
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 260,
             y: 300
           },
-          count: 1
+          results: {
+            count: 1
+          }
         },
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 10,
             y: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      rectangle: [
+      pickObjects: [
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 0,
             y: 0,
             width: 400,
             height: 400
           },
-          count: 3
+          results: {
+            count: 3
+          }
         },
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 10,
             y: 10,
             width: 10,
             height: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      multiDepth: [
+      pickMultipleObjects: [
         // {
-        //   funcName: 'pickMultipleObjects',
-        //   positions: {
+        //   parameters: {
         //     x: 260,
         //     y: 300
         //   },
-        //   count: 1
+        //   results: {
+        //     count: 1
+        //   }
         // },
         {
-          funcName: 'pickMultipleObjects',
-          positions: {
+          parameters: {
             x: 10,
             y: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ]
     }
@@ -329,96 +347,104 @@ const TEST_CASES = [
       useDevicePixels: false
     },
     pickingMethods: {
-      singlePixel: [
+      pickObject: [
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 260,
             y: 300
           },
-          count: 1
+          results: {
+            count: 1
+          }
         },
         {
-          funcName: 'pickObject',
-          positions: {
+          parameters: {
             x: 10,
             y: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      rectangle: [
+      pickObjects: [
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 0,
             y: 0,
             width: 400,
             height: 400
           },
-          count: 32
+          results: {
+            count: 32
+          }
         },
         {
-          funcName: 'pickObjects',
-          positions: {
+          parameters: {
             x: 10,
             y: 10,
             width: 10,
             height: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ],
-      multiDepth: [
+      pickMultipleObjects: [
         // {
-        //   funcName: 'pickMultipleObjects',
-        //   positions: {
+        //   parameters: {
         //     x: 260,
         //     y: 300
         //   },
-        //   count: 1
+        //   results: {
+        //     count: 1
+        //   }
         // },
         {
-          funcName: 'pickMultipleObjects',
-          positions: {
+          parameters: {
             x: 10,
             y: 10
           },
-          count: 0
+          results: {
+            count: 0
+          }
         }
       ]
     }
   }
 ];
 
-for (const testCase of TEST_CASES) {
-  // eslint-disable-next-line no-loop-func
-  test(`picking#${testCase.id}`, t => {
-    const deck = new Deck();
+test(`pickingTest`, t => {
+  const deck = new Deck();
+  t.ok(deck, 'Deck should be constructed');
 
-    t.ok(deck, 'Deck should be constructed');
+  const len = TEST_CASES.length;
+  let index = 0;
+  let testCase;
 
-    deck.setProps(Object.assign({}, testCase.props, {onAfterRender: runTests}));
+  function runTests() {
+    testCase = TEST_CASES[index++];
+    const pickingMethods = testCase.pickingMethods;
 
-    function runTests() {
-      const pickingMethods = testCase.pickingMethods;
-
-      let pickInfos;
-      for (const i in pickingMethods) {
-        for (const j in pickingMethods[i]) {
-          const pickingMethod = pickingMethods[i][j];
-          const pickingFunc = pickingMethod.funcName;
-          const pickingPos = pickingMethod.positions;
-          pickInfos = deck[pickingFunc](pickingPos);
-          t.equal(
-            !pickInfos ? 0 : !Array.isArray(pickInfos) ? 1 : pickInfos.length,
-            pickingMethod.count,
-            `${pickingFunc} should find expected number of objects`
-          );
-        }
+    let pickInfos;
+    for (const pickingMethod in pickingMethods) {
+      for (const pickingCase of pickingMethods[pickingMethod]) {
+        pickInfos = deck[pickingMethod](pickingCase.parameters);
+        t.equal(
+          !pickInfos ? 0 : !Array.isArray(pickInfos) ? 1 : pickInfos.length,
+          pickingCase.results.count,
+          `${testCase.id}: ${pickingMethod} should find expected number of objects`
+        );
       }
+    }
+    if (index === len) {
       deck.animationLoop.stop();
       t.end();
+    } else {
+      deck.setProps(TEST_CASES[index].props);
     }
-  });
-}
+  }
+
+  deck.setProps(Object.assign({}, TEST_CASES[0].props, {onAfterRender: runTests}));
+});
