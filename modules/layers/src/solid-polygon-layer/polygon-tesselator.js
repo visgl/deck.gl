@@ -24,7 +24,8 @@
 // - 3D surfaces (top and sides only)
 // - 3D wireframes (not yet)
 import * as Polygon from './polygon';
-import Tesselator from '../path-layer/tesselator';
+import {experimental} from '@deck.gl/core';
+const {Tesselator} = experimental;
 import {fp64 as fp64Module} from 'luma.gl';
 const {fp64LowPart} = fp64Module;
 
@@ -38,7 +39,7 @@ export default class PolygonTesselator extends Tesselator {
       fp64,
       attributes: {
         positions: {size: 3},
-        positions64xyLow: {size: 2},
+        positions64xyLow: {size: 2, fp64Only: true},
         vertexValid: {type: Uint8ClampedArray, size: 1},
         indices: {type: IndexType, size: 1}
       }
@@ -46,109 +47,100 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   /* Getters */
-  indices() {
-    return this.attributes.indices;
+  get(attributeName, target, accessor) {
+    if (attributeName === 'indices') {
+      return this.attributes.indices.subarray(0, this.vertexCount);
+    }
+
+    if (this.attributes[attributeName]) {
+      return this.attributes[attributeName];
+    }
+
+    switch (attributeName) {
+      case 'elevations':
+        return this._updateAttribute({
+          target,
+          size: 1,
+          getValue: object => [accessor(object)]
+        });
+
+      case 'colors':
+        return this._updateAttribute({
+          target,
+          size: 4,
+          getValue: object => {
+            const color = accessor(object);
+            if (isNaN(color[3])) {
+              color[3] = 255;
+            }
+            return color;
+          }
+        });
+
+      case 'pickingColors':
+        return this._updateAttribute({
+          target,
+          size: 3,
+          getValue: (object, index) => accessor(index)
+        });
+
+      default:
+        return null;
+    }
   }
 
-  positions() {
-    return this.attributes.positions;
-  }
-  positions64xyLow() {
-    return this.attributes.positions64xyLow;
-  }
-
-  vertexValid() {
-    return this.attributes.vertexValid;
-  }
-
-  elevations({target, getElevation}) {
-    return this._updateAttribute({
-      target,
-      size: 1,
-      getValue: object => [getElevation(object)]
-    });
-  }
-
-  colors({target, getColor}) {
-    return this._updateAttribute({
-      target,
-      size: 4,
-      getValue: object => {
-        const color = getColor(object);
-        if (isNaN(color[3])) {
-          color[3] = 255;
-        }
-        return color;
-      }
-    });
-  }
-
-  pickingColors({target, getPickingColor}) {
-    return this._updateAttribute({
-      target,
-      size: 3,
-      getValue: (object, index) => getPickingColor(index)
-    });
-  }
-
-  /* Utils */
-  countInstancesInGeometry(polygon) {
+  /* Implement base Tesselator interface */
+  getGeometrySize(polygon) {
     return Polygon.getVertexCount(polygon);
   }
 
-  /* Updaters */
-  updateGeometryAttributes() {
-    const {attributes, fp64, bufferLayout, typedArrayManager} = this;
+  updateGeometryAttributes(polygon, context) {
+    polygon = Polygon.normalize(polygon);
 
-    const polygons = [];
-
-    this._forEachGeometry(polygon => {
-      polygons.push(Polygon.normalize(polygon));
-    });
-
-    updatePositions({attributes, polygons, fp64});
-
-    attributes.indices = calculateIndices({
-      polygons,
-      target: attributes.indices,
-      bufferLayout,
-      reallocate: typedArrayManager.reallocate.bind(typedArrayManager)
-    });
+    this._updateIndices(polygon, context);
+    this._updatePositions(polygon, context);
   }
-}
 
-// Flatten the indices array
-function calculateIndices({polygons, bufferLayout, target, reallocate}) {
-  let currentLength = target.length;
-  let i = 0;
-  let offset = 0;
-  polygons.forEach((polygon, polygonIndex) => {
+  // Flatten the indices array
+  _updateIndices(polygon, {geometryIndex, vertexStart: offset, indexStart}) {
+    const {attributes, indexLayout, typedArrayManager} = this;
+
+    let target = attributes.indices;
+    let currentLength = target.length;
+    let i = indexStart;
+
     // 1. get triangulated indices for the internal areas
     const indices = Polygon.getSurfaceIndices(polygon);
 
     // make sure the buffer is large enough
     if (currentLength < i + indices.length) {
       currentLength *= 2;
-      target = reallocate(target, currentLength, true);
+      target = typedArrayManager.allocate(target, currentLength, {
+        type: target.constructor,
+        size: 1,
+        copy: true
+      });
     }
 
     // 2. offset each index by the number of indices in previous polygons
     for (let j = 0; j < indices.length; j++) {
       target[i++] = indices[j] + offset;
     }
-    offset += bufferLayout[polygonIndex];
-  });
 
-  return target.subarray(0, i);
-}
+    indexLayout[geometryIndex] = indices.length;
+    attributes.indices = target;
+  }
 
-function updatePositions({attributes: {positions, positions64xyLow, vertexValid}, polygons, fp64}) {
-  vertexValid.fill(1);
   // Flatten out all the vertices of all the sub subPolygons
-  let i = 0;
-  polygons.forEach((polygon, polygonIndex) => {
+  _updatePositions(polygon, {vertexStart}) {
+    const {
+      attributes: {positions, positions64xyLow, vertexValid},
+      fp64
+    } = this;
+
+    let i = vertexStart;
     polygon.forEach(loop => {
-      loop.forEach((vertex, vertexIndex) => {
+      loop.forEach(vertex => {
         // eslint-disable-line
         const x = vertex[0];
         const y = vertex[1];
@@ -161,6 +153,7 @@ function updatePositions({attributes: {positions, positions64xyLow, vertexValid}
           positions64xyLow[i * 2] = fp64LowPart(x);
           positions64xyLow[i * 2 + 1] = fp64LowPart(y);
         }
+        vertexValid[i] = 1;
         i++;
       });
       /* We are reusing the some buffer for `nextPositions` by offsetting one vertex
@@ -174,5 +167,5 @@ function updatePositions({attributes: {positions, positions64xyLow, vertexValid}
        */
       vertexValid[i - 1] = 0;
     });
-  });
+  }
 }

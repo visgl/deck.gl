@@ -129,16 +129,17 @@ test('PolygonTesselator#constructor', t => {
       t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
 
       t.is(tesselator.instanceCount, 52, 'PolygonTesselator counts points correctly');
+      t.is(tesselator.vertexCount, 105, 'PolygonTesselator counts indices correctly');
       t.ok(Array.isArray(tesselator.bufferLayout), 'PolygonTesselator.bufferLayout');
 
-      t.ok(ArrayBuffer.isView(tesselator.indices()), 'PolygonTesselator.indices');
-      t.ok(ArrayBuffer.isView(tesselator.positions()), 'PolygonTesselator.positions');
-      t.ok(ArrayBuffer.isView(tesselator.vertexValid()), 'PolygonTesselator.vertexValid');
+      t.ok(ArrayBuffer.isView(tesselator.get('indices')), 'PolygonTesselator.get indices');
+      t.ok(ArrayBuffer.isView(tesselator.get('positions')), 'PolygonTesselator.get positions');
+      t.ok(ArrayBuffer.isView(tesselator.get('vertexValid')), 'PolygonTesselator.get vertexValid');
 
       if (testCase.params.fp64) {
         t.ok(
-          ArrayBuffer.isView(tesselator.positions64xyLow()),
-          'PolygonTesselator.positions64xyLow'
+          ArrayBuffer.isView(tesselator.get('positions64xyLow')),
+          'PolygonTesselator.get positions64xyLow'
         );
       }
     });
@@ -152,38 +153,29 @@ test('PolygonTesselator#methods', t => {
     t.comment(`Polygon data: ${testData.title}`);
     const tesselator = new PolygonTesselator(testData);
 
-    const elevations = tesselator.elevations({
-      target: new Float32Array(tesselator.instanceCount),
-      getElevation: d => d.height || 0
-    });
-    t.ok(ArrayBuffer.isView(elevations), 'PolygonTesselator.elevations');
-    t.deepEquals(
-      elevations.slice(0, 8),
-      [1, 2, 2, 2, 2, 0, 0, 0],
-      'PolygonTesselator.elevations are filled'
+    const elevations = tesselator.get(
+      'elevations',
+      new Float32Array(tesselator.instanceCount),
+      d => d.height || 0
     );
+    t.ok(ArrayBuffer.isView(elevations), 'PolygonTesselator.get elevations');
+    t.deepEquals(elevations.slice(0, 8), [1, 2, 2, 2, 2, 0, 0, 0], 'elevations are filled');
 
-    const colors = tesselator.colors({
-      target: new Uint8ClampedArray(tesselator.instanceCount * 4),
-      getColor: d => [255, 0, 0]
-    });
-    t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.colors');
-    t.deepEquals(
-      colors.slice(0, 8),
-      [255, 0, 0, 255, 255, 0, 0, 255],
-      'PolygonTesselator.colors are filled'
+    const colors = tesselator.get(
+      'colors',
+      new Uint8ClampedArray(tesselator.instanceCount * 4),
+      d => [255, 0, 0]
     );
+    t.ok(ArrayBuffer.isView(colors), 'PolygonTesselator.get colors');
+    t.deepEquals(colors.slice(0, 8), [255, 0, 0, 255, 255, 0, 0, 255], 'colors are filled');
 
-    const pickingColors = tesselator.pickingColors({
-      target: new Uint8ClampedArray(tesselator.instanceCount * 3),
-      getPickingColor: index => [0, 0, index]
-    });
-    t.ok(ArrayBuffer.isView(pickingColors), 'PolygonTesselator.pickingColors');
-    t.deepEquals(
-      pickingColors.slice(0, 6),
-      [0, 0, 1, 0, 0, 2],
-      'PolygonTesselator.pickingColors are filled'
+    const pickingColors = tesselator.get(
+      'pickingColors',
+      new Uint8ClampedArray(tesselator.instanceCount * 3),
+      index => [0, 0, index]
     );
+    t.ok(ArrayBuffer.isView(pickingColors), 'PolygonTesselator.get pickingColors');
+    t.deepEquals(pickingColors.slice(0, 6), [0, 0, 1, 0, 0, 2], 'pickingColors are filled');
   });
 
   t.end();

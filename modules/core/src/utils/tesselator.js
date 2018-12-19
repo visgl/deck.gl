@@ -24,7 +24,7 @@ class TypedArrayManager {
     this.overAlloc = overAlloc;
   }
 
-  allocate(typedArray, count, {size, Type, copy = false}) {
+  allocate(typedArray, count, {size, type, copy = false}) {
     const newSize = count * size;
     if (typedArray && newSize <= typedArray.length) {
       return typedArray;
@@ -32,7 +32,7 @@ class TypedArrayManager {
 
     // Allocate at least one element to ensure a valid buffer
     const allocSize = Math.max(Math.ceil(newSize * this.overAlloc), 1);
-    const newArray = this._allocate(Type, allocSize);
+    const newArray = this._allocate(type, allocSize);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
@@ -65,7 +65,9 @@ export default class Tesselator {
     const {attributes = {}} = opts;
 
     this.typedArrayManager = new TypedArrayManager();
+    this.indexLayout = null;
     this.bufferLayout = null;
+    this.vertexCount = 0;
     this.instanceCount = 0;
     this.attributes = {};
     this._attributeDefs = attributes;
@@ -135,6 +137,7 @@ export default class Tesselator {
     }
 
     // count instances
+    const indexLayout = [];
     const bufferLayout = [];
     let instanceCount = 0;
     this._forEachGeometry((geometry, dataIndex) => {
@@ -154,14 +157,23 @@ export default class Tesselator {
       }
     }
 
+    this.indexLayout = indexLayout;
     this.bufferLayout = bufferLayout;
     this.instanceCount = instanceCount;
 
-    let vertexIndex = 0;
+    const context = {
+      vertexStart: 0,
+      indexStart: 0
+    };
     this._forEachGeometry((geometry, dataIndex) => {
       const geometrySize = bufferLayout[dataIndex];
-      this.updateGeometryAttributes(geometry, vertexIndex, geometrySize);
-      vertexIndex += geometrySize;
+      context.geometryIndex = dataIndex;
+      context.geometrySize = geometrySize;
+      this.updateGeometryAttributes(geometry, context);
+      context.vertexStart += geometrySize;
+      context.indexStart += indexLayout[dataIndex] || 0;
     });
+
+    this.vertexCount = context.indexStart;
   }
 }
