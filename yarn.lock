@@ -1663,6 +1663,13 @@ babel-plugin-minify-type-constructors@^0.4.3:
   dependencies:
     babel-helper-is-void-0 "^0.4.3"
 
+babel-plugin-remove-glsl-comments@^0.1.0:
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-remove-glsl-comments/-/babel-plugin-remove-glsl-comments-0.1.0.tgz#97ab1d99a18f1a5943454ad6c57b67cde3e6df8e"
+  integrity sha512-+yuLcUG65OE2i/Pr5uwyV1f4yM1xo9l5MxZcxemhuhPsVuFWyPtEJ/hlHTTSsc+fS6gSTqXbPW+1J0Izx1HTRw==
+  dependencies:
+    minimatch "^3.0.0"
+
 babel-plugin-syntax-async-functions@^6.8.0:
   version "6.13.0"
   resolved "https://registry.yarnpkg.com/babel-plugin-syntax-async-functions/-/babel-plugin-syntax-async-functions-6.13.0.tgz#cad9cad1191b5ad634bf30ae0872391e0647be95"
