@@ -30,4 +30,5 @@ if (typeof document !== 'undefined') {
   require('./lite');
   require('./core/experimental/utils/gpu-grid-aggregator.spec');
   require('./core/experimental/utils/grid-aggregation-utils.spec');
+  require('./core/lib/pick-layers.spec');
 }
