@@ -103,8 +103,9 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 Returns the specified path for the object.
 
 A path can be one of the following formats:
-- An array of coordinates following the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) specification.
-- A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`. By default, each coordinate is assumed to contain 3 numbers. Attach a `stride` field to the array if it should be sliced differently:
+
+* An array of coordinates following the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) specification.
+* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`. By default, each coordinate is assumed to contain 3 numbers. Attach a `stride` field to the array if it should be sliced differently:
 
 ```js
 getPath: object => {
