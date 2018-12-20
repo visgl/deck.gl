@@ -1,7 +1,7 @@
 # RFC: Using Binary Data
 
-* Authors: Ib Green, ...
-* Date: June 13, 2018
+* Authors: Ib Green, Xiaoji Chen
+* Date: December 19, 2018
 * Status: **Draft**
 
 
@@ -27,7 +27,27 @@ In some cases the application may receive all or parts of a layer's geometry in 
 
 One of the biggest differences that makes it hard to use binary arrays directly is that they are flat, whereas JavaScript arrays tend to have a sub-array for each vertex or color.
 
-TBA...
+```js
+new Scatterplot({
+  data: new Float32Array([-122.4, 37.78, 1000, 255, 200, 0, -122.41, 37.775, 500, 200, 0, 0, -122.39, 37.8, 500, 0, 40, 200]),
+  datumSize: 6,
+  getPosition: d => d.slice(0, 2),
+  getRadius: d => d[2],
+  getColor: d => d.slice(3)
+})
+```
+
+The binary data object may be sliced into messages with variable size:
+
+```js
+new PathLayer({
+  data: new Float32Array([-122.426942, 37.801537, 0, -122.425942, 37.711537, 0, ...]),
+  datumSize: [36, 36, 75, 6],
+  getPath: d => d,
+  getWidth: 10,
+  getColor: [255, 0, 0]
+})
+```
 
 deck.gl layers carefully formats data in memory so that it can be accessed efficiently by the GPU...
 

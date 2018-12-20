@@ -144,10 +144,25 @@ export default class PathTesselator extends Tesselator {
 
   /* Utilities */
   getPathLength(path) {
+    if (Number.isFinite(path[0]) || path.stride) {
+      // flat format
+      const stride = path.stride || 3;
+      return path.length / stride;
+    }
     return path.length;
   }
 
   getPointOnPath(path, index) {
+    if (Number.isFinite(path[0]) || path.stride) {
+      // flat format
+      const stride = path.stride || 3;
+      // TODO - avoid creating new arrays when using binary
+      return [
+        path[index * stride],
+        path[index * stride + 1],
+        stride > 2 ? path[index * stride + 2] : 0
+      ];
+    }
     return path[index];
   }
 
