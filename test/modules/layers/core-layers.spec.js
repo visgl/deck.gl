@@ -23,7 +23,7 @@ import {testLayer} from '@deck.gl/test-utils';
 
 import {
   ScatterplotLayer,
-  IconLayer,
+  // IconLayer,
   ArcLayer,
   LineLayer,
   ScreenGridLayer,
@@ -225,7 +225,8 @@ test('LineLayer#constructor', t => {
   t.end();
 });
 
-test('IconLayer#constructor', t => {
+/* IconLayer tests don't work under Node due to IconManager needing canvas
+test('IconLayerc#constructor', t => {
   const data = FIXTURES.points;
 
   testLayer({
@@ -271,6 +272,7 @@ test('IconLayer#constructor', t => {
 
   t.end();
 });
+*/
 
 test('PathLayer#constructor', t => {
   const data = FIXTURES.zigzag;
