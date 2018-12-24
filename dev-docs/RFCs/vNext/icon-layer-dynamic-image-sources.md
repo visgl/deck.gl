@@ -14,16 +14,16 @@ This RFC proposes a way to allow `IconLayer` to load image sources dynamically.
 In some use cases, it is not possible to know the icons that will be used. Instead, each icon needs to be fetched from
 a programmatically generated URL at runtime.
  
-## Proposal - Extending current `getIcon` API
+## Proposal - Extend `getIcon` API to support auto packing
 
 Change the `getIcon` API to allow user to return either a `string` or an `object`.
 
-- If `getIcon` return a `string`:
+- **Prepacked iconAtlas**, `getIcon` return a `string`:
   - the behavior should be the same as before, return the icon name of each data point, 
 which is used to get icon descriptor from `iconMapping` and then to retrieve icon from `iconAtlas`. 
   -  when constructing a `IconLayer`, `iconMppping` and `iconAtlas` are required as before.
 
-- If `getIcon` return an `object`:
+- **Auto packing iconAtlas**, `getIcon` return an `object`:
   -  when constructing a `IconLayer`, `iconMppping` and `iconAtlas` are not needed. 
   - The expected `object` should include:
     * `url`: url to fetch the icon
@@ -38,7 +38,7 @@ which is used to get icon descriptor from `iconMapping` and then to retrieve ico
  
 ## Code examples 
 
-- `getIcon` return a string, also require to `IconLayer`
+- **Prepacked icon atlas**, `getIcon` return a string, `iconAtlas` and `iconMapping` are also required when constructing `IconLayer`
 ```js
 import DeckGL, {IconLayer} from 'deck.gl';
 
@@ -85,7 +85,7 @@ const App = ({data, viewport}) => {
 };
 ```
 
-- `getIcon` return an object
+- **Auto packing iconAtlas**, `getIcon` return an object
 ```js
 import DeckGL, {IconLayer} from 'deck.gl';
 
@@ -132,11 +132,14 @@ const App = ({data, viewport}) => {
 The proposal will require the following changes:
 - `IconManager` class: add a new class to help fetch icons and manage `iconMapping` and `iconAltas` from 
 dynamically fetched icons. 
-- `IconLayer` needs update to handle both pre-defined sprite image and dynamic fetched icons.
+- `IconLayer` needs update to handle both pre-packed sprite image and auto packing icons.
 
 If implemented:
 - Existing applications should not need change.
 - Existing applications should not see visible difference in terms of behavior or performance.
+- Auto packing icons is less efficient than pre-packed because 
+the former needs go through all the icons to calculate `iconMapping` 
+and update texture data when each icon fetched.
 
 ## More Advanced Features - Support mix pre-packed and dynamic URLs 
 
