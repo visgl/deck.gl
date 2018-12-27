@@ -1,5 +1,13 @@
 import GL from 'luma.gl/constants';
-import {Buffer, Model, Transform, FEATURES, hasFeatures, isWebGL2} from 'luma.gl';
+import {
+  Buffer,
+  Model,
+  Transform,
+  FEATURES,
+  hasFeatures,
+  isWebGL2,
+  readPixelsToBuffer
+} from 'luma.gl';
 import {log} from '@deck.gl/core';
 import assert from '../../../utils/assert';
 import {fp64 as fp64Utils, withParameters} from 'luma.gl';
@@ -530,26 +538,26 @@ export default class GPUGridAggregator {
       results[id] = {};
       const {needMin, needMax, combineMaxMin} = weights[id];
       results[id].aggregationTexture = textures[id];
-      results[id].aggregationBuffer = framebuffers[id].readPixelsToBuffer({
-        buffer: weights[id].aggregationBuffer, // update if a buffer is provided
-        type: GL.FLOAT
+      results[id].aggregationBuffer = readPixelsToBuffer(framebuffers[id], {
+        target: weights[id].aggregationBuffer, // update if a buffer is provided
+        sourceType: GL.FLOAT
       });
       if (needMin && needMax && combineMaxMin) {
-        results[id].maxMinBuffer = maxMinFramebuffers[id].readPixelsToBuffer({
-          buffer: weights[id].maxMinBuffer, // update if a buffer is provided
-          type: GL.FLOAT
+        results[id].maxMinBuffer = readPixelsToBuffer(maxMinFramebuffers[id], {
+          target: weights[id].maxMinBuffer, // update if a buffer is provided
+          sourceType: GL.FLOAT
         });
       } else {
         if (needMin) {
-          results[id].minBuffer = minFramebuffers[id].readPixelsToBuffer({
-            buffer: weights[id].minBuffer, // update if a buffer is provided
-            type: GL.FLOAT
+          results[id].minBuffer = readPixelsToBuffer(minFramebuffers[id], {
+            target: weights[id].minBuffer, // update if a buffer is provided
+            sourceType: GL.FLOAT
           });
         }
         if (needMax) {
-          results[id].maxBuffer = maxFramebuffers[id].readPixelsToBuffer({
-            buffer: weights[id].maxBuffer, // update if a buffer is provided
-            type: GL.FLOAT
+          results[id].maxBuffer = readPixelsToBuffer(maxFramebuffers[id], {
+            target: weights[id].maxBuffer, // update if a buffer is provided
+            sourceType: GL.FLOAT
           });
         }
       }
