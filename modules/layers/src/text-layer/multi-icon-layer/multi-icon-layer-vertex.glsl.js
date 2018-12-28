@@ -38,10 +38,12 @@ attribute vec2 instancePixelOffset;
 
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
+uniform float gamma;
 
 varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
+varying float vGamma;
 
 vec2 rotate_by_angle(vec2 vertex, float angle) {
   float angle_radian = angle * PI / 180.0;
@@ -77,6 +79,6 @@ void main(void) {
   vColor = instanceColors / 255.;
   picking_setPickingColor(instancePickingColors);
 
-  vColorMode = instanceColorModes;
+  vGamma = gamma / (sizeScale * iconSize.y);
 }
 `;
