@@ -106,13 +106,13 @@ const defaultProps = {
   lightSettings: {},
 
   getPosition: {type: 'accessor', value: x => x.position},
-  getColor: {type: 'accessor', DEFAULT_COLOR},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: {type: 'accessor', value: 0},
-  getPitch: {type: 'accessor', value: 0},
-  getRoll: {type: 'accessor', value: 0}
+  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
+  getPitch: {type: 'accessor', value: x => x.pitch || 0},
+  getRoll: {type: 'accessor', value: x => x.roll || 0}
 };
 
 export default class MeshLayer extends Layer {
@@ -136,7 +136,7 @@ export default class MeshLayer extends Layer {
       instanceRotations: {
         size: 3,
         accessor: ['getYaw', 'getPitch', 'getRoll'],
-        defaultValue: [0, 0, 0]
+        update: this.calculateInstanceRotations
       },
       instanceColors: {
         size: 4,
@@ -240,6 +240,18 @@ export default class MeshLayer extends Layer {
       const position = getPosition(point);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
+    }
+  }
+
+  // yaw(z), pitch(y) and roll(x) in radians
+  calculateInstanceRotations(attribute) {
+    const {data, getYaw, getPitch, getRoll} = this.props;
+    const {value, size} = attribute;
+    let i = 0;
+    for (const point of data) {
+      value[i++] = getRoll(point) * RADIAN_PER_DEGREE;
+      value[i++] = getPitch(point) * RADIAN_PER_DEGREE;
+      value[i++] = getYaw(point) * RADIAN_PER_DEGREE;
     }
   }
 }

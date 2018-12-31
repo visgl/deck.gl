@@ -99,7 +99,7 @@ See [Euler angles](https://en.wikipedia.org/wiki/Euler_angles).
 
 ##### `getColor` (Function, optional)
 
-- Default: `object => object.color || [0, 0, 0, 255]`
+- Default: `object => [0, 0, 0, 255]`
 
 The color of each object. Only used if `texture` is empty.
 
