@@ -307,6 +307,25 @@ export default class PathLayer extends Layer {
     const {pathTesselator} = this.state;
     attribute.value = pathTesselator.get('pickingColors', attribute.value, this.encodePickingColor);
   }
+
+  clearPickingColor(color) {
+    const index = this.decodePickingColor(color);
+    const {bufferLayout} = this.state.pathTesselator;
+    const numVertices = bufferLayout[index];
+
+    let startInd = 0;
+    for (let i = 0; i < index; i++) {
+      startInd += bufferLayout[i];
+    }
+
+    const {instancePickingColors} = this.getAttributeManager().attributes;
+
+    const {value} = instancePickingColors;
+    for (let i = 0, start = startInd * 3; i < numVertices * 3; i++) {
+      value[start + i] = 0;
+    }
+    instancePickingColors.update({value});
+  }
 }
 
 PathLayer.layerName = 'PathLayer';
