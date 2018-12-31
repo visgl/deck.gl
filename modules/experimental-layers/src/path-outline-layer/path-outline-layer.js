@@ -63,8 +63,7 @@ export default class PathOutlineLayer extends PathLayer {
         size: 1,
         type: GL.UNSIGNED_BYTE,
         update: this.calculateZLevels,
-        accessor: 'getZLevel',
-        defaultValue: 0
+        accessor: 'getZLevel'
       }
     });
   }
