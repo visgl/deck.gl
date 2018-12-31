@@ -309,20 +309,23 @@ export default class PathLayer extends Layer {
   }
 
   clearPickingColor(color) {
-    const index = this.decodePickingColor(color);
+    const pickedPathIndex = this.decodePickingColor(color);
     const {bufferLayout} = this.state.pathTesselator;
-    const numVertices = bufferLayout[index];
+    const numVertices = bufferLayout[pickedPathIndex];
 
-    let startInd = 0;
-    for (let i = 0; i < index; i++) {
-      startInd += bufferLayout[i];
+    let startInstanceIndex = 0;
+    for (let pathIndex = 0; pathIndex < pickedPathIndex; pathIndex++) {
+      startInstanceIndex += bufferLayout[pathIndex];
     }
 
     const {instancePickingColors} = this.getAttributeManager().attributes;
 
     const {value} = instancePickingColors;
-    for (let i = 0, start = startInd * 3; i < numVertices * 3; i++) {
-      value[start + i] = 0;
+    const endInstanceIndex = startInstanceIndex + numVertices;
+    for (let i = startInstanceIndex; i < endInstanceIndex; i++) {
+      value[i * 3] = 0;
+      value[i * 3 + 1] = 0;
+      value[i * 3 + 2] = 0;
     }
     instancePickingColors.update({value});
   }
