@@ -89,6 +89,38 @@ Notes:
 * In simple applications, use of the `initialViewState` prop can avoid the need track the view state in the application .
 * One drawback of using `initialViewState` for reactive/functional applications is that the `Deck` component becomes more stateful.
 
+##### `controller` (Function | Boolean | Object)
+
+Options for viewport interactivity, e.g. pan, rotate and zoom with mouse, touch and keyboard. This is a shorthand for defining interaction with the `views` prop if you are using the default view (i.e. a single `MapView`).
+
+```js
+new Deck({
+  ...
+  views: [new MapView({controller: true})]
+})
+```
+
+is equivalent to:
+
+```js
+new Deck({
+  ...
+  // views: undefined
+  controller: true
+})
+```
+
+`controller` can be one of the following types:
+
+* `null` or `false`: the viewport is not interactive.
+* `true`: initiates the default controller with default options.
+* `Controller` class (not instance): initiates the provided controller with default options.
+* `Object`: controller options. This will be merged with the default controller options.
+  + `controller.type`: the controller class
+  + For other options, consult the documentation of [Controller](/docs/api-reference/controller.md).
+
+Default `null`.
+
 
 ### Configuration Properties
 

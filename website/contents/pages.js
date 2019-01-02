@@ -395,8 +395,16 @@ export const docPages = generatePath([
             content: getDocUrl('layers/grid-layer.md')
           },
           {
+            name: 'GridLayer',
+            content: getDocUrl('layers/grid-cell-layer.md')
+          },
+          {
             name: 'HexagonLayer',
             content: getDocUrl('layers/hexagon-layer.md')
+          },
+          {
+            name: 'HexagonCellLayer',
+            content: getDocUrl('layers/hexagon-cell-layer.md')
           },
           {
             name: 'IconLayer',
