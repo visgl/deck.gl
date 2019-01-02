@@ -322,11 +322,7 @@ export default class PathLayer extends Layer {
 
     const {value} = instancePickingColors;
     const endInstanceIndex = startInstanceIndex + numVertices;
-    for (let i = startInstanceIndex; i < endInstanceIndex; i++) {
-      value[i * 3] = 0;
-      value[i * 3 + 1] = 0;
-      value[i * 3 + 2] = 0;
-    }
+    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
     instancePickingColors.update({value});
   }
 }
