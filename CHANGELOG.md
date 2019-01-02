@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.3] - Jan 2 2019
+
+- Fallback to gl.canvas.height when gl.canvas.clientHeight are not available (#2421)
+- Fix pickMultipleObjects in pathLayer (#2534)
+- Fix handling for event callback function return values (#2535)
+
 #### [6.3.2] - Dec 10 2018
 
 - Use default Alpha for picking highlight color (#2479)
