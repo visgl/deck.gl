@@ -94,7 +94,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultProps = {
   mesh: null,
   texture: null,
-  sizeScale: 1,
+  sizeScale: {type: 'number', value: 1, min: 0},
 
   // TODO - parameters should be merged, not completely overridden
   parameters: {
@@ -105,14 +105,14 @@ const defaultProps = {
   // Optional settings for 'lighting' shader module
   lightSettings: {},
 
-  getPosition: x => x.position,
-  getColor: x => x.color || DEFAULT_COLOR,
+  getPosition: {type: 'accessor', value: x => x.position},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: x => x.yaw || x.angle || 0,
-  getPitch: x => x.pitch || 0,
-  getRoll: x => x.roll || 0
+  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
+  getPitch: {type: 'accessor', value: x => x.pitch || 0},
+  getRoll: {type: 'accessor', value: x => x.roll || 0}
 };
 
 export default class MeshLayer extends Layer {
@@ -126,8 +126,7 @@ export default class MeshLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions
+        accessor: 'getPosition'
       },
       instancePositions64xy: {
         size: 2,
@@ -139,7 +138,11 @@ export default class MeshLayer extends Layer {
         accessor: ['getYaw', 'getPitch', 'getRoll'],
         update: this.calculateInstanceRotations
       },
-      instanceColors: {size: 4, accessor: 'getColor', update: this.calculateInstanceColors}
+      instanceColors: {
+        size: 4,
+        accessor: 'getColor',
+        defaultValue: [0, 0, 0, 255]
+      }
     });
 
     this.setState({
@@ -221,19 +224,6 @@ export default class MeshLayer extends Layer {
     }
   }
 
-  calculateInstancePositions(attribute) {
-    const {data, getPosition} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
-      value[i] = position[0];
-      value[i + 1] = position[1];
-      value[i + 2] = position[2] || 0;
-      i += size;
-    }
-  }
-
   calculateInstancePositions64xyLow(attribute) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
@@ -262,19 +252,6 @@ export default class MeshLayer extends Layer {
       value[i++] = getRoll(point) * RADIAN_PER_DEGREE;
       value[i++] = getPitch(point) * RADIAN_PER_DEGREE;
       value[i++] = getYaw(point) * RADIAN_PER_DEGREE;
-    }
-  }
-
-  calculateInstanceColors(attribute) {
-    const {data, getColor} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const color = getColor(point) || DEFAULT_COLOR;
-      value[i++] = color[0];
-      value[i++] = color[1];
-      value[i++] = color[2];
-      value[i++] = isNaN(color[3]) ? 255 : color[3];
     }
   }
 }
