@@ -246,14 +246,16 @@ export default class Layer extends Component {
   // Event handling
   onHover(info) {
     if (this.props.onHover) {
-      this.props.onHover(info, this.context.pickingEvent);
+      return this.props.onHover(info, this.context.pickingEvent);
     }
+    return false;
   }
 
   onClick(info) {
     if (this.props.onClick) {
-      this.props.onClick(info, this.context.pickingEvent);
+      return this.props.onClick(info, this.context.pickingEvent);
     }
+    return false;
   }
 
   // Returns the picking color that doesn't match any subfeature
