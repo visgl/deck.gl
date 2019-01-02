@@ -434,6 +434,24 @@ export default class PathLayer extends Layer {
       }
     });
   }
+
+  clearPickingColor(color) {
+    const pickedPathIndex = this.decodePickingColor(color);
+    const {bufferLayout} = this.state;
+    const numVertices = bufferLayout[pickedPathIndex];
+
+    let startInstanceIndex = 0;
+    for (let pathIndex = 0; pathIndex < pickedPathIndex; pathIndex++) {
+      startInstanceIndex += bufferLayout[pathIndex];
+    }
+
+    const {instancePickingColors} = this.getAttributeManager().attributes;
+
+    const {value} = instancePickingColors;
+    const endInstanceIndex = startInstanceIndex + numVertices;
+    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
+    instancePickingColors.update({value});
+  }
 }
 
 PathLayer.layerName = 'PathLayer';
