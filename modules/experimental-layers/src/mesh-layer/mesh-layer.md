@@ -97,9 +97,9 @@ The roll (bank) in degrees of each object.
 See [Euler angles](https://en.wikipedia.org/wiki/Euler_angles).
 
 
-##### `getColor` (Function, optional)
+##### `getColor` (Function|Array, optional)
 
-- Default: `object => [0, 0, 0, 255]`
+- Default: `[0, 0, 0, 255]`
 
 The color of each object. Only used if `texture` is empty.
 
