@@ -26,7 +26,13 @@ import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
 
 import GL from '@luma.gl/constants';
-import {AnimationLoop, createGLContext, trackContextState, setParameters} from 'luma.gl';
+import {
+  AnimationLoop,
+  createGLContext,
+  trackContextState,
+  setParameters,
+  LightingEffect
+} from 'luma.gl';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
@@ -59,7 +65,9 @@ function getPropTypes(PropTypes) {
     layerFilter: PropTypes.func,
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
-    effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
+    effects: PropTypes.arrayOf(
+      PropTypes.oneOfType([PropTypes.instanceOf(Effect), PropTypes.instanceOf(LightingEffect)])
+    ),
     controller: PropTypes.oneOfType([PropTypes.func, PropTypes.bool, PropTypes.object]),
 
     // GL settings
@@ -499,7 +507,9 @@ export default class Deck {
     this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
 
     for (const effect of this.props.effects) {
-      this.effectManager.addEffect(effect);
+      if (effect instanceof Effect) {
+        this.effectManager.addEffect(effect);
+      }
     }
 
     this.setProps(this.props);
@@ -521,7 +531,8 @@ export default class Deck {
       views: this.viewManager.getViews(),
       redrawReason,
       drawPickingColors: this.props.drawPickingColors, // Debug picking, helps in framebuffered layers
-      customRender: Boolean(this.props._customRender)
+      customRender: Boolean(this.props._customRender),
+      effects: this.props.effects
     });
 
     this.props.onAfterRender({gl});

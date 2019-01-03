@@ -63,8 +63,6 @@ void main(void) {
 
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_worldspace);
-
-  float lightWeight = 1.0;
   
   if (extruded) {
     if (isSideVertex) {
@@ -74,11 +72,11 @@ void main(void) {
       normal = vec3(0.0, 0.0, 1.0);
     }
 
-    lightWeight = lighting_getLightWeight(position_worldspace.xyz, normal);
+    vec3 lightColor = lighting_getLightColor(colors.rgb, position_worldspace.xyz, normal);
+    vColor = vec4(lightColor, colors.a * opacity) / 255.0;
+  } else {
+    vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;
   }
-
-  vec3 lightWeightedColor = lightWeight * colors.rgb;
-  vColor = vec4(lightWeightedColor, colors.a * opacity) / 255.0;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(pickingColors);

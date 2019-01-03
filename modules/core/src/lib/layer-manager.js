@@ -249,7 +249,8 @@ export default class LayerManager {
     viewports,
     views,
     redrawReason = 'unknown reason',
-    customRender = false
+    customRender = false,
+    effects
   }) {
     const {drawPickingColors} = this;
     const {gl, useDevicePixels} = this.context;
@@ -265,7 +266,8 @@ export default class LayerManager {
       pass,
       layerFilter: this.layerFilter,
       redrawReason,
-      customRender
+      customRender,
+      effects
     });
   }
 
