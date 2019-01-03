@@ -1,6 +1,3 @@
-<div align="center">
-  <img height="300" src="/website/src/static/images/hexagon-cell-layer.png" />
-</div>
 
 <p class="badges">
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
@@ -9,7 +6,9 @@
 
 # HexagonCellLayer
 
-The Hexagon Cell Layer is a variation of the grid layer. It is intended to render
+> This is the primitive layer rendered by [HexagonLayer](/docs/layers/hexagon-layer.md) after aggregation. Unlike the HexagonLayer, it renders one column for each data object.
+
+The HexagonCellLayer is a variation of the [GridCellLayer](/docs/layers/grid-cell-layer.md). It is intended to render
 tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
 takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
 and an array of hexagon centroid as `[longitude, latitude]`.
@@ -23,7 +22,7 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {centroid: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
+   *   {position: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
    *   ...
    * ]
    */
@@ -31,7 +30,11 @@ const App = ({data, viewport}) => {
     id: 'hexagon-cell-layer',
     data,
     radius: 500,
-    angle: 0
+    angle: 0,
+    extruded: true,
+    getCentroid: d => d.position,
+    getColor: d => d.color,
+    getElevation: d => d.elevation
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
@@ -47,8 +50,8 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 ##### `hexagonVertices` (Array[[lon, lat]], optional)
 
 Primitive hexagon vertices as an array of six [lon, lat] pairs,
-in either clockwise or counter clouckwise direction. Use radius and angle
-instead of hexagonVertices if provided.
+in either clockwise or counter clouckwise direction. Use `radius` and `angle`
+instead if `hexagonVertices` are not available.
 
 ##### `radius` (Number, optional)
 
@@ -112,11 +115,15 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getElevation` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
-Method called to retrieve the elevation of each object. 1 unit approximate to 100 meters.
+The elevation of each cell in meters.
+
+* If a number is provided, it is used as the elevation for all objects.
+* If a function is provided, it is called on each object to retrieve its elevation.
+
 
 ## Source
 

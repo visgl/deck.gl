@@ -1,6 +1,3 @@
-<div align="center">
-  <img height="300" src="/website/src/static/images/grid-layer.gif" />
-</div>
 
 <p class="badges">
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
@@ -9,7 +6,9 @@
 
 # GridCellLayer
 
-The Grid Cell Layer can render a grid-based heatmap.
+> This is the primitive layer rendered by [GridLayer](/docs/layers/grid-layer.md) after aggregation. Unlike the GridLayer, it renders one column for each data object.
+
+The GridCellLayer can render a grid-based heatmap.
 It takes the constant width / height of all cells and top-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
 
@@ -28,7 +27,11 @@ const App = ({data, viewport}) => {
   const layer = new GridCellLayer({
     id: 'grid-cell-layer',
     data,
-    cellSize: 500
+    cellSize: 500,
+    extruded: true,
+    getPosition: d => d.position,
+    getColor: d => d.color,
+    getElevation: d => d.elevation
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
@@ -83,17 +86,10 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 ##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `cell => cell.position`
+* Default: `x => x.position`
 
 Method called to retrieve the top left corner of each cell.
 Expecting [lon, lat].
-
-##### `getElevation` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `1000`
-
-Method called to retrieve the elevation of each cell.
-Expecting a number, 1 unit approximate to 100 meter
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -103,6 +99,16 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+
+##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1000`
+
+The elevation of each cell in meters.
+
+* If a number is provided, it is used as the elevation for all objects.
+* If a function is provided, it is called on each object to retrieve its elevation.
+
 
 ## Source
 
