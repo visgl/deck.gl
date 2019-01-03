@@ -395,7 +395,7 @@ export const docPages = generatePath([
             content: getDocUrl('layers/grid-layer.md')
           },
           {
-            name: 'GridLayer',
+            name: 'GridCellLayer',
             content: getDocUrl('layers/grid-cell-layer.md')
           },
           {

@@ -113,10 +113,10 @@ new Deck({
 `controller` can be one of the following types:
 
 * `null` or `false`: the viewport is not interactive.
-* `true`: initiates the default controller with default options.
-* `Controller` class (not instance): initiates the provided controller with default options.
+* `true`: initiates the default controller - a [MapController](/docs/api-reference/map-controller.md), with default options.
+* `Controller` class (not instance): initiates the provided controller with default options. Must be a subclass of the [MapController](/docs/api-reference/map-controller.md).
 * `Object`: controller options. This will be merged with the default controller options.
-  + `controller.type`: the controller class
+  + `controller.type`: the controller class, must be a subclass of the [MapController](/docs/api-reference/map-controller.md).
   + For other options, consult the documentation of [Controller](/docs/api-reference/controller.md).
 
 Default `null`.

@@ -8,7 +8,7 @@
 
 > This is the primitive layer rendered by [HexagonLayer](/docs/layers/hexagon-layer.md) after aggregation. Unlike the HexagonLayer, it renders one column for each data object.
 
-The Hexagon Cell Layer is a variation of the grid layer. It is intended to render
+The HexagonCellLayer is a variation of the [GridCellLayer](/docs/layers/grid-cell-layer.md). It is intended to render
 tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
 takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
 and an array of hexagon centroid as `[longitude, latitude]`.
@@ -50,8 +50,8 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 ##### `hexagonVertices` (Array[[lon, lat]], optional)
 
 Primitive hexagon vertices as an array of six [lon, lat] pairs,
-in either clockwise or counter clouckwise direction. Use radius and angle
-instead of hexagonVertices if provided.
+in either clockwise or counter clouckwise direction. Use `radius` and `angle`
+instead if `hexagonVertices` are not available.
 
 ##### `radius` (Number, optional)
 
