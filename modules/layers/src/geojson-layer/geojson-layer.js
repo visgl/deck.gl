@@ -160,7 +160,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           filled,
           wireframe,
           lightSettings,
-
           getElevation: unwrappingAccessor(getElevation),
           getFillColor: unwrappingAccessor(getFillColor),
           getLineColor: unwrappingAccessor(getLineColor),

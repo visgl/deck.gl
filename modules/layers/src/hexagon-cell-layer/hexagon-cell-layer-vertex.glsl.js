@@ -76,19 +76,12 @@ void main(void) {
 
   vec3 normals_worldspace = vec3(rotationMatrix * normals.xy, normals.z);
 
-  float lightWeight = 1.0;
-
   if (extruded > 0.5) {
-    lightWeight = lighting_getLightWeight(
-      position_worldspace.xyz, // the w component is always 1.0
-      normals_worldspace
-    );
+    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, position_worldspace.xyz, normals_worldspace);
+    vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
+  } else {
+    vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.0;
   }
-
-  vec3 lightWeightedColor = lightWeight * instanceColors.rgb;
-
-  // opacity-multiplied instance color
-  vColor = vec4(lightWeightedColor, opacity * instanceColors.a) / 255.0;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
