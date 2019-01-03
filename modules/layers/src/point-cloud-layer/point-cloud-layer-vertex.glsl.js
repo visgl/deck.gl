@@ -44,11 +44,10 @@ void main(void) {
   gl_Position += project_pixel_to_clipspace(positions.xy * radiusPixels);
 
   // Apply lighting
-  float lightWeight = lighting_getLightWeight(position_worldspace.xyz, // the w component is always 1.0
-    project_normal(instanceNormals));
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, position_worldspace.xyz, project_normal(instanceNormals));
 
   // Apply opacity to instance color, or return instance picking color
-  vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);

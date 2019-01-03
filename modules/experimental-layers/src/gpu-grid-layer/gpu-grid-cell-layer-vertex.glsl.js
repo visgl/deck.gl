@@ -97,16 +97,11 @@ void main(void) {
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(extrudedPosition, extrudedPosition64xyLow, offset, position_worldspace);
 
-  float lightWeight = 1.0;
-
-  if (extruded > 0.5) {
-    lightWeight = lighting_getLightWeight(
-      position_worldspace.xyz, // the w component is always 1.0
-      normals
-    );
+   if (extruded > 0.5) {
+    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, position_worldspace.xyz, normals);
+    vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
+  } else {
+    vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.0;
   }
-
-  vec3 lightWeightedColor = lightWeight * color.rgb;
-  vColor = vec4(lightWeightedColor, color.a * opacity);
 }
 `;
