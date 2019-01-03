@@ -24,9 +24,9 @@ Each point is defined as an array of three numbers: `[x, y, z]`.
 
 Each point is defined as an array of three numbers: `[x, y, z]`.
 
-##### `getColor` (Function, optional)
+##### `getColor` (Function|Array, optional)
 
-- Default: `d => d.color`
+- Default: `[0, 0, 0, 255]`
 
-Called for each data object to retreive stroke colors.
+Called for each data object to retrieve stroke colors.
 Returns an array in the form of `[r, g, b]`.
