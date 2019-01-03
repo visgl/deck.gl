@@ -360,6 +360,24 @@ export default class SolidPolygonLayer extends Layer {
       this.encodePickingColor
     );
   }
+
+  clearPickingColor(color) {
+    const pickedPolygonIndex = this.decodePickingColor(color);
+    const {bufferLayout} = this.state.polygonTesselator;
+    const numVertices = bufferLayout[pickedPolygonIndex];
+
+    let startInstanceIndex = 0;
+    for (let polygonIndex = 0; polygonIndex < pickedPolygonIndex; polygonIndex++) {
+      startInstanceIndex += bufferLayout[polygonIndex];
+    }
+
+    const {pickingColors} = this.getAttributeManager().attributes;
+
+    const {value} = pickingColors;
+    const endInstanceIndex = startInstanceIndex + numVertices;
+    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
+    pickingColors.update({value});
+  }
 }
 
 SolidPolygonLayer.layerName = 'SolidPolygonLayer';
