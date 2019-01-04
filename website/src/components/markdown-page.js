@@ -103,8 +103,10 @@ export default class MarkdownPage extends PureComponent {
     }
   }
 
-  componentDidUpdate() {
-    this._jumpTo(this.props.query);
+  componentDidUpdate(prevProps, prevState) {
+    if (prevState.html !== this.state.html || prevProps.query !== this.props.query) {
+      this._jumpTo(this.props.query);
+    }
   }
 
   // get the vertical scroll position of a DOM object relative to this component
@@ -149,19 +151,20 @@ export default class MarkdownPage extends PureComponent {
 
     // Calculate all scroll positions of h2, h3 once
     if (!_anchorPositions) {
-      _anchorPositions = {};
+      _anchorPositions = [];
       // generate mapping of anchor id -> scrollTop
-      const anchors = this.refs.container.querySelectorAll('h2[id],h3[id]');
+      const anchors = this.refs.container.querySelectorAll('h2[id],h3[id],h4[id],h5[id]');
       for (const anchor of anchors) {
-        _anchorPositions[anchor.id] = this._getScrollPosition(anchor);
+        _anchorPositions.push({id: anchor.id, y: this._getScrollPosition(anchor)});
       }
+      _anchorPositions.sort((p1, p2) => p1.y - p2.y);
       this._anchorPositions = _anchorPositions;
     }
 
     let currentSection;
-    for (const id in _anchorPositions) {
-      if (_anchorPositions[id] <= top) {
-        currentSection = id;
+    for (const p of _anchorPositions) {
+      if (p.y <= top) {
+        currentSection = p.id;
       } else {
         break;
       }
