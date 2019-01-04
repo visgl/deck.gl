@@ -265,7 +265,6 @@ const ContourLayerBandsExample = {
     cellSize: 200,
     getPosition: d => d.COORDINATES,
     gpuAggregation: true,
-    zOffsetScale: 5,
     contours: [
       {threshold: [1, 5], color: [255, 0, 0]},
       {threshold: [5, 15], color: [0, 255, 0]},

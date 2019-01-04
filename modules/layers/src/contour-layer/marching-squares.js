@@ -9,11 +9,9 @@ export const CONTOUR_TYPE = {
   ISO_BANDS: 2
 };
 
-const Z_OFFSET = 0.002;
-
 const DEFAULT_THRESHOLD_DATA = {
   zIndex: 0,
-  zOffsetScale: 1
+  zOffset: 0.005
 };
 
 // Utility methods
@@ -127,7 +125,7 @@ export function getVertices(opts) {
 
   // Reference vertex is at top-right move to top-right corner
 
-  const vZ = thresholdData.zIndex * Z_OFFSET * thresholdData.zOffsetScale;
+  const vZ = thresholdData.zIndex * thresholdData.zOffset;
   const rX = (x + 1) * cellSize[0];
   const rY = (y + 1) * cellSize[1];
 

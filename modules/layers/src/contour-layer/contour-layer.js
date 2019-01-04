@@ -42,7 +42,7 @@ const defaultProps = {
   contours: [{threshold: DEFAULT_THRESHOLD}],
 
   fp64: false,
-  zOffsetScale: 1
+  zOffset: 0.005
 };
 
 export default class ContourLayer extends CompositeLayer {
@@ -237,9 +237,9 @@ export default class ContourLayer extends CompositeLayer {
   _shouldRebuildContours({oldProps, props}) {
     if (
       !oldProps.contours ||
-      !oldProps.zOffsetScale ||
+      !oldProps.zOffset ||
       oldProps.contours.length !== props.contours.length ||
-      oldProps.zOffsetScale !== props.zOffsetScale
+      oldProps.zOffset !== props.zOffset
     ) {
       return true;
     }
@@ -280,7 +280,7 @@ export default class ContourLayer extends CompositeLayer {
       return {
         threshold: x.threshold,
         zIndex: x.zIndex || index,
-        zOffsetScale: props.zOffsetScale
+        zOffset: props.zOffset
       };
     });
     this.setState({thresholdData});
