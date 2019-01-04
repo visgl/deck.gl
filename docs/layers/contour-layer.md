@@ -70,19 +70,19 @@ Array of objects with following keys
 * `threshold` (Number or Array) :
 
   - Isolines: `threshold` value must be a single `Number`, Isolines are generated based on this threshold value.
-  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
+  - Isobands: `threshold` value must be an Array of two `Number`s. Isobands are generated using `[threshold[0], threshold[1])` as threshold range, i.e area that has values `>= threshold[0]` and `< threshold[1]` are rendered with corresponding color. NOTE: `threshold[0]` is inclusive and `threshold[1]` is not inclusive.
 
 * `color` (Array, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
 
 * `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
 
-* `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffsetScale` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
+* `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
-##### `zOffsetScale`: (Number, optional)
+##### `zOffset`: (Number, optional)
 
-* Default: `1`
+* Default: `0.005`
 
-A very small z offset is added for each vertex of a contour (Isoline or Isoband). This is needed to control the layout of contours, especially when rendering overlapping contours. Imagine a case where an Isoline is specified which is overlapped with an Isoband. To make sure the Isoline is visible we need to render this above the Isoband. `zOffsetScale` can be used to scale (reduce or increase) the z offset that gets added to each vertex.
+A very small z offset that is added for each vertex of a contour (Isoline or Isoband). This is needed to control the layout of contours, especially when rendering overlapping contours. Imagine a case where an Isoline is specified which is overlapped with an Isoband. To make sure the Isoline is visible we need to render this above the Isoband.
 
 ##### `fp64` (Boolean, optional)
 
