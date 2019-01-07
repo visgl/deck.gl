@@ -1,8 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import {AmbientLight, DirectionalLight, PhongMaterial, LightingEffect} from 'luma.gl';
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import {AmbientLight, PointLight, DirectionalLight, PhongMaterial} from 'luma.gl';
+import DeckGL, {GeoJsonLayer, LightingEffect} from 'deck.gl';
 import {scaleThreshold} from 'd3-scale';
 
 // Set your mapbox token here
@@ -32,10 +32,10 @@ export const COLOR_SCALE = scaleThreshold()
   ]);
 
 const ambientLight = new AmbientLight({color: [255, 255, 255], intensity: 1.0});
-const pointLight = new DirectionalLight({
+const pointLight = new PointLight({
   color: [255, 255, 255],
   intensity: 2.0,
-  direction: [5446, 6114, -200]
+  position: [-125, 50.5, 5000]
 });
 const directionalLight = new DirectionalLight({
   color: [255, 255, 255],
