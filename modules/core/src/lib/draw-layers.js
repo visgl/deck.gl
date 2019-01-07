@@ -23,6 +23,7 @@ import GL from '@luma.gl/constants';
 import {withParameters, setParameters, clear} from 'luma.gl';
 import log from '../utils/log';
 import assert from '../utils/assert';
+import LightingEffect from '../effects/lighting-effect';
 
 const LOG_PRIORITY_DRAW = 2;
 
@@ -251,6 +252,44 @@ function drawLayersInViewport(
   logRenderStats({renderStats, pass, redrawReason, stats});
 }
 
+function getLightSources({viewport, modelMatrix, coordinateSystem, coordinateOrigin, effects}) {
+  let lightEffect;
+  if (effects && Array.isArray(effects)) {
+    for (const i in effects) {
+      const effect = effects[i];
+      if (effect instanceof LightingEffect) {
+        lightEffect = effect;
+        break;
+      }
+    }
+  }
+
+  let lightSources = {};
+  if (lightEffect && lightEffect.ambientLight) {
+    lightSources = Object.assign(lightSources, {
+      ambientLight: lightEffect.ambientLight
+    });
+  }
+
+  if (lightEffect && lightEffect.pointLights) {
+    lightSources = Object.assign(lightSources, {
+      pointLights: lightEffect.getProjectedPointLights({
+        viewport,
+        modelMatrix,
+        coordinateSystem,
+        coordinateOrigin
+      })
+    });
+  }
+
+  if (lightEffect && lightEffect.directionalLights) {
+    lightSources = Object.assign(lightSources, {
+      directionalLights: lightEffect.directionalLights
+    });
+  }
+  return lightSources;
+}
+
 function drawLayerInViewport({
   gl,
   layer,
@@ -261,17 +300,27 @@ function drawLayerInViewport({
   parameters,
   effects
 }) {
-  const moduleParameters = Object.assign(Object.create(layer.props), {
-    viewport: layer.context.viewport,
-    pickingActive: drawPickingColors ? 1 : 0,
-    devicePixelRatio: pixelRatio,
-    effects
-  });
+  const moduleParameters = Object.assign(
+    Object.create(layer.props),
+    {
+      viewport: layer.context.viewport,
+      pickingActive: drawPickingColors ? 1 : 0,
+      devicePixelRatio: pixelRatio,
+      effects
+    },
+    getLightSources({
+      viewport: layer.context.viewport,
+      modelMatrix: layer.props.modelMatrix,
+      coordinateSystem: layer.props.coordinateSystem,
+      coordinateOrigin: layer.props.coordinateOrigin,
+      effects
+    })
+  );
 
   const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
 
   // All parameter resolving is done here instead of the layer
-  // Blend parameters must not be overriden
+  // Blend parameters must not be overridden
   const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
 
   Object.assign(layerParameters, {

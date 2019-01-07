@@ -67,7 +67,8 @@ export {
   // Effects
   _EffectManager,
   _Effect,
-  _ReflectionEffect
+  _ReflectionEffect,
+  LightingEffect
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
