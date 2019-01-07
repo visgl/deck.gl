@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {readPixelsToArray} from 'luma.gl';
 import {drawPickingBuffer, getPixelRatio} from './draw-layers';
 import log from '../utils/log';
 import assert from '../utils/assert';
@@ -246,7 +247,13 @@ function drawAndSamplePickingBuffer(
   // Returns an Uint8ClampedArray of picked pixels
   const {x, y, width, height} = deviceRect;
   const pickedColors = new Uint8Array(width * height * 4);
-  pickingFBO.readPixels({x, y, width, height, pixelArray: pickedColors});
+  readPixelsToArray(pickingFBO, {
+    sourceX: x,
+    sourceY: y,
+    sourceWidth: width,
+    sourceHeight: height,
+    target: pickedColors
+  });
   return pickedColors;
 }
 

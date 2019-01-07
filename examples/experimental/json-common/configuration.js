@@ -1,5 +1,5 @@
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {GL} from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 
 export default {
   // a map of all layers that should be exposes as JSONLayers

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 
 // Polygon geometry generation is managed by the polygon tesselator

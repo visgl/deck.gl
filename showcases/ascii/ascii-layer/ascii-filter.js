@@ -1,5 +1,5 @@
-import {Texture2D, Model, Buffer, Framebuffer, Geometry, TransformFeedback} from 'luma.gl';
-import GL from 'luma.gl/constants';
+import {Texture2D, Model, Buffer, Framebuffer, Geometry, TransformFeedback, readPixelsToArray} from 'luma.gl';
+import GL from '@luma.gl/constants';
 import {sortCharactersByBrightness} from './utils';
 
 const vs = `
@@ -61,11 +61,11 @@ function getPixelMapTexture(gl, {iconMapping, iconAtlas}) {
   for (const char in iconMapping) {
     const bbox = iconMapping[char];
 
-    const pixels = frameBuffer.readPixels({
-      x: bbox.x,
-      y: height - bbox.y - bbox.height,
-      width: bbox.width,
-      height: bbox.height
+    const pixels = readPixelsToArray(frameBuffer, {
+      sourceX: bbox.x,
+      sourceY: height - bbox.y - bbox.height,
+      sourceWidth: bbox.width,
+      sourceHeight: bbox.height
     });
     const len = pixels.length;
     let sum = 0;

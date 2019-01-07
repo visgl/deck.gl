@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import assert from '../utils/assert';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Buffer, _Attribute as Attribute} from 'luma.gl';
 
 const DEFAULT_STATE = {

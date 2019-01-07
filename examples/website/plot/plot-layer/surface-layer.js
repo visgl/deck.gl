@@ -1,5 +1,5 @@
 import {Layer} from 'deck.gl';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Model, Geometry} from 'luma.gl';
 
 import surfaceVertex from './surface-vertex.glsl';

@@ -20,7 +20,7 @@
 
 import {Layer, log} from '@deck.gl/core';
 
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
 

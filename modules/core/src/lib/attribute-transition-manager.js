@@ -1,4 +1,4 @@
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Buffer, Transform} from 'luma.gl';
 import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
 import Attribute from './attribute';

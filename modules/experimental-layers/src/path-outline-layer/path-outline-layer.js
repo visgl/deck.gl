@@ -1,5 +1,5 @@
 import {PathLayer} from '@deck.gl/layers';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Framebuffer, Texture2D} from 'luma.gl';
 import outline from '../shaderlib/outline/outline';
 

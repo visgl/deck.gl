@@ -28,7 +28,7 @@ import {
 } from '@deck.gl/core';
 const {defaultColorRange} = experimental;
 
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Model, Geometry, Buffer, isWebGL2} from 'luma.gl';
 
 import vs from './screen-grid-layer-vertex.glsl';

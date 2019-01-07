@@ -3,7 +3,7 @@ import {Deck} from '@deck.gl/core';
 import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
-import {GL} from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 
 const configuration = {
   // a map of all layers that should be exposes as JSONLayers

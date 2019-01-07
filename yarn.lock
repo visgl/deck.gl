@@ -690,6 +690,11 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
+"@luma.gl/constants@^7.0.0-alpha.3":
+  version "7.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.3.tgz#c3b86a6c9acaff27fed887e9731a19d8fe7c562e"
+  integrity sha512-ZVaVt1dr5D3L7IRrjK9a7diIxjzX96suaFQBn9D3e+h1IjI0YA8RuO3U9/o1GHxO8N7FXmAUBVd0Kgrn/B7bOg==
+
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@mapbox/geojson-area/-/geojson-area-0.2.2.tgz#18d7814aa36bf23fbbcc379f8e26a22927debf10"
@@ -6890,16 +6895,16 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^7.0.0-alpha.2:
-  version "7.0.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-7.0.0-alpha.2.tgz#d83ebc095418557c6252a803f8f735de8b59a009"
-  integrity sha512-S000cJax7EsoYMTgX2SUQ2cWkN94bf6rnrF8eFR5J47AKofS9TBCJikIyk0n7LipvGZuCDTp28rXtmeVAtgAJA==
+luma.gl@^7.0.0-alpha.3:
+  version "7.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-7.0.0-alpha.3.tgz#d694e33d440e5acbe87726615b8b919fa5e13880"
+  integrity sha512-ZDtCWg0R/x22yPB5vxiYZPF98Pof+vwKKQG6TC56VW11Zdb4xqguSvuRUuNE/aje+7UKQowKDtXW5hHZLxi92A==
   dependencies:
     "@babel/runtime" "^7.0.0"
+    "@luma.gl/constants" "^7.0.0-alpha.3"
     math.gl "^2.2.0"
     probe.gl "^2.0.1"
     seer "^0.2.4"
-    webgl-debug "^2.0.0"
 
 magic-string@^0.22.4:
   version "0.22.5"
@@ -10759,11 +10764,6 @@ wcwidth@^1.0.0:
   integrity sha1-8LDc+RW8X/FSivrbLA4XtTLaL+g=
   dependencies:
     defaults "^1.0.3"
-
-webgl-debug@^2.0.0:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/webgl-debug/-/webgl-debug-2.0.1.tgz#dc11bea3d947764bce061fdb5a23109c13787c95"
-  integrity sha512-G7BOpMmqdc31X1nb3eqwVxw/v1MNV/ulgw7Bs+7+a/sn+fC0d0OiMkerA55C6+3BL2vULyJ3kZLPcEL5GbXzhw==
 
 webidl-conversions@^3.0.0:
   version "3.0.1"

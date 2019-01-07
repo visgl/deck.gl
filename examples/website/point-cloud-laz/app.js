@@ -2,7 +2,7 @@ import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import loadLazFile from './utils/laslaz-loader';
 import {normalize} from './utils/point-cloud-utils';
 
