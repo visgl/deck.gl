@@ -8,7 +8,7 @@ import {
 } from '@deck.gl/experimental-layers';
 
 import {COORDINATE_SYSTEM} from 'deck.gl';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
 import * as dataSamples from '../data-samples';
 

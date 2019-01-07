@@ -1,5 +1,5 @@
 /* global document */
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {Texture2D} from 'luma.gl';
 
 // helper for textMatrixToTexture

@@ -1,7 +1,7 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {GPUGridLayer} from '@deck.gl/experimental-layers';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {OrbitView, OrthographicView, FirstPersonView} from 'deck.gl';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';

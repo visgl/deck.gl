@@ -27,7 +27,7 @@ import {removeLayerInSeer} from './seer-integration';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {withParameters} from 'luma.gl';
 import assert from '../utils/assert';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';

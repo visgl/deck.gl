@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* global window */
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {withParameters, setParameters, clear} from 'luma.gl';
 import log from '../utils/log';
 import assert from '../utils/assert';

@@ -1,5 +1,5 @@
 import {Texture2D, Model, Buffer, Framebuffer, Geometry, TransformFeedback, readPixelsToArray} from 'luma.gl';
-import GL from 'luma.gl/constants';
+import GL from '@luma.gl/constants';
 import {sortCharactersByBrightness} from './utils';
 
 const vs = `
