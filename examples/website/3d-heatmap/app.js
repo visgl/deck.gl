@@ -2,7 +2,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {HexagonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {HexagonLayer} from '@deck.gl/layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line

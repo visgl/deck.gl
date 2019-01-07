@@ -1,4 +1,4 @@
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 import {Model, Geometry, setParameters} from 'luma.gl';
 
 import vertex from './delaunay-cover-layer-vertex.glsl';

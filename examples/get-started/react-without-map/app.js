@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
 // source: Natural Earth http://www.naturalearthdata.com/
 // via geojson.xyz

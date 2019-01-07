@@ -13,7 +13,8 @@ It takes the constant width / height of all cells and top-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
 
 ```js
-import DeckGL, {GridCellLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GridCellLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

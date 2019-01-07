@@ -10,7 +10,8 @@ To use deck.gl with React, simply import the `DeckGL` React component and render
 ```jsx
 /// app.js
 import React from 'react';
-import DeckGL, {LineLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {LineLayer} from '@deck.gl/layers';
 
 // Viewport settings
 const viewState = {
@@ -46,7 +47,8 @@ An important companion to deck.gl is `react-map-gl`. It is a React wrapper for [
 ```jsx
 /// app.js
 import React from 'react';
-import DeckGL, {LineLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {LineLayer} from '@deck.gl/layers';
 import {StaticMap} from 'react-map-gl';
 
 // Set your mapbox access token here

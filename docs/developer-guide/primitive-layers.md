@@ -20,7 +20,7 @@ A layer should create its model during this phase. A model is a [luma.gl](https:
 Most layers are **Single-model layers** - this is the predominant form among all core layers that deck.gl currently provides. In these layers, a single geometry model is created for each layer and saved to `state.model` during initialization. The default implementation of the rest of the lifecycle methods will then look for this model for rendering and picking etc., meaning that you don't have to do anything more to get a working layer.
 
 ```js
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 
 export default class MeshLayer extends Layer {
 

@@ -2,7 +2,9 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {HexagonLayer, LinearInterpolator} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {LinearInterpolator} from '@deck.gl/core';
+import {HexagonLayer} from '@deck.gl/layers';
 import {csv as requestCsv} from 'd3-request';
 
 // Set your mapbox token here

@@ -16,7 +16,7 @@ There are a couple of ways to build a layer in deck.gl, and it is helpful to con
 Your layer class must be a subclass of [Layer](/docs/api-reference/layer.md).
 
 ```js
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 
 class AwesomeLayer extends Layer {...}
 ```

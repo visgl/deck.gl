@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {ArcLayer} from 'deck.gl';
+import {ArcLayer} from '@deck.gl/layers';
 
 import arcVertex from './arc-brushing-layer-vertex.glsl';
 import arcFragment from './arc-brushing-layer-fragment.glsl';

@@ -1,6 +1,7 @@
 /* global, window */
 import React, {Component} from 'react';
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import PropTypes from 'prop-types';
 import {isWebGL2, registerShaderModules} from 'luma.gl';
 

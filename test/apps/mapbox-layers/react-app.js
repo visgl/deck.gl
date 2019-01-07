@@ -1,7 +1,8 @@
 /* global document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {ScatterplotLayer, ArcLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer, ArcLayer} from '@deck.gl/layers';
 import {StaticMap} from 'react-map-gl';
 
 import {MapboxLayer} from '@deck.gl/mapbox';

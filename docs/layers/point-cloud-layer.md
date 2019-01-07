@@ -10,7 +10,8 @@ The Point Cloud Layer takes in points with 3d positions, normals and colors
 and renders them as spheres with a certain radius.
 
 ```js
-import DeckGL, {PointCloudLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PointCloudLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

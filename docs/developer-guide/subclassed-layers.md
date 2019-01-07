@@ -11,7 +11,7 @@ good technique to add it.
 
 ```js
 // Example to add per-segment color to PathLayer
-import {PathLayer} from 'deck.gl';
+import {PathLayer} from '@deck.gl/layers';
 
 // Accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
@@ -84,7 +84,7 @@ the `draw()` method:
 ```js
 /// my-scatterplot-layer.js
 // Example to draw rounded rectangles instead of circles in ScatterplotLayer
-import {ScatterplotLayer} from 'deck.gl';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import customFragmentShader from 'my-scatterplot-layer-fragment';
 
 export default RoundedRectangleLayer extends ScatterplotLayer {
@@ -149,7 +149,7 @@ layer's [attribute manager](/docs/developer-guide/attribute-management.md):
 ```js
 // my-point-cloud-layer.js
 // Example to add per-point size to point cloud layer
-import {PointCloudLayer} from 'deck.gl';
+import {PointCloudLayer} from '@deck.gl/layers';
 import vertexShader from 'my-point-cloud-layer-vertex';
 
 export default MyPointCloudLayer extends PointCloudLayer {

@@ -14,7 +14,8 @@ and height of the cell is scaled by number of points it contains.
 GridLayer is a `CompositeLayer`
 
 ```js
-import DeckGL, {GridLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GridLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

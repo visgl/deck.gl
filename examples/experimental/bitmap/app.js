@@ -1,8 +1,8 @@
 /* global window,document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, PerspectiveView} from 'deck.gl';
-import {_OrbitController as OrbitController} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {COORDINATE_SYSTEM, PerspectiveView, OrbitController} from '@deck.gl/core';
 import {BitmapLayer} from '@deck.gl/experimental-layers';
 
 const IMAGES = {

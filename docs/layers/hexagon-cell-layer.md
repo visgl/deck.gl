@@ -15,7 +15,8 @@ and an array of hexagon centroid as `[longitude, latitude]`.
 It renders each hexagon based on color, opacity and elevation.
 
 ```js
-import DeckGL, {HexagonCellLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {HexagonCellLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

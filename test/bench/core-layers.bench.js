@@ -21,7 +21,7 @@
 /* eslint-disable no-console, no-invalid-this */
 import * as data from 'deck.gl/test/data';
 
-import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer, TextLayer} from 'deck.gl';
+import {ScatterplotLayer, PolygonLayer, PathLayer, GeoJsonLayer, TextLayer} from '@deck.gl/layers';
 
 import {testInitializeLayer} from '@deck.gl/test-utils';
 

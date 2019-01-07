@@ -9,7 +9,8 @@ and height of the cell is a linear function of number of points it contains.
 GPUGridLayer is a `CompositeLayer`
 
 ```js
-import DeckGL, {GridLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GridLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

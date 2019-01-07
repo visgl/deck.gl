@@ -9,7 +9,7 @@ If you are using React, you should not use this component directly. Instead you 
 
 ```js
 // Basic standalone use
-import {Deck, ScatterplotLayer} from 'deck.gl';
+import {Deck, ScatterplotLayer} from '@deck.gl/core';
 
 const App = (viewState, data) => (
   const deck = new Deck({

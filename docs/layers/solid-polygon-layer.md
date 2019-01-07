@@ -8,7 +8,8 @@
 The SolidPolygon Layer renders filled polygons.
 
 ```js
-import DeckGL, {SolidPolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
 new PolygonLayer({
   data: [

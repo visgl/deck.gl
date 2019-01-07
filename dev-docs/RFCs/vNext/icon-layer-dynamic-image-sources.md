@@ -40,7 +40,8 @@ which is used to get icon descriptor from `iconMapping` and then to retrieve ico
 
 - **Prepacked icon atlas**, `getIcon` return a string, `iconAtlas` and `iconMapping` are also required when constructing `IconLayer`
 ```js
-import DeckGL, {IconLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {IconLayer} from '@deck.gl/layers';
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
@@ -87,7 +88,8 @@ const App = ({data, viewport}) => {
 
 - **Auto packing iconAtlas**, `getIcon` return an object
 ```js
-import DeckGL, {IconLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {IconLayer} from '@deck.gl/layers';
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 32, height: 32, mask: true}

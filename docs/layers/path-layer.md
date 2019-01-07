@@ -9,7 +9,8 @@
 The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
 
 ```js
-import DeckGL, {PathLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PathLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

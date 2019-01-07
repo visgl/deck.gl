@@ -11,7 +11,8 @@ The `MapController` class can be passed to the `Deck.controller` or `View.contro
 Use with the default view:
 
 ```jsx
-import DeckGL, {MapController} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {MapController} from '@deck.gl/core';
 
 <DeckGL
 controller={{type: MapController, dragRotate: false}}
@@ -23,7 +24,8 @@ onViewportChange={v => this.setState({viewport: v})}
 Use with multiple views:
 
 ```jsx
-import DeckGL, {MapView} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+impor {MapView} from '@deck.gl/core';
 
 <DeckGL
 views={[

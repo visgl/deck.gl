@@ -2,7 +2,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {PolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PolygonLayer} from '@deck.gl/layers';
 import {TripsLayer} from '@deck.gl/experimental-layers';
 
 // Set your mapbox token here

@@ -85,7 +85,8 @@ map.on('load', () => {
 
 ```js
 import React from 'react';
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {StaticMap} from 'react-map-gl';
 
 import {MapboxLayer} from '@deck.gl/mapbox';

@@ -14,7 +14,8 @@
 ## Usage
 
 ```js
-import DeckGL, {ContourLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ContourLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

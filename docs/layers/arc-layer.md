@@ -10,7 +10,8 @@ The Arc Layer renders raised arcs joining pairs of source and target points,
 specified as latitude/longitude coordinates.
 
 ```js
-import DeckGL, {ArcLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ArcLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

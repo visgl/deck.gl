@@ -25,7 +25,7 @@ The base Controller class supports the following options:
 ##### constructor
 
 ```js
-import {Controller} from 'deck.gl';
+import {Controller} from '@deck.gl/core';
 
 class MyController extends Controller {
     constructor(options = {}) {
@@ -108,7 +108,7 @@ Returns `true` if the user is dragging the view.
 A controller can specify a list of additional event names that this control subscribes to by adding them to the `events` field.
 
 ```js
-import {Controller} from 'deck.gl';
+import {Controller} from '@deck.gl/core';
 
 class MyController extends Controller{
     constructor(options = {}) {

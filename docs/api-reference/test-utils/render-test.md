@@ -27,7 +27,7 @@ renderTest.run();
 In `test-cases.js`:
 
 ```js
-import {PathLayer} from 'deck.gl';
+import {PathLayer} from '@deck.gl/layers';
 
 export default [{
   name: 'path-lnglat',

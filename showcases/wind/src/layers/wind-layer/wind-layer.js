@@ -1,4 +1,4 @@
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 import GL from 'luma.gl/constants';
 import {Model, Geometry, loadTextures, Texture2D} from 'luma.gl';
 

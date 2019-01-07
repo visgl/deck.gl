@@ -11,7 +11,8 @@ The `DeckGL` class is a React wrapper of the `Deck` JavaScript class which expos
 
 ```js
 // Basic usage
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 const App = (data) => (
   <DeckGL
@@ -25,7 +26,7 @@ const App = (data) => (
 Like any React component, `DeckGL` can accept child components. Child components are often maps (e.g. the `StaticMap` component from react-map-gl), but can be any React components.
 
 ```js
-import DeckGL from 'deck.gl';
+import DeckGL from '@deck.gl/react';
 import {StaticMap} from 'react-map-gl';
 
 const App = (data) => (

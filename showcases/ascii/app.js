@@ -2,7 +2,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 
-import DeckGL, {OrthographicView} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {OrthographicView} from '@deck.gl/core';
 import {isWebGL2} from 'luma.gl';
 import ControlPanel from './components/control-panel';
 import AsciiLayer from './ascii-layer/ascii-layer';

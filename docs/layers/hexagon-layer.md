@@ -14,7 +14,8 @@ and height of the hexagon is scaled by number of points it contains.
 HexagonLayer is a `CompositeLayer` and at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
 ```js
-import DeckGL, {HexagonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {HexagonLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

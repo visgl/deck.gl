@@ -2,7 +2,8 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 
 import ScatterplotLayer from './scatterplot-layer';
 import POINTS from './data-sample';

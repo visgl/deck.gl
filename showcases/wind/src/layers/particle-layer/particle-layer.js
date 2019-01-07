@@ -1,5 +1,5 @@
 /* global window */
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 import GL from 'luma.gl/constants';
 import {Model, Geometry, Buffer, setParameters, loadTextures, Texture2D} from 'luma.gl';
 import {Transform} from 'luma.gl';

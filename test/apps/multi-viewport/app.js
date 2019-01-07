@@ -3,14 +3,10 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  PolygonLayer,
-  PointCloudLayer,
-  MapView,
-  FirstPersonView,
-  ThirdPersonView
-} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {COORDINATE_SYSTEM, MapView, FirstPersonView, ThirdPersonView} from '@deck.gl/core';
+
+import {PolygonLayer, PointCloudLayer} from '@deck.gl/layers';
 
 import TripsLayer from '../../../examples/website/trips/trips-layer';
 

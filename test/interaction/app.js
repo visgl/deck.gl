@@ -2,14 +2,16 @@
 
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {
+import DeckGL from '@deck.gl/react';
+import {
   COORDINATE_SYSTEM,
   PointCloudLayer,
   PolygonLayer,
   ScatterplotLayer,
-  OrbitView
-} from 'deck.gl';
-import {OrthographicView} from 'deck.gl';
+  OrbitView,
+  OrthographicView
+} from '@deck.gl/core';
+
 import {default as choropleths} from '../../examples/layer-browser/data/sf.zip.geo';
 
 function getPointCloud() {

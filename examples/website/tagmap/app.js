@@ -2,7 +2,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {TextLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {TextLayer} from '@deck.gl/layers';
 import TagmapLayer from './tagmap-layer';
 
 // Set your mapbox token here

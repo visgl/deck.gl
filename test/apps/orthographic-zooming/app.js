@@ -1,7 +1,9 @@
 /* global window, document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, LineLayer, ScatterplotLayer, OrthographicView} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {COORDINATE_SYSTEM, OrthographicView} from 'deck.gl/core';
+import {LineLayer, ScatterplotLayer} from 'deck.gl/layers';
 
 class Root extends Component {
   constructor(props) {

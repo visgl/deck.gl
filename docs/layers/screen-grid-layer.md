@@ -7,7 +7,8 @@ coordinated points, aggregates them into histogram bins and
 renders as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to false.
 
 ```js
-import DeckGL, {ScreenGridLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScreenGridLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

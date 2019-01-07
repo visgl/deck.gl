@@ -9,7 +9,8 @@
 The Icon Layer renders raster icons at given coordinates.
 
 ```js
-import DeckGL, {IconLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {IconLayer} from '@deck.gl/layers';
 
 const ICON_MAPPING = {
   marker: {x: 0, y: 0, width: 32, height: 32, mask: true}

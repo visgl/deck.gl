@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 import {normalizeGeojson} from './geojson';
 import flatten from 'lodash.flattendeep';
 import GL from 'luma.gl/constants';

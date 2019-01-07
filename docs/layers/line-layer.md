@@ -10,7 +10,8 @@ The Line Layer renders flat lines joining pairs of source and target points,
 specified as latitude/longitude coordinates.
 
 ```js
-import DeckGL, {LineLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {LineLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

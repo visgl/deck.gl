@@ -16,7 +16,7 @@ A number of deck.gl features are enabled by rich descriptions of the types of th
 A layer class may supply a static member `defaultProps` that defines its default property types and values:
 
 ```js
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/layers';
 
 class MyLayer extends Layer {
   // implementation

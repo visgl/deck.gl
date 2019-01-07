@@ -1,7 +1,8 @@
 /* global window */
 import React, {Component} from 'react';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {MapController, FlyToInterpolator, TRANSITION_EVENTS} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {MapController, FlyToInterpolator, TRANSITION_EVENTS} from '@deck.gl/core';
 
 import ControlPanel from './control-panel';
 

@@ -10,7 +10,8 @@ The Scatterplot Layer takes in paired latitude and longitude coordinated
 points and renders them as circles with a certain radius.
 
 ```js
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 

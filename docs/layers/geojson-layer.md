@@ -11,7 +11,8 @@ The GeoJson Layer takes in [GeoJson](http://geojson.org) formatted data and
 renders it as interactive polygons, lines and points.
 
 ```js
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
   const {data, viewport} = this.props;

@@ -3,13 +3,11 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  MapView,
-  ScatterplotLayer,
-  PolygonLayer,
-  MapController
-} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+
+import {COORDINATE_SYSTEM, MapView, MapController} from '@deck.gl/core';
+
+import {ScatterplotLayer, PolygonLayer} from '@deck.gl/layers';
 
 import DataGenerator from './data-generator';
 

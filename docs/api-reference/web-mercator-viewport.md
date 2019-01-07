@@ -11,7 +11,7 @@ For more information consult the [Viewports](/docs/developer-guide/viewports.md)
 The `WebMercatorViewport` is the default viewport for deck.gl, created under the hood to do geospatial projections in JavaScript.
 
 ```jsx
-import DeckGL from 'deck.gl';
+import DeckGL from '@deck.gl/react';
 
 <DeckGL width={width} heigh={height} longitude={longitude} latitude={latitude} zoom={zoom} pitch={pitch} bearing={bearing} layers=[...]/>
 ```
@@ -19,7 +19,9 @@ import DeckGL from 'deck.gl';
 Is equivalent to
 
 ```jsx
-import DeckGL, {WebMercatorViewport} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {WebMercatorViewport} from '@deck.gl/core';
+
 const viewport = new WebMercatorViewport({width, height, longitude, latitude, zoom, pitch, bearing});
 
 <DeckGL views={[viewport]} layers=[...]/>

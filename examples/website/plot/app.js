@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {OrbitView} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {OrbitView} from '@deck.gl/core';
 import PlotLayer from './plot-layer';
 import {scaleLinear} from 'd3-scale';
 
