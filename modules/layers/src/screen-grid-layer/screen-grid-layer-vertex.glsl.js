@@ -43,6 +43,7 @@ uniform vec2 colorDomain;
 uniform bool shouldUseMinMax;
 
 out vec4 vColor;
+out float vSampleCount;
 
 vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
   vec4 outColor = vec4(0., 0., 0., 0.);
@@ -64,6 +65,8 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
 }
 
 void main(void) {
+  vSampleCount = instanceCounts.a;
+
   float weight = instanceCounts.r ;
   float maxWeight = aggregationData.maxCount.r;
   float step = weight / maxWeight;

@@ -51,7 +51,8 @@ const defaultProps = {
   getPosition: {type: 'accessor', value: d => d.position},
   getWeight: {type: 'accessor', value: d => [1, 0, 0]},
 
-  gpuAggregation: true
+  gpuAggregation: true,
+  aggregation: 'SUM'
 };
 
 export default class ScreenGridLayer extends Layer {
@@ -215,7 +216,7 @@ export default class ScreenGridLayer extends Layer {
     const cellSizeChanged =
       props.cellSizePixels !== oldProps.cellSizePixels ||
       props.cellMarginPixels !== oldProps.cellMarginPixels;
-    const dataChanged = changeFlags.dataChanged;
+    const dataChanged = changeFlags.dataChanged || props.aggregation !== oldProps.aggregation;
     const viewportChanged = changeFlags.viewportChanged;
 
     if (cellSizeChanged || dataChanged || viewportChanged) {
@@ -316,6 +317,9 @@ export default class ScreenGridLayer extends Layer {
 
     const {positions, weights} = this.state;
     const {viewport} = this.context;
+
+    weights.color.operation =
+      AGGREGATION_OPERATION[this.props.aggregation.toUpperCase()] || AGGREGATION_OPERATION.SUM;
 
     let projectPoints = false;
     let gridTransformMatrix = null;

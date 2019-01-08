@@ -25,8 +25,12 @@ export default `\
 precision highp float;
 
 varying vec4 vColor;
+varying float vSampleCount;
 
 void main(void) {
+  if (vSampleCount <= 0.0) {
+    discard;
+  }
   gl_FragColor = vColor;
 
   gl_FragColor = picking_filterColor(gl_FragColor);
