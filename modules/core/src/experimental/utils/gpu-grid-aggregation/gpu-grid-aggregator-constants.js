@@ -27,7 +27,7 @@ export const DEFAULT_RUN_PARAMS = {
   createBufferObjects: true
 };
 
-export const MAX_32_BIT_FLOAT = 3.402823466e+38;
+export const MAX_32_BIT_FLOAT = 3.402823466e38;
 export const MIN_BLEND_EQUATION = [GL.MIN, GL.FUNC_ADD];
 export const MAX_BLEND_EQUATION = [GL.MAX, GL.FUNC_ADD];
 export const MAX_MIN_BLEND_EQUATION = [GL.MAX, GL.MIN];
