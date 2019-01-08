@@ -187,10 +187,8 @@ const PathLayerBinaryExample = {
   },
   props: {
     ...PathLayerExample.props,
-    getPath: d => {
-      d.stride = 2;
-      return d;
-    }
+    getPath: d => d,
+    is3D: false
   }
 };
 

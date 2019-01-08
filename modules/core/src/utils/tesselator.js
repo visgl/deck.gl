@@ -78,10 +78,11 @@ export default class Tesselator {
   }
 
   /* Public methods */
-  updateGeometry({data, getGeometry, fp64}) {
+  updateGeometry({data, getGeometry, stride, fp64}) {
     this.data = data;
     this.getGeometry = getGeometry;
     this.fp64 = fp64;
+    this.stride = stride === 2 ? 2 : 3;
     this._rebuildGeometry();
   }
 

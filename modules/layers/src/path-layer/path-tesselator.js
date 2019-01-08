@@ -25,11 +25,12 @@ const {fp64LowPart} = fp64Module;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PathTesselator extends Tesselator {
-  constructor({data, getGeometry, fp64}) {
+  constructor({data, getGeometry, stride, fp64}) {
     super({
       data,
       getGeometry,
       fp64,
+      stride,
       attributes: {
         startPositions: {size: 3},
         endPositions: {size: 3},
@@ -144,23 +145,22 @@ export default class PathTesselator extends Tesselator {
 
   /* Utilities */
   getPathLength(path) {
-    if (Number.isFinite(path[0]) || path.stride) {
+    if (Number.isFinite(path[0])) {
       // flat format
-      const stride = path.stride || 3;
-      return path.length / stride;
+      return path.length / this.stride;
     }
     return path.length;
   }
 
   getPointOnPath(path, index) {
-    if (Number.isFinite(path[0]) || path.stride) {
+    if (Number.isFinite(path[0])) {
       // flat format
-      const stride = path.stride || 3;
+      const {stride} = this;
       // TODO - avoid creating new arrays when using binary
       return [
         path[index * stride],
         path[index * stride + 1],
-        stride > 2 ? path[index * stride + 2] : 0
+        stride === 3 ? path[index * stride + 2] : 0
       ];
     }
     return path[index];

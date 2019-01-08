@@ -38,6 +38,7 @@ const defaultProps = {
   miterLimit: {type: 'number', min: 0, value: 4},
   fp64: false,
   dashJustified: false,
+  is3D: true,
 
   getPath: {type: 'accessor', value: object => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -125,6 +126,7 @@ export default class PathLayer extends Layer {
     const geometryChanged =
       changeFlags.dataChanged ||
       props.fp64 !== oldProps.fp64 ||
+      props.is3D !== oldProps.is3D ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
 
@@ -132,6 +134,7 @@ export default class PathLayer extends Layer {
       this.state.pathTesselator.updateGeometry({
         data: props.data,
         getGeometry: props.getPath,
+        stride: props.is3D ? 3 : 2,
         fp64: this.use64bitPositions()
       });
       this.setState({
