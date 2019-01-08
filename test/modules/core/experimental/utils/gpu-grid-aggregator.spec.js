@@ -92,6 +92,22 @@ test('GPUGridAggregator#CPU', t => {
 });
 
 function testAggregationOperations(opts) {
+  const filterCellsWithNoData = (inArray, op) => {
+    if (op !== AGGREGATION_OPERATION.MIN) {
+      return inArray;
+    }
+    // When aggregation operation is MIN cpu and gpu will have different values
+    // for the cells which do not contain any sample points. In cpu weights will be 0,
+    // for gpu weights will be max float values. This is due to cpu/gpu aggregation implementation differences
+    // when operation is MIN. For testing purposes, discard all such cells.
+    const outArray = [];
+    for (let i = 0; i < inArray.length; i += 4) {
+      if (inArray[i + 3] > 0) {
+        outArray.push(inArray.slice(i, i + 4));
+      }
+    }
+    return outArray;
+  };
   const {t, op, testName, pointsData} = opts;
   const oldEpsilon = config.EPSILON;
   if (op === AGGREGATION_OPERATION.MEAN) {
@@ -108,7 +124,7 @@ function testAggregationOperations(opts) {
     Object.assign({}, fixture, {useGPU: false}, pointsData, {weights: {weight1: weight}})
   );
   const cpuResults = {
-    aggregationData: results.weight1.aggregationBuffer.getData(),
+    aggregationData: filterCellsWithNoData(results.weight1.aggregationBuffer.getData(), op),
     minData: results.weight1.minBuffer.getData(),
     maxData: results.weight1.maxBuffer.getData()
   };
@@ -121,7 +137,7 @@ function testAggregationOperations(opts) {
     Object.assign({}, fixture, {useGPU: true}, pointsData, {weights: {weight1: weight}})
   );
   const gpuResults = {
-    aggregationData: results.weight1.aggregationBuffer.getData(),
+    aggregationData: filterCellsWithNoData(results.weight1.aggregationBuffer.getData(), op),
     minData: results.weight1.minBuffer.getData(),
     maxData: results.weight1.maxBuffer.getData()
   };

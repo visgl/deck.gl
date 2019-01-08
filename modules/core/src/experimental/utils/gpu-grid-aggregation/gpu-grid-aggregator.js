@@ -289,6 +289,7 @@ export default class GPUGridAggregator {
   // CPU Aggregation methods
 
   // aggregated weight value to a cell
+  /* eslint-disable max-depth */
   calculateAggregationData(opts) {
     const {weights, results, cellIndex, posIndex} = opts;
     for (const id in weights) {
@@ -301,27 +302,33 @@ export default class GPUGridAggregator {
         const cellElementIndex = cellIndex + sizeIndex;
         const weightComponent = values[posIndex * WEIGHT_SIZE + sizeIndex];
         assert(Number.isFinite(weightComponent));
-        switch (operation) {
-          case AGGREGATION_OPERATION.SUM:
-          case AGGREGATION_OPERATION.MEAN:
-            aggregationData[cellElementIndex] += weightComponent;
-            break;
-          case AGGREGATION_OPERATION.MIN:
-            aggregationData[cellElementIndex] = Math.min(
-              aggregationData[cellElementIndex],
-              weightComponent
-            );
-            break;
-          case AGGREGATION_OPERATION.MAX:
-            aggregationData[cellElementIndex] = Math.max(
-              aggregationData[cellElementIndex],
-              weightComponent
-            );
-            break;
-          default:
-            // Not a valid operation enum.
-            assert(false);
-            break;
+        if (aggregationData[cellIndex + 3] === 0) {
+          // if the cell is getting update the first time, set the value directly.
+          aggregationData[cellElementIndex] = weightComponent;
+        } else {
+          switch (operation) {
+            case AGGREGATION_OPERATION.SUM:
+            case AGGREGATION_OPERATION.MEAN:
+              aggregationData[cellElementIndex] += weightComponent;
+              // MEAN value is calculated during 'calculateMeanMaxMinData'
+              break;
+            case AGGREGATION_OPERATION.MIN:
+              aggregationData[cellElementIndex] = Math.min(
+                aggregationData[cellElementIndex],
+                weightComponent
+              );
+              break;
+            case AGGREGATION_OPERATION.MAX:
+              aggregationData[cellElementIndex] = Math.max(
+                aggregationData[cellElementIndex],
+                weightComponent
+              );
+              break;
+            default:
+              // Not a valid operation enum.
+              assert(false);
+              break;
+          }
         }
       }
 
@@ -330,7 +337,7 @@ export default class GPUGridAggregator {
     }
   }
 
-  /* eslint-disable max-depth */
+  /* eslint-disable max-depth, complexity */
   calculateMeanMaxMinData(opts) {
     const {validCellIndices, results, weights} = opts;
 
@@ -340,12 +347,17 @@ export default class GPUGridAggregator {
         const {size, needMin, needMax, operation} = weights[id];
         const {aggregationData, minData, maxData, maxMinData} = results[id];
         const calculateMinMax = needMin || needMax;
+        const calculateMean = operation === AGGREGATION_OPERATION.MEAN;
         const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
         const count = aggregationData[cellIndex + ELEMENTCOUNT - 1];
-        for (let sizeIndex = 0; sizeIndex < size && calculateMinMax; sizeIndex++) {
+        for (
+          let sizeIndex = 0;
+          sizeIndex < size && (calculateMinMax || calculateMean);
+          sizeIndex++
+        ) {
           const cellElementIndex = cellIndex + sizeIndex;
           let weight = aggregationData[cellElementIndex];
-          if (operation === AGGREGATION_OPERATION.MEAN) {
+          if (calculateMean) {
             aggregationData[cellElementIndex] /= count;
             weight = aggregationData[cellElementIndex];
           }
@@ -710,7 +722,14 @@ export default class GPUGridAggregator {
 
     framebuffers[id].bind();
     gl.viewport(0, 0, gridSize[0], gridSize[1]);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    const clearColor =
+      operation === AGGREGATION_OPERATION.MIN
+        ? [MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, MAX_32_BIT_FLOAT, 0]
+        : [0, 0, 0, 0];
+    withParameters(gl, {clearColor}, () => {
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    });
+
     const attributes = {weights: weightAttributes[id]};
     gridAggregationModel.draw({
       parameters: Object.assign({}, parameters, {blendEquation: equations[id]}),
@@ -728,7 +747,13 @@ export default class GPUGridAggregator {
         elementCount: textures[id].width * textures[id].height
       };
       const meanTransform = this.getMeanTransform(transformOptions);
-      meanTransform.run();
+      meanTransform.run({
+        parameters: {
+          blend: false,
+          depthTest: false
+        }
+      });
+
       // update framebuffer with mean results so readPixelsToBuffer returns mean values
       framebuffers[id].attach({[GL.COLOR_ATTACHMENT0]: textures[id]});
     }
@@ -773,14 +798,16 @@ export default class GPUGridAggregator {
         meanTextures[id].resize(framebufferSize);
         texture = meanTextures[id];
       }
-      framebuffers[id] =
-        framebuffers[id] ||
-        getFramebuffer(this.gl, {
+      if (framebuffers[id]) {
+        framebuffers[id].attach({[GL.COLOR_ATTACHMENT0]: texture});
+      } else {
+        framebuffers[id] = getFramebuffer(this.gl, {
           id: `${id}-fb`,
           width: numCol,
           height: numRow,
           texture
         });
+      }
       framebuffers[id].resize(framebufferSize);
       equations[id] = EQUATION_MAP[operation];
       // For min/max framebuffers will use default size 1X1
