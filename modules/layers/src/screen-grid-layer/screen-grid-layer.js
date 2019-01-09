@@ -188,15 +188,13 @@ export default class ScreenGridLayer extends Layer {
   getPickingInfo({info, mode}) {
     const {index} = info;
     if (index >= 0) {
-      let {aggregationResults} = this.state;
-      if (!aggregationResults) {
-        aggregationResults = {
-          aggregationData: this.state.aggregationBuffer.getData(),
-          maxData: this.state.maxBuffer.getData()
-        };
-        // Cache aggregationResults to avoid multiple buffer reads.
-        this.setState({aggregationResults});
-      }
+      const {aggregationResults} = this.state;
+
+      // Cache aggregationResults to avoid multiple buffer reads.
+      aggregationResults.aggregationData =
+        aggregationResults.aggregationData || this.state.aggregationBuffer.getData();
+      aggregationResults.maxData = aggregationResults.maxData || this.state.maxBuffer.getData();
+
       const {aggregationData, maxData} = aggregationResults;
       // Each instance (one cell) is aggregated into single pixel,
       // Get current instance's aggregation details.
@@ -347,8 +345,14 @@ export default class ScreenGridLayer extends Layer {
       results.color.maxData && Number.isFinite(results.color.maxData[0])
         ? results.color.maxData[0]
         : 0;
+    // Under WebGL1 results are available in JS Arrays
+    // For WebGL2, data is in Buffer objects and will be read on demand (like picking)
+    const aggregationResults = {
+      aggregationData: results.color.aggregationData,
+      maxData: results.color.maxData
+    };
     this.setState({
-      aggregationResults: null, // Aggregation changed, enforce reading buffer data for picking.
+      aggregationResults,
       maxWeight // uniform to use under WebGL1
     });
 
