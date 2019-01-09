@@ -13,6 +13,9 @@ assignees: ''
 
 #### Repro Steps
 <!-- Steps to reproduce the behavior. -->
+<!-- Providing the following could help us resolve this issue faster:
+- A Codepen [example](https://codepen.io/vis-gl) that reproduces the behavior
+- A sample of your dataset -->
 
 #### Expected behavior
 <!-- A clear and concise description of what you expected to happen. -->
@@ -24,8 +27,5 @@ assignees: ''
  - GPU [e.g. AMD Radeon Pro 560X, see (http://webglreport.com)[http://webglreport.com/?v=2]]
 
 #### Logs
-<!-- Check the browser console for any relevant errors or warnings.  
-For issues in deck.gl examples, please provide detailed logs by typing `luma.log.priority=2` and `deck.log.priority=2` in browser console. -->
-
-#### Code Example
-<!-- Providing a minimal, complete, and verifiable demonstration of the bug is the *best* way to get maintainers and contributors to fix issues.  Please include any necessary sample data.  -->
+<!-- Check the browser console for any relevant errors or warnings.
+(Optional) For more detailed logs, type `luma.log.priority=2` and `deck.log.priority=2` in browser console. -->

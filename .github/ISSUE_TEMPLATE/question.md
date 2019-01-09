@@ -1,5 +1,5 @@
 ---
-name: Question
+name: Help Request
 about: Ask a question or request a documentation improvement.
 title: ''
 labels: question
