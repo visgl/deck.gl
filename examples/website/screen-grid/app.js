@@ -31,7 +31,7 @@ const colorRange = [
 
 export class App extends Component {
   _renderLayers() {
-    const {data = DATA_URL, cellSize = 20, gpuAggregation = true} = this.props;
+    const {data = DATA_URL, cellSize = 20, gpuAggregation = true, aggregation = 'Sum'} = this.props;
 
     return [
       new ScreenGridLayer({
@@ -41,7 +41,8 @@ export class App extends Component {
         getWeight: d => d[2],
         cellSizePixels: cellSize,
         colorRange,
-        gpuAggregation
+        gpuAggregation,
+        aggregation
       })
     ];
   }
