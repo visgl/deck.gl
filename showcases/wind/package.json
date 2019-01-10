@@ -29,7 +29,7 @@
     "buble-loader": "^0.4.0",
     "transform-loader": "^0.2.3",
     "webpack": "^2.6.1",
-    "webpack-dev-server": "^2.4.5"
+    "webpack-dev-server": "^3.1.11"
   },
   "babel": {
     "presets": [

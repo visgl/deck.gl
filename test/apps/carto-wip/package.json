@@ -9,6 +9,6 @@
   "devDependencies": {
     "buble-loader": "^0.4.0",
     "webpack": "^2.2.0",
-    "webpack-dev-server": "^2.2.0"
+    "webpack-dev-server": "^3.1.11"
   }
 }
