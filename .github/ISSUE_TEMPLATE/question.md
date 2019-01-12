@@ -8,5 +8,6 @@ assignees: ''
 ---
 
 <!-- Ask a question that is not answered in our (documentation)[http://deck.gl/#/documentation]. -->
+<!-- Also check answered issues tagged as (FAQ)[https://github.com/uber/deck.gl/issues?utf8=%E2%9C%93&q=is%3Aissue+label%3Afaq]-->
 
 <!-- Suggest an improvement or clarification in our documentation. -->
