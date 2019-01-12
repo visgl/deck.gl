@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.4] - Jan 11 2019
+
+- ScreenGridLayer: fix picking under WebGL1 (#2557)
+
 #### [6.3.3] - Jan 2 2019
 
 - Fallback to gl.canvas.height when gl.canvas.clientHeight are not available (#2421)
