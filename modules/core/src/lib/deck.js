@@ -24,15 +24,10 @@ import MapView from '../views/map-view';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
+import LightingEffect from '../effects/lighting-effect';
 
 import GL from '@luma.gl/constants';
-import {
-  AnimationLoop,
-  createGLContext,
-  trackContextState,
-  setParameters,
-  LightingEffect
-} from 'luma.gl';
+import {AnimationLoop, createGLContext, trackContextState, setParameters} from 'luma.gl';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
