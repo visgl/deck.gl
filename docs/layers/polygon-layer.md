@@ -244,5 +244,5 @@ The dash array to draw each outline path with: `[dashSize, gapSize]` relative to
 
 ## Source
 
-[modules/layers/src/polygon-layer](https://github.com/uber/deck.gl/tree/6.3-release/modules/layers/src/polygon-layer)
+[modules/layers/src/polygon-layer](https://github.com/uber/deck.gl/tree/6.4-release/modules/layers/src/polygon-layer)
 

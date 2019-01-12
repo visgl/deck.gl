@@ -208,4 +208,4 @@ This callback will be called when bin elevation domain has been calculated.
 
 ## Source
 
-[modules/layers/src/grid-layer](https://github.com/uber/deck.gl/tree/6.3-release/modules/layers/src/grid-layer)
+[modules/layers/src/grid-layer](https://github.com/uber/deck.gl/tree/6.4-release/modules/layers/src/grid-layer)

@@ -99,5 +99,5 @@ The stroke width of each object, in pixels.
 
 ## Source
 
-[modules/layers/src/line-layer](https://github.com/uber/deck.gl/tree/6.3-release/modules/layers/src/line-layer)
+[modules/layers/src/line-layer](https://github.com/uber/deck.gl/tree/6.4-release/modules/layers/src/line-layer)
 

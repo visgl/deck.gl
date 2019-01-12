@@ -322,4 +322,4 @@ Notes:
 
 ## Source
 
-[modules/core/src/core/lib/deck.js](https://github.com/uber/deck.gl/tree/6.3-release/modules/core/src/lib/deck.js)
+[modules/core/src/core/lib/deck.js](https://github.com/uber/deck.gl/tree/6.4-release/modules/core/src/lib/deck.js)

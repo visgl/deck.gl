@@ -134,4 +134,4 @@ The dash array to draw each path with: `[dashSize, gapSize]` relative to the wid
 
 ## Source
 
-[modules/layers/src/path-layer](https://github.com/uber/deck.gl/tree/6.3-release/modules/layers/src/path-layer)
+[modules/layers/src/path-layer](https://github.com/uber/deck.gl/tree/6.4-release/modules/layers/src/path-layer)

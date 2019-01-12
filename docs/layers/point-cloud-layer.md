@@ -96,5 +96,5 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 ## Source
 
-[modules/layers/src/point-cloud-layer](https://github.com/uber/deck.gl/tree/6.3-release/modules/layers/src/point-cloud-layer)
+[modules/layers/src/point-cloud-layer](https://github.com/uber/deck.gl/tree/6.4-release/modules/layers/src/point-cloud-layer)
 
