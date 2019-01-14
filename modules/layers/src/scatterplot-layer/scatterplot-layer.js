@@ -122,8 +122,8 @@ export default class ScatterplotLayer extends Layer {
 
     this.state.model.render(
       Object.assign({}, uniforms, {
-        stroked: stroked ? 1 : 0,
-        filled: filled ? 1 : outline ? 1 : 0,
+        stroked: stroked ? 1 : outline ? 1 : 0,
+        filled: filled ? 1 : 0,
         radiusScale,
         radiusMinPixels,
         radiusMaxPixels
