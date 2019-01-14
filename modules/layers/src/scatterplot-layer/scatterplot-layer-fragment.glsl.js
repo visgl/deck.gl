@@ -23,18 +23,26 @@ export default `\
 
 precision highp float;
 
-varying vec4 vColor;
+varying vec4 vFillColor;
+varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
+varying float fillUnitRadius;
 
 void main(void) {
 
   float distToCenter = length(unitPosition);
 
-  if (distToCenter > 1.0 || distToCenter < innerUnitRadius) {
+  if (distToCenter > 1.0) {
     discard;
+  } 
+  if (distToCenter > innerUnitRadius) {
+    gl_FragColor = vLineColor;
+  } 
+  if (distToCenter < fillUnitRadius){
+    gl_FragColor = vFillColor;
   }
-  gl_FragColor = vColor;
+  
 
   // use highlight color if this fragment belongs to the selected object.
   gl_FragColor = picking_filterHighlightColor(gl_FragColor);

@@ -30,18 +30,35 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   radiusScale: {type: 'number', min: 0, value: 1},
-  radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
-  radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
-  strokeWidth: {type: 'number', min: 0, value: 1},
-  outline: false,
+  radiusMinPixels: {type: 'number', min: 1, value: 1}, //  min point radius in pixels
+  radiusMaxPixels: {type: 'number', min: 1, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
+  lineWidthMinPixels: {type: 'number', min: 0, value: 1},
+  lineWidthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
+  stroked: false,
   fp64: false,
+  filled: true,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getRadius: {type: 'accessor', value: 1},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR}
+  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', value: 1}
 };
 
 export default class ScatterplotLayer extends Layer {
+  constructor(props) {
+    const {getColor, getLineColor, getFillColor, getLineWidth, strokeWidth} = props;
+
+    if (getColor) {
+      if (!getLineColor) props.getLineColor = getColor;
+      if (!getFillColor) props.getFillColor = getColor;
+    }
+
+    if (!getLineWidth && strokeWidth) props.getLineWidth = strokeWidth;
+
+    super(props);
+  }
+
   getShaders(id) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
@@ -65,12 +82,25 @@ export default class ScatterplotLayer extends Layer {
         accessor: 'getRadius',
         defaultValue: 1
       },
-      instanceColors: {
+      instanceFillColors: {
         size: 4,
         transition: true,
         type: GL.UNSIGNED_BYTE,
-        accessor: 'getColor',
+        accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineColors: {
+        size: 4,
+        transition: true,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getLineColor',
+        defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineWidths: {
+        size: 1,
+        transition: true,
+        accessor: 'getLineWidth',
+        defaultValue: 1
       }
     });
   }
@@ -88,11 +118,12 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
+    const {radiusScale, radiusMinPixels, radiusMaxPixels, stroked, filled, outline} = this.props;
+
     this.state.model.render(
       Object.assign({}, uniforms, {
-        outline: outline ? 1 : 0,
-        strokeWidth,
+        stroked: stroked ? 1 : 0,
+        filled: filled ? 1 : outline ? 1 : 0,
         radiusScale,
         radiusMinPixels,
         radiusMaxPixels
