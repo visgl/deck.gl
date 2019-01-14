@@ -51,7 +51,6 @@ void main(void) {
     radiusMinPixels, radiusMaxPixels
   );
 
-  // stroked is centered at the radius
   // outer radius needs to offset by half stroke width
   outerRadiusPixels += stroked * instanceLineWidths / 2.0;
 
@@ -59,7 +58,6 @@ void main(void) {
   unitPosition = positions.xy;
 
   innerUnitRadius = 1.0 - stroked * instanceLineWidths / outerRadiusPixels;
-  fillUnitRadius = filled * innerUnitRadius;
   
   vec3 offset = positions * outerRadiusPixels;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset);

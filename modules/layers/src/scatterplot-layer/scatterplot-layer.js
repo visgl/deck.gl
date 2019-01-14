@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
@@ -47,14 +47,36 @@ const defaultProps = {
 
 export default class ScatterplotLayer extends Layer {
   constructor(props) {
-    const {getColor, getLineColor, getFillColor, getLineWidth, strokeWidth} = props;
+    const {
+      getColor,
+      getLineColor,
+      getFillColor,
+      getLineWidth,
+      strokeWidth,
+      stroked,
+      outline
+    } = props;
 
     if (getColor) {
-      if (!getLineColor) props.getLineColor = getColor;
-      if (!getFillColor) props.getFillColor = getColor;
+      if (!getLineColor) {
+        log.deprecated('ScatterplotLayer: `getColor`', '`getLineColor`')();
+        props.getLineColor = getColor;
+      }
+      if (!getFillColor) {
+        log.deprecated('ScatterplotLayer: `getColor`', '`getFillColor`')();
+        props.getFillColor = getColor;
+      }
     }
 
-    if (!getLineWidth && strokeWidth) props.getLineWidth = strokeWidth;
+    if (!getLineWidth && strokeWidth) {
+      log.deprecated('ScatterplotLayer: `strokeWidth`', '`getLineWidth`')();
+      props.getLineWidth = strokeWidth;
+    }
+
+    if (stroked === null && outline !== null) {
+      log.deprecated('ScatterplotLayer: `stroked`', '`outline`')();
+      props.stroked = outline;
+    }
 
     super(props);
   }
@@ -118,11 +140,11 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, stroked, filled, outline} = this.props;
+    const {radiusScale, radiusMinPixels, radiusMaxPixels, stroked, filled} = this.props;
 
     this.state.model.render(
       Object.assign({}, uniforms, {
-        stroked: stroked ? 1 : outline ? 1 : 0,
+        stroked: stroked ? 1 : 0,
         filled: filled ? 1 : 0,
         radiusScale,
         radiusMinPixels,

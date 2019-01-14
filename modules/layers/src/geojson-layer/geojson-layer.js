@@ -288,6 +288,8 @@ export default class GeoJsonLayer extends CompositeLayer {
             data: pointFeatures,
 
             fp64,
+            stroked,
+            filled,
             radiusScale: pointRadiusScale,
             radiusMinPixels: pointRadiusMinPixels,
             radiusMaxPixels: pointRadiusMaxPixels,
