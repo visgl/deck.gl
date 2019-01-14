@@ -9,9 +9,12 @@ export function getDeckInstance({map, gl, deck}) {
   const deckProps = {
     useDevicePixels: true,
     _customRender: () => map.triggerRepaint(),
+    // TODO: import these defaults from a single source of truth
     parameters: {
       depthMask: true,
-      depthTest: true
+      depthTest: true,
+      blendFunc: [gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
+      blendEquation: gl.FUNC_ADD
     },
     userData: {
       isExternal: false,
