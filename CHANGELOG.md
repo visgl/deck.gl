@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.5] - Jan 14 2019
+
+- @deck.gl/mapbox: Reset blend params after mapbox render (#2574)
+
 #### [6.3.4] - Jan 11 2019
 
 - ScreenGridLayer: fix picking under WebGL1 (#2557)
