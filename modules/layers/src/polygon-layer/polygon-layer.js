@@ -121,6 +121,7 @@ export default class PolygonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
+      subLayerProps,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -144,7 +145,7 @@ export default class PolygonLayer extends CompositeLayer {
 
     const {paths} = this.state;
 
-    const hasData = paths.length > 0;
+    const hasData = paths.length > 0 || subLayerProps;
 
     // Filled Polygon Layer
     const polygonLayer =

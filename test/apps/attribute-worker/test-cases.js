@@ -30,7 +30,7 @@ export default {
     getColor: d => d.color.match(/\w\w/g).map(x => parseInt(x, 16)),
     getWidth: 50
   },
-  SolidPolygonLayer: {
+  PolygonLayer: {
     data:
       'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf-zipcodes.json',
     getPolygon: d => d.contour,

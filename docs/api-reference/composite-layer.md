@@ -34,6 +34,27 @@ Parameters:
 * `props` (Object) - `Layer` properties.
 
 
+## Properties
+
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
+
+##### `subLayerProps` (Object)
+
+Key is the id of a sublayer and value is an object used to override the props of the sublayer.
+
+```js
+new GeoJsonLayer({
+  ...
+  pickable: true,
+  subLayerProps: {
+    points: {
+      pickable: false
+    }
+  }
+})
+```
+
+
 ## Methods
 
 ##### `draw`
