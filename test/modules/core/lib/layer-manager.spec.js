@@ -46,8 +46,17 @@ const LAYERS = [
 
 test('LayerManager#constructor', t => {
   t.ok(LayerManager, 'LayerManager imported');
-  const layerManager = new LayerManager(gl);
+
+  let layerManager = new LayerManager(gl);
   t.ok(layerManager, 'LayerManager created');
+  layerManager.finalize();
+  t.pass('LayerManager finalized');
+
+  layerManager = new LayerManager(null);
+  t.ok(layerManager, 'LayerManager created without GL context');
+  layerManager.finalize();
+  t.pass('LayerManager finalized');
+
   t.end();
 });
 

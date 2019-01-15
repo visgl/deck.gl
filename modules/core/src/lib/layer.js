@@ -474,14 +474,14 @@ export default class Layer extends Component {
   getNumInstances(props) {
     props = props || this.props;
 
-    // First check if the layer has set its own value
-    if (this.state && this.state.numInstances !== undefined) {
-      return this.state.numInstances;
-    }
-
-    // Check if app has provided an explicit value
+    // First Check if app has provided an explicit value
     if (props.numInstances !== undefined) {
       return props.numInstances;
+    }
+
+    // Second check if the layer has set its own value
+    if (this.state && this.state.numInstances !== undefined) {
+      return this.state.numInstances;
     }
 
     // Use container library to get a count for any ES6 container or object
@@ -495,8 +495,6 @@ export default class Layer extends Component {
   // Called by layer manager when a new layer is found
   /* eslint-disable max-statements */
   _initialize() {
-    assert(this.context.gl);
-
     this._initState();
 
     // Call subclass lifecycle methods
