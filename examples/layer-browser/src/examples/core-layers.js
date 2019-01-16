@@ -188,7 +188,7 @@ const PathLayerBinaryExample = {
   props: {
     ...PathLayerExample.props,
     getPath: d => d,
-    is3D: false
+    positionFormat: 'XY'
   }
 };
 

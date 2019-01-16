@@ -88,12 +88,6 @@ Only works if `rounded` is `false`.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `is3D` (Boolean, optional)
-
-* Default: `true`
-
-Whether the vertex positions along the path are 3-dimensional (contain `z`). See `getPath` for more information.
-
 ##### `dashJustified` (Boolean, optional)
 
 * Default: `false`
@@ -110,14 +104,14 @@ Returns the specified path for the object.
 
 A path can be one of the following formats:
 
-* An array of coordinates following the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) specification.
-* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`. By default, each coordinate is assumed to contain 3 numbers. Set the `is3D` prop to `false` if it should be sliced differently:
+* An array of points (`[x, y, z]`). Compatible with the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) specification.
+* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop to `XY`:
 
 ```js
 new PathLayer({
   ...
   getPath: object => object.vertices, // [x0, y0, x1, y1, x2, y2, ...]
-  is3D: false
+  positionFormat: `XY`
 })
 ```
 

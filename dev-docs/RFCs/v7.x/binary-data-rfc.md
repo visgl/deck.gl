@@ -99,19 +99,19 @@ A binary data buffer may be sliced into messages with variable sizes:
 
 ```js
 // lon1, lat1, alt1, lon2, lat2, alt2, ...
-const vertices = new Float32Array([-122.426942, 37.801537, 0, -122.425942, 37.711537, 0, ...]);
+const positions = new Float32Array([-122.426942, 37.801537, 0, -122.425942, 37.711537, 0, ...]);
 // path1_start_index, path2_start_index, ...
-const indices = new Uint16Array([0, 36, 72, 147]);
+const pathStartIndices = new Uint16Array([0, 36, 72, 147]);
 
-const data = {vertices, indices, length: 4};
+const data = {positions, pathStartIndices, length: 4};
 
 new PathLayer({
   data,
   getPath: (object, {index, data}) => {
-    const {vertices, indices} = data;
-    const startIndex = indices[index];
-    const endIndex = indices[index + 1] || vertices.length / 3;
-    return vertices.subarray(startIndex * 3, endIndex * 3);
+    const {positions, pathStartIndices} = data;
+    const startIndex = pathStartIndices[index];
+    const endIndex = pathStartIndices[index + 1] || positions.length / 3;
+    return positions.subarray(startIndex * 3, endIndex * 3);
   },
   getWidth: 10,
   getColor: [255, 0, 0]
