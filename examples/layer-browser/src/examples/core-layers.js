@@ -363,7 +363,7 @@ const TextLayerExample = {
     }
   },
   props: {
-    id: 'text-layer',
+    id: 'textgetAnchorX-layer',
     sizeScale: 1,
     fontFamily: 'Monaco',
     getText: x => x.LOCATION_NAME,

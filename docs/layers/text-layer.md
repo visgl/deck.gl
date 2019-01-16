@@ -49,8 +49,10 @@ const App = ({data, viewport}) => {
 
 ## Example: rendering with sdf (Signed Distance Fields)
 
-This approach is slower but can provide a better this font is slower to generate but can provide a sharper look
-when used with very large or small font sizes.
+You may consider using [`sdf` (Signed Distance Fields)](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf)
+option when rendering with very large or small font sizes, which will provide a sharper look. `TextLayer` integrates 
+with [`TinySDF`](https://github.com/mapbox/tiny-sdf) which implements the `sdf` algorithm. You can enable `sdf` by 
+setting `sdf` to true or pass customized options, which will be used in `TinySDF`.
 
 ```js
 import DeckGL from 'deck.gl';
@@ -69,14 +71,14 @@ const App = ({data, viewport}) => {
     id: 'text-layer',
     data,
    
-   // sdf will be used to construct `TinySDF` instance
+   // sdf object will be used to construct `TinySDF` instance
    // https://github.com/mapbox/tiny-sdf
     sdf: {
       fontSize: 64,
-      buffer: 0,
+      buffer: 1,
       radius: 3,
       cutoff: 0.25,
-      fontWeight: 'normal',
+      fontWeight: 'normal'
     },
 
     pickable: true,

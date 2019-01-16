@@ -75,23 +75,37 @@ export function makeFontAtlas(
   // build mapping
   // TODO - use Advanced text metrics when they are adopted:
   // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-  setTextStyle(ctx, fontFamily, fontSize);
+  const fontSettings = {
+    fontSize: sdf ? sdf.fontSize : fontSize,
+    fontFamily: sdf ? sdf.fontFamily : fontFamily,
+    fontHeight: (sdf ? sdf.fontSize : fontSize) * HEIGHT_SCALE,
+    buffer: sdf ? sdf.buffer : padding
+  };
+
+  setTextStyle(ctx, fontSettings.fontFamily, fontSettings.fontSize);
   const {canvasHeight, mapping} = buildMapping({
     ctx,
-    fontHeight: (sdf ? sdf.fontSize : fontSize) * HEIGHT_SCALE,
-    buffer: sdf ? sdf.buffer : padding,
+    fontHeight: fontSettings.fontHeight,
+    buffer: fontSettings.buffer,
     characterSet,
     maxCanvasWidth: MAX_CANVAS_WIDTH
   });
 
   canvas.width = MAX_CANVAS_WIDTH;
   canvas.height = canvasHeight;
-  setTextStyle(ctx, fontFamily, fontSize);
+  setTextStyle(ctx, fontSettings.fontFamily, fontSettings.fontSize);
 
   // layout characters
   if (sdf) {
-    const {buffer, radius, cutoff, fontWeight} = sdf;
-    const tinySDF = new TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight);
+    const tinySDF = new TinySDF(
+      fontSettings.fontSize,
+      fontSettings.buffer,
+      sdf.radius,
+      sdf.cutoff,
+      fontSettings.fontFamily,
+      sdf.fontWeight
+    );
+    setTextStyle(tinySDF.ctx, fontFamily, fontSize);
     // used to store distance values from tinySDF
     const imageData = ctx.createImageData(tinySDF.size, tinySDF.size);
 
@@ -101,7 +115,7 @@ export function makeFontAtlas(
     }
   } else {
     for (const char in mapping) {
-      ctx.fillText(char, mapping[char].x, mapping[char].y + fontSize * BASELINE_SCALE);
+      ctx.fillText(char, mapping[char].x, mapping[char].y + fontSettings.fontSize * BASELINE_SCALE);
     }
   }
 

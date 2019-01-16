@@ -40,9 +40,9 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const MISSING_CHAR_WIDTH = 32;
 
 // used in TinySDF
-const SDFPreset = {
+const SDF_PRESET = {
   fontSize: DEFAULT_FONT_SIZE,
-  radius: 3,
+  radius: 2,
   buffer: 2,
   cutoff: 0.25,
   fontWeight: 'normal'
@@ -92,8 +92,18 @@ export default class TextLayer extends CompositeLayer {
     const {gl} = this.context;
     const {sdf, fontFamily, characterSet} = this.props;
 
+    let sdfSettings = null;
+    if (sdf) {
+      sdfSettings = Object.assign({}, SDF_PRESET, {fontFamily});
+      // merge with user settings
+      // override fontFamily with layer prop's fontFamily
+      if (typeof sdf === 'object') {
+        Object.assign(sdfSettings, sdf, {fontFamily});
+      }
+    }
+
     const {scale, mapping, texture} = makeFontAtlas(gl, {
-      sdf: sdf ? SDFPreset : null,
+      sdf: sdfSettings,
       fontFamily,
       characterSet
     });
