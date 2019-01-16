@@ -20,7 +20,7 @@
 
 import {CompositeLayer, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
-import {makeFontAtlas, DEFAULT_CHAR_SET} from './font-atlas';
+import {makeFontAtlas, DEFAULT_CHAR_SET, DEFAULT_FONT_SIZE} from './font-atlas';
 
 const TEXT_ANCHOR = {
   start: 1,
@@ -39,11 +39,21 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const MISSING_CHAR_WIDTH = 32;
 
+// used in TinySDF
+const SDF_PRESET = {
+  fontSize: DEFAULT_FONT_SIZE,
+  radius: 2,
+  buffer: 2,
+  cutoff: 0.25,
+  fontWeight: 'normal'
+};
+
 const defaultProps = {
   fp64: false,
   sizeScale: 1,
-  fontFamily: DEFAULT_FONT_FAMILY,
+  sdf: false,
   characterSet: DEFAULT_CHAR_SET,
+  fontFamily: DEFAULT_FONT_FAMILY,
 
   getText: {type: 'accessor', value: x => x.text},
   getPosition: {type: 'accessor', value: x => x.position},
@@ -58,10 +68,12 @@ const defaultProps = {
 export default class TextLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
     const fontChanged =
-      oldProps.fontFamily !== props.fontFamily || oldProps.characterSet !== props.characterSet;
+      oldProps.fontFamily !== props.fontFamily ||
+      oldProps.characterSet !== props.characterSet ||
+      oldProps.sdf !== props.sdf;
 
     if (fontChanged) {
-      this.updateFontAtlas(props.fontFamily, props.characterSet);
+      this.updateFontAtlas();
     }
 
     if (
@@ -74,9 +86,30 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
-  updateFontAtlas(fontFamily, characterSet) {
+  updateFontAtlas() {
+    const startTime = Date.now();
+
     const {gl} = this.context;
-    const {scale, mapping, texture} = makeFontAtlas(gl, {fontFamily, characterSet});
+    const {sdf, fontFamily, characterSet} = this.props;
+
+    let sdfSettings = null;
+    if (sdf) {
+      sdfSettings = Object.assign({}, SDF_PRESET, {fontFamily});
+      // merge with user settings
+      // override fontFamily with layer prop's fontFamily
+      if (typeof sdf === 'object') {
+        Object.assign(sdfSettings, sdf, {fontFamily});
+      }
+    }
+
+    const {scale, mapping, texture} = makeFontAtlas(gl, {
+      sdf: sdfSettings,
+      fontFamily,
+      characterSet
+    });
+
+    log.log(`Make font atlas in ${Date.now() - startTime} milliseconds.`)();
+
     this.setState({
       scale,
       iconAtlas: texture,
@@ -172,6 +205,7 @@ export default class TextLayer extends CompositeLayer {
       getAlignmentBaseline,
       getPixelOffset,
       fp64,
+      sdf,
       sizeScale,
       transitions,
       updateTriggers
@@ -182,6 +216,7 @@ export default class TextLayer extends CompositeLayer {
         this.getSubLayerProps({
           id: 'text-multi-icon-layer',
           data,
+          sdf,
           iconAtlas,
           iconMapping,
           getIcon: d => d.text,
@@ -196,6 +231,7 @@ export default class TextLayer extends CompositeLayer {
           getPixelOffset: this._getAccessor(getPixelOffset),
           fp64,
           sizeScale: sizeScale * scale,
+
           transitions: transitions && {
             getPosition: transitions.getPosition,
             getAngle: transitions.getAngle,
