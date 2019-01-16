@@ -21,6 +21,11 @@
 import IconLayer from '../../icon-layer/icon-layer';
 
 import vs from './multi-icon-layer-vertex.glsl';
+import fs from './multi-icon-layer-fragment.glsl';
+
+// TODO expose as layer properties
+const DEFAULT_GAMMA = 0.2;
+const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
   getShiftInQueue: {type: 'accessor', value: x => x.shift || 0},
@@ -35,7 +40,8 @@ const defaultProps = {
 export default class MultiIconLayer extends IconLayer {
   getShaders() {
     return Object.assign({}, super.getShaders(), {
-      vs
+      vs,
+      fs
     });
   }
 
@@ -62,6 +68,19 @@ export default class MultiIconLayer extends IconLayer {
     ) {
       this.getAttributeManager().invalidate('instanceOffsets');
     }
+  }
+
+  draw({uniforms}) {
+    const {sdf} = this.props;
+    super.draw({
+      uniforms: Object.assign({}, uniforms, {
+        // Refer the following doc about gamma and buffer
+        // https://blog.mapbox.com/drawing-text-with-signed-distance-fields-in-mapbox-gl-b0933af6f817
+        buffer: DEFAULT_BUFFER,
+        gamma: DEFAULT_GAMMA,
+        sdf: Boolean(sdf)
+      })
+    });
   }
 
   calculateInstanceOffsets(attribute) {
