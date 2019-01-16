@@ -68,7 +68,7 @@ export default class ScatterplotLayer extends Layer {
       }
     }
 
-    if (!getLineWidth && strokeWidth) {
+    if (getLineWidth === undefined && strokeWidth !== undefined) {
       log.deprecated('ScatterplotLayer: `strokeWidth`', '`getLineWidth`')();
       overrideProps.getLineWidth = strokeWidth;
     }
@@ -140,7 +140,15 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, stroked, filled} = this.props;
+    const {
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      stroked,
+      filled,
+      lineWidthMinPixels,
+      lineWidthMaxPixels
+    } = this.props;
 
     this.state.model.render(
       Object.assign({}, uniforms, {
@@ -148,7 +156,9 @@ export default class ScatterplotLayer extends Layer {
         filled,
         radiusScale,
         radiusMinPixels,
-        radiusMaxPixels
+        radiusMaxPixels,
+        lineWidthMinPixels,
+        lineWidthMaxPixels
       })
     );
   }

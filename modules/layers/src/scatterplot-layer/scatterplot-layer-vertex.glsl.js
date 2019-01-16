@@ -35,6 +35,8 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
+uniform float lineWidthMinPixels;
+uniform float lineWidthMaxPixels;
 uniform float stroked;
 uniform bool filled;
 
@@ -49,14 +51,17 @@ void main(void) {
     project_scale(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
+  
+  // clamp line width to limits
+  float lineWidth = clamp(instanceLineWidths, lineWidthMinPixels, lineWidthMaxPixels);
 
   // outer radius needs to offset by half stroke width
-  outerRadiusPixels += stroked * instanceLineWidths / 2.0;
+  outerRadiusPixels += stroked * lineWidth / 2.0;
 
   // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
 
-  innerUnitRadius = 1.0 - stroked * instanceLineWidths / outerRadiusPixels;
+  innerUnitRadius = 1.0 - stroked * lineWidth / outerRadiusPixels;
   
   vec3 offset = positions * outerRadiusPixels;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset);
