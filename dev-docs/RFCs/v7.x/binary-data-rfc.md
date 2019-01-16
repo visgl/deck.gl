@@ -1,7 +1,7 @@
 # RFC: Using Binary Data
 
-* Authors: Ib Green, ...
-* Date: June 13, 2018
+* Authors: Ib Green, Xiaoji Chen
+* Date: December 19, 2018
 * Status: **Draft**
 
 
@@ -21,15 +21,102 @@ This article focused on the following use cases:
 * **Using typed arrays as layer input data** - Using The input data is in binary form, perhaps it is delivered this way from the back-end, and it would be preferable to not have to unpack it.
 * **Using typed arrays or GPU buffers directly as layer attributes** - The input data is already formatted in the memory format expected by the GPU and deck.gl's shaders.
 
-## Using Flattend Data (Typed Arrays as layer input data
+## Using Flattened Data (Typed Arrays) as layer input data
 
-In some cases the application may receive all or parts of a layer's geometry in the form of binary typed arrays instead of Javascript arrays. Typed arrays can sometimes be transported more efficiently in binary form than classic arrays that tend to be JSON stringified and then parsed.
+In some cases the application may receive all or parts of a layer's geometry in the form of binary typed arrays instead of Javascript arrays. When communicating with a server or web workers, typed arrays can be transported more efficiently in binary form than classic arrays that tend to be JSON stringified and then parsed. For example, a ScatterplotLayer may receive input data like this:
 
-One of the biggest differences that makes it hard to use binary arrays directly is that they are flat, whereas JavaScript arrays tend to have a sub-array for each vertex or color.
+```js
+// lon1, lat1, radius1, red1, green1, blue1, lon2, lat2, ...
+const binaryData = new Float32Array([-122.4, 37.78, 1000, 255, 200, 0, -122.41, 37.775, 500, 200, 0, 0, -122.39, 37.8, 500, 0, 40, 200]);
+```
 
-TBA...
+Upon receiving the typed arrays, the application can of course re-construct a classic JavaScript array:
 
-deck.gl layers carefully formats data in memory so that it can be accessed efficiently by the GPU...
+```js
+const data = [];
+for (let i = 0; i < binaryData.length; i += 6) {
+  data.push({
+    position: binaryData.subarray(i, i + 2),
+    radius: binaryData[i + 2],
+    color: binaryData.subarray(i + 3, i + 6)
+  });
+}
+
+new ScatterplotLayer({
+  data,
+  getPosition: d => d.position,
+  getRadius: d => d.radius,
+  getColor: d => d.color
+});
+```
+
+However, in addition to requiring custom repacking code, this array will take valuable CPU time to create, and significantly more memory to store than its binary form. In performance-sensitive applications that constantly push a large volumn of data (e.g. animations), this method will not be efficient enough.
+
+Alternatively, one may supply a non-iterable object (not Array or TypedArray) to the `data` object. In this case, it must contain a `length` field that specifies the total number of objects. Since `data` is not iterable, each accessor will not receive a valid `object` argument, and therefore responsible of interpreting the input data's buffer layout:
+
+```js
+const data = {src: binaryData, length: 3}
+
+new ScatterplotLayer({
+  data,
+  getPosition: (object, {index, data, target}) => {
+    target[0] = data.src[index * 6];
+    target[1] = data.src[index * 6 + 1];
+    target[2] = 0;
+    return target;
+  },
+  getRadius: (object, {index, data}) => {
+    return data.src[index * 6 + 2];
+  },
+  getColor: (object, {index, data, target}) => {
+    target[0] = data.src[index * 6 + 3];
+    target[1] = data.src[index * 6 + 4];
+    target[2] = data.src[index * 6 + 5];
+    target[3] = 255;
+    return target;
+  }
+})
+```
+
+When non-iterable data is used, to populate the picking event with a valid `object` value, one may optionally specify a `getPickingInfo` callback:
+
+```js
+new ScatterplotLayer({
+  ...
+  getPickingInfo: ({info, data}) => {
+    const i = info.index * 6;
+    info.object = {
+      position: data.src.subarray(i, i + 2),
+      radius: data.src[i + 2],
+      color: data.src.subarray(i + 3, i + 6)
+    };
+    return info;
+  }
+})
+```
+
+A binary data buffer may be sliced into messages with variable sizes:
+
+```js
+// lon1, lat1, alt1, lon2, lat2, alt2, ...
+const positions = new Float32Array([-122.426942, 37.801537, 0, -122.425942, 37.711537, 0, ...]);
+// path1_start_index, path2_start_index, ...
+const pathStartIndices = new Uint16Array([0, 36, 72, 147]);
+
+const data = {positions, pathStartIndices, length: 4};
+
+new PathLayer({
+  data,
+  getPath: (object, {index, data}) => {
+    const {positions, pathStartIndices} = data;
+    const startIndex = pathStartIndices[index];
+    const endIndex = pathStartIndices[index + 1] || positions.length / 3;
+    return positions.subarray(startIndex * 3, endIndex * 3);
+  },
+  getWidth: 10,
+  getColor: [255, 0, 0]
+})
+```
 
 
 ## Passing Typed Arrays directly to layer attributes

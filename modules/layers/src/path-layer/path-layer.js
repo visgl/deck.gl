@@ -132,6 +132,7 @@ export default class PathLayer extends Layer {
       this.state.pathTesselator.updateGeometry({
         data: props.data,
         getGeometry: props.getPath,
+        positionFormat: props.positionFormat,
         fp64: this.use64bitPositions()
       });
       this.setState({

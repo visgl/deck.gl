@@ -102,7 +102,18 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 Returns the specified path for the object.
 
-A path is an array of coordinates.
+A path can be one of the following formats:
+
+* An array of points (`[x, y, z]`). Compatible with the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) specification.
+* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop to `XY`:
+
+```js
+new PathLayer({
+  ...
+  getPath: object => object.vertices, // [x0, y0, x1, y1, x2, y2, ...]
+  positionFormat: `XY`
+})
+```
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

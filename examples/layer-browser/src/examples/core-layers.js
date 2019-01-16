@@ -13,9 +13,11 @@ import {
   GeoJsonLayer,
   PolygonLayer,
   PathLayer,
-  TextLayer
+  TextLayer,
+  experimental
   //  ContourLayer
 } from 'deck.gl';
+const {flattenVertices} = experimental;
 
 import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
@@ -169,6 +171,24 @@ const PathLayerExample = {
     getDashArray: f => [20, 0],
     widthMinPixels: 1,
     pickable: true
+  }
+};
+
+const PathLayerBinaryExample = {
+  ...PathLayerExample,
+  getData: () => {
+    const data = [];
+    dataSamples.zigzag.forEach(({path}) => {
+      // Convert each path from an array of points to an array of numbers
+      // TODO: flatten the entire data array
+      data.push(flattenVertices(path, {dimensions: 2}));
+    });
+    return data;
+  },
+  props: {
+    ...PathLayerExample.props,
+    getPath: d => d,
+    positionFormat: 'XY'
   }
 };
 
@@ -383,6 +403,7 @@ export default {
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
     PathLayer: PathLayerExample,
+    'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
