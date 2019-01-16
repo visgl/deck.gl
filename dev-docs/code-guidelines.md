@@ -12,18 +12,18 @@ The biggest missing feature for most devs is generally:
 
 ## Coding Style
 
-We follow uber coding styles with a few exceptions.
+Prettier and eslint with Uber's standard config are used to enforce coding style, with a few exceptions:
 
-We allow longer line due to a preference for slightly more compact code (less lines).
-
-> Q: JSPrettier is the latest fashion in the JS coding style world...
-
-A: Latest Uber coding style now includes JSPrettier, we might consider upgrading.
+* We allow longer line due to a preference for slightly more compact code (less lines).
 
 
 ## Exports
 
 We avoid excessive index.js files and `export *` constructions, favoring explicit exports at the top level.
+
+Experimental exports start with an underscore `_`.
+
+We prefer individual exports over container objects to maximize tree-shakability.
 
 
 ## Naming
@@ -36,6 +36,16 @@ We avoid excessive index.js files and `export *` constructions, favoring explici
 * always type out identifiers, no one letter of abbreviations like `array.map(e => e + 1)`;
 
 As always, exceptions OK where it makes sense (e.g. `AnimationLoop.start`)
+
+
+## Logging
+
+We use [probe.gl](https://uber-web.github.io/probe.gl) for all information printed to the console. The minimalist library allows us to mange formatting, repeated messages and log priority in one place.
+
+* API deprecation and removal
+* Warnings
+* Errors
+* Debug logs
 
 
 ### assert
