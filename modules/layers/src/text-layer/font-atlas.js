@@ -45,8 +45,8 @@ function buildMapping({ctx, fontHeight, buffer, characterSet, maxCanvasWidth}) {
       row++;
     }
     mapping[char] = {
-      x,
-      y: row * (fontHeight + buffer * 2),
+      x: x + buffer,
+      y: row * (fontHeight + buffer * 2) + buffer,
       width,
       height: fontHeight,
       mask: true
@@ -109,12 +109,16 @@ export function makeFontAtlas(
     // used to store distance values from tinySDF
     const imageData = ctx.createImageData(tinySDF.size, tinySDF.size);
 
-    for (const char in mapping) {
+    for (const char of characterSet) {
       populateAlphaChannel(tinySDF.draw(char), imageData);
-      ctx.putImageData(imageData, mapping[char].x, mapping[char].y);
+      ctx.putImageData(
+        imageData,
+        mapping[char].x - fontSettings.buffer,
+        mapping[char].y - fontSettings.buffer
+      );
     }
   } else {
-    for (const char in mapping) {
+    for (const char of characterSet) {
       ctx.fillText(char, mapping[char].x, mapping[char].y + fontSettings.fontSize * BASELINE_SCALE);
     }
   }
