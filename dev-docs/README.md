@@ -11,9 +11,7 @@ Some of these documents may also be referenced by other repositories in the stac
 * math.gl
 * probe.gl
 
-## Setting Up Dev Environment
-
-Follow the instructions in [developing deck.gl](../docs/contributing.md).
+For instructions to set up the dev environment, see [developing deck.gl](../docs/contributing.md).
 
 ## Development Process
 
