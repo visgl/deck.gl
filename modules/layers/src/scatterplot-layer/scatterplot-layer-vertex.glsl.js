@@ -36,13 +36,12 @@ uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
 uniform float stroked;
-uniform float filled;
+uniform bool filled;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
-varying float fillUnitRadius;
 
 void main(void) {
   // Multiply out radius and clamp to limits

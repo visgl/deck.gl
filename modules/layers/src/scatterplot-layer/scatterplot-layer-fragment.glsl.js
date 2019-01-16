@@ -23,13 +23,12 @@ export default `\
 
 precision highp float;
 
-uniform float filled;
+uniform bool filled;
 
 varying vec4 vFillColor;
 varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
-varying float fillUnitRadius;
 
 void main(void) {
 
@@ -41,8 +40,13 @@ void main(void) {
   if (distToCenter > innerUnitRadius) {
     gl_FragColor = vLineColor;
   } 
-  if (distToCenter < innerUnitRadius * filled){
-    gl_FragColor = vFillColor;
+ 
+  if (distToCenter < innerUnitRadius){
+    if (filled) {
+      gl_FragColor = vFillColor;
+    } else {
+      discard;
+    }
   }
   
 

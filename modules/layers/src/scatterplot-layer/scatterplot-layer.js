@@ -57,28 +57,28 @@ export default class ScatterplotLayer extends Layer {
       outline
     } = props;
 
+    const overrideProps = {};
+
     if (getColor) {
       if (!getLineColor) {
-        log.deprecated('ScatterplotLayer: `getColor`', '`getLineColor`')();
-        props.getLineColor = getColor;
+        overrideProps.getLineColor = getColor;
       }
       if (!getFillColor) {
-        log.deprecated('ScatterplotLayer: `getColor`', '`getFillColor`')();
-        props.getFillColor = getColor;
+        overrideProps.getFillColor = getColor;
       }
     }
 
     if (!getLineWidth && strokeWidth) {
       log.deprecated('ScatterplotLayer: `strokeWidth`', '`getLineWidth`')();
-      props.getLineWidth = strokeWidth;
+      overrideProps.getLineWidth = strokeWidth;
     }
 
-    if (stroked === null && outline !== null) {
+    if (stroked === undefined && outline !== undefined) {
       log.deprecated('ScatterplotLayer: `stroked`', '`outline`')();
-      props.stroked = outline;
+      overrideProps.stroked = outline;
     }
 
-    super(props);
+    super(props, overrideProps);
   }
 
   getShaders(id) {
@@ -145,7 +145,7 @@ export default class ScatterplotLayer extends Layer {
     this.state.model.render(
       Object.assign({}, uniforms, {
         stroked: stroked ? 1 : 0,
-        filled: filled ? 1 : 0,
+        filled,
         radiusScale,
         radiusMinPixels,
         radiusMaxPixels
