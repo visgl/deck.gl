@@ -18,12 +18,17 @@ Developer documentaion is available [here](https://github.com/uber/deck.gl/tree/
 The **master** branch is the active development branch.
 
 ```bash
-npm run bootstrap
-npm test
-npm start  # See note below
+yarn bootstrap
+yarn test
 ```
 
-Note that `npm start` in the main directory actually runs `examples/layer-browser`.
+Run the layer browser app for testing:
+
+```bash
+cd examples/layer-browser
+yarn
+yarn start-local  # See note below
+```
 
 
 ### Node Version Requirement
