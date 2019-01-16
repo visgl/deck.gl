@@ -23,10 +23,9 @@ export default `\
 
 precision highp float;
 
-uniform float opacity;
 uniform sampler2D iconsTexture;
 uniform float buffer;
-uniform float sdf;
+uniform bool sdf;
 
 varying vec4 vColor;
 varying vec2 vTextureCoords;
@@ -39,13 +38,13 @@ void main(void) {
   
   float alpha = texColor.a;
   // if enable sdf (signed distance fields)
-  if (sdf > 0.5) {
+  if (sdf) {
     float distance = texture2D(iconsTexture, vTextureCoords).a;
     alpha = smoothstep(buffer - vGamma, buffer + vGamma, distance);
   }
 
   // Take the global opacity and the alpha from vColor into account for the alpha component
-  float a = alpha * opacity * vColor.a;
+  float a = alpha * vColor.a;
 
   if (a < MIN_ALPHA) {
     discard;
