@@ -131,10 +131,17 @@ export default class IconLayer extends Layer {
 
     // prepacked iconAtlas from user
     if (iconAtlas) {
-      iconMappingChanged = oldProps.iconMapping !== props.iconMapping;
+      if (oldProps.getIcon !== props.getIcon) {
+        iconManager.updateState({getIcon});
+      }
 
       if (oldProps.iconAtlas !== props.iconAtlas) {
-        iconManager.updateState({iconAtlas, iconMapping, getIcon});
+        iconManager.updateState({iconAtlas});
+      }
+
+      if (oldProps.iconMapping !== props.iconMapping) {
+        iconManager.updateState({iconMapping});
+        iconMappingChanged = true;
       }
 
       // auto pack iconAtlas in IconManager

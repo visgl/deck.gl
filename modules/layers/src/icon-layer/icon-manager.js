@@ -16,21 +16,21 @@ function nextPowOfTwo(number) {
 }
 
 // resize image to given width and height
-function resizeImage(canvas, imageData, width, height) {
+function resizeImage(ctx, imageData, width, height) {
   const {naturalWidth, naturalHeight} = imageData;
   if (width === naturalWidth && height === naturalHeight) {
     return imageData;
   }
 
-  canvas.height = height;
-  canvas.width = width;
+  ctx.canvas.height = height;
+  ctx.canvas.width = width;
 
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
 
   // image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight
   ctx.drawImage(imageData, 0, 0, naturalWidth, naturalHeight, 0, 0, width, height);
-  return canvas;
+
+  return ctx.canvas;
 }
 
 // traverse icons in a row of icon atlas
@@ -137,6 +137,9 @@ export default class IconManager {
     this.gl = gl;
     this.onUpdate = onUpdate;
 
+    this._mapping = {};
+    this._texture = null;
+
     this._canvas = document.createElement('canvas');
     this.updateState({data, iconAtlas, iconMapping, getIcon});
   }
@@ -156,8 +159,12 @@ export default class IconManager {
       this.getIcon = getIcon;
     }
 
+    if (iconMapping) {
+      this._mapping = iconMapping;
+    }
+
     if (iconAtlas) {
-      this._updatePrePacked({iconAtlas, iconMapping});
+      this._updateIconAtlas(iconAtlas);
     } else {
       this._updateAutoPacking({
         data,
@@ -167,8 +174,7 @@ export default class IconManager {
     }
   }
 
-  _updatePrePacked({iconAtlas, iconMapping}) {
-    this._mapping = iconMapping;
+  _updateIconAtlas(iconAtlas) {
     if (iconAtlas instanceof Texture2D) {
       iconAtlas.setParameters({
         [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
@@ -217,13 +223,15 @@ export default class IconManager {
   }
 
   _loadImages(icons) {
+    const ctx = this._canvas.getContext('2d');
     const canvasHeight = this._texture.height;
+
     for (const icon of icons) {
       loadImages({urls: [icon.url]}).then(([imageData]) => {
         const iconMapping = this._mapping[icon.url];
         const {x, y, width, height} = iconMapping;
 
-        const data = resizeImage(this._canvas, imageData, width, height);
+        const data = resizeImage(ctx, imageData, width, height);
 
         this._texture.setSubImageData({
           data,

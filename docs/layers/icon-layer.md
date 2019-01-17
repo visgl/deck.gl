@@ -21,6 +21,10 @@ use cases.
 ```js
 import DeckGL, {IconLayer} from 'deck.gl';
 
+const ICON_MAPPING = {
+  marker: {x: 0, y: 0, width: 32, height: 32, mask: true}
+};
+
 const App = ({data, viewport}) => {
 
   /**
@@ -37,16 +41,7 @@ const App = ({data, viewport}) => {
     // iconAtlas and iconMapping are required
     // getIcon: return a string
     iconAtlas: 'images/icon-atlas.png',
-    iconMapping: {
-      marker: {
-        x: 0,
-        y: 0,
-        width: 128,
-        height: 128,
-        anchorY: 128,
-        mask: true
-      }
-    },
+    iconMapping: ICON_MAPPING,
     getIcon: d => 'marker',
 
     sizeScale: 15,
