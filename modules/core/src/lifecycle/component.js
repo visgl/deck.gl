@@ -32,7 +32,20 @@ export default class Component {
 
   // clone this layer with modified props
   clone(newProps) {
-    return new this.constructor(Object.assign({}, this.props, newProps));
+    const {props} = this;
+
+    // Async props cannot be copied with Object.assign. Extract the plain value.
+    const asyncProps = {};
+
+    for (const key in props._asyncPropDefaultValues) {
+      if (key in props._asyncPropResolvedValues) {
+        asyncProps[key] = props._asyncPropResolvedValues[key];
+      } else if (key in props._asyncPropOriginalValues) {
+        asyncProps[key] = props._asyncPropOriginalValues[key];
+      }
+    }
+
+    return new this.constructor(Object.assign({}, props, asyncProps, newProps));
   }
 
   get stats() {
