@@ -35,6 +35,7 @@ uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
+uniform float lineWidthScale;
 uniform float lineWidthMinPixels;
 uniform float lineWidthMaxPixels;
 uniform float stroked;
@@ -52,8 +53,11 @@ void main(void) {
     radiusMinPixels, radiusMaxPixels
   );
   
-  // clamp line width to limits
-  float lineWidth = clamp(instanceLineWidths, lineWidthMinPixels, lineWidthMaxPixels);
+  // Multiply out line width and clamp to limits
+  float lineWidth = clamp(
+    project_scale(lineWidthScale * instanceLineWidths), 
+    lineWidthMinPixels, lineWidthMaxPixels
+  );
 
   // outer radius needs to offset by half stroke width
   outerRadiusPixels += stroked * lineWidth / 2.0;

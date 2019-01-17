@@ -293,6 +293,9 @@ export default class GeoJsonLayer extends CompositeLayer {
             radiusScale: pointRadiusScale,
             radiusMinPixels: pointRadiusMinPixels,
             radiusMaxPixels: pointRadiusMaxPixels,
+            lineWidthScale,
+            lineWidthMinPixels,
+            lineWidthMaxPixels,
 
             getPosition: getCoordinates,
             getFillColor: unwrappingAccessor(getFillColor),

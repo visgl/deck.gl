@@ -32,6 +32,7 @@ const defaultProps = {
   radiusScale: {type: 'number', min: 0, value: 1},
   radiusMinPixels: {type: 'number', min: 1, value: 1}, //  min point radius in pixels
   radiusMaxPixels: {type: 'number', min: 1, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
+  lineWidthScale: {type: 'number', min: 0, value: 1},
   lineWidthMinPixels: {type: 'number', min: 0, value: 1},
   lineWidthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
   stroked: false,
@@ -146,6 +147,7 @@ export default class ScatterplotLayer extends Layer {
       radiusMaxPixels,
       stroked,
       filled,
+      lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels
     } = this.props;
@@ -157,6 +159,7 @@ export default class ScatterplotLayer extends Layer {
         radiusScale,
         radiusMinPixels,
         radiusMaxPixels,
+        lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels
       })
