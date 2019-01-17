@@ -49,7 +49,7 @@ const defaultProps = {
   elevationScale: 1,
 
   pointRadiusScale: 1,
-  pointRadiusMinPixels: 0, //  min point radius in pixels
+  pointRadiusMinPixels: 1, //  min point radius in pixels
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
 
   lineDashJustified: false,
