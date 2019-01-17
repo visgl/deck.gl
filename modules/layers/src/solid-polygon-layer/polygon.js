@@ -21,15 +21,16 @@
 /* eslint-disable max-params */
 import earcut from 'earcut';
 
-// Basic polygon support
-//
-// Handles simple and complex polygons
-// Simple polygons are arrays of vertices, implicitly "closed"
-// Complex polygons are arrays of simple polygons, with the first polygon
-// representing the outer hull and other polygons representing holes
+// 4 data formats are supported:
+// Simple Polygon: an array of points
+// Complex Polygon: an array of array of points (array of loops)
+//   with the first loop representing the outer hull and other loops representing holes
+// Simple Flat: an array of numbers (flattened "simple polygon")
+// Complex Flat: {position: array<number>, loopStartIndices: array<number>}
+//   (flattened "complex polygon")
 
 /**
- * Check if a nested polygon contains holes
+ * Check if a polygon is simple or complex
  * @param {Array} polygon - either a complex or simple polygon
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
@@ -37,6 +38,11 @@ function isSimple(polygon) {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
 }
 
+/**
+ * Check if a simple polygon is a closed loop
+ * @param {Array} simplePolygon - array of points
+ * @return {Boolean} - true if the simple polygon is a closed loop
+ */
 function isNestedPathClosed(simplePolygon) {
   // check if first and last vertex are the same
   const p0 = simplePolygon[0];
@@ -45,6 +51,14 @@ function isNestedPathClosed(simplePolygon) {
   return p0[0] === p1[0] && p0[1] === p1[1] && p0[2] === p1[2];
 }
 
+/**
+ * Check if a simple flat array is a closed loop
+ * @param {Array} positions - array of numbers
+ * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
+ * @param {Number} startIndex - start index of the path in the positions array
+ * @param {Number} endIndex - end index of the path in the positions array
+ * @return {Boolean} - true if the simple flat array is a closed loop
+ */
 function isFlatPathClosed(positions, size, startIndex, endIndex) {
   for (let i = 0; i < size; i++) {
     if (positions[startIndex + i] !== positions[endIndex - size + i]) {
@@ -55,8 +69,12 @@ function isFlatPathClosed(positions, size, startIndex, endIndex) {
 }
 
 /**
- * Copy nested polygon coordinates into a flat array.
- * Ensure that all simple polygons have the same start and end vertex
+ * Copy a simple polygon coordinates into a flat array, closes the loop if needed.
+ * @param {Float64Array} target - destination
+ * @param {Number} targetStartIndex - index in the destination to start copying into
+ * @param {Array} simplePolygon - array of points
+ * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
+ * @returns {Number} - the index of the write head in the destination
  */
 function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
   let targetIndex = targetStartIndex;
@@ -76,8 +94,14 @@ function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
 }
 
 /**
- * Copy flat polygon coordinates into a flat array.
- * Ensure that all simple polygons have the same start and end vertex
+ * Copy a simple flat array into another flat array, closes the loop if needed.
+ * @param {Float64Array} target - destination
+ * @param {Number} targetStartIndex - index in the destination to start copying into
+ * @param {Array} positions - array of numbers
+ * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
+ * @param {Number} [srcStartIndex] - start index of the path in the positions array
+ * @param {Number} [srcEndIndex] - end index of the path in the positions array
+ * @returns {Number} - the index of the write head in the destination
  */
 function copyAsFlatLoop(target, targetStartIndex, positions, size, srcStartIndex = 0, srcEndIndex) {
   srcEndIndex = srcEndIndex || positions.length;
@@ -99,10 +123,23 @@ function copyAsFlatLoop(target, targetStartIndex, positions, size, srcStartIndex
   return targetIndex;
 }
 
+/**
+ * Counts the number of vertices in a simple polygon, closes the polygon if needed.
+ * @param {Array} simplePolygon - array of points
+ * @returns {Number} vertex count
+ */
 function getNestedVertexCount(simplePolygon) {
   return (isNestedPathClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
 }
 
+/**
+ * Counts the number of vertices in a simple flat array, closes the polygon if needed.
+ * @param {Array} positions - array of numbers
+ * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
+ * @param {Number} [startIndex] - start index of the path in the positions array
+ * @param {Number} [endIndex] - end index of the path in the positions array
+ * @returns {Number} vertex count
+ */
 function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
   endIndex = endIndex || positions.length;
   if (startIndex >= endIndex) {
@@ -115,13 +152,14 @@ function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
 }
 
 /**
- * Check if this is a non-nested polygon (i.e. the first element of the first element is a number)
- * @param {Array} polygon - either a complex or simple polygon
- * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
+ * Counts the number of vertices in any polygon representation.
+ * @param {Array|Object} polygon
+ * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
+ * @returns {Number} vertex count
  */
 export function getVertexCount(polygon, positionSize) {
   if (polygon.positions) {
-    // object form
+    // complex flat
     const {positions, loopStartIndices} = polygon;
 
     if (loopStartIndices) {
@@ -139,24 +177,28 @@ export function getVertexCount(polygon, positionSize) {
     polygon = positions;
   }
   if (Number.isFinite(polygon[0])) {
-    // flat array form
+    // simple flat
     return getFlatVertexCount(polygon, positionSize);
   }
   if (!isSimple(polygon)) {
+    // complex polygon
     let vertexCount = 0;
     for (const simplePolygon of polygon) {
       vertexCount += getNestedVertexCount(simplePolygon);
     }
     return vertexCount;
   }
+  // simple polygon
   return getNestedVertexCount(polygon);
 }
 
 /**
- * Normalize to ensure that all polygons in a list are complex - simplifies processing
- * @param {Array} polygon - either a complex or a simple polygon
- * @param {Number} positionSize - 2 (xy) or 3 (xyz)
- * @return {Array} - returns an array of flat rings
+ * Normalize any polygon representation into the "complex flat" format
+ * @param {Array|Object} polygon
+ * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
+ * @param {Number} [vertexCount] - pre-computed vertex count in the polygon.
+ *   If provided, will skip counting.
+ * @return {Object} - {positions: <Float64Array>, loopStartIndices: <Array|null>}
  */
 export function normalize(polygon, positionSize, vertexCount) {
   vertexCount = vertexCount || getVertexCount(polygon, positionSize);
@@ -165,7 +207,7 @@ export function normalize(polygon, positionSize, vertexCount) {
   const loopStartIndices = [];
 
   if (polygon.positions) {
-    // object form
+    // complex flat
     const {positions: srcPositions, loopStartIndices: srcLoopStartIndices} = polygon;
 
     if (srcLoopStartIndices) {
@@ -187,11 +229,12 @@ export function normalize(polygon, positionSize, vertexCount) {
     polygon = srcPositions;
   }
   if (Number.isFinite(polygon[0])) {
-    // flat array form
+    // simple flat
     copyAsFlatLoop(positions, 0, polygon, positionSize);
     return {positions, loopStartIndices: null};
   }
   if (!isSimple(polygon)) {
+    // complex polygon
     let targetIndex = 0;
 
     for (const simplePolygon of polygon) {
@@ -201,15 +244,16 @@ export function normalize(polygon, positionSize, vertexCount) {
     // last index points to the end of the array, remove it
     return {positions, loopStartIndices};
   }
+  // simple polygon
   copyAsNestedLoop(positions, 0, polygon, positionSize);
   return {positions, loopStartIndices: null};
 }
 
 /*
- * Get vertex indices for drawing complexPolygon mesh
- * @private
- * @param {[Number,Number,Number][][]} complexPolygon
- * @returns {[Number]} indices
+ * Get vertex indices for drawing polygon mesh
+ * @param {Object} normalizedPolygon - {positions, loopStartIndices}
+ * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
+ * @returns {Array} array of indices
  */
 export function getSurfaceIndices(normalizedPolygon, positionSize) {
   let holeIndices = null;
