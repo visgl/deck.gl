@@ -15,6 +15,8 @@ To render, `OrthographicView` needs to be used together with a `viewState` with 
 * `zoom` (`Number`, optional) - The zoom level of the viewport. Default `1`.
 * `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `0`.
 * `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `10`.
+* `enagleZooming` (`Boolean`, optional) - Enable to zoom the viewport. Default `true`.
+* `enablePanning` (`Boolean`, optional) - Enable to pan the viewport. Default `true`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
