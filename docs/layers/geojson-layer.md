@@ -143,7 +143,7 @@ A global radius multiplier for all points.
 
 ##### `pointRadiusMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
 The minimum radius in pixels.
 
