@@ -1,4 +1,4 @@
-# DEPRECATION GUIDELINES
+# Deprecation Guidelines
 
 Every feature removal should be given careful thought. Gently deprecating things (keep supporting them for 1+ release with a console warning) has a big value and is the preference.
 
