@@ -151,15 +151,11 @@ const PolygonLayerExample = {
 
 const PolygonLayerBinaryExample = {
   ...PolygonLayerExample,
-  getData: () => {
-    const data = [];
-    dataSamples.polygons.forEach(polygon => {
-      // Convert each path from an array of points to an array of numbers
-      // TODO: flatten the entire data array
-      data.push(flattenVertices(polygon, {dimensions: 2}));
-    });
-    return data;
-  },
+  getData: () =>
+    dataSamples.polygons.map(polygon => {
+      // Convert each polygon from an array of points to an array of numbers
+      return flattenVertices(polygon, {dimensions: 2});
+    }),
   props: {
     ...PolygonLayerExample.props,
     getPolygon: d => d,
@@ -194,15 +190,12 @@ const PathLayerExample = {
 
 const PathLayerBinaryExample = {
   ...PathLayerExample,
-  getData: () => {
-    const data = [];
-    dataSamples.zigzag.forEach(({path}) => {
+  getData: () =>
+    dataSamples.zigzag.map(({path}) => {
       // Convert each path from an array of points to an array of numbers
       // TODO: flatten the entire data array
-      data.push(flattenVertices(path, {dimensions: 2}));
-    });
-    return data;
-  },
+      return flattenVertices(path, {dimensions: 2});
+    }),
   props: {
     ...PathLayerExample.props,
     getPath: d => d,

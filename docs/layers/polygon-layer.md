@@ -172,14 +172,16 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 * default: `object => object.polygon`
 
-This accessor returns the polygon corresponding to an object in the `data` stream.
+Called on each object in the `data` stream to retrieve its corresponding polygon.
 
 A polygon can be one of the following formats:
 
 * An array of points (`[x, y, z]`) - a.k.a. a "loop".
-* An array of loops. The first loop is the exterior boundary and the following loops are the holes. Compatible with the GeoJSON [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) specification.
-* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`, is equivalent to a single loop. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
-* An object of shape `{positions, loopStartIndices}`, where `positions` is a flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, and `loopStartIndices` is an array containing the starting index of each loop in the `positions` array.
+* An array of loops. The first loop is the exterior boundary and the successive loops are the holes. Compatible with the GeoJSON [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) specification.
+* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of coordinates, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`, is equivalent to a single loop. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
+* An object of shape `{positions, loopStartIndices}`.
+  - `positions` (Array|TypedArray) - a flat array of coordinates.
+  - `loopStartIndices` (Array) - the starting index of each loop in the `positions` array. The first loop is the exterior boundary and the successive loops are the holes.
 
 If the optional third component `z` is supplied for a position, it specifies the altitude of the vertex:
 

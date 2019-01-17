@@ -100,7 +100,7 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 * Default: `object => object.path`
 
-This accessor returns the path corresponding to an object in the `data` stream.
+Called on each object in the `data` stream to retrieve its corresponding path.
 
 A path can be one of the following formats:
 
