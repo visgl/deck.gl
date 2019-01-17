@@ -76,12 +76,15 @@ function arrayEqual(array1, array2) {
 export function parsePropTypes(propDefs) {
   const propTypes = {};
   const defaultProps = {};
+  const defaultPropCallbacks = {};
+
   for (const [propName, propDef] of Object.entries(propDefs)) {
     const propType = parsePropType(propName, propDef);
     propTypes[propName] = propType;
     defaultProps[propName] = propType.value;
+    defaultPropCallbacks[propName] = propType.getValue;
   }
-  return {propTypes, defaultProps};
+  return {propTypes, defaultProps, defaultPropCallbacks};
 }
 
 // Parses one property definition entry. Either contains:

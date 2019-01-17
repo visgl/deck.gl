@@ -34,19 +34,16 @@ const defaultProps = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getStrokeWidth: {type: 'accessor', value: 1}
+  getStrokeWidth: {type: 'accessor', getValue: props => props.strokeWidth || 1}
 };
 
 export default class LineLayer extends Layer {
-  constructor(props) {
-    let overrideProps = null;
-    if (Number.isFinite(props.strokeWidth)) {
+  constructor(...props) {
+    super(...props);
+
+    if (Number.isFinite(this.props.strokeWidth)) {
       log.deprecated('LineLayer: `strokeWidth`', '`getStrokeWidth`')();
-      overrideProps = {
-        getStrokeWidth: props.strokeWidth
-      };
     }
-    super(props, overrideProps);
   }
 
   getShaders() {

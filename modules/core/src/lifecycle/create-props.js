@@ -7,7 +7,8 @@ export function createProps() {
   const component = this; // eslint-disable-line
 
   // Get default prop object (a prototype chain for now)
-  const propsPrototype = getPropsPrototypeAndTypes(component.constructor).defaultProps;
+  const propTypeDefs = getPropsPrototypeAndTypes(component.constructor);
+  const propsPrototype = propTypeDefs.defaultProps;
 
   // Create a new prop object with default props object in prototype chain
   const propsInstance = Object.create(propsPrototype, {
@@ -35,6 +36,8 @@ export function createProps() {
     Object.assign(propsInstance, arguments[i]);
   }
 
+  applyDefaultPropCallbacks(propsInstance, propTypeDefs.defaultPropCallbacks);
+
   // SEER: Apply any overrides from the seer debug extension if it is active
   applyPropOverrides(propsInstance);
 
@@ -44,6 +47,14 @@ export function createProps() {
   return propsInstance;
 }
 
+function applyDefaultPropCallbacks(propsInstance, defaultPropCallbacks) {
+  for (const name in defaultPropCallbacks) {
+    if (!Object.prototype.hasOwnProperty.call(propsInstance, name)) {
+      propsInstance[name] = defaultPropCallbacks[name](propsInstance);
+    }
+  }
+}
+
 // Return precalculated defaultProps and propType objects if available
 // build them if needed
 function getPropsPrototypeAndTypes(componentClass) {
@@ -51,7 +62,8 @@ function getPropsPrototypeAndTypes(componentClass) {
   if (props) {
     return {
       defaultProps: props,
-      propTypes: getOwnProperty(componentClass, '_propTypes')
+      propTypes: getOwnProperty(componentClass, '_propTypes'),
+      defaultPropCallbacks: getOwnProperty(componentClass, '_defaultPropCallbacks')
     };
   }
 
@@ -90,11 +102,24 @@ function createPropsPrototypeAndTypes(componentClass) {
     componentClass
   );
 
+  // Create a map for prop whose default value is a callback
+  const defaultPropCallbacks = Object.assign(
+    {},
+    parentPropDefs && parentPropDefs.defaultPropCallbacks,
+    componentPropDefs.defaultPropCallbacks
+  );
+  for (const name in defaultProps) {
+    if (!defaultPropCallbacks[name]) {
+      delete defaultPropCallbacks[name];
+    }
+  }
+
   // Store the precalculated props
   componentClass._mergedDefaultProps = defaultProps;
   componentClass._propTypes = propTypes;
+  componentClass._defaultPropCallbacks = defaultPropCallbacks;
 
-  return {propTypes, defaultProps};
+  return {propTypes, defaultProps, defaultPropCallbacks};
 }
 
 // Builds a pre-merged default props object that component props can inherit from
