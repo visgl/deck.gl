@@ -39,16 +39,11 @@ void main(void) {
   } 
   if (distToCenter > innerUnitRadius) {
     gl_FragColor = vLineColor;
-  } 
- 
-  if (distToCenter < innerUnitRadius){
-    if (filled) {
-      gl_FragColor = vFillColor;
-    } else {
-      discard;
-    }
+  } else if (filled) {
+    gl_FragColor = vFillColor;
+  } else {
+    discard;
   }
-  
 
   // use highlight color if this fragment belongs to the selected object.
   gl_FragColor = picking_filterHighlightColor(gl_FragColor);

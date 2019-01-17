@@ -56,6 +56,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 A global radius multiplier for all points.
 
+##### `lineWidthScale` (Number, optional)
+
+* Default: `1`
+
+A global line width multiplier for all points.
+
 ##### `stroked` (Boolean, optional)
 
 * Default: `false`
@@ -124,6 +130,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+* It will be overridden by getLineColor and getFillColor to retrieve colors if these new accessors are specified.
 
 ##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
