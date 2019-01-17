@@ -102,6 +102,17 @@ test('Layer#constructor', t => {
   t.end();
 });
 
+test('Layer#clone', t => {
+  const layer = new SubLayer({id: 'test-layer', data: [0, 1]});
+  const newLayer = layer.clone({pickable: true});
+
+  t.is(newLayer.constructor.name, 'SubLayer', 'cloned layer has correct type');
+  t.is(newLayer.props.id, 'test-layer', 'cloned layer has correct id');
+  t.deepEquals(newLayer.props.data, [0, 1], 'cloned layer has correct data');
+
+  t.end();
+});
+
 test('Layer#constructor(multi prop objects)', t => {
   for (const tc of LAYER_CONSTRUCT_MULTIPROP_TEST_CASES) {
     const layer = new Layer(...tc.props);

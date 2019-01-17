@@ -32,7 +32,22 @@ export default class Component {
 
   // clone this layer with modified props
   clone(newProps) {
-    return new this.constructor(Object.assign({}, this.props, newProps));
+    const {props} = this;
+
+    // Async props cannot be copied with Object.assign, copy them separately
+    const asyncProps = {};
+
+    // See async props definition in create-props.js
+    for (const key in props._asyncPropDefaultValues) {
+      if (key in props._asyncPropResolvedValues) {
+        asyncProps[key] = props._asyncPropResolvedValues[key];
+      } else if (key in props._asyncPropOriginalValues) {
+        asyncProps[key] = props._asyncPropOriginalValues[key];
+      }
+    }
+
+    // Some custom layer implementation may not support multiple arguments in the constructor
+    return new this.constructor(Object.assign({}, props, asyncProps, newProps));
   }
 
   get stats() {
