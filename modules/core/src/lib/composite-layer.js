@@ -67,6 +67,7 @@ export default class CompositeLayer extends Layer {
       coordinateSystem,
       coordinateOrigin,
       wrapLongitude,
+      positionFormat,
       modelMatrix
     } = this.props;
     const newProps = {
@@ -81,6 +82,7 @@ export default class CompositeLayer extends Layer {
       coordinateSystem,
       coordinateOrigin,
       wrapLongitude,
+      positionFormat,
       modelMatrix
     };
 

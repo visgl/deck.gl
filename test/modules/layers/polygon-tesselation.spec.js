@@ -47,6 +47,27 @@ const SAMPLE_DATA = [
   {
     polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 0.5], [0.5, 1]], [[1, 1], [2, 2]]],
     name: 'with invalid hole'
+  },
+  {
+    polygon: new Float64Array([1, 1, 2, 2, 3, 0]),
+    name: 'flat array - open path'
+  },
+  {
+    polygon: new Float64Array([1, 1, 2, 2, 3, 0, 1, 1]),
+    name: 'flat array - closed loop'
+  },
+  {
+    polygon: {
+      positions: new Float64Array([1, 1, 2, 2, 3, 0, 1, 1])
+    },
+    name: 'object - single loop'
+  },
+  {
+    polygon: {
+      positions: new Float64Array([0, 0, 2, 0, 2, 2, 0, 2, 0.5, 0.5, 1, 0.5, 0.5, 1]),
+      loopStartIndices: [0, 8]
+    },
+    name: 'object - with holes'
   }
 ];
 
@@ -54,12 +75,14 @@ const TEST_DATA = [
   {
     title: 'Plain array',
     data: SAMPLE_DATA,
-    getGeometry: d => d.polygon
+    getGeometry: d => d.polygon,
+    positionFormat: 'XY'
   },
   {
     title: 'Iterable',
     data: new Set(SAMPLE_DATA),
-    getGeometry: d => d.polygon
+    getGeometry: d => d.polygon,
+    positionFormat: 'XY'
   }
 ];
 
@@ -78,7 +101,6 @@ test('polygon#imports', t => {
   t.ok(typeof Polygon.normalize === 'function', 'Polygon.normalize imported');
   t.ok(typeof Polygon.getVertexCount === 'function', 'Polygon.getVertexCount imported');
   t.ok(typeof Polygon.getSurfaceIndices === 'function', 'Polygon.getSurfaceIndices imported');
-  t.ok(typeof Polygon.getTriangleCount === 'function', 'Polygon.getTriangleCount imported');
   t.end();
 });
 
@@ -86,28 +108,25 @@ test('polygon#fuctions', t => {
   for (const object of SAMPLE_DATA) {
     t.comment(object.name);
 
-    const complexPolygon = Polygon.normalize(object.polygon);
-    t.ok(Array.isArray(complexPolygon), 'Polygon.normalize');
-    if (complexPolygon.length) {
+    const complexPolygon = Polygon.normalize(object.polygon, 2);
+    t.ok(ArrayBuffer.isView(complexPolygon.positions), 'Polygon.normalize flattens positions');
+    if (complexPolygon.loopStartIndices) {
       t.ok(
-        Array.isArray(complexPolygon[0]) && Array.isArray(complexPolygon[0][0]),
-        'Polygon.normalize returns array of rings'
+        Array.isArray(complexPolygon.loopStartIndices),
+        'Polygon.normalize returns starting indices of rings'
       );
     }
 
-    const vertexCount = Polygon.getVertexCount(object.polygon);
+    const vertexCount = Polygon.getVertexCount(object.polygon, 2);
     t.ok(Number.isFinite(vertexCount), 'Polygon.getVertexCount');
     t.is(
       vertexCount,
-      Polygon.getVertexCount(complexPolygon),
+      Polygon.getVertexCount(complexPolygon, 2),
       'Polygon.getVertexCount returns consistent result'
     );
 
-    const indices = Polygon.getSurfaceIndices(complexPolygon);
+    const indices = Polygon.getSurfaceIndices(complexPolygon, 2);
     t.ok(Array.isArray(indices), 'Polygon.getSurfaceIndices');
-
-    const indexCount = Polygon.getTriangleCount(complexPolygon) * 3;
-    t.ok(indices.length <= indexCount, 'Polygon.getTriangleCount returns sufficient space');
   }
 
   t.end();
@@ -127,9 +146,10 @@ test('PolygonTesselator#constructor', t => {
 
       const tesselator = new PolygonTesselator(Object.assign({}, testData, testCase.params));
       t.ok(tesselator instanceof PolygonTesselator, 'PolygonTesselator created');
+      t.is(tesselator.positionSize, 2, 'PolygonTesselator populates positionSize');
 
-      t.is(tesselator.instanceCount, 52, 'PolygonTesselator counts points correctly');
-      t.is(tesselator.vertexCount, 105, 'PolygonTesselator counts indices correctly');
+      t.is(tesselator.instanceCount, 73, 'PolygonTesselator counts points correctly');
+      t.is(tesselator.vertexCount, 135, 'PolygonTesselator counts indices correctly');
       t.ok(Array.isArray(tesselator.bufferLayout), 'PolygonTesselator.bufferLayout');
 
       t.ok(ArrayBuffer.isView(tesselator.get('indices')), 'PolygonTesselator.get indices');

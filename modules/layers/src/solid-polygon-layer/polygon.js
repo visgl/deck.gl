@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {experimental} from '@deck.gl/core';
-const {flattenVertices} = experimental;
+/* eslint-disable max-params */
 import earcut from 'earcut';
 
 // Basic polygon support
@@ -30,7 +29,7 @@ import earcut from 'earcut';
 // representing the outer hull and other polygons representing holes
 
 /**
- * Check if this is a non-nested polygon (i.e. the first element of the first element is a number)
+ * Check if a nested polygon contains holes
  * @param {Array} polygon - either a complex or simple polygon
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
@@ -38,7 +37,7 @@ function isSimple(polygon) {
   return polygon.length >= 1 && polygon[0].length >= 2 && Number.isFinite(polygon[0][0]);
 }
 
-function isClosed(simplePolygon) {
+function isNestedPathClosed(simplePolygon) {
   // check if first and last vertex are the same
   const p0 = simplePolygon[0];
   const p1 = simplePolygon[simplePolygon.length - 1];
@@ -46,30 +45,73 @@ function isClosed(simplePolygon) {
   return p0[0] === p1[0] && p0[1] === p1[1] && p0[2] === p1[2];
 }
 
+function isFlatPathClosed(positions, size, startIndex, endIndex) {
+  for (let i = 0; i < size; i++) {
+    if (positions[startIndex + i] !== positions[endIndex - size + i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
+ * Copy nested polygon coordinates into a flat array.
  * Ensure that all simple polygons have the same start and end vertex
  */
-function closeLoop(simplePolygon) {
-  if (isClosed(simplePolygon)) {
-    return simplePolygon;
+function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
+  let targetIndex = targetStartIndex;
+  const len = simplePolygon.length;
+  for (let i = 0; i < len; i++) {
+    for (let j = 0; j < size; j++) {
+      target[targetIndex++] = simplePolygon[i][j] || 0;
+    }
   }
-  // duplicate the starting vertex at end
-  return simplePolygon.concat([simplePolygon[0]]);
+
+  if (!isNestedPathClosed(simplePolygon)) {
+    for (let j = 0; j < size; j++) {
+      target[targetIndex++] = simplePolygon[0][j] || 0;
+    }
+  }
+  return targetIndex;
 }
 
 /**
- * Normalize to ensure that all polygons in a list are complex - simplifies processing
- * @param {Array} polygon - either a complex or a simple polygon
- * @param {Object} opts
- * @param {Object} opts.dimensions - if 3, the coords will be padded with 0's if needed
- * @return {Array} - returns a complex polygons
+ * Copy flat polygon coordinates into a flat array.
+ * Ensure that all simple polygons have the same start and end vertex
  */
-export function normalize(polygon, {dimensions = 3} = {}) {
-  return isSimple(polygon) ? [closeLoop(polygon)] : polygon.map(closeLoop);
+function copyAsFlatLoop(target, targetStartIndex, positions, size, srcStartIndex = 0, srcEndIndex) {
+  srcEndIndex = srcEndIndex || positions.length;
+  const srcLength = srcEndIndex - srcStartIndex;
+  if (srcLength <= 0) {
+    return targetStartIndex;
+  }
+  let targetIndex = targetStartIndex;
+
+  for (let i = 0; i < srcLength; i++) {
+    target[targetIndex++] = positions[srcStartIndex + i];
+  }
+
+  if (!isFlatPathClosed(positions, size, srcStartIndex, srcEndIndex)) {
+    for (let i = 0; i < size; i++) {
+      target[targetIndex++] = positions[srcStartIndex + i];
+    }
+  }
+  return targetIndex;
 }
 
-function _getVertexCount(simplePolygon) {
-  return (isClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
+function getNestedVertexCount(simplePolygon) {
+  return (isNestedPathClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
+}
+
+function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
+  endIndex = endIndex || positions.length;
+  if (startIndex >= endIndex) {
+    return 0;
+  }
+  return (
+    (isFlatPathClosed(positions, size, startIndex, endIndex) ? 0 : 1) +
+    (endIndex - startIndex) / size
+  );
 }
 
 /**
@@ -77,43 +119,90 @@ function _getVertexCount(simplePolygon) {
  * @param {Array} polygon - either a complex or simple polygon
  * @return {Boolean} - true if the polygon is a simple polygon (i.e. not an array of polygons)
  */
-export function getVertexCount(polygon) {
-  return isSimple(polygon)
-    ? _getVertexCount(polygon)
-    : polygon.reduce((length, simplePolygon) => length + _getVertexCount(simplePolygon), 0);
-}
+export function getVertexCount(polygon, positionSize) {
+  if (polygon.positions) {
+    // object form
+    const {positions, loopStartIndices} = polygon;
 
-// Roughly estimate the number of triangles needed to tesselate the polygon
-// For allocating the index buffer - the number returned might be excessive
-export function getTriangleCount(complexPolygon) {
-  let triangleCount = 0;
-  let first = true;
-  for (const simplePolygon of complexPolygon) {
-    const size = simplePolygon.length;
-    if (first) {
-      triangleCount += size >= 3 ? size - 2 : 0;
-    } else {
-      triangleCount += size + 1;
+    if (loopStartIndices) {
+      let vertexCount = 0;
+      for (let i = 0; i < loopStartIndices.length; i++) {
+        vertexCount += getFlatVertexCount(
+          polygon.positions,
+          positionSize,
+          loopStartIndices[i],
+          loopStartIndices[i + 1]
+        );
+      }
+      return vertexCount;
     }
-    first = false;
+    polygon = positions;
   }
-  return triangleCount;
+  if (Number.isFinite(polygon[0])) {
+    // flat array form
+    return getFlatVertexCount(polygon, positionSize);
+  }
+  if (!isSimple(polygon)) {
+    let vertexCount = 0;
+    for (const simplePolygon of polygon) {
+      vertexCount += getNestedVertexCount(simplePolygon);
+    }
+    return vertexCount;
+  }
+  return getNestedVertexCount(polygon);
 }
 
-// Returns the offset of each hole polygon in the flattened array for that polygon
-function getHoleIndices(complexPolygon) {
-  let holeIndices = null;
-  if (complexPolygon.length > 1) {
-    let polygonStartIndex = 0;
-    holeIndices = [];
-    complexPolygon.forEach(polygon => {
-      polygonStartIndex += polygon.length;
-      holeIndices.push(polygonStartIndex);
-    });
-    // Last element points to end of the flat array, remove it
-    holeIndices.pop();
+/**
+ * Normalize to ensure that all polygons in a list are complex - simplifies processing
+ * @param {Array} polygon - either a complex or a simple polygon
+ * @param {Number} positionSize - 2 (xy) or 3 (xyz)
+ * @return {Array} - returns an array of flat rings
+ */
+export function normalize(polygon, positionSize, vertexCount) {
+  vertexCount = vertexCount || getVertexCount(polygon, positionSize);
+
+  const positions = new Float64Array(vertexCount * positionSize);
+  const loopStartIndices = [];
+
+  if (polygon.positions) {
+    // object form
+    const {positions: srcPositions, loopStartIndices: srcLoopStartIndices} = polygon;
+
+    if (srcLoopStartIndices) {
+      let targetIndex = 0;
+
+      for (let i = 0; i < srcLoopStartIndices.length; i++) {
+        loopStartIndices.push(targetIndex);
+        targetIndex = copyAsFlatLoop(
+          positions,
+          targetIndex,
+          srcPositions,
+          positionSize,
+          srcLoopStartIndices[i],
+          srcLoopStartIndices[i + 1]
+        );
+      }
+      return {positions, loopStartIndices};
+    }
+    polygon = srcPositions;
   }
-  return holeIndices;
+  if (Number.isFinite(polygon[0])) {
+    // flat array form
+    copyAsFlatLoop(positions, 0, polygon, positionSize);
+    return {positions, loopStartIndices: null};
+  }
+  if (!isSimple(polygon)) {
+    let targetIndex = 0;
+
+    for (const simplePolygon of polygon) {
+      loopStartIndices.push(targetIndex);
+      targetIndex = copyAsNestedLoop(positions, targetIndex, simplePolygon, positionSize);
+    }
+    // last index points to the end of the array, remove it
+    return {positions, loopStartIndices};
+  }
+  copyAsNestedLoop(positions, 0, polygon, positionSize);
+  return {positions, loopStartIndices: null};
 }
 
 /*
@@ -122,11 +211,14 @@ function getHoleIndices(complexPolygon) {
  * @param {[Number,Number,Number][][]} complexPolygon
  * @returns {[Number]} indices
  */
-export function getSurfaceIndices(complexPolygon) {
-  // Prepare an array of hole indices as expected by earcut
-  const holeIndices = getHoleIndices(complexPolygon);
-  // Flatten the polygon as expected by earcut
-  const verts = flattenVertices(complexPolygon, {dimensions: 2, result: []});
+export function getSurfaceIndices(normalizedPolygon, positionSize) {
+  let holeIndices = null;
+
+  if (normalizedPolygon.loopStartIndices) {
+    holeIndices = normalizedPolygon.loopStartIndices
+      .slice(1)
+      .map(positionIndex => positionIndex / positionSize);
+  }
   // Let earcut triangulate the polygon
-  return earcut(verts, holeIndices, 2);
+  return earcut(normalizedPolygon.positions, holeIndices, positionSize);
 }

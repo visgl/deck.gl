@@ -172,11 +172,16 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 
 * default: `object => object.polygon`
 
-Like any deck.gl layer, the polygon accepts a data prop which is expected to
-be an iterable container of objects, and an accessor
-that extracts a polygon (simple or complex) from each object.
+This accessor returns the polygon corresponding to an object in the `data` stream.
 
-This accessor returns the polygon corresponding to an object in the `data` stream. A polygon is expected to be an array of coordinates following either the GeoJSON [LineString](https://tools.ietf.org/html/rfc7946#section-3.1.4) ("simple polygon") or [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) (polygon with holes) specification. Each vertex can optionally supply a third component `z` which specifies the altitude of the vertex.
+A polygon can be one of the following formats:
+
+* An array of points (`[x, y, z]`) - a.k.a. a "loop".
+* An array of loops. The first loop is the exterior boundary and the following loops are the holes. Compatible with the GeoJSON [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) specification.
+* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`, is equivalent to a single loop. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
+* An object of shape `{positions, loopStartIndices}`, where `positions` is a flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of numbers, and `loopStartIndices` is an array containing the starting index of each loop in the `positions` array.
+
+If the optional third component `z` is supplied for a position, it specifies the altitude of the vertex:
 
 <div>
   <img src="https://user-images.githubusercontent.com/18344164/48512983-cca32e80-e8ae-11e8-9107-c380925cf861.gif" />

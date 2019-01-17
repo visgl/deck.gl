@@ -71,17 +71,7 @@ export default class PolygonLayer extends CompositeLayer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
     if (geometryChanged) {
-      const {data, getPolygon} = this.props;
-      this.state.paths = [];
-      for (const object of data) {
-        const complexPolygon = Polygon.normalize(getPolygon(object));
-        complexPolygon.forEach(polygon =>
-          this.state.paths.push({
-            path: polygon,
-            object
-          })
-        );
-      }
+      this.state.paths = this._getPaths(props);
     }
   }
 
@@ -90,6 +80,28 @@ export default class PolygonLayer extends CompositeLayer {
       // override object with picked data
       object: (info.object && info.object.object) || info.object
     });
+  }
+
+  _getPaths({data, getPolygon, positionFormat}) {
+    const paths = [];
+    const positionSize = positionFormat === 'XY' ? 2 : 3;
+
+    for (const object of data) {
+      const {positions, loopStartIndices} = Polygon.normalize(getPolygon(object), positionSize);
+
+      if (loopStartIndices) {
+        for (let i = 0; i < loopStartIndices.length; i++) {
+          const path = positions.subarray(
+            loopStartIndices[i],
+            loopStartIndices[i + 1] || positions.length
+          );
+          paths.push({path, object});
+        }
+      } else {
+        paths.push({path: positions, object});
+      }
+    }
+    return paths;
   }
 
   _getAccessor(accessor) {

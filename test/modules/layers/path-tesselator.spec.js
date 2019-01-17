@@ -26,20 +26,23 @@ const SAMPLE_DATA = [
   {path: [], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1]], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1], [2, 2], [3, 3]], width: 2, dashArray: [0, 0], color: [255, 0, 0]},
+  {path: new Float64Array([1, 1, 2, 2, 3, 3]), width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1], [2, 2], [3, 3], [1, 1]], width: 3, dashArray: [2, 1], color: [0, 0, 255]}
 ];
-const INSTANCE_COUNT = 5;
+const INSTANCE_COUNT = 7;
 
 const TEST_DATA = [
   {
     title: 'Plain array',
     data: SAMPLE_DATA,
-    getGeometry: d => d.path
+    getGeometry: d => d.path,
+    positionFormat: 'XY'
   },
   {
     title: 'Iterable',
     data: new Set(SAMPLE_DATA),
-    getGeometry: d => d.path
+    getGeometry: d => d.path,
+    positionFormat: 'XY'
   }
 ];
 
@@ -142,7 +145,7 @@ test('PolygonTesselator#methods', t => {
       d => d.width
     );
     t.ok(ArrayBuffer.isView(strokeWidths), 'PathTesselator.get strokeWidths');
-    t.deepEquals(strokeWidths, [2, 2, 3, 3, 3], 'strokeWidths are filled');
+    t.deepEquals(strokeWidths, [2, 2, 1, 1, 3, 3, 3], 'strokeWidths are filled');
 
     const dashArrays = tesselator.get(
       'dashArrays',
@@ -150,7 +153,7 @@ test('PolygonTesselator#methods', t => {
       d => d.dashArray
     );
     t.ok(ArrayBuffer.isView(dashArrays), 'PathTesselator.get dashArrays');
-    t.deepEquals(dashArrays, [0, 0, 0, 0, 2, 1, 2, 1, 2, 1], 'dashArrays are filled');
+    t.deepEquals(dashArrays, [0, 0, 0, 0, 0, 0, 0, 0, 2, 1, 2, 1, 2, 1], 'dashArrays are filled');
 
     const colors = tesselator.get(
       'colors',

@@ -166,12 +166,11 @@ export default class App extends PureComponent {
   _renderExampleLayer(example, settings, index) {
     const {layer: Layer, props, getData} = example;
 
-    const layerProps = Object.assign({}, props, settings);
-
-    if (getData) {
-      Object.assign(layerProps, {data: getData()});
+    if (getData && !props.data) {
+      props.data = getData();
     }
 
+    const layerProps = Object.assign({}, props, settings);
     Object.assign(layerProps, {
       modelMatrix: this._getModelMatrix(index, layerProps.coordinateSystem)
     });

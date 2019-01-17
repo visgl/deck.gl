@@ -133,6 +133,8 @@ function diffDataProps(props, oldProps) {
     // Otherwise, do a shallow equal on props
   } else if (props.data !== oldProps.data) {
     return 'A new data container was supplied';
+  } else if (props.positionFormat !== oldProps.positionFormat) {
+    return 'Position format changed';
   }
 
   return null;
