@@ -173,13 +173,27 @@ const PolygonLayerExample = {
     getFillColor: f => [200 + Math.random() * 55, 0, 0],
     getLineColor: f => [0, 0, 0, 255],
     getLineDashArray: f => [20, 0],
-    getWidth: f => 20,
+    getLineWidth: f => 20,
     getElevation: f => Math.random() * 1000,
     opacity: 0.8,
     pickable: true,
     lineDashJustified: true,
     lightSettings: LIGHT_SETTINGS,
     elevationScale: 0.6
+  }
+};
+
+const PolygonLayerBinaryExample = {
+  ...PolygonLayerExample,
+  getData: () =>
+    dataSamples.polygons.map(polygon => {
+      // Convert each polygon from an array of points to an array of numbers
+      return flattenVertices(polygon, {dimensions: 2});
+    }),
+  props: {
+    ...PolygonLayerExample.props,
+    getPolygon: d => d,
+    positionFormat: 'XY'
   }
 };
 
@@ -210,15 +224,11 @@ const PathLayerExample = {
 
 const PathLayerBinaryExample = {
   ...PathLayerExample,
-  getData: () => {
-    const data = [];
-    dataSamples.zigzag.forEach(({path}) => {
+  getData: () =>
+    dataSamples.zigzag.map(({path}) => {
       // Convert each path from an array of points to an array of numbers
-      // TODO: flatten the entire data array
-      data.push(flattenVertices(path, {dimensions: 2}));
-    });
-    return data;
-  },
+      return flattenVertices(path, {dimensions: 2});
+    }),
   props: {
     ...PathLayerExample.props,
     getPath: d => d,
@@ -436,6 +446,7 @@ export default {
     GeoJsonLayer: GeoJsonLayerExample,
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
+    'PolygonLayer (Flat)': PolygonLayerBinaryExample,
     PathLayer: PathLayerExample,
     'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
