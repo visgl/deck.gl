@@ -129,29 +129,27 @@ export default class IconLayer extends Layer {
 
     let iconMappingChanged = false;
 
-    if (
-      oldProps.getIcon !== getIcon ||
-      (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getIcon)
-    ) {
-      iconManager.updateState({getIcon});
-    }
-
     // prepacked iconAtlas from user
     if (iconAtlas) {
       if (oldProps.iconAtlas !== props.iconAtlas) {
-        iconManager.updateState({iconAtlas});
+        iconManager.setProps({iconAtlas, autoPacking: false});
       }
 
       if (oldProps.iconMapping !== props.iconMapping) {
-        iconManager.updateState({iconMapping});
+        iconManager.setProps({iconMapping});
         iconMappingChanged = true;
       }
-    } else if (
+    } else {
+      // otherwise, use autoPacking
+      iconManager.setProps({autoPacking: true});
+    }
+
+    if (
       changeFlags.dataChanged ||
-      changeFlags.updateTriggersChanged.all ||
-      changeFlags.updateTriggersChanged.getIcon
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getIcon))
     ) {
-      iconManager.updateState({data, getIcon});
+      iconManager.setProps({data, getIcon});
       iconMappingChanged = true;
     }
 

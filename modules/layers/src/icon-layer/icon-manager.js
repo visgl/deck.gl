@@ -108,7 +108,7 @@ export function buildMapping({icons, buffer, maxCanvasWidth}) {
 }
 
 // extract unique icons from data
-export function getIcons(data, getIcon) {
+function getIcons(data, getIcon) {
   if (!data || !getIcon) {
     return null;
   }
@@ -116,7 +116,15 @@ export function getIcons(data, getIcon) {
   const icons = {};
   for (const point of data) {
     const icon = getIcon(point);
-    if (icon && icon.url && !icons[icon.url]) {
+    if (!icon) {
+      throw new Error('Icon is missing.');
+    }
+
+    if (!icon.url) {
+      throw new Error('Icon url is missing.');
+    }
+
+    if (!icons[icon.url]) {
       icons[icon.url] = icon;
     }
   }
@@ -136,6 +144,7 @@ export default class IconManager {
     this._getIcon = null;
     this._mapping = {};
     this._texture = null;
+    this._autoPacking = false;
 
     this._canvas = document.createElement('canvas');
   }
@@ -150,16 +159,24 @@ export default class IconManager {
     return this._mapping[name] || {};
   }
 
-  updateState({iconAtlas, iconMapping, data, getIcon}) {
+  setProps({autoPacking, iconAtlas, iconMapping, data, getIcon}) {
+    if (autoPacking !== undefined) {
+      this._autoPacking = autoPacking;
+    }
+
     if (getIcon) {
       this._getIcon = getIcon;
     }
 
     if (iconMapping) {
       this._mapping = iconMapping;
-    } else if (iconAtlas) {
+    }
+
+    if (iconAtlas) {
       this._updateIconAtlas(iconAtlas);
-    } else {
+    }
+
+    if (this._autoPacking && (data || getIcon)) {
       this._updateAutoPacking({
         data,
         buffer: DEFAULT_BUFFER,
