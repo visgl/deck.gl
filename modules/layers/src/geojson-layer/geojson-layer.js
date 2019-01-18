@@ -273,31 +273,45 @@ export default class GeoJsonLayer extends CompositeLayer {
     const pointLayer =
       drawPoints &&
       new subLayers.PointLayer(
-        this.getSubLayerProps({
-          id: 'points',
-          updateTriggers: {
-            getColor: updateTriggers.getFillColor,
-            getRadius: updateTriggers.getRadius
+        Object.assign(
+          {},
+          this.getSubLayerProps({
+            id: 'points',
+            updateTriggers: {
+              getFillColor: updateTriggers.getFillColor,
+              getLineColor: updateTriggers.getLineColor,
+              getRadius: updateTriggers.getRadius,
+              getLineWidth: updateTriggers.getLineWidth
+            }
+          }),
+          {
+            data: pointFeatures,
+
+            fp64,
+            stroked,
+            filled,
+            radiusScale: pointRadiusScale,
+            radiusMinPixels: pointRadiusMinPixels,
+            radiusMaxPixels: pointRadiusMaxPixels,
+            lineWidthScale,
+            lineWidthMinPixels,
+            lineWidthMaxPixels,
+
+            getPosition: getCoordinates,
+            getFillColor: unwrappingAccessor(getFillColor),
+            getLineColor: unwrappingAccessor(getLineColor),
+            getRadius: unwrappingAccessor(getRadius),
+            getLineWidth: unwrappingAccessor(getLineWidth),
+
+            transitions: transitions && {
+              getPosition: transitions.geometry,
+              getFillColor: transitions.getFillColor,
+              getLineColor: transitions.getLineColor,
+              getRadius: transitions.getRadius,
+              getLineWidth: transitions.getLineWidth
+            }
           }
-        }),
-        {
-          data: pointFeatures,
-
-          fp64,
-          radiusScale: pointRadiusScale,
-          radiusMinPixels: pointRadiusMinPixels,
-          radiusMaxPixels: pointRadiusMaxPixels,
-
-          getPosition: getCoordinates,
-          getColor: unwrappingAccessor(getFillColor),
-          getRadius: unwrappingAccessor(getRadius),
-
-          transitions: transitions && {
-            getPosition: transitions.geometry,
-            getColor: transitions.getFillColor,
-            getRadius: transitions.getRadius
-          }
-        }
+        )
       );
 
     return [
