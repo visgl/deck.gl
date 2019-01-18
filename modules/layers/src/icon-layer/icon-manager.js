@@ -146,7 +146,7 @@ export default class IconManager {
     this._texture = null;
     this._autoPacking = false;
 
-    this._canvas = document.createElement('canvas');
+    this._canvas = null;
   }
 
   getTexture() {
@@ -154,8 +154,8 @@ export default class IconManager {
   }
 
   getIconMapping(dataPoint) {
-    const icon = this._getIcon ? this._getIcon(dataPoint) : null;
-    const name = icon ? (typeof icon === 'object' ? icon.url : icon) : null;
+    const icon = this._getIcon(dataPoint);
+    const name = this._autoPacking ? icon.url : icon;
     return this._mapping[name] || {};
   }
 
@@ -177,6 +177,8 @@ export default class IconManager {
     }
 
     if (this._autoPacking && (data || getIcon)) {
+      this._canvas = this._canvas || document.createElement('canvas');
+
       this._updateAutoPacking({
         data,
         buffer: DEFAULT_BUFFER,
