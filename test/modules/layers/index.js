@@ -32,3 +32,4 @@ import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';
 import './contour-layer/marching-squares.spec';
 import './contour-layer/contour-layer.spec';
+import './icon-manager.spec';

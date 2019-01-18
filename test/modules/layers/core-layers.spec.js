@@ -225,7 +225,7 @@ test('LineLayer#constructor', t => {
   t.end();
 });
 
-test('IconLayer#constructor', t => {
+test('IconLayerc#constructor', t => {
   const data = FIXTURES.points;
 
   testLayer({
