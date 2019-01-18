@@ -76,7 +76,7 @@ Draw the filled area of a point.
 
 ##### `radiusMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
 The minimum radius in pixels.
 
@@ -88,7 +88,7 @@ The maximum radius in pixels.
 
 ##### `lineWidthMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
 The minimum line width in pixels.
 
@@ -130,7 +130,8 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
-* It will be overridden by getLineColor and getFillColor to retrieve colors if these new accessors are specified.
+
+It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
 
 ##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 

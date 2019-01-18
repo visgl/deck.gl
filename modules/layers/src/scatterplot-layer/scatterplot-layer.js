@@ -30,10 +30,10 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   radiusScale: {type: 'number', min: 0, value: 1},
-  radiusMinPixels: {type: 'number', min: 0, value: 1}, //  min point radius in pixels
+  radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
   lineWidthScale: {type: 'number', min: 0, value: 1},
-  lineWidthMinPixels: {type: 'number', min: 0, value: 1},
+  lineWidthMinPixels: {type: 'number', min: 0, value: 0},
   lineWidthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
   stroked: false,
   fp64: false,
