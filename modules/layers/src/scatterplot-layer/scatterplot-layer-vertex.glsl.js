@@ -26,17 +26,23 @@ attribute vec3 positions;
 attribute vec3 instancePositions;
 attribute vec2 instancePositions64xyLow;
 attribute float instanceRadius;
-attribute vec4 instanceColors;
+attribute float instanceLineWidths;
+attribute vec4 instanceFillColors;
+attribute vec4 instanceLineColors;
 attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
-uniform float outline;
-uniform float strokeWidth;
+uniform float lineWidthScale;
+uniform float lineWidthMinPixels;
+uniform float lineWidthMaxPixels;
+uniform float stroked;
+uniform bool filled;
 
-varying vec4 vColor;
+varying vec4 vFillColor;
+varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
 
@@ -46,22 +52,28 @@ void main(void) {
     project_scale(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
+  
+  // Multiply out line width and clamp to limits
+  float lineWidth = clamp(
+    project_scale(lineWidthScale * instanceLineWidths), 
+    lineWidthMinPixels, lineWidthMaxPixels
+  );
 
-  // outline is centered at the radius
   // outer radius needs to offset by half stroke width
-  outerRadiusPixels += outline * strokeWidth / 2.0;
+  outerRadiusPixels += stroked * lineWidth / 2.0;
 
   // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
-  // 0 - solid circle, 1 - stroke with lineWidth=0
-  innerUnitRadius = outline * (1.0 - strokeWidth / outerRadiusPixels);
 
+  innerUnitRadius = 1.0 - stroked * lineWidth / outerRadiusPixels;
+  
   vec3 offset = positions * outerRadiusPixels;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset);
 
   // Apply opacity to instance color, or return instance picking color
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
-
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity) / 255.;
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity) / 255.;
+  
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
 }

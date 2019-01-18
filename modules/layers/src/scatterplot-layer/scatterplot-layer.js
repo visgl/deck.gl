@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, log} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
@@ -32,16 +32,56 @@ const defaultProps = {
   radiusScale: {type: 'number', min: 0, value: 1},
   radiusMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
-  strokeWidth: {type: 'number', min: 0, value: 1},
-  outline: false,
+  lineWidthScale: {type: 'number', min: 0, value: 1},
+  lineWidthMinPixels: {type: 'number', min: 0, value: 0},
+  lineWidthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
+  stroked: false,
   fp64: false,
+  filled: true,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getRadius: {type: 'accessor', value: 1},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR}
+  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', value: 1}
 };
 
 export default class ScatterplotLayer extends Layer {
+  constructor(props) {
+    const {
+      getColor,
+      getLineColor,
+      getFillColor,
+      getLineWidth,
+      strokeWidth,
+      stroked,
+      outline
+    } = props;
+
+    const overrideProps = {};
+
+    if (getColor) {
+      if (!getLineColor) {
+        overrideProps.getLineColor = getColor;
+      }
+      if (!getFillColor) {
+        overrideProps.getFillColor = getColor;
+      }
+    }
+
+    if (getLineWidth === undefined && strokeWidth !== undefined) {
+      log.deprecated('ScatterplotLayer: `strokeWidth`', '`getLineWidth`')();
+      overrideProps.getLineWidth = strokeWidth;
+    }
+
+    if (stroked === undefined && outline !== undefined) {
+      log.deprecated('ScatterplotLayer: `stroked`', '`outline`')();
+      overrideProps.stroked = outline;
+    }
+
+    super(props, overrideProps);
+  }
+
   getShaders(id) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
@@ -65,12 +105,25 @@ export default class ScatterplotLayer extends Layer {
         accessor: 'getRadius',
         defaultValue: 1
       },
-      instanceColors: {
+      instanceFillColors: {
         size: 4,
         transition: true,
         type: GL.UNSIGNED_BYTE,
-        accessor: 'getColor',
+        accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineColors: {
+        size: 4,
+        transition: true,
+        type: GL.UNSIGNED_BYTE,
+        accessor: 'getLineColor',
+        defaultValue: [0, 0, 0, 255]
+      },
+      instanceLineWidths: {
+        size: 1,
+        transition: true,
+        accessor: 'getLineWidth',
+        defaultValue: 1
       }
     });
   }
@@ -88,14 +141,27 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusScale, radiusMinPixels, radiusMaxPixels, outline, strokeWidth} = this.props;
+    const {
+      radiusScale,
+      radiusMinPixels,
+      radiusMaxPixels,
+      stroked,
+      filled,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels
+    } = this.props;
+
     this.state.model.render(
       Object.assign({}, uniforms, {
-        outline: outline ? 1 : 0,
-        strokeWidth,
+        stroked: stroked ? 1 : 0,
+        filled,
         radiusScale,
         radiusMinPixels,
-        radiusMaxPixels
+        radiusMaxPixels,
+        lineWidthScale,
+        lineWidthMinPixels,
+        lineWidthMaxPixels
       })
     );
   }
