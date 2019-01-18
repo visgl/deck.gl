@@ -23,11 +23,22 @@ import earcut from 'earcut';
 
 // 4 data formats are supported:
 // Simple Polygon: an array of points
-// Complex Polygon: an array of array of points (array of loops)
-//   with the first loop representing the outer hull and other loops representing holes
+// Complex Polygon: an array of array of points (array of rings)
+//   with the first ring representing the outer hull and other rings representing holes
 // Simple Flat: an array of numbers (flattened "simple polygon")
-// Complex Flat: {position: array<number>, loopStartIndices: array<number>}
+// Complex Flat: {position: array<number>, holeIndices: array<number>}
 //   (flattened "complex polygon")
+
+/**
+ * Ensure a polygon is valid format
+ * @param {Array|Object} polygon
+ */
+function validate(polygon) {
+  polygon = (polygon && polygon.positions) || polygon;
+  if (!Array.isArray(polygon) && !ArrayBuffer.isView(polygon)) {
+    throw new Error('invalid polygon');
+  }
+}
 
 /**
  * Check if a polygon is simple or complex
@@ -39,11 +50,11 @@ function isSimple(polygon) {
 }
 
 /**
- * Check if a simple polygon is a closed loop
+ * Check if a simple polygon is a closed ring
  * @param {Array} simplePolygon - array of points
- * @return {Boolean} - true if the simple polygon is a closed loop
+ * @return {Boolean} - true if the simple polygon is a closed ring
  */
-function isNestedPathClosed(simplePolygon) {
+function isNestedRingClosed(simplePolygon) {
   // check if first and last vertex are the same
   const p0 = simplePolygon[0];
   const p1 = simplePolygon[simplePolygon.length - 1];
@@ -52,14 +63,14 @@ function isNestedPathClosed(simplePolygon) {
 }
 
 /**
- * Check if a simple flat array is a closed loop
+ * Check if a simple flat array is a closed ring
  * @param {Array} positions - array of numbers
  * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
  * @param {Number} startIndex - start index of the path in the positions array
  * @param {Number} endIndex - end index of the path in the positions array
- * @return {Boolean} - true if the simple flat array is a closed loop
+ * @return {Boolean} - true if the simple flat array is a closed ring
  */
-function isFlatPathClosed(positions, size, startIndex, endIndex) {
+function isFlatRingClosed(positions, size, startIndex, endIndex) {
   for (let i = 0; i < size; i++) {
     if (positions[startIndex + i] !== positions[endIndex - size + i]) {
       return false;
@@ -69,14 +80,14 @@ function isFlatPathClosed(positions, size, startIndex, endIndex) {
 }
 
 /**
- * Copy a simple polygon coordinates into a flat array, closes the loop if needed.
+ * Copy a simple polygon coordinates into a flat array, closes the ring if needed.
  * @param {Float64Array} target - destination
  * @param {Number} targetStartIndex - index in the destination to start copying into
  * @param {Array} simplePolygon - array of points
  * @param {Number} size - size of a position, 2 (xy) or 3 (xyz)
  * @returns {Number} - the index of the write head in the destination
  */
-function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
+function copyNestedRing(target, targetStartIndex, simplePolygon, size) {
   let targetIndex = targetStartIndex;
   const len = simplePolygon.length;
   for (let i = 0; i < len; i++) {
@@ -85,7 +96,7 @@ function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
     }
   }
 
-  if (!isNestedPathClosed(simplePolygon)) {
+  if (!isNestedRingClosed(simplePolygon)) {
     for (let j = 0; j < size; j++) {
       target[targetIndex++] = simplePolygon[0][j] || 0;
     }
@@ -94,7 +105,7 @@ function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
 }
 
 /**
- * Copy a simple flat array into another flat array, closes the loop if needed.
+ * Copy a simple flat array into another flat array, closes the ring if needed.
  * @param {Float64Array} target - destination
  * @param {Number} targetStartIndex - index in the destination to start copying into
  * @param {Array} positions - array of numbers
@@ -103,7 +114,7 @@ function copyAsNestedLoop(target, targetStartIndex, simplePolygon, size) {
  * @param {Number} [srcEndIndex] - end index of the path in the positions array
  * @returns {Number} - the index of the write head in the destination
  */
-function copyAsFlatLoop(target, targetStartIndex, positions, size, srcStartIndex = 0, srcEndIndex) {
+function copyFlatRing(target, targetStartIndex, positions, size, srcStartIndex = 0, srcEndIndex) {
   srcEndIndex = srcEndIndex || positions.length;
   const srcLength = srcEndIndex - srcStartIndex;
   if (srcLength <= 0) {
@@ -115,7 +126,7 @@ function copyAsFlatLoop(target, targetStartIndex, positions, size, srcStartIndex
     target[targetIndex++] = positions[srcStartIndex + i];
   }
 
-  if (!isFlatPathClosed(positions, size, srcStartIndex, srcEndIndex)) {
+  if (!isFlatRingClosed(positions, size, srcStartIndex, srcEndIndex)) {
     for (let i = 0; i < size; i++) {
       target[targetIndex++] = positions[srcStartIndex + i];
     }
@@ -129,7 +140,7 @@ function copyAsFlatLoop(target, targetStartIndex, positions, size, srcStartIndex
  * @returns {Number} vertex count
  */
 function getNestedVertexCount(simplePolygon) {
-  return (isNestedPathClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
+  return (isNestedRingClosed(simplePolygon) ? 0 : 1) + simplePolygon.length;
 }
 
 /**
@@ -146,7 +157,7 @@ function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
     return 0;
   }
   return (
-    (isFlatPathClosed(positions, size, startIndex, endIndex) ? 0 : 1) +
+    (isFlatRingClosed(positions, size, startIndex, endIndex) ? 0 : 1) +
     (endIndex - startIndex) / size
   );
 }
@@ -158,18 +169,20 @@ function getFlatVertexCount(positions, size, startIndex = 0, endIndex) {
  * @returns {Number} vertex count
  */
 export function getVertexCount(polygon, positionSize) {
+  validate(polygon);
+
   if (polygon.positions) {
     // complex flat
-    const {positions, loopStartIndices} = polygon;
+    const {positions, holeIndices} = polygon;
 
-    if (loopStartIndices) {
+    if (holeIndices) {
       let vertexCount = 0;
-      for (let i = 0; i < loopStartIndices.length; i++) {
+      for (let i = 0; i <= holeIndices.length; i++) {
         vertexCount += getFlatVertexCount(
           polygon.positions,
           positionSize,
-          loopStartIndices[i],
-          loopStartIndices[i + 1]
+          holeIndices[i - 1],
+          holeIndices[i]
         );
       }
       return vertexCount;
@@ -198,70 +211,77 @@ export function getVertexCount(polygon, positionSize) {
  * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
  * @param {Number} [vertexCount] - pre-computed vertex count in the polygon.
  *   If provided, will skip counting.
- * @return {Object} - {positions: <Float64Array>, loopStartIndices: <Array|null>}
+ * @return {Object} - {positions: <Float64Array>, holeIndices: <Array|null>}
  */
+/* eslint-disable max-statements */
 export function normalize(polygon, positionSize, vertexCount) {
+  validate(polygon);
+
   vertexCount = vertexCount || getVertexCount(polygon, positionSize);
 
   const positions = new Float64Array(vertexCount * positionSize);
-  const loopStartIndices = [];
+  const holeIndices = [];
 
   if (polygon.positions) {
     // complex flat
-    const {positions: srcPositions, loopStartIndices: srcLoopStartIndices} = polygon;
+    const {positions: srcPositions, holeIndices: srcHoleIndices} = polygon;
 
-    if (srcLoopStartIndices) {
+    if (srcHoleIndices) {
       let targetIndex = 0;
 
-      for (let i = 0; i < srcLoopStartIndices.length; i++) {
-        loopStartIndices.push(targetIndex);
-        targetIndex = copyAsFlatLoop(
+      for (let i = 0; i <= srcHoleIndices.length; i++) {
+        targetIndex = copyFlatRing(
           positions,
           targetIndex,
           srcPositions,
           positionSize,
-          srcLoopStartIndices[i],
-          srcLoopStartIndices[i + 1]
+          srcHoleIndices[i - 1],
+          srcHoleIndices[i]
         );
+        holeIndices.push(targetIndex);
       }
-      return {positions, loopStartIndices};
+      // The last one is not a starting index of a hole, remove
+      holeIndices.pop();
+
+      return {positions, holeIndices};
     }
     polygon = srcPositions;
   }
   if (Number.isFinite(polygon[0])) {
     // simple flat
-    copyAsFlatLoop(positions, 0, polygon, positionSize);
-    return {positions, loopStartIndices: null};
+    copyFlatRing(positions, 0, polygon, positionSize);
+    return {positions, holeIndices: null};
   }
   if (!isSimple(polygon)) {
     // complex polygon
     let targetIndex = 0;
 
     for (const simplePolygon of polygon) {
-      loopStartIndices.push(targetIndex);
-      targetIndex = copyAsNestedLoop(positions, targetIndex, simplePolygon, positionSize);
+      targetIndex = copyNestedRing(positions, targetIndex, simplePolygon, positionSize);
+      holeIndices.push(targetIndex);
     }
+    // The last one is not a starting index of a hole, remove
+    holeIndices.pop();
     // last index points to the end of the array, remove it
-    return {positions, loopStartIndices};
+    return {positions, holeIndices};
   }
   // simple polygon
-  copyAsNestedLoop(positions, 0, polygon, positionSize);
-  return {positions, loopStartIndices: null};
+  copyNestedRing(positions, 0, polygon, positionSize);
+  return {positions, holeIndices: null};
 }
+/* eslint-enable max-statements */
 
 /*
  * Get vertex indices for drawing polygon mesh
- * @param {Object} normalizedPolygon - {positions, loopStartIndices}
+ * @param {Object} normalizedPolygon - {positions, holeIndices}
  * @param {Number} positionSize - size of a position, 2 (xy) or 3 (xyz)
  * @returns {Array} array of indices
  */
 export function getSurfaceIndices(normalizedPolygon, positionSize) {
   let holeIndices = null;
 
-  if (normalizedPolygon.loopStartIndices) {
-    holeIndices = normalizedPolygon.loopStartIndices
-      .slice(1)
-      .map(positionIndex => positionIndex / positionSize);
+  if (normalizedPolygon.holeIndices) {
+    holeIndices = normalizedPolygon.holeIndices.map(positionIndex => positionIndex / positionSize);
   }
   // Let earcut triangulate the polygon
   return earcut(normalizedPolygon.positions, holeIndices, positionSize);

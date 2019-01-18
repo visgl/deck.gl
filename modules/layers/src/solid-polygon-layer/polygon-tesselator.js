@@ -141,7 +141,7 @@ export default class PolygonTesselator extends Tesselator {
     } = this;
 
     let i = vertexStart;
-    const {positions: polygonPositions, loopStartIndices} = polygon;
+    const {positions: polygonPositions, holeIndices} = polygon;
 
     for (let j = 0; j < geometrySize; j++) {
       const x = polygonPositions[j * positionSize];
@@ -159,22 +159,20 @@ export default class PolygonTesselator extends Tesselator {
       i++;
     }
 
-    /* We are reusing the some buffer for `nextPositions` by offsetting one vertex
+    /* We are reusing the some buffer for `nextPositions` by offseting one vertex
      * to the left. As a result,
-     * the last vertex of each loop overlaps with the first vertex of the next loop.
-     * `vertexValid` is used to mark the end of each loop so we don't draw these
+     * the last vertex of each ring overlaps with the first vertex of the next ring.
+     * `vertexValid` is used to mark the end of each ring so we don't draw these
      * segments:
       positions      A0 A1 A2 A3 A4 B0 B1 B2 C0 ...
       nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
       vertexValid    1  1  1  1  0  1  1  0  1 ...
      */
-    if (loopStartIndices) {
-      for (let j = 1; j <= loopStartIndices.length; j++) {
-        const loopStartIndex = loopStartIndices[j] || geometrySize;
-        vertexValid[vertexStart + loopStartIndex - 1] = 0;
+    if (holeIndices) {
+      for (let j = 0; j < holeIndices.length; j++) {
+        vertexValid[vertexStart + holeIndices[j] - 1] = 0;
       }
-    } else {
-      vertexValid[vertexStart + geometrySize - 1] = 0;
     }
+    vertexValid[vertexStart + geometrySize - 1] = 0;
   }
 }

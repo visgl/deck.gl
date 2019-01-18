@@ -62,14 +62,6 @@ const App = ({data, viewport}) => {
 };
 ```
 
-If a cartographic projection mode is used, height will be interpreted as meters,
-otherwise will be in unit coordinates.
-
-* The polypgons can be simple or complex (complex polygons are polygons with holes).
-* A simple polygon specified as an array of vertices, each vertice being an array of two or three numbers
-* A complex polygon is specified as an array of simple polygons, the first polygon
-  representing the outer outline, and the remaining polygons representing holes. These polygons are expected to not intersect.
-
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
@@ -176,12 +168,32 @@ Called on each object in the `data` stream to retrieve its corresponding polygon
 
 A polygon can be one of the following formats:
 
-* An array of points (`[x, y, z]`) - a.k.a. a "loop".
-* An array of loops. The first loop is the exterior boundary and the successive loops are the holes. Compatible with the GeoJSON [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) specification.
-* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of coordinates, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`, is equivalent to a single loop. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
-* An object of shape `{positions, loopStartIndices}`.
-  - `positions` (Array|TypedArray) - a flat array of coordinates.
-  - `loopStartIndices` (Array) - the starting index of each loop in the `positions` array. The first loop is the exterior boundary and the successive loops are the holes.
+* An array of points (`[x, y, z]`) - a.k.a. a "ring".
+* An array of rings. The first ring is the exterior boundary and the successive rings are the holes. Compatible with the GeoJSON [Polygon](https://tools.ietf.org/html/rfc7946#section-3.1.6) specification.
+* A flat array or [TypedArray](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/TypedArray) of coordinates, in the shape of `[x0, y0, z0, x1, y1, z1, ...]`, is equivalent to a single ring. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
+* An object of shape `{positions, holeIndices}`.
+  - `positions` (Array|TypedArray) - a flat array of coordinates. By default, each coordinate is assumed to contain 3 consecutive numbers. If each coordinate contains only two numbers (x, y), set the `positionFormat` prop of the layer to `XY`.
+  - `holeIndices` (Array) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
+
+```js
+// All of the following are valid polygons
+const polygons = [
+  // Simple polygon (array of points)
+  [[-122.4, 37.7, 0], [-122.4, 37.8, 5], [-122.5, 37.8, 10], [-122.5, 37.7, 5], [-122.4, 37.7, 0]],
+  // Polygon with holes (array of rings)
+  [
+    [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
+    [[-122.45, 37.73], [-122.47, 37.76], [-122.47, 37.71], [-122.45, 37.73]]
+  ],
+  // Flat simple polygon
+  [-122.4, 37.7, 0, -122.4, 37.8, 5, -122.5, 37.8, 10, -122.5, 37.7, 5, -122.4, 37.7, 0],
+  // Flat polygon with holes
+  {
+    positions: [-122.4, 37.7, 0, -122.4, 37.8, 0, -122.5, 37.8, 0, -122.5, 37.7, 0, -122.4, 37.7, 0, -122.45, 37.73, 0, -122.47, 37.76, 0, -122.47, 37.71, 0, -122.45, 37.73, 0],
+    holeIndices: [15]
+  }
+]
+```
 
 If the optional third component `z` is supplied for a position, it specifies the altitude of the vertex:
 
@@ -222,7 +234,10 @@ The width of the outline of the polygon, in meters. Only applies if `extruded: f
 
 * Default: `1000`
 
-The elevation to extrude each polygon with, in meters. Only applies if `extruded: true`.
+The elevation to extrude each polygon with. 
+If a cartographic projection mode is used, height will be interpreted as meters,
+otherwise will be in unit coordinates.
+Only applies if `extruded: true`.
 
 * If a number is provided, it is used as the elevation for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its elevation.

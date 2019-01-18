@@ -87,13 +87,14 @@ export default class PolygonLayer extends CompositeLayer {
     const positionSize = positionFormat === 'XY' ? 2 : 3;
 
     for (const object of data) {
-      const {positions, loopStartIndices} = Polygon.normalize(getPolygon(object), positionSize);
+      const {positions, holeIndices} = Polygon.normalize(getPolygon(object), positionSize);
 
-      if (loopStartIndices) {
-        for (let i = 0; i < loopStartIndices.length; i++) {
+      if (holeIndices) {
+        // split the positions array by holeIndices
+        for (let i = 0; i <= holeIndices.length; i++) {
           const path = positions.subarray(
-            loopStartIndices[i],
-            loopStartIndices[i + 1] || positions.length
+            holeIndices[i - 1] || 0,
+            holeIndices[i] || positions.length
           );
           paths.push({path, object});
         }

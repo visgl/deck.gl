@@ -193,7 +193,6 @@ const PathLayerBinaryExample = {
   getData: () =>
     dataSamples.zigzag.map(({path}) => {
       // Convert each path from an array of points to an array of numbers
-      // TODO: flatten the entire data array
       return flattenVertices(path, {dimensions: 2});
     }),
   props: {

@@ -65,7 +65,7 @@ const SAMPLE_DATA = [
   {
     polygon: {
       positions: new Float64Array([0, 0, 2, 0, 2, 2, 0, 2, 0.5, 0.5, 1, 0.5, 0.5, 1]),
-      loopStartIndices: [0, 8]
+      holeIndices: [8]
     },
     name: 'object - with holes'
   }
@@ -110,9 +110,9 @@ test('polygon#fuctions', t => {
 
     const complexPolygon = Polygon.normalize(object.polygon, 2);
     t.ok(ArrayBuffer.isView(complexPolygon.positions), 'Polygon.normalize flattens positions');
-    if (complexPolygon.loopStartIndices) {
+    if (complexPolygon.holeIndices) {
       t.ok(
-        Array.isArray(complexPolygon.loopStartIndices),
+        Array.isArray(complexPolygon.holeIndices),
         'Polygon.normalize returns starting indices of rings'
       );
     }
