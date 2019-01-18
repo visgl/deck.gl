@@ -109,7 +109,7 @@ export function buildMapping({icons, buffer, maxCanvasWidth}) {
 
 // extract unique icons from data
 export function getIcons(data, getIcon) {
-  if (!data) {
+  if (!data || !getIcon) {
     return null;
   }
 
@@ -133,6 +133,7 @@ export default class IconManager {
     this.gl = gl;
     this.onUpdate = onUpdate;
 
+    this._getIcon = null;
     this._mapping = {};
     this._texture = null;
 
@@ -144,14 +145,14 @@ export default class IconManager {
   }
 
   getIconMapping(dataPoint) {
-    const icon = this.getIcon(dataPoint);
+    const icon = this._getIcon ? this._getIcon(dataPoint) : null;
     const name = icon ? (typeof icon === 'object' ? icon.url : icon) : null;
     return this._mapping[name] || {};
   }
 
   updateState({iconAtlas, iconMapping, data, getIcon}) {
     if (getIcon) {
-      this.getIcon = getIcon;
+      this._getIcon = getIcon;
     }
 
     if (iconMapping) {
@@ -191,7 +192,7 @@ export default class IconManager {
   }
 
   _updateAutoPacking({data, buffer, maxCanvasWidth}) {
-    const icons = Object.values(getIcons(data, this.getIcon) || {});
+    const icons = Object.values(getIcons(data, this._getIcon) || {});
     if (icons.length > 0) {
       // generate icon mapping
       const {mapping, canvasHeight} = buildMapping({

@@ -119,7 +119,7 @@ export default class IconLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  /* eslint-disable max-statements */
+  /* eslint-disable max-statements, complexity */
   updateState({oldProps, props, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
@@ -129,7 +129,10 @@ export default class IconLayer extends Layer {
 
     let iconMappingChanged = false;
 
-    if (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getIcon) {
+    if (
+      oldProps.getIcon !== getIcon ||
+      (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getIcon)
+    ) {
       iconManager.updateState({getIcon});
     }
 
@@ -143,15 +146,12 @@ export default class IconLayer extends Layer {
         iconManager.updateState({iconMapping});
         iconMappingChanged = true;
       }
-    }
-
-    // auto pack iconAtlas in IconManager
-    if (
+    } else if (
       changeFlags.dataChanged ||
       changeFlags.updateTriggersChanged.all ||
       changeFlags.updateTriggersChanged.getIcon
     ) {
-      iconManager.updateState({data});
+      iconManager.updateState({data, getIcon});
       iconMappingChanged = true;
     }
 
@@ -170,7 +170,7 @@ export default class IconLayer extends Layer {
       attributeManager.invalidateAll();
     }
   }
-  /* eslint-enable max-statements */
+  /* eslint-enable max-statements, complexity */
 
   draw({uniforms}) {
     const {sizeScale} = this.props;
