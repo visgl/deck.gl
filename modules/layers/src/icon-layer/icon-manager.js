@@ -127,10 +127,6 @@ export default class IconManager {
   constructor(
     gl,
     {
-      data,
-      iconAtlas,
-      iconMapping,
-      getIcon = noop,
       onUpdate = noop // notify IconLayer when icon texture update
     }
   ) {
@@ -141,7 +137,6 @@ export default class IconManager {
     this._texture = null;
 
     this._canvas = document.createElement('canvas');
-    this.updateState({data, iconAtlas, iconMapping, getIcon});
   }
 
   getTexture() {
@@ -154,16 +149,14 @@ export default class IconManager {
     return this._mapping[name] || {};
   }
 
-  updateState({data, iconAtlas, iconMapping, getIcon}) {
+  updateState({iconAtlas, iconMapping, data, getIcon}) {
     if (getIcon) {
       this.getIcon = getIcon;
     }
 
     if (iconMapping) {
       this._mapping = iconMapping;
-    }
-
-    if (iconAtlas) {
+    } else if (iconAtlas) {
       this._updateIconAtlas(iconAtlas);
     } else {
       this._updateAutoPacking({
