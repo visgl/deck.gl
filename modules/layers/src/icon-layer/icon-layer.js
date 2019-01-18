@@ -129,7 +129,7 @@ export default class IconLayer extends Layer {
 
     let iconMappingChanged = false;
 
-    if (changeFlags.updateTriggersChanged.getIcon) {
+    if (changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged.getIcon) {
       iconManager.updateState({getIcon});
     }
 
