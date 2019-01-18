@@ -90,7 +90,9 @@ export default class PolygonLayer extends CompositeLayer {
       const {positions, holeIndices} = Polygon.normalize(getPolygon(object), positionSize);
 
       if (holeIndices) {
-        // split the positions array by holeIndices
+        // split the positions array into `holeIndices.length + 1` rings
+        // holeIndices[-1] falls back to 0
+        // holeIndices[holeIndices.length] falls back to positions.length
         for (let i = 0; i <= holeIndices.length; i++) {
           const path = positions.subarray(
             holeIndices[i - 1] || 0,

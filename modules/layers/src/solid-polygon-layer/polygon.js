@@ -177,6 +177,9 @@ export function getVertexCount(polygon, positionSize) {
 
     if (holeIndices) {
       let vertexCount = 0;
+      // split the positions array into `holeIndices.length + 1` rings
+      // holeIndices[-1] falls back to 0
+      // holeIndices[holeIndices.length] falls back to positions.length
       for (let i = 0; i <= holeIndices.length; i++) {
         vertexCount += getFlatVertexCount(
           polygon.positions,
@@ -228,7 +231,9 @@ export function normalize(polygon, positionSize, vertexCount) {
 
     if (srcHoleIndices) {
       let targetIndex = 0;
-
+      // split the positions array into `holeIndices.length + 1` rings
+      // holeIndices[-1] falls back to 0
+      // holeIndices[holeIndices.length] falls back to positions.length
       for (let i = 0; i <= srcHoleIndices.length; i++) {
         targetIndex = copyFlatRing(
           positions,
