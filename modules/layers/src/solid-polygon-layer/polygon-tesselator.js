@@ -32,11 +32,12 @@ const {fp64LowPart} = fp64Module;
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PolygonTesselator extends Tesselator {
-  constructor({data, getGeometry, fp64, IndexType = Uint32Array}) {
+  constructor({data, getGeometry, fp64, positionFormat, IndexType = Uint32Array}) {
     super({
       data,
       getGeometry,
       fp64,
+      positionFormat,
       attributes: {
         positions: {size: 3},
         positions64xyLow: {size: 2, fp64Only: true},
@@ -91,11 +92,11 @@ export default class PolygonTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(polygon) {
-    return Polygon.getVertexCount(polygon);
+    return Polygon.getVertexCount(polygon, this.positionSize);
   }
 
   updateGeometryAttributes(polygon, context) {
-    polygon = Polygon.normalize(polygon);
+    polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
 
     this._updateIndices(polygon, context);
     this._updatePositions(polygon, context);
@@ -110,11 +111,11 @@ export default class PolygonTesselator extends Tesselator {
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
-    const indices = Polygon.getSurfaceIndices(polygon);
+    const indices = Polygon.getSurfaceIndices(polygon, this.positionSize);
 
     // make sure the buffer is large enough
     if (currentLength < i + indices.length) {
-      currentLength *= 2;
+      currentLength = (i + indices.length) * 2;
       target = typedArrayManager.allocate(target, currentLength, {
         type: target.constructor,
         size: 1,
@@ -132,40 +133,46 @@ export default class PolygonTesselator extends Tesselator {
   }
 
   // Flatten out all the vertices of all the sub subPolygons
-  _updatePositions(polygon, {vertexStart}) {
+  _updatePositions(polygon, {vertexStart, geometrySize}) {
     const {
       attributes: {positions, positions64xyLow, vertexValid},
-      fp64
+      fp64,
+      positionSize
     } = this;
 
     let i = vertexStart;
-    polygon.forEach(loop => {
-      loop.forEach(vertex => {
-        // eslint-disable-line
-        const x = vertex[0];
-        const y = vertex[1];
-        const z = vertex[2] || 0;
+    const {positions: polygonPositions, holeIndices} = polygon;
 
-        positions[i * 3] = x;
-        positions[i * 3 + 1] = y;
-        positions[i * 3 + 2] = z;
-        if (fp64) {
-          positions64xyLow[i * 2] = fp64LowPart(x);
-          positions64xyLow[i * 2 + 1] = fp64LowPart(y);
-        }
-        vertexValid[i] = 1;
-        i++;
-      });
-      /* We are reusing the some buffer for `nextPositions` by offsetting one vertex
-       * to the left. As a result,
-       * the last vertex of each loop overlaps with the first vertex of the next loop.
-       * `vertexValid` is used to mark the end of each loop so we don't draw these
-       * segments:
-        positions      A0 A1 A2 A3 A4 B0 B1 B2 C0 ...
-        nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
-        vertexValid    1  1  1  1  0  1  1  0  1 ...
-       */
-      vertexValid[i - 1] = 0;
-    });
+    for (let j = 0; j < geometrySize; j++) {
+      const x = polygonPositions[j * positionSize];
+      const y = polygonPositions[j * positionSize + 1];
+      const z = positionSize > 2 ? polygonPositions[j * positionSize + 2] : 0;
+
+      positions[i * 3] = x;
+      positions[i * 3 + 1] = y;
+      positions[i * 3 + 2] = z;
+      if (fp64) {
+        positions64xyLow[i * 2] = fp64LowPart(x);
+        positions64xyLow[i * 2 + 1] = fp64LowPart(y);
+      }
+      vertexValid[i] = 1;
+      i++;
+    }
+
+    /* We are reusing the some buffer for `nextPositions` by offseting one vertex
+     * to the left. As a result,
+     * the last vertex of each ring overlaps with the first vertex of the next ring.
+     * `vertexValid` is used to mark the end of each ring so we don't draw these
+     * segments:
+      positions      A0 A1 A2 A3 A4 B0 B1 B2 C0 ...
+      nextPositions  A1 A2 A3 A4 B0 B1 B2 C0 C1 ...
+      vertexValid    1  1  1  1  0  1  1  0  1 ...
+     */
+    if (holeIndices) {
+      for (let j = 0; j < holeIndices.length; j++) {
+        vertexValid[vertexStart + holeIndices[j] - 1] = 0;
+      }
+    }
+    vertexValid[vertexStart + geometrySize - 1] = 0;
   }
 }

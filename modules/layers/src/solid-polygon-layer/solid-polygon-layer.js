@@ -188,6 +188,7 @@ export default class SolidPolygonLayer extends Layer {
       polygonTesselator.updateGeometry({
         data: props.data,
         getGeometry: props.getPolygon,
+        positionFormat: props.positionFormat,
         fp64: this.use64bitPositions()
       });
 
