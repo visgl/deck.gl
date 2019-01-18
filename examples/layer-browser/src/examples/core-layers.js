@@ -280,7 +280,8 @@ const ScatterplotLayerExample = {
   props: {
     id: 'scatterplotLayer',
     getPosition: d => d.COORDINATES,
-    getColor: d => [255, 128, 0],
+    getFillColor: d => [255, 128, 0],
+    getLineColor: d => [0, 128, 255],
     getRadius: d => d.SPACES,
     opacity: 1,
     pickable: true,
