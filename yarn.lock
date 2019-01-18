@@ -690,10 +690,17 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@luma.gl/constants@^7.0.0-alpha.3":
-  version "7.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.3.tgz#c3b86a6c9acaff27fed887e9731a19d8fe7c562e"
-  integrity sha512-ZVaVt1dr5D3L7IRrjK9a7diIxjzX96suaFQBn9D3e+h1IjI0YA8RuO3U9/o1GHxO8N7FXmAUBVd0Kgrn/B7bOg==
+"@luma.gl/constants@^7.0.0-alpha.6":
+  version "7.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.6.tgz#05804fa1c7feae9aedaef96365cc48cb23d5069c"
+  integrity sha512-nCSDNduFUSe4OoSkt/NydcGo/pjd8HTzs5AtjsCyG9cIVaKzrXeB4FUBNFIILWtiJJxtdrJnuYxK9tim7o/WeQ==
+
+"@luma.gl/shadertools@^7.0.0-alpha.6":
+  version "7.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-7.0.0-alpha.6.tgz#124bd4125e615eebac9a5bf86293312ff89f36f1"
+  integrity sha512-HQQGWI5P4TUeqPgnVdS8qv+U2NZozyMTv58L+ZptuVkZTg059oxlFBGbQk4q5HP7uKp4iTJE0tCIY/74I5sexQ==
+  dependencies:
+    "@luma.gl/constants" "^7.0.0-alpha.6"
 
 "@mapbox/geojson-area@0.2.2":
   version "0.2.2"
@@ -6895,13 +6902,14 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^7.0.0-alpha.3:
-  version "7.0.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-7.0.0-alpha.3.tgz#d694e33d440e5acbe87726615b8b919fa5e13880"
-  integrity sha512-ZDtCWg0R/x22yPB5vxiYZPF98Pof+vwKKQG6TC56VW11Zdb4xqguSvuRUuNE/aje+7UKQowKDtXW5hHZLxi92A==
+luma.gl@^7.0.0-alpha.6:
+  version "7.0.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-7.0.0-alpha.6.tgz#71179499275f4560ddeaee1b72ec4855981ea7f5"
+  integrity sha512-1OSu2GDIzQR3SRFKYroZEHEyn0VcuwfDxfk+jq2EWVEVVGcVT6FOY8l21bUi/eTCsRTbmk32TnipMoprfal/OA==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    "@luma.gl/constants" "^7.0.0-alpha.3"
+    "@luma.gl/constants" "^7.0.0-alpha.6"
+    "@luma.gl/shadertools" "^7.0.0-alpha.6"
     math.gl "^2.2.0"
     probe.gl "^2.0.1"
     seer "^0.2.4"
