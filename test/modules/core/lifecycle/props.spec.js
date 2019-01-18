@@ -164,7 +164,8 @@ test('createProps', t => {
   A.defaultProps = {
     a: 1,
     data: [],
-    c: {type: 'number', getValue: props => props.c0 || 0}
+    c: {type: 'number', value: 0},
+    c0: {deprecatedFor: 'c'}
   };
 
   class B extends A {}

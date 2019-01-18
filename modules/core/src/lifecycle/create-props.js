@@ -36,7 +36,7 @@ export function createProps() {
     Object.assign(propsInstance, arguments[i]);
   }
 
-  applyDefaultPropCallbacks(propsInstance, propTypeDefs.defaultPropCallbacks);
+  checkDeprecatedProps(propsInstance, propTypeDefs.deprecatedProps);
 
   // SEER: Apply any overrides from the seer debug extension if it is active
   applyPropOverrides(propsInstance);
@@ -47,10 +47,17 @@ export function createProps() {
   return propsInstance;
 }
 
-function applyDefaultPropCallbacks(propsInstance, defaultPropCallbacks) {
-  for (const name in defaultPropCallbacks) {
-    if (!Object.prototype.hasOwnProperty.call(propsInstance, name)) {
-      propsInstance[name] = defaultPropCallbacks[name](propsInstance);
+function checkDeprecatedProps(propsInstance, deprecatedProps) {
+  for (const name in deprecatedProps) {
+    if (hasOwnProperty(propsInstance, name)) {
+      const nameStr = `${propsInstance._component.constructor.name}: ${name}`;
+      const newPropName = deprecatedProps[name];
+
+      if (newPropName && !hasOwnProperty(propsInstance, newPropName)) {
+        propsInstance[newPropName] = propsInstance[name];
+      }
+
+      log.deprecated(nameStr, newPropName)();
     }
   }
 }
@@ -63,7 +70,7 @@ function getPropsPrototypeAndTypes(componentClass) {
     return {
       defaultProps: props,
       propTypes: getOwnProperty(componentClass, '_propTypes'),
-      defaultPropCallbacks: getOwnProperty(componentClass, '_defaultPropCallbacks')
+      deprecatedProps: getOwnProperty(componentClass, '_deprecatedProps')
     };
   }
 
@@ -103,23 +110,18 @@ function createPropsPrototypeAndTypes(componentClass) {
   );
 
   // Create a map for prop whose default value is a callback
-  const defaultPropCallbacks = Object.assign(
+  const deprecatedProps = Object.assign(
     {},
-    parentPropDefs && parentPropDefs.defaultPropCallbacks,
-    componentPropDefs.defaultPropCallbacks
+    parentPropDefs && parentPropDefs.deprecatedProps,
+    componentPropDefs.deprecatedProps
   );
-  for (const name in defaultProps) {
-    if (!defaultPropCallbacks[name]) {
-      delete defaultPropCallbacks[name];
-    }
-  }
 
   // Store the precalculated props
   componentClass._mergedDefaultProps = defaultProps;
   componentClass._propTypes = propTypes;
-  componentClass._defaultPropCallbacks = defaultPropCallbacks;
+  componentClass._deprecatedProps = deprecatedProps;
 
-  return {propTypes, defaultProps, defaultPropCallbacks};
+  return {propTypes, defaultProps, deprecatedProps};
 }
 
 // Builds a pre-merged default props object that component props can inherit from
@@ -226,9 +228,13 @@ function getDescriptorForAsyncProp(name) {
 
 // HELPER METHODS
 
+function hasOwnProperty(object, prop) {
+  return Object.prototype.hasOwnProperty.call(object, prop);
+}
+
 // Constructors have their super class constructors as prototypes
 function getOwnProperty(object, prop) {
-  return Object.prototype.hasOwnProperty.call(object, prop) && object[prop];
+  return hasOwnProperty(object, prop) && object[prop];
 }
 
 function getComponentName(componentClass) {
