@@ -56,54 +56,6 @@ const defaultProps = {
 };
 
 export default class HexagonLayer extends CompositeLayer {
-  constructor(props) {
-    if (!props.hexagonAggregator && !props.radius) {
-      log.once(
-        0,
-        'HexagonLayer: Default hexagonAggregator requires radius prop to be set, ' +
-          'Now using 1000 meter as default'
-      )();
-
-      props.radius = defaultProps.radius.value;
-    }
-
-    if (
-      Number.isFinite(props.upperPercentile) &&
-      (props.upperPercentile > 100 || props.upperPercentile < 0)
-    ) {
-      log.once(
-        0,
-        'HexagonLayer: upperPercentile should be between 0 and 100. ' + 'Assign to 100 by default'
-      )();
-
-      props.upperPercentile = defaultProps.upperPercentile.value;
-    }
-
-    if (
-      Number.isFinite(props.lowerPercentile) &&
-      (props.lowerPercentile > 100 || props.lowerPercentile < 0)
-    ) {
-      log.once(
-        0,
-        'HexagonLayer: lowerPercentile should be between 0 and 100. ' + 'Assign to 0 by default'
-      )();
-
-      props.lowerPercentile = defaultProps.upperPercentile.value;
-    }
-
-    if (props.lowerPercentile >= props.upperPercentile) {
-      log.once(
-        0,
-        'HexagonLayer: lowerPercentile should not be bigger than ' +
-          'upperPercentile. Assign to 0 by default'
-      )();
-
-      props.lowerPercentile = defaultProps.lowerPercentile.value;
-    }
-
-    super(props);
-  }
-
   initializeState() {
     this.state = {
       hexagons: [],
@@ -281,6 +233,10 @@ export default class HexagonLayer extends CompositeLayer {
 
   getColorValueDomain() {
     const {lowerPercentile, upperPercentile, onSetColorDomain} = this.props;
+
+    if (lowerPercentile > upperPercentile) {
+      log.warn('HexagonLayer: lowerPercentile is bigger than upperPercentile')();
+    }
 
     this.state.colorValueDomain = this.state.sortedColorBins.getValueRange([
       lowerPercentile,
