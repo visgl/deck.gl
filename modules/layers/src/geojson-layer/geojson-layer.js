@@ -160,11 +160,16 @@ export default class GeoJsonLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
-    const drawPoints = (pointFeatures && pointFeatures.length > 0) || subLayerProps;
-    const drawLines = (lineFeatures && lineFeatures.length > 0) || subLayerProps;
+    const hasPoints =
+      (pointFeatures && pointFeatures.length > 0) || (subLayerProps && subLayerProps.points);
+    const hasLines =
+      (lineFeatures && lineFeatures.length > 0) || (subLayerProps && subLayerProps['line-paths']);
     const hasPolygonLines =
-      (polygonOutlineFeatures && polygonOutlineFeatures.length > 0) || subLayerProps;
-    const hasPolygon = (polygonFeatures && polygonFeatures.length > 0) || subLayerProps;
+      (polygonOutlineFeatures && polygonOutlineFeatures.length > 0) ||
+      (subLayerProps && subLayerProps['polygon-outline']);
+    const hasPolygon =
+      (polygonFeatures && polygonFeatures.length > 0) ||
+      (subLayerProps && subLayerProps['polygon-fill']);
 
     // Filled Polygon Layer
     const polygonFillLayer =
@@ -238,7 +243,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pathLayer =
-      drawLines &&
+      hasLines &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'line-paths',
@@ -273,7 +278,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pointLayer =
-      drawPoints &&
+      hasPoints &&
       new subLayers.PointLayer(
         this.getSubLayerProps({
           id: 'points',
