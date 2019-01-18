@@ -76,12 +76,18 @@ function arrayEqual(array1, array2) {
 export function parsePropTypes(propDefs) {
   const propTypes = {};
   const defaultProps = {};
+  const deprecatedProps = {};
+
   for (const [propName, propDef] of Object.entries(propDefs)) {
-    const propType = parsePropType(propName, propDef);
-    propTypes[propName] = propType;
-    defaultProps[propName] = propType.value;
+    if (propDef && propDef.deprecatedFor) {
+      deprecatedProps[propName] = propDef.deprecatedFor;
+    } else {
+      const propType = parsePropType(propName, propDef);
+      propTypes[propName] = propType;
+      defaultProps[propName] = propType.value;
+    }
   }
-  return {propTypes, defaultProps};
+  return {propTypes, defaultProps, deprecatedProps};
 }
 
 // Parses one property definition entry. Either contains:

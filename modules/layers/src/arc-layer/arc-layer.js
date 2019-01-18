@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 
 import GL from 'luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
@@ -38,21 +38,13 @@ const defaultProps = {
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
   getStrokeWidth: {type: 'accessor', value: 1},
-  widthScale: {type: 'number', value: 1, min: 0}
+  widthScale: {type: 'number', value: 1, min: 0},
+
+  // deprecated
+  strokeWidth: {deprecatedFor: 'getStrokeWidth'}
 };
 
 export default class ArcLayer extends Layer {
-  constructor(props) {
-    let overrideProps = null;
-    if (Number.isFinite(props.strokeWidth)) {
-      log.deprecated('ArcLayer: `strokeWidth`', '`getStrokeWidth`')();
-      overrideProps = {
-        getStrokeWidth: props.strokeWidth
-      };
-    }
-    super(props, overrideProps);
-  }
-
   getShaders() {
     return this.use64bitProjection()
       ? {vs: vs64, fs, modules: ['project64', 'picking']}

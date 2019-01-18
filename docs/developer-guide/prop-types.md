@@ -53,10 +53,11 @@ The property types system enables layers to opt-in to specifying types, and also
 Each prop in `defaultProps` may be an object in the following shape:
 
 - `type` (string, required)
-- `value` (any, required)
+- `value` (any, required) - the default value if this prop is not supplied
 - `async` (boolean, optional) - if `true`, the prop can either be a [Promise](https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Promise) that resolves to its actual value, or an url string (loaded using the base Layer's [fetch](/docs/api-reference/layer.md) prop).
 - `validate` (function, optional) - receives `value` as argument and returns `true` if the value is valid. Validation of layer props is only invoked in debug mode. This function is automatically populated if the prop has a built-in type.
 - `equal` (function, optional) - receives `value1`, `value2` as argument and returns `true` if the two values are equal. Comparison of layer props is invoked during layer update and the result is passed to `changeFlags.propsChanged`. This function is automatically populated if the prop has a built-in type.
+- `deprecatedFor` (string, optional) - mark this prop as deprecated. The value is the new prop name that this prop has been deprecated for. If the old prop is supplied instead of the new one, its value will be transferred to the new prop. The user will get a warning about the deprecation.
 - Any additional options, see individual types below.
 
 ### Built-in Types
