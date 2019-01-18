@@ -79,7 +79,7 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 - Default: `(err) => console.error(err)`
 
-##### `renderSubLayer` (Function)
+##### `renderSubLayers` (Function)
 
 Renders a sub-layer with the `data` prop being the resolved value of `getTileData`, and other props that are passed in the `TileLayer`
 
