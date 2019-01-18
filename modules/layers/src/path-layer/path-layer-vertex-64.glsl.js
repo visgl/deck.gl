@@ -46,7 +46,7 @@ varying vec4 vColor;
 varying vec2 vCornerOffset;
 varying float vMiterLength;
 varying vec2 vDashArray;
-varying float vPathPosition;
+varying vec2 vPathPosition;
 varying float vPathLength;
 
 const float EPSILON = 0.001;
@@ -177,7 +177,10 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
   float isEnd = positions.x;
   vec2 offsetFromStartOfPath = mix(vCornerOffset, vCornerOffset + deltaA / width, isEnd);
   vec2 dir = mix(dirB, dirA, isEnd);
-  vPathPosition = dot(offsetFromStartOfPath, dir);
+  vPathPosition = vec2(
+    positions.y + positions.z * offsetDirection,
+    dot(offsetFromStartOfPath, dir)
+  );
 
   return vec3(vCornerOffset * width, 0.0);
 }
