@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
@@ -34,21 +34,13 @@ const defaultProps = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getStrokeWidth: {type: 'accessor', value: 1}
+  getStrokeWidth: {type: 'accessor', value: 1},
+
+  // deprecated
+  strokeWidth: {deprecatedFor: 'getStrokeWidth'}
 };
 
 export default class LineLayer extends Layer {
-  constructor(props) {
-    let overrideProps = null;
-    if (Number.isFinite(props.strokeWidth)) {
-      log.deprecated('LineLayer: `strokeWidth`', '`getStrokeWidth`')();
-      overrideProps = {
-        getStrokeWidth: props.strokeWidth
-      };
-    }
-    super(props, overrideProps);
-  }
-
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
