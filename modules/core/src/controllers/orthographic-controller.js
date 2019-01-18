@@ -20,9 +20,6 @@ class OrthographicState extends ViewState {
     minZoom = DEFAULT_MIN_ZOOM,
     maxZoom = DEFAULT_MAX_ZOOM,
 
-    enableZooming = true,
-    enablePanning = true,
-
     /** Interaction states */
     /* The point on the view being grabbed when the operation first started */
     startPanPosition,
@@ -39,9 +36,7 @@ class OrthographicState extends ViewState {
       offset,
       zoom,
       minZoom,
-      maxZoom,
-      enableZooming,
-      enablePanning
+      maxZoom
     });
     this._interactiveState = {
       startPanPosition,
@@ -74,10 +69,6 @@ class OrthographicState extends ViewState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   pan({pos}) {
-    const {enablePanning} = this._viewportProps;
-    if (!enablePanning) {
-      return this;
-    }
     const {startPanPosition, startPanOffset} = this._interactiveState;
     const delta = new Vector2(pos).subtract(startPanPosition);
     return this._getUpdatedState({
@@ -145,10 +136,6 @@ class OrthographicState extends ViewState {
    * @param {[number, number]} pos - current mouse cursor screen position
    */
   zoom({pos, startPos, scale}) {
-    const {enableZooming} = this._viewportProps;
-    if (!enableZooming) {
-      return this;
-    }
     const {zoom, width, height, offset} = this._viewportProps;
     let {startZoom, startZoomPosition} = this._interactiveState;
     if (!Number.isFinite(startZoom)) {
