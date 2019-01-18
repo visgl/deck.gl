@@ -26,6 +26,7 @@ import {
   MeshLayer,
   PathMarkerLayer,
   PathOutlineLayer,
+  BitmapLayer,
   outline
 } from '@deck.gl/experimental-layers';
 
@@ -36,7 +37,9 @@ test('Top-level imports', t => {
   t.ok(Arrow2DGeometry, 'Arrow2DGeometry symbol imported');
   t.ok(outline, 'outline symbol imported');
   t.ok(BezierCurveLayer, 'BezierCurveLayer symbol imported');
+  t.ok(BitmapLayer, 'BitmapLayer symbol imported');
   t.end();
 });
 
 import './tile-layer/tile-cache.spec';
+import './bitmap-layer.spec';
