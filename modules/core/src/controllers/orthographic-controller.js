@@ -41,6 +41,7 @@ class OrthographicState extends ViewState {
     this._interactiveState = {
       startPanPosition,
       startPanOffset,
+      startZoomPosition,
       startZoom
     };
   }
