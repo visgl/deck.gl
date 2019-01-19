@@ -77,7 +77,7 @@ void main(void) {
   vec3 normals_worldspace = vec3(rotationMatrix * normals.xy, normals.z);
 
   if (extruded > 0.5) {
-    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, position_worldspace.xyz, normals_worldspace);
+    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_worldspace.xyz, normals_worldspace);
     vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
   } else {
     vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.0;
