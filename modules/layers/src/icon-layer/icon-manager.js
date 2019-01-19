@@ -1,5 +1,5 @@
 /* global document */
-import GL from '@luma.gl/constants';
+import GL from 'luma.gl/constants';
 import {Texture2D, loadImages, loadTextures} from 'luma.gl';
 
 const MAX_CANVAS_WIDTH = 1024;
