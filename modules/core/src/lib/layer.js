@@ -535,8 +535,16 @@ export default class Layer extends Component {
   _updateState() {
     const updateParams = this._getUpdateParams();
 
-    // Call subclass lifecycle methods
-    this.updateState(updateParams);
+    // Safely call subclass lifecycle methods
+    if (this.context.gl) {
+      this.updateState(updateParams);
+    } else {
+      try {
+        this.updateState(updateParams);
+      } catch (error) {
+        // ignore error if gl context is missing
+      }
+    }
     // End subclass lifecycle methods
 
     if (this.isComposite) {
