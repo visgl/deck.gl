@@ -27,12 +27,15 @@ export const ScatterplotLayerDemo = createLayerDemoClass({
   props: {
     pickable: true,
     opacity: 0.8,
+    stroked: true,
     radiusScale: 6,
     radiusMinPixels: 1,
     radiusMaxPixels: 100,
+    lineWidthMinPixels: 1,
     getPosition: d => d.coordinates,
     getRadius: d => Math.sqrt(d.exits),
-    getColor: [255, 140, 0]
+    getFillColor: [255, 140, 0],
+    getStrokeColor: [0, 0, 0]
   }
 });
 

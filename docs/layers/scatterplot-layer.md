@@ -26,12 +26,16 @@ const App = ({data, viewport}) => {
     data,
     pickable: true,
     opacity: 0.8,
+    stroke: true,
+    fill: true,
     radiusScale: 6,
     radiusMinPixels: 1,
     radiusMaxPixels: 100,
+    lineWidthMinPixels: 1,
     getPosition: d => d.coordinates,
     getRadius: d => Math.sqrt(d.exits),
-    getColor: d => [255, 140, 0],
+    getFillColor: d => [255, 140, 0],
+    getLineColor: d => [0, 0, 0],
     onHover: ({object, x, y}) => {
       const tooltip = `${object.name}\n${object.address}`;
       /* Update tooltip
