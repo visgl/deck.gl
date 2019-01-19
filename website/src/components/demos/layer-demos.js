@@ -35,7 +35,7 @@ export const ScatterplotLayerDemo = createLayerDemoClass({
     getPosition: d => d.coordinates,
     getRadius: d => Math.sqrt(d.exits),
     getFillColor: [255, 140, 0],
-    getStrokeColor: [0, 0, 0]
+    getLineColor: [0, 0, 0]
   }
 });
 
