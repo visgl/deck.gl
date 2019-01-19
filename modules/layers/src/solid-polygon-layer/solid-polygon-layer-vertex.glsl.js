@@ -72,7 +72,7 @@ void main(void) {
       normal = vec3(0.0, 0.0, 1.0);
     }
 
-    vec3 lightColor = lighting_getLightColor(colors.rgb, position_worldspace.xyz, normal);
+    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_worldspace.xyz, normal);
     vColor = vec4(lightColor, colors.a * opacity) / 255.0;
   } else {
     vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;

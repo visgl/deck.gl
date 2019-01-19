@@ -252,7 +252,7 @@ function drawLayersInViewport(
   logRenderStats({renderStats, pass, redrawReason, stats});
 }
 
-function getLightSources({viewport, modelMatrix, coordinateSystem, coordinateOrigin, effects}) {
+function getLightSources({viewport, effects}) {
   let lightEffect;
   if (effects && Array.isArray(effects)) {
     for (const i in effects) {
@@ -264,7 +264,12 @@ function getLightSources({viewport, modelMatrix, coordinateSystem, coordinateOri
     }
   }
 
-  let lightSources = {};
+  let lightSources = {
+    ambientLight: null,
+    pointLights: [],
+    directionalLights: []
+  };
+
   if (lightEffect && lightEffect.ambientLight) {
     lightSources = Object.assign(lightSources, {
       ambientLight: lightEffect.ambientLight
@@ -273,12 +278,7 @@ function getLightSources({viewport, modelMatrix, coordinateSystem, coordinateOri
 
   if (lightEffect && lightEffect.pointLights) {
     lightSources = Object.assign(lightSources, {
-      pointLights: lightEffect.getProjectedPointLights({
-        viewport,
-        modelMatrix,
-        coordinateSystem,
-        coordinateOrigin
-      })
+      pointLights: lightEffect.getProjectedPointLights(viewport)
     });
   }
 
@@ -310,9 +310,6 @@ function drawLayerInViewport({
     },
     getLightSources({
       viewport: layer.context.viewport,
-      modelMatrix: layer.props.modelMatrix,
-      coordinateSystem: layer.props.coordinateSystem,
-      coordinateOrigin: layer.props.coordinateOrigin,
       effects
     })
   );
