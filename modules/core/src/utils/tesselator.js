@@ -43,6 +43,9 @@ class TypedArrayManager {
   }
 
   _allocate(Type = Float32Array, size) {
+    if (Type === Uint16Array && size > 65535) {
+      throw new Error('Vertex count exceeds browser index limit');
+    }
     // TODO - check if available in pool
     return new Type(size);
   }
