@@ -47,20 +47,23 @@ export function createProps() {
   return propsInstance;
 }
 
+/* eslint-disable max-depth */
 function checkDeprecatedProps(propsInstance, deprecatedProps) {
   for (const name in deprecatedProps) {
     if (hasOwnProperty(propsInstance, name)) {
       const nameStr = `${propsInstance._component.constructor.name}: ${name}`;
-      const newPropName = deprecatedProps[name];
 
-      if (newPropName && !hasOwnProperty(propsInstance, newPropName)) {
-        propsInstance[newPropName] = propsInstance[name];
+      for (const newPropName of deprecatedProps[name]) {
+        if (!hasOwnProperty(propsInstance, newPropName)) {
+          propsInstance[newPropName] = propsInstance[name];
+        }
       }
 
-      log.deprecated(nameStr, newPropName)();
+      log.deprecated(nameStr, deprecatedProps[name].join('/'))();
     }
   }
 }
+/* eslint-enable max-depth */
 
 // Return precalculated defaultProps and propType objects if available
 // build them if needed

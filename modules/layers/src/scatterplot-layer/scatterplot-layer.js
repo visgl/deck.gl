@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from 'luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
 const {fp64LowPart} = fp64;
@@ -43,45 +43,15 @@ const defaultProps = {
   getRadius: {type: 'accessor', value: 1},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getLineWidth: {type: 'accessor', value: 1}
+  getLineWidth: {type: 'accessor', value: 1},
+
+  // deprecated
+  strokeWidth: {deprecatedFor: 'getLineWidth'},
+  outline: {deprecatedFor: 'stroked'},
+  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
 export default class ScatterplotLayer extends Layer {
-  constructor(props) {
-    const {
-      getColor,
-      getLineColor,
-      getFillColor,
-      getLineWidth,
-      strokeWidth,
-      stroked,
-      outline
-    } = props;
-
-    const overrideProps = {};
-
-    if (getColor) {
-      if (!getLineColor) {
-        overrideProps.getLineColor = getColor;
-      }
-      if (!getFillColor) {
-        overrideProps.getFillColor = getColor;
-      }
-    }
-
-    if (getLineWidth === undefined && strokeWidth !== undefined) {
-      log.deprecated('ScatterplotLayer: `strokeWidth`', '`getLineWidth`')();
-      overrideProps.getLineWidth = strokeWidth;
-    }
-
-    if (stroked === undefined && outline !== undefined) {
-      log.deprecated('ScatterplotLayer: `stroked`', '`outline`')();
-      overrideProps.stroked = outline;
-    }
-
-    super(props, overrideProps);
-  }
-
   getShaders(id) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'picking']};
