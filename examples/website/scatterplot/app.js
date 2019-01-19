@@ -37,10 +37,10 @@ export class App extends Component {
         radiusScale: radius,
         radiusMinPixels: 0.25,
         getPosition: d => [d[0], d[1], 0],
-        getColor: d => (d[2] === 1 ? maleColor : femaleColor),
+        getFillColor: d => (d[2] === 1 ? maleColor : femaleColor),
         getRadius: 1,
         updateTriggers: {
-          getColor: [maleColor, femaleColor]
+          getFillColor: [maleColor, femaleColor]
         }
       })
     ];
