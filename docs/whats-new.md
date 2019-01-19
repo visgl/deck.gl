@@ -2,6 +2,41 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v6.4
+
+Release Date: TBD
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-sdf.gif" />
+        <p><i>SDF font in TextLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-scatterplot.jpg" />
+        <p><i>Stroke and fill in ScatterplotLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-isoband.jpg" />
+        <p><i>Isoband in ContourLayer</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Layer API Improvements
+
+- `ScatterplotLayer` now supports drawing both stroke and fill, and outline width can be controlled per-instance.
+- `ContourLayer` now supports isoband - filling between two thresholds.
+- `ScreenGridLayer` now supports aggregating by min/max/mean.
+- `TextLayer` adds a new `sdf` prop that generates the font with [Signed Distance Fields](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf). When rendering large font sizes, this will yield a much crisper look.
+- `IconLayer` supports dynamically packed icon atlas. Users can now load programatically generated image urls as icons, for example Facebook profile images.
+- `PathLayer`'s `getPath` and `PolygonLayer`'s `getPolygon` props now support flattened coordinates instead of nested arrays, making it easier for these layers to use binary data.
+
+See each layer's documentation for full API changes.
+
+
 ## deck.gl v6.3
 
 Release Date: Nov 19, 2018
@@ -168,9 +203,9 @@ It is now possible to set global WebGL parameters (controlling how the GPU rende
 
 The `DeckGL` React component now provides a more powerful API to create sophisticated visualizations, highlights including:
 
-* `DeckGL` can be used as a "stateful" component providing automatic interactivity
-* You can now specify deck.gl views (in addition to layers) directly using JSX
-* Adds "render callbacks" for dynamically rendering React children based on deck.gl view states, providing more control over synchronization of positions and sizes between deck.gl's WebGL view layouts and React's DOM components.
+- `DeckGL` can be used as a "stateful" component providing automatic interactivity
+- You can now specify deck.gl views (in addition to layers) directly using JSX
+- Adds "render callbacks" for dynamically rendering React children based on deck.gl view states, providing more control over synchronization of positions and sizes between deck.gl's WebGL view layouts and React's DOM components.
 
 See [Use with React](/docs/get-started/using-with-react.md) for more details.
 
@@ -268,9 +303,9 @@ See our [scripting blog post](https://medium.com/vis-gl/start-scripting-with-dec
 
 deck.gl is now published as multiple npm modules allowing applications to choose which features to import. The basic modules are:
 
-* [`@deck.gl/core`](https://www.npmjs.com/package/@deck.gl/core) - the core deck.gl API (JavaScript classes, including the `Deck` top-level class).
-* [`@deck.gl/react`](https://www.npmjs.com/package/@deck.gl/react) - React bindings for deck.gl (i.e. the top-level `DeckGL` React class).
-* [`deck.gl`](https://www.npmjs.com/package/deck.gl) - The classic module is still supported for backwards compatibility with React applications.
+- [`@deck.gl/core`](https://www.npmjs.com/package/@deck.gl/core) - the core deck.gl API (JavaScript classes, including the `Deck` top-level class).
+- [`@deck.gl/react`](https://www.npmjs.com/package/@deck.gl/react) - React bindings for deck.gl (i.e. the top-level `DeckGL` React class).
+- [`deck.gl`](https://www.npmjs.com/package/deck.gl) - The classic module is still supported for backwards compatibility with React applications.
 
 
 ### Multi-Viewport Support
@@ -461,9 +496,9 @@ The [Seer](https://chrome.google.com/webstore/detail/seer/eogckabefmgphfgngjdmml
 
 Note: This change is mainly relevant to developers who write custom deck.gl layers.
 
-* Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
-* The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixels` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
-* The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions for naming uniforms and functions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are provided to ensure that existing layers do not break.
+- Shader module documentation is much improved, both in deck.gl and luma.gl. In the deck.gl docs, shader modules are listed in the "API Reference" section, after the JavaScript classes.
+- The `project` module provides a new function `project_pixel_to_clipspace` for screen space calculations that takes variables like `useDevicePixels` and "focal distance" into account, making pixel space calculation simpler and less prone to fail when parameters change.
+- The core deck.gl shader modules (`project` etc) now conform to the luma.gl shadertools conventions for naming uniforms and functions, making this module easier to describe and use. In spite of these changes, backwards compatible uniforms are provided to ensure that existing layers do not break.
 
 
 ### React Integration
@@ -543,10 +578,10 @@ Also, as a performance improvements, deck.gl now avoids "rerendering" sublayers 
 
 Several new examples have been added to illustrate the wide applicability of deck.gl. To name a few:
 
-* Wind visualization in US. This example is featured on [OpenVIS 2017 by @philogb](https://www.youtube.com/watch?v=KPiONdmNOuI). This example shows how new features in WebGL2 can be used to accelerate compute intensive tasks through GPU computing right in the browsers
-* Tagmap - This example by @rivulet-zhang shows some novel approching in placing and rendering text symbols in deck.gl
-* Point cloud example - The point cloud example shows how deck.gl could be used to render large amount of 3D point cloud data without any basemap context.
-* Node-link Graph - This is another example showing how deck.gl could be extended to the info-vis domain.
+- Wind visualization in US. This example is featured on [OpenVIS 2017 by @philogb](https://www.youtube.com/watch?v=KPiONdmNOuI). This example shows how new features in WebGL2 can be used to accelerate compute intensive tasks through GPU computing right in the browsers
+- Tagmap - This example by @rivulet-zhang shows some novel approching in placing and rendering text symbols in deck.gl
+- Point cloud example - The point cloud example shows how deck.gl could be used to render large amount of 3D point cloud data without any basemap context.
+- Node-link Graph - This is another example showing how deck.gl could be extended to the info-vis domain.
 
 
 ### Touch Support
@@ -567,15 +602,15 @@ Release date: March 31, 2017
 
 ### Highlights
 
-* **New Geospatial Layers** GeoJsonLayer, PathLayer, PolygonLayer, IconLayer, GridCellLayer, HexagonCellLayer, PointCloudLayer.
-* **New Aggregating Layers** GridLayer and HexagonLayer now join the ScreenGridLayer in a growing family of layers that automatically "bin" your point data, in this case into grid cells or hexagons.
-* **New Examples** deck.gl now provides multiple stand-alone examples, with minimal configuration files (`package.json`, `webpack.config.js` etc) intended to make it easy to just copy an example folder and get an app up and running in minutes.
-* **Unified 64-bit Layers** - 64-bit Layers are now unified with 32-bit layers, controlled via a new `fp64` prop.
-* **Library Size Reduction** - A number of npm package dependencies have been trimmed from deck.gl, and the distribution has initial support for "tree-shaking" bundlers like webpack2 and rollup.
-* **Performance** A number of improvements across the core library and layers improves rendering and picking performance.
-* **Model Matrix Support** - Model matrix support for the `METER_OFFSET` projection mode enables arbitrary coordinate transforms (translations, rotations, scaling etc) to be applied on individual layer enabling scene graph like layer composition and animation.
-* **Documentation** Improved and reorganized in response to user feedback.
-* **Experimental Features** Experimental support for non-Mercator projections and rendering effects (e.g. Reflections)
+- **New Geospatial Layers** GeoJsonLayer, PathLayer, PolygonLayer, IconLayer, GridCellLayer, HexagonCellLayer, PointCloudLayer.
+- **New Aggregating Layers** GridLayer and HexagonLayer now join the ScreenGridLayer in a growing family of layers that automatically "bin" your point data, in this case into grid cells or hexagons.
+- **New Examples** deck.gl now provides multiple stand-alone examples, with minimal configuration files (`package.json`, `webpack.config.js` etc) intended to make it easy to just copy an example folder and get an app up and running in minutes.
+- **Unified 64-bit Layers** - 64-bit Layers are now unified with 32-bit layers, controlled via a new `fp64` prop.
+- **Library Size Reduction** - A number of npm package dependencies have been trimmed from deck.gl, and the distribution has initial support for "tree-shaking" bundlers like webpack2 and rollup.
+- **Performance** A number of improvements across the core library and layers improves rendering and picking performance.
+- **Model Matrix Support** - Model matrix support for the `METER_OFFSET` projection mode enables arbitrary coordinate transforms (translations, rotations, scaling etc) to be applied on individual layer enabling scene graph like layer composition and animation.
+- **Documentation** Improved and reorganized in response to user feedback.
+- **Experimental Features** Experimental support for non-Mercator projections and rendering effects (e.g. Reflections)
 
 ### New Layers
 
@@ -614,9 +649,9 @@ Draws a LiDAR point cloud. Supports point position/normal/color.
 
 Each layer now supports a `modelMatrix` property that can be used to specify a local coordinate system for the data in that layer:
 
-* Model matrices can dramatically simplify working with data in different coordinate systems, as the data does not need to be pre-transformed into a common coordinate system.
+- Model matrices can dramatically simplify working with data in different coordinate systems, as the data does not need to be pre-transformed into a common coordinate system.
 
-* Model matrices also enable interesting layer animation and composition possibilities as individual layers can be scaled, rotated, translated etc with very low computational cost (i.e. without modifying the data).
+- Model matrices also enable interesting layer animation and composition possibilities as individual layers can be scaled, rotated, translated etc with very low computational cost (i.e. without modifying the data).
 
 #### UpdateTriggers now accept Accessor Names
 
@@ -626,8 +661,8 @@ The `updateTriggers` mechanism in deck.gl v3 required the user to know the name 
 
 #### More intuitive mouse events
 
-* `onHover` is now only fired on entering/exiting an object instead of on mouse move.
-* `onClick` is now only fired on the picked layer instead of all pickable layers.
+- `onHover` is now only fired on entering/exiting an object instead of on mouse move.
+- `onClick` is now only fired on the picked layer instead of all pickable layers.
 
 ### New Features for Layer Subclassing
 
@@ -661,19 +696,19 @@ In addition, the new function `AttributeManager.setDefaultLogFunctions` allows t
 
 JavaScript build tooling continues to evolve and efforts have been made to ensure deck.gl supports several popular new tooling setups:
 
-* **Dependency Reduction** The number of npm dependencies (both in `deck.gl`, `luma.gl` and `react-map-gl`) have been reduced considerably, meaning that installing deck.gl and related modules will bring in less additional JavaScript code into your app, and your app will build and run faster.
-* **Tree-shaking support**: deck.gl and related libraries now publish a "module" entry point in package.json which points to a parallel distribution (`deck.gl/dist-es6`) that preserves the `import` and `export` statements. This should allow tree shaking bundlers such as webpack 2 and rollup to further reduce bundle size.
-* **Pure ES6 source code**: With few exceptions (e.g some JSX usage in examples), the source code of deck.gl and related modules are now all restricted to conformant ES6 (i.e. no ES2016 or ES2017, flow or similar syntax is used). This means that the source code can run directly (ie. without transpilation) in Node.js and modern browsers. You could potentially import code directly from `deck.gl/src` to experiment with this.
-* **Buble support** in examples. [Buble](https://buble.surge.sh/guide/) is a nice alternative to babel if you have a simple app and don't need all the power of babel. Many of the examples now use buble for faster and smaller builds.
+- **Dependency Reduction** The number of npm dependencies (both in `deck.gl`, `luma.gl` and `react-map-gl`) have been reduced considerably, meaning that installing deck.gl and related modules will bring in less additional JavaScript code into your app, and your app will build and run faster.
+- **Tree-shaking support**: deck.gl and related libraries now publish a "module" entry point in package.json which points to a parallel distribution (`deck.gl/dist-es6`) that preserves the `import` and `export` statements. This should allow tree shaking bundlers such as webpack 2 and rollup to further reduce bundle size.
+- **Pure ES6 source code**: With few exceptions (e.g some JSX usage in examples), the source code of deck.gl and related modules are now all restricted to conformant ES6 (i.e. no ES2016 or ES2017, flow or similar syntax is used). This means that the source code can run directly (ie. without transpilation) in Node.js and modern browsers. You could potentially import code directly from `deck.gl/src` to experiment with this.
+- **Buble support** in examples. [Buble](https://buble.surge.sh/guide/) is a nice alternative to babel if you have a simple app and don't need all the power of babel. Many of the examples now use buble for faster and smaller builds.
 
 ### Examples
 
 Code examples have been improved in several ways:
 
-* **Multiple Examples** deck.gl now provides multiple different examples in an `examples` folder, showing various interesting uses of deck.gl.
-* **Stand Alone Examples** Examples are now stand alone, each with its own minimal `package.json` and configuration files, enabling them to be easily copied and modified.
-* **Hello World Examples** Minimal examples for building with webpack 2 and browserify (previously called "exhibits") are still provided, and have been further simplified.
-* **Layer Browser** The main `layer-browser` example has been expanded into a full "layer and property browser" allowing for easy testing of layers.
+- **Multiple Examples** deck.gl now provides multiple different examples in an `examples` folder, showing various interesting uses of deck.gl.
+- **Stand Alone Examples** Examples are now stand alone, each with its own minimal `package.json` and configuration files, enabling them to be easily copied and modified.
+- **Hello World Examples** Minimal examples for building with webpack 2 and browserify (previously called "exhibits") are still provided, and have been further simplified.
+- **Layer Browser** The main `layer-browser` example has been expanded into a full "layer and property browser" allowing for easy testing of layers.
 
 ### Deprecations
 
@@ -690,56 +725,56 @@ Release date: November, 2016
 
 ### Highlights
 
-* New website
-* Comprehensive documentation
-* All Core Layers updated (API, features, performance)
-* 64-bit Layers (High Precision)
-* METERS projection mode (High Precision)
-* Multi-Primitive Layer Support
-* Composite Layer Support
+- New website
+- Comprehensive documentation
+- All Core Layers updated (API, features, performance)
+- 64-bit Layers (High Precision)
+- METERS projection mode (High Precision)
+- Multi-Primitive Layer Support
+- Composite Layer Support
 
 ### React Integration
 
-* `DeckGL` (`DeckGLOverlay` in v2) component now requires a separate import (`import DeckGL from 'deck.gl/react'`). This allows the core deck.gl library to be imported by non-React applications without pulling in React.
-* Adds `onLayerClick` and `onLayerHover` props to the `DeckGL` React component.
-* The `DeckGL` component now cancels animation loop on unmount, important when repeatedly creating/destroying deck.gl components.
-* The `DeckGL` component no longer manages WebGL blending modes, as this is better done directly by layers.
+- `DeckGL` (`DeckGLOverlay` in v2) component now requires a separate import (`import DeckGL from 'deck.gl/react'`). This allows the core deck.gl library to be imported by non-React applications without pulling in React.
+- Adds `onLayerClick` and `onLayerHover` props to the `DeckGL` React component.
+- The `DeckGL` component now cancels animation loop on unmount, important when repeatedly creating/destroying deck.gl components.
+- The `DeckGL` component no longer manages WebGL blending modes, as this is better done directly by layers.
 
 ### Layers
 
-* All layers now support accessors, removing the need for applications to transform data before passing it to deck.gl.
-* Layer props and accessors now always expect arrays (e.g. colors are expected as `[r,g,b,a]` instead of `{r,g,b,a}` etc).
-* line widths now takes device pixel ratio into account for more consistent look between displays
-* METERS projection mode allows specifying positions in meter offsets in addition to longitude/latitude.
-* Layers now receive viewport information from the `DeckGL` component. This implies that apps no longer need to pass the `width`, `height`, `longitude`, `latitude`, `zoom`, `pitch`, `bearing` and `bearing` props to each layer. These properties only need to be passed to the `DeckGL` react component.
+- All layers now support accessors, removing the need for applications to transform data before passing it to deck.gl.
+- Layer props and accessors now always expect arrays (e.g. colors are expected as `[r,g,b,a]` instead of `{r,g,b,a}` etc).
+- line widths now takes device pixel ratio into account for more consistent look between displays
+- METERS projection mode allows specifying positions in meter offsets in addition to longitude/latitude.
+- Layers now receive viewport information from the `DeckGL` component. This implies that apps no longer need to pass the `width`, `height`, `longitude`, `latitude`, `zoom`, `pitch`, `bearing` and `bearing` props to each layer. These properties only need to be passed to the `DeckGL` react component.
 
 #### Base Layer
 
-* `deepCompare` prop replaced with more flexible `dataComparator`
+- `deepCompare` prop replaced with more flexible `dataComparator`
 
 #### ArcLayer
 
-* Specify separate start and end color for each arc.
-* Renders smoother arcs, especially for bottom arc segments close to map
-* Fixes flickering last segments
+- Specify separate start and end color for each arc.
+- Renders smoother arcs, especially for bottom arc segments close to map
+- Fixes flickering last segments
 
 #### ScatterplotLayer
 
-* Adds drawOutline option.
+- Adds drawOutline option.
 
 ##### ScreenGridLayer
 
-* New name for deck.gl v2 GridLayer
-* Now have accessors (getPosition, getWeight)
-* Custom color ramps (minColor, maxColor)
+- New name for deck.gl v2 GridLayer
+- Now have accessors (getPosition, getWeight)
+- Custom color ramps (minColor, maxColor)
 
 ##### ChoroplethLayer
 
-* Now renders MultiPolygons and Polygons with holes
+- Now renders MultiPolygons and Polygons with holes
 
 ##### HexagonLayer (REMOVED)
 
-* The v2 HexagonLayer has not yet been ported to v3.
+- The v2 HexagonLayer has not yet been ported to v3.
 
 #### 64bit layers
 
@@ -753,12 +788,12 @@ A set of new high precision layers that support extreme zoom levels
 
 ##### 64 bit ExtrudedChoroplethLayer (NEW)
 
-* Great for rendering 3D buildings on top of maps
-* Includes a basic shading model
+- Great for rendering 3D buildings on top of maps
+- Includes a basic shading model
 
 ##### GeoJsonLayer (NEW, EXPERIMENTAL)
 
-* Initial composite layer, only Polygons for now.
+- Initial composite layer, only Polygons for now.
 
 #### Sample Layers
 
@@ -768,18 +803,18 @@ Sample layers now available through `import 'deck.gl/samples';`
 
 #### Streamlined life cycle methods
 
-* The Layer life cycle methods are now optimized for deck.gl's needs and no longer try to mimic React.
-* Limited compatibility with deck.gl v2 is provided but it is strongly recommended to update layers to the new methods
+- The Layer life cycle methods are now optimized for deck.gl's needs and no longer try to mimic React.
+- Limited compatibility with deck.gl v2 is provided but it is strongly recommended to update layers to the new methods
 
 #### Optimizations
 
-* `Uint8Array` encoding is now supported for color and picking color attributes, which provides significant GPU memory savings.
+- `Uint8Array` encoding is now supported for color and picking color attributes, which provides significant GPU memory savings.
 
 #### GLSL package manager and modules
 
-* All layers now use `assembleShaders` to inject GLSL packages and platform
+- All layers now use `assembleShaders` to inject GLSL packages and platform
   fixes
-* GLSL `project` package
+- GLSL `project` package
   + GLSL `fp64` emulated double precision floating point package
   + GLSL `fp32` package - 32bit improved precision library
     - Adds high precision version of trigonometry functions and `tan`
@@ -791,27 +826,27 @@ Release date: May 2016
 
 ### Highlights
 
-* 3D Perspective Mode
-* Performance: Huge under the hood refactor of layer update logic
-* Automatic attribute management (`AttributeManager` class)
-* Linux fixes - deck.gl and luma.gl now work on Linux.
-* Adopts [luma.gl](https://github.com/uber/luma.gl) as default WebGL framework.
-* Retina display support
-* Support for disabling mercator project (experimental)
+- 3D Perspective Mode
+- Performance: Huge under the hood refactor of layer update logic
+- Automatic attribute management (`AttributeManager` class)
+- Linux fixes - deck.gl and luma.gl now work on Linux.
+- Adopts [luma.gl](https://github.com/uber/luma.gl) as default WebGL framework.
+- Retina display support
+- Support for disabling mercator project (experimental)
 
 ### React Integration
 
-* Ability to specify canvas ID and customize styles
+- Ability to specify canvas ID and customize styles
 
 ### Layers
 
-* Added data deep comparison support
+- Added data deep comparison support
 
 #### ScatterplotLayer
 
-* Add per point radius support for the scatterplot-layer
-* Added per point color support for the scatterplot-layer
-* Fixed primitive distortion bug
+- Add per point radius support for the scatterplot-layer
+- Added per point color support for the scatterplot-layer
+- Fixed primitive distortion bug
 
 #### LineLayer (NEW)
 
