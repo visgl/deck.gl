@@ -135,11 +135,9 @@ export default class Root extends Component {
     const viewState = this.state.viewState || this.deckProps.viewState;
 
     return (
-      <div style={{width: '100%', height:'100%'}}>
-
+      <div style={{width: '100%', height: '100%'}}>
         {/* Left Pane: Ace Editor and Template Selector */}
-        <div id='left-pane' style={STYLES.LEFT_PANE}>
-
+        <div id="left-pane" style={STYLES.LEFT_PANE}>
           {this._renderJsonSelector()}
 
           <AceEditor
@@ -155,12 +153,10 @@ export default class Root extends Component {
             }}
             value={this.state.text}
           />
-
         </div>
 
         {/* Right Pane: DeckGL */}
-        <div id='right-pane' style={STYLES.RIGHT_PANE}>
-
+        <div id="right-pane" style={STYLES.RIGHT_PANE}>
           {Boolean(deckProps.map) && (
             <StaticMap
               reuseMap
@@ -181,7 +177,6 @@ export default class Root extends Component {
             onViewStateChange={this._onViewStateChange.bind(this)}
           />
         </div>
-
       </div>
     );
   }
