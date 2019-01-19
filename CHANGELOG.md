@@ -15,6 +15,53 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v6.4
+
+#### [6.4.0-alpha.2] - Jan 18 2019
+
+- reset blend params after mapbox render
+- Apply TinySDF to TextLayer (#2549)
+- Flat path data proposal (#2522)
+- Fix layer.clone bug (#2583)
+- PathLayer shader: 2-dimensional vPathPosition (#2515)
+- allow ScatterplotLayer to draw both stroke and fill (#2573)
+- support dynamically load icons (#2526)
+- Add deprecated flag to prop types (#2586)
+- Support flat data input to polygon layer (#2581)
+- Pass the missing startZoomPosition into Orthographic Controller interactiveState (#2587)
+- Fix multiple argument support in ScatterplotLayer (#2593)
+
+#### [6.4.0-alpha.1] - Jan 11 2019
+
+- enable website examples to be copied out and run standalone (#2450)
+- IsoBands Part-1: Add Marching Squares utility methods (#2429)
+- Replace gl packages with original gl-matrix (#2463)
+- Add interaction test (#2407)
+- IsoBands Part-2: Add support in Contour Layer. (#2434)
+- Docs/RFC directory minor cleanup (#2491)
+- Reverse zoom in Orthographic controller (#2466)
+- Fix info-viz render tests (#2502)
+- Fix fp64 shader tests (#2506)
+- fix RFC Readme table formatting (#2512)
+- specify types for defaultProps in bezier curve layer (#2505)
+- specify types for defaultProps in bitmap layer (#2516)
+- specify types for defaultProps in gpu grid layer (#2518)
+- Strip glsl comments (#2517)
+- PathTesselator class (#2493)
+- Refactor PolygonTesselator (#2494)
+- add picking test (#2514)
+- specify types for defaultProps in mesh layer (#2520)
+- modify clearPickingColor in solid-polygon-layer (#2538)
+- Documentation updates (#2536)
+- fix anchor bugs (#2539)
+- add IconManager RFC (#2510)
+- update readme for bezier curve layer (#2542)
+- GPUAggregator: fixes for Min and Mean aggregation (#2554)
+- ScreenGridLayer: add support Min/Max/Mean aggregation (#2560)
+- ScreenGridLayer: fix picking under WebGL1 (#2557)
+- update webpack versions (#2559)
+- Documentation Updates (#2567)
+
 ## deck.gl v6.3
 
 #### [6.3.3] - Jan 2 2019
