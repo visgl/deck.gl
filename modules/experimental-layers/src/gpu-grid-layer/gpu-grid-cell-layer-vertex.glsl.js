@@ -98,10 +98,10 @@ void main(void) {
   gl_Position = project_position_to_clipspace(extrudedPosition, extrudedPosition64xyLow, offset, position_worldspace);
 
    if (extruded > 0.5) {
-    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, position_worldspace.xyz, normals);
-    vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
+    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_worldspace.xyz, normals);
+    vColor = vec4(lightColor, color.a * opacity);
   } else {
-    vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.0;
+    vColor = vec4(color.rgb, color.a * opacity);
   }
 }
 `;

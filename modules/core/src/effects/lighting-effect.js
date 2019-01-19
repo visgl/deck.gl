@@ -1,10 +1,10 @@
-import {PointLight} from 'luma.gl';
+import {PointLight as BasePointLight} from 'luma.gl';
 import Effect from '../experimental/lib/effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 
 export default class LightingEffect extends Effect {
   constructor(props) {
-    super();
+    super(props);
     this.ambientLight = undefined;
     this.directionalLights = [];
     this.pointLights = [];
@@ -30,29 +30,16 @@ export default class LightingEffect extends Effect {
   }
 
   // Pre-project point light positions
-  getProjectedPointLights({
-    viewport,
-    modelMatrix,
-    coordinateSystem,
-    coordinateOrigin,
-    fromCoordinateSystem,
-    fromCoordinateOrigin
-  }) {
-    const projectionParameters = {
-      viewport,
-      modelMatrix,
-      coordinateSystem,
-      coordinateOrigin,
-      fromCoordinateSystem,
-      fromCoordinateOrigin
-    };
-
+  getProjectedPointLights(viewport) {
     const projectedPointLights = [];
     for (let i = 0; i < this.pointLights.length; i++) {
       const pointLight = this.pointLights[i];
-      const position = projectPosition(pointLight.position, projectionParameters);
+      const position = projectPosition(pointLight.position, {
+        viewport,
+        coordinateSystem: pointLight.coordinateSystem
+      });
       projectedPointLights.push(
-        new PointLight({
+        new BasePointLight({
           color: pointLight.color,
           intensity: pointLight.intensity,
           position
