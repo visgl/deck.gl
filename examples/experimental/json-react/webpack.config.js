@@ -29,7 +29,7 @@ const CONFIG = {
   },
 
   plugins: [
-    new HtmlWebpackPlugin({title: 'JSON Browser', template: './index.html'}),
+    new HtmlWebpackPlugin({title: 'JSON Browser'}),
     // Optional: Enables reading mapbox token from environment variable
     new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ],
