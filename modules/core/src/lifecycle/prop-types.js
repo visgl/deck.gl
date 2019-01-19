@@ -80,7 +80,9 @@ export function parsePropTypes(propDefs) {
 
   for (const [propName, propDef] of Object.entries(propDefs)) {
     if (propDef && propDef.deprecatedFor) {
-      deprecatedProps[propName] = propDef.deprecatedFor;
+      deprecatedProps[propName] = Array.isArray(propDef.deprecatedFor)
+        ? propDef.deprecatedFor
+        : [propDef.deprecatedFor];
     } else {
       const propType = parsePropType(propName, propDef);
       propTypes[propName] = propType;
