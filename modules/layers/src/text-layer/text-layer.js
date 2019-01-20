@@ -87,8 +87,6 @@ export default class TextLayer extends CompositeLayer {
   }
 
   updateFontAtlas() {
-    const startTime = Date.now();
-
     const {gl} = this.context;
     const {sdf, fontFamily, characterSet} = this.props;
 
@@ -107,8 +105,6 @@ export default class TextLayer extends CompositeLayer {
       fontFamily,
       characterSet
     });
-
-    log.log(`Make font atlas in ${Date.now() - startTime} milliseconds.`)();
 
     this.setState({
       scale,
