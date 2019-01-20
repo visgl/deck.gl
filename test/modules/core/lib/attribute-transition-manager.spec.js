@@ -32,13 +32,20 @@ const TEST_ATTRIBUTES = {
 };
 
 test('AttributeTransitionManager#constructor', t => {
-  const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+  let manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
   t.ok(manager, 'AttributeTransitionManager is constructed');
   t.is(
     Boolean(manager.isSupported),
     isWebGL2(gl),
     'AttributeTransitionManager checks WebGL support'
   );
+
+  manager.finalize();
+  t.pass('AttributeTransitionManager is finalized');
+
+  manager = new AttributeTransitionManager(null, {id: 'attribute-transition'});
+  t.ok(manager, 'AttributeTransitionManager is constructed without GL context');
+  t.notOk(manager.isSupported, 'AttributeTransitionManager checks WebGL support');
 
   manager.finalize();
   t.pass('AttributeTransitionManager is finalized');

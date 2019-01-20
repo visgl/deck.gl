@@ -88,7 +88,7 @@ export default class LayerManager {
 
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      shaderCache: new ShaderCache({gl, _cachePrograms: true}),
+      shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
       stats: stats || new Stats({id: 'deck.gl'}),
       lastPickedInfo: {
         // For callback tracking and autohighlight
