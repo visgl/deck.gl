@@ -113,14 +113,6 @@ export default class PathLayer extends Layer {
     super.updateState({props, oldProps, changeFlags});
 
     const attributeManager = this.getAttributeManager();
-    if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      this.setState({model: this._getModel(gl)});
-      attributeManager.invalidateAll();
-    }
 
     const geometryChanged =
       changeFlags.dataChanged ||
@@ -138,6 +130,15 @@ export default class PathLayer extends Layer {
       this.setState({
         numInstances: this.state.pathTesselator.instanceCount
       });
+      attributeManager.invalidateAll();
+    }
+
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
+      }
+      this.setState({model: this._getModel(gl)});
       attributeManager.invalidateAll();
     }
   }
