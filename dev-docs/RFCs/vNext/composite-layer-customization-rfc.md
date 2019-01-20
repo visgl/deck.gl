@@ -1,7 +1,7 @@
 # RFC: Improved Customization of Composite Layers
 
-* **Authors**: Ib Green
-* **Date**: Sep 2017
+* **Authors**: Ib Green, Xiaoji Chen
+* **Date**: Jan 2019
 * **Status**: Draft
 
 ## Motivation
@@ -29,9 +29,9 @@ There are two types of naming possible
 The `forwardBaseLayerProps()` method could check for `transferAllProps`
 
 
-### Proposal: CompositeLayers take new a `subLayerProps` prop
+### Proposal: CompositeLayers take a new `subLayerProps` prop
 
-The sublayerProps would be a recursive object. A special prop `layer` can be used to override layer type.
+The `subLayerProps` prop would be a recursive object. The keys are sublayer ids and the values are object of props to override. A special prop `layer` can be used to override layer type.
 
 
 In application:
@@ -40,11 +40,11 @@ const customizedGeoJsonLayer = new GeoJsonLayer({
   ...,
   transferAllProps: true,
   subLayerProps: {
-    ScatterplotLayer: {
+    points: {
       layer: ExtendedScatterplotLayer,
       extendedProp: 100
     },
-    PolygonLayer: {
+    'polygons-fill': {
       subLayerProps: {  // Recursive application of sublayerProps!
         SolidPolygonLayer: {
           layer: HollowPolygonLayer
@@ -55,47 +55,46 @@ const customizedGeoJsonLayer = new GeoJsonLayer({
 })
 ```
 
-In geojson:
-```js
-const defaultProps = {
-  ...,
-  subLayers: {
-    PointLayer: ScatterplotLayer,
-    LineLayer: PathLayer,
-    PolygonLayer: SolidPolygonLayer
-  }
-};
+#### Changes to the CompositeLayer API
 
-const GeoJsonLayer extends CompositeLayer {
-  ...
-  renderLayers() {
-  	return [
-  	  new this.props.subLayerProps.PointLayer({
-  	  }),
-  	];
-  }
+**getSubLayerProps**
+
+The overriding props supplied by the user can be merged inside `compositeLayer.getSubLayerProps` so that each layer does not have to implement their own handling of `subLayerProps`.
+
+**getSubLayerClass**
+
+A new CompositeLayer class method that extracts the `layer` field from `subLayerProps`, if any. This will replace the ad-hoc implementations in e.g. [HexagonLayer](https://github.com/uber/deck.gl/blob/6.3-release/modules/layers/src/hexagon-layer/hexagon-layer.js#L396) and [GeoJsonLayer](https://github.com/uber/deck.gl/blob/6.3-release/modules/layers/src/geojson-layer/geojson-layer.js#L71).
+
+
+#### Open Questions
+
+**Should keys be layer class name or sublayer id?**
+
+Composite layers may render multiple sublayers of the same type. For example, the GeoJsonLayer renders two `PathLayer` instances, one for polygon outlines and one for line strings. Differentiating them with unique ids would give the user finer grain control.
+
+**How do user props merge with props created by the parent layer?**
+
+The composite layer themselves should decide which props are "overridable" by the user. This can be done via supplying multiple arguments to the sublayer constructor:
+
+```js
+renderLayers() {
+  const SubLayer = new this.getSubLayerClass('child-layer') || ScatterplotLayer;
+  return new SubLayer(
+    {
+      // "overridable" props
+      stroked: this.props.stroked,
+      filled: this.props.filled
+    },
+    // where subLayerProps are merged in
+    this.getSubLayerProps({id: 'child-layer'}),
+    {
+      // "non-overridable" props
+      data
+    }
+  );
 }
 ```
 
+**The coupling of sub layers is pretty tight, it becomes part of the interface.**
 
-### Proposal: CompositeLayers take a `subLayerProps` prop
-
-
-In application:
-```js
-  const customizedGeoJsonLayer = new GeoJsonLayer({
-  	...,
-  	subLayerProps: {
-  	  PointLayer: ...
-  	}
-  })
-```
-
-
-
-## Open Questions
-
-* Key by sub id or by layer type?
-* Merging props
-* Overriding props for sub layers recursively
-* The coupling of sub layers is pretty tight, it becomes part of the interface.
+The sublayer ids will need to be documented as each composite layer's public API.
