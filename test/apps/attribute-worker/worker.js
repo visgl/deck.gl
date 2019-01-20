@@ -80,25 +80,6 @@ function getCompositeLayerSnapshot(layer) {
 // Props used for attribute generation, can be safely discarded
 const propBlackList = new Set(['data', 'updateTriggers']);
 
-// Props inherited from parent
-const sublayerPropBlackList = new Set([
-  'fp64',
-  'lightSettings',
-  'transitions',
-  'opacity',
-  'pickable',
-  'visible',
-  'parameters',
-  'getPolygonOffset',
-  'highlightedObjectIndex',
-  'autoHighlight',
-  'highlightColor',
-  'coordinateSystem',
-  'coordinateOrigin',
-  'wrapLongitude',
-  'modelMatrix'
-]);
-
 function getPrimitiveLayerSnapshot(layer) {
   // Extract generated attributes - should move to AttributeManager?
   const props = {};
@@ -118,7 +99,7 @@ function getPrimitiveLayerSnapshot(layer) {
     if (
       Object.hasOwnProperty.call(layer.props, propName) &&
       !propBlackList.has(propName) &&
-      (!layer.parent || !sublayerPropBlackList.has(propName)) &&
+      (!layer.parent || layer.props[propName] !== layer.parent.props[propName]) &&
       typeof layer.props[propName] !== 'function'
     ) {
       props[propName] = layer.props[propName];
