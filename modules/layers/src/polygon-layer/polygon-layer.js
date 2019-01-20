@@ -144,11 +144,9 @@ export default class PolygonLayer extends CompositeLayer {
 
     const {paths} = this.state;
 
-    const hasData = paths.length > 0;
-
     // Filled Polygon Layer
     const polygonLayer =
-      hasData &&
+      this.shouldRenderSubLayer('fill', paths) &&
       new SolidPolygonLayer(
         this.getSubLayerProps({
           id: 'fill',
@@ -182,7 +180,7 @@ export default class PolygonLayer extends CompositeLayer {
     const polygonLineLayer =
       !extruded &&
       stroked &&
-      hasData &&
+      this.shouldRenderSubLayer('stroke', paths) &&
       new PathLayer(
         this.getSubLayerProps({
           id: 'stroke',

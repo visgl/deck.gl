@@ -34,6 +34,27 @@ Parameters:
 * `props` (Object) - `Layer` properties.
 
 
+## Properties
+
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
+
+##### `_subLayerProps` (Object) (experimental)
+
+Key is the id of a sublayer and value is an object used to override the props of the sublayer.
+
+```js
+new GeoJsonLayer({
+  ...
+  pickable: true,
+  subLayerProps: {
+    points: {
+      pickable: false
+    }
+  }
+})
+```
+
+
 ## Methods
 
 ##### `draw`
@@ -95,6 +116,16 @@ The default implementation returns `pickParams.info` without any change.
 Returns an object with the properties of the sublayer built using the passed props and
 key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
 Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
+
+
+##### `shouldRenderSubLayer`
+
+Parameters:
+
+* `id` (String) - the sublayer id
+* `data` (Array) - the sublayer data
+
+Returns `true` if the sublayer should be rendered. The default implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
 
 
 ## Source
