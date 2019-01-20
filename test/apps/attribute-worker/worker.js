@@ -65,9 +65,6 @@ function getPrimitiveLayerSnapshot(layer) {
 
   props.type = layer.constructor.name;
   props.numInstances = layer.getNumInstances();
-  if ('vertexCount' in layer.state) {
-    props.vertexCount = layer.state.vertexCount;
-  }
 
   return {props, transferList};
 }

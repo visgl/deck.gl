@@ -193,7 +193,6 @@ export default class SolidPolygonLayer extends Layer {
       });
 
       this.setState({
-        vertexCount: polygonTesselator.vertexCount,
         numInstances: polygonTesselator.instanceCount
       });
 
@@ -205,11 +204,13 @@ export default class SolidPolygonLayer extends Layer {
     super.updateAttributes(props);
     const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
     const {topModel, sideModel} = this.state;
-    const vertexCount = this.props.vertexCount || this.state.vertexCount;
-    const numInstances = this.props.numInstances || this.state.numInstances;
+    const numInstances = this.getNumInstances();
 
     if (topModel) {
-      topModel.setVertexCount(vertexCount);
+      if (attributes.indices) {
+        const vertexCount = attributes.indices.value.length;
+        topModel.setVertexCount(vertexCount);
+      }
       topModel.setAttributes(attributes);
     }
     if (sideModel) {
