@@ -210,7 +210,7 @@ export default class TextLayer extends CompositeLayer {
     return [
       new MultiIconLayer(
         this.getSubLayerProps({
-          id: 'text-multi-icon-layer',
+          id: 'characters',
           data,
           sdf,
           iconAtlas,

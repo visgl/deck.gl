@@ -11,7 +11,7 @@ The Grid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
 
-GridLayer is a `CompositeLayer`
+GridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL, {GridLayer} from 'deck.gl';
@@ -49,7 +49,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
 
 ### Render Options
 
@@ -205,6 +205,13 @@ This callback will be called when bin color domain has been calculated.
 * Default: `() => {}`
 
 This callback will be called when bin elevation domain has been calculated.
+
+
+## Sub Layers
+
+The GridLayer renders the following sublayers:
+
+* `grid-cell` - a [GridCellLayer](/docs/layers/grid-cell-layer.md) rendering the aggregated columns.
 
 ## Source
 

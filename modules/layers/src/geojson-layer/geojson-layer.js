@@ -161,10 +161,10 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Filled Polygon Layer
     const polygonFillLayer =
-      this.shouldRenderSubLayer('polygon-fill', polygonFeatures) &&
+      this.shouldRenderSubLayer('polygons-fill', polygonFeatures) &&
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
-          id: 'polygon-fill',
+          id: 'polygons-fill',
           updateTriggers: {
             getElevation: updateTriggers.getElevation,
             getFillColor: updateTriggers.getFillColor,
@@ -196,10 +196,10 @@ export default class GeoJsonLayer extends CompositeLayer {
     const polygonLineLayer =
       !extruded &&
       stroked &&
-      this.shouldRenderSubLayer('polygon-outline', polygonOutlineFeatures) &&
+      this.shouldRenderSubLayer('polygons-stroke', polygonOutlineFeatures) &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
-          id: 'polygon-outline',
+          id: 'polygons-stroke',
           updateTriggers: {
             getColor: updateTriggers.getLineColor,
             getWidth: updateTriggers.getLineWidth,
@@ -231,10 +231,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pathLayer =
-      this.shouldRenderSubLayer('line-paths', lineFeatures) &&
+      this.shouldRenderSubLayer('linestrings', lineFeatures) &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
-          id: 'line-paths',
+          id: 'line-strings',
           updateTriggers: {
             getColor: updateTriggers.getLineColor,
             getWidth: updateTriggers.getLineWidth,

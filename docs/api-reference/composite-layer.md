@@ -38,9 +38,9 @@ Parameters:
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
-##### `_subLayerProps` (Object) (experimental)
+##### `_subLayerProps` (Object) **EXPERIMENTAL**
 
-Key is the id of a sublayer and value is an object used to override the props of the sublayer.
+Key is the id of a sublayer and value is an object used to override the props of the sublayer. For a list of ids rendered by each composite layer, consult the *Sub Layers* section in each layer's documentation.
 
 ```js
 new GeoJsonLayer({
@@ -113,9 +113,16 @@ The default implementation returns `pickParams.info` without any change.
 
 ##### `getSubLayerProps`
 
-Returns an object with the properties of the sublayer built using the passed props and
+Parameters:
+
+* `subLayerProps` (Object)
+  + `id` (String) - the sublayer id. The parent layer `id` will be prepended to the sublayer id.
+  + `updateTriggers` - the sublayer update triggers. Will be merged with the parent layer update triggers.
+
+Returns:
+
+An object with the properties of the sublayer built using the passed props and
 key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
-Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
 
 
 ##### `shouldRenderSubLayer`
