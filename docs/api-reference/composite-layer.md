@@ -117,11 +117,15 @@ Returns an object with the properties of the sublayer built using the passed pro
 key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
 Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
 
-##### `shouldRenderSubLayer(id, data)`
 
-Called with the sublayer id and data.
+##### `shouldRenderSubLayer`
 
-Returns `true` if the sublayer should be rendered.
+Parameters:
+
+* `id` (String) - the sublayer id
+* `data` (Array) - the sublayer data
+
+Returns `true` if the sublayer should be rendered. The default implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
 
 
 ## Source

@@ -266,7 +266,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pointLayer =
-      this.shouldRenderSubLayer('point', pointFeatures) &&
+      this.shouldRenderSubLayer('points', pointFeatures) &&
       new subLayers.PointLayer(
         this.getSubLayerProps({
           id: 'points',
