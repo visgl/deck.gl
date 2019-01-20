@@ -172,7 +172,7 @@ test('AttributeManager.update - external buffers', t => {
     }
   });
 
-  t.is(attribute.buffer.accessor.type, gl.UNSIGNED_BYTE, 'colors casted to incorrect type');
+  t.is(attribute.buffer.accessor.type, gl.UNSIGNED_BYTE, 'colors casted to correct type');
 
   t.end();
 });
