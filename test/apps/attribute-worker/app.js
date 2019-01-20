@@ -14,6 +14,7 @@ const deck = new Deck({
   controller: true
 });
 
+// require.resolve is required by webworkify-webpack
 const worker = createWorker(require.resolve('./worker.js'));
 worker.onmessage = onDataLoaded;
 
