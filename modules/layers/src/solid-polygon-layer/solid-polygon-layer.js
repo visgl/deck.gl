@@ -70,7 +70,7 @@ export default class SolidPolygonLayer extends Layer {
     this.setState({
       numInstances: 0,
       polygonTesselator: new PolygonTesselator({
-        IndexType: hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+        IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
       })
     });
 

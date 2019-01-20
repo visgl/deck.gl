@@ -3,6 +3,8 @@ import assert from '../utils/assert';
 import GL from 'luma.gl/constants';
 import {Buffer, _Attribute as Attribute} from 'luma.gl';
 
+import log from '../utils/log';
+
 const DEFAULT_STATE = {
   isExternalBuffer: false,
   needsUpdate: true,
@@ -206,18 +208,25 @@ export default class LayerAttribute extends Attribute {
           this.update({constant: false, buffer});
           state.needsRedraw = true;
         }
-      } else {
-        const ArrayType = glArrayFromType(this.type || GL.FLOAT);
-        if (!(buffer instanceof ArrayType)) {
-          throw new Error(`Attribute ${this.id} must be of type ${ArrayType.name}`);
+      } else if (this.value !== buffer) {
+        if (!ArrayBuffer.isView(buffer)) {
+          throw new Error('Attribute prop must be typed array');
         }
         if (state.auto && buffer.length <= numInstances * this.size) {
           throw new Error('Attribute prop array must match length and size');
         }
-        if (this.value !== buffer) {
+
+        const ArrayType = glArrayFromType(this.type || GL.FLOAT);
+        if (buffer instanceof ArrayType) {
           this.update({constant: false, value: buffer});
-          state.needsRedraw = true;
+        } else {
+          log.warn(`Attribute prop ${this.id} is casted to ${ArrayType.name}`)();
+          // Cast to proper type
+          this.update({constant: false, value: new ArrayType(buffer)});
         }
+        // Save original typed array
+        this.value = buffer;
+        state.needsRedraw = true;
       }
       return true;
     }
