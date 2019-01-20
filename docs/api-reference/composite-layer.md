@@ -38,7 +38,7 @@ Parameters:
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
-##### `subLayerProps` (Object)
+##### `_subLayerProps` (Object) (experimental)
 
 Key is the id of a sublayer and value is an object used to override the props of the sublayer.
 
@@ -116,6 +116,12 @@ The default implementation returns `pickParams.info` without any change.
 Returns an object with the properties of the sublayer built using the passed props and
 key base `Layer` props that `CompositeLayer`s typically forward to their sublayers.
 Prepends the parent layer `id` to the sublayer id and merges `updateTriggers`.
+
+##### `shouldRenderSubLayer(id, data)`
+
+Called with the sublayer id and data.
+
+Returns `true` if the sublayer should be rendered.
 
 
 ## Source

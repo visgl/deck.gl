@@ -53,6 +53,13 @@ export default class CompositeLayer extends Layer {
     return null;
   }
 
+  // Returns true if sub layer needs to be rendered
+  shouldRenderSubLayer(id, data) {
+    const {_subLayerProps: overridingProps} = this.props;
+
+    return (data && data.length) || (overridingProps && overridingProps[id]);
+  }
+
   // Returns sub layer props for a specific sublayer
   getSubLayerProps(sublayerProps) {
     const {
@@ -69,7 +76,7 @@ export default class CompositeLayer extends Layer {
       wrapLongitude,
       positionFormat,
       modelMatrix,
-      subLayerProps: userProps
+      _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
       opacity,
@@ -88,15 +95,21 @@ export default class CompositeLayer extends Layer {
     };
 
     if (sublayerProps) {
-      Object.assign(newProps, sublayerProps, userProps && userProps[sublayerProps.id], {
-        id: `${this.props.id}-${sublayerProps.id}`,
-        updateTriggers: Object.assign(
-          {
-            all: this.props.updateTriggers.all
-          },
-          sublayerProps.updateTriggers
-        )
-      });
+      Object.assign(
+        newProps,
+        sublayerProps,
+        // experimental feature that allows users to override sublayer props via parent layer prop
+        overridingProps && overridingProps[sublayerProps.id],
+        {
+          id: `${this.props.id}-${sublayerProps.id}`,
+          updateTriggers: Object.assign(
+            {
+              all: this.props.updateTriggers.all
+            },
+            sublayerProps.updateTriggers
+          )
+        }
+      );
     }
 
     return newProps;

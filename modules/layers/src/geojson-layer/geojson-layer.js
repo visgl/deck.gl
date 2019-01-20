@@ -135,7 +135,6 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
-      subLayerProps,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -160,20 +159,9 @@ export default class GeoJsonLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
-    const hasPoints =
-      (pointFeatures && pointFeatures.length > 0) || (subLayerProps && subLayerProps.points);
-    const hasLines =
-      (lineFeatures && lineFeatures.length > 0) || (subLayerProps && subLayerProps['line-paths']);
-    const hasPolygonLines =
-      (polygonOutlineFeatures && polygonOutlineFeatures.length > 0) ||
-      (subLayerProps && subLayerProps['polygon-outline']);
-    const hasPolygon =
-      (polygonFeatures && polygonFeatures.length > 0) ||
-      (subLayerProps && subLayerProps['polygon-fill']);
-
     // Filled Polygon Layer
     const polygonFillLayer =
-      hasPolygon &&
+      this.shouldRenderSubLayer('polygon-fill', polygonFeatures) &&
       new subLayers.PolygonLayer(
         this.getSubLayerProps({
           id: 'polygon-fill',
@@ -208,7 +196,7 @@ export default class GeoJsonLayer extends CompositeLayer {
     const polygonLineLayer =
       !extruded &&
       stroked &&
-      hasPolygonLines &&
+      this.shouldRenderSubLayer('polygon-outline', polygonOutlineFeatures) &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'polygon-outline',
@@ -243,7 +231,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pathLayer =
-      hasLines &&
+      this.shouldRenderSubLayer('line-paths', lineFeatures) &&
       new subLayers.LineLayer(
         this.getSubLayerProps({
           id: 'line-paths',
@@ -278,7 +266,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       );
 
     const pointLayer =
-      hasPoints &&
+      this.shouldRenderSubLayer('point', pointFeatures) &&
       new subLayers.PointLayer(
         this.getSubLayerProps({
           id: 'points',
