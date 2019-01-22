@@ -48,6 +48,7 @@ export default class AttributeTransitionManager {
   // Check the latest attributes for updates.
   update({attributes, transitions = {}, numInstances}) {
     this.opts = transitions;
+    // Transform class will crash if elementCount is 0
     this.numInstances = numInstances || 1;
 
     if (!this.isSupported) {
