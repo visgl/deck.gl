@@ -30,7 +30,7 @@ const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
   hexagonVertices: null,
-  radius: {type: 'number', min: 1, value: 1000},
+  radius: {type: 'number', min: 0, value: 1000},
   angle: {type: 'number', value: 0},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
