@@ -30,8 +30,8 @@ const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
   hexagonVertices: null,
-  radius: null,
-  angle: null,
+  radius: {type: 'number', min: 0, value: 1000},
+  angle: {type: 'number', value: 0},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
@@ -45,33 +45,6 @@ const defaultProps = {
 };
 
 export default class HexagonCellLayer extends Layer {
-  constructor(props) {
-    let missingProps = false;
-    if (!props.hexagonVertices && (!props.radius || !Number.isFinite(props.angle))) {
-      log.once(
-        0,
-        'HexagonCellLayer: Either hexagonVertices or radius and angle are ' +
-          'needed to calculate primitive hexagon.'
-      )();
-      missingProps = true;
-    } else if (
-      props.hexagonVertices &&
-      (!Array.isArray(props.hexagonVertices) || props.hexagonVertices.length < 6)
-    ) {
-      log.once(0, 'HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
-
-      missingProps = true;
-    }
-
-    if (missingProps) {
-      log.once(0, 'Now using 1000 meter as default radius, 0 as default angle')();
-      props.radius = 1000;
-      props.angle = 0;
-    }
-
-    super(props);
-  }
-
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
@@ -135,7 +108,11 @@ export default class HexagonCellLayer extends Layer {
     let {angle, radius} = this.props;
     const {hexagonVertices} = this.props;
 
-    if (Array.isArray(hexagonVertices) && hexagonVertices.length >= 6) {
+    if (Array.isArray(hexagonVertices)) {
+      if (hexagonVertices.length < 6) {
+        log.error('HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
+      }
+
       // calculate angle and vertices from hexagonVertices if provided
       const vertices = this.props.hexagonVertices;
 
