@@ -1127,7 +1127,7 @@ export const TEST_CASES = [
         cellSize: 200,
         opacity: 1,
         extruded: true,
-        pickable: false,
+        pickable: true,
         getPosition: d => d.COORDINATES,
         gpuAggregation: true
       })

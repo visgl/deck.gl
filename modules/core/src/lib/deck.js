@@ -24,7 +24,6 @@ import MapView from '../views/map-view';
 import EffectManager from '../experimental/lib/effect-manager';
 import Effect from '../experimental/lib/effect';
 import log from '../utils/log';
-import LightingEffect from '../effects/lighting-effect';
 
 import GL from '@luma.gl/constants';
 import {AnimationLoop, createGLContext, trackContextState, setParameters} from 'luma.gl';
@@ -60,9 +59,7 @@ function getPropTypes(PropTypes) {
     layerFilter: PropTypes.func,
     views: PropTypes.oneOfType([PropTypes.object, PropTypes.array]),
     viewState: PropTypes.object,
-    effects: PropTypes.arrayOf(
-      PropTypes.oneOfType([PropTypes.instanceOf(Effect), PropTypes.instanceOf(LightingEffect)])
-    ),
+    effects: PropTypes.arrayOf(PropTypes.instanceOf(Effect)),
     controller: PropTypes.oneOfType([PropTypes.func, PropTypes.bool, PropTypes.object]),
 
     // GL settings
