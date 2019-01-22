@@ -48,7 +48,7 @@ export default class AttributeTransitionManager {
   // Check the latest attributes for updates.
   update({attributes, transitions = {}, numInstances}) {
     this.opts = transitions;
-    this.numInstances = numInstances;
+    this.numInstances = numInstances || 1;
 
     if (!this.isSupported) {
       return;
