@@ -20,6 +20,25 @@ const INITIAL_JSON = Object.values(JSON_TEMPLATES)[0];
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const MAPBOX_STYLESHEET = `https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css`;
 
+const STYLES = {
+  LEFT_PANE: {
+    position: 'absolute',
+    top: '0%',
+    left: '0%',
+    width: '40%',
+    height: '100%',
+    margin: 0
+  },
+  RIGHT_PANE: {
+    position: 'absolute',
+    top: '0%',
+    left: '40%',
+    width: '60%',
+    height: '100%',
+    margin: 0
+  }
+};
+
 export default class Root extends Component {
   constructor(props) {
     super(props);
@@ -27,7 +46,12 @@ export default class Root extends Component {
     setStyleSheet(MAPBOX_STYLESHEET);
 
     this.deckProps = {};
-    this.state = {deckProps: {}};
+    this.state = {
+      // react-ace
+      text: '',
+      // deck.gl
+      deckProps: {}
+    };
 
     this._onTemplateChange = this._onTemplateChange.bind(this);
     this._onEditorChange = this._onEditorChange.bind(this);
@@ -37,6 +61,7 @@ export default class Root extends Component {
 
   componentDidMount() {
     this._setEditorText(INITIAL_JSON);
+    this._setJSON(INITIAL_JSON);
   }
 
   _setJSON(json, updateEditor = true) {
@@ -51,12 +76,12 @@ export default class Root extends Component {
   }
 
   _setEditorText(json) {
-    if (this.ace) {
-      // Pretty print JSON with tab size 2
-      const text = JSON.stringify(json, null, 2);
-      // console.log('setting text', text)
-      this.ace.editor.setValue(text, 0);
-    }
+    // Pretty print JSON with tab size 2
+    const text = typeof json !== 'string' ? JSON.stringify(json, null, 2) : json;
+    // console.log('setting text', text)
+    this.setState({
+      text
+    });
   }
 
   _onTemplateChange(event) {
@@ -71,8 +96,9 @@ export default class Root extends Component {
     try {
       json = text && JSON.parse(text);
     } catch (error) {
-      // ignore error
+      // ignore error, user is editing and not yet correct JSON
     }
+    this._setEditorText(text);
     this._setJSON(json, false);
   }
 
@@ -87,7 +113,7 @@ export default class Root extends Component {
         onChange={this._onTemplateChange}
         style={{
           margin: 0,
-          width: 400,
+          width: '100%',
           padding: '5px 35px 5px 5px',
           fontSize: 16,
           border: '1px solid #ccc',
@@ -105,12 +131,32 @@ export default class Root extends Component {
   }
 
   render() {
-    const {deckProps} = this;
+    const {deckProps} = this.state;
     const viewState = this.state.viewState || this.deckProps.viewState;
 
     return (
-      <div>
-        <div>
+      <div style={{width: '100%', height: '100%'}}>
+        {/* Left Pane: Ace Editor and Template Selector */}
+        <div id="left-pane" style={STYLES.LEFT_PANE}>
+          {this._renderJsonSelector()}
+
+          <AceEditor
+            width="100%"
+            height="100%"
+            mode="json"
+            theme="github"
+            onChange={this._onEditorChange}
+            name="AceEditorDiv"
+            editorProps={{$blockScrolling: true}}
+            ref={instance => {
+              this.ace = instance;
+            }}
+            value={this.state.text}
+          />
+        </div>
+
+        {/* Right Pane: DeckGL */}
+        <div id="right-pane" style={STYLES.RIGHT_PANE}>
           {Boolean(deckProps.map) && (
             <StaticMap
               reuseMap
@@ -118,31 +164,18 @@ export default class Root extends Component {
               {...viewState}
               viewState={viewState}
               viewport={viewState}
-              width={window.innerWidth}
+              width={window.innerWidth * 0.6}
               height={window.innerHeight}
               mapboxApiAccessToken={MAPBOX_TOKEN}
             />
           )}
+
           <DeckGL
             id="json-deck"
             {...deckProps}
             viewState={viewState}
             onViewStateChange={this._onViewStateChange.bind(this)}
           />
-
-          <div style={{position: 'absolute', top: '5%', width: '40%', left: '55%', margin: 0}}>
-            {this._renderJsonSelector()}
-            <AceEditor
-              mode="json"
-              theme="github"
-              onChange={this._onEditorChange}
-              name="UNIQUE_ID_OF_DIV"
-              editorProps={{$blockScrolling: true}}
-              ref={instance => {
-                this.ace = instance;
-              }} // Let's put things into scope
-            />
-          </div>
         </div>
       </div>
     );
