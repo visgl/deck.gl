@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "6.3.6",
+  "version": "6.3.7",
   "publishConfig": {
     "access": "public"
   },
@@ -33,7 +33,7 @@
     "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.3.6",
+    "@deck.gl/core": "^6.3.7",
     "prop-types": "^15.6.0"
   },
   "peerDependencies": {
