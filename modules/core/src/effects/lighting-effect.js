@@ -2,10 +2,11 @@ import {PointLight as BasePointLight} from 'luma.gl';
 import Effect from '../experimental/lib/effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 
+// Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
   constructor(props) {
     super(props);
-    this.ambientLight = undefined;
+    this.ambientLight = null;
     this.directionalLights = [];
     this.pointLights = [];
 

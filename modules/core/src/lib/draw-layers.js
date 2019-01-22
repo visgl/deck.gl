@@ -255,37 +255,25 @@ function drawLayersInViewport(
 function getLightSources({viewport, effects}) {
   let lightEffect;
   if (effects && Array.isArray(effects)) {
-    for (const i in effects) {
-      const effect = effects[i];
-      if (effect instanceof LightingEffect) {
-        lightEffect = effect;
-        break;
-      }
-    }
+    lightEffect = effects.find(effect => effect instanceof LightingEffect);
   }
 
-  let lightSources = {
+  const lightSources = {
     ambientLight: null,
     pointLights: [],
     directionalLights: []
   };
 
   if (lightEffect && lightEffect.ambientLight) {
-    lightSources = Object.assign(lightSources, {
-      ambientLight: lightEffect.ambientLight
-    });
+    lightSources.ambientLight = lightEffect.ambientLight;
   }
 
   if (lightEffect && lightEffect.pointLights) {
-    lightSources = Object.assign(lightSources, {
-      pointLights: lightEffect.getProjectedPointLights(viewport)
-    });
+    lightSources.pointLights = lightEffect.getProjectedPointLights(viewport);
   }
 
   if (lightEffect && lightEffect.directionalLights) {
-    lightSources = Object.assign(lightSources, {
-      directionalLights: lightEffect.directionalLights
-    });
+    lightSources.directionalLights = lightEffect.directionalLights;
   }
   return lightSources;
 }
