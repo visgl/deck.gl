@@ -37,6 +37,13 @@ Release Date: TBD
 See each layer's documentation for full API changes.
 
 
+### Composite Layer Customization (experimental)
+
+It is now possible to fine-tune sublayer appearances by passing a new experimental prop `_subLayerProps` to a composite layer. For example, in a `GeoJsonLayer`, one may wish to make only the point features interactive, or replace the circles with icons.
+
+This offers a light alternative to overriding composite layer behaviors without creating a custom class. See [CompositeLayer](/docs/api-reference/composite-layer.md) for details.
+
+
 ## deck.gl v6.3
 
 Release Date: Nov 19, 2018

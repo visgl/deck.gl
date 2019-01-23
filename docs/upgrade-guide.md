@@ -17,7 +17,22 @@ Deprecations:
 Breaking changes:
 
 - `outline` / `stroked` no longer turns off fill. Use `filled: false` instead.
-- `getColor` update trigger no longer works.
+
+#### GeoJsonLayer
+
+Breaking changes:
+
+- `stroked`, `getLineWidth` and `getLineColor` props now apply to point features (rendered with a ScatterplotLayer) in addition to polygon features. To revert to the old appearance, supply a `_subLayerProps` override:
+
+```js
+new GeoJsonLayer({
+  // ...other props
+  stroked: true,
+  _subLayerProps: {
+    points: {stroked: false}
+  }
+});
+```
 
 
 ## Upgrading from deck.gl v6.2 to v6.3
