@@ -53,7 +53,7 @@
     </div>
     {{{iframeSrc}}}
     <script type="text/javascript">
-      var blob = new Blob([src], {type: 'text/html'})
+      var blob = new Blob([src], {type: 'text/html'});
       document.querySelector('iframe').src = URL.createObjectURL(blob);
     </script>
   </body>
