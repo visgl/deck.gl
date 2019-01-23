@@ -22,12 +22,11 @@
 // micro modules like 'global' and 'is-browser';
 
 /* global process, window, global, document */
-const isBrowser =
+export const isBrowser =
   typeof process !== 'object' || String(process) !== '[object process]' || process.browser;
 
-module.exports = {
-  window: typeof window !== 'undefined' ? window : global,
-  global: typeof global !== 'undefined' ? global : window,
-  document: typeof document !== 'undefined' ? document : {},
-  isBrowser
-};
+const window_ = typeof window !== 'undefined' ? window : global;
+const global_ = typeof global !== 'undefined' ? global : window;
+const document_ = typeof document !== 'undefined' ? document : {};
+
+export {window_ as window, global_ as global, document_ as document};
