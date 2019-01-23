@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.8] - Jan 23 2019
+
+- Fix bundling issues when using rollup (#2607)
+- Fix occasional picking failure in mapbox layer (#2606)
+
 #### [6.3.7] - Jan 22 2019
 
 - Fix AttributeTransitionManager crash when data is empty (#2605)
