@@ -146,12 +146,30 @@ Returns an properties object used to generate a sublayer, with the following key
 
 ##### `shouldRenderSubLayer`
 
+Called to determine if a sublayer should be rendered.
+A composite layer can override this method to change the default behavior.
+
 Parameters:
 
 * `id` (String) - the sublayer id
 * `data` (Array) - the sublayer data
 
-Returns `true` if the sublayer should be rendered. The default implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
+Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
+
+
+##### `getSubLayerClass`
+
+Called to retrieve the constructor of a sublayer.
+A composite layer can override this method to change the default behavior.
+
+Parameters:
+
+* `id` (String) - the sublayer id
+* `DefaultLayerClass` - the default constructor used for this sublayer.
+
+Returns:
+
+Constructor for this sublayer. The base class implementation checks if `type` is specified for the sublayer in `_subLayerProps`, otherwise returns the default.
 
 
 ## Source

@@ -310,9 +310,7 @@ export default class GridLayer extends CompositeLayer {
     return isElevationValueInDomain ? elevationScaleFunc(ev) : -1;
   }
 
-  // for subclassing, override this method to return
-  // customized sub layer props
-  getSubLayerProps() {
+  renderLayers() {
     const {
       elevationScale,
       fp64,
@@ -323,38 +321,32 @@ export default class GridLayer extends CompositeLayer {
       transitions
     } = this.props;
 
-    // return props to the sublayer constructor
-    return super.getSubLayerProps({
-      id: 'grid-cell',
-      data: this.state.layerData,
+    const SubLayerClass = this.getSubLayerClass('grid-cell', GridCellLayer);
 
-      fp64,
-      cellSize,
-      coverage,
-      lightSettings,
-      elevationScale,
-      extruded,
+    return new SubLayerClass(
+      {
+        fp64,
+        cellSize,
+        coverage,
+        lightSettings,
+        elevationScale,
+        extruded,
 
-      getColor: this._onGetSublayerColor.bind(this),
-      getElevation: this._onGetSublayerElevation.bind(this),
-      transitions: transitions && {
-        getColor: transitions.getColorValue,
-        getElevation: transitions.getElevationValue
+        getColor: this._onGetSublayerColor.bind(this),
+        getElevation: this._onGetSublayerElevation.bind(this),
+        transitions: transitions && {
+          getColor: transitions.getColorValue,
+          getElevation: transitions.getElevationValue
+        }
       },
-      updateTriggers: this.getUpdateTriggers()
-    });
-  }
-
-  // for subclassing, override this method to return
-  // customized sub layer class
-  getSubLayerClass() {
-    return GridCellLayer;
-  }
-
-  renderLayers() {
-    const SubLayerClass = this.getSubLayerClass();
-
-    return new SubLayerClass(this.getSubLayerProps());
+      this.getSubLayerProps({
+        id: 'grid-cell',
+        updateTriggers: this.getUpdateTriggers()
+      }),
+      {
+        data: this.state.layerData
+      }
+    );
   }
 }
 
