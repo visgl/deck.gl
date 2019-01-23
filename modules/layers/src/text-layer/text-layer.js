@@ -20,7 +20,7 @@
 
 import {CompositeLayer, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
-import {makeFontAtlas, DEFAULT_CHAR_SET, DEFAULT_FONT_SIZE} from './font-atlas';
+import {makeFontAtlas, DEFAULT_CHAR_SET, DEFAULT_PADDING, DEFAULT_FONT_SIZE} from './font-atlas';
 
 const TEXT_ANCHOR = {
   start: 1,
@@ -43,7 +43,7 @@ const MISSING_CHAR_WIDTH = 32;
 const SDF_PRESET = {
   fontSize: DEFAULT_FONT_SIZE,
   radius: 2,
-  buffer: 2,
+  buffer: DEFAULT_PADDING,
   cutoff: 0.25,
   fontWeight: 'normal'
 };

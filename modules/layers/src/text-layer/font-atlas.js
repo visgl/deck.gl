@@ -44,6 +44,7 @@ function buildMapping({ctx, fontHeight, buffer, characterSet, maxCanvasWidth}) {
       x = 0;
       row++;
     }
+
     mapping[char] = {
       x: x + buffer,
       y: row * (fontHeight + buffer * 2) + buffer,
@@ -71,15 +72,6 @@ export function makeFontAtlas(
 ) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
-
-  const id = 'test-font';
-  canvas.id = id;
-  const el = document.getElementById(id);
-  if (el) {
-    el.parentNode.removeChild(el);
-  }
-  canvas.style = 'position:fixed;';
-  document.body.appendChild(canvas);
 
   // build mapping
   // TODO - use Advanced text metrics when they are adopted:
