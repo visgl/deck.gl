@@ -13,10 +13,15 @@ const HEIGHT_SCALE = 1.2;
 export const DEFAULT_PADDING = 2;
 export const DEFAULT_FONT_SIZE = 64;
 
-export const DEFAULT_CHAR_SET = [];
-for (let i = 32; i < 128; i++) {
-  DEFAULT_CHAR_SET.push(String.fromCharCode(i));
+function getDefaultCharacterSet() {
+  const charSet = [];
+  for (let i = 32; i < 128; i++) {
+    charSet.push(String.fromCharCode(i));
+  }
+  return charSet;
 }
+
+export const DEFAULT_CHAR_SET = getDefaultCharacterSet();
 
 function populateAlphaChannel(alphaChannel, imageData) {
   // populate distance value from tinySDF to image alpha channel
