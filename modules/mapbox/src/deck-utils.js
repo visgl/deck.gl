@@ -1,5 +1,5 @@
 import {Deck} from '@deck.gl/core';
-import {setParameters} from 'luma.gl';
+import {withParameters} from 'luma.gl';
 
 export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
@@ -169,13 +169,16 @@ function handleMouseEvent(deck, event) {
 
   // Work around for https://github.com/mapbox/mapbox-gl-js/issues/7801
   const {gl} = deck.layerManager.context;
-  setParameters(gl, {
-    depthMask: true,
-    depthTest: true,
-    colorMask: [true, true, true, true]
-  });
-
-  callback(event);
+  withParameters(
+    gl,
+    {
+      depthMask: true,
+      depthTest: true,
+      depthRange: [0, 1],
+      colorMask: [true, true, true, true]
+    },
+    () => callback(event)
+  );
 }
 
 // Register deck callbacks for pointer events
