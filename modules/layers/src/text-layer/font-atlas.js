@@ -10,7 +10,7 @@ const MAX_CANVAS_WIDTH = 1024;
 const BASELINE_SCALE = 0.9;
 const HEIGHT_SCALE = 1.2;
 
-export const DEFAULT_PADDING = 2;
+export const DEFAULT_PADDING = 16;
 export const DEFAULT_FONT_SIZE = 64;
 
 export const DEFAULT_CHAR_SET = [];
@@ -40,7 +40,7 @@ function buildMapping({ctx, fontHeight, buffer, characterSet, maxCanvasWidth}) {
     // measure texts
     const {width} = ctx.measureText(char);
 
-    if (x + width > maxCanvasWidth) {
+    if (x + width + buffer * 2 > maxCanvasWidth) {
       x = 0;
       row++;
     }
@@ -71,6 +71,15 @@ export function makeFontAtlas(
 ) {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
+
+  const id = 'test-font';
+  canvas.id = id;
+  const el = document.getElementById(id);
+  if (el) {
+    el.parentNode.removeChild(el);
+  }
+  canvas.style = 'position:fixed;';
+  document.body.appendChild(canvas);
 
   // build mapping
   // TODO - use Advanced text metrics when they are adopted:
