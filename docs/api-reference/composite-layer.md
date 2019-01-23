@@ -42,16 +42,40 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Key is the id of a sublayer and value is an object used to override the props of the sublayer. For a list of ids rendered by each composite layer, consult the *Sub Layers* section in each layer's documentation.
 
+Example: make only the point features in a GeoJsonLayer respond to hover and click
+
 ```js
+import {GeoJsonLayer} from '@deck.gl/layers';
+
 new GeoJsonLayer({
-  ...
-  pickable: true,
-  subLayerProps: {
+  // ...other props
+  pickable: false,
+  _subLayerProps: {
     points: {
-      pickable: false
+      pickable: true
     }
   }
-})
+});
+```
+
+Example: use IconLayer instead of ScatterplotLayer to render the point features in a GeoJsonLayer
+
+```js
+import {IconLayer, GeoJsonLayer} from '@deck.gl/layers';
+
+new GeoJsonLayer({
+  // ...other props
+  _subLayerProps: {
+    points: {
+      type: IconLayer,
+      iconAtlas: './icon-atlas.png',
+      iconMapping: './icon-mapping.json',
+      getIcon: d => d.sourceFeature.feature.properties.marker,
+      getColor: [255, 200, 0],
+      getSize: 32
+    }
+  }
+});
 ```
 
 
