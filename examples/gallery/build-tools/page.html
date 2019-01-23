@@ -45,11 +45,16 @@
         <a href="./">↩ Back to Gallery</a>
       </div>
       <h2>Demo</h2>
-      <iframe width="100%" height="450" frameborder="0" src="{{iframeSrc}}" ></iframe>
+      <iframe width="100%" height="450" frameborder="0" ></iframe>
       <h2>Source</h2>
       <div id="source">
         <code class="prettyprint">{{content}}</code>
       </div>
     </div>
+    {{{iframeSrc}}}
+    <script type="text/javascript">
+      var blob = new Blob([src], {type: 'text/html'})
+      document.querySelector('iframe').src = URL.createObjectURL(blob);
+    </script>
   </body>
 </html>

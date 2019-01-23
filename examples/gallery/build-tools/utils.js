@@ -73,9 +73,9 @@ function getPage(page, opts = {}) {
 
   return Mustache.render(CACHE.pageTemplate, {
     ...page,
-    iframeSrc: `data:text/html;charset=utf-8,${encodeURI(
+    iframeSrc: `<script>var src = unescape('${escape(
       content.replace('<mapbox-access-token>', MAPBOX_TOKEN)
-    )}`,
+    )}');</script>`,
     content,
     analytics: opts.analytics && analytics
   });
