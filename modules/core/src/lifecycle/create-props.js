@@ -36,7 +36,11 @@ export function createProps() {
     Object.assign(propsInstance, arguments[i]);
   }
 
-  checkDeprecatedProps(propsInstance, propTypeDefs.deprecatedProps);
+  const {layerName} = component.constructor;
+  const {deprecatedProps} = propTypeDefs;
+  checkDeprecatedProps(layerName, propsInstance, deprecatedProps);
+  checkDeprecatedProps(layerName, propsInstance.updateTriggers, deprecatedProps);
+  checkDeprecatedProps(layerName, propsInstance.transitions, deprecatedProps);
 
   // SEER: Apply any overrides from the seer debug extension if it is active
   applyPropOverrides(propsInstance);
@@ -48,10 +52,14 @@ export function createProps() {
 }
 
 /* eslint-disable max-depth */
-function checkDeprecatedProps(propsInstance, deprecatedProps) {
+function checkDeprecatedProps(layerName, propsInstance, deprecatedProps) {
+  if (!propsInstance) {
+    return;
+  }
+
   for (const name in deprecatedProps) {
     if (hasOwnProperty(propsInstance, name)) {
-      const nameStr = `${propsInstance._component.constructor.name}: ${name}`;
+      const nameStr = `${layerName || 'Layer'}: ${name}`;
 
       for (const newPropName of deprecatedProps[name]) {
         if (!hasOwnProperty(propsInstance, newPropName)) {
