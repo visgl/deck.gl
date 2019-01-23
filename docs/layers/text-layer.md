@@ -4,11 +4,14 @@
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
-# Text Layer
+# TextLayer
 
 The text layer renders text labels on the map using texture mapping. This Layer is extended based on [Icon Layer](/docs/layers/icon-layer.md) and wrapped using [Composite Layer](/docs/api-reference/composite-layer.md).
 
 Auto pack required `characterSet` into a shared texture `fontAtlas`.
+
+TextLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+
 
 ## Example
 
@@ -101,6 +104,8 @@ const App = ({data, viewport}) => {
 ```
 
 ## Properties
+
+Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
 
 ### Rendering Options
 
@@ -222,6 +227,13 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
+
+
+## Sub Layers
+
+The TextLayer renders the following sublayers:
+
+* `characters` - a `MultiIconLayer` rendering all the characters.
 
 
 ## Source

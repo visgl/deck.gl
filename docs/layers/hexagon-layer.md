@@ -11,7 +11,7 @@ The Hexagon Layer renders a hexagon heatmap based on an array of points.
 It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains.
 
-HexagonLayer is a `CompositeLayer` and at the moment only works with COORDINATE_SYSTEM.LNGLAT.
+HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and at the moment only works with COORDINATE_SYSTEM.LNGLAT.
 
 ```js
 import DeckGL, {HexagonLayer} from 'deck.gl';
@@ -47,7 +47,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
 
 ### Render Options
 
@@ -230,6 +230,14 @@ This callback will be called when bin color domain has been calculated.
 * Default: `() => {}`
 
 This callback will be called when bin elevation domain has been calculated.
+
+
+## Sub Layers
+
+The HexagonLayer renders the following sublayers:
+
+* `hexagon-cell` - a [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md) rendering the aggregated columns.
+
 
 ## Source
 
