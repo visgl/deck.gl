@@ -4,7 +4,7 @@ This TileLayer takes in a function `getTileData` that fetches tiles, and renders
 
 ```js
 import DeckGL from 'deck.gl';
-import TileLayer from '@deck.gl/experimental-layers/tile-layer/tile-layer';
+import {TileLayer} from '@deck.gl/experimental-layers';
 import {VectorTile} from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 
