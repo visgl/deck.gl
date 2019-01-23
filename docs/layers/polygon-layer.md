@@ -9,6 +9,8 @@
 
 The Polygon Layer renders filled and/or stroked polygons.
 
+PolygonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+
 ```js
 import DeckGL, {PolygonLayer} from 'deck.gl';
 
@@ -64,7 +66,7 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
 
 ### Render Options
 
@@ -253,6 +255,14 @@ The dash array to draw each outline path with: `[dashSize, gapSize]` relative to
 * If an array is provided, it is used as the dash array for all paths.
 * If a function is provided, it is called on each path to retrieve its dash array. Return `[0, 0]` to draw the path in solid line.
 * If this accessor is not specified, all paths are drawn as solid lines.
+
+## Sub Layers
+
+The PolygonLayer renders the following sublayers:
+
+* `fill` - a [SolidPolygonLayer](/docs/layers/solid-polygon-layer.md) rendering the surface of all polygons.
+* `stroke` - a [PathLayer](/docs/layers/path-layer.md) rendering the outline of all polygons. Only rendered if `stroked: true` and `extruded: false`.
+
 
 ## Remarks
 
