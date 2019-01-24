@@ -207,46 +207,52 @@ export default class TextLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
-    return [
-      new MultiIconLayer(
-        this.getSubLayerProps({
-          id: 'characters',
-          data,
-          sdf,
-          iconAtlas,
-          iconMapping,
-          getIcon: d => d.text,
-          getPosition: d => getPosition(d.object),
-          getShiftInQueue: d => this.getLetterOffset(d),
-          getLengthOfQueue: d => this.getTextLength(d),
-          getColor: this._getAccessor(getColor),
-          getSize: this._getAccessor(getSize),
-          getAngle: this._getAccessor(getAngle),
-          getAnchorX: this.getAnchorXFromTextAnchor(getTextAnchor),
-          getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
-          getPixelOffset: this._getAccessor(getPixelOffset),
-          fp64,
-          sizeScale: sizeScale * scale,
+    const SubLayerClass = this.getSubLayerClass('characters', MultiIconLayer);
 
-          transitions: transitions && {
-            getPosition: transitions.getPosition,
-            getAngle: transitions.getAngle,
-            getColor: transitions.getColor,
-            getSize: transitions.getSize,
-            getPixelOffset: updateTriggers.getPixelOffset
-          },
-          updateTriggers: {
-            getPosition: updateTriggers.getPosition,
-            getAngle: updateTriggers.getAngle,
-            getColor: updateTriggers.getColor,
-            getSize: updateTriggers.getSize,
-            getPixelOffset: updateTriggers.getPixelOffset,
-            getAnchorX: updateTriggers.getTextAnchor,
-            getAnchorY: updateTriggers.getAlignmentBaseline
-          }
-        })
-      )
-    ];
+    return new SubLayerClass(
+      {
+        sdf,
+        iconAtlas,
+        iconMapping,
+
+        getPosition: d => getPosition(d.object),
+        getColor: this._getAccessor(getColor),
+        getSize: this._getAccessor(getSize),
+        getAngle: this._getAccessor(getAngle),
+        getAnchorX: this.getAnchorXFromTextAnchor(getTextAnchor),
+        getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
+        getPixelOffset: this._getAccessor(getPixelOffset),
+        fp64,
+        sizeScale: sizeScale * scale,
+
+        transitions: transitions && {
+          getPosition: transitions.getPosition,
+          getAngle: transitions.getAngle,
+          getColor: transitions.getColor,
+          getSize: transitions.getSize,
+          getPixelOffset: updateTriggers.getPixelOffset
+        }
+      },
+      this.getSubLayerProps({
+        id: 'characters',
+        updateTriggers: {
+          getPosition: updateTriggers.getPosition,
+          getAngle: updateTriggers.getAngle,
+          getColor: updateTriggers.getColor,
+          getSize: updateTriggers.getSize,
+          getPixelOffset: updateTriggers.getPixelOffset,
+          getAnchorX: updateTriggers.getTextAnchor,
+          getAnchorY: updateTriggers.getAlignmentBaseline
+        }
+      }),
+      {
+        data,
+
+        getIcon: d => d.text,
+        getShiftInQueue: d => this.getLetterOffset(d),
+        getLengthOfQueue: d => this.getTextLength(d)
+      }
+    );
   }
 }
 

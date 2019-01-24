@@ -60,6 +60,15 @@ export default class CompositeLayer extends Layer {
     return (data && data.length) || (overridingProps && overridingProps[id]);
   }
 
+  // Returns sub layer class for a specific sublayer
+  getSubLayerClass(id, DefaultLayerClass) {
+    const {_subLayerProps: overridingProps} = this.props;
+
+    return (
+      (overridingProps && overridingProps[id] && overridingProps[id].type) || DefaultLayerClass
+    );
+  }
+
   // Returns sub layer props for a specific sublayer
   getSubLayerProps(sublayerProps) {
     const {

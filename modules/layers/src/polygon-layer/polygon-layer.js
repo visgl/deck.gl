@@ -144,10 +144,28 @@ export default class PolygonLayer extends CompositeLayer {
 
     const {paths} = this.state;
 
+    const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
+    const StrokeLayer = this.getSubLayerClass('stroke', PathLayer);
+
     // Filled Polygon Layer
     const polygonLayer =
       this.shouldRenderSubLayer('fill', paths) &&
-      new SolidPolygonLayer(
+      new FillLayer(
+        {
+          extruded,
+          elevationScale,
+
+          fp64,
+          filled,
+          wireframe,
+
+          getElevation,
+          getFillColor,
+          getLineColor,
+
+          lightSettings,
+          transitions
+        },
         this.getSubLayerProps({
           id: 'fill',
           updateTriggers: {
@@ -159,20 +177,7 @@ export default class PolygonLayer extends CompositeLayer {
         }),
         {
           data,
-          extruded,
-          elevationScale,
-
-          fp64,
-          filled,
-          wireframe,
-
-          getPolygon,
-          getElevation,
-          getFillColor,
-          getLineColor,
-
-          lightSettings,
-          transitions
+          getPolygon
         }
       );
 
@@ -181,18 +186,8 @@ export default class PolygonLayer extends CompositeLayer {
       !extruded &&
       stroked &&
       this.shouldRenderSubLayer('stroke', paths) &&
-      new PathLayer(
-        this.getSubLayerProps({
-          id: 'stroke',
-          updateTriggers: {
-            getWidth: updateTriggers.getLineWidth,
-            getColor: updateTriggers.getLineColor,
-            getDashArray: updateTriggers.getLineDashArray
-          }
-        }),
+      new StrokeLayer(
         {
-          data: paths,
-
           fp64,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -207,10 +202,21 @@ export default class PolygonLayer extends CompositeLayer {
             getPath: transitions.getPolygon
           },
 
-          getPath: x => x.path,
           getColor: this._getAccessor(getLineColor),
           getWidth: this._getAccessor(getLineWidth),
           getDashArray: this._getAccessor(getLineDashArray)
+        },
+        this.getSubLayerProps({
+          id: 'stroke',
+          updateTriggers: {
+            getWidth: updateTriggers.getLineWidth,
+            getColor: updateTriggers.getLineColor,
+            getDashArray: updateTriggers.getLineDashArray
+          }
+        }),
+        {
+          data: paths,
+          getPath: x => x.path
         }
       );
 
