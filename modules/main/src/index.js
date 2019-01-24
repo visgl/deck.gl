@@ -128,6 +128,8 @@ export {
 
 export {default, DeckGL} from '@deck.gl/react';
 
+export {AmbientLight, DirectionalLight} from 'luma.gl';
+
 //
 // EXPERIMENTAL EXPORTS
 //

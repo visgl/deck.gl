@@ -1,8 +1,15 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import {AmbientLight, DirectionalLight, PhongMaterial} from 'luma.gl';
-import DeckGL, {GeoJsonLayer, PointLight, LightingEffect, COORDINATE_SYSTEM} from 'deck.gl';
+import {PhongMaterial} from 'luma.gl';
+import DeckGL, {
+  GeoJsonLayer,
+  AmbientLight,
+  PointLight,
+  DirectionalLight,
+  LightingEffect,
+  COORDINATE_SYSTEM
+} from 'deck.gl';
 import {scaleThreshold} from 'd3-scale';
 
 // Set your mapbox token here
