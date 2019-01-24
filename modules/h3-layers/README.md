@@ -1,4 +1,4 @@
-# @deck.gl/s2-layers (Experimental)
+# @deck.gl/h3-layers (Experimental)
 
 This is deck.gl layer catalog contains layers that understands H3 geospatial indices.
 
