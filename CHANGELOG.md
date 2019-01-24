@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.3
 
+#### [6.3.9] - Jan 23 2019
+
+- Fix additional bundling issues when using rollup (#2613)
+- Fix TextLayer when used with Angular minification (#2615)
+
 #### [6.3.8] - Jan 23 2019
 
 - Fix bundling issues when using rollup (#2607)
