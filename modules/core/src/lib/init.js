@@ -49,6 +49,3 @@ if (!global.deck) {
 if (!console.table) {
   console.table = () => {};
 }
-
-// Make sure we register shader modules
-require('../shaderlib');
