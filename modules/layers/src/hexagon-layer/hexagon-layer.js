@@ -310,9 +310,7 @@ export default class HexagonLayer extends CompositeLayer {
     return isElevationValueInDomain ? elevationScaleFunc(ev) : -1;
   }
 
-  // for subclassing, override this method to return
-  // customized sub layer props
-  getSubLayerProps() {
+  renderLayers() {
     const {
       radius,
       elevationScale,
@@ -323,40 +321,34 @@ export default class HexagonLayer extends CompositeLayer {
       transitions
     } = this.props;
 
-    // return props to the sublayer constructor
-    return super.getSubLayerProps({
-      id: 'hexagon-cell',
-      data: this.state.hexagons,
+    const SubLayerClass = this.getSubLayerClass('hexagon-cell', HexagonCellLayer);
 
-      fp64,
-      hexagonVertices: this.state.hexagonVertices,
-      radius,
-      elevationScale,
-      angle: Math.PI / 2,
-      extruded,
-      coverage,
-      lightSettings,
+    return new SubLayerClass(
+      {
+        fp64,
+        radius,
+        elevationScale,
+        angle: Math.PI / 2,
+        extruded,
+        coverage,
+        lightSettings,
 
-      getColor: this._onGetSublayerColor.bind(this),
-      getElevation: this._onGetSublayerElevation.bind(this),
-      transitions: transitions && {
-        getColor: transitions.getColorValue,
-        getElevation: transitions.getElevationValue
+        getColor: this._onGetSublayerColor.bind(this),
+        getElevation: this._onGetSublayerElevation.bind(this),
+        transitions: transitions && {
+          getColor: transitions.getColorValue,
+          getElevation: transitions.getElevationValue
+        }
       },
-      updateTriggers: this.getUpdateTriggers()
-    });
-  }
-
-  // for subclassing, override this method to return
-  // customized sub layer class
-  getSubLayerClass() {
-    return HexagonCellLayer;
-  }
-
-  renderLayers() {
-    const SubLayerClass = this.getSubLayerClass();
-
-    return new SubLayerClass(this.getSubLayerProps());
+      this.getSubLayerProps({
+        id: 'hexagon-cell',
+        updateTriggers: this.getUpdateTriggers()
+      }),
+      {
+        data: this.state.hexagons,
+        hexagonVertices: this.state.hexagonVertices
+      }
+    );
   }
 }
 

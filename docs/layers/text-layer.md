@@ -233,7 +233,7 @@ Screen space offset relative to the `coordinates` in pixel unit.
 
 The TextLayer renders the following sublayers:
 
-* `characters` - a `MultiIconLayer` rendering all the characters.
+* `characters` - an `IconLayer` rendering all the characters.
 
 
 ## Source

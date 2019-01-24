@@ -42,16 +42,40 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Key is the id of a sublayer and value is an object used to override the props of the sublayer. For a list of ids rendered by each composite layer, consult the *Sub Layers* section in each layer's documentation.
 
+Example: make only the point features in a GeoJsonLayer respond to hover and click
+
 ```js
+import {GeoJsonLayer} from '@deck.gl/layers';
+
 new GeoJsonLayer({
-  ...
-  pickable: true,
-  subLayerProps: {
+  // ...other props
+  pickable: false,
+  _subLayerProps: {
     points: {
-      pickable: false
+      pickable: true
     }
   }
-})
+});
+```
+
+Example: use IconLayer instead of ScatterplotLayer to render the point features in a GeoJsonLayer
+
+```js
+import {IconLayer, GeoJsonLayer} from '@deck.gl/layers';
+
+new GeoJsonLayer({
+  // ...other props
+  _subLayerProps: {
+    points: {
+      type: IconLayer,
+      iconAtlas: './icon-atlas.png',
+      iconMapping: './icon-mapping.json',
+      getIcon: d => d.sourceFeature.feature.properties.marker,
+      getColor: [255, 200, 0],
+      getSize: 32
+    }
+  }
+});
 ```
 
 
@@ -146,12 +170,30 @@ Returns an properties object used to generate a sublayer, with the following key
 
 ##### `shouldRenderSubLayer`
 
+Called to determine if a sublayer should be rendered.
+A composite layer can override this method to change the default behavior.
+
 Parameters:
 
 * `id` (String) - the sublayer id
 * `data` (Array) - the sublayer data
 
-Returns `true` if the sublayer should be rendered. The default implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
+Returns `true` if the sublayer should be rendered. The base class implementation returns `true` if either `data` is not empty or the `_subLayerProps` prop contains override for this sublayer.
+
+
+##### `getSubLayerClass`
+
+Called to retrieve the constructor of a sublayer.
+A composite layer can override this method to change the default behavior.
+
+Parameters:
+
+* `id` (String) - the sublayer id
+* `DefaultLayerClass` - the default constructor used for this sublayer.
+
+Returns:
+
+Constructor for this sublayer. The base class implementation checks if `type` is specified for the sublayer in `_subLayerProps`, otherwise returns the default.
 
 
 ## Source
