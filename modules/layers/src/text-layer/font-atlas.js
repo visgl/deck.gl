@@ -11,10 +11,15 @@ const DEFAULT_PADDING = 4;
 const BASELINE_SCALE = 0.9;
 const HEIGHT_SCALE = 1.2;
 
-export const DEFAULT_CHAR_SET = [];
-for (let i = 32; i < 128; i++) {
-  DEFAULT_CHAR_SET.push(String.fromCharCode(i));
+function getDefaultCharacterSet() {
+  const charSet = [];
+  for (let i = 32; i < 128; i++) {
+    charSet.push(String.fromCharCode(i));
+  }
+  return charSet;
 }
+
+export const DEFAULT_CHAR_SET = getDefaultCharacterSet();
 
 function setTextStyle(ctx, fontFamily, fontSize) {
   ctx.font = `${fontSize}px ${fontFamily}`;
