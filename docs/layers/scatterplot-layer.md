@@ -80,7 +80,7 @@ Draw the filled area of a point.
 
 ##### `radiusMinPixels` (Number, optional)
 
-* Default: `0`
+* Default: `1`
 
 The minimum radius in pixels.
 
@@ -92,7 +92,7 @@ The maximum radius in pixels.
 
 ##### `lineWidthMinPixels` (Number, optional)
 
-* Default: `0`
+* Default: `1`
 
 The minimum line width in pixels.
 
