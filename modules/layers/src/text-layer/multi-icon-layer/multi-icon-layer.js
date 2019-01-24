@@ -34,7 +34,10 @@ const defaultProps = {
   getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
   // 1: top, 0: center, -1: bottom
   getAnchorY: {type: 'accessor', value: x => x.anchorY || 0},
-  getPixelOffset: {type: 'accessor', value: [0, 0]}
+  getPixelOffset: {type: 'accessor', value: [0, 0]},
+
+  // object with the same pickingIndex will be picked when any one of them is being picked
+  getPickingIndex: {type: 'accessor', value: x => x.objectIndex}
 };
 
 export default class MultiIconLayer extends IconLayer {
@@ -103,6 +106,20 @@ export default class MultiIconLayer extends IconLayer {
 
       value[i++] = ((getAnchorX(object) - 1) * len) / 2 + rect.width / 2 + shiftX || 0;
       value[i++] = (rect.height / 2) * getAnchorY(object) || 0;
+    }
+  }
+
+  calculateInstancePickingColors(attribute) {
+    const {data, getPickingIndex} = this.props;
+    const {value} = attribute;
+    let i = 0;
+    for (const point of data) {
+      const index = getPickingIndex(point);
+      const pickingColor = this.encodePickingColor(index);
+
+      value[i++] = pickingColor[0];
+      value[i++] = pickingColor[1];
+      value[i++] = pickingColor[2];
     }
   }
 }
