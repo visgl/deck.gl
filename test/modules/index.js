@@ -27,6 +27,8 @@ import './geo-layers';
 
 import './json';
 
+import './h3-layers';
+
 // TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
   require('./react');
