@@ -81,6 +81,7 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
+  let cameraPos = viewport.cameraPosition;
   let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
   let shaderCoordinateOrigin = coordinateOrigin;
 
@@ -113,6 +114,13 @@ function calculateMatrixAndOffset({
         shaderCoordinateOrigin,
         Math.pow(2, coordinateZoom)
       );
+
+      cameraPos = [
+        cameraPos[0] - positionPixels[0],
+        cameraPos[1] - positionPixels[1],
+        cameraPos[2]
+      ];
+
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
       projectionCenter = vec4.transformMat4(
@@ -139,7 +147,7 @@ function calculateMatrixAndOffset({
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
-    cameraPos: viewport.cameraPosition,
+    cameraPos,
     shaderCoordinateSystem,
     shaderCoordinateOrigin
   };
