@@ -32,9 +32,9 @@ export default class BezierGraphLayer extends CompositeLayer {
         data: nodes,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
-        getRadius: d => 5,
-        getFillColor: d => [0, 0, 150, 255],
-        getLineColor: d => [255, 128, 0, 255],
+        getRadius: 5,
+        getFillColor: [0, 0, 150, 255],
+        getLineColor: [255, 128, 0, 255],
         // interaction:
         pickable: true,
         autoHighlight: true,

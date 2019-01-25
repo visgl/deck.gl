@@ -146,8 +146,8 @@ const ScatterplotLayerPerfExample = (id, getData) => ({
   props: {
     id: `scatterplotLayerPerf-${id}`,
     getPosition: d => d,
-    getFillColor: d => [0, 128, 0],
-    getLineColor: d => [0, 128, 255],
+    getFillColor: [0, 128, 0],
+    getLineColor: [0, 128, 255],
     // pickable: true,
     radiusMinPixels: 1,
     radiusMaxPixels: 5
@@ -160,8 +160,8 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
   props: {
     id: `scatterplotLayer64Perf-${id}`,
     getPosition: d => d,
-    getFillColor: d => [0, 128, 0],
-    getLineColor: d => [0, 128, 255],
+    getFillColor: [0, 128, 0],
+    getLineColor: [0, 128, 255],
     // pickable: true,
     radiusMinPixels: 1,
     radiusMaxPixels: 5,
