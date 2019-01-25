@@ -18,22 +18,19 @@ if the target `characterSet` is considerably large, which is not necessary for o
 
 `TextLayer` supports [`sdf`](https://github.com/mapbox/tiny-sdf), check [Text Layer](/docs/layers/text-layer.md) for details.
 
+`fontSettings` together with the other two layer props `characterSet` and `fontFamily` will be used in generating `fontAtlas`.
+
 ```js
 
 import {TextLayer} from '@deck.gl/layers'
 
- fontSize: 64,
- buffer: 2,
- radius: 3,
- cutoff: 0.25,
- 
- fontWeight: 'normal'
-
 const textLayer = new TextLayer({
   ...,
+  characterSet: 'abcdefg',
+  fontFamily: 'Monaco, monospace',
+
   fontSettings: {
     // shared options between non-sdf and sdf
-    fontFamily: props.fontFamily, // from layer prop
     // this fontSize if only applied for generating fontAtlas
     // it does not impact the size of the text labels 
     fontSize: 64, 
