@@ -141,10 +141,7 @@ export const TEST_CASES = [
     name: 'bezier-curve-2d',
     views: [new OrthographicView()],
     viewState: {
-      left: -WIDTH / 2,
-      top: -HEIGHT / 2,
-      right: WIDTH / 2,
-      bottom: HEIGHT / 2
+      zoom: 1
     },
     layers: [
       new BezierCurveLayer({

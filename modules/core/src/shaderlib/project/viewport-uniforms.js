@@ -197,7 +197,6 @@ function calculateViewportUniforms({
   wrapLongitude
 }) {
   const coordinateZoom = viewport.zoom;
-  assert(coordinateZoom >= 0);
 
   const {
     projectionCenter,
