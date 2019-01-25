@@ -33,7 +33,7 @@ const textLayer = new TextLayer({
   ...,
   fontSettings: {
     // shared options between non-sdf and sdf
-    fontFamily: 'Monaco, monospace',
+    fontFamily: props.fontFamily, // from layer prop
     // this fontSize if only applied for generating fontAtlas
     // it does not impact the size of the text labels 
     fontSize: 64, 
