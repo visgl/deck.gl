@@ -84,14 +84,14 @@ export default class TileLayer extends CompositeLayer {
 
   renderLayers() {
     // eslint-disable-next-line no-unused-vars
-    const {getTileData, renderSubLayers, ...geoProps} = this.props;
+    const {getTileData, renderSubLayers, visible, ...geoProps} = this.props;
     const z = this.getLayerZoomLevel();
     return this.state.tiles.map(tile => {
       return renderSubLayers({
         ...geoProps,
         id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
         data: tile.data,
-        visible: !this.state.isLoaded || tile.z === z,
+        visible: visible && (!this.state.isLoaded || tile.z === z),
         tile
       });
     });
