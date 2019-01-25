@@ -1,5 +1,47 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v6.3 to v6.4
+
+#### OrthographicView
+
+The experimental `OrthographicView` class has the following breaking changes:
+
+- `zoom` is reversed (larger value means zooming in) and switched to logarithmic scale.
+- Changed view state defaults:
+  + `zoom` - `1` -> `0`
+  + `offset` - `[0, 1]` -> `[0, 0]`
+  + `minZoom` - `0.1` -> `-10`
+- `eye`, `lookAt` and `up` are now set in the  `OrthographicView` constructor instead of `viewState`.
+
+#### ScatterplotLayer
+
+Deprecations:
+
+- `outline` is deprecated: use `stroked` instead.
+- `strokeWidth` is deprecated: use `getLineWidth` instead.
+- `getColor` is deprecated: use `getFillColor` and `getLineColor` instead.
+
+Breaking changes:
+
+- `outline` / `stroked` no longer turns off fill. Use `filled: false` instead.
+
+#### GeoJsonLayer
+
+Breaking changes:
+
+- `stroked`, `getLineWidth` and `getLineColor` props now apply to point features (rendered with a ScatterplotLayer) in addition to polygon features. To revert to the old appearance, supply a `_subLayerProps` override:
+
+```js
+new GeoJsonLayer({
+  // ...other props
+  stroked: true,
+  _subLayerProps: {
+    points: {stroked: false}
+  }
+});
+```
+
+
 ## Upgrading from deck.gl v6.2 to v6.3
 
 #### GridLayer and HexagonLayer
@@ -44,11 +86,11 @@ deck.gl v6.0 brings in luma.gl v6.0 which is a major release with a few breaking
 
 Pixel sizes in line, icon and text layers now match their HTML/SVG counterparts. To achieve the same rendering output as v5, you should use half the previous value in the following props:
 
-* `ArcLayer.getStrokeWidth`
-* `LineLayer.getStrokeWidth`
-* `IconLayer.getSize` or `IconLayer.sizeScale`
-* `TextLayer.getSize` or `TextLayer.sizeScale`
-* `PointCloudLayer.radiusPixels`
+- `ArcLayer.getStrokeWidth`
+- `LineLayer.getStrokeWidth`
+- `IconLayer.getSize` or `IconLayer.sizeScale`
+- `TextLayer.getSize` or `TextLayer.sizeScale`
+- `PointCloudLayer.radiusPixels`
 
 
 #### Accessors
@@ -58,10 +100,10 @@ All layer accessors that support constant values have had their default values c
 
 #### Views and Controllers
 
-* (React only) Viewport constraint props: `maxZoom`, `minZoom`, `maxPitch`, `minPitch` are no longer supported by the `DeckGL` component. They must be specified as part of the `viewState` object.
-* (React only) `ViewportController` React component has been removed. The functionality is now built in to the `Deck` and `DeckGL` classes.
-* `Deck.onViewportChange(viewport)` etc callbacks are no longer supported. Use `Deck.onViewStateChange({viewState})`
-* `DeckGL.viewport` and `DeckGL.viewports` props are no longer supported. Use `DeckGL.views`.
+- (React only) Viewport constraint props: `maxZoom`, `minZoom`, `maxPitch`, `minPitch` are no longer supported by the `DeckGL` component. They must be specified as part of the `viewState` object.
+- (React only) `ViewportController` React component has been removed. The functionality is now built in to the `Deck` and `DeckGL` classes.
+- `Deck.onViewportChange(viewport)` etc callbacks are no longer supported. Use `Deck.onViewStateChange({viewState})`
+- `DeckGL.viewport` and `DeckGL.viewports` props are no longer supported. Use `DeckGL.views`.
 
 
 #### ScreenGridLayer
@@ -117,17 +159,17 @@ Users of `deck.gl` are not affected by this change.
 
 ### DeckGL component
 
-* `DeckGL.viewports` and `DeckGL.viewport` are deprecated and should be replaced with `DeckGL.views`.
+- `DeckGL.viewports` and `DeckGL.viewport` are deprecated and should be replaced with `DeckGL.views`.
 
 ### Viewport classes
 
-* A number of `Viewport` subclasses have been deprecated. They should be replaced with their `View` counterparts.
+- A number of `Viewport` subclasses have been deprecated. They should be replaced with their `View` counterparts.
 
 ### Experimental Features
 
 Some experimental exports have been removed:
 
-* The experimental React controller components (`MapController` and `OrbitController`) have been removed. These are now replaced with JavaScript classes that can be used with the `Deck.controller` / `DeckGL.controller` property.
+- The experimental React controller components (`MapController` and `OrbitController`) have been removed. These are now replaced with JavaScript classes that can be used with the `Deck.controller` / `DeckGL.controller` property.
 
 
 ## Upgrading from deck.gl v5 to v5.1
@@ -210,7 +252,7 @@ Be aware that deck.gl 4.1 bumps the luma.gl peer dependency from 3.0 to 4.0. The
 
 ### Layer Life Cycle Optimization
 
-* **shouldUpdateState** - deck.gl v4.1 contains additional optimizations of the layer lifecycle and layer diffing algorithms. Most of these changes are completely under the hood but one  visible change is that the default implementation of `Layer.shouldUpdate` no longer returns true if only the viewport has changed. This means that layers that need to update state in response to changes in screen space (viewport) will need to redefine `shouldUpdate`:
+- **shouldUpdateState** - deck.gl v4.1 contains additional optimizations of the layer lifecycle and layer diffing algorithms. Most of these changes are completely under the hood but one  visible change is that the default implementation of `Layer.shouldUpdate` no longer returns true if only the viewport has changed. This means that layers that need to update state in response to changes in screen space (viewport) will need to redefine `shouldUpdate`:
 
 ```js
   shouldUpdateState({changeFlags}) {
@@ -222,7 +264,7 @@ Note that this change has already been done in all the provided deck.gl layers t
 
 ### luma.gl `Model` class API change
 
-* deck.gl v4.1 bumps luma.gl to from v3 to v4. This is major release that brings full WebGL2 enablement to deck.gl. This should not affect you if you are mainly using the provided deck.gl layers but if you are writing your own layers using luma.gl classes you may want to look at the upgrade guide of luma.gl.
+- deck.gl v4.1 bumps luma.gl to from v3 to v4. This is major release that brings full WebGL2 enablement to deck.gl. This should not affect you if you are mainly using the provided deck.gl layers but if you are writing your own layers using luma.gl classes you may want to look at the upgrade guide of luma.gl.
 
 The `gl` parameter is provided as a separate argument in luma.gl v4, instead of part of the options object.
 
@@ -271,7 +313,7 @@ const model = new Model({
 | `ChoroplethLayer64` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
 | `ExtrudedChoroplethLayer` | Removed | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
 
-* ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
+- ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
 
 These set of layers were deprecated in deck.gl v4, and are now removed in v5. You can still get same functionality using more unified, flexible and performant layers:
  `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
@@ -301,14 +343,14 @@ While it would have been preferable to avoid this change, a significant moderniz
 | `ExtrudedChoroplethLayer` | Deprecated | `GeoJsonLayer`, `PolygonLayer` and `PathLayer`    |
 | `EnhancedChoroplethLayer`  | Moved to examples  | `PathLayer`    |
 
-* ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
+- ChoroplethLayer, ChoroplethLayer64, ExtrudedChoroplethLayer
 
 These set of layers are deprecated in deck.gl v4, with their functionality completely substituted by more unified, flexible and performant new layers:
  `GeoJsonLayer`, `PolygonLayer` and `PathLayer`.
 
 Developers should be able to just supply the same geojson data that are used with `ChoroplethLayer`s to the new `GeoJsonLayer`. The props of the `GeoJsonLayer` are a bit different from the old `ChoroplethLayer`, so proper testing is recommended to achieve satisfactory result.
 
-* EnhancedChoroplethLayer
+- EnhancedChoroplethLayer
 
 This was a a sample layer in deck.gl v3 and has now been moved to a stand-alone example and is no longer exported from the deck.gl npm module.
 
