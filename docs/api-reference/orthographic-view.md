@@ -9,7 +9,7 @@ The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
 * `offset` (`Number[2]`, optional) - The offset of the viewport, in screen pixels. Default `[0, 0]` (the coordinate origin is projected to the center of the viewport).
-* `zoom` (`Number`, optional) - The zoom level of the viewport. Default `0` (one unit distance maps to one pixel on screen).
+* `zoom` (`Number`, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
 * `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `-10`.
 * `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `10`.
 
