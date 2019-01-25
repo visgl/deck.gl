@@ -201,8 +201,8 @@ export class App extends Component {
         data: targets,
         brushRadius,
         mousePosition,
-        getLineWidth: 2,
-        stroked: true,
+        strokeWidth: 2,
+        outline: true,
         opacity: 1,
         enableBrushing: startBrushing,
         // only show rings when brushing
