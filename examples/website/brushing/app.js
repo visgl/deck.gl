@@ -224,15 +224,15 @@ export class App extends Component {
       new ArcBrushingLayer({
         id: 'arc',
         data: arcs,
-        strokeWidth,
+        getStrokeWidth: strokeWidth,
         opacity,
         brushRadius,
         enableBrushing: startBrushing,
         mousePosition,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
-        getSourceColor: d => SOURCE_COLOR,
-        getTargetColor: d => TARGET_COLOR
+        getSourceColor: SOURCE_COLOR,
+        getTargetColor: TARGET_COLOR
       })
     ];
   }
