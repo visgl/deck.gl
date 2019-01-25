@@ -17,6 +17,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.0-alpha.3] - Jan 24 2019
+
+- Generate layer attributes on a worker (PR 1/3) (#2490)
+- Generate layer attributes on a worker (PR 2/3) (#2575)
+- Generate layer attributes on a worker (PR 3/3) (#2576)
+- remove loggoing fontAlas time (#2601)
+- Fix AttributeTransitionManager crash when data is empty (#2605)
+- Fix HexagonLayer constructors (#2590)
+- remove module.exports (#2607)
+- Fix occasional picking failure in mapbox layer (#2606)
+- Document the sublayers of all composite layers (#2599)
+- Update composite layer customization RFC (#2600)
+- check deprecated props in updateTriggers and transitions (#2611)
+- Remove require() (#2613)
+- fix angular (#2615)
+- Update composite layer API (#2612)
+
 #### [6.4.0-alpha.2] - Jan 18 2019
 
 - reset blend params after mapbox render

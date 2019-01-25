@@ -6897,10 +6897,10 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^6.4.0-alpha.2:
-  version "6.4.0-alpha.2"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.4.0-alpha.2.tgz#b41a95157511f3851b5fd70f83aa75cfc3b88809"
-  integrity sha512-zWHEmBoGlZ8uuEW9WbGZUocxDUB52dSiT7+J1ryc8bZduMSDpVK85ta7w5L4BFKMPdawWAGPHpYq95mnjtYuEw==
+luma.gl@^6.4.0-alpha.3:
+  version "6.4.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.4.0-alpha.3.tgz#5d4ac242ce436314b690ddc9dd9c2b740cc0561d"
+  integrity sha512-bk/ScnfDXjHFzP7XmXNZ620A8YlRPygohmGBEFJyJOAEIHBfhISBflHqfNhQGTMDDcSJ3nPYNVaLszj1hYF+zA==
   dependencies:
     "@babel/runtime" "^7.0.0"
     math.gl "^2.3.0-beta.1"

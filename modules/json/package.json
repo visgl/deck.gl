@@ -2,7 +2,7 @@
   "name": "@deck.gl/json",
   "description": "JSON format rendering components for deck.gl",
   "license": "MIT",
-  "version": "6.4.0-alpha.2",
+  "version": "6.4.0-alpha.3",
   "publishConfig": {
     "access": "public"
   },
@@ -33,7 +33,7 @@
     "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.4.0-alpha.2",
+    "@deck.gl/core": "^6.4.0-alpha.3",
     "d3-dsv": "^1.0.8"
   }
 }
