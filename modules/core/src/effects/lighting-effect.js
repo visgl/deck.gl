@@ -31,13 +31,14 @@ export default class LightingEffect extends Effect {
   }
 
   // Pre-project point light positions
-  getProjectedPointLights(viewport) {
+  getProjectedPointLights(viewport, coordinateSystem) {
     const projectedPointLights = [];
     for (let i = 0; i < this.pointLights.length; i++) {
       const pointLight = this.pointLights[i];
       const position = projectPosition(pointLight.position, {
         viewport,
-        coordinateSystem: pointLight.coordinateSystem
+        fromCoordinateSystem: pointLight.coordinateSystem,
+        coordinateSystem
       });
       projectedPointLights.push(
         new BasePointLight({

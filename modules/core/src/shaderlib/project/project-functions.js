@@ -91,12 +91,15 @@ export function getWorldPosition(
 
 /**
  * Equivalent to project_position in project.glsl
- * projects a user supplied position to world position in the target coordinates system
+ * projects a user supplied position to world position directly or convert to a
+ * intermediate coordinates system first, then to world position
  * @param {array} position - [x, y, z]
  * @param {object} params
  * @param {Viewport} params.viewport - the current viewport
  * @param {number} params.coordinateSystem - the coordinate system to project into
+ *   before projected into world position
  * @param {array} params.coordinateOrigin - the coordinate origin to project into
+ *   before projected into world position
  * @param {Matrix4} [params.modelMatrix] - the model matrix of the supplied position
  * @param {number} [params.fromCoordinateSystem] - the coordinate system that the
  *   supplied position is in. Default to the same as `coordinateSystem`.

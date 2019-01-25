@@ -42,8 +42,8 @@ const ambientLight = new AmbientLight({color: [255, 255, 255], intensity: 1.0});
 const pointLight = new PointLight({
   color: [255, 255, 255],
   intensity: 2.0,
-  position: [-125, 50.5, 5000],
-  coordinateSystem: COORDINATE_SYSTEM.LNGLAT
+  position: [10000, 10000.5, 5000],
+  coordinateSystem: COORDINATE_SYSTEM.IDENTITY
 });
 const directionalLight = new DirectionalLight({
   color: [255, 255, 255],
