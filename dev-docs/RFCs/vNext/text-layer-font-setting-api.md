@@ -1,16 +1,16 @@
 # RFC: Text Layer API Change
 
 * **Authors**: Xintong Xia 
-* **Date**: December 2018
+* **Date**: January 2019
 * **Status**: Draft 
 
 ## Motivation 
 
-When `TextLayer` generates shared `fontAtlas` for required `characterSet`, it applied default settings, like `fontSize`, 
-`buffer`(Whitespace surround each character), etc.. However one setting can not be suitable for all the different fonts. 
-For example, [Cinzel](https://fonts.google.com/specimen/Cinzel) has a special shape of `Q` character, which requires
-a big buffer [See detail](https://github.com/uber/deck.gl/pull/2609). Big buffer around each character can be very
-expensive if the target `characterSet` is considerably large, which is not necessary for other fonts.
+When `TextLayer` generates shared `fontAtlas` for required `characterSet`, it applied default settings, like 
+`fontSize`, `buffer`(Whitespace surround each character), etc.. However one setting can not be suitable for 
+all the different fonts. For example, [Cinzel](https://fonts.google.com/specimen/Cinzel) has a special shape 
+of `Q` character, which requires a big buffer [See detail](https://github.com/uber/deck.gl/pull/2609). Big buffer around each character can be very expensive 
+if the target `characterSet` is considerably large, which is not necessary for other fonts.
 
 `TextLayer` needs expose settings related to `fontAtlas` generation for users to manipulate when needed.
 
@@ -59,12 +59,8 @@ const textLayer = new TextLayer({
 If nested as the above proposal, it is more clear and more organized, but `TextLayer` needs compare the all the
 properties nested in `fontSettings` to decide whether update `fontAtlas`. 
 
-If flat, expose as layer props, it can be confusing to the users since some settings like `fontSize`, `fontWeight` is 
+If flat, exposed all the options under `fontSettings` as layer props, it can be confusing to the users since some settings like `fontSize`, `fontWeight` is 
 not apply to the text labels rendering in the layer, but only impact `fontAtlas` generating.
 
 ## Cost and Impact
 With the new proposal, the users using `sdf` needs to migrate to new API. Others should not be impacted.
-
-
-
-
