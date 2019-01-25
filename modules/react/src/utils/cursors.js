@@ -18,15 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// import browser from 'bowser';
-
-const PREFIX = '-webkit-';
-// browser.webkit || browser.blink ? '-webkit-' :
-// browser.gecko ? '-moz-' :
-// '';
-
 export default {
-  GRABBING: `${PREFIX}grabbing`,
-  GRAB: `${PREFIX}grab`,
+  GRABBING: 'grabbing',
+  GRAB: 'grab',
   POINTER: 'pointer'
 };
