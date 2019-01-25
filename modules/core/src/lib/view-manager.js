@@ -280,7 +280,7 @@ export default class ViewManager {
 
   _updateController(view, viewState, viewport, controller) {
     if (view.controller) {
-      const controllerProps = Object.assign({}, view.controller, view.defaultState, viewState, {
+      const controllerProps = Object.assign({}, view.controller, viewState, {
         id: view.id,
         x: viewport.x,
         y: viewport.y,

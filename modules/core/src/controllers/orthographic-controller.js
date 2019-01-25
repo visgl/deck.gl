@@ -4,9 +4,13 @@ import ViewState from './view-state';
 import {Vector2, clamp} from 'math.gl';
 
 const MOVEMENT_SPEED = 10; // per keyboard click
-// TODO - make default unlimited in the next major version
-const DEFAULT_MIN_ZOOM = 0;
-const DEFAULT_MAX_ZOOM = 10;
+
+const DEFAULT_STATE = {
+  zoom: 0,
+  offset: [0, 0],
+  minZoom: -10,
+  maxZoom: 10
+};
 
 const zoom2Scale = zoom => Math.pow(2, zoom);
 
@@ -15,10 +19,10 @@ class OrthographicState extends ViewState {
     /* Viewport arguments */
     width, // Width of viewport
     height, // Height of viewport
-    offset, // Offset to the origin
-    zoom, // Zoom level of the view
-    minZoom = DEFAULT_MIN_ZOOM,
-    maxZoom = DEFAULT_MAX_ZOOM,
+    offset = DEFAULT_STATE.offset, // Offset to the origin
+    zoom = DEFAULT_STATE.zoom, // Zoom level of the view
+    minZoom = DEFAULT_STATE.minZoom,
+    maxZoom = DEFAULT_STATE.maxZoom,
 
     /** Interaction states */
     /* The point on the view being grabbed when the operation first started */
@@ -155,11 +159,12 @@ class OrthographicState extends ViewState {
 
     const centerX = width / 2 - offset[0];
     const centerY = height / 2 - offset[1];
-    const dX = (startZoomPosition[0] - centerX) * (startScale / newScale - 1);
-    const dY = (startZoomPosition[1] - centerY) * (startScale / newScale - 1);
+    const dX = (startZoomPosition[0] - centerX) * (newScale / startScale - 1);
+    const dY = (startZoomPosition[1] - centerY) * (newScale / startScale - 1);
+
     return this._getUpdatedState({
       zoom: newZoom,
-      offset: [offset[0] - dX, offset[1] - dY]
+      offset: [offset[0] + dX, offset[1] + dY]
     });
   }
 
