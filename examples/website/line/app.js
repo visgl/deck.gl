@@ -81,7 +81,8 @@ export class App extends Component {
         data: airports,
         radiusScale: 20,
         getPosition: d => d.coordinates,
-        getColor: [255, 140, 0],
+        getFillColor: [255, 140, 0],
+        getLineColor: [0, 0, 255],
         getRadius: d => getSize(d.type),
         pickable: true,
         onHover: this._onHover

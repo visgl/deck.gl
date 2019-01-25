@@ -26,7 +26,8 @@ class Root extends Component {
         <ScatterplotLayer
           data={[{position: [-122.41669, 37.79]}]}
           radiusScale={100}
-          getColor={x => [0, 0, 255]}
+          getFillColor={x => [0, 0, 255]}
+          getLineColor={x => [255, 128, 0]}
         />
       </DeckGL>
     );
