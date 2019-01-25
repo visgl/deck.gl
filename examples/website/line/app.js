@@ -82,7 +82,6 @@ export class App extends Component {
         radiusScale: 20,
         getPosition: d => d.coordinates,
         getFillColor: [255, 140, 0],
-        getLineColor: [0, 0, 255],
         getRadius: d => getSize(d.type),
         pickable: true,
         onHover: this._onHover

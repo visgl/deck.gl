@@ -27,7 +27,6 @@ class Root extends Component {
           data={[{position: [-122.41669, 37.79]}]}
           radiusScale={100}
           getFillColor={[0, 0, 255]}
-          getLineColor={[255, 128, 0]}
         />
       </DeckGL>
     );

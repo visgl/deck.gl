@@ -193,8 +193,7 @@ export class App extends Component {
         pickable: false,
         // only show source points when brushing
         radiusScale: startBrushing ? 3000 : 0,
-        getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        getLineColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
+        getColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         getTargetPosition: d => [d.position[0], d.position[1], 0]
       }),
       new ScatterplotBrushingLayer({
@@ -208,8 +207,7 @@ export class App extends Component {
         enableBrushing: startBrushing,
         // only show rings when brushing
         radiusScale: startBrushing ? 4000 : 0,
-        getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        getLineColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
+        getColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
       }),
       new ScatterplotBrushingLayer({
         id: 'targets',
@@ -221,8 +219,7 @@ export class App extends Component {
         pickable: true,
         radiusScale: 3000,
         onHover: this._onHover,
-        getFillColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
-        getLineColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
+        getColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR)
       }),
       new ArcBrushingLayer({
         id: 'arc',
