@@ -8,12 +8,9 @@ The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.
 
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
-* `eye` (`Number[3]`, optional) - The eye position in world coordinates. Default `[0, 0, 1]`.
-* `lookAt` (`Number[3]`, optional) - The position being looked at. Default `[0, 0, 0]`.
-* `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
-* `offset` (`Number[2]`, optional) - The offset of the viewport. Default `[0, 1]`.
-* `zoom` (`Number`, optional) - The zoom level of the viewport. Default `1`.
-* `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `0`.
+* `offset` (`Number[2]`, optional) - The offset of the viewport, in screen pixels. Default `[0, 0]` (the coordinate origin is projected to the center of the viewport).
+* `zoom` (`Number`, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
+* `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `-10`.
 * `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `10`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
@@ -22,17 +19,16 @@ For more information on using `View` classes, consult the [Views](/docs/develope
 ## Constructor
 
 ```js
-new OrthographicView({left: 0, top: 0, width: 500, height: 500});
+new OrthographicView({controller: true});
 ```
 
 The `OrthographicView` constructor takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor, plus the following orthographic projection matrix arguments:
 
+* `eye` (`Number[3]`, optional) - The eye position in world coordinates. Default `[0, 0, 1]`.
+* `lookAt` (`Number[3]`, optional) - The position being looked at. Default `[0, 0, 0]`.
+* `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
 * `near` (`Number`, optional) - Distance of near clipping plane. Default to `1`.
 * `far` (`Number`, optional) - Distance of far clipping plane. Default to `100`.
-* `left` (`Number`, optional) - Left bound of the frustum. Automatically calculated if not provided.
-* `top` (`Number`, optional) - Top bound of the frustum. Automatically calculated if not provided.
-* `right` (`Number`, optional) - Right bound of the frustum. Automatically calculated if not provided.
-* `bottom` (`Number`, optional) - Bottom bound of the frustum. Automatically calculated if not provided.
 
 
 ## Methods

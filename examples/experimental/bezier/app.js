@@ -7,7 +7,6 @@ import BezierGraphLayer from './bezier-graph-layer';
 import SAMPLE_GRAPH from './sample-graph.json';
 
 const INITIAL_VIEW_STATE = {
-  offset: [0, 0],
   zoom: 1
 };
 
