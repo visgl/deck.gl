@@ -2,9 +2,16 @@
 
 ## Upgrading from deck.gl v6.3 to v6.4
 
-#### OrthographicController
+#### OrthographicView
 
-`zoom` is reversed (larger value means zooming in) and switched to logarithmic scale.
+The experimental `OrthographicView` class has the following breaking changes:
+
+- `zoom` is reversed (larger value means zooming in) and switched to logarithmic scale.
+- Changed view state defaults:
+  + `zoom` - `1` -> `0`
+  + `offset` - `[0, 1]` -> `[0, 0]`
+  + `minZoom` - `0.1` -> `-10`
+- `eye`, `lookAt` and `up` are now set in the  `OrthographicView` constructor instead of `viewState`.
 
 #### ScatterplotLayer
 
