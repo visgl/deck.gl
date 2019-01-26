@@ -12,13 +12,13 @@ all the different fonts. For example, [Cinzel](https://fonts.google.com/specimen
 of `Q` character, which requires a big buffer [See detail](https://github.com/uber/deck.gl/pull/2609). Big buffer around each character can be very expensive 
 if the target `characterSet` is considerably large, which is not necessary for other fonts.
 
-`TextLayer` needs expose settings related to `fontAtlas` generation for users to manipulate when needed.
+`TextLayer` needs expose the settings related to `fontAtlas` generation for users to manipulate when needed.
 
 ## Proposal: Expose font settings as layer props
 
 `TextLayer` supports [`sdf`](https://github.com/mapbox/tiny-sdf), check [Text Layer](/docs/layers/text-layer.md) for details.
 
-`fontSettings` together with the other two layer props `characterSet` and `fontFamily` will be used in generating `fontAtlas`.
+`fontSettings` together with the other three layer props `characterSet`, `fontFamily` and `fontWeight` will be used in generating `fontAtlas`.
 
 ```js
 
@@ -28,6 +28,7 @@ const textLayer = new TextLayer({
   ...,
   characterSet: 'abcdefg',
   fontFamily: 'Monaco, monospace',
+  fontWeight: 'normal',
 
   fontSettings: {
     // shared options between non-sdf and sdf
@@ -42,8 +43,7 @@ const textLayer = new TextLayer({
     sdf: true,
     // if `sdf` is false, the following parameters are not appliable
     radius: 3,
-    cutoff: 0.25,
-    fontWeight: 'normal'
+    cutoff: 0.25
   },
   ...
 ```
@@ -56,8 +56,9 @@ const textLayer = new TextLayer({
 If nested as the above proposal, it is more clear and more organized, but `TextLayer` needs compare the all the
 properties nested in `fontSettings` to decide whether update `fontAtlas`. 
 
-If flat, exposed all the options under `fontSettings` as layer props, it can be confusing to the users since some settings like `fontSize`, `fontWeight` is 
-not apply to the text labels rendering in the layer, but only impact `fontAtlas` generating.
+If flat, exposed all the options under `fontSettings` as layer props, it can be confusing to the users since
+some settings like `fontSize`, `fontWeight` is not apply to the text labels rendering in the layer,
+but only impact `fontAtlas` generating.
 
 ## Cost and Impact
 With the new proposal, the users using `sdf` needs to migrate to new API. Others should not be impacted.
