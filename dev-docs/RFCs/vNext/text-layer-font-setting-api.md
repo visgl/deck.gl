@@ -18,7 +18,7 @@ if the target `characterSet` is considerably large, which is not necessary for o
 
 `TextLayer` supports [`sdf`](https://github.com/mapbox/tiny-sdf), check [Text Layer](/docs/layers/text-layer.md) for details.
 
-`fontSettings` together with the other three layer props `characterSet`, `fontFamily` will be used in generating `fontAtlas`.
+`fontSettings` together with the other three layer props `characterSet`, `fontFamily` and `fontWeight` will be used in generating `fontAtlas`.
 
 ```js
 
@@ -28,6 +28,7 @@ const textLayer = new TextLayer({
   ...,
   characterSet: 'abcdefg',
   fontFamily: 'Monaco, monospace',
+  fontWeight: 'normal',
 
   fontSettings: {
     // shared options between non-sdf and sdf
@@ -36,7 +37,6 @@ const textLayer = new TextLayer({
     fontSize: 64, 
     // Whitespace buffer around each side of the character
     buffer: 2,
-    fontWeight: 'normal',
     
     // `sdf` only options
     // https://github.com/mapbox/tiny-sdf
