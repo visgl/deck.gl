@@ -92,19 +92,21 @@ export default class EnhancedHexagonLayer extends Layer {
   }
 
   getModel(gl) {
-    return new Model(gl, {
-      ...this.getShaders(),
-      id: 'enhanced-hexagon-layer',
-      geometry: new Geometry({
-        id: this.id,
-        drawMode: GL.TRIANGLE_FAN,
-        attributes: {
-          positions: this.getPositions()
-        }
-      }),
-      isInstanced: true,
-      shaderCache: this.context.shaderCache
-    });
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: 'enhanced-hexagon-layer',
+        geometry: new Geometry({
+          id: this.id,
+          drawMode: GL.TRIANGLE_FAN,
+          attributes: {
+            positions: this.getPositions()
+          }
+        }),
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   // Modify geometry to match hexagonVertices

@@ -21,10 +21,11 @@
 import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
 
-import {H3HexagonLayer, H3OutlineLayer, H3RingLayer} from '@deck.gl/h3-layers';
+import {/* H3HexagonLayer, */ H3OutlineLayer, H3RingLayer} from '@deck.gl/h3-layers';
 
 // import * as TEST_DATA from 'deck.gl/test/data';
 
+/*
 test('H3HexagonLayer#constructor', t => {
   // const data = TEST_DATA.points;
 
@@ -51,6 +52,7 @@ test('H3HexagonLayer#constructor', t => {
 
   t.end();
 });
+*/
 
 test('H3OutlineLayer#constructor', t => {
   // const data = TEST_DATA.points;

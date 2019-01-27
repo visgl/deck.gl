@@ -73,16 +73,18 @@ export default class ExtrudedChoroplethLayer extends Layer {
   }
 
   getModel(gl) {
-    return new Model(gl, {
-      ...this.getShaders(),
-      id: this.props.id,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES
-      }),
-      vertexCount: 0,
-      isIndexed: true,
-      shaderCache: this.context.shaderCache
-    });
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLES
+        }),
+        vertexCount: 0,
+        isIndexed: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
   calculatePositions(attribute) {
@@ -187,14 +189,14 @@ export default class ExtrudedChoroplethLayer extends Layer {
     const {index} = info;
     const {data} = this.props;
     const feature = data.features[index];
-    this.props.onHover({...info, feature});
+    this.props.onHover(Object.assign({}, info, {feature}));
   }
 
   onClick(info) {
     const {index} = info;
     const {data} = this.props;
     const feature = data.features[index];
-    this.props.onClick({...info, feature});
+    this.props.onClick(Object.assign({}, info, {feature}));
   }
 }
 

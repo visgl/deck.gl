@@ -38,6 +38,8 @@
     "earcut": "^2.1.4",
     "extrude-polyline": "^1.0.6",
     "geojson-normalize": "^0.0.1",
+    "geojson2h3": "^1.0.1",
+    "h3-js": "^3.4.1",
     "lodash.flattendeep": "^4.4.0"
   }
 }

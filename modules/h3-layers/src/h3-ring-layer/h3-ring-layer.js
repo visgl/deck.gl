@@ -1,8 +1,22 @@
-import * as h3 from '@uber/h3-transitional';
-import {hexToFeature} from '@uber/geojson2hex';
-import ExtrudedChoroplethLayer from './extruded-choropleth-layer';
+import {h3SetToFeature} from 'geojson2h3';
+import * as h3 from 'h3-js';
+
+import {CompositeLayer} from '@deck.gl/core';
+import ExtrudedChoroplethLayer from '../extruded-choropleth-layer/extruded-choropleth-layer';
 
 const SUPERFINE_ORANGE = [202, 50, 39];
+
+/* @param {number} props.getHexagonId= - accessor, gets hexagonId from the
+ *    data objects. Defaults to `object.hexagonId`
+ * @param {number} [props.centerHexLat] Latitude of the center hexagon
+ * @param {number} [props.centerHexLon] Longitude of the center hexagon
+ */
+const defaultProps = {
+  radius: 0,
+  strokeColor: SUPERFINE_ORANGE,
+  strokeWidth: 5,
+  hexToFeature: h3SetToFeature
+};
 
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
@@ -14,21 +28,12 @@ const SUPERFINE_ORANGE = [202, 50, 39];
  * objects. Since this is calculated using math, hexagonId will be present
  * even when no corresponding hexagon is in the data set. You can check
  * index !== -1 to see if picking matches an actual object.
- *
- * @class
- * @param {number} props.getHexagonId= - accessor, gets hexagonId from the
- *    data objects. Defaults to `object.hexagonId`
- * @param {number} [props.centerHexLat] Latitude of the center hexagon
- * @param {number} [props.centerHexLon] Longitude of the center hexagon
  */
-export default class H3RingLayer extends ExtrudedChoroplethLayer {
-  constructor({
-    hexagonId,
-    radius = 0,
-    strokeColor = SUPERFINE_ORANGE,
-    strokeWidth = 5,
-    ...props
-  } = {}) {
+export default class H3RingLayer extends CompositeLayer {
+  initializeState() {
+    const {hexagonId, radius, hexToFeature} = this.props;
+
+    // Calculate a GeoJSON polygon "feature" from the hex ids
     let features = [];
 
     if (hexagonId) {
@@ -38,22 +43,26 @@ export default class H3RingLayer extends ExtrudedChoroplethLayer {
     }
 
     // ExtrudedChoroplethLayer expects coords to be wrapped in a GeoJSON object
-    const data = {
-      type: 'FeatureCollection',
-      features
+    this.state = {
+      geoJsonRing: {
+        type: 'FeatureCollection',
+        features
+      }
     };
+  }
 
-    super({
+  renderSubLayers() {
+    const {strokeColor, strokeWidth} = this.props;
+    const {geoJsonRing} = this.state;
+
+    return new ExtrudedChoroplethLayer({
       // For debugging only, already used
-      hexagonId,
-      radius,
-
-      data,
+      data: geoJsonRing,
       strokeColor,
-      strokeWidth,
-      ...props
+      strokeWidth
     });
   }
 }
 
+H3RingLayer.defaultProps = defaultProps;
 H3RingLayer.layerName = 'H3RingLayer';
