@@ -104,7 +104,7 @@ void main(void) {
   );
   
   // outer radius needs to offset by half stroke width
-  outerRadiusPixels += stroked * mix(0., instanceLineWidths, isInBrush) / 2.;
+  outerRadiusPixels += stroked * mix(0., lineWidth, isInBrush) / 2.;
 
   // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
