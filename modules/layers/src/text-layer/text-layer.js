@@ -123,7 +123,7 @@ export default class TextLayer extends CompositeLayer {
     // here info.index refers the index of text label in props.data
     return Object.assign(info, {
       // override object with original data
-      object: info.index > -1 && this.props.data[info.index]
+      object: info.index >= 0 ? this.props.data[info.index] : null
     });
   }
 
