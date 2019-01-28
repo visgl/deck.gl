@@ -30,7 +30,7 @@ Release Date: TBD
 - `ScatterplotLayer` now supports drawing both stroke and fill, and outline width can be controlled per-instance.
 - `ContourLayer` now supports isoband - filling between two thresholds.
 - `ScreenGridLayer` now supports aggregating by min/max/mean.
-- `TextLayer` adds a new `sdf` prop that generates the font with [Signed Distance Fields](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf). When rendering large font sizes, this will yield a much crisper look.
+- `TextLayer` adds new props that allow better control of the font rendering quality, including font weight and raster size. The layer can also optionally generate a font atlas with [Signed Distance Fields](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf), which yields a much crisper look when rendering large font sizes.
 - `IconLayer` supports dynamically packed icon atlas. Users can now load programatically generated image urls as icons, for example Facebook profile images.
 - `PathLayer`'s `getPath` and `PolygonLayer`'s `getPolygon` props now support flattened coordinates instead of nested arrays, making it easier for these layers to use binary data.
 

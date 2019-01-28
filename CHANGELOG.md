@@ -17,6 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.0-beta.1] - Jan 28 2019
+
+- fix the visible prop in TileLayer (#2624)
+- OrthographicView bug fixes (#2625)
+- expose font settings as TextLayer props (#2628)
+- fix text-layer per object highlighting (#2633)
+
 #### [6.4.0-alpha.3] - Jan 24 2019
 
 - Generate layer attributes on a worker (PR 1/3) (#2490)
