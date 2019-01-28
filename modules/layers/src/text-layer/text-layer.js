@@ -20,7 +20,13 @@
 
 import {CompositeLayer, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
-import {makeFontAtlas, DEFAULT_CHAR_SET, DEFAULT_FONT_SIZE} from './font-atlas';
+import {
+  makeFontAtlas,
+  DEFAULT_CHAR_SET,
+  DEFAULT_FONT_FAMILY,
+  DEFAULT_FONT_WEIGHT,
+  DEFAULT_FONT_SETTINGS
+} from './font-atlas';
 
 const TEXT_ANCHOR = {
   start: 1,
@@ -34,26 +40,19 @@ const ALIGNMENT_BASELINE = {
   bottom: -1
 };
 
-const DEFAULT_FONT_FAMILY = 'Monaco, monospace';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const MISSING_CHAR_WIDTH = 32;
-
-// used in TinySDF
-const SDF_PRESET = {
-  fontSize: DEFAULT_FONT_SIZE,
-  radius: 2,
-  buffer: 2,
-  cutoff: 0.25,
-  fontWeight: 'normal'
-};
+const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
   fp64: false,
   sizeScale: 1,
-  sdf: false,
+
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
+  fontWeight: DEFAULT_FONT_WEIGHT,
+  fontSettings: {},
 
   getText: {type: 'accessor', value: x => x.text},
   getPosition: {type: 'accessor', value: x => x.position},
@@ -67,11 +66,7 @@ const defaultProps = {
 
 export default class TextLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
-    const fontChanged =
-      oldProps.fontFamily !== props.fontFamily ||
-      oldProps.characterSet !== props.characterSet ||
-      oldProps.sdf !== props.sdf;
-
+    const fontChanged = this.fontChanged(oldProps, props);
     if (fontChanged) {
       this.updateFontAtlas();
     }
@@ -88,29 +83,39 @@ export default class TextLayer extends CompositeLayer {
 
   updateFontAtlas() {
     const {gl} = this.context;
-    const {sdf, fontFamily, characterSet} = this.props;
+    const {fontSettings, fontFamily, fontWeight, characterSet} = this.props;
 
-    let sdfSettings = null;
-    if (sdf) {
-      sdfSettings = Object.assign({}, SDF_PRESET, {fontFamily});
-      // merge with user settings
-      // override fontFamily with layer prop's fontFamily
-      if (typeof sdf === 'object') {
-        Object.assign(sdfSettings, sdf, {fontFamily});
-      }
-    }
-
-    const {scale, mapping, texture} = makeFontAtlas(gl, {
-      sdf: sdfSettings,
+    const mergedFontSettings = Object.assign({}, DEFAULT_FONT_SETTINGS, fontSettings, {
       fontFamily,
+      fontWeight,
       characterSet
     });
+    const {scale, mapping, texture} = makeFontAtlas(gl, mergedFontSettings);
 
     this.setState({
       scale,
       iconAtlas: texture,
       iconMapping: mapping
     });
+  }
+
+  fontChanged(oldProps, props) {
+    if (
+      oldProps.fontFamily !== props.fontFamily ||
+      oldProps.characterSet !== props.characterSet ||
+      oldProps.fontWeight !== props.fontWeight
+    ) {
+      return true;
+    }
+
+    if (oldProps.fontSettings === props.fontSettings) {
+      return false;
+    }
+
+    const oldFontSettings = oldProps.fontSettings || {};
+    const fontSettings = props.fontSettings || {};
+
+    return FONT_SETTINGS_PROPS.some(prop => oldFontSettings[prop] !== fontSettings[prop]);
   }
 
   getPickingInfo({info}) {
