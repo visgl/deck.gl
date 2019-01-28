@@ -136,7 +136,10 @@ export default class PathOutlineLayer extends PathLayer {
     attribute.value = pathTesselator._updateAttribute({
       target: attribute.value,
       size: 1,
-      getValue: (object, index) => getZLevel(object, index) || 0
+      getValue: (object, index) => {
+        const zLevel = getZLevel(object, index);
+        return isNaN(zLevel) ? 0 : [zLevel];
+      }
     });
   }
 }
