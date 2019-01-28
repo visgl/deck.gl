@@ -27,15 +27,20 @@ attribute vec3 positions;
 attribute vec3 instancePositions;
 attribute vec3 instanceTargetPositions;
 attribute float instanceRadius;
-attribute vec4 instanceColors;
+attribute float instanceLineWidths;
+attribute vec4 instanceFillColors;
+attribute vec4 instanceLineColors;
 attribute vec3 instancePickingColors;
 
 uniform float opacity;
 uniform float radiusScale;
 uniform float radiusMinPixels;
 uniform float radiusMaxPixels;
-uniform float outline;
-uniform float strokeWidth;
+uniform float lineWidthScale;
+uniform float lineWidthMinPixels;
+uniform float lineWidthMaxPixels;
+uniform float stroked;
+uniform bool filled;
 
 // uniform for brushing
 uniform vec2 mousePos;
@@ -43,7 +48,8 @@ uniform float brushRadius;
 uniform bool enableBrushing;
 uniform float brushTarget;
 
-varying vec4 vColor;
+varying vec4 vFillColor;
+varying vec4 vLineColor;
 varying vec2 unitPosition;
 varying float innerUnitRadius;
 
@@ -90,14 +96,21 @@ void main(void) {
     project_scale(radiusScale * finalRadius),
     radiusMinPixels, radiusMaxPixels
   );
-  // outline is centered at the radius
+  
+  // multiply out line width and clamp to limits
+  float lineWidth = clamp(
+    project_scale(lineWidthScale * instanceLineWidths),
+    lineWidthMinPixels, lineWidthMaxPixels
+  );
+  
   // outer radius needs to offset by half stroke width
-  outerRadiusPixels += outline * mix(0., strokeWidth, isInBrush) / 2.;
+  outerRadiusPixels += stroked * mix(0., lineWidth, isInBrush) / 2.;
 
   // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
+  
   // 0 - solid circle, 1 - stroke with lineWidth=0
-  innerUnitRadius = outline * (1. - strokeWidth / outerRadiusPixels);
+  innerUnitRadius = 1. - stroked * lineWidth / outerRadiusPixels;
 
   // Find the center of the point and add the current vertex
   vec3 center = project_position(instancePositions);
@@ -105,10 +118,10 @@ void main(void) {
   gl_Position = project_to_clipspace(vec4(center + vertex, 1.));
 
   // Apply opacity to instance color
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity) / 255.;
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity) / 255.;
 
   // Set picking color
   picking_setPickingColor(instancePickingColors);
-
 }
 `;

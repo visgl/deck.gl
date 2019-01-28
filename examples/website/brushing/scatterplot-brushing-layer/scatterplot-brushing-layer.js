@@ -31,7 +31,8 @@ const defaultProps = {
   // brush radius in meters
   brushRadius: 100000,
   mousePosition: [0, 0],
-  getTargetPosition: d => d.target
+  getTargetPosition: d => d.target,
+  radiusMinPixels: 0
 };
 
 export default class ScatterplotBrushingLayer extends ScatterplotLayer {
