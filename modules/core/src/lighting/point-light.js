@@ -1,7 +1,0 @@
-import {PointLight as BasePointLight} from 'luma.gl';
-
-export default class PointLight extends BasePointLight {
-  constructor(props) {
-    super(props);
-  }
-}
