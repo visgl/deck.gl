@@ -68,8 +68,7 @@ export {
   _EffectManager,
   _Effect,
   _ReflectionEffect,
-  LightingEffect,
-  PointLight
+  LightingEffect
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
@@ -128,7 +127,7 @@ export {
 
 export {default, DeckGL} from '@deck.gl/react';
 
-export {AmbientLight, DirectionalLight} from 'luma.gl';
+export {AmbientLight, PointLight, DirectionalLight} from 'luma.gl';
 
 //
 // EXPERIMENTAL EXPORTS
