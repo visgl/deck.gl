@@ -10,9 +10,6 @@ const MAX_CANVAS_WIDTH = 1024;
 const BASELINE_SCALE = 0.9;
 const HEIGHT_SCALE = 1.2;
 
-export const DEFAULT_PADDING = 2;
-export const DEFAULT_FONT_SIZE = 64;
-
 function getDefaultCharacterSet() {
   const charSet = [];
   for (let i = 32; i < 128; i++) {
@@ -22,6 +19,16 @@ function getDefaultCharacterSet() {
 }
 
 export const DEFAULT_CHAR_SET = getDefaultCharacterSet();
+export const DEFAULT_FONT_FAMILY = 'Monaco, monospace';
+export const DEFAULT_FONT_WEIGHT = 'normal';
+
+export const DEFAULT_FONT_SETTINGS = {
+  fontSize: 64,
+  buffer: 2,
+  sdf: false,
+  cutoff: 0.25,
+  radius: 3
+};
 
 function populateAlphaChannel(alphaChannel, imageData) {
   // populate distance value from tinySDF to image alpha channel
@@ -30,8 +37,8 @@ function populateAlphaChannel(alphaChannel, imageData) {
   }
 }
 
-function setTextStyle(ctx, fontFamily, fontSize) {
-  ctx.font = `${fontSize}px ${fontFamily}`;
+function setTextStyle(ctx, fontFamily, fontSize, fontWeight) {
+  ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
   ctx.fillStyle = '#000';
   ctx.textBaseline = 'baseline';
   ctx.textAlign = 'left';
@@ -43,9 +50,11 @@ function buildMapping({ctx, fontHeight, buffer, characterSet, maxCanvasWidth}) {
   let x = 0;
   Array.from(characterSet).forEach(char => {
     // measure texts
+    // TODO - use Advanced text metrics when they are adopted:
+    // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
     const {width} = ctx.measureText(char);
 
-    if (x + width > maxCanvasWidth) {
+    if (x + width + buffer * 2 > maxCanvasWidth) {
       x = 0;
       row++;
     }
@@ -64,67 +73,59 @@ function buildMapping({ctx, fontHeight, buffer, characterSet, maxCanvasWidth}) {
   return {mapping, canvasHeight};
 }
 
-export function makeFontAtlas(
-  gl,
-  {
-    sdf,
+export function makeFontAtlas(gl, fontSettings) {
+  const mergedFontSettings = Object.assign(
+    {
+      fontFamily: DEFAULT_FONT_FAMILY,
+      fontWeight: DEFAULT_FONT_WEIGHT,
+      characterSet: DEFAULT_CHAR_SET
+    },
+    DEFAULT_FONT_SETTINGS,
+    fontSettings
+  );
+
+  const {
     fontFamily,
-    fontSize = DEFAULT_FONT_SIZE,
-    characterSet = DEFAULT_CHAR_SET,
-    padding = DEFAULT_PADDING
-  }
-) {
+    fontWeight,
+    characterSet,
+    fontSize,
+    buffer,
+    sdf,
+    radius,
+    cutoff
+  } = mergedFontSettings;
+
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
 
   // build mapping
-  // TODO - use Advanced text metrics when they are adopted:
-  // https://developer.mozilla.org/en-US/docs/Web/API/TextMetrics
-  const fontSettings = {
-    fontSize: sdf ? sdf.fontSize : fontSize,
-    fontFamily: sdf ? sdf.fontFamily : fontFamily,
-    fontHeight: (sdf ? sdf.fontSize : fontSize) * HEIGHT_SCALE,
-    buffer: sdf ? sdf.buffer : padding
-  };
-
-  setTextStyle(ctx, fontSettings.fontFamily, fontSettings.fontSize);
+  setTextStyle(ctx, fontFamily, fontSize, fontWeight);
+  const fontHeight = fontSize * HEIGHT_SCALE;
   const {canvasHeight, mapping} = buildMapping({
     ctx,
-    fontHeight: fontSettings.fontHeight,
-    buffer: fontSettings.buffer,
+    fontHeight,
+    buffer,
     characterSet,
     maxCanvasWidth: MAX_CANVAS_WIDTH
   });
 
   canvas.width = MAX_CANVAS_WIDTH;
   canvas.height = canvasHeight;
-  setTextStyle(ctx, fontSettings.fontFamily, fontSettings.fontSize);
+  setTextStyle(ctx, fontFamily, fontSize, fontWeight);
 
   // layout characters
   if (sdf) {
-    const tinySDF = new TinySDF(
-      fontSettings.fontSize,
-      fontSettings.buffer,
-      sdf.radius,
-      sdf.cutoff,
-      fontSettings.fontFamily,
-      sdf.fontWeight
-    );
-    setTextStyle(tinySDF.ctx, fontFamily, fontSize);
+    const tinySDF = new TinySDF(fontSize, buffer, radius, cutoff, fontFamily, fontWeight);
     // used to store distance values from tinySDF
     const imageData = ctx.createImageData(tinySDF.size, tinySDF.size);
 
     for (const char of characterSet) {
       populateAlphaChannel(tinySDF.draw(char), imageData);
-      ctx.putImageData(
-        imageData,
-        mapping[char].x - fontSettings.buffer,
-        mapping[char].y - fontSettings.buffer
-      );
+      ctx.putImageData(imageData, mapping[char].x - buffer, mapping[char].y - buffer);
     }
   } else {
     for (const char of characterSet) {
-      ctx.fillText(char, mapping[char].x, mapping[char].y + fontSettings.fontSize * BASELINE_SCALE);
+      ctx.fillText(char, mapping[char].x, mapping[char].y + fontSize * BASELINE_SCALE);
     }
   }
 
