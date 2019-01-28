@@ -36,13 +36,7 @@ import {EVENTS} from './constants';
 
 function noop() {}
 
-const CURSOR = {
-  GRABBING: 'grabbing',
-  GRAB: 'grab',
-  POINTER: 'pointer'
-};
-
-const getCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
+const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 
 function getPropTypes(PropTypes) {
   // Note: Arrays (layers, views, ) can contain falsy values
