@@ -31,21 +31,12 @@ import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
-import VENDOR_PREFIX from '../utils/css-vendor-prefix';
 import {EVENTS} from './constants';
 /* global document */
 
 function noop() {}
 
-const PREFIX = VENDOR_PREFIX === '-webkit-' ? VENDOR_PREFIX : '';
-
-const CURSOR = {
-  GRABBING: `${PREFIX}grabbing`,
-  GRAB: `${PREFIX}grab`,
-  POINTER: 'pointer'
-};
-
-const getCursor = ({isDragging}) => (isDragging ? CURSOR.GRABBING : CURSOR.GRAB);
+const getCursor = ({isDragging}) => (isDragging ? 'grabbing' : 'grab');
 
 function getPropTypes(PropTypes) {
   // Note: Arrays (layers, views, ) can contain falsy values
