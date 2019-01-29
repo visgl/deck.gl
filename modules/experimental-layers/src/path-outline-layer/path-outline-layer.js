@@ -33,7 +33,7 @@ const FS_CODE = `\
 `;
 
 const defaultProps = {
-  getZLevel: object => object.zLevel | 0
+  getZLevel: {type: 'accessor', value: 0}
 };
 
 export default class PathOutlineLayer extends PathLayer {
@@ -136,7 +136,7 @@ export default class PathOutlineLayer extends PathLayer {
     attribute.value = pathTesselator._updateAttribute({
       target: attribute.value,
       size: 1,
-      getValue: (object, index) => getZLevel(object, index) || 0
+      getValue: (object, index) => [getZLevel(object, index) || 0]
     });
   }
 }
