@@ -17,6 +17,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.0] - Jan 29 2019
+
+- Remove prefixes for grab and grabbing cursor values. (#2629)
+- bump dev dependencies (#2635)
+- add type for defaultProps in path outline layer (#2521)
+
+### Pre-releases
+
 #### [6.4.0-beta.1] - Jan 28 2019
 
 - fix the visible prop in TileLayer (#2624)

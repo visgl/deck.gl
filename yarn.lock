@@ -4971,7 +4971,7 @@ gl-matrix@^2.6.1:
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-2.7.1.tgz#0874a6f641bf4ad12e125b3f4ad8e5a70775fbea"
   integrity sha512-22I6q7aO2oKNahNV0+9JavVNUhQXRTvR5jP2s8U1l93TkjcQe8RK6MeMYpM7+66R0sCVUgSdO97BL439vePyzQ==
 
-gl-matrix@^3.0.0:
+gl-matrix@^3.0.0, gl-matrix@^3.0.0-0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.0.0.tgz#888301ac7650e148c3865370e13ec66d08a8381f"
   integrity sha512-PD4mVH/C/Zs64kOozeFnKY8ybhgwxXXQYGWdB4h68krAHknWJgk9uKOn6z8YElh5//vs++90pb6csrTIDWnexA==
@@ -6865,13 +6865,13 @@ lru-cache@^4.0.1, lru-cache@^4.1.1:
     pseudomap "^1.0.2"
     yallist "^2.1.2"
 
-luma.gl@^6.4.0-alpha.3:
-  version "6.4.0-alpha.3"
-  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.4.0-alpha.3.tgz#5d4ac242ce436314b690ddc9dd9c2b740cc0561d"
-  integrity sha512-bk/ScnfDXjHFzP7XmXNZ620A8YlRPygohmGBEFJyJOAEIHBfhISBflHqfNhQGTMDDcSJ3nPYNVaLszj1hYF+zA==
+luma.gl@^6.4.0:
+  version "6.4.0"
+  resolved "https://registry.yarnpkg.com/luma.gl/-/luma.gl-6.4.0.tgz#ac915602f60d723861da19cfe30855493bd492e1"
+  integrity sha512-z/1OY9N0CWvKaLlKmAPycvjfHYmCJlKHjS/2/xrz7ccva1yEJR/PEpq4tSNjqQjcZ3/BoOIM+oAA6e2eOzk+dw==
   dependencies:
     "@babel/runtime" "^7.0.0"
-    math.gl "^2.3.0-beta.1"
+    math.gl "^2.3.0"
     probe.gl "^2.0.1"
     seer "^0.2.4"
     webgl-debug "^2.0.0"
@@ -7015,14 +7015,13 @@ math.gl@^2.1.0:
     gl-vec3 "^1.0.3"
     gl-vec4 "^1.0.1"
 
-math.gl@^2.3.0-beta.1:
-  version "2.3.0-beta.1"
-  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.3.0-beta.1.tgz#99afdaafb9184cdf255e51537d04d1183fcd2344"
-  integrity sha512-4fq2y5ZQLMg0AKbxyEzX6ErQpB7J0nfa/kVelIceR6P15/07hC0CQdFJGlcv4w/A5DVEWtEsjcaEUsiRCR45qg==
+math.gl@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/math.gl/-/math.gl-2.3.0.tgz#d6312eb2b28e4e72116ab845fbebc482b6fea5ba"
+  integrity sha512-6a2II4xlYg4k0Z9KLh0u9LzVjb/17/viobJlyI1GzzK2COF3SF28VlYH0I4O8MduObZjlJR+E7Y9OM7d8VuZlw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"
-    puppeteer "^1.11.0"
 
 md5-hex@^1.2.0:
   version "1.3.0"
@@ -7336,10 +7335,10 @@ mjolnir.js@^1.2.1:
   dependencies:
     hammerjs "^2.0.8"
 
-mjolnir.js@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.0.2.tgz#bd8f4ee36ce8a05d9643e3b4738436c1df2e3a04"
-  integrity sha512-xNWPIHATqMAgxv3KO1R/c6XfxRJ0eNNlEHXuUKEgN2S3NjuSxQ1Evvqu5DkNdJ7SWwGDpmenUUpi5/Vak+f3+Q==
+mjolnir.js@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.0.3.tgz#2354d31bc966a13f18d3bc350d5491acfb562914"
+  integrity sha512-3AvoMwJCR3m9QQYzsE+D+LWZ9N2uWbl7prixSJGRZNOpaagRgiXJeVvDEHTiXAGmNhdn/VAtgWrx3lpdrj2sIQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
     hammerjs "^2.0.8"
@@ -8440,11 +8439,6 @@ progress@^2.0.0:
   resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.0.tgz#8a1be366bf8fc23db2bd23f10c6fe920b4389d1f"
   integrity sha1-ihvjZr+Pwj2yvSPxDG/pILQ4nR8=
 
-progress@^2.0.1:
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/progress/-/progress-2.0.3.tgz#7e8cf8d8f5b8f239c1bc68beb4eb78567d572ef8"
-  integrity sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==
-
 promise-inflight@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/promise-inflight/-/promise-inflight-1.0.1.tgz#98472870bf228132fcbdd868129bad12c3c029e3"
@@ -8562,20 +8556,6 @@ puppeteer@^1.0.0:
     proxy-from-env "^1.0.0"
     rimraf "^2.6.1"
     ws "^5.1.1"
-
-puppeteer@^1.11.0:
-  version "1.11.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.11.0.tgz#63cdbe12b07275cd6e0b94bce41f3fcb20305770"
-  integrity sha512-iG4iMOHixc2EpzqRV+pv7o3GgmU2dNYEMkvKwSaQO/vMZURakwSOn/EYJ6OIRFYOque1qorzIBvrytPIQB3YzQ==
-  dependencies:
-    debug "^4.1.0"
-    extract-zip "^1.6.6"
-    https-proxy-agent "^2.2.1"
-    mime "^2.0.3"
-    progress "^2.0.1"
-    proxy-from-env "^1.0.0"
-    rimraf "^2.6.1"
-    ws "^6.1.0"
 
 q@^1.4.1, q@^1.5.1:
   version "1.5.1"
@@ -10706,6 +10686,14 @@ viewport-mercator-project@^6.0.0:
     "@babel/runtime" "^7.0.0"
     math.gl "^2.1.0"
 
+viewport-mercator-project@^6.1.0:
+  version "6.1.0"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-6.1.0.tgz#94824977e023f96f0c0bf0d821d73f63c45478e4"
+  integrity sha512-fy28QiLZ5t4SRMS7orqpRiE3tJ+ruvbjw6S6wguy15eRTc+RDwqCBDBt1YOd7WMHMBmBAjVNgYThQTNTDK/nIw==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    gl-matrix "^3.0.0-0"
+
 vinyl-file@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/vinyl-file/-/vinyl-file-2.0.0.tgz#a7ebf5ffbefda1b7d18d140fcb07b223efb6751a"
@@ -11120,13 +11108,6 @@ ws@^5.1.1:
   version "5.2.2"
   resolved "https://registry.yarnpkg.com/ws/-/ws-5.2.2.tgz#dffef14866b8e8dc9133582514d1befaf96e980f"
   integrity sha512-jaHFD6PFv6UgoIVda6qZllptQsMlDEJkTQcybzzXDYM1XO9Y8em691FGMPmM46WGyLU4z9KMgQN+qrux/nhlHA==
-  dependencies:
-    async-limiter "~1.0.0"
-
-ws@^6.1.0:
-  version "6.1.2"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-6.1.2.tgz#3cc7462e98792f0ac679424148903ded3b9c3ad8"
-  integrity sha512-rfUqzvz0WxmSXtJpPMX2EeASXabOrSMk1ruMOV3JBTBjo4ac2lDjGGsbQSyxj8Odhw5fBib8ZKEjDNvgouNKYw==
   dependencies:
     async-limiter "~1.0.0"
 
