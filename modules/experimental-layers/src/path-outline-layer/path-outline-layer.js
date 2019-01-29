@@ -2,7 +2,6 @@ import {PathLayer} from '@deck.gl/layers';
 import GL from '@luma.gl/constants';
 import {Framebuffer, Texture2D} from 'luma.gl';
 import outline from '../shaderlib/outline/outline';
-import assert from '../../../core/src/utils/assert';
 
 // TODO - this should be built into assembleShaders
 function injectShaderCode({source, declarations = '', code = ''}) {
@@ -137,11 +136,7 @@ export default class PathOutlineLayer extends PathLayer {
     attribute.value = pathTesselator._updateAttribute({
       target: attribute.value,
       size: 1,
-      getValue: (object, index) => {
-        const zLevel = getZLevel(object, index);
-        assert(!isNaN(zLevel), '`getZLevel` does not return a number!');
-        return [zLevel];
-      }
+      getValue: (object, index) => [getZLevel(object, index) || 0]
     });
   }
 }
