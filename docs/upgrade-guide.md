@@ -18,7 +18,7 @@ The experimental `OrthographicView` class has the following breaking changes:
 Deprecations:
 
 - `outline` is deprecated: use `stroked` instead.
-- `strokeWidth` is deprecated: use `getLineWidth` instead.
+- `strokeWidth` is deprecated: use `getLineWidth` instead. Note that while `strokeWidth` is in pixels, line width is now pecified in meters. The old appearance can be achieved by using `lineWidthMinPixels` and/or `lineWidthMaxPixels`.
 - `getColor` is deprecated: use `getFillColor` and `getLineColor` instead.
 
 Breaking changes:
