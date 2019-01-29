@@ -201,7 +201,7 @@ export class App extends Component {
         data: targets,
         brushRadius,
         mousePosition,
-        getLineWidth: 2,
+        lineWidthMinPixels: 2,
         stroked: true,
         filled: false,
         opacity: 1,
