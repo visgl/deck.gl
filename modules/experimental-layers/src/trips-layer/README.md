@@ -15,7 +15,7 @@ Returns an array of navigation points on a single path.
 Each navigation point is defined as an array of three numbers: `[longitude, latitude, timestamp]`.
 Points should be sorted by timestamp.
 
-##### `getColor` (Function, optional)
+##### `getColor` (Function|Array, optional)
 
 - Default: `d => d.color`
 
