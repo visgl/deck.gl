@@ -164,7 +164,7 @@ Returns an properties object used to generate a sublayer, with the following key
   + `wrapLongitude`
   + `positionFormat`
   + `modelMatrix`
-* Any other additional props from the input paramter are directly forwarded.
+* Any other additional props from the input parameter are directly forwarded.
 * Any overriding props specified in `_subLayerProps`.
 
 

@@ -26,6 +26,7 @@ import {
   MeshLayer,
   PathMarkerLayer,
   PathOutlineLayer,
+  S2Layer,
   outline
 } from '@deck.gl/experimental-layers';
 
@@ -36,7 +37,9 @@ test('Top-level imports', t => {
   t.ok(Arrow2DGeometry, 'Arrow2DGeometry symbol imported');
   t.ok(outline, 'outline symbol imported');
   t.ok(BezierCurveLayer, 'BezierCurveLayer symbol imported');
+  t.ok(S2Layer, 'S2Layer symbol imported');
   t.end();
 });
 
 import './tile-layer/tile-cache.spec';
+import './s2-layers/s2-layer.spec';

@@ -15,6 +15,7 @@ export {default as AdvancedTextLayer} from './advanced-text-layer/advanced-text-
 //  3D CATALOG LAYERS
 export {default as MeshLayer} from './mesh-layer/mesh-layer';
 export {default as BitmapLayer} from './bitmap-layer/bitmap-layer';
+export {default as S2Layer} from './s2-layers/s2-layer';
 
 // INFOVIS LAYERS
 export {default as BezierCurveLayer} from './bezier-curve-layer/bezier-curve-layer';

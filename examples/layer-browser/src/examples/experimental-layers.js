@@ -3,7 +3,8 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   AdvancedTextLayer,
-  GPUGridLayer
+  GPUGridLayer,
+  S2Layer
   // KMLLayer
 } from '@deck.gl/experimental-layers';
 
@@ -198,6 +199,19 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
+const S2LayerExample = {
+  layer: S2Layer,
+  props: {
+    data: dataSamples.s2cells,
+    opacity: 0.6,
+    elevationScale: 1,
+    getS2Token: f => f.token,
+    getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128],
+    getElevation: f => Math.random() * 1000,
+    pickable: true
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Experimental 3D Layers': {
@@ -213,6 +227,7 @@ export default {
     AdvancedTextLayer: AdvancedTextLayerExample,
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
-    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
+    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
+    S2Layer: S2LayerExample
   }
 };

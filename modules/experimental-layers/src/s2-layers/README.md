@@ -5,12 +5,13 @@
 
 # S2Layer
 
-The S2Layer renders filled and/or stroked polygons, with geometry automatically calculated based on an S2 token (geospatial index).
+The S2Layer renders filled and/or stroked polygons, with geometry automatically calculated based on an [S2](http://s2geometry.io/) token (geospatial index).
 
 For more information
 
 ```js
-import DeckGL, {PolygonLayer} from '@deck.gl/s2-layers';
+import DeckGL from 'deck.gl';
+import {S2Layer} from '@deck.gl/experimental-layers';
 
 const App = ({data, viewport}) => {
 
@@ -75,8 +76,3 @@ Accepts all accessors from `PolygonLayer`, except `getPolygon` has been replaced
 ## Remarks
 
 * Uses the [`s2-geometry`](http://s2geometry.io/) library for S2 polygon calculations.
-
-## Source
-
-[modules/s2-layers/src/s2-layer](https://github.com/uber/deck.gl/tree/master/modules/s2-layers/src/s2-layer)
-

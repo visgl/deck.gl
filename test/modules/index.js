@@ -22,7 +22,6 @@ import './imports-spec';
 import './core';
 
 import './layers';
-import './s2-layers';
 
 import './json';
 

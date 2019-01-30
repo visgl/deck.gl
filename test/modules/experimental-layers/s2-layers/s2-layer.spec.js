@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import {testLayer} from '@deck.gl/test-utils';
-import {S2Layer} from '@deck.gl/s2-layers';
+import {S2Layer} from '@deck.gl/experimental-layers';
 import data from 'deck.gl/test/data/s2-sf.json';
 
 test('S2Layer#constructor', t => {
