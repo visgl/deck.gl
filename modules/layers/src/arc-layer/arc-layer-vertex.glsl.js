@@ -32,6 +32,7 @@ attribute float instanceWidths;
 uniform float numSegments;
 uniform float opacity;
 uniform float widthScale;
+uniform bool isGreatCircle;
 
 varying vec4 vColor;
 
@@ -72,19 +73,56 @@ vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
   );
 }
 
-void main(void) {
-  vec2 source = project_position(vec3(instancePositions.xy, 0.0), instancePositions64Low.xy).xy;
-  vec2 target = project_position(vec3(instancePositions.zw, 0.0), instancePositions64Low.zw).xy;
+vec2 toRadian(vec2 v) {
+  return v / 180.0 * PI;
+}
 
+vec2 toDegree(vec2 v) {
+  return v * 180.0 / PI;
+}
+
+// checkout the following link for formula
+// https://www.movable-type.co.uk/scripts/latlong.html
+float getAngularDist (vec2 source, vec2 target) {
+  vec2 delta = source - target;
+  float a =
+    sin(delta.y * 0.5) * sin(delta.y * 0.5) +
+    cos(source.y * PI / 180.) * cos(target.y * PI / 180.) *
+    sin(delta.x / 2.0) * sin(delta.x / 2.);
+	return 2.0 * atan(sqrt(a), sqrt(1.0 - a));
+}
+
+vec2 interpolate (vec2 source, vec2 target, float t) {
+	float angularDist = getAngularDist(source, target);
+	float a = sin((1.0 - t) * angularDist) / sin(angularDist);
+	float b = sin(t * angularDist) / sin(angularDist);
+	float x = a * cos(source.y) * cos(source.x) + b * cos(target.y) * cos(target.x);
+	float y = a * cos(source.y) * sin(source.x) + b * cos(target.y) * sin(target.x);
+	float z = a * sin(source.y) + b * sin(target.y);
+	return vec2(atan(y, x), atan(z, sqrt(x * x + y * y)));
+}
+
+void main(void) {
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
   float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
+  vec3 currPos, nextPos;
 
-  vec3 currPos = getPos(source, target, segmentRatio);
-  vec3 nextPos = getPos(source, target, nextSegmentRatio);
+  if (isGreatCircle) {
+    vec2 source = toRadian(instancePositions.xy);
+    vec2 target = toRadian(instancePositions.zw);
+    currPos = project_position(vec3(toDegree(interpolate(source, target, segmentRatio)), 0.0));
+    nextPos = project_position(vec3(toDegree(interpolate(source, target, nextSegmentRatio)), 0.0));
+  } else {
+    vec2 source = project_position(vec3(instancePositions.xy, 0.0), instancePositions64Low.xy).xy;
+    vec2 target = project_position(vec3(instancePositions.zw, 0.0), instancePositions64Low.zw).xy;
+    currPos = getPos(source, target, segmentRatio);
+    nextPos = getPos(source, target, nextSegmentRatio);
+  }
+
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
 

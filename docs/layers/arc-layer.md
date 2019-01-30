@@ -64,6 +64,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
+##### `isGreatCircle` (Boolean, optional)
+
+* Default: `false`
+
+Draw a great circle between two end points if true.
+
 ##### `widthScale` (number, optional)
 
 * Default: 1

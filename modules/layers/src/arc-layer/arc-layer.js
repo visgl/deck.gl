@@ -32,7 +32,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   fp64: false,
-
+  isGreatCircle: false,
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -104,7 +104,8 @@ export default class ArcLayer extends Layer {
     }
 
     this.state.model.setUniforms({
-      widthScale: props.widthScale
+      widthScale: props.widthScale,
+      isGreatCircle: props.isGreatCircle
     });
   }
 

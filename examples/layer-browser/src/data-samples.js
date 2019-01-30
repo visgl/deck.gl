@@ -109,6 +109,17 @@ export const zigzag = [
   }
 ];
 
+export const greatCircles = [
+  {source: [-20, 0], target: [-160, 0]},
+  {source: [-20, 10], target: [-160, 10]},
+  {source: [-20, 20], target: [-160, 20]},
+  {source: [-20, 30], target: [-160, 30]},
+  {source: [-20, 40], target: [-160, 40]},
+  {source: [-20, 50], target: [-160, 50]},
+  {source: [-20, 60], target: [-160, 60]},
+  {source: [-20, 70], target: [-160, 70]}
+];
+
 // Extract simple/complex polygons arrays from geojson
 export const polygons = choropleths.features.map(choropleth => choropleth.geometry.coordinates);
 
