@@ -3,7 +3,8 @@ import {
   PathOutlineLayer,
   PathMarkerLayer,
   AdvancedTextLayer,
-  GPUGridLayer
+  GPUGridLayer,
+  GreatCircleLayer
   // KMLLayer
 } from '@deck.gl/experimental-layers';
 
@@ -198,6 +199,20 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
+const ArcLayerGreatCircleExample = {
+  layer: GreatCircleLayer,
+  getData: () => dataSamples.greatCircles,
+  props: {
+    id: 'greatCircleLayer',
+    getSourcePosition: d => d.source,
+    getTargetPosition: d => d.target,
+    getSourceColor: [64, 255, 0],
+    getTargetColor: [0, 128, 200],
+    getStrokeWidth: 5,
+    pickable: true
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Experimental 3D Layers': {
@@ -213,6 +228,7 @@ export default {
     AdvancedTextLayer: AdvancedTextLayerExample,
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
-    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
+    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
+    'ArcLayer (Great Circle)': ArcLayerGreatCircleExample
   }
 };

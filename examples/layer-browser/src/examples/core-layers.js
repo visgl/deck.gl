@@ -17,7 +17,6 @@ import {
   experimental
   //  ContourLayer
 } from 'deck.gl';
-
 const {flattenVertices} = experimental;
 
 import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
@@ -50,21 +49,6 @@ const ArcLayerExample = {
     getTargetPosition: d => d.END,
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
-    pickable: true
-  }
-};
-
-const ArcLayerGreatCircleExample = {
-  layer: ArcLayer,
-  getData: () => dataSamples.greatCircles,
-  props: {
-    id: 'greatCircleLayer',
-    getSourcePosition: d => d.source,
-    getTargetPosition: d => d.target,
-    getSourceColor: [64, 255, 0],
-    getTargetColor: [0, 128, 200],
-    getStrokeWidth: 5,
-    isGreatCircle: true,
     pickable: true
   }
 };
@@ -529,7 +513,6 @@ export default {
     'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
-    'ArcLayer (Great Circle)': ArcLayerGreatCircleExample,
     LineLayer: LineLayerExample,
     LineLayerNewCoords: LineLayerExampleNewCoords,
     IconLayer: IconLayerExample,
