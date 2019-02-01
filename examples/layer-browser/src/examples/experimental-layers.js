@@ -199,7 +199,7 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
-const ArcLayerGreatCircleExample = {
+const GreatCircleLayerExample = {
   layer: GreatCircleLayer,
   getData: () => dataSamples.greatCircles,
   props: {
@@ -229,6 +229,6 @@ export default {
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
-    'ArcLayer (Great Circle)': ArcLayerGreatCircleExample
+    GreatCircleLayer: GreatCircleLayerExample
   }
 };
