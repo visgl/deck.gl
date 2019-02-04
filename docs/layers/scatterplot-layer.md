@@ -161,7 +161,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * Default: `1`
 
-The width of the outline of the object in pixels.
+The width of the outline of each object, in meters.
 
 * If a number is provided, it is used as the outline width for all objects.
 * If a function is provided, it is called on each object to retrieve its outline width.
