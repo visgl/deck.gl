@@ -70,6 +70,18 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 The scaling factor for the width of each arc. If you set the property to `Math.pow(2, viewport.zoom - 12)` it will keep the width constant, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can also limit the minimum size of the arc with this property.
 
+##### `widthMinPixels` (Number, optional)
+
+# Default: 1
+
+The minimum stroke width in pixels.
+
+##### `widthMaxPixels` (Number, optional)
+
+# Default: Number.MAX_SAFE_INTEGER
+
+The maximum stroke width in pixels.
+
 ### Data Accessors
 
 ##### `getSourcePosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
@@ -110,6 +122,18 @@ The stroke width of each object, in pixels.
 
 * If a number is provided, it is used as the stroke width for all objects.
 * If a function is provided, it is called on each object to retrieve its stroke width.
+
+It will be overridden by `getWidth` if this new accessor is provided.
+
+##### `getWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1`
+
+The stroke width of each object, in meters.
+
+* If a number is provided, it is used as the stroke width for all objects.
+* If a function is provided, it is called on each object to retrieve its stroke width.
+* If not provided, it falls back to `getStrokeWidth`.
 
 ## Source
 
