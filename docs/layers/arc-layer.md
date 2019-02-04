@@ -72,13 +72,13 @@ The scaling factor for the width of each arc. If you set the property to `Math.p
 
 ##### `widthMinPixels` (Number, optional)
 
-# Default: 1
+* Default: 1
 
 The minimum stroke width in pixels.
 
 ##### `widthMaxPixels` (Number, optional)
 
-# Default: Number.MAX_SAFE_INTEGER
+* Default: Number.MAX_SAFE_INTEGER
 
 The maximum stroke width in pixels.
 
