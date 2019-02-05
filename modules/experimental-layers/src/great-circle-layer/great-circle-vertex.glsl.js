@@ -51,25 +51,17 @@ float getSegmentRatio(float index) {
   return smoothstep(0.0, 1.0, index / (numSegments - 1.0));
 }
 
-vec2 toRadian(vec2 v) {
-  return v / 180.0 * PI;
-}
-
-vec2 toDegree(vec2 v) {
-  return v * 180.0 / PI;
-}
-
+// get angular distance in radian
 float getAngularDist (vec2 source, vec2 target) {
   vec2 delta = source - target;
-  float a = 
-    sin(delta.y * 0.5) * sin(delta.y * 0.5) + 
-    cos(source.y * PI / 180.) * cos(target.y * PI / 180.) * 
-    sin(delta.x / 2.0) * sin(delta.x / 2.);
+  float a =
+    sin(delta.y / 2.0) * sin(delta.y / 2.0) +
+    cos(radians(source.y)) * cos(radians(target.y)) *
+    sin(delta.x / 2.0) * sin(delta.x / 2.0);
 	return 2.0 * atan(sqrt(a), sqrt(1.0 - a));
 }
 
-vec2 interpolate (vec2 source, vec2 target, float t) {
-	float angularDist = getAngularDist(source, target);
+vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
 	float a = sin((1.0 - t) * angularDist) / sin(angularDist);
 	float b = sin(t * angularDist) / sin(angularDist);
 	float x = a * cos(source.y) * cos(source.x) + b * cos(target.y) * cos(target.x);
@@ -87,18 +79,20 @@ void main(void) {
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
   float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
   
-  vec2 source = toRadian(instancePositions.xy);
-  vec2 target = toRadian(instancePositions.zw);
+  vec2 source = radians(instancePositions.xy);
+  vec2 target = radians(instancePositions.zw);
   
-  vec3 currPos = project_position(vec3(toDegree(interpolate(source, target, segmentRatio)), 0.0));
-  vec3 nextPos = project_position(vec3(toDegree(interpolate(source, target, nextSegmentRatio)), 0.0));
+  float angularDist = getAngularDist(source, target);
+
+  vec3 currPos = project_position(vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0));
+  vec3 nextPos = project_position(vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0));
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
-  
+
   // extrude
   vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
-  vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
+  vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.0;
   vColor = vec4(color.rgb, color.a * opacity);
   
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
