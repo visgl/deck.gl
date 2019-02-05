@@ -35,7 +35,6 @@ uniform float widthScale;
 uniform float widthMinPixels;
 uniform float widthMaxPixels;
 
-
 varying vec4 vColor;
 
 float paraboloid(vec2 source, vec2 target, float ratio) {
