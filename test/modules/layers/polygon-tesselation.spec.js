@@ -168,6 +168,36 @@ test('PolygonTesselator#constructor', t => {
   t.end();
 });
 
+test('PolygonTesselator#tesselation', t => {
+  const tesselator = new PolygonTesselator({
+    data: [
+      {
+        polygon: [[1, 1], [2, 2], [3, 0], [1, 1]],
+        name: 'simple loop'
+      },
+      {
+        polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]], [[0.5, 0.5], [1, 0.5], [0.5, 1]]],
+        name: 'with 1 hole'
+      }
+    ],
+    getGeometry: d => d.polygon,
+    positionFormat: 'XY'
+  });
+
+  t.deepEquals(
+    tesselator.get('indices'),
+    [1, 3, 2, 4, 12, 11, 10, 12, 4, 5, 6, 7, 7, 4, 11, 10, 4, 5, 5, 7, 11, 11, 10, 5],
+    'returned correct indices'
+  );
+  t.deepEquals(
+    tesselator.get('vertexValid'),
+    [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
+    'returned correct vertexValid'
+  );
+
+  t.end();
+});
+
 test('PolygonTesselator#methods', t => {
   TEST_DATA.forEach(testData => {
     t.comment(`Polygon data: ${testData.title}`);
