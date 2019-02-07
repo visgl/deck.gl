@@ -29,7 +29,7 @@ export default class DeckRenderer {
       layers,
       viewports,
       views,
-      onViewportActive: this.layerManager.getActivateViewport(),
+      onViewportActive: this.layerManager.getActiveViewport(),
       useDevicePixels,
       drawPickingColors,
       layerFilter,
