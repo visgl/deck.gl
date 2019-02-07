@@ -616,8 +616,6 @@ export const TEST_CASES = [
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
         pickable: true,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         lightSettings: LIGHT_SETTINGS
       })
     ],
@@ -655,8 +653,6 @@ export const TEST_CASES = [
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
         pickable: true,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         lightSettings: LIGHT_SETTINGS
       })
     ],
