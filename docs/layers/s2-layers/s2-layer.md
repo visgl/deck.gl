@@ -7,7 +7,9 @@
 
 The S2Layer renders filled and/or stroked polygons, with geometry automatically calculated based on an S2 token (geospatial index).
 
-For more information
+Remarks:
+
+* Uses the [`s2-geometry`](http://s2geometry.io/) library for S2 polygon calculations.
 
 ```js
 import DeckGL, {PolygonLayer} from '@deck.gl/s2-layers';
@@ -20,19 +22,12 @@ const App = ({data, viewport}) => {
    *   {
    *     // S2 Cell in SF Bay Area
    *     token: "80858004",
-   *     // Simple polygon (array of coords)
-   *     token: [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
    *     zipcode: 94107,
    *     population: 26599,
    *     area: 6.11
    *   },
    *   {
    *     token: "8085800c",
-   *     // Complex polygon with holes (array of rings)
-   *     token: [
-   *       [[-122.4, 37.7], [-122.4, 37.8], [-122.5, 37.8], [-122.5, 37.7], [-122.4, 37.7]],
-   *       [[-122.45, 37.73], [-122.47, 37.76], [-122.47, 37.71], [-122.45, 37.73]]
-   *     ],
    *     zipcode: 94107,
    *     population: 26599,
    *     area: 6.11
@@ -81,11 +76,9 @@ Accepts all accessors from `PolygonLayer`, except `getPolygon` has been replaced
 
 ##### `getToken` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
+Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details.
+
 * default: `object => object.token`
-
-## Remarks
-
-* Uses the [`s2-geometry`](http://s2geometry.io/) library for S2 polygon calculations.
 
 ## Source
 
