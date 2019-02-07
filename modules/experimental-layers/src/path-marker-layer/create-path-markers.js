@@ -25,7 +25,7 @@ export default function createPathMarkers({
   for (const object of data) {
     const path = getPath(object);
     const direction = getDirection(object) || DEFAULT_DIRECTION;
-    const color = getColor(object);
+    const color = typeof getColor === 'function' ? getColor(object) : getColor;
 
     const vPoints = path.map(p => new Vector2(p));
     const vPointsReverse = vPoints.slice(0).reverse();
