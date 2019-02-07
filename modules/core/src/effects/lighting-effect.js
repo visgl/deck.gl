@@ -1,5 +1,5 @@
 import {PointLight as BasePointLight} from 'luma.gl';
-import Effect from '../experimental/lib/effect';
+import Effect from './effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../lib';
 
@@ -29,6 +29,13 @@ export default class LightingEffect extends Effect {
         default:
       }
     }
+  }
+
+  prepare() {
+    const {ambientLight, directionalLights, pointLights} = this;
+    return {
+      lightSourcs: {ambientLight, directionalLights, pointLights}
+    };
   }
 
   // Pre-project point light positions
