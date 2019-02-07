@@ -344,6 +344,10 @@ export default class LayerManager {
     });
   }
 
+  getActiveViewport() {
+    return this._activateViewport;
+  }
+
   //
   // PRIVATE METHODS
   //
