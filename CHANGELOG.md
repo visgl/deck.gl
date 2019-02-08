@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.1] - Feb 7 2019
+
+- specify default props for trips layer (#2644)
+- Polygon tesselation fix (#2659)
+
 #### [6.4.0] - Jan 29 2019
 
 - Remove prefixes for grab and grabbing cursor values. (#2629)
