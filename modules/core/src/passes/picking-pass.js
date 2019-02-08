@@ -1,40 +1,9 @@
 import BaseLayersPass from './base-layers-pass';
 import {withParameters} from 'luma.gl';
 
-export default class BaseLayerPass extends BaseLayersPass {
+export default class PickingPass extends BaseLayersPass {
   constructor(gl, props) {
     super(gl, props);
-  }
-
-  checkShouldDrawLayer(layer, layerFilter, viewport) {
-    let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
-
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: true});
-    }
-    return shouldDrawLayer;
-  }
-
-  getModuleParameters(layer, pixelRatio) {
-    const moduleParameters = Object.assign(Object.create(layer.props), {
-      viewport: layer.context.viewport,
-      pickingActive: 1,
-      devicePixelRatio: pixelRatio
-    });
-    return moduleParameters;
-  }
-
-  getLayerParameters(layer, layerIndex, glViewport, parameters) {
-    // All parameter resolving is done here instead of the layer
-    // Blend parameters must not be overridden
-    const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
-
-    Object.assign(layerParameters, {
-      viewport: glViewport,
-      blendColor: [0, 0, 0, (layerIndex + 1) / 255]
-    });
-
-    return layerParameters;
   }
 
   // Draws list of layers and viewports into the picking buffer
@@ -84,5 +53,37 @@ export default class BaseLayerPass extends BaseLayersPass {
         });
       }
     );
+  }
+
+  // PRIVATE
+  shouldDrawLayer(layer, layerFilter, viewport) {
+    let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
+
+    if (shouldDrawLayer && layerFilter) {
+      shouldDrawLayer = layerFilter({layer, viewport, isPicking: true});
+    }
+    return shouldDrawLayer;
+  }
+
+  getModuleParameters(layer, pixelRatio) {
+    const moduleParameters = Object.assign(Object.create(layer.props), {
+      viewport: layer.context.viewport,
+      pickingActive: 1,
+      devicePixelRatio: pixelRatio
+    });
+    return moduleParameters;
+  }
+
+  getLayerParameters(layer, layerIndex, glViewport, parameters) {
+    // All parameter resolving is done here instead of the layer
+    // Blend parameters must not be overridden
+    const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
+
+    Object.assign(layerParameters, {
+      viewport: glViewport,
+      blendColor: [0, 0, 0, (layerIndex + 1) / 255]
+    });
+
+    return layerParameters;
   }
 }
