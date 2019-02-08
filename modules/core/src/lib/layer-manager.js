@@ -107,7 +107,7 @@ export default class LayerManager {
     this._needsUpdate = false;
     this._debug = false;
 
-    this._activateViewport = this._activateViewport.bind(this);
+    this.activateViewport = this.activateViewport.bind(this);
 
     // Seer integration
     this._initSeer = this._initSeer.bind(this);
@@ -260,7 +260,7 @@ export default class LayerManager {
       layers: this.layers,
       viewports,
       views,
-      onViewportActive: this._activateViewport,
+      onViewportActive: this.activateViewport,
       useDevicePixels,
       drawPickingColors,
       pass,
@@ -312,7 +312,7 @@ export default class LayerManager {
       depth,
       // Injected params
       viewports,
-      onViewportActive: this._activateViewport,
+      onViewportActive: this.activateViewport,
       pickingFBO: this._getPickingBuffer(),
       lastPickedInfo: this.context.lastPickedInfo,
       useDevicePixels
@@ -338,7 +338,7 @@ export default class LayerManager {
       layerFilter: this.layerFilter,
       mode: 'pickObjects',
       viewports,
-      onViewportActive: this._activateViewport,
+      onViewportActive: this.activateViewport,
       pickingFBO: this._getPickingBuffer(),
       useDevicePixels
     });
@@ -365,7 +365,7 @@ export default class LayerManager {
   }
 
   // Make a viewport "current" in layer context, updating viewportChanged flags
-  _activateViewport(viewport) {
+  activateViewport(viewport) {
     const oldViewport = this.context.viewport;
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
