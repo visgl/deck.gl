@@ -616,8 +616,6 @@ export const TEST_CASES = [
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
         pickable: true,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         lightSettings: LIGHT_SETTINGS
       })
     ],
@@ -627,21 +625,33 @@ export const TEST_CASES = [
   {
     name: 'geojson-extruded-lnglat',
     viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 12,
       pitch: 0,
       bearing: 0
     },
     layers: [
       new GeoJsonLayer({
         id: 'geojson-extruded-lnglat',
-        data: dataSamples.choropleths,
-        getElevation: f => ((f.properties.ZIP_CODE * 10) % 127) * 10,
-        getFillColor: f => [0, 100, (f.properties.ZIP_CODE * 55) % 255],
-        getLineColor: f => [200, 0, 80],
+        data: dataSamples.geojson,
         extruded: true,
         wireframe: true,
+        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getFillColor: f => {
+          const color = parseColor(f.properties.fill || f.properties['marker-color']);
+          const opacity = (f.properties['fill-opacity'] || 1) * 255;
+          return setOpacity(color, opacity);
+        },
+        getLineColor: f => {
+          const color = parseColor(f.properties.stroke);
+          const opacity = (f.properties['stroke-opacity'] || 1) * 255;
+          return setOpacity(color, opacity);
+        },
+        getLineWidth: f => f.properties['stroke-width'],
+        getElevation: f => 500,
+        lineWidthScale: 10,
+        lineWidthMinPixels: 1,
         pickable: true,
         lightSettings: LIGHT_SETTINGS
       })
