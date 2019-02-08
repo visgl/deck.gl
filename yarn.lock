@@ -4983,7 +4983,7 @@ gl-matrix@^2.6.1:
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-2.7.1.tgz#0874a6f641bf4ad12e125b3f4ad8e5a70775fbea"
   integrity sha512-22I6q7aO2oKNahNV0+9JavVNUhQXRTvR5jP2s8U1l93TkjcQe8RK6MeMYpM7+66R0sCVUgSdO97BL439vePyzQ==
 
-gl-matrix@^3.0.0:
+gl-matrix@^3.0.0-0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/gl-matrix/-/gl-matrix-3.0.0.tgz#888301ac7650e148c3865370e13ec66d08a8381f"
   integrity sha512-PD4mVH/C/Zs64kOozeFnKY8ybhgwxXXQYGWdB4h68krAHknWJgk9uKOn6z8YElh5//vs++90pb6csrTIDWnexA==
