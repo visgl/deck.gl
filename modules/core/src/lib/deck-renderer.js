@@ -1,5 +1,5 @@
 import log from '../utils/log';
-import LayersPass from '../passes/layers-pass';
+import DrawLayersPass from '../passes/draw-layers-pass';
 
 const LOG_PRIORITY_DRAW = 2;
 
@@ -10,7 +10,7 @@ export default class DeckRenderer {
     this.gl = gl;
     this.layerManager = layerManager;
     this.effectManager = effectManager;
-    this.layersPass = new LayersPass(gl);
+    this.drawLayersPass = new DrawLayersPass(gl);
     this.renderCount = 0;
   }
 
@@ -25,7 +25,7 @@ export default class DeckRenderer {
     const {drawPickingColors, layers, layerFilter} = this.layerManager;
     const {useDevicePixels} = this.layerManager.context;
 
-    this.layersPass.setProps({
+    this.drawLayersPass.setProps({
       layers,
       viewports,
       views,
@@ -37,7 +37,7 @@ export default class DeckRenderer {
       customRender
     });
 
-    const renderStats = this.layersPass.render();
+    const renderStats = this.drawLayersPass.render();
     this.renderCount++;
 
     if (log.priority >= LOG_PRIORITY_DRAW) {

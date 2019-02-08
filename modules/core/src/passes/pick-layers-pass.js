@@ -1,7 +1,7 @@
-import BaseLayersPass from './base-layers-pass';
+import LayersPass from './base-layers-pass';
 import {withParameters} from 'luma.gl';
 
-export default class PickingPass extends BaseLayersPass {
+export default class PickLayersPass extends LayersPass {
   constructor(gl, props) {
     super(gl, props);
   }
