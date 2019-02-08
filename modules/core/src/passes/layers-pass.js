@@ -77,6 +77,7 @@ export default class LayersPass extends Pass {
       effects
     }
   ) {
+    // TODO: move parameters to props to avoid passing around
     const pixelRatio = this.getPixelRatio({useDevicePixels});
     const glViewport = this.getGLViewport(gl, {viewport, pixelRatio});
 

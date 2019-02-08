@@ -22,6 +22,7 @@ export default class DeckRenderer {
     pass,
     stats
   }) {
+    // TODO: Remove LayerManager reference after clean up LayerManager & pick-layers.js
     const {drawPickingColors, layers, layerFilter} = this.layerManager;
     const {useDevicePixels} = this.layerManager.context;
 
