@@ -6,9 +6,5 @@ export default class Effect {
     Object.assign(this.props, props);
   }
 
-  setProps(props) {
-    Object.assign(this.props, props);
-  }
-
   prepare() {}
 }

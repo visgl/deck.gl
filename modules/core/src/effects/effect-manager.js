@@ -1,22 +1,13 @@
 export default class EffectManager {
   constructor() {
-    this._effects = [];
+    this.effects = [];
   }
 
-  addEffect(effect) {
-    this._effects.push(effect);
-  }
-
-  removeEffect(effect) {
-    const i = this._effects.indexOf(effect);
-    if (i >= 0) {
-      this._effects.splice(i, 1);
-      return true;
-    }
-    return false;
+  setEffects(effects = []) {
+    this.effects = effects;
   }
 
   getEffects() {
-    return this._effects;
+    return this.effects;
   }
 }

@@ -34,7 +34,7 @@ export default class LightingEffect extends Effect {
   prepare() {
     const {ambientLight, directionalLights, pointLights} = this;
     return {
-      lightSourcs: {ambientLight, directionalLights, pointLights}
+      lightSources: {ambientLight, directionalLights, pointLights}
     };
   }
 
