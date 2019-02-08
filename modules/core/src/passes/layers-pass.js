@@ -1,20 +1,10 @@
 import BaseLayersPass from './base-layers-pass';
 
-export default class BaseLayerPass extends BaseLayersPass {
-  constructor(gl, props) {
-    super(gl, props);
-  }
-
+export default class LayersPass extends BaseLayersPass {
+  // PRIVATE
   getModuleParameters(layer, pixelRatio) {
-    const moduleParameters = Object.assign(
-      Object.create(layer.props),
-      {
-        viewport: layer.context.viewport,
-        pickingActive: 0,
-        devicePixelRatio: pixelRatio
-      },
-      this.getObjectHighlightParameters(layer)
-    );
+    const moduleParameters = super.getModuleParameters(layer, pixelRatio);
+    Object.assign(moduleParameters, this.getObjectHighlightParameters(layer));
     return moduleParameters;
   }
 

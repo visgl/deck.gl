@@ -29,7 +29,7 @@ export default class DeckRenderer {
       layers,
       viewports,
       views,
-      onViewportActive: this.layerManager.getActiveViewport(),
+      onViewportActive: this.layerManager.activateViewport,
       useDevicePixels,
       drawPickingColors,
       layerFilter,
@@ -40,30 +40,30 @@ export default class DeckRenderer {
     const renderStats = this.layersPass.render();
     this.renderCount++;
 
-    renderStats.forEach(status => {
-      this.logRenderStats({status, pass, redrawReason, stats});
-    });
+    if (log.priority >= LOG_PRIORITY_DRAW) {
+      renderStats.forEach(status => {
+        this.logRenderStats({status, pass, redrawReason, stats});
+      });
+    }
   }
 
   logRenderStats({renderStats, pass, redrawReason, stats}) {
-    if (log.priority >= LOG_PRIORITY_DRAW) {
-      const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
-      const primitiveCount = totalCount - compositeCount;
-      const hiddenCount = primitiveCount - visibleCount;
+    const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
+    const primitiveCount = totalCount - compositeCount;
+    const hiddenCount = primitiveCount - visibleCount;
 
-      let message = '';
-      message += `RENDER #${this.renderCount} \
+    let message = '';
+    message += `RENDER #${this.renderCount} \
 ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
-      if (log.priority > LOG_PRIORITY_DRAW) {
-        message += `\
+    if (log.priority > LOG_PRIORITY_DRAW) {
+      message += `\
 (${hiddenCount} hidden, ${compositeCount} composite ${pickableCount} pickable)`;
-      }
+    }
 
-      log.log(LOG_PRIORITY_DRAW, message)();
+    log.log(LOG_PRIORITY_DRAW, message)();
 
-      if (stats) {
-        stats.increment('redraw layers', visibleCount);
-      }
+    if (stats) {
+      stats.increment('redraw layers', visibleCount);
     }
   }
 }
