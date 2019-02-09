@@ -22,16 +22,15 @@ const defaultProps = Object.assign({}, PathOutlineLayer.defaultProps, {
   MarkerLayer: DEFAULT_MARKER_LAYER,
   markerLayerProps: DEFAULT_MARKER_LAYER_PROPS,
 
-  sizeScale: {type: 'number', value: 100, min: 1},
+  sizeScale: {type: 'number', value: 100, min: 0},
   fp64: false,
 
   hightlightIndex: {type: 'number', value: -1},
   highlightPoint: null,
 
   getPath: {type: 'accessor', value: x => x.path},
-  getColor: {type: 'accessor', value: x => x.color},
   getMarkerColor: {type: 'accessor', value: [0, 0, 0, 255]},
-  getDirection: {type: 'accessor', value: x => x.direction},
+  getDirection: {type: 'accessor', value: {forward: true, backward: false}},
   getMarkerPercentages: {
     type: 'accessor',
     value: (object, {lineLength}) =>
