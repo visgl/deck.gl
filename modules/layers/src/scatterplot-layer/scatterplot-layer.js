@@ -165,14 +165,14 @@ export default class ScatterplotLayer extends Layer {
       return;
     }
 
-    const {data, getPosition} = this.props;
+    const {getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
+    this.iterateData((object, context) => {
+      const position = getPosition(object, context);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
-    }
+    });
   }
 }
 

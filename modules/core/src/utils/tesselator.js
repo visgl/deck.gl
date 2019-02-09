@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {fillArray} from './flatten';
+import {forEach} from './array-utils';
 
 class TypedArrayManager {
   constructor({overAlloc = 1} = {}) {
@@ -110,25 +111,23 @@ export default class Tesselator {
    */
   _forEachGeometry(visitor) {
     const {data, getGeometry} = this;
-    let dataIndex = 0;
-    for (const object of data) {
-      const geometry = getGeometry(object);
-      visitor(geometry, dataIndex++);
-    }
+    forEach(data, (object, context) => {
+      const geometry = getGeometry(object, context);
+      visitor(geometry, context.index);
+    });
   }
 
   _updateAttribute({target, size, getValue}) {
     const {data, bufferLayout} = this;
 
     let i = 0;
-    let dataIndex = 0;
-    for (const object of data) {
-      const value = getValue(object, dataIndex);
-      const numVertices = bufferLayout[dataIndex++];
+    forEach(data, (object, context) => {
+      const value = getValue(object, context);
+      const numVertices = bufferLayout[context.index];
 
       fillArray({target, source: value, start: i, count: numVertices});
       i += numVertices * size;
-    }
+    });
     return target;
   }
 

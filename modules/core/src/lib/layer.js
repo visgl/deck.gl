@@ -30,6 +30,7 @@ import log from '../utils/log';
 import GL from '@luma.gl/constants';
 import {withParameters} from 'luma.gl';
 import assert from '../utils/assert';
+import {forEach} from '../utils/array-utils';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 
 import Component from '../lifecycle/component';
@@ -232,6 +233,10 @@ export default class Layer extends Component {
     }
 
     return false;
+  }
+
+  iterateData(visitor) {
+    forEach(this.props.data, visitor);
   }
 
   use64bitPositions() {

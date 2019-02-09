@@ -18,6 +18,34 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export function forEach(data, visitor) {
+  if (!data) {
+    return;
+  }
+
+  const context = {
+    index: 0,
+    data,
+    // visitor can optionally utilize this to avoid constructing a new array for every object
+    target: []
+  };
+
+  // Check if data is iterable:
+  // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
+  if (typeof data[Symbol.iterator] === 'function') {
+    for (const object of data) {
+      visitor(object, context);
+      context.index++;
+    }
+  } else {
+    // visitor is responsible of interpreting the format
+    for (let i = 0; i < data.length; i++) {
+      visitor(null, context);
+      context.index++;
+    }
+  }
+}
+
 /*
  * Helper function for padArray
  */
