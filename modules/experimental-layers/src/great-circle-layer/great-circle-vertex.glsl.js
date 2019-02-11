@@ -56,12 +56,17 @@ float getAngularDist (vec2 source, vec2 target) {
   vec2 delta = source - target;
   float a =
     sin(delta.y / 2.0) * sin(delta.y / 2.0) +
-    cos(radians(source.y)) * cos(radians(target.y)) *
+    cos(source.y) * cos(target.y) *
     sin(delta.x / 2.0) * sin(delta.x / 2.0);
 	return 2.0 * atan(sqrt(a), sqrt(1.0 - a));
 }
 
 vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
+// if the angularDist is PI, linear interpolation is applied. otherwise, use spherical interpolation
+  if(abs(angularDist - PI) < 0.001) {
+    return (1.0 - t) * source + t * target;
+  }
+
 	float a = sin((1.0 - t) * angularDist) / sin(angularDist);
 	float b = sin(t * angularDist) / sin(angularDist);
 	float x = a * cos(source.y) * cos(source.x) + b * cos(target.y) * cos(target.x);
@@ -84,10 +89,11 @@ void main(void) {
   
   float angularDist = getAngularDist(source, target);
 
-  vec3 currPos = project_position(vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0));
-  vec3 nextPos = project_position(vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0));
-  vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
-  vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
+  vec3 currPos = vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0);
+  vec3 nextPos = vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0);
+
+  vec4 curr = project_position_to_clipspace(currPos, instancePositions64Low.xy, vec3(0.0));
+  vec4 next = project_position_to_clipspace(nextPos, instancePositions64Low.zw, vec3(0.0));
 
   // extrude
   vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
