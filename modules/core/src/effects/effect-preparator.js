@@ -7,8 +7,8 @@ export default class EffectPreparator {
   prepareEffects({effects}) {
     const effectProps = {};
 
-    for (const i in effects) {
-      Object.assign(effectProps, effects[i].prepare());
+    for (const effect of effects) {
+      Object.assign(effectProps, effect.prepare());
     }
   }
 }
