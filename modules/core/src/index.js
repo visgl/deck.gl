@@ -78,6 +78,7 @@ export {default as FlyToInterpolator} from './transitions/viewport-fly-to-interp
 export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
+import {forEach} from './utils/array-utils';
 import {default as BinSorter} from './utils/bin-sorter';
 import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 import {defaultColorRange} from './utils/color-utils';
@@ -104,5 +105,6 @@ export const experimental = {
   getQuantizeScale,
   defaultColorRange,
   flattenVertices,
-  fillArray
+  fillArray,
+  forEach
 };
