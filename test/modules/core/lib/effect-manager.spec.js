@@ -19,10 +19,26 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import Effect from '@deck.gl/core/experimental/lib/effect';
+import EffectManager from '@deck.gl/core/lib/effect-manager';
+import Effect from '@deck.gl/core/lib/effect';
+import LayerManager from '@deck.gl/core/lib/layer-manager';
 
-test('Effect#constructor', t => {
-  const effect = new Effect();
-  t.ok(effect, 'Effect created');
+import {gl} from '@deck.gl/test-utils';
+
+const layerManager = new LayerManager(gl);
+
+test('EffectManager#constructor', t => {
+  const effectManager = new EffectManager({gl, layerManager});
+  t.ok(effectManager, 'Effect Manager created');
+  t.end();
+});
+
+test('EffectManager#set and get Effects', t => {
+  const effectManager = new EffectManager({gl, layerManager});
+  const effect1 = new Effect();
+  const effect2 = new Effect();
+  effectManager.setEffects([effect1, effect2]);
+  const effects = effectManager.getEffects();
+  t.equal(effects.length, 2, 'Effect set and get successfully');
   t.end();
 });
