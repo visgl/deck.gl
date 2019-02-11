@@ -48,6 +48,15 @@ export default class DeckRenderer {
     }
   }
 
+  // Private
+  prepareEffects({effects}) {
+    const effectProps = {};
+
+    for (const effect of effects) {
+      Object.assign(effectProps, effect.prepare());
+    }
+  }
+
   logRenderStats({renderStats, pass, redrawReason, stats}) {
     const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
     const primitiveCount = totalCount - compositeCount;
