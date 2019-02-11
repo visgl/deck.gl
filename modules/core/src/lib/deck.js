@@ -21,8 +21,9 @@
 import LayerManager from './layer-manager';
 import ViewManager from './view-manager';
 import MapView from '../views/map-view';
-import EffectManager from '../experimental/lib/effect-manager';
-import Effect from '../experimental/lib/effect';
+import EffectManager from './effect-manager';
+import Effect from './effect';
+import DeckRenderer from './deck-renderer';
 import log from '../utils/log';
 
 import GL from '@luma.gl/constants';
@@ -112,6 +113,7 @@ const defaultProps = {
   drawPickingColors: false
 };
 
+/* eslint-disable max-statements */
 export default class Deck {
   constructor(props) {
     props = Object.assign({}, defaultProps, props);
@@ -123,6 +125,7 @@ export default class Deck {
     this.viewManager = null;
     this.layerManager = null;
     this.effectManager = null;
+    this.deckRenderer = null;
 
     this.stats = new Stats({id: 'deck.gl'});
 
@@ -487,13 +490,13 @@ export default class Deck {
       viewport
     });
 
-    this.effectManager = new EffectManager({gl, layerManager: this.layerManager});
+    this.effectManager = new EffectManager();
 
-    for (const effect of this.props.effects) {
-      if (effect instanceof Effect) {
-        this.effectManager.addEffect(effect);
-      }
-    }
+    this.deckRenderer = new DeckRenderer({
+      gl,
+      layerManager: this.layerManager,
+      effectManager: this.effectManager
+    });
 
     this.setProps(this.props);
 
@@ -508,7 +511,7 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
-    this.layerManager.drawLayers({
+    this.deckRenderer.renderLayers({
       pass: 'screen',
       viewports: this.viewManager.getViewports(),
       views: this.viewManager.getViews(),

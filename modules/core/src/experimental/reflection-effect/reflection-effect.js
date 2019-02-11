@@ -21,7 +21,7 @@
 /* global window */
 import GL from '@luma.gl/constants';
 import {Framebuffer, Model, Geometry} from 'luma.gl';
-import Effect from '../lib/effect';
+import Effect from '../../lib/effect';
 import WebMercatorViewport from '../../viewports/web-mercator-viewport';
 
 import reflectionVertex from './reflection-effect-vertex.glsl';
