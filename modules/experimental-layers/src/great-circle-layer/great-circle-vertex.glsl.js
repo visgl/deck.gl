@@ -92,8 +92,11 @@ void main(void) {
   vec3 currPos = vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0);
   vec3 nextPos = vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0);
 
-  vec4 curr = project_position_to_clipspace(currPos, instancePositions64Low.xy, vec3(0.0));
-  vec4 next = project_position_to_clipspace(nextPos, instancePositions64Low.zw, vec3(0.0));
+  vec2 currPos64Low = degrees(interpolate(instancePositions64Low.xy, instancePositions64Low.zw, angularDist, segmentRatio));
+  vec2 nextPos64Low = degrees(interpolate(instancePositions64Low.xy, instancePositions64Low.zw, angularDist, nextSegmentRatio));
+
+  vec4 curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0));
+  vec4 next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
 
   // extrude
   vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
