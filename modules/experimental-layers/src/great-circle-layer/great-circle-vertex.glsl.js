@@ -92,8 +92,8 @@ void main(void) {
   vec3 currPos = vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0);
   vec3 nextPos = vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0);
 
-  vec2 currPos64Low = degrees(interpolate(instancePositions64Low.xy, instancePositions64Low.zw, angularDist, segmentRatio));
-  vec2 nextPos64Low = degrees(interpolate(instancePositions64Low.xy, instancePositions64Low.zw, angularDist, nextSegmentRatio));
+  vec2 currPos64Low = mix(instancePositions64Low.xy, instancePositions64Low.zw, segmentRatio);
+  vec2 nextPos64Low = mix(instancePositions64Low.xy, instancePositions64Low.zw, nextSegmentRatio);
 
   vec4 curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0));
   vec4 next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
