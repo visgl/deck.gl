@@ -65,9 +65,7 @@ export {
   LinearInterpolator,
   FlyToInterpolator,
   // Effects
-  _EffectManager,
-  _Effect,
-  _ReflectionEffect,
+  Effect,
   LightingEffect
 } from '@deck.gl/core';
 
