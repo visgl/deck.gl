@@ -1,7 +1,7 @@
 /* eslint-disable quotes, no-console */
 /* global console */
 import 'luma.gl';
-import {global, isBrowser} from '../utils/globals';
+import {global, isBrowser} from './globals';
 
 const ERR_NO_HEADLESS_GL = `\
 Failed to dynamically load headless gl. \

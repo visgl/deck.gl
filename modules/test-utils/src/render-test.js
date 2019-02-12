@@ -22,8 +22,8 @@
 
 import SceneRenderer from './scene-renderer';
 
-import {diffImagePixels} from './luma.gl/gpgpu';
-import {createImage, getImagePixelData} from './luma.gl/io-basic/browser-image-utils';
+import {diffImagePixels} from './utils/deprecated/diff-images';
+import {createImage, getImagePixelData} from './utils/deprecated/browser-image-utils';
 
 export default class RenderTest {
   constructor({

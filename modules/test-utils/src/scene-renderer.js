@@ -20,7 +20,7 @@
 
 import {Deck, MapView} from 'deck.gl';
 
-import {getImageFromContext} from './luma.gl/io-basic/browser-image-utils';
+import {getImageFromContext} from './utils/deprecated/browser-image-utils';
 
 const GL_VENDOR = 0x1f00;
 
