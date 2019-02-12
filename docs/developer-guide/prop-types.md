@@ -8,7 +8,7 @@ A number of deck.gl features are enabled by rich descriptions of the types of th
 - Type checking (during development)
 - Improve render performance, see "Prop Types and Performance" section below
 - Transitions and Animation
-- [Reflection](https://en.wikipedia.org/wiki/Reflection_(computer_programming)) (e.g. dynamically creating UI controls for layer props)
+- [Reflection](https://en.wikipedia.org/wiki/Reflection_%28computer_programming%29) (e.g. dynamically creating UI controls for layer props)
 
 
 ## Declaring Layer Properties
@@ -48,7 +48,7 @@ const layer = new MyLayer({id: 'my-layer', strokeOpacity: 0.5})
 
 ## Property Types
 
-The property types system enables layers to opt-in to specifying types, and also offers a certain amount of type auto-deduction to happen based on existing default values for layers that do not opt in.
+The property types system enables layers to opt-in to specifying types, and also allows a certain amount of type auto-deduction to happen based on existing default values for layers that do not opt in.
 
 Each prop in `defaultProps` may be an object in the following shape:
 
