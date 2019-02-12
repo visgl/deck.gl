@@ -5,7 +5,7 @@
 
 ## Per Layer Control of WebGL parameters
 
-The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering rendering.
+The base `Layer` class (which is inherited by all layers) supports a `parameters` property that allows applications to specify the state of WebGL parameters such as blending mode, depth testing etc. This can provide signigicant extra control over rendering.
 
 The new `parameters` prop leverages the luma.gl v4 [setParameters](http://uber.github.io/luma.gl/#/documentation/api-reference/get-parameter) API, which allows all WebGL parameters to be specified as keys in a single parameter object.
 
@@ -42,7 +42,7 @@ One way to control this blending effect is by specifying the CSS property `mix-b
 }
 ```
 
-`multiply` blend mode usually gives the expected results, as it only darkens. This blend mode keeps the overlay colors, but let map legends underneath remain black and legible.
+`multiply` blend mode usually gives the expected results, as it only darkens. This blend mode keeps the overlay colors, but lets map legends underneath remain black and legible.
 
 **Note:** that there is a caveat with setting `mix-blend-mode`, as it can affect other peer HTML elements, especially other map children (perhaps controls or legends that are being rendered on top of the map).
 If this is an issue, set the `isolation` CSS prop on the `DeckGL` parent element.
