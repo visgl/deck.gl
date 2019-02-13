@@ -15,6 +15,7 @@ export {default as GreatCircleLayer} from './great-circle-layer/great-circle-lay
 
 //  3D CATALOG LAYERS
 export {default as MeshLayer} from './mesh-layer/mesh-layer';
+export {default as ScenegraphLayer} from './scenegraph-layer/scenegraph-layer';
 export {default as BitmapLayer} from './bitmap-layer/bitmap-layer';
 
 // INFOVIS LAYERS
