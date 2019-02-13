@@ -150,6 +150,13 @@ export default class MeshLayer extends Layer {
     this.state.matrixBuffer = new Buffer(this.context.gl, matrixData.byteLength);
     this.state.matrixBuffer.setData(matrixData);
 
+    this.state.buffers = {
+      instanceModelMatCol1: this.state.matrixBuffer,
+      instanceModelMatCol2: this.state.matrixBuffer,
+      instanceModelMatCol3: this.state.matrixBuffer,
+      instanceModelMatCol4: this.state.matrixBuffer
+    };
+
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
@@ -171,7 +178,6 @@ export default class MeshLayer extends Layer {
         defaultValue: [0, 0, 0, 255]
       },
       instanceModelMatCol1: {
-        buffer: this.state.matrixBuffer,
         size: 4,
         stride: 64,
         offset: 0,
@@ -180,7 +186,6 @@ export default class MeshLayer extends Layer {
         update: () => {}
       },
       instanceModelMatCol2: {
-        buffer: this.state.matrixBuffer,
         size: 4,
         stride: 64,
         offset: 16,
@@ -189,7 +194,6 @@ export default class MeshLayer extends Layer {
         update: () => {}
       },
       instanceModelMatCol3: {
-        buffer: this.state.matrixBuffer,
         size: 4,
         stride: 64,
         offset: 32,
@@ -198,7 +202,6 @@ export default class MeshLayer extends Layer {
         update: () => {}
       },
       instanceModelMatCol4: {
-        buffer: this.state.matrixBuffer,
         size: 4,
         stride: 64,
         offset: 48,
