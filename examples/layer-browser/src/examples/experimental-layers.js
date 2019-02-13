@@ -26,7 +26,7 @@ const MeshLayerExample = {
   props: {
     id: 'mesh-layer',
     data: dataSamples.points,
-    // texture: 'data/texture.png',
+    texture: 'data/texture.png',
     mesh: new CylinderGeometry({
       radius: 1,
       topRadius: 1,
@@ -40,7 +40,8 @@ const MeshLayerExample = {
     sizeScale: 10,
     getPosition: d => d.COORDINATES,
     getYaw: d => Math.random() * 360,
-    getColor: d => [0, d.RACKS * 50, d.SPACES * 20]
+    getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
+    getScale: d => [Math.random() * 3 + 0.1, Math.random() * 3 + 0.1, Math.random() * 3 + 0.1]
   }
 };
 

@@ -25,12 +25,15 @@
 import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, loadTextures, Texture2D, fp64, Buffer} from 'luma.gl';
+import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
 
 const RADIAN_PER_DEGREE = Math.PI / 180;
+let rotationMatrix = new Float32Array(16);
+let xformMatrix = new Matrix4();
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -112,7 +115,9 @@ const defaultProps = {
   // https://en.wikipedia.org/wiki/Euler_angles
   getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
   getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0}
+  getRoll: {type: 'accessor', value: x => x.roll || 0},
+  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
+  getTranslate: {type: 'accessor', value: x => x.translate || [0, 0, 0]}
 };
 
 export default class MeshLayer extends Layer {
@@ -284,7 +289,7 @@ export default class MeshLayer extends Layer {
   }
 
   calculateInstanceXform() {
-    const {data, getYaw, getPitch, getRoll} = this.props;
+    const {data, getYaw, getPitch, getRoll, getScale, getTranslate} = this.props;
     let matrixData = this.state.matrixData;
 
     let i = 0;
@@ -292,6 +297,8 @@ export default class MeshLayer extends Layer {
       let roll = getRoll(point) * RADIAN_PER_DEGREE;
       let pitch = getPitch(point) * RADIAN_PER_DEGREE;
       let yaw = getYaw(point) * RADIAN_PER_DEGREE;
+      let scale = getScale(point);
+      let translate = getTranslate(point);
 
       let sr = Math.sin(roll);
       let sp = Math.sin(pitch);
@@ -301,22 +308,45 @@ export default class MeshLayer extends Layer {
       let cp = Math.cos(pitch);
       let cw = Math.cos(yaw);
 
-      matrixData[i++] = cw * cp; // 0,0
-      matrixData[i++] = sw * cp; // 1,0
-      matrixData[i++] = -sp; // 2,0
-      matrixData[i++] = 0;
-      matrixData[i++] = -sw * cr + cw * sp * sr; // 0,1
-      matrixData[i++] = cw * cr + sw * sp * sr; // 1,1
-      matrixData[i++] = cp * sr; // 2,1
-      matrixData[i++] = 0;
-      matrixData[i++] = sw * sr + cw * sp * cr; // 0,2
-      matrixData[i++] = -cw * sr + sw * sp * cr; // 1,2
-      matrixData[i++] = cp * cr; // 2,2
-      matrixData[i++] = 0;
-      matrixData[i++] = 0;
-      matrixData[i++] = 0;
-      matrixData[i++] = 0;
-      matrixData[i++] = 1;
+      rotationMatrix[0] = cw * cp; // 0,0
+      rotationMatrix[1] = sw * cp; // 1,0
+      rotationMatrix[2] = -sp; // 2,0
+      rotationMatrix[3] = 0;
+      rotationMatrix[4] = -sw * cr + cw * sp * sr; // 0,1
+      rotationMatrix[5] = cw * cr + sw * sp * sr; // 1,1
+      rotationMatrix[6] = cp * sr; // 2,1
+      rotationMatrix[7] = 0;
+      rotationMatrix[8] = sw * sr + cw * sp * cr; // 0,2
+      rotationMatrix[9] = -cw * sr + sw * sp * cr; // 1,2
+      rotationMatrix[10] = cp * cr; // 2,2
+      rotationMatrix[11] = 0;
+      rotationMatrix[12] = 0;
+      rotationMatrix[13] = 0;
+      rotationMatrix[14] = 0;
+      rotationMatrix[15] = 1;
+
+      xformMatrix
+        .identity()
+        .translate(translate)
+        .multiplyRight(rotationMatrix)
+        .scale(scale);
+
+      matrixData[i++] = xformMatrix[0];
+      matrixData[i++] = xformMatrix[1];
+      matrixData[i++] = xformMatrix[2];
+      matrixData[i++] = xformMatrix[3];
+      matrixData[i++] = xformMatrix[4];
+      matrixData[i++] = xformMatrix[5];
+      matrixData[i++] = xformMatrix[6];
+      matrixData[i++] = xformMatrix[7];
+      matrixData[i++] = xformMatrix[8];
+      matrixData[i++] = xformMatrix[9];
+      matrixData[i++] = xformMatrix[10];
+      matrixData[i++] = xformMatrix[11];
+      matrixData[i++] = xformMatrix[12];
+      matrixData[i++] = xformMatrix[13];
+      matrixData[i++] = xformMatrix[14];
+      matrixData[i++] = xformMatrix[15];
     }
 
     this.state.matrixBuffer.setData(matrixData);
