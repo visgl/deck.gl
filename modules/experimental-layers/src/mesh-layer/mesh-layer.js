@@ -117,7 +117,7 @@ const defaultProps = {
   getPitch: {type: 'accessor', value: x => x.pitch || 0},
   getRoll: {type: 'accessor', value: x => x.roll || 0},
   getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslate: {type: 'accessor', value: x => x.translate || [0, 0, 0]}
+  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]}
 };
 
 export default class MeshLayer extends Layer {
@@ -289,7 +289,7 @@ export default class MeshLayer extends Layer {
   }
 
   calculateInstanceXform() {
-    const {data, getYaw, getPitch, getRoll, getScale, getTranslate} = this.props;
+    const {data, getYaw, getPitch, getRoll, getScale, getTranslation} = this.props;
     let matrixData = this.state.matrixData;
 
     let i = 0;
@@ -298,7 +298,7 @@ export default class MeshLayer extends Layer {
       let pitch = getPitch(point) * RADIAN_PER_DEGREE;
       let yaw = getYaw(point) * RADIAN_PER_DEGREE;
       let scale = getScale(point);
-      let translate = getTranslate(point);
+      let translate = getTranslation(point);
 
       let sr = Math.sin(roll);
       let sp = Math.sin(pitch);
