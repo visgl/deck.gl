@@ -241,5 +241,6 @@ export default class OrthographicController extends Controller {
   constructor(props) {
     super(OrthographicState, props);
     this.invertPan = true;
+    this.invertPanRotate = true;
   }
 }

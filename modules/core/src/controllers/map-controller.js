@@ -413,6 +413,7 @@ export default class MapController extends Controller {
   constructor(props) {
     super(MapState, props);
     this.invertPan = true;
+    this.invertPanRotate = true;
   }
 
   _getTransitionProps() {

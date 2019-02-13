@@ -55,6 +55,7 @@ export default class Controller {
     this.onViewStateChange = null;
     this.onStateChange = null;
     this.invertPan = false;
+    this.invertPanRotate = false;
 
     this.handleEvent = this.handleEvent.bind(this);
 
@@ -274,7 +275,7 @@ export default class Controller {
       return false;
     }
 
-    return this.invertPan ? this._onPanRotateMap(event) : this._onPanRotateStandard(event);
+    return this.invertPanRotate ? this._onPanRotateMap(event) : this._onPanRotateStandard(event);
   }
 
   // Normal pan to rotate
