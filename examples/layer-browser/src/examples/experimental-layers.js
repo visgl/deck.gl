@@ -26,7 +26,7 @@ const MeshLayerExample = {
   props: {
     id: 'mesh-layer',
     data: dataSamples.points,
-    texture: 'data/texture.png',
+    // texture: 'data/texture.png',
     mesh: new CylinderGeometry({
       radius: 1,
       topRadius: 1,

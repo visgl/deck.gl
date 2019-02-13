@@ -15,6 +15,10 @@ attribute vec2 instancePositions64xy;
 attribute vec3 instanceRotations;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
+attribute vec4 instanceModelMatCol1;
+attribute vec4 instanceModelMatCol2;
+attribute vec4 instanceModelMatCol3;
+attribute vec4 instanceModelMatCol4;
 
 // Outputs to fragment shader
 varying vec2 vTexCoord;
@@ -46,8 +50,15 @@ mat3 getRotationMatrix(vec3 rotation) {
 
 void main(void) {
   mat3 rotationMatrix = getRotationMatrix(instanceRotations);
+  mat4 modelMat = mat4(
+    instanceModelMatCol1,
+    instanceModelMatCol2,
+    instanceModelMatCol3,
+    instanceModelMatCol4
+  );
 
-  vec3 pos = positions;
+  vec3 pos = (modelMat * vec4(positions, 1.0)).xyz;
+  // vec3 pos = positions;
   pos = rotationMatrix * pos;
   pos = project_scale(pos * sizeScale);
   // TODO - backward compatibility, remove in next major release

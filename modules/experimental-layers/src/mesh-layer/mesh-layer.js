@@ -24,7 +24,7 @@
 
 import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, loadTextures, Texture2D, fp64} from 'luma.gl';
+import {Model, Geometry, loadTextures, Texture2D, fp64, Buffer} from 'luma.gl';
 const {fp64LowPart} = fp64;
 
 import vs from './mesh-layer-vertex.glsl';
@@ -123,6 +123,33 @@ export default class MeshLayer extends Layer {
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
+
+    let numInstances = this.getNumInstances();
+    let matrixData = new Float32Array(numInstances * 16);
+
+    for (let i = 0, len = matrixData.length; i < len; i += 16) {
+      matrixData[i] = 1;
+      matrixData[i + 1] = 0;
+      matrixData[i + 2] = 0;
+      matrixData[i + 3] = 0;
+      matrixData[i + 4] = 0;
+      matrixData[i + 5] = 1;
+      matrixData[i + 6] = 0;
+      matrixData[i + 7] = 0;
+      matrixData[i + 8] = 0;
+      matrixData[i + 8] = 0;
+      matrixData[i + 10] = 1;
+      matrixData[i + 11] = 0;
+      matrixData[i + 12] = 0;
+      matrixData[i + 13] = 0;
+      matrixData[i + 14] = 0;
+      matrixData[i + 15] = 1;
+    }
+
+    this.state.matrixData = matrixData;
+    this.state.matrixBuffer = new Buffer(this.context.gl, matrixData.byteLength);
+    this.state.matrixBuffer.setData(matrixData);
+
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
@@ -142,6 +169,42 @@ export default class MeshLayer extends Layer {
         size: 4,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
+      },
+      instanceModelMatCol1: {
+        buffer: this.state.matrixBuffer,
+        size: 4,
+        stride: 64,
+        offset: 0,
+        divisor: 1,
+        defaultValue: [1, 0, 0, 0],
+        update: () => {}
+      },
+      instanceModelMatCol2: {
+        buffer: this.state.matrixBuffer,
+        size: 4,
+        stride: 64,
+        offset: 16,
+        divisor: 1,
+        defaultValue: [0, 1, 0, 0],
+        update: () => {}
+      },
+      instanceModelMatCol3: {
+        buffer: this.state.matrixBuffer,
+        size: 4,
+        stride: 64,
+        offset: 32,
+        divisor: 1,
+        defaultValue: [0, 0, 1, 0],
+        update: () => {}
+      },
+      instanceModelMatCol4: {
+        buffer: this.state.matrixBuffer,
+        size: 4,
+        stride: 64,
+        offset: 48,
+        divisor: 1,
+        defaultValue: [0, 0, 0, 1],
+        update: () => {}
       }
     });
 

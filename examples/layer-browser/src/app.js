@@ -68,7 +68,7 @@ export default class App extends PureComponent {
         maxDistance: 20
       },
       activeExamples: {
-        ScatterplotLayer: true
+        MeshLayer: true
       },
       settings: {
         orthographic: false,
