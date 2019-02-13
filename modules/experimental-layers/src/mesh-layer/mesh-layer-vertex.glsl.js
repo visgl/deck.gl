@@ -12,7 +12,6 @@ attribute vec2 texCoords;
 // Instance attributes
 attribute vec3 instancePositions;
 attribute vec2 instancePositions64xy;
-attribute vec3 instanceRotations;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 attribute vec4 instanceModelMatCol1;
@@ -25,31 +24,7 @@ varying vec2 vTexCoord;
 varying vec4 vColor;
 varying float vLightWeight;
 
-// yaw(z) pitch(y) roll(x)
-mat3 getRotationMatrix(vec3 rotation) {
-  float sr = sin(rotation.x);
-  float sp = sin(rotation.y);
-  float sw = sin(rotation.z);
-
-  float cr = cos(rotation.x);
-  float cp = cos(rotation.y);
-  float cw = cos(rotation.z);
-
-  return mat3(
-    cw * cp,                  // 0,0
-    sw * cp,                  // 1,0
-    -sp,                      // 2,0
-    -sw * cr + cw * sp * sr,  // 0,1
-    cw * cr + sw * sp * sr,   // 1,1
-    cp * sr,                  // 2,1
-    sw * sr + cw * sp * cr,   // 0,2
-    -cw * sr + sw * sp * cr,  // 1,2
-    cp * cr                   // 2,2
-  );
-}
-
 void main(void) {
-  mat3 rotationMatrix = getRotationMatrix(instanceRotations);
   mat4 modelMat = mat4(
     instanceModelMatCol1,
     instanceModelMatCol2,
@@ -58,8 +33,6 @@ void main(void) {
   );
 
   vec3 pos = (modelMat * vec4(positions, 1.0)).xyz;
-  // vec3 pos = positions;
-  pos = rotationMatrix * pos;
   pos = project_scale(pos * sizeScale);
   // TODO - backward compatibility, remove in next major release
   if (project_uPixelsPerMeter.y < 0.0) {

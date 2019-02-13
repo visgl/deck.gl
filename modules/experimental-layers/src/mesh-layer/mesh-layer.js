@@ -124,31 +124,8 @@ export default class MeshLayer extends Layer {
   initializeState() {
     const attributeManager = this.getAttributeManager();
 
-    let numInstances = this.getNumInstances();
-    let matrixData = new Float32Array(numInstances * 16);
-
-    for (let i = 0, len = matrixData.length; i < len; i += 16) {
-      matrixData[i] = 1;
-      matrixData[i + 1] = 0;
-      matrixData[i + 2] = 0;
-      matrixData[i + 3] = 0;
-      matrixData[i + 4] = 0;
-      matrixData[i + 5] = 1;
-      matrixData[i + 6] = 0;
-      matrixData[i + 7] = 0;
-      matrixData[i + 8] = 0;
-      matrixData[i + 8] = 0;
-      matrixData[i + 10] = 1;
-      matrixData[i + 11] = 0;
-      matrixData[i + 12] = 0;
-      matrixData[i + 13] = 0;
-      matrixData[i + 14] = 0;
-      matrixData[i + 15] = 1;
-    }
-
-    this.state.matrixData = matrixData;
-    this.state.matrixBuffer = new Buffer(this.context.gl, matrixData.byteLength);
-    this.state.matrixBuffer.setData(matrixData);
+    this.state.matrixData = new Float32Array(this.getNumInstances() * 16);
+    this.state.matrixBuffer = new Buffer(this.context.gl, this.state.matrixData.byteLength);
 
     this.state.buffers = {
       instanceModelMatCol1: this.state.matrixBuffer,
@@ -167,11 +144,6 @@ export default class MeshLayer extends Layer {
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
       },
-      instanceRotations: {
-        size: 3,
-        accessor: ['getYaw', 'getPitch', 'getRoll'],
-        update: this.calculateInstanceRotations
-      },
       instanceColors: {
         size: 4,
         accessor: 'getColor',
@@ -183,7 +155,7 @@ export default class MeshLayer extends Layer {
         offset: 0,
         divisor: 1,
         defaultValue: [1, 0, 0, 0],
-        update: () => {}
+        noAlloc: true
       },
       instanceModelMatCol2: {
         size: 4,
@@ -191,7 +163,7 @@ export default class MeshLayer extends Layer {
         offset: 16,
         divisor: 1,
         defaultValue: [0, 1, 0, 0],
-        update: () => {}
+        noAlloc: true
       },
       instanceModelMatCol3: {
         size: 4,
@@ -199,7 +171,7 @@ export default class MeshLayer extends Layer {
         offset: 32,
         divisor: 1,
         defaultValue: [0, 0, 1, 0],
-        update: () => {}
+        noAlloc: true
       },
       instanceModelMatCol4: {
         size: 4,
@@ -207,9 +179,11 @@ export default class MeshLayer extends Layer {
         offset: 48,
         divisor: 1,
         defaultValue: [0, 0, 0, 1],
-        update: () => {}
+        noAlloc: true
       }
     });
+
+    this.calculateInstanceXform();
 
     this.setState({
       // Avoid luma.gl's missing uniform warning
@@ -309,16 +283,43 @@ export default class MeshLayer extends Layer {
     }
   }
 
-  // yaw(z), pitch(y) and roll(x) in radians
-  calculateInstanceRotations(attribute) {
+  calculateInstanceXform() {
     const {data, getYaw, getPitch, getRoll} = this.props;
-    const {value, size} = attribute;
+    let matrixData = this.state.matrixData;
+
     let i = 0;
     for (const point of data) {
-      value[i++] = getRoll(point) * RADIAN_PER_DEGREE;
-      value[i++] = getPitch(point) * RADIAN_PER_DEGREE;
-      value[i++] = getYaw(point) * RADIAN_PER_DEGREE;
+      let roll = getRoll(point) * RADIAN_PER_DEGREE;
+      let pitch = getPitch(point) * RADIAN_PER_DEGREE;
+      let yaw = getYaw(point) * RADIAN_PER_DEGREE;
+
+      let sr = Math.sin(roll);
+      let sp = Math.sin(pitch);
+      let sw = Math.sin(yaw);
+
+      let cr = Math.cos(roll);
+      let cp = Math.cos(pitch);
+      let cw = Math.cos(yaw);
+
+      matrixData[i++] = cw * cp; // 0,0
+      matrixData[i++] = sw * cp; // 1,0
+      matrixData[i++] = -sp; // 2,0
+      matrixData[i++] = 0;
+      matrixData[i++] = -sw * cr + cw * sp * sr; // 0,1
+      matrixData[i++] = cw * cr + sw * sp * sr; // 1,1
+      matrixData[i++] = cp * sr; // 2,1
+      matrixData[i++] = 0;
+      matrixData[i++] = sw * sr + cw * sp * cr; // 0,2
+      matrixData[i++] = -cw * sr + sw * sp * cr; // 1,2
+      matrixData[i++] = cp * cr; // 2,2
+      matrixData[i++] = 0;
+      matrixData[i++] = 0;
+      matrixData[i++] = 0;
+      matrixData[i++] = 0;
+      matrixData[i++] = 1;
     }
+
+    this.state.matrixBuffer.setData(matrixData);
   }
 }
 
