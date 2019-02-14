@@ -14,10 +14,10 @@ attribute vec3 instancePositions;
 attribute vec2 instancePositions64xy;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
-attribute vec4 instanceModelMatCol1;
-attribute vec4 instanceModelMatCol2;
-attribute vec4 instanceModelMatCol3;
-attribute vec4 instanceModelMatCol4;
+attribute vec4 instanceModelMatrixColumn1;
+attribute vec4 instanceModelMatrixColumn2;
+attribute vec4 instanceModelMatrixColumn3;
+attribute vec4 instanceModelMatrixColumn4;
 
 // Outputs to fragment shader
 varying vec2 vTexCoord;
@@ -26,10 +26,10 @@ varying float vLightWeight;
 
 void main(void) {
   mat4 modelMat = mat4(
-    instanceModelMatCol1,
-    instanceModelMatCol2,
-    instanceModelMatCol3,
-    instanceModelMatCol4
+    instanceModelMatrixColumn1,
+    instanceModelMatrixColumn2,
+    instanceModelMatrixColumn3,
+    instanceModelMatrixColumn4
   );
 
   vec3 pos = (modelMat * vec4(positions, 1.0)).xyz;

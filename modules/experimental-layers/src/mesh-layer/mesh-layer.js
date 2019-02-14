@@ -33,7 +33,7 @@ import fs from './mesh-layer-fragment.glsl';
 
 const RADIAN_PER_DEGREE = Math.PI / 180;
 let rotationMatrix = new Float32Array(16);
-let xformMatrix = new Matrix4();
+let modelMatrix = new Matrix4();
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -117,7 +117,8 @@ const defaultProps = {
   getPitch: {type: 'accessor', value: x => x.pitch || 0},
   getRoll: {type: 'accessor', value: x => x.roll || 0},
   getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]}
+  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]},
+  getMatrix: {type: 'accessor', value: x => x.matrix || null}
 };
 
 export default class MeshLayer extends Layer {
@@ -129,14 +130,17 @@ export default class MeshLayer extends Layer {
   initializeState() {
     const attributeManager = this.getAttributeManager();
 
-    this.state.matrixData = new Float32Array(this.getNumInstances() * 16);
-    this.state.matrixBuffer = new Buffer(this.context.gl, this.state.matrixData.byteLength);
+    this.state.instanceModelMatrixData = new Float32Array(this.getNumInstances() * 16);
+    this.state.instanceModelMatrixBuffer = new Buffer(
+      this.context.gl,
+      this.state.instanceModelMatrixData.byteLength
+    );
 
     this.state.buffers = {
-      instanceModelMatCol1: this.state.matrixBuffer,
-      instanceModelMatCol2: this.state.matrixBuffer,
-      instanceModelMatCol3: this.state.matrixBuffer,
-      instanceModelMatCol4: this.state.matrixBuffer
+      instanceModelMatrixColumn1: this.state.instanceModelMatrixBuffer,
+      instanceModelMatrixColumn2: this.state.instanceModelMatrixBuffer,
+      instanceModelMatrixColumn3: this.state.instanceModelMatrixBuffer,
+      instanceModelMatrixColumn4: this.state.instanceModelMatrixBuffer
     };
 
     attributeManager.addInstanced({
@@ -154,7 +158,7 @@ export default class MeshLayer extends Layer {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
-      instanceModelMatCol1: {
+      instanceModelMatrixColumn1: {
         size: 4,
         stride: 64,
         offset: 0,
@@ -162,7 +166,7 @@ export default class MeshLayer extends Layer {
         defaultValue: [1, 0, 0, 0],
         noAlloc: true
       },
-      instanceModelMatCol2: {
+      instanceModelMatrixColumn2: {
         size: 4,
         stride: 64,
         offset: 16,
@@ -170,7 +174,7 @@ export default class MeshLayer extends Layer {
         defaultValue: [0, 1, 0, 0],
         noAlloc: true
       },
-      instanceModelMatCol3: {
+      instanceModelMatrixColumn3: {
         size: 4,
         stride: 64,
         offset: 32,
@@ -178,7 +182,7 @@ export default class MeshLayer extends Layer {
         defaultValue: [0, 0, 1, 0],
         noAlloc: true
       },
-      instanceModelMatCol4: {
+      instanceModelMatrixColumn4: {
         size: 4,
         stride: 64,
         offset: 48,
@@ -281,75 +285,81 @@ export default class MeshLayer extends Layer {
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
+    for (const object of data) {
+      const position = getPosition(object);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
   }
 
   calculateInstanceXform() {
-    const {data, getYaw, getPitch, getRoll, getScale, getTranslation} = this.props;
-    let matrixData = this.state.matrixData;
+    const {data, getYaw, getPitch, getRoll, getScale, getTranslation, getMatrix} = this.props;
+    let instanceModelMatrixData = this.state.instanceModelMatrixData;
 
     let i = 0;
-    for (const point of data) {
-      let roll = getRoll(point) * RADIAN_PER_DEGREE;
-      let pitch = getPitch(point) * RADIAN_PER_DEGREE;
-      let yaw = getYaw(point) * RADIAN_PER_DEGREE;
-      let scale = getScale(point);
-      let translate = getTranslation(point);
+    for (const object of data) {
+      let matrix = getMatrix(object);
 
-      let sr = Math.sin(roll);
-      let sp = Math.sin(pitch);
-      let sw = Math.sin(yaw);
+      if (!matrix) {
+        let roll = getRoll(object) * RADIAN_PER_DEGREE;
+        let pitch = getPitch(object) * RADIAN_PER_DEGREE;
+        let yaw = getYaw(object) * RADIAN_PER_DEGREE;
+        let scale = getScale(object);
+        let translate = getTranslation(object);
 
-      let cr = Math.cos(roll);
-      let cp = Math.cos(pitch);
-      let cw = Math.cos(yaw);
+        let sr = Math.sin(roll);
+        let sp = Math.sin(pitch);
+        let sw = Math.sin(yaw);
 
-      rotationMatrix[0] = cw * cp; // 0,0
-      rotationMatrix[1] = sw * cp; // 1,0
-      rotationMatrix[2] = -sp; // 2,0
-      rotationMatrix[3] = 0;
-      rotationMatrix[4] = -sw * cr + cw * sp * sr; // 0,1
-      rotationMatrix[5] = cw * cr + sw * sp * sr; // 1,1
-      rotationMatrix[6] = cp * sr; // 2,1
-      rotationMatrix[7] = 0;
-      rotationMatrix[8] = sw * sr + cw * sp * cr; // 0,2
-      rotationMatrix[9] = -cw * sr + sw * sp * cr; // 1,2
-      rotationMatrix[10] = cp * cr; // 2,2
-      rotationMatrix[11] = 0;
-      rotationMatrix[12] = 0;
-      rotationMatrix[13] = 0;
-      rotationMatrix[14] = 0;
-      rotationMatrix[15] = 1;
+        let cr = Math.cos(roll);
+        let cp = Math.cos(pitch);
+        let cw = Math.cos(yaw);
 
-      xformMatrix
-        .identity()
-        .translate(translate)
-        .multiplyRight(rotationMatrix)
-        .scale(scale);
+        rotationMatrix[0] = cw * cp; // 0,0
+        rotationMatrix[1] = sw * cp; // 1,0
+        rotationMatrix[2] = -sp; // 2,0
+        rotationMatrix[3] = 0;
+        rotationMatrix[4] = -sw * cr + cw * sp * sr; // 0,1
+        rotationMatrix[5] = cw * cr + sw * sp * sr; // 1,1
+        rotationMatrix[6] = cp * sr; // 2,1
+        rotationMatrix[7] = 0;
+        rotationMatrix[8] = sw * sr + cw * sp * cr; // 0,2
+        rotationMatrix[9] = -cw * sr + sw * sp * cr; // 1,2
+        rotationMatrix[10] = cp * cr; // 2,2
+        rotationMatrix[11] = 0;
+        rotationMatrix[12] = 0;
+        rotationMatrix[13] = 0;
+        rotationMatrix[14] = 0;
+        rotationMatrix[15] = 1;
 
-      matrixData[i++] = xformMatrix[0];
-      matrixData[i++] = xformMatrix[1];
-      matrixData[i++] = xformMatrix[2];
-      matrixData[i++] = xformMatrix[3];
-      matrixData[i++] = xformMatrix[4];
-      matrixData[i++] = xformMatrix[5];
-      matrixData[i++] = xformMatrix[6];
-      matrixData[i++] = xformMatrix[7];
-      matrixData[i++] = xformMatrix[8];
-      matrixData[i++] = xformMatrix[9];
-      matrixData[i++] = xformMatrix[10];
-      matrixData[i++] = xformMatrix[11];
-      matrixData[i++] = xformMatrix[12];
-      matrixData[i++] = xformMatrix[13];
-      matrixData[i++] = xformMatrix[14];
-      matrixData[i++] = xformMatrix[15];
+        modelMatrix
+          .identity()
+          .translate(translate)
+          .multiplyRight(rotationMatrix)
+          .scale(scale);
+
+        matrix = modelMatrix;
+      }
+
+      instanceModelMatrixData[i++] = matrix[0];
+      instanceModelMatrixData[i++] = matrix[1];
+      instanceModelMatrixData[i++] = matrix[2];
+      instanceModelMatrixData[i++] = matrix[3];
+      instanceModelMatrixData[i++] = matrix[4];
+      instanceModelMatrixData[i++] = matrix[5];
+      instanceModelMatrixData[i++] = matrix[6];
+      instanceModelMatrixData[i++] = matrix[7];
+      instanceModelMatrixData[i++] = matrix[8];
+      instanceModelMatrixData[i++] = matrix[9];
+      instanceModelMatrixData[i++] = matrix[10];
+      instanceModelMatrixData[i++] = matrix[11];
+      instanceModelMatrixData[i++] = matrix[12];
+      instanceModelMatrixData[i++] = matrix[13];
+      instanceModelMatrixData[i++] = matrix[14];
+      instanceModelMatrixData[i++] = matrix[15];
     }
 
-    this.state.matrixBuffer.setData(matrixData);
+    this.state.instanceModelMatrixBuffer.setData(instanceModelMatrixData);
   }
 }
 

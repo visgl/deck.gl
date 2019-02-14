@@ -42,6 +42,9 @@ const MeshLayerExample = {
     getYaw: d => Math.random() * 360,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
     getScale: d => [Math.random() * 3 + 0.1, Math.random() * 3 + 0.1, Math.random() * 3 + 0.1]
+
+    // Random shear matrix. Overrides the above.
+    // getMatrix: d => [1, Math.random() * 4, 0, 0, 0, 1, 0, 0, 0, Math.random() * 4, 1, 0, 0, 0, 0, 1]
   }
 };
 
