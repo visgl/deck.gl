@@ -23,7 +23,7 @@ import {Framebuffer, _ShaderCache as ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
 import {drawLayers} from './draw-layers';
-import {pickObject, pickVisibleObjects} from './pick-layers';
+import DeckPicker from './deck-picker';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
@@ -301,7 +301,7 @@ export default class LayerManager {
 
     const layers = this.getLayers({layerIds});
 
-    const result = pickObject(gl, {
+    const result = new DeckPicker().pickObject(gl, {
       // User params
       x,
       y,
@@ -329,7 +329,7 @@ export default class LayerManager {
 
     const layers = this.getLayers({layerIds});
 
-    return pickVisibleObjects(gl, {
+    return new DeckPicker().pickVisibleObjects(gl, {
       x,
       y,
       width,
