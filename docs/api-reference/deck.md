@@ -307,7 +307,7 @@ Returns:
 Performs deep picking. Finds all close pickable and visible object at the given screen coordinate, even if those objects are occluded by other objects.
 
 ```js
-deck.pickObject({x, y, radius, layerIds, depth})
+deck.pickMultipleObjects({x, y, radius, layerIds, depth})
 ```
 
 * `x` (Number) - x position in pixels
