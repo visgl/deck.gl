@@ -1,6 +1,7 @@
 /* global document */
 import GL from '@luma.gl/constants';
-import {Texture2D, loadImages, loadTextures} from 'luma.gl';
+import {Texture2D} from 'luma.gl';
+import {loadImage} from '@loaders.gl/core';
 
 const MAX_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
@@ -197,14 +198,14 @@ export default class IconManager {
       this._texture = iconAtlas;
       this.onUpdate();
     } else if (typeof iconAtlas === 'string') {
-      loadTextures(this.gl, {
-        urls: [iconAtlas],
-        parameters: {
-          [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-          [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-        }
-      }).then(([texture]) => {
-        this._texture = texture;
+      loadImage(iconAtlas).then(data => {
+        this._texture = new Texture2D(this.gl, {
+          data,
+          parameters: {
+            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
+            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
+          }
+        });
         this.onUpdate();
       });
     }
@@ -240,7 +241,7 @@ export default class IconManager {
     const canvasHeight = this._texture.height;
 
     for (const icon of icons) {
-      loadImages({urls: [icon.url]}).then(([imageData]) => {
+      loadImage(icon.url).then(imageData => {
         const iconMapping = this._mapping[icon.url];
         const {x, y, width, height} = iconMapping;
 
