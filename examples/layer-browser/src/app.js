@@ -3,7 +3,6 @@
 // deck.gl ES6 components
 import {COORDINATE_SYSTEM, View, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
 import {_OrbitController as OrbitController} from '@deck.gl/core';
-import {_ReflectionEffect as ReflectionEffect} from '@deck.gl/core';
 
 // deck.gl react components
 import DeckGL from '@deck.gl/react';
@@ -93,8 +92,6 @@ export default class App extends PureComponent {
 
       enableDepthPickOnClick: false
     };
-
-    this._effects = [new ReflectionEffect()];
   }
 
   componentDidUpdate(prevProps, prevState) {
