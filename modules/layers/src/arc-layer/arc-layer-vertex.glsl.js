@@ -49,15 +49,16 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)
-
-vec2 getExtrusionOffset(vec2 line_worldspace, float offset_direction, float width) {
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
-  vec2 dir_worldspace = normalize(line_worldspace);
+  vec2 dir_screenspace = normalize(line_clipspace * project_uViewportSize);
   // rotate by 90 degrees
-  dir_worldspace = vec2(-dir_worldspace.y, dir_worldspace.x);
+  dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
-  vec2 offset_worldspace = dir_worldspace * offset_direction * width / 2.0;
-  return offset_worldspace;
+  vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
+  vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
+
+  return offset_clipspace;
 }
 
 float getSegmentRatio(float index) {
@@ -84,18 +85,20 @@ void main(void) {
   float indexDir = mix(-1.0, 1.0, step(segmentIndex, 0.0));
   float nextSegmentRatio = getSegmentRatio(segmentIndex + indexDir);
 
+  vec3 currPos = getPos(source, target, segmentRatio);
+  vec3 nextPos = getPos(source, target, nextSegmentRatio);
+  vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
+  vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
+
   // Multiply out width and clamp to limits
   float width = clamp(
     project_scale(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
 
-  vec3 currPos = getPos(source, target, segmentRatio);
-  vec3 nextPos = getPos(source, target, nextSegmentRatio);
-
   // extrude
-  vec2 offset = getExtrusionOffset((nextPos.xy - currPos.xy) * indexDir, positions.y, width);
-  gl_Position = project_to_clipspace(vec4(currPos, 1.0) + vec4(offset, 0.0, 0.0));
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, width);
+  gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
   vColor = vec4(color.rgb, color.a * opacity);
