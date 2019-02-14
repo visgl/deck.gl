@@ -413,12 +413,18 @@ export default class MapController extends Controller {
   constructor(props) {
     super(MapState, props);
     this.invertPan = true;
-    this.invertPanRotate = true;
   }
 
   _getTransitionProps() {
     // Enables Transitions on double-tap and key-down events.
     return LINEAR_TRANSITION_PROPS;
+  }
+
+  _onPanRotate(event) {
+    if (!this.dragRotate) {
+      return false;
+    }
+    return this._onPanRotateMap(event);
   }
 }
 
