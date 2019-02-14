@@ -379,7 +379,7 @@ export default class Layer extends Component {
       numInstances,
       props,
       transitions: props.transitions,
-      buffers: Object.assign({}, this.state.buffers, props),
+      buffers: props,
       context: this,
       // Don't worry about non-attribute props
       ignoreUnknownAttributes: true
