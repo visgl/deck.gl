@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "gl-matrix": "^3.0.0",
-    "luma.gl": "^7.0.0-alpha.6",
+    "luma.gl": "^7.0.0-alpha.11",
     "math.gl": "^2.2.0",
     "mjolnir.js": "^2.0.2",
     "probe.gl": "^2.0.1",

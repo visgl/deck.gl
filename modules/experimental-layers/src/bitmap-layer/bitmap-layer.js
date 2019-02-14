@@ -20,7 +20,8 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, loadTextures} from 'luma.gl';
+import {Model, Geometry, Texture2D} from 'luma.gl';
+import {loadImage} from '@loaders.gl/core';
 
 import BITMAP_VERTEX_SHADER from './bitmap-layer-vertex';
 import BITMAP_FRAGMENT_SHADER from './bitmap-layer-fragment';
@@ -127,9 +128,8 @@ export default class BitmapLayer extends Layer {
     const {model} = this.state;
     const {images} = this.props;
     for (let i = 0; i < Math.min(images.length, MAX_BITMAPS); i++) {
-      loadTextures(this.context.gl, {
-        urls: [images[i]]
-      }).then(([texture]) => {
+      loadImage(images[i]).then(data => {
+        const texture = new Texture2D(this.context.gl, {data});
         return model.setUniforms({[`uBitmap${i}`]: texture});
       });
     }
