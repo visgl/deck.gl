@@ -273,8 +273,7 @@ export default class Controller {
     if (!this.dragRotate) {
       return false;
     }
-
-    return this.invertPan ? this._onPanRotateMap(event) : this._onPanRotateStandard(event);
+    return this._onPanRotateStandard(event);
   }
 
   // Normal pan to rotate

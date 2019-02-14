@@ -419,6 +419,13 @@ export default class MapController extends Controller {
     // Enables Transitions on double-tap and key-down events.
     return LINEAR_TRANSITION_PROPS;
   }
+
+  _onPanRotate(event) {
+    if (!this.dragRotate) {
+      return false;
+    }
+    return this._onPanRotateMap(event);
+  }
 }
 
 export const testExports = {MapState};
