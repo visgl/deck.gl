@@ -130,19 +130,6 @@ export default class MeshLayer extends Layer {
   initializeState() {
     const attributeManager = this.getAttributeManager();
 
-    this.state.instanceModelMatrixData = new Float32Array(this.getNumInstances() * 16);
-    this.state.instanceModelMatrixBuffer = new Buffer(
-      this.context.gl,
-      this.state.instanceModelMatrixData.byteLength
-    );
-
-    this.state.buffers = {
-      instanceModelMatrixColumn1: this.state.instanceModelMatrixBuffer,
-      instanceModelMatrixColumn2: this.state.instanceModelMatrixBuffer,
-      instanceModelMatrixColumn3: this.state.instanceModelMatrixBuffer,
-      instanceModelMatrixColumn4: this.state.instanceModelMatrixBuffer
-    };
-
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
@@ -158,41 +145,33 @@ export default class MeshLayer extends Layer {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
-      instanceModelMatrixColumn1: {
-        size: 4,
-        stride: 64,
-        offset: 0,
-        divisor: 1,
-        defaultValue: [1, 0, 0, 0],
-        noAlloc: true
-      },
-      instanceModelMatrixColumn2: {
-        size: 4,
-        stride: 64,
-        offset: 16,
-        divisor: 1,
-        defaultValue: [0, 1, 0, 0],
-        noAlloc: true
-      },
-      instanceModelMatrixColumn3: {
-        size: 4,
-        stride: 64,
-        offset: 32,
-        divisor: 1,
-        defaultValue: [0, 0, 1, 0],
-        noAlloc: true
-      },
-      instanceModelMatrixColumn4: {
-        size: 4,
-        stride: 64,
-        offset: 48,
-        divisor: 1,
-        defaultValue: [0, 0, 0, 1],
-        noAlloc: true
+      instanceModelMatrix: {
+        size: 16,
+        shaderAttributes: {
+          instanceModelMatrixColumn1: {
+            size: 4,
+            stride: 64,
+            offset: 0
+          },
+          instanceModelMatrixColumn2: {
+            size: 4,
+            stride: 64,
+            offset: 16
+          },
+          instanceModelMatrixColumn3: {
+            size: 4,
+            stride: 64,
+            offset: 32
+          },
+          instanceModelMatrixColumn4: {
+            size: 4,
+            stride: 64,
+            offset: 48
+          }
+        },
+        update: this.calculateInstanceXform
       }
     });
-
-    this.calculateInstanceXform();
 
     this.setState({
       // Avoid luma.gl's missing uniform warning
@@ -292,9 +271,9 @@ export default class MeshLayer extends Layer {
     }
   }
 
-  calculateInstanceXform() {
+  calculateInstanceXform(attribute) {
     const {data, getYaw, getPitch, getRoll, getScale, getTranslation, getMatrix} = this.props;
-    let instanceModelMatrixData = this.state.instanceModelMatrixData;
+    let instanceModelMatrixData = attribute.value;
 
     let i = 0;
     for (const object of data) {
@@ -358,8 +337,6 @@ export default class MeshLayer extends Layer {
       instanceModelMatrixData[i++] = matrix[14];
       instanceModelMatrixData[i++] = matrix[15];
     }
-
-    this.state.instanceModelMatrixBuffer.setData(instanceModelMatrixData);
   }
 }
 

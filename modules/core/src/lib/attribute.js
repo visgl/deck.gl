@@ -164,6 +164,13 @@ export default class LayerAttribute extends Attribute {
       updated = false;
     }
 
+    if (this.userData.shaderAttributes) {
+      const shaderAttributes = this.userData.shaderAttributes;
+      for (const shaderAttributeName in shaderAttributes) {
+        shaderAttributes[shaderAttributeName].update({buffer: this.buffer});
+      }
+    }
+
     state.needsUpdate = false;
     state.needsRedraw = true;
 

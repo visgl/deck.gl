@@ -117,6 +117,7 @@ export default class AttributeManager {
     this.gl = gl;
 
     this.attributes = {};
+    this.shaderAttributes = {};
 
     this.updateTriggers = {};
     this.accessors = {};
@@ -271,7 +272,7 @@ export default class AttributeManager {
 
   /**
    * Returns changed attribute descriptors
-   * This indicates which WebGLBuggers need to be updated
+   * This indicates which WebGLBuffers need to be updated
    * @return {Object} attributes - descriptors
    */
   getChangedAttributes({clearChangedFlags = false}) {
@@ -282,8 +283,13 @@ export default class AttributeManager {
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       if (attribute.needsRedraw({clearChangedFlags: true})) {
-        // Only return non-transition attributes
-        if (!attributeTransitionManager.hasAttribute(attributeName)) {
+        if (attribute.userData.shaderAttributes) {
+          this._getChangedShaderAttributes(
+            attribute.userData.shaderAttributes,
+            attributeTransitionManager,
+            changedAttributes
+          );
+        } else if (!attributeTransitionManager.hasAttribute(attributeName)) {
           changedAttributes[attributeName] = attribute;
         }
       }
@@ -313,7 +319,7 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      newAttributes[attributeName] = new Attribute(
+      const newAttribute = (newAttributes[attributeName] = new Attribute(
         this.gl,
         Object.assign({}, attribute, {
           id: attributeName,
@@ -324,7 +330,11 @@ export default class AttributeManager {
           value: attribute.value || null,
           instanced: attribute.instanced || extraProps.instanced
         })
-      );
+      ));
+
+      if (attribute.shaderAttributes) {
+        this._addShaderAttributes(newAttribute, attribute.shaderAttributes, extraProps);
+      }
     }
 
     Object.assign(this.attributes, newAttributes);
@@ -332,6 +342,29 @@ export default class AttributeManager {
     this._mapUpdateTriggersToAttributes();
   }
   /* eslint-enable max-statements */
+
+  _addShaderAttributes(attribute, shaderAttributes, extraProps) {
+    attribute.userData.shaderAttributes = {};
+
+    for (const shaderAttributeName in shaderAttributes) {
+      const shaderAttribute = shaderAttributes[shaderAttributeName];
+
+      // Initialize the attribute descriptor, with WebGL and metadata fields
+      attribute.userData.shaderAttributes[shaderAttributeName] = new Attribute(
+        this.gl,
+        Object.assign({}, shaderAttribute, {
+          id: shaderAttributeName,
+          // Luma fields
+          constant: shaderAttribute.constant || false,
+          isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
+          size: (shaderAttribute.elements && 1) || shaderAttribute.size,
+          value: shaderAttribute.value || null,
+          instanced: shaderAttribute.instanced || extraProps.instanced,
+          noAlloc: true
+        })
+      );
+    }
+  }
 
   // build updateTrigger name to attribute name mapping
   _mapUpdateTriggersToAttributes() {
@@ -390,6 +423,14 @@ export default class AttributeManager {
         level: LOG_DETAIL_PRIORITY,
         message: `${attribute.id} updated ${numInstances} in ${timeMs}ms`
       });
+    }
+  }
+
+  _getChangedShaderAttributes(shaderAttributes, attributeTransitionManager, changedAttributes) {
+    for (const shaderAttributeName in shaderAttributes) {
+      if (!attributeTransitionManager.hasAttribute(shaderAttributeName)) {
+        changedAttributes[shaderAttributeName] = shaderAttributes[shaderAttributeName];
+      }
     }
   }
 }
