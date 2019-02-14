@@ -40,7 +40,7 @@ export default class MeshLayer extends Layer {
 
 A choice to make is whether your WebGL primitives (draw calls) should be instanced, or use dynamic geometry:
 
-* **Instanced layer** - This is type of layer renders the same geometry many times. Usually the simplest way to go when creating layers that renders a lot of similar objects (think ScatterplotLayer, ArcLayers etc).
+* **Instanced layer** - This type of layer renders the same geometry many times. Usually the simplest way to go when creating a layer that renders a lot of similar objects (think ScatterplotLayer, ArcLayers etc).
 
 ```js
   /// examples/sample-layers/mesh-layer/mesh-layer.js
@@ -62,7 +62,7 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
   }
 ```
 
-* **Dynamic geometry layer** - This is needed when dealing with data that needs to be rendered using multiple similar but unique geometries, such as polygons (i.e. the geometries are not copies of each that that only differ in terms of.
+* **Dynamic geometry layer** - This is needed when dealing with data that needs to be rendered using multiple similar but unique geometries, such as polygons (i.e. the geometries are not copies of each other that that only differ in terms of parameters).
 
 ```js
   /// examples/trips/trips-layer/trips-layer.js
@@ -81,7 +81,7 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
   }
 ```
 
-It sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/uber/deck.gl/tree/5.2-release/examples/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
+It is sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/uber/deck.gl/tree/5.2-release/examples/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
 
 
 #### Defining Attributes
@@ -121,9 +121,9 @@ The ideas used here are very similar to (and directly inspired by) those used in
 
 ### Rendering Layer
 
-[`draw()`](/docs/api-reference/layer.md#-draw-) - If you want to use custom uniforms or settings when drawing, you would typical implement the `draw` method and pass those to your render call. Note that `draw` is called with viewport uniforms that you need to pass to your shader, but you can of course add any layer specific uniforms to that.
+[`draw()`](/docs/api-reference/layer.md#-draw-) - If you want to use custom uniforms or settings when drawing, you would typically implement the `draw` method and pass those to your render call. Note that `draw` is called with viewport uniforms that you need to pass to your shader, but you can of course add any layer specific uniforms to that.
 
-Note: the reason that the supplied uniforms need to be passed on to your shaders is to enable your shader to use deck.gl's GLSL shaderlibs such as `project` or `project64` etc). If you don't use these shaderlibs, you would obviously not need to supply these uniforms, but you would have to implement features like cartographic projection etc on your own.
+Note: the reason that the supplied uniforms need to be passed on to your shaders is to enable your shader to use deck.gl's GLSL shaderlibs (such as `project` or `project64` etc.). If you don't use these shaderlibs, you would obviously not need to supply these uniforms, but you would have to implement features like cartographic projection etc. on your own.
 
 
 ### Destroying Layer
@@ -143,7 +143,7 @@ By always using the following shader functions for handling projections and scal
 
 * All positions must be passed through the `project_position` function (available both in JavaScript and GLSL) to convert non-linear web-mercator coordinates to linear mercator "world" or "pixel" coordinates, that can be passed to the projection matrix.
 
-* All offsets must be passed through the `project_scale` function (available both in JavaScript and GLSL) to convert distances to world coordinates (note that that distance scales are latitude dependent under web mercator projection (see [http://wiki.openstreetmap.org/wiki/Zoom_levels](http://wiki.openstreetmap.org/wiki/Zoom_levels) for more details), so scaling will depend on the viewport center and should only be expected to be locally correct.
+* All offsets must be passed through the `project_scale` function (available both in JavaScript and GLSL) to convert distances to world coordinates. Note that that distance scales are latitude dependent under web mercator projection (see [http://wiki.openstreetmap.org/wiki/Zoom_levels](http://wiki.openstreetmap.org/wiki/Zoom_levels) for more details), so scaling will depend on the viewport center and should only be expected to be locally correct.
 
 
 ## Implement Picking
