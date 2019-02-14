@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import log from '../utils/log';
+import log from '../../utils/log';
 
 const NO_PICKED_OBJECT = {
   pickedColor: null,

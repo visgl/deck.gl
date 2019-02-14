@@ -20,10 +20,10 @@
 
 import {readPixelsToArray} from 'luma.gl';
 import {drawPickingBuffer} from './draw-layers';
-import getPixelRatio from '../utils/pixel-ratio';
+import getPixelRatio from '../utils/get-pixel-ratio';
 import assert from '../utils/assert';
-import {getClosestObject, getUniqueObjects} from '../utils/query-object';
-import {processPickInfo, getLayerPickingInfo} from '../utils/pick-info';
+import {getClosestObject, getUniqueObjects} from './picking/query-object';
+import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
   constructor(props) {}
