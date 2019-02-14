@@ -17,6 +17,7 @@ export default class DeckRenderer {
   renderLayers({
     viewports,
     views,
+    useDevicePixels,
     redrawReason = 'unknown reason',
     customRender = false,
     pass,
@@ -24,7 +25,6 @@ export default class DeckRenderer {
   }) {
     // TODO: Remove LayerManager reference after clean up LayerManager & pick-layers.js
     const {drawPickingColors, layers, layerFilter} = this.layerManager;
-    const {useDevicePixels} = this.layerManager.context;
 
     this.drawLayersPass.setProps({
       layers,
