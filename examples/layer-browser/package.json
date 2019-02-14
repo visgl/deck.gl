@@ -8,6 +8,7 @@
     "start-local-production": "webpack-dev-server --env.local --env.production --progress --hot --open"
   },
   "dependencies": {
+    "@loaders.gl/gltf": "^0.6.1",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^1.0.6",

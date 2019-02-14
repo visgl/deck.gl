@@ -1,5 +1,8 @@
+/* global window */
+
 import {
   MeshLayer,
+  ScenegraphLayer,
   PathOutlineLayer,
   PathMarkerLayer,
   AdvancedTextLayer,
@@ -11,6 +14,7 @@ import {
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import GL from '@luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
+import {GLTFParser} from '@loaders.gl/gltf';
 import * as dataSamples from '../data-samples';
 
 const LIGHT_SETTINGS = {
@@ -42,6 +46,28 @@ const MeshLayerExample = {
     getPosition: d => d.COORDINATES,
     getYaw: d => Math.random() * 360,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20]
+  }
+};
+
+const ScenegraphLayerExample = {
+  layer: ScenegraphLayer,
+  initialize: () => {
+    const url =
+      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
+    window
+      .fetch(url)
+      .then(res => res.arrayBuffer())
+      .then(data => {
+        const gltfParser = new GLTFParser();
+        ScenegraphLayerExample.props.gltf = gltfParser.parse(data);
+      });
+  },
+  props: {
+    id: 'scenegraph-layer',
+    data: dataSamples.points,
+    sizeScale: 1,
+    pickable: true,
+    getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000]
   }
 };
 
@@ -216,7 +242,8 @@ const GreatCircleLayerExample = {
 /* eslint-disable quote-props */
 export default {
   'Experimental 3D Layers': {
-    MeshLayer: MeshLayerExample
+    MeshLayer: MeshLayerExample,
+    ScenegraphLayer: ScenegraphLayerExample
   },
   'Experimental Trips Layers': {
     PathOutlineLayer: PathOutlineExample,
