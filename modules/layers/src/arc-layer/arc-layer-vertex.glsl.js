@@ -91,6 +91,7 @@ void main(void) {
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
 
   // Multiply out width and clamp to limits
+  // mercator pixels are interpreted as screen pixels
   float width = clamp(
     project_scale(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels

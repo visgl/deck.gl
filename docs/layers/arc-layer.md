@@ -133,7 +133,6 @@ The stroke width of each object, in meters.
 
 * If a number is provided, it is used as the stroke width for all objects.
 * If a function is provided, it is called on each object to retrieve its stroke width.
-* If not provided, it falls back to `getStrokeWidth`.
 
 ## Source
 
