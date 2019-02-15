@@ -117,7 +117,6 @@ export default class AttributeManager {
     this.gl = gl;
 
     this.attributes = {};
-    this.shaderAttributes = {};
 
     this.updateTriggers = {};
     this.accessors = {};

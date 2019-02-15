@@ -169,7 +169,7 @@ export default class MeshLayer extends Layer {
             offset: 48
           }
         },
-        update: this.calculateInstanceXform
+        update: this.calculateInstanceModelMatrix
       }
     });
 
@@ -271,7 +271,7 @@ export default class MeshLayer extends Layer {
     }
   }
 
-  calculateInstanceXform(attribute) {
+  calculateInstanceModelMatrix(attribute) {
     const {data, getYaw, getPitch, getRoll, getScale, getTranslation, getMatrix} = this.props;
     let instanceModelMatrixData = attribute.value;
 
