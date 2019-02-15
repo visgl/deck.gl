@@ -17,6 +17,15 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.2] - Feb 15 2019
+
+- docs: pick methods belong to Deck, not DeckGL (#2675)
+- grammar typos in primitive-layers (#2677)
+- In docs: pickObjects -> pickMultipleObjects (#2676)
+- additin -> addition (#2680)
+- Encode URL so that extra ")" does not come through (#2678)
+- Don't use invertPan flag in _onPanRotate method (#2682)
+
 #### [6.4.1] - Feb 7 2019
 
 - specify default props for trips layer (#2644)
