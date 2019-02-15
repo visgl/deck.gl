@@ -278,22 +278,32 @@ export default class AttributeManager {
     const {attributes, attributeTransitionManager} = this;
 
     const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
+    const changedShaderAttributes = {};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
-      if (attribute.needsRedraw({clearChangedFlags: true})) {
-        if (attribute.userData.shaderAttributes) {
-          this._getChangedShaderAttributes(
-            attribute.userData.shaderAttributes,
-            attributeTransitionManager,
-            changedAttributes
-          );
-        } else if (!attributeTransitionManager.hasAttribute(attributeName)) {
-          changedAttributes[attributeName] = attribute;
-        }
+      if (
+        attribute.needsRedraw({clearChangedFlags: true}) &&
+        !attributeTransitionManager.hasAttribute(attributeName)
+      ) {
+        changedAttributes[attributeName] = attribute;
       }
     }
-    return changedAttributes;
+
+    for (const attributeName in changedAttributes) {
+      const attribute = changedAttributes[attributeName];
+
+      if (attribute.userData.shaderAttributes) {
+        const shaderAttributes = attribute.userData.shaderAttributes;
+        for (const shaderAttributeName in shaderAttributes) {
+          changedShaderAttributes[shaderAttributeName] = shaderAttributes[shaderAttributeName];
+        }
+      } else {
+        changedShaderAttributes[attributeName] = attribute;
+      }
+    }
+
+    return changedShaderAttributes;
   }
 
   // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
@@ -318,7 +328,7 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const newAttribute = (newAttributes[attributeName] = new Attribute(
+      const newAttribute = new Attribute(
         this.gl,
         Object.assign({}, attribute, {
           id: attributeName,
@@ -329,11 +339,13 @@ export default class AttributeManager {
           value: attribute.value || null,
           instanced: attribute.instanced || extraProps.instanced
         })
-      ));
+      );
 
       if (attribute.shaderAttributes) {
         this._addShaderAttributes(newAttribute, attribute.shaderAttributes, extraProps);
       }
+
+      newAttributes[attributeName] = newAttribute;
     }
 
     Object.assign(this.attributes, newAttributes);
@@ -422,14 +434,6 @@ export default class AttributeManager {
         level: LOG_DETAIL_PRIORITY,
         message: `${attribute.id} updated ${numInstances} in ${timeMs}ms`
       });
-    }
-  }
-
-  _getChangedShaderAttributes(shaderAttributes, attributeTransitionManager, changedAttributes) {
-    for (const shaderAttributeName in shaderAttributes) {
-      if (!attributeTransitionManager.hasAttribute(shaderAttributeName)) {
-        changedAttributes[shaderAttributeName] = shaderAttributes[shaderAttributeName];
-      }
     }
   }
 }
