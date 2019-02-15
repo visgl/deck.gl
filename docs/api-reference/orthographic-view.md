@@ -33,7 +33,7 @@ The `OrthographicView` constructor takes the same parameters as the [View](/docs
 
 ## Methods
 
-Inherits all [Viewport methods](/docs/api-reference/view.md#methods).
+Inherits all [View methods](/docs/api-reference/view.md#methods).
 
 
 ## Remarks

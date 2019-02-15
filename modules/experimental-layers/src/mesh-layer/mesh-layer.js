@@ -24,7 +24,8 @@
 
 import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, loadTextures, Texture2D, fp64, Buffer} from 'luma.gl';
+import {Model, Geometry, Texture2D, fp64, Buffer} from 'luma.gl';
+import {loadImage} from '@loaders.gl/core';
 import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
@@ -52,8 +53,8 @@ function assert(condition, message) {
 function getTexture(gl, src, opts) {
   if (typeof src === 'string') {
     // Url, load the image
-    return loadTextures(gl, Object.assign({urls: [src]}, opts))
-      .then(textures => textures[0])
+    return loadImage(src)
+      .then(data => getTextureFromData(gl, data, opts))
       .catch(error => {
         throw new Error(`Could not load texture from ${src}: ${error}`);
       });

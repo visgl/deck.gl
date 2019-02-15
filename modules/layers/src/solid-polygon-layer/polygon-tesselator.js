@@ -170,7 +170,7 @@ export default class PolygonTesselator extends Tesselator {
      */
     if (holeIndices) {
       for (let j = 0; j < holeIndices.length; j++) {
-        vertexValid[vertexStart + holeIndices[j] - 1] = 0;
+        vertexValid[vertexStart + holeIndices[j] / positionSize - 1] = 0;
       }
     }
     vertexValid[vertexStart + geometrySize - 1] = 0;

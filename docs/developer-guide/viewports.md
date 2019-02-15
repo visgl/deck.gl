@@ -35,7 +35,7 @@ Like many things in deck.gl, Viewports can be positioned using a lng/lat "anchor
 
 Viewports allow the application to specify the position and extent of the viewport (i.e. the target rendering area on the screen). Viewport positions are specified in CSS coordinates (top left, non-retina, these coordinates are different from WebGL coordinates, see remarks below). It is expected that CSS coordinates are most natural to work with, as the rest of the UI layout with other HTML components is done in the CSS coordinate system.
 
-* **x,y coordinates** - Viewports allow specification of x,y coordinates in the viewport in additin to width and height. These are only used for positioning (and not for calculation of intrinsic viewport parameters).
+* **x,y coordinates** - Viewports allow specification of x,y coordinates in the viewport in addition to width and height. These are only used for positioning (and not for calculation of intrinsic viewport parameters).
 
 
 ## Remarks

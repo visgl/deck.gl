@@ -164,10 +164,15 @@ export default class App extends PureComponent {
   }
 
   _renderExampleLayer(example, settings, index) {
-    const {layer: Layer, props, getData} = example;
+    const {layer: Layer, props, getData, initialize, isInitialized} = example;
 
     if (getData && !props.data) {
       props.data = getData();
+    }
+
+    if (initialize && !isInitialized) {
+      initialize();
+      example.isInitialized = true;
     }
 
     const layerProps = Object.assign({}, props, settings);

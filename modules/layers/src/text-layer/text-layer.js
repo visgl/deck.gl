@@ -20,13 +20,23 @@
 
 import {CompositeLayer, log} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
-import {
-  makeFontAtlas,
+import FontAtlasManager, {
   DEFAULT_CHAR_SET,
   DEFAULT_FONT_FAMILY,
   DEFAULT_FONT_WEIGHT,
-  DEFAULT_FONT_SETTINGS
-} from './font-atlas';
+  DEFAULT_FONT_SIZE,
+  DEFAULT_BUFFER,
+  DEFAULT_RADIUS,
+  DEFAULT_CUTOFF
+} from './font-atlas-manager';
+
+const DEFAULT_FONT_SETTINGS = {
+  fontSize: DEFAULT_FONT_SIZE,
+  buffer: DEFAULT_BUFFER,
+  sdf: false,
+  radius: DEFAULT_RADIUS,
+  cutoff: DEFAULT_CUTOFF
+};
 
 const TEXT_ANCHOR = {
   start: 1,
@@ -65,10 +75,16 @@ const defaultProps = {
 };
 
 export default class TextLayer extends CompositeLayer {
+  initializeState() {
+    this.state = {
+      fontAtlasManager: new FontAtlasManager(this.context.gl)
+    };
+  }
+
   updateState({props, oldProps, changeFlags}) {
     const fontChanged = this.fontChanged(oldProps, props);
     if (fontChanged) {
-      this.updateFontAtlas();
+      this.updateFontAtlas({oldProps, props});
     }
 
     if (
@@ -81,22 +97,28 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
-  updateFontAtlas() {
-    const {gl} = this.context;
-    const {fontSettings, fontFamily, fontWeight, characterSet} = this.props;
+  updateFontAtlas({oldProps, props}) {
+    const {characterSet, fontSettings, fontFamily, fontWeight} = props;
 
-    const mergedFontSettings = Object.assign({}, DEFAULT_FONT_SETTINGS, fontSettings, {
-      fontFamily,
-      fontWeight,
-      characterSet
-    });
-    const {scale, mapping, texture} = makeFontAtlas(gl, mergedFontSettings);
+    // generate test characterSet
+    const fontAtlasManager = this.state.fontAtlasManager;
+    fontAtlasManager.setProps(
+      Object.assign({}, DEFAULT_FONT_SETTINGS, fontSettings, {
+        characterSet,
+        fontFamily,
+        fontWeight
+      })
+    );
+
+    const {scale, texture, mapping} = fontAtlasManager;
 
     this.setState({
       scale,
       iconAtlas: texture,
       iconMapping: mapping
     });
+
+    this.setNeedsRedraw(true);
   }
 
   fontChanged(oldProps, props) {

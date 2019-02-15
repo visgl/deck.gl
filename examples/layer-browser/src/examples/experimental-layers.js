@@ -1,15 +1,20 @@
+/* global window */
+
 import {
   MeshLayer,
+  ScenegraphLayer,
   PathOutlineLayer,
   PathMarkerLayer,
   AdvancedTextLayer,
-  GPUGridLayer
+  GPUGridLayer,
+  GreatCircleLayer
   // KMLLayer
 } from '@deck.gl/experimental-layers';
 
 import {COORDINATE_SYSTEM} from 'deck.gl';
 import GL from '@luma.gl/constants';
 import {CylinderGeometry} from 'luma.gl';
+import {GLTFParser} from '@loaders.gl/gltf';
 import * as dataSamples from '../data-samples';
 
 const LIGHT_SETTINGS = {
@@ -45,6 +50,28 @@ const MeshLayerExample = {
 
     // Random shear matrix. Overrides the above.
     // getMatrix: d => [1, Math.random() * 4, 0, 0, 0, 1, 0, 0, 0, Math.random() * 4, 1, 0, 0, 0, 0, 1]
+  }
+};
+
+const ScenegraphLayerExample = {
+  layer: ScenegraphLayer,
+  initialize: () => {
+    const url =
+      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
+    window
+      .fetch(url)
+      .then(res => res.arrayBuffer())
+      .then(data => {
+        const gltfParser = new GLTFParser();
+        ScenegraphLayerExample.props.gltf = gltfParser.parse(data);
+      });
+  },
+  props: {
+    id: 'scenegraph-layer',
+    data: dataSamples.points,
+    sizeScale: 1,
+    pickable: true,
+    getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000]
   }
 };
 
@@ -202,10 +229,25 @@ const GPUGridLayerPerfExample = (id, getData) => ({
   }
 });
 
+const GreatCircleLayerExample = {
+  layer: GreatCircleLayer,
+  getData: () => dataSamples.greatCircles,
+  props: {
+    id: 'greatCircleLayer',
+    getSourcePosition: d => d.source,
+    getTargetPosition: d => d.target,
+    getSourceColor: [64, 255, 0],
+    getTargetColor: [0, 128, 200],
+    getStrokeWidth: 5,
+    pickable: true
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Experimental 3D Layers': {
-    MeshLayer: MeshLayerExample
+    MeshLayer: MeshLayerExample,
+    ScenegraphLayer: ScenegraphLayerExample
   },
   'Experimental Trips Layers': {
     PathOutlineLayer: PathOutlineExample,
@@ -217,6 +259,7 @@ export default {
     AdvancedTextLayer: AdvancedTextLayerExample,
     GPUGridLayer: GPUGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
-    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
+    'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M),
+    GreatCircleLayer: GreatCircleLayerExample
   }
 };

@@ -20,7 +20,10 @@
 
 import './imports-spec';
 import './core';
+
 import './layers';
+import './s2-layers';
+
 import './json';
 
 // TODO - Tests currently only work in browser

@@ -18,21 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './path-tesselator.spec';
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-import './grid-cell-layer.spec';
-import './grid-layer.spec';
-import './grid-aggregator.spec';
-import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
-import './contour-layer/marching-squares.spec';
-import './contour-layer/contour-layer.spec';
-import './path-layer/path-layer-vertex.spec';
-import './icon-manager.spec';
-import './text-layer/font-atlas-utils.spec';
-import './text-layer/lru-cache.spec';
+import test from 'tape-catch';
+import {testLayer} from '@deck.gl/test-utils';
+import {S2Layer} from '@deck.gl/s2-layers';
+import data from 'deck.gl/test/data/s2-sf.json';
+
+test('S2Layer#constructor', t => {
+  testLayer({
+    Layer: S2Layer,
+    testCases: [
+      {props: []},
+      {props: null},
+      {
+        props: {
+          data,
+          getPolygon: f => f
+        }
+      },
+      {
+        updateProps: {
+          filled: false
+        },
+        assert({layer, subLayers, oldState}) {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(subLayers.length, 'subLayers rendered');
+
+          const polygonLayer = layer.internalState.subLayers[0];
+          t.equal(
+            polygonLayer.state.paths.length,
+            data.length,
+            'should update PolygonLayers state.paths'
+          );
+        }
+      }
+    ]
+  });
+
+  t.end();
+});
