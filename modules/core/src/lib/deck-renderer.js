@@ -4,8 +4,8 @@ import DrawLayersPass from '../passes/draw-layers-pass';
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
-  constructor(props) {
-    const {gl, layerManager, effectManager} = props;
+  constructor(gl, props) {
+    const {layerManager, effectManager} = props;
 
     this.gl = gl;
     this.layerManager = layerManager;

@@ -502,13 +502,12 @@ export default class Deck {
 
     this.effectManager = new EffectManager();
 
-    this.deckRenderer = new DeckRenderer({
-      gl,
+    this.deckRenderer = new DeckRenderer(gl, {
       layerManager: this.layerManager,
       effectManager: this.effectManager
     });
 
-    this.deckPicker = new DeckPicker({gl, layerManager: this.layerManager});
+    this.deckPicker = new DeckPicker(gl, {layerManager: this.layerManager});
 
     this.setProps(this.props);
 

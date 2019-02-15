@@ -26,39 +26,16 @@ import {getClosestObject, getUniqueObjects} from './picking/query-object';
 import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
 
 export default class DeckPicker {
-  constructor(props) {
-    this.gl = props.gl;
+  constructor(gl, props) {
+    this.gl = gl;
     this.layerManager = props.layerManager;
     this.pickingEvent = null;
     this.lastPickedInfo = {
-      // For callback tracking and autohighlight
+      // For callback tracking and auto highlight
       index: -1,
       layerId: null,
       info: null
     };
-  }
-
-  // Returns a new picking info object by assuming the last picked object is still picked
-  getLastPickedObject({x, y, viewports}) {
-    const layers = this.layerManager.getLayers();
-    const lastPickedInfo = this.lastPickedInfo.info;
-    const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
-    const layer = lastPickedLayerId ? layers.find(l => l.id === lastPickedLayerId) : null;
-    const coordinate = viewports[0] && viewports[0].unproject([x, y]);
-
-    const info = {
-      x,
-      y,
-      coordinate,
-      // TODO remove the lngLat prop after compatibility check
-      lngLat: coordinate,
-      layer
-    };
-
-    if (layer) {
-      return Object.assign({}, lastPickedInfo, info);
-    }
-    return Object.assign(info, {color: null, object: null, index: -1});
   }
 
   // Pick the closest info at given coordinate
@@ -79,7 +56,7 @@ export default class DeckPicker {
     const layers = this.layerManager.getLayers({layerIds});
     const {layerFilter, activateViewport} = this.layerManager;
 
-    const result = this.pickClosetObject({
+    const result = this.pickClosestObject({
       // User params
       x,
       y,
@@ -121,9 +98,32 @@ export default class DeckPicker {
     });
   }
 
+  // Returns a new picking info object by assuming the last picked object is still picked
+  getLastPickedObject({x, y, viewports}) {
+    const layers = this.layerManager.getLayers();
+    const lastPickedInfo = this.lastPickedInfo.info;
+    const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
+    const layer = lastPickedLayerId ? layers.find(l => l.id === lastPickedLayerId) : null;
+    const coordinate = viewports[0] && viewports[0].unproject([x, y]);
+
+    const info = {
+      x,
+      y,
+      coordinate,
+      // TODO remove the lngLat prop after compatibility check
+      lngLat: coordinate,
+      layer
+    };
+
+    if (layer) {
+      return Object.assign({}, lastPickedInfo, info);
+    }
+    return Object.assign(info, {color: null, object: null, index: -1});
+  }
+
   // Private
   // Pick the closest object at the given (x,y) coordinate
-  pickClosetObject({
+  pickClosestObject({
     layers,
     viewports,
     x,
