@@ -341,6 +341,7 @@ export default class AttributeManager {
 
     this._mapUpdateTriggersToAttributes();
   }
+  /* eslint-enable max-statements */
 
   _addShaderAttributes(attribute, shaderAttributes, extraProps) {
     attribute.userData.shaderAttributes = {};
@@ -358,23 +359,23 @@ export default class AttributeManager {
     }
   }
 
-  _createAttribute(name, attribute, extraProps, noAlloc = false) {
-    return new Attribute(
-      this.gl,
-      Object.assign({}, attribute, {
-        id: name,
-        // Luma fields
-        constant: attribute.constant || false,
-        isIndexed: attribute.isIndexed || attribute.elements,
-        size: (attribute.elements && 1) || attribute.size,
-        value: attribute.value || null,
-        instanced: attribute.instanced || extraProps.instanced,
-        noAlloc
-      })
-    );
-  }
+  _createAttribute(name, attribute, extraProps, forceNoAlloc = false) {
+    const props = {
+      id: name,
+      // Luma fields
+      constant: attribute.constant || false,
+      isIndexed: attribute.isIndexed || attribute.elements,
+      size: (attribute.elements && 1) || attribute.size,
+      value: attribute.value || null,
+      instanced: attribute.instanced || extraProps.instanced
+    };
 
-  /* eslint-enable max-statements */
+    if (forceNoAlloc) {
+      props.noAlloc = true;
+    }
+
+    return new Attribute(this.gl, Object.assign({}, attribute, props));
+  }
 
   // build updateTrigger name to attribute name mapping
   _mapUpdateTriggersToAttributes() {
