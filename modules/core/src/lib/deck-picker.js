@@ -47,9 +47,7 @@ export default class DeckPicker {
     }
 
     if ('layerFilter' in props) {
-      if (this.layerFilter !== props.layerFilter) {
-        this.layerFilter = props.layerFilter;
-      }
+      this.layerFilter = props.layerFilter;
     }
   }
 

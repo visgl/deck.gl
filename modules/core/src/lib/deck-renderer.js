@@ -21,15 +21,11 @@ export default class DeckRenderer {
     }
 
     if ('layerFilter' in props) {
-      if (this.layerFilter !== props.layerFilter) {
-        this.layerFilter = props.layerFilter;
-      }
+      this.layerFilter = props.layerFilter;
     }
 
     if ('drawPickingColors' in props) {
-      if (props.drawPickingColors !== this.drawPickingColors) {
-        this.drawPickingColors = props.drawPickingColors;
-      }
+      this.drawPickingColors = props.drawPickingColors;
     }
   }
 
