@@ -30,7 +30,7 @@ export default class DeckPicker {
     this.gl = gl;
     this.pickingFBO = null;
     this.pickLayersPass = new PickLayersPass(gl);
-    this.useDevicePixels = true;
+    this.pixelRatio = null;
     this.layerFilter = null;
     this.pickingEvent = null;
     this.lastPickedInfo = {
@@ -43,12 +43,16 @@ export default class DeckPicker {
 
   setProps(props) {
     if ('useDevicePixels' in props) {
-      this.useDevicePixels = props.useDevicePixels;
+      this.pixelRatio = getPixelRatio(props.useDevicePixels);
     }
 
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
     }
+    this.pickLayersPass.setProps({
+      pixelRatio: this.pixelRatio,
+      layerFilter: this.layerFilter
+    });
   }
 
   // Pick the closest info at given coordinate
@@ -136,7 +140,7 @@ export default class DeckPicker {
     this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
-    const pixelRatio = getPixelRatio(this.useDevicePixels);
+    const pixelRatio = this.pixelRatio;
     const deviceX = Math.round(x * pixelRatio);
     const deviceY = Math.round(this.gl.canvas.height - y * pixelRatio);
     const deviceRadius = Math.round(radius * pixelRatio);
@@ -222,8 +226,7 @@ export default class DeckPicker {
     this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
-    const pixelRatio = getPixelRatio(this.useDevicePixels);
-
+    const pixelRatio = this.pixelRatio;
     const deviceLeft = Math.round(x * pixelRatio);
     const deviceBottom = Math.round(this.gl.canvas.height - y * pixelRatio);
     const deviceRight = Math.round((x + width) * pixelRatio);
@@ -282,16 +285,14 @@ export default class DeckPicker {
       return null;
     }
 
-    const {useDevicePixels, pickingFBO, layerFilter} = this;
+    const {pickingFBO} = this;
 
     this.pickLayersPass.drawPickingBuffer(this.gl, {
       layers,
       viewports,
       onViewportActive,
-      useDevicePixels,
       pickingFBO,
       deviceRect,
-      layerFilter,
       redrawReason
     });
 

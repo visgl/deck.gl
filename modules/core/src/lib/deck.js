@@ -183,8 +183,6 @@ export default class Deck {
 
   setProps(props) {
     this.stats.timeStart('deck.setProps');
-
-    this.updateNeedsRedraw(props);
     props = Object.assign({}, this.props, props);
     this.props = props;
 
@@ -230,25 +228,6 @@ export default class Deck {
   }
 
   // Public API
-
-  updateNeedsRedraw(props) {
-    if (this.props) {
-      let reason = this._needsRedraw;
-      if ('layerFilter' in props) {
-        if (this.props.layerFilter !== props.layerFilter) {
-          reason = 'layerFilter changed';
-        }
-      }
-
-      if ('drawPickingColors' in props) {
-        if (this.props.drawPickingColors !== props.drawPickingColors) {
-          reason = 'drawPickingColors changed';
-        }
-      }
-      this._needsRedraw = this._needsRedraw || reason;
-    }
-  }
-
   // Check if a redraw is needed
   // Returns `false` or a string summarizing the redraw reason
   needsRedraw({clearRedrawFlags = true} = {}) {
@@ -264,7 +243,9 @@ export default class Deck {
 
     const viewManagerNeedsRedraw = this.viewManager.needsRedraw({clearRedrawFlags});
     const layerManagerNeedsRedraw = this.layerManager.needsRedraw({clearRedrawFlags});
-    redraw = redraw || viewManagerNeedsRedraw || layerManagerNeedsRedraw;
+    const deckRendererNeedsRedraw = this.deckRenderer.needsRedraw({clearRedrawFlags});
+
+    redraw = redraw || viewManagerNeedsRedraw || layerManagerNeedsRedraw || deckRendererNeedsRedraw;
     return redraw;
   }
 

@@ -1,32 +1,51 @@
 import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
+import getPixelRatio from '../utils/get-pixel-ratio';
 
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
   constructor(gl) {
     this.gl = gl;
-    this.useDevicePixels = true;
+    this.pixelRatio = null;
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(gl);
     this.pickLayersPass = new PickLayersPass(gl);
     this.renderCount = 0;
+    this._needsRedraw = 'Initial render';
   }
 
   setProps(props) {
     if ('useDevicePixels' in props) {
-      this.useDevicePixels = props.useDevicePixels;
+      this.pixelRatio = getPixelRatio(props.useDevicePixels);
     }
 
     if ('layerFilter' in props) {
-      this.layerFilter = props.layerFilter;
+      if (this.layerFilter !== props.layerFilter) {
+        this.layerFilter = props.layerFilter;
+        this._needsRedraw = 'layerFilter changed';
+      }
     }
 
     if ('drawPickingColors' in props) {
-      this.drawPickingColors = props.drawPickingColors;
+      if (this.drawPickingColors !== props.drawPickingColors) {
+        this.drawPickingColors = props.drawPickingColors;
+        this._needsRedraw = 'drawPickingColors changed';
+      }
     }
+
+    const {pixelRatio, layerFilter} = this;
+
+    this.drawLayersPass.setProps({
+      pixelRatio,
+      layerFilter
+    });
+    this.pickLayersPass.setProps({
+      pixelRatio,
+      layerFilter
+    });
   }
 
   renderLayers({
@@ -39,14 +58,14 @@ export default class DeckRenderer {
     pass,
     stats
   }) {
-    const {drawPickingColors, layerFilter} = this;
+    const {drawPickingColors, layerFilter, pixelRatio} = this;
     const layerPass = drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
     layerPass.setProps({
       layers,
       viewports,
       views,
       onViewportActive: activateViewport,
-      useDevicePixels: this.useDevicePixels,
+      pixelRatio,
       layerFilter,
       redrawReason,
       customRender
@@ -60,6 +79,14 @@ export default class DeckRenderer {
         this.logRenderStats({status, pass, redrawReason, stats});
       });
     }
+  }
+
+  needsRedraw(clearRedrawFlags) {
+    const redraw = this._needsRedraw;
+    if (clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+    return redraw;
   }
 
   // Private

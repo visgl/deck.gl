@@ -14,10 +14,8 @@ export default class PickLayersPass extends LayersPass {
       layers,
       viewports,
       onViewportActive,
-      useDevicePixels,
       pickingFBO,
       deviceRect: {x, y, width, height},
-      layerFilter = null,
       redrawReason = ''
     }
   ) {
@@ -39,9 +37,7 @@ export default class PickLayersPass extends LayersPass {
           layers,
           viewports,
           onViewportActive,
-          useDevicePixels,
           drawPickingColors: true,
-          layerFilter,
           pass: 'picking',
           redrawReason,
           parameters: {
@@ -56,7 +52,8 @@ export default class PickLayersPass extends LayersPass {
   }
 
   // PRIVATE
-  shouldDrawLayer(layer, layerFilter, viewport) {
+  shouldDrawLayer(layer, viewport) {
+    const layerFilter = this.layerFilter;
     let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
 
     if (shouldDrawLayer && layerFilter) {
@@ -65,11 +62,11 @@ export default class PickLayersPass extends LayersPass {
     return shouldDrawLayer;
   }
 
-  getModuleParameters(layer, pixelRatio) {
+  getModuleParameters(layer) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
-      devicePixelRatio: pixelRatio
+      devicePixelRatio: this.pixelRatio
     });
     return moduleParameters;
   }
