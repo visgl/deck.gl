@@ -28,7 +28,7 @@ import {processPickInfo, getLayerPickingInfo} from './picking/pick-info';
 export default class DeckPicker {
   constructor(gl) {
     this.gl = gl;
-    this.pickingFBO = this.getPickingBuffer();
+    this.pickingFBO = null;
     this.pickLayersPass = new PickLayersPass(gl);
     this.useDevicePixels = true;
     this.layerFilter = null;
@@ -120,7 +120,7 @@ export default class DeckPicker {
   }
 
   // Private
-  getPickingBuffer() {
+  updatePickingBuffer() {
     const {gl} = this;
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
@@ -133,6 +133,7 @@ export default class DeckPicker {
 
   // Pick the closest object at the given (x,y) coordinate
   pickClosestObject({layers, viewports, x, y, radius, depth = 1, mode, onViewportActive}) {
+    this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
     const pixelRatio = getPixelRatio(this.useDevicePixels);
@@ -218,6 +219,7 @@ export default class DeckPicker {
 
   // Pick all objects within the given bounding box
   pickVisibleObjects({layers, viewports, x, y, width, height, mode, onViewportActive}) {
+    this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
     const pixelRatio = getPixelRatio(this.useDevicePixels);
