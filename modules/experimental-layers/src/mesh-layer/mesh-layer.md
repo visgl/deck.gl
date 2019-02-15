@@ -96,6 +96,25 @@ The roll (bank) in degrees of each object.
 
 See [Euler angles](https://en.wikipedia.org/wiki/Euler_angles).
 
+##### `getScale` (Function, optional)
+
+- Default: `object => object.scale || [1, 1, 1]`
+
+Scaling factor on the mesh along each axis.
+
+##### `getTranslation` (Function, optional)
+
+- Default: `object => object.translation || [0, 0, 0]`
+
+Translation of the mesh along each axis. Offset from the center position given by `getPosition`
+
+##### `getMatrix` (Function, optional)
+
+- Default: `object => null`
+
+Explicitly define a 4x4 column-major model matrix for the mesh. If provided, will override
+`getYaw`, `getPitch`, `getRoll`, `getScale`, `getTranslation`.
+
 
 ##### `getColor` (Function|Array, optional)
 
