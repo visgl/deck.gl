@@ -38,6 +38,7 @@ export {default as LayerManager} from './lib/layer-manager';
 export {default as AttributeManager} from './lib/attribute-manager';
 export {default as Layer} from './lib/layer';
 export {default as CompositeLayer} from './lib/composite-layer';
+export {default as DeckRenderer} from './lib/deck-renderer';
 
 // Viewports
 export {default as Viewport} from './viewports/viewport';

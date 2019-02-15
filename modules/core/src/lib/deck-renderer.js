@@ -1,44 +1,62 @@
 import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
+import PickLayersPass from '../passes/pick-layers-pass';
 
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
-  constructor(gl, props) {
-    const {layerManager, effectManager} = props;
-
+  constructor(gl) {
     this.gl = gl;
-    this.layerManager = layerManager;
-    this.effectManager = effectManager;
+    this.useDevicePixels = true;
+    this.layerFilter = null;
+    this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(gl);
+    this.pickLayersPass = new PickLayersPass(gl);
     this.renderCount = 0;
   }
 
+  setProps(props) {
+    if ('useDevicePixels' in props) {
+      this.useDevicePixels = props.useDevicePixels;
+    }
+
+    if ('layerFilter' in props) {
+      if (this.layerFilter !== props.layerFilter) {
+        this.layerFilter = props.layerFilter;
+      }
+    }
+
+    if ('drawPickingColors' in props) {
+      if (props.drawPickingColors !== this.drawPickingColors) {
+        this.drawPickingColors = props.drawPickingColors;
+      }
+    }
+  }
+
   renderLayers({
+    layers,
     viewports,
+    activateViewport,
     views,
-    useDevicePixels,
     redrawReason = 'unknown reason',
     customRender = false,
     pass,
     stats
   }) {
-    // TODO: Remove LayerManager reference after clean up LayerManager & pick-layers.js
-    const {drawPickingColors, layers, layerFilter} = this.layerManager;
-
-    this.drawLayersPass.setProps({
+    const {drawPickingColors, layerFilter} = this;
+    const layerPass = drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
+    layerPass.setProps({
       layers,
       viewports,
       views,
-      onViewportActive: this.layerManager.activateViewport,
-      useDevicePixels,
-      drawPickingColors,
+      onViewportActive: activateViewport,
+      useDevicePixels: this.useDevicePixels,
       layerFilter,
       redrawReason,
       customRender
     });
 
-    const renderStats = this.drawLayersPass.render();
+    const renderStats = layerPass.render();
     this.renderCount++;
 
     if (log.priority >= LOG_PRIORITY_DRAW) {

@@ -55,6 +55,7 @@ export {
   lighting,
   // Internal classes
   LayerManager,
+  DeckRenderer,
   // Logging
   log,
   // Controllers

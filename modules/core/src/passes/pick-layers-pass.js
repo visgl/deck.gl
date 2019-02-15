@@ -1,4 +1,4 @@
-import LayersPass from './base-layers-pass';
+import LayersPass from './layers-pass';
 import {withParameters} from 'luma.gl';
 
 export default class PickLayersPass extends LayersPass {
