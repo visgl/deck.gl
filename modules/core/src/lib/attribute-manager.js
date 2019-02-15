@@ -328,18 +328,7 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      const newAttribute = new Attribute(
-        this.gl,
-        Object.assign({}, attribute, {
-          id: attributeName,
-          // Luma fields
-          constant: attribute.constant || false,
-          isIndexed: attribute.isIndexed || attribute.elements,
-          size: (attribute.elements && 1) || attribute.size,
-          value: attribute.value || null,
-          instanced: attribute.instanced || extraProps.instanced
-        })
-      );
+      const newAttribute = this._createAttribute(attributeName, attribute, extraProps);
 
       if (attribute.shaderAttributes) {
         this._addShaderAttributes(newAttribute, attribute.shaderAttributes, extraProps);
@@ -352,7 +341,6 @@ export default class AttributeManager {
 
     this._mapUpdateTriggersToAttributes();
   }
-  /* eslint-enable max-statements */
 
   _addShaderAttributes(attribute, shaderAttributes, extraProps) {
     attribute.userData.shaderAttributes = {};
@@ -361,21 +349,32 @@ export default class AttributeManager {
       const shaderAttribute = shaderAttributes[shaderAttributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      attribute.userData.shaderAttributes[shaderAttributeName] = new Attribute(
-        this.gl,
-        Object.assign({}, shaderAttribute, {
-          id: shaderAttributeName,
-          // Luma fields
-          constant: shaderAttribute.constant || false,
-          isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
-          size: (shaderAttribute.elements && 1) || shaderAttribute.size,
-          value: shaderAttribute.value || null,
-          instanced: shaderAttribute.instanced || extraProps.instanced,
-          noAlloc: true
-        })
+      attribute.userData.shaderAttributes[shaderAttributeName] = this._createAttribute(
+        shaderAttributeName,
+        shaderAttribute,
+        extraProps,
+        true
       );
     }
   }
+
+  _createAttribute(name, attribute, extraProps, noAlloc = false) {
+    return new Attribute(
+      this.gl,
+      Object.assign({}, attribute, {
+        id: name,
+        // Luma fields
+        constant: attribute.constant || false,
+        isIndexed: attribute.isIndexed || attribute.elements,
+        size: (attribute.elements && 1) || attribute.size,
+        value: attribute.value || null,
+        instanced: attribute.instanced || extraProps.instanced,
+        noAlloc
+      })
+    );
+  }
+
+  /* eslint-enable max-statements */
 
   // build updateTrigger name to attribute name mapping
   _mapUpdateTriggersToAttributes() {
