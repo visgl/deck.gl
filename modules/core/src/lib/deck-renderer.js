@@ -4,8 +4,8 @@ import DrawLayersPass from '../passes/draw-layers-pass';
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
-  constructor(props) {
-    const {gl, layerManager, effectManager} = props;
+  constructor(gl, props) {
+    const {layerManager, effectManager} = props;
 
     this.gl = gl;
     this.layerManager = layerManager;
@@ -17,6 +17,7 @@ export default class DeckRenderer {
   renderLayers({
     viewports,
     views,
+    useDevicePixels,
     redrawReason = 'unknown reason',
     customRender = false,
     pass,
@@ -24,7 +25,6 @@ export default class DeckRenderer {
   }) {
     // TODO: Remove LayerManager reference after clean up LayerManager & pick-layers.js
     const {drawPickingColors, layers, layerFilter} = this.layerManager;
-    const {useDevicePixels} = this.layerManager.context;
 
     this.drawLayersPass.setProps({
       layers,
