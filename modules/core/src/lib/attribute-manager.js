@@ -271,24 +271,39 @@ export default class AttributeManager {
 
   /**
    * Returns changed attribute descriptors
-   * This indicates which WebGLBuggers need to be updated
+   * This indicates which WebGLBuffers need to be updated
    * @return {Object} attributes - descriptors
    */
   getChangedAttributes({clearChangedFlags = false}) {
     const {attributes, attributeTransitionManager} = this;
 
     const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
+    const changedShaderAttributes = {};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
-      if (attribute.needsRedraw({clearChangedFlags: true})) {
-        // Only return non-transition attributes
-        if (!attributeTransitionManager.hasAttribute(attributeName)) {
-          changedAttributes[attributeName] = attribute;
-        }
+      if (
+        attribute.needsRedraw({clearChangedFlags: true}) &&
+        !attributeTransitionManager.hasAttribute(attributeName)
+      ) {
+        changedAttributes[attributeName] = attribute;
       }
     }
-    return changedAttributes;
+
+    for (const attributeName in changedAttributes) {
+      const attribute = changedAttributes[attributeName];
+
+      if (attribute.userData.shaderAttributes) {
+        const shaderAttributes = attribute.userData.shaderAttributes;
+        for (const shaderAttributeName in shaderAttributes) {
+          changedShaderAttributes[shaderAttributeName] = shaderAttributes[shaderAttributeName];
+        }
+      } else {
+        changedShaderAttributes[attributeName] = attribute;
+      }
+    }
+
+    return changedShaderAttributes;
   }
 
   // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
@@ -313,18 +328,13 @@ export default class AttributeManager {
       const attribute = attributes[attributeName];
 
       // Initialize the attribute descriptor, with WebGL and metadata fields
-      newAttributes[attributeName] = new Attribute(
-        this.gl,
-        Object.assign({}, attribute, {
-          id: attributeName,
-          // Luma fields
-          constant: attribute.constant || false,
-          isIndexed: attribute.isIndexed || attribute.elements,
-          size: (attribute.elements && 1) || attribute.size,
-          value: attribute.value || null,
-          instanced: attribute.instanced || extraProps.instanced
-        })
-      );
+      const newAttribute = this._createAttribute(attributeName, attribute, extraProps);
+
+      if (attribute.shaderAttributes) {
+        this._addShaderAttributes(newAttribute, attribute.shaderAttributes, extraProps);
+      }
+
+      newAttributes[attributeName] = newAttribute;
     }
 
     Object.assign(this.attributes, newAttributes);
@@ -332,6 +342,40 @@ export default class AttributeManager {
     this._mapUpdateTriggersToAttributes();
   }
   /* eslint-enable max-statements */
+
+  _addShaderAttributes(attribute, shaderAttributes, extraProps) {
+    attribute.userData.shaderAttributes = {};
+
+    for (const shaderAttributeName in shaderAttributes) {
+      const shaderAttribute = shaderAttributes[shaderAttributeName];
+
+      // Initialize the attribute descriptor, with WebGL and metadata fields
+      attribute.userData.shaderAttributes[shaderAttributeName] = this._createAttribute(
+        shaderAttributeName,
+        shaderAttribute,
+        extraProps,
+        true
+      );
+    }
+  }
+
+  _createAttribute(name, attribute, extraProps, forceNoAlloc = false) {
+    const props = {
+      id: name,
+      // Luma fields
+      constant: attribute.constant || false,
+      isIndexed: attribute.isIndexed || attribute.elements,
+      size: (attribute.elements && 1) || attribute.size,
+      value: attribute.value || null,
+      instanced: attribute.instanced || extraProps.instanced
+    };
+
+    if (forceNoAlloc) {
+      props.noAlloc = true;
+    }
+
+    return new Attribute(this.gl, Object.assign({}, attribute, props));
+  }
 
   // build updateTrigger name to attribute name mapping
   _mapUpdateTriggersToAttributes() {

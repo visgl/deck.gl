@@ -44,8 +44,25 @@ const MeshLayerExample = {
     }),
     sizeScale: 10,
     getPosition: d => d.COORDINATES,
-    getYaw: d => Math.random() * 360,
-    getColor: d => [0, d.RACKS * 50, d.SPACES * 20]
+    getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
+    getMatrix: d => [
+      Math.random() * 2,
+      Math.random() * 2,
+      Math.random() * 2,
+      0,
+      Math.random() * 2,
+      Math.random() * 2,
+      Math.random() * 2,
+      0,
+      Math.random() * 2,
+      Math.random() * 2,
+      Math.random() * 2,
+      0,
+      Math.random() * 2,
+      Math.random() * 2,
+      Math.random() * 2,
+      1
+    ]
   }
 };
 
