@@ -24,14 +24,17 @@
 
 import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, fp64} from 'luma.gl';
+import {Model, Geometry, Texture2D, fp64, Buffer} from 'luma.gl';
 import {loadImage} from '@loaders.gl/core';
+import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
 import vs from './mesh-layer-vertex.glsl';
 import fs from './mesh-layer-fragment.glsl';
 
 const RADIAN_PER_DEGREE = Math.PI / 180;
+let rotationMatrix = new Float32Array(16);
+let modelMatrix = new Matrix4();
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -113,7 +116,10 @@ const defaultProps = {
   // https://en.wikipedia.org/wiki/Euler_angles
   getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
   getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0}
+  getRoll: {type: 'accessor', value: x => x.roll || 0},
+  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]},
+  getMatrix: {type: 'accessor', value: x => x.matrix || null}
 };
 
 export default class MeshLayer extends Layer {
@@ -124,6 +130,7 @@ export default class MeshLayer extends Layer {
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
+
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
@@ -134,15 +141,36 @@ export default class MeshLayer extends Layer {
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
       },
-      instanceRotations: {
-        size: 3,
-        accessor: ['getYaw', 'getPitch', 'getRoll'],
-        update: this.calculateInstanceRotations
-      },
       instanceColors: {
         size: 4,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
+      },
+      instanceModelMatrix: {
+        size: 16,
+        shaderAttributes: {
+          instanceModelMatrixColumn1: {
+            size: 4,
+            stride: 64,
+            offset: 0
+          },
+          instanceModelMatrixColumn2: {
+            size: 4,
+            stride: 64,
+            offset: 16
+          },
+          instanceModelMatrixColumn3: {
+            size: 4,
+            stride: 64,
+            offset: 32
+          },
+          instanceModelMatrixColumn4: {
+            size: 4,
+            stride: 64,
+            offset: 48
+          }
+        },
+        update: this.calculateInstanceModelMatrix
       }
     });
 
@@ -237,22 +265,78 @@ export default class MeshLayer extends Layer {
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
+    for (const object of data) {
+      const position = getPosition(object);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
   }
 
-  // yaw(z), pitch(y) and roll(x) in radians
-  calculateInstanceRotations(attribute) {
-    const {data, getYaw, getPitch, getRoll} = this.props;
-    const {value, size} = attribute;
+  calculateInstanceModelMatrix(attribute) {
+    const {data, getYaw, getPitch, getRoll, getScale, getTranslation, getMatrix} = this.props;
+    let instanceModelMatrixData = attribute.value;
+
     let i = 0;
-    for (const point of data) {
-      value[i++] = getRoll(point) * RADIAN_PER_DEGREE;
-      value[i++] = getPitch(point) * RADIAN_PER_DEGREE;
-      value[i++] = getYaw(point) * RADIAN_PER_DEGREE;
+    for (const object of data) {
+      let matrix = getMatrix(object);
+
+      if (!matrix) {
+        let roll = getRoll(object) * RADIAN_PER_DEGREE;
+        let pitch = getPitch(object) * RADIAN_PER_DEGREE;
+        let yaw = getYaw(object) * RADIAN_PER_DEGREE;
+        let scale = getScale(object);
+        let translate = getTranslation(object);
+
+        let sr = Math.sin(roll);
+        let sp = Math.sin(pitch);
+        let sw = Math.sin(yaw);
+
+        let cr = Math.cos(roll);
+        let cp = Math.cos(pitch);
+        let cw = Math.cos(yaw);
+
+        rotationMatrix[0] = cw * cp; // 0,0
+        rotationMatrix[1] = sw * cp; // 1,0
+        rotationMatrix[2] = -sp; // 2,0
+        rotationMatrix[3] = 0;
+        rotationMatrix[4] = -sw * cr + cw * sp * sr; // 0,1
+        rotationMatrix[5] = cw * cr + sw * sp * sr; // 1,1
+        rotationMatrix[6] = cp * sr; // 2,1
+        rotationMatrix[7] = 0;
+        rotationMatrix[8] = sw * sr + cw * sp * cr; // 0,2
+        rotationMatrix[9] = -cw * sr + sw * sp * cr; // 1,2
+        rotationMatrix[10] = cp * cr; // 2,2
+        rotationMatrix[11] = 0;
+        rotationMatrix[12] = 0;
+        rotationMatrix[13] = 0;
+        rotationMatrix[14] = 0;
+        rotationMatrix[15] = 1;
+
+        modelMatrix
+          .identity()
+          .translate(translate)
+          .multiplyRight(rotationMatrix)
+          .scale(scale);
+
+        matrix = modelMatrix;
+      }
+
+      instanceModelMatrixData[i++] = matrix[0];
+      instanceModelMatrixData[i++] = matrix[1];
+      instanceModelMatrixData[i++] = matrix[2];
+      instanceModelMatrixData[i++] = matrix[3];
+      instanceModelMatrixData[i++] = matrix[4];
+      instanceModelMatrixData[i++] = matrix[5];
+      instanceModelMatrixData[i++] = matrix[6];
+      instanceModelMatrixData[i++] = matrix[7];
+      instanceModelMatrixData[i++] = matrix[8];
+      instanceModelMatrixData[i++] = matrix[9];
+      instanceModelMatrixData[i++] = matrix[10];
+      instanceModelMatrixData[i++] = matrix[11];
+      instanceModelMatrixData[i++] = matrix[12];
+      instanceModelMatrixData[i++] = matrix[13];
+      instanceModelMatrixData[i++] = matrix[14];
+      instanceModelMatrixData[i++] = matrix[15];
     }
   }
 }
