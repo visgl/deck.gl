@@ -73,6 +73,13 @@ Takes a single parameter as a map of attribute descriptor objects:
     (same value applied to every vertex). Default to `false`.
   + `noAlloc` (Boolean, optional) - if this attribute should not be
     automatically allocated. Default to `false`.
+  + `shaderAttributes` (Object, optional) - If this attribute maps to multiple
+    attributes in the vertex shader, that mapping can be defined here. All
+    `shaderAttributes` will share a single buffer created based on the `size`
+    parameter. This can be used to interleave attributes. Shader attribute properties are:
+      + `size` (Number) - Number of elements per object.
+      + `offset` (Number) - Offset of the initial element.
+      + `stride` (Number) - Stride between elements.
 
 ##### `addInstanced`
 
