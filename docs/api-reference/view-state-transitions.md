@@ -25,6 +25,9 @@ Following fields of `viewState` can be used to achieve viewport transitions.
 Sample code that provides `flyTo` style transition to move camera from current location to NewYork city.
 
 ```js
+import DeckGL, {FlyToInterpolator} from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+
 class App extends Component {
   constructor(props) {
     super(props);
@@ -87,6 +90,9 @@ class App extends Component {
 Sample code to get continuous rotations along vertical axis until user interrupts by rotating the map by mouse interaction. It uses `LinearInterpolator` and restricts transitions for `bearing` prop. Continuous transitions are achieved by triggering new transitions using `onTranstionEnd` callback.
 
 ```js
+import DeckGL from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
+
 const transitionInterpolator = new LinearInterpolator(['bearing']);
 
 const INITIAL_VIEW_STATE = {
