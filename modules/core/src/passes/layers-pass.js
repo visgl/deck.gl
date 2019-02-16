@@ -3,39 +3,25 @@ import Pass from './pass';
 import {clear, setParameters, withParameters} from 'luma.gl';
 
 export default class LayersPass extends Pass {
-  constructor(gl, props) {
-    super(gl, props);
-    this.pixelRatio = null;
-    this.layerFilter = null;
+  render(props) {
+    return this.drawLayers(props);
   }
 
-  setProps(props) {
-    super.setProps(props);
-    const {pixelRatio, layerFilter} = props;
-    this.pixelRatio = pixelRatio;
-    this.layerFilter = layerFilter;
-  }
-
-  render() {
-    return this.drawLayers(this.gl, this.props);
-  }
-
+  // PRIVATE
   // Draw a list of layers in a list of viewports
-  drawLayers(
-    gl,
-    {
-      layers,
-      viewports,
-      views,
-      onViewportActive,
-      deviceRect = null,
-      parameters = {},
-      pass = 'draw',
-      redrawReason = '',
-      customRender,
-      effects
-    }
-  ) {
+  drawLayers({
+    layers,
+    viewports,
+    views,
+    onViewportActive,
+    deviceRect = null,
+    parameters = {},
+    pass = 'draw',
+    redrawReason = '',
+    customRender,
+    effects
+  }) {
+    const gl = this.gl;
     if (!customRender) {
       this.clearCanvas(gl);
     }
@@ -65,7 +51,6 @@ export default class LayersPass extends Pass {
     return renderStats;
   }
 
-  // PRIVATE
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
@@ -138,7 +123,7 @@ export default class LayersPass extends Pass {
   }
 
   drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters}) {
-    const moduleParameters = this.getModuleParameters(layer, this.pixelRatio);
+    const moduleParameters = this.getModuleParameters(layer, this.props.pixelRatio);
 
     const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
 
@@ -157,7 +142,7 @@ export default class LayersPass extends Pass {
   }
 
   shouldDrawLayer(layer, viewport) {
-    const layerFilter = this.layerFilter;
+    const layerFilter = this.props.layerFilter;
     let shouldDrawLayer = !layer.isComposite && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
@@ -170,7 +155,7 @@ export default class LayersPass extends Pass {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 0,
-      devicePixelRatio: this.pixelRatio
+      devicePixelRatio: this.props.pixelRatio
     });
     return moduleParameters;
   }
@@ -193,7 +178,7 @@ export default class LayersPass extends Pass {
     const height = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
     // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
     const dimensions = viewport;
-    const pixelRatio = this.pixelRatio;
+    const pixelRatio = this.props.pixelRatio;
     return [
       dimensions.x * pixelRatio,
       (height - dimensions.y - dimensions.height) * pixelRatio,

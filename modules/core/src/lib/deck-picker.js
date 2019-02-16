@@ -285,9 +285,9 @@ export default class DeckPicker {
       return null;
     }
 
-    const {pickingFBO} = this;
+    const pickingFBO = this.pickingFBO;
 
-    this.pickLayersPass.drawPickingBuffer(this.gl, {
+    this.pickLayersPass.render({
       layers,
       viewports,
       onViewportActive,

@@ -58,20 +58,15 @@ export default class DeckRenderer {
     pass,
     stats
   }) {
-    const {drawPickingColors, layerFilter, pixelRatio} = this;
-    const layerPass = drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
-    layerPass.setProps({
+    const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
+    const renderStats = layerPass.render({
       layers,
       viewports,
       views,
       onViewportActive: activateViewport,
-      pixelRatio,
-      layerFilter,
       redrawReason,
       customRender
     });
-
-    const renderStats = layerPass.render();
     this.renderCount++;
 
     if (log.priority >= LOG_PRIORITY_DRAW) {
