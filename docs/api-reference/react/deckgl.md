@@ -190,8 +190,15 @@ Additional Notes:
 
 ## Methods
 
-All [Deck](/docs/api-reference/deck.md#methods) methods are available on the `DeckGL` component.
+All [Deck](/docs/api-reference/deck.md#methods) methods are available on the `DeckGL` component, but not all of them can be explicitly called. For example, to rerender your component, you can pass updated props to `DeckGL` component directly, while you should call `setProps` with new props in `Deck`. 
 
+The public methods you can call explicitly list below:
+
+* `pickObject`
+* `pickMultipleObjects`
+* `pickObjects`
+
+We do recommend you to use the pure JavaScript version of deck.gl if you are more comfortable with an imperative programming style (e.g. `deck.setProps()`).
 
 ## Source
 
