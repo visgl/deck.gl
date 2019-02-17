@@ -104,6 +104,7 @@ test('PathTesselator#constructor', t => {
       );
 
       t.ok(ArrayBuffer.isView(tesselator.get('leftDeltas')), 'PathTesselator.get leftDeltas');
+      t.ok(tesselator.get('leftDeltas').every(Number.isFinite), 'Valid leftDeltas attribute');
       t.deepEquals(
         tesselator.get('leftDeltas').slice(0, 6),
         [0, 0, 0, 1, 1, 0],
@@ -116,6 +117,7 @@ test('PathTesselator#constructor', t => {
         [1, 1, 0, 0, 0, 0],
         'rightDeltas are filled'
       );
+      t.ok(tesselator.get('rightDeltas').every(Number.isFinite), 'Valid rightDeltas attribute');
       t.deepEquals(
         tesselator.get('rightDeltas').slice(-3),
         [1, 1, 0],

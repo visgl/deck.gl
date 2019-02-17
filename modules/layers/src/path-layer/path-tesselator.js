@@ -108,8 +108,9 @@ export default class PathTesselator extends Tesselator {
     let nextPoint;
 
     for (let i = context.vertexStart, ptIndex = 1; ptIndex < numPoints; i++, ptIndex++) {
-      nextPoint = this.getPointOnPath(path, ptIndex + 1);
-      if (!nextPoint) {
+      if (ptIndex + 1 < numPoints) {
+        nextPoint = this.getPointOnPath(path, ptIndex + 1);
+      } else {
         nextPoint = isPathClosed ? this.getPointOnPath(path, 1) : endPoint;
       }
 
