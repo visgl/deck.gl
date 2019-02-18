@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerManager, MapView} from 'deck.gl';
+import {LayerManager, MapView, DeckRenderer} from 'deck.gl';
 
 import {makeSpy} from 'probe.gl/test-utils';
 import gl from './utils/setup-gl';
@@ -64,10 +64,15 @@ export function testUpdateLayer({layer, viewport, newProps}) {
 
 export function testDrawLayer({layer, uniforms = {}}) {
   const layerManager = new LayerManager(gl);
+  const deckRenderer = new DeckRenderer(gl);
 
   try {
     layerManager.setLayers([layer]);
-    layerManager.drawLayers({viewports: [testViewport]});
+    deckRenderer.renderLayers({
+      viewports: [testViewport],
+      layers: layerManager.getLayers(),
+      activateViewport: layerManager.activateViewport
+    });
   } catch (error) {
     return error;
   }
@@ -85,6 +90,7 @@ export function testLayer({
   // assert(Layer);
 
   const layerManager = new LayerManager(gl);
+  const deckRenderer = new DeckRenderer(gl);
 
   const initialProps = testCases[0].props;
   const layer = new Layer(initialProps);
@@ -95,11 +101,19 @@ export function testLayer({
     userData
   );
 
-  runLayerTests(layerManager, layer, testCases, spies, userData, doesNotThrow);
+  runLayerTests(layerManager, deckRenderer, layer, testCases, spies, userData, doesNotThrow);
 }
 
 /* eslint-disable max-params, no-loop-func */
-function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotThrow) {
+function runLayerTests(
+  layerManager,
+  deckRenderer,
+  layer,
+  testCases,
+  spies,
+  userData,
+  doesNotThrow
+) {
   let combinedProps = {};
 
   // Run successive update tests
@@ -141,7 +155,12 @@ function runLayerTests(layerManager, layer, testCases, spies, userData, doesNotT
 
     // call draw layer
     doesNotThrow(
-      () => layerManager.drawLayers({viewports: [testViewport]}),
+      () =>
+        deckRenderer.renderLayers({
+          viewports: [testViewport],
+          layers: layerManager.getLayers(),
+          activateViewport: layerManager.activateViewport
+        }),
       `draw ${layer} should not fail`,
       userData
     );

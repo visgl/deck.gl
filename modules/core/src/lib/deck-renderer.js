@@ -1,44 +1,72 @@
 import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
+import PickLayersPass from '../passes/pick-layers-pass';
+import getPixelRatio from '../utils/get-pixel-ratio';
 
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
-  constructor(gl, props) {
-    const {layerManager, effectManager} = props;
-
+  constructor(gl) {
     this.gl = gl;
-    this.layerManager = layerManager;
-    this.effectManager = effectManager;
+    this.pixelRatio = null;
+    this.layerFilter = null;
+    this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(gl);
+    this.pickLayersPass = new PickLayersPass(gl);
     this.renderCount = 0;
+    this._needsRedraw = 'Initial render';
+  }
+
+  setProps(props) {
+    if ('useDevicePixels' in props) {
+      this.pixelRatio = getPixelRatio(props.useDevicePixels);
+    }
+
+    if ('layerFilter' in props) {
+      if (this.layerFilter !== props.layerFilter) {
+        this.layerFilter = props.layerFilter;
+        this._needsRedraw = 'layerFilter changed';
+      }
+    }
+
+    if ('drawPickingColors' in props) {
+      if (this.drawPickingColors !== props.drawPickingColors) {
+        this.drawPickingColors = props.drawPickingColors;
+        this._needsRedraw = 'drawPickingColors changed';
+      }
+    }
+
+    const {pixelRatio, layerFilter} = this;
+
+    this.drawLayersPass.setProps({
+      pixelRatio,
+      layerFilter
+    });
+    this.pickLayersPass.setProps({
+      pixelRatio,
+      layerFilter
+    });
   }
 
   renderLayers({
+    layers,
     viewports,
+    activateViewport,
     views,
-    useDevicePixels,
     redrawReason = 'unknown reason',
     customRender = false,
     pass,
     stats
   }) {
-    // TODO: Remove LayerManager reference after clean up LayerManager & pick-layers.js
-    const {drawPickingColors, layers, layerFilter} = this.layerManager;
-
-    this.drawLayersPass.setProps({
+    const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
+    const renderStats = layerPass.render({
       layers,
       viewports,
       views,
-      onViewportActive: this.layerManager.activateViewport,
-      useDevicePixels,
-      drawPickingColors,
-      layerFilter,
+      onViewportActive: activateViewport,
       redrawReason,
       customRender
     });
-
-    const renderStats = this.drawLayersPass.render();
     this.renderCount++;
 
     if (log.priority >= LOG_PRIORITY_DRAW) {
@@ -46,6 +74,14 @@ export default class DeckRenderer {
         this.logRenderStats({status, pass, redrawReason, stats});
       });
     }
+  }
+
+  needsRedraw(clearRedrawFlags) {
+    const redraw = this._needsRedraw;
+    if (clearRedrawFlags) {
+      this._needsRedraw = false;
+    }
+    return redraw;
   }
 
   // Private

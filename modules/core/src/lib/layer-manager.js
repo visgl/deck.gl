@@ -19,10 +19,9 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {Framebuffer, _ShaderCache as ShaderCache} from 'luma.gl';
+import {_ShaderCache as ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
-import {drawLayers} from './draw-layers';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
@@ -88,9 +87,6 @@ export default class LayerManager {
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
     });
-
-    this.layerFilter = null;
-    this.drawPickingColors = false;
 
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
@@ -169,20 +165,6 @@ export default class LayerManager {
     if ('layers' in props) {
       this.setLayers(props.layers);
     }
-
-    if ('layerFilter' in props) {
-      if (this.layerFilter !== props.layerFilter) {
-        this.layerFilter = props.layerFilter;
-        this.setNeedsRedraw('layerFilter changed');
-      }
-    }
-
-    if ('drawPickingColors' in props) {
-      if (props.drawPickingColors !== this.drawPickingColors) {
-        this.drawPickingColors = props.drawPickingColors;
-        this.setNeedsRedraw('drawPickingColors changed');
-      }
-    }
   }
   /* eslint-enable complexity, max-statements */
 
@@ -229,38 +211,6 @@ export default class LayerManager {
   }
 
   //
-  // METHODS FOR LAYERS
-  //
-
-  // Draw all layers in all views
-  drawLayers({
-    pass = 'render to screen',
-    viewports,
-    views,
-    redrawReason = 'unknown reason',
-    customRender = false,
-    effects
-  }) {
-    const {drawPickingColors} = this;
-    const {gl, useDevicePixels} = this.context;
-
-    // render this viewport
-    drawLayers(gl, {
-      layers: this.layers,
-      viewports,
-      views,
-      onViewportActive: this.activateViewport,
-      useDevicePixels,
-      drawPickingColors,
-      pass,
-      layerFilter: this.layerFilter,
-      redrawReason,
-      customRender,
-      effects
-    });
-  }
-
-  //
   // PRIVATE METHODS
   //
 
@@ -301,15 +251,6 @@ export default class LayerManager {
     assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
-  }
-
-  getPickingBuffer() {
-    const {gl} = this.context;
-    // Create a frame buffer if not already available
-    this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl);
-    // Resize it to current canvas size (this is a noop if size hasn't changed)
-    this.context.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
-    return this.context.pickingFBO;
   }
 
   // Match all layers, checking for caught errors

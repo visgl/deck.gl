@@ -1,34 +1,29 @@
-/* global window */
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import assert from '../utils/assert';
 import {clear, setParameters, withParameters} from 'luma.gl';
 
 export default class LayersPass extends Pass {
-  render() {
-    return this.drawLayers(this.gl, this.props);
+  render(props) {
+    return this.drawLayers(props);
   }
 
+  // PRIVATE
   // Draw a list of layers in a list of viewports
-  drawLayers(
-    gl,
-    {
-      layers,
-      viewports,
-      views,
-      onViewportActive,
-      useDevicePixels,
-      deviceRect = null,
-      parameters = {},
-      layerFilter = null,
-      pass = 'draw',
-      redrawReason = '',
-      customRender,
-      effects
-    }
-  ) {
+  drawLayers({
+    layers,
+    viewports,
+    views,
+    onViewportActive,
+    deviceRect = null,
+    parameters = {},
+    pass = 'draw',
+    redrawReason = '',
+    customRender,
+    effects
+  }) {
+    const gl = this.gl;
     if (!customRender) {
-      this.clearCanvas(gl, {useDevicePixels});
+      this.clearCanvas(gl);
     }
 
     const renderStats = [];
@@ -45,10 +40,8 @@ export default class LayersPass extends Pass {
         layers,
         viewport,
         view,
-        useDevicePixels,
         deviceRect,
         parameters,
-        layerFilter,
         pass,
         redrawReason,
         effects
@@ -58,7 +51,6 @@ export default class LayersPass extends Pass {
     return renderStats;
   }
 
-  // PRIVATE
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
@@ -68,18 +60,14 @@ export default class LayersPass extends Pass {
       layers,
       viewport,
       view,
-      useDevicePixels,
       deviceRect = null,
       parameters = {},
-      layerFilter,
       pass = 'draw',
       redrawReason = '',
       effects
     }
   ) {
-    // TODO: move parameters to props to avoid passing around
-    const pixelRatio = this.getPixelRatio({useDevicePixels});
-    const glViewport = this.getGLViewport(gl, {viewport, pixelRatio});
+    const glViewport = this.getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
@@ -106,7 +94,7 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
       // Check if we should draw layer
-      const shouldDrawLayer = this.shouldDrawLayer(layer, layerFilter, viewport);
+      const shouldDrawLayer = this.shouldDrawLayer(layer, viewport);
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -124,7 +112,6 @@ export default class LayersPass extends Pass {
           gl,
           layer,
           layerIndex,
-          pixelRatio,
           glViewport,
           parameters,
           effects
@@ -135,8 +122,8 @@ export default class LayersPass extends Pass {
     return renderStatus;
   }
 
-  drawLayerInViewport({gl, layer, layerIndex, pixelRatio, glViewport, parameters}) {
-    const moduleParameters = this.getModuleParameters(layer, pixelRatio);
+  drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters}) {
+    const moduleParameters = this.getModuleParameters(layer, this.props.pixelRatio);
 
     const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
 
@@ -154,7 +141,8 @@ export default class LayersPass extends Pass {
     return viewportOrDescriptor.viewport ? viewportOrDescriptor.viewport : viewportOrDescriptor;
   }
 
-  shouldDrawLayer(layer, layerFilter, viewport) {
+  shouldDrawLayer(layer, viewport) {
+    const layerFilter = this.props.layerFilter;
     let shouldDrawLayer = !layer.isComposite && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
@@ -163,11 +151,11 @@ export default class LayersPass extends Pass {
     return shouldDrawLayer;
   }
 
-  getModuleParameters(layer, pixelRatio) {
+  getModuleParameters(layer) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 0,
-      devicePixelRatio: pixelRatio
+      devicePixelRatio: this.props.pixelRatio
     });
     return moduleParameters;
   }
@@ -183,18 +171,14 @@ export default class LayersPass extends Pass {
     return layerParameters;
   }
 
-  getPixelRatio({useDevicePixels}) {
-    assert(typeof useDevicePixels === 'boolean', 'Invalid useDevicePixels');
-    return useDevicePixels && typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-  }
-
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-  getGLViewport(gl, {viewport, pixelRatio}) {
+  getGLViewport(gl, {viewport}) {
     // TODO - dummy default for node
     // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
     const height = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
     // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
     const dimensions = viewport;
+    const pixelRatio = this.props.pixelRatio;
     return [
       dimensions.x * pixelRatio,
       (height - dimensions.y - dimensions.height) * pixelRatio,

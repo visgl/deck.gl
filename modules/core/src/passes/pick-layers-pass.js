@@ -1,26 +1,27 @@
-import LayersPass from './base-layers-pass';
+import LayersPass from './layers-pass';
 import {withParameters} from 'luma.gl';
 
 export default class PickLayersPass extends LayersPass {
-  constructor(gl, props) {
-    super(gl, props);
+  render(props) {
+    if (props.pickingFBO) {
+      this.drawPickingBuffer(props);
+    } else {
+      super.render(props);
+    }
   }
 
+  // Private
   // Draws list of layers and viewports into the picking buffer
   // Note: does not sample the buffer, that has to be done by the caller
-  drawPickingBuffer(
-    gl,
-    {
-      layers,
-      viewports,
-      onViewportActive,
-      useDevicePixels,
-      pickingFBO,
-      deviceRect: {x, y, width, height},
-      layerFilter = null,
-      redrawReason = ''
-    }
-  ) {
+  drawPickingBuffer({
+    layers,
+    viewports,
+    onViewportActive,
+    pickingFBO,
+    deviceRect: {x, y, width, height},
+    redrawReason = ''
+  }) {
+    const gl = this.gl;
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
     // Note that the callback here is called synchronously.
@@ -35,13 +36,11 @@ export default class PickLayersPass extends LayersPass {
         clearColor: [0, 0, 0, 0]
       },
       () => {
-        this.drawLayers(gl, {
+        this.drawLayers({
           layers,
           viewports,
           onViewportActive,
-          useDevicePixels,
           drawPickingColors: true,
-          layerFilter,
           pass: 'picking',
           redrawReason,
           parameters: {
@@ -56,7 +55,8 @@ export default class PickLayersPass extends LayersPass {
   }
 
   // PRIVATE
-  shouldDrawLayer(layer, layerFilter, viewport) {
+  shouldDrawLayer(layer, viewport) {
+    const layerFilter = this.props.layerFilter;
     let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
 
     if (shouldDrawLayer && layerFilter) {
@@ -65,11 +65,11 @@ export default class PickLayersPass extends LayersPass {
     return shouldDrawLayer;
   }
 
-  getModuleParameters(layer, pixelRatio) {
+  getModuleParameters(layer) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
-      devicePixelRatio: pixelRatio
+      devicePixelRatio: this.props.pixelRatio
     });
     return moduleParameters;
   }
