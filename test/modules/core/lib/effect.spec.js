@@ -18,5 +18,11 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './effect.spec';
-import './effect-manager.spec';
+import test from 'tape-catch';
+import Effect from '@deck.gl/core/lib/effect';
+
+test('Effect#constructor', t => {
+  const effect = new Effect();
+  t.ok(effect, 'Effect created');
+  t.end();
+});

@@ -26,3 +26,5 @@ import './composite-layer.spec';
 import './layer-manager.spec';
 import './transition-manager.spec';
 import './seer-integration.spec';
+import './effect.spec';
+import './effect-manager.spec';
