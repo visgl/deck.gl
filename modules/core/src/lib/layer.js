@@ -406,19 +406,22 @@ export default class Layer extends Component {
     const {value, size} = attribute;
 
     if (value[0] === 1) {
-      // already populated
+      // This can happen when data has changed, but the attribute value typed array
+      // has sufficient size and does not need to be re-allocated.
+      // This attribute is already populated, we do not have to recalculate it
       return;
     }
 
     const cacheSize = pickingColorCache.length / size;
 
+    // Copy the last calculated picking color sequence into the attribute
     value.set(
       numInstances < cacheSize
         ? pickingColorCache.subarray(0, numInstances * size)
         : pickingColorCache
     );
 
-    // add 1 to index to seperate from no selection
+    // If the attribute is larger than the cache, populate the missing chunk
     for (let i = cacheSize; i < numInstances; i++) {
       const pickingColor = this.encodePickingColor(i);
       value[i * size + 0] = pickingColor[0];
@@ -427,6 +430,7 @@ export default class Layer extends Component {
     }
 
     if (cacheSize < numInstances) {
+      // Save the largest picking color sequence
       pickingColorCache = value;
     }
   }
