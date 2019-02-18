@@ -19,11 +19,9 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {Framebuffer, _ShaderCache as ShaderCache} from 'luma.gl';
+import {_ShaderCache as ShaderCache} from 'luma.gl';
 import seer from 'seer';
 import Layer from './layer';
-import {drawLayers} from './draw-layers';
-import {pickObject, pickVisibleObjects} from './pick-layers';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
@@ -57,10 +55,6 @@ const INITIAL_CONTEXT = Object.seal({
   shaderCache: null,
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
-  // State
-  pickingEvent: null,
-  lastPickedInfo: null,
-
   animationProps: null,
 
   userData: {} // Place for any custom app `context`
@@ -90,24 +84,15 @@ export default class LayerManager {
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
       stats: stats || new Stats({id: 'deck.gl'}),
-      lastPickedInfo: {
-        // For callback tracking and autohighlight
-        index: -1,
-        layerId: null,
-        info: null
-      },
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
     });
-
-    this.layerFilter = null;
-    this.drawPickingColors = false;
 
     this._needsRedraw = 'Initial render';
     this._needsUpdate = false;
     this._debug = false;
 
-    this._activateViewport = this._activateViewport.bind(this);
+    this.activateViewport = this.activateViewport.bind(this);
 
     // Seer integration
     this._initSeer = this._initSeer.bind(this);
@@ -180,20 +165,6 @@ export default class LayerManager {
     if ('layers' in props) {
       this.setLayers(props.layers);
     }
-
-    if ('layerFilter' in props) {
-      if (this.layerFilter !== props.layerFilter) {
-        this.layerFilter = props.layerFilter;
-        this.setNeedsRedraw('layerFilter changed');
-      }
-    }
-
-    if ('drawPickingColors' in props) {
-      if (props.drawPickingColors !== this.drawPickingColors) {
-        this.drawPickingColors = props.drawPickingColors;
-        this.setNeedsRedraw('drawPickingColors changed');
-      }
-    }
   }
   /* eslint-enable complexity, max-statements */
 
@@ -240,109 +211,6 @@ export default class LayerManager {
   }
 
   //
-  // METHODS FOR LAYERS
-  //
-
-  // Draw all layers in all views
-  drawLayers({
-    pass = 'render to screen',
-    viewports,
-    views,
-    redrawReason = 'unknown reason',
-    customRender = false
-  }) {
-    const {drawPickingColors} = this;
-    const {gl, useDevicePixels} = this.context;
-
-    // render this viewport
-    drawLayers(gl, {
-      layers: this.layers,
-      viewports,
-      views,
-      onViewportActive: this._activateViewport,
-      useDevicePixels,
-      drawPickingColors,
-      pass,
-      layerFilter: this.layerFilter,
-      redrawReason,
-      customRender
-    });
-  }
-
-  // Returns a new picking info object by assuming the last picked object is still picked
-  getLastPickedObject({x, y, viewports}) {
-    const lastPickedInfo = this.context.lastPickedInfo.info;
-    const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
-    const layer = lastPickedLayerId ? this.layers.find(l => l.id === lastPickedLayerId) : null;
-    const coordinate = viewports[0] && viewports[0].unproject([x, y]);
-
-    const info = {
-      x,
-      y,
-      coordinate,
-      // TODO remove the lngLat prop after compatibility check
-      lngLat: coordinate,
-      layer
-    };
-
-    if (layer) {
-      return Object.assign({}, lastPickedInfo, info);
-    }
-    return Object.assign(info, {color: null, object: null, index: -1});
-  }
-
-  // Pick the closest info at given coordinate
-  pickObject({x, y, mode, radius = 0, layerIds, viewports, depth = 1, event = null}) {
-    const {gl, useDevicePixels} = this.context;
-    // Allow layers to access the event
-    this.context.pickingEvent = event;
-
-    const layers = this.getLayers({layerIds});
-
-    const result = pickObject(gl, {
-      // User params
-      x,
-      y,
-      radius,
-      layers,
-      mode,
-      layerFilter: this.layerFilter,
-      depth,
-      // Injected params
-      viewports,
-      onViewportActive: this._activateViewport,
-      pickingFBO: this._getPickingBuffer(),
-      lastPickedInfo: this.context.lastPickedInfo,
-      useDevicePixels
-    });
-
-    // Clear the current event
-    this.context.pickingEvent = null;
-    return result;
-  }
-
-  // Get all unique infos within a bounding box
-  pickObjects({x, y, width, height, layerIds, viewports}) {
-    const {gl, useDevicePixels} = this.context;
-
-    const layers = this.getLayers({layerIds});
-
-    return pickVisibleObjects(gl, {
-      x,
-      y,
-      width,
-      height,
-      layers,
-      layerFilter: this.layerFilter,
-      mode: 'pickObjects',
-      viewports,
-      onViewportActive: this._activateViewport,
-      pickingFBO: this._getPickingBuffer(),
-      useDevicePixels
-    });
-  }
-
-  //
   // PRIVATE METHODS
   //
 
@@ -363,7 +231,7 @@ export default class LayerManager {
   }
 
   // Make a viewport "current" in layer context, updating viewportChanged flags
-  _activateViewport(viewport) {
+  activateViewport(viewport) {
     const oldViewport = this.context.viewport;
     const viewportChanged = !oldViewport || !viewport.equals(oldViewport);
 
@@ -383,15 +251,6 @@ export default class LayerManager {
     assert(this.context.viewport, 'LayerManager: viewport not set');
 
     return this;
-  }
-
-  _getPickingBuffer() {
-    const {gl} = this.context;
-    // Create a frame buffer if not already available
-    this.context.pickingFBO = this.context.pickingFBO || new Framebuffer(gl);
-    // Resize it to current canvas size (this is a noop if size hasn't changed)
-    this.context.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
-    return this.context.pickingFBO;
   }
 
   // Match all layers, checking for caught errors
