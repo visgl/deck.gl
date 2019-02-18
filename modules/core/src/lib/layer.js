@@ -41,6 +41,8 @@ const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = Object.freeze([]);
 
+let pickingColorCache = new Uint8ClampedArray(0);
+
 const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
@@ -268,7 +270,7 @@ export default class Layer extends Component {
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
   encodePickingColor(i) {
-    assert((((i + 1) >> 24) & 255) === 0, 'index out of picking color range');
+    assert(i < 16777215, 'index out of picking color range');
     return [(i + 1) & 255, ((i + 1) >> 8) & 255, (((i + 1) >> 8) >> 8) & 255];
   }
 
@@ -402,12 +404,30 @@ export default class Layer extends Component {
 
   calculateInstancePickingColors(attribute, {numInstances}) {
     const {value, size} = attribute;
+
+    if (value[0] === 1) {
+      // already populated
+      return;
+    }
+
+    const cacheSize = pickingColorCache.length / size;
+
+    value.set(
+      numInstances < cacheSize
+        ? pickingColorCache.subarray(0, numInstances * size)
+        : pickingColorCache
+    );
+
     // add 1 to index to seperate from no selection
-    for (let i = 0; i < numInstances; i++) {
+    for (let i = cacheSize; i < numInstances; i++) {
       const pickingColor = this.encodePickingColor(i);
       value[i * size + 0] = pickingColor[0];
       value[i * size + 1] = pickingColor[1];
       value[i * size + 2] = pickingColor[2];
+    }
+
+    if (cacheSize < numInstances) {
+      pickingColorCache = value;
     }
   }
 
