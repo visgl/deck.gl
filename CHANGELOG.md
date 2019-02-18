@@ -17,13 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.3] - Feb 17 2019
+
+- PathLayer: fix rightDeltas attribute generation when using flat vertices (#2694)
+
 #### [6.4.2] - Feb 15 2019
 
-- docs: pick methods belong to Deck, not DeckGL (#2675)
-- grammar typos in primitive-layers (#2677)
-- In docs: pickObjects -> pickMultipleObjects (#2676)
-- additin -> addition (#2680)
-- Encode URL so that extra ")" does not come through (#2678)
+- Match auto-highlight color blending behavior with 6.3
 - Don't use invertPan flag in _onPanRotate method (#2682)
 
 #### [6.4.1] - Feb 7 2019
