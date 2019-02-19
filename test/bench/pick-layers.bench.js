@@ -1,5 +1,5 @@
 import {Layer} from '@deck.gl/core';
-import {getClosestFromPickingBuffer} from '@deck.gl/core/lib/pick-layers';
+import {getClosestObject} from '@deck.gl/core/lib/picking/query-object';
 
 const SAMPLE_LAYERS = [new Layer()];
 const OBJECT_COLOR = [0, 10, 20, 1];
@@ -40,10 +40,10 @@ const TEST_CASES = [
 ];
 
 export default function pickLayersBench(bench) {
-  bench = bench.group('getClosestFromPickingBuffer');
+  bench = bench.group('getClosestObject');
 
   TEST_CASES.forEach(testCase => {
-    bench = bench.add(testCase.title, () => getClosestFromPickingBuffer(null, testCase.data));
+    bench = bench.add(testCase.title, () => getClosestObject(testCase.data));
   });
 
   return bench;
