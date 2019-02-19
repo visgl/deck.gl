@@ -269,9 +269,12 @@ export default class Layer extends Component {
 
   // Returns the picking color that doesn't match any subfeature
   // Use if some graphics do not belong to any pickable subfeature
-  encodePickingColor(i) {
+  encodePickingColor(i, target = []) {
     assert(i < 16777215, 'index out of picking color range');
-    return [(i + 1) & 255, ((i + 1) >> 8) & 255, (((i + 1) >> 8) >> 8) & 255];
+    target[0] = (i + 1) & 255;
+    target[1] = ((i + 1) >> 8) & 255;
+    target[2] = (((i + 1) >> 8) >> 8) & 255;
+    return target;
   }
 
   // Returns the index corresponding to a picking color that doesn't match any subfeature
@@ -412,7 +415,25 @@ export default class Layer extends Component {
       return;
     }
 
+    // calculateInstancePickingColors always generates the same sequence.
+    // pickingColorCache saves the largest generated sequence for reuse
     const cacheSize = pickingColorCache.length / size;
+
+    if (cacheSize < numInstances) {
+      // If the attribute is larger than the cache, resize the cache and populate the missing chunk
+      const newPickingColorCache = new Uint8ClampedArray(numInstances * size);
+      newPickingColorCache.set(pickingColorCache);
+      const pickingColor = [];
+
+      for (let i = cacheSize; i < numInstances; i++) {
+        this.encodePickingColor(i, pickingColor);
+        newPickingColorCache[i * size + 0] = pickingColor[0];
+        newPickingColorCache[i * size + 1] = pickingColor[1];
+        newPickingColorCache[i * size + 2] = pickingColor[2];
+      }
+
+      pickingColorCache = newPickingColorCache;
+    }
 
     // Copy the last calculated picking color sequence into the attribute
     value.set(
@@ -420,19 +441,6 @@ export default class Layer extends Component {
         ? pickingColorCache.subarray(0, numInstances * size)
         : pickingColorCache
     );
-
-    // If the attribute is larger than the cache, populate the missing chunk
-    for (let i = cacheSize; i < numInstances; i++) {
-      const pickingColor = this.encodePickingColor(i);
-      value[i * size + 0] = pickingColor[0];
-      value[i * size + 1] = pickingColor[1];
-      value[i * size + 2] = pickingColor[2];
-    }
-
-    if (cacheSize < numInstances) {
-      // Save the largest picking color sequence
-      pickingColorCache = value;
-    }
   }
 
   // Sets the specified instanced picking color to null picking color. Used for multi picking.

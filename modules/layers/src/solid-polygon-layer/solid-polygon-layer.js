@@ -358,10 +358,9 @@ export default class SolidPolygonLayer extends Layer {
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-    attribute.value = this.state.polygonTesselator.get(
-      'pickingColors',
-      attribute.value,
-      this.encodePickingColor
+    const pickingColor = [];
+    attribute.value = this.state.polygonTesselator.get('pickingColors', attribute.value, index =>
+      this.encodePickingColor(index, pickingColor)
     );
   }
 
