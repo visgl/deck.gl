@@ -18,21 +18,51 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
+export default function getVertexShader(isSide) {
+  let attributes;
+  let positions;
+  let normals;
+
+  if (isSide) {
+    attributes = `
+    attribute vec3 nextPositions;
+    attribute vec2 nextPositions64xyLow;
+    `;
+    positions = `
+    pos = mix(positions, nextPositions, vertexPositions.x);
+    pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
+    isValid = vertexValid;
+    `;
+    normals = `
+    normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
+    normal = project_normal(normal);
+    `;
+  } else {
+    attributes = '';
+    positions = `
+    pos = positions;
+    pos64xyLow = positions64xyLow;
+    isValid = 1.0;
+    `;
+    normals = `
+    normal = vec3(0.0, 0.0, 1.0);
+    `;
+  }
+
+  return `\
 #define SHADER_NAME solid-polygon-layer-vertex-shader
 
 attribute vec2 vertexPositions;
 attribute float vertexValid;
 attribute vec3 positions;
 attribute vec2 positions64xyLow;
-attribute vec3 nextPositions;
-attribute vec2 nextPositions64xyLow;
+
+${attributes}
 attribute float elevations;
 attribute vec4 fillColors;
 attribute vec4 lineColors;
 attribute vec3 pickingColors;
 
-uniform bool isSideVertex;
 uniform bool extruded;
 uniform bool isWireframe;
 uniform float elevationScale;
@@ -47,15 +77,7 @@ void main(void) {
   vec3 normal;
   vec4 colors = isWireframe ? lineColors : fillColors;
 
-  if (isSideVertex) {
-    pos = mix(positions, nextPositions, vertexPositions.x);
-    pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
-    isValid = vertexValid;
-  } else {
-    pos = positions;
-    pos64xyLow = positions64xyLow;
-    isValid = 1.0;
-  }
+  ${positions}
   if (extruded) {
     pos.z += elevations * vertexPositions.y;
   }
@@ -65,14 +87,9 @@ void main(void) {
   gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_worldspace);
 
   float lightWeight = 1.0;
-  
+
   if (extruded) {
-    if (isSideVertex) {
-      normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
-      normal = project_normal(normal);
-    } else {
-      normal = vec3(0.0, 0.0, 1.0);
-    }
+    ${normals}
 
     lightWeight = lighting_getLightWeight(position_worldspace.xyz, normal);
   }
@@ -84,3 +101,4 @@ void main(void) {
   picking_setPickingColor(pickingColors);
 }
 `;
+}
