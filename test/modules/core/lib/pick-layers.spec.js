@@ -267,15 +267,15 @@ const TEST_CASES = [
         }
       ],
       pickMultipleObjects: [
-        // {
-        //   parameters: {
-        //     x: 260,
-        //     y: 300
-        //   },
-        //   results: {
-        //     count: 1
-        //   }
-        // },
+        {
+          parameters: {
+            x: 260,
+            y: 300
+          },
+          results: {
+            count: 1
+          }
+        },
         {
           parameters: {
             x: 10,
@@ -366,15 +366,15 @@ const TEST_CASES = [
         }
       ],
       pickMultipleObjects: [
-        // {
-        //   parameters: {
-        //     x: 260,
-        //     y: 300
-        //   },
-        //   results: {
-        //     count: 1
-        //   }
-        // },
+        {
+          parameters: {
+            x: 260,
+            y: 300
+          },
+          results: {
+            count: 2
+          }
+        },
         {
           parameters: {
             x: 10,

@@ -312,7 +312,7 @@ export default class PathLayer extends Layer {
 
   clearPickingColor(color) {
     const pickedPathIndex = this.decodePickingColor(color);
-    const {bufferLayout} = this.state;
+    const {bufferLayout} = this.state.pathTesselator;
     const numVertices = bufferLayout[pickedPathIndex];
 
     let startInstanceIndex = 0;
