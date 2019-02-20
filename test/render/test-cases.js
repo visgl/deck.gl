@@ -6,12 +6,7 @@ import {OrbitView, OrthographicView, FirstPersonView} from 'deck.gl';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
-import {
-  BezierCurveLayer,
-  MeshLayer,
-  PathOutlineLayer,
-  Arrow2DGeometry
-} from '@deck.gl/experimental-layers';
+import {BezierCurveLayer, PathOutlineLayer} from '@deck.gl/experimental-layers';
 
 import {
   COORDINATE_SYSTEM,
@@ -31,15 +26,6 @@ import {
   TextLayer
 } from 'deck.gl';
 import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
-
-const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
-  ambientRatio: 0.3,
-  diffuseRatio: 0.6,
-  specularRatio: 0.4,
-  lightsStrength: [1, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -70,14 +56,6 @@ function getColorValue(points) {
 function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
-
-// experimental layer data
-
-const arrowDataLngLat = [
-  {position: [-122.4111557006836, 37.774879455566406], angle: 0},
-  {position: [-122.41878509521484, 37.75032043457031], angle: 70},
-  {position: [-122.43194580078125, 37.75153732299805], angle: 212}
-];
 
 export const WIDTH = 800;
 export const HEIGHT = 450;
@@ -130,8 +108,7 @@ export const TEST_CASES = [
         wireframe: true,
         getElevation: 500,
         lineWidthScale: 10,
-        lineWidthMinPixels: 1,
-        lightSettings: LIGHT_SETTINGS
+        lineWidthMinPixels: 1
       })
     ],
     referenceImageUrl: './test/render/golden-images/first-person.png'
@@ -291,7 +268,6 @@ export const TEST_CASES = [
         opacity: 0.8,
         pickable: true,
         lineDashJustified: true,
-        lightSettings: LIGHT_SETTINGS,
         elevationScale: 0.6
       })
     ],
@@ -321,7 +297,6 @@ export const TEST_CASES = [
         opacity: 0.8,
         pickable: true,
         lineDashJustified: true,
-        lightSettings: LIGHT_SETTINGS,
         elevationScale: 0.6
       })
     ],
@@ -615,8 +590,7 @@ export const TEST_CASES = [
         getElevation: f => 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
-        pickable: true,
-        lightSettings: LIGHT_SETTINGS
+        pickable: true
       })
     ],
     referenceImageUrl: './test/render/golden-images/geojson-lnglat.png',
@@ -652,8 +626,7 @@ export const TEST_CASES = [
         getElevation: f => 500,
         lineWidthScale: 10,
         lineWidthMinPixels: 1,
-        pickable: true,
-        lightSettings: LIGHT_SETTINGS
+        pickable: true
       })
     ],
     referenceImageUrl: './test/render/golden-images/geojson-extruded-lnglat.png',
@@ -677,8 +650,7 @@ export const TEST_CASES = [
         pickable: true,
         opacity: 1,
         getColor: g => [245, 166, g.value * 255, 255],
-        getElevation: h => h.value * 5000,
-        lightSettings: LIGHT_SETTINGS
+        getElevation: h => h.value * 5000
       })
     ],
     referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
@@ -704,8 +676,7 @@ export const TEST_CASES = [
         pickable: true,
         opacity: 1,
         getColor: g => [245, 166, g.value * 255, 255],
-        getElevation: h => h.value * 5000,
-        lightSettings: LIGHT_SETTINGS
+        getElevation: h => h.value * 5000
       })
     ],
     referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
@@ -730,8 +701,7 @@ export const TEST_CASES = [
         pickable: true,
         getPosition: d => d.COORDINATES,
         getColorValue,
-        getElevationValue,
-        lightSettings: LIGHT_SETTINGS
+        getElevationValue
       })
     ],
     referenceImageUrl: './test/render/golden-images/grid-lnglat.png',
@@ -822,8 +792,7 @@ export const TEST_CASES = [
         pickable: true,
         opacity: 1,
         getColor: h => [48, 128, h.value * 255, 255],
-        getElevation: h => h.value * 5000,
-        lightSettings: LIGHT_SETTINGS
+        getElevation: h => h.value * 5000
       })
     ],
     referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat.png',
@@ -850,8 +819,7 @@ export const TEST_CASES = [
         pickable: true,
         opacity: 1,
         getColor: h => [48, 128, h.value * 255, 255],
-        getElevation: h => h.value * 5000,
-        lightSettings: LIGHT_SETTINGS
+        getElevation: h => h.value * 5000
       })
     ],
     referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat-64.png'
@@ -878,8 +846,7 @@ export const TEST_CASES = [
         coverage: 1,
         getPosition: d => d.COORDINATES,
         getColorValue,
-        getElevationValue,
-        lightSettings: LIGHT_SETTINGS
+        getElevationValue
       })
     ],
     referenceImageUrl: './test/render/golden-images/hexagon-lnglat.png'
@@ -904,8 +871,7 @@ export const TEST_CASES = [
         getColor: d => d.color,
         opacity: 1,
         radiusPixels: 2,
-        pickable: true,
-        lightSettings: LIGHT_SETTINGS
+        pickable: true
       })
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-lnglat.png',
@@ -936,8 +902,7 @@ export const TEST_CASES = [
         getColor: d => d.color,
         opacity: 1,
         radiusPixels: 2,
-        pickable: true,
-        lightSettings: LIGHT_SETTINGS
+        pickable: true
       })
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-lnglat-64.png',
@@ -963,8 +928,7 @@ export const TEST_CASES = [
         getColor: d => d.color,
         opacity: 1,
         radiusPixels: 2,
-        pickable: true,
-        lightSettings: LIGHT_SETTINGS
+        pickable: true
       })
     ],
     referenceImageUrl: './test/render/golden-images/pointcloud-meter.png',
@@ -1000,46 +964,6 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/path-meter.png'
-  },
-  {
-    name: 'mesh-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 12,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new MeshLayer({
-        id: 'mesh-lnglat',
-        data: arrowDataLngLat,
-        mesh: new Arrow2DGeometry(),
-        sizeScale: 10000
-      })
-    ],
-    referenceImageUrl: './test/render/golden-images/mesh-lnglat.png'
-  },
-  {
-    name: 'mesh-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 12,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new MeshLayer({
-        id: 'mesh-lnglat-64',
-        data: arrowDataLngLat,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        mesh: new Arrow2DGeometry(),
-        sizeScale: 10000
-      })
-    ],
-    referenceImageUrl: './test/render/golden-images/mesh-lnglat.png'
   },
   {
     name: 'path-outline',
@@ -1212,7 +1136,6 @@ export const TEST_CASES = [
         extruded: true,
         pickable: true,
         getPosition: d => d.COORDINATES,
-        lightSettings: LIGHT_SETTINGS,
         gpuAggregation: true
       })
     ],
@@ -1235,9 +1158,8 @@ export const TEST_CASES = [
         cellSize: 200,
         opacity: 1,
         extruded: true,
-        pickable: true,
+        pickable: false,
         getPosition: d => d.COORDINATES,
-        lightSettings: LIGHT_SETTINGS,
         gpuAggregation: false
       })
     ],
@@ -1260,7 +1182,6 @@ export const TEST_CASES = [
         cellSize: 200,
         opacity: 1,
         getPosition: d => d.COORDINATES,
-        lightSettings: LIGHT_SETTINGS,
         contours: [
           {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
           {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
@@ -1288,7 +1209,6 @@ export const TEST_CASES = [
         cellSize: 200,
         opacity: 1,
         getPosition: d => d.COORDINATES,
-        lightSettings: LIGHT_SETTINGS,
         contours: [
           {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
           {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
@@ -1316,7 +1236,6 @@ export const TEST_CASES = [
         cellSize: 200,
         opacity: 1,
         getPosition: d => d.COORDINATES,
-        lightSettings: LIGHT_SETTINGS,
         contours: [
           {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
           {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},

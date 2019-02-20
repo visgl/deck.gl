@@ -113,9 +113,10 @@ export default class MultiIconLayer extends IconLayer {
     const {data, getPickingIndex} = this.props;
     const {value} = attribute;
     let i = 0;
+    const pickingColor = [];
     for (const point of data) {
       const index = getPickingIndex(point);
-      const pickingColor = this.encodePickingColor(index);
+      this.encodePickingColor(index, pickingColor);
 
       value[i++] = pickingColor[0];
       value[i++] = pickingColor[1];
