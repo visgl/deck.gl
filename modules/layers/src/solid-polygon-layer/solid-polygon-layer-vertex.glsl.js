@@ -25,14 +25,17 @@ attribute vec2 vertexPositions;
 attribute float vertexValid;
 attribute vec3 positions;
 attribute vec2 positions64xyLow;
+
+#ifdef IS_SIDE_VERTEX
 attribute vec3 nextPositions;
 attribute vec2 nextPositions64xyLow;
+#endif
+
 attribute float elevations;
 attribute vec4 fillColors;
 attribute vec4 lineColors;
 attribute vec3 pickingColors;
 
-uniform bool isSideVertex;
 uniform bool extruded;
 uniform bool isWireframe;
 uniform float elevationScale;
@@ -47,15 +50,16 @@ void main(void) {
   vec3 normal;
   vec4 colors = isWireframe ? lineColors : fillColors;
 
-  if (isSideVertex) {
-    pos = mix(positions, nextPositions, vertexPositions.x);
-    pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
-    isValid = vertexValid;
-  } else {
-    pos = positions;
-    pos64xyLow = positions64xyLow;
-    isValid = 1.0;
-  }
+#ifdef IS_SIDE_VERTEX
+  pos = mix(positions, nextPositions, vertexPositions.x);
+  pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
+  isValid = vertexValid;
+#else
+  pos = positions;
+  pos64xyLow = positions64xyLow;
+  isValid = 1.0;
+#endif
+
   if (extruded) {
     pos.z += elevations * vertexPositions.y;
   }
@@ -63,14 +67,14 @@ void main(void) {
 
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_worldspace);
-  
+
   if (extruded) {
-    if (isSideVertex) {
-      normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
-      normal = project_normal(normal);
-    } else {
-      normal = vec3(0.0, 0.0, 1.0);
-    }
+#ifdef IS_SIDE_VERTEX
+    normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
+    normal = project_normal(normal);
+#else
+    normal = vec3(0.0, 0.0, 1.0);
+#endif
 
     vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_worldspace.xyz, normal);
     vColor = vec4(lightColor, colors.a * opacity) / 255.0;

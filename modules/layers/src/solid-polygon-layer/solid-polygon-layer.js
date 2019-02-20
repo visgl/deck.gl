@@ -60,9 +60,16 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders() {
+  getShaders(isSide) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
+    return {
+      vs,
+      fs,
+      modules: [projectModule, 'lighting', 'picking'],
+      defines: {
+        IS_SIDE_VERTEX: isSide
+      }
+    };
   }
 
   initializeState() {
@@ -87,9 +94,29 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
         update: this.calculatePositions,
-        noAlloc
+        shaderAttributes: {
+          positions: {
+            size: 3
+          },
+          nextPositions: {
+            size: 3,
+            offset: 12
+          }
+        }
       },
-      positions64xyLow: {size: 2, update: this.calculatePositionsLow, noAlloc},
+      positions64xyLow: {
+        size: 2,
+        update: this.calculatePositionsLow,
+        shaderAttributes: {
+          positions64xyLow: {
+            size: 2
+          },
+          nextPositions64xyLow: {
+            size: 2,
+            offset: 8
+          }
+        }
+      },
       vertexValid: {
         size: 1,
         type: GL.UNSIGNED_BYTE,
@@ -228,20 +255,6 @@ export default class SolidPolygonLayer extends Layer {
           });
         }
       }
-      if (newAttributes.positions) {
-        newAttributes.nextPositions = Object.assign(
-          {},
-          newAttributes.positions,
-          {id: 'nextPositions', offset: 12} // 1 vertex * 3 floats * 4 bits
-        );
-      }
-      if (newAttributes.positions64xyLow) {
-        newAttributes.nextPositions64xyLow = Object.assign(
-          {},
-          newAttributes.positions64xyLow,
-          {id: 'nextPositions64xyLow', offset: 8} // 1 vertex * 2 floats * 4 bits
-        );
-      }
       sideModel.setAttributes(newAttributes);
     }
   }
@@ -255,14 +268,12 @@ export default class SolidPolygonLayer extends Layer {
     if (filled) {
       topModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(), {
+        Object.assign({}, this.getShaders(false), {
           id: `${id}-top`,
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
             attributes: {
-              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])},
-              nextPositions: {size: 3, constant: true, value: new Float32Array(3)},
-              nextPositions64xyLow: {size: 2, constant: true, value: new Float32Array(2)}
+              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])}
             }
           }),
           uniforms: {
@@ -278,7 +289,7 @@ export default class SolidPolygonLayer extends Layer {
     if (extruded) {
       sideModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(), {
+        Object.assign({}, this.getShaders(true), {
           id: `${id}-side`,
           geometry: new Geometry({
             drawMode: GL.LINES,
