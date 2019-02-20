@@ -25,7 +25,7 @@ import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
-import getVertexSource from './solid-polygon-layer-vertex.glsl';
+import vs from './solid-polygon-layer-vertex.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -63,9 +63,12 @@ export default class SolidPolygonLayer extends Layer {
   getShaders(isSide) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {
-      vs: getVertexSource(isSide),
+      vs,
       fs,
-      modules: [projectModule, 'lighting', 'picking']
+      modules: [projectModule, 'lighting', 'picking'],
+      defines: {
+        IS_SIDE_VERTEX: isSide
+      }
     };
   }
 
