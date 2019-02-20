@@ -25,7 +25,7 @@ import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
-import getVertexSource from './solid-polygon-layer-vertex.glsl';
+import vs from './solid-polygon-layer-vertex.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -63,7 +63,7 @@ export default class SolidPolygonLayer extends Layer {
   getShaders(isSide) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {
-      vs: getVertexSource(isSide),
+      vs,
       fs,
       modules: [projectModule, 'lighting', 'picking']
     };
@@ -321,8 +321,13 @@ export default class SolidPolygonLayer extends Layer {
   calculatePositions(attribute) {
     const {polygonTesselator} = this.state;
     attribute.bufferLayout = polygonTesselator.bufferLayout;
-    attribute.value = polygonTesselator.get('positions');
+
+    const positions = polygonTesselator.get('positions');
+    const extendedPositions = new Float32Array(positions.length + 3); // Required so top model can access it.
+    extendedPositions.set(positions);
+    attribute.value = extendedPositions;
   }
+
   calculatePositionsLow(attribute) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
@@ -332,7 +337,10 @@ export default class SolidPolygonLayer extends Layer {
       return;
     }
 
-    attribute.value = this.state.polygonTesselator.get('positions64xyLow');
+    const positions = this.state.polygonTesselator.get('positions64xyLow');
+    const extendedPositions = new Float32Array(positions.length + 2); // Required so top model can access it.
+    extendedPositions.set(positions);
+    attribute.value = extendedPositions;
   }
 
   calculateVertexValid(attribute) {
