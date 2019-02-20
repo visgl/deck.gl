@@ -60,7 +60,7 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders(isSide) {
+  getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {
       vs,
@@ -265,7 +265,7 @@ export default class SolidPolygonLayer extends Layer {
     if (filled) {
       topModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(false), {
+        Object.assign({}, this.getShaders(), {
           id: `${id}-top`,
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
@@ -286,7 +286,7 @@ export default class SolidPolygonLayer extends Layer {
     if (extruded) {
       sideModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(true), {
+        Object.assign({}, this.getShaders(), {
           id: `${id}-side`,
           geometry: new Geometry({
             drawMode: GL.LINES,
