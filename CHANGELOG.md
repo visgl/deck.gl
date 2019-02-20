@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.4] - Feb 20 2019
+
+- Multi-depth picking fix (#2701)
+
 #### [6.4.3] - Feb 17 2019
 
 - PathLayer: fix rightDeltas attribute generation when using flat vertices (#2694)
