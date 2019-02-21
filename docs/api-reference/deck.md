@@ -271,9 +271,9 @@ Called once every second with performance metrics.
 Callback arguments:
 
 * `stats` (Object)
-  - `fps` (Number)
-  - `redraw` (Number) - number of times the WebGLContext was rerendered.
-  - `deck.setProps` (Number) - number of times `setProps` was called.
+  + `fps` (Number)
+  + `redraw` (Number) - number of times the WebGLContext was rerendered.
+  + `deck.setProps` (Number) - number of times `setProps` was called.
 
 
 ## Methods
