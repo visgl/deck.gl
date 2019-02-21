@@ -105,6 +105,7 @@ const defaultProps = {
   onLayerClick: null,
   onLayerHover: null,
   onLoad: noop,
+  _onMetrics: null,
 
   getCursor,
 
@@ -530,6 +531,14 @@ export default class Deck {
       const table = this.stats.getStatsTable();
       this.stats.reset();
       log.table(3, table)();
+
+      // Experimental: report metrics
+      if (this.props._onMetrics) {
+        for (const key in table) {
+          table[key] = table[key].total;
+        }
+        this.props._onMetrics(table);
+      }
     }
 
     this._updateCanvasSize();
@@ -551,7 +560,7 @@ export default class Deck {
       return;
     }
 
-    this.stats.bump('render-fps');
+    this.stats.bump('redraw');
     if (this.props._customRender) {
       this.props._customRender();
     } else {
