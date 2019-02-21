@@ -118,7 +118,7 @@ export default class WindDemo extends Component {
         id: 'stations',
         data: stations,
         getPosition: d => [-d.long, d.lat, d.elv],
-        getColor: d => [200, 200, 100],
+        getFillColor: d => [200, 200, 100],
         getRadius: d => 150,
         opacity: 0.2,
         radiusScale: 30

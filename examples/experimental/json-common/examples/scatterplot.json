@@ -21,7 +21,7 @@
       "radiusScale": 30,
       "radiusMinPixels": 0.25,
       "getPosition": "-",
-      "getColor": [0, 128, 255],
+      "getFillColor": [0, 128, 255],
       "getRadius": 1
     }
   ]

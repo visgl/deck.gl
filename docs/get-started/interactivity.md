@@ -54,7 +54,7 @@ const deck = new Deck({
       ],
       getPosition: d => d.position,
       getRadius: 1000,
-      getColor: [255, 255, 0],
+      getFillColor: [255, 255, 0],
       // Enable picking
       pickable: true,
       // Update tooltip
@@ -101,7 +101,7 @@ class App extends React.Component {
         ],
         getPosition: d => d.position,
         getRadius: 1000,
-        getColor: [255, 255, 0],
+        getFillColor: [255, 255, 0],
         // Enable picking
         pickable: true,
         // Update app state

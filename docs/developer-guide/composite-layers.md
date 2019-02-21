@@ -95,22 +95,23 @@ class NiceScatterplotLayer extends CompositeLayer {
       new ScatterplotLayer({
         ...this.props,
         id: 'fill',
-        getColor: this.props.getFillColor,
-        outline: false,
+        getFillColor: this.props.getFillColor,
+        filled: true,
         updateTriggers: {
           ...updateTrigger,
-          getColor: updateTrigger.getFillColor
+          getFillColor: updateTrigger.getFillColor
         }
       }),
       // the outlines
       new ScatterplotLayer({
         ...this.props,
         id: 'outline',
-        getColor: this.props.getStrokeColor,
-        outline: true,
+        getLineColor: this.props.getStrokeColor,
+        stroked: true,
+        filled: false,
         updateTriggers: {
           ...updateTrigger,
-          getColor: updateTrigger.getStrokeColor
+          getLineColor: updateTrigger.getStrokeColor
         }
       })
     ];
