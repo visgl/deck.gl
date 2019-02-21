@@ -20,7 +20,7 @@ test('BitmapLayer#constructor', t => {
       },
       {
         updateProps: {
-          bitmapBounds: [[2, 4, 1], [2, 8, 1], [16, 8, 1], [16, 4, 1]]
+          bounds: [[2, 4, 1], [2, 8, 1], [16, 8, 1], [16, 4, 1]]
         },
         assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
@@ -37,7 +37,7 @@ test('BitmapLayer#constructor', t => {
       },
       {
         updateProps: {
-          bitmapBounds: [2, 4, 16, 8]
+          bounds: [2, 4, 16, 8]
         },
         assert({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');

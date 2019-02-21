@@ -31,7 +31,7 @@ import fs from './bitmap-layer-fragment';
 
 const defaultProps = {
   image: null,
-  bitmapBounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
+  bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   fp64: false,
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
@@ -94,19 +94,19 @@ export default class BitmapLayer extends Layer {
 
     const attributeManager = this.getAttributeManager();
 
-    if (props.bitmapBounds !== oldProps.bitmapBounds) {
+    if (props.bounds !== oldProps.bounds) {
       this.setState({
-        positions: this._getPositionsFromBounds(props.bitmapBounds)
+        positions: this._getPositionsFromBounds(props.bounds)
       });
       attributeManager.invalidate('positions');
       attributeManager.invalidate('positions64xyLow');
     }
   }
 
-  _getPositionsFromBounds(bitmapBounds) {
+  _getPositionsFromBounds(bounds) {
     const positions = new Array(12);
-    // bitmapBounds as [minX, minY, maxX, maxY]
-    if (Number.isFinite(bitmapBounds[0])) {
+    // bounds as [minX, minY, maxX, maxY]
+    if (Number.isFinite(bounds[0])) {
       /*
         (minX0, maxY3) ---- (maxX2, maxY3)
                |                  |
@@ -114,27 +114,27 @@ export default class BitmapLayer extends Layer {
                |                  |
         (minX0, minY1) ---- (maxX2, minY1)
      */
-      positions[0] = bitmapBounds[0];
-      positions[1] = bitmapBounds[1];
+      positions[0] = bounds[0];
+      positions[1] = bounds[1];
       positions[2] = 0;
 
-      positions[3] = bitmapBounds[0];
-      positions[4] = bitmapBounds[3];
+      positions[3] = bounds[0];
+      positions[4] = bounds[3];
       positions[5] = 0;
 
-      positions[6] = bitmapBounds[2];
-      positions[7] = bitmapBounds[3];
+      positions[6] = bounds[2];
+      positions[7] = bounds[3];
       positions[8] = 0;
 
-      positions[9] = bitmapBounds[2];
-      positions[10] = bitmapBounds[1];
+      positions[9] = bounds[2];
+      positions[10] = bounds[1];
       positions[11] = 0;
     } else {
       // [[minX, minY], [minX, maxY], [maxX, maxY], [maxX, minY]]
-      for (let i = 0; i < bitmapBounds.length; i++) {
-        positions[i * 3 + 0] = bitmapBounds[i][0];
-        positions[i * 3 + 1] = bitmapBounds[i][1];
-        positions[i * 3 + 2] = bitmapBounds[i][2] || 0;
+      for (let i = 0; i < bounds.length; i++) {
+        positions[i * 3 + 0] = bounds[i][0];
+        positions[i * 3 + 1] = bounds[i][1];
+        positions[i * 3 + 2] = bounds[i][2] || 0;
       }
     }
 

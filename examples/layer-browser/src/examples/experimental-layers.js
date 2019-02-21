@@ -262,7 +262,7 @@ const BitmapLayerExample = {
   props: {
     id: 'bitmap-layer',
     image: 'data/radar.gif',
-    bitmapBounds: [-80.425, 37.936, -71.516, 46.437]
+    bounds: [-80.425, 37.936, -71.516, 46.437]
   }
 };
 
