@@ -30,7 +30,7 @@ npm install deck.gl
 
 deck.gl offers an extensive catalog of pre-packaged visualization "layers", including [ScatterplotLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/scatterplot-layer), [ArcLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/arc-layer), [TextLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/text-layer), [GeoJsonLayer](http://deck.gl/#/documentation/deckgl-api-reference/layers/geojson-layer), etc. The input to a layer is usually an array of JSON objects. Each layer offers highly-flexible API to customize how the data should be rendered.
 
-Example constructing a deck.gl ScatterplotLayer: 
+Example constructing a deck.gl ScatterplotLayer:
 
 ```js
 import {ScatterplotLayer} from '@deck.gl/layers';
@@ -50,7 +50,7 @@ const scatterplotLayer = new ScatterplotLayer({
   data: 'https://github.com/uber-common/deck.gl-data/blob/master/website/bart-stations.json',
   getRadius: d => Math.sqrt(d.entries) / 100,
   getPosition: d => d.coordinates,
-  getColor: [255, 228, 0],
+  getFillColor: [255, 228, 0],
 });
 ```
 

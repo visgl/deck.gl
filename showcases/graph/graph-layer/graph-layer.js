@@ -122,13 +122,13 @@ export default class GraphLayer extends CompositeLayer {
         data: nodes,
         getPosition: getNodePosition,
         getRadius: getNodeSize,
-        getColor: n => (n.highlighting ? [255, 255, 0, 255] : getNodeColor(n)),
+        getFillColor: n => (n.highlighting ? [255, 255, 0, 255] : getNodeColor(n)),
         opacity,
         pickable,
         coordinateSystem,
         updateTriggers: {
           getPosition: layoutTime,
-          getColor: layoutTime
+          getFillColor: layoutTime
         },
         visible
       });

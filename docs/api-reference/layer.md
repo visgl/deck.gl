@@ -244,27 +244,27 @@ Sometimes `data` remains the same, but the outcome of an accessor has changed. I
 ```js
   const layer = new ScatterplotLayer({
     ... // Other props
-    getColor: d => d.male ? maleColor : femaleColor
+    getFillColor: d => d.male ? maleColor : femaleColor
   });
 ```
 
-In this case, you need to explicitly inform deck.gl to re-evaluate `getColor` for all data items. You do so by defining `updateTriggers`:
+In this case, you need to explicitly inform deck.gl to re-evaluate `getFillColor` for all data items. You do so by defining `updateTriggers`:
 
 ```js
   const layer = new ScatterplotLayer({
     ... // Other props
-    getColor: d => d.male ? maleColor : femaleColor,
+    getFillColor: d => d.male ? maleColor : femaleColor,
     updateTriggers: {
-        getColor: [maleColor, femaleColor]
+        getFillColor: [maleColor, femaleColor]
     }
   });
 ```
 
 `updateTriggers` expect an object whose keys are names of accessor props of this layer, and values are one or more variables that affect the output of the accessors.
 
-For example, `updateTriggers.getColor` is a list of variables that affect the output of
- `getColor`. If either value in the array changes, all attributes that depend on
- `getColor` will be updated.
+For example, `updateTriggers.getFillColor` is a list of variables that affect the output of
+ `getFillColor`. If either value in the array changes, all attributes that depend on
+ `getFillColor` will be updated.
 The variables may be numbers, strings, objects or functions. During each rendering cycle, deck.gl shallow-compares them with the previous values.
 
 
