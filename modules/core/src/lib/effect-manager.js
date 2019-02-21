@@ -1,4 +1,4 @@
-import deepEqual from '../utils/deep-equal';
+import {deepEqual} from '../utils/deep-equal';
 
 export default class EffectManager {
   constructor() {
