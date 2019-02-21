@@ -1,3 +1,5 @@
+import deepEqual from '../utils/deep-equal';
+
 export default class EffectManager {
   constructor() {
     this.effects = [];
@@ -6,7 +8,7 @@ export default class EffectManager {
 
   setProps(props) {
     if ('effects' in props) {
-      if (this.effects !== props.effects) {
+      if (!deepEqual(this.effects, props.effects)) {
         this.setEffects(props.effects);
         this._needsRedraw = 'effects changed';
       }
