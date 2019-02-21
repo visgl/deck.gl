@@ -264,6 +264,18 @@ Callback Arguments:
 Callback, called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. Can be used to trigger viewport transitions.
 
 
+##### `_onMetrics` (Function, optional) **Experimental**
+
+Called once every second with performance metrics.
+
+Callback arguments:
+
+* `stats` (Object)
+  - `fps` (Number)
+  - `redraw` (Number) - number of times the WebGLContext was rerendered.
+  - `deck.setProps` (Number) - number of times `setProps` was called.
+
+
 ## Methods
 
 ##### `finalize`
