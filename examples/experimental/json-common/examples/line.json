@@ -23,7 +23,7 @@
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/airports.json",
       "radiusScale": 20,
       "getPosition": "coordinates",
-      "getColor": [255, 140, 0],
+      "getFillColor": [255, 140, 0],
       "getRadius": 60
     },
     {

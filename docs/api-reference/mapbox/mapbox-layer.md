@@ -59,7 +59,7 @@ const deck = new Deck({
             ],
             getPosition: d => d.position,
             getRadius: d => d.size,
-            getColor: [255, 0, 0]
+            getFillColor: [255, 0, 0]
         })
     ]
 });
@@ -77,7 +77,7 @@ deck.setProps({
             ],
             getPosition: d => d.position,
             getRadius: d => d.size,
-            getColor: [0, 0, 255]
+            getFillColor: [0, 0, 255]
         })
     ]
 });

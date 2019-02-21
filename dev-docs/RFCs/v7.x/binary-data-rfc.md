@@ -46,7 +46,7 @@ new ScatterplotLayer({
   data,
   getPosition: d => d.position,
   getRadius: d => d.radius,
-  getColor: d => d.color
+  getFillColor: d => d.color
 });
 ```
 
@@ -68,7 +68,7 @@ new ScatterplotLayer({
   getRadius: (object, {index, data}) => {
     return data.src[index * 6 + 2];
   },
-  getColor: (object, {index, data, target}) => {
+  getFillColor: (object, {index, data, target}) => {
     target[0] = data.src[index * 6 + 3];
     target[1] = data.src[index * 6 + 4];
     target[2] = data.src[index * 6 + 5];

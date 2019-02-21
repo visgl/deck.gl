@@ -121,7 +121,7 @@ export class App extends React.Component {
             ],
             getPosition: d => d.position,
             getRadius: d => d.size,
-            getColor: [255, 0, 0]
+            getFillColor: [255, 0, 0]
         })
     ];
 
