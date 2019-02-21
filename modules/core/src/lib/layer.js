@@ -390,10 +390,23 @@ export default class Layer extends Component {
       ignoreUnknownAttributes: true
     });
 
-    const model = this.getSingleModel();
+    let model;
+
+    model = this.getSingleModel();
     if (model) {
       const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
       model.setAttributes(changedAttributes);
+    }
+
+    if (props.modelAttributeUpdaters) {
+      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+      for (const modelName in props.modelAttributeUpdaters) {
+        model = this.state[modelName];
+        const updater = props.modelAttributeUpdaters[modelName];
+        if (model && updater) {
+          updater(this, model, changedAttributes);
+        }
+      }
     }
   }
 

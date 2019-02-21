@@ -50,7 +50,36 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  lightSettings: {},
+
+  modelAttributeUpdaters: {
+    topModel: (layer, topModel, changedAttributes) => {
+      if (changedAttributes.indices) {
+        const vertexCount = changedAttributes.indices.value.length;
+        topModel.setVertexCount(vertexCount);
+      }
+      topModel.setAttributes(changedAttributes);
+    },
+    sideModel: (layer, sideModel, changedAttributes) => {
+      const numInstances = layer.getNumInstances();
+
+      // Remove one to account for the offset
+      sideModel.setInstanceCount(numInstances - 1);
+      const newAttributes = {};
+      for (const attributeName in changedAttributes) {
+        const attribute = changedAttributes[attributeName];
+
+        if (attributeName !== 'indices') {
+          // Apply layout override to the attribute.
+          newAttributes[attributeName] = Object.assign({}, attribute, {
+            isInstanced: true,
+            buffer: attribute.getBuffer()
+          });
+        }
+      }
+      sideModel.setAttributes(newAttributes);
+    }
+  }
 };
 
 const ATTRIBUTE_TRANSITION = {
@@ -224,38 +253,6 @@ export default class SolidPolygonLayer extends Layer {
       });
 
       this.getAttributeManager().invalidateAll();
-    }
-  }
-
-  updateAttributes(props) {
-    super.updateAttributes(props);
-    const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
-    const {topModel, sideModel} = this.state;
-    const numInstances = this.getNumInstances();
-
-    if (topModel) {
-      if (attributes.indices) {
-        const vertexCount = attributes.indices.value.length;
-        topModel.setVertexCount(vertexCount);
-      }
-      topModel.setAttributes(attributes);
-    }
-    if (sideModel) {
-      // Remove one to account for the offset
-      sideModel.setInstanceCount(numInstances - 1);
-      const newAttributes = {};
-      for (const attributeName in attributes) {
-        const attribute = attributes[attributeName];
-
-        if (attributeName !== 'indices') {
-          // Apply layout override to the attribute.
-          newAttributes[attributeName] = Object.assign({}, attribute, {
-            isInstanced: true,
-            buffer: attribute.getBuffer()
-          });
-        }
-      }
-      sideModel.setAttributes(newAttributes);
     }
   }
 
