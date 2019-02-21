@@ -37,11 +37,14 @@ const defaultProps = {
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getStrokeWidth: {type: 'accessor', value: 1},
+  getWidth: {type: 'accessor', value: 1},
   widthScale: {type: 'number', value: 1, min: 0},
+  widthMinPixels: {type: 'number', value: 1, min: 0},
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // deprecated
-  strokeWidth: {deprecatedFor: 'getStrokeWidth'}
+  strokeWidth: {deprecatedFor: 'getStrokeWidth'},
+  getStrokeWidth: {deprecatedFor: 'getWidth'}
 };
 
 export default class ArcLayer extends Layer {
@@ -84,7 +87,7 @@ export default class ArcLayer extends Layer {
       instanceWidths: {
         size: 1,
         transition: true,
-        accessor: 'getStrokeWidth',
+        accessor: 'getWidth',
         defaultValue: 1
       }
     });
@@ -104,7 +107,9 @@ export default class ArcLayer extends Layer {
     }
 
     this.state.model.setUniforms({
-      widthScale: props.widthScale
+      widthScale: props.widthScale,
+      widthMinPixels: props.widthMinPixels,
+      widthMaxPixels: props.widthMaxPixels
     });
   }
 

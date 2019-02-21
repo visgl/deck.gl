@@ -32,6 +32,8 @@ attribute float instanceWidths;
 uniform float numSegments;
 uniform float opacity;
 uniform float widthScale;
+uniform float widthMinPixels;
+uniform float widthMaxPixels;
 
 varying vec4 vColor;
 
@@ -47,13 +49,13 @@ float paraboloid(vec2 source, vec2 target, float ratio) {
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)
-vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
   vec2 dir_screenspace = normalize(line_clipspace * project_uViewportSize);
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
-  vec2 offset_screenspace = dir_screenspace * offset_direction * instanceWidths * widthScale / 2.0;
+  vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
   vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
 
   return offset_clipspace;
@@ -88,8 +90,15 @@ void main(void) {
   vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
 
+  // Multiply out width and clamp to limits
+  // mercator pixels are interpreted as screen pixels
+  float width = clamp(
+    project_scale(instanceWidths * widthScale),
+    widthMinPixels, widthMaxPixels
+  );
+
   // extrude
-  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, width);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
