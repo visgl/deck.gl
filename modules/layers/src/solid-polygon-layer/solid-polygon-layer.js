@@ -274,6 +274,14 @@ export default class SolidPolygonLayer extends Layer {
         numInstances: polygonTesselator.instanceCount
       });
 
+      if (this.state.topModel) {
+        this.state.topModel.setVertexCount(polygonTesselator.get('indices').length);
+      }
+
+      if (this.state.sideModel) {
+        this.state.sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+      }
+
       this.getAttributeManager().invalidateAll();
     }
   }
@@ -282,18 +290,12 @@ export default class SolidPolygonLayer extends Layer {
     super.updateAttributes(props);
     const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
     const {topModel, sideModel} = this.state;
-    const numInstances = this.getNumInstances();
 
     if (topModel) {
-      if (attributes.indices) {
-        const vertexCount = attributes.indices.value.length;
-        topModel.setVertexCount(vertexCount);
-      }
       topModel.setAttributes(attributes);
     }
     if (sideModel) {
       // Remove one to account for the offset
-      sideModel.setInstanceCount(numInstances - 1);
       const newAttributes = {};
       for (const attributeName in attributes) {
         const attribute = attributes[attributeName];
@@ -314,6 +316,7 @@ export default class SolidPolygonLayer extends Layer {
     let sideModel;
 
     if (filled) {
+      const vertexCount = this.state.polygonTesselator.get('indices').length;
       topModel = new Model(
         gl,
         Object.assign({}, this.getShaders(false), {
@@ -328,13 +331,14 @@ export default class SolidPolygonLayer extends Layer {
             isWireframe: false,
             isSideVertex: false
           },
-          vertexCount: 0,
+          vertexCount,
           isIndexed: true,
           shaderCache: this.context.shaderCache
         })
       );
     }
     if (extruded) {
+      const instanceCount = this.state.polygonTesselator.instanceCount - 1;
       sideModel = new Model(
         gl,
         Object.assign({}, this.getShaders(true), {
@@ -350,9 +354,7 @@ export default class SolidPolygonLayer extends Layer {
               }
             }
           }),
-          uniforms: {
-            isSideVertex: true
-          },
+          instanceCount,
           isInstanced: 1,
           shaderCache: this.context.shaderCache
         })
