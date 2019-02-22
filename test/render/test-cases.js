@@ -221,32 +221,32 @@ export const TEST_CASES = [
     ],
     goldenImage: './test/render/golden-images/contour-infoviz.png'
   },
-  // {
-  //   name: 'contour-isobands-infoviz',
-  //   views: [new OrthographicView()],
-  //   viewState: {
-  //     left: -WIDTH / 2,
-  //     top: -HEIGHT / 2,
-  //     right: WIDTH / 2,
-  //     bottom: HEIGHT / 2
-  //   },
-  //   layers: [
-  //     new ContourLayer({
-  //       id: 'contour-isobands-infoviz',
-  //       data: screenSpaceData,
-  //       getPosition: d => d,
-  //       coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-  //       cellSize: 40,
-  //       opacity: 1,
-  //       contours: [
-  //         {threshold: [1, 2], color: [150, 0, 0]},
-  //         {threshold: [2, 5], color: [0, 150, 0]}
-  //       ],
-  //       gpuAggregation: false
-  //     })
-  //   ],
-  //   goldenImage: './test/render/golden-images/contour-infoviz_border_ref.png'
-  // },
+  {
+    name: 'contour-isobands-infoviz',
+    views: [new OrthographicView()],
+    viewState: {
+      left: -WIDTH / 2,
+      top: -HEIGHT / 2,
+      right: WIDTH / 2,
+      bottom: HEIGHT / 2
+    },
+    layers: [
+      new ContourLayer({
+        id: 'contour-isobands-infoviz',
+        data: screenSpaceData,
+        getPosition: d => d,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        cellSize: 40,
+        opacity: 1,
+        contours: [
+          {threshold: [1, 2], color: [150, 0, 0]},
+          {threshold: [2, 5], color: [0, 150, 0]}
+        ],
+        gpuAggregation: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/contour-infoviz_border_ref.png'
+  },
 
   // GEOSPATIAL
   {
