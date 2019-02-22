@@ -288,7 +288,6 @@ export default class SolidPolygonLayer extends Layer {
     let sideModel;
 
     if (filled) {
-      const vertexCount = this.state.polygonTesselator.get('indices').length;
       topModel = new Model(
         gl,
         Object.assign({}, this.getShaders(false), {
@@ -303,14 +302,13 @@ export default class SolidPolygonLayer extends Layer {
             isWireframe: false,
             isSideVertex: false
           },
-          vertexCount,
+          vertexCount: 0,
           isIndexed: true,
           shaderCache: this.context.shaderCache
         })
       );
     }
     if (extruded) {
-      const instanceCount = this.state.polygonTesselator.instanceCount - 1;
       sideModel = new Model(
         gl,
         Object.assign({}, this.getShaders(true), {
@@ -326,7 +324,7 @@ export default class SolidPolygonLayer extends Layer {
               }
             }
           }),
-          instanceCount,
+          instanceCount: 0,
           isInstanced: 1,
           shaderCache: this.context.shaderCache
         })
