@@ -390,10 +390,13 @@ export default class Layer extends Component {
       ignoreUnknownAttributes: true
     });
 
-    const model = this.getSingleModel();
-    if (model) {
+    const models = this.getModels();
+
+    if (models.length > 0) {
       const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-      model.setAttributes(changedAttributes);
+      for (let i = 0, len = models.length; i < len; ++i) {
+        this._setModelAttributes(models[i], changedAttributes);
+      }
     }
   }
 
@@ -441,6 +444,21 @@ export default class Layer extends Component {
         ? pickingColorCache.subarray(0, numInstances * size)
         : pickingColorCache
     );
+  }
+
+  _setModelAttributes(model, changedAttributes) {
+    if (model.userData.excludeAttributes) {
+      const filteredAttributes = {};
+      const excludeAttributes = model.userData.excludeAttributes;
+      for (const attributeName in changedAttributes) {
+        if (!excludeAttributes[attributeName]) {
+          filteredAttributes[attributeName] = changedAttributes[attributeName];
+        }
+      }
+      model.setAttributes(filteredAttributes);
+    } else {
+      model.setAttributes(changedAttributes);
+    }
   }
 
   // Sets the specified instanced picking color to null picking color. Used for multi picking.

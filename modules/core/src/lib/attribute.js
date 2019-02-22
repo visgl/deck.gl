@@ -167,7 +167,11 @@ export default class LayerAttribute extends Attribute {
     if (this.userData.shaderAttributes) {
       const shaderAttributes = this.userData.shaderAttributes;
       for (const shaderAttributeName in shaderAttributes) {
-        shaderAttributes[shaderAttributeName].update({buffer: this.buffer});
+        shaderAttributes[shaderAttributeName].update({
+          buffer: this.buffer,
+          value: this.value,
+          constant: this.constant
+        });
       }
     }
 

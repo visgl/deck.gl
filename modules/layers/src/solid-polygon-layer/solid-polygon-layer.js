@@ -286,29 +286,6 @@ export default class SolidPolygonLayer extends Layer {
     }
   }
 
-  updateAttributes(props) {
-    super.updateAttributes(props);
-    const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
-    const {topModel, sideModel} = this.state;
-
-    if (topModel) {
-      topModel.setAttributes(attributes);
-    }
-    if (sideModel) {
-      // Remove one to account for the offset
-      const newAttributes = {};
-      for (const attributeName in attributes) {
-        const attribute = attributes[attributeName];
-
-        if (attributeName !== 'indices') {
-          // Apply layout override to the attribute.
-          newAttributes[attributeName] = attribute;
-        }
-      }
-      sideModel.setAttributes(newAttributes);
-    }
-  }
-
   _getModels(gl) {
     const {id, filled, extruded} = this.props;
 
@@ -359,6 +336,8 @@ export default class SolidPolygonLayer extends Layer {
           shaderCache: this.context.shaderCache
         })
       );
+
+      sideModel.userData.excludeAttributes = {indices: true};
     }
 
     return {
