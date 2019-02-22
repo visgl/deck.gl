@@ -749,6 +749,24 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.1.tgz#53f349bb986ab273d601175aa1b25a655ab90ee3"
   integrity sha512-KU/VDjC5RwtDUZiz3d+DHXJF2lp5hB9dn552TXIyptj8SH1vXmR40mG0JgGq03IlYsOgGfcv8xrLpSQ0YUMQdA==
 
+"@probe.gl/bench@^3.0.0-alpha.3":
+  version "3.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/@probe.gl/bench/-/bench-3.0.0-alpha.3.tgz#bea1dc7504bfdff117d4ef17bb0a05a110f251ab"
+  integrity sha512-6TKk7jschwe2lW7TwzMd3xviAFXp4fjWAeVUyyVncmw5nsF4fsb2zpZWR1i4on4PKFNBSc3vKVsp/wR5DPH2Ig==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    probe.gl "^3.0.0-alpha.3"
+
+"@probe.gl/test-utils@^3.0.0-alpha.4":
+  version "3.0.0-alpha.4"
+  resolved "https://registry.yarnpkg.com/@probe.gl/test-utils/-/test-utils-3.0.0-alpha.4.tgz#86d80115144f0d087f2816c1dd770722a7bc8406"
+  integrity sha512-bDtVcspwLkuPuV/rNIN+yLPFhZ0e4rQNKOLFCvF530+UEYsFqjBDglxrXftajHqMbFC/6skzAKGZFHUu9ZCAdQ==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    pixelmatch "^4.0.2"
+    probe.gl "^3.0.0-alpha.3"
+    puppeteer "1.8.0"
+
 "@samverschueren/stream-to-observable@^0.3.0":
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/@samverschueren/stream-to-observable/-/stream-to-observable-0.3.0.tgz#ecdf48d532c58ea477acfcab80348424f8d0662f"
@@ -8460,17 +8478,17 @@ private@^0.1.6, private@^0.1.8, private@~0.1.5:
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
 
-probe.gl@^2.0.0:
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.0.tgz#42df14da22c2991c96daf21d381ea02fe398329e"
-  integrity sha512-8yeL0zoK/n/fXZ/EIpy4teWBt/eeVqZzM451IpU+jTWycQ3jtBHQZ5hIfK3xMlMOGftVOyYHN+KV9oGsdNeeEw==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
 probe.gl@^2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.1.tgz#e42dfe02eca9ef262cdf89a24e1a4c0856e989e0"
   integrity sha512-BNL0Eys0VzoM82gD9sUF3WQmzFv3LNV5WH8LzwYeGOKG1ro2TxVaOSKKD92TVK1qjg9miOiCh7S1ppGS9c1ylQ==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+
+probe.gl@^3.0.0-alpha.3:
+  version "3.0.0-alpha.3"
+  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.0.0-alpha.3.tgz#183bbf05634906fd12d25bf702fa042705dc5d0f"
+  integrity sha512-+IDi1LQ8iC/7DeaxCK0b2Qdu1MF8Adsx/icZMFsioA8pdwJu3ut8h8CTAOyzM6ccuPj6mIum2Rfc2ZffAP0yDw==
   dependencies:
     "@babel/runtime" "^7.0.0"
 
@@ -8597,6 +8615,20 @@ punycode@^2.1.0:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
+
+puppeteer@1.8.0:
+  version "1.8.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.8.0.tgz#9e8bbd2f5448cc19cac220efc0512837104877ad"
+  integrity sha512-wJ7Fxs03l4dy/ZXQACUKBBobIuJaS4NHq44q7/QinpAXFMwJMJFEIPjzoksVzUhZxQe+RXnjXH69mg13yMh0BA==
+  dependencies:
+    debug "^3.1.0"
+    extract-zip "^1.6.6"
+    https-proxy-agent "^2.2.1"
+    mime "^2.0.3"
+    progress "^2.0.0"
+    proxy-from-env "^1.0.0"
+    rimraf "^2.6.1"
+    ws "^5.1.1"
 
 puppeteer@^1.0.0:
   version "1.7.0"
@@ -10122,11 +10154,6 @@ table@^4.0.1:
     lodash "^4.17.4"
     slice-ansi "1.0.0"
     string-width "^2.1.1"
-
-tap-browser-color@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/tap-browser-color/-/tap-browser-color-0.1.2.tgz#16cf89083adb695b05d49372295e5e90cbbbac31"
-  integrity sha1-Fs+JCDrbaVsF1JNyKV5ekMu7rDE=
 
 tapable@^1.0.0:
   version "1.0.0"

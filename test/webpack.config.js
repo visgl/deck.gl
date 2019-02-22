@@ -73,7 +73,7 @@ const CONFIGS = {
     Object.assign({}, TEST_CONFIG, {
       // Bundle the tests for running in the browser
       entry: {
-        'test-browser': resolve('./test/test-browser.js')
+        'test-browser': resolve('./test/browser.js')
       }
       // plugins: [new HtmlWebpackPlugin()]
     }),
@@ -90,7 +90,7 @@ const CONFIGS = {
     Object.assign({}, TEST_CONFIG, {
       // Bundle the tests for running in the browser
       entry: {
-        'test-browser': resolve('./test/render/test-rendering.js')
+        'test-browser': resolve('./test/render/index.js')
       },
       plugins: [new HtmlWebpackPlugin()]
     }),
