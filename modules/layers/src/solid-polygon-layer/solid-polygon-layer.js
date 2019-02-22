@@ -98,9 +98,14 @@ export default class SolidPolygonLayer extends Layer {
           positions: {
             size: 3
           },
+          instancedPositions: {
+            size: 3,
+            divisor: 1
+          },
           nextPositions: {
             size: 3,
-            offset: 12
+            offset: 12,
+            divisor: 1
           }
         }
       },
@@ -111,14 +116,20 @@ export default class SolidPolygonLayer extends Layer {
           positions64xyLow: {
             size: 2
           },
+          instancedPositions64xyLow: {
+            size: 2,
+            divisor: 1
+          },
           nextPositions64xyLow: {
             size: 2,
-            offset: 8
+            offset: 8,
+            divisor: 1
           }
         }
       },
       vertexValid: {
         size: 1,
+        divisor: 1,
         type: GL.UNSIGNED_BYTE,
         update: this.calculateVertexValid,
         noAlloc
@@ -127,7 +138,16 @@ export default class SolidPolygonLayer extends Layer {
         size: 1,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
-        update: this.calculateElevations
+        update: this.calculateElevations,
+        shaderAttributes: {
+          elevations: {
+            size: 1
+          },
+          instancedElevations: {
+            size: 1,
+            divisor: 1
+          }
+        }
       },
       fillColors: {
         alias: 'colors',
@@ -136,7 +156,16 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        shaderAttributes: {
+          fillColors: {
+            size: 4
+          },
+          instancedFillColors: {
+            size: 4,
+            divisor: 1
+          }
+        }
       },
       lineColors: {
         alias: 'colors',
@@ -145,9 +174,31 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        shaderAttributes: {
+          lineColors: {
+            size: 4
+          },
+          instancedLineColors: {
+            size: 4,
+            divisor: 1
+          }
+        }
       },
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
+      pickingColors: {
+        size: 3,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculatePickingColors,
+        shaderAttributes: {
+          pickingColors: {
+            size: 3
+          },
+          instancedPickingColors: {
+            size: 3,
+            divisor: 1
+          }
+        }
+      }
     });
     /* eslint-enable max-len */
   }
@@ -249,10 +300,7 @@ export default class SolidPolygonLayer extends Layer {
 
         if (attributeName !== 'indices') {
           // Apply layout override to the attribute.
-          newAttributes[attributeName] = Object.assign({}, attribute, {
-            isInstanced: true,
-            buffer: attribute.getBuffer()
-          });
+          newAttributes[attributeName] = attribute;
         }
       }
       sideModel.setAttributes(newAttributes);
@@ -296,7 +344,10 @@ export default class SolidPolygonLayer extends Layer {
             vertexCount: 4,
             attributes: {
               // top right - top left - bootom left - bottom right
-              vertexPositions: {size: 2, value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])}
+              vertexPositions: {
+                size: 2,
+                value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])
+              }
             }
           }),
           uniforms: {
