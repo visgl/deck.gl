@@ -205,7 +205,7 @@ export default class SolidPolygonLayer extends Layer {
 
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
-    const {topModel, sideModel} = this.state;
+    const {topModel, sideModel, polygonTesselator} = this.state;
 
     const renderUniforms = Object.assign({}, uniforms, {
       extruded: Boolean(extruded),
@@ -214,6 +214,7 @@ export default class SolidPolygonLayer extends Layer {
 
     // Note: the order is important
     if (sideModel) {
+      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
         sideModel.setDrawMode(GL.LINE_STRIP);
@@ -224,7 +225,9 @@ export default class SolidPolygonLayer extends Layer {
         sideModel.render({isWireframe: false});
       }
     }
+
     if (topModel) {
+      topModel.setVertexCount(polygonTesselator.get('indices').length);
       topModel.render(renderUniforms);
     }
   }
@@ -273,14 +276,6 @@ export default class SolidPolygonLayer extends Layer {
       this.setState({
         numInstances: polygonTesselator.instanceCount
       });
-
-      if (this.state.topModel) {
-        this.state.topModel.setVertexCount(polygonTesselator.get('indices').length);
-      }
-
-      if (this.state.sideModel) {
-        this.state.sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
-      }
 
       this.getAttributeManager().invalidateAll();
     }
