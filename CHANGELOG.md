@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.5] - Feb 21 2019
+
+- Improve picking color generation (#2697)
+- Add experimental onMetrics callback (#2711)
+
 #### [6.4.4] - Feb 20 2019
 
 - Multi-depth picking fix (#2701)
