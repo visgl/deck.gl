@@ -18,30 +18,28 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+/* global Image, HTMLCanvasElement */
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D} from 'luma.gl';
+import {Layer} from '@deck.gl/core';
+import {Model, Geometry, Texture2D, fp64} from 'luma.gl';
 import {loadImage} from '@loaders.gl/core';
 
-import BITMAP_VERTEX_SHADER from './bitmap-layer-vertex';
-import BITMAP_FRAGMENT_SHADER from './bitmap-layer-fragment';
+const {fp64LowPart} = fp64;
 
-// Note: needs to match vertex shader
-const MAX_BITMAPS = 11;
+import vs from './bitmap-layer-vertex';
+import fs from './bitmap-layer-fragment';
 
 const defaultProps = {
-  images: {type: 'array', value: []},
+  image: null,
+  bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
+  fp64: false,
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
-  blendMode: null,
   // More context: because of the blending mode we're using for ground imagery,
   // alpha is not effective when blending the bitmap layers with the base map.
   // Instead we need to manually dim/blend rgb values with a background color.
   transparentColor: {type: 'color', value: [0, 0, 0, 0]},
-  tintColor: {type: 'color', value: [255, 255, 255]},
-  // accessors
-  getCenter: {type: 'accessor', value: x => x.center},
-  getRotation: {type: 'accessor', value: x => x.rotation}
+  tintColor: {type: 'color', value: [255, 255, 255]}
 };
 
 /*
@@ -51,107 +49,178 @@ const defaultProps = {
  * @param {number} props.tintColor - color bias
  */
 export default class BitmapLayer extends Layer {
-  initializeState() {
-    const {gl} = this.context;
-    this.setState({model: this.getModel(gl)});
+  getShaders() {
+    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
+    return {vs, fs, modules: [projectModule, 'picking']};
+  }
 
-    const {attributeManager} = this.state;
-    attributeManager.addInstanced({
-      instanceCenter: {size: 3, accessor: 'getCenter'},
-      instanceRotation: {size: 3, accessor: 'getRotation'},
-      instanceBitmapIndex: {size: 1, update: this.calculateInstanceBitmapIndex}
+  initializeState() {
+    const attributeManager = this.getAttributeManager();
+    /*
+      -1,1  ---  1,1
+        |         |
+      -1,-1 --- 1,-1
+     */
+    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+
+    attributeManager.add({
+      positions: {
+        size: 3,
+        update: this.calculatePositions,
+        value: new Float32Array(positions)
+      },
+      positions64xyLow: {
+        size: 3,
+        update: this.calculatePositions64xyLow,
+        value: new Float32Array(positions)
+      }
     });
   }
 
-  updateState({props, oldProps}) {
-    if (props.images !== oldProps.images) {
-      let changed = !oldProps.images || props.images.length !== oldProps.images.length;
-      if (!changed) {
-        for (let i = 0; i < props.images.length; ++i) {
-          changed = changed || props.images[i] !== oldProps.images[i];
-        }
+  updateState({props, oldProps, changeFlags}) {
+    // setup model first
+    if (props.fp64 !== oldProps.fp64) {
+      const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
       }
-      if (changed) {
-        this.loadMapImagesToTextures();
+      this.setState({model: this._getModel(gl)});
+      this.getAttributeManager().invalidateAll();
+    }
+
+    if (props.image !== oldProps.image) {
+      this.loadTexture();
+    }
+
+    const attributeManager = this.getAttributeManager();
+
+    if (props.bounds !== oldProps.bounds) {
+      this.setState({
+        positions: this._getPositionsFromBounds(props.bounds)
+      });
+      attributeManager.invalidate('positions');
+      attributeManager.invalidate('positions64xyLow');
+    }
+  }
+
+  _getPositionsFromBounds(bounds) {
+    const positions = new Array(12);
+    // bounds as [minX, minY, maxX, maxY]
+    if (Number.isFinite(bounds[0])) {
+      /*
+        (minX0, maxY3) ---- (maxX2, maxY3)
+               |                  |
+               |                  |
+               |                  |
+        (minX0, minY1) ---- (maxX2, minY1)
+     */
+      positions[0] = bounds[0];
+      positions[1] = bounds[1];
+      positions[2] = 0;
+
+      positions[3] = bounds[0];
+      positions[4] = bounds[3];
+      positions[5] = 0;
+
+      positions[6] = bounds[2];
+      positions[7] = bounds[3];
+      positions[8] = 0;
+
+      positions[9] = bounds[2];
+      positions[10] = bounds[1];
+      positions[11] = 0;
+    } else {
+      // [[minX, minY], [minX, maxY], [maxX, maxY], [maxX, minY]]
+      for (let i = 0; i < bounds.length; i++) {
+        positions[i * 3 + 0] = bounds[i][0];
+        positions[i * 3 + 1] = bounds[i][1];
+        positions[i * 3 + 2] = bounds[i][2] || 0;
       }
     }
-    const {desaturate} = props;
-    this.state.model.setUniforms({desaturate});
+
+    return positions;
   }
 
-  getModel(gl) {
-    // Two triangles making up a square to render the bitmap texture on
-    const verts = [[1, 1, 0], [-1, 1, 0], [1, -1, 0], [-1, 1, 0], [1, -1, 0], [-1, -1, 0]];
-    const positions = [];
-    const texCoords = [];
-    verts.forEach(vertex => {
-      // geometry: unit square centered on origin
-      positions.push(vertex[0] / 2, vertex[1] / 2, vertex[2] / 2);
-      // texture: unit square with bottom left in origin
-      texCoords.push(vertex[0] / 2 + 0.5, -vertex[1] / 2 + 0.5);
-    });
+  _getModel(gl) {
+    if (!gl) {
+      return null;
+    }
 
-    const model = new Model(gl, {
-      id: this.props.id,
-      vs: BITMAP_VERTEX_SHADER,
-      fs: BITMAP_FRAGMENT_SHADER,
-      shaderCache: this.context.shaderCache,
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        vertexCount: 6,
-        attributes: {
-          positions: new Float32Array(positions),
-          texCoords: new Float32Array(texCoords)
-        }
-      }),
-      isInstanced: true
-    });
-
-    return model;
-  }
-
-  draw({uniforms}) {
-    const {transparentColor, tintColor} = this.props;
-
-    // TODO fix zFighting
-
-    // Render the image
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        transparentColor,
-        tintColor
+    /*
+      0,1 --- 1,1
+       |       |
+      0,0 --- 1,0
+    */
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        shaderCache: this.context.shaderCache,
+        geometry: new Geometry({
+          drawMode: GL.TRIANGLE_FAN,
+          vertexCount: 4,
+          attributes: {
+            texCoords: new Float32Array([0, 0, 0, 1, 1, 1, 1, 0])
+          }
+        }),
+        isInstanced: false
       })
     );
   }
 
-  loadMapImagesToTextures() {
-    const {model} = this.state;
-    const {images} = this.props;
-    for (let i = 0; i < Math.min(images.length, MAX_BITMAPS); i++) {
-      loadImage(images[i]).then(data => {
-        const texture = new Texture2D(this.context.gl, {data});
-        return model.setUniforms({[`uBitmap${i}`]: texture});
+  draw({uniforms}) {
+    const {bitmapTexture, model} = this.state;
+    const {desaturate, transparentColor, tintColor} = this.props;
+
+    // // TODO fix zFighting
+    // Render the image
+    if (bitmapTexture && model) {
+      model.render(
+        Object.assign({}, uniforms, {
+          bitmapTexture,
+          desaturate,
+          transparentColor,
+          tintColor
+        })
+      );
+    }
+  }
+
+  loadTexture() {
+    const {gl} = this.context;
+    const {image} = this.props;
+
+    if (typeof image === 'string') {
+      loadImage(image).then(data => {
+        this.setState({bitmapTexture: new Texture2D(gl, {data})});
       });
+    } else if (image instanceof Texture2D) {
+      this.setState({bitmapTexture: image});
+    } else if (
+      // browser object
+      image instanceof Image ||
+      image instanceof HTMLCanvasElement
+    ) {
+      this.setState({bitmapTexture: new Texture2D(gl, {data: image})});
     }
   }
 
-  getBitmapIndex(point) {
-    const url = point.imageUrl;
-    const idx = Math.max(this.props.images.indexOf(url), 0);
-    return idx >= MAX_BITMAPS ? 0 : idx;
+  calculatePositions({value}) {
+    const {positions} = this.state;
+    value.set(positions);
   }
 
-  calculateInstanceBitmapIndex(attribute) {
-    const {data} = this.props;
-    const {value, size} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const bitmapIndex = Number.isFinite(point.bitmapIndex)
-        ? point.bitmapIndex
-        : this.getBitmapIndex(point);
-      value[i] = bitmapIndex;
-      i += size;
+  calculatePositions64xyLow(attribute) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(4);
+      return;
     }
+
+    const {value} = attribute;
+    value.set(this.state.positions.map(fp64LowPart));
   }
 }
 
