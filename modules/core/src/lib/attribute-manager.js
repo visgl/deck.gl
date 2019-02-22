@@ -233,6 +233,17 @@ export default class AttributeManager {
         this._updateAttribute({attribute, numInstances, data, props, context});
       }
 
+      if (attribute.userData.shaderAttributes) {
+        const shaderAttributes = attribute.userData.shaderAttributes;
+        for (const shaderAttributeName in shaderAttributes) {
+          shaderAttributes[shaderAttributeName].update({
+            buffer: attribute.buffer,
+            value: attribute.value,
+            constant: attribute.constant
+          });
+        }
+      }
+
       this.needsRedraw |= attribute.needsRedraw();
     }
 
