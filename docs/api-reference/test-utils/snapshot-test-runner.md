@@ -68,7 +68,7 @@ new TestRender({width: 800, height: 600})
 
 ### constructor(props: Object)
 
-```
+```js
 new SnapshotTestRunner(deckProps)
 ```
 
