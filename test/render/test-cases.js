@@ -263,15 +263,14 @@ export const TEST_CASES = [
         id: 'polygon-lnglat',
         data: dataSamples.polygons,
         getPolygon: f => f,
-        getFillColor: f => [200, 0, 0],
-        getLineColor: f => [0, 0, 0, 255],
-        getLineDashArray: f => [20, 0],
+        getFillColor: [200, 0, 0],
+        getLineColor: [0, 0, 0],
+        getLineDashArray: [20, 0],
         getWidth: f => 20,
-        getElevation: f => 1000,
         opacity: 0.8,
         pickable: true,
-        lineDashJustified: true,
-        elevationScale: 0.6
+        lineWidthMinPixels: 1,
+        lineDashJustified: true
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'
@@ -289,18 +288,15 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: dataSamples.polygons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         getPolygon: f => f,
-        getFillColor: f => [200, 0, 0],
-        getLineColor: f => [0, 0, 0, 255],
-        getLineDashArray: f => [20, 0],
+        getFillColor: [200, 0, 0],
+        getLineColor: [0, 0, 0],
+        getLineDashArray: [20, 0],
         getWidth: f => 20,
-        getElevation: f => 1000,
         opacity: 0.8,
         pickable: true,
-        lineDashJustified: true,
-        elevationScale: 0.6
+        lineWidthMinPixels: 1,
+        lineDashJustified: true
       })
     ],
     goldenImage: './test/render/golden-images/polygon-lnglat.png'

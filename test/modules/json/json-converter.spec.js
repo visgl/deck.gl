@@ -59,14 +59,28 @@ test('JSONConverter#convert', t => {
 });
 
 test('JSONConverter#render', t => {
+  if (typeof document === 'undefined') {
+    t.comment('test only available in browser');
+    t.end();
+    return;
+  }
+
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
 
   const deckProps = jsonConverter.convertJsonToDeckProps(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
 
-  const jsonDeck = new Deck(deckProps);
-  t.ok(jsonDeck, 'JSONConverter created');
-  jsonDeck.finalize();
-  t.end();
+  const jsonDeck = new Deck(
+    Object.assign(
+      {
+        onAfterRender: () => {
+          t.ok(jsonDeck, 'JSONConverter rendered');
+          jsonDeck.finalize();
+          t.end();
+        }
+      },
+      deckProps
+    )
+  );
 });

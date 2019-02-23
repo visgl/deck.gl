@@ -24,7 +24,7 @@ import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
 test('Render Test', t => {
   // tape's default timeout is 500ms
-  t.timeoutAfter(TEST_CASES.length * 1000);
+  t.timeoutAfter(TEST_CASES.length * 2000);
 
   new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
     .add(TEST_CASES)
