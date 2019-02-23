@@ -423,7 +423,7 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat.png',
-    imageDiffOptions: !IS_HEADLESS && {
+    imageDiffOptions: IS_HEADLESS && {
       threshold: 0.985
     }
   },
@@ -451,7 +451,7 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat-64.png',
-    imageDiffOptions: !IS_HEADLESS && {
+    imageDiffOptions: IS_HEADLESS && {
       threshold: 0.985
     }
   },
@@ -1063,6 +1063,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [153, 0, 0],
@@ -1089,6 +1090,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer-64',
         data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
