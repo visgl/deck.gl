@@ -157,12 +157,16 @@ export default class TestRunner {
       this.initTestCase(testCase);
 
       let isDone = false;
+      let timeoutId = null;
       const done = () => {
         if (!isDone) {
           isDone = true;
+          window.clearTimeout(timeoutId);
           this.assert(testCase);
         }
       };
+
+      timeoutId = window.setTimeout(done, testCase.timeout || this.testOptions.timeout);
 
       deck.setProps(
         Object.assign({}, this.props, testCase, {
