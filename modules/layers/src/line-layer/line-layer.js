@@ -34,13 +34,14 @@ const defaultProps = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getStrokeWidth: {type: 'accessor', value: 1},
+  getWidth: {type: 'accessor', value: 1},
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 1, min: 0},
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // deprecated
-  strokeWidth: {deprecatedFor: 'getStrokeWidth'}
+  strokeWidth: {deprecatedFor: 'getStrokeWidth'},
+  getStrokeWidth: {deprecatedFor: 'getWidth'}
 };
 
 export default class LineLayer extends Layer {
