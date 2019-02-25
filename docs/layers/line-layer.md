@@ -97,6 +97,24 @@ The stroke width of each object, in pixels.
 * If a number is provided, it is used as the stroke width for all objects.
 * If a function is provided, it is called on each object to retrieve its stroke width.
 
+##### `widthScale` (number, optional)
+
+* Default: 1
+
+The scaling factor for the width of each line. If you set the property to `Math.pow(2, viewport.zoom - 12)` it will keep the width constant, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can also limit the minimum size of the line with this property.
+
+##### `widthMinPixels` (Number, optional)
+
+* Default: 1
+
+The minimum stroke width in pixels.
+
+##### `widthMaxPixels` (Number, optional)
+
+* Default: Number.MAX_SAFE_INTEGER
+
+The maximum stroke width in pixels.
+
 ## Source
 
 [modules/layers/src/line-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/line-layer)

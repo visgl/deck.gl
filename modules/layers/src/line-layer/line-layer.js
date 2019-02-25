@@ -35,6 +35,9 @@ const defaultProps = {
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getStrokeWidth: {type: 'accessor', value: 1},
+  widthScale: {type: 'number', value: 1, min: 0},
+  widthMinPixels: {type: 'number', value: 1, min: 0},
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // deprecated
   strokeWidth: {deprecatedFor: 'getStrokeWidth'}
@@ -94,6 +97,12 @@ export default class LineLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
+
+    this.state.model.setUniforms({
+      widthScale: props.widthScale,
+      widthMinPixels: props.widthMinPixels,
+      widthMaxPixels: props.widthMaxPixels
+    });
   }
 
   _getModel(gl) {
