@@ -25,7 +25,8 @@ import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
-import vs from './solid-polygon-layer-vertex.glsl';
+import vsTop from './solid-polygon-layer-vertex-top.glsl';
+import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -60,15 +61,12 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders(isSide) {
+  getShaders(vs) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {
       vs,
       fs,
-      modules: [projectModule, 'lighting', 'picking'],
-      defines: {
-        IS_SIDE_VERTEX: isSide
-      }
+      modules: [projectModule, 'lighting', 'picking']
     };
   }
 
@@ -96,11 +94,16 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculatePositions,
         shaderAttributes: {
           positions: {
-            size: 3
+            offset: 0,
+            divisor: 0
+          },
+          instancePositions: {
+            offset: 0,
+            divisor: 1
           },
           nextPositions: {
-            size: 3,
-            offset: 12
+            offset: 12,
+            divisor: 1
           }
         }
       },
@@ -109,16 +112,22 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculatePositionsLow,
         shaderAttributes: {
           positions64xyLow: {
-            size: 2
+            offset: 0,
+            divisor: 0
+          },
+          instancePositions64xyLow: {
+            offset: 0,
+            divisor: 1
           },
           nextPositions64xyLow: {
-            size: 2,
-            offset: 8
+            offset: 8,
+            divisor: 1
           }
         }
       },
       vertexValid: {
         size: 1,
+        divisor: 1,
         type: GL.UNSIGNED_BYTE,
         update: this.calculateVertexValid,
         noAlloc
@@ -127,7 +136,15 @@ export default class SolidPolygonLayer extends Layer {
         size: 1,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
-        update: this.calculateElevations
+        update: this.calculateElevations,
+        shaderAttributes: {
+          elevations: {
+            divisor: 0
+          },
+          instanceElevations: {
+            divisor: 1
+          }
+        }
       },
       fillColors: {
         alias: 'colors',
@@ -136,7 +153,15 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
         update: this.calculateFillColors,
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        shaderAttributes: {
+          fillColors: {
+            divisor: 0
+          },
+          instanceFillColors: {
+            divisor: 1
+          }
+        }
       },
       lineColors: {
         alias: 'colors',
@@ -145,16 +170,36 @@ export default class SolidPolygonLayer extends Layer {
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
         update: this.calculateLineColors,
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        shaderAttributes: {
+          lineColors: {
+            divisor: 0
+          },
+          instanceLineColors: {
+            divisor: 1
+          }
+        }
       },
-      pickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
+      pickingColors: {
+        size: 3,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculatePickingColors,
+        shaderAttributes: {
+          pickingColors: {
+            divisor: 0
+          },
+          instancePickingColors: {
+            divisor: 1
+          }
+        }
+      }
     });
     /* eslint-enable max-len */
   }
 
   draw({uniforms}) {
     const {extruded, filled, wireframe, elevationScale} = this.props;
-    const {topModel, sideModel} = this.state;
+    const {topModel, sideModel, polygonTesselator} = this.state;
 
     const renderUniforms = Object.assign({}, uniforms, {
       extruded: Boolean(extruded),
@@ -163,6 +208,7 @@ export default class SolidPolygonLayer extends Layer {
 
     // Note: the order is important
     if (sideModel) {
+      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
         sideModel.setDrawMode(GL.LINE_STRIP);
@@ -173,7 +219,9 @@ export default class SolidPolygonLayer extends Layer {
         sideModel.render({isWireframe: false});
       }
     }
+
     if (topModel) {
+      topModel.setVertexCount(polygonTesselator.get('indices').length);
       topModel.render(renderUniforms);
     }
   }
@@ -227,38 +275,6 @@ export default class SolidPolygonLayer extends Layer {
     }
   }
 
-  updateAttributes(props) {
-    super.updateAttributes(props);
-    const attributes = this.getAttributeManager().getChangedAttributes({clearChangedFlags: true});
-    const {topModel, sideModel} = this.state;
-    const numInstances = this.getNumInstances();
-
-    if (topModel) {
-      if (attributes.indices) {
-        const vertexCount = attributes.indices.value.length;
-        topModel.setVertexCount(vertexCount);
-      }
-      topModel.setAttributes(attributes);
-    }
-    if (sideModel) {
-      // Remove one to account for the offset
-      sideModel.setInstanceCount(numInstances - 1);
-      const newAttributes = {};
-      for (const attributeName in attributes) {
-        const attribute = attributes[attributeName];
-
-        if (attributeName !== 'indices') {
-          // Apply layout override to the attribute.
-          newAttributes[attributeName] = Object.assign({}, attribute, {
-            isInstanced: true,
-            buffer: attribute.getBuffer()
-          });
-        }
-      }
-      sideModel.setAttributes(newAttributes);
-    }
-  }
-
   _getModels(gl) {
     const {id, filled, extruded} = this.props;
 
@@ -268,7 +284,7 @@ export default class SolidPolygonLayer extends Layer {
     if (filled) {
       topModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(false), {
+        Object.assign({}, this.getShaders(vsTop), {
           id: `${id}-top`,
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
@@ -289,23 +305,26 @@ export default class SolidPolygonLayer extends Layer {
     if (extruded) {
       sideModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(true), {
+        Object.assign({}, this.getShaders(vsSide), {
           id: `${id}-side`,
           geometry: new Geometry({
             drawMode: GL.LINES,
             vertexCount: 4,
             attributes: {
               // top right - top left - bootom left - bottom right
-              vertexPositions: {size: 2, value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])}
+              vertexPositions: {
+                size: 2,
+                value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])
+              }
             }
           }),
-          uniforms: {
-            isSideVertex: true
-          },
+          instanceCount: 0,
           isInstanced: 1,
           shaderCache: this.context.shaderCache
         })
       );
+
+      sideModel.userData.excludeAttributes = {indices: true};
     }
 
     return {
