@@ -180,6 +180,12 @@ export default class Deck {
     if (this.eventManager) {
       this.eventManager.destroy();
     }
+
+    if (!this.props.canvas && !this.props.gl && this.canvas) {
+      // remove internally created canvas
+      this.canvas.parentElement.removeChild(this.canvas);
+      this.canvas = null;
+    }
   }
 
   setProps(props) {
