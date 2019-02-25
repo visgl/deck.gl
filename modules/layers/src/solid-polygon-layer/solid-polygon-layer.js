@@ -25,7 +25,8 @@ import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
 
-import vs from './solid-polygon-layer-vertex.glsl';
+import vsTop from './solid-polygon-layer-vertex-top.glsl';
+import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -60,15 +61,12 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders(isSide) {
+  getShaders(vs) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {
       vs,
       fs,
-      modules: [projectModule, 'lighting', 'picking'],
-      defines: {
-        IS_SIDE_VERTEX: isSide
-      }
+      modules: [projectModule, 'lighting', 'picking']
     };
   }
 
@@ -98,7 +96,7 @@ export default class SolidPolygonLayer extends Layer {
           positions: {
             size: 3
           },
-          instancedPositions: {
+          instancePositions: {
             size: 3,
             divisor: 1
           },
@@ -116,7 +114,7 @@ export default class SolidPolygonLayer extends Layer {
           positions64xyLow: {
             size: 2
           },
-          instancedPositions64xyLow: {
+          instancePositions64xyLow: {
             size: 2,
             divisor: 1
           },
@@ -143,7 +141,7 @@ export default class SolidPolygonLayer extends Layer {
           elevations: {
             size: 1
           },
-          instancedElevations: {
+          instanceElevations: {
             size: 1,
             divisor: 1
           }
@@ -161,7 +159,7 @@ export default class SolidPolygonLayer extends Layer {
           fillColors: {
             size: 4
           },
-          instancedFillColors: {
+          instanceFillColors: {
             size: 4,
             divisor: 1
           }
@@ -179,7 +177,7 @@ export default class SolidPolygonLayer extends Layer {
           lineColors: {
             size: 4
           },
-          instancedLineColors: {
+          instanceLineColors: {
             size: 4,
             divisor: 1
           }
@@ -193,7 +191,7 @@ export default class SolidPolygonLayer extends Layer {
           pickingColors: {
             size: 3
           },
-          instancedPickingColors: {
+          instancePickingColors: {
             size: 3,
             divisor: 1
           }
@@ -290,7 +288,7 @@ export default class SolidPolygonLayer extends Layer {
     if (filled) {
       topModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(false), {
+        Object.assign({}, this.getShaders(vsTop), {
           id: `${id}-top`,
           geometry: new Geometry({
             drawMode: GL.TRIANGLES,
@@ -311,7 +309,7 @@ export default class SolidPolygonLayer extends Layer {
     if (extruded) {
       sideModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(true), {
+        Object.assign({}, this.getShaders(vsSide), {
           id: `${id}-side`,
           geometry: new Geometry({
             drawMode: GL.LINES,

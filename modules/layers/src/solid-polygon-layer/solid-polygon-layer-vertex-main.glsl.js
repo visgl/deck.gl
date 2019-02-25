@@ -19,47 +19,6 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME solid-polygon-layer-vertex-shader
-
-attribute vec2 vertexPositions;
-
-#ifdef IS_SIDE_VERTEX
-attribute vec3 instancedPositions;
-attribute vec2 instancedPositions64xyLow;
-attribute vec3 nextPositions;
-attribute vec2 nextPositions64xyLow;
-attribute float instancedElevations;
-attribute vec4 instancedFillColors;
-attribute vec4 instancedLineColors;
-attribute vec3 instancedPickingColors;
-attribute float vertexValid;
-#else
-attribute vec3 positions;
-attribute vec2 positions64xyLow;
-attribute float elevations;
-attribute vec4 fillColors;
-attribute vec4 lineColors;
-attribute vec3 pickingColors;
-#endif
-
-uniform bool extruded;
-uniform bool isWireframe;
-uniform float elevationScale;
-uniform float opacity;
-
-varying vec4 vColor;
-varying float isValid;
-
-void main(void) {
-#ifdef IS_SIDE_VERTEX
-  vec3 positions = instancedPositions;
-  vec2 positions64xyLow = instancedPositions64xyLow;
-  float elevations = instancedElevations;
-  vec4 fillColors = instancedFillColors;
-  vec4 lineColors = instancedLineColors;
-  vec3 pickingColors = instancedPickingColors;
-#endif
-
   vec3 pos;
   vec2 pos64xyLow;
   vec3 normal;
@@ -99,5 +58,4 @@ void main(void) {
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(pickingColors);
-}
 `;
