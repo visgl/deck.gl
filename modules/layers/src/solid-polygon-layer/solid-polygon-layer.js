@@ -94,14 +94,14 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculatePositions,
         shaderAttributes: {
           positions: {
-            size: 3
+            offset: 0,
+            divisor: 0
           },
           instancePositions: {
-            size: 3,
+            offset: 0,
             divisor: 1
           },
           nextPositions: {
-            size: 3,
             offset: 12,
             divisor: 1
           }
@@ -112,14 +112,14 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculatePositionsLow,
         shaderAttributes: {
           positions64xyLow: {
-            size: 2
+            offset: 0,
+            divisor: 0
           },
           instancePositions64xyLow: {
-            size: 2,
+            offset: 0,
             divisor: 1
           },
           nextPositions64xyLow: {
-            size: 2,
             offset: 8,
             divisor: 1
           }
@@ -139,10 +139,9 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculateElevations,
         shaderAttributes: {
           elevations: {
-            size: 1
+            divisor: 0
           },
           instanceElevations: {
-            size: 1,
             divisor: 1
           }
         }
@@ -157,10 +156,9 @@ export default class SolidPolygonLayer extends Layer {
         defaultValue: DEFAULT_COLOR,
         shaderAttributes: {
           fillColors: {
-            size: 4
+            divisor: 0
           },
           instanceFillColors: {
-            size: 4,
             divisor: 1
           }
         }
@@ -175,10 +173,9 @@ export default class SolidPolygonLayer extends Layer {
         defaultValue: DEFAULT_COLOR,
         shaderAttributes: {
           lineColors: {
-            size: 4
+            divisor: 0
           },
           instanceLineColors: {
-            size: 4,
             divisor: 1
           }
         }
@@ -189,10 +186,9 @@ export default class SolidPolygonLayer extends Layer {
         update: this.calculatePickingColors,
         shaderAttributes: {
           pickingColors: {
-            size: 3
+            divisor: 0
           },
           instancePickingColors: {
-            size: 3,
             divisor: 1
           }
         }
