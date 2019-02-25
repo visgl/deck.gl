@@ -43,7 +43,7 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
 * **Instanced layer** - This type of layer renders the same geometry many times. Usually the simplest way to go when creating a layer that renders a lot of similar objects (think ScatterplotLayer, ArcLayers etc).
 
 ```js
-  /// examples/sample-layers/mesh-layer/mesh-layer.js
+  /// modules/experimental-layers/src/mesh-layer/mesh-layer.js
   import {Model, Geometry} from 'luma.gl';
 
   _getModel(gl) {
@@ -65,7 +65,7 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
 * **Dynamic geometry layer** - This is needed when dealing with data that needs to be rendered using multiple similar but unique geometries, such as polygons (i.e. the geometries are not copies of each other that that only differ in terms of parameters).
 
 ```js
-  /// examples/trips/trips-layer/trips-layer.js
+  /// modules/experimental-layers/src/trips-layer/trips-layer.js
   import {Model, Geometry} from 'luma.gl';
 
   _getModel(gl) {
