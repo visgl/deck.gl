@@ -24,7 +24,6 @@ export default `\
 #define SHADER_NAME solid-polygon-layer-vertex-shader-side
 #define IS_SIDE_VERTEX
 
-attribute vec2 vertexPositions;
 
 attribute vec3 instancePositions;
 attribute vec2 instancePositions64xyLow;
@@ -34,23 +33,21 @@ attribute float instanceElevations;
 attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
 attribute vec3 instancePickingColors;
-attribute float vertexValid;
 
-uniform bool extruded;
-uniform bool isWireframe;
-uniform float elevationScale;
-uniform float opacity;
-
-varying vec4 vColor;
-varying float isValid;
+${main}
 
 void main(void) {
-  vec3 positions = instancePositions;
-  vec2 positions64xyLow = instancePositions64xyLow;
-  float elevations = instanceElevations;
-  vec4 fillColors = instanceFillColors;
-  vec4 lineColors = instanceLineColors;
-  vec3 pickingColors = instancePickingColors;
-  ${main}
+  PolygonProps props;
+
+  props.positions = instancePositions;
+  props.positions64xyLow = instancePositions64xyLow;
+  props.elevations = instanceElevations;
+  props.fillColors = instanceFillColors;
+  props.lineColors = instanceLineColors;
+  props.pickingColors = instancePickingColors;
+  props.nextPositions = nextPositions;
+  props.nextPositions64xyLow = nextPositions64xyLow;
+
+  calculatePosition(props);
 }
 `;

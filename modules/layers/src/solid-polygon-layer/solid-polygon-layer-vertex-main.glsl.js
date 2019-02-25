@@ -19,23 +19,47 @@
 // THE SOFTWARE.
 
 export default `\
+
+attribute vec2 vertexPositions;
+attribute float vertexValid;
+
+uniform bool extruded;
+uniform bool isWireframe;
+uniform float elevationScale;
+uniform float opacity;
+
+varying vec4 vColor;
+varying float isValid;
+
+struct PolygonProps {
+  vec4 fillColors;
+  vec4 lineColors;
+  vec3 positions;
+  vec3 nextPositions;
+  vec3 pickingColors;
+  vec2 positions64xyLow;
+  vec2 nextPositions64xyLow;
+  float elevations;
+};
+
+void calculatePosition(PolygonProps props) {
   vec3 pos;
   vec2 pos64xyLow;
   vec3 normal;
-  vec4 colors = isWireframe ? lineColors : fillColors;
+  vec4 colors = isWireframe ? props.lineColors : props.fillColors;
 
 #ifdef IS_SIDE_VERTEX
-  pos = mix(positions, nextPositions, vertexPositions.x);
-  pos64xyLow = mix(positions64xyLow, nextPositions64xyLow, vertexPositions.x);
+  pos = mix(props.positions, props.nextPositions, vertexPositions.x);
+  pos64xyLow = mix(props.positions64xyLow, props.nextPositions64xyLow, vertexPositions.x);
   isValid = vertexValid;
 #else
-  pos = positions;
-  pos64xyLow = positions64xyLow;
+  pos = props.positions;
+  pos64xyLow = props.positions64xyLow;
   isValid = 1.0;
 #endif
 
   if (extruded) {
-    pos.z += elevations * vertexPositions.y;
+    pos.z += props.elevations * vertexPositions.y;
   }
   pos.z *= elevationScale;
 
@@ -44,7 +68,7 @@ export default `\
 
   if (extruded) {
 #ifdef IS_SIDE_VERTEX
-    normal = vec3(positions.y - nextPositions.y, nextPositions.x - positions.x, 0.0);
+    normal = vec3(props.positions.y - props.nextPositions.y, props.nextPositions.x - props.positions.x, 0.0);
     normal = project_normal(normal);
 #else
     normal = vec3(0.0, 0.0, 1.0);
@@ -57,5 +81,6 @@ export default `\
   }
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(pickingColors);
+  picking_setPickingColor(props.pickingColors);
+}
 `;
