@@ -80,7 +80,7 @@ export default class LineLayer extends Layer {
       instanceWidths: {
         size: 1,
         transition: true,
-        accessor: 'getStrokeWidth',
+        accessor: 'getWidth',
         defaultValue: 1
       }
     });
