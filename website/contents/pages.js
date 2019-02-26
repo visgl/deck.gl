@@ -587,12 +587,8 @@ export const docPages = generatePath([
         content: getDocUrl('api-reference/test-utils/test-layer.md')
       },
       {
-        name: 'SceneRenderer',
-        content: getDocUrl('api-reference/test-utils/scene-renderer.md')
-      },
-      {
-        name: 'RenderTest',
-        content: getDocUrl('api-reference/test-utils/render-test.md')
+        name: 'SnapshotTestRunner',
+        content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
       }
     ]
   }
