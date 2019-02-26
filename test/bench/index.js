@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-console, no-invalid-this */
-import {Bench} from 'probe.gl/bench';
+import {Bench} from '@probe.gl/bench';
 
 import layerBench from './layer.bench';
 import coreLayersBench from './core-layers.bench';
