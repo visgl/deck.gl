@@ -19,7 +19,7 @@ addons:
     - libosmesa6
     - libxi-dev
 install:
-  - yarn --ignore-engines
+  - yarn bootstrap
 node_js:
   - 8.9.4
   - 10.4.0

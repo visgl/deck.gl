@@ -1,8 +1,9 @@
+/* global window */
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {GPUGridLayer} from '@deck.gl/experimental-layers';
 import GL from '@luma.gl/constants';
-import {OrbitView, OrthographicView, FirstPersonView} from 'deck.gl';
+import {OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
@@ -26,6 +27,8 @@ import {
   TextLayer
 } from 'deck.gl';
 import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
+
+const IS_HEADLESS = Boolean(window.browserTestDriver_isHeadless);
 
 const MARKER_SIZE_MAP = {
   small: 200,
@@ -111,7 +114,7 @@ export const TEST_CASES = [
         lineWidthMinPixels: 1
       })
     ],
-    referenceImageUrl: './test/render/golden-images/first-person.png'
+    goldenImage: './test/render/golden-images/first-person.png'
   },
   // INFOVIS
   {
@@ -136,7 +139,7 @@ export const TEST_CASES = [
         strokeWidth: 5
       })
     ],
-    referenceImageUrl: './test/render/golden-images/bezier-curve-2d.png'
+    goldenImage: './test/render/golden-images/bezier-curve-2d.png'
   },
   {
     name: 'pointcloud-identity',
@@ -165,7 +168,7 @@ export const TEST_CASES = [
         radiusPixels: 50
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
+    goldenImage: './test/render/golden-images/pointcloud-identity.png'
   },
   {
     name: 'screengrid-infoviz',
@@ -188,7 +191,7 @@ export const TEST_CASES = [
         pickable: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/screengrid-infoviz.png'
+    goldenImage: './test/render/golden-images/screengrid-infoviz.png'
   },
   {
     name: 'contour-infoviz',
@@ -216,7 +219,7 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/contour-infoviz.png'
+    goldenImage: './test/render/golden-images/contour-infoviz.png'
   },
   {
     name: 'contour-isobands-infoviz',
@@ -242,7 +245,7 @@ export const TEST_CASES = [
         gpuAggregation: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/contour-infoviz_border_ref.png'
+    goldenImage: './test/render/golden-images/contour-infoviz_border_ref.png'
   },
 
   // GEOSPATIAL
@@ -260,18 +263,17 @@ export const TEST_CASES = [
         id: 'polygon-lnglat',
         data: dataSamples.polygons,
         getPolygon: f => f,
-        getFillColor: f => [200, 0, 0],
-        getLineColor: f => [0, 0, 0, 255],
-        getLineDashArray: f => [20, 0],
+        getFillColor: [200, 0, 0],
+        getLineColor: [0, 0, 0],
+        getLineDashArray: [20, 0],
         getWidth: f => 20,
-        getElevation: f => 1000,
         opacity: 0.8,
         pickable: true,
-        lineDashJustified: true,
-        elevationScale: 0.6
+        lineWidthMinPixels: 1,
+        lineDashJustified: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/polygon-lnglat.png'
+    goldenImage: './test/render/golden-images/polygon-lnglat.png'
   },
   {
     name: 'polygon-lnglat-64',
@@ -286,21 +288,18 @@ export const TEST_CASES = [
       new PolygonLayer({
         id: 'polygon-lnglat-64',
         data: dataSamples.polygons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         getPolygon: f => f,
-        getFillColor: f => [200, 0, 0],
-        getLineColor: f => [0, 0, 0, 255],
-        getLineDashArray: f => [20, 0],
+        getFillColor: [200, 0, 0],
+        getLineColor: [0, 0, 0],
+        getLineDashArray: [20, 0],
         getWidth: f => 20,
-        getElevation: f => 1000,
         opacity: 0.8,
         pickable: true,
-        lineDashJustified: true,
-        elevationScale: 0.6
+        lineWidthMinPixels: 1,
+        lineDashJustified: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/polygon-lnglat.png'
+    goldenImage: './test/render/golden-images/polygon-lnglat.png'
   },
   {
     name: 'path-lnglat',
@@ -323,8 +322,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/path-lnglat.png'
   },
   {
     name: 'path-lnglat-64',
@@ -349,8 +347,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/path-lnglat.png'
   },
   {
     name: 'scatterplot-lnglat',
@@ -375,7 +372,7 @@ export const TEST_CASES = [
         radiusMaxPixels: 30
       })
     ],
-    referenceImageUrl: './test/render/golden-images/scatterplot-lnglat.png'
+    goldenImage: './test/render/golden-images/scatterplot-lnglat.png'
   },
   {
     name: 'scatterplot-lnglat-64',
@@ -402,7 +399,7 @@ export const TEST_CASES = [
         radiusMaxPixels: 30
       })
     ],
-    referenceImageUrl: './test/render/golden-images/scatterplot-lnglat.png'
+    goldenImage: './test/render/golden-images/scatterplot-lnglat.png'
   },
   {
     name: 'arc-lnglat',
@@ -410,14 +407,14 @@ export const TEST_CASES = [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 20,
       bearing: 0
     },
     layers: [
       new ArcLayer({
         id: 'arc-lnglat',
         data: dataSamples.routes,
-        strokeWidth: 0.5,
+        strokeWidth: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getSourceColor: d => [64, 255, 0],
@@ -425,8 +422,10 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/arc-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/arc-lnglat.png',
+    imageDiffOptions: IS_HEADLESS && {
+      threshold: 0.985
+    }
   },
   {
     name: 'arc-lnglat-64',
@@ -434,14 +433,14 @@ export const TEST_CASES = [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 20,
       bearing: 0
     },
     layers: [
       new ArcLayer({
         id: 'arc-lnglat-64',
         data: dataSamples.routes,
-        strokeWidth: 0.5,
+        strokeWidth: 2,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
@@ -451,8 +450,10 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/arc-lnglat-64.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/arc-lnglat-64.png',
+    imageDiffOptions: IS_HEADLESS && {
+      threshold: 0.985
+    }
   },
   {
     name: 'line-lnglat',
@@ -467,15 +468,14 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat',
         data: dataSamples.routes,
-        strokeWidth: 0.5,
+        strokeWidth: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/line-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/line-lnglat.png'
   },
   {
     name: 'line-lnglat-64',
@@ -490,7 +490,7 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat-64',
         data: dataSamples.routes,
-        strokeWidth: 0.5,
+        strokeWidth: 2,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
@@ -499,8 +499,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/line-lnglat-64.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/line-lnglat-64.png'
   },
   {
     name: 'icon-lnglat',
@@ -528,8 +527,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/icon-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
     name: 'icon-lnglat-64',
@@ -559,8 +557,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/icon-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
     name: 'geojson-lnglat',
@@ -593,8 +590,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/geojson-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/geojson-lnglat.png'
   },
   {
     name: 'geojson-extruded-lnglat',
@@ -629,8 +625,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/geojson-extruded-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/geojson-extruded-lnglat.png'
   },
   {
     name: 'gridcell-lnglat',
@@ -653,8 +648,7 @@ export const TEST_CASES = [
         getElevation: h => h.value * 5000
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/gridcell-lnglat.png'
   },
   {
     name: 'gridcell-lnglat-64',
@@ -679,8 +673,7 @@ export const TEST_CASES = [
         getElevation: h => h.value * 5000
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gridcell-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/gridcell-lnglat.png'
   },
   {
     name: 'grid-lnglat',
@@ -704,8 +697,7 @@ export const TEST_CASES = [
         getElevationValue
       })
     ],
-    referenceImageUrl: './test/render/golden-images/grid-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/grid-lnglat.png'
   },
   {
     name: 'screengrid-lnglat',
@@ -727,7 +719,7 @@ export const TEST_CASES = [
         pickable: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
+    goldenImage: './test/render/golden-images/screengrid-lnglat.png'
   },
   {
     name: 'screengrid-lnglat-cpu-aggregation',
@@ -750,7 +742,7 @@ export const TEST_CASES = [
         gpuAggregation: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/screengrid-lnglat.png'
+    goldenImage: './test/render/golden-images/screengrid-lnglat.png'
   },
   {
     name: 'screengrid-lnglat-colorRange',
@@ -770,7 +762,7 @@ export const TEST_CASES = [
         pickable: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/screengrid-lnglat-colorRange.png'
+    goldenImage: './test/render/golden-images/screengrid-lnglat-colorRange.png'
   },
   {
     name: 'hexagoncell-lnglat',
@@ -795,8 +787,7 @@ export const TEST_CASES = [
         getElevation: h => h.value * 5000
       })
     ],
-    referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/hexagoncell-lnglat.png'
   },
   {
     name: 'hexagoncell-lnglat-64',
@@ -822,7 +813,7 @@ export const TEST_CASES = [
         getElevation: h => h.value * 5000
       })
     ],
-    referenceImageUrl: './test/render/golden-images/hexagoncell-lnglat-64.png'
+    goldenImage: './test/render/golden-images/hexagoncell-lnglat-64.png'
   },
   {
     name: 'hexagon-lnglat',
@@ -849,7 +840,7 @@ export const TEST_CASES = [
         getElevationValue
       })
     ],
-    referenceImageUrl: './test/render/golden-images/hexagon-lnglat.png'
+    goldenImage: './test/render/golden-images/hexagon-lnglat.png'
   },
   {
     name: 'pointcloud-lnglat',
@@ -874,8 +865,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/pointcloud-lnglat.png'
   },
   {
     name: 'pointcloud-lnglat-64',
@@ -905,8 +895,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-lnglat-64.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/pointcloud-lnglat-64.png'
   },
   {
     name: 'pointcloud-meter',
@@ -931,8 +920,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/pointcloud-meter.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/pointcloud-meter.png'
   },
   {
     name: 'path-meter',
@@ -963,7 +951,7 @@ export const TEST_CASES = [
         coordinateOrigin: dataSamples.positionOrigin
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-meter.png'
+    goldenImage: './test/render/golden-images/path-meter.png'
   },
   {
     name: 'path-outline',
@@ -994,8 +982,7 @@ export const TEST_CASES = [
         }
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-outline.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/path-outline.png'
   },
   {
     name: 'path-outline-64',
@@ -1028,8 +1015,7 @@ export const TEST_CASES = [
         }
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-outline-64.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/path-outline-64.png'
   },
   // Chrome 65 can't render this case correctly
   /* {
@@ -1062,7 +1048,7 @@ export const TEST_CASES = [
         sizeScale: 200
       })
     ],
-    referenceImageUrl: './test/render/golden-images/path-maker.png'
+    goldenImage: './test/render/golden-images/path-maker.png'
   }, */
   {
     name: 'text-layer',
@@ -1077,6 +1063,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [153, 0, 0],
@@ -1088,7 +1075,7 @@ export const TEST_CASES = [
         getPixelOffset: x => [10, 0]
       })
     ],
-    referenceImageUrl: './test/render/golden-images/text-layer.png'
+    goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
     name: 'text-layer-64',
@@ -1103,6 +1090,7 @@ export const TEST_CASES = [
       new TextLayer({
         id: 'text-layer-64',
         data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
@@ -1116,7 +1104,7 @@ export const TEST_CASES = [
         getPixelOffset: x => [10, 0]
       })
     ],
-    referenceImageUrl: './test/render/golden-images/text-layer.png'
+    goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
     name: 'gpu-grid-lnglat',
@@ -1139,8 +1127,7 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
   },
   {
     name: 'gpu-grid-lnglat-cpu-aggregation',
@@ -1163,8 +1150,7 @@ export const TEST_CASES = [
         gpuAggregation: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/gpu-grid-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
   },
   {
     name: 'contour-lnglat-cpu-aggregation',
@@ -1190,8 +1176,7 @@ export const TEST_CASES = [
         gpuAggregation: false
       })
     ],
-    referenceImageUrl: './test/render/golden-images/contour-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/contour-lnglat.png'
   },
   {
     name: 'contour-lnglat',
@@ -1217,8 +1202,7 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/contour-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/contour-lnglat.png'
   },
   {
     name: 'contour-isobands-lnglat',
@@ -1244,7 +1228,6 @@ export const TEST_CASES = [
         gpuAggregation: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/contour-isobands-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/contour-isobands-lnglat.png'
   }
 ];

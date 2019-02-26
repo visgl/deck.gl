@@ -18,18 +18,27 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('tap-browser-color')();
+import test from 'tape';
+import {TEST_CASES, WIDTH, HEIGHT} from './test-cases';
+import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
-require('luma.gl/debug');
+test('Render Test', t => {
+  // tape's default timeout is 500ms
+  t.timeoutAfter(TEST_CASES.length * 2000);
 
-const {callExposedFunction} = require('probe.gl/test-utils');
+  new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
+    .add(TEST_CASES)
+    .run({
+      onTestStart: testCase => t.comment(testCase.name),
+      onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
+      onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
 
-const test = require('tape');
-test.onFinish(() => callExposedFunction('testDone', {success: true}));
-test.onFailure(() => callExposedFunction('testDone', {success: false}));
-
-test('deck.gl', t => {
-  require('./modules/index');
-  require('./modules/react');
-  t.end();
+      imageDiffOptions: {
+        threshold: 0.99
+        // uncomment to save screenshot to disk
+        // saveOnFail: true,
+        // saveAs: '[name].png'
+      }
+    })
+    .then(() => t.end());
 });
