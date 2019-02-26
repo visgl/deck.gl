@@ -40,7 +40,6 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // deprecated
-  strokeWidth: {deprecatedFor: 'getStrokeWidth'},
   getStrokeWidth: {deprecatedFor: 'getWidth'}
 };
 

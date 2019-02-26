@@ -112,7 +112,7 @@ The stroke width of each object, in meters.
 
 * Default: 1
 
-The scaling factor for the width of each line. If you set the property to `Math.pow(2, viewport.zoom - 12)` it will keep the width constant, corresponding to the current zoom level and the width of 1 pixel at zoom level 12. You can also limit the minimum size of the line with this property.
+The scaling factor for the width of each line. You can also limit the minimum size of the line with this property.
 
 ##### `widthMinPixels` (Number, optional)
 
