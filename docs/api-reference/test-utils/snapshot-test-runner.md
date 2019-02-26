@@ -35,6 +35,7 @@ const {ScatterplotLayer} = require('@deck.gl/layers');
 const TEST_CASES = [
   {
     name: 'ScatterplotLayer',
+    // `Deck` props
     viewState: {
       longitude: -122.4,
       latitude: 37.8,
@@ -43,15 +44,21 @@ const TEST_CASES = [
     },
     layers: [
       new ScatterplotLayer({
-        data: [
-          {position: [-122.45, 37.78], size: 100}
-        ],
+        id: 'circles',
+        data: './data/scatterplot.json',
         getPosition: d => d.position,
         getRadius: d => d.size,
         getFillColor: [255, 0, 0]
       })
     ],
-    // `onRender` receives animation props from the AnimationLoop
+    // `done` must be called when ready for screenshot and compare
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].props.data.length) {
+        // data is loaded
+        done();
+      }
+    },
+    // Target rendering result
     goldenImage: './test/render/golden-images/scatterplot.png'
   }
 ];
