@@ -55,7 +55,7 @@ export default class DeckRenderer {
     views,
     redrawReason = 'unknown reason',
     customRender = false,
-    effects,
+    effects = [],
     pass,
     stats
   }) {
@@ -68,6 +68,7 @@ export default class DeckRenderer {
       onViewportActive: activateViewport,
       redrawReason,
       customRender,
+      effects,
       effectProps
     });
     this.renderCount++;
@@ -91,11 +92,10 @@ export default class DeckRenderer {
   prepareEffects(effects) {
     const effectProps = {};
 
-    if (effects) {
-      for (const effect of effects) {
-        Object.assign(effectProps, effect.prepare());
-      }
+    for (const effect of effects) {
+      Object.assign(effectProps, effect.prepare());
     }
+
     return effectProps;
   }
 

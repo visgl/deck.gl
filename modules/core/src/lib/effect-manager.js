@@ -8,7 +8,7 @@ export default class EffectManager {
 
   setProps(props) {
     if ('effects' in props) {
-      if (!deepEqual(this.effects, props.effects)) {
+      if (props.effects.length !== this.effects.length || !deepEqual(props.effects, this.effects)) {
         this.setEffects(props.effects);
         this._needsRedraw = 'effects changed';
       }

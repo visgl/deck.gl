@@ -1,19 +1,13 @@
 import LayersPass from './layers-pass';
-import {projectPosition} from '../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../lib';
-import {PointLight as BasePointLight} from 'luma.gl';
 
 export default class DrawLayersPass extends LayersPass {
   // PRIVATE
-  getModuleParameters(layer, pixelRatio, effectProps) {
+  getModuleParameters(layer, pixelRatio, effects, effectProps) {
     const moduleParameters = super.getModuleParameters(layer, pixelRatio);
-    const effectParameters = this.getEffectParameters(
-      layer.context.viewport,
-      layer.props.coordinateSystem,
-      layer.props.coordinateOrigin,
-      effectProps
-    );
-    Object.assign(moduleParameters, this.getObjectHighlightParameters(layer), effectParameters);
+    Object.assign(moduleParameters, this.getObjectHighlightParameters(layer), effectProps);
+    for (const effect of effects) {
+      Object.assign(moduleParameters, effect.getParameters(layer));
+    }
     return moduleParameters;
   }
 
@@ -41,37 +35,5 @@ export default class DrawLayersPass extends LayersPass {
         highlightedObjectIndex >= 0 ? layer.encodePickingColor(highlightedObjectIndex) : null;
     }
     return parameters;
-  }
-
-  // Pre-project point light positions here
-  getEffectParameters(viewport, coordinateSystem, coordinateOrigin, effectProps) {
-    if (effectProps && effectProps.lightSources) {
-      const {pointLights} = effectProps.lightSources;
-      const projectedPointLights = [];
-
-      for (let i = 0; i < pointLights.length; i++) {
-        const pointLight = pointLights[i];
-        const position = projectPosition(pointLight.position, {
-          viewport,
-          coordinateSystem,
-          coordinateOrigin,
-          fromCoordinateSystem: viewport.isGeospatial
-            ? COORDINATE_SYSTEM.LNGLAT
-            : COORDINATE_SYSTEM.IDENTITY,
-          fromCoordinateOrigin: [0, 0, 0]
-        });
-        projectedPointLights.push(
-          new BasePointLight({
-            color: pointLight.color,
-            intensity: pointLight.intensity,
-            position
-          })
-        );
-      }
-      if (projectedPointLights.length > 0) {
-        effectProps.lightSources.pointLights = projectedPointLights;
-      }
-    }
-    return effectProps;
   }
 }
