@@ -179,8 +179,10 @@ the following properties.
 - `url` (String, required): url to fetch the icon
 - `height` (Number, required): height of icon
 - `width` (Number, required): width of icon
-- `id`: (String, optional): identifier of the icon, fall back to `url` if not specified 
+- `id`: (String, optional): unique identifier of the icon, fall back to `url` if not specified 
 - `anchorX`, `anchorY`, `mask` are the same as mentioned in `iconMapping`
+
+`IconLayer` use `id` (fallback to `url`) to dedupe icons. If for the same icon identifier, `getIcon` returns different `width` or `height`, `IconLayer` will only apply the first occurrence and ignore the rest of them.
 
 ##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
