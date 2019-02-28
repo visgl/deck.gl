@@ -13,7 +13,7 @@ It is recommended that an RFC follows roughly the following structure:
 * Motivation: Short explanation of why the proposed functionality/change is valuable
 * Marketing Pitch: A section that can be copied into the website "What's New" page that shows how this feature will be pitched to users. (The intention is of course to make the pitch easy to understand, and as compelling and applicable to as a wide audience as possible).
 * Technical Overview
-* Proposals. Hint: It is ideal if propsa;s can be written in the form of clean documentation additions, as this saves a lot of work and typing later when updating the docs to cover the new feature.
+* Proposals. Hint: It is ideal if proposals can be written in the form of clean documentation additions, as this saves a lot of work and typing later when updating the docs to cover the new feature.
 * Open Issues: The author should try to solve as many of these off-line as possible to reduce the burden on reviewers, but any remaining ones can be listed here.
 * Future Extensions: It is always encouraging to see that a proposed feature is not a dead end and that more can be built on it. Any bullets here can later be a seed for a second, successor RFC.
 * Alternatives (Options): Especially if alternative ideas have already been floated during discussions etc, it is nice to mention them and briefly explain why they were not chosen.
