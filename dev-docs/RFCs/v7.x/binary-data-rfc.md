@@ -123,7 +123,7 @@ new PathLayer({
 
 deck.gl layers will look for each attribute name in the `props` and use a provided typed array (and upload it to a GPU Buffer) instead of attempting to build its own buffer from data.
 
-## Passing GPU Buffers directluy to layer attributes
+## Passing GPU Buffers directly to layer attributes
 
 deck.gl layers will look for each attribute name in the `props` and use a provided GPU Buffer instead of attempting to build its own buffer from data.
 
