@@ -27,11 +27,11 @@ Note: This would be a fairly delicate engineering task, best performed by someon
 
 The best example here might be the lighting support that we have built-in to all our extrusion enabled core layers. Fully configuring lighting support requires a big bundle of props to be sent to each layer.
 
-Since it is rare that one would use different l;ighting parameters on different layers, not only is it wasteful to keep sending these params to each layer, but also it adds a lot of unnecessary plumbing in the application code (declaring an object with shared lighting settings in some constants file, importing it in each file that instantiates a layer etc).
+Since it is rare that one would use different lighting parameters on different layers, not only is it wasteful to keep sending these params to each layer, but also it adds a lot of unnecessary plumbing in the application code (declaring an object with shared lighting settings in some constants file, importing it in each file that instantiates a layer etc).
 
 A solution to this could be to create a `LightingEffect` subclass that contain all the parameters. These params would automatically be provided to layers without having to be supplied in every instantiation. This is listed as a separate proposal below.
 
-Open questions if if individual layers still should have an ability to override effects (enable/disable and or completely override parameters)
+Open questions if individual layers still should have an ability to override effects (enable/disable and or completely override parameters)
 
 
 ## Proposal: MirrorEffect
@@ -66,10 +66,3 @@ Framebuffers are big and expensive, deck.gl should maintain them and make them a
 Many effects could just use the picking buffer we have already allocated, unless we need to keep it around.
 
 Resource management - framebuffers (shadow buffers) take a lot of space, we will want to extend seer integration to show us how much resources effects re consuming.
-
-
-
-
-
-
-
