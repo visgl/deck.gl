@@ -1,7 +1,7 @@
 import Effect from '../lib/effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../lib';
-import {PointLight as BasePointLight} from 'luma.gl';
+import {PointLight as BasePointLight} from '@luma.gl/core';
 
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
