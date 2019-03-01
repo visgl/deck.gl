@@ -70,9 +70,9 @@ export default class PolygonTesselator extends Tesselator {
           target,
           size: 4,
           getValue: object => {
-            const color = accessor(object);
-            if (isNaN(color[3])) {
-              color[3] = 255;
+            let color = accessor(object);
+            if (color.length < 4) {
+              color = [...color, 255];
             }
             return color;
           }
