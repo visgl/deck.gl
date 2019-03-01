@@ -1,7 +1,7 @@
-import {PointLight as BasePointLight} from 'luma.gl';
 import Effect from '../lib/effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../lib';
+import {PointLight as BasePointLight} from '@luma.gl/core';
 
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
@@ -31,16 +31,19 @@ export default class LightingEffect extends Effect {
     }
   }
 
-  prepare() {
-    const {ambientLight, directionalLights, pointLights} = this;
+  getParameters(layer) {
+    const {ambientLight, directionalLights} = this;
+    const pointLights = this.getProjectedPointLights(layer);
     return {
       lightSources: {ambientLight, directionalLights, pointLights}
     };
   }
 
-  // Pre-project point light positions
-  getProjectedPointLights(viewport, coordinateSystem, coordinateOrigin) {
+  getProjectedPointLights(layer) {
+    const viewport = layer.context.viewport;
+    const {coordinateSystem, coordinateOrigin} = layer.props;
     const projectedPointLights = [];
+
     for (let i = 0; i < this.pointLights.length; i++) {
       const pointLight = this.pointLights[i];
       const position = projectPosition(pointLight.position, {

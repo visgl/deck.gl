@@ -55,17 +55,21 @@ export default class DeckRenderer {
     views,
     redrawReason = 'unknown reason',
     customRender = false,
+    effects = [],
     pass,
     stats
   }) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
+    const effectProps = this.prepareEffects(effects);
     const renderStats = layerPass.render({
       layers,
       viewports,
       views,
       onViewportActive: activateViewport,
       redrawReason,
-      customRender
+      customRender,
+      effects,
+      effectProps
     });
     this.renderCount++;
 
@@ -85,12 +89,14 @@ export default class DeckRenderer {
   }
 
   // Private
-  prepareEffects({effects}) {
+  prepareEffects(effects) {
     const effectProps = {};
 
     for (const effect of effects) {
       Object.assign(effectProps, effect.prepare());
     }
+
+    return effectProps;
   }
 
   logRenderStats({renderStats, pass, redrawReason, stats}) {

@@ -7,4 +7,6 @@ export default class Effect {
   }
 
   prepare() {}
+
+  getParameters() {}
 }

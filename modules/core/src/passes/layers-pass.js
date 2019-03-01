@@ -19,7 +19,8 @@ export default class LayersPass extends Pass {
     pass = 'draw',
     redrawReason = '',
     customRender,
-    effects
+    effects,
+    effectProps
   }) {
     const gl = this.gl;
     if (!customRender) {
@@ -44,7 +45,8 @@ export default class LayersPass extends Pass {
         parameters,
         pass,
         redrawReason,
-        effects
+        effects,
+        effectProps
       });
       renderStats.push(stats);
     });
@@ -64,7 +66,8 @@ export default class LayersPass extends Pass {
       parameters = {},
       pass = 'draw',
       redrawReason = '',
-      effects
+      effects,
+      effectProps
     }
   ) {
     const glViewport = this.getGLViewport(gl, {viewport});
@@ -114,7 +117,8 @@ export default class LayersPass extends Pass {
           layerIndex,
           glViewport,
           parameters,
-          effects
+          effects,
+          effectProps
         });
       }
     });
@@ -122,11 +126,14 @@ export default class LayersPass extends Pass {
     return renderStatus;
   }
 
-  drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters}) {
-    const moduleParameters = this.getModuleParameters(layer, this.props.pixelRatio);
-
+  drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters, effects, effectProps}) {
+    const moduleParameters = this.getModuleParameters(
+      layer,
+      this.props.pixelRatio,
+      effects,
+      effectProps
+    );
     const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
-
     const layerParameters = this.getLayerParameters(layer, layerIndex, glViewport, parameters);
 
     layer.drawLayer({
