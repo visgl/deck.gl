@@ -41,7 +41,7 @@ export default class LightingEffect extends Effect {
 
   getProjectedPointLights(layer) {
     const viewport = layer.context.viewport;
-    const {coordinateSystem, coordinateOrigin} = layer.props.coordinateSystem;
+    const {coordinateSystem, coordinateOrigin} = layer.props;
     const projectedPointLights = [];
 
     for (let i = 0; i < this.pointLights.length; i++) {
