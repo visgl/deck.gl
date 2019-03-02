@@ -423,7 +423,7 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat.png',
-    imageDiffOptions: IS_HEADLESS && {
+    imageDiffOptions: !IS_HEADLESS && {
       threshold: 0.985
     }
   },
@@ -451,7 +451,7 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/arc-lnglat-64.png',
-    imageDiffOptions: IS_HEADLESS && {
+    imageDiffOptions: !IS_HEADLESS && {
       threshold: 0.985
     }
   },
