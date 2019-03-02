@@ -1,6 +1,6 @@
 import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
-import {BezierCurveLayer} from '@deck.gl/experimental-layers';
+import {BezierCurveLayer} from './bezier-curve-layer/bezier-curve-layer';
 
 export default class BezierGraphLayer extends CompositeLayer {
   updateState({props, changeFlags}) {
