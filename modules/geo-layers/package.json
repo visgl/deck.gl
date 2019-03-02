@@ -1,6 +1,6 @@
 {
-  "name": "@deck.gl/layers",
-  "description": "deck.gl core layers",
+  "name": "@deck.gl/geo-layers",
+  "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
   "version": "7.0.0-alpha.3",
   "publishConfig": {
@@ -9,6 +9,7 @@
   "keywords": [
     "webgl",
     "visualization",
+    "geospatial",
     "layer"
   ],
   "repository": {
@@ -32,12 +33,10 @@
     "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   },
   "dependencies": {
-    "@loaders.gl/core": "^0.6.2",
-    "@mapbox/tiny-sdf": "^1.1.0",
-    "d3-hexbin": "^0.2.1",
-    "earcut": "^2.0.6"
+    "s2-geometry": "^1.2.10"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0-alpha.3"
+    "@deck.gl/core": "^7.0.0-alpha.3",
+    "@deck.gl/layers": "^7.0.0-alpha.3"
   }
 }

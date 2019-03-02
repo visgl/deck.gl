@@ -18,22 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
+import test from 'tape-catch';
 
-import './layers';
-import './aggregation-layers';
-import './geo-layers';
+import {GreatCircleLayer, S2Layer, TileLayer, TripsLayer} from '@deck.gl/geo-layers';
 
-import './json';
+test('Top-level imports', t => {
+  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
+  t.ok(S2Layer, 'S2Layer symbol imported');
+  t.ok(TileLayer, 'TileLayer symbol imported');
+  t.ok(TripsLayer, 'TripsLayer symbol imported');
+  t.end();
+});
 
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./react');
-  require('./lite');
-  require('./core/experimental/utils/gpu-grid-aggregator.spec');
-  // TODO - This is failing in headless browser test. Might be related to
-  // https://github.com/uber/luma.gl/issues/906
-  // require('./core/experimental/utils/grid-aggregation-utils.spec');
-  require('./core/lib/pick-layers.spec');
-}
+import './tile-layer/tile-cache.spec';
+import './s2-layer.spec';

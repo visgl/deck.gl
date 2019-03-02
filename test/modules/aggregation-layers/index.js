@@ -18,22 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
-
-import './layers';
-import './aggregation-layers';
-import './geo-layers';
-
-import './json';
-
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./react');
-  require('./lite');
-  require('./core/experimental/utils/gpu-grid-aggregator.spec');
-  // TODO - This is failing in headless browser test. Might be related to
-  // https://github.com/uber/luma.gl/issues/906
-  // require('./core/experimental/utils/grid-aggregation-utils.spec');
-  require('./core/lib/pick-layers.spec');
-}
+import './grid-layer.spec';
+import './grid-aggregator.spec';
+import './hexagon-layer.spec';
+import './hexagon-aggregator.spec';
+import './contour-layer/marching-squares.spec';
+import './contour-layer/contour-layer.spec';

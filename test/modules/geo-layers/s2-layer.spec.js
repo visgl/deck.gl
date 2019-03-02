@@ -18,22 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
+import test from 'tape-catch';
+import {testLayer} from '@deck.gl/test-utils';
+import {S2Layer} from '@deck.gl/geo-layers';
+import data from 'deck.gl/test/data/s2-sf.json';
 
-import './layers';
-import './aggregation-layers';
-import './geo-layers';
+test('S2Layer#constructor', t => {
+  testLayer({
+    Layer: S2Layer,
+    testCases: [
+      {props: []},
+      {props: null},
+      {
+        props: {
+          data,
+          getPolygon: f => f
+        }
+      },
+      {
+        updateProps: {
+          filled: false
+        },
+        assert({layer, subLayers, oldState}) {
+          t.ok(layer.state, 'should update layer state');
+          t.ok(subLayers.length, 'subLayers rendered');
 
-import './json';
+          const polygonLayer = layer.internalState.subLayers[0];
+          t.equal(
+            polygonLayer.state.paths.length,
+            data.length,
+            'should update PolygonLayers state.paths'
+          );
+        }
+      }
+    ]
+  });
 
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./react');
-  require('./lite');
-  require('./core/experimental/utils/gpu-grid-aggregator.spec');
-  // TODO - This is failing in headless browser test. Might be related to
-  // https://github.com/uber/luma.gl/issues/906
-  // require('./core/experimental/utils/grid-aggregation-utils.spec');
-  require('./core/lib/pick-layers.spec');
-}
+  t.end();
+});

@@ -100,25 +100,30 @@ Object.assign(experimental, {
 });
 
 //
-// CORE LAYERS PACKAGE
+// LAYERS PACKAGES
 //
 
 export {
   ArcLayer,
+  BitmapLayer,
   IconLayer,
   LineLayer,
   PointCloudLayer,
   ScatterplotLayer,
-  ScreenGridLayer,
-  GridLayer,
   GridCellLayer,
-  HexagonLayer,
   HexagonCellLayer,
   PathLayer,
   PolygonLayer,
+  SolidPolygonLayer,
   GeoJsonLayer,
   TextLayer
 } from '@deck.gl/layers';
+
+export {ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer} from '@deck.gl/aggregation-layers';
+
+export {GreatCircleLayer, S2Layer, TileLayer, TripsLayer} from '@deck.gl/geo-layers';
+
+export {MeshLayer, SceneGraphLayer} from '@deck.gl/mesh-layers';
 
 //
 // REACT BINDINGS PACKAGE

@@ -27,8 +27,11 @@
     "prepublishOnly": "npm run build"
   },
   "dependencies": {
+    "@deck.gl/aggregation-layers": "^7.0.0-alpha.3",
     "@deck.gl/core": "^7.0.0-alpha.3",
+    "@deck.gl/geo-layers": "^7.0.0-alpha.3",
     "@deck.gl/layers": "^7.0.0-alpha.3",
+    "@deck.gl/mesh-layers": "^7.0.0-alpha.3",
     "@deck.gl/react": "^7.0.0-alpha.3"
   }
 }

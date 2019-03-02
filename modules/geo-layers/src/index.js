@@ -17,23 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+/* eslint-disable max-len */
 
-import './imports-spec';
-import './core';
-
-import './layers';
-import './aggregation-layers';
-import './geo-layers';
-
-import './json';
-
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./react');
-  require('./lite');
-  require('./core/experimental/utils/gpu-grid-aggregator.spec');
-  // TODO - This is failing in headless browser test. Might be related to
-  // https://github.com/uber/luma.gl/issues/906
-  // require('./core/experimental/utils/grid-aggregation-utils.spec');
-  require('./core/lib/pick-layers.spec');
-}
+export {default as GreatCircleLayer} from './great-circle-layer/great-circle-layer';
+export {default as S2Layer} from './s2-layer/s2-layer';
+export {default as TileLayer} from './tile-layer/tile-layer';
+export {default as TripsLayer} from './trips-layer/trips-layer';
