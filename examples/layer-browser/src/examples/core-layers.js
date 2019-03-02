@@ -73,7 +73,7 @@ const IconLayerAutoPackingExample = {
   layer: IconLayer,
   getData: () => dataSamples.points,
   props: {
-    id: 'icon-layer-experimental',
+    id: 'icon-layer-auto-packing',
     sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
@@ -88,6 +88,7 @@ const IconLayerAutoPackingExample = {
         };
       }
       return {
+        id: 'warning',
         url: 'data/icon-warning.png',
         width: 128,
         height: 128,

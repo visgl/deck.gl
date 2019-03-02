@@ -133,13 +133,13 @@ Atlas image url or texture
 
 Icon names mapped to icon definitions. Each icon is defined with the following values:
 
-- `x`: x position of icon on the atlas image
-- `y`: y position of icon on the atlas image
-- `width`: width of icon on the atlas image
-- `height`: height of icon on the atlas image
-- `anchorX`: horizontal position of icon anchor. Default: half width.
-- `anchorY`: vertical position of icon anchor. Default: half height.
-- `mask`: whether icon is treated as a transparency mask.
+- `x` (Number, required): x position of icon on the atlas image
+- `y` (Number, required): y position of icon on the atlas image
+- `width` (Number, required): width of icon on the atlas image
+- `height` (Number, required): height of icon on the atlas image
+- `anchorX` (Number, optional): horizontal position of icon anchor. Default: half width.
+- `anchorY` (Number, optional): vertical position of icon anchor. Default: half height.
+- `mask` (Boolean, optional): whether icon is treated as a transparency mask.
   If `true`, user defined color is applied.
   If `false`, pixel color from the image is applied. User still can specify the opacity through getColor.
   Default: `false`
@@ -176,10 +176,13 @@ used to retrieve icon definition from given `iconMapping`.
 If you choose to use auto packing, then `getIcon` should return an object which contains 
 the following properties. 
 
-- `url`: url to fetch the icon
-- `height`: height of icon
-- `width`: width of icon
+- `url` (String, required): url to fetch the icon
+- `height` (Number, required): height of icon
+- `width` (Number, required): width of icon
+- `id`: (String, optional): unique identifier of the icon, fall back to `url` if not specified 
 - `anchorX`, `anchorY`, `mask` are the same as mentioned in `iconMapping`
+
+`IconLayer` use `id` (fallback to `url`) to dedupe icons. If for the same icon identifier, `getIcon` returns different `width` or `height`, `IconLayer` will only apply the first occurrence and ignore the rest of them.
 
 ##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
