@@ -22,7 +22,7 @@ import test from 'tape-catch';
 
 import * as FIXTURES from 'deck.gl/test/data';
 
-import {pointToDensityGridData} from '@deck.gl/layers/grid-layer/grid-aggregator';
+import {pointToDensityGridData} from '@deck.gl/aggregation-layers/grid-layer/grid-aggregator';
 
 const getPosition = d => d.COORDINATES;
 const iterableData = new Set(FIXTURES.points);

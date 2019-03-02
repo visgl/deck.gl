@@ -1,7 +1,7 @@
 import test from 'tape-catch';
-import TileCache from '@deck.gl/experimental-layers/tile-layer/utils/tile-cache';
-import Tile from '@deck.gl/experimental-layers/tile-layer/utils/tile';
-import {WebMercatorViewport} from 'deck.gl';
+import TileCache from '@deck.gl/geo-layers/tile-layer/utils/tile-cache';
+import Tile from '@deck.gl/geo-layers/tile-layer/utils/tile';
+import {WebMercatorViewport} from '@deck.gl/core';
 
 const testViewState = {
   bearing: 0,
@@ -57,12 +57,13 @@ test('should clear not visible tiles when cache is full', t => {
   testTileCache.update(testViewport, () => null);
   // load another viewport. The previous cached tiles shouldn't be visible
   testTileCache.update(
-    new WebMercatorViewport({
-      ...testViewState,
-      longitude: -100,
-      latitude: 80
-      // tile is 12-910-2958
-    }),
+    new WebMercatorViewport(
+      Object.assign({}, testViewState, {
+        longitude: -100,
+        latitude: 80
+        // tile is 12-910-2958
+      })
+    ),
     tiles => {
       t.equal(testTileCache._cache.size, 1);
       const x = 910;
@@ -82,10 +83,11 @@ test('should clear not visible tiles when cache is full', t => {
 test('should load the cached parent tiles while we are loading the current tiles', t => {
   testTileCache.update(testViewport, tiles => null);
 
-  const zoomedInViewport = new WebMercatorViewport({
-    ...testViewState,
-    zoom: maxZoom
-  });
+  const zoomedInViewport = new WebMercatorViewport(
+    Object.assign({}, testViewState, {
+      zoom: maxZoom
+    })
+  );
   testTileCache.update(zoomedInViewport, tiles => {
     t.true(
       tiles.some(tile => tile.x === testTile.x && tile.y === testTile.y && tile.z === testTile.z)
@@ -96,10 +98,11 @@ test('should load the cached parent tiles while we are loading the current tiles
 });
 
 test('should try to load the existing zoom levels if we zoom in too far', t => {
-  const zoomedInViewport = new WebMercatorViewport({
-    ...testViewState,
-    zoom: 20
-  });
+  const zoomedInViewport = new WebMercatorViewport(
+    Object.assign({}, testViewState, {
+      zoom: 20
+    })
+  );
 
   testTileCache.update(zoomedInViewport, tiles => {
     tiles.forEach(tile => {
@@ -111,10 +114,11 @@ test('should try to load the existing zoom levels if we zoom in too far', t => {
 });
 
 test('should not display anything if we zoom out too far', t => {
-  const zoomedOutViewport = new WebMercatorViewport({
-    ...testViewState,
-    zoom: 1
-  });
+  const zoomedOutViewport = new WebMercatorViewport(
+    Object.assign({}, testViewState, {
+      zoom: 1
+    })
+  );
 
   testTileCache.update(zoomedOutViewport, tiles => {
     t.equal(tiles.length, 0);
@@ -133,7 +137,7 @@ test('should set isLoaded to true even when loading the tile throws an error', t
 
   errorTileCache.update(testViewport, tiles => {
     // eslint-disable-next-line
-    window.setTimeout(() => {
+    setTimeout(() => {
       t.equal(tiles[0].isLoaded, true);
       t.end();
     });

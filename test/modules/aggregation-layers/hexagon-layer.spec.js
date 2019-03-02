@@ -24,7 +24,8 @@ import {makeSpy} from '@probe.gl/test-utils';
 import * as data from 'deck.gl/test/data';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
-import {HexagonLayer, HexagonCellLayer} from 'deck.gl';
+import {HexagonCellLayer} from '@deck.gl/layers';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const getColorValue = points => points.length;
 const getElevationValue = points => points.length;

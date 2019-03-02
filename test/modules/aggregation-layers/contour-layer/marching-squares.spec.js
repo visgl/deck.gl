@@ -1,5 +1,9 @@
 import test from 'tape-catch';
-import {getCode, getVertices, CONTOUR_TYPE} from '@deck.gl/layers/contour-layer/marching-squares';
+import {
+  getCode,
+  getVertices,
+  CONTOUR_TYPE
+} from '@deck.gl/aggregation-layers/contour-layer/marching-squares';
 
 const GETCODE_TESTS = [
   // ISO LINES

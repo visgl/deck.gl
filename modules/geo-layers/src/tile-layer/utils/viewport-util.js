@@ -33,10 +33,11 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
     return [];
   }
 
-  viewport = new viewport.constructor({
-    ...viewport,
-    zoom: z
-  });
+  viewport = new viewport.constructor(
+    Object.assign({}, viewport, {
+      zoom: z
+    })
+  );
 
   const bbox = getBoundingBox(viewport);
 

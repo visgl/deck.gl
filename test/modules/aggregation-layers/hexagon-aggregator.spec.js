@@ -22,7 +22,7 @@ import test from 'tape-catch';
 
 import * as FIXTURES from 'deck.gl/test/data';
 
-import {pointToHexbin} from '@deck.gl/layers/hexagon-layer/hexagon-aggregator';
+import {pointToHexbin} from '@deck.gl/aggregation-layers/hexagon-layer/hexagon-aggregator';
 
 const getPosition = d => d.COORDINATES;
 const iterableData = new Set(FIXTURES.points);

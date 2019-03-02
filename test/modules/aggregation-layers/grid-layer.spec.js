@@ -24,7 +24,8 @@ import * as FIXTURES from 'deck.gl/test/data';
 
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
-import {GridLayer, GridCellLayer} from 'deck.gl';
+import {GridCellLayer} from '@deck.gl/layers';
+import {GridLayer} from '@deck.gl/aggregation-layers';
 
 const getColorValue = points => points.length;
 const getElevationValue = points => points.length;
