@@ -20,7 +20,7 @@
 
 import {LayerManager, MapView, DeckRenderer} from 'deck.gl';
 
-import {makeSpy} from 'probe.gl/test-utils';
+import {makeSpy} from '@probe.gl/test-utils';
 import gl from './utils/setup-gl';
 
 const testViewport = new MapView().makeViewport({

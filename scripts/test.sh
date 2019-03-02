@@ -13,8 +13,7 @@ run_lint() {
 run_full_test() {
   run_lint
   node test/start.js test
-  node test/start.js test-browser
-  node test/start.js render
+  node test/start.js browser-headless
 }
 
 
@@ -35,8 +34,9 @@ case $MODE in
 
   "ci")
     # run by Travis CI
+    run_lint
     node test/start.js test-ci
-    npm run build
+    node test/start.js browser-headless
     npm run collect-metrics
     break;;
 
