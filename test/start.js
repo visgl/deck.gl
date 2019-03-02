@@ -9,7 +9,7 @@ const moduleAlias = require('module-alias');
 const getAliases = require('../aliases');
 moduleAlias.addAliases(getAliases('src'));
 
-const {BrowserTestDriver} = require('probe.gl/test-utils');
+const {BrowserTestDriver} = require('@probe.gl/test-utils');
 
 const mode = process.argv.length >= 3 ? process.argv[2] : 'default';
 console.log(`Running ${mode} tests...`); // eslint-disable-line
@@ -44,36 +44,35 @@ switch (mode) {
     require('./bench/index'); // Run the benchmarks
     break;
 
-  case 'test-browser':
+  case 'browser':
+  case 'browser-headless':
     new BrowserTestDriver().run({
-      process: 'webpack-dev-server',
-      parameters: ['--config', 'test/webpack.config.js', '--env.testBrowser'],
-      exposeFunction: 'testDone'
+      command: 'webpack-dev-server',
+      arguments: ['--config', 'test/webpack.config.js', '--env.testBrowser'],
+      headless: mode === 'browser-headless'
     });
     break;
 
-  case 'test-render':
   case 'render':
+  case 'render-headless':
     new BrowserTestDriver().run({
-      process: 'webpack-dev-server',
-      parameters: ['--config', 'test/webpack.config.js', '--env.render'],
-      exposeFunction: 'testDone'
+      command: 'webpack-dev-server',
+      arguments: ['--config', 'test/webpack.config.js', '--env.render'],
+      headless: mode === 'render-headless'
     });
     break;
 
   case 'render-react':
     new BrowserTestDriver().run({
-      process: 'webpack-dev-server',
-      parameters: ['--config', 'test/webpack.config.js', '--env.renderReact'],
-      exposeFunction: 'testDone'
+      command: 'webpack-dev-server',
+      arguments: ['--config', 'test/webpack.config.js', '--env.renderReact']
     });
     break;
 
   case 'bench-browser':
     new BrowserTestDriver().run({
-      process: 'webpack-dev-server',
-      parameters: ['--config', 'test/webpack.config.js', '--env.bench'],
-      exposeFunction: 'testDone'
+      command: 'webpack-dev-server',
+      arguments: ['--config', 'test/webpack.config.js', '--env.bench']
     });
     break;
 

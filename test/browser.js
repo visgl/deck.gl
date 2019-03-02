@@ -18,6 +18,31 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-require('tap-browser-color')();
+/* global window */
+const test = require('tape');
+const {_enableDOMLogging: enableDOMLogging} = require('@probe.gl/test-utils');
 
-require('./index');
+// require('@luma.gl/debug');
+
+let failed = false;
+test.onFinish(window.browserTestDriver_finish);
+test.onFailure(() => {
+  failed = true;
+  window.browserTestDriver_fail();
+});
+
+// tap-browser-color alternative
+enableDOMLogging({
+  getStyle: message => ({
+    background: failed ? '#F28E82' : '#8ECA6C',
+    position: 'absolute',
+    top: '500px',
+    width: '100%'
+  })
+});
+
+test('deck.gl', t => {
+  require('./modules');
+  require('./render');
+  t.end();
+});
