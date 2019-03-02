@@ -97,7 +97,7 @@ Be aware that this prop will likely be changed in a future version of deck.gl.
 Method called to retrieve the position of each point.
 
 
-## Following props of GridLyer are not supported yet.
+## Following props of GridLyer are not supported yet
 
 `colorDomain`, `colorRange`, `elevationDomain`,`elevationRange`, `upperPercentile` `lowerPercentile` `elevationUpperPercentile`, `elevationLowerPercentile`
 

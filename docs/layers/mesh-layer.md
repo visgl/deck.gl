@@ -45,6 +45,7 @@ The geometry to render for each data object.
 Can be a luma.gl [Geometry](http://uber.github.io/luma.gl/#/documentation/api-reference/geometry) instance, or an object of attributes.
 
 The following attributes are expected:
+
 - `positions` (Float32Array) - 3d vertex offset from the object center, in meters
 - `normals` (Float32Array) - 3d nomals
 - `texCoords` (Float32Array) - 2d texture coordinates
@@ -129,9 +130,7 @@ The color of each object. Only used if `texture` is empty.
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `lightSettings` (Object, optional)
-
-**EXPERIMENTAL**
+##### `lightSettings` (Object, optional) **EXPERIMENTAL**
 
 This is an object that contains light settings for extruded polygons.
 Be aware that this prop will likely be changed in a future version of deck.gl.

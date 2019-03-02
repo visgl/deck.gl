@@ -64,6 +64,7 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 ### Render Options
 
 ##### `onDataLoaded` (Function)
+
 `onDataLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
 
 - Default: `onDataLoaded: (data) => null`
@@ -75,6 +76,7 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 - Default: `getTileData: ({x, y, z}) => Promise.resolve(null)`
 
 ##### `onGetTileDataError` (Function)
+
 `onGetTileDataError` called when a tile failed to load.
 
 - Default: `(err) => console.error(err)`

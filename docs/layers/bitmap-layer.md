@@ -36,9 +36,9 @@ const App = ({data, viewport}) => {
 ##### `bounds` (Array)
 
 Supported formats:
+
 - Coordinates of the bounding box of the bitmap `[left, bottom, right, top]`
-- Coordinates of four corners of the bitmap, should follow the sequence of `[[left, bottom], [left, top], [right, top], [right, bottom]]` 
-each position could optionally contain a third component `z`.
+- Coordinates of four corners of the bitmap, should follow the sequence of `[[left, bottom], [left, top], [right, top], [right, bottom]]`. Each position could optionally contain a third component `z`.
 
 `left`, `bottom`, `right`, `top` refers to the coordinate of the corresponding side of the image.
 
