@@ -55,7 +55,7 @@ function buildRowMapping(mapping, columns, yOffset) {
 function resizeTexture(texture, width, height) {
   const oldWidth = texture.width;
   const oldHeight = texture.height;
-  const oldPixels = readPixelsToBuffer(texture);
+  const oldPixels = readPixelsToBuffer(texture, {});
 
   texture.resize({width, height});
 
@@ -70,8 +70,10 @@ function resizeTexture(texture, width, height) {
       [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
     }
   });
+
   texture.generateMipmap();
 
+  oldPixels.delete();
   return texture;
 }
 
@@ -274,12 +276,12 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
-          height: canvasHeight
+          height: this._canvasHeight
         });
       }
 
-      if (this._texture.height !== canvasHeight) {
-        resizeTexture(this._texture, this._canvasWidth, canvasHeight);
+      if (this._texture.height !== this._canvasHeight) {
+        resizeTexture(this._texture, this._canvasWidth, this._canvasHeight);
       }
 
       this.onUpdate();
