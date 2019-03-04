@@ -22,13 +22,13 @@ import './imports-spec';
 import './core';
 
 import './layers';
-import './s2-layers';
+import './aggregation-layers';
+import './geo-layers';
 
 import './json';
 
 // TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
-  require('./experimental-layers');
   require('./react');
   require('./lite');
   require('./core/experimental/utils/gpu-grid-aggregator.spec');

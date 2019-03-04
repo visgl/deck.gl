@@ -2,8 +2,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {PolygonLayer} from 'deck.gl';
-import {TripsLayer} from '@deck.gl/experimental-layers';
+import DeckGL, {PolygonLayer, TripsLayer} from 'deck.gl';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
