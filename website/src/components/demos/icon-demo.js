@@ -44,7 +44,7 @@ export default class IconDemo extends Component {
         <p>Hover on a pin to see the list of names</p>
         <p>Click on a pin to see the details</p>
         <p>Data source:
-          <a href="https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh">NASA</a>
+          <a href="https://data.nasa.gov/Space-Science/Meteorite-Landings/gh4g-9sfh"> NASA</a>
         </p>
         <div className="layout">
           <div className="stat col-1-2">No. of Meteorites
