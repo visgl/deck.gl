@@ -22,6 +22,10 @@ const {Tesselator} = experimental;
 import {fp64 as fp64Module} from 'luma.gl';
 const {fp64LowPart} = fp64Module;
 
+// colorArray is used to copy over color values if the passed color is an RGB
+// array instead of RGBA
+const colorArray = [0, 0, 0, 255];
+
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PathTesselator extends Tesselator {
@@ -64,10 +68,13 @@ export default class PathTesselator extends Tesselator {
           size: 4,
           getValue: object => {
             const color = accessor(object);
-            if (isNaN(color[3])) {
-              color[3] = 255;
+            if (color.length === 4) {
+              return color;
             }
-            return color;
+            colorArray[0] = color[0];
+            colorArray[1] = color[1];
+            colorArray[2] = color[2];
+            return colorArray;
           }
         });
 
