@@ -744,7 +744,7 @@ export const TEST_CASES = [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 30,
       bearing: 0,
       orthographic: true
     },
@@ -769,7 +769,7 @@ export const TEST_CASES = [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 30,
       bearing: 0
     },
     layers: [
@@ -795,7 +795,7 @@ export const TEST_CASES = [
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
       zoom: 11.5,
-      pitch: 0,
+      pitch: 20,
       bearing: 0
     },
     layers: [

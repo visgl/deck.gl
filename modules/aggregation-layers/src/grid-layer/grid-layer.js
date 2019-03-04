@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer, experimental} from '@deck.gl/core';
 const {BinSorter, defaultColorRange, getQuantizeScale, getLinearScale} = experimental;
 
@@ -52,8 +53,8 @@ const defaultProps = {
   extruded: false,
   fp64: false,
 
-  // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  // Optional material for 'lighting' shader module
+  material: new PhongMaterial()
 };
 
 export default class GridLayer extends CompositeLayer {
@@ -311,15 +312,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {
-      elevationScale,
-      fp64,
-      extruded,
-      cellSize,
-      coverage,
-      lightSettings,
-      transitions
-    } = this.props;
+    const {elevationScale, fp64, extruded, cellSize, coverage, material, transitions} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('grid-cell', GridCellLayer);
 
@@ -328,7 +321,7 @@ export default class GridLayer extends CompositeLayer {
         fp64,
         cellSize,
         coverage,
-        lightSettings,
+        material,
         elevationScale,
         extruded,
 

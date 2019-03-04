@@ -24,7 +24,7 @@
 
 import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, fp64, Buffer} from 'luma.gl';
+import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/core';
 import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
@@ -106,8 +106,8 @@ const defaultProps = {
     depthFunc: GL.LEQUAL
   },
   fp64: false,
-  // Optional settings for 'lighting' shader module
-  lightSettings: {},
+  // Optional material for 'lighting' shader module
+  material: new PhongMaterial(),
 
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},

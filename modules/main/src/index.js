@@ -52,7 +52,6 @@ export {
   // Shader modules
   project,
   project64,
-  lighting,
   // Internal classes
   LayerManager,
   DeckRenderer,

@@ -1,4 +1,5 @@
 import {deepEqual} from '../utils/deep-equal';
+import {default as LightingEffect} from '../effects/lighting-effect';
 
 export default class EffectManager {
   constructor() {
@@ -13,6 +14,7 @@ export default class EffectManager {
         this._needsRedraw = 'effects changed';
       }
     }
+    this.applyDefaultLightingEffect();
   }
 
   needsRedraw(clearRedrawFlags) {
@@ -29,5 +31,19 @@ export default class EffectManager {
 
   getEffects() {
     return this.effects;
+  }
+
+  // Private
+  applyDefaultLightingEffect() {
+    let hasEffect = false;
+    for (const effect of this.effects) {
+      if (effect instanceof LightingEffect) {
+        hasEffect = true;
+        break;
+      }
+    }
+    if (!hasEffect) {
+      this.effects.push(new LightingEffect());
+    }
   }
 }
