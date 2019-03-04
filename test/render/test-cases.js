@@ -1,16 +1,13 @@
+/* eslint-disable callback-return */
 /* global window */
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {GPUGridLayer} from '@deck.gl/experimental-layers';
-import GL from '@luma.gl/constants';
-import {OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
+import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {COORDINATE_SYSTEM, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
-import {BezierCurveLayer, PathOutlineLayer} from '@deck.gl/experimental-layers';
-
 import {
-  COORDINATE_SYSTEM,
   ScatterplotLayer,
   PolygonLayer,
   PathLayer,
@@ -19,14 +16,11 @@ import {
   IconLayer,
   GeoJsonLayer,
   GridCellLayer,
-  GridLayer,
-  ScreenGridLayer,
   HexagonCellLayer,
-  HexagonLayer,
   PointCloudLayer,
   TextLayer
-} from 'deck.gl';
-import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
+} from '@deck.gl/layers';
+import {ContourLayer, ScreenGridLayer, GridLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const IS_HEADLESS = Boolean(window.browserTestDriver_isHeadless);
 
@@ -115,31 +109,6 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/first-person.png'
-  },
-  // INFOVIS
-  {
-    name: 'bezier-curve-2d',
-    views: [new OrthographicView()],
-    viewState: {
-      zoom: 1
-    },
-    layers: [
-      new BezierCurveLayer({
-        id: 'bezier-curve-2d',
-        data: [
-          {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [50, 0]},
-          {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [-50, 0]},
-          {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [100, 0]},
-          {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [-100, 0]},
-          {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [150, 0]},
-          {sourcePosition: [0, -100], targetPosition: [0, 100], controlPoint: [-150, 0]}
-        ],
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        getColor: d => [255, 255, 0, 128],
-        strokeWidth: 5
-      })
-    ],
-    goldenImage: './test/render/golden-images/bezier-curve-2d.png'
   },
   {
     name: 'pointcloud-identity',
@@ -527,6 +496,11 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
@@ -953,103 +927,6 @@ export const TEST_CASES = [
     ],
     goldenImage: './test/render/golden-images/path-meter.png'
   },
-  {
-    name: 'path-outline',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PathOutlineLayer({
-        id: 'path-outline',
-        data: dataSamples.routes,
-        opacity: 0.6,
-        getPath: f => [f.START, f.END],
-        getColor: f => [128, 0, 0],
-        getZLevel: f => 125,
-        getWidth: f => 10,
-        widthMinPixels: 1,
-        pickable: true,
-        strokeWidth: 5,
-        widthScale: 10,
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 255],
-        parameters: {
-          blendEquation: GL.MAX
-        }
-      })
-    ],
-    goldenImage: './test/render/golden-images/path-outline.png'
-  },
-  {
-    name: 'path-outline-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PathOutlineLayer({
-        id: 'path-outline-64',
-        data: dataSamples.routes,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        opacity: 0.6,
-        getPath: f => [f.START, f.END],
-        getColor: f => [128, 0, 0],
-        getZLevel: f => 125,
-        getWidth: f => 10,
-        widthMinPixels: 1,
-        pickable: true,
-        strokeWidth: 5,
-        widthScale: 10,
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 255],
-        parameters: {
-          blendEquation: GL.MAX
-        }
-      })
-    ],
-    goldenImage: './test/render/golden-images/path-outline-64.png'
-  },
-  // Chrome 65 can't render this case correctly
-  /* {
-    name: 'path-marker',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PathMarkerLayer({
-        id: 'path-marker',
-        data: dataSamples.routes,
-        opacity: 0.6,
-        getPath: f => [f.START, f.END],
-        getColor: f => [230, 230, 230],
-        getZLevel: f => 125,
-        getWidth: f => 10,
-        widthMinPixels: 1,
-        pickable: true,
-        strokeWidth: 5,
-        widthScale: 10,
-        autoHighlight: true,
-        highlightColor: [255, 255, 255, 255],
-        parameters: {
-          blendEquation: GL.MAX
-        },
-        sizeScale: 200
-      })
-    ],
-    goldenImage: './test/render/golden-images/path-maker.png'
-  }, */
   {
     name: 'text-layer',
     viewState: {

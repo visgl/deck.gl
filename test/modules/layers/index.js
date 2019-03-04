@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import './bitmap-layer.spec';
 import './path-tesselator.spec';
 import './polygon-tesselation.spec';
 import './core-layers.spec';
@@ -25,13 +26,7 @@ import './polygon-layer.spec';
 import './geojson.spec';
 import './geojson-layer.spec';
 import './grid-cell-layer.spec';
-import './grid-layer.spec';
-import './grid-aggregator.spec';
 import './hexagon-cell-layer.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
-import './contour-layer/marching-squares.spec';
-import './contour-layer/contour-layer.spec';
 import './path-layer/path-layer-vertex.spec';
 import './icon-manager.spec';
 import './text-layer/font-atlas-utils.spec';

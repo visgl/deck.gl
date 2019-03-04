@@ -4,6 +4,8 @@ import {
   ArcLayer,
   LineLayer,
   // PointCloudLayer,
+  BitmapLayer,
+  ContourLayer,
   ScreenGridLayer,
   IconLayer,
   GridCellLayer,
@@ -18,8 +20,6 @@ import {
   //  ContourLayer
 } from 'deck.gl';
 const {flattenVertices} = experimental;
-
-import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
@@ -503,6 +503,15 @@ const TextLayerExample = {
   }
 };
 
+const BitmapLayerExample = {
+  layer: BitmapLayer,
+  props: {
+    id: 'bitmap-layer',
+    image: 'data/radar.gif',
+    bounds: [-80.425, 37.936, -71.516, 46.437]
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Core Layers - LngLat': {
@@ -525,6 +534,7 @@ export default {
     HexagonLayer: HexagonLayerExample,
     TextLayer: TextLayerExample,
     ContourLayer: ContourLayerExample,
-    'ContourLayer (Bands)': ContourLayerBandsExample
+    'ContourLayer (Bands)': ContourLayerBandsExample,
+    BitmapLayer: BitmapLayerExample
   }
 };
