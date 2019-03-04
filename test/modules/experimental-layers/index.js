@@ -20,22 +20,10 @@
 
 import test from 'tape-catch';
 
-import {
-  Arrow2DGeometry,
-  BezierCurveLayer,
-  MeshLayer,
-  PathMarkerLayer,
-  PathOutlineLayer,
-  BitmapLayer,
-  outline
-} from '@deck.gl/experimental-layers';
+import {BezierCurveLayer, MeshLayer, BitmapLayer} from '@deck.gl/experimental-layers';
 
 test('Top-level imports', t => {
   t.ok(MeshLayer, 'MeshLayer symbol imported');
-  t.ok(PathMarkerLayer, 'PathMarkerLayer symbol imported');
-  t.ok(PathOutlineLayer, 'PathOutlineLayer symbol imported');
-  t.ok(Arrow2DGeometry, 'Arrow2DGeometry symbol imported');
-  t.ok(outline, 'outline symbol imported');
   t.ok(BezierCurveLayer, 'BezierCurveLayer symbol imported');
   t.ok(BitmapLayer, 'BitmapLayer symbol imported');
   t.end();

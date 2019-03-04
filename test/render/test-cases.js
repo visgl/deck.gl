@@ -2,12 +2,11 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {GPUGridLayer} from '@deck.gl/experimental-layers';
-import GL from '@luma.gl/constants';
 import {OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
-import {BezierCurveLayer, PathOutlineLayer} from '@deck.gl/experimental-layers';
+import {BezierCurveLayer} from '@deck.gl/experimental-layers';
 
 import {
   COORDINATE_SYSTEM,
@@ -953,6 +952,7 @@ export const TEST_CASES = [
     ],
     goldenImage: './test/render/golden-images/path-meter.png'
   },
+  /*
   {
     name: 'path-outline',
     viewState: {
@@ -1017,6 +1017,7 @@ export const TEST_CASES = [
     ],
     goldenImage: './test/render/golden-images/path-outline-64.png'
   },
+  */
   // Chrome 65 can't render this case correctly
   /* {
     name: 'path-marker',

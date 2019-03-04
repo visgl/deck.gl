@@ -3,10 +3,7 @@
 //
 
 // SHADER MODULES
-export {default as outline} from './shaderlib/outline/outline';
-
-// GEOMETRIES
-export {default as Arrow2DGeometry} from './path-marker-layer/arrow-2d-geometry';
+// export {default as outline} from './shaderlib/outline/outline'; ////////<<<
 
 // ENHANCED CORE LAYERS
 export {default as GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
@@ -23,8 +20,6 @@ export {default as BezierCurveLayer} from './bezier-curve-layer/bezier-curve-lay
 
 // TRIP LAYERS
 export {default as TripsLayer} from './trips-layer/trips-layer';
-export {default as PathMarkerLayer} from './path-marker-layer/path-marker-layer';
-export {default as PathOutlineLayer} from './path-outline-layer/path-outline-layer';
 
 // TILE LAYERS
 export {default as TileLayer} from './tile-layer/tile-layer';
