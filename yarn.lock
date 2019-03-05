@@ -8473,17 +8473,10 @@ private@^0.1.6, private@^0.1.8, private@~0.1.5:
   resolved "https://registry.yarnpkg.com/private/-/private-0.1.8.tgz#2381edb3689f7a53d653190060fcf822d2f368ff"
   integrity sha512-VvivMrbvd2nKkiG38qjULzlc+4Vx4wm/whI9pQD35YrARNnhxeiRktSOhSukRLFNlzg6Br/cJPet5J/u19r/mg==
 
-probe.gl@3.0.0-alpha.5:
+probe.gl@3.0.0-alpha.5, probe.gl@^3.0.0-alpha.5:
   version "3.0.0-alpha.5"
   resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-3.0.0-alpha.5.tgz#0e79879fa0c3977da3ced90e3276503364d42fa3"
   integrity sha512-CH/IJWw80KQkDD4TU+YmrtmALNDsGyxaNJAu/LqkCsgZ+0JQf75XUJ1D97FN8aRKb08Nc8fkHOMYbIXbUMW49A==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-
-probe.gl@^2.0.1:
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/probe.gl/-/probe.gl-2.0.1.tgz#e42dfe02eca9ef262cdf89a24e1a4c0856e989e0"
-  integrity sha512-BNL0Eys0VzoM82gD9sUF3WQmzFv3LNV5WH8LzwYeGOKG1ro2TxVaOSKKD92TVK1qjg9miOiCh7S1ppGS9c1ylQ==
   dependencies:
     "@babel/runtime" "^7.0.0"
 
