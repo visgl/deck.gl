@@ -24,7 +24,7 @@ fetch().then(data => {
 }
 
 // Now we update the props
-button.onClick({} => {
+button.onClick(() => {
   deck.setProps({
     layers: new ScatterplotLayer({
       getPosition: getPositionByState, // I just want to change the accessor, but
@@ -52,7 +52,7 @@ deck.setProps({
 })
 
 // Now we update the props
-button.onClick({} => {
+button.onClick(() => {
   deck.setProps({
     layers: new ScatterplotLayer({
       data
