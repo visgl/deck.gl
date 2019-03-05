@@ -21,6 +21,7 @@
 import {CompositeLayer} from '@deck.gl/core';
 import ScatterplotLayer from '../scatterplot-layer/scatterplot-layer';
 import PathLayer from '../path-layer/path-layer';
+import {PhongMaterial} from '@luma.gl/core';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
@@ -67,8 +68,8 @@ const defaultProps = {
   getLineDashArray: {type: 'accessor', value: [0, 0]},
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
-  // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  // Optional material for 'lighting' shader module
+  material: new PhongMaterial()
 };
 
 function getCoordinates(f) {

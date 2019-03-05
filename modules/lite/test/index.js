@@ -52,11 +52,7 @@ const nonGeoExample = new deck.DeckGL({
       getPosition: d => d.position,
       getColor: d => d.color,
       getNormal: [0, 0, 1],
-      radiusPixels: 10,
-      lightSettings: {
-        coordinateSystem: deck.COORDINATE_SYSTEM.IDENTITY,
-        lightsPosition: [100, 100, 100]
-      }
+      radiusPixels: 10
     })
   ]
 });

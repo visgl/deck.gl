@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PhongMaterial} from '@luma.gl/core';
 import {
   CompositeLayer,
   _GPUGridAggregator as GPUGridAggregator,
@@ -41,8 +42,8 @@ const defaultProps = {
   fp64: false,
   pickable: false, // TODO: Enable picking with GPU Aggregation
 
-  // Optional settings for 'lighting' shader module
-  lightSettings: {},
+  // Optional material for 'lighting' shader module
+  material: new PhongMaterial(),
 
   // GPU Aggregation
   gpuAggregation: true
@@ -114,7 +115,7 @@ export default class GPUGridLayer extends CompositeLayer {
       extruded,
       cellSize: cellSizeMeters,
       coverage,
-      lightSettings
+      material
     } = this.props;
 
     const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = this.state;
@@ -138,7 +139,7 @@ export default class GPUGridLayer extends CompositeLayer {
       fp64,
       cellSize: cellSizeMeters,
       coverage,
-      lightSettings,
+      material,
       elevationScale,
       extruded,
       pickable: false

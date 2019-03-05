@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer, log, experimental} from '@deck.gl/core';
 import {HexagonCellLayer} from '@deck.gl/layers';
 
@@ -51,8 +52,8 @@ const defaultProps = {
   hexagonAggregator: pointToHexbin,
   getPosition: {type: 'accessor', value: x => x.position},
   fp64: false,
-  // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  // Optional material for 'lighting' shader module
+  material: new PhongMaterial()
 };
 
 export default class HexagonLayer extends CompositeLayer {
@@ -311,15 +312,7 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {
-      radius,
-      elevationScale,
-      extruded,
-      coverage,
-      lightSettings,
-      fp64,
-      transitions
-    } = this.props;
+    const {radius, elevationScale, extruded, coverage, material, fp64, transitions} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', HexagonCellLayer);
 
@@ -331,7 +324,7 @@ export default class HexagonLayer extends CompositeLayer {
         angle: Math.PI / 2,
         extruded,
         coverage,
-        lightSettings,
+        material,
 
         getColor: this._onGetSublayerColor.bind(this),
         getElevation: this._onGetSublayerElevation.bind(this),

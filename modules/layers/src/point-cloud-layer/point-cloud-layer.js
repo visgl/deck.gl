@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from 'luma.gl';
+import {Model, Geometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 
 import vs from './point-cloud-layer-vertex.glsl';
@@ -37,7 +37,7 @@ const defaultProps = {
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  lightSettings: {}
+  material: new PhongMaterial()
 };
 
 export default class PointCloudLayer extends Layer {
