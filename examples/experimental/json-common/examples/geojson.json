@@ -27,15 +27,7 @@
       "elevationScale": 0.10,
       "getElevation": "properties.valuePerSqm",
       "getFillColor": [199, 233, 180],
-      "getLineColor": [255, 255, 255],
-      "lightSettings": {
-        "lightsPosition": [-125, 50.5, 5000, -122.8, 48.5, 8000],
-        "ambientRatio": 0.2,
-        "diffuseRatio": 0.5,
-        "specularRatio": 0.3,
-        "lightsStrength": [1.0, 0.0, 2.0, 0.0],
-        "numberOfLights": 2
-      }
+      "getLineColor": [255, 255, 255]
     }
   ]
 }

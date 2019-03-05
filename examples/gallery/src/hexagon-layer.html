@@ -82,15 +82,6 @@
       [209, 55, 78]
     ];
 
-    const LIGHT_SETTINGS = {
-      lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
-      ambientRatio: 0.4,
-      diffuseRatio: 0.6,
-      specularRatio: 0.2,
-      lightsStrength: [0.8, 0.0, 0.8, 0.0],
-      numberOfLights: 2
-    };
-
     OPTIONS.forEach(key => {
       document.getElementById(key).oninput = renderLayer;
     });
@@ -111,7 +102,6 @@
         elevationScale: 250,
         extruded: true,
         getPosition: d => d,
-        lightSettings: LIGHT_SETTINGS,
         opacity: 1,
         ...options
       });
