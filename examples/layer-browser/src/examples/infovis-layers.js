@@ -7,18 +7,6 @@ import PlotLayer from '../../../website/plot/plot-layer';
 // import * as dataSamples from '../data-samples';
 // import {scaleLinear} from 'd3-scale';
 
-// const LIGHT_SETTINGS = {
-//   lightsPosition: [
-//     -122.45, 37.66, 8000,
-//     -122.0, 38.00, 8000
-//   ],
-//   ambientRatio: 0.3,
-//   diffuseRatio: 0.6,
-//   specularRatio: 0.4,
-//   lightsStrength: [1, 0.0, 0.8, 0.0],
-//   numberOfLights: 2
-// };
-
 function getScale({min, max}) {
   return x => (x - min) / (max - min);
   // return scaleLinear().domain([min, max]).range([0, 1]);
@@ -69,7 +57,6 @@ const PointCloudLayerInfovisExample = {
     opacity: 1,
     radiusPixels: 4,
     pickable: true,
-    lightSettings: LIGHT_SETTINGS,
 
     getPosition: d => d.position,
     getNormal: d => d.normal,

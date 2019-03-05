@@ -39,15 +39,6 @@
 
     const {DeckGL, GeoJsonLayer} = deck;
 
-    const LIGHT_SETTINGS = {
-      lightsPosition: [-125, 50.5, 5000, -122.8, 48.5, 8000],
-      ambientRatio: 0.2,
-      diffuseRatio: 0.5,
-      specularRatio: 0.3,
-      lightsStrength: [2.0, 0.0, 1.0, 0.0],
-      numberOfLights: 2
-    };
-
     const COLOR_SCALE = [
       // negative
       [65, 182, 196],
@@ -75,7 +66,6 @@
       extruded: true,
       wireframe: true,
       fp64: true,
-      lightSettings: LIGHT_SETTINGS,
 
       getElevation: f => Math.sqrt(f.properties.valuePerSqm) * 10,
       getFillColor: f => colorScale(f.properties.growth),

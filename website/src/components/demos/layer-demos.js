@@ -194,8 +194,7 @@ export const PointCloudLayerDemo = createLayerDemoClass({
     radiusPixels: 2,
     getPosition: d => d.position,
     getNormal: d => d.normal,
-    getColor: d => d.color,
-    lightSettings: {}
+    getColor: d => d.color
   }
 });
 
