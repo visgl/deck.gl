@@ -15,7 +15,7 @@ Each composite layer will be expected to document names for its sublayers. This 
 
 There are two types of naming possible
 - name the actual layer types being rendered: Scatterplot, Path, Polygon in the case of GeoJSON
-- name the actual layer instances being rendered (Points, Lines, PolygonOutlines, ExtrudedPolygons, ...) 
+- name the actual layer instances being rendered (Points, Lines, PolygonOutlines, ExtrudedPolygons, ...)
 
 **QUESTION** - Pick one of these schemes, or support both?
 
