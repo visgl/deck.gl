@@ -64,7 +64,7 @@ export default class S2Layer extends CompositeLayer {
     } = this.props;
 
     // Accessor props for underlying layers
-    const {updateTriggers, lightSettings} = this.props;
+    const {updateTriggers, material} = this.props;
 
     // Filled Polygon Layer
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
@@ -85,7 +85,7 @@ export default class S2Layer extends CompositeLayer {
         lineMiterLimit,
         lineDashJustified,
 
-        lightSettings,
+        material,
 
         getElevation,
         getFillColor,

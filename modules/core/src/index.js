@@ -47,7 +47,6 @@ export {default as WebMercatorViewport} from './viewports/web-mercator-viewport'
 // Shader modules
 export {default as project} from './shaderlib/project/project';
 export {default as project64} from './shaderlib/project64/project64';
-export {default as lighting} from './shaderlib/lighting/lighting';
 
 export {default as View} from './views/view';
 export {default as MapView} from './views/map-view';

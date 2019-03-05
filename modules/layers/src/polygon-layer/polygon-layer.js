@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
@@ -53,8 +54,8 @@ const defaultProps = {
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
 
-  // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  // Optional material for 'lighting' shader module
+  material: new PhongMaterial()
 };
 
 export default class PolygonLayer extends CompositeLayer {
@@ -139,7 +140,7 @@ export default class PolygonLayer extends CompositeLayer {
       getElevation,
       getPolygon,
       updateTriggers,
-      lightSettings
+      material
     } = this.props;
 
     const {paths} = this.state;
@@ -163,7 +164,7 @@ export default class PolygonLayer extends CompositeLayer {
           getFillColor,
           getLineColor,
 
-          lightSettings,
+          material,
           transitions
         },
         this.getSubLayerProps({

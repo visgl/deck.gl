@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeature, FEATURES} from 'luma.gl';
+import {Model, Geometry, hasFeature, FEATURES, PhongMaterial} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -51,7 +51,7 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // Optional settings for 'lighting' shader module
-  lightSettings: {}
+  material: new PhongMaterial()
 };
 
 const ATTRIBUTE_TRANSITION = {

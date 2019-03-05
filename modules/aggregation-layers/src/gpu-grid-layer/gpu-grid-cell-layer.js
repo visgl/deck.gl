@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CubeGeometry, fp64} from 'luma.gl';
+import {Model, CubeGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 
 import vs from './gpu-grid-cell-layer-vertex.glsl';
@@ -41,7 +41,7 @@ const defaultProps = {
   minColor: {type: 'color', value: DEFAULT_MINCOLOR},
   maxColor: {type: 'color', value: DEFAULT_MAXCOLOR},
 
-  lightSettings: {}
+  material: new PhongMaterial()
 };
 
 export default class GPUGridCellLayer extends Layer {
