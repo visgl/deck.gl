@@ -1,4 +1,4 @@
-from components import (
+from deck_bindings.components import (
     Layer,
     LightSettings,
     ViewState,
