@@ -14,15 +14,6 @@ import {CylinderGeometry} from 'luma.gl';
 import {GLTFParser} from '@loaders.gl/gltf';
 import * as dataSamples from '../data-samples';
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
-  ambientRatio: 0.3,
-  diffuseRatio: 0.6,
-  specularRatio: 0.4,
-  lightsStrength: [1, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
-
 const MeshLayerExample = {
   layer: MeshLayer,
   props: {
@@ -94,8 +85,7 @@ const GPUGridLayerExample = {
     opacity: 1,
     extruded: true,
     pickable: false,
-    getPosition: d => d.COORDINATES,
-    lightSettings: LIGHT_SETTINGS
+    getPosition: d => d.COORDINATES
   }
 };
 
@@ -108,8 +98,7 @@ const GPUGridLayerPerfExample = (id, getData) => ({
     opacity: 1,
     extruded: true,
     pickable: false,
-    getPosition: d => d,
-    lightSettings: LIGHT_SETTINGS
+    getPosition: d => d
   }
 });
 

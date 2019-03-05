@@ -25,15 +25,6 @@ const {flattenVertices} = experimental;
 import * as dataSamples from '../data-samples';
 import {parseColor, setOpacity} from '../utils/color';
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-122.45, 37.66, 8000, -122.0, 38.0, 8000],
-  ambientRatio: 0.3,
-  diffuseRatio: 0.6,
-  specularRatio: 0.4,
-  lightsStrength: [1, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
-
 const MARKER_SIZE_MAP = {
   small: 200,
   medium: 500,
@@ -136,8 +127,7 @@ const GeoJsonLayerExample = {
     lineWidthScale: 10,
     lineWidthMinPixels: 1,
     pickable: true,
-    fp64: true,
-    lightSettings: LIGHT_SETTINGS
+    fp64: true
   }
 };
 
@@ -151,8 +141,7 @@ const GeoJsonLayerExtrudedExample = {
     getLineColor: f => [200, 0, 80],
     extruded: true,
     wireframe: true,
-    pickable: true,
-    lightSettings: LIGHT_SETTINGS
+    pickable: true
   }
 };
 
@@ -179,7 +168,6 @@ const PolygonLayerExample = {
     opacity: 0.8,
     pickable: true,
     lineDashJustified: true,
-    lightSettings: LIGHT_SETTINGS,
     elevationScale: 0.6
   }
 };
@@ -302,8 +290,7 @@ const GridCellLayerExample = {
     pickable: true,
     opacity: 1,
     getColor: d => [245, 166, d.value * 255, 255],
-    getElevation: d => d.value * 5000,
-    lightSettings: LIGHT_SETTINGS
+    getElevation: d => d.value * 5000
   }
 };
 
@@ -378,8 +365,7 @@ const GridLayerExample = {
     pickable: true,
     getPosition: d => d.COORDINATES,
     getColorValue,
-    getElevationValue,
-    lightSettings: LIGHT_SETTINGS
+    getElevationValue
   }
 };
 
@@ -394,8 +380,7 @@ const HexagonCellLayerExample = {
     pickable: true,
     opacity: 1,
     getColor: d => [48, 128, d.value * 255, 255],
-    getElevation: d => d.value * 5000,
-    lightSettings: LIGHT_SETTINGS
+    getElevation: d => d.value * 5000
   }
 };
 
@@ -413,8 +398,7 @@ const HexagonLayerExample = {
     coverage: 1,
     getPosition: d => d.COORDINATES,
     getColorValue,
-    getElevationValue,
-    lightSettings: LIGHT_SETTINGS
+    getElevationValue
   }
 };
 

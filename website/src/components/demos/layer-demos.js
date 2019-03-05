@@ -16,7 +16,7 @@ import {
   GeoJsonLayer,
   PointCloudLayer
 } from 'deck.gl';
-import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
+import ContourLayer from '@deck.gl/aggregation-layers/contour-layer/contour-layer';
 
 import {colorToRGBArray} from '../../utils/format-utils';
 
@@ -194,8 +194,7 @@ export const PointCloudLayerDemo = createLayerDemoClass({
     radiusPixels: 2,
     getPosition: d => d.position,
     getNormal: d => d.normal,
-    getColor: d => d.color,
-    lightSettings: {}
+    getColor: d => d.color
   }
 });
 

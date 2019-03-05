@@ -21,15 +21,6 @@ export const INITIAL_VIEW_STATE = {
   bearing: -27.396674584323023
 };
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000],
-  ambientRatio: 0.4,
-  diffuseRatio: 0.6,
-  specularRatio: 0.2,
-  lightsStrength: [0.8, 0.0, 0.8, 0.0],
-  numberOfLights: 2
-};
-
 const colorRange = [
   [1, 152, 189],
   [73, 227, 206],
@@ -111,7 +102,6 @@ export class App extends Component {
         elevationScale: this.state.elevationScale,
         extruded: true,
         getPosition: d => d,
-        lightSettings: LIGHT_SETTINGS,
         onHover: this.props.onHover,
         opacity: 1,
         pickable: Boolean(this.props.onHover),
