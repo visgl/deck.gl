@@ -33,8 +33,12 @@ function getSubmodules() {
   .forEach(item => {
     const itemPath = resolve(parentPath, item);
     if (fs.lstatSync(itemPath).isDirectory()) {
-      const packageInfo = require(resolve(itemPath, 'package.json'));
-      submodules[packageInfo.name] = packageInfo;
+      try {
+        const packageInfo = require(resolve(itemPath, 'package.json'));
+        submodules[packageInfo.name] = packageInfo;
+      } catch (err) {
+        // ignore if sub directory does not contain package.json
+      }
     }
   });
 
