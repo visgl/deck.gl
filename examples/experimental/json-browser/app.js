@@ -202,6 +202,7 @@ export default class App extends Component {
             <StaticMap
               reuseMap
               {...jsonProps.map}
+              style={{}}
               {...viewState}
               viewState={viewState}
               viewport={viewState}
