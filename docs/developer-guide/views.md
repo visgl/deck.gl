@@ -147,7 +147,7 @@ Note that the `pickInfo` object does not contain a viewport reference, so you wi
 
 ## Projecting Coordinates Using Views
 
-While a `View` by itself does not contain enough information to support projection and unprojection of coordinates, calling `view.getViewport({viewState, width, height})` with a "view state" and `width` and `height` values for the WebGL canvas, creates a [`Viewport`](/docs/api-reference/viewport.md) that in turn can be used to efficiently project and unproject coordinates.
+While a `View` by itself does not contain enough information to support projection and unprojection of coordinates, calling `view.makeViewport({viewState, width, height})` with a "view state" and `width` and `height` values for the WebGL canvas, creates a [`Viewport`](/docs/api-reference/viewport.md) that in turn can be used to efficiently project and unproject coordinates.
 
 
 ## Choosing a Projection Mode
