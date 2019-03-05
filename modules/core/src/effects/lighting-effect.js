@@ -1,4 +1,4 @@
-import {AmbientLight, PointLight as BasePointLight, DirectionalLight} from '@luma.gl/core';
+import {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
 import Effect from '../lib/effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../lib';
@@ -81,7 +81,7 @@ export default class LightingEffect extends Effect {
         fromCoordinateOrigin: [0, 0, 0]
       });
       projectedPointLights.push(
-        new BasePointLight({
+        new PointLight({
           color: pointLight.color,
           intensity: pointLight.intensity,
           position
