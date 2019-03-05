@@ -18,13 +18,36 @@ By providing a set of very simple bindings, focusing on overcoming the most basi
 Offering such an integration clearly makes sense, as long as we can do it with low effort and maintenance cost.
 
 
-### Leveraging the deck.gl JSON API
+## Leveraging the deck.gl JSON API
 
 Normally, exposing an API in a new language requires porting that API to the new language, which can be a significant undertaking, creating a large set of class and function "wrappers" that glue to the original code, with associated maintenance costs.
 
-However, deck.gl now supports a JSON API. The JSON API makes it possible for users to specify deck.gl layers and access a large subset of deck.gl's functionality without directly using the deck.gl JavaScript API, making it an ideal API entry point to expose in other languages.
+However, deck.gl now supports a [JSON API](http://deck.gl/#/documentation/developer-guide/json/using-the-json-api) [API Reference](http://deck.gl/#/documentation/json-api-reference-experimental/json-layer-experimental) ([demo](http://deck.gl/json/).
+
+The JSON API makes it possible for users to specify deck.gl layers and access a large subset of deck.gl's functionality without directly using the deck.gl JavaScript API, making it an ideal API entry point to expose in other languages.
 
 The idea is thus to create a minimal binding in Python that allows a python application to generate a JSON payload compatible with the deck.gl API and then start an inline frame running deck.gl rendering that JSON payload.
+
+
+### Stability of the JSON API
+
+The JSON API is a pass-through of the underlying layer APIs. In fact, the JSON API allows the app to register layers imported from modules. Thus, the exposed API will change if the deck.gl layer APIs change.
+
+This fits with the spirit that the official Python API matches the official deck.gl API.
+
+
+### Completeness of the JSON API
+
+The JSON API does not support everything. Some issues are already on the "roadmap" for the json module:
+* Only a single mapbox base map
+* Accessors can only be 'dotty' style strings, general expression evaluation has not been integrated yet.
+
+Others reflect generally useful features that are not yet supported by the deck.gl core:
+* No time playback
+* No tooltips
+
+One option is that it could make sense to build things like tooltip support and support for time into the core deck.gl library, in which case these would be easy to expose through JSON. This fits with the platform spirit where we solve application problems in a reusable way.
+
 
 
 ### Focus Areas
@@ -47,6 +70,10 @@ Something we would likely want to support is that other deck.gl/Python integtati
 ## Technical Challenges
 
 * Starting up a JavaScript iframe in Notebook
+  * The solution will be loading pre-bundled deck.gl from CDN.
+  * We do not currently publish the JSON module as part of the standalone bundle in 6.4. In 7.0 we plan to publish a master bundle (deckgl.min.js) as well as individual bundles for each submodule.
+  * We could make a decision which bundles to include for the Python API.
+  * Alternatively, the JSON module allows additional layer modules to be registered. Perhaps the Python API could take a list of layer module URLs, and inject those requires into the HTML and register the imported layers.
 
 * Controlling Size of iframe
   * full screen rendering
