@@ -56,7 +56,7 @@ deck.gl supports both functional (react, json) and imperative (pure-js, scriptin
 
 ### Proposal: Support partially updating layer props (v7.0 API)
 
-Reference: [Imperative Programming RFC]().
+Reference: [Imperative Programming RFC](/dev-docs/RFCs/v7.x/imperative-programming-rfc.md).
 
 Summary: One could say that React "sets all the props of all the layers all the time". This is how the deck.gl API is designed (the `layers` prop needs to be completely resupplied whenever any prop in any layer changes). Imperative programs are different, they normally just want to change a few props in one layer.
 
@@ -85,5 +85,8 @@ class LineLayerState extends LayerState {
 This would let layer subclass writers focus on the permanent part of the Layer, as opposed to putting all their logic on the "dumb" descriptor.
 
 A number of Layer methods should probably move to the Layer state, and be forwarded for now for backwards compatibility.
+
+Note that this would not break the React JSX style of specifying the layer props?
+`<LineLayer data={...} {...otherProps}/>` since those methods are not used directly in this syntax.
 
 More thought would also need to go into how applications could benefit from this change.
