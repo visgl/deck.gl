@@ -28,7 +28,7 @@ const STYLES = {
     height: '100%',
     display: 'flex',
     flexDirection: 'row',
-    alignItems: 'stretch',
+    alignItems: 'stretch'
   },
 
   LEFT_PANE: {
@@ -36,7 +36,7 @@ const STYLES = {
     margin: 0,
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'stretch',
+    alignItems: 'stretch'
   },
 
   LEFT_PANE_SELECTOR: {
@@ -46,17 +46,17 @@ const STYLES = {
     padding: '5px 35px 5px 5px',
     fontSize: 16,
     border: '1px solid #ccc',
-    appearance: 'none',
+    appearance: 'none'
   },
 
   LEFT_PANE_TEXT: {
-    flex: '0 1 100%',
+    flex: '0 1 100%'
   },
 
   RIGHT_PANE: {
     flex: '0 1 60%',
-    margin: 0,
-  },
+    margin: 0
+  }
 };
 
 // Helper function to set mapbox stylesheet (avoids need for index.html just to set styles)
@@ -83,7 +83,7 @@ export default class App extends Component {
       jsonProps: {},
       // NOTE: viewState is re-initialized from jsonProps when those change,
       // but can be updated independently by the user "panning".
-      viewState: null,
+      viewState: null
     };
 
     // TODO/ib - could use arrow functions
@@ -105,7 +105,7 @@ export default class App extends Component {
     const jsonProps = this.jsonConverter.convertJsonToDeckProps(json);
     this.setState({
       jsonProps,
-      viewState: jsonProps.viewState,
+      viewState: jsonProps.viewState
     });
   }
 
@@ -113,11 +113,10 @@ export default class App extends Component {
   // Called on init, when template is changed, or user types
   _setEditorText(json) {
     // Pretty print JSON with tab size 2
-    const text =
-      typeof json !== 'string' ? JSON.stringify(json, null, 2) : json;
+    const text = typeof json !== 'string' ? JSON.stringify(json, null, 2) : json;
     // console.log('setting text', text)
     this.setState({
-      text,
+      text
     });
   }
 
