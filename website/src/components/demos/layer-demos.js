@@ -16,7 +16,7 @@ import {
   GeoJsonLayer,
   PointCloudLayer
 } from 'deck.gl';
-import ContourLayer from '@deck.gl/layers/contour-layer/contour-layer';
+import ContourLayer from '@deck.gl/aggregation-layers/contour-layer/contour-layer';
 
 import {colorToRGBArray} from '../../utils/format-utils';
 
