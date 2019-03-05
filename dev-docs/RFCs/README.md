@@ -14,11 +14,11 @@ Also see luma.gl roadmaps, such as the GPGPU roadmap
 
 | Roadmap                                                            | Status       | Description |
 | ---                                                                | ---          | ---         |
+| [**API Evolution Roadmap**](../roadmaps/api-evolution-roadmap.md)  | Draft        | Ideas for changes/extensions to the core deck.gl API |
 | [**New Layers Roadmap**](../roadmaps/layers-roadmap.md)            | Draft        | Ideas for new layers |
-| [**Animation Roadmap**](../roadmaps/animation-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
-| [**Performance Roadmap**](../roadmaps/performance-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
-| [**Infovis Roadmap**](../roadmaps/infovis-roadmap.md)                | Just started | infovis (non-geospatial) features roadmap |
-| [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
+| [**Animation Roadmap**](../roadmaps/animation-roadmap.md)          | Draft        | Animation API roadmap |
+| [**Performance Roadmap**](../roadmaps/performance-roadmap.md)      | Draft        | Performance Improvements |
+| [**Infovis Roadmap**](../roadmaps/infovis-roadmap.md)              | Draft        | Infovis (non-geospatial) features roadmap |
 | [**Reduce Distribution Size**](../roadmaps/dist-size-roadmap.md)   | Ongoing      | Reduce size of distribution and the bundle size of applications using deck.gl |
 | [**Pure JS and Scripting Roadmap**](../roadmaps/purejs-roadmap.md) | Implemented  | Support for Scripting and Pure-JS APIs |
 
@@ -29,45 +29,68 @@ These RFCs are not yet associated with any specific release.
 
 | RFC | Author | Status | Description |
 | --- | --- | --- | --- |
-| **Ongoing Efforts** | | | |
 | [**Reduce Repository Size**](vNext/reduce-repo-size-rfc.md) | @ibgreen | **Draft** | Reduce size of deck.gl github repository |
-| | | | |
-| **WIP/Draft** | | | |
 | [**Projection Mode Improvements**](vNext/projection-mode-improvements-rfc.md) | @ibgreen @pessimistress | **Draft** | Improvements to projection system |
 | [**Composite Layer Customization**](vNext/composite-layer-customization-rfc.md) | @ibgreen | **Draft** | Improvements to customizing composite layers |
 | **[Render Layer to Texture](vNext/render-layer-to-texture-rfc.md)** | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
-| | | | |
-| **Reviewed/Deferred** | | | |
-| [**Off-thread attribute generation**](vNext/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** has been broken out. |
-| [**Expose Layer AttributeManager**](vNext/expose-attribute-manager.md) | @ibgreen | **Deferred** | simplifies pregenerating attributes in apps for fast animation. |
-| [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
-| [**New Layers**](vNext/new-layers-rfc.md) | @shaojingli | **Deferred** | Ideas for new layers |
-
-
-## v6.x RFCs
-
-RFCs loosely targeted for 6.X releases. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v6x-rfcs)
-
-
-| RFC | Author | Status | Description |
-| --- | ---    | ---    | ---         |
-| [**Partial Updates**](v6.1/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
-| [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
-| [**Binary Data**](v6.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
-| [**Layer Operations**](v6.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
-| [**PropTypes**](v6.x/prop-types-rfc.md) | @ibgreen | **Review** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
-| [**Property Animation**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| **[Effects Manager](v6.x/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
-| [**Advanced Event Handling**](v6.x/event-handling.md) | @pessimistress | Draft | Allow Layer props to accept *on<Event>* style callbacks for events other than hover and click |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
 
 
+## Deferred RFCs
+
+| RFC | Author | Status | Description |
+| --- | --- | --- | --- |
+| [**Off-thread attribute generation**](vNext/off-thread-attribute-generation.md) | @pessimistress | **Deferred** | Generate attributes off-thread (to avoid locking the main thread). Deferred due to issues with supporting the more general use cases. **dataUrl RFC** has been broken out. |
+| [**Expose Layer AttributeManager**](vNext/expose-attribute-manager.md) | @ibgreen | **Deferred** | simplifies pregenerating attributes in apps for fast animation. |
+| [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
+
+
+## v7.x Binary Data RFCs
+
+Group of related RFCs loosely targeted for 7.x releases.
+
+| [**Binary Data**](v7.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
+
+
+## v7.x RFCs
+
+RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v7x-rfcs)
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**Imperative API Improvements**](v7.x/imperative-api-rfc.md) | @ibgreen | **draft** | Potential API improvements for imperative programming. |
+| [**Partial Updates**](vNext/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
+| [**Layer Operations**](v7.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
+| [**Property Animation**](v7.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
+
+
+## v7.0 RFCs
+
+These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v70-rfcs).
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**Phong Lighting**](v7.0/phong-lighting-rfc.md) | @jianhuang01 | **Implemented** | Add phong lighting module to luma and deck |
+| **[Effects Manager](v7.x/effects-manager-rfc.md)** | @jianhuang01 | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
+| [**Composite Layer Prop Forwarding**](v7.0/composite-layer-prop-forwarding-rfc.md) | @ibgreen @pessimistress | **Implemented** | Conventions for overriding sublayer props |
+
+
+## v6.3 RFCs
+
+These RFCS were implemented in v6.3. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v63-rfcs).
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**Prop Types**](v6.3/prop-types-rfc.md) | @ibgreen | **Implemented** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| [**Advanced Event Handling**](v6.3/event-handling.md) | @pessimistress | Draft | Allow Layer props to accept *on<Event>* style callbacks for events other than hover and click |
+
 
 ## v6.2 RFCs
 
-These RFCS are currently targeted for v6.2. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v62-rfcs).
+These RFCS were implemented in v6.2. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v62-rfcs).
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
