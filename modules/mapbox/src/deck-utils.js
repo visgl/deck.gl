@@ -1,5 +1,5 @@
 import {Deck} from '@deck.gl/core';
-import {withParameters} from 'luma.gl';
+import {withParameters} from '@luma.gl/webgl-state-tracker';
 
 export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
@@ -64,7 +64,7 @@ export function updateLayer(deck, layer) {
 
 export function drawLayer(deck, layer) {
   // set layerFilter to only allow the current layer
-  deck.layerManager.layerFilter = params => shouldDrawLayer(layer.id, params.layer);
+  deck.deckRenderer.layerFilter = params => shouldDrawLayer(layer.id, params.layer);
   deck._drawLayers('mapbox-repaint');
 }
 
@@ -95,7 +95,7 @@ function afterRender(deck, map) {
 
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    deck.layerManager.layerFilter = params => {
+    deck.deckRenderer.layerFilter = params => {
       for (const id of mapboxLayerIds) {
         if (shouldDrawLayer(id, params.layer)) {
           return false;
@@ -137,7 +137,7 @@ function updateLayers(deck) {
 // Triggers picking on a mouse event
 function handleMouseEvent(deck, event) {
   // reset layerFilter to allow all layers during picking
-  deck.layerManager.layerFilter = null;
+  deck.deckPicker.layerFilter = null;
 
   let callback;
   switch (event.type) {

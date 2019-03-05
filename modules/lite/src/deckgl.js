@@ -1,6 +1,6 @@
 /* global window, document */
 /* eslint-disable max-statements */
-import Mapbox from 'react-map-gl/src/mapbox/mapbox';
+import Mapbox from 'react-map-gl/dist/es6/mapbox/mapbox';
 
 import {Deck} from '@deck.gl/core';
 
@@ -94,13 +94,16 @@ export default class DeckGL extends Deck {
       this._map = map;
     }
 
-    // Callback for the controller
-    this._updateViewState = params => {
-      if (this.onViewStateChange) {
-        this.onViewStateChange(params);
-      }
+    // Update base map
+    this._onBeforeRender = params => {
+      this.onBeforeRender(params);
       if (this._map) {
-        this._map.setProps(params);
+        const viewport = this.getViewports()[0];
+        this._map.setProps({
+          width: viewport.width,
+          height: viewport.height,
+          viewState: viewport
+        });
       }
     };
   }
@@ -118,16 +121,17 @@ export default class DeckGL extends Deck {
   }
 
   setProps(props) {
-    // this._updateViewState must be bound to `this`
-    // but we don't have access to the current instance before calling super().
-    if ('onViewStateChange' in props && this._updateViewState) {
-      // This is called at least once at _onRendererInitialized
-      this.onViewStateChange = props.onViewStateChange;
-      props.onViewStateChange = this._updateViewState;
-    }
-
-    if (this._map) {
-      this._map.setProps(props);
+    // Replace user callback with our own
+    // `setProps` is first called in parent class constructor
+    // During which this._onBeforeRender is not defined
+    // It is called a second time in _onRendererInitialized with all current props
+    if (
+      'onBeforeRender' in props &&
+      this._onBeforeRender &&
+      props.onBeforeRender !== this._onBeforeRender
+    ) {
+      this.onBeforeRender = props.onBeforeRender;
+      props.onBeforeRender = this._onBeforeRender;
     }
 
     super.setProps(props);
