@@ -37,6 +37,7 @@ These RFCs are not yet associated with any specific release.
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
 
+
 ## Deferred RFCs
 
 | RFC | Author | Status | Description |
@@ -46,22 +47,24 @@ Possible other animation related RFCs:
 | [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
 
 
+## v7.x Binary Data RFCs
+
+Group of related RFCs loosely targeted for 7.x releases.
+
+| [**Binary Data**](v7.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
+
+
 ## v7.x RFCs
 
-RFCs loosely targeted for 7.C releases. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v6x-rfcs)
+RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v7x-rfcs)
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
 | [**Imperative API Improvements**](v7.x/imperative-api-rfc.md) | @ibgreen | **draft** | Potential API improvements for imperative programming. |
 | [**Partial Updates**](vNext/partial-updates-rfc.md) | @ibgreen @georgios-uber | **draft** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
-| [**Binary Data**](v7.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
 | [**Layer Operations**](v7.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
-| [**PropTypes**](v7.x/prop-types-rfc.md) | @ibgreen | **Review** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | [**Property Animation**](v7.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| **[Effects Manager](v7.x/effects-manager-rfc.md)** | @1chandu @ibgreen | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
-| [**Advanced Event Handling**](v7.x/event-handling.md) | @pessimistress | Draft | Allow Layer props to accept *on<Event>* style callbacks for events other than hover and click |
-
 
 
 ## v7.0 RFCs
@@ -70,7 +73,19 @@ These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://gith
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
+| [**Phong Lighting**](v7.0/phong-lighting-rfc.md) | @jianhuang01 | **Implemented** | Add phong lighting module to luma and deck |
+| **[Effects Manager](v7.x/effects-manager-rfc.md)** | @jianhuang01 | Draft | Official support for effects (shadows, reflections, better lighting, postprocessing, framebuffer composition etc).  |
 | [**Composite Layer Prop Forwarding**](v7.0/composite-layer-prop-forwarding-rfc.md) | @ibgreen @pessimistress | **Implemented** | Conventions for overriding sublayer props |
+
+
+## v6.3 RFCs
+
+These RFCS were implemented in v6.3. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v63-rfcs).
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**Prop Types**](v6.3/prop-types-rfc.md) | @ibgreen | **Implemented** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
+| [**Advanced Event Handling**](v6.3/event-handling.md) | @pessimistress | Draft | Allow Layer props to accept *on<Event>* style callbacks for events other than hover and click |
 
 
 ## v6.2 RFCs
