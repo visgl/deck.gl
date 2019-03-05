@@ -5,9 +5,16 @@ This section explains how the data in deck.gl layers are mapped to and accessed 
 
 ## Overview
 
-A central concept of deck.gl is that the majority of deck.gl layers map rows of "tables of data" supplied in the layer's `data` prop into similar-looking visual elements rendered on the GPU.
+A central concept of deck.gl is that every `Layer` accepts a "table of data" (through the `data` prop) and maps into visual elements that are then rendered efficiently on the GPU.
 
-For the purposes of GPU computation, there are two separate types of layers.
+For purposes of GPU computation, there are two separate types of layers and two types of attributes. We'll use the following terminology:
+
+|                          | Geometric Attribute per row   | Descriptive Attribute per row |
+| ---                      | ---                           | ---                           |
+| Shared-Primitive Layer   | N/A (Use shared primitive)    | `1` value (instance) per row  |
+| Variable-Primitive Layer | Variable # of vertices (`Ni`) | `Ni` duplicate values per row  |
+
+
 
 ### Fixed vs Variable Primitive Layers
 
@@ -25,7 +32,7 @@ Remarks:
 * As mentioned, _Fixed primitive layers_ are sometimes called _instanced layers_, however the term is not precise as it is possible for a tesselated/variable primitive layer to use instanced rendering (e.g. the `PathLayer` currently does this as a performance micro-optimization to reduce the amount of custom geometry generated during tesselation). This use of instancing is not related to efficiently storing the unique values for each table row.
 
 
-## Handling of Attributes
+## Geometric vs Descriptive Attributes
 
 ### Geometric Attributes
 

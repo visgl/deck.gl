@@ -42,14 +42,14 @@ const binaryData = new Float32Array([-122.4, 37.78, 1000, 255, 200, 0, -122.41, 
 ```
 
 
-## Table Formats
+## Binary Table Formats
 
-deck.gl layers are designed to accept "tables" of data as input (the `data` prop). Tables can be organized in several different ways. For binary data you will work with columnar tables.
+deck.gl layers are designed to accept "tables" of data as input (the `data` prop). Tables can be organized in several different ways. For binary data you will be working with columnar tables.
 
 
-### Row-Based Tables
+### Row-Based Tables (non-Binary)
 
-In general, tables can be row oriented or column oriented. Row oriented tables are generally the easiest to work with (each row is typically a JavaScript object with fields representing the values of various columns at that row).
+Row-based tables are the most common and generally the easiest to work with (each row is typically a JavaScript object with fields representing the values of various columns at that row).
 
 ```js
 new Layer({
@@ -80,7 +80,7 @@ new Layer({
 
 A disadvantage of columnar tables is that columns can get very long, blocking incremental reads/writes of tables and even exceeding platform's allocation limits.
 
-Advanced binary columnar table formats like Apache Arrow solves this by breaking logical arrays into chunks. In addition, chunked arrays can support remarkably efficient data-frame operations (slicing/dicing and filtering multigigabyte data set with "zero cost").
+More advanced binary columnar table formats like Apache Arrow solves this by breaking logical arrays into chunks. An additional benefit of chunked arrays can support remarkably efficient data-frame operations (slicing/dicing and filtering multigigabyte data set with "zero cost").
 
 Another complication when using binary columnar tables is that it may not be possible to represent e.g. the lack of a value. In some libraries (e.g. Apache Arrow) this is solved through an additional `null map`.
 
@@ -90,7 +90,7 @@ Chunked Arrow Arrays follows a more complicated relationship with `Vector` insta
 
 `Table ---* Column (Chunked) ---* Vector`
 
-These cannot currently be used in deck.gl without pre-concatenating the chunks.
+Note: These cannot currently be used in deck.gl without pre-concatenating the chunks.
 
 
 > There is an RFC (chunked-data-rfc) that would enable chunked data tables (data frames) to be directly consumed by deck.gl (and then sliced and diced at zero cost).
