@@ -1,4 +1,3 @@
-from IPython.core.display import HTML
 from IPython.utils import capture
 
 
@@ -13,15 +12,9 @@ def get_max_cell():
     return max(Out.keys())
 
 
-def get_or_instantiate_history():
-    if not deck_history:
-        global deck_history
-
 
 def store_and_print(exec_func):
-    """
-    Uses global variable to handle state.
-    Would love to know if there's actually a better way to do this."""
+    """Stores a 
     with capture.capture_output() as cap:
         def wrapper_func(*args, **kwargs):
             exec_func(*args, **kwargs)
@@ -36,4 +29,5 @@ def store_and_print(exec_func):
     cap.stdout
 
 
-def embed_json()
+def embed_in_cell(json):
+    pass
