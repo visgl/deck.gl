@@ -38,7 +38,7 @@
     "luma.gl": "^7.0.0-alpha.13",
     "math.gl": "^2.2.0",
     "mjolnir.js": "^2.0.2",
-    "probe.gl": "^3.0.0-alpha.5",
+    "probe.gl": "^3.0.0-alpha.6",
     "seer": "^0.2.4",
     "viewport-mercator-project": "^6.0.0"
   }
