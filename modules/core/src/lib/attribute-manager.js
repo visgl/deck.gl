@@ -218,7 +218,7 @@ export default class AttributeManager {
 
     logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     if (this.stats) {
-      this.stats.timeStart('attribute updates', this.id);
+      this.stats.get('Update Attributes').timeStart();
     }
 
     for (const attributeName in this.attributes) {
@@ -249,10 +249,11 @@ export default class AttributeManager {
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      if (this.stats) {
-        this.stats.timeEnd('attribute updates', this.id);
-      }
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+    }
+
+    if (this.stats) {
+      this.stats.get('Update Attributes').timeEnd();
     }
 
     this.attributeTransitionManager.update({
