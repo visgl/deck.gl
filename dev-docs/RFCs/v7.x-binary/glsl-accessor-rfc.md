@@ -94,6 +94,8 @@ PointCloudLayer({
 
 ## Proposals
 
+> THIS SECTION IS STILL BEING DEVELOPED, NOT READY FOR REVIEW
+
 ### AttributeManager changes
 
 * The presence of a string valued accessor would cause the `AttributeManager` to skip the generation of the attribute related to that accessor.

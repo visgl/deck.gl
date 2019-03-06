@@ -85,15 +85,11 @@ This RFC starts with proposals. To have the right context, there is significant 
 Some layers are "row based" (or "instanced") in the sense that each vertex shader invocation deals with a specific instance (table row). In this case, each table row is associated with a fixed number of vertices (defined by the layer's primitive) and using the GPU buffers from the arrow chunks as instanced data will work very well.
 
 
-## Proposal: Support for Tesselated Layers
+## Proposal: Support for Variable-Primitive Layers
 
-Other layers are tesselated, and each row is represented by a variable amount of vertices.
+See the separate texture attribute RFC. The idea is to use textures instead of buffers to represent columns for _variable-primitive layers_.
 
-The way deck.gl traditionally makes data from the initial table available to the layer is by repeatedly copying.
-
-In this case it may be best to wrap the chunk containing the table information as a texture, and simply store a chunk element index in an index attribute to be used to reference the texture.
-
-Tesselation will have to be chunked as well. This guarantees that each shader will only use data in the texture representing the data for that chunk.
+In this case Textures should be chunked just like Buffers. The way data frame filtering works (by row) guarantees that each shader will only use data in the texture representing the data for that chunk.
 
 
 ### Proposal: Utils for Creating/Releasing Buffers for individual Chunks in an Arrow Table
@@ -153,36 +149,7 @@ An issue with splitting an array into (many) chunks is that each contiguous chun
 
 ## Background
 
-### How to detect chunks?
-
-Check if element of `data` is iterable?
-
-
-## Change detection?
-
-This section looks at the following questions:
-- To what extent are chunks on the JS side immutable once created (and loaded into the GPU)?
-- If not immutable, how would we detect changes in the chunks of a chunked array?
-- When do we actually update GPU data?
-
-This RFC makes the assumption that chunks are immutable and that once uploaded, change detection is not needed. This is consistent with the spirit of the Arrow Library, where in general, nearly everything is meant to be immutable from the library’s perspective.
-
-Note: The Arrow library does have a `set` method on the `Vector` class but this is not used by the library. Maybe we can offer a manual mechanism letting a user invalidate a chunk?
-
-
-
-## Support for chunks
-
-### Columnar chunks can be uploaded to single buffer
-
-The minimal
-
-### Columnar chunks can be uploaded to separate buffers
-
-
-
-
-## Background
+> THESE TOPICS ARE STILL WORK-IN-PROGRESS
 
 ### How to detect chunks?
 
@@ -201,90 +168,16 @@ This RFC makes the assumption that chunks are immutable and that once uploaded, 
 Note: The Arrow library does have a `set` method on the `Vector` class but this is not used by the library. Maybe we can offer a manual mechanism letting a user invalidate a chunk?
 
 
-
 ## Support for chunks
 
 ### Columnar chunks can be uploaded to single buffer
 
-The minimal 
-
 ### Columnar chunks can be uploaded to separate buffers
-
-### Improving Chunked Rendering Performance with MultiDraw Extensions
-
-* [WEBGL_multi_draw Extension](https://www.khronos.org/registry/webgl/extensions/WEBGL_multi_draw/)
-* [WEBGL_multi_draw_instanced Extension](https://www.khronos.org/registry/webgl/extensions/WEBGL_multi_draw_instanced/)
 
 
 
 ## Data Frame Operations
-
-
 ### Dropping Columns
-
-
 ### Slicing Chunks
 
 Chunks can be sliced (this should generate new immutable chunks) and new Columns and Tables can be composed from them. This will not affect allocation.
-
-
-
-## Mapping of Table Schemas to GLSL
-
-Columns will generate attributes and accessor functions
-
-```
-in float column_value;
-in int column_time;
-in int column_date_lo;
-in int column_date_hi;
-
-float getColumn_Value() { return table_ColumnName; }
-int getColumn_Time() {}
-int64 getColumn_Date() {}
-```
-
-## GLSL Accessors
-
-Instead of transforming data in JS, supply GLSL accessors.
-
-```
-  // DEFAULTS
-  vec3 getPosition() { return instancePositions; }
-  vec4 getColor()
-
-  // GLSL ACCESSORS
-  getPosition: 'return vec3(getColumn_longitude(), getColumn_latitude(), 0);',
-  getColor: 'return colorScale(getColumn_value());',
-  getFilter: 'return true;',
-```
-
-This needs some support from the shader module system.
-
-```
-new Model {
-  vs,
-  fs,
-  modules: [...],
-  vsDefaultFunctions: {
-
-  },
-  vsFunctions: props
-};
-```
-
-Tesselated data
-
-- Columns need to be read from textures?
-
-
-## Additional Ideas
-
-These ideas/topics are not part of the 
-
-### Supporting Arrow Chunks while Remaining Generic
-
-During upload we want to iterate over chunks. Ideally we would have a generic mechanism to allow the user to write an adapter for any chunked system, and provide a pretested adapter for accessing Arrow chunks.
-
-`ChunkIterator (yields) => {chunk, index, ...}`
-
