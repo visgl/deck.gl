@@ -28,6 +28,8 @@ attribute vec4 instancePositions;
 attribute vec4 instancePositions64Low;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
+attribute float instanceHeights;
+attribute float instanceTilts;
 
 uniform float numSegments;
 uniform float opacity;
@@ -66,11 +68,15 @@ float getSegmentRatio(float index) {
 }
 
 vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
-  float vertex_height = paraboloid(source, target, segmentRatio);
+  float vertexHeight = sqrt(max(0.0, paraboloid(source, target, segmentRatio))) * instanceHeights;
+
+  float tiltAngle = radians(instanceTilts);
+  vec2 tiltDirection = normalize(target - source);
+  vec2 tilt = vec2(-tiltDirection.y, tiltDirection.x) * vertexHeight * sin(tiltAngle);
 
   return vec3(
-    mix(source, target, segmentRatio),
-    sqrt(max(0.0, vertex_height))
+    mix(source, target, segmentRatio) + tilt,
+    vertexHeight * cos(tiltAngle)
   );
 }
 
