@@ -9,37 +9,41 @@ const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
 
 /**
  * peerDependencies are excluded using `externals`
+ * https://webpack.js.org/configuration/externals/
  * e.g. @deck.gl/core is not bundled with @deck.gl/geo-layers
  */
+function getExternals(packageInfo) {
+  let externals = {};
+  const {peerDependencies = {}} = packageInfo;
 
-let externals = {};
-const {peerDependencies = {}} = PACKAGE_INFO;
-
-for (const depName in peerDependencies) {
-  if (depName.startsWith('@deck.gl')) {
-    // Instead of bundling the dependency, import from the global `deck` object
-    externals[depName] = 'deck';
-  }
-}
-
-if (externals['@deck.gl/core']) {
-  // Do not bundle luma.gl if `core` is peer dependency
-  externals = [
-    externals,
-    (context, request, callback) => {
-      if (/^@?luma\.gl/.test(request)) {
-        return callback(null, 'luma');
-      }
-      return callback();
+  for (const depName in peerDependencies) {
+    if (depName.startsWith('@deck.gl')) {
+      // Instead of bundling the dependency, import from the global `deck` object
+      externals[depName] = 'deck';
     }
-  ];
+  }
+
+  if (externals['@deck.gl/core']) {
+    // Do not bundle luma.gl if `core` is peer dependency
+    externals = [
+      externals,
+      (context, request, callback) => {
+        if (/^@?luma\.gl/.test(request)) {
+          return callback(null, 'luma');
+        }
+        return callback();
+      }
+    ];
+  }
+
+  return externals;
 }
 
 const config = {
   mode: 'production',
 
   entry: {
-    main: resolve('./bundle/index.js')
+    main: resolve('./bundle')
   },
 
   output: {
@@ -63,7 +67,7 @@ const config = {
     ]
   },
 
-  externals,
+  externals: getExternals(PACKAGE_INFO),
 
   plugins: [
     // This is used to define the __VERSION__ constant in core/lib/init.js

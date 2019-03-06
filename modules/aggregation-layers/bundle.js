@@ -1,12 +1,12 @@
-const deckGLLayers = require('../src');
+const deckGLLayers = require('./src');
 
 /* global window, global */
 const _global = typeof window === 'undefined' ? global : window;
 const deck = _global.deck || {};
 
 // Check if peer dependencies are included
-if (!deck.Layer) {
-  throw new Error('@deck.gl/core is not found');
+if (!deck.LineLayer) {
+  throw new Error('@deck.gl/layers is not found');
 }
 
 module.exports = Object.assign(deck, deckGLLayers);

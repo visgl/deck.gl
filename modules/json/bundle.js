@@ -1,4 +1,4 @@
-const MapboxUtils = require('../src');
+const JSONUtils = require('./src');
 
 /* global window, global */
 const _global = typeof window === 'undefined' ? global : window;
@@ -9,4 +9,4 @@ if (!deck.Layer) {
   throw new Error('@deck.gl/core is not found');
 }
 
-module.exports = Object.assign(deck, MapboxUtils);
+module.exports = Object.assign(deck, JSONUtils);

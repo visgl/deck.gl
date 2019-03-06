@@ -1,4 +1,4 @@
-const JSONUtils = require('../src');
+const deckGLLayers = require('./src');
 
 /* global window, global */
 const _global = typeof window === 'undefined' ? global : window;
@@ -9,4 +9,4 @@ if (!deck.Layer) {
   throw new Error('@deck.gl/core is not found');
 }
 
-module.exports = Object.assign(deck, JSONUtils);
+module.exports = Object.assign(deck, deckGLLayers);

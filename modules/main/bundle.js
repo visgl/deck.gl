@@ -1,4 +1,4 @@
-const deck = require('../../core/bundle');
+const deck = require('../core/bundle');
 
 Object.assign(
   deck,
