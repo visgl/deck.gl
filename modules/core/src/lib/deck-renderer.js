@@ -115,7 +115,7 @@ ${visibleCount} (of ${totalCount} layers) to ${pass} because ${redrawReason} `;
     log.log(LOG_PRIORITY_DRAW, message)();
 
     if (stats) {
-      stats.get('DeckGL: Redraw Layers').add(visibleCount);
+      stats.get('Redraw Layers').add(visibleCount);
     }
   }
 }

@@ -156,8 +156,6 @@ export default class Deck {
     }
     this.animationLoop = this._createAnimationLoop(props);
 
-    // TODO(Tarek): Eventually, stats object should come from Luma.gl
-    //   Frame rate stat in _onRenderFrame can be removed when that happens.
     this.stats = new Stats({id: 'deck.gl'});
 
     this.setProps(props);
@@ -191,7 +189,7 @@ export default class Deck {
   }
 
   setProps(props) {
-    this.stats.get('DeckGL: setProps Time').timeStart();
+    this.stats.get('setProps Time').timeStart();
     props = Object.assign({}, this.props, props);
     this.props = props;
 
@@ -237,7 +235,7 @@ export default class Deck {
       this.deckPicker.setProps(newProps);
     }
 
-    this.stats.get('DeckGL: setProps Time').timeEnd();
+    this.stats.get('setProps Time').timeEnd();
   }
 
   // Public API
@@ -278,7 +276,7 @@ export default class Deck {
   }
 
   pickObject({x, y, radius = 0, layerIds = null}) {
-    this.stats.get('DeckGL: pickObject Time').timeStart();
+    this.stats.get('pickObject Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
     const selectedInfos = this.deckPicker.pickObject({
@@ -291,12 +289,12 @@ export default class Deck {
       mode: 'query',
       depth: 1
     });
-    this.stats.get('DeckGL: pickObject Time').timeEnd();
+    this.stats.get('pickObject Time').timeEnd();
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
   pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
-    this.stats.get('DeckGL: pickMultipleObjects Time').timeStart();
+    this.stats.get('pickMultipleObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
     const selectedInfos = this.deckPicker.pickObject({
@@ -309,12 +307,12 @@ export default class Deck {
       mode: 'query',
       depth
     });
-    this.stats.get('DeckGL: pickMultipleObjects Time').timeEnd();
+    this.stats.get('pickMultipleObjects Time').timeEnd();
     return selectedInfos;
   }
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    this.stats.get('DeckGL: pickObjects Time').timeStart();
+    this.stats.get('pickObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
     const infos = this.deckPicker.pickObjects({
@@ -326,7 +324,7 @@ export default class Deck {
       viewports: this.getViewports({x, y, width, height}),
       activateViewport
     });
-    this.stats.get('DeckGL: pickObjects Time').timeEnd();
+    this.stats.get('pickObjects Time').timeEnd();
     return infos;
   }
 
@@ -576,8 +574,8 @@ export default class Deck {
   }
 
   _onRenderFrame(animationProps) {
-    this.stats.get('DeckGL: frameRate').timeEnd();
-    this.stats.get('DeckGL: frameRate').timeStart();
+    this.stats.get('frameRate').timeEnd();
+    this.stats.get('frameRate').timeStart();
 
     // Log perf stats every second
     if (animationProps.tick % 60 === 0) {
@@ -616,7 +614,7 @@ export default class Deck {
       return;
     }
 
-    this.stats.get('DeckGL: Redraw Count').incrementCount();
+    this.stats.get('Redraw Count').incrementCount();
     if (this.props._customRender) {
       this.props._customRender();
     } else {

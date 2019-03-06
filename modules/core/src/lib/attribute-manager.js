@@ -218,7 +218,7 @@ export default class AttributeManager {
 
     logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     if (this.stats) {
-      this.stats.get('DeckGL: Update Attributes').timeStart();
+      this.stats.get('Update Attributes').timeStart();
     }
 
     for (const attributeName in this.attributes) {
@@ -253,7 +253,7 @@ export default class AttributeManager {
     }
 
     if (this.stats) {
-      this.stats.get('DeckGL: Update Attributes').timeEnd();
+      this.stats.get('Update Attributes').timeEnd();
     }
 
     this.attributeTransitionManager.update({
