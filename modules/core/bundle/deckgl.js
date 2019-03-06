@@ -2,7 +2,7 @@
 /* eslint-disable max-statements */
 import Mapbox from 'react-map-gl/dist/es6/mapbox/mapbox';
 
-import {Deck} from '@deck.gl/core';
+import {Deck} from '../src';
 
 const CANVAS_STYLE = {
   position: 'absolute',
