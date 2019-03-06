@@ -21,6 +21,6 @@
     "build": "webpack --config webpack.config.js"
   },
   "devDependencies": {
-    "react-map-gl": "^3.3.7"
+    "react-map-gl": "^4.0.14"
   }
 }
