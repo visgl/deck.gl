@@ -1,6 +1,6 @@
 /* global deck, document */
 /* eslint-disable no-unused-vars */
-import '../src';
+import 'deck.gl/../standalone';
 import {choropleths} from '../../../examples/layer-browser/src/data-samples';
 
 const SAMPLE_SIZE = 10;

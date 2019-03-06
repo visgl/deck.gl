@@ -17,10 +17,13 @@
   },
   "main": "dist/deckgl.min.js",
   "scripts": {
-    "start": "webpack-dev-server --env.dev --progress --open",
-    "build": "webpack --config webpack.config.js"
+    "start-local": "webpack-dev-server --env.local --progress --open"
   },
   "devDependencies": {
-    "react-map-gl": "^4.0.14"
+    "buble": "^0.19.3",
+    "buble-loader": "^0.5.0",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.1"
   }
 }

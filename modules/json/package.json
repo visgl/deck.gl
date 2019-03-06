@@ -22,7 +22,7 @@
   "files": [
     "dist",
     "src",
-    "README.md"
+    "*.min.js"
   ],
   "sideEffects": false,
   "scripts": {
@@ -30,7 +30,9 @@
     "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
     "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
     "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
-    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
+    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
+    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5",
+    "prepublishOnly": "npm run build-bundle"
   },
   "dependencies": {
     "@deck.gl/core": "^7.0.0-alpha.4",

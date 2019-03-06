@@ -73,6 +73,7 @@
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
+    "react-map-gl": "^4.0.14",
     "reify": "0.4.4",
     "source-map-loader": "^0.2.1",
     "tape": "^4.9",
