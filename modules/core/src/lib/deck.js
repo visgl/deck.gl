@@ -130,8 +130,6 @@ export default class Deck {
     this.deckRenderer = null;
     this.deckPicker = null;
 
-    this.stats = new Stats({id: 'deck.gl'});
-
     this._needsRedraw = true;
 
     this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
@@ -157,6 +155,10 @@ export default class Deck {
       }
     }
     this.animationLoop = this._createAnimationLoop(props);
+
+    // TODO(Tarek): Eventually, stats object should come from Luma.gl
+    //   Frame rate stat in _onRenderFrame can be removed when that happens.
+    this.stats = new Stats({id: 'deck.gl'});
 
     this.setProps(props);
 
@@ -189,7 +191,7 @@ export default class Deck {
   }
 
   setProps(props) {
-    this.stats.timeStart('deck.setProps');
+    this.stats.get('DeckGL: setProps Time').timeStart();
     props = Object.assign({}, this.props, props);
     this.props = props;
 
@@ -235,7 +237,7 @@ export default class Deck {
       this.deckPicker.setProps(newProps);
     }
 
-    this.stats.timeEnd('deck.setProps');
+    this.stats.get('DeckGL: setProps Time').timeEnd();
   }
 
   // Public API
@@ -276,7 +278,7 @@ export default class Deck {
   }
 
   pickObject({x, y, radius = 0, layerIds = null}) {
-    this.stats.timeStart('deck.pickObject');
+    this.stats.get('DeckGL: pickObject Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
     const selectedInfos = this.deckPicker.pickObject({
@@ -289,12 +291,12 @@ export default class Deck {
       mode: 'query',
       depth: 1
     });
-    this.stats.timeEnd('deck.pickObject');
+    this.stats.get('DeckGL: pickObject Time').timeEnd();
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
   pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
-    this.stats.timeStart('deck.pickMultipleObjects');
+    this.stats.get('DeckGL: pickMultipleObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
     const selectedInfos = this.deckPicker.pickObject({
@@ -307,12 +309,12 @@ export default class Deck {
       mode: 'query',
       depth
     });
-    this.stats.timeEnd('deck.pickMultipleObjects');
+    this.stats.get('DeckGL: pickMultipleObjects Time').timeEnd();
     return selectedInfos;
   }
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    this.stats.timeStart('deck.pickObjects');
+    this.stats.get('DeckGL: pickObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
     const infos = this.deckPicker.pickObjects({
@@ -324,7 +326,7 @@ export default class Deck {
       viewports: this.getViewports({x, y, width, height}),
       activateViewport
     });
-    this.stats.timeEnd('deck.pickObjects');
+    this.stats.get('DeckGL: pickObjects Time').timeEnd();
     return infos;
   }
 
@@ -574,17 +576,25 @@ export default class Deck {
   }
 
   _onRenderFrame(animationProps) {
+    this.stats.get('DeckGL: frameRate').timeEnd();
+    this.stats.get('DeckGL: frameRate').timeStart();
+
     // Log perf stats every second
-    if (this.stats.oneSecondPassed()) {
-      const table = this.stats.getStatsTable();
+    if (animationProps.tick % 60 === 0) {
+      const table = {};
+      this.stats.forEach(stat => {
+        table[stat.name] = {
+          time: stat.time || 0,
+          count: stat.count || 0,
+          average: stat.getAverageTime() || 0,
+          hz: stat.getHz() || 0
+        };
+      });
       this.stats.reset();
       log.table(3, table)();
 
       // Experimental: report metrics
       if (this.props._onMetrics) {
-        for (const key in table) {
-          table[key] = table[key].total;
-        }
         this.props._onMetrics(table);
       }
     }
@@ -597,8 +607,6 @@ export default class Deck {
     // Note: This can trigger a redraw
     this.layerManager.updateLayers();
 
-    this.stats.bump('fps');
-
     // Needs to be done before drawing
     this._updateAnimationProps(animationProps);
 
@@ -608,7 +616,7 @@ export default class Deck {
       return;
     }
 
-    this.stats.bump('redraw');
+    this.stats.get('DeckGL: Redraw Count').incrementCount();
     if (this.props._customRender) {
       this.props._customRender();
     } else {
