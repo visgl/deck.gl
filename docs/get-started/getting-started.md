@@ -74,7 +74,7 @@ npm run start-local
 
 ## Selectively Install Dependencies
 
-A family of NPM modules are published as part of the deck.gl framework. The following tree shows their scope and dependents:
+A family of NPM modules are published as part of the deck.gl framework. The following tree shows their scope and dependencies:
 
 - `@deck.gl/core` - Core module that handles the WebGL rendering pipeline, data management, and user interaction
   + `@deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
@@ -82,7 +82,7 @@ A family of NPM modules are published as part of the deck.gl framework. The foll
     * `@deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
     * `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
   + `@deck.gl/json` - Declarative interface that supports specifying deck.gl layers and views using a JSON format.
-  + `@deck.gl/mapbox` - An implementation of the [Mapbox custom layer](/docs/api-reference/mapbox/overview.md) API.
+  + `@deck.gl/mapbox` - An integration with the [Mapbox custom layer](/docs/api-reference/mapbox/overview.md) API.
   + `@deck.gl/react` - React wrapper of deck.gl.
   + `@deck.gl/test-utils` - Testing utilities.
 
