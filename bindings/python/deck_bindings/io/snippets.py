@@ -1,12 +1,14 @@
+import jinja2
+
 '''String that will render a deck.gl vis in a Jupyter notebook. Very minimal and WIP at the moment'''
 
-JUPYTER_HTML = '''
-<div id="deck-container" style="height:500px;width:700px;background:grey;">
-  <h1> Demo Vis </h1>
+JUPYTER_HTML = jinja2.Template('''
+<div id="deck-container" style="height:{{height}}px;width:{{width}}px;background:grey;color:white;">
   <div id="deck-map-wrapper">
-    <canvas id='deck-map-container' style='position:absolute;height:100%;width:100%;'></canvas>
+    <canvas id='deck-map-container' style='position:absolute;height:{{height}}px;width:{{width}}px;'></canvas>
   </div>
 </div>
+<script src="https://duberste.in/deckJson.js"></script>
 <script>
 
 function installStyleSheet(url) {
@@ -16,46 +18,55 @@ function installStyleSheet(url) {
   styles.rel = 'stylesheet';
   styles.href = url;
   document.head.appendChild(styles);
-
   document.body.style.margin = '0px';
 }
 
-
 installStyleSheet('https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css')
+</script>
+''')
+
+JUPYTER_JS = jinja2.Template('''
+requirejs.config({
+  shim: {
+    'https://unpkg.com/deck.gl@latest/deckgl.min.js': [
+        'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'],
+  }
+});
+
 
 require([
     'https://unpkg.com/deck.gl@latest/deckgl.min.js',
-    'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'
-], function(deckgl, mapboxgl) {
-    mapboxgl.accessToken = {}
+    'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js',
+    'https://cdnjs.cloudflare.com/ajax/libs/d3-dsv/1.0.8/d3-dsv.min.js'
+], function(core, mapboxgl, d3Dsv) {
 
-    const layer = new deckgl.ScatterplotLayer({
-      id: 'dots',
-      data: [{coordinates: [0, 0]}, {coordinates: [0.001, 0]}],
-      getRadius: 100,
-      getPosition: d => d.coordinates,
-      getFillColor: [255, 255, 255],
-    });
+  mapboxgl.accessToken = 'pk.eyJ1IjoidWJlcmRhdGEiLCJhIjoiY2pwY3owbGFxMDVwNTNxcXdwMms2OWtzbiJ9.1PPVl0VLUQgqrosrI2nUhg';
 
-    const INITIAL_VIEWPORT_STATE = {
-      latitude: 0,
-      longitude: 0,
-      zoom: 15
-    };
-    const deck = new deckgl.Deck({
-      canvas: 'deck-map-container',
-      longitude: 0,
-      latitude: 0,
-      mapboxApiAccessToken: mapboxgl.accessToken,
-      viewState: INITIAL_VIEWPORT_STATE,
-      onViewportChange: onViewportChange,
-      views: [new deckgl.MapView()],
-      layers: [layer]
-    });
+  const deck = new core.Deck({
+    canvas: 'deck-map-container',
+    height: '{{height}}px',
+    width: '{{width}}px',
+    position: 'relative',
+    mapboxApiAccessToken: mapboxgl.accessToken,
+    onViewportChange: onViewportChange,
+    views: [new core.MapView()]
+  });
 
-    function onViewportChange(viewport) {
-      deck.setProps({viewState: viewport});
+  function onViewportChange(viewport) {
+    deck.setProps({viewState: viewport});
+  };
+
+  var exports = {};
+  var deckJsonApiExports = deckJsonApi(exports, core, d3Dsv);
+
+  var jsonConverter = new deckJsonApiExports._JSONConverter({
+    'configuration' : {
+      'layers':{
+        'HexagonLayer': core.HexagonLayer
+      }
     }
+  });
+  const results = jsonConverter.convertJsonToDeckProps({{json}});
+  deck.setProps(results);
 });
-</script>
-'''
+''')

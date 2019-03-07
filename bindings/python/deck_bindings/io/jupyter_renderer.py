@@ -1,33 +1,17 @@
-from IPython.utils import capture
+from . import snippets
+from IPython.core.display import (
+    display,
+    HTML,
+    Javascript
+)
 
 
-try:
-    Out = Out  # noqa
-except NameError:
-    raise Exception("No history variable detected. Are you executing this code in a Jupyter notebook?")
-
-
-def get_max_cell():
-    """Get the last cell executed in a Jupyter notebook"""
-    return max(Out.keys())
-
-
-
-def store_and_print(exec_func):
-    """Stores a 
-    with capture.capture_output() as cap:
-        def wrapper_func(*args, **kwargs):
-            exec_func(*args, **kwargs)
-        if cap.stdout:
-            print(cap.stdout)
-        if cap.stderr:
-            print(cap.stderr)
-    history = get_or_instantiate_history()
-    history.merge({
-        'cell_index': get_max_cell() + 1,
-        'output': cap.stdout})
-    cap.stdout
-
-
-def embed_in_cell(json):
-    pass
+def render_json(json, height=400, width=600):
+    # TODO cehck if the HTML is already cached in current cell and don't reload if it is
+    # Might be helpful:
+    # http://jakevdp.github.io/blog/2013/06/01/ipython-notebook-javascript-python-communication/
+    html = HTML(snippets.JUPYTER_HTML.render(height=height, width=width))
+    js_str = snippets.JUPYTER_JS.render(json=json, height=height, width=width)
+    rendered_js = Javascript(js_str)
+    display(html)
+    display(rendered_js)
