@@ -8,15 +8,30 @@ As shown in the [examples](https://github.com/uber/deck.gl/tree/master/examples/
 
 ## About Mapbox Tokens
 
-To show maps from a service such as Mapbox you will need to register with Mapbox and get a "token" that you need to provide to your map component. The map component will use the token to identify itself to the mapbox service which then will start serving up map tiles.
+react-map-gl and the underlying Mapbox GL JS libraries are open source and free to use. However, to load the map styles and tiles from Mapbox's data service, you will need to register on their website in order to retrieve an [access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/) required by the map component, which will be used to identify you and start serving up map tiles. The service will be free until a certain level of traffic is exceeded.
 
-To get a token, you typically need to register (create an account) with the map data provider (mapbox), and apply for a token. The token will usually be free until a certain level of traffic is exceeded.
+If you are using mapbox-gl without React, check out [Mapbox GL JS API](https://docs.mapbox.com/mapbox-gl-js/api/#accesstoken) for how to apply the token.
 
-While the token will need to be hard-coded into your application in production, there are several ways to provide a token during development:
+If you are using react-map-gl, there are several ways to provide a token to your app:
 
-* Modify file to specify your Mapbox token,
-* Set an environment variable (MapboxAccessToken) - through the use of a webpack loader or browserify transform, see the hello-world examples for details.
-* Provide a token in the URL. See documentation of react-map-gl.
+* Set the `MapboxAccessToken` environment variable. You may need to add additional set up to the bundler ([example](https://webpack.js.org/plugins/environment-plugin/)) so that `process.env.MapboxAccessToekn` is accessible at runtime.
+* Provide it in the URL, e.g `?access_token=TOKEN`
+* Pass it as a prop to the ReactMapGL instance `<ReactMapGL mapboxApiAccessToken={TOKEN} />`
+
+
+### Display Maps Without A Mapbox Token
+
+It is possible to use the map component without the Mapbox service, if you use another tile source (for example, if you host your own map tiles). You will need a custom Mapbox GL style that points to your own [vector tile source](https://www.mapbox.com/mapbox-gl-js/style-spec/), and pass it to `ReactMapGL` using the `mapStyle` prop. This custom style must match the schema of your tile source. 
+
+Open source tile schemas include: 
+
+- [TileZen schema](https://tilezen.readthedocs.io/en/latest/layers/)
+- [OpenMapTiles schema ](https://openmaptiles.org/schema/)
+
+Some useful resources for creating your own map service:
+
+- [Mapbox Vector Tile Spec](https://www.mapbox.com/developers/vector-tiles/)
+- [Open source tools](https://github.com/mapbox/awesome-vector-tiles)
 
 
 ## Mixing deck.gl and mapbox Layers

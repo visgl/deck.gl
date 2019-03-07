@@ -23,10 +23,8 @@
     "dist",
     "src"
   ],
-  "dependencies": {
-    "@deck.gl/core": "^7.0.0-alpha.4"
-  },
   "peerDependencies": {
+    "@deck.gl/core": "^7.0.0-alpha.4",
     "@probe.gl/test-utils": "^3.0.0-alpha.4"
   },
   "scripts": {
