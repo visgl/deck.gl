@@ -34,12 +34,25 @@ const MARKER_SIZE_MAP = {
 const ArcLayerExample = {
   layer: ArcLayer,
   getData: () => dataSamples.routes,
+  propTypes: {
+    getHeight: {
+      type: 'number',
+      max: 10
+    },
+    getTilt: {
+      type: 'number',
+      min: -90,
+      max: 90
+    }
+  },
   props: {
     id: 'arcLayer',
     getSourcePosition: d => d.START,
     getTargetPosition: d => d.END,
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
+    getHeight: d => 1,
+    getTilt: d => 0,
     pickable: true
   }
 };

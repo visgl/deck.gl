@@ -123,6 +123,19 @@ The stroke width of each object, in meters.
 * If a number is provided, it is used as the stroke width for all objects.
 * If a function is provided, it is called on each object to retrieve its stroke width.
 
+##### `getHeight` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1`
+
+Multiplier of layer height. `0` will make the layer flat.
+
+##### `getTilt` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `0`
+
+Use to tilt the arc to the side if you have multiple arcs with the same source and target positions.
+In degrees, can be positive or negative (`-90 to +90`).
+
 ## Source
 
 [/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer)
