@@ -30,7 +30,9 @@
     "prepublishOnly": "npm run build-bundle"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.0.0-alpha.4",
     "d3-dsv": "^1.0.8"
+  },
+  "peerDependencies": {
+    "@deck.gl/core": "^7.0.0-alpha.4"
   }
 }

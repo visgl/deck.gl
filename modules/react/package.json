@@ -27,10 +27,10 @@
   "scripts": {
   },
   "dependencies": {
-    "@deck.gl/core": "^7.0.0-alpha.4",
     "prop-types": "^15.6.0"
   },
   "peerDependencies": {
+    "@deck.gl/core": "^7.0.0-alpha.4",
     "react": "0.14.x - 16.x",
     "react-dom": "0.14.x - 16.x"
   }

@@ -31,7 +31,6 @@
   "dependencies": {
     "@loaders.gl/core": "^0.6.2",
     "@mapbox/tiny-sdf": "^1.1.0",
-    "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6"
   },
   "peerDependencies": {
