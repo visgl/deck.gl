@@ -38,6 +38,8 @@ const defaultProps = {
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
+  getHeight: {type: 'accessor', value: 1},
+  getTilt: {type: 'accessor', value: 0},
   widthScale: {type: 'number', value: 1, min: 0},
   widthMinPixels: {type: 'number', value: 1, min: 0},
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
@@ -89,6 +91,18 @@ export default class ArcLayer extends Layer {
         transition: true,
         accessor: 'getWidth',
         defaultValue: 1
+      },
+      instanceHeights: {
+        size: 1,
+        transition: true,
+        accessor: 'getHeight',
+        defaultValue: 1
+      },
+      instanceTilts: {
+        size: 1,
+        transition: true,
+        accessor: 'getTilt',
+        defaultValue: 0
       }
     });
     /* eslint-enable max-len */
