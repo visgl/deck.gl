@@ -1,18 +1,6 @@
 const {resolve} = require('path');
 
 module.exports = {
-  babel: {
-    plugins: [
-      'version-inline',
-      [
-        'remove-glsl-comments',
-        {
-          patterns: ['**/*.glsl.js']
-        }
-      ]
-    ]
-  },
-
   lint: {
     paths: ['modules', 'examples', 'test'],
     extensions: ['js']
@@ -23,9 +11,9 @@ module.exports = {
   },
 
   entry: {
-    'test-node': 'test/modules/index.js',
+    test: 'test/modules/index.js',
     'test-browser': 'test/browser.js',
-    'bench-node': 'test/bench/index.js',
+    bench: 'test/bench/index.js',
     'bench-browser': 'test/bench/browser.js',
     size: 'test/size/import-nothing.js'
   }
