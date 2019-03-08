@@ -12,7 +12,9 @@ const webpack = require('webpack');
 const LIB_DIR = resolve(__dirname, '../..');
 const SRC_DIR = resolve(LIB_DIR, 'modules');
 
-const ALIASES = require('../../aliases')('src');
+const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+  root: resolve(__dirname, '../..')
+}).aliases;
 
 // Support for hot reloading changes to the deck.gl library:
 function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
