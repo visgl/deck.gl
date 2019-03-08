@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, WebMercatorViewport, log} from '@deck.gl/core';
+import {Layer, WebMercatorViewport, createIterable, log} from '@deck.gl/core';
 import {defaultColorRange} from '../utils/color-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
@@ -261,11 +261,12 @@ export default class ScreenGridLayer extends Layer {
     const colorWeights = [];
     const {weights} = this.state;
 
-    for (const point of data) {
-      const position = getPosition(point);
+    // TODO - using array.push is expensive
+    for (const object of createIterable(data)) {
+      const position = getPosition(object.element, object);
       positions.push(position[0]);
       positions.push(position[1]);
-      colorWeights.push(...this._getWeight(point));
+      colorWeights.push(...this._getWeight(object.element, object));
     }
     weights.color.values = colorWeights;
     this.setState({positions});

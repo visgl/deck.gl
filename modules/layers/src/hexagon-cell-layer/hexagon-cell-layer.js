@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log} from '@deck.gl/core';
+import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
@@ -191,8 +191,8 @@ export default class HexagonCellLayer extends Layer {
     const {data, getCentroid} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const object of data) {
-      const position = getCentroid(object);
+    for (const object of createIterable(data)) {
+      const position = getCentroid(object.element, object);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }

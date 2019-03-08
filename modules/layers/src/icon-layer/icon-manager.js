@@ -2,6 +2,7 @@
 import GL from '@luma.gl/constants';
 import {Texture2D, readPixelsToBuffer} from 'luma.gl';
 import {loadImage} from '@loaders.gl/core';
+import {createIterable} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
@@ -148,8 +149,8 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
 
   cachedIcons = cachedIcons || {};
   const icons = {};
-  for (const point of data) {
-    const icon = getIcon(point);
+  for (const object of createIterable(data)) {
+    const icon = getIcon(object.element, object);
     const id = getIconId(icon);
 
     if (!icon) {
@@ -164,7 +165,6 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
       icons[id] = icon;
     }
   }
-
   return icons;
 }
 
@@ -201,7 +201,7 @@ export default class IconManager {
   }
 
   getIconMapping(dataPoint) {
-    const icon = this._getIcon(dataPoint);
+    const icon = this._getIcon(dataPoint.element, dataPoint);
     const id = this._autoPacking ? getIconId(icon) : icon;
     return this._mapping[id] || {};
   }

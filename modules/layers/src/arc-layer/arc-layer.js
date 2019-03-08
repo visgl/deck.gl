@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry, fp64} from 'luma.gl';
@@ -165,9 +165,9 @@ export default class ArcLayer extends Layer {
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
+    for (const object of createIterable(data)) {
+      const sourcePosition = getSourcePosition(object.element, object);
+      const targetPosition = getTargetPosition(object.element, object);
       value[i + 0] = sourcePosition[0];
       value[i + 1] = sourcePosition[1];
       value[i + 2] = targetPosition[0];
@@ -188,9 +188,9 @@ export default class ArcLayer extends Layer {
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
+    for (const object of createIterable(data)) {
+      const sourcePosition = getSourcePosition(object.element, object);
+      const targetPosition = getTargetPosition(object.element, object);
       value[i + 0] = fp64LowPart(sourcePosition[0]);
       value[i + 1] = fp64LowPart(sourcePosition[1]);
       value[i + 2] = fp64LowPart(targetPosition[0]);
