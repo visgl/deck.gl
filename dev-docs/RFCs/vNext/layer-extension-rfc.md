@@ -23,6 +23,11 @@ To mitigate this, we can of course add as many customizable functionalities to t
 
 ## Case Studies
 
+### fp64
+
+* Shader module: `project64` (replaces `project32`)
+* Uniforms: `projectionFP64[16]`, `projectionScaleFP64`
+
 ### Picking
 
 Components:
@@ -30,6 +35,7 @@ Components:
 * Props: `pickable`, `autoHighlight`, `highlightedObjectIndex`, `highlightColor`
 * Shader module: `picking`
 * Attribute: `instancePickingColors` (generated regardless of the `pickable` setting)
+* Uniforms: `picking_uActive`, `picking_uHighlightColor`, `picking_uSelectedColor`
 * Shader injection:
   - Vertex shader: `picking_setPickingColor(instancePickingColors);`
   - Fragment shader: `gl_FragColor = picking_filterHighlightColor(gl_FragColor); gl_FragColor = picking_filterPickingColor(gl_FragColor);`
@@ -43,6 +49,7 @@ Components:
 * Props: `getFilterValue`, `filterRange`
 * Shader module: `filter`
 * Attributes: `instanceFilterValue`
+* Uniforms: `filterRange`
 * Shader injection:
   - Vertex shader: `filter_setVisibility(instanceFilterValue);`
   - Frament shader: `gl_FragColor = filter_filterColor(gl_FragColor);`
@@ -55,6 +62,7 @@ A generic version of this functionality would need the following components:
 
 * Props: `enableBrush`, `brushRadius`
 * Shader module: `brush`
+* Uniforms: `mousePosition`, `enableBrush`, `brushRadius`
 * Shader injection:
   - Vertex shader: `brush_setVisibility(instancePositions);`
   - Frament shader: `gl_FragColor = brush_filterColor(gl_FragColor);`
@@ -79,10 +87,11 @@ Some changes to the base Layer class are needed to make a generic, reusable exte
 This is inspired by React's [Higher-Order Components](https://reactjs.org/docs/higher-order-components.html) concept.
 
 ```js
-import {Deck, ScatterplotLayer} from 'deck.gl';
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {brushing, filterable} from '@deck.gl/layer-extensions';
 
-const BrushingFiterableScatterplotLayer = brushing(filterable(ScatterplotLayer));
+const BrushingFiterableScatterplotLayer = brushing(filterable(ScatterplotLayer, {size: 2}));
 
 new Deck({
   layers: [
@@ -100,13 +109,23 @@ new Deck({
 
 When used, these extensions wrap the original layer and return a new class with the additional functionality.
 
+Pros:
+
+- The extension system can be implemented entirely independently from the core.
+
+Cons:
+
+- Composite layers are difficult to extend in this fashion. Sub layer classes need to be extended individually and overriden with `subLayerProps`.
+- Using multiple extensions will wrap a layer in nested classes, making it harder to debug.
+
 
 ### Idea 2: Extensions Prop
 
 Add a new `extensions` prop to the base `Layer` class which accepts an array of `LayerExtension` objects.
 
 ```js
-import {Deck, ScatterplotLayer} from 'deck.gl';
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {Brushing, DataFilter} from '@deck.gl/layer-extensions';
 
 const LAYER_EXTENSIONS = [
@@ -130,6 +149,16 @@ new Deck({
 ```
 
 The default value of `extensions` is `[new Picking()]`.
+
+Pros:
+
+- Composite layers can directly pass extensions to sub layers
+- Flat structure, easy to read
+
+Cons:
+
+- The base layer class need to handle the shallow/deep change of the prop and recompile the shader on change.
+
 
 #### LayerExtension Class
 
