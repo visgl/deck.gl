@@ -1,0 +1,3 @@
+{
+  "extends": "node_modules/ocular-dev-tools/templates/.nycrc"
+}

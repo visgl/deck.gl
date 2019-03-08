@@ -6,6 +6,7 @@ node_modules/
 coverage/
 .nyc_output/
 .vscode/
+.reify-cache/
 
 dist-bundle.js
 examples/winds/data/*.html
