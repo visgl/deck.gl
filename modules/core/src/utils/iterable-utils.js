@@ -18,78 +18,33 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+const EMPTY_ARRAY = [];
+const placeholderArray = [];
+
 /*
- * Make sure that `data` is an iterable.
+ * Create an Iterable
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
+ * and a "context" tracker from the given data
  */
 export function createIterable(data) {
+  let iterable = EMPTY_ARRAY;
+
+  const objectInfo = {
+    index: -1,
+    data,
+    // visitor can optionally utilize this to avoid constructing a new array for every object
+    target: []
+  };
+
   if (!data) {
-    return null;
-  }
-
-  if (typeof data[Symbol.iterator] === 'function') {
+    iterable = EMPTY_ARRAY;
+  } else if (typeof data[Symbol.iterator] === 'function') {
     // data is already an iterable
-    return {
-      [Symbol.iterator]: () => wrapIterator(data)
-    };
+    iterable = data;
+  } else if (data.length > 0) {
+    placeholderArray.length = data.length;
+    iterable = placeholderArray;
   }
 
-  return {
-    [Symbol.iterator]: () => getIterator(data)
-  };
-}
-
-// Create an iterator for `for...of` loops
-function getIterator(data) {
-  const length = data.length || 0;
-
-  const value = {
-    element: null,
-    index: -1,
-    data,
-    // visitor can optionally utilize this to avoid constructing a new array for every object
-    target: []
-  };
-
-  const result = {
-    value,
-    done: false
-  };
-
-  const next = () => {
-    if (++value.index >= length) {
-      result.done = true;
-    }
-    return result;
-  };
-
-  return {next};
-}
-
-// Wraps an iterator with our own format for `for...of` loops
-function wrapIterator(data) {
-  const iterator = data[Symbol.iterator]();
-
-  const value = {
-    element: null,
-    index: -1,
-    data,
-    // visitor can optionally utilize this to avoid constructing a new array for every object
-    target: []
-  };
-
-  const result = {
-    value,
-    done: false
-  };
-
-  const next = () => {
-    const originalResult = iterator.next();
-    value.index++;
-    value.element = originalResult.value;
-    result.done = originalResult.done;
-    return result;
-  };
-
-  return {next};
+  return {iterable, objectInfo};
 }

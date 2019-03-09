@@ -111,9 +111,11 @@ export default class Tesselator {
    */
   _forEachGeometry(visitor) {
     const {data, getGeometry} = this;
-    for (const object of createIterable(data)) {
-      const geometry = getGeometry(object.element, object);
-      visitor(geometry, object.index);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const geometry = getGeometry(object, objectInfo);
+      visitor(geometry, objectInfo.index);
     }
   }
 
@@ -121,9 +123,11 @@ export default class Tesselator {
     const {data, bufferLayout} = this;
 
     let i = 0;
-    for (const object of createIterable(data)) {
-      const value = getValue(object.element, object);
-      const numVertices = bufferLayout[object.index];
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const value = getValue(object, objectInfo);
+      const numVertices = bufferLayout[objectInfo.index];
 
       fillArray({target, source: value, start: i, count: numVertices});
       i += numVertices * size;

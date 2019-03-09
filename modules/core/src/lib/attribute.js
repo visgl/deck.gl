@@ -281,8 +281,10 @@ export default class LayerAttribute extends Attribute {
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = 0;
-    for (const object of createIterable(data)) {
-      const objectValue = accessorFunc(object.element, object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const objectValue = accessorFunc(object, objectInfo);
       this._normalizeValue(objectValue, value, i);
       i += size;
     }

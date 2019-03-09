@@ -307,10 +307,7 @@ export default class PathLayer extends Layer {
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
     const {pathTesselator} = this.state;
-    const pickingColor = [];
-    attribute.value = pathTesselator.get('pickingColors', attribute.value, index =>
-      this.encodePickingColor(index, pickingColor)
-    );
+    attribute.value = pathTesselator.get('pickingColors', attribute.value, this.encodePickingColor);
   }
 
   clearPickingColor(color) {
