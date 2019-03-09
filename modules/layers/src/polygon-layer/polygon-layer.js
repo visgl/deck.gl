@@ -87,9 +87,11 @@ export default class PolygonLayer extends CompositeLayer {
     const paths = [];
     const positionSize = positionFormat === 'XY' ? 2 : 3;
 
-    for (const object of createIterable(data)) {
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
       const {positions, holeIndices} = Polygon.normalize(
-        getPolygon(object.element, object),
+        getPolygon(object, objectInfo),
         positionSize
       );
 
@@ -102,10 +104,10 @@ export default class PolygonLayer extends CompositeLayer {
             holeIndices[i - 1] || 0,
             holeIndices[i] || positions.length
           );
-          paths.push({path, object: object.element});
+          paths.push({path, object});
         }
       } else {
-        paths.push({path: positions, object: object.element});
+        paths.push({path: positions, object});
       }
     }
     return paths;

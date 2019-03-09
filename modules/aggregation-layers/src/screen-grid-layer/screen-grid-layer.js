@@ -262,11 +262,13 @@ export default class ScreenGridLayer extends Layer {
     const {weights} = this.state;
 
     // TODO - using array.push is expensive
-    for (const object of createIterable(data)) {
-      const position = getPosition(object.element, object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const position = getPosition(object, objectInfo);
       positions.push(position[0]);
       positions.push(position[1]);
-      colorWeights.push(...this._getWeight(object.element, object));
+      colorWeights.push(...this._getWeight(object, objectInfo));
     }
     weights.color.values = colorWeights;
     this.setState({positions});

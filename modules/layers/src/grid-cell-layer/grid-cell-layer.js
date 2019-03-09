@@ -139,8 +139,10 @@ export default class GridCellLayer extends Layer {
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const object of createIterable(data)) {
-      const position = getPosition(object.element, object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const position = getPosition(object, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }

@@ -221,8 +221,10 @@ export default class IconLayer extends Layer {
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const object of createIterable(data)) {
-      const position = getPosition(object.element, object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const position = getPosition(object, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
@@ -233,8 +235,10 @@ export default class IconLayer extends Layer {
     const {iconManager} = this.state;
     const {value} = attribute;
     let i = 0;
-    for (const object of createIterable(data)) {
-      const rect = iconManager.getIconMapping(object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const rect = iconManager.getIconMapping(object, objectInfo);
       value[i++] = rect.width / 2 - rect.anchorX || 0;
       value[i++] = rect.height / 2 - rect.anchorY || 0;
     }
@@ -245,8 +249,10 @@ export default class IconLayer extends Layer {
     const {iconManager} = this.state;
     const {value} = attribute;
     let i = 0;
-    for (const object of createIterable(data)) {
-      const mapping = iconManager.getIconMapping(object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const mapping = iconManager.getIconMapping(object, objectInfo);
       const colorMode = mapping.mask;
       value[i++] = colorMode ? 1 : 0;
     }
@@ -257,8 +263,10 @@ export default class IconLayer extends Layer {
     const {iconManager} = this.state;
     const {value} = attribute;
     let i = 0;
-    for (const object of createIterable(data)) {
-      const rect = iconManager.getIconMapping(object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const rect = iconManager.getIconMapping(object, objectInfo);
       value[i++] = rect.x || 0;
       value[i++] = rect.y || 0;
       value[i++] = rect.width || 0;

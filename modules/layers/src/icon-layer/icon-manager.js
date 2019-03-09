@@ -149,8 +149,10 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
 
   cachedIcons = cachedIcons || {};
   const icons = {};
-  for (const object of createIterable(data)) {
-    const icon = getIcon(object.element, object);
+  const {iterable, objectInfo} = createIterable(data);
+  for (const object of iterable) {
+    objectInfo.index++;
+    const icon = getIcon(object, objectInfo);
     const id = getIconId(icon);
 
     if (!icon) {
@@ -200,8 +202,8 @@ export default class IconManager {
     return this._texture;
   }
 
-  getIconMapping(dataPoint) {
-    const icon = this._getIcon(dataPoint.element, dataPoint);
+  getIconMapping(object, objectInfo) {
+    const icon = this._getIcon(object, objectInfo);
     const id = this._autoPacking ? getIconId(icon) : icon;
     return this._mapping[id] || {};
   }

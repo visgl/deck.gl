@@ -36,13 +36,15 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
 
   // add world space coordinates to points
   const screenPoints = [];
-  for (const object of createIterable(data)) {
+  const {iterable, objectInfo} = createIterable(data);
+  for (const object of iterable) {
+    objectInfo.index++;
     screenPoints.push(
       Object.assign(
         {
-          screenCoord: viewport.projectFlat(getPosition(object.element, object))
+          screenCoord: viewport.projectFlat(getPosition(object, objectInfo))
         },
-        object.element
+        object
       )
     );
   }

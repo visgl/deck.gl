@@ -134,9 +134,11 @@ export default class LineLayer extends Layer {
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
     let i = 0;
-    for (const object of createIterable(data)) {
-      const sourcePosition = getSourcePosition(object.element, object);
-      const targetPosition = getTargetPosition(object.element, object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const sourcePosition = getSourcePosition(object, objectInfo);
+      const targetPosition = getTargetPosition(object, objectInfo);
       value[i + 0] = fp64LowPart(sourcePosition[0]);
       value[i + 1] = fp64LowPart(sourcePosition[1]);
       value[i + 2] = fp64LowPart(targetPosition[0]);

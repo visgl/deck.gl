@@ -156,8 +156,10 @@ export default class TextLayer extends CompositeLayer {
 
     const transformedData = [];
 
-    for (const object of createIterable(data)) {
-      const text = getText(object.element, object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = getText(object, objectInfo);
       if (text) {
         const letters = Array.from(text);
         const offsets = [0];
@@ -170,8 +172,8 @@ export default class TextLayer extends CompositeLayer {
             offsets,
             len: text.length,
             // reference of original object and object index
-            object: object.element,
-            objectIndex: object.index
+            object,
+            objectIndex: objectInfo.index
           };
 
           const frame = iconMapping[letter];
