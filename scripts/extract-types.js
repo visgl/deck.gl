@@ -4,7 +4,12 @@
 // Enables ES2015 import/export in Node.js
 require('reify');
 
-require('../aliases');
+const moduleAlias = require('module-alias');
+const config = require('ocular-dev-tools/config/ocular.config')({
+  aliasMode: 'src',
+  root: resolve(__dirname, '..')
+});
+moduleAlias.addAliases(config.aliases);
 
 genTypesForLayers(require('../modules/layers/src'));
 genTypesForLayers(require('../modules/experimental-layers/src'));
