@@ -9,7 +9,6 @@ import {
   readPixelsToBuffer
 } from 'luma.gl';
 import {log} from '@deck.gl/core';
-import assert from '../../../utils/assert';
 import {fp64 as fp64Utils, withParameters} from 'luma.gl';
 import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64Utils;
@@ -46,8 +45,8 @@ import {
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
   static getAggregationData({aggregationData, maxData, pixelIndex}) {
-    assert(aggregationData.length >= (pixelIndex + 1) * PIXEL_SIZE);
-    assert(maxData.length === PIXEL_SIZE);
+    log.assert(aggregationData.length >= (pixelIndex + 1) * PIXEL_SIZE);
+    log.assert(maxData.length === PIXEL_SIZE);
     const index = pixelIndex * PIXEL_SIZE;
     const cellCount = aggregationData[index + 3];
     const cellWeight = aggregationData[index];
@@ -161,7 +160,7 @@ export default class GPUGridAggregator {
   // Perform aggregation and retun the results
   run(opts = {}) {
     const aggregationParams = this.getAggregationParams(opts);
-    assert(aggregationParams);
+    log.assert(aggregationParams);
     this.updateGridSize(aggregationParams);
     const {useGPU} = aggregationParams;
     if (this._hasGPUSupport && useGPU) {
@@ -263,28 +262,32 @@ export default class GPUGridAggregator {
     this.setState({numCol, numRow, windowSize: [width, height]});
   }
 
-  // validate and assert
+  /* eslint-disable complexity */
+  // validate and log.assert
   validateProps(aggregationParams, opts) {
     const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
-    assert(changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged);
+    log.assert(
+      changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged
+    );
 
-    // assert for required options
-    assert(
+    // log.assert for required options
+    log.assert(
       !changeFlags.dataChanged ||
         (opts.positions &&
           opts.weights &&
           (!opts.projectPositions || opts.viewport) &&
           opts.cellSize)
     );
-    assert(!changeFlags.cellSizeChanged || opts.cellSize);
+    log.assert(!changeFlags.cellSizeChanged || opts.cellSize);
 
     // viewport need only when performing screen space aggregation (projectPoints is true)
-    assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
+    log.assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
 
     if (projectPoints && gridTransformMatrix) {
       log.warn('projectPoints is true, gridTransformMatrix is ignored')();
     }
   }
+  /* eslint-enable complexity */
 
   // CPU Aggregation methods
 
@@ -295,13 +298,13 @@ export default class GPUGridAggregator {
     for (const id in weights) {
       const {values, size, operation} = weights[id];
       const {aggregationData} = results[id];
-      assert(size >= 1 && size <= 3);
+      log.assert(size >= 1 && size <= 3);
 
       // Fill RGB with weights
       for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
         const cellElementIndex = cellIndex + sizeIndex;
         const weightComponent = values[posIndex * WEIGHT_SIZE + sizeIndex];
-        assert(Number.isFinite(weightComponent));
+        log.assert(Number.isFinite(weightComponent));
         if (aggregationData[cellIndex + 3] === 0) {
           // if the cell is getting update the first time, set the value directly.
           aggregationData[cellElementIndex] = weightComponent;
@@ -326,7 +329,7 @@ export default class GPUGridAggregator {
               break;
             default:
               // Not a valid operation enum.
-              assert(false);
+              log.assert(false);
               break;
           }
         }
@@ -444,7 +447,7 @@ export default class GPUGridAggregator {
     const gridTransformRequired = this.shouldTransformToGrid(opts);
     let gridPositions = [];
 
-    assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
+    log.assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
 
     let posCount;
     if (gridTransformRequired) {
@@ -848,7 +851,7 @@ export default class GPUGridAggregator {
       const {values} = weights[id];
       // values can be Array, Float32Array or Buffer
       if (Array.isArray(values) || values.constructor === Float32Array) {
-        assert(values.length / 3 === vertexCount);
+        log.assert(values.length / 3 === vertexCount);
         const typedArray = Array.isArray(values) ? new Float32Array(values) : values;
         if (weightAttributes[id] instanceof Buffer) {
           weightAttributes[id].setData(typedArray);
@@ -856,8 +859,8 @@ export default class GPUGridAggregator {
           weightAttributes[id] = new Buffer(this.gl, typedArray);
         }
       } else {
-        // assert((values instanceof Attribute) || (values instanceof Buffer));
-        assert(values instanceof Buffer);
+        // log.assert((values instanceof Attribute) || (values instanceof Buffer));
+        log.assert(values instanceof Buffer);
         weightAttributes[id] = values;
       }
     }
@@ -900,7 +903,7 @@ export default class GPUGridAggregator {
     }
 
     if (createPos64xyLow) {
-      assert(positions64xyLow);
+      log.assert(positions64xyLow);
       if (positions64xyLowBuffer) {
         positions64xyLowBuffer.delete();
       }

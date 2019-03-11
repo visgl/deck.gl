@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {quantizeScale} from '@deck.gl/core/utils/scale-utils';
+import {quantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
 
 const RANGE = [100, 200, 300, 400, 500, 600, 700, 800, 900, 1000];
 const QUANTIZE_SCALE_TEST_CASES = [

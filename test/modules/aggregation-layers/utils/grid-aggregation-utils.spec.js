@@ -20,11 +20,11 @@
 
 import test from 'tape-catch';
 
-import {alignToCell} from '@deck.gl/core/experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
-import {
-  _pointToDensityGridData as pointToDensityGridData,
-  _GPUGridAggregator as GPUGridAggregator
-} from '@deck.gl/core';
+import {alignToCell} from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/grid-aggregation-utils';
+
+import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {pointToDensityGridData} from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/grid-aggregation-utils';
+
 import {gl} from '@deck.gl/test-utils';
 import * as FIXTURES from 'deck.gl/test/data';
 
