@@ -2,7 +2,10 @@
 const {resolve} = require('path');
 const webpack = require('webpack');
 
-const getAliases = require('../aliases');
+const ALIASES = require('ocular-dev-tools/config/ocular.config')({
+  aliasMode: 'src',
+  root: resolve(__dirname, '..')
+}).aliases;
 
 const PACKAGE_ROOT = resolve('.');
 const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
@@ -53,7 +56,7 @@ const config = {
   },
 
   resolve: {
-    alias: Object.assign({}, getAliases('src'))
+    alias: ALIASES
   },
 
   module: {
