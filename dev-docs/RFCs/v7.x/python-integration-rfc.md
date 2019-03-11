@@ -54,51 +54,85 @@ One option is that it could make sense to build things like tooltip support and 
 
 To minimize initial effort and long-term maintenance, we want to keep the scope very limited and focus on solving core problems such as:
 
+Primary goals:
 * Making the deck.gl Python module easy to install and use for Python users
 * Handle proper initial sizing and resizing the JavaScript/HTML window
 * Efficiently transfer large data sets between Python and JavaScript
+
+Secondary goals:
 * Make it easy to build more ambitions Python class libraries on top of the basic module.
 
 
 ### Constraints
 
-deck.gl should not grow to include a major Python port of its API (e.g. a Python class library that mirrors all deck.gl layers). That would represent too big of a distraction to the core deck.gl mission. We should leave such work to the community, and instead encourage, support and promote such efforts as they happen.
+deck.gl **should not** include a major Python port of its API (e.g. a big Python class library that mirrors all deck.gl layers). That would represent too big a distraction to the core deck.gl mission.
 
-Something we would likely want to support is that other deck.gl/Python integtation libraries build on our official integration (i.e. they use it as a python dependency). Alternatively, they could just use it as an inspiration/springboard to get started, or fork it to help them solve some of the initial integration issues.
+We should leave such work to the Python community, and instead encourage, support and promote such efforts as they happen.
+Thus, we'd encourage independent deck.gl/Python integration libraries build on our official "minimal" integration and try to support them if they have issues.
+
+External python deck.gl; integration libraries could  either use it as a python dependency, or alternatively, they could just use it as an springboard to get started, perhaps forking it to help them solve some of the basic Python/JavaScript integration issues.
+
+
+## Integration Approaches
+
+Starting up a JavaScript cell in Notebook can be done in (at least) two different ways:
+
+* (Dynamically) generated JavaScript app
+    * Could generate dynamical code
+    * loading pre-bundled deck.gl from CDN.
+
+* iframe linking to published app
+    * python would generates minimal iframe HTML wrapper
+    * I would like to URL published application (e.g. https://deck.gl/json).
+    * NOTE: This setup can support non-deck.gl applications
+
+
+x* We do not currently publish the JSON module as part of the standalone bundle in 6.4. In 7.0 we plan to publish a master bundle (deckgl.min.js) as well as individual bundles for each submodule.
+* We could make a decision which bundles to include for the Python API.
+* Alternatively, the JSON module allows additional layer modules to be registered. Perhaps the Python API could take a list of layer module URLs, and inject those requires into the HTML and register the imported layers.
 
 
 ## Technical Challenges
 
-* Starting up a JavaScript iframe in Notebook
-  * The solution will be loading pre-bundled deck.gl from CDN.
-  * We do not currently publish the JSON module as part of the standalone bundle in 6.4. In 7.0 we plan to publish a master bundle (deckgl.min.js) as well as individual bundles for each submodule.
-  * We could make a decision which bundles to include for the Python API.
-  * Alternatively, the JSON module allows additional layer modules to be registered. Perhaps the Python API could take a list of layer module URLs, and inject those requires into the HTML and register the imported layers.
 
-* Controlling Size of iframe
-  * full screen rendering
-  * height of frame controllable by app?
-  * frame resizable by user?
+* The solution will be loading pre-bundled deck.gl from CDN.
 
-* One way communication
-  * Most Python/JS bindings generate HTML dynamically using Python API then create the iframe, after that Python has no more control.
-  * However deck.gl JSON api can accept new JSON payloads, they go through standard deck.gl layer diffing.
-  * Maintain a network connection so that Python can push new payloads?
+* Controlling size of deck.gl visualization
+    * height of frame controllable by python code?
+    * frame auto resizes to full width screen?
+    * frame height (width?) resizable by user?
 
-* Efficient data transfer
-  * Many Python JS integrations serialize data into the HTML/JS payload.
-  * Inefficient for large data sets.
-  * Want to support binary data transfer: panda dataframe -> pyarrow -> deck
+* Continuous Updates?
+    * Most Python/JS bindings generate HTML dynamically using Python API then create the iframe, after that Python has no more control.
+    * However deck.gl JSON api can accept new JSON payloads, they go through standard deck.gl layer diffing.
+    * As fallback, Python can emit new invisible HTML cells that "postmessage" to the (iframed) app.
+    * Ideally for best perf we'd maintain a network connection from remote notebook to JS app so that Python can push new payloads?
+
+* Two-way Communication?
+    * It would be great if deck.gl could send mouse clicks etc back to Python.
+    * So far we have not discovered and Ikernel or similar method to achieve this.
+
+* Efficient/Binary Data Transfer
+    * Many Python JS integrations serialize data into the HTML/JS payload.
+    * Inefficient for large data sets.
+    * Want to support binary data transfer: panda dataframe -> pyarrow -> deck
+    * Ideally for best perf we'd maintain a network connection from remote notebook to JS app so that Python can push new payloads?
+
+* WebGL Context Reuse
+    * When using multiple cells the user can quickly run out of deck.gl contexts, leading to intermittent deck.gl failures
+    * It should be possible to add a WebGLContext reuse system to deck.gl similar to react-map-gl
+    * Investigate if the notebook provides the right callbacks to enable reuse across cells
+    * (It may be hard to reuse across iframed apps...)
 
 
 ## Practical Concerns
-
 
 * How to publish Python modules (pip, conda)?
 * When to update? (every JS release)
 * Versioning schemes (do Python package managers use semver)?
 * Where to put Python code? (in same github repo, `bindings/python`?)
 * Maintenance: deck.gl programmers don't regularly use Python
+* Testing/Deployment
 * ...
 
 
@@ -134,11 +168,3 @@ Minimal integrations for other languages? Especially languages that run in Noteb
 
 See the [mapdeck](https://symbolixau.github.io/mapdeck/articles/mapdeck.html) integration for R.
 
-
-### Sample External Python Framework Integration
-
-Support development of an ongoing prototype integration.
-
-* A richer Python class API exposing the deck.gl layers.
-* Port it to use JSON API (at least as an option to generating HTML)
-* Extend it to support two way updates if possible?
