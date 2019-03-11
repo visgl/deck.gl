@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import log from './log';
+import {log} from '@deck.gl/core';
 
 // Linear scale maps continuous domain to continuous range
 export function linearScale(domain, range, value) {

@@ -1,5 +1,6 @@
 import test from 'tape-catch';
-import {_GPUGridAggregator as GPUGridAggregator, AGGREGATION_OPERATION} from '@deck.gl/core';
+import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {AGGREGATION_OPERATION} from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
 import {gl} from '@deck.gl/test-utils';
 import {GridAggregationData} from 'deck.gl/test/data';
 import {equals, config} from 'math.gl';
