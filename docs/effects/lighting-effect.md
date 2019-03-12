@@ -92,6 +92,8 @@ Array of point light source which emits from a point in all directions.
     * [GeoJsonLayer](/docs/layers/geojson-layer.md)
     * [HexagonLayer](/docs/layers/hexagon-layer.md)
     * [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md)
+    * [GridLayer](/docs/layers/grid-layer.md)
+    * [GridCellLayer](/docs/layers/grid-cell-layer.md)
     * [PointCloudLayer](/docs/layers/point-cloud-layer.md)
     * [PolygonLayer](/docs/layers/polygon-layer.md)
 
