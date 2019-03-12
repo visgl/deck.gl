@@ -52,10 +52,10 @@ test('ViewManager#needsRedraw', t => {
 
   viewManager.getViewports();
 
-  let redrawReason = viewManager.needsRedraw({clearRedrawFlags: false});
+  let redrawReason = viewManager.needsRedraw();
   t.equals(typeof redrawReason, 'string', 'Viewport needs redrawing');
 
-  redrawReason = viewManager.needsRedraw();
+  redrawReason = viewManager.needsRedraw({clearRedrawFlags: true});
   t.equals(typeof redrawReason, 'string', 'Viewport still needs redrawing');
 
   redrawReason = viewManager.needsRedraw();
