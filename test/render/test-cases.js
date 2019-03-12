@@ -546,9 +546,13 @@ export const TEST_CASES = [
     renderingTimes: 2,
     layers: [
       new IconLayer({
-        id: 'icon-lnglat',
+        id: 'icon-lnglat-64',
         data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        iconMapping: dataSamples.iconAtlas,
         sizeScale: 12,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        fp64: true,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -566,8 +570,7 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
-    referenceImageUrl: './test/render/golden-images/icon-lnglat.png',
-    ignoreGPUs: [`Intel`]
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
     name: 'geojson-lnglat',
