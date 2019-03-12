@@ -102,4 +102,4 @@ Array of point light source which emits from a point in all directions.
 
 ## Source
 
-[/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting-effect.js)
+[/modules/core/src/effects/lighting-effect.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting-effect.js)
