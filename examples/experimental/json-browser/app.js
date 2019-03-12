@@ -1,5 +1,3 @@
-// @noflow
-/* prettier-ingore-start */
 /* global window */
 import React, {Component} from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
