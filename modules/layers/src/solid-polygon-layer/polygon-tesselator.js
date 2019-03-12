@@ -29,10 +29,6 @@ const {Tesselator} = experimental;
 import {fp64 as fp64Module} from 'luma.gl';
 const {fp64LowPart} = fp64Module;
 
-// colorArray is used to copy over color values if the passed color is an RGB
-// array instead of RGBA
-const colorArray = [0, 0, 0, 255];
-
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PolygonTesselator extends Tesselator {
@@ -66,22 +62,26 @@ export default class PolygonTesselator extends Tesselator {
         return this._updateAttribute({
           target,
           size: 1,
-          getValue: object => [accessor(object)]
+          getValue: (object, {target: value}) => {
+            value[0] = accessor(object);
+            return value;
+          }
         });
 
       case 'colors':
         return this._updateAttribute({
           target,
           size: 4,
-          getValue: object => {
+          getValue: (object, {target: value}) => {
             const color = accessor(object);
             if (color.length === 4) {
               return color;
             }
-            colorArray[0] = color[0];
-            colorArray[1] = color[1];
-            colorArray[2] = color[2];
-            return colorArray;
+            value[0] = color[0];
+            value[1] = color[1];
+            value[2] = color[2];
+            value[3] = 255;
+            return value;
           }
         });
 
@@ -89,7 +89,7 @@ export default class PolygonTesselator extends Tesselator {
         return this._updateAttribute({
           target,
           size: 3,
-          getValue: (object, index) => accessor(index)
+          getValue: (object, {index, target: value}) => accessor(index, value)
         });
 
       default:

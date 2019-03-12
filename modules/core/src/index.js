@@ -78,6 +78,7 @@ export {default as FlyToInterpolator} from './transitions/viewport-fly-to-interp
 export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
+export {createIterable} from './utils/iterable-utils';
 import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 
 // Exports for layers
