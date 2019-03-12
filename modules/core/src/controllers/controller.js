@@ -263,7 +263,7 @@ export default class Controller {
       return false;
     }
     const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos) || !this.isDragging()) {
+    if (!this.isDragging()) {
       return false;
     }
     const newControllerState = this.controllerState.pan({pos});
