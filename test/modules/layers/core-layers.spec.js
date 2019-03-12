@@ -78,8 +78,6 @@ test('ScreenGridLayer#constructor', t => {
 });
 
 test('ScatterplotLayer#constructor', t => {
-  const data = FIXTURES.points;
-
   testLayer({
     Layer: ScatterplotLayer,
     testCases: [
@@ -93,7 +91,7 @@ test('ScatterplotLayer#constructor', t => {
       },
       {
         props: {
-          data,
+          data: FIXTURES.points,
           radiusScale: 5,
           getPosition: getPointPosition
         }
@@ -116,6 +114,59 @@ test('ScatterplotLayer#constructor', t => {
           t.ok(
             layer.getAttributeManager().attributes.instancePositions64xyLow,
             'should add instancePositions64xyLow'
+          );
+        }
+      },
+      {
+        // non-iterable data
+        updateProps: {
+          data: {
+            length: 3,
+            src: new Float32Array([
+              -122.4,
+              37.78,
+              1000,
+              255,
+              200,
+              0,
+              -122.41,
+              37.775,
+              500,
+              200,
+              0,
+              0,
+              -122.39,
+              37.8,
+              500,
+              0,
+              40,
+              200
+            ])
+          },
+          getPosition: (object, {index, data, target}) => {
+            target[0] = data.src[index * 6];
+            target[1] = data.src[index * 6 + 1];
+            target[2] = 0;
+            return target;
+          },
+          getRadius: (object, {index, data}) => {
+            return data.src[index * 6 + 2];
+          },
+          getFillColor: (object, {index, data, target}) => {
+            target[0] = data.src[index * 6 + 3];
+            target[1] = data.src[index * 6 + 4];
+            target[2] = data.src[index * 6 + 5];
+            target[3] = 255;
+            return target;
+          }
+        },
+        assert({layer, oldState}) {
+          t.is(layer.state.model.getInstanceCount(), 3, 'instance count is correct');
+          const {instanceFillColors} = layer.state.attributeManager.getAttributes();
+          t.deepEquals(
+            instanceFillColors.value.slice(0, 12),
+            [255, 200, 0, 255, 200, 0, 0, 255, 0, 40, 200, 255],
+            'instanceColors updated'
           );
         }
       }
