@@ -19,13 +19,12 @@
 // THE SOFTWARE.
 
 import {equals} from 'math.gl';
-import {
-  CompositeLayer,
-  _GPUGridAggregator as GPUGridAggregator,
-  _pointToDensityGridData as pointToDensityGridData
-} from '@deck.gl/core';
+import {CompositeLayer} from '@deck.gl/core';
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {generateContours} from './contour-utils';
+
+import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 const DEFAULT_STROKE_WIDTH = 1;

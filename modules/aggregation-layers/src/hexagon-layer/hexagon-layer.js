@@ -19,10 +19,12 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer, log, experimental} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 import {HexagonCellLayer} from '@deck.gl/layers';
 
-const {BinSorter, getQuantizeScale, getLinearScale, defaultColorRange} = experimental;
+import BinSorter from '../utils/bin-sorter';
+import {defaultColorRange} from '../utils/color-utils';
+import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
 
 import {pointToHexbin} from './hexagon-aggregator';
 

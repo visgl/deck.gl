@@ -1,7 +1,6 @@
-import assert from '../../../utils/assert';
 import {Matrix4} from 'math.gl';
 import {fp64 as fp64Utils} from 'luma.gl';
-import {COORDINATE_SYSTEM} from '../../../lib/constants';
+import {COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import {AGGREGATION_OPERATION} from './gpu-grid-aggregator-constants';
 const {fp64LowPart} = fp64Utils;
 
@@ -22,7 +21,7 @@ export function pointToDensityGridData({
   boundingBox = null
 }) {
   let gridData = {};
-  assert(
+  log.assert(
     aggregationFlags.dataChanged ||
       aggregationFlags.cellSizeChanged ||
       aggregationFlags.viewportChanged
@@ -33,10 +32,10 @@ export function pointToDensityGridData({
   }
   let cellSize = [cellSizeMeters, cellSizeMeters];
   let worldOrigin = [0, 0];
-  assert(
+  log.assert(
     coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
   );
-  assert(boundingBox);
+  log.assert(boundingBox);
 
   switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT:
@@ -51,7 +50,7 @@ export function pointToDensityGridData({
       break;
     default:
       // Currently other coodinate systems not supported/verified.
-      assert(false);
+      log.assert(false);
   }
 
   const opts = getGPUAggregationParams({boundingBox, cellSize, worldOrigin});
@@ -84,7 +83,7 @@ export function pointToDensityGridData({
 // Parse input data to build positions, wights and bounding box.
 /* eslint-disable max-statements */
 function parseGridData(data, getPosition, getWeight = null) {
-  assert(data && getPosition);
+  log.assert(data && getPosition);
   const positions = [];
   const positions64xyLow = [];
   const weightValues = [];
@@ -108,7 +107,7 @@ function parseGridData(data, getPosition, getWeight = null) {
       // backward compitability
       weight = [weight, 0, 0];
     }
-    assert(weight.length === 3);
+    log.assert(weight.length === 3);
     weightValues.push(...weight);
 
     if (Number.isFinite(y) && Number.isFinite(x)) {

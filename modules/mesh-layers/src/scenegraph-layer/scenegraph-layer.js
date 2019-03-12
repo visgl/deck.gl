@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {GLTFInstantiator, fp64} from 'luma.gl';
+import {createGLTFObjects, fp64} from 'luma.gl';
+import {MATRIX_SHADER_ATTRIBUTES} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;
 
@@ -27,7 +28,9 @@ const vs = `
   // Instance attributes
   attribute vec3 instancePositions;
   attribute vec2 instancePositions64xy;
+  attribute vec4 instanceColors;
   attribute vec3 instancePickingColors;
+  attribute mat4 instanceModelMatrix;
 
   // Uniforms
   uniform float sizeScale;
@@ -39,13 +42,15 @@ const vs = `
     attribute vec2 TEXCOORD_0;
     varying vec2 vTEXCOORD_0;
   #endif
+  varying vec4 vColor;
 
   void main(void) {
     #ifdef HAS_UV
       vTEXCOORD_0 = TEXCOORD_0;
     #endif
+    vColor = instanceColors;
 
-    vec3 pos = POSITION.xyz;
+    vec3 pos = (instanceModelMatrix * POSITION).xyz;
     pos = project_scale(pos * sizeScale);
 
     vec4 worldPosition;
@@ -59,31 +64,35 @@ const fs = `
     varying vec2 vTEXCOORD_0;
     uniform sampler2D u_BaseColorSampler;
   #endif
+  varying vec4 vColor;
 
   void main(void) {
     #ifdef HAS_UV
-      gl_FragColor = texture2D(u_BaseColorSampler, vTEXCOORD_0);
+      gl_FragColor = (vColor / 255.) * texture2D(u_BaseColorSampler, vTEXCOORD_0);
     #else
-      gl_FragColor = vec4(0, 0, 0, 1);
+      gl_FragColor = vColor / 255.;
     #endif
 
     gl_FragColor = picking_filterPickingColor(gl_FragColor);
   }
 `;
 
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
 
   getPosition: {type: 'accessor', value: x => x.position},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
   getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0}
+  getRoll: {type: 'accessor', value: x => x.roll || 0},
+  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]},
+  getMatrix: {type: 'accessor', value: x => x.matrix || null}
 };
 
 export default class ScenegraphLayer extends Layer {
@@ -98,7 +107,13 @@ export default class ScenegraphLayer extends Layer {
         size: 2,
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
-      }
+      },
+      instanceColors: {
+        size: 4,
+        accessor: 'getColor',
+        defaultValue: DEFAULT_COLOR
+      },
+      instanceModelMatrix: MATRIX_SHADER_ATTRIBUTES
     });
   }
 
@@ -123,7 +138,7 @@ export default class ScenegraphLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     if (changeFlags.propsChanged && props.gltf) {
-      const instantiator = new GLTFInstantiator(this.context.gl, {
+      const {scenes} = createGLTFObjects(this.context.gl, props.gltf, {
         modelOptions: {
           vs,
           fs,
@@ -131,8 +146,6 @@ export default class ScenegraphLayer extends Layer {
           isInstanced: true
         }
       });
-
-      const scenes = instantiator.instantiate(props.gltf);
       this.setState({
         sceneGraph: scenes[0]
       });

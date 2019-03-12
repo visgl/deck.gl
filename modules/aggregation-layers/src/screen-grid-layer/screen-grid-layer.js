@@ -18,15 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {
-  Layer,
-  experimental,
-  WebMercatorViewport,
-  _GPUGridAggregator as GPUGridAggregator,
-  AGGREGATION_OPERATION,
-  log
-} from '@deck.gl/core';
-const {defaultColorRange} = experimental;
+import {Layer, WebMercatorViewport, log} from '@deck.gl/core';
+import {defaultColorRange} from '../utils/color-utils';
+import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Buffer, isWebGL2} from 'luma.gl';

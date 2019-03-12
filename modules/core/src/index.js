@@ -79,31 +79,12 @@ export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
 export {createIterable} from './utils/iterable-utils';
-import {default as BinSorter} from './utils/bin-sorter';
 import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
-import {defaultColorRange} from './utils/color-utils';
-import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
-
-export {
-  default as _GPUGridAggregator
-} from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator';
-export {
-  AGGREGATION_OPERATION
-} from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
-export {
-  pointToDensityGridData as _pointToDensityGridData
-} from './experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
-  BinSorter,
   Tesselator,
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  defaultColorRange,
   flattenVertices,
   fillArray
 };
