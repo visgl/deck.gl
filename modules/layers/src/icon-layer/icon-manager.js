@@ -225,7 +225,7 @@ export default class IconManager {
       this._updateIconAtlas(iconAtlas);
     }
 
-    if (this._autoPacking && (data || getIcon)) {
+    if (this._autoPacking && (data || getIcon) && typeof document !== 'undefined') {
       this._canvas = this._canvas || document.createElement('canvas');
 
       this._updateAutoPacking(data);
