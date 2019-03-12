@@ -154,8 +154,27 @@ function enhancedFetch(url) {
       try {
         return JSON.parse(text);
       } catch (error) {
-        const csv = csvParseRows(text);
-        return csv;
+        return parseCSV(text);
       }
     });
+}
+
+function parseCSV(text) {
+  const csv = csvParseRows(text);
+
+  // Remove header
+  if (csv.length > 0) {
+    csv.shift();
+  }
+
+  for (const row of csv) {
+    for (const key in row) {
+      const number = parseFloat(row[key]) || 0;
+      if (!Number.isNaN(number)) {
+        row[key] = number;
+      }
+    }
+  }
+
+  return csv;
 }

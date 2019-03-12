@@ -1,9 +1,14 @@
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
+import * as Layers from '@deck.gl/layers';
+import * as AggregationLayers from '@deck.gl/aggregation-layers';
+import * as GeoLayers from '@deck.gl/geo-layers';
+import * as MeshLayers from '@deck.gl/mesh-layers';
+
 export default {
   // a map of all layers that should be exposes as JSONLayers
-  layers: Object.assign({}, require('@deck.gl/layers'), {
+  layers: Object.assign({}, Layers, AggregationLayers, GeoLayers, MeshLayers, {
     BezierGraphLayer: require('../../bezier/src/bezier-graph-layer').default
     // PlotLayer: require('../../website/plot/plot-layer').default
   }),
