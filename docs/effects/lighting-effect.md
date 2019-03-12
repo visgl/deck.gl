@@ -93,7 +93,7 @@ Array of point light source which emits from a point in all directions.
 ## Remarks
 
 * Point light position uses the same coordinate system as view state.
-* Lighting need both effect per deck and material per layer, here are the list of layers which support lighting
+* Lighting need both effect per deck and material per layer, here is the list of layers which support lighting
     * [GeoJsonLayer](/docs/layers/geojson-layer.md)
     * [HexagonLayer](/docs/layers/hexagon-layer.md)
     * [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md)
