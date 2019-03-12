@@ -6,15 +6,18 @@ The Lighting Effect applies ambient, point and directional lighting to layers wh
 import DeckGL, {GeoJsonLayer, LightingEffect} from '@deck.gl/core';
 import {AmbientLight, PointLight, DirectionalLight, PhongMaterial} from 'luma.gl';
 
+// create ambient light source
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
   intensity: 1.0});
+// create point light source
 const pointLight = new PointLight({
   color: [255, 255, 255],
   intensity: 2.0,
   // use coordinate system as the same as view state
   position: [-125, 50.5, 5000]
 });
+// create directional light source
 const directionalLight = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
@@ -39,18 +42,10 @@ const deckgl = new Deck({
   layers: [
     new GeoJsonLayer({
         id: 'geojson-layer',
-        data,
-        pickable: true,
-        stroked: false,
-        filled: true,
+        // layer props
+        ...
+        // lighting only applies to extruded polygons
         extruded: true,
-        lineWidthScale: 20,
-        lineWidthMinPixels: 2,
-        getFillColor: [160, 160, 180, 200],
-        getLineColor: d => colorToRGBArray(d.properties.color),
-        getRadius: 100,
-        getLineWidth: 1,
-        getElevation: 30,
         // specify material properties per layer
         material: new PhongMaterial({
           ambient: 0.2,
