@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, createIterable} from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
@@ -87,8 +87,13 @@ export default class PolygonLayer extends CompositeLayer {
     const paths = [];
     const positionSize = positionFormat === 'XY' ? 2 : 3;
 
-    for (const object of data) {
-      const {positions, holeIndices} = Polygon.normalize(getPolygon(object), positionSize);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const {positions, holeIndices} = Polygon.normalize(
+        getPolygon(object, objectInfo),
+        positionSize
+      );
 
       if (holeIndices) {
         // split the positions array into `holeIndices.length + 1` rings

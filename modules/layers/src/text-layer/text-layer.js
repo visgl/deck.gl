@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, log, createIterable} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_CHAR_SET,
@@ -155,9 +155,11 @@ export default class TextLayer extends CompositeLayer {
     const {iconMapping} = this.state;
 
     const transformedData = [];
-    let objectIndex = 0;
-    for (const val of data) {
-      const text = getText(val);
+
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = getText(object, objectInfo);
       if (text) {
         const letters = Array.from(text);
         const offsets = [0];
@@ -170,8 +172,8 @@ export default class TextLayer extends CompositeLayer {
             offsets,
             len: text.length,
             // reference of original object and object index
-            object: val,
-            objectIndex
+            object,
+            objectIndex: objectInfo.index
           };
 
           const frame = iconMapping[letter];
@@ -185,8 +187,6 @@ export default class TextLayer extends CompositeLayer {
           transformedData.push(datum);
         });
       }
-
-      objectIndex++;
     }
 
     this.setState({data: transformedData});
