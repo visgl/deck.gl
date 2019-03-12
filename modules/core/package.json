@@ -26,7 +26,8 @@
   ],
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
-    "prepublishOnly": "npm run build-bundle"
+    "build-dev-bundle": "webpack --config ../../scripts/bundle-dev.config.js",
+    "prepublishOnly": "npm run build-bundle && npm run build-dev-bundle"
   },
   "dependencies": {
     "gl-matrix": "^3.0.0",

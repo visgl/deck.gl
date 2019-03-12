@@ -27,7 +27,8 @@
   "sideEffects": false,
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
-    "prepublishOnly": "npm run build-bundle"
+    "build-dev-bundle": "webpack --config ../../scripts/bundle-dev.config.js",
+    "prepublishOnly": "npm run build-bundle && npm run build-dev-bundle"
   },
   "peerDependencies": {
     "@deck.gl/core": "^7.0.0-alpha.4"

@@ -1,4 +1,3 @@
-/* global process */
 const {resolve} = require('path');
 const webpack = require('webpack');
 
