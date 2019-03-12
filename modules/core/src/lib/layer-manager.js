@@ -286,6 +286,7 @@ export default class LayerManager {
     return {error: firstError, generatedLayers};
   }
 
+  /* eslint-disable complexity,max-statements */
   // Note: adds generated layers to `generatedLayers` array parameter
   _updateSublayersRecursively({newLayers, oldLayerMap, generatedLayers}) {
     let error = null;
@@ -311,11 +312,13 @@ export default class LayerManager {
         }
 
         if (!oldLayer) {
-          this._initializeLayer(newLayer);
+          const err = this._initializeLayer(newLayer);
+          error = error || err;
           initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
           this._transferLayerState(oldLayer, newLayer);
-          this._updateLayer(newLayer);
+          const err = this._updateLayer(newLayer);
+          error = error || err;
           updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
@@ -329,16 +332,18 @@ export default class LayerManager {
       }
 
       if (sublayers) {
-        this._updateSublayersRecursively({
+        const err = this._updateSublayersRecursively({
           newLayers: sublayers,
           oldLayerMap,
           generatedLayers
         });
+        error = error || err;
       }
     }
 
     return error;
   }
+  /* eslint-enable complexity,max-statements */
 
   // Finalize any old layers that were not matched
   _finalizeOldLayers(oldLayerMap) {

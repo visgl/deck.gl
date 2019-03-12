@@ -19,42 +19,25 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 
 import * as FIXTURES from 'deck.gl/test/data';
-const data = FIXTURES.choropleths;
 
 test('GeoJsonLayer#tests', t => {
-  testLayer({
+  const testCases = generateLayerTests(t, {
     Layer: GeoJsonLayer,
-    userData: t,
-    testCases: [
-      {props: {data: []}},
-      {props: {data: null}},
-      {props: {data}},
-      {props: {data, pickable: true}},
-      {
-        props: {
-          data: Object.assign({}, data)
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.features !== oldState.features, 'should update features');
-        }
-      },
-      {
-        updateProps: {
-          lineWidthScale: 3
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          const subLayers = layer.renderLayers().filter(Boolean);
-          t.equal(subLayers.length, 2, 'should render 2 subLayers');
-        }
-      }
-    ]
+    sampleProps: {
+      data: FIXTURES.choropleths
+    },
+    assert: ({layer, subLayers}) => {
+      t.ok(layer.state.features, 'should update features');
+      t.is(subLayers.length, layer.props.stroked ? 2 : 1, 'correct number of sublayers');
+    }
   });
+
+  testLayer({Layer: GeoJsonLayer, testCases, doesNotThrow: t.doesNotThrow});
+
   t.end();
 });
