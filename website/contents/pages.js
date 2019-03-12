@@ -557,6 +557,15 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/map-controller.md')
           }
         ]
+      },
+      {
+        name: 'Effects',
+        children: [
+          {
+            name: 'LightingEffect',
+            content: getDocUrl('effects/lighting-effect.md')
+          }
+        ]
       }
     ]
   },

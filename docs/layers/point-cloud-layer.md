@@ -31,7 +31,6 @@ const App = ({data, viewport}) => {
     getPosition: d => d.position,
     getNormal: d => d.normal,
     getColor: d => d.color,
-    lightSettings: {},
     onHover: ({object, x, y}) => {
       const tooltip = object.position.join(', ');
       /* Update tooltip
@@ -62,10 +61,11 @@ Global radius of all points.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for the point cloud.
-Be aware that this prop will likely be changed in a future version of deck.gl.
+* Default: `PhongMaterial`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md).
 
 ### Data Accessors
 
