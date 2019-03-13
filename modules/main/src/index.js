@@ -60,6 +60,8 @@ export {
   // Controllers
   _OrbitController,
   _FirstPersonController,
+  // Animation
+  LayerPropAnimation,
   // Transition bindings
   TRANSITION_EVENTS,
   LinearInterpolator,

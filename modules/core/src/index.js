@@ -66,6 +66,8 @@ export {default as _OrthographicController} from './controllers/orthographic-con
 
 // EXPERIMENTAL EXPORTS
 
+export {default as LayerPropAnimation} from './lifecycle/prop-animation';
+
 // Experimental Effects (non-React) bindings
 export {default as Effect} from './lib/effect';
 

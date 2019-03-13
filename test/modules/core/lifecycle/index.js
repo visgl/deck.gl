@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import './props.spec';
+import './prop-animation.spec';
 import './prop-types.spec';
 import './component.spec';
 import './component-state.spec';
