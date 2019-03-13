@@ -185,6 +185,7 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
+        // eslint-disable-next-line
         name: "What's New",
         content: getDocUrl('whats-new.md')
       },
@@ -589,6 +590,10 @@ export const docPages = generatePath([
   {
     name: 'test-utils API Reference',
     children: [
+      {
+        name: 'generateLayerTests',
+        content: getDocUrl('api-reference/test-utils/generate-layer-test.md')
+      },
       {
         name: 'testLayer',
         content: getDocUrl('api-reference/test-utils/test-layer.md')

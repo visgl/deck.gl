@@ -1,31 +1,55 @@
-// Automatically generate testLayer test cases
-export function generateLayerTests(t, {Layer, sampleProps = {}, assert = () => {}}) {
-  t.ok(Layer.layerName, 'Layer should have display name');
+// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
-  const logTitle = title => () => t.comment(`${Layer.layerName}#${title}`);
-  const validate = params => {
-    if (params.layer.isComposite) {
-      t.ok(params.subLayers.length, 'Layer has sublayers');
-    } else {
-      t.ok(params.layer.getModels().length, 'Layer has models');
-    }
-    // User callback
-    assert(params);
-  };
+function defaultAssert(condition, comment) {
+  if (!condition) {
+    throw new Error(comment);
+  }
+}
+
+// Automatically generate testLayer test cases
+export function generateLayerTests({
+  Layer,
+  sampleProps = {},
+  assert = defaultAssert,
+  onBeforeUpdate,
+  onAfterUpdate = () => {}
+}) {
+  assert(Layer.layerName, 'Layer should have display name');
+
+  function wrapTestCaseTitle(title) {
+    return `${Layer.layerName}#${title}`;
+  }
 
   const testCases = [
     {
-      assertBefore: logTitle('Empty props'),
+      title: 'Empty props',
       props: {}
     },
     {
-      assertBefore: logTitle('Null data'),
+      title: 'Null data',
       updateProps: {data: null}
     },
     {
-      assertBefore: logTitle('Sample data'),
-      updateProps: sampleProps,
-      assert: validate
+      title: 'Sample data',
+      updateProps: sampleProps
     }
   ];
 
@@ -34,7 +58,7 @@ export function generateLayerTests(t, {Layer, sampleProps = {}, assert = () => {
     // eslint-disable-next-line
     new Layer({});
   } catch (error) {
-    t.fail(`Error constructing ${Layer.layerName}: ${error.message}`);
+    assert(false, `Construct ${Layer.layerName} throws: ${error.message}`);
   }
 
   const {_propTypes: propTypes, _mergedDefaultProps: defaultProps} = Layer;
@@ -42,9 +66,8 @@ export function generateLayerTests(t, {Layer, sampleProps = {}, assert = () => {
   // Test alternative data formats
   for (const {title, props} of makeAltDataTestCases(sampleProps, propTypes)) {
     testCases.push({
-      assertBefore: logTitle(title),
-      updateProps: props,
-      assert: validate
+      title,
+      updateProps: props
     });
   }
 
@@ -54,13 +77,29 @@ export function generateLayerTests(t, {Layer, sampleProps = {}, assert = () => {
       const newTestCase = makeAltPropTestCase(propName, propTypes, defaultProps);
       if (newTestCase) {
         testCases.push({
-          assertBefore: logTitle(newTestCase.title),
-          updateProps: newTestCase.props,
-          assert: validate
+          title: newTestCase.title,
+          updateProps: newTestCase.props
         });
       }
     }
   }
+
+  const _onAfterUpdate = params => {
+    // User callback
+    onAfterUpdate(params);
+    // Default assert
+    if (params.layer.isComposite) {
+      assert(params.subLayers.length, 'Layer should have sublayers');
+    } else {
+      assert(params.layer.getModels().length, 'Layer should have models');
+    }
+  };
+
+  testCases.forEach(testCase => {
+    testCase.title = wrapTestCaseTitle(testCase.title);
+    testCase.onBeforeUpdate = onBeforeUpdate;
+    testCases.onAfterUpdate = _onAfterUpdate;
+  });
 
   return testCases;
 }

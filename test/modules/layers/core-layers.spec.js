@@ -36,14 +36,16 @@ import * as FIXTURES from 'deck.gl/test/data';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 test('ScreenGridLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {
       data: FIXTURES.points,
       getPosition: d => d.COORDINATES,
       gpuAggregation: false
     },
-    assert: ({layer}) => {
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
       t.deepEquals(
         layer.state.model.program.uniforms.cellScale,
         layer.state.cellScale,
@@ -52,19 +54,21 @@ test('ScreenGridLayer', t => {
     }
   });
 
-  testLayer({Layer: ScreenGridLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
 test('ScatterplotLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: ScatterplotLayer,
     sampleProps: {
       data: FIXTURES.points,
       getPosition: d => d.COORDINATES
     },
-    assert: ({layer}) => {
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
       t.is(
         layer.state.model.program.uniforms.radiusScale,
         layer.props.radiusScale,
@@ -73,34 +77,38 @@ test('ScatterplotLayer', t => {
     }
   });
 
-  testLayer({Layer: ScatterplotLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: ScatterplotLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
 test('ArcLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: ArcLayer,
     sampleProps: {
       data: FIXTURES.routes,
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
-    }
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
 
-  testLayer({Layer: ArcLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: ArcLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
 test('PointCloudLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: PointCloudLayer,
     sampleProps: {
       data: FIXTURES.getPointCloud(),
       getPosition: d => d.position
     },
-    assert: ({layer}) => {
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
       t.is(
         layer.state.model.program.uniforms.radiusPixels,
         layer.props.radiusPixels,
@@ -109,28 +117,30 @@ test('PointCloudLayer', t => {
     }
   });
 
-  testLayer({Layer: PointCloudLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: PointCloudLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
 test('LineLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: LineLayer,
     sampleProps: {
       data: FIXTURES.routes,
       getSourcePosition: d => d.START,
       getTargetPosition: d => d.END
-    }
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
 
-  testLayer({Layer: LineLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: LineLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
 test('IconLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: IconLayer,
     sampleProps: {
       data: FIXTURES.points,
@@ -140,22 +150,26 @@ test('IconLayer', t => {
       },
       getPosition: d => d.COORDINATES,
       getIcon: d => 'marker'
-    }
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
 
-  testLayer({Layer: IconLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: IconLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
 test('PathLayer', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: PathLayer,
     sampleProps: {
       data: FIXTURES.zigzag,
       getPath: d => d.path
     },
-    assert: ({layer}) => {
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
       t.is(
         layer.state.model.program.uniforms.widthMinPixels,
         layer.props.widthMinPixels,
@@ -164,7 +178,7 @@ test('PathLayer', t => {
     }
   });
 
-  testLayer({Layer: PathLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: PathLayer, testCases, onError: t.notOk});
 
   t.end();
 });
@@ -206,7 +220,7 @@ test('Text#constructor', t => {
         updateProps: {
           data: data.slice(0, 2)
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state.data.length !== oldState.data.length, 'should update state.data');
         }
       }

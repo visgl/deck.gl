@@ -26,6 +26,7 @@ import data from 'deck.gl/test/data/s2-sf.json';
 test('S2Layer#constructor', t => {
   testLayer({
     Layer: S2Layer,
+    onError: t.notOk,
     testCases: [
       {props: []},
       {props: null},
@@ -39,7 +40,7 @@ test('S2Layer#constructor', t => {
         updateProps: {
           filled: false
         },
-        assert({layer, subLayers, oldState}) {
+        onAfterUpdate({layer, subLayers, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.ok(subLayers.length, 'subLayers rendered');
 

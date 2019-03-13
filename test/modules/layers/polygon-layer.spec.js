@@ -27,18 +27,20 @@ import {PolygonLayer} from 'deck.gl';
 import * as FIXTURES from 'deck.gl/test/data';
 
 test('PolygonLayer#constructor', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: PolygonLayer,
     sampleProps: {
       data: FIXTURES.polygons.slice(0, 3),
       getPolygon: f => f
     },
-    assert({layer}) {
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate({layer}) {
       t.ok(layer.state.paths.length, 'should update state.paths');
     }
   });
 
-  testLayer({Layer: PolygonLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: PolygonLayer, testCases, onError: t.notOk});
 
   t.end();
 });
