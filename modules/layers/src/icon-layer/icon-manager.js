@@ -278,7 +278,11 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
-          height: this._canvasHeight
+          height: this._canvasHeight,
+          parameters: {
+            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
+            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
+          }
         });
       }
 
