@@ -97,11 +97,6 @@ Notes:
 
 Options for viewport interactivity, e.g. pan, rotate and zoom with mouse, touch and keyboard. This is a shorthand for defining interaction with the `views` prop if you are using the default view (i.e. a single `MapView`).
 
-#### `effects` (Array)
-
-The array of effects to be rendered, refer to effect's documentation to see details
-* [LightingEffect](/docs/effects/lighting-effect.md)
- 
 ```js
 new Deck({
   ...
@@ -130,6 +125,10 @@ new Deck({
 
 Default `null`.
 
+#### `effects` (Array)
+
+The array of effects to be rendered, refer to effect's documentation to see details
+* [LightingEffect](/docs/effects/lighting-effect.md)
 
 ### Configuration Properties
 
