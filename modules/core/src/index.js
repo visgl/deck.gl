@@ -80,11 +80,13 @@ import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to l
 
 export {createIterable} from './utils/iterable-utils';
 import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
+import {count} from './utils/count';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
   Tesselator,
   flattenVertices,
-  fillArray
+  fillArray,
+  count
 };
