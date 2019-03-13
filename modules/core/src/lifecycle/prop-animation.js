@@ -28,7 +28,11 @@ export default class LayerPropAnimation extends Animation {
         return lerp;
 
       case 'array':
-        if (startValue.length === endValue.length && startValue.length <= 16 && Number.isFinite(startValue[0])) {
+        if (
+          startValue.length === endValue.length &&
+          startValue.length <= 16 &&
+          Number.isFinite(startValue[0])
+        ) {
           // Array of numbers
           return lerp;
         }

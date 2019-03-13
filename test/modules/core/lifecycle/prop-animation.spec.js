@@ -26,7 +26,9 @@ test('LayerPropsAnimation#update', t => {
   t.is(animation.value, 1, 'evaluates to correct value');
   t.is(animation.isDone(), true, 'animation is finished');
 
-  animation = new LayerPropsAnimation(1).to({value: 2, duration: 100}).to({value: 3, duration: 200});
+  animation = new LayerPropsAnimation(1)
+    .to({value: 2, duration: 100})
+    .to({value: 3, duration: 200});
   t.is(animation.isDone(), false, 'animation added');
   animation.update(0);
   t.is(animation.value, 1, 'evaluates to correct value');
@@ -40,7 +42,10 @@ test('LayerPropsAnimation#update', t => {
   t.is(animation.value, 3, 'evaluates to correct value');
   t.is(animation.isDone(), true, 'animation is finished');
 
-  animation = new LayerPropsAnimation(1).to({value: 2, duration: 100}).to({value: 3, duration: 200}).loop();
+  animation = new LayerPropsAnimation(1)
+    .to({value: 2, duration: 100})
+    .to({value: 3, duration: 200})
+    .loop();
   animation.update(0);
   animation.update(100);
   animation.update(300);
@@ -78,8 +83,11 @@ test('LayerPropsAnimation#interpolation', t => {
   animation.update(0);
   t.deepEqual(animation.value, [0, 0, 0], 'non-matching types interpolated correctly');
 
-  animation = new LayerPropsAnimation([200, 200, 200])
-    .to({value: [0, 0, 0], duration: 100, easing: t => t * t});
+  animation = new LayerPropsAnimation([200, 200, 200]).to({
+    value: [0, 0, 0],
+    duration: 100,
+    easing: t => t * t
+  });
   animation.update(0);
   t.deepEqual(animation.value, [200, 200, 200], 'arrays interpolated correctly');
   animation.update(50);
