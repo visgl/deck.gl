@@ -26,6 +26,7 @@ import * as Polygon from '../solid-polygon-layer/polygon';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   stroked: true,
@@ -55,7 +56,7 @@ const defaultProps = {
   getElevation: {type: 'accessor', value: 1000},
 
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class PolygonLayer extends CompositeLayer {

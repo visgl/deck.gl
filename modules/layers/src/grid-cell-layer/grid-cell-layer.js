@@ -22,6 +22,7 @@ import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CubeGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
+const defaultMaterial = new PhongMaterial();
 
 import vs from './grid-cell-layer-vertex.glsl';
 import fs from './grid-cell-layer-fragment.glsl';
@@ -39,7 +40,7 @@ const defaultProps = {
   getElevation: {type: 'accessor', value: 1000},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class GridCellLayer extends Layer {

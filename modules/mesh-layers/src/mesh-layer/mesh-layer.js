@@ -93,6 +93,8 @@ function getGeometry(data) {
 }
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
+
 const defaultProps = {
   mesh: null,
   texture: null,
@@ -105,7 +107,7 @@ const defaultProps = {
   },
   fp64: false,
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial(),
+  material: defaultMaterial,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
