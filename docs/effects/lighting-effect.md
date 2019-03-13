@@ -68,7 +68,7 @@ new LightingEffect({light0, light1, light2, ...});
 ```
 
 Parameters:
-* props: a collection of light sources
+* props(Object): a collection of light sources with user defined keys.
 
 ## Properties
 

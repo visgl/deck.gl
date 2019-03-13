@@ -99,7 +99,8 @@ Options for viewport interactivity, e.g. pan, rotate and zoom with mouse, touch 
 
 #### `effects` (Array)
 
-The array of effects to be rendered
+The array of effects to be rendered, refer to effect's documentation to see details
+* [LightingEffect](/docs/effects/lighting-effect.md)
  
 ```js
 new Deck({
