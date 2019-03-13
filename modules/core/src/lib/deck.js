@@ -74,12 +74,7 @@ function getPropTypes(PropTypes) {
 
     // Debug settings
     debug: PropTypes.bool,
-    drawPickingColors: PropTypes.bool,
-
-    // Experimental props
-
-    // Forces a redraw every animation frame
-    _animate: PropTypes.bool
+    drawPickingColors: PropTypes.bool
   };
 }
 
@@ -97,7 +92,6 @@ const defaultProps = {
   views: null,
   controller: null, // Rely on external controller, e.g. react-map-gl
   useDevicePixels: true,
-  _animate: false,
 
   onWebGLInitialized: noop,
   onResize: noop,
@@ -242,10 +236,6 @@ export default class Deck {
   // Check if a redraw is needed
   // Returns `false` or a string summarizing the redraw reason
   needsRedraw({clearRedrawFlags = true} = {}) {
-    if (this.props._animate) {
-      return 'Deck._animate';
-    }
-
     let redraw = this._needsRedraw;
 
     if (clearRedrawFlags) {
@@ -601,12 +591,10 @@ export default class Deck {
 
     this._updateCursor();
 
+    this._updateAnimationProps(animationProps);
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
     this.layerManager.updateLayers();
-
-    // Needs to be done before drawing
-    this._updateAnimationProps(animationProps);
 
     // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});

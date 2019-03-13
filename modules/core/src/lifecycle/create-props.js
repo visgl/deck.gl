@@ -1,6 +1,7 @@
 import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
 import {parsePropTypes} from './prop-types';
+import LayerPropAnimation from './prop-animation';
 
 // Create a property object
 export function createProps() {
@@ -28,6 +29,11 @@ export function createProps() {
     _asyncPropResolvedValues: {
       enumerable: false,
       value: {}
+    },
+    // Animated values
+    _animationOriginalValues: {
+      enumerable: false,
+      value: {}
     }
   });
 
@@ -45,10 +51,31 @@ export function createProps() {
   // SEER: Apply any overrides from the seer debug extension if it is active
   applyPropOverrides(propsInstance);
 
+  addAnimationProps(propsInstance);
+
   // Props must be immutable
   Object.freeze(propsInstance);
 
   return propsInstance;
+}
+
+function addAnimationProps(props) {
+  for (const name in props) {
+    if (hasOwnProperty(props, name) && props[name] instanceof LayerPropAnimation) {
+      const animation = props[name];
+      props._animationOriginalValues[name] = animation;
+
+      /* eslint-disable-next-line accessor-pairs */
+      Object.defineProperty(props, name, {
+        configurable: false,
+        enumerable: true,
+        get() {
+          // animation props need to be evaluated at runtime
+          return animation.value;
+        }
+      });
+    }
+  }
 }
 
 /* eslint-disable max-depth */

@@ -30,6 +30,8 @@ export default class ComponentState {
     this.onAsyncPropUpdated = () => {};
     this.oldProps = EMPTY_PROPS; // Last props before update
     this.oldAsyncProps = null; // Last props before update, with async values copied.
+
+    this.hasAnimation = false;
   }
 
   getOldProps() {
@@ -102,6 +104,28 @@ export default class ComponentState {
       this._createAsyncPropData(propName, value, defaultValues[propName]);
       this._updateAsyncProp(propName, value);
     }
+  }
+
+  updateAnimationProps(props, animationProps) {
+    const changeFlags = {};
+    if (!animationProps) {
+      return {};
+    }
+
+    const originalValues = props._animationOriginalValues || {};
+
+    let hasAnimation = false;
+    for (const propName in originalValues) {
+      const animation = originalValues[propName];
+      if (!animation.isDone()) {
+        hasAnimation = true;
+        changeFlags.propsChanged = true;
+        animation.update(animationProps.time);
+      }
+    }
+    this.hasAnimation = hasAnimation;
+
+    return changeFlags;
   }
 
   // Intercept strings (URLs) and Promises and activates loading and prop rewriting

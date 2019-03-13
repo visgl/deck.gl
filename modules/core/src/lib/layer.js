@@ -126,6 +126,13 @@ export default class Layer extends Component {
     return this._getNeedsRedraw(clearRedrawFlags);
   }
 
+  hasAnimation() {
+    if (!this.internalState) {
+      return false;
+    }
+    return this.internalState.hasAnimation;
+  }
+
   // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
@@ -558,6 +565,7 @@ export default class Layer extends Component {
     // initializeState callback tends to clear state
     this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
 
+    this._updateAnimationProps();
     this._updateState();
 
     const model = this.getSingleModel();
@@ -571,6 +579,8 @@ export default class Layer extends Component {
   // Called by layer manager
   // if this layer is new (not matched with an existing layer) oldProps will be empty object
   _update() {
+    this._updateAnimationProps();
+
     // Call subclass lifecycle method
     const stateNeedsUpdate = this.needsUpdate();
     // End lifecycle method
@@ -580,6 +590,14 @@ export default class Layer extends Component {
     }
   }
   /* eslint-enable max-statements */
+
+  _updateAnimationProps() {
+    const changeFlags = this.internalState.updateAnimationProps(
+      this.props,
+      this.context.animationProps
+    );
+    this.setChangeFlags(changeFlags);
+  }
 
   // Common code for _initialize and _update
   _updateState() {
@@ -636,14 +654,6 @@ export default class Layer extends Component {
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
       this.setModuleParameters(moduleParameters);
-    }
-
-    // Hack/ib - define a public luma function
-    const {animationProps} = this.context;
-    if (animationProps) {
-      for (const model of this.getModels()) {
-        model._setAnimationProps(animationProps);
-      }
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -909,10 +919,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _updateBaseUniforms() {
     const uniforms = {
       // apply gamma to opacity to make it visually "linear"
-      opacity:
-        typeof this.props.opacity === 'function'
-          ? animationProps => Math.pow(this.props.opacity(animationProps), 1 / 2.2)
-          : Math.pow(this.props.opacity, 1 / 2.2)
+      opacity: Math.pow(this.props.opacity, 1 / 2.2)
     };
     for (const model of this.getModels()) {
       model.setUniforms(uniforms);

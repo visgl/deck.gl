@@ -118,6 +118,13 @@ export default class LayerManager {
 
   // Check if a deep update of all layers is needed
   needsUpdate() {
+    if (this.lastRenderedLayers) {
+      for (const layer of this.lastRenderedLayers) {
+        if (layer.hasAnimation()) {
+          return true;
+        }
+      }
+    }
     return this._needsUpdate;
   }
 
