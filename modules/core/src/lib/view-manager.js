@@ -62,17 +62,12 @@ export default class ViewManager {
   }
 
   // Check if a redraw is needed
-  needsRedraw({clearRedrawFlags = true} = {}) {
+  needsRedraw(opts = {clearRedrawFlags: false}) {
     const redraw = this._needsRedraw;
-    if (clearRedrawFlags) {
+    if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
     }
     return redraw;
-  }
-
-  // Layers will be redrawn (in next animation frame)
-  setNeedsRedraw(reason) {
-    this._needsRedraw = this._needsRedraw || reason;
   }
 
   // Layers will be updated deeply (in next animation frame)

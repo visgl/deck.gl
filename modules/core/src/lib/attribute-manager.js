@@ -146,9 +146,9 @@ export default class AttributeManager {
   //
   // @param {String} [clearRedrawFlags=false] - whether to clear the flag
   // @return {false|String} - reason a redraw is needed.
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
+  getNeedsRedraw(opts = {clearRedrawFlags: false}) {
     const redraw = this.needsRedraw;
-    this.needsRedraw = this.needsRedraw && !clearRedrawFlags;
+    this.needsRedraw = this.needsRedraw && !opts.clearRedrawFlags;
     return redraw && this.id;
   }
 
@@ -284,9 +284,10 @@ export default class AttributeManager {
   /**
    * Returns changed attribute descriptors
    * This indicates which WebGLBuffers need to be updated
+   * @param opts.clearChangedFlags {Boolean}
    * @return {Object} attributes - descriptors
    */
-  getChangedAttributes({clearChangedFlags = false}) {
+  getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
     const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
@@ -294,10 +295,7 @@ export default class AttributeManager {
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
-      if (
-        attribute.needsRedraw({clearChangedFlags: true}) &&
-        !attributeTransitionManager.hasAttribute(attributeName)
-      ) {
+      if (attribute.needsRedraw(opts) && !attributeTransitionManager.hasAttribute(attributeName)) {
         changedAttributes[attributeName] = attribute;
       }
     }
