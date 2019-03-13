@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, WebMercatorViewport, createIterable, log} from '@deck.gl/core';
+import {Layer, WebMercatorViewport, createIterable, log, experimental} from '@deck.gl/core';
+const {count} = experimental;
 import {defaultColorRange} from '../utils/color-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
@@ -245,30 +246,32 @@ export default class ScreenGridLayer extends Layer {
     });
   }
 
-  _getWeight(point) {
-    const {getWeight} = this.props;
-    const weight = getWeight(point);
-    if (!Array.isArray(weight)) {
-      // backward compitability
-      return [weight, 0, 0];
-    }
-    return weight;
-  }
   // Process 'data' and build positions and weights Arrays.
   _processData() {
-    const {data, getPosition} = this.props;
-    const positions = [];
-    const colorWeights = [];
+    const {data, getPosition, getWeight} = this.props;
+    const pointCount = count(data);
+    const positions = new Float64Array(pointCount * 2);
+    const colorWeights = new Float32Array(pointCount * 3);
     const {weights} = this.state;
 
-    // TODO - using array.push is expensive
     const {iterable, objectInfo} = createIterable(data);
     for (const object of iterable) {
       objectInfo.index++;
       const position = getPosition(object, objectInfo);
-      positions.push(position[0]);
-      positions.push(position[1]);
-      colorWeights.push(...this._getWeight(object, objectInfo));
+      const weight = getWeight(object, objectInfo);
+      const {index} = objectInfo;
+
+      positions[index * 2] = position[0];
+      positions[index * 2 + 1] = position[1];
+
+      if (Array.isArray(weight)) {
+        colorWeights[index * 3] = weight[0];
+        colorWeights[index * 3 + 1] = weight[1];
+        colorWeights[index * 3 + 2] = weight[2];
+      } else {
+        // backward compitability
+        colorWeights[index * 3] = weight;
+      }
     }
     weights.color.values = colorWeights;
     this.setState({positions});

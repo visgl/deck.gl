@@ -1,10 +1,12 @@
 import {Matrix4} from 'math.gl';
 import {fp64 as fp64Utils} from 'luma.gl';
-import {COORDINATE_SYSTEM, log} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, log, createIterable, experimental} from '@deck.gl/core';
+const {count} = experimental;
 import {AGGREGATION_OPERATION} from './gpu-grid-aggregator-constants';
 const {fp64LowPart} = fp64Utils;
 
 const R_EARTH = 6378000;
+const DEFAULT_WEIGHT = [1, 0, 0];
 
 // Takes data and aggregation params and returns aggregated data.
 export function pointToDensityGridData({
@@ -14,7 +16,7 @@ export function pointToDensityGridData({
   gpuGridAggregator,
   gpuAggregation,
   aggregationFlags,
-  getWeight = d => [1.0, 0, 0],
+  getWeight,
   fp64 = false,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   viewport = null,
@@ -35,7 +37,6 @@ export function pointToDensityGridData({
   log.assert(
     coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
   );
-  log.assert(boundingBox);
 
   switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT:
@@ -83,10 +84,10 @@ export function pointToDensityGridData({
 // Parse input data to build positions, wights and bounding box.
 /* eslint-disable max-statements */
 function parseGridData(data, getPosition, getWeight = null) {
-  log.assert(data && getPosition);
-  const positions = [];
-  const positions64xyLow = [];
-  const weightValues = [];
+  const pointCount = count(data);
+  const positions = new Float32Array(pointCount * 2);
+  const positions64xyLow = new Float32Array(pointCount * 2);
+  const weightValues = new Float32Array(pointCount * 3);
 
   let yMin = Infinity;
   let yMax = -Infinity;
@@ -94,21 +95,29 @@ function parseGridData(data, getPosition, getWeight = null) {
   let xMax = -Infinity;
   let y;
   let x;
-  for (let p = 0; p < data.length; p++) {
-    const position = getPosition(data[p]);
+  const {iterable, objectInfo} = createIterable(data);
+  for (const object of iterable) {
+    objectInfo.index++;
+    const position = getPosition(object, objectInfo);
+    const {index} = objectInfo;
     x = position[0];
     y = position[1];
-    positions.push(x, y);
-    positions64xyLow.push(fp64LowPart(x), fp64LowPart(y));
+    positions[index * 2] = x;
+    positions[index * 2 + 1] = y;
 
-    let weight = getWeight ? getWeight(data[p]) : [1.0, 0, 0];
+    positions64xyLow[index * 2] = fp64LowPart(x);
+    positions64xyLow[index * 2 + 1] = fp64LowPart(y);
+
+    const weight = getWeight ? getWeight(object, objectInfo) : DEFAULT_WEIGHT;
     // Aggregator expects each weight is an array of size 3
-    if (!Array.isArray(weight)) {
+    if (Array.isArray(weight)) {
+      weightValues[index * 3] = weight[0];
+      weightValues[index * 3 + 1] = weight[1];
+      weightValues[index * 3 + 2] = weight[2];
+    } else {
       // backward compitability
-      weight = [weight, 0, 0];
+      weightValues[index * 3] = weight;
     }
-    log.assert(weight.length === 3);
-    weightValues.push(...weight);
 
     if (Number.isFinite(y) && Number.isFinite(x)) {
       yMin = y < yMin ? y : yMin;

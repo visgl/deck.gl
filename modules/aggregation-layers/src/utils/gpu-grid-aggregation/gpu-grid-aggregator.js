@@ -62,15 +62,16 @@ export default class GPUGridAggregator {
 
   // Decodes and retuns counts and weights of all cells
   static getCellData({countsData, size = 1}) {
-    const cellWeights = [];
-    const cellCounts = [];
-    for (let index = 0; index < countsData.length; index += 4) {
+    const numCells = countsData.length / 4;
+    const cellWeights = new Float32Array(numCells * size);
+    const cellCounts = new Uint32Array(numCells);
+    for (let i = 0; i < numCells; i++) {
       // weights in RGB channels
       for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
-        cellWeights.push(countsData[index + sizeIndex]);
+        cellWeights[i * size + sizeIndex] = countsData[i * 4 + sizeIndex];
       }
       // count in Alpha channel
-      cellCounts.push(countsData[index + 3]);
+      cellCounts[i] = countsData[i * 4 + 3];
     }
     return {cellCounts, cellWeights};
   }
@@ -160,7 +161,6 @@ export default class GPUGridAggregator {
   // Perform aggregation and retun the results
   run(opts = {}) {
     const aggregationParams = this.getAggregationParams(opts);
-    log.assert(aggregationParams);
     this.updateGridSize(aggregationParams);
     const {useGPU} = aggregationParams;
     if (this._hasGPUSupport && useGPU) {
@@ -298,13 +298,12 @@ export default class GPUGridAggregator {
     for (const id in weights) {
       const {values, size, operation} = weights[id];
       const {aggregationData} = results[id];
-      log.assert(size >= 1 && size <= 3);
 
       // Fill RGB with weights
       for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
         const cellElementIndex = cellIndex + sizeIndex;
         const weightComponent = values[posIndex * WEIGHT_SIZE + sizeIndex];
-        log.assert(Number.isFinite(weightComponent));
+
         if (aggregationData[cellIndex + 3] === 0) {
           // if the cell is getting update the first time, set the value directly.
           aggregationData[cellElementIndex] = weightComponent;
@@ -445,14 +444,16 @@ export default class GPUGridAggregator {
     const results = this.initCPUResults(opts);
     // screen space or world space projection required
     const gridTransformRequired = this.shouldTransformToGrid(opts);
-    let gridPositions = [];
+    let gridPositions;
+    const pos = [0, 0, 0];
 
     log.assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
 
     let posCount;
     if (gridTransformRequired) {
-      this.setState({gridPositions});
       posCount = positions.length / 2;
+      gridPositions = new Float64Array(positions.length);
+      this.setState({gridPositions});
     } else {
       gridPositions = this.state.gridPositions;
       weights = this.state.weights;
@@ -461,21 +462,23 @@ export default class GPUGridAggregator {
 
     const validCellIndices = new Set();
     for (let posIndex = 0; posIndex < posCount; posIndex++) {
-      let gridPos;
+      let x;
+      let y;
       if (gridTransformRequired) {
-        const pos = [positions[posIndex * 2], positions[posIndex * 2 + 1]];
+        pos[0] = positions[posIndex * 2];
+        pos[1] = positions[posIndex * 2 + 1];
         if (projectPoints) {
-          gridPos = viewport.project([pos[0], pos[1]]);
+          [x, y] = viewport.project(pos);
         } else {
-          gridPos = worldToPixels([pos[0], pos[1], 0], gridTransformMatrix).slice(0, 2);
+          [x, y] = worldToPixels(pos, gridTransformMatrix);
         }
-        gridPositions.push(...gridPos);
+        gridPositions[posIndex * 2] = x;
+        gridPositions[posIndex * 2 + 1] = y;
       } else {
-        gridPos = [gridPositions[posIndex * 2], gridPositions[posIndex * 2 + 1]];
+        x = gridPositions[posIndex * 2];
+        y = gridPositions[posIndex * 2 + 1];
       }
 
-      const x = gridPos[0];
-      const y = gridPos[1];
       const colId = Math.floor(x / cellSize[0]);
       const rowId = Math.floor(y / cellSize[1]);
       if (colId >= 0 && colId < numCol && rowId >= 0 && rowId < numRow) {
