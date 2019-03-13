@@ -51,6 +51,8 @@ Possible other animation related RFCs:
 
 Group of related RFCs loosely targeted for 7.x releases.
 
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
 | [**Binary Data**](v7.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
 
 
@@ -65,7 +67,6 @@ RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.c
 | [**Project / Unproject Improvements**](v6.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
 | [**Layer Operations**](v7.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Property Animation**](v7.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-
 
 ## v7.0 RFCs
 
