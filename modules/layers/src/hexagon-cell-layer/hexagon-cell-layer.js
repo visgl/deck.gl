@@ -27,6 +27,7 @@ import vs from './hexagon-cell-layer-vertex.glsl';
 import fs from './hexagon-cell-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   hexagonVertices: null,
@@ -41,7 +42,7 @@ const defaultProps = {
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getElevation: {type: 'accessor', value: 1000},
 
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class HexagonCellLayer extends Layer {

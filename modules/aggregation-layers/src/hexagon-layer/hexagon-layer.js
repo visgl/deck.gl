@@ -30,6 +30,8 @@ import {pointToHexbin} from './hexagon-aggregator';
 
 function nop() {}
 
+const defaultMaterial = new PhongMaterial();
+
 const defaultProps = {
   // color
   colorDomain: null,
@@ -55,7 +57,7 @@ const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
   fp64: false,
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class HexagonLayer extends CompositeLayer {

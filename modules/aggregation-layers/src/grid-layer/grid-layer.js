@@ -30,6 +30,8 @@ import {pointToDensityGridData} from './grid-aggregator';
 
 function nop() {}
 
+const defaultMaterial = new PhongMaterial();
+
 const defaultProps = {
   // color
   colorDomain: null,
@@ -56,7 +58,7 @@ const defaultProps = {
   fp64: false,
 
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class GridLayer extends CompositeLayer {

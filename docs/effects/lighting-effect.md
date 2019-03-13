@@ -4,12 +4,13 @@ The Lighting Effect applies ambient, point and directional lighting to layers wh
 
 ```js
 import DeckGL, {GeoJsonLayer, LightingEffect} from '@deck.gl/core';
-import {AmbientLight, PointLight, DirectionalLight, PhongMaterial} from 'luma.gl';
+import {AmbientLight, PointLight, DirectionalLight, PhongMaterial} from '@luma.gl/core';
 
 // create ambient light source
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
-  intensity: 1.0});
+  intensity: 1.0
+});
 // create point light source
 const pointLight = new PointLight({
   color: [255, 255, 255],
@@ -26,7 +27,14 @@ const directionalLight = new DirectionalLight({
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight, directionalLight});
 
-export const INITIAL_VIEW_STATE = {
+const material =  new PhongMaterial({
+  ambient: 0.2,
+  diffuse: 0.5,
+  shininess: 32,
+  specularColor: [255, 255, 255]
+});
+
+const INITIAL_VIEW_STATE = {
   latitude: 49.254,
   longitude: -123.13,
   zoom: 11,
@@ -47,16 +55,20 @@ const deckgl = new Deck({
         // lighting only applies to extruded polygons
         extruded: true,
         // specify material properties per layer
-        material: new PhongMaterial({
-          ambient: 0.2,
-          diffuse: 0.5,
-          shininess: 32,
-          specularColor: [255, 255, 255]
-        }),
+        material
     })
   ]
 });
 ```
+
+## Constructor
+
+```js
+new LightingEffect({light0, light1, light2, ...});
+```
+
+Parameters:
+* props: a collection of light sources
 
 ## Properties
 
@@ -88,7 +100,7 @@ Array of point light source which emits from a point in all directions.
 ## Remarks
 
 * Point light position uses the same coordinate system as view state.
-* Lighting need both effect per deck and material per layer, here is the list of layers which support lighting
+* To enable lighting on a layer, it is required that both the [effects prop of Deck](/docs/api-reference/deck.md?section=effects) and the material prop of the layer are specified. Refer to each layer's documentation to see if the lighting effect is supported.
     * [GeoJsonLayer](/docs/layers/geojson-layer.md)
     * [HexagonLayer](/docs/layers/hexagon-layer.md)
     * [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md)
