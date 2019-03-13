@@ -241,21 +241,22 @@ export default class Deck {
   // Public API
   // Check if a redraw is needed
   // Returns `false` or a string summarizing the redraw reason
-  needsRedraw({clearRedrawFlags = true} = {}) {
+  // opts.clearRedrawFlags (Boolean) - clear the redraw flag. Default `true`
+  needsRedraw(opts = {clearRedrawFlags: false}) {
     if (this.props._animate) {
       return 'Deck._animate';
     }
 
     let redraw = this._needsRedraw;
 
-    if (clearRedrawFlags) {
+    if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
     }
 
-    const viewManagerNeedsRedraw = this.viewManager.needsRedraw({clearRedrawFlags});
-    const layerManagerNeedsRedraw = this.layerManager.needsRedraw({clearRedrawFlags});
-    const effectManagerNeedsRedraw = this.effectManager.needsRedraw({clearRedrawFlags});
-    const deckRendererNeedsRedraw = this.deckRenderer.needsRedraw({clearRedrawFlags});
+    const viewManagerNeedsRedraw = this.viewManager.needsRedraw(opts);
+    const layerManagerNeedsRedraw = this.layerManager.needsRedraw(opts);
+    const effectManagerNeedsRedraw = this.effectManager.needsRedraw(opts);
+    const deckRendererNeedsRedraw = this.deckRenderer.needsRedraw(opts);
 
     redraw =
       redraw ||

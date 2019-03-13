@@ -112,8 +112,8 @@ export default class LayerManager {
   }
 
   // Check if a redraw is needed
-  needsRedraw({clearRedrawFlags = true} = {}) {
-    return this._checkIfNeedsRedraw(clearRedrawFlags);
+  needsRedraw(opts = {clearRedrawFlags: false}) {
+    return this._checkIfNeedsRedraw(opts);
   }
 
   // Check if a deep update of all layers is needed
@@ -214,16 +214,16 @@ export default class LayerManager {
   // PRIVATE METHODS
   //
 
-  _checkIfNeedsRedraw(clearRedrawFlags) {
+  _checkIfNeedsRedraw(opts) {
     let redraw = this._needsRedraw;
-    if (clearRedrawFlags) {
+    if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
     }
 
     // This layers list doesn't include sublayers, relying on composite layers
     for (const layer of this.layers) {
       // Call every layer to clear their flags
-      const layerNeedsRedraw = layer.getNeedsRedraw({clearRedrawFlags});
+      const layerNeedsRedraw = layer.getNeedsRedraw(opts);
       redraw = redraw || layerNeedsRedraw;
     }
 

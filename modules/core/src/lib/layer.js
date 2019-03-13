@@ -122,8 +122,8 @@ export default class Layer extends Component {
   }
 
   // Checks state of attributes and model
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    return this._getNeedsRedraw(clearRedrawFlags);
+  getNeedsRedraw(opts = {clearRedrawFlags: false}) {
+    return this._getNeedsRedraw(opts);
   }
 
   // Checks if layer attributes needs updating
@@ -789,7 +789,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   }
 
   // Checks state of attributes and model
-  _getNeedsRedraw(clearRedrawFlags) {
+  _getNeedsRedraw(opts) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
     if (!this.internalState) {
@@ -798,23 +798,22 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     let redraw = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
-    this.internalState.needsRedraw = this.internalState.needsRedraw && !clearRedrawFlags;
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
-    const attributeManagerNeedsRedraw =
-      attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
-    const modelNeedsRedraw = this._modelNeedsRedraw(clearRedrawFlags);
+    const attributeManagerNeedsRedraw = attributeManager && attributeManager.getNeedsRedraw(opts);
+    const modelNeedsRedraw = this._modelNeedsRedraw(opts);
     redraw = redraw || attributeManagerNeedsRedraw || modelNeedsRedraw;
 
     return redraw;
   }
 
-  _modelNeedsRedraw(clearRedrawFlags) {
+  _modelNeedsRedraw(opts) {
     let redraw = false;
 
     for (const model of this.getModels()) {
-      let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
+      let modelNeedsRedraw = model.getNeedsRedraw(opts);
       if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
         modelNeedsRedraw = `model ${model.id}`;
       }

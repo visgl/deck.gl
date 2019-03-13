@@ -80,9 +80,9 @@ export default class DeckRenderer {
     }
   }
 
-  needsRedraw(clearRedrawFlags) {
+  needsRedraw(opts = {clearRedrawFlags: false}) {
     const redraw = this._needsRedraw;
-    if (clearRedrawFlags) {
+    if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
     }
     return redraw;
