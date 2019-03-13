@@ -84,4 +84,20 @@ const config = {
   devtool: false
 };
 
-module.exports = config;
+module.exports = (env = {}) => {
+  // console.log(JSON.stringify(env, null, 2));
+
+  if (env.dev) {
+    // Set development mode (no minification)
+    config.mode = 'development';
+    // Remove .min from the name
+    config.output.filename = 'dist.js';
+    // Disable transpilation
+    config.module.rules = [];
+  }
+
+  // NOTE uncomment to display config
+  // console.log('webpack config', JSON.stringify(config, null, 2));
+
+  return config;
+};
