@@ -22,7 +22,8 @@
   "files": [
     "dist",
     "src",
-    "*.min.js"
+    "dist.js",
+    "dist.min.js"
   ],
   "sideEffects": false,
   "scripts": {
