@@ -28,6 +28,7 @@ import fs from './point-cloud-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const DEFAULT_NORMAL = [0, 0, 1];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   radiusPixels: {type: 'number', min: 0, value: 10}, //  point radius in pixels
@@ -37,7 +38,7 @@ const defaultProps = {
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class PointCloudLayer extends Layer {

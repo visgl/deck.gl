@@ -83,10 +83,11 @@ Whether to enable cell elevation. Cell elevation scale by count of points in eac
 
 Whether the layer should be rendered in high-precision 64-bit mode
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for extruded polygons.
-Be aware that this prop will likely be changed in a future version of deck.gl.
+* Default: `new PhongMaterial()`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
 
 ### Data Accessors
 

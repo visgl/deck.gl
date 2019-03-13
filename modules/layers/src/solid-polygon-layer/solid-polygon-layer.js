@@ -30,6 +30,7 @@ import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   filled: true,
@@ -51,7 +52,7 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // Optional settings for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 const ATTRIBUTE_TRANSITION = {

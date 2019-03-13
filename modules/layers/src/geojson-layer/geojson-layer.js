@@ -34,6 +34,7 @@ import {
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   stroked: true,
@@ -69,7 +70,7 @@ const defaultProps = {
   // Polygon extrusion accessor
   getElevation: {type: 'accessor', value: 1000},
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 function getCoordinates(f) {

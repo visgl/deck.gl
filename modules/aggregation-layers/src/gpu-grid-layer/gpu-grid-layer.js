@@ -28,6 +28,7 @@ import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggrega
 
 const MINCOLOR = [0, 0, 0, 255];
 const MAXCOLOR = [0, 255, 0, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   // elevation
@@ -42,7 +43,7 @@ const defaultProps = {
   pickable: false, // TODO: Enable picking with GPU Aggregation
 
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial(),
+  material: defaultMaterial,
 
   // GPU Aggregation
   gpuAggregation: true
