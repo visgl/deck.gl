@@ -22,12 +22,13 @@
   "files": [
     "dist",
     "src",
-    "*.min.js"
+    "dist.js",
+    "dist.min.js"
   ],
   "sideEffects": false,
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
-    "prepublishOnly": "npm run build-bundle"
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
     "s2-geometry": "^1.2.10"
