@@ -1,8 +1,8 @@
+/* eslint-disable */
 // NOTE: To use this example standalone (e.g. outside of deck.gl repo)
 // delete the local development overrides at the bottom of this file
 
-// avoid destructuring for older Node version support
-const resolve = require('path').resolve;
+const {resolve} = require('path');
 const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
@@ -10,7 +10,7 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./root.js')
   },
 
   module: {
@@ -38,4 +38,5 @@ const CONFIG = {
 };
 
 // This line enables bundling against src in this repo rather than installed deck.gl module
-module.exports = env => (env ? require('../../webpack.config.local')(CONFIG)(env) : CONFIG);
+module.exports = env =>
+  env ? require('../../webpack.config.local')(CONFIG, __dirname)(env) : CONFIG;
