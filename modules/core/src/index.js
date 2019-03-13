@@ -92,6 +92,9 @@ export {
   pointToDensityGridData as _pointToDensityGridData
 } from './experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
 
+export {createIterable} from './utils/iterable-utils';
+import {count} from './utils/count';
+
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
@@ -103,5 +106,6 @@ export const experimental = {
   getQuantizeScale,
   defaultColorRange,
   flattenVertices,
-  fillArray
+  fillArray,
+  count
 };
