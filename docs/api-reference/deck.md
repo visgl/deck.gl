@@ -127,7 +127,7 @@ Default `null`.
 
 #### `effects` (Array)
 
-The array of effects to be rendered, refer to effect's documentation to see details
+The array of effects to be rendered, a lighting effect will be added if an empty array is supplied, refer to effect's documentation to see details
 * [LightingEffect](/docs/effects/lighting-effect.md)
 
 ### Configuration Properties
