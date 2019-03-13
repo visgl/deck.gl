@@ -68,7 +68,7 @@ new LightingEffect({light0, light1, light2, ...});
 ```
 
 Parameters:
-* props(Object): a collection of light sources with user defined keys.
+* `props`(Object) - a collection of light sources. Keys can be any arbitrary name and values are instances of [LightSource](https://github.com/uber/luma.gl/tree/master/modules/core/src/lighting/light-source.js).
 
 ## Properties
 
@@ -84,7 +84,7 @@ An ambient light source which illuminates all the objects equally.
 
 Array of Directional light source which emits from a specific directions.
 
-* Default: Two directional light sources
+* Default: two directional light sources
 
 | Light Source |      Color      | Intensity |   Direction  |
 |:------------:|:---------------:|:---------:|:------------:|
@@ -99,6 +99,7 @@ Array of point light source which emits from a point in all directions.
 
 ## Remarks
 
+* Only one ambient light is supported.
 * Point light position uses the same coordinate system as view state.
 * To enable lighting on a layer, it is required that both the [effects prop of Deck](/docs/api-reference/deck.md?section=effects) and the material prop of the layer are specified. Refer to each layer's documentation to see if the lighting effect is supported.
     * [GeoJsonLayer](/docs/layers/geojson-layer.md)
