@@ -18,7 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, WebMercatorViewport, createIterable, log} from '@deck.gl/core';
+import {Layer, WebMercatorViewport, createIterable, log, experimental} from '@deck.gl/core';
+const {count} = experimental;
 import {defaultColorRange} from '../utils/color-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
@@ -35,6 +36,8 @@ const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const AGGREGATION_DATA_UBO_INDEX = 0;
 const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
+
+const weightObject = [0, 0, 0];
 
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
@@ -250,25 +253,34 @@ export default class ScreenGridLayer extends Layer {
     const weight = getWeight(point);
     if (!Array.isArray(weight)) {
       // backward compitability
-      return [weight, 0, 0];
+      weightObject[0] = weight;
+      return weightObject;
     }
     return weight;
   }
   // Process 'data' and build positions and weights Arrays.
   _processData() {
     const {data, getPosition} = this.props;
-    const positions = [];
-    const colorWeights = [];
+    const pointCount = count(data);
+    const positions = new Float64Array(pointCount * 2);
+    const colorWeights = new Float32Array(pointCount * 3);
     const {weights} = this.state;
 
-    // TODO - using array.push is expensive
     const {iterable, objectInfo} = createIterable(data);
+    let i = 0;
     for (const object of iterable) {
       objectInfo.index++;
       const position = getPosition(object, objectInfo);
-      positions.push(position[0]);
-      positions.push(position[1]);
-      colorWeights.push(...this._getWeight(object, objectInfo));
+      const weight = this._getWeight(object, objectInfo);
+
+      positions[i * 2] = position[0];
+      positions[i * 2 + 1] = position[1];
+
+      colorWeights[i * 3] = weight[0];
+      colorWeights[i * 3 + 1] = weight[1];
+      colorWeights[i * 3 + 2] = weight[2];
+
+      i++;
     }
     weights.color.values = colorWeights;
     this.setState({positions});
