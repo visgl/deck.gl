@@ -95,28 +95,28 @@ function parseGridData(data, getPosition, getWeight = null) {
   let xMax = -Infinity;
   let y;
   let x;
-  let i = 0;
   const {iterable, objectInfo} = createIterable(data);
   for (const object of iterable) {
     objectInfo.index++;
     const position = getPosition(object, objectInfo);
+    const {index} = objectInfo;
     x = position[0];
     y = position[1];
-    positions[i * 2] = x;
-    positions[i * 2 + 1] = y;
+    positions[index * 2] = x;
+    positions[index * 2 + 1] = y;
 
-    positions64xyLow[i * 2] = fp64LowPart(x);
-    positions64xyLow[i * 2 + 1] = fp64LowPart(y);
+    positions64xyLow[index * 2] = fp64LowPart(x);
+    positions64xyLow[index * 2 + 1] = fp64LowPart(y);
 
     const weight = getWeight ? getWeight(object, objectInfo) : DEFAULT_WEIGHT;
     // Aggregator expects each weight is an array of size 3
     if (Array.isArray(weight)) {
-      weightValues[i * 3] = weight[0];
-      weightValues[i * 3 + 1] = weight[1];
-      weightValues[i * 3 + 2] = weight[2];
+      weightValues[index * 3] = weight[0];
+      weightValues[index * 3 + 1] = weight[1];
+      weightValues[index * 3 + 2] = weight[2];
     } else {
       // backward compitability
-      weightValues[i * 3] = weight;
+      weightValues[index * 3] = weight;
     }
 
     if (Number.isFinite(y) && Number.isFinite(x)) {
@@ -126,7 +126,6 @@ function parseGridData(data, getPosition, getWeight = null) {
       xMin = x < xMin ? x : xMin;
       xMax = x > xMax ? x : xMax;
     }
-    i++;
   }
   const weights = {
     weight1: {

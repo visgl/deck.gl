@@ -37,8 +37,6 @@ const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const AGGREGATION_DATA_UBO_INDEX = 0;
 const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
 
-const weightObject = [0, 0, 0];
-
 const defaultProps = {
   cellSizePixels: {value: 100, min: 1},
   cellMarginPixels: {value: 2, min: 0, max: 5},
@@ -248,39 +246,32 @@ export default class ScreenGridLayer extends Layer {
     });
   }
 
-  _getWeight(point) {
-    const {getWeight} = this.props;
-    const weight = getWeight(point);
-    if (!Array.isArray(weight)) {
-      // backward compitability
-      weightObject[0] = weight;
-      return weightObject;
-    }
-    return weight;
-  }
   // Process 'data' and build positions and weights Arrays.
   _processData() {
-    const {data, getPosition} = this.props;
+    const {data, getPosition, getWeight} = this.props;
     const pointCount = count(data);
     const positions = new Float64Array(pointCount * 2);
     const colorWeights = new Float32Array(pointCount * 3);
     const {weights} = this.state;
 
     const {iterable, objectInfo} = createIterable(data);
-    let i = 0;
     for (const object of iterable) {
       objectInfo.index++;
       const position = getPosition(object, objectInfo);
-      const weight = this._getWeight(object, objectInfo);
+      const weight = getWeight(object, objectInfo);
+      const {index} = objectInfo;
 
-      positions[i * 2] = position[0];
-      positions[i * 2 + 1] = position[1];
+      positions[index * 2] = position[0];
+      positions[index * 2 + 1] = position[1];
 
-      colorWeights[i * 3] = weight[0];
-      colorWeights[i * 3 + 1] = weight[1];
-      colorWeights[i * 3 + 2] = weight[2];
-
-      i++;
+      if (Array.isArray(weight)) {
+        colorWeights[index * 3] = weight[0];
+        colorWeights[index * 3 + 1] = weight[1];
+        colorWeights[index * 3 + 2] = weight[2];
+      } else {
+        // backward compitability
+        colorWeights[index * 3] = weight;
+      }
     }
     weights.color.values = colorWeights;
     this.setState({positions});

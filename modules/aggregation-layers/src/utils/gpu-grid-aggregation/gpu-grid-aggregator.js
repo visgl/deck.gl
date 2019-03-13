@@ -62,18 +62,16 @@ export default class GPUGridAggregator {
 
   // Decodes and retuns counts and weights of all cells
   static getCellData({countsData, size = 1}) {
-    const count = countsData.length;
-    const cellWeights = new Float32Array(count * size);
-    const cellCounts = new Uint32Array(count);
-    let i = 0;
-    for (let index = 0; index < count; index += 4) {
+    const numCells = countsData.length / 4;
+    const cellWeights = new Float32Array(numCells * size);
+    const cellCounts = new Uint32Array(numCells);
+    for (let i = 0; i < numCells; i++) {
       // weights in RGB channels
       for (let sizeIndex = 0; sizeIndex < size; sizeIndex++) {
-        cellWeights[i * size + sizeIndex] = countsData[index + sizeIndex];
+        cellWeights[i * size + sizeIndex] = countsData[i * 4 + sizeIndex];
       }
       // count in Alpha channel
-      cellCounts[i] = countsData[index + 3];
-      i++;
+      cellCounts[i] = countsData[i * 4 + 3];
     }
     return {cellCounts, cellWeights};
   }
