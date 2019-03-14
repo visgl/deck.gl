@@ -7,11 +7,13 @@ import {createIterable} from '@deck.gl/core';
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
 
-const DEFAULT_TEXTURE_MIN_FILTER = GL.LINEAR_MIPMAP_LINEAR;
-// GL.LINEAR is the default value but explicitly set it here
-const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR;
-
 const noop = () => {};
+
+const DEFAULT_TEXTURE_PARAMETERS = {
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  // GL.LINEAR is the default value but explicitly set it here
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+};
 
 function nextPowOfTwo(number) {
   return Math.pow(2, Math.ceil(Math.log2(number)));
@@ -66,10 +68,7 @@ function resizeTexture(texture, width, height) {
     y: height - oldHeight,
     width: oldWidth,
     height: oldHeight,
-    parameters: {
-      [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-      [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-    }
+    parameters: DEFAULT_TEXTURE_PARAMETERS
   });
 
   texture.generateMipmap();
@@ -234,10 +233,7 @@ export default class IconManager {
 
   _updateIconAtlas(iconAtlas) {
     if (iconAtlas instanceof Texture2D) {
-      iconAtlas.setParameters({
-        [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-        [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-      });
+      iconAtlas.setParameters(DEFAULT_TEXTURE_PARAMETERS);
 
       this._texture = iconAtlas;
       this.onUpdate();
@@ -245,10 +241,7 @@ export default class IconManager {
       loadImage(iconAtlas).then(data => {
         this._texture = new Texture2D(this.gl, {
           data,
-          parameters: {
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-          }
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         });
         this.onUpdate();
       });
@@ -278,7 +271,8 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
-          height: this._canvasHeight
+          height: this._canvasHeight,
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         });
       }
 
@@ -310,11 +304,9 @@ export default class IconManager {
           y: canvasHeight - y - height, // flip Y as texture stored as reversed Y
           width,
           height,
-          parameters: {
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER,
+          parameters: Object.assign({}, DEFAULT_TEXTURE_PARAMETERS, {
             [GL.UNPACK_FLIP_Y_WEBGL]: true
-          }
+          })
         });
 
         // Call to regenerate mipmaps after modifying texture(s)
