@@ -26,18 +26,20 @@ import {GeoJsonLayer} from 'deck.gl';
 import * as FIXTURES from 'deck.gl/test/data';
 
 test('GeoJsonLayer#tests', t => {
-  const testCases = generateLayerTests(t, {
+  const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
       data: FIXTURES.choropleths
     },
-    assert: ({layer, subLayers}) => {
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
       t.ok(layer.state.features, 'should update features');
       t.is(subLayers.length, layer.props.stroked ? 2 : 1, 'correct number of sublayers');
     }
   });
 
-  testLayer({Layer: GeoJsonLayer, testCases, doesNotThrow: t.doesNotThrow});
+  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
 
   t.end();
 });

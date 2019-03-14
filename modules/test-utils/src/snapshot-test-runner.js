@@ -46,6 +46,10 @@ export default class SnapshotTestRunner extends TestRunner {
   }
 
   assert(testCase) {
+    if (this.isDiffing) {
+      // already performing diffing
+      return;
+    }
     this.isDiffing = true;
 
     const diffOptions = Object.assign(

@@ -9,6 +9,7 @@ test.skip('BitmapLayer#constructor', t => {
 
   testLayer({
     Layer: BitmapLayer,
+    onError: t.notOk,
     testCases: [
       {
         title: 'Empty layer',
@@ -22,7 +23,7 @@ test.skip('BitmapLayer#constructor', t => {
         updateProps: {
           bounds: [[2, 4, 1], [2, 8, 1], [16, 8, 1], [16, 4, 1]]
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.deepEqual(
             layer.getAttributeManager().attributes.positions.value,
@@ -39,7 +40,7 @@ test.skip('BitmapLayer#constructor', t => {
         updateProps: {
           bounds: [2, 4, 16, 8]
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer state');
           t.deepEqual(
             layer.getAttributeManager().attributes.positions.value,

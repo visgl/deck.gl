@@ -192,7 +192,7 @@ test('Layer#validateProps', t => {
 // eslint-disable-next-line max-statements
 test('Layer#diffProps', t => {
   let layer = new SubLayer(LAYER_PROPS);
-  t.doesNotThrow(() => testInitializeLayer({layer}), 'Layer initialized OK');
+  t.doesNotThrow(() => testInitializeLayer({layer, onError: t.notOk}), 'Layer initialized OK');
 
   layer.diffProps(new SubLayer(Object.assign({}, LAYER_PROPS)).props, layer.props);
   t.false(layer.getChangeFlags().somethingChanged, 'same props');
@@ -222,7 +222,7 @@ test('Layer#diffProps', t => {
   spy.restore();
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}})).props,
     layer.props
@@ -230,7 +230,7 @@ test('Layer#diffProps', t => {
   t.false(layer.getChangeFlags().updateTriggersChanged, 'updateTriggers not fired');
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 1}})).props,
     layer.props
@@ -238,7 +238,7 @@ test('Layer#diffProps', t => {
   t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: null}})).props,
     layer.props
@@ -246,7 +246,7 @@ test('Layer#diffProps', t => {
   t.true(layer.getChangeFlags().updateTriggersChanged, 'updateTriggersChanged fired');
 
   layer = new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: 0}}));
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.diffProps(
     new SubLayer(Object.assign({}, LAYER_PROPS, {updateTriggers: {time: undefined}})).props,
     layer.props
@@ -293,7 +293,7 @@ test('Layer#use64bitPositions', t => {
 
 test('Layer#project', t => {
   let layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,
     height: 300,
@@ -306,7 +306,7 @@ test('Layer#project', t => {
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: [0.01, 0.01]
   });
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.context.viewport = new MapView().makeViewport({
     width: 400,
     height: 300,
@@ -326,7 +326,7 @@ test('Layer#project', t => {
     coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
     modelMatrix: new Matrix4().rotateZ(Math.PI / 2)
   });
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
   layer.context.viewport = new OrbitView().makeViewport({
     width: 400,
     height: 300,

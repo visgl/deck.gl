@@ -42,11 +42,11 @@ test('GridLayer#renderSubLayer', t => {
     pickable: true
   });
 
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
 
   // render sublayer
   const subLayer = layer.renderLayers();
-  testInitializeLayer({layer: subLayer});
+  testInitializeLayer({layer: subLayer, onError: t.notOk});
 
   t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
@@ -63,6 +63,7 @@ test('GridLayer#renderSubLayer', t => {
 test('GridLayer#updates', t => {
   testLayer({
     Layer: GridLayer,
+    onError: t.notOk,
     testCases: [
       {
         props: {
@@ -71,7 +72,7 @@ test('GridLayer#updates', t => {
           getPosition,
           pickable: true
         },
-        assert({layer}) {
+        onAfterUpdate({layer}) {
           const {
             layerData,
             sortedColorBins,
@@ -120,7 +121,7 @@ test('GridLayer#updates', t => {
           pickable: true
         },
         spies: ['_onGetSublayerColor', '_onGetSublayerElevation'],
-        assert({layer, subLayer, spies}) {
+        onAfterUpdate({layer, subLayer, spies}) {
           t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
           // should call attribute updater twice
@@ -135,7 +136,7 @@ test('GridLayer#updates', t => {
         updateProps: {
           cellSize: 800
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData !== layer.state.layerData, 'should update layer data');
 
           t.ok(
@@ -176,7 +177,7 @@ test('GridLayer#updates', t => {
             getPosition: 1
           }
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(
             oldState.layerData !== layer.state.layerData,
             'getPosition prop change should update layer data'
@@ -220,7 +221,7 @@ test('GridLayer#updates', t => {
             getColorValue: 1
           }
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
@@ -258,7 +259,7 @@ test('GridLayer#updates', t => {
         updateProps: {
           upperPercentile: 90
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
@@ -296,7 +297,7 @@ test('GridLayer#updates', t => {
         updateProps: {
           colorDomain: [0, 10]
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
@@ -337,7 +338,7 @@ test('GridLayer#updates', t => {
             getElevationValue: 1
           }
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
@@ -375,7 +376,7 @@ test('GridLayer#updates', t => {
         updateProps: {
           elevationLowerPercentile: 1
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
@@ -413,7 +414,7 @@ test('GridLayer#updates', t => {
         updateProps: {
           elevationRange: [1, 10]
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
@@ -460,6 +461,7 @@ test('GridLayer#updateTriggers', t => {
   testLayer({
     Layer: GridLayer,
     spies: SPIES,
+    onError: t.notOk,
     testCases: [
       {
         props: {
@@ -472,7 +474,7 @@ test('GridLayer#updateTriggers', t => {
         updateProps: {
           cellSize: 800
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(spies._onGetSublayerColor.called, 'update radius should call _onGetSublayerColor');
           t.ok(
             spies._onGetSublayerElevation.called,
@@ -484,7 +486,7 @@ test('GridLayer#updateTriggers', t => {
         updateProps: {
           opacity: 0.1
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update opacity should not call _onGetSublayerColor'
@@ -502,7 +504,7 @@ test('GridLayer#updateTriggers', t => {
             getColorValue: 1
           }
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             spies._onGetSublayerColor.called,
             'update getColorValue should call _onGetSublayerColor'
@@ -517,7 +519,7 @@ test('GridLayer#updateTriggers', t => {
         updateProps: {
           upperPercentile: 90
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             spies._onGetSublayerColor.called,
             'update upperPercentile should call _onGetSublayerColor'
@@ -535,7 +537,7 @@ test('GridLayer#updateTriggers', t => {
             getElevationValue: 1
           }
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update getElevationValue should not call _onGetSublayerColor'
@@ -550,7 +552,7 @@ test('GridLayer#updateTriggers', t => {
         updateProps: {
           elevationUpperPercentile: 99
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update elevationUpperPercentile should not call _onGetSublayerColor'
@@ -565,7 +567,7 @@ test('GridLayer#updateTriggers', t => {
         updateProps: {
           elevationRange: [0, 100]
         },
-        assert({subLayer, spies}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update elevationRange should not call _onGetSublayerColor'

@@ -28,6 +28,7 @@ const GRID = [{position: [37, 122]}, {position: [37.1, 122.8]}];
 test('GridCellLayer#updates', t => {
   testLayer({
     Layer: GridCellLayer,
+    onError: t.notOk,
     testCases: [
       {props: []},
       {props: null, pickable: true},
@@ -35,7 +36,7 @@ test('GridCellLayer#updates', t => {
         props: {
           data: GRID
         },
-        assert({layer}) {
+        onAfterUpdate({layer}) {
           t.equal(layer.props.cellSize, 1000, 'Use default radius if not specified');
           t.equal(layer.props.coverage, 1, 'Use default angel if not specified');
         }
@@ -44,7 +45,7 @@ test('GridCellLayer#updates', t => {
         updateProps: {
           coverage: 0.8
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer');
         }
       },
@@ -52,7 +53,7 @@ test('GridCellLayer#updates', t => {
         updateProps: {
           fp64: true
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer');
           t.ok(
             layer.getAttributeManager().attributes.instancePositions64xyLow,

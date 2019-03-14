@@ -28,6 +28,7 @@ const HEXAGONS = [{centroid: [37, 122]}, {centroid: [37.1, 122.8]}];
 test('HexagonCellLayer#updates', t => {
   testLayer({
     Layer: HexagonCellLayer,
+    onError: t.notOk,
     testCases: [
       {
         props: {
@@ -48,7 +49,7 @@ test('HexagonCellLayer#updates', t => {
           data: HEXAGONS,
           pickable: true
         },
-        assert({layer}) {
+        onAfterUpdate({layer}) {
           t.equal(layer.props.radius, 1000, 'Use default radius if not specified');
           t.equal(layer.props.angle, 0, 'Use default angel if not specified');
         }
@@ -57,7 +58,7 @@ test('HexagonCellLayer#updates', t => {
         updateProps: {
           coverage: 0.8
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer');
         }
       },
@@ -65,7 +66,7 @@ test('HexagonCellLayer#updates', t => {
         updateProps: {
           fp64: true
         },
-        assert({layer, oldState}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(layer.state, 'should update layer');
           t.ok(
             layer.getAttributeManager().attributes.instancePositions64xyLow,
@@ -89,7 +90,7 @@ test('HexagonCellLayer#updates', t => {
           radius: 10,
           angle: 10
         },
-        assert({layer}) {
+        onAfterUpdate({layer}) {
           layer.updateRadiusAngle();
           const {angle} = layer.state;
           t.equal(
