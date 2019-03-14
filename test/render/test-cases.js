@@ -534,6 +534,45 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-lnglat-auto',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat-64',
+        data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        iconMapping: dataSamples.iconAtlas,
+        sizeScale: 12,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        fp64: true,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => {
+          if (d.PLACEMENT === 'SW') {
+            return Object.assign({}, dataSamples.iconAtlas.marker, {
+              url: './test/render/icon-marker.png'
+            });
+          }
+          return Object.assign({}, dataSamples.iconAtlas['marker-warning'], {
+            url: './test/render/icon-warning.png'
+          });
+        },
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
     name: 'geojson-lnglat',
     viewState: {
       latitude: 37.751537058389985,
