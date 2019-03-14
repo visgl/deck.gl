@@ -263,6 +263,9 @@ export default class Controller {
       return false;
     }
     const pos = this.getCenter(event);
+    if (!this.isDragging()) {
+      return false;
+    }
     const newControllerState = this.controllerState.pan({pos});
     return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
   }
