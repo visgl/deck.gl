@@ -34,12 +34,7 @@ export {
 } from './utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 import {default as BinSorter} from './utils/bin-sorter';
-import {
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale
-} from './utils/scale-utils';
+import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
 import {defaultColorRange} from './utils/color-utils';
 
 export const experimental = {

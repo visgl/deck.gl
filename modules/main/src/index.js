@@ -88,7 +88,7 @@ const {
   getLinearScale,
   quantizeScale,
   getQuantizeScale,
-  defaultColorRange,
+  defaultColorRange
 } = AggregationExperimental;
 
 Object.assign(experimental, {
