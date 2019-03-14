@@ -25,7 +25,7 @@ export default `\
 attribute vec3 positions;
 attribute vec3 normals;
 
-attribute vec2 instancePositions;
+attribute vec3 instancePositions;
 attribute float instanceElevations;
 attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
@@ -61,7 +61,7 @@ void main(void) {
   float dotRadius = project_scale(radius) * coverage * shouldRender;
 
   // project center of column
-  vec3 centroidPosition = vec3(instancePositions, elevation);
+  vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
   vec3 pos = vec3((rotationMatrix * positions.xy + offset * 2.0) * dotRadius, 0.);
 

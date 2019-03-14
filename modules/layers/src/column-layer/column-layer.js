@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log, createIterable} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
@@ -61,7 +61,7 @@ export default class ColumnLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {
-        size: 2,
+        size: 3,
         transition: true,
         accessor: 'getPosition'
       },
@@ -128,7 +128,7 @@ export default class ColumnLayer extends Layer {
     this.state.model.render(
       Object.assign({}, uniforms, {
         radius,
-        angle,
+        angle: (angle / 180) * Math.PI,
         offset,
         extruded,
         coverage,

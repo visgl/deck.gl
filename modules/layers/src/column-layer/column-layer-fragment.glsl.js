@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME hexagon-cell-layer-fragment-shader
+#define SHADER_NAME column-layer-fragment-shader
 
 precision highp float;
 

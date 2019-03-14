@@ -213,7 +213,7 @@ export default class HexagonLayer extends CompositeLayer {
 
   updateRadiusAngle(vertices) {
     let {radius} = this.props;
-    let angle = Math.PI / 2;
+    let angle = 90;
 
     if (Array.isArray(vertices)) {
       if (vertices.length < 6) {
@@ -236,7 +236,7 @@ export default class HexagonLayer extends CompositeLayer {
       const dxy = Math.sqrt(dx * dx + dy * dy);
 
       // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
+      angle = ((Math.acos(dx / dxy) * -Math.sign(dy)) / Math.PI) * 180 + 90;
       radius = dxy / 2 / pixelsPerMeter[0];
     }
 

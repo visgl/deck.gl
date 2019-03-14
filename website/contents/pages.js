@@ -388,6 +388,10 @@ export const docPages = generatePath([
             content: getDocUrl('layers/bitmap-layer.md')
           },
           {
+            name: 'ColumnLayer',
+            content: getDocUrl('layers/column-layer.md')
+          },
+          {
             name: 'ContourLayer',
             content: getDocUrl('layers/contour-layer.md')
           },
@@ -406,10 +410,6 @@ export const docPages = generatePath([
           {
             name: 'HexagonLayer',
             content: getDocUrl('layers/hexagon-layer.md')
-          },
-          {
-            name: 'HexagonCellLayer',
-            content: getDocUrl('layers/hexagon-cell-layer.md')
           },
           {
             name: 'IconLayer',
