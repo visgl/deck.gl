@@ -45,12 +45,12 @@ test('ContourLayer#renderSubLayer', t => {
     getPosition
   });
 
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
 
   // render sublayer
   const subLayers = layer.renderLayers();
-  testInitializeLayer({layer: subLayers[0]});
-  testInitializeLayer({layer: subLayers[1]});
+  testInitializeLayer({layer: subLayers[0], onError: t.notOk});
+  testInitializeLayer({layer: subLayers[1], onError: t.notOk});
 
   t.ok(subLayers[0] instanceof LineLayer, 'Sublayer Line layer rendered');
   t.ok(subLayers[1] instanceof SolidPolygonLayer, 'Sublayer SolidPolygon layer rendered');
@@ -69,6 +69,7 @@ test('ContourLayer#renderSubLayer', t => {
 test('ContourLayer#updates', t => {
   testLayer({
     Layer: ContourLayer,
+    onError: t.notOk,
     testCases: [
       {
         props: {
@@ -82,7 +83,7 @@ test('ContourLayer#updates', t => {
           getPosition,
           pickable: true
         },
-        assert({layer}) {
+        onAfterUpdate({layer}) {
           const {countsData, contourData, thresholdData} = layer.state;
 
           t.ok(countsData.length > 0, 'ContourLayer data is aggregated');
@@ -111,7 +112,7 @@ test('ContourLayer#updates', t => {
           '_aggregateData',
           '_generateContours'
         ],
-        assert({layer, subLayers, spies}) {
+        onAfterUpdate({layer, subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
           t.ok(spies._aggregateData.called, 'should re-aggregate data on cellSize change');
@@ -139,7 +140,7 @@ test('ContourLayer#updates', t => {
           ]
         },
         spies: ['_updateThresholdData', '_generateContours', '_aggregateData'],
-        assert({subLayers, spies}) {
+        onAfterUpdate({subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
           t.ok(
@@ -168,7 +169,7 @@ test('ContourLayer#updates', t => {
           ]
         },
         spies: ['_updateThresholdData', '_generateContours'],
-        assert({subLayers, spies}) {
+        onAfterUpdate({subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
           t.ok(
@@ -192,7 +193,7 @@ test('ContourLayer#updates', t => {
           ]
         },
         spies: ['_onGetSublayerColor', '_generateContours', '_aggregateData'],
-        assert({subLayers, spies}) {
+        onAfterUpdate({subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
           t.ok(spies._onGetSublayerColor.called, 'should update color on threshold color change');
@@ -215,7 +216,7 @@ test('ContourLayer#updates', t => {
           ]
         },
         spies: ['_onGetSublayerStrokeWidth', '_generateContours', '_aggregateData'],
-        assert({subLayers, spies}) {
+        onAfterUpdate({subLayers, spies}) {
           t.ok(subLayers.length === 2, 'Sublayers rendered');
 
           t.ok(

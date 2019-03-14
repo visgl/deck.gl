@@ -37,7 +37,7 @@ const getPosition = d => d.COORDINATES;
 test('HexagonLayer#updateLayer', t => {
   testLayer({
     Layer: HexagonLayer,
-    userData: t,
+    onError: t.notOk,
     testCases: [
       {
         title: 'Initialize',
@@ -52,7 +52,7 @@ test('HexagonLayer#updateLayer', t => {
         updateProps: {
           radius: 800
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons !== layer.state.hexagons, 'should update layer data');
 
           t.ok(
@@ -94,7 +94,7 @@ test('HexagonLayer#updateLayer', t => {
             getColorValue: 1
           }
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
           t.ok(
@@ -133,7 +133,7 @@ test('HexagonLayer#updateLayer', t => {
         updateProps: {
           upperPercentile: 90
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
           t.ok(
@@ -172,7 +172,7 @@ test('HexagonLayer#updateLayer', t => {
         updateProps: {
           colorDomain: [0, 10]
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
           t.ok(
@@ -214,7 +214,7 @@ test('HexagonLayer#updateLayer', t => {
             getElevationValue: 1
           }
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
           t.ok(
@@ -253,7 +253,7 @@ test('HexagonLayer#updateLayer', t => {
         updateProps: {
           elevationLowerPercentile: 1
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
           t.ok(
@@ -292,7 +292,7 @@ test('HexagonLayer#updateLayer', t => {
         updateProps: {
           elevationRange: [1, 10]
         },
-        assert({layer, oldState, userData}) {
+        onAfterUpdate({layer, oldState}) {
           t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
 
           t.ok(
@@ -337,8 +337,8 @@ test('HexagonLayer#updateTriggers', t => {
 
   testLayer({
     Layer: HexagonLayer,
+    onError: t.notOk,
     spies: SPIES,
-    userData: t,
     testCases: [
       {
         // props to initialize layer with
@@ -353,7 +353,7 @@ test('HexagonLayer#updateTriggers', t => {
         updateProps: {
           radius: 800
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(spies._onGetSublayerColor.called, 'update radius should call _onGetSublayerColor');
           t.ok(
             spies._onGetSublayerElevation.called,
@@ -366,7 +366,7 @@ test('HexagonLayer#updateTriggers', t => {
         updateProps: {
           opacity: 0.1
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update opacity should not call _onGetSublayerColor'
@@ -385,7 +385,7 @@ test('HexagonLayer#updateTriggers', t => {
             getColorValue: 1
           }
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             spies._onGetSublayerColor.called,
             'update getColorValue should call _onGetSublayerColor'
@@ -401,7 +401,7 @@ test('HexagonLayer#updateTriggers', t => {
         updateProps: {
           upperPercentile: 90
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             spies._onGetSublayerColor.called,
             'update upperPercentile should call _onGetSublayerColor'
@@ -420,7 +420,7 @@ test('HexagonLayer#updateTriggers', t => {
             getElevationValue: 1
           }
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update getElevationValue should not call _onGetSublayerColor'
@@ -436,7 +436,7 @@ test('HexagonLayer#updateTriggers', t => {
         updateProps: {
           elevationUpperPercentile: 99
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update elevationUpperPercentile should not call _onGetSublayerColor'
@@ -452,7 +452,7 @@ test('HexagonLayer#updateTriggers', t => {
         updateProps: {
           elevationRange: [0, 100]
         },
-        assert({subLayer, spies, userData}) {
+        onAfterUpdate({subLayer, spies}) {
           t.ok(
             !spies._onGetSublayerColor.called,
             'update elevationRange should not call _onGetSublayerColor'
@@ -492,7 +492,7 @@ test('HexagonLayer#constructor', t => {
   });
   t.ok(layer instanceof HexagonLayer, 'HexagonLayer created');
 
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
 
   t.doesNotThrow(
     () =>
@@ -518,11 +518,11 @@ test('HexagonLayer#renderSubLayer', t => {
     pickable: true
   });
 
-  testInitializeLayer({layer});
+  testInitializeLayer({layer, onError: t.notOk});
 
   // render sublayer
   const subLayer = layer.renderLayers();
-  testInitializeLayer({layer: subLayer});
+  testInitializeLayer({layer: subLayer, onError: t.notOk});
 
   t.ok(subLayer instanceof HexagonCellLayer, 'HexagonCellLayer rendered');
 

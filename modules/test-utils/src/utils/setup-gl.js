@@ -1,7 +1,8 @@
 import {setContextDefaults} from 'luma.gl';
 import {createGLContext} from 'luma.gl';
-// import createContext from '../luma.gl/headless/headless';
-import {global} from './deprecated/globals';
+
+/* global window, global*/
+const _global = typeof global !== 'undefined' ? global : window;
 
 setContextDefaults({
   width: 1,
@@ -11,9 +12,9 @@ setContextDefaults({
   // throwOnError: false
 });
 
-global.glContext = global.glContext || createGLContext();
+_global.glContext = _global.glContext || createGLContext();
 //   // TODO - Seems to be an issue in luma.gl
 //   (createContext && createContext(100, 100, {}));
-// // console.log('Context', global.glContext);
+// // console.log('Context', _global.glContext);
 
-export default global.glContext;
+export default _global.glContext;

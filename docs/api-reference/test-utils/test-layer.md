@@ -1,42 +1,41 @@
 # testLayer (Test Function)
 
+This utility initializes a layer, test layer updates and draw calls on a series of new props, and allow test suites to inspect the result.
 
-## Usage
+## Example
 
-Example of layer unit tests using `tape`. Any unit test framework can be used.
+Example of layer unit tests using `tape`. The test utility itself is test framework agnostic.
 
 ```js
 import test from 'tape-catch';
-import * as FIXTURES from 'deck.gl/test/data/geojson-data';
 import {testLayer} from '@deck.gl/test-utils';
-
-import {GeoJsonLayer} from 'deck.gl';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
 test('GeoJsonLayer#tests', t => {
   testLayer({Layer: GeoJsonLayer, testCases: [
-  	// Each array object represents a test case. The layer will be updated with
-  	// the new `props` and the `assert` function will be called so that the application
-  	// can do additional checks (beyond verifying that the layer doesn't
-  	// crash during the update)
-    {props: {data}},
-    {props: {data, pickable: true}},
+  	// Test case 1
+    {
+      props: {data: []}
+    },
+    // Test case 2
     {
       props: {
-        data: Object.assign({}, data)
+        data: SAMPLE_GEOJSON
       },
       assert({layer, oldState}) {
-        t.ok(layer.state, 'should update layer state');
         t.ok(layer.state.features !== oldState.features, 'should update features');
+        t.is(subLayers.length, 2, 'should render 2 subLayers');
       }
     },
+    // Test case 3
     {
-      props: {
+      updateProps: {
+        // will be merged with the previous props
         lineWidthScale: 3
       },
-      assert({layer, oldState}) {
-        t.ok(layer.state, 'should update layer state');
-        const subLayers = layer.renderLayers().filter(Boolean);
-        t.equal(subLayers.length, 2, 'should render 2 subLayers');
+      assert({subLayers}) {
+        const pathLayer = subLayers.find(layer => layer.id.endsWith('linestrings'));
+        t.is(pathLayer.props.widthScale, 3, 'widthScale is passed to sub layer');
       }
     }
   ]});
@@ -46,46 +45,42 @@ test('GeoJsonLayer#tests', t => {
 ```
 
 
-## Description
-
-Initialize a layer, test layer update on a series of newProps, assert on the resulting layer
-
-Initialize a parent layer and its subLayer, update the parent layer a series of newProps, assert on the updated subLayer.
+## Usage
 
 ```js
-testLayer({Layer, spies, testCases});
+testLayer({Layer, spies, testCases, onError});
 ```
 
-* `Layer` (`Object`) - The layer component class
-* `spies` (`Array`) - Array of Layer class methods to spy on.
-* `testCases` (`Array`) - A list of test cases, as described below.
+* `Layer` (Object) - the layer component class to test
+* `testCases` (Array) - a list of test cases, as described below.
+* `viewport` (`Viewport`, Optional) - a viewport instance to use for the tests.
+* `spies` (Array, Optional) - names of layer class methods to spy on.
+* `onError` (Function, Optional) - callback after each operation with potential errors. Called with two arguments:
+  - `error` (`Error`|`null`)
+  - `title` (String) - name of the operation.
 
 
-## Test Cases
+### Test Cases
 
 Test cases specified as objects and are run sequentially. Each test case provided to `testLayer` specifies what properties are going to be updated.
 
 A test case is an object with the following fields:
 
-* `title` (`String`) - title of the test case
-* `props` (`Object`) - Specifies a complete new set of props
-* `updateProps` (`Object`) - Specifies an incremental prop change (overrides props from previous test case)
-* `spies`=`[]` (`Array`) - The list of updates to update
-* `assert`=`null` (`Function`) - Callback, see below
-
-
-## Writing assert Functions
-
-Each test case provided to `testLayer` specifies what properties are going to be updated. However it is also possible to specify an `assert` function that gets called after those properties have been updated.
-
-The `assert` function in the test case allows the test suite to verify that the layer's state has been correctly updated, or that certain functions (spies) have been called etc.
-
-Assert functions, when supplied, are called with the following properties:
-
-* `layer`
-* `oldState`
-* `subLayers`
-* `spies`
+* `title` (String) - title of the test case
+* `props` (Object) - specifies a complete new set of props
+* `updateProps` (Object) - specifies an incremental prop change (overrides props from previous test case)
+* `spies` (Array, Optional) - names of layer class methods to spy on. Overrides the list that was sent to `testLayer`.
+* `onBeforeUpdate` (Function, Optional) - callback invoked before the layer props are updated. Receives a single argument `info`:
+  - `info.testCase` (Object) - the current test case
+  - `info.layer` (`Layer`) - the old layer
+* `onAfterUpdate` (Function, Optional) - callback invoked after the layer props have been updated. This allows the test case to verify that the layer's state has been correctly updated, or that certain functions (spies) have been called etc. Receives a single argument `info`:
+{layer, oldState, subLayers, subLayer, spies: spyMap}
+  - `info.testCase` (Object) - the current test case
+  - `info.layer` (`Layer`) - the updated layer
+  - `info.oldState` (Object) - layer state before the update
+  - `info.subLayers` (Array) - sub layers rendered, if the layer is composite
+  - `info.subLayer` (`Layer`) - the first sub layer rendered, if the layer is composite
+  - `info.spies` (Object) - key are layer method names and values are [spies](https://github.com/uber-web/probe.gl/blob/master/docs/api-reference/test-utils/make-spy.md#methods-and-fields-on-the-wrapped-function).
 
 
 ## Source
