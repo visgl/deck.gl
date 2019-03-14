@@ -18,60 +18,63 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Inspired by screen-grid-layer vertex shader in deck.gl
-
 export default `\
-#define SHADER_NAME grid-cell-layer-vertex-shader
+
+#define SHADER_NAME column-layer-vertex-shader
 
 attribute vec3 positions;
 attribute vec3 normals;
 
-attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
+attribute vec2 instancePositions;
 attribute float instanceElevations;
+attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 
 // Custom uniforms
-uniform float extruded;
-uniform float cellSize;
-uniform float coverage;
 uniform float opacity;
+uniform float radius;
+uniform float angle;
+uniform vec2 offset;
+uniform bool extruded;
+uniform float coverage;
 uniform float elevationScale;
-
-// A magic number to scale elevation so that 1 unit approximate to 1 meter
-#define ELEVATION_SCALE 0.8
 
 // Result
 varying vec4 vColor;
 
 void main(void) {
 
-  // if ahpha == 0.0 or z < 0.0, do not render element
-  float noRender = float(instanceColors.a == 0.0 || instanceElevations < 0.0);
-  float finalCellSize = project_scale(cellSize) * mix(1.0, 0.0, noRender);
+  // rotate primitive position and normal
+  mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
+  // calculate elevation, if 3d not enabled set to 0
+  // cylindar gemoetry height are between -1.0 to 1.0, transform it to between 0, 1
   float elevation = 0.0;
 
-  if (extruded > 0.5) {
-    elevation = instanceElevations  * (positions.z + 1.0) *
-      ELEVATION_SCALE * elevationScale;
+  if (extruded) {
+    elevation = instanceElevations * (positions.z + 1.0) / 2.0 * elevationScale;
   }
 
-  // cube geometry vertics are between -1 to 1, scale and transform it to between 0, 1
-  vec3 extrudedPosition = vec3(instancePositions.xy, elevation);
-  vec2 extrudedPosition64xyLow = instancePositions64xyLow;
-  vec3 offset = vec3(
-    (positions.x * coverage + 1.0) / 2.0 * finalCellSize,
-    (positions.y * coverage - 1.0) / 2.0 * finalCellSize,
-    1.0);
+  // if ahpha == 0.0 or z < 0.0, do not render element
+  float shouldRender = float(instanceColors.a > 0.0 && instanceElevations >= 0.0);
+  float dotRadius = project_scale(radius) * coverage * shouldRender;
 
-  // extrude positions
+  // project center of column
+  vec3 centroidPosition = vec3(instancePositions, elevation);
+  vec2 centroidPosition64xyLow = instancePositions64xyLow;
+  vec3 pos = vec3((rotationMatrix * positions.xy + offset * 2.0) * dotRadius, 0.);
+
   vec4 position_worldspace;
-  gl_Position = project_position_to_clipspace(extrudedPosition, extrudedPosition64xyLow, offset, position_worldspace);
+  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_worldspace);
 
-  if (extruded > 0.5) {
-    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_worldspace.xyz, normals);
+  // Light calculations
+  // Worldspace is the linear space after Mercator projection
+
+  vec3 normals_worldspace = vec3(rotationMatrix * normals.xy, normals.z);
+
+  if (extruded) {
+    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_worldspace.xyz, normals_worldspace);
     vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
   } else {
     vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.0;

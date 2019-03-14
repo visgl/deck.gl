@@ -71,20 +71,25 @@ export {
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
 import {experimental as CoreExperimental} from '@deck.gl/core';
+import {experimental as AggregationExperimental} from '@deck.gl/aggregation-layers';
 
 // Experimental Data Accessor Helpers
 // INTERNAL - TODO remove from experimental exports
 const {
   // For layers
+  count,
+  flattenVertices,
+  fillArray
+} = CoreExperimental;
+
+const {
   BinSorter,
   linearScale,
   getLinearScale,
   quantizeScale,
   getQuantizeScale,
   defaultColorRange,
-  flattenVertices,
-  fillArray
-} = CoreExperimental;
+} = AggregationExperimental;
 
 Object.assign(experimental, {
   // For layers
@@ -94,6 +99,7 @@ Object.assign(experimental, {
   quantizeScale,
   getQuantizeScale,
   defaultColorRange,
+  count,
   flattenVertices,
   fillArray
 });
@@ -110,7 +116,7 @@ export {
   PointCloudLayer,
   ScatterplotLayer,
   GridCellLayer,
-  HexagonCellLayer,
+  ColumnLayer,
   PathLayer,
   PolygonLayer,
   SolidPolygonLayer,

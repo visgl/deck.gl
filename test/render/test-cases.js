@@ -16,7 +16,7 @@ import {
   IconLayer,
   GeoJsonLayer,
   GridCellLayer,
-  HexagonCellLayer,
+  ColumnLayer,
   PointCloudLayer,
   TextLayer
 } from '@deck.gl/layers';
@@ -778,7 +778,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/screengrid-lnglat-colorRange.png'
   },
   {
-    name: 'hexagoncell-lnglat',
+    name: 'column-lnglat',
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -788,45 +788,21 @@ export const TEST_CASES = [
       orthographic: true
     },
     layers: [
-      new HexagonCellLayer({
-        id: 'hexagoncell-lnglat',
+      new ColumnLayer({
+        id: 'column-lnglat',
         data: dataSamples.hexagons,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
+        radius: 250,
+        angle: Math.PI / 2,
         coverage: 1,
         extruded: true,
         pickable: true,
         opacity: 1,
+        getPosition: h => h.centroid,
         getColor: h => [48, 128, h.value * 255, 255],
         getElevation: h => h.value * 5000
       })
     ],
-    goldenImage: './test/render/golden-images/hexagoncell-lnglat.png'
-  },
-  {
-    name: 'hexagoncell-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 30,
-      bearing: 0
-    },
-    layers: [
-      new HexagonCellLayer({
-        id: 'hexagoncell-lnglat-64',
-        data: dataSamples.hexagons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
-        coverage: 1,
-        extruded: true,
-        pickable: true,
-        opacity: 1,
-        getColor: h => [48, 128, h.value * 255, 255],
-        getElevation: h => h.value * 5000
-      })
-    ],
-    goldenImage: './test/render/golden-images/hexagoncell-lnglat-64.png'
+    goldenImage: './test/render/golden-images/column-lnglat.png'
   },
   {
     name: 'hexagon-lnglat',

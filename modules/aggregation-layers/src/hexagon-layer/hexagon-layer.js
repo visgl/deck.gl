@@ -20,7 +20,7 @@
 
 import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer, log} from '@deck.gl/core';
-import {HexagonCellLayer} from '@deck.gl/layers';
+import {ColumnLayer} from '@deck.gl/layers';
 
 import BinSorter from '../utils/bin-sorter';
 import {defaultColorRange} from '../utils/color-utils';
@@ -64,7 +64,6 @@ export default class HexagonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       hexagons: [],
-      hexagonVertices: null,
       sortedColorBins: null,
       sortedElevationBins: null,
       colorValueDomain: null,
@@ -158,7 +157,8 @@ export default class HexagonLayer extends CompositeLayer {
     const {hexagonAggregator} = this.props;
     const {viewport} = this.context;
     const {hexagons, hexagonVertices} = hexagonAggregator(this.props, viewport);
-    this.setState({hexagons, hexagonVertices});
+    this.updateRadiusAngle(hexagonVertices);
+    this.setState({hexagons});
     this.getSortedBins();
   }
 
@@ -209,6 +209,38 @@ export default class HexagonLayer extends CompositeLayer {
     }
 
     return updateTriggers;
+  }
+
+  updateRadiusAngle(vertices) {
+    let {radius} = this.props;
+    let angle = Math.PI / 2;
+
+    if (Array.isArray(vertices)) {
+      if (vertices.length < 6) {
+        log.error('HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
+      }
+
+      // calculate angle and vertices from hexagonVertices if provided
+      const vertex0 = vertices[0];
+      const vertex3 = vertices[3];
+
+      // transform to space coordinates
+      const {viewport} = this.context;
+      const {pixelsPerMeter} = viewport.getDistanceScales();
+      const spaceCoord0 = this.projectFlat(vertex0);
+      const spaceCoord3 = this.projectFlat(vertex3);
+
+      // distance between two close centroids
+      const dx = spaceCoord0[0] - spaceCoord3[0];
+      const dy = spaceCoord0[1] - spaceCoord3[1];
+      const dxy = Math.sqrt(dx * dx + dy * dy);
+
+      // Calculate angle that the perpendicular hexagon vertex axis is tilted
+      angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
+      radius = dxy / 2 / pixelsPerMeter[0];
+    }
+
+    this.setState({angle, radius});
   }
 
   getValueDomain() {
@@ -316,16 +348,18 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {radius, elevationScale, extruded, coverage, material, fp64, transitions} = this.props;
+    const {elevationScale, extruded, coverage, material, fp64, transitions} = this.props;
+    const {angle, radius} = this.state;
 
-    const SubLayerClass = this.getSubLayerClass('hexagon-cell', HexagonCellLayer);
+    const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
 
     return new SubLayerClass(
       {
         fp64,
         radius,
+        diskResolution: 6,
         elevationScale,
-        angle: Math.PI / 2,
+        angle,
         extruded,
         coverage,
         material,
@@ -342,8 +376,7 @@ export default class HexagonLayer extends CompositeLayer {
         updateTriggers: this.getUpdateTriggers()
       }),
       {
-        data: this.state.hexagons,
-        hexagonVertices: this.state.hexagonVertices
+        data: this.state.hexagons
       }
     );
   }

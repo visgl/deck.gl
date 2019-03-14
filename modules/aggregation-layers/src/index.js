@@ -32,3 +32,23 @@ export {AGGREGATION_OPERATION} from './utils/gpu-grid-aggregation/gpu-grid-aggre
 export {
   pointToDensityGridData as _pointToDensityGridData
 } from './utils/gpu-grid-aggregation/grid-aggregation-utils';
+
+import {default as BinSorter} from './utils/bin-sorter';
+import {
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale
+} from './utils/scale-utils';
+import {defaultColorRange} from './utils/color-utils';
+
+export const experimental = {
+  BinSorter,
+
+  linearScale,
+  getLinearScale,
+  quantizeScale,
+  getQuantizeScale,
+
+  defaultColorRange
+};

@@ -18,20 +18,35 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
-#define SHADER_NAME grid-cell-layer-fragment-shader
+import {CubeGeometry} from '@luma.gl/core';
 
-precision highp float;
+import ColumnLayer from './column-layer';
 
-varying vec4 vColor;
+const defaultProps = {
+  cellSize: {type: 'number', min: 0, value: 1000},
+  offset: {type: 'array', min: 0, value: [0.5, -0.5]}
+};
 
-void main(void) {
-  gl_FragColor = vColor;
+export default class GridCellLayer extends ColumnLayer {
+  getGeometry(diskResolution) {
+    return new CubeGeometry();
+  }
 
-  // use highlight color if this fragment belongs to the selected object.
-  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+  draw({uniforms}) {
+    const {elevationScale, extruded, offset, coverage, cellSize, angle} = this.props;
 
-  // use picking color if rendering to picking FBO.
-  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        radius: cellSize / 2,
+        angle,
+        offset,
+        extruded,
+        coverage,
+        elevationScale
+      })
+    );
+  }
 }
-`;
+
+GridCellLayer.displayName = 'GridCellLayer';
+GridCellLayer.defaultProps = defaultProps;
