@@ -577,6 +577,18 @@ Returns:
 
 * a "null" picking color which is equal the the color of pixels not covered by the layer. This color is guaranteed not to match any index value greater than or equal to zero.
 
+##### `pickObject`
+
+Get the closest pickable and visible object at the given screen coordinate.
+
+* `x` (Number) - x position in pixels
+* `y` (Number) - y position in pixels
+* `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
+
+Returns:
+
+* a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
+
 ## Source
 
 [modules/core/src/core/lib/layer.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/layer.js)

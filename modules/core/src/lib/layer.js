@@ -288,6 +288,14 @@ export default class Layer extends Component {
     return index;
   }
 
+  // Return the closest pickable and visible object at the given screen coordinate.
+  pickObject({x, y, radius = 0}) {
+    if (this.context.deck) {
+      return this.context.deck.pickObject({x, y, radius, layerIds: [this.props.id]});
+    }
+    return null;
+  }
+
   // //////////////////////////////////////////////////
   // LIFECYCLE METHODS, overridden by the layer subclasses
 
