@@ -2,7 +2,7 @@
   "name": "@deck.gl/layers",
   "description": "deck.gl core layers",
   "license": "MIT",
-  "version": "6.4.6",
+  "version": "6.4.7",
   "publishConfig": {
     "access": "public"
   },
@@ -33,7 +33,7 @@
     "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
   },
   "dependencies": {
-    "@deck.gl/core": "^6.4.5",
+    "@deck.gl/core": "^6.4.7",
     "@mapbox/tiny-sdf": "^1.1.0",
     "d3-hexbin": "^0.2.1",
     "earcut": "^2.0.6"

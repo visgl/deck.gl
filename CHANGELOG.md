@@ -17,6 +17,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.7] - Mar 14 2019
+
+- Don't fire panmove if drag started somewhere else (#2780)
+- Fix module alias error when switching branches (#2754)
+- getViewport -> makeViewport (#2752)
+- Small UI fixes and updates on the website (#2740)
+
 #### [6.4.6] - Feb 21 2019
 
 - Prevent mutation of color variables passed to color setters (#2733)
