@@ -28,7 +28,6 @@ const App = ({data, viewport}) => {
   const layer = new SimpleMeshLayer({
     id: 'mesh-layer',
     data,
-    sizeScale: 100,
     texture: 'texture.png',
     mesh: new CubeGeometry()
   });
@@ -59,13 +58,6 @@ The texture of the geometries.
 Can be either a luma.gl [Texture2D](http://uber.github.io/luma.gl/#/documentation/api-reference/texture-2) instance, an HTMLImageElement, or a url string to the texture image.
 
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
-
-
-##### `sizeScale` (Number, optional)
-
-- Default `1`.
-
-Multiplier to scale each geometry by.
 
 
 ##### `getPosition` (Function, optional)

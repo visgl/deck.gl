@@ -98,7 +98,6 @@ const defaultMaterial = new PhongMaterial();
 const defaultProps = {
   mesh: null,
   texture: null,
-  sizeScale: {type: 'number', value: 1, min: 0},
 
   // TODO - parameters should be merged, not completely overridden
   parameters: {
@@ -192,13 +191,7 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {sizeScale} = this.props;
-
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        sizeScale
-      })
-    );
+    this.state.model.render(uniforms);
   }
 
   getModel(gl) {

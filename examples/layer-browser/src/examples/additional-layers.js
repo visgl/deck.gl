@@ -30,21 +30,20 @@ const SimpleMeshLayerExample = {
       nradial: 20,
       nvertical: 1
     }),
-    sizeScale: 10,
     getPosition: d => d.COORDINATES,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
     getTransformMatrix: d => [
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      Math.random() * 20,
+      Math.random() * 20,
+      Math.random() * 20,
       0,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      Math.random() * 20,
+      Math.random() * 20,
+      Math.random() * 20,
       0,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      Math.random() * 20,
+      Math.random() * 20,
+      Math.random() * 20,
       0,
       0,
       0,
@@ -70,12 +69,15 @@ const ScenegraphLayerExample = {
   props: {
     id: 'scenegraph-layer',
     data: dataSamples.points,
-    sizeScale: 1,
     pickable: true,
     getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000],
     getPitch: d => Math.random() * 360,
     getRoll: d => Math.random() * 360,
-    getYaw: d => Math.random() * 360
+    getYaw: d => Math.random() * 360,
+    getScale: d => {
+      const s = Math.random() * 3;
+      return [s, s, s];
+    }
   }
 };
 
