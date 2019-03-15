@@ -1,3 +1,4 @@
+/* eslint-disable no-invalid-this */
 import {Matrix4} from 'math.gl';
 
 const RADIAN_PER_DEGREE = Math.PI / 180;
@@ -57,8 +58,15 @@ function makeMatrix({
 }
 
 function calculateModelMatrices(attribute) {
-  // eslint-disable-next-line no-invalid-this
-  const {data, getYaw, getPitch, getRoll, getScale, getTranslation, getMatrix} = this.props;
+  const {
+    data,
+    getYaw,
+    getPitch,
+    getRoll,
+    getScale,
+    getTranslation,
+    getTransformMatrix
+  } = this.props;
 
   const instanceModelMatrixData = attribute.value;
 
@@ -68,7 +76,7 @@ function calculateModelMatrices(attribute) {
   let i = 0;
   for (const object of data) {
     const matrix =
-      getMatrix(object) ||
+      getTransformMatrix(object) ||
       makeMatrix({
         object,
         getYaw,
@@ -101,7 +109,7 @@ function calculateModelMatrices(attribute) {
 
 export const MATRIX_SHADER_ATTRIBUTES = {
   size: 16,
-  accessor: ['getYaw', 'getPitch', 'getRoll', 'getScale', 'getTranslation', 'getMatrix'],
+  accessor: ['getYaw', 'getPitch', 'getRoll', 'getScale', 'getTranslation', 'getTransformMatrix'],
   shaderAttributes: {
     instanceModelMatrix__LOCATION_0: {
       size: 4,

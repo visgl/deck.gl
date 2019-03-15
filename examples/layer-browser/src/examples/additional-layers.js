@@ -33,7 +33,7 @@ const MeshLayerExample = {
     sizeScale: 10,
     getPosition: d => d.COORDINATES,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
-    getMatrix: d => [
+    getTransformMatrix: d => [
       Math.random() * 2,
       Math.random() * 2,
       Math.random() * 2,
@@ -46,9 +46,9 @@ const MeshLayerExample = {
       Math.random() * 2,
       Math.random() * 2,
       0,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      0,
+      0,
+      Math.random() * 1000,
       1
     ]
   }
@@ -72,7 +72,10 @@ const ScenegraphLayerExample = {
     data: dataSamples.points,
     sizeScale: 1,
     pickable: true,
-    getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000]
+    getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000],
+    getPitch: d => Math.random() * 360,
+    getRoll: d => Math.random() * 360,
+    getYaw: d => Math.random() * 360
   }
 };
 

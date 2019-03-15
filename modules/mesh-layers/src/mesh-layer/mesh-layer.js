@@ -118,8 +118,8 @@ const defaultProps = {
   getPitch: {type: 'accessor', value: x => x.pitch || 0},
   getRoll: {type: 'accessor', value: x => x.roll || 0},
   getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]},
-  getMatrix: {type: 'accessor', value: x => x.matrix || null}
+  getTranslation: {type: 'accessor', value: x => x.translation || [0, 0, 0]},
+  getTransformMatrix: {type: 'accessor', value: x => x.transformMatrix || null}
 };
 
 export default class MeshLayer extends Layer {
