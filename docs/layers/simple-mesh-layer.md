@@ -1,10 +1,10 @@
-# MeshLayer
+# SimpleMeshLayer
 
 The Mesh Layer renders a number of arbitrary geometries. For example, a fleet of 3d cars each with a position and an orientation over the map.
 
 ```js
 import DeckGL from 'deck.gl';
-import {MeshLayer} from '@deck.gl/experimental-layers';
+import {SimpleMeshLayer} from '@deck.gl/experimental-layers';
 import {CubeGeometry} from 'luma.gl'
 
 const App = ({data, viewport}) => {
@@ -25,7 +25,7 @@ const App = ({data, viewport}) => {
    *   ...
    * ]
    */
-  const layer = new MeshLayer({
+  const layer = new SimpleMeshLayer({
     id: 'mesh-layer',
     data,
     sizeScale: 100,
@@ -109,7 +109,7 @@ Scaling factor on the mesh along each axis.
 
 Translation of the mesh along each axis. Offset from the center position given by `getPosition`
 
-##### `getMatrix` (Function, optional)
+##### `getTransformMatrix` (Function, optional)
 
 - Default: `object => null`
 

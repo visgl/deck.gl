@@ -1,5 +1,5 @@
 export default `
-#define SHADER_NAME mesh-layer-vs
+#define SHADER_NAME simple-mesh-layer-vs
 
 // Scale the model
 uniform float sizeScale;

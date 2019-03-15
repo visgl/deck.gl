@@ -25,7 +25,7 @@ These are layers from an older releases that now have better counterparts. They 
 
 deck.gl provides a number of experimental layers in the [@deck.gl/experimental-layers](https://github.com/uber/deck.gl/tree/master/modules/experimental-layers) module. These layers are being actively developed and subject to major changes. Their documentations can be found along with the source code, but not hosted on the official documentation website.
 
-The experimental layers may graduate to core layers in a later release. 
+The experimental layers may graduate to core layers in a later release.
 
 To use one of the experimental layers, install the module:
 
@@ -36,6 +36,6 @@ npm install @deck.gl/experimental-layers
 Then import in code:
 
 ```js
-import {MeshLayer} from '@deck.gl/experimental-layers'
+import {SimpleMeshLayer} from '@deck.gl/experimental-layers'
 ```
 

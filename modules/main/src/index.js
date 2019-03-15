@@ -122,7 +122,7 @@ export {ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer} from '@deck.gl/a
 
 export {GreatCircleLayer, S2Layer, TileLayer, TripsLayer} from '@deck.gl/geo-layers';
 
-export {MeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
+export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 //
 // REACT BINDINGS PACKAGE

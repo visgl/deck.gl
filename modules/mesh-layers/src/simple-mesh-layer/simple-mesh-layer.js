@@ -31,8 +31,8 @@ const {fp64LowPart} = fp64;
 
 import {MATRIX_SHADER_ATTRIBUTES} from '../utils/matrix';
 
-import vs from './mesh-layer-vertex.glsl';
-import fs from './mesh-layer-fragment.glsl';
+import vs from './simple-mesh-layer-vertex.glsl';
+import fs from './simple-mesh-layer-fragment.glsl';
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -122,7 +122,7 @@ const defaultProps = {
   getTransformMatrix: {type: 'accessor', value: x => x.transformMatrix || null}
 };
 
-export default class MeshLayer extends Layer {
+export default class SimpleMeshLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     // TODO: add phong-lighting when merged in luma.gl
@@ -249,5 +249,5 @@ export default class MeshLayer extends Layer {
   }
 }
 
-MeshLayer.layerName = 'MeshLayer';
-MeshLayer.defaultProps = defaultProps;
+SimpleMeshLayer.layerName = 'SimpleMeshLayer';
+SimpleMeshLayer.defaultProps = defaultProps;

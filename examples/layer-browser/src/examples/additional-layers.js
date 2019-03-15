@@ -1,7 +1,7 @@
 /* global window */
 
 import {
-  MeshLayer,
+  SimpleMeshLayer,
   ScenegraphLayer,
   GreatCircleLayer,
   S2Layer
@@ -14,8 +14,8 @@ import {CylinderGeometry} from 'luma.gl';
 import {GLTFParser} from '@loaders.gl/gltf';
 import * as dataSamples from '../data-samples';
 
-const MeshLayerExample = {
-  layer: MeshLayer,
+const SimpleMeshLayerExample = {
+  layer: SimpleMeshLayer,
   props: {
     id: 'mesh-layer',
     data: dataSamples.points,
@@ -134,7 +134,7 @@ const S2LayerExample = {
 /* eslint-disable quote-props */
 export default {
   'Mesh Layers': {
-    MeshLayer: MeshLayerExample,
+    SimpleMeshLayer: SimpleMeshLayerExample,
     ScenegraphLayer: ScenegraphLayerExample
   },
   'Geo Layers': {

@@ -22,7 +22,7 @@ Most layers are **Single-model layers** - this is the predominant form among all
 ```js
 import {Layer} from 'deck.gl';
 
-export default class MeshLayer extends Layer {
+export default class SimpleMeshLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
