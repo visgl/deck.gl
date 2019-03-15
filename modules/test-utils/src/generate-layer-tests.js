@@ -89,7 +89,9 @@ export function generateLayerTests({
     onAfterUpdate(params);
     // Default assert
     if (params.layer.isComposite) {
-      assert(params.subLayers.length, 'Layer should have sublayers');
+      if (Object.keys(params.layer.props).length) {
+        assert(params.subLayers.length, 'Layer should have sublayers');
+      }
     } else {
       assert(params.layer.getModels().length, 'Layer should have models');
     }
@@ -98,9 +100,8 @@ export function generateLayerTests({
   testCases.forEach(testCase => {
     testCase.title = wrapTestCaseTitle(testCase.title);
     testCase.onBeforeUpdate = onBeforeUpdate;
+    testCase.onAfterUpdate = _onAfterUpdate;
   });
-
-  testCases[2].onAfterUpdate = _onAfterUpdate;
 
   return testCases;
 }
