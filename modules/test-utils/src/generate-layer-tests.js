@@ -98,8 +98,9 @@ export function generateLayerTests({
   testCases.forEach(testCase => {
     testCase.title = wrapTestCaseTitle(testCase.title);
     testCase.onBeforeUpdate = onBeforeUpdate;
-    testCases.onAfterUpdate = _onAfterUpdate;
   });
+
+  testCases[2].onAfterUpdate = _onAfterUpdate;
 
   return testCases;
 }
