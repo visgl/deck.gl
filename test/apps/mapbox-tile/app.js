@@ -70,19 +70,58 @@ function getTileData({x, y, z}) {
 }
 
 class Root extends PureComponent {
+  constructor(props) {
+    super(props);
+    this._onClick = this._onClick.bind(this);
+    this.state = {
+      clickedItem: null
+    };
+  }
+
+  _onClick(info) {
+    this.setState({clickedItem: info && info.object});
+  }
+
+  _renderClickedItem() {
+    const {clickedItem} = this.state;
+    if (!clickedItem || !clickedItem.properties) {
+      return null;
+    }
+
+    return (
+      <div
+        style={{
+          position: 'fixed',
+          zIndex: 9,
+          margin: '20px',
+          left: 0,
+          bottom: 0,
+          whiteSpace: 'nowrap',
+          pointerEvents: 'none'
+        }}
+      >
+        {JSON.stringify(clickedItem.properties)}
+      </div>
+    );
+  }
+
   render() {
     return (
-      <DeckGL
-        initialViewState={INITIAL_VIEW_STATE}
-        controller={true}
-        layers={[
-          new TileLayer({
-            ...MAP_LAYER_STYLES,
-            pickable: true,
-            getTileData
-          })
-        ]}
-      />
+      <div>
+        <DeckGL
+          initialViewState={INITIAL_VIEW_STATE}
+          controller={true}
+          onLayerClick={this._onClick}
+          layers={[
+            new TileLayer({
+              ...MAP_LAYER_STYLES,
+              pickable: true,
+              getTileData
+            })
+          ]}
+        />
+        {this._renderClickedItem()}
+      </div>
     );
   }
 }

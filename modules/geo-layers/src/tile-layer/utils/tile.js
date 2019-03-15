@@ -1,5 +1,5 @@
 export default class Tile {
-  constructor({getTileData, x, y, z, onGetTileDataError}) {
+  constructor({getTileData, x, y, z, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -8,7 +8,7 @@ export default class Tile {
     this._data = null;
     this._isLoaded = false;
     this._loader = this._loadData();
-    this.onGetTileDataError = onGetTileDataError;
+    this.onTileError = onTileError;
   }
 
   get data() {
@@ -36,7 +36,7 @@ export default class Tile {
       })
       .catch(err => {
         this._isLoaded = true;
-        this.onGetTileDataError(err);
+        this.onTileError(err);
       });
   }
 

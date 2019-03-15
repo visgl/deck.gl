@@ -3,6 +3,10 @@ import TileCache from '@deck.gl/geo-layers/tile-layer/utils/tile-cache';
 import Tile from '@deck.gl/geo-layers/tile-layer/utils/tile';
 import {WebMercatorViewport} from '@deck.gl/core';
 
+/* eslint-disable no-console, no-undef */
+const onError = console.error;
+/* eslint-enable no-console, no-undef */
+
 const testViewState = {
   bearing: 0,
   pitch: 0,
@@ -16,7 +20,7 @@ const testViewState = {
 };
 
 // testViewState should load tile 12-1171-1566
-const testTile = new Tile({x: 1171, y: 1566, z: 12});
+const testTile = new Tile({x: 1171, y: 1566, z: 12, onTileError: onError});
 
 const testViewport = new WebMercatorViewport(testViewState);
 
@@ -29,7 +33,8 @@ const testTileCache = new TileCache({
   getTileData,
   maxSize: cacheMaxSize,
   minZoom,
-  maxZoom
+  maxZoom,
+  onTileError: onError
 });
 
 test('should clear the cache when finalize is called', t => {
@@ -69,7 +74,7 @@ test('should clear not visible tiles when cache is full', t => {
       const x = 910;
       const y = 459;
       const z = 12;
-      const expectedTile = new Tile({x, y, z, getTileData});
+      const expectedTile = new Tile({x, y, z, getTileData, onTileError: onError});
       const actualTile = testTileCache._cache.get(`${z}-${x}-${y}`);
       t.equal(actualTile.x, expectedTile.x);
       t.equal(actualTile.y, expectedTile.y);
@@ -132,7 +137,8 @@ test('should set isLoaded to true even when loading the tile throws an error', t
     getTileData: () => Promise.reject(null),
     maxSize: cacheMaxSize,
     minZoom,
-    maxZoom
+    maxZoom,
+    onTileError: onError
   });
 
   errorTileCache.update(testViewport, tiles => {
