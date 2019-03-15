@@ -9,7 +9,7 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./src/app.js')
   },
 
   module: {

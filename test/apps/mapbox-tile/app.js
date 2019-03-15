@@ -1,9 +1,9 @@
 /* global document fetch window */
 /* eslint-disable no-console */
-import React, {Component} from 'react';
+import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL from 'deck.gl';
-import {TileLayer} from '@deck.gl/experimental-layers';
+import {TileLayer} from '@deck.gl/geo-layers';
 
 import {decodeTile} from './utils/decode';
 
@@ -58,18 +58,18 @@ const MAP_LAYER_STYLES = {
   opacity: 1
 };
 
-class Root extends Component {
-  getTileData({x, y, z}) {
-    const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
-    return fetch(mapSource)
-      .then(response => {
-        return response.arrayBuffer();
-      })
-      .then(buffer => {
-        return decodeTile(x, y, z, buffer);
-      });
-  }
+function getTileData({x, y, z}) {
+  const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
+  return fetch(mapSource)
+    .then(response => {
+      return response.arrayBuffer();
+    })
+    .then(buffer => {
+      return decodeTile(x, y, z, buffer);
+    });
+}
 
+class Root extends PureComponent {
   render() {
     return (
       <DeckGL
@@ -79,7 +79,7 @@ class Root extends Component {
           new TileLayer({
             ...MAP_LAYER_STYLES,
             pickable: true,
-            getTileData: this.getTileData
+            getTileData
           })
         ]}
       />
