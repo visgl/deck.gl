@@ -21,7 +21,7 @@
 import test from 'tape-catch';
 import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
-/* eslint-disable */
+
 test('TileLayer#constructor', t => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
