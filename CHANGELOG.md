@@ -19,6 +19,38 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.0 Prereleases
 
+#### deck.gl [v7.0.0-alpha.5] - Mar 15 2019
+- integrate new light module (#2806)
+- Don't fire panmove if drag started somewhere else (#2780)
+- Fixes in showcases and documentation UI (#2774)
+- Add benchmarks for attribute update (#2770)
+- Fix IconLayer autopacking: generate mipmap when constructing Texture (#2790)
+- Test utils cleanup (#2795)
+- add render test for IconLayer autopacking (#2783)
+- add lighting effect docs (#2786)
+- Improve grid aggregation perf (#2794)
+- Fix missed push in previous PR (#2793)
+- Add RFC: Imperative API Improvements (#2621)
+- JSON browser example - update to v7 (#2789)
+- Publish dev (unminified) scripts (#2788)
+- avoid creating small objects when checking redraw flags (#2785)
+- Implement binary data RFC (PR 3/3) (#2670)
+- Implement binary data RFC (PR 2/3) (#2667)
+- Implement binary data RFC (PR 1/3) (#2666)
+- Refactor mesh-layers model matrix (#2778)
+- Fix additional alias imports (#2777)
+- Fix coverage report (#2776)
+- Add mat4 instanceModelMatrix to ScenegraphLayer (#2767)
+- Move aggregation utils from core to submodule (#2771)
+- fix start-local commands (#2769)
+- Replace dev scripts with ocular-dev-tools (#2764)
+- Add tilt and height to arc-layer (#2762)
+- Use new stats API (#2763)
+- Build standalone bundle for each submodule (#2760)
+- Upgrade mapbox dependency for standalone bundle (#2757)
+- Update probe.gl versions to fix website crash (#2759)
+- fix point light class name (#2756)
+
 #### deck.gl [v7.0.0-alpha.4] - Mar 5 2019
 - Remove lightSettings prop in examples and website (#2755)
 - Fix module alias error when switching branches (#2754)
