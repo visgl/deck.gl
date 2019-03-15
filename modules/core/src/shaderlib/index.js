@@ -19,17 +19,17 @@
 // THE SOFTWARE.
 
 import {registerShaderModules, setDefaultShaderModules} from 'luma.gl';
-import {fp32, fp64, picking, phonglighting as lighting} from 'luma.gl';
+import {fp32, fp64, picking, phonglighting} from 'luma.gl';
 import project from '../shaderlib/project/project';
 import project32 from '../shaderlib/project32/project32';
 import project64 from '../shaderlib/project64/project64';
 
 export function initializeShaderModules() {
-  registerShaderModules([fp32, fp64, project, project32, project64, lighting, picking]);
+  registerShaderModules([fp32, fp64, project, project32, project64, phonglighting, picking]);
 
   setDefaultShaderModules([project]);
 }
 
 initializeShaderModules();
 
-export {fp32, fp64, picking, project, project64, lighting};
+export {fp32, fp64, picking, project, project64, phonglighting};

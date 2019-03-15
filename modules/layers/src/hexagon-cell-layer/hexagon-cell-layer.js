@@ -48,7 +48,7 @@ const defaultProps = {
 export default class HexagonCellLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'lighting', 'picking']};
+    return {vs, fs, modules: [projectModule, 'phong-lighting', 'picking']};
   }
 
   /**
