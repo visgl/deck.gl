@@ -67,7 +67,7 @@ export default class SolidPolygonLayer extends Layer {
     return {
       vs,
       fs,
-      modules: [projectModule, 'lighting', 'picking']
+      modules: [projectModule, 'phong-lighting', 'picking']
     };
   }
 
