@@ -195,6 +195,19 @@ Returns:
 
 Constructor for this sublayer. The base class implementation checks if `type` is specified for the sublayer in `_subLayerProps`, otherwise returns the default.
 
+##### `pickObject`
+
+Get the closest pickable and visible object at the given screen coordinate.
+
+* `x` (Number) - x position in pixels
+* `y` (Number) - y position in pixels
+* `radius` (Number, optional) - radius of tolerance in pixels. Default `0`.
+* `subLayerIds` (array, optional) - ids of sub layers to be queried, default is this composite layer id which equals to array of all sub layers
+
+Returns:
+
+* a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
+
 
 ## Source
 

@@ -124,6 +124,15 @@ export default class CompositeLayer extends Layer {
     return newProps;
   }
 
+  // Return the closest pickable and visible object at the given screen coordinate.
+  pickObject({x, y, radius = 0, subLayerIds = []}) {
+    if (this.context.deck) {
+      const layerIds = subLayerIds.length ? subLayerIds : [this.props.id];
+      return this.context.deck.pickObject({x, y, radius, layerIds});
+    }
+    return null;
+  }
+
   _getAttributeManager() {
     return null;
   }
