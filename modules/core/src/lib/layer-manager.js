@@ -43,6 +43,7 @@ const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
+  deck: null,
   gl: null,
 
   // Settings
@@ -64,7 +65,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {stats, viewport = null} = {}) {
+  constructor(gl, {deck, stats, viewport = null} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -79,7 +80,7 @@ export default class LayerManager {
 
     this.context = Object.assign({}, INITIAL_CONTEXT, {
       layerManager: this,
-
+      deck,
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
