@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
@@ -31,6 +31,7 @@ const DEFAULT_COLOR = [255, 0, 255, 255];
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
+  vertices: null,
   radius: {type: 'number', min: 0, value: 1000},
   angle: {type: 'number', value: 0},
   offset: {type: 'array', value: [0, 0]},
@@ -96,6 +97,10 @@ export default class ColumnLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
+
+    if (props.vertices !== oldProps.vertices) {
+      this._updateVertices(props.vertices);
+    }
   }
 
   getGeometry(diskResolution) {
@@ -120,6 +125,29 @@ export default class ColumnLayer extends Layer {
         shaderCache: this.context.shaderCache
       })
     );
+  }
+
+  _updateVertices(vertices) {
+    if (!vertices) {
+      return;
+    }
+
+    const {diskResolution} = this.props;
+    log.assert(vertices.length >= diskResolution);
+
+    const {model} = this.state;
+    const {positions} = model.geometry.attributes;
+    let i = 0;
+    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
+      for (let j = 0; j <= diskResolution; j++) {
+        const p = vertices[j] || vertices[0]; // auto close loop
+        // replace x and y in geometry
+        positions.value[i++] = p[0];
+        positions.value[i++] = p[1];
+        i++;
+      }
+    }
+    model.setAttributes({positions});
   }
 
   draw({uniforms}) {

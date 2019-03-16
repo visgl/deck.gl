@@ -58,12 +58,12 @@ void main(void) {
 
   // if ahpha == 0.0 or z < 0.0, do not render element
   float shouldRender = float(instanceColors.a > 0.0 && instanceElevations >= 0.0);
-  float dotRadius = project_scale(radius) * coverage * shouldRender;
+  float dotRadius = radius * coverage * shouldRender;
 
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
-  vec3 pos = vec3((rotationMatrix * positions.xy + offset * 2.0) * dotRadius, 0.);
+  vec3 pos = vec3(project_scale(rotationMatrix * positions.xy + offset) * dotRadius, 0.);
 
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_worldspace);

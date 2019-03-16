@@ -24,7 +24,7 @@ import ColumnLayer from './column-layer';
 
 const defaultProps = {
   cellSize: {type: 'number', min: 0, value: 1000},
-  offset: {type: 'array', min: 0, value: [0.5, -0.5]}
+  offset: {type: 'array', min: 0, value: [1, 1]}
 };
 
 export default class GridCellLayer extends ColumnLayer {

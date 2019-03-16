@@ -62,7 +62,11 @@ Disk radius in meters.
 
 Disk rotation, counter-clockwise in degrees.
 
-##### `offsest` ([Number, Number], optional)
+##### `vertices` (Array, optional)
+
+Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one. The length of the array must be at least `diskResolution`. Each vertex is a point `[x, y]` that is the offset from the instance position, relative to the radius.
+
+##### `offset` ([Number, Number], optional)
 
 * Default: `[0, 0]`
 
