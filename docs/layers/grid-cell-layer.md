@@ -9,6 +9,7 @@
 > This is the primitive layer rendered by [GridLayer](/docs/layers/grid-layer.md) after aggregation. Unlike the GridLayer, it renders one column for each data object.
 
 The GridCellLayer can render a grid-based heatmap.
+It is a variation of the [ColumnLayer](/docs/layers/column-layer.md).
 It takes the constant width / height of all cells and top-left coordinate of
 each cell. The grid cells can be given a height using the `getElevation` accessor.
 

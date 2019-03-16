@@ -22,30 +22,32 @@ import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
-
-import vs from './hexagon-cell-layer-vertex.glsl';
-import fs from './hexagon-cell-layer-fragment.glsl';
-
-const DEFAULT_COLOR = [255, 0, 255, 255];
 const defaultMaterial = new PhongMaterial();
 
+import vs from './column-layer-vertex.glsl';
+import fs from './column-layer-fragment.glsl';
+
+const DEFAULT_COLOR = [255, 0, 255, 255];
+
 const defaultProps = {
-  hexagonVertices: null,
+  diskResolution: {type: 'number', min: 4, value: 20},
+  vertices: null,
   radius: {type: 'number', min: 0, value: 1000},
   angle: {type: 'number', value: 0},
+  offset: {type: 'array', value: [0, 0]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
   fp64: false,
 
-  getCentroid: {type: 'accessor', value: x => x.centroid},
+  getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   getElevation: {type: 'accessor', value: 1000},
 
   material: defaultMaterial
 };
 
-export default class HexagonCellLayer extends Layer {
+export default class ColumnLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return {vs, fs, modules: [projectModule, 'phong-lighting', 'picking']};
@@ -60,9 +62,9 @@ export default class HexagonCellLayer extends Layer {
     /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {
-        size: 2,
+        size: 3,
         transition: true,
-        accessor: 'getCentroid'
+        accessor: 'getPosition'
       },
       instanceElevations: {
         size: 1,
@@ -71,7 +73,7 @@ export default class HexagonCellLayer extends Layer {
       },
       instancePositions64xyLow: {
         size: 2,
-        accessor: 'getCentroid',
+        accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
@@ -87,7 +89,7 @@ export default class HexagonCellLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
-    if (props.fp64 !== oldProps.fp64) {
+    if (props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();
@@ -96,59 +98,19 @@ export default class HexagonCellLayer extends Layer {
       this.getAttributeManager().invalidateAll();
     }
 
-    if (
-      props.hexagonVertices !== oldProps.hexagonVertices ||
-      props.radius !== oldProps.radius ||
-      props.angle !== oldProps.angle
-    ) {
-      this.updateRadiusAngle();
+    if (props.vertices !== oldProps.vertices) {
+      this._updateVertices(props.vertices);
     }
   }
 
-  updateRadiusAngle() {
-    let {angle, radius} = this.props;
-    const {hexagonVertices} = this.props;
-
-    if (Array.isArray(hexagonVertices)) {
-      if (hexagonVertices.length < 6) {
-        log.error('HexagonCellLayer: hexagonVertices needs to be an array of 6 points')();
-      }
-
-      // calculate angle and vertices from hexagonVertices if provided
-      const vertices = this.props.hexagonVertices;
-
-      const vertex0 = vertices[0];
-      const vertex3 = vertices[3];
-
-      // transform to space coordinates
-      const {viewport} = this.context;
-      const {pixelsPerMeter} = viewport.getDistanceScales();
-      const spaceCoord0 = this.projectFlat(vertex0);
-      const spaceCoord3 = this.projectFlat(vertex3);
-
-      // distance between two close centroids
-      const dx = spaceCoord0[0] - spaceCoord3[0];
-      const dy = spaceCoord0[1] - spaceCoord3[1];
-      const dxy = Math.sqrt(dx * dx + dy * dy);
-
-      // Calculate angle that the perpendicular hexagon vertex axis is tilted
-      angle = Math.acos(dx / dxy) * -Math.sign(dy) + Math.PI / 2;
-      radius = dxy / 2 / pixelsPerMeter[0];
-    }
-
-    this.setState({angle, radius});
-  }
-
-  getCylinderGeometry(radius) {
+  getGeometry(diskResolution) {
     return new CylinderGeometry({
-      radius,
-      topRadius: radius,
-      bottomRadius: radius,
-      topCap: true,
+      radius: 1,
+      topCap: false,
       bottomCap: true,
-      height: 1,
+      height: 2,
       verticalAxis: 'z',
-      nradial: 6,
+      nradial: diskResolution,
       nvertical: 1
     });
   }
@@ -158,21 +120,44 @@ export default class HexagonCellLayer extends Layer {
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: this.getCylinderGeometry(1),
+        geometry: this.getGeometry(this.props.diskResolution),
         isInstanced: true,
         shaderCache: this.context.shaderCache
       })
     );
   }
 
+  _updateVertices(vertices) {
+    if (!vertices) {
+      return;
+    }
+
+    const {diskResolution} = this.props;
+    log.assert(vertices.length >= diskResolution);
+
+    const {model} = this.state;
+    const {positions} = model.geometry.attributes;
+    let i = 0;
+    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
+      for (let j = 0; j <= diskResolution; j++) {
+        const p = vertices[j] || vertices[0]; // auto close loop
+        // replace x and y in geometry
+        positions.value[i++] = p[0];
+        positions.value[i++] = p[1];
+        i++;
+      }
+    }
+    model.setAttributes({positions});
+  }
+
   draw({uniforms}) {
-    const {elevationScale, extruded, coverage} = this.props;
-    const {radius, angle} = this.state;
+    const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
 
     this.state.model.render(
       Object.assign({}, uniforms, {
         radius,
-        angle,
+        angle: (angle / 180) * Math.PI,
+        offset,
         extruded,
         coverage,
         elevationScale
@@ -189,18 +174,18 @@ export default class HexagonCellLayer extends Layer {
       return;
     }
 
-    const {data, getCentroid} = this.props;
+    const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
     const {iterable, objectInfo} = createIterable(data);
     for (const object of iterable) {
       objectInfo.index++;
-      const position = getCentroid(object, objectInfo);
+      const position = getPosition(object, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
   }
 }
 
-HexagonCellLayer.layerName = 'HexagonCellLayer';
-HexagonCellLayer.defaultProps = defaultProps;
+ColumnLayer.layerName = 'ColumnLayer';
+ColumnLayer.defaultProps = defaultProps;

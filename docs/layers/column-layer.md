@@ -4,18 +4,14 @@
   <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
 </p>
 
-# HexagonCellLayer
+# ColumnLayer
 
 > This is the primitive layer rendered by [HexagonLayer](/docs/layers/hexagon-layer.md) after aggregation. Unlike the HexagonLayer, it renders one column for each data object.
 
-The HexagonCellLayer is a variation of the [GridCellLayer](/docs/layers/grid-cell-layer.md). It is intended to render
-tessellated hexagons, and also enables height in 3d. The HexagonCellLayer
-takes in the vertices of a primitive hexagon as `[[longitude, latitude]]`,
-and an array of hexagon centroid as `[longitude, latitude]`.
-It renders each hexagon based on color, opacity and elevation.
+The ColumnLayer can be used to render a heatmap of vertical cylinders. It renders a tesselated regular polygon centered at each given position (a "disk"), and extrude it in 3d.
 
 ```js
-import DeckGL, {HexagonCellLayer} from 'deck.gl';
+import DeckGL, {ColumnLayer} from 'deck.gl';
 
 const App = ({data, viewport}) => {
 
@@ -26,13 +22,14 @@ const App = ({data, viewport}) => {
    *   ...
    * ]
    */
-  const layer = new HexagonCellLayer({
-    id: 'hexagon-cell-layer',
+  const layer = new ColumnLayer({
+    id: 'column-layer',
     data,
+    diskResolution: 12,
     radius: 500,
     angle: 0,
     extruded: true,
-    getCentroid: d => d.position,
+    getPosition: d => d.position,
     getColor: d => d.color,
     getElevation: d => d.elevation
   });
@@ -47,36 +44,46 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-##### `hexagonVertices` (Array[[lon, lat]], optional)
+##### `diskResolution` (Number, optional)
 
-Primitive hexagon vertices as an array of six [lon, lat] pairs,
-in either clockwise or counter clouckwise direction. Use `radius` and `angle`
-instead if `hexagonVertices` are not available.
+* Default: `20`
+
+The number of sides to render the disk as. The disk is a regular polygon that fits inside the given radius. A higher resolution will yield a smoother look close-up, but also need more resources to render.
 
 ##### `radius` (Number, optional)
 
-Primitive hexagon radius in meter. The hexagons are pointy-topped (rather than flat-topped).
-If `radius` and `angle` are provided, they will be used to calculate
-primitive hexagon instead of `hexagonVertices`
+* Default: `1000`
+
+Disk radius in meters.
 
 ##### `angle` (Number, optional)
 
-Primitive hexagon angle in radian. Angle is the rotation of one corner
-counter clockwise from north. If `radius` and `angle` are provided,
-they will be used to calculate primitive hexagon instead of `hexagonVertices`
+* Default: `0`
+
+Disk rotation, counter-clockwise in degrees.
+
+##### `vertices` (Array, optional)
+
+Replace the default geometry (regular polygon that fits inside the unit circle) with a custom one. The length of the array must be at least `diskResolution`. Each vertex is a point `[x, y]` that is the offset from the instance position, relative to the radius.
+
+##### `offset` ([Number, Number], optional)
+
+* Default: `[0, 0]`
+
+Disk offset from the position, relative to the radius. By default, the disk is centered at each position.
 
 ##### `coverage` (Number, optional)
 
 * Default: `1`
 
-Hexagon radius multiplier, between 0 - 1. The radius of hexagon is calculated by
+Radius multiplier, between 0 - 1. The radius of the disk is calculated by
 `coverage * radius`
 
 ##### `elevationScale` (Number, optional)
 
 * Default: `1`
 
-Hexagon elevation multiplier. The elevation of hexagon is calculated by
+Column elevation multiplier. The elevation of column is calculated by
 `elevationScale * getElevation(d)`. `elevationScale` is a handy property
 to scale all hexagon elevations without updating the data.
 
@@ -100,12 +107,11 @@ This is an object that contains material props for [lighting effect](/docs/effec
 
 ### Data Accessors
 
-##### `getCentroid` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `object => object.centroid`
+* Default: `object => object.position`
 
-Method called to retrieve the centroid of each hexagon. Centorid should be
-set to [lon, lat]
+Method called to retrieve the position of each column, in `[x, y]`. An optional third component can be used to set the elevation of the bottom.
 
 ##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -128,5 +134,5 @@ The elevation of each cell in meters.
 
 ## Source
 
-[modules/layers/src/hexagon-cell-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/hexagon-cell-layer)
+[modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer)
 
