@@ -528,6 +528,7 @@ export default class Deck {
     const viewport = this.viewManager.getViewports()[0];
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
+      deck: this,
       stats: this.stats,
       viewport
     });
