@@ -47,7 +47,9 @@ test('Top-level imports', t0 => {
 
   test('import "deck.gl"', t => {
     t.notOk(hasEmptyExports(deck), 'No empty top-level export in deck.gl');
+    t.notOk(hasEmptyExports(deck.experimental), 'No empty experimental export in deck.gl');
     t.notOk(hasEmptyExports(core), 'No empty top-level export in @deck.gl/core');
+    t.notOk(hasEmptyExports(core.experimental), 'No empty experimental export in @deck.gl/core');
     t.end();
   });
 
