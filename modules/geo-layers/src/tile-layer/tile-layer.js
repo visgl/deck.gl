@@ -5,11 +5,11 @@ import TileCache from './utils/tile-cache';
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
   getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null)},
-  onTileLoaded: {type: 'function', value: () => {}},
+  onViewportLoaded: {type: 'function', value: () => {}},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err)},
-  maxZoom: {type: 'number', min: 0, value: null},
-  minZoom: {type: 'number', min: 0, value: null},
+  maxZoom: {min: 0, value: null},
+  minZoom: {min: 0, value: 0},
   maxCacheSize: {type: 'number', min: 0, value: null}
 };
 
@@ -28,7 +28,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
-    const {onTileLoaded, onTileError} = props;
+    const {onViewportLoaded, onTileError} = props;
     if (
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData)
@@ -56,10 +56,10 @@ export default class TileLayer extends CompositeLayer {
           if (!allCurrTilesLoaded) {
             Promise.all(currTiles.map(tile => tile.data)).then(() => {
               this.setState({isLoaded: true});
-              onTileLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+              onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
             });
           } else {
-            onTileLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+            onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
           }
         });
       }

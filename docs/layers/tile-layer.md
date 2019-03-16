@@ -8,10 +8,8 @@ import {TileLayer} from '@deck.gl/geo-layers';
 import {VectorTile} from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 
-const MAP_SOURCE = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
-
 function getTileData({x, y, z}) {
-  return fetch(MAP_SOURCE)
+  return fetch(`https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`)
     .then(response => response.arrayBuffer())
     .then(buffer => vectorTileToGeoJSON(buffer, x, y, z));
 }
@@ -44,7 +42,7 @@ export const App = ({viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `onTileError`, `onTileLoaded`, `maxZoom`, `minZoom` and `maxCacheSize`.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with the following props. 
 
 ##### `maxZoom` (Number|Null, optional)
 
@@ -52,11 +50,11 @@ The maximum zoom level of the tiles from consumers' data. If provided, and the c
 
 - Default: `null`
 
-##### `minZoom` (Number|Null, optional)
+##### `minZoom` (Number, optional)
 
 The minimum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is smaller than `minZoom`, we will fetch data at `minZoom` instead of the current zoom level.
 
-- Default: `null`
+- Default: 0
 
 ##### `maxCacheSize` (Number|Null, optional)
 
@@ -66,11 +64,11 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 ### Render Options
 
-##### `onTileLoaded` (Function, optional)
+##### `onViewportLoaded` (Function, optional)
 
-`onTileLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
+`onViewportLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
 
-- Default: `onTileLoaded: (data) => null`
+- Default: `onViewportLoaded: (data) => null`
 
 ##### `getTileData` (Function,  optional)
 
