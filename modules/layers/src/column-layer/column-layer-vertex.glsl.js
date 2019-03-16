@@ -71,7 +71,7 @@ void main(void) {
   // Light calculations
   // Worldspace is the linear space after Mercator projection
 
-  vec3 normals_worldspace = vec3(rotationMatrix * normals.xy, normals.z);
+  vec3 normals_worldspace = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
 
   if (extruded) {
     vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_worldspace.xyz, normals_worldspace);
