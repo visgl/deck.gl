@@ -1,6 +1,9 @@
 export default `
 #define SHADER_NAME simple-mesh-layer-vs
 
+// Scale the model
+uniform float sizeScale;
+
 // Primitive attributes
 attribute vec3 positions;
 attribute vec3 normals;
@@ -19,7 +22,7 @@ varying vec4 vColor;
 
 void main(void) {
   vec3 pos = (instanceModelMatrix * vec4(positions, 1.0)).xyz;
-  pos = project_scale(pos);
+  pos = project_scale(pos * sizeScale);
 
   vec4 worldPosition;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);

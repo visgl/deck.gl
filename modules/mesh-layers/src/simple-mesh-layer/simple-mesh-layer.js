@@ -98,7 +98,7 @@ const defaultMaterial = new PhongMaterial();
 const defaultProps = {
   mesh: null,
   texture: null,
-
+  sizeScale: {type: 'number', value: 1, min: 0},
   // TODO - parameters should be merged, not completely overridden
   parameters: {
     depthTest: true,
@@ -107,7 +107,7 @@ const defaultProps = {
   fp64: false,
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
-
+  sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
@@ -191,7 +191,13 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   draw({uniforms}) {
-    this.state.model.render(uniforms);
+    const {sizeScale} = this.props;
+
+    this.state.model.render(
+      Object.assign({}, uniforms, {
+        sizeScale
+      })
+    );
   }
 
   getModel(gl) {

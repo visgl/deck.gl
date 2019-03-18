@@ -32,6 +32,9 @@ const vs = `
   attribute vec3 instancePickingColors;
   attribute mat4 instanceModelMatrix;
 
+  // Uniforms
+  uniform float sizeScale;
+
   // Attributes
   attribute vec4 POSITION;
 
@@ -48,7 +51,7 @@ const vs = `
     vColor = instanceColors;
 
     vec3 pos = (instanceModelMatrix * POSITION).xyz;
-    pos = project_scale(pos);
+    pos = project_scale(pos * sizeScale);
 
     vec4 worldPosition;
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
@@ -77,6 +80,7 @@ const fs = `
 const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
+  sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
 
@@ -150,6 +154,8 @@ export default class ScenegraphLayer extends Layer {
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
     if (!this.state.sceneGraph) return;
 
+    const {sizeScale} = this.props;
+
     const attributeManager = this.getAttributeManager();
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
     const numInstances = this.getNumInstances();
@@ -159,7 +165,10 @@ export default class ScenegraphLayer extends Layer {
       model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
-        parameters
+        parameters,
+        uniforms: {
+          sizeScale
+        }
       });
     });
   }
