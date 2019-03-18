@@ -1,4 +1,4 @@
-/* eslint-disable no-invalid-this */
+/* eslint-disable no-invalid-this, max-statements */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(9);
 
@@ -27,7 +27,23 @@ function updateTransformMatrix(targetMatrix, roll, pitch, yaw, scale) {
 }
 
 function calculateModelMatrices(attribute) {
-  const {data, getOrientation, getScale, getTransformMatrix} = this.props;
+  const {data} = this.props;
+  let {getOrientation, getScale, getTransformMatrix} = this.props;
+
+  if (Array.isArray(getOrientation)) {
+    const constantOrientation = getOrientation;
+    getOrientation = () => constantOrientation;
+  }
+
+  if (Array.isArray(getScale)) {
+    const constantScale = getScale;
+    getScale = () => constantScale;
+  }
+
+  if (Array.isArray(getTransformMatrix)) {
+    const constantMatrix = getTransformMatrix;
+    getTransformMatrix = () => constantMatrix;
+  }
 
   const instanceModelMatrixData = attribute.value;
 
@@ -61,7 +77,7 @@ function calculateModelMatrices(attribute) {
 
 export const MATRIX_SHADER_ATTRIBUTES = {
   size: 9,
-  accessor: ['getYaw', 'getPitch', 'getRoll', 'getScale', 'getTranslation', 'getTransformMatrix'],
+  accessor: ['getYaw', 'getPitch', 'getRoll', 'getScale', 'getTransformMatrix'],
   shaderAttributes: {
     instanceModelMatrix__LOCATION_0: {
       size: 3,
