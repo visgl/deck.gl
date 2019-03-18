@@ -8,8 +8,8 @@ const defaultProps = {
   onViewportLoaded: {type: 'function', value: () => {}},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err)},
-  maxZoom: {min: 0, value: null},
-  minZoom: {min: 0, value: 0},
+  maxZoom: null,
+  minZoom: 0,
   maxCacheSize: {type: 'number', min: 0, value: null}
 };
 

@@ -3,10 +3,6 @@ import TileCache from '@deck.gl/geo-layers/tile-layer/utils/tile-cache';
 import Tile from '@deck.gl/geo-layers/tile-layer/utils/tile';
 import {WebMercatorViewport} from '@deck.gl/core';
 
-/* eslint-disable no-console, no-undef */
-const onError = console.error;
-/* eslint-enable no-console, no-undef */
-
 const testViewState = {
   bearing: 0,
   pitch: 0,
@@ -20,7 +16,7 @@ const testViewState = {
 };
 
 // testViewState should load tile 12-1171-1566
-const testTile = new Tile({x: 1171, y: 1566, z: 12, onTileError: onError});
+const testTile = new Tile({x: 1171, y: 1566, z: 12});
 
 const testViewport = new WebMercatorViewport(testViewState);
 
@@ -33,11 +29,10 @@ const testTileCache = new TileCache({
   getTileData,
   maxSize: cacheMaxSize,
   minZoom,
-  maxZoom,
-  onTileError: onError
+  maxZoom
 });
 
-test('should clear the cache when finalize is called', t => {
+test('TileCache#TileCache#should clear the cache when finalize is called', t => {
   testTileCache.update(testViewport, () => null);
   t.equal(testTileCache._cache.size, 1);
   testTileCache.finalize();
@@ -45,7 +40,7 @@ test('should clear the cache when finalize is called', t => {
   t.end();
 });
 
-test('should call onUpdate with the expected tiles', t => {
+test('TileCache#should call onUpdate with the expected tiles', t => {
   testTileCache.update(testViewport, tiles => {
     t.equal(tiles.length, 1);
     t.equal(tiles[0].x, testTile.x);
@@ -56,7 +51,7 @@ test('should call onUpdate with the expected tiles', t => {
   testTileCache.finalize();
 });
 
-test('should clear not visible tiles when cache is full', t => {
+test('TileCache#should clear not visible tiles when cache is full', t => {
   // load a viewport to fill the cache
 
   testTileCache.update(testViewport, () => null);
@@ -74,7 +69,7 @@ test('should clear not visible tiles when cache is full', t => {
       const x = 910;
       const y = 459;
       const z = 12;
-      const expectedTile = new Tile({x, y, z, getTileData, onTileError: onError});
+      const expectedTile = new Tile({x, y, z, getTileData});
       const actualTile = testTileCache._cache.get(`${z}-${x}-${y}`);
       t.equal(actualTile.x, expectedTile.x);
       t.equal(actualTile.y, expectedTile.y);
@@ -85,7 +80,7 @@ test('should clear not visible tiles when cache is full', t => {
   testTileCache.finalize();
 });
 
-test('should load the cached parent tiles while we are loading the current tiles', t => {
+test('TileCache#should load the cached parent tiles while we are loading the current tiles', t => {
   testTileCache.update(testViewport, tiles => null);
 
   const zoomedInViewport = new WebMercatorViewport(
@@ -102,7 +97,7 @@ test('should load the cached parent tiles while we are loading the current tiles
   testTileCache.finalize();
 });
 
-test('should try to load the existing zoom levels if we zoom in too far', t => {
+test('TileCache#should try to load the existing zoom levels if we zoom in too far', t => {
   const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 20
@@ -118,7 +113,7 @@ test('should try to load the existing zoom levels if we zoom in too far', t => {
   testTileCache.finalize();
 });
 
-test('should not display anything if we zoom out too far', t => {
+test('TileCache#should not display anything if we zoom out too far', t => {
   const zoomedOutViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 1
@@ -132,13 +127,12 @@ test('should not display anything if we zoom out too far', t => {
   testTileCache.finalize();
 });
 
-test('should set isLoaded to true even when loading the tile throws an error', t => {
+test('TileCache#should set isLoaded to true even when loading the tile throws an error', t => {
   const errorTileCache = new TileCache({
     getTileData: () => Promise.reject(null),
     maxSize: cacheMaxSize,
     minZoom,
-    maxZoom,
-    onTileError: onError
+    maxZoom
   });
 
   errorTileCache.update(testViewport, tiles => {
