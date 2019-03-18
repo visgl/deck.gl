@@ -86,11 +86,12 @@ const defaultProps = {
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
-  getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0},
+  // [pitch, yaw, roll]
+  getOrientation: {
+    type: 'accessor',
+    value: x => x.orientation || [x.pitch || 0, x.yaw || x.angle || 0, x.roll || 0]
+  },
   getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: x => x.translation || [0, 0, 0]},
   getTransformMatrix: {type: 'accessor', value: x => x.transformMatrix || null}
 };
 

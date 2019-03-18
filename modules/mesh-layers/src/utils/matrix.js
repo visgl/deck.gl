@@ -27,7 +27,7 @@ function updateTransformMatrix(targetMatrix, roll, pitch, yaw, scale) {
 }
 
 function calculateModelMatrices(attribute) {
-  const {data, getYaw, getPitch, getRoll, getScale, getTransformMatrix} = this.props;
+  const {data, getOrientation, getScale, getTransformMatrix} = this.props;
 
   const instanceModelMatrixData = attribute.value;
 
@@ -38,9 +38,10 @@ function calculateModelMatrices(attribute) {
     if (!matrix) {
       matrix = modelMatrix;
 
-      const roll = getRoll(object) * RADIAN_PER_DEGREE;
-      const pitch = getPitch(object) * RADIAN_PER_DEGREE;
-      const yaw = getYaw(object) * RADIAN_PER_DEGREE;
+      const orientation = getOrientation(object);
+      const pitch = orientation[0] * RADIAN_PER_DEGREE;
+      const yaw = orientation[1] * RADIAN_PER_DEGREE;
+      const roll = orientation[2] * RADIAN_PER_DEGREE;
       const scale = getScale(object);
 
       updateTransformMatrix(matrix, roll, pitch, yaw, scale);

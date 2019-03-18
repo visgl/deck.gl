@@ -66,9 +66,7 @@ const ScenegraphLayerExample = {
     pickable: true,
     sizeScale: 1,
     getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000],
-    getPitch: d => Math.random() * 360,
-    getRoll: d => Math.random() * 360,
-    getYaw: d => Math.random() * 360,
+    getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
     getScale: d => {
       const s = Math.random() * 3;
       return [s, s, s];
