@@ -62,6 +62,24 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 Text size multiplier.
 
+##### `sizeUnits` (String, optional)
+
+* Default: `pixels` 
+
+One of `pixels` or `meters`.
+
+##### `sizeMinPixels` (Number, optional)
+
+* Default: `1`
+
+The minimum size in pixels.
+
+##### `sizeMaxPixels` (Number, optional)
+
+* Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum size in pixels.
+
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`

@@ -56,6 +56,9 @@ const defaultProps = {
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   fp64: false,
+  sizeUnits: 'pixels',
+  sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
+  sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
 
   getPosition: {type: 'accessor', value: x => x.position},
   getIcon: {type: 'accessor', value: x => x.icon},
@@ -171,8 +174,9 @@ export default class IconLayer extends Layer {
   /* eslint-enable max-statements, complexity */
 
   draw({uniforms}) {
-    const {sizeScale} = this.props;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits} = this.props;
     const {iconManager} = this.state;
+    const {viewport} = this.context;
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
@@ -180,7 +184,10 @@ export default class IconLayer extends Layer {
         Object.assign({}, uniforms, {
           iconsTexture,
           iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeScale
+          sizeScale:
+            sizeScale * (sizeUnits === 'meters' ? viewport.distanceScales.pixelsPerMeter[2] : 1),
+          sizeMinPixels,
+          sizeMaxPixels
         })
       );
     }

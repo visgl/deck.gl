@@ -35,6 +35,8 @@ attribute vec2 instanceOffsets;
 
 uniform float sizeScale;
 uniform vec2 iconsTextureDim;
+uniform float sizeMinPixels;
+uniform float sizeMaxPixels;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -50,12 +52,18 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 
 void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
+  // convert size in meters to pixels, then scaled and clamp
+  
+  float sizeScalePixels = instanceSizes * sizeScale;
+  
+  sizeScalePixels = clamp(sizeScalePixels, sizeMinPixels, sizeMaxPixels);
+  
   // scale icon height to match instanceSize
-  float instanceScale = iconSize.y == 0.0 ? 0.0 : instanceSizes / iconSize.y;
+  float instanceScale = iconSize.y == 0.0 ? 0.0 : sizeScalePixels / iconSize.y;
 
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
-  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * sizeScale * instanceScale;
+  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
   pixelOffset.y *= -1.0;
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0));

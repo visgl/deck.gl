@@ -578,6 +578,42 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-meters',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat',
+        data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        iconMapping: dataSamples.iconAtlas,
+        sizeScale: 256,
+        sizeUnits: 'meters',
+        sizeMinPixels: 1,
+        sizeMaxPixels: 2048,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
     name: 'geojson-lnglat',
     viewState: {
       latitude: 37.751537058389985,
@@ -996,6 +1032,34 @@ export const TEST_CASES = [
         getSize: x => 16,
         getAngle: x => 0,
         sizeScale: 1,
+        getTextAnchor: x => 'start',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer.png'
+  },
+  {
+    name: 'text-layer-meters',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
+        getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 21,
+        sizeUnits: 'meters',
         getTextAnchor: x => 'start',
         getAlignmentBaseline: x => 'center',
         getPixelOffset: x => [10, 0]

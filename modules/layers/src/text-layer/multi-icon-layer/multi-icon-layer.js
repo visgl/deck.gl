@@ -28,6 +28,10 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
+  sizeUnits: 'pixels',
+  sizeMinPixels: 0,
+  sizeMaxPixels: Number.MAX_SAFE_INTEGER,
+
   getShiftInQueue: {type: 'accessor', value: x => x.shift || 0},
   getLengthOfQueue: {type: 'accessor', value: x => x.len || 1},
   // 1: left, 0: middle, -1: right
