@@ -60,6 +60,13 @@ Can be either a luma.gl [Texture2D](http://uber.github.io/luma.gl/#/documentatio
 If `texture` is supplied, texture is used to render the geometries. Otherwise, object color obtained via the `getColor` accessor is used.
 
 
+##### `sizeScale` (Number, optional)
+
+- Default `1`.
+
+Multiplier to scale each geometry by.
+
+
 ##### `getPosition` (Function, optional)
 
 - Default: `object => object.position`
@@ -67,27 +74,12 @@ If `texture` is supplied, texture is used to render the geometries. Otherwise, o
 This accessor returns the center position corresponding to an object in the `data` stream.
 
 
-##### `getYaw` (Function, optional)
+##### `getOrientation` (Function, optional)
 
-- Default: `object => object.yaw || object.angle || 0`
+- Default: `object => object.orientation || [object.pitch || 0, object.yaw || object.angle || 0, object.roll || 0]`
 
-The yaw (heading) in degrees of each object.
+Object orientation defined as a vec3 of Euler angles, [pitch, yaw, roll].
 
-
-##### `getPitch` (Function, optional)
-
-- Default: `object => object.pitch || 0`
-
-The pitch (elevation) in degrees of each object.
-
-
-##### `getRoll` (Function, optional)
-
-- Default: `object => object.roll || 0`
-
-The roll (bank) in degrees of each object.
-
-See [Euler angles](https://en.wikipedia.org/wiki/Euler_angles).
 
 ##### `getScale` (Function, optional)
 
