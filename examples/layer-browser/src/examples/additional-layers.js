@@ -37,19 +37,12 @@ const SimpleMeshLayerExample = {
       Math.random() * 2,
       Math.random() * 2,
       Math.random() * 2,
-      0,
       Math.random() * 2,
       Math.random() * 2,
       Math.random() * 2,
-      0,
       Math.random() * 2,
       Math.random() * 2,
-      Math.random() * 2,
-      0,
-      0,
-      0,
-      Math.random() * 200,
-      1
+      Math.random() * 2
     ]
   }
 };
