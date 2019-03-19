@@ -40,7 +40,6 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // deprecated
-  strokeWidth: {deprecatedFor: 'getWidth'},
   getStrokeWidth: {deprecatedFor: 'getWidth'}
 };
 
@@ -142,18 +141,17 @@ export default class LineLayer extends Layer {
     }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
     const {iterable, objectInfo} = createIterable(data);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
       const targetPosition = getTargetPosition(object, objectInfo);
-      value[i + 0] = fp64LowPart(sourcePosition[0]);
-      value[i + 1] = fp64LowPart(sourcePosition[1]);
-      value[i + 2] = fp64LowPart(targetPosition[0]);
-      value[i + 3] = fp64LowPart(targetPosition[1]);
-      i += size;
+      value[i++] = fp64LowPart(sourcePosition[0]);
+      value[i++] = fp64LowPart(sourcePosition[1]);
+      value[i++] = fp64LowPart(targetPosition[0]);
+      value[i++] = fp64LowPart(targetPosition[1]);
     }
   }
 }

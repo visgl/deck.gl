@@ -437,7 +437,8 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat',
         data: dataSamples.routes,
-        strokeWidth: 2,
+        getWidth: 0,
+        widthMinPixels: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
@@ -459,7 +460,8 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat-64',
         data: dataSamples.routes,
-        strokeWidth: 2,
+        getWidth: 0,
+        widthMinPixels: 2,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
@@ -1061,10 +1063,11 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
-          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 1, color: [255, 0, 0]},
+          {threshold: 5, color: [0, 255, 0]},
           {threshold: 15, color: [0, 0, 255]}
         ],
+        strokeWidth: 3,
         gpuAggregation: false
       })
     ],
@@ -1087,10 +1090,11 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
-          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 1, color: [255, 0, 0]},
+          {threshold: 5, color: [0, 255, 0]},
           {threshold: 15, color: [0, 0, 255]}
         ],
+        strokeWidth: 3,
         gpuAggregation: true
       })
     ],
@@ -1113,10 +1117,11 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
-          {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},
+          {threshold: [1, 5], color: [255, 0, 0]},
+          {threshold: [5, 15], color: [0, 255, 0]},
           {threshold: [15, 1000], color: [0, 0, 255]}
         ],
+        strokeWidth: 3,
         gpuAggregation: true
       })
     ],
