@@ -7,7 +7,7 @@
 
 # H3HexagonLayer
 
-The `H3HexagonLayer` renders hexagons from the [h3](https://uber.github.io/h3/) geospatial indexing system.
+The `H3HexagonLayer` renders hexagons from the [H3](https://uber.github.io/h3/) geospatial indexing system.
 
 `H3HexagonLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
@@ -56,8 +56,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 * Default: `1`
 
-Radius multiplier, between 0 - 1. The radius of the disk is calculated by
-`coverage * radius`
+Hexagon size multiplier, between 0 - 1. When a number smaller than `1` is provided, the hexagon is scaled down around the centroid.
 
 ##### `elevationScale` (Number, optional)
 
@@ -71,7 +70,7 @@ to scale all hexagon elevations without updating the data.
 
 * Default: `true`
 
-Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
+Whether to extrude hexagon. If set to false, all hexagons will be set to flat.
 
 ##### `fp64` (Boolean, optional)
 
@@ -115,7 +114,7 @@ The elevation of each cell in meters.
 
 ## Sub Layers
 
-The H3HexagonLayer renders the following sublayers:
+The `H3HexagonLayer` renders the following sublayers:
 
 * `hexagon-cell` - a [ColumnLayer](/docs/layers/column-layer.md) rendering all hexagons.
 

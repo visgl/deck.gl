@@ -7,7 +7,7 @@
 
 # H3ClusterLayer
 
-The `H3ClusterLayer` renders regions represented by hexagon sets from the [h3](https://uber.github.io/h3/) geospatial indexing system.
+The `H3ClusterLayer` renders regions represented by hexagon sets from the [H3](https://uber.github.io/h3/) geospatial indexing system.
 
 `H3ClusterLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
