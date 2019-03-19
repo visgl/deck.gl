@@ -53,7 +53,7 @@ export default class PathTesselator extends Tesselator {
           target,
           size: 1,
           getValue: (object, objectInfo) => {
-            objectInfo.target[0] = accessor(object);
+            objectInfo.target[0] = accessor(object, objectInfo);
             return objectInfo.target;
           }
         });
