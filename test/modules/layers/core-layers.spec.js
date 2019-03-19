@@ -206,7 +206,8 @@ test('PathLayer', t => {
     Layer: PathLayer,
     sampleProps: {
       data: FIXTURES.zigzag,
-      getPath: d => d.path
+      getPath: d => d.path,
+      getColor: (d, {index}) => [index, 0, 0]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
