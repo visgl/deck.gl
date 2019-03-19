@@ -130,6 +130,7 @@ test('TileCache#should not display anything if we zoom out too far', t => {
 test('TileCache#should set isLoaded to true even when loading the tile throws an error', t => {
   const errorTileCache = new TileCache({
     getTileData: () => Promise.reject(null),
+    onTileError: () => {},
     maxSize: cacheMaxSize,
     minZoom,
     maxZoom

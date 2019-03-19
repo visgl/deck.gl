@@ -21,6 +21,9 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 import {ContourLayer, ScreenGridLayer, GridLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+
+import * as h3 from 'h3-js';
 
 const IS_HEADLESS = Boolean(window.browserTestDriver_isHeadless);
 
@@ -1126,5 +1129,44 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/contour-isobands-lnglat.png'
+  },
+  {
+    name: 'h3-hexagon-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('882830829bfffff', 4),
+        getHexagon: d => d,
+        getColor: (d, {index}) => [255, index * 5, 0],
+        getElevation: (d, {index}) => index * 100
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon.png'
+  },
+  {
+    name: 'h3-cluster-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3ClusterLayer({
+        data: ['882830829bfffff'],
+        getHexagons: d => h3.kRing(d, 6),
+        getLineWidth: 100,
+        stroked: true,
+        filled: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-cluster.png'
   }
 ];

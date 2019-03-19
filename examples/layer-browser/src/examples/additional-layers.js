@@ -147,8 +147,8 @@ const H3HexagonLayerExample = {
   props: {
     data: h3.kRing('882830829bfffff', 4),
     getHexagon: d => d,
-    getColor: (d, {index}) => [255, index * 10, 0],
-    getElevation: d => Math.random() * 1000,
+    getColor: (d, {index}) => [255, index * 5, 0],
+    getElevation: d => Math.random() * 1000
   }
 };
 

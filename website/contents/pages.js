@@ -408,6 +408,14 @@ export const docPages = generatePath([
             content: getDocUrl('layers/grid-cell-layer.md')
           },
           {
+            name: 'H3HexagonLayer',
+            content: getDocUrl('layers/h3-hexagon-layer.md')
+          },
+          {
+            name: 'H3ClusterLayer',
+            content: getDocUrl('layers/h3-cluster-layer.md')
+          },
+          {
             name: 'HexagonLayer',
             content: getDocUrl('layers/hexagon-layer.md')
           },

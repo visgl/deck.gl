@@ -18,22 +18,43 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './imports-spec';
-import './core';
+import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+import data from 'deck.gl/test/data/h3-sf.json';
 
-import './layers';
-import './aggregation-layers';
-import './geo-layers';
+test('H3HexagonLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: H3HexagonLayer,
+    sampleProps: {
+      data,
+      getHexagon: d => d.hexagons[0]
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
 
-import './json';
+  testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});
 
-// TODO - Tests currently only work in browser
-if (typeof document !== 'undefined') {
-  require('./react');
-  require('./main/bundle');
-  require('./aggregation-layers/utils/gpu-grid-aggregator.spec');
-  // TODO - This is failing in headless browser test. Might be related to
-  // https://github.com/uber/luma.gl/issues/906
-  // require('./aggregation-layers/utils/grid-aggregation-utils.spec');
-  require('./core/lib/pick-layers.spec');
-}
+  t.end();
+});
+
+test('H3ClusterLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: H3ClusterLayer,
+    sampleProps: {
+      data,
+      getHexagons: d => d.hexagons
+      // getElevation: d => d.size
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
+      t.is(layer.state.polygons.length, data.length, 'polygons are generated');
+    }
+  });
+
+  testLayer({Layer: H3ClusterLayer, testCases, onError: t.notOk});
+
+  t.end();
+});

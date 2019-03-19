@@ -1,15 +1,15 @@
-import * as h3 from 'h3-js';
+import {h3ToGeoBoundary, h3GetResolution, h3ToGeo, geoToH3} from 'h3-js';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {ColumnLayer} from '@deck.gl/layers';
 
 function getHexagonCentroid(getHexagon, object, objectInfo) {
   const hexagonId = getHexagon(object, objectInfo);
-  const [lat, lng] = h3.h3ToGeo(hexagonId);
+  const [lat, lng] = h3ToGeo(hexagonId);
   return [lng, lat];
-};
+}
 
 const defaultProps = {
-  getHexagon: x => x.hexagon
+  getHexagon: {type: 'accessor', value: x => x.hexagon}
 };
 
 /**
@@ -24,13 +24,13 @@ const defaultProps = {
  * index !== -1 to see if picking matches an actual object.
  */
 export default class H3HexagonLayer extends CompositeLayer {
-
   shouldUpdateState({changeFlags}) {
     return changeFlags.somethingChanged;
   }
 
   updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.dataChanged ||
+    if (
+      changeFlags.dataChanged ||
       (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon)
     ) {
       let resolution = -1;
@@ -38,7 +38,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       for (const object of iterable) {
         objectInfo.index++;
         const sampleHex = props.getHexagon(object, objectInfo);
-        resolution = h3.h3GetResolution(sampleHex);
+        resolution = h3GetResolution(sampleHex);
         break;
       }
       this.setState({resolution, vertices: null});
@@ -53,15 +53,15 @@ export default class H3HexagonLayer extends CompositeLayer {
     if (resolution < 0) {
       return;
     }
-    const hex = h3.geoToH3(viewport.latitude, viewport.longitude, resolution);
+    const hex = geoToH3(viewport.latitude, viewport.longitude, resolution);
     if (centerHex === hex) {
       return;
     }
 
     const {pixelsPerMeter} = viewport.distanceScales;
 
-    let vertices = h3.h3ToGeoBoundary(hex, true);
-    const [centerLat, centerLng] = h3.h3ToGeo(hex);
+    let vertices = h3ToGeoBoundary(hex, true);
+    const [centerLat, centerLng] = h3ToGeo(hex);
 
     const [centerX, centerY] = viewport.projectFlat([centerLng, centerLat]);
     vertices = vertices.map(p => {
@@ -84,7 +84,8 @@ export default class H3HexagonLayer extends CompositeLayer {
       this.getSubLayerProps({
         id: 'hexagon-cell',
         updateTriggers
-      }), {
+      }),
+      {
         data,
         diskResolution: 6,
         radius: 1,

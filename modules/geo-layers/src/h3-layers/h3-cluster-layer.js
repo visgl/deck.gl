@@ -3,13 +3,17 @@ import {h3SetToMultiPolygon} from 'h3-js';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
 
-const defaultProps = Object.assign({
-  getHexagons: {type: 'accessor', value: d => d.hexagons}
-}, PolygonLayer.defaultProps);
+const defaultProps = Object.assign(
+  {
+    getHexagons: {type: 'accessor', value: d => d.hexagons}
+  },
+  PolygonLayer.defaultProps
+);
 
 export default class H3ClusterLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.dataChanged ||
+    if (
+      changeFlags.dataChanged ||
       (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagons)
     ) {
       const {data, getHexagons} = props;
@@ -41,7 +45,7 @@ export default class H3ClusterLayer extends CompositeLayer {
     if (typeof accessor !== 'function') return accessor;
 
     return (object, objectInfo) => {
-      return accessor(object.object, objectInfo)
+      return accessor(object.object, objectInfo);
     };
   }
 
@@ -71,7 +75,8 @@ export default class H3ClusterLayer extends CompositeLayer {
         updateTriggers
       }),
       {
-        data: this.state.polygons
+        data: this.state.polygons,
+        getPolygon: d => d.polygon
       }
     );
   }
