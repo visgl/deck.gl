@@ -1,9 +1,13 @@
-/* eslint-disable no-invalid-this, max-statements */
+/* eslint-disable max-statements */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(9);
 const DUMMY_OBJECT = {};
 
-function updateTransformMatrix(targetMatrix, roll, pitch, yaw, scale) {
+function calculateTransformMatrix(targetMatrix, orientation, scale) {
+  const pitch = orientation[0] * RADIAN_PER_DEGREE;
+  const yaw = orientation[1] * RADIAN_PER_DEGREE;
+  const roll = orientation[2] * RADIAN_PER_DEGREE;
+
   const sr = Math.sin(roll);
   const sp = Math.sin(pitch);
   const sw = Math.sin(yaw);
@@ -27,8 +31,8 @@ function updateTransformMatrix(targetMatrix, roll, pitch, yaw, scale) {
   targetMatrix[8] = scz * cp * cr; // 2,2
 }
 
-function calculateModelMatrices(attribute) {
-  let {data, getOrientation, getScale, getTransformMatrix} = this.props;
+function calculateModelMatrices(layer, attribute) {
+  const {data, getOrientation, getScale, getTransformMatrix} = layer.props;
 
   const constantMatrix = Array.isArray(getTransformMatrix);
   const constantScale = Array.isArray(getScale);
@@ -42,58 +46,43 @@ function calculateModelMatrices(attribute) {
     attribute.constant = constantOrientation && constantScale;
   }
 
-  if (attribute.constant) {
-    data = data.slice(0, 1);
-  }
-
-  if (constantMatrix) {
-    const matrixValue = getTransformMatrix;
-    getTransformMatrix = () => matrixValue;
-  }
-  if (constantScale) {
-    const scaleValue = getScale;
-    getScale = () => scaleValue;
-  }
-
-  if (constantOrientation) {
-    const orientationValue = getOrientation;
-    getOrientation = () => orientationValue;
-  }
-
   const instanceModelMatrixData = attribute.value;
 
-  let i = 0;
-  for (const object of data) {
+  if (attribute.constant) {
     let matrix;
 
     if (hasMatrix) {
-      matrix = getTransformMatrix(object);
+      matrix = getTransformMatrix;
     } else {
       matrix = modelMatrix;
 
-      const orientation = getOrientation(object);
-      const pitch = orientation[0] * RADIAN_PER_DEGREE;
-      const yaw = orientation[1] * RADIAN_PER_DEGREE;
-      const roll = orientation[2] * RADIAN_PER_DEGREE;
-      const scale = getScale(object);
+      const orientation = getOrientation;
+      const scale = getScale;
 
-      updateTransformMatrix(matrix, roll, pitch, yaw, scale);
+      calculateTransformMatrix(matrix, orientation, scale);
     }
 
-    if (attribute.constant) {
-      attribute.userData.shaderAttributes.instanceModelMatrix__LOCATION_0.value = matrix.slice(
-        0,
-        3
-      );
-      attribute.userData.shaderAttributes.instanceModelMatrix__LOCATION_1.value = matrix.slice(
-        3,
-        6
-      );
-      attribute.userData.shaderAttributes.instanceModelMatrix__LOCATION_2.value = matrix.slice(
-        6,
-        9
-      );
-    } else {
+    const valueMatrix = new Float32Array(matrix);
+    const shaderAttributes = attribute.userData.shaderAttributes;
+    shaderAttributes.instanceModelMatrix__LOCATION_0.value = valueMatrix.subarray(0, 3);
+    shaderAttributes.instanceModelMatrix__LOCATION_1.value = valueMatrix.subarray(3, 6);
+    shaderAttributes.instanceModelMatrix__LOCATION_2.value = valueMatrix.subarray(6, 9);
+  } else {
+    let i = 0;
+    for (const object of data) {
+      let matrix;
+
+      if (hasMatrix) {
+        matrix = constantMatrix ? getTransformMatrix : getTransformMatrix(object);
+      } else {
+        matrix = modelMatrix;
+
+        const orientation = constantOrientation ? getOrientation : getOrientation(object);
+        const scale = constantScale ? getScale : getScale(object);
+
+        calculateTransformMatrix(matrix, orientation, scale);
+      }
+
       instanceModelMatrixData[i++] = matrix[0];
       instanceModelMatrixData[i++] = matrix[1];
       instanceModelMatrixData[i++] = matrix[2];
@@ -107,25 +96,29 @@ function calculateModelMatrices(attribute) {
   }
 }
 
-export const MATRIX_SHADER_ATTRIBUTES = {
-  size: 9,
-  accessor: ['getYaw', 'getPitch', 'getRoll', 'getScale', 'getTransformMatrix'],
-  shaderAttributes: {
-    instanceModelMatrix__LOCATION_0: {
-      size: 3,
-      stride: 36,
-      offset: 0
+export function getMatrixAttributes(layer) {
+  return {
+    size: 9,
+    accessor: ['getOrientation', 'getScale', 'getTransformMatrix'],
+    shaderAttributes: {
+      instanceModelMatrix__LOCATION_0: {
+        size: 3,
+        stride: 36,
+        offset: 0
+      },
+      instanceModelMatrix__LOCATION_1: {
+        size: 3,
+        stride: 36,
+        offset: 12
+      },
+      instanceModelMatrix__LOCATION_2: {
+        size: 3,
+        stride: 36,
+        offset: 24
+      }
     },
-    instanceModelMatrix__LOCATION_1: {
-      size: 3,
-      stride: 36,
-      offset: 12
-    },
-    instanceModelMatrix__LOCATION_2: {
-      size: 3,
-      stride: 36,
-      offset: 24
+    update: function updater(attribute) {
+      calculateModelMatrices(layer, attribute);
     }
-  },
-  update: calculateModelMatrices
-};
+  };
+}

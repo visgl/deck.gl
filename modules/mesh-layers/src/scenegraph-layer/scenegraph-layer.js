@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import {createGLTFObjects, fp64} from 'luma.gl';
-import {MATRIX_SHADER_ATTRIBUTES} from '../utils/matrix';
+import {getMatrixAttributes} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;
 
@@ -113,7 +113,7 @@ export default class ScenegraphLayer extends Layer {
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
       },
-      instanceModelMatrix: MATRIX_SHADER_ATTRIBUTES
+      instanceModelMatrix: getMatrixAttributes(this)
     });
   }
 
