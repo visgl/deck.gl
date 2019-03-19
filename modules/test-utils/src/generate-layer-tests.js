@@ -17,6 +17,8 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import {experimental} from '@deck.gl/core';
+const {count} = experimental;
 
 function defaultAssert(condition, comment) {
   if (!condition) {
@@ -89,7 +91,9 @@ export function generateLayerTests({
     onAfterUpdate(params);
     // Default assert
     if (params.layer.isComposite) {
-      assert(params.subLayers.length, 'Layer should have sublayers');
+      if (count(params.layer.props.data)) {
+        assert(params.subLayers.length, 'Layer should have sublayers');
+      }
     } else {
       assert(params.layer.getModels().length, 'Layer should have models');
     }
@@ -98,7 +102,7 @@ export function generateLayerTests({
   testCases.forEach(testCase => {
     testCase.title = wrapTestCaseTitle(testCase.title);
     testCase.onBeforeUpdate = onBeforeUpdate;
-    testCases.onAfterUpdate = _onAfterUpdate;
+    testCase.onAfterUpdate = _onAfterUpdate;
   });
 
   return testCases;

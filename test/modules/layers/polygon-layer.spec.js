@@ -37,7 +37,9 @@ test('PolygonLayer#constructor', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.paths.length, 'should update state.paths');
+      if (layer.props.data && layer.props.data.length) {
+        t.ok(layer.state.paths.length, 'should update state.paths');
+      }
     }
   });
 

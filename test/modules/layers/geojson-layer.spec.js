@@ -35,7 +35,12 @@ test('GeoJsonLayer#tests', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayers}) => {
       t.ok(layer.state.features, 'should update features');
-      t.is(subLayers.length, layer.props.stroked ? 2 : 1, 'correct number of sublayers');
+      const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
+      t.is(
+        subLayers.length,
+        !hasData ? 0 : layer.props.stroked ? 2 : 1,
+        'correct number of sublayers'
+      );
     }
   });
 
