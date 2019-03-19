@@ -29,10 +29,11 @@ const App = ({data, viewport}) => {
     id: 'contourLayer',
     // Three contours are rendered.
     contours: [
-      {threshold: 1, color: [255, 0, 0, 255], strokeWidth: 1}, // => Isoline for threshold 1
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2}, // => Isoline for threshold 5
+      {threshold: 1, color: [255, 0, 0, 255]}, // => Isoline for threshold 1
+      {threshold: 5, color: [0, 255, 0]}, // => Isoline for threshold 5
       {threshold: [6, 10], color: [0, 0, 255, 128]} // => Isoband for threshold range [6, 10)
     ],
+    strokeWidth: 2
     cellSize: 200,
     getPosition: d => d.COORDINATES,
   });
@@ -74,11 +75,15 @@ Array of objects with following keys
 
 * `color` (Array, optional) : RGBA color array to be used to render the contour, if not specified a default value of `[255, 255, 255, 255]` is used. When a three component RGB array specified, a default value of 255 is used for Alpha.
 
-* `strokeWidth` (Number, optional) : Applicable for `Isoline`s only, width of the Isoline in pixels, if not specified a default value of `1` is used.
-
 * `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
-##### `zOffset`: (Number, optional)
+##### `strokeWidth` (Number, optional)
+
+* Default: `1`
+
+Applicable for `Isoline`s only, width of the Isoline in pixels.
+
+##### `zOffset` (Number, optional)
 
 * Default: `0.005`
 

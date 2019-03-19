@@ -35,7 +35,7 @@ const App = ({data, viewport}) => {
     id: 'line-layer',
     data,
     pickable: true,
-    getStrokeWidth: 12,
+    getWidth: 50,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0],
@@ -88,14 +88,32 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getStrokeWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
-The stroke width of each object, in pixels.
+The stroke width of each object, in meters.
 
 * If a number is provided, it is used as the stroke width for all objects.
 * If a function is provided, it is called on each object to retrieve its stroke width.
+
+##### `widthScale` (number, optional)
+
+* Default: `1`
+
+The scaling multiplier for the width of each line.
+
+##### `widthMinPixels` (Number, optional)
+
+* Default: `1`
+
+The minimum stroke width in pixels.
+
+##### `widthMaxPixels` (Number, optional)
+
+* Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum stroke width in pixels.
 
 ## Source
 
