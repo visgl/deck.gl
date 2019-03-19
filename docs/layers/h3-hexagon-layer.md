@@ -7,9 +7,9 @@
 
 # H3HexagonLayer
 
-The H3HexagonLayer Layer renders hexagons from the [h3](https://uber.github.io/h3/) geospatial indexing system.
+The `H3HexagonLayer` renders hexagons from the [h3](https://uber.github.io/h3/) geospatial indexing system.
 
-H3HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+`H3HexagonLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL, {H3HexagonLayer} from 'deck.gl';
@@ -122,7 +122,7 @@ The H3HexagonLayer renders the following sublayers:
 
 ## Remarks
 
-* Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems). To draw a large number of hexagons efficiently, the H3HexagonLayer assumes that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. This strategy is usually sufficient. However, the discrepancy may become visually significant at rare geolocations. In that case, the [H3ClusterLayer] can be used as an alternative by trading performance for accuracy.
+* Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` assumes that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. This strategy is usually sufficient. However, the discrepancy may become visually significant at rare geolocations. In that case, the [H3ClusterLayer] can be used as an alternative by trading performance for accuracy.
 
 
 ## Source

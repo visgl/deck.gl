@@ -87,7 +87,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       }),
       {
         data,
-        diskResolution: 6,
+        diskResolution: 6, // generate an extruded hexagon as the base geometry
         radius: 1,
         vertices: this.state.vertices,
         getPosition: getHexagonCentroid.bind(null, getHexagon)

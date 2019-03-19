@@ -7,9 +7,9 @@
 
 # H3ClusterLayer
 
-The H3ClusterLayer Layer renders regions represented by hexagon sets from the [h3](https://uber.github.io/h3/) geospatial indexing system.
+The `H3ClusterLayer` renders regions represented by hexagon sets from the [h3](https://uber.github.io/h3/) geospatial indexing system.
 
-H3ClusterLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+`H3ClusterLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL, {H3ClusterLayer} from 'deck.gl';
@@ -71,7 +71,7 @@ Method called to retrieve the hexagon cluster from each object, as an array of [
 
 ## Sub Layers
 
-The H3ClusterLayer renders the following sublayers:
+The `H3ClusterLayer` renders the following sublayers:
 
 * `cluster-region` - a [PolygonLayer](/docs/layers/column-layer.md) rendering all clusters.
 
