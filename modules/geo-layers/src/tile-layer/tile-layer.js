@@ -10,7 +10,7 @@ const defaultProps = {
   onTileError: {type: 'function', value: err => console.error(err)},
   maxZoom: null,
   minZoom: 0,
-  maxCacheSize: {type: 'number', min: 0, value: null}
+  maxCacheSize: null
 };
 
 export default class TileLayer extends CompositeLayer {
