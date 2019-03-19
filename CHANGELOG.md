@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.0 Prereleases
 
+#### deck.gl [v7.0.0-alpha.6] - Mar 18 2019
+- Line layer api update (#2723)
+- TileLayer API audit (#2799)
+- Add deck instance to layer context (#2805)
+- Consolidate cell layers (#2796)
+
 #### deck.gl [v7.0.0-alpha.5] - Mar 15 2019
 - integrate new light module (#2806)
 - Don't fire panmove if drag started somewhere else (#2780)
