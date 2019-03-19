@@ -164,7 +164,7 @@ function makeAltDataTestCases(props, propTypes) {
   };
   for (const propName in props) {
     if (propTypes[propName].type === 'accessor') {
-      nonIterableProps[propName] = (_, {index}) => props[propName](originalData[index]);
+      nonIterableProps[propName] = (_, info) => props[propName](originalData[info.index], info);
     }
   }
 
