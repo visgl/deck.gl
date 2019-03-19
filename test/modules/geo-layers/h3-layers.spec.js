@@ -19,6 +19,8 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {experimental} from '@deck.gl/core';
+const {count} = experimental;
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 import data from 'deck.gl/test/data/h3-sf.json';
@@ -50,7 +52,7 @@ test('H3ClusterLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
-      t.is(layer.state.polygons.length, data.length, 'polygons are generated');
+      t.ok(layer.state.polygons.length >= count(layer.props.data), 'polygons are generated');
     }
   });
 
