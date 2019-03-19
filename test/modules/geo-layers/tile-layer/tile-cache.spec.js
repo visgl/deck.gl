@@ -32,7 +32,7 @@ const testTileCache = new TileCache({
   maxZoom
 });
 
-test('should clear the cache when finalize is called', t => {
+test('TileCache#TileCache#should clear the cache when finalize is called', t => {
   testTileCache.update(testViewport, () => null);
   t.equal(testTileCache._cache.size, 1);
   testTileCache.finalize();
@@ -40,7 +40,7 @@ test('should clear the cache when finalize is called', t => {
   t.end();
 });
 
-test('should call onUpdate with the expected tiles', t => {
+test('TileCache#should call onUpdate with the expected tiles', t => {
   testTileCache.update(testViewport, tiles => {
     t.equal(tiles.length, 1);
     t.equal(tiles[0].x, testTile.x);
@@ -51,7 +51,7 @@ test('should call onUpdate with the expected tiles', t => {
   testTileCache.finalize();
 });
 
-test('should clear not visible tiles when cache is full', t => {
+test('TileCache#should clear not visible tiles when cache is full', t => {
   // load a viewport to fill the cache
 
   testTileCache.update(testViewport, () => null);
@@ -80,7 +80,7 @@ test('should clear not visible tiles when cache is full', t => {
   testTileCache.finalize();
 });
 
-test('should load the cached parent tiles while we are loading the current tiles', t => {
+test('TileCache#should load the cached parent tiles while we are loading the current tiles', t => {
   testTileCache.update(testViewport, tiles => null);
 
   const zoomedInViewport = new WebMercatorViewport(
@@ -97,7 +97,7 @@ test('should load the cached parent tiles while we are loading the current tiles
   testTileCache.finalize();
 });
 
-test('should try to load the existing zoom levels if we zoom in too far', t => {
+test('TileCache#should try to load the existing zoom levels if we zoom in too far', t => {
   const zoomedInViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 20
@@ -113,7 +113,7 @@ test('should try to load the existing zoom levels if we zoom in too far', t => {
   testTileCache.finalize();
 });
 
-test('should not display anything if we zoom out too far', t => {
+test('TileCache#should not display anything if we zoom out too far', t => {
   const zoomedOutViewport = new WebMercatorViewport(
     Object.assign({}, testViewState, {
       zoom: 1
@@ -127,7 +127,7 @@ test('should not display anything if we zoom out too far', t => {
   testTileCache.finalize();
 });
 
-test('should set isLoaded to true even when loading the tile throws an error', t => {
+test('TileCache#should set isLoaded to true even when loading the tile throws an error', t => {
   const errorTileCache = new TileCache({
     getTileData: () => Promise.reject(null),
     maxSize: cacheMaxSize,
