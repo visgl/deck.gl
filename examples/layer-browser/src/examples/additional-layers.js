@@ -33,17 +33,7 @@ const SimpleMeshLayerExample = {
     sizeScale: 40,
     getPosition: d => d.COORDINATES,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
-    getTransformMatrix: d => [
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2
-    ]
+    getTransformMatrix: [Math.random() * 8, 0, 0, 0, Math.random() * 8, 0, 0, 0, Math.random() * 8]
   }
 };
 
@@ -67,7 +57,10 @@ const ScenegraphLayerExample = {
     sizeScale: 1,
     getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000],
     getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
-    getScale: [2, 8, 2]
+    getScale: d => {
+      const s = Math.random() * 2;
+      return [s, s * 4, s];
+    }
   }
 };
 

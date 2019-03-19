@@ -1,6 +1,7 @@
 /* eslint-disable no-invalid-this, max-statements */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(9);
+const DUMMY_OBJECT = {};
 
 function updateTransformMatrix(targetMatrix, roll, pitch, yaw, scale) {
   const sr = Math.sin(roll);
@@ -27,31 +28,47 @@ function updateTransformMatrix(targetMatrix, roll, pitch, yaw, scale) {
 }
 
 function calculateModelMatrices(attribute) {
-  const {data} = this.props;
-  let {getOrientation, getScale, getTransformMatrix} = this.props;
+  let {data, getOrientation, getScale, getTransformMatrix} = this.props;
 
-  if (Array.isArray(getOrientation)) {
-    const constantOrientation = getOrientation;
-    getOrientation = () => constantOrientation;
+  const constantMatrix = Array.isArray(getTransformMatrix);
+  const constantScale = Array.isArray(getScale);
+  const constantOrientation = Array.isArray(getOrientation);
+
+  const hasMatrix = constantMatrix || Boolean(getTransformMatrix(DUMMY_OBJECT));
+
+  if (hasMatrix) {
+    attribute.constant = constantMatrix;
+  } else {
+    attribute.constant = constantOrientation && constantScale;
   }
 
-  if (Array.isArray(getScale)) {
-    const constantScale = getScale;
-    getScale = () => constantScale;
+  if (attribute.constant) {
+    data = data.slice(0, 1);
   }
 
-  if (Array.isArray(getTransformMatrix)) {
-    const constantMatrix = getTransformMatrix;
-    getTransformMatrix = () => constantMatrix;
+  if (constantMatrix) {
+    const matrixValue = getTransformMatrix;
+    getTransformMatrix = () => matrixValue;
+  }
+  if (constantScale) {
+    const scaleValue = getScale;
+    getScale = () => scaleValue;
+  }
+
+  if (constantOrientation) {
+    const orientationValue = getOrientation;
+    getOrientation = () => orientationValue;
   }
 
   const instanceModelMatrixData = attribute.value;
 
   let i = 0;
   for (const object of data) {
-    let matrix = getTransformMatrix(object);
+    let matrix;
 
-    if (!matrix) {
+    if (hasMatrix) {
+      matrix = getTransformMatrix(object);
+    } else {
       matrix = modelMatrix;
 
       const orientation = getOrientation(object);
@@ -63,15 +80,30 @@ function calculateModelMatrices(attribute) {
       updateTransformMatrix(matrix, roll, pitch, yaw, scale);
     }
 
-    instanceModelMatrixData[i++] = matrix[0];
-    instanceModelMatrixData[i++] = matrix[1];
-    instanceModelMatrixData[i++] = matrix[2];
-    instanceModelMatrixData[i++] = matrix[3];
-    instanceModelMatrixData[i++] = matrix[4];
-    instanceModelMatrixData[i++] = matrix[5];
-    instanceModelMatrixData[i++] = matrix[6];
-    instanceModelMatrixData[i++] = matrix[7];
-    instanceModelMatrixData[i++] = matrix[8];
+    if (attribute.constant) {
+      attribute.userData.shaderAttributes.instanceModelMatrix__LOCATION_0.value = matrix.slice(
+        0,
+        3
+      );
+      attribute.userData.shaderAttributes.instanceModelMatrix__LOCATION_1.value = matrix.slice(
+        3,
+        6
+      );
+      attribute.userData.shaderAttributes.instanceModelMatrix__LOCATION_2.value = matrix.slice(
+        6,
+        9
+      );
+    } else {
+      instanceModelMatrixData[i++] = matrix[0];
+      instanceModelMatrixData[i++] = matrix[1];
+      instanceModelMatrixData[i++] = matrix[2];
+      instanceModelMatrixData[i++] = matrix[3];
+      instanceModelMatrixData[i++] = matrix[4];
+      instanceModelMatrixData[i++] = matrix[5];
+      instanceModelMatrixData[i++] = matrix[6];
+      instanceModelMatrixData[i++] = matrix[7];
+      instanceModelMatrixData[i++] = matrix[8];
+    }
   }
 }
 
