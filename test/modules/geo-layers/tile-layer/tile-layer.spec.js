@@ -19,17 +19,15 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
+import {TileLayer} from '@deck.gl/geo-layers';
 
-import {GreatCircleLayer, S2Layer, TileLayer, TripsLayer} from '@deck.gl/geo-layers';
-
-test('Top-level imports', t => {
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
+test('TileLayer#constructor', t => {
+  const testCases = generateLayerTests({
+    Layer: TileLayer,
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+  testLayer({Layer: TileLayer, testCases, onError: t.notOk});
   t.end();
 });
-
-import './tile-layer/tile-cache.spec';
-import './tile-layer/tile-layer.spec';
-import './s2-layer.spec';
