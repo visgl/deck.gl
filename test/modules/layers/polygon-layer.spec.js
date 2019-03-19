@@ -31,7 +31,8 @@ test('PolygonLayer#constructor', t => {
     Layer: PolygonLayer,
     sampleProps: {
       data: FIXTURES.polygons.slice(0, 3),
-      getPolygon: f => f
+      getPolygon: f => f,
+      getFillColor: (f, {index}) => [index, 0, 0]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
