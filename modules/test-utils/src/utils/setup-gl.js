@@ -1,5 +1,4 @@
-import {setContextDefaults} from 'luma.gl';
-import {createGLContext} from 'luma.gl';
+import {createGLContext, setContextDefaults} from '@luma.gl/core';
 
 /* global window, global*/
 const _global = typeof global !== 'undefined' ? global : window;

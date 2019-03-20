@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {createGLTFObjects, fp64} from 'luma.gl';
+import {createGLTFObjects, fp64} from '@luma.gl/core';
 import {MATRIX_SHADER_ATTRIBUTES} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;

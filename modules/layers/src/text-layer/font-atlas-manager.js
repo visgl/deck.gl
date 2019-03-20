@@ -1,6 +1,6 @@
 /* global document */
 
-import {Texture2D} from 'luma.gl';
+import {Texture2D} from '@luma.gl/core';
 import TinySDF from '@mapbox/tiny-sdf';
 import GL from '@luma.gl/constants';
 

@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from 'luma.gl';
+import {Model, Geometry} from '@luma.gl/core';
 
 import PathTesselator from './path-tesselator';
 

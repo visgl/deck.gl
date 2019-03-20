@@ -30,7 +30,9 @@
     "@deck.gl/aggregation-layers": "^7.0.0-alpha.6",
     "@deck.gl/core": "^7.0.0-alpha.6",
     "@deck.gl/geo-layers": "^7.0.0-alpha.6",
+    "@deck.gl/json": "^7.0.0-alpha.5",
     "@deck.gl/layers": "^7.0.0-alpha.6",
+    "@deck.gl/mapbox": "^7.0.0-alpha.5",
     "@deck.gl/mesh-layers": "^7.0.0-alpha.5",
     "@deck.gl/react": "^7.0.0-alpha.5"
   }

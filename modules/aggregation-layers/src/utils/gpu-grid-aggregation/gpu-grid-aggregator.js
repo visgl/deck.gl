@@ -6,10 +6,11 @@ import {
   FEATURES,
   hasFeatures,
   isWebGL2,
-  readPixelsToBuffer
-} from 'luma.gl';
+  readPixelsToBuffer,
+  fp64 as fp64Utils,
+  withParameters
+} from '@luma.gl/core';
 import {log} from '@deck.gl/core';
-import {fp64 as fp64Utils, withParameters} from 'luma.gl';
 import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64Utils;
 
