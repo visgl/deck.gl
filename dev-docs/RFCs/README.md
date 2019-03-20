@@ -3,7 +3,7 @@
 
 ## Guidelines
 
-The core developers will review RFCs (and of course, comments from the community are always welcome). Recommended review criteria are being documented in [RFC Review Guidelines](../common/RFC-GUIDELINES.md).
+The core developers will review RFCs (and of course, comments from the community are always welcome). Recommended review criteria are being documented in [RFC Review Guidelines](../rfc-guidelines.md).
 
 
 ## Roadmaps
