@@ -1141,6 +1141,7 @@ export const TEST_CASES = [
     },
     layers: [
       new H3HexagonLayer({
+        h3,
         data: h3.kRing('882830829bfffff', 4),
         getHexagon: d => d,
         getColor: (d, {index}) => [255, index * 5, 0],
@@ -1160,6 +1161,7 @@ export const TEST_CASES = [
     },
     layers: [
       new H3ClusterLayer({
+        h3,
         data: ['882830829bfffff'],
         getHexagons: d => h3.kRing(d, 6),
         getLineWidth: 100,
