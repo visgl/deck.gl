@@ -31,6 +31,7 @@ const vs = `
   attribute vec4 instanceColors;
   attribute vec3 instancePickingColors;
   attribute mat3 instanceModelMatrix;
+  attribute vec3 instanceTranslation;
 
   // Uniforms
   uniform float sizeScale;
@@ -50,7 +51,7 @@ const vs = `
     #endif
     vColor = instanceColors;
 
-    vec3 pos = instanceModelMatrix * POSITION.xyz;
+    vec3 pos = instanceModelMatrix * POSITION.xyz + instanceTranslation;
     pos = project_scale(pos * sizeScale);
 
     vec4 worldPosition;

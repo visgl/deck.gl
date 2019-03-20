@@ -55,7 +55,7 @@ const SimpleMeshLayerExample = {
       0,
       0,
       0,
-      Math.random() * 1000,
+      Math.random() * 100,
       1
     ]
   }
