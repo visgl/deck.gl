@@ -1,7 +1,6 @@
-/* eslint-disable max-statements */
+/* eslint-disable max-statements, complexity */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(9);
-const DUMMY_OBJECT = {};
 
 function calculateTransformMatrix(targetMatrix, orientation, scale) {
   const pitch = orientation[0] * RADIAN_PER_DEGREE;
@@ -38,7 +37,7 @@ function calculateModelMatrices(layer, attribute) {
   const constantScale = Array.isArray(getScale);
   const constantOrientation = Array.isArray(getOrientation);
 
-  const hasMatrix = constantMatrix || Boolean(getTransformMatrix(DUMMY_OBJECT));
+  const hasMatrix = getTransformMatrix && (constantMatrix || Boolean(getTransformMatrix(data[0])));
 
   if (hasMatrix) {
     attribute.constant = constantMatrix;

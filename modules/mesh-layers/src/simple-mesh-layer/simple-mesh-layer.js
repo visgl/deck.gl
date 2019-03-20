@@ -114,12 +114,10 @@ const defaultProps = {
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   // [pitch, yaw, roll]
-  getOrientation: {
-    type: 'accessor',
-    value: x => x.orientation || [x.pitch || 0, x.yaw || x.angle || 0, x.roll || 0]
-  },
-  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTransformMatrix: {type: 'accessor', value: x => x.transformMatrix || null}
+  getOrientation: [0, 0, 0],
+  getScale: [1, 1, 1],
+  // 3x3 matrix
+  getTransformMatrix: [1, 0, 0, 0, 1, 0, 0, 0, 1]
 };
 
 export default class SimpleMeshLayer extends Layer {
