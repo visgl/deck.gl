@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-console, no-invalid-this */
-import * as data from 'deck.gl/test/data';
+import * as data from 'deck.gl-test/data';
 
 import {WebMercatorViewport} from 'deck.gl';
 

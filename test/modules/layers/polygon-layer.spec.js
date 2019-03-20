@@ -24,7 +24,7 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {PolygonLayer} from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 test('PolygonLayer#constructor', t => {
   const testCases = generateLayerTests({
