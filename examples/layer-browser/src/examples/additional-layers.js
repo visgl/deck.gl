@@ -20,15 +20,19 @@ const SimpleMeshLayerExample = {
     id: 'mesh-layer',
     data: dataSamples.points,
     texture: 'data/texture.png',
-    mesh: new CylinderGeometry({
-      radius: 1,
-      topRadius: 1,
-      bottomRadius: 1,
-      topCap: true,
-      bottomCap: true,
-      height: 5,
-      nradial: 20,
-      nvertical: 1
+    mesh: new Promise(resolve => {
+      resolve(
+        new CylinderGeometry({
+          radius: 1,
+          topRadius: 1,
+          bottomRadius: 1,
+          topCap: true,
+          bottomCap: true,
+          height: 5,
+          nradial: 20,
+          nvertical: 1
+        })
+      );
     }),
     sizeScale: 40,
     getPosition: d => d.COORDINATES,

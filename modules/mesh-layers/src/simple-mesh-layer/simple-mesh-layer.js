@@ -96,7 +96,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
-  mesh: null,
+  mesh: {value: null, type: 'object', async: true},
   texture: null,
   sizeScale: {type: 'number', value: 1, min: 0},
   // TODO - parameters should be merged, not completely overridden
@@ -162,36 +162,30 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    const attributeManager = this.getAttributeManager();
-
-    // super.updateState({props, oldProps, changeFlags});
-    if (changeFlags.dataChanged) {
-      attributeManager.invalidateAll();
+    if (props.mesh !== oldProps.mesh) {
+      if (this.state.model) {
+        this.state.model.delete();
+      }
+      if (props.mesh) {
+        this.setState({model: this.getModel(props.mesh)});
+      }
+      this.getAttributeManager().invalidateAll();
     }
-
-    this._updateFP64(props, oldProps);
 
     if (props.texture !== oldProps.texture) {
       this.setTexture(props.texture);
     }
-  }
 
-  _updateFP64(props, oldProps) {
-    if (props.fp64 !== oldProps.fp64) {
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-
-      this.setState({model: this.getModel(this.context.gl)});
-
-      this.setTexture(this.state.texture);
-
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
+    if (changeFlags.dataChanged || props.fp64 !== oldProps.fp64) {
+      this.getAttributeManager().invalidateAll();
     }
   }
 
   draw({uniforms}) {
+    if (!this.state.model) {
+      return;
+    }
+
     const {sizeScale} = this.props;
 
     this.state.model.render(
@@ -201,31 +195,43 @@ export default class SimpleMeshLayer extends Layer {
     );
   }
 
-  getModel(gl) {
-    return new Model(
-      gl,
+  getModel(mesh) {
+    const model = new Model(
+      this.context.gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: getGeometry(this.props.mesh),
+        geometry: getGeometry(mesh),
         isInstanced: true,
         shaderCache: this.context.shaderCache
       })
     );
+
+    if (this.state.texture) {
+      model.setUniforms({sampler: this.state.texture, hasTexture: 1});
+    } else {
+      model.setUniforms({sampler: this.state.emptyTexture, hasTexture: 0});
+    }
+
+    return model;
   }
 
   setTexture(src) {
     const {gl} = this.context;
-    const {model, emptyTexture} = this.state;
+    const {emptyTexture} = this.state;
 
     if (src) {
       getTexture(gl, src).then(texture => {
-        model.setUniforms({sampler: texture, hasTexture: 1});
         this.setState({texture});
+        if (this.state.model) {
+          this.state.model.setUniforms({sampler: this.state.texture, hasTexture: 1});
+        }
       });
     } else {
       // reset
-      this.state.model.setUniforms({sampler: emptyTexture, hasTexture: 0});
       this.setState({texture: null});
+      if (this.state.model) {
+        this.state.model.setUniforms({sampler: emptyTexture, hasTexture: 0});
+      }
     }
   }
 
