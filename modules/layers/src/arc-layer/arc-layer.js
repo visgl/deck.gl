@@ -21,7 +21,7 @@
 import {Layer, createIterable} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from 'luma.gl';
+import {Model, Geometry, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 
 import vs from './arc-layer-vertex.glsl';

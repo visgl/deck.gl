@@ -33,7 +33,7 @@ import {
   // TextLayer
 } from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 

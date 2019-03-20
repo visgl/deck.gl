@@ -1,5 +1,5 @@
 import {Matrix4} from 'math.gl';
-import {fp64 as fp64Utils} from 'luma.gl';
+import {fp64 as fp64Utils} from '@luma.gl/core';
 import {COORDINATE_SYSTEM, log, createIterable, experimental} from '@deck.gl/core';
 const {count} = experimental;
 import {AGGREGATION_OPERATION} from './gpu-grid-aggregator-constants';

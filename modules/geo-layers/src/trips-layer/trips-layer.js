@@ -1,6 +1,6 @@
 import {Layer} from '@deck.gl/core';
 
-import {Model, Geometry} from 'luma.gl';
+import {Model, Geometry} from '@luma.gl/core';
 
 import tripsVertex from './trips-layer-vertex.glsl';
 import tripsFragment from './trips-layer-fragment.glsl';
