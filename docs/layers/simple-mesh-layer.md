@@ -83,22 +83,22 @@ Object orientation defined as a vec3 of Euler angles, [pitch, yaw, roll].
 
 ##### `getScale` (Function, optional)
 
-- Default: `object => object.scale || [1, 1, 1]`
+- Default: `[1, 1, 1]`
 
 Scaling factor on the mesh along each axis.
 
 ##### `getTranslation` (Function, optional)
 
-- Default: `object => object.translation || [0, 0, 0]`
+- Default: `[0, 0, 0]`
 
 Translation of the mesh along each axis. Offset from the center position given by `getPosition`
 
 ##### `getTransformMatrix` (Function, optional)
 
-- Default: `object => null`
+- Default: `[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]`
 
 Explicitly define a 4x4 column-major model matrix for the mesh. If provided, will override
-`getYaw`, `getPitch`, `getRoll`, `getScale`, `getTranslation`.
+`getOrientation`, `getScale`, `getTranslation`.
 
 
 ##### `getColor` (Function|Array, optional)
