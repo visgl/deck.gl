@@ -104,7 +104,7 @@ Array of point light source which emits from a point in all directions.
 * To enable lighting on a layer, it is required that both the [effects prop of Deck](/docs/api-reference/deck.md?section=effects) and the material prop of the layer are specified. Refer to each layer's documentation to see if the lighting effect is supported.
     * [GeoJsonLayer](/docs/layers/geojson-layer.md)
     * [HexagonLayer](/docs/layers/hexagon-layer.md)
-    * [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md)
+    * [ColumnLayer](/docs/layers/column-layer.md)
     * [GridLayer](/docs/layers/grid-layer.md)
     * [GridCellLayer](/docs/layers/grid-cell-layer.md)
     * [PointCloudLayer](/docs/layers/point-cloud-layer.md)

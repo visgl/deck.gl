@@ -15,13 +15,14 @@ attribute vec2 instancePositions64xy;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
 attribute mat3 instanceModelMatrix;
+attribute vec3 instanceTranslation;
 
 // Outputs to fragment shader
 varying vec2 vTexCoord;
 varying vec4 vColor;
 
 void main(void) {
-  vec3 pos = instanceModelMatrix * positions;
+  vec3 pos = instanceModelMatrix * positions + instanceTranslation;
   pos = project_scale(pos * sizeScale);
 
   vec4 worldPosition;

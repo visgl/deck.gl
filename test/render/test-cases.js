@@ -16,11 +16,14 @@ import {
   IconLayer,
   GeoJsonLayer,
   GridCellLayer,
-  HexagonCellLayer,
+  ColumnLayer,
   PointCloudLayer,
   TextLayer
 } from '@deck.gl/layers';
 import {ContourLayer, ScreenGridLayer, GridLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+
+import * as h3 from 'h3-js';
 
 const IS_HEADLESS = Boolean(window.browserTestDriver_isHeadless);
 
@@ -437,7 +440,8 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat',
         data: dataSamples.routes,
-        strokeWidth: 2,
+        getWidth: 0,
+        widthMinPixels: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
@@ -459,7 +463,8 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat-64',
         data: dataSamples.routes,
-        strokeWidth: 2,
+        getWidth: 0,
+        widthMinPixels: 2,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
@@ -778,7 +783,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/screengrid-lnglat-colorRange.png'
   },
   {
-    name: 'hexagoncell-lnglat',
+    name: 'column-lnglat',
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -788,45 +793,21 @@ export const TEST_CASES = [
       orthographic: true
     },
     layers: [
-      new HexagonCellLayer({
-        id: 'hexagoncell-lnglat',
+      new ColumnLayer({
+        id: 'column-lnglat',
         data: dataSamples.hexagons,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
+        radius: 250,
+        angle: Math.PI / 2,
         coverage: 1,
         extruded: true,
         pickable: true,
         opacity: 1,
+        getPosition: h => h.centroid,
         getColor: h => [48, 128, h.value * 255, 255],
         getElevation: h => h.value * 5000
       })
     ],
-    goldenImage: './test/render/golden-images/hexagoncell-lnglat.png'
-  },
-  {
-    name: 'hexagoncell-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 30,
-      bearing: 0
-    },
-    layers: [
-      new HexagonCellLayer({
-        id: 'hexagoncell-lnglat-64',
-        data: dataSamples.hexagons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
-        coverage: 1,
-        extruded: true,
-        pickable: true,
-        opacity: 1,
-        getColor: h => [48, 128, h.value * 255, 255],
-        getElevation: h => h.value * 5000
-      })
-    ],
-    goldenImage: './test/render/golden-images/hexagoncell-lnglat-64.png'
+    goldenImage: './test/render/golden-images/column-lnglat.png'
   },
   {
     name: 'hexagon-lnglat',
@@ -1085,10 +1066,11 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
-          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 1, color: [255, 0, 0]},
+          {threshold: 5, color: [0, 255, 0]},
           {threshold: 15, color: [0, 0, 255]}
         ],
+        strokeWidth: 3,
         gpuAggregation: false
       })
     ],
@@ -1111,10 +1093,11 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
-          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
+          {threshold: 1, color: [255, 0, 0]},
+          {threshold: 5, color: [0, 255, 0]},
           {threshold: 15, color: [0, 0, 255]}
         ],
+        strokeWidth: 3,
         gpuAggregation: true
       })
     ],
@@ -1137,13 +1120,53 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
-          {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},
+          {threshold: [1, 5], color: [255, 0, 0]},
+          {threshold: [5, 15], color: [0, 255, 0]},
           {threshold: [15, 1000], color: [0, 0, 255]}
         ],
+        strokeWidth: 3,
         gpuAggregation: true
       })
     ],
     goldenImage: './test/render/golden-images/contour-isobands-lnglat.png'
+  },
+  {
+    name: 'h3-hexagon-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('882830829bfffff', 4),
+        getHexagon: d => d,
+        getColor: (d, {index}) => [255, index * 5, 0],
+        getElevation: (d, {index}) => index * 100
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon.png'
+  },
+  {
+    name: 'h3-cluster-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3ClusterLayer({
+        data: ['882830829bfffff'],
+        getHexagons: d => h3.kRing(d, 6),
+        getLineWidth: 100,
+        stroked: true,
+        filled: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-cluster.png'
   }
 ];

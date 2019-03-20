@@ -344,6 +344,7 @@ The context object stores information that are shared by all layers.
 
 * `gl` ([WebGLRenderingContext](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext)) - WebGL context of the current canvas.
 * `viewport` ([Viewport](/docs/api-reference/viewport.md)) - The current viewport
+* `deck` ([Deck](/docs/api-reference/deck.md)) - The current deck.gl instance
 
 ##### `state` (Object)
 

@@ -10,7 +10,7 @@ import {
   IconLayer,
   GridCellLayer,
   GridLayer,
-  HexagonCellLayer,
+  ColumnLayer,
   HexagonLayer,
   GeoJsonLayer,
   PolygonLayer,
@@ -382,16 +382,18 @@ const GridLayerExample = {
   }
 };
 
-const HexagonCellLayerExample = {
-  layer: HexagonCellLayer,
+const ColumnLayerExample = {
+  layer: ColumnLayer,
   props: {
-    id: 'hexagonCellLayer',
+    id: 'ColumnLayer',
     data: dataSamples.hexagons,
-    hexagonVertices: dataSamples.hexagons[0].vertices,
+    radius: 100,
+    diskResolution: 6,
     coverage: 1,
     extruded: true,
     pickable: true,
     opacity: 1,
+    getPosition: d => d.centroid,
     getColor: d => [48, 128, d.value * 255, 255],
     getElevation: d => d.value * 5000
   }
@@ -527,7 +529,7 @@ export default {
     GridCellLayer: GridCellLayerExample,
     GridLayer: GridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
-    HexagonCellLayer: HexagonCellLayerExample,
+    ColumnLayer: ColumnLayerExample,
     HexagonLayer: HexagonLayerExample,
     TextLayer: TextLayerExample,
     ContourLayer: ContourLayerExample,

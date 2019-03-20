@@ -20,7 +20,7 @@
 
 import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from 'luma.gl';
+import {Model, Geometry, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 
 import vs from './line-layer-vertex.glsl';
@@ -34,10 +34,13 @@ const defaultProps = {
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
-  getStrokeWidth: {type: 'accessor', value: 1},
+  getWidth: {type: 'accessor', value: 1},
+  widthScale: {type: 'number', value: 1, min: 0},
+  widthMinPixels: {type: 'number', value: 1, min: 0},
+  widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // deprecated
-  strokeWidth: {deprecatedFor: 'getStrokeWidth'}
+  getStrokeWidth: {deprecatedFor: 'getWidth'}
 };
 
 export default class LineLayer extends Layer {
@@ -76,7 +79,7 @@ export default class LineLayer extends Layer {
       instanceWidths: {
         size: 1,
         transition: true,
-        accessor: 'getStrokeWidth',
+        accessor: 'getWidth',
         defaultValue: 1
       }
     });
@@ -94,6 +97,12 @@ export default class LineLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
+
+    this.state.model.setUniforms({
+      widthScale: props.widthScale,
+      widthMinPixels: props.widthMinPixels,
+      widthMaxPixels: props.widthMaxPixels
+    });
   }
 
   _getModel(gl) {
@@ -132,18 +141,17 @@ export default class LineLayer extends Layer {
     }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
     const {iterable, objectInfo} = createIterable(data);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
       const targetPosition = getTargetPosition(object, objectInfo);
-      value[i + 0] = fp64LowPart(sourcePosition[0]);
-      value[i + 1] = fp64LowPart(sourcePosition[1]);
-      value[i + 2] = fp64LowPart(targetPosition[0]);
-      value[i + 3] = fp64LowPart(targetPosition[1]);
-      i += size;
+      value[i++] = fp64LowPart(sourcePosition[0]);
+      value[i++] = fp64LowPart(sourcePosition[1]);
+      value[i++] = fp64LowPart(targetPosition[0]);
+      value[i++] = fp64LowPart(targetPosition[1]);
     }
   }
 }

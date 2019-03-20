@@ -1,6 +1,8 @@
 /* eslint-disable max-statements, complexity */
 const RADIAN_PER_DEGREE = Math.PI / 180;
-const modelMatrix = new Float32Array(9);
+const modelMatrix = new Float32Array(16);
+const linearTransform = new Float32Array(9);
+const modelTranslation = new Float32Array(3);
 
 function calculateTransformMatrix(targetMatrix, orientation, scale) {
   const pitch = orientation[0] * RADIAN_PER_DEGREE;
@@ -30,19 +32,34 @@ function calculateTransformMatrix(targetMatrix, orientation, scale) {
   targetMatrix[8] = scz * cp * cr; // 2,2
 }
 
+function getMat3FromMat4(mat4) {
+  mat4[0] = mat4[0];
+  mat4[1] = mat4[1];
+  mat4[2] = mat4[2];
+  mat4[3] = mat4[4];
+  mat4[4] = mat4[5];
+  mat4[5] = mat4[6];
+  mat4[6] = mat4[8];
+  mat4[7] = mat4[9];
+  mat4[8] = mat4[10];
+
+  return mat4.subarray(0, 9);
+}
+
 function calculateModelMatrices(layer, attribute) {
-  const {data, getOrientation, getScale, getTransformMatrix} = layer.props;
+  const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = layer.props;
 
   const constantMatrix = Array.isArray(getTransformMatrix);
   const constantScale = Array.isArray(getScale);
   const constantOrientation = Array.isArray(getOrientation);
+  const constantTranslation = Array.isArray(getTranslation);
 
   const hasMatrix = getTransformMatrix && (constantMatrix || Boolean(getTransformMatrix(data[0])));
 
   if (hasMatrix) {
     attribute.constant = constantMatrix;
   } else {
-    attribute.constant = constantOrientation && constantScale;
+    attribute.constant = constantOrientation && constantScale && constantTranslation;
   }
 
   const instanceModelMatrixData = attribute.value;
@@ -51,35 +68,47 @@ function calculateModelMatrices(layer, attribute) {
     let matrix;
 
     if (hasMatrix) {
-      matrix = getTransformMatrix;
+      modelMatrix.set(getTransformMatrix);
+      modelTranslation[0] = modelMatrix[12];
+      modelTranslation[1] = modelMatrix[13];
+      modelTranslation[2] = modelMatrix[14];
+      matrix = getMat3FromMat4(modelMatrix);
     } else {
-      matrix = modelMatrix;
+      matrix = linearTransform;
 
       const orientation = getOrientation;
       const scale = getScale;
 
       calculateTransformMatrix(matrix, orientation, scale);
+      modelTranslation.set(getTranslation);
     }
 
     const valueMatrix = new Float32Array(matrix);
+    const valueTranslation = new Float32Array(modelTranslation);
     const shaderAttributes = attribute.userData.shaderAttributes;
     shaderAttributes.instanceModelMatrix__LOCATION_0.value = valueMatrix.subarray(0, 3);
     shaderAttributes.instanceModelMatrix__LOCATION_1.value = valueMatrix.subarray(3, 6);
     shaderAttributes.instanceModelMatrix__LOCATION_2.value = valueMatrix.subarray(6, 9);
+    shaderAttributes.instanceTranslation.value = valueTranslation;
   } else {
     let i = 0;
     for (const object of data) {
       let matrix;
 
       if (hasMatrix) {
-        matrix = constantMatrix ? getTransformMatrix : getTransformMatrix(object);
+        modelMatrix.set(constantMatrix ? getTransformMatrix : getTransformMatrix(object));
+        modelTranslation[0] = modelMatrix[12];
+        modelTranslation[1] = modelMatrix[13];
+        modelTranslation[2] = modelMatrix[14];
+        matrix = getMat3FromMat4(modelMatrix);
       } else {
-        matrix = modelMatrix;
+        matrix = linearTransform;
 
         const orientation = constantOrientation ? getOrientation : getOrientation(object);
         const scale = constantScale ? getScale : getScale(object);
 
         calculateTransformMatrix(matrix, orientation, scale);
+        modelTranslation.set(constantTranslation ? getTranslation : getTranslation(object));
       }
 
       instanceModelMatrixData[i++] = matrix[0];
@@ -91,29 +120,37 @@ function calculateModelMatrices(layer, attribute) {
       instanceModelMatrixData[i++] = matrix[6];
       instanceModelMatrixData[i++] = matrix[7];
       instanceModelMatrixData[i++] = matrix[8];
+      instanceModelMatrixData[i++] = modelTranslation[0];
+      instanceModelMatrixData[i++] = modelTranslation[1];
+      instanceModelMatrixData[i++] = modelTranslation[2];
     }
   }
 }
 
 export function getMatrixAttributes(layer) {
   return {
-    size: 9,
-    accessor: ['getOrientation', 'getScale', 'getTransformMatrix'],
+    size: 12,
+    accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
     shaderAttributes: {
       instanceModelMatrix__LOCATION_0: {
         size: 3,
-        stride: 36,
+        stride: 48,
         offset: 0
       },
       instanceModelMatrix__LOCATION_1: {
         size: 3,
-        stride: 36,
+        stride: 48,
         offset: 12
       },
       instanceModelMatrix__LOCATION_2: {
         size: 3,
-        stride: 36,
+        stride: 48,
         offset: 24
+      },
+      instanceTranslation: {
+        size: 3,
+        stride: 48,
+        offset: 36
       }
     },
     update: function updater(attribute) {

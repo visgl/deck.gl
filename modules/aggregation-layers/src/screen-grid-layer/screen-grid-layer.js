@@ -25,7 +25,7 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Buffer, isWebGL2} from 'luma.gl';
+import {Model, Geometry, Buffer, isWebGL2} from '@luma.gl/core';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import vs_WebGL1 from './screen-grid-layer-vertex-webgl1.glsl';

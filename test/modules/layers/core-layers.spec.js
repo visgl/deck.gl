@@ -25,15 +25,24 @@ import {
   IconLayer,
   ArcLayer,
   LineLayer,
+  GridCellLayer,
+  ColumnLayer,
   ScreenGridLayer,
   PointCloudLayer,
   PathLayer
   // TextLayer
 } from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+
+const GRID = [
+  {position: [37, 122]},
+  {position: [37.1, 122]},
+  {position: [37, 122.8]},
+  {position: [37.1, 122.8]}
+];
 
 test('ScreenGridLayer', t => {
   const testCases = generateLayerTests({
@@ -139,6 +148,38 @@ test('LineLayer', t => {
   t.end();
 });
 
+test('ColumnLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: ColumnLayer,
+    sampleProps: {
+      data: GRID,
+      getPosition: d => d.position
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+
+  testLayer({Layer: ColumnLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('GridCellLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: GridCellLayer,
+    sampleProps: {
+      data: GRID,
+      getPosition: d => d.position
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+
+  testLayer({Layer: GridCellLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
 test('IconLayer', t => {
   const testCases = generateLayerTests({
     Layer: IconLayer,
@@ -165,7 +206,8 @@ test('PathLayer', t => {
     Layer: PathLayer,
     sampleProps: {
       data: FIXTURES.zigzag,
-      getPath: d => d.path
+      getPath: d => d.path,
+      getColor: (d, {index}) => [index, 0, 0]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),

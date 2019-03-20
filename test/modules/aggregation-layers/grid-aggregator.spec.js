@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 import {pointToDensityGridData} from '@deck.gl/aggregation-layers/grid-layer/grid-aggregator';
 

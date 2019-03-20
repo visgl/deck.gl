@@ -24,19 +24,22 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {PolygonLayer} from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 test('PolygonLayer#constructor', t => {
   const testCases = generateLayerTests({
     Layer: PolygonLayer,
     sampleProps: {
       data: FIXTURES.polygons.slice(0, 3),
-      getPolygon: f => f
+      getPolygon: f => f,
+      getFillColor: (f, {index}) => [index, 0, 0]
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.paths.length, 'should update state.paths');
+      if (layer.props.data && layer.props.data.length) {
+        t.ok(layer.state.paths.length, 'should update state.paths');
+      }
     }
   });
 

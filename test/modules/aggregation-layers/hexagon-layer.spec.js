@@ -21,10 +21,10 @@
 import test from 'tape-catch';
 import {makeSpy} from '@probe.gl/test-utils';
 
-import * as data from 'deck.gl/test/data';
+import * as data from 'deck.gl-test/data';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
-import {HexagonCellLayer} from '@deck.gl/layers';
+import {ColumnLayer} from '@deck.gl/layers';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const getColorValue = points => points.length;
@@ -524,7 +524,7 @@ test('HexagonLayer#renderSubLayer', t => {
   const subLayer = layer.renderLayers();
   testInitializeLayer({layer: subLayer, onError: t.notOk});
 
-  t.ok(subLayer instanceof HexagonCellLayer, 'HexagonCellLayer rendered');
+  t.ok(subLayer instanceof ColumnLayer, 'ColumnLayer rendered');
 
   // should call attribute updater twice
   // because test util calls both initialize and update layer

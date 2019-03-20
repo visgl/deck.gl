@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {createGLTFObjects, fp64} from 'luma.gl';
+import {createGLTFObjects, fp64} from '@luma.gl/core';
 import {getMatrixAttributes} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;
@@ -92,6 +92,7 @@ const defaultProps = {
     value: x => x.orientation || [x.pitch || 0, x.yaw || x.angle || 0, x.roll || 0]
   },
   getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: x => x.scale || [0, 0, 0]},
   getTransformMatrix: {type: 'accessor', value: x => x.transformMatrix || null}
 };
 

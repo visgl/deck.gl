@@ -19,50 +19,44 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testLayer} from '@deck.gl/test-utils';
+import {experimental} from '@deck.gl/core';
+const {count} = experimental;
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+import data from 'deck.gl-test/data/h3-sf.json';
 
-import {GridCellLayer} from 'deck.gl';
-
-const GRID = [{position: [37, 122]}, {position: [37.1, 122.8]}];
-
-test('GridCellLayer#updates', t => {
-  testLayer({
-    Layer: GridCellLayer,
-    onError: t.notOk,
-    testCases: [
-      {props: []},
-      {props: null, pickable: true},
-      {
-        props: {
-          data: GRID
-        },
-        onAfterUpdate({layer}) {
-          t.equal(layer.props.cellSize, 1000, 'Use default radius if not specified');
-          t.equal(layer.props.coverage, 1, 'Use default angel if not specified');
-        }
-      },
-      {
-        updateProps: {
-          coverage: 0.8
-        },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(layer.state, 'should update layer');
-        }
-      },
-      {
-        updateProps: {
-          fp64: true
-        },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(layer.state, 'should update layer');
-          t.ok(
-            layer.getAttributeManager().attributes.instancePositions64xyLow,
-            'should add instancePositions64xyLow'
-          );
-        }
-      }
-    ]
+test('H3HexagonLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: H3HexagonLayer,
+    sampleProps: {
+      data,
+      getHexagon: d => d.hexagons[0]
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
   });
+
+  testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
+
+test('H3ClusterLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: H3ClusterLayer,
+    sampleProps: {
+      data,
+      getHexagons: d => d.hexagons
+      // getElevation: d => d.size
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
+      t.ok(layer.state.polygons.length >= count(layer.props.data), 'polygons are generated');
+    }
+  });
+
+  testLayer({Layer: H3ClusterLayer, testCases, onError: t.notOk});
 
   t.end();
 });

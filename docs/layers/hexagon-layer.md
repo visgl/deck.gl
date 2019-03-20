@@ -237,7 +237,7 @@ This callback will be called when bin elevation domain has been calculated.
 
 The HexagonLayer renders the following sublayers:
 
-* `hexagon-cell` - a [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md) rendering the aggregated columns.
+* `hexagon-cell` - a [ColumnLayer](/docs/layers/column-layer.md) rendering the aggregated columns.
 
 
 ## Source

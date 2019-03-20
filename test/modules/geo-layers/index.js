@@ -20,15 +20,26 @@
 
 import test from 'tape-catch';
 
-import {GreatCircleLayer, S2Layer, TileLayer, TripsLayer} from '@deck.gl/geo-layers';
+import {
+  GreatCircleLayer,
+  H3HexagonLayer,
+  H3ClusterLayer,
+  S2Layer,
+  TileLayer,
+  TripsLayer
+} from '@deck.gl/geo-layers';
 
 test('Top-level imports', t => {
   t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
   t.ok(S2Layer, 'S2Layer symbol imported');
+  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
+  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
   t.ok(TileLayer, 'TileLayer symbol imported');
   t.ok(TripsLayer, 'TripsLayer symbol imported');
   t.end();
 });
 
 import './tile-layer/tile-cache.spec';
+import './tile-layer/tile-layer.spec';
 import './s2-layer.spec';
+import './h3-layers.spec';

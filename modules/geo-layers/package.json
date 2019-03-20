@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "7.0.0-alpha.4",
+  "version": "7.0.0-alpha.6",
   "publishConfig": {
     "access": "public"
   },
@@ -31,6 +31,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
+    "h3-js": "^3.0.0",
     "s2-geometry": "^1.2.10"
   },
   "peerDependencies": {
