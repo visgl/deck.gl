@@ -7,7 +7,7 @@ module.exports = {
   },
 
   aliases: {
-    'deck.gl/test': resolve(__dirname, './test')
+    'deck.gl-test': resolve(__dirname, './test')
   },
 
   entry: {

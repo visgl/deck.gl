@@ -1,6 +1,6 @@
 /* global document */
 import GL from '@luma.gl/constants';
-import {Texture2D, readPixelsToBuffer} from 'luma.gl';
+import {Texture2D, readPixelsToBuffer} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/core';
 import {createIterable} from '@deck.gl/core';
 

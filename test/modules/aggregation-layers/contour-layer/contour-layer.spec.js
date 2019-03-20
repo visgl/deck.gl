@@ -20,7 +20,7 @@
 import test from 'tape-catch';
 import {makeSpy} from '@probe.gl/test-utils';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 

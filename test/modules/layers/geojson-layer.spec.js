@@ -23,7 +23,7 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 test('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({

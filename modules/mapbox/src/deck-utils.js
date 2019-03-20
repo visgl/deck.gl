@@ -1,5 +1,5 @@
 import {Deck} from '@deck.gl/core';
-import {withParameters} from '@luma.gl/webgl-state-tracker';
+import {withParameters} from '@luma.gl/core';
 
 export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context

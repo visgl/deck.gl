@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {LayerManager, MapView, DeckRenderer} from 'deck.gl';
+import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
 
 import {makeSpy} from '@probe.gl/test-utils';
 import gl from './utils/setup-gl';

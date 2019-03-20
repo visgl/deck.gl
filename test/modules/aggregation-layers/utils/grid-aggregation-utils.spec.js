@@ -26,7 +26,7 @@ import GPUGridAggregator from '@deck.gl/aggregation-layers/utils/gpu-grid-aggreg
 import {pointToDensityGridData} from '@deck.gl/aggregation-layers/utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 import {gl} from '@deck.gl/test-utils';
-import * as FIXTURES from 'deck.gl/test/data';
+import * as FIXTURES from 'deck.gl-test/data';
 
 const getPosition = d => d.COORDINATES;
 const CELLSIZE = 500;
