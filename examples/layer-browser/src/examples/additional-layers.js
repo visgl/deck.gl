@@ -4,11 +4,14 @@ import {
   MeshLayer,
   ScenegraphLayer,
   GreatCircleLayer,
-  S2Layer
+  S2Layer,
+  H3ClusterLayer,
+  H3HexagonLayer
   // KMLLayer
 } from 'deck.gl';
 
 import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import * as h3 from 'h3-js';
 
 import {CylinderGeometry} from 'luma.gl';
 import {GLTFParser} from '@loaders.gl/gltf';
@@ -128,6 +131,27 @@ const S2LayerExample = {
   }
 };
 
+const H3ClusterLayerExample = {
+  layer: H3ClusterLayer,
+  props: {
+    data: ['882830829bfffff'],
+    getHexagons: d => h3.kRing(d, 6),
+    getLineWidth: 100,
+    stroked: true,
+    filled: false
+  }
+};
+
+const H3HexagonLayerExample = {
+  layer: H3HexagonLayer,
+  props: {
+    data: h3.kRing('882830829bfffff', 4),
+    getHexagon: d => d,
+    getColor: (d, {index}) => [255, index * 5, 0],
+    getElevation: d => Math.random() * 1000
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Mesh Layers': {
@@ -136,6 +160,8 @@ export default {
   },
   'Geo Layers': {
     S2Layer: S2LayerExample,
+    H3ClusterLayer: H3ClusterLayerExample,
+    H3HexagonLayer: H3HexagonLayerExample,
     GreatCircleLayer: GreatCircleLayerExample
   },
   'Experimental Core Layers': {

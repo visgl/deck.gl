@@ -126,7 +126,14 @@ export {
 
 export {ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer} from '@deck.gl/aggregation-layers';
 
-export {GreatCircleLayer, S2Layer, TileLayer, TripsLayer} from '@deck.gl/geo-layers';
+export {
+  GreatCircleLayer,
+  S2Layer,
+  H3ClusterLayer,
+  H3HexagonLayer,
+  TileLayer,
+  TripsLayer
+} from '@deck.gl/geo-layers';
 
 export {MeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 

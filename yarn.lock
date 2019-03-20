@@ -4212,6 +4212,11 @@ gzip-size@^5.0.0:
     duplexer "^0.1.1"
     pify "^3.0.0"
 
+h3-js@^3.4.1:
+  version "3.4.2"
+  resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-3.4.2.tgz#1cceab6944a801cc0617a03d8e477d1e6d849753"
+  integrity sha512-ljo2lvf+h0BKmdVg4bS027YJa023/SM/aFKO5pJuvLMwvMMGEWc7dwffoiPuH49ayECdEyIZRtMkDz0jiFXK0Q==
+
 hammerjs@^2.0.8:
   version "2.0.8"
   resolved "https://registry.yarnpkg.com/hammerjs/-/hammerjs-2.0.8.tgz#04ef77862cff2bb79d30f7692095930222bf60f1"

@@ -19,27 +19,44 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {experimental} from '@deck.gl/core';
+const {count} = experimental;
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+import data from 'deck.gl/test/data/h3-sf.json';
 
-import {
-  GreatCircleLayer,
-  H3HexagonLayer,
-  H3ClusterLayer,
-  S2Layer,
-  TileLayer,
-  TripsLayer
-} from '@deck.gl/geo-layers';
+test('H3HexagonLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: H3HexagonLayer,
+    sampleProps: {
+      data,
+      getHexagon: d => d.hexagons[0]
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
 
-test('Top-level imports', t => {
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
-  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
+  testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});
+
   t.end();
 });
 
-import './tile-layer/tile-cache.spec';
-import './tile-layer/tile-layer.spec';
-import './s2-layer.spec';
-import './h3-layers.spec';
+test('H3ClusterLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: H3ClusterLayer,
+    sampleProps: {
+      data,
+      getHexagons: d => d.hexagons
+      // getElevation: d => d.size
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
+      t.ok(layer.state.polygons.length >= count(layer.props.data), 'polygons are generated');
+    }
+  });
+
+  testLayer({Layer: H3ClusterLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
