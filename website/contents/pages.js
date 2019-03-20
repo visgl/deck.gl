@@ -1,5 +1,7 @@
 function getDocUrl(filename) {
-  return `https://raw.githubusercontent.com/uber/deck.gl/master/docs/${filename}`;
+  // DOCS_DIR specified in webpack config file
+  // eslint-disable-next-line no-undef
+  return `${DOCS_DIR}/docs/${filename}`;
 }
 function getCodeUrl(pathname) {
   return `https://github.com/uber/deck.gl/tree/master/${pathname}`;

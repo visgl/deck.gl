@@ -13,19 +13,16 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 // Seems to be a Babel bug
 // https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
 const BABEL_CONFIG = {
-  presets: [
-    'es2015',
-    'stage-2',
-    'react'
-  ].map(name => require.resolve(`babel-preset-${name}`)),
-  plugins: [
-    'transform-decorators-legacy'
-  ].map(name => require.resolve(`babel-plugin-${name}`))
+  presets: ['es2015', 'stage-2', 'react'].map(name => require.resolve(`babel-preset-${name}`)),
+  plugins: ['transform-decorators-legacy'].map(name => require.resolve(`babel-plugin-${name}`))
 };
 
 const COMMON_CONFIG = {
-
   entry: ['./src/main'],
+
+  devServer: {
+    contentBase: [resolve(__dirname, './src/static')]
+  },
 
   output: {
     path: resolve(__dirname, './dist'),
@@ -41,10 +38,12 @@ const COMMON_CONFIG = {
         options: BABEL_CONFIG,
         include: [resolve('..'), libSources],
         exclude: [/node_modules/]
-      }, {
+      },
+      {
         test: /\.scss$/,
         loaders: ['style-loader', 'css-loader', 'sass-loader']
-      }, {
+      },
+      {
         test: /\.(eot|svg|ttf|woff|woff2|gif|jpe?g|png)$/,
         loader: 'url-loader'
       }
@@ -73,17 +72,17 @@ const COMMON_CONFIG = {
       MapboxAccessToken: `"${process.env.MapboxAccessToken}"` // eslint-disable-line
     })
   ]
-
 };
 
 const addDevConfig = config => {
-
   config.module.rules.push({
     // Unfortunately, webpack doesn't import library sourcemaps on its own...
     test: /\.js$/,
     use: ['source-map-loader'],
     enforce: 'pre'
   });
+
+  config.devServer.contentBase.push(resolve(__dirname, '../'));
 
   return Object.assign(config, {
     mode: 'development',
@@ -94,14 +93,20 @@ const addDevConfig = config => {
       new webpack.NoEmitOnErrorsPlugin(),
       new webpack.DefinePlugin({
         USE_LOCAL_PAGES: true // eslint-disable-line
+      }),
+      new webpack.DefinePlugin({
+        DOCS_DIR: JSON.stringify('.')
       })
     ])
-
   });
-
 };
 
 const addProdConfig = config => {
+  config.plugins = config.plugins.concat(
+    new webpack.DefinePlugin({
+      DOCS_DIR: JSON.stringify('https://raw.githubusercontent.com/uber/deck.gl/master')
+    })
+  );
 
   return Object.assign(config, {
     mode: 'production'

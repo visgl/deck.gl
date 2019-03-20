@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --env.local --progress --content-base ./src/static --open",
+    "start": "webpack-dev-server --env.local --progress --open",
     "start-local": "yarn start",
     "build-clean": "rm -rf ./dist && mkdir dist",
     "build-static": "cp -r ./src/static/* dist && babel ./src/static/workers --out-dir dist/workers",
