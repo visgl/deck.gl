@@ -13,6 +13,7 @@ The `H3HexagonLayer` renders hexagons from the [H3](https://uber.github.io/h3/) 
 
 ```js
 import DeckGL, {H3HexagonLayer} from 'deck.gl';
+import * as h3 from 'h3-js';
 
 const App = ({data, viewport}) => {
 
@@ -28,6 +29,7 @@ const App = ({data, viewport}) => {
    */
   const layer = new H3HexagonLayer({
     id: 'h3-hexagon-layer',
+    h3,
     data,
     extruded: true,
     pickable: true,
@@ -49,6 +51,18 @@ const App = ({data, viewport}) => {
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
+
+### H3
+
+##### `h3` (Object)
+
+The H3 interface. This allows users to use a version of the [H3 Core Library](https://github.com/uber/h3) that matches the source data.
+The `h3` object is expected to contain the following methods:
+
+* `h3GetResolution`
+* `h3ToGeo`
+* `geoToH3`
+* `h3ToGeoBoundary`
 
 ### Render Options
 

@@ -23,12 +23,23 @@ import {experimental} from '@deck.gl/core';
 const {count} = experimental;
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+import {geoToH3, h3ToGeo, h3ToGeoBoundary, h3GetResolution, h3SetToMultiPolygon} from 'h3-js';
 import data from 'deck.gl-test/data/h3-sf.json';
+
+// TODO - `import * as h3` breaks compareProps when trying to convert h3 to string
+const h3 = {
+  geoToH3,
+  h3ToGeo,
+  h3ToGeoBoundary,
+  h3GetResolution,
+  h3SetToMultiPolygon
+};
 
 test('H3HexagonLayer', t => {
   const testCases = generateLayerTests({
     Layer: H3HexagonLayer,
     sampleProps: {
+      h3,
       data,
       getHexagon: d => d.hexagons[0]
     },
@@ -45,6 +56,7 @@ test('H3ClusterLayer', t => {
   const testCases = generateLayerTests({
     Layer: H3ClusterLayer,
     sampleProps: {
+      h3,
       data,
       getHexagons: d => d.hexagons
       // getElevation: d => d.size

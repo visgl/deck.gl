@@ -13,6 +13,7 @@ The `H3ClusterLayer` renders regions represented by hexagon sets from the [H3](h
 
 ```js
 import DeckGL, {H3ClusterLayer} from 'deck.gl';
+import * as h3 from 'h3-js';
 
 const App = ({data, viewport}) => {
 
@@ -37,6 +38,7 @@ const App = ({data, viewport}) => {
    */
   const layer = new H3ClusterLayer({
     id: 'h3-cluster-layer',
+    h3,
     data,
     stroked: true,
     filled: true,
@@ -61,6 +63,16 @@ const App = ({data, viewport}) => {
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/docs/api-reference/composite-layer.md), and [PolygonLayer](/docs/api-reference/polygon-layer.md) properties, plus the following:
+
+### H3
+
+##### `h3` (Object)
+
+The H3 interface. This allows users to use a version of the [H3 Core Library](https://github.com/uber/h3) that matches the source data.
+The `h3` object is expected to contain the following methods:
+
+* `h3SetToMultiPolygon`
+
 
 ### Data Accessors
 

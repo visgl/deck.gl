@@ -134,6 +134,7 @@ const S2LayerExample = {
 const H3ClusterLayerExample = {
   layer: H3ClusterLayer,
   props: {
+    h3,
     data: ['882830829bfffff'],
     getHexagons: d => h3.kRing(d, 6),
     getLineWidth: 100,
@@ -145,6 +146,7 @@ const H3ClusterLayerExample = {
 const H3HexagonLayerExample = {
   layer: H3HexagonLayer,
   props: {
+    h3,
     data: h3.kRing('882830829bfffff', 4),
     getHexagon: d => d,
     getColor: (d, {index}) => [255, index * 5, 0],
