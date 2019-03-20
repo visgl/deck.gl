@@ -45,7 +45,7 @@
     "coveralls": "^3.0.0",
     "eslint-config-uber-jsx": "^3.3.3",
     "eslint-plugin-react": "^7.10",
-    "gl": "^4.0.3",
+    "gl": "^4.1.1",
     "glsl-transpiler": "^1.8.3",
     "ocular-dev-tools": "0.0.13",
     "png.js": "^0.1.1",

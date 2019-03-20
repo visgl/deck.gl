@@ -408,6 +408,14 @@ export const docPages = generatePath([
             content: getDocUrl('layers/grid-cell-layer.md')
           },
           {
+            name: 'H3HexagonLayer',
+            content: getDocUrl('layers/h3-hexagon-layer.md')
+          },
+          {
+            name: 'H3ClusterLayer',
+            content: getDocUrl('layers/h3-cluster-layer.md')
+          },
+          {
             name: 'HexagonLayer',
             content: getDocUrl('layers/hexagon-layer.md')
           },
@@ -454,6 +462,23 @@ export const docPages = generatePath([
           {
             name: 'TripsLayer',
             content: getDocUrl('layers/trips-layer.md')
+          },
+          {
+            name: 'H3 Layers',
+            children: [
+              {
+                name: 'H3HexagonLayer (Experimental)',
+                content: getDocUrl('layers/h3-layers/h3-hexagon-layer.md')
+              },
+              {
+                name: 'H3OutlineLayer (Experimental)',
+                content: getDocUrl('layers/h3-layers/h3-outline-layer.md')
+              },
+              {
+                name: 'H3RingLayer (Experimental)',
+                content: getDocUrl('layers/h3-layers/h3-ring-layer.md')
+              }
+            ]
           }
         ]
       },
