@@ -698,7 +698,7 @@
     "@luma.gl/constants" "^7.0.0-alpha.15"
     "@luma.gl/core" "^7.0.0-alpha.17"
 
-"@luma.gl/constants@^7.0.0-alpha.15":
+"@luma.gl/constants@^7.0.0-alpha.15", "@luma.gl/constants@^7.0.0-alpha.6":
   version "7.0.0-alpha.15"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.15.tgz#eca7e19466ebfd07d88e18bc966880779a6f9fd4"
   integrity sha512-oH2mN/P3LvNsFNPVO7Lyb1RSf4lF1rsAEcdvpwyg0IKtHXPBwLKJwfk/3f8Leh3eqI6yz2hkK51nGkFJSbe7+A==
@@ -1378,6 +1378,13 @@ babel-loader@^8.0.0:
     loader-utils "^1.0.2"
     mkdirp "^0.5.1"
     util.promisify "^1.0.0"
+
+babel-plugin-inline-webgl-constants@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/babel-plugin-inline-webgl-constants/-/babel-plugin-inline-webgl-constants-1.0.0.tgz#206548c03df77ea800c40bf59622000fbd976753"
+  integrity sha512-50aOuF9zgvZZn8RA+cxHtjSlbQEQDeus6LJlA5DLMobq8LzIhs/RaTkZmVDRfwT3+I5h9+sSVwiOppKOY19GXA==
+  dependencies:
+    "@luma.gl/constants" "^7.0.0-alpha.6"
 
 babel-plugin-istanbul@^5.0.0:
   version "5.1.1"
@@ -3437,10 +3444,10 @@ expand-brackets@^2.1.4:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
-expand-template@^1.0.2:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/expand-template/-/expand-template-1.1.1.tgz#981f188c0c3a87d2e28f559bc541426ff94f21dd"
-  integrity sha512-cebqLtV8KOZfw0UI8TEFWxtczxxC1jvyUvx6H4fyp1K1FN7A4Q+uggVUlOsI1K8AGU0rwOGqP8nCapdrw8CYQg==
+expand-template@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.yarnpkg.com/expand-template/-/expand-template-2.0.3.tgz#6e14b3fcee0f3a6340ecb57d2e8918692052a47c"
+  integrity sha512-XYfuKMvj4O35f/pOXLObndIRvyQ+/+6AhODh+OKWj9S9498pHHn/IMszH+gt0fBCRWMNfk1ZSp5x3AifmnI2vg==
 
 expand-tilde@^2.0.0, expand-tilde@^2.0.2:
   version "2.0.2"
@@ -4042,17 +4049,17 @@ gl-vec4@^1.0.0, gl-vec4@^1.0.1:
   resolved "https://registry.yarnpkg.com/gl-vec4/-/gl-vec4-1.0.1.tgz#97d96878281b14b532cbce101785dfd1cb340964"
   integrity sha1-l9loeCgbFLUyy84QF4Xf0cs0CWQ=
 
-gl@^4.0.3:
-  version "4.0.4"
-  resolved "https://registry.yarnpkg.com/gl/-/gl-4.0.4.tgz#46745f365a230672b2f988d85018f737e64c3343"
-  integrity sha512-J/l/QSjbW9UHQjWqmCtXe2H1Gt8ednfC1tofmwABg9z+36DMNBs8W3i/2NgLg4Mdg+bED/DKnU1B3HIpSSidFQ==
+gl@^4.1.1:
+  version "4.2.2"
+  resolved "https://registry.yarnpkg.com/gl/-/gl-4.2.2.tgz#e5aa1a7a9ccb5f36464763ff9454f41f2fa59424"
+  integrity sha512-RiFX+eUrMiVXyYaO1/tsHE8ex+a/52GY2mTE5MjUWE6gJvRFqGYwE6psPtEeiucBlX7DDmHe2QjJ4qyT/ubrYA==
   dependencies:
     bindings "^1.2.1"
     bit-twiddle "^1.0.2"
     glsl-tokenizer "^2.0.2"
     nan "^2.6.2"
     node-gyp "^3.6.2"
-    prebuild-install "^2.1.1"
+    prebuild-install "^5.1.0"
 
 glob-parent@^3.1.0:
   version "3.1.0"
@@ -4212,7 +4219,7 @@ gzip-size@^5.0.0:
     duplexer "^0.1.1"
     pify "^3.0.0"
 
-h3-js@^3.4.1:
+h3-js@^3.0.0:
   version "3.4.2"
   resolved "https://registry.yarnpkg.com/h3-js/-/h3-js-3.4.2.tgz#1cceab6944a801cc0617a03d8e477d1e6d849753"
   integrity sha512-ljo2lvf+h0BKmdVg4bS027YJa023/SM/aFKO5pJuvLMwvMMGEWc7dwffoiPuH49ayECdEyIZRtMkDz0jiFXK0Q==
@@ -5858,6 +5865,11 @@ nanomatch@^1.2.9:
     snapdragon "^0.8.1"
     to-regex "^3.0.1"
 
+napi-build-utils@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/napi-build-utils/-/napi-build-utils-1.0.1.tgz#1381a0f92c39d66bf19852e7873432fc2123e508"
+  integrity sha512-boQj1WFgQH3v4clhu3mTNfP+vOBxorDlE8EKiMjUlLG3C4qAESnn9AxIOkFgTR2c9LtzNjPrjS60cT27ZKBhaA==
+
 natural-compare@^1.4.0:
   version "1.4.0"
   resolved "https://registry.yarnpkg.com/natural-compare/-/natural-compare-1.4.0.tgz#4abebfeed7541f2c27acfb29bdbbd15c8d5ba4f7"
@@ -5894,10 +5906,10 @@ no-case@^2.2.0:
   dependencies:
     lower-case "^1.1.1"
 
-node-abi@^2.2.0:
-  version "2.4.3"
-  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-2.4.3.tgz#43666b7b17e57863e572409edbb82115ac7af28b"
-  integrity sha512-b656V5C0628gOOA2kwcpNA/bxdlqYF9FvxJ+qqVX0ctdXNVZpS8J6xEUYir3WAKc7U0BH/NRlSpNbGsy+azjeg==
+node-abi@^2.7.0:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/node-abi/-/node-abi-2.7.1.tgz#a8997ae91176a5fbaa455b194976e32683cda643"
+  integrity sha512-OV8Bq1OrPh6z+Y4dqwo05HqrRL9YNF7QVMRfq1/pguwKLG+q9UB/Lk0x5qXjO23JjJg+/jqCHSTaG1P3tfKfuw==
   dependencies:
     semver "^5.4.1"
 
@@ -6663,22 +6675,23 @@ pre-push@^0.1.1:
   dependencies:
     shelljs "0.3.x"
 
-prebuild-install@^2.1.1:
-  version "2.5.3"
-  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-2.5.3.tgz#9f65f242782d370296353710e9bc843490c19f69"
-  integrity sha512-/rI36cN2g7vDQnKWN8Uzupi++KjyqS9iS+/fpwG4Ea8d0Pip0PQ5bshUNzVwt+/D2MRfhVAplYMMvWLqWrCF/g==
+prebuild-install@^5.1.0:
+  version "5.2.5"
+  resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-5.2.5.tgz#c7485911fe98950b7f7cd15bb9daee11b875cc44"
+  integrity sha512-6uZgMVg7yDfqlP5CPurVhtq3hUKBFNufiar4J5hZrlHTo59DDBEtyxw01xCdFss9j0Zb9+qzFVf/s4niayba3w==
   dependencies:
     detect-libc "^1.0.3"
-    expand-template "^1.0.2"
+    expand-template "^2.0.3"
     github-from-package "0.0.0"
     minimist "^1.2.0"
     mkdirp "^0.5.1"
-    node-abi "^2.2.0"
+    napi-build-utils "^1.0.1"
+    node-abi "^2.7.0"
     noop-logger "^0.1.1"
     npmlog "^4.0.1"
     os-homedir "^1.0.1"
     pump "^2.0.1"
-    rc "^1.1.6"
+    rc "^1.2.7"
     simple-get "^2.7.0"
     tar-fs "^1.13.0"
     tunnel-agent "^0.6.0"
