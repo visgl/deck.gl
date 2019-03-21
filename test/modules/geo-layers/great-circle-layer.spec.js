@@ -19,28 +19,24 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {GreatCircleLayer} from '@deck.gl/geo-layers';
 
-import {
-  GreatCircleLayer,
-  H3HexagonLayer,
-  H3ClusterLayer,
-  S2Layer,
-  TileLayer,
-  TripsLayer
-} from '@deck.gl/geo-layers';
+import * as FIXTURES from 'deck.gl-test/data';
 
-test('Top-level imports', t => {
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
-  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
+test('GreatCircleLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: GreatCircleLayer,
+    sampleProps: {
+      data: FIXTURES.routes,
+      getSourcePosition: d => d.START,
+      getTargetPosition: d => d.END
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+
+  testLayer({Layer: GreatCircleLayer, testCases, onError: t.notOk});
+
   t.end();
 });
-
-import './tile-layer/tile-cache.spec';
-import './tile-layer/tile-layer.spec';
-import './s2-layer.spec';
-import './great-circle-layer.spec';
-import './h3-layers.spec';

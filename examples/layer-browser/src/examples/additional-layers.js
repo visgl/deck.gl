@@ -114,7 +114,7 @@ const GreatCircleLayerExample = {
     getTargetPosition: d => d.target,
     getSourceColor: [64, 255, 0],
     getTargetColor: [0, 128, 200],
-    getStrokeWidth: 5,
+    widthMinPixels: 5,
     pickable: true
   }
 };
