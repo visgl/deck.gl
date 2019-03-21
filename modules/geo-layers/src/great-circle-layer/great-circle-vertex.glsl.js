@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME arc-layer-vertex-shader
+#define SHADER_NAME great-circle-layer-vertex-shader
 
 attribute vec3 positions;
 attribute vec4 instanceSourceColors;
@@ -67,13 +67,13 @@ float getAngularDist (vec2 source, vec2 target) {
 }
 
 vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
-// if the angularDist is PI, linear interpolation is applied. otherwise, use spherical interpolation
+  // if the angularDist is PI, linear interpolation is applied. otherwise, use spherical interpolation
   if(abs(angularDist - PI) < 0.001) {
     return (1.0 - t) * source + t * target;
   }
 
-	float a = sin((1.0 - t) * angularDist) / sin(angularDist);
-	float b = sin(t * angularDist) / sin(angularDist);
+  float a = sin((1.0 - t) * angularDist) / sin(angularDist);
+  float b = sin(t * angularDist) / sin(angularDist);
   vec2 sin_source = sin(source);
   vec2 cos_source = cos(source);
   vec2 sin_target = sin(target);
@@ -82,7 +82,7 @@ vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
   float x = a * cos_source.y * cos_source.x + b * cos_target.y * cos_target.x;
   float y = a * cos_source.y * sin_source.x + b * cos_target.y * sin_target.x;
   float z = a * sin_source.y + b * sin_target.y;
-	return vec2(atan(y, x), atan(z, sqrt(x * x + y * y)));
+  return vec2(atan(y, x), atan(z, sqrt(x * x + y * y)));
 }
 
 void main(void) {
