@@ -114,5 +114,5 @@ The elevation of each cell in meters.
 
 ## Source
 
-[modules/layers/src/grid-cell-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/grid-cell-layer)
+[modules/layers/src/grid-cell-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer/grid-cell-layer.js)
 

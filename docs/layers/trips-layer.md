@@ -4,7 +4,7 @@ This layer renders animated paths that represent vehicle trips.
 
     import TripsLayer from './trips-layer';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ##### `getPath` (Function, optional)
 
@@ -34,3 +34,8 @@ This value is used with the timestamps from `getPath` to determine where the veh
 - Default: `120`
 
 How long it takes for a path to completely fade out.
+
+
+# Source
+
+[modules/geo-layers/src/trips-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/trips-layer)

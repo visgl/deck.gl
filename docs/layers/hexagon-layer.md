@@ -242,4 +242,4 @@ The HexagonLayer renders the following sublayers:
 
 ## Source
 
-[modules/layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/hexagon-layer)
+[modules/aggregation-layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/hexagon-layer)

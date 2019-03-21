@@ -141,4 +141,4 @@ Notes:
 
 ## Source
 
-[modules/core/src/core/lib/attribute-manager.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/attribute-manager.js)
+[modules/core/src/lib/attribute-manager.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/attribute-manager.js)

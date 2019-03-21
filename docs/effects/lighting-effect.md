@@ -101,7 +101,7 @@ Array of point light source which emits from a point in all directions.
 
 * Only one ambient light is supported.
 * Point light position uses the same coordinate system as view state.
-* To enable lighting on a layer, it is required that both the [effects prop of Deck](/docs/api-reference/deck.md?section=effects) and the material prop of the layer are specified. Refer to each layer's documentation to see if the lighting effect is supported.
+* To enable lighting on a layer, it is required that both the [effects prop of Deck](/docs/api-reference/deck.md#effects) and the material prop of the layer are specified. Refer to each layer's documentation to see if the lighting effect is supported.
     * [GeoJsonLayer](/docs/layers/geojson-layer.md)
     * [HexagonLayer](/docs/layers/hexagon-layer.md)
     * [ColumnLayer](/docs/layers/column-layer.md)
