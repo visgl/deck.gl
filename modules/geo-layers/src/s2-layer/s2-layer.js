@@ -33,15 +33,68 @@ const defaultProps = Object.assign(
 export default class S2Layer extends CompositeLayer {
   renderLayers() {
     // Layer prop
-    const {data, getS2Token, updateTriggers} = this.props;
+    const {data, getS2Token} = this.props;
+
+    // Rendering props underlying layer
+    const {
+      elevationScale,
+      extruded,
+      wireframe,
+      filled,
+      stroked,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      lineJointRounded,
+      lineMiterLimit,
+      lineDashJustified,
+      fp64,
+      getElevation,
+      getFillColor,
+      getLineColor,
+      getLineWidth,
+      getLineDashArray
+    } = this.props;
+
+    // Accessor props for underlying layers
+    const {updateTriggers, material} = this.props;
 
     // Filled Polygon Layer
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
     return new CellLayer(
-      this.props,
+      {
+        fp64,
+        filled,
+        wireframe,
+
+        extruded,
+        elevationScale,
+
+        stroked,
+        lineWidthScale,
+        lineWidthMinPixels,
+        lineWidthMaxPixels,
+        lineJointRounded,
+        lineMiterLimit,
+        lineDashJustified,
+
+        material,
+
+        getElevation,
+        getFillColor,
+        getLineColor,
+        getLineWidth,
+        getLineDashArray
+      },
       this.getSubLayerProps({
         id: 'cell',
-        updateTriggers
+        updateTriggers: {
+          getElevation: updateTriggers.getElevation,
+          getFillColor: updateTriggers.getFillColor,
+          getLineColor: updateTriggers.getLineColor,
+          getLineWidth: updateTriggers.getLineWidth,
+          getLineDashArray: updateTriggers.getLineDashArray
+        }
       }),
       {
         data,
