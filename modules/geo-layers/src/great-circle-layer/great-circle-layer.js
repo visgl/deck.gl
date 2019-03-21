@@ -30,3 +30,5 @@ export default class GreatCircleLayer extends ArcLayer {
     return shaders;
   }
 }
+
+GreatCircleLayer.layerName = 'GreatCircleLayer';
