@@ -1,9 +1,15 @@
+<p class="badges">
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+</p>
+
 # BitmapLayer
 
 The BitmapLayer renders a bitmap at specified boundaries.
 
 ```js
-import {BitmapLayer} from '@deck.gl/experimental-layers';
+import DeckGL from '@deck.gl/react';
+import {BitmapLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -24,6 +30,36 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 }
 ```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {BitmapLayer} from '@deck.gl/layers';
+new BitmapLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.BitmapLayer({});
+```
+
 
 ## Properties
 
