@@ -29,6 +29,12 @@ const {fp64LowPart} = fp64;
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
+const DEFAULT_TEXTURE_PARAMETERS = {
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  // GL.LINEAR is the default value but explicitly set it here
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+};
+
 const defaultProps = {
   image: null,
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
@@ -192,7 +198,12 @@ export default class BitmapLayer extends Layer {
 
     if (typeof image === 'string') {
       loadImage(image).then(data => {
-        this.setState({bitmapTexture: new Texture2D(gl, {data})});
+        this.setState({
+          bitmapTexture: new Texture2D(gl, {
+            data,
+            parameters: DEFAULT_TEXTURE_PARAMETERS
+          })
+        });
       });
     } else if (image instanceof Texture2D) {
       this.setState({bitmapTexture: image});
@@ -201,7 +212,12 @@ export default class BitmapLayer extends Layer {
       image instanceof Image ||
       image instanceof HTMLCanvasElement
     ) {
-      this.setState({bitmapTexture: new Texture2D(gl, {data: image})});
+      this.setState({
+        bitmapTexture: new Texture2D(gl, {
+          data: image,
+          parameters: DEFAULT_TEXTURE_PARAMETERS
+        })
+      });
     }
   }
 

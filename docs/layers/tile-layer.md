@@ -104,7 +104,10 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 ##### `renderSubLayers` (Function, optional))
 
-Renders one or an array of Layer instances with `data` resolved from `getTileData` and other `TileLayer` props.
+Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
+
+* `data`: Resolved from `getTileData`
+* `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile. `bbox` is an object of `{west, north, east, south}`.
 
 - Default: `props => new GeoJsonLayer(props)`
 
