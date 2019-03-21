@@ -3,7 +3,7 @@ import {PolygonLayer} from '@deck.gl/layers';
 
 const defaultProps = Object.assign(
   {
-    h3: {type: 'object', value: {}},
+    h3: {},
     getHexagons: {type: 'accessor', value: d => d.hexagons}
   },
   PolygonLayer.defaultProps

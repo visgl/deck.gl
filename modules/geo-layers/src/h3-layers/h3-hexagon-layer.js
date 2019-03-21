@@ -8,7 +8,7 @@ function getHexagonCentroid(getHexagon, h3ToGeo, object, objectInfo) {
 }
 
 const defaultProps = {
-  h3: {type: 'object', value: {}},
+  h3: {},
   getHexagon: {type: 'accessor', value: x => x.hexagon}
 };
 
