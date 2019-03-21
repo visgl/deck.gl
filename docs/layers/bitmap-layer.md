@@ -62,3 +62,7 @@ The color to use for transparent pixels, in `[r, g, b, a]`. Each component is in
 
 The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 255]` range.
 
+
+## Source
+
+[modules/layers/src/bitmap-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/bitmap-layer)

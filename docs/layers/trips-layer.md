@@ -34,3 +34,8 @@ This value is used with the timestamps from `getPath` to determine where the veh
 - Default: `120`
 
 How long it takes for a path to completely fade out.
+
+
+# Source
+
+[modules/geo-layers/src/trips-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/trips-layer)
