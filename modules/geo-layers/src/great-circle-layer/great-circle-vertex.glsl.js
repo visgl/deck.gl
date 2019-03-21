@@ -32,18 +32,22 @@ attribute float instanceWidths;
 uniform float numSegments;
 uniform float opacity;
 uniform float widthScale;
+uniform float widthMinPixels;
+uniform float widthMaxPixels;
 
 varying vec4 vColor;
 
 // offset vector by strokeWidth pixels
 // offset_direction is -1 (left) or 1 (right)
-vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction) {
+vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width) {
   // normalized direction of the line
   vec2 dir_screenspace = normalize(line_clipspace * project_uViewportSize);
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
-  vec2 offset_screenspace = dir_screenspace * offset_direction * instanceWidths * widthScale / 2.0;
+
+  vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
   vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
+
   return offset_clipspace;
 }
 
@@ -54,11 +58,12 @@ float getSegmentRatio(float index) {
 // get angular distance in radian
 float getAngularDist (vec2 source, vec2 target) {
   vec2 delta = source - target;
+  vec2 sin_half_delta = sin(delta / 2.0);
   float a =
-    sin(delta.y / 2.0) * sin(delta.y / 2.0) +
+    sin_half_delta.y * sin_half_delta.y +
     cos(source.y) * cos(target.y) *
-    sin(delta.x / 2.0) * sin(delta.x / 2.0);
-	return 2.0 * atan(sqrt(a), sqrt(1.0 - a));
+    sin_half_delta.x * sin_half_delta.x;
+  return 2.0 * atan(sqrt(a), sqrt(1.0 - a));
 }
 
 vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
@@ -69,9 +74,14 @@ vec2 interpolate (vec2 source, vec2 target, float angularDist, float t) {
 
 	float a = sin((1.0 - t) * angularDist) / sin(angularDist);
 	float b = sin(t * angularDist) / sin(angularDist);
-	float x = a * cos(source.y) * cos(source.x) + b * cos(target.y) * cos(target.x);
-	float y = a * cos(source.y) * sin(source.x) + b * cos(target.y) * sin(target.x);
-	float z = a * sin(source.y) + b * sin(target.y);
+  vec2 sin_source = sin(source);
+  vec2 cos_source = cos(source);
+  vec2 sin_target = sin(target);
+  vec2 cos_target = cos(target);
+
+  float x = a * cos_source.y * cos_source.x + b * cos_target.y * cos_target.x;
+  float y = a * cos_source.y * sin_source.x + b * cos_target.y * sin_target.x;
+  float z = a * sin_source.y + b * sin_target.y;
 	return vec2(atan(y, x), atan(z, sqrt(x * x + y * y)));
 }
 
@@ -98,9 +108,17 @@ void main(void) {
   vec4 curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0));
   vec4 next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
 
+  // Multiply out width and clamp to limits
+  // mercator pixels are interpreted as screen pixels
+  float width = clamp(
+    project_scale(instanceWidths * widthScale),
+    widthMinPixels, widthMaxPixels
+  );
+
   // extrude
-  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y);
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, width);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
+
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.0;
   vColor = vec4(color.rgb, color.a * opacity);
   
