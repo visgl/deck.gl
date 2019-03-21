@@ -157,4 +157,4 @@ Additionally, event objects for different event types contain a subset of the fo
 
 ## Source
 
-[modules/core/src/core/controllers/controller.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/controllers/controller.js)
+[modules/core/src/controllers/controller.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/controllers/controller.js)

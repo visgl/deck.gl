@@ -38,4 +38,4 @@ Inherits all [View methods](/docs/api-reference/view.md#methods).
 
 ## Source
 
-[modules/core/src/core/views/perspective-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/perspective-view.js)
+[modules/core/src/views/perspective-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/perspective-view.js)
