@@ -18,15 +18,42 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './bitmap-layer.spec';
-import './path-tesselator.spec';
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-import './simple-mesh-layer.spec';
-import './path-layer/path-layer-vertex.spec';
-import './icon-manager.spec';
-import './text-layer/font-atlas-utils.spec';
-import './text-layer/lru-cache.spec';
+import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+
+import {SimpleMeshLayer} from 'deck.gl';
+import {CylinderGeometry} from 'luma.gl';
+
+import * as FIXTURES from 'deck.gl-test/data';
+
+test('SimpleMeshLayer#tests', t => {
+  const testCases = generateLayerTests({
+    Layer: SimpleMeshLayer,
+    sampleProps: {
+      data: FIXTURES.points,
+      getPosition: d => d.COORDINATES,
+      mesh: new CylinderGeometry({
+        radius: 1,
+        topRadius: 1,
+        bottomRadius: 1,
+        topCap: true,
+        bottomCap: true,
+        height: 5,
+        nradial: 20,
+        nvertical: 1
+      })
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      if (layer.props.mesh) {
+        t.ok(layer.getModels().length > 0, 'Layer should have models');
+      }
+    },
+    runDefaultAsserts: false
+  });
+
+  testLayer({Layer: SimpleMeshLayer, testCases, onError: t.notOk});
+
+  t.end();
+});

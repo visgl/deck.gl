@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/core';
@@ -246,8 +246,10 @@ export default class SimpleMeshLayer extends Layer {
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const object of data) {
-      const position = getPosition(object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const position = getPosition(object, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }

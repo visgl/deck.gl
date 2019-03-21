@@ -1,3 +1,5 @@
+import {createIterable} from '@deck.gl/core';
+
 /* eslint-disable max-statements, complexity */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(16);
@@ -92,11 +94,15 @@ function calculateModelMatrices(layer, attribute) {
     shaderAttributes.instanceTranslation.value = valueTranslation;
   } else {
     let i = 0;
-    for (const object of data) {
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
       let matrix;
 
       if (hasMatrix) {
-        modelMatrix.set(constantMatrix ? getTransformMatrix : getTransformMatrix(object));
+        modelMatrix.set(
+          constantMatrix ? getTransformMatrix : getTransformMatrix(object, objectInfo)
+        );
         modelTranslation[0] = modelMatrix[12];
         modelTranslation[1] = modelMatrix[13];
         modelTranslation[2] = modelMatrix[14];
@@ -104,11 +110,15 @@ function calculateModelMatrices(layer, attribute) {
       } else {
         matrix = linearTransform;
 
-        const orientation = constantOrientation ? getOrientation : getOrientation(object);
-        const scale = constantScale ? getScale : getScale(object);
+        const orientation = constantOrientation
+          ? getOrientation
+          : getOrientation(object, objectInfo);
+        const scale = constantScale ? getScale : getScale(object, objectInfo);
 
         calculateTransformMatrix(matrix, orientation, scale);
-        modelTranslation.set(constantTranslation ? getTranslation : getTranslation(object));
+        modelTranslation.set(
+          constantTranslation ? getTranslation : getTranslation(object, objectInfo)
+        );
       }
 
       instanceModelMatrixData[i++] = matrix[0];
