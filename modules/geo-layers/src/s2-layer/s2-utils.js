@@ -24,11 +24,12 @@ function getLevelFromToken(token) {
  * */
 function getIdFromToken(token) {
   // pad token with zeros to make the length 16
-  const paddedToken = token.padEnd(16, '0')
+  const paddedToken = token.padEnd(16, '0');
   return String(parseInt(paddedToken, 16));
 }
 
 const RADIAN_TO_DEGREE = 180 / Math.PI;
+const MAX_RESOLUTION = 100;
 
 /* Modified from s2-geometry's S2.XYZToLatLng */
 function XYZToLngLat([x, y, z]) {
@@ -40,15 +41,14 @@ function XYZToLngLat([x, y, z]) {
 
 function getGeoBounds({face, ij, level}) {
   const result = [];
-  const offsets = [
-    [0, 0],
-    [0, 1],
-    [1, 1],
-    [1, 0],
-    [0, 0]
-  ];
+  const offsets = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
 
-  const resolution = Math.max(1, 100 * Math.pow(2, -level));
+  // The S2 cell edge is curved: http://s2geometry.io/
+  // This is more prominent at lower levels
+  // resolution is the number of segments to generate per edge.
+  // We exponentially reduce resolution as level increases so it doesn't affect perf
+  // when there are a large number of cells
+  const resolution = Math.max(1, MAX_RESOLUTION * Math.pow(2, -level));
 
   for (let i = 0; i < 4; i++) {
     const offset = offsets[i].slice(0);
