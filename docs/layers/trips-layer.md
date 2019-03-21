@@ -4,7 +4,7 @@ This layer renders animated paths that represent vehicle trips.
 
     import TripsLayer from './trips-layer';
 
-Inherits from all [Base Layer](/docs/layers/base-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ##### `getPath` (Function, optional)
 

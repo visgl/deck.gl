@@ -1,6 +1,6 @@
 # LayerManager Class (Internal)
 
-> The `LayerManager` class is an internal class that apps normally would not want to use. It was initially exposed primarily to enable deck.gl to be used without React, however as of deck.gl v5.0 you are more likely to want to use the new `Deck` class (or the [`DeckGL`](/docs/api-reference/deckgl.md) React Component). Those classes create a `LayerManager` under the hood to handle layer management, and you do not need to use this class directly.
+> The `LayerManager` class is an internal class that apps normally would not want to use. It was initially exposed primarily to enable deck.gl to be used without React, however as of deck.gl v5.0 you are more likely to want to use the new `Deck` class (or the [`DeckGL`](/docs/api-reference/react/deckgl.md) React Component). Those classes create a `LayerManager` under the hood to handle layer management, and you do not need to use this class directly.
 
 The `LayerManager` class handles updates, drawing and picking for a set of layers.
 

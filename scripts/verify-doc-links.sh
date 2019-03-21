@@ -50,4 +50,9 @@ for f in ${FILES[@]};
     echo
 done
 
-exit ${#BAD_LINKS[@]}
+if [ -z "${BAD_LINKS}" ]; then
+  echo -e "\033[92mAll links ok\033[0m $1"
+else
+  echo -e "\033[91mFound ${#BAD_LINKS[@]} bad links!\033[0m $1"
+  exit 1
+fi
