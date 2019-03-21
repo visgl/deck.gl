@@ -10,7 +10,7 @@
 
 ## Using probe.gl BrowserTestDriver
 
-Helper class primarily intended for automating browser tests from Node.js shell scripts. A `RenderTestDriver` starts a Chrome browser instance and a server and opens a page with a URL that loads a script from the server. The script that runs in the browser is expected to be using the [`RenderTest`](/docs/api-reference/test-utils/render-test.md) class.
+Helper class primarily intended for automating browser tests from Node.js shell scripts. A `BrowserTestDriver` starts a Chrome browser instance and a server and opens a page with a URL that loads a script from the server. The script that runs in the browser is expected to be using the [`SnapshotTestRunner`](/docs/api-reference/test-utils/snapshot-test-runner.md) class.
 
 For details on how the automation works, see the [probe.gl](https://uber-web.github.io/probe.gl/#/documentation) [`BrowserDriver`](https://uber-web.github.io/probe.gl/#/documentation/api-reference-testing/browserdriver) class.
 

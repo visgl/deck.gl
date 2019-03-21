@@ -82,5 +82,5 @@ Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details
 
 ## Source
 
-[modules/s2-layers/src/s2-layer](https://github.com/uber/deck.gl/tree/master/modules/s2-layers/src/s2-layer)
+[modules/geo-layers/src/s2-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/s2-layer)
 
