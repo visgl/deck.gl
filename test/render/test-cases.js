@@ -1066,11 +1066,10 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0]},
-          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
           {threshold: 15, color: [0, 0, 255]}
         ],
-        strokeWidth: 3,
         gpuAggregation: false
       })
     ],
@@ -1093,11 +1092,10 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0]},
-          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
           {threshold: 15, color: [0, 0, 255]}
         ],
-        strokeWidth: 3,
         gpuAggregation: true
       })
     ],
@@ -1120,11 +1118,10 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: [1, 5], color: [255, 0, 0]},
-          {threshold: [5, 15], color: [0, 255, 0]},
+          {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
+          {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},
           {threshold: [15, 1000], color: [0, 0, 255]}
         ],
-        strokeWidth: 3,
         gpuAggregation: true
       })
     ],

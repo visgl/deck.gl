@@ -60,6 +60,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 A global radius multiplier for all points.
 
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
 ##### `lineWidthScale` (Number, optional)
 
 * Default: `1`
@@ -161,7 +167,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * Default: `1`
 
-The width of the outline of each object, in meters.
+The width of the outline of each object, in units specified by `lineWidthUnits` (default meters).
 
 * If a number is provided, it is used as the outline width for all objects.
 * If a function is provided, it is called on each object to retrieve its outline width.

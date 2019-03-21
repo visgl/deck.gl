@@ -49,6 +49,7 @@ export default class S2Layer extends CompositeLayer {
       wireframe,
       filled,
       stroked,
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -78,6 +79,7 @@ export default class S2Layer extends CompositeLayer {
         elevationScale,
 
         stroked,
+        lineWidthUnits,
         lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels,

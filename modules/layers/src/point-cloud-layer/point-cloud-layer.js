@@ -31,14 +31,18 @@ const DEFAULT_NORMAL = [0, 0, 1];
 const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
-  radiusPixels: {type: 'number', min: 0, value: 10}, //  point radius in pixels
+  sizeUnits: 'pixels',
+  pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
   fp64: false,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
-  material: defaultMaterial
+  material: defaultMaterial,
+
+  // Depreated
+  radiusPixels: {deprecatedFor: 'pointSize'}
 };
 
 export default class PointCloudLayer extends Layer {
@@ -90,10 +94,14 @@ export default class PointCloudLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {radiusPixels} = this.props;
+    const {viewport} = this.context;
+    const {pointSize, sizeUnits} = this.props;
+
+    const sizeMultiplier = sizeUnits === 'meters' ? viewport.distanceScales.pixelsPerMeter[2] : 1;
+
     this.state.model.render(
       Object.assign({}, uniforms, {
-        radiusPixels
+        radiusPixels: pointSize * sizeMultiplier
       })
     );
   }
