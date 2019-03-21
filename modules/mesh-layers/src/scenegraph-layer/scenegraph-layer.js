@@ -88,13 +88,11 @@ const defaultProps = {
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
   // [pitch, yaw, roll]
-  getOrientation: {
-    type: 'accessor',
-    value: x => x.orientation || [x.pitch || 0, x.yaw || x.angle || 0, x.roll || 0]
-  },
-  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: x => x.scale || [0, 0, 0]},
-  getTransformMatrix: {type: 'accessor', value: x => x.transformMatrix || null}
+  getOrientation: {type: 'accessor', value: [0, 0, 0]},
+  getScale: {type: 'accessor', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  // 3x3 matrix
+  getTransformMatrix: {type: 'accessor', value: null}
 };
 
 export default class ScenegraphLayer extends Layer {

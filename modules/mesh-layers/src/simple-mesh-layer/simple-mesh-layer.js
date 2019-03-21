@@ -118,7 +118,7 @@ const defaultProps = {
   getScale: {type: 'accessor', value: [1, 1, 1]},
   getTranslation: {type: 'accessor', value: [0, 0, 0]},
   // 3x3 matrix
-  getTransformMatrix: {type: 'accessor', value: [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]}
+  getTransformMatrix: {type: 'accessor', value: null}
 };
 
 export default class SimpleMeshLayer extends Layer {
