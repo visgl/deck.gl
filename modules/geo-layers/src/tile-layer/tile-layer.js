@@ -84,7 +84,6 @@ export default class TileLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    // eslint-disable-next-line no-unused-vars
     const {renderSubLayers, visible} = this.props;
     const z = this.getLayerZoomLevel();
     return this.state.tiles.map(tile => {
