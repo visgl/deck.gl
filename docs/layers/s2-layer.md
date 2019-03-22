@@ -79,6 +79,7 @@ new S2Layer({});
 To use pre-bundled scripts:
 
 ```html
+<script src="https://unpkg.com/s2-geometry"></script>
 <script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>

@@ -41,8 +41,8 @@ Default: `window.mapboxgl`
 The scripting API offers out-of-the-box integration with Mapbox. To add a base map to your visualization, you need to include the Mapbox library and stylesheet:
 
 ```html
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
 ```
 
 To disable the base map, simply exclude the mapbox script or set `map` to false.

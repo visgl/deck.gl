@@ -14,7 +14,7 @@ if (!MAPBOX_TOKEN) {
 
 const LOCAL_BUNDLE = path.resolve(
   __dirname,
-  '../../../node_modules/@deck.gl/lite/dist/deckgl.min.js'
+  '../../../node_modules/deck.gl/dist.min.js'
 );
 
 module.exports = {

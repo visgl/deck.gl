@@ -22,7 +22,7 @@ let bundleUrl = null;
 if (ARGS.version === 'local') {
   bundleUrl = `http://localhost:${PORT}/deckgl.min.js`;
 } else if (ARGS.version) {
-  bundleUrl = `https://unpkg.com/deck.gl@${ARGS.version}/deckgl.min.js`;
+  bundleUrl = `https://unpkg.com/deck.gl@${ARGS.version}/dist.min.js`;
 }
 
 function getAllMetadata() {
