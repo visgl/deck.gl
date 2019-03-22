@@ -54,10 +54,11 @@ void main(void) {
   vec2 iconSize = instanceIconFrames.zw;
   // convert size in meters to pixels, then scaled and clamp
   
-  float sizeScalePixels = instanceSizes * sizeScale;
-  
-  sizeScalePixels = clamp(sizeScalePixels, sizeMinPixels, sizeMaxPixels);
-  
+  float sizeScalePixels = clamp(
+    project_scale(instanceSizes * sizeScale), 
+    sizeMinPixels, sizeMaxPixels
+  );
+
   // scale icon height to match instanceSize
   float instanceScale = iconSize.y == 0.0 ? 0.0 : sizeScalePixels / iconSize.y;
 

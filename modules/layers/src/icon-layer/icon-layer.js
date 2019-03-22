@@ -185,7 +185,7 @@ export default class IconLayer extends Layer {
           iconsTexture,
           iconsTextureDim: [iconsTexture.width, iconsTexture.height],
           sizeScale:
-            sizeScale * (sizeUnits === 'meters' ? viewport.distanceScales.pixelsPerMeter[2] : 1),
+            sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
           sizeMinPixels,
           sizeMaxPixels
         })

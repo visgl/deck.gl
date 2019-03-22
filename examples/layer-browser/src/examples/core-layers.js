@@ -63,14 +63,11 @@ const IconLayerExample = {
   props: {
     iconAtlas: 'data/icon-atlas.png',
     iconMapping: dataSamples.iconAtlas,
+    sizeScale: 24,
     getPosition: d => d.COORDINATES,
     getColor: d => [64, 64, 72],
     getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
     getSize: d => (d.RACKS > 2 ? 2 : 1),
-    sizeMinPixels: 1,
-    sizeMaxPixels: 2048,
-    sizeScale: 480,
-    sizeUnits: 'meters',
     opacity: 0.8,
     pickable: true
   }
@@ -103,7 +100,9 @@ const IconLayerAutoPackingExample = {
         mask: false
       };
     },
-    getSize: d => (d.RACKS > 2 ? 2 : 1),
+    getSize: d => {
+      return d.RACKS > 2 ? 2 : 1;
+    },
     opacity: 0.8,
     pickable: true
   }
@@ -487,15 +486,12 @@ const TextLayerExample = {
   },
   props: {
     id: 'textgetAnchorX-layer',
-    sizeScale: 20,
+    sizeScale: 1,
     fontFamily: 'Monaco',
     fontSettings: {},
     autoHighlight: true,
     pickable: true,
     highlightColor: [0, 0, 128, 128],
-    sizeUnits: 'meters',
-    sizeMinPixels: 1,
-    sizeMaxPixels: 2048,
     getText: x => x.LOCATION_NAME,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],

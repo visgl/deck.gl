@@ -551,10 +551,8 @@ export const TEST_CASES = [
     renderingTimes: 2,
     layers: [
       new IconLayer({
-        id: 'icon-lnglat-64',
+        id: 'icon-lnglat-auto',
         data: dataSamples.points,
-        iconAtlas: ICON_ATLAS,
-        iconMapping: dataSamples.iconAtlas,
         sizeScale: 12,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
@@ -590,14 +588,12 @@ export const TEST_CASES = [
     renderingTimes: 2,
     layers: [
       new IconLayer({
-        id: 'icon-lnglat',
+        id: 'icon-meters',
         data: dataSamples.points,
         iconAtlas: ICON_ATLAS,
         iconMapping: dataSamples.iconAtlas,
         sizeScale: 256,
         sizeUnits: 'meters',
-        sizeMinPixels: 1,
-        sizeMaxPixels: 2048,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
