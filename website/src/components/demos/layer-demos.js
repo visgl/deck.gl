@@ -1,3 +1,6 @@
+/* global fetch */
+import {VectorTile} from '@mapbox/vector-tile';
+import Protobuf from 'pbf';
 import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
@@ -14,7 +17,8 @@ import {
   HexagonLayer,
   PolygonLayer,
   GeoJsonLayer,
-  PointCloudLayer
+  PointCloudLayer,
+  TileLayer
 } from 'deck.gl';
 import ContourLayer from '@deck.gl/aggregation-layers/contour-layer/contour-layer';
 
@@ -211,6 +215,53 @@ export const TextLayerDemo = createLayerDemoClass({
     getAngle: 0,
     getTextAnchor: 'middle',
     getAlignmentBaseline: 'center'
+  }
+});
+
+export const TileLayerDemo = createLayerDemoClass({
+  Layer: TileLayer,
+  formatTooltip: f => JSON.stringify(f.properties),
+  allowMissingData: true,
+  props: {
+    stroked: false,
+    opacity: 1,
+
+    getLineColor: [192, 192, 192],
+    getFillColor: [140, 170, 180],
+
+    getLineWidth: f => {
+      if (f.properties.layer === 'transportation') {
+        switch (f.properties.class) {
+          case 'primary':
+            return 12;
+          case 'motorway':
+            return 16;
+          default:
+            return 6;
+        }
+      }
+      return 1;
+    },
+    lineWidthMinPixels: 1,
+
+    getTileData: ({x, y, z}) => {
+      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MapboxAccessToken}`;
+      return fetch(mapSource)
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          const tile = new VectorTile(new Protobuf(buffer));
+          const features = [];
+          for (const layerName in tile.layers) {
+            const vectorTileLayer = tile.layers[layerName];
+            for (let i = 0; i < vectorTileLayer.length; i++) {
+              const vectorTileFeature = vectorTileLayer.feature(i);
+              const feature = vectorTileFeature.toGeoJSON(x, y, z);
+              features.push(feature);
+            }
+          }
+          return features;
+        });
+    }
   }
 });
 
