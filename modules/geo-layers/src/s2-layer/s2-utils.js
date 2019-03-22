@@ -31,7 +31,7 @@ function getIdFromToken(token) {
 const RADIAN_TO_DEGREE = 180 / Math.PI;
 const MAX_RESOLUTION = 100;
 
-/* Modified from s2-geometry's S2.XYZToLatLng */
+/* Adapted from s2-geometry's S2.XYZToLatLng */
 function XYZToLngLat([x, y, z]) {
   const lat = Math.atan2(z, Math.sqrt(x * x + y * y));
   const lng = Math.atan2(y, x);
@@ -39,6 +39,7 @@ function XYZToLngLat([x, y, z]) {
   return [lng * RADIAN_TO_DEGREE, lat * RADIAN_TO_DEGREE];
 }
 
+/* Adapted from s2-geometry's S2Cell.getCornerLatLngs */
 function getGeoBounds({face, ij, level}) {
   const result = [];
   const offsets = [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]];
@@ -59,6 +60,8 @@ function getGeoBounds({face, ij, level}) {
     for (let j = 0; j < resolution; j++) {
       offset[0] += stepI;
       offset[1] += stepJ;
+      // Cell can be represented by coordinates IJ, ST, UV, XYZ
+      // http://s2geometry.io/devguide/s2cell_hierarchy#coordinate-systems
       const st = S2.IJToST(ij, level, offset);
       const uv = S2.STToUV(st);
       const xyz = S2.FaceUVToXYZ(face, uv);
