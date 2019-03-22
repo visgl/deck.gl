@@ -8,9 +8,12 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-const defaultProps = {
-  getHexagon: {type: 'accessor', value: x => x.hexagon}
-};
+const defaultProps = Object.assign(
+  {
+    getHexagon: {type: 'accessor', value: x => x.hexagon}
+  },
+  ColumnLayer.defaultProps
+);
 
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
@@ -75,12 +78,33 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, getHexagon, updateTriggers} = this.props;
+    const {
+      data,
+      getHexagon,
+      updateTriggers,
+
+      coverage,
+      elevationScale,
+      extruded,
+      fp64,
+
+      getColor,
+      getElevation,
+      material
+    } = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
 
     return new SubLayerClass(
-      this.props,
+      {
+        coverage,
+        elevationScale,
+        extruded,
+        fp64,
+        getColor,
+        getElevation,
+        material
+      },
       this.getSubLayerProps({
         id: 'hexagon-cell',
         updateTriggers
