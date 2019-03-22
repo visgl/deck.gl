@@ -15,7 +15,11 @@ const PACKAGE_INFO = require(resolve(PACKAGE_ROOT, 'package.json'));
  * e.g. @deck.gl/core is not bundled with @deck.gl/geo-layers
  */
 function getExternals(packageInfo) {
-  let externals = {};
+  let externals = {
+    // Hard coded externals
+    'h3-js': 'H3',
+    's2-geometry': 'S2'
+  };
   const {peerDependencies = {}} = packageInfo;
 
   for (const depName in peerDependencies) {

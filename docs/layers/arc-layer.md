@@ -35,7 +35,7 @@ const App = ({data, viewport}) => {
     id: 'arc-layer',
     data,
     pickable: true,
-    getStrokeWidth: 12,
+    getWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -64,23 +64,30 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `widthScale` (number, optional)
+##### `widthUnits` (String, optional)
 
-* Default: 1
+* Default: `'pixels'`
 
-The scaling factor for the width of each arc.
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `widthScale` (Number, optional)
+
+* Default: `1`
+
+The scaling multiplier for the width of each line. This prop is a very efficient way to change the width of all objects, comparing to recalculating the width for each object with `getWidth`.
 
 ##### `widthMinPixels` (Number, optional)
 
-* Default: 1
+* Default: `1`
 
-The minimum stroke width in pixels.
+The minimum line width in pixels. This prop can be used to prevent the line from getting too thin when zoomed out.
 
 ##### `widthMaxPixels` (Number, optional)
 
-* Default: Number.MAX_SAFE_INTEGER
+* Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum stroke width in pixels.
+The maximum line width in pixels. This prop can be used to prevent the line from getting too thick when zoomed in.
+
 
 ### Data Accessors
 
@@ -118,10 +125,10 @@ The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 
 
 * Default: `1`
 
-The stroke width of each object, in meters.
+The line width of each object, in units specified by `widthUnits` (default pixels).
 
-* If a number is provided, it is used as the stroke width for all objects.
-* If a function is provided, it is called on each object to retrieve its stroke width.
+* If a number is provided, it is used as the line width for all objects.
+* If a function is provided, it is called on each object to retrieve its line width.
 
 ##### `getHeight` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -138,4 +145,4 @@ In degrees, can be positive or negative (`-90 to +90`).
 
 ## Source
 
-[/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer)
+[modules/layers/src/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer)

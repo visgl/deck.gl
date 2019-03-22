@@ -1,6 +1,6 @@
 # DeckGL (Scripting Interface)
 
-`DeckGL` extends the core [Deck](/docs/api-reference/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://www.obervablehq.com). 
+`DeckGL` extends the core [Deck](/docs/api-reference/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://obervablehq.com). 
 
 Make sure to read the [Using deck.gl Scripting API](/docs/get-started/using-standalone.md) article.
 
@@ -82,4 +82,4 @@ Returns the mapbox-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instan
 
 ## Source
 
-[modules/lite/src/deckgl.js](https://github.com/uber/deck.gl/blob/master/modules/lite/src/deckgl.js)
+[modules/main/bundle.js](https://github.com/uber/deck.gl/blob/master/modules/main/bundle.js)

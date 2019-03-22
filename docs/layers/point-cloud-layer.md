@@ -49,11 +49,17 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-##### `radiusPixels` (Number, optional)
+##### `sizeUnits` (String, optional)
+
+* Default: `'pixels'`
+
+The units of the point size, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `pointSize` (Number, optional)
 
 * Default: `10`
 
-Global radius of all points.
+Global radius of all points, in units specified by `sizeUnits` (default pixels).
 
 ##### `fp64` (Boolean, optional)
 

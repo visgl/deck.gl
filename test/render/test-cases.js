@@ -551,10 +551,8 @@ export const TEST_CASES = [
     renderingTimes: 2,
     layers: [
       new IconLayer({
-        id: 'icon-lnglat-64',
+        id: 'icon-lnglat-auto',
         data: dataSamples.points,
-        iconAtlas: ICON_ATLAS,
-        iconMapping: dataSamples.iconAtlas,
         sizeScale: 12,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
@@ -575,6 +573,40 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
+    name: 'icon-meters',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-meters',
+        data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        iconMapping: dataSamples.iconAtlas,
+        sizeScale: 256,
+        sizeUnits: 'meters',
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
@@ -1004,6 +1036,34 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
+    name: 'text-layer-meters',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
+        getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 21,
+        sizeUnits: 'meters',
+        getTextAnchor: x => 'start',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer.png'
+  },
+  {
     name: 'gpu-grid-lnglat',
     viewState: {
       latitude: 37.751537058389985,
@@ -1066,11 +1126,10 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0]},
-          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
           {threshold: 15, color: [0, 0, 255]}
         ],
-        strokeWidth: 3,
         gpuAggregation: false
       })
     ],
@@ -1093,11 +1152,10 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: 1, color: [255, 0, 0]},
-          {threshold: 5, color: [0, 255, 0]},
+          {threshold: 1, color: [255, 0, 0], strokeWidth: 6},
+          {threshold: 5, color: [0, 255, 0], strokeWidth: 3},
           {threshold: 15, color: [0, 0, 255]}
         ],
-        strokeWidth: 3,
         gpuAggregation: true
       })
     ],
@@ -1120,11 +1178,10 @@ export const TEST_CASES = [
         opacity: 1,
         getPosition: d => d.COORDINATES,
         contours: [
-          {threshold: [1, 5], color: [255, 0, 0]},
-          {threshold: [5, 15], color: [0, 255, 0]},
+          {threshold: [1, 5], color: [255, 0, 0], strokeWidth: 6},
+          {threshold: [5, 15], color: [0, 255, 0], strokeWidth: 3},
           {threshold: [15, 1000], color: [0, 0, 255]}
         ],
-        strokeWidth: 3,
         gpuAggregation: true
       })
     ],

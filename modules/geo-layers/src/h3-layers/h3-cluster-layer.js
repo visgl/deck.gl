@@ -51,6 +51,20 @@ export default class H3ClusterLayer extends CompositeLayer {
 
   renderLayers() {
     const {
+      elevationScale,
+      extruded,
+      wireframe,
+      filled,
+      stroked,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      lineJointRounded,
+      lineMiterLimit,
+      lineDashJustified,
+      fp64,
+      material,
+
       getFillColor,
       getLineColor,
       getLineWidth,
@@ -62,8 +76,24 @@ export default class H3ClusterLayer extends CompositeLayer {
     const SubLayerClass = this.getSubLayerClass('cluster-region', PolygonLayer);
 
     return new SubLayerClass(
-      this.props,
       {
+        fp64,
+        filled,
+        wireframe,
+
+        extruded,
+        elevationScale,
+
+        stroked,
+        lineWidthScale,
+        lineWidthMinPixels,
+        lineWidthMaxPixels,
+        lineJointRounded,
+        lineMiterLimit,
+        lineDashJustified,
+
+        material,
+
         getFillColor: this.getSubLayerAccessor(getFillColor),
         getLineColor: this.getSubLayerAccessor(getLineColor),
         getLineWidth: this.getSubLayerAccessor(getLineWidth),

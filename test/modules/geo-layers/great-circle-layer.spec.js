@@ -18,27 +18,25 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
-#define SHADER_NAME trips-layer-vertex-shader
+import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {GreatCircleLayer} from '@deck.gl/geo-layers';
 
-attribute vec3 positions;
-attribute vec3 colors;
+import * as FIXTURES from 'deck.gl-test/data';
 
-uniform float opacity;
-uniform float currentTime;
-uniform float trailLength;
+test('GreatCircleLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: GreatCircleLayer,
+    sampleProps: {
+      data: FIXTURES.routes,
+      getSourcePosition: d => d.START,
+      getTargetPosition: d => d.END
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
 
-varying float vTime;
-varying vec4 vColor;
+  testLayer({Layer: GreatCircleLayer, testCases, onError: t.notOk});
 
-void main(void) {
-  vec2 p = project_position(positions.xy);
-  // the magic de-flickering factor
-  vec4 shift = vec4(0., 0., mod(positions.z, trailLength) * 1e-4, 0.);
-
-  gl_Position = project_to_clipspace(vec4(p, 1., 1.)) + shift;
-
-  vColor = vec4(colors / 255.0, opacity);
-  vTime = 1.0 - (currentTime - positions.z) / trailLength;
-}
-`;
+  t.end();
+});

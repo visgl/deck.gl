@@ -42,4 +42,5 @@ test('Top-level imports', t => {
 import './tile-layer/tile-cache.spec';
 import './tile-layer/tile-layer.spec';
 import './s2-layer.spec';
+import './great-circle-layer.spec';
 import './h3-layers.spec';

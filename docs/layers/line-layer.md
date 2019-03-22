@@ -57,13 +57,38 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-The stroke width used to draw each line. Unit is pixels.
+The width used to draw each line. Unit is pixels.
 
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
+
+##### `widthUnits` (String, optional)
+
+* Default: `'pixels'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `widthScale` (Number, optional)
+
+* Default: `1`
+
+The scaling multiplier for the width of each line. This prop is a very efficient way to change the width of all objects, comparing to recalculating the width for each object with `getWidth`.
+
+##### `widthMinPixels` (Number, optional)
+
+* Default: `1`
+
+The minimum line width in pixels. This prop can be used to prevent the line from getting to thin when zoomed out.
+
+##### `widthMaxPixels` (Number, optional)
+
+* Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum line width in pixels. This prop can be used to prevent the line from getting to thick when zoomed in.
+
 
 ### Data Accessors
 
@@ -92,28 +117,10 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * Default: `1`
 
-The stroke width of each object, in meters.
+The line width of each object, in units specified by `widthUnits` (default pixels).
 
-* If a number is provided, it is used as the stroke width for all objects.
-* If a function is provided, it is called on each object to retrieve its stroke width.
-
-##### `widthScale` (number, optional)
-
-* Default: `1`
-
-The scaling multiplier for the width of each line.
-
-##### `widthMinPixels` (Number, optional)
-
-* Default: `1`
-
-The minimum stroke width in pixels.
-
-##### `widthMaxPixels` (Number, optional)
-
-* Default: `Number.MAX_SAFE_INTEGER`
-
-The maximum stroke width in pixels.
+* If a number is provided, it is used as the line width for all objects.
+* If a function is provided, it is called on each object to retrieve its line width.
 
 ## Source
 

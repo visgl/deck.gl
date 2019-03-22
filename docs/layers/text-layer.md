@@ -62,6 +62,24 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 Text size multiplier.
 
+##### `sizeUnits` (String, optional)
+
+* Default: `pixels` 
+
+The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `sizeMinPixels` (Number, optional)
+
+* Default: `1`
+
+The minimum size in pixels.
+
+##### `sizeMaxPixels` (Number, optional)
+
+* Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum size in pixels.
+
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`
@@ -117,7 +135,7 @@ Method called to retrieve the location of each text label.
 
 * Default: `32`
 
-The font size of each text label, in pixels.
+The font size of each text label, in units specified by `sizeUnits` (default pixels).
 
 * If a number is provided, it is used as the size for all objects.
 * If a function is provided, it is called on each object to retrieve its size.
