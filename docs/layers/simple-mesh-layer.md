@@ -1,10 +1,10 @@
-# MeshLayer
+# SimpleMeshLayer
 
 The Mesh Layer renders a number of arbitrary geometries. For example, a fleet of 3d cars each with a position and an orientation over the map.
 
 ```js
 import DeckGL from 'deck.gl';
-import {MeshLayer} from '@deck.gl/experimental-layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry} from 'luma.gl'
 
 const App = ({data, viewport}) => {
@@ -25,10 +25,9 @@ const App = ({data, viewport}) => {
    *   ...
    * ]
    */
-  const layer = new MeshLayer({
+  const layer = new SimpleMeshLayer({
     id: 'mesh-layer',
     data,
-    sizeScale: 100,
     texture: 'texture.png',
     mesh: new CubeGeometry()
   });
@@ -75,46 +74,31 @@ Multiplier to scale each geometry by.
 This accessor returns the center position corresponding to an object in the `data` stream.
 
 
-##### `getYaw` (Function, optional)
+##### `getOrientation` (Function, optional)
 
-- Default: `object => object.yaw || object.angle || 0`
+- Default: `[0, 0, 0]`
 
-The yaw (heading) in degrees of each object.
+Object orientation defined as a vec3 of Euler angles, [pitch, yaw, roll].
 
-
-##### `getPitch` (Function, optional)
-
-- Default: `object => object.pitch || 0`
-
-The pitch (elevation) in degrees of each object.
-
-
-##### `getRoll` (Function, optional)
-
-- Default: `object => object.roll || 0`
-
-The roll (bank) in degrees of each object.
-
-See [Euler angles](https://en.wikipedia.org/wiki/Euler_angles).
 
 ##### `getScale` (Function, optional)
 
-- Default: `object => object.scale || [1, 1, 1]`
+- Default: `[1, 1, 1]`
 
 Scaling factor on the mesh along each axis.
 
 ##### `getTranslation` (Function, optional)
 
-- Default: `object => object.translation || [0, 0, 0]`
+- Default: `[0, 0, 0]`
 
 Translation of the mesh along each axis. Offset from the center position given by `getPosition`
 
-##### `getMatrix` (Function, optional)
+##### `getTransformMatrix` (Function, optional)
 
-- Default: `object => null`
+- Default: `[1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]`
 
 Explicitly define a 4x4 column-major model matrix for the mesh. If provided, will override
-`getYaw`, `getPitch`, `getRoll`, `getScale`, `getTranslation`.
+`getOrientation`, `getScale`, `getTranslation`.
 
 
 ##### `getColor` (Function|Array, optional)

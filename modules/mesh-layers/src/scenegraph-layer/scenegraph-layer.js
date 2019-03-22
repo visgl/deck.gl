@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import {createGLTFObjects, fp64} from '@luma.gl/core';
-import {MATRIX_SHADER_ATTRIBUTES} from '../utils/matrix';
+import {getMatrixAttributes} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;
 
@@ -30,7 +30,8 @@ const vs = `
   attribute vec2 instancePositions64xy;
   attribute vec4 instanceColors;
   attribute vec3 instancePickingColors;
-  attribute mat4 instanceModelMatrix;
+  attribute mat3 instanceModelMatrix;
+  attribute vec3 instanceTranslation;
 
   // Uniforms
   uniform float sizeScale;
@@ -50,8 +51,8 @@ const vs = `
     #endif
     vColor = instanceColors;
 
-    vec3 pos = (instanceModelMatrix * POSITION).xyz;
-    pos = project_scale(pos * sizeScale);
+    vec3 pos = (instanceModelMatrix * POSITION.xyz) * sizeScale + instanceTranslation;
+    pos = project_scale(pos);
 
     vec4 worldPosition;
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
@@ -81,18 +82,17 @@ const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
-
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
-  getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0},
-  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]},
-  getMatrix: {type: 'accessor', value: x => x.matrix || null}
+  // [pitch, yaw, roll]
+  getOrientation: {type: 'accessor', value: [0, 0, 0]},
+  getScale: {type: 'accessor', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  // 3x3 matrix
+  getTransformMatrix: {type: 'accessor', value: null}
 };
 
 export default class ScenegraphLayer extends Layer {
@@ -113,7 +113,7 @@ export default class ScenegraphLayer extends Layer {
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
       },
-      instanceModelMatrix: MATRIX_SHADER_ATTRIBUTES
+      instanceModelMatrix: getMatrixAttributes(this)
     });
   }
 

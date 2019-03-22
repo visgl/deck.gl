@@ -17,7 +17,43 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-/* eslint-disable max-len */
 
-export {default as SimpleMeshLayer} from './simple-mesh-layer/simple-mesh-layer';
-export {default as ScenegraphLayer} from './scenegraph-layer/scenegraph-layer';
+import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+
+import {SimpleMeshLayer} from 'deck.gl';
+import {CylinderGeometry} from 'luma.gl';
+
+import * as FIXTURES from 'deck.gl-test/data';
+
+test('SimpleMeshLayer#tests', t => {
+  const testCases = generateLayerTests({
+    Layer: SimpleMeshLayer,
+    sampleProps: {
+      data: FIXTURES.points,
+      getPosition: d => d.COORDINATES,
+      mesh: new CylinderGeometry({
+        radius: 1,
+        topRadius: 1,
+        bottomRadius: 1,
+        topCap: true,
+        bottomCap: true,
+        height: 5,
+        nradial: 20,
+        nvertical: 1
+      })
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      if (layer.props.mesh) {
+        t.ok(layer.getModels().length > 0, 'Layer should have models');
+      }
+    },
+    runDefaultAsserts: false
+  });
+
+  testLayer({Layer: SimpleMeshLayer, testCases, onError: t.notOk});
+
+  t.end();
+});

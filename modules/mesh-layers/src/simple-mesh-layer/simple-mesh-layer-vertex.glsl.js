@@ -1,5 +1,5 @@
 export default `
-#define SHADER_NAME mesh-layer-vs
+#define SHADER_NAME simple-mesh-layer-vs
 
 // Scale the model
 uniform float sizeScale;
@@ -14,15 +14,16 @@ attribute vec3 instancePositions;
 attribute vec2 instancePositions64xy;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
-attribute mat4 instanceModelMatrix;
+attribute mat3 instanceModelMatrix;
+attribute vec3 instanceTranslation;
 
 // Outputs to fragment shader
 varying vec2 vTexCoord;
 varying vec4 vColor;
 
 void main(void) {
-  vec3 pos = (instanceModelMatrix * vec4(positions, 1.0)).xyz;
-  pos = project_scale(pos * sizeScale);
+  vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
+  pos = project_scale(pos);
 
   vec4 worldPosition;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
