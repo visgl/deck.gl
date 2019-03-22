@@ -40,7 +40,7 @@ const defaultProps = {
   contours: [{threshold: DEFAULT_THRESHOLD}],
 
   fp64: false,
-  zOffsetScale: 1
+  zOffset: 0.005
 };
 
 export default class ContourLayer extends CompositeLayer {
@@ -172,7 +172,7 @@ export default class ContourLayer extends CompositeLayer {
     const {fp64} = this.props;
     const {colorTrigger, strokeWidthTrigger} = this.state;
 
-    return super.getSubLayerProps({
+    return this.getSubLayerProps({
       id: 'contour-line-layer',
       data: this.state.contourData.contourSegments,
       fp64,
@@ -181,8 +181,6 @@ export default class ContourLayer extends CompositeLayer {
       getColor: this._onGetSublayerColor.bind(this),
       getWidth: this._onGetSublayerStrokeWidth.bind(this),
       widthUnits: 'pixels',
-      colorTrigger,
-      strokeWidthTrigger,
       updateTriggers: {
         getColor: colorTrigger,
         getWidth: strokeWidthTrigger
@@ -194,13 +192,12 @@ export default class ContourLayer extends CompositeLayer {
     const {fp64} = this.props;
     const {colorTrigger} = this.state;
 
-    return super.getSubLayerProps({
+    return this.getSubLayerProps({
       id: 'contour-solid-polygon-layer',
       data: this.state.contourData.contourPolygons,
       fp64,
       getPolygon: d => d.vertices,
       getFillColor: this._onGetSublayerColor.bind(this),
-      colorTrigger,
       updateTriggers: {
         getFillColor: colorTrigger
       }
@@ -236,9 +233,9 @@ export default class ContourLayer extends CompositeLayer {
   _shouldRebuildContours({oldProps, props}) {
     if (
       !oldProps.contours ||
-      !oldProps.zOffsetScale ||
+      !oldProps.zOffset ||
       oldProps.contours.length !== props.contours.length ||
-      oldProps.zOffsetScale !== props.zOffsetScale
+      oldProps.zOffset !== props.zOffset
     ) {
       return true;
     }
@@ -250,25 +247,14 @@ export default class ContourLayer extends CompositeLayer {
 
   _updateSubLayerTriggers(oldProps, props) {
     if (oldProps && oldProps.contours && props && props.contours) {
-      // threshold value change or count change will trigger data change for sublayers
-      // those cases are not handled here.
-      let oldColors = [];
-      let newColors = [];
-      const oldStrokeWidths = [];
-      const newStrokeWidths = [];
-      oldProps.contours.forEach(contour => {
-        oldColors = oldColors.concat(contour.color);
-        oldStrokeWidths.push(contour.strokeWidth || DEFAULT_STROKE_WIDTH);
-      });
-      props.contours.forEach(contour => {
-        newColors = newColors.concat(contour.color);
-        newStrokeWidths.push(contour.strokeWidth || DEFAULT_STROKE_WIDTH);
-      });
-
-      if (!equals(oldColors, newColors)) {
+      if (props.contours.some((contour, i) => contour.color !== oldProps.contours[i].color)) {
         this.state.colorTrigger++;
       }
-      if (!equals(oldStrokeWidths, newStrokeWidths)) {
+      if (
+        props.contours.some(
+          (contour, i) => contour.strokeWidth !== oldProps.contours[i].strokeWidth
+        )
+      ) {
         this.state.strokeWidthTrigger++;
       }
     }
@@ -279,7 +265,7 @@ export default class ContourLayer extends CompositeLayer {
       return {
         threshold: x.threshold,
         zIndex: x.zIndex || index,
-        zOffsetScale: props.zOffsetScale
+        zOffset: props.zOffset
       };
     });
     this.setState({thresholdData});
