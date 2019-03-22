@@ -19,7 +19,6 @@ export const INITIAL_VIEW_STATE = {
   longitude: -74,
   latitude: 40.72,
   zoom: 13,
-  maxZoom: 16,
   pitch: 45,
   bearing: 0
 };
@@ -66,7 +65,8 @@ export class App extends Component {
         getPath: d => d.segments,
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
-        strokeWidth: 2,
+        widthMinPixels: 2,
+        rounded: true,
         trailLength,
         currentTime: this.state.time
       }),
