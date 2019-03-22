@@ -4,7 +4,7 @@ The Mesh Layer renders a number of arbitrary geometries. For example, a fleet of
 
 ```js
 import DeckGL from 'deck.gl';
-import {SimpleMeshLayer} from '@deck.gl/experimental-layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 import {CubeGeometry} from 'luma.gl'
 
 const App = ({data, viewport}) => {
@@ -76,7 +76,7 @@ This accessor returns the center position corresponding to an object in the `dat
 
 ##### `getOrientation` (Function, optional)
 
-- Default: `object => object.orientation || [object.pitch || 0, object.yaw || object.angle || 0, object.roll || 0]`
+- Default: `[0, 0, 0]`
 
 Object orientation defined as a vec3 of Euler angles, [pitch, yaw, roll].
 

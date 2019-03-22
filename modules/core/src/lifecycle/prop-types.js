@@ -27,10 +27,7 @@ const TYPE_DEFINITIONS = {
   accessor: {
     validate(value, propType) {
       const valueType = getTypeOf(value);
-      const propValueType = getTypeOf(propType.value);
-      return (
-        valueType === 'function' || propValueType === 'function' || valueType === propValueType
-      );
+      return valueType === 'function' || valueType === getTypeOf(propType.value);
     },
     equal(value1, value2, propType) {
       if (typeof value2 === 'function') {

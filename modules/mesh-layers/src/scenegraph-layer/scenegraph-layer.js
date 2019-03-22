@@ -51,8 +51,8 @@ const vs = `
     #endif
     vColor = instanceColors;
 
-    vec3 pos = instanceModelMatrix * POSITION.xyz + instanceTranslation;
-    pos = project_scale(pos * sizeScale);
+    vec3 pos = (instanceModelMatrix * POSITION.xyz) * sizeScale + instanceTranslation;
+    pos = project_scale(pos);
 
     vec4 worldPosition;
     gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);

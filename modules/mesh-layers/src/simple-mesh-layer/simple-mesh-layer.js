@@ -161,6 +161,8 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
+    super.updateState({props, oldProps, changeFlags});
+
     if (props.mesh !== oldProps.mesh || props.fp64 !== oldProps.fp64) {
       if (this.state.model) {
         this.state.model.delete();
@@ -173,10 +175,6 @@ export default class SimpleMeshLayer extends Layer {
 
     if (props.texture !== oldProps.texture) {
       this.setTexture(props.texture);
-    }
-
-    if (changeFlags.dataChanged) {
-      super.updateState({props, oldProps, changeFlags});
     }
   }
 
