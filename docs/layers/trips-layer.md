@@ -40,8 +40,6 @@ new deck.TripsLayer({});
 
 ## Properties
 
-## Properties
-
 Inherits from all [Base Layer](/docs/api-reference/layer.md) and [PathLayer](/docs/layers/path-layer.md) properties, plus the following:
 
 ### Render Options
