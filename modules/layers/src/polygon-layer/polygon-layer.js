@@ -35,6 +35,7 @@ const defaultProps = {
   elevationScale: 1,
   wireframe: false,
 
+  lineWidthUnits: 'meters',
   lineWidthScale: 1,
   lineWidthMinPixels: 0,
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
@@ -128,6 +129,7 @@ export default class PolygonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -196,6 +198,7 @@ export default class PolygonLayer extends CompositeLayer {
       new StrokeLayer(
         {
           fp64,
+          widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,

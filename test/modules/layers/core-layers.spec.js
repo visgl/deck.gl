@@ -119,9 +119,9 @@ test('PointCloudLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.radiusPixels,
+        layer.state.model.program.uniforms.pointSize,
         layer.props.radiusPixels,
-        'should update radiusPixels'
+        'should update pointSize'
       );
     }
   });

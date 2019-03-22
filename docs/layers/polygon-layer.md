@@ -110,6 +110,12 @@ Elevation multiplier. The final elevation is calculated by
   `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
 all elevation without updating the data.
 
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
 ##### `lineWidthScale` (Boolean, optional)
 
 * Default: `1`
@@ -228,7 +234,7 @@ The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in 
 
 * Default: `1`
 
-The width of the outline of the polygon, in meters. Only applies if `extruded: false`.
+The width of the outline of the polygon, in units specified by `lineWidthUnits` (default meters). Only applies if `extruded: false`.
 
 * If a number is provided, it is used as the outline width for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline width.

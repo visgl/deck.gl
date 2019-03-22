@@ -96,6 +96,12 @@ Remarks:
   with the same data if you want a combined rendering effect.
 * This is only effective if the `extruded` prop is set to true.
 
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
 ##### `lineWidthScale` (Boolean, optional)
 
 * Default: `1`
@@ -212,7 +218,7 @@ The radius of `Point` and `MultiPoint` feature, in meters.
 
 * Default: `1`
 
-The width of line string and/or the outline of polygon for a GeoJson feature, depending on its type. Unit is meters.
+The width of line string and/or the outline of polygon for a GeoJson feature, depending on its type. In units specified by `lineWidthUnits` (default meters).
 
 * If a number is provided, it is used as the line width for all features.
 * If a function is provided, it is called on each feature to retrieve its line width.
