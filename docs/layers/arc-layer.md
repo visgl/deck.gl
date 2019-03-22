@@ -80,13 +80,13 @@ The scaling multiplier for the width of each line. This prop is a very efficient
 
 * Default: `1`
 
-The minimum line width in pixels. This prop can be used to prevent the line from getting to thin when zoomed out.
+The minimum line width in pixels. This prop can be used to prevent the line from getting too thin when zoomed out.
 
 ##### `widthMaxPixels` (Number, optional)
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum line width in pixels. This prop can be used to prevent the line from getting to thick when zoomed in.
+The maximum line width in pixels. This prop can be used to prevent the line from getting too thick when zoomed in.
 
 
 ### Data Accessors
