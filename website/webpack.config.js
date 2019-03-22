@@ -13,8 +13,11 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 // Seems to be a Babel bug
 // https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
 const BABEL_CONFIG = {
-  presets: ['es2015', 'stage-2', 'react'].map(name => require.resolve(`babel-preset-${name}`)),
-  plugins: ['transform-decorators-legacy'].map(name => require.resolve(`babel-plugin-${name}`))
+  presets: ['@babel/preset-env', '@babel/preset-react'],
+  plugins: [
+    ['@babel/plugin-proposal-decorators', {legacy: true}],
+    ['@babel/plugin-proposal-class-properties', {loose: true}]
+  ]
 };
 
 const COMMON_CONFIG = {
