@@ -135,7 +135,7 @@ export {
   TripsLayer
 } from '@deck.gl/geo-layers';
 
-export {MeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
+export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 //
 // REACT BINDINGS PACKAGE

@@ -1,7 +1,7 @@
 /* global window */
 
 import {
-  MeshLayer,
+  SimpleMeshLayer,
   ScenegraphLayer,
   GreatCircleLayer,
   S2Layer,
@@ -17,41 +17,45 @@ import {CylinderGeometry} from 'luma.gl';
 import {GLTFParser} from '@loaders.gl/gltf';
 import * as dataSamples from '../data-samples';
 
-const MeshLayerExample = {
-  layer: MeshLayer,
+const SimpleMeshLayerExample = {
+  layer: SimpleMeshLayer,
   props: {
     id: 'mesh-layer',
     data: dataSamples.points,
     texture: 'data/texture.png',
-    mesh: new CylinderGeometry({
-      radius: 1,
-      topRadius: 1,
-      bottomRadius: 1,
-      topCap: true,
-      bottomCap: true,
-      height: 5,
-      nradial: 20,
-      nvertical: 1
+    mesh: new Promise(resolve => {
+      resolve(
+        new CylinderGeometry({
+          radius: 1,
+          topRadius: 1,
+          bottomRadius: 1,
+          topCap: true,
+          bottomCap: true,
+          height: 5,
+          nradial: 20,
+          nvertical: 1
+        })
+      );
     }),
-    sizeScale: 10,
+    sizeScale: 40,
     getPosition: d => d.COORDINATES,
     getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
-    getMatrix: d => [
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+    getTransformMatrix: d => [
+      Math.random() * 4 - 2,
+      Math.random() * 4 - 2,
+      Math.random() * 4 - 2,
       0,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      Math.random() * 4 - 2,
+      Math.random() * 4 - 2,
+      Math.random() * 4 - 2,
       0,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      Math.random() * 4 - 2,
+      Math.random() * 4 - 2,
+      Math.random() * 4 - 2,
       0,
-      Math.random() * 2,
-      Math.random() * 2,
-      Math.random() * 2,
+      0,
+      0,
+      Math.random() * 10000,
       1
     ]
   }
@@ -73,9 +77,12 @@ const ScenegraphLayerExample = {
   props: {
     id: 'scenegraph-layer',
     data: dataSamples.points,
-    sizeScale: 1,
     pickable: true,
-    getPosition: d => [d.COORDINATES[0], d.COORDINATES[1], Math.random() * 10000]
+    sizeScale: 1,
+    getPosition: d => d.COORDINATES,
+    getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
+    getTranslation: d => [0, 0, Math.random() * 10000],
+    getScale: [2, 4, 2]
   }
 };
 
@@ -156,7 +163,7 @@ const H3HexagonLayerExample = {
 /* eslint-disable quote-props */
 export default {
   'Mesh Layers': {
-    MeshLayer: MeshLayerExample,
+    SimpleMeshLayer: SimpleMeshLayerExample,
     ScenegraphLayer: ScenegraphLayerExample
   },
   'Geo Layers': {

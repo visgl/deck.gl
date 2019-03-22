@@ -22,17 +22,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, COORDINATE_SYSTEM} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/core';
 import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
-import {MATRIX_SHADER_ATTRIBUTES} from '../utils/matrix';
+import {getMatrixAttributes} from '../utils/matrix';
 
-import vs from './mesh-layer-vertex.glsl';
-import fs from './mesh-layer-fragment.glsl';
+import vs from './simple-mesh-layer-vertex.glsl';
+import fs from './simple-mesh-layer-fragment.glsl';
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -96,10 +96,9 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
-  mesh: null,
+  mesh: {value: null, type: 'object', async: true},
   texture: null,
   sizeScale: {type: 'number', value: 1, min: 0},
-
   // TODO - parameters should be merged, not completely overridden
   parameters: {
     depthTest: true,
@@ -108,21 +107,21 @@ const defaultProps = {
   fp64: false,
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
-
+  sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
-  getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0},
-  getScale: {type: 'accessor', value: x => x.scale || [1, 1, 1]},
-  getTranslation: {type: 'accessor', value: x => x.translate || [0, 0, 0]},
-  getMatrix: {type: 'accessor', value: x => x.matrix || null}
+  // [pitch, yaw, roll]
+  getOrientation: {type: 'accessor', value: [0, 0, 0]},
+  getScale: {type: 'accessor', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  // 3x3 matrix
+  getTransformMatrix: {type: 'accessor', value: null}
 };
 
-export default class MeshLayer extends Layer {
+export default class SimpleMeshLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     // TODO: add phong-lighting when merged in luma.gl
@@ -147,7 +146,7 @@ export default class MeshLayer extends Layer {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
-      instanceModelMatrix: MATRIX_SHADER_ATTRIBUTES
+      instanceModelMatrix: getMatrixAttributes(this)
     });
 
     this.setState({
@@ -162,36 +161,28 @@ export default class MeshLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    const attributeManager = this.getAttributeManager();
+    super.updateState({props, oldProps, changeFlags});
 
-    // super.updateState({props, oldProps, changeFlags});
-    if (changeFlags.dataChanged) {
-      attributeManager.invalidateAll();
+    if (props.mesh !== oldProps.mesh || props.fp64 !== oldProps.fp64) {
+      if (this.state.model) {
+        this.state.model.delete();
+      }
+      if (props.mesh) {
+        this.setState({model: this.getModel(props.mesh)});
+      }
+      this.getAttributeManager().invalidateAll();
     }
-
-    this._updateFP64(props, oldProps);
 
     if (props.texture !== oldProps.texture) {
       this.setTexture(props.texture);
     }
   }
 
-  _updateFP64(props, oldProps) {
-    if (props.fp64 !== oldProps.fp64) {
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-
-      this.setState({model: this.getModel(this.context.gl)});
-
-      this.setTexture(this.state.texture);
-
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-    }
-  }
-
   draw({uniforms}) {
+    if (!this.state.model) {
+      return;
+    }
+
     const {sizeScale} = this.props;
 
     this.state.model.render(
@@ -201,31 +192,43 @@ export default class MeshLayer extends Layer {
     );
   }
 
-  getModel(gl) {
-    return new Model(
-      gl,
+  getModel(mesh) {
+    const model = new Model(
+      this.context.gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: getGeometry(this.props.mesh),
+        geometry: getGeometry(mesh),
         isInstanced: true,
         shaderCache: this.context.shaderCache
       })
     );
+
+    if (this.state.texture) {
+      model.setUniforms({sampler: this.state.texture, hasTexture: 1});
+    } else {
+      model.setUniforms({sampler: this.state.emptyTexture, hasTexture: 0});
+    }
+
+    return model;
   }
 
   setTexture(src) {
     const {gl} = this.context;
-    const {model, emptyTexture} = this.state;
+    const {emptyTexture} = this.state;
 
     if (src) {
       getTexture(gl, src).then(texture => {
-        model.setUniforms({sampler: texture, hasTexture: 1});
         this.setState({texture});
+        if (this.state.model) {
+          this.state.model.setUniforms({sampler: this.state.texture, hasTexture: 1});
+        }
       });
     } else {
       // reset
-      this.state.model.setUniforms({sampler: emptyTexture, hasTexture: 0});
       this.setState({texture: null});
+      if (this.state.model) {
+        this.state.model.setUniforms({sampler: emptyTexture, hasTexture: 0});
+      }
     }
   }
 
@@ -241,13 +244,15 @@ export default class MeshLayer extends Layer {
     const {data, getPosition} = this.props;
     const {value} = attribute;
     let i = 0;
-    for (const object of data) {
-      const position = getPosition(object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const position = getPosition(object, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
   }
 }
 
-MeshLayer.layerName = 'MeshLayer';
-MeshLayer.defaultProps = defaultProps;
+SimpleMeshLayer.layerName = 'SimpleMeshLayer';
+SimpleMeshLayer.defaultProps = defaultProps;

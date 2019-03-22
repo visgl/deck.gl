@@ -1,5 +1,5 @@
 export default `
-#define SHADER_NAME mesh-layer-fs
+#define SHADER_NAME simple-mesh-layer-fs
 
 precision highp float;
 

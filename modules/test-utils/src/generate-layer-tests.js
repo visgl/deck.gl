@@ -32,7 +32,8 @@ export function generateLayerTests({
   sampleProps = {},
   assert = defaultAssert,
   onBeforeUpdate,
-  onAfterUpdate = () => {}
+  onAfterUpdate = () => {},
+  runDefaultAsserts = true
 }) {
   assert(Layer.layerName, 'Layer should have display name');
 
@@ -89,13 +90,16 @@ export function generateLayerTests({
   const _onAfterUpdate = params => {
     // User callback
     onAfterUpdate(params);
+
     // Default assert
-    if (params.layer.isComposite) {
-      if (count(params.layer.props.data)) {
-        assert(params.subLayers.length, 'Layer should have sublayers');
+    if (runDefaultAsserts) {
+      if (params.layer.isComposite) {
+        if (count(params.layer.props.data)) {
+          assert(params.subLayers.length, 'Layer should have sublayers');
+        }
+      } else {
+        assert(params.layer.getModels().length, 'Layer should have models');
       }
-    } else {
-      assert(params.layer.getModels().length, 'Layer should have models');
     }
   };
 

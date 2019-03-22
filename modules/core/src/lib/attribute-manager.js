@@ -236,9 +236,10 @@ export default class AttributeManager {
       if (attribute.userData.shaderAttributes) {
         const shaderAttributes = attribute.userData.shaderAttributes;
         for (const shaderAttributeName in shaderAttributes) {
-          shaderAttributes[shaderAttributeName].update({
+          const shaderAttribute = shaderAttributes[shaderAttributeName];
+          shaderAttribute.update({
             buffer: attribute.buffer,
-            value: attribute.value,
+            value: shaderAttribute.value || attribute.value,
             constant: attribute.constant
           });
         }
