@@ -32,9 +32,12 @@ const defaultProps = {
   radiusScale: {type: 'number', min: 0, value: 1},
   radiusMinPixels: {type: 'number', min: 0, value: 1}, //  min point radius in pixels
   radiusMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
+
+  lineWidthUnits: 'meters',
   lineWidthScale: {type: 'number', min: 0, value: 1},
   lineWidthMinPixels: {type: 'number', min: 0, value: 1},
   lineWidthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
+
   stroked: false,
   fp64: false,
   filled: true,
@@ -111,16 +114,21 @@ export default class ScatterplotLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {viewport} = this.context;
     const {
       radiusScale,
       radiusMinPixels,
       radiusMaxPixels,
       stroked,
       filled,
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels
     } = this.props;
+
+    const widthMultiplier =
+      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
 
     this.state.model.render(
       Object.assign({}, uniforms, {
@@ -129,7 +137,7 @@ export default class ScatterplotLayer extends Layer {
         radiusScale,
         radiusMinPixels,
         radiusMaxPixels,
-        lineWidthScale,
+        lineWidthScale: lineWidthScale * widthMultiplier,
         lineWidthMinPixels,
         lineWidthMaxPixels
       })

@@ -42,6 +42,7 @@ const defaultProps = {
   extruded: false,
   wireframe: false,
 
+  lineWidthUnits: 'meters',
   lineWidthScale: 1,
   lineWidthMinPixels: 0,
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
@@ -122,6 +123,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -194,6 +196,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       new PolygonStrokeLayer(
         {
           fp64,
+          widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,
@@ -230,6 +233,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       new LineStringsLayer(
         {
           fp64,
+          widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,
@@ -271,6 +275,7 @@ export default class GeoJsonLayer extends CompositeLayer {
           radiusScale: pointRadiusScale,
           radiusMinPixels: pointRadiusMinPixels,
           radiusMaxPixels: pointRadiusMaxPixels,
+          lineWidthUnits,
           lineWidthScale,
           lineWidthMinPixels,
           lineWidthMaxPixels,
