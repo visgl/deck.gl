@@ -5,14 +5,13 @@
 
 # S2Layer (Experimental)
 
-The S2Layer renders filled and/or stroked polygons, with geometry automatically calculated based on an S2 token (geospatial index).
+The S2Layer renders filled and/or stroked cells of the [S2 geospatial indexing system](http://s2geometry.io/).
 
-Remarks:
-
-* Uses the [`s2-geometry`](http://s2geometry.io/) library for S2 polygon calculations.
+The JavaScript implementation of S2 [`s2-geometry`](https://git.coolaj86.com/coolaj86/s2-geometry.js) is used for cell boundary calculations.
 
 ```js
-import DeckGL, {PolygonLayer} from '@deck.gl/s2-layers';
+import DeckGL from 'deck.gl';
+import {S2Layer} from '@deck.gl/geo-layers';
 
 const App = ({data, viewport}) => {
 
@@ -43,7 +42,7 @@ const App = ({data, viewport}) => {
     filled: true,
     wireframe: true,
     lineWidthMinPixels: 1,
-    getToken: d => d.token,
+    getS2Token: d => d.token,
     getElevation: d => d.population / d.area / 10,
     getFillColor: d => [d.population / d.area / 60, 140, 0],
     getLineColor: [80, 80, 80],
@@ -62,23 +61,23 @@ const App = ({data, viewport}) => {
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
-
-Accepts all properties from `PolygonLayer`, except `getPolygon` has been replaced with `getToken`:
-
-### Render Options
-
-Accepts all render options from `PolygonLayer`.
+Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/docs/api-reference/composite-layer.md), and [PolygonLayer](/docs/api-reference/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-Accepts all accessors from `PolygonLayer`, except `getPolygon` has been replaced with `getToken`:
-
-##### `getToken` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getS2Token` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details.
 
 * default: `object => object.token`
+
+
+## Sub Layers
+
+The `S2Layer` renders the following sublayers:
+
+* `cell` - a [PolygonLayer](/docs/layers/polygon-layer.md) rendering all S2 cells.
+
 
 ## Source
 

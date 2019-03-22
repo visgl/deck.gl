@@ -123,6 +123,7 @@ const S2LayerExample = {
   layer: S2Layer,
   props: {
     data: dataSamples.s2cells,
+    // data: ['14','1c','24','2c','34','3c'],
     opacity: 0.6,
     getS2Token: f => f.token,
     getFillColor: f => [f.value * 255, (1 - f.value) * 255, (1 - f.value) * 128, 128],

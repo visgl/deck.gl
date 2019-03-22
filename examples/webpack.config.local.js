@@ -30,6 +30,10 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
 
     devtool: 'source-map',
 
+    node: {
+      fs: 'empty'
+    },
+
     resolve: {
       // mainFields: ['esnext', 'module', 'main'],
 
