@@ -13,11 +13,21 @@ Target Release Date: Mar, 2019
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/s2-layer.png" />
         <p><i>S2Layer</i></p>
       </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
+        <p><i>MeshLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-layer.jpg" />
+        <p><i>TileLayer</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
 
 ### New Effects System
+
+A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](/docs/effects/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers.
 
 ### New Layer Catalog
 
@@ -56,7 +66,13 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 ### Binary Data Support
 
+In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`.
+
 ### Improved Test Utilities
+
+The `@deck.gl/test-utils` module is revamped with two new exports:
+* [`generateLayerTests`](/docs/api-reference/test-utils/generate-layer-tests.md) - automatically create test cases for use with [`testLayer`](/docs/api-reference/test-utils/test-layer.md) to test layer conformance.
+* [`SnapshotTestRunner`](/docs/api-reference/test-utils/snapshot-test-runner.md) - automated integration test for WebGL. Renders deck.gl layers, takes screenshot and compare with golden images in headless Chromium.
 
 
 ## deck.gl v6.4
