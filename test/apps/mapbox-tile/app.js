@@ -111,12 +111,11 @@ class Root extends PureComponent {
         <DeckGL
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
-          // onLayerClick={this._onClick}
+          onLayerClick={this._onClick}
           layers={[
             new TileLayer({
               ...MAP_LAYER_STYLES,
               pickable: true,
-              onClick: this._onClick,
               getTileData
             })
           ]}
