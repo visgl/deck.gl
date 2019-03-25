@@ -33,10 +33,6 @@ vec4 apply_opacity(vec3 color, float alpha) {
 void main(void) {
   vec4 bitmapColor = texture2D(bitmapTexture, vTexCoord);
 
-  if (bitmapColor == vec4(0., 0., 0., 1.)) {
-    discard;
-  }
-
   gl_FragColor = apply_opacity(color_tint(color_desaturate(bitmapColor.rgb)), bitmapColor.a * opacity);
 
   // use highlight color if this fragment belongs to the selected object.
