@@ -1,7 +1,9 @@
 <!-- INJECT:"PointCloudLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # PointCloudLayer
@@ -10,7 +12,8 @@ The Point Cloud Layer takes in points with 3d positions, normals and colors
 and renders them as spheres with a certain radius.
 
 ```js
-import DeckGL, {PointCloudLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PointCloudLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -41,6 +44,34 @@ const App = ({data, viewport}) => {
 
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
+```
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {PointCloudLayer} from '@deck.gl/layers';
+new PointCloudLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.PointCloudLayer({});
 ```
 
 ## Properties

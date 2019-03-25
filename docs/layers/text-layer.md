@@ -1,7 +1,8 @@
 <!-- INJECT:"TextLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # TextLayer
@@ -13,11 +14,9 @@ Auto pack required `characterSet` into a shared texture `fontAtlas`.
 TextLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 
-## Example
-
 ```js
-import DeckGL from 'deck.gl';
-import TextLayer from './text-layer';
+import DeckGL from '@deck.gl/react';
+import {TextLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
   /**
@@ -48,6 +47,35 @@ const App = ({data, viewport}) => {
 
   return <DeckGL {...viewport} layers={[layer]} />;
 };
+```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {TextLayer} from '@deck.gl/layers';
+new TextLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.TextLayer({});
 ```
 
 ## Properties

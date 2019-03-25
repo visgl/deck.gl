@@ -1,8 +1,9 @@
 <!-- INJECT:"HexagonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # HexagonLayer
@@ -11,10 +12,11 @@ The Hexagon Layer renders a hexagon heatmap based on an array of points.
 It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains.
 
-HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and at the moment only works with COORDINATE_SYSTEM.LNGLAT.
+HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
 ```js
-import DeckGL, {HexagonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -44,6 +46,37 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
+```
+
+```js
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
+new HexagonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.HexagonLayer({});
+```
+
 
 ## Properties
 

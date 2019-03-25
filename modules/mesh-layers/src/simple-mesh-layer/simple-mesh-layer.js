@@ -133,6 +133,7 @@ export default class SimpleMeshLayer extends Layer {
 
     attributeManager.addInstanced({
       instancePositions: {
+        transition: true,
         size: 3,
         accessor: 'getPosition'
       },
@@ -142,6 +143,7 @@ export default class SimpleMeshLayer extends Layer {
         update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
+        transition: true,
         size: 4,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]

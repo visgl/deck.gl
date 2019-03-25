@@ -22,7 +22,7 @@ let bundleUrl = null;
 if (ARGS.version === 'local') {
   bundleUrl = `http://localhost:${PORT}/deckgl.min.js`;
 } else if (ARGS.version) {
-  bundleUrl = `https://unpkg.com/deck.gl@${ARGS.version}/deckgl.min.js`;
+  bundleUrl = `https://unpkg.com/deck.gl@${ARGS.version}/dist.min.js`;
 }
 
 function getAllMetadata() {
@@ -64,7 +64,7 @@ function getIndexPage(pages, opts = {}) {
 function getPage(page, opts = {}) {
   let content = fs.readFileSync(page.src, 'utf-8');
   if (bundleUrl) {
-    content = content.replace(/src="[^"]+\/deckgl\.min\.js"/, `src="${bundleUrl}"`);
+    content = content.replace(/src=".+?\/@?deck\.gl.*?\/dist\.min\.js"/, `src="${bundleUrl}"`);
   }
 
   if (!CACHE.pageTemplate || opts.noCache) {

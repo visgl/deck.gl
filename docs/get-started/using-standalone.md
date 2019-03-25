@@ -46,10 +46,10 @@ deck.gl also offers a standalone bundled version of the library - a native JavaS
 To use deck.gl in a scripting environment, include the standalone version in a `script` tag:
 
 ```html
-<script src="https://unpkg.com/deck.gl@latest/deckgl.min.js"></script>
+<script src="https://unpkg.com/deck.gl@latest/dist.min.js"></script>
 <!-- optional if mapbox base map is needed -->
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
 ```
 
 It exposes two global objects `deck` and `luma`. Any exports from the deck.gl core can be accessed by `deck.<Class>`.
