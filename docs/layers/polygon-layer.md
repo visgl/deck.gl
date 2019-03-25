@@ -1,8 +1,9 @@
 <!-- INJECT:"PolygonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # PolygonLayer
@@ -12,7 +13,8 @@ The Polygon Layer renders filled and/or stroked polygons.
 PolygonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
-import DeckGL, {PolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PolygonLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -62,6 +64,34 @@ const App = ({data, viewport}) => {
 
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
+```
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {PolygonLayer} from '@deck.gl/layers';
+new PolygonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.PolygonLayer({});
 ```
 
 ## Properties

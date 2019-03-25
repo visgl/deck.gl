@@ -1,6 +1,7 @@
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # SolidPolygonLayer
@@ -8,9 +9,10 @@
 The SolidPolygon Layer renders filled polygons.
 
 ```js
-import DeckGL, {_SolidPolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
-new _SolidPolygonLayer({
+new SolidPolygonLayer({
   data: [
     [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],   // Simple polygon (array of coords)
     [                                           // Complex polygon with one hole
@@ -22,6 +24,35 @@ new _SolidPolygonLayer({
   getColor: [255, 0, 0],
   extruded: false
 });
+```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {SolidPolygonLayer} from '@deck.gl/layers';
+new SolidPolygonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.SolidPolygonLayer({});
 ```
 
 ## Properties

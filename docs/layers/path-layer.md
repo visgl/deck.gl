@@ -1,7 +1,8 @@
 <!-- INJECT:"PathLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # PathLayer
@@ -9,7 +10,8 @@
 The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
 
 ```js
-import DeckGL, {PathLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PathLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -43,6 +45,34 @@ const App = ({data, viewport}) => {
 
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
+```
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {PathLayer} from '@deck.gl/layers';
+new PathLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.PathLayer({});
 ```
 
 ## Properties

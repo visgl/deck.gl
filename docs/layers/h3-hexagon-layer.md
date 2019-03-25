@@ -1,8 +1,9 @@
 <!-- INJECT:"PolygonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # H3HexagonLayer
@@ -12,7 +13,8 @@ The `H3HexagonLayer` renders hexagons from the [H3](https://uber.github.io/h3/) 
 `H3HexagonLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
-import DeckGL, {H3HexagonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
 
 const App = ({data, viewport}) => {
 
@@ -45,6 +47,37 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+```
+
+```js
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
+new H3HexagonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.H3HexagonLayer({});
+```
+
 
 ## Properties
 

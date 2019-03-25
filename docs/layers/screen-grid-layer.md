@@ -1,5 +1,9 @@
 <!-- INJECT:"ScreenGridLayerDemo" -->
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
+</p>
+
 # ScreenGridLayer
 
 The Screen Grid Layer takes in an array of latitude and longitude
@@ -7,7 +11,8 @@ coordinated points, aggregates them into histogram bins and
 renders as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to false.
 
 ```js
-import DeckGL, {ScreenGridLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -44,6 +49,38 @@ const App = ({data, viewport}) => {
 needs to be reaggregated by the layer whenever the map is zoomed or panned.
 This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
+
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
+```
+
+```js
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
+new ScreenGridLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.ScreenGridLayer({});
+```
+
 
 ## Properties
 
