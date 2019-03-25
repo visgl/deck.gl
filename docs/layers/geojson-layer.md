@@ -84,6 +84,13 @@ new deck.GeoJsonLayer({});
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
 
+##### `data`
+
+The `GeoJSONLayer` accepts any of the following formats passed to the `data` prop:
+
+* A valid GeoJSON `FeatureCollection`, `Feature`, `Geometry` or `GeometryCollection` object.
+* An array of GeoJSON `Feature` objects.
+
 ### Render Options
 
 Inherits from all [Base Layer properties](/docs/api-reference/layer.md),
@@ -215,7 +222,7 @@ This is an object that contains material props for [lighting effect](/docs/effec
 
 ### Data Accessors
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -225,7 +232,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 * If an array is provided, it is used as the line color for all features.
 * If a function is provided, it is called on each feature to retrieve its line color.
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -237,7 +244,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` features.
 
-##### `getRadius` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getRadius` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -246,7 +253,7 @@ The radius of `Point` and `MultiPoint` feature, in meters.
 * If a number is provided, it is used as the radius for all point features.
 * If a function is provided, it is called on each point feature to retrieve its radius.
 
-##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -259,7 +266,7 @@ Note: This accessor is called for `LineString` and `MultiLineString`
 features. It is called for `Polygon` and `MultiPolygon` features if the
 `stroked` attribute is true.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -273,7 +280,7 @@ otherwise will be in unit coordinates.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
-##### `getLineDashArray` (Function|Array, optional)
+##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 * Default: `null`
 

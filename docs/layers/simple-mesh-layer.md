@@ -123,14 +123,14 @@ This is an object that contains material props for [lighting effect](/docs/effec
 ### Data Accessors
 
 
-##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 - Default: `object => object.position`
 
 Method called to retrieve the center position for each object in the `data` stream.
 
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 - Default: `[0, 0, 0, 255]`
 
@@ -139,7 +139,7 @@ The color of each object, in `r, g, b, [a]`. Each component is in the 0-255 rang
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getOrientation` (Function|Array, optional)
+##### `getOrientation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 - Default: `[0, 0, 0]`
 
@@ -148,7 +148,7 @@ Object orientation defined as a vec3 of Euler angles, `[pitch, yaw, roll]` in de
 * If an array is provided, it is used as the orientation for all objects.
 * If a function is provided, it is called on each object to retrieve its orientation.
 
-##### `getScale` (Function|Array, optional)
+##### `getScale` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 - Default: `[1, 1, 1]`
 
@@ -157,7 +157,7 @@ Scaling factor on the mesh along each axis.
 * If an array is provided, it is used as the scale for all objects.
 * If a function is provided, it is called on each object to retrieve its scale.
 
-##### `getTranslation` (Function|Array, optional)
+##### `getTranslation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 - Default: `[0, 0, 0]`
 
@@ -166,7 +166,7 @@ Translation of the mesh along each axis. Offset from the center position given b
 * If an array is provided, it is used as the offset for all objects.
 * If a function is provided, it is called on each object to retrieve its offset.
 
-##### `getTransformMatrix` (Function|Array, optional)
+##### `getTransformMatrix` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 - Default: `null`
 

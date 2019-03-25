@@ -146,20 +146,20 @@ Options:
 
 ### Data Accessors
 
-##### `getText` (Function, optional)
+##### `getText` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `x => x.text`
 
 Method called to retrieve the content of each text label.
 
-##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `x => x.position || x.coordinates`
 
 Method called to retrieve the location of each text label.
 
 
-##### `getSize` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getSize` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `32`
 
@@ -169,7 +169,7 @@ The font size of each text label, in units specified by `sizeUnits` (default pix
 * If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -179,7 +179,7 @@ The rgba color of each text label, in `r, g, b, [a]`. Each component is in the 0
 * If a function is provided, it is called on each object to retrieve its color.
 
 
-##### `getAngle` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getAngle` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
@@ -190,7 +190,7 @@ The rotating angle of each text label, in degrees.
 
 ### Text Alignment Options
 
-##### `getTextAnchor` (Function|String, optional)
+##### `getTextAnchor` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
 
 * Default: `x => x.textAnchor || 'middle'`
 
@@ -200,7 +200,7 @@ The text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 * If a function is provided, it is called on each object to retrieve its text anchor.
 
 
-##### `getAlignmentBaseline` (Function|String, optional)
+##### `getAlignmentBaseline` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
 
 * Default: `x => x.alignmentBaseline || 'center'`
 
@@ -210,7 +210,7 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 * If a function is provided, it is called on each object to retrieve its alignment baseline.
 
 
-##### `getPixelOffset` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPixelOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `x.pixelOffset || [0, 0]`
 

@@ -151,13 +151,13 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` (Function, optional)
+##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => 1`
 

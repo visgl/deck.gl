@@ -120,13 +120,13 @@ This is an object that contains material props for [lighting effect](/docs/effec
 
 ### Data Accessors
 
-##### `getHexagon` (Function, optional)
+##### `getHexagon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.hexagon`
 
 Method called to retrieve the [H3](https://uber.github.io/h3/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://uber.github.io/h3/#/documentation/core-library/resolution-table).
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[255, 0, 255, 255]`
 
@@ -135,7 +135,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 

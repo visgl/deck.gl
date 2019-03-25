@@ -122,13 +122,13 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each point.
 
-##### `getWeight` (Function, optional)
+##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => 1`
 
