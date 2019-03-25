@@ -14,8 +14,14 @@
 
 #### Layers
 
-- `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/layers/column-layer.md) with `diskResolution: 6` instead.
+**Deprecations**
+
 - `ArcLayer` and `LineLayer`'s `getStrokeWidth` props are deprecated. Use `getWidth` instead.
+
+**Breaking Changes**
+
+- `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/layers/column-layer.md) with `diskResolution: 6` instead.
+- A bug in projecting elevation was fixed in `HexagonLayer`, `GridLayer` and `GridCellLayer`. The resulting heights of extruded grids/hexagons have changed. You may adjust them to match previous behavior by tweaking `elevationScale`.
 - The following former experimental layers' APIs are redesigned as they graduate to official layers. Refer to their documentations for details:
   - [BitmapLayer](/docs/layers/column-layer.md)
   - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md)
