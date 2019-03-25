@@ -2,7 +2,10 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {HexagonLayer} from 'deck.gl';
+import {PhongMaterial} from '@luma.gl/core';
+import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
+import DeckGL from '@deck.gl/react';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -10,6 +13,32 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 // Source data CSV
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'; // eslint-disable-line
+
+const ambientLight = new AmbientLight({
+  color: [255, 255, 255],
+  intensity: 1.0
+});
+
+const pointLight1 = new PointLight({
+  color: [255, 255, 255],
+  intensity: 0.8,
+  position: [-0.144528, 49.739968, 80000]
+});
+
+const pointLight2 = new PointLight({
+  color: [255, 255, 255],
+  intensity: 0.8,
+  position: [-3.807751, 54.104682, 8000]
+});
+
+const lightingEffect = new LightingEffect({ambientLight, pointLight1, pointLight2});
+
+const material = new PhongMaterial({
+  ambient: 0.64,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [51, 51, 51]
+});
 
 export const INITIAL_VIEW_STATE = {
   longitude: -1.4157267858730052,
@@ -106,7 +135,8 @@ export class App extends Component {
         opacity: 1,
         pickable: Boolean(this.props.onHover),
         radius,
-        upperPercentile
+        upperPercentile,
+        material
       })
     ];
   }
@@ -117,6 +147,7 @@ export class App extends Component {
     return (
       <DeckGL
         layers={this._renderLayers()}
+        effects={[lightingEffect]}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}
