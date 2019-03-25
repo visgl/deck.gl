@@ -1,5 +1,74 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v6.4 to v7.0
+
+#### Submodule Structure and Dependency Changes
+
+- `@deck.gl/core` is moved from `dependencies` to `devDependencies` for all submodules. This will reduce the runtime error caused by installing multiple copies of the core.
+- The master module `deck.gl` now include all submodules except `@deck.gl/test-utils`. See [list of submodules](/docs/get-started/getting-started.md#selectively-install-dependencies) for details.
+- `ContourLayer`, `GridLayer`, `HexagonLayer` and `ScreenGridLayer` are moved from `@deck.gl/layers` to `@deck.gl/aggregation-layers`. No action is required if you are importing them from `deck.gl`.
+- `@deck.gl/experimental-layers` is deprecated. Experimental layers will be exported from their respective modules with a `_` prefix.
+  + `BitmapLayer` is moved to `@deck.gl/layers`.
+  + `MeshLayer` is renamed to `SimpleMeshLayer` and moved to `@deck.gl/mesh-layers`.
+  + `TileLayer` and `TripsLayer` are moved to `@deck.gl/geo-layers`.
+
+#### Layers
+
+- `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/layers/column-layer.md) with `diskResolution: 6` instead.
+- `ArcLayer` and `LineLayer`'s `getStrokeWidth` props are deprecated. Use `getWidth` instead.
+- The following former experimental layers' APIs are redesigned as they graduate to official layers. Refer to their documentations for details:
+  - [BitmapLayer](/docs/layers/column-layer.md)
+  - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md)
+  - [TileLayer](/docs/layers/tile-layer.md)
+  - [TripsLayer](/docs/layers/trips-layer.md)
+
+#### Lighting
+
+The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/uber/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/effects/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/deck.md#effects).
+
+
+## Upgrading from deck.gl v6.3 to v6.4
+
+#### OrthographicView
+
+The experimental `OrthographicView` class has the following breaking changes:
+
+- `zoom` is reversed (larger value means zooming in) and switched to logarithmic scale.
+- Changed view state defaults:
+  + `zoom` - `1` -> `0`
+  + `offset` - `[0, 1]` -> `[0, 0]`
+  + `minZoom` - `0.1` -> `-10`
+- `eye`, `lookAt` and `up` are now set in the  `OrthographicView` constructor instead of `viewState`.
+
+#### ScatterplotLayer
+
+Deprecations:
+
+- `outline` is deprecated: use `stroked` instead.
+- `strokeWidth` is deprecated: use `getLineWidth` instead. Note that while `strokeWidth` is in pixels, line width is now pecified in meters. The old appearance can be achieved by using `lineWidthMinPixels` and/or `lineWidthMaxPixels`.
+- `getColor` is deprecated: use `getFillColor` and `getLineColor` instead.
+
+Breaking changes:
+
+- `outline` / `stroked` no longer turns off fill. Use `filled: false` instead.
+
+#### GeoJsonLayer
+
+Breaking changes:
+
+- `stroked`, `getLineWidth` and `getLineColor` props now apply to point features (rendered with a ScatterplotLayer) in addition to polygon features. To revert to the old appearance, supply a `_subLayerProps` override:
+
+```js
+new GeoJsonLayer({
+  // ...other props
+  stroked: true,
+  _subLayerProps: {
+    points: {stroked: false}
+  }
+});
+```
+
+
 ## Upgrading from deck.gl v6.2 to v6.3
 
 #### GridLayer and HexagonLayer
