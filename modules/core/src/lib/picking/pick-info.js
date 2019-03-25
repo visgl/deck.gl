@@ -114,6 +114,8 @@ export function processPickInfo({
     layer.setModuleParameters({
       pickingSelectedColor
     });
+
+    layer.setNeedsRedraw();
   });
 
   return infos;

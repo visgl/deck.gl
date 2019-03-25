@@ -19,27 +19,18 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
+import {tile2boundingBox} from '@deck.gl/geo-layers/tile-layer/utils/tile';
 
-import {
-  GreatCircleLayer,
-  H3HexagonLayer,
-  H3ClusterLayer,
-  S2Layer,
-  TileLayer,
-  TripsLayer
-} from '@deck.gl/geo-layers';
+test('tile2boundingBox', t => {
+  const results = tile2boundingBox(8, 5, 4);
+  const expected = {
+    east: 22.5,
+    north: 55.77657301866769,
+    south: 40.97989806962013,
+    west: 0
+  };
 
-test('Top-level imports', t => {
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
-  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
+  t.deepEqual(results, expected, 'Should match the results.');
+
   t.end();
 });
-
-import './tile-layer';
-import './s2-layer.spec';
-import './great-circle-layer.spec';
-import './h3-layers.spec';
