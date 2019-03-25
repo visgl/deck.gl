@@ -64,9 +64,10 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
   - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) **New**
   - [ScenegraphLayer](/docs/layers/scene-graph-layer.md) **New**
 
-### Binary Data Support
+### Layer API
 
-In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`.
+* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](/docs/developer-guide/performance.md#on-using-binary-data).
+* **Alignment in core layer API**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
 
 ### Improved Test Utilities
 
