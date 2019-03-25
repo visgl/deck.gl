@@ -201,7 +201,7 @@ This is an object that contains material props for [lighting effect](/docs/effec
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.position`
 

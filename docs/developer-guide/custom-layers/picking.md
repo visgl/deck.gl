@@ -1,6 +1,6 @@
 # Picking
 
-> Make sure you have read [Interactivity](/docs/get-started/interactivity.md) before reading this section.
+> Make sure you have read [Interactivity](/docs/developer-guide/interactivity.md) before reading this section.
 
 ## How It Works
 

@@ -132,7 +132,7 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 ### Data Accessors
 
-##### `getPath` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.path`
 
@@ -151,7 +151,7 @@ new PathLayer({
 })
 ```
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default `[0, 0, 0, 255]`
 
@@ -160,7 +160,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -169,7 +169,7 @@ The width of each path, in units specified by `widthUnits` (default meters).
 * If a number is provided, it is used as the width for all paths.
 * If a function is provided, it is called on each path to retrieve its width.
 
-##### `getDashArray` (Function|Array, optional)
+##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 * Default: `null`
 

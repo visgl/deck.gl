@@ -199,7 +199,7 @@ This is an object that contains material props for [lighting effect](/docs/effec
 
 ### Data Accessors
 
-##### `getPolygon` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPolygon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * default: `object => object.polygon`
 
@@ -241,7 +241,7 @@ If the optional third component `z` is supplied for a position, it specifies the
   <p><i>Polygons with 3D positions, courtesy of <a href="https://github.com/SymbolixAU">@SymbolixAU</a> and <a href="https://github.com/mdsumner">@mdsumner</a></i></p>
 </div>
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -250,7 +250,7 @@ The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -260,7 +260,7 @@ The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in 
 * If a function is provided, it is called on each polygon to retrieve its outline color.
 
 
-##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -269,7 +269,7 @@ The width of the outline of the polygon, in units specified by `lineWidthUnits` 
 * If a number is provided, it is used as the outline width for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline width.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -283,7 +283,7 @@ Only applies if `extruded: true`.
 
 **Note:** If 3D positions are returned by `getPolygon`, the extrusion returned by `getElevation` is added to the base altitude of each vertex.
 
-##### `getLineDashArray` (Function|Array, optional)
+##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 * Default: `null`
 

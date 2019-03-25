@@ -77,7 +77,7 @@ Shallow changes in `getColorValue` and `getElevationValue` props are now ignored
 
 #### Prop Types in Custom Layers
 
-Although the [prop types system](/docs/developer-guide/prop-types.md) is largely backward-compatible, it is possible that some custom layers may stop updating when a certain prop changes. This is because the automatically deduced prop type from `defaultProps` does not match its desired usage. Switch to explicit descriptors will fix the issue, e.g. from:
+Although the [prop types system](/docs/developer-guide/custom-layers/prop-types.md) is largely backward-compatible, it is possible that some custom layers may stop updating when a certain prop changes. This is because the automatically deduced prop type from `defaultProps` does not match its desired usage. Switch to explicit descriptors will fix the issue, e.g. from:
 
 ```js
 MyLayer.defaultProps = {

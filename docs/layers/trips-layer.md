@@ -62,7 +62,7 @@ This value should be in the same units as the timestamps from `getPath`.
 
 ### Data Accessors
 
-##### `getPath` (Function, optional)
+##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 - Default: `d => d.path`
 

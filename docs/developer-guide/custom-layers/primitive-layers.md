@@ -5,7 +5,7 @@ If you want to draw something completely different and you are comfortable aroun
 
 ## Implementing the Layer Lifecycle Functions
 
-To describe how a layer's properties relate to WebGL attributes and uniforms you need to implement the layer's [lifecycle functions](/docs/developer-guide/layer-lifecycle.md).
+To describe how a layer's properties relate to WebGL attributes and uniforms you need to implement the layer's [lifecycle functions](/docs/developer-guide/custom-layers/layer-lifecycle.md).
 
 
 ### Initializing Layer
@@ -86,7 +86,7 @@ It is sometimes desirable to have a single layer render using multiple geometry 
 
 #### Defining Attributes
 
-A layer should also define its attributes during initialization. This allows the [`attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for [Attribute Management](/docs/developer-guide/attribute-management.md).
+A layer should also define its attributes during initialization. This allows the [`attribute manager`](/docs/api-reference/attribute-manager.md) to do the heavy lifting for [Attribute Management](/docs/developer-guide/custom-layers/attribute-management.md).
 
 Define attributes by calling [`attributeManager.add`](/docs/api-reference/attribute-manager.md#-add-):
 
@@ -137,7 +137,7 @@ While you have the freedom to create any type of layer you want, with any type o
 
 ### Making Shaders Work with deck.gl's Coordinate Systems
 
-By supplying the `modules: ['project']` parameter when you create your layer's luma.gl `Model` you get access to deck.gl's [family of GLSL projection methods](/docs/developer-guide/writing-shaders.md#projection-vertex-shader-) that support all three deck.gl projection modes: latlon (default), meters and neutral.
+By supplying the `modules: ['project']` parameter when you create your layer's luma.gl `Model` you get access to deck.gl's [family of GLSL projection methods](/docs/developer-guide/custom-layers/writing-shaders.md#projection-vertex-shader-) that support all three deck.gl projection modes: latlon (default), meters and neutral.
 
 By always using the following shader functions for handling projections and scaling, a single layer class can support all projection modes for free:
 
@@ -152,4 +152,4 @@ If your layer is instanced (`data` prop is an array and each element is rendered
 
 By default, each layer creates an `instancePickingColors` attribute and automatically calculates it using the length of the `data` array.
 
-For custom picking, read about [Implementing Custom Picking](/docs/developer-guide/picking.md#implementing-custom-picking).
+For custom picking, read about [Implementing Custom Picking](/docs/developer-guide/custom-layers/picking.md#implementing-custom-picking).

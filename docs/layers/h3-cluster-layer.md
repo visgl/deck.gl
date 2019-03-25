@@ -97,7 +97,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/
 
 ### Data Accessors
 
-##### `getHexagons` (Function, optional)
+##### `getHexagons` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 Method called to retrieve the hexagon cluster from each object, as an array of [H3](https://uber.github.io/h3/) hexagon indices. These hexagons are joined into polygons that represent the geospatial outline of the cluster.
 

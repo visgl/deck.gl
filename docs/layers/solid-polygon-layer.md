@@ -112,7 +112,7 @@ This is an object that contains material props for [lighting effect](/docs/effec
 
 ### Data Accessors
 
-##### `getPolygon` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPolygon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.polygon`
 
@@ -128,7 +128,7 @@ A polygon can be one of the following formats:
   - `holeIndices` (Array) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
 
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -137,7 +137,7 @@ The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component 
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -147,7 +147,7 @@ Only applies if `extruded: true`.
 * If an array is provided, it is used as the stroke color for all polygons.
 * If a function is provided, it is called on each object to retrieve its stroke color.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 

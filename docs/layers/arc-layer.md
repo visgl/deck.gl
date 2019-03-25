@@ -121,19 +121,19 @@ The maximum line width in pixels. This prop can be used to prevent the line from
 
 ### Data Accessors
 
-##### `getSourcePosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getSourcePosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.sourcePosition`
 
 Method called to retrieve the source position of each object.
 
-##### `getTargetPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getTargetPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.targetPosition`
 
 Method called to retrieve the target position of each object.
 
-##### `getSourceColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getSourceColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -142,7 +142,7 @@ The rgba color at the source, in `r, g, b, [a]`. Each component is in the 0-255 
 * If an array is provided, it is used as the source color for all objects.
 * If a function is provided, it is called on each object to retrieve its source color.
 
-##### `getTargetColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getTargetColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default `[0, 0, 0, 255]`
 
@@ -151,7 +151,7 @@ The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 
 * If an array is provided, it is used as the target color for all objects.
 * If a function is provided, it is called on each object to retrieve its target color.
 
-##### `getWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -160,13 +160,13 @@ The line width of each object, in units specified by `widthUnits` (default pixel
 * If a number is provided, it is used as the line width for all objects.
 * If a function is provided, it is called on each object to retrieve its line width.
 
-##### `getHeight` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getHeight` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
 Multiplier of layer height. `0` will make the layer flat.
 
-##### `getTilt` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getTilt` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 

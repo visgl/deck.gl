@@ -94,11 +94,11 @@ new deck.S2Layer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/docs/api-reference/composite-layer.md), and [PolygonLayer](/docs/api-reference/polygon-layer.md) properties, plus the following:
+Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/docs/api-reference/composite-layer.md), and [PolygonLayer](/docs/layers/polygon-layer.md) properties, plus the following:
 
 ### Data Accessors
 
-##### `getS2Token` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getS2Token` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details.
 
