@@ -237,11 +237,11 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Using Layers',
-        content: getDocUrl('get-started/using-layers.md')
+        content: getDocUrl('developer-guide/using-layers.md')
       },
       {
         name: 'Adding Interactivity',
-        content: getDocUrl('get-started/interactivity.md')
+        content: getDocUrl('developer-guide/interactivity.md')
       },
       {
         name: 'About View States',
@@ -260,11 +260,7 @@ export const docPages = generatePath([
         content: getDocUrl('developer-guide/viewports.md')
       },
       {
-        name: 'Optimizing Updates',
-        content: getDocUrl('developer-guide/updates.md')
-      },
-      {
-        name: 'Performance Notes',
+        name: 'Performance Optimization',
         content: getDocUrl('developer-guide/performance.md')
       },
       {
@@ -318,39 +314,39 @@ export const docPages = generatePath([
         children: [
           {
             name: 'Writing Your Own Layer',
-            content: getDocUrl('developer-guide/custom-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/README.md')
           },
           {
             name: 'Layer Lifecycle',
-            content: getDocUrl('developer-guide/layer-lifecycle.md')
+            content: getDocUrl('developer-guide/custom-layers/layer-lifecycle.md')
           },
           {
             name: 'Picking',
-            content: getDocUrl('developer-guide/picking.md')
+            content: getDocUrl('developer-guide/custom-layers/picking.md')
           },
           {
             name: 'Composite Layers',
-            content: getDocUrl('developer-guide/composite-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/composite-layers.md')
           },
           {
             name: 'Subclassed Layers',
-            content: getDocUrl('developer-guide/subclassed-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/subclassed-layers.md')
           },
           {
             name: 'Primitive Layers',
-            content: getDocUrl('developer-guide/primitive-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/primitive-layers.md')
           },
           {
             name: 'Layer Prop Types',
-            content: getDocUrl('developer-guide/prop-types.md')
+            content: getDocUrl('developer-guide/custom-layers/prop-types.md')
           },
           {
             name: 'Attribute Management',
-            content: getDocUrl('developer-guide/attribute-management.md')
+            content: getDocUrl('developer-guide/custom-layers/attribute-management.md')
           },
           {
             name: 'Writing Shaders',
-            content: getDocUrl('developer-guide/writing-shaders.md')
+            content: getDocUrl('developer-guide/custom-layers/writing-shaders.md')
           }
         ]
       }
@@ -371,6 +367,10 @@ export const docPages = generatePath([
       {
         name: 'Layers',
         children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('layers/README.md')
+          },
           {
             name: 'Layer',
             content: getDocUrl('api-reference/layer.md')

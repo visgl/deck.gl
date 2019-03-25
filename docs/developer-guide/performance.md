@@ -1,7 +1,7 @@
-# Performance Notes
+# Performance Optimization
 
 
-## General Expectations
+## General Performance Expectations
 
 There are mainly two aspects that developers usually consider regarding the
 performance of any computer programs: the time and the memory consumption, both of which obviously depends on the specs of the hardware deck.gl is ultimately running on.
@@ -16,28 +16,510 @@ Modern phones (recent iPhones and higher-end Android phones) are surprisingly ca
 
 ## Layer Update Performance
 
-In addition to rendering performance, another consideration is deck.gl's
-automatic WebGL buffer generation which takes some time to complete
-whenever data changes.
+Layer update happens when the layer is first created, or when some layer props change. During an update, deck.gl may load necessary resources (e.g. image textures), generate WebGL buffers, and upload them to the GPU, all of which may take some time to complete, depending on the number of items in your `data` prop. Therefore, the key to performant deck.gl applications is to minimize layer updates wherever possible.
 
-When the `data` prop changes, deck.gl will recalculate its WebGL buffers.
-The time required for this is proportional to the number of items in your
+### Minimize data changes
+
+When the `data` prop changes, the layer will recalculate all of its WebGL buffers. The time required for this is proportional to the number of items in your
 `data` prop.
-Note that deck.gl will call the accessors you supply to the layer for
-every object, so normally you would want the accessors to be trivial functions
-that just return already precomputed/transformed data.
-
-While often imperceptible for small, non-changing data sets, this step can take
+This step is the most expensive operation that a layer does - also on CPU - potentially affecting the responsiveness of the application. It may take
 multiple seconds for multi-million item layers, and if your `data` prop is updated
-frequently, buffer generation can cause "stutter" in e.g. animations,
-even for layers with just a few thousand items. While it is usually possible to
-overcome these issues using special techniques, but it can require extra work.
-Before optimizing data updates, make sure that:
+frequently (e.g. animations), "stutter" can be visible even for layers with just a few thousand items.
 
-* you are not modifying the data prop when it hasn't changed. The layer will
-   do a shallow equal to determine if it needs to regenerate buffers. So if
-   nothing has changed, make sure you supply the **same** data object (typically
-   an Array) every time you render.
+Some good places to check for performance improvements are:
+
+* **Has `data` really changed?**
+
+  The layer does a shallow comparison between renders to determine if it needs to regenerate buffers. If
+  nothing has changed, make sure you supply the *same* data object every time you render. If the data object has to change shallowly for some reason, consider using the `dataComparator` prop to supply a custom comparison logic.
+
+  ```js
+  // Bad
+  const DATA = [...];
+  const filters = {minTime: -1, maxTime: Infinity};
+
+  function setFilters(minTime, maxTime) {
+    filters.minTime = minTime;
+    filters.maxTime = maxTime;
+    render();
+  }
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      // `filter` creates a new array every time `render` is called, even if the filters have not changed
+      data: DATA.filter(d => d.time >= filters.minTime && d.time <= filters.maxTime),
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+  ```js
+  // Good
+  const DATA = [...];
+  let filteredData = DATA;
+  const filters = {minTime: -1, maxTime: Infinity};
+
+  function setFilters(minTime, maxTime) {
+    filters.minTime = minTime;
+    filters.maxTime = maxTime;
+    // filtering is performed only once when the filters change
+    filteredData = DATA.filter(d => d.time >= minTime && d.time <= maxTime);
+    render();
+  }
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      data: filteredData,
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+* **Is the change internal to each object?**
+
+  So `data` has indeed changed. Do we have an entirely new collection of objects? Or did just certain fields changed in each row? Remember that changing `data` will update *all* buffers, so if, for example, object positions have not changed, it will be a waste of time to recalculate them.
+
+  ```js
+  // Bad
+  const DATA = [...];
+  let currentYear = null;
+  let currentData = DATA;
+
+  function selectYear(year) {
+    currentYear = year;
+    currentData = DATA.map(d => ({
+      position: d.position,
+      population: d.populationsByYear[year]
+    }));
+    render();
+  }
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      // `data` changes every time year changed, but positions don't need to update
+      data: currentData,
+      getPosition: d => d.position,
+      getRadius: d => Math.sqrt(d.population),
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+  In this case, it is more efficient to use [`updateTriggers`](/docs/api-reference/layer.md#updatetriggers-object-optional) to invalidate only the selected attributes:
+
+  ```js
+  // Good
+  const DATA = [...];
+  let currentYear = null;
+
+  function selectYear(year) {
+    currentYear = year;
+    render();
+  }
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      // `data` never changes
+      data: DATA,
+      getPosition: d => d.position,
+      // radius depends on `currentYear`
+      getRadius: d => Math.sqrt(d.populationsByYear[currentYear]),
+      updateTriggers: {
+        // This tells deck.gl to recalculat radius when `currentYear` changes
+        getRadius: currentYear
+      },
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+* **Is the data change incremental?**
+
+  A common technique for handling big datasets on the client side is to load data in chunks. We want to update the visualization whenever a new chunk comes in. If we append the new chunk to an existing data array, deck.gl will recalculate the whole buffers, even for the previously loaded chunks where nothing have changed:
+
+  ```js
+  // Bad
+  let loadedData = [];
+
+  function onNewDataArrive(chunk) {
+    loadedData = loadedData.concat(chunk);
+    render();
+  }
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      // If we have 1 million rows loaded and 100,000 new rows arrive,
+      // we end up recalculating the buffers for all 1,100,000 rows
+      data: loadedData,
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+  To avoid doing this, we instead generate one layer for each chunk:
+
+  ```js
+  // Good
+  const dataChunks = [];
+
+  function onNewDataArrive(chunk) {
+    dataChunks.push(chunk);
+    render();
+  }
+
+  function render() {
+    const layers = dataChunks.map((chunk, chunkIndex) => new ScatterplotLayer({
+      // Important: each layer must have a consistent & unique id
+      id: `chunk-${chunkIndex}`,
+      // If we have 10 100,000-row chunks already loaded and a new one arrive,
+      // the first 10 layers will see no prop change
+      // only the 11th layer's buffers need to be generated
+      data: chunk,
+      ...
+    }));
+
+    deck.setProps({layers});
+  }
+  ```
+
+* **When to remove a layer**
+
+  Removing a layer will lose all of its internal states, including generated buffers. If the layer is added back later, all the WebGL resources need to be regenerated again. In the use cases where layers need to be toggled frequently (e.g. via a control panel), there might be a significant perf penalty:
+
+  ```js
+  // Bad
+  const DATA = [...];
+  const layerVisibility = {circles: true, labels: true}
+
+  function toggleLayer(key) {
+    layerVisibility[key] = !layerVisibility[key];
+    render();
+  }
+
+  function render() {
+    const layers = [
+      // when visibility goes from on to off to on, this layer will be completely removed and then regenerated
+      layerVisibility.circles && new ScatterplotLayer({
+        data: DATA,
+        ...
+      }),
+      layerVisibility.labels && new TextLayer({
+        data: DATA,
+        ...
+      })
+    ];
+
+    deck.setProps({layers});
+  }
+  ```
+
+  The [`visible`](/docs/api-reference/layer.md#visible-boolean-optional) prop is a cheap way to temporarily disable a layer:
+
+  ```js
+  // Bad
+  const DATA = [...];
+  const layerVisibility = {circles: true, labels: true}
+
+  function toggleLayer(key) {
+    layerVisibility[key] = !layerVisibility[key];
+    render();
+  }
+
+  function render() {
+    const layers = [
+      // when visibility is off, this layer's internal states will be retained in memory, making turning it back on instant
+      new ScatterplotLayer({
+        data: DATA,
+        visible: layerVisibility.circles,
+        ...
+      }),
+      new TextLayer({
+        data: DATA,
+        visible: layerVisibility.labels,
+        ...
+      })
+    ];
+
+    deck.setProps({layers});
+  }
+  ```
+
+### Optimize Accessors
+
+99% of the CPU time that deck.gl spends in updating buffers is calling the accessors you supply to the layer. Since they are called on every data object, any performance issue in the accessors is amplified by the size of your data.
+
+* **Use constants before callback functions**
+
+  Most accessors accept constant values as well as functions. Constant props are extremely cheap to update in comparison. Use `ScatterplotLayer` as an example, the following two prop settings yield exactly the same visual outcome:
+
+  - `getFillColor: [255, 0, 0, 128]` - deck.gl uploads 4 numbers to the GPU.
+  - `getFillColor: d => [255, 0, 0, 128]` - deck.gl first builds a typed array of `4 * data.length` elements, call the accessor `data.length` times to fill it, then upload it to the GPU.
+
+  Aside from accessors, most layers also offer one or more `*Scale` props that are uniform multipliers on top of the per-object value. Always consider using them before invoking the accessors:
+
+  ```js
+  // Bad
+  const DATA = [...];
+
+  function animate() {
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  function render() {
+    const scale = Date.now() % 2000;
+
+    const layer = new ScatterplotLayer({
+      data: DATA,
+      getRadius: object => object.size * scale,
+      // deck.gl will call `getRadius` for ALL data objects every animation frame, which will likely choke the app
+      updateTriggers: {
+        getRadius: scale
+      },
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+  ```js
+  // Good
+  const DATA = [...];
+
+  function animate() {
+    render();
+    requestAnimationFrame(animate);
+  }
+
+  function render() {
+    const scale = Date.now() % 2000;
+
+    const layer = new ScatterplotLayer({
+      data: DATA,
+      getRadius: object => object.size,
+      // This has virtually no cost to update, easily getting 60fps animation
+      radiusScale: scale,
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+
+* **Use trivial functions as accessors**
+
+  Whenever possible, make the accessors trivial functions and utilize pre-defined and/or pre-computed data.
+
+  ```js
+  // Bad
+  const DATA = [...];
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      data: DATA,
+      getFillColor: object => {
+        // This line creates a new values array from each object
+        // which can incur significant cost in garbage collection
+        const maxPopulation = Math.max.apply(null, Object.values(object.populationsByYear));
+        // This switch case creates a new color array for each object
+        // which can also incur significant cost in garbage collection
+        if (maxPopulation > 1000000) {
+          return [255, 0, 0];
+        } else if (maxPopulation > 100000) {
+          return [0, 255, 0];
+        } else {
+          return [0, 0, 255];
+        }
+      },
+      getRadius: object => {
+        // This line duplicates what's done in `getFillColor` and doubles the cost
+        const maxPopulation = Math.max.apply(null, Object.values(object.populationsByYear));
+        return Math.sqrt(maxPopulation);
+      }
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+  ```js
+  // Good
+  const DATA = [...];
+
+  // Use a for loop to avoid creating new objects
+  function getMaxPopulation(populationsByYear) {
+    let maxPopulation = 0;
+    for (const year in populationsByYear) {
+      const population = populationsByYear[year];
+      if (population > maxPopulation) {
+        maxPopulation = population;
+      }
+    }
+    return maxPopulation;
+  }
+
+  // Calculate max population once and store it in the data
+  DATA.forEach(d => {
+    d.maxPopulation = getMaxPopulation(d.populationsByYear);
+  });
+
+  // Use constant color values to avoid generating new arrays
+  const COLORS = {
+    ONE_MILLION: [255, 0, 0],
+    HUNDRED_THOUSAND: [0, 255, 0],
+    OTHER: [0, 0, 255]
+  };
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      data: DATA,
+      getFillColor: object => {
+        if (object.maxPopulation > 1000000) {
+          return COLORS.ONE_MILLION;
+        } else if (maxPopulation > 100000) {
+          return COLORS.HUNDRED_THOUSAND;
+        } else {
+          return COLORS.OTHER;
+        }
+      },
+      getRadius: object => Math.sqrt(object.maxPopulation),
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+### On Using Binary Data
+
+When creating data-intensive applications, it is often desirable to offload client-side data processing to the server or web workers. To transfer data efficiently between threads, some binary format is likely involved.
+
+* **Supply binary data to the `data` prop**
+
+  Assume we have the data source encoded in the following format:
+
+  ```js
+  // lon1, lat1, radius1, red1, green1, blue1, lon2, lat2, ...
+  const binaryData = new Float32Array([-122.4, 37.78, 1000, 255, 200, 0, -122.41, 37.775, 500, 200, 0, 0, -122.39, 37.8, 500, 0, 40, 200]);
+  ```
+
+  Upon receiving the typed arrays, the application can of course re-construct a classic JavaScript array:
+
+  ```js
+  // Bad
+  const data = [];
+  for (let i = 0; i < binaryData.length; i += 6) {
+    data.push({
+      position: binaryData.subarray(i, i + 2),
+      radius: binaryData[i + 2],
+      color: binaryData.subarray(i + 3, i + 6)
+    });
+  }
+
+  new ScatterplotLayer({
+    data,
+    getPosition: d => d.position,
+    getRadius: d => d.radius,
+    getFillColor: d => d.color
+  });
+  ```
+
+  However, in addition to requiring custom repacking code, this array will take valuable CPU time to create, and significantly more memory to store than its binary form. In performance-sensitive applications that constantly push a large volumn of data (e.g. animations), this method will not be efficient enough.
+
+  Alternatively, one may supply a non-iterable object (not Array or TypedArray) to the `data` object. In this case, it must contain a `length` field that specifies the total number of objects. Since `data` is not iterable, each accessor will not receive a valid `object` argument, and therefore responsible of interpreting the input data's buffer layout:
+
+  ```js
+  // Good
+  // Note: binaryData.length does not equal the number of items,
+  // which is why we need to wrap it in an object that contains a custom `length` field
+  const DATA = {src: binaryData, length: binaryData.length / 6}
+
+  new ScatterplotLayer({
+    data: DATA,
+    getPosition: (object, {index, data}) => {
+      return data.src.subarray(index * 6, index * 6 + 2);
+    },
+    getRadius: (object, {index, data}) => {
+      return data.src[index * 6 + 2];
+    },
+    getFillColor: (object, {index, data, target}) => {
+      return data.src.subarray(index * 6 + 3, index * 6 + 6);
+    }
+  })
+  ```
+
+  Optionally, the accessors can utilize the pre-allocated `target` array in the second argument to further avoid creating new objects:
+
+  ```js
+  // Good
+  const DATA = {src: binaryData, length: binaryData.length / 6}
+
+  new ScatterplotLayer({
+    data: DATA,
+    getPosition: (object, {index, data, target}) => {
+      target[0] = data.src[index * 6];
+      target[1] = data.src[index * 6 + 1];
+      target[2] = 0;
+      return target;
+    },
+    getRadius: (object, {index, data}) => {
+      return data.src[index * 6 + 2];
+    },
+    getFillColor: (object, {index, data, target}) => {
+      target[0] = data.src[index * 6 + 3];
+      target[1] = data.src[index * 6 + 4];
+      target[2] = data.src[index * 6 + 5];
+      target[3] = 255;
+      return target;
+    }
+  })
+  ```
+
+* **Supplying attributes directly**
+
+  While the built-in attribute generation functionality is a major part of a `Layer`s functionality, it is possible for applications to bypass it, and supply the layer with precalculated attributes.
+
+  Some deck.gl applications use workers to load data and generate attributes to get the processing off the main thread. Modern worker implementations allow ownership of typed arrays to be transferred between threads which takes care of about half of the biggest performance problem with workers (deserialization of calculated data when transferring it between threads).
+
+  To generate attributes for the `PointCloudLayer`:
+
+  ```js
+  // Worker
+  // point[0].x, point[0].y, point[0].z, point[1].x, point[1].y, point[1].z, ...
+  const positions = new Float32Array(...);
+  // point[0].r, point[0].g, point[0].b, point[0].a, point[1].r, point[1].g, point[1].b, point[1].a, ...
+  const colors = new Uint8ClampedArray(...);
+
+  // send back to main thread
+  postMessage({positions, colors}, [positions.buffer, colors.buffer]);
+  ```
+
+  ```js
+  // Main thread
+  // `data` is received from the worker
+  new PointCloudLayer({
+    // since there's no raw data, the layer needs to know how many instances to draw
+    numInstances: data.positions.length / 3,
+    // external buffer
+    instancePositions: data.positions,
+    instanceColors: data.colors,
+    // constant accessor works without raw data
+    getNormal: [0, 0, 1]
+  });
+  ```
 
 
 ## Layer Rendering Performance
@@ -56,11 +538,6 @@ point is small.
 It is good to be aware that excessive overdraw (drawing many objects/pixels on top of each other) can generate very high fragment counts and thus hurt performance. As an example, a `Scatterplot` radius of 5 pixels generates ~ 100 pixels per point. If you have a `Scatterplot` layer with 10 million points, this can result in up to 1 billion fragment shader invocations per frame. While dependent on zoom levels (clipping will improve performance to some extent) this many fragments will certainly strain even a recent MacBook Pro GPU.
 
 
-## Layer Precision
-
-UPDATE: Since v6.1, deck.gl uses a hybrid 32 bit projection mode that achieves "64-bit precision" with "32-bit performance" (10x faster). It is no longer required to set the `fp64` prop to true, or top use an "offset mode" based coordinate system (in fact, this automatically done under the hood).
-
-
 ## Layer Picking Performance
 
 deck.gl performs picking by drawing the layer into an off screen picking buffer. This essentially means that every layer that supports picking will be drawn off screen when panning and hovering. The picking is performed using the same GPU code that does the visual rendering, so the performance should be easy to predict.
@@ -75,13 +552,6 @@ Picking limitations:
 
 The layer count of an advanced deck.gl application tends to gradually increase, especially when using composite layers. We have built and optimized a highly complex application using close to 100 deck.gl layers (this includes hierarchies of sublayers rendered by custom composite layers rendering other composite layers) without seeing any performance issues related to the number of layers. If you really need to, it is probably possible to go a little higher (a few hundred layers). Just keep in mind that deck.gl was not designed to be used with thousands of layers.
 
-
-## Profiling Ideas
-
-Some profiling techniques:
-
-* Using the `seer` chrome extension you can also get GPU timings for your layers.
-* The `layer-browser` example (in the `examples` folder has a couple of performance tests that you can use to get FPS readings on your hardware for Scatterplot layers with 1M and 10M points.
 
 ## Common Issues
 

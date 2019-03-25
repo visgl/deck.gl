@@ -221,7 +221,7 @@ Callback - called when the object under the pointer changes.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
+* `info` - the [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
 * `pickedInfos` - an array of info objects for all pickable layers that are affected.
 * `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
@@ -231,7 +231,7 @@ Callback - called when clicking on the canvas.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
+* `info` - the [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
 * `pickedInfos` - an array of info objects for all pickable layers that are affected.
 * `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
 
@@ -241,7 +241,7 @@ Callback - called when the user starts dragging on the canvas.
 
 Callback Arguments:
 
-* `info` - the [picking info](/docs/get-started/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 ##### `onDrag` (Function, optional)
@@ -250,7 +250,7 @@ Callback - called when dragging the canvas.
 
 Callback Arguments:
 
-* `info` - the [picking info](/docs/get-started/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 ##### `onDragEnd` (Function, optional)
@@ -259,7 +259,7 @@ Callback - called when the user releases from dragging the canvas.
 
 Callback Arguments:
 
-* `info` - the [picking info](/docs/get-started/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 
@@ -315,7 +315,7 @@ deck.pickObject({x, y, radius, layerIds})
 
 Returns:
 
-* a single [`info`](/docs/get-started/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
+* a single [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) object, or `null` if nothing is found.
 
 
 ##### `pickMultipleObjects`
@@ -334,7 +334,7 @@ deck.pickMultipleObjects({x, y, radius, layerIds, depth})
 
 Returns:
 
-* An array of [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects. The array will be empty if no object was picked.
+* An array of [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) objects. The array will be empty if no object was picked.
 
 Notes:
 
@@ -359,7 +359,7 @@ Parameters:
 
 Returns:
 
-* an array of unique [`info`](/docs/get-started/interactivity.md#the-picking-info-object) objects
+* an array of unique [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) objects
 
 Notes:
 
