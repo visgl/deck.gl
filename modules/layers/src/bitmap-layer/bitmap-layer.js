@@ -81,6 +81,8 @@ export default class BitmapLayer extends Layer {
         value: new Float32Array(positions)
       }
     });
+
+    this.setState({numInstances: 1});
   }
 
   updateState({props, oldProps, changeFlags}) {

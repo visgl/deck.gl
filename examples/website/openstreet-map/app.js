@@ -7,15 +7,12 @@ export const INITIAL_VIEW_STATE = {
   latitude: 47.65,
   longitude: 7,
   zoom: 4.5,
-  // https://wiki.openstreetmap.org/wiki/Zoom_levels
   maxZoom: 20,
-  pitch: 50,
   bearing: 0
 };
 
 // https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames#Tile_servers
-// `s` represents sub-domain of tile servers
-const s = 'c';
+const tileServer = 'https://c.tile.openstreetmap.org/';
 
 export class App extends PureComponent {
   constructor(props) {
@@ -37,23 +34,7 @@ export class App extends PureComponent {
       tile && (
         <div className="tooltip" style={{left: x, top: y}}>
           <div className="tooltip-item">
-            <div>tile:</div>
-            <div>
-              x: {tile.x}, y: {tile.y}, z: {tile.z}
-            </div>
-          </div>
-          <div className="tooltip-item">
-            <div>boundary:</div>
-            <div>
-              north: {sourceLayer.props.bounds[3].toFixed(4)}, west:{' '}
-              {sourceLayer.props.bounds[0].toFixed(4)}
-            </div>
-          </div>
-          <div className="tooltip-item">
-            <div>coordinates:</div>
-            <div>
-              x: {x.toFixed(4)}, y: {y.toFixed(4)}
-            </div>
+            tile: x: {tile.x}, y: {tile.y}, z: {tile.z}
           </div>
         </div>
       )
@@ -65,17 +46,20 @@ export class App extends PureComponent {
       new TileLayer({
         pickable: true,
         onHover: this._onHover,
+        autoHighlight: true,
+        highlightColor: [60, 60, 60, 40],
+        opacity: 1,
+        // https://wiki.openstreetmap.org/wiki/Zoom_levels
+        minZoom: 0,
+        maxZoom: 19,
+
         renderSubLayers: props => {
           const {x, y, z, bbox} = props.tile;
           const {west, south, east, north} = bbox;
 
-          return new BitmapLayer({
-            id: `bitmap-${props.id}`,
-            image: `https://${s}.tile.openstreetmap.org/${z}/${x}/${y}.png`,
-            bounds: [west, south, east, north],
-
-            pickable: true,
-            tile: props.tile
+          return new BitmapLayer(props, {
+            image: `${tileServer}/${z}/${x}/${y}.png`,
+            bounds: [west, south, east, north]
           });
         }
       })

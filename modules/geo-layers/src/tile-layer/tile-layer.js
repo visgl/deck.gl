@@ -91,7 +91,7 @@ export default class TileLayer extends CompositeLayer {
         Object.assign({}, this.props, {
           id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
           data: tile.data,
-          visible: visible && (this.state.isLoaded || tile.z === z),
+          visible: visible && (!this.state.isLoaded || tile.z === z),
           tile
         })
       );
