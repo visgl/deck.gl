@@ -786,22 +786,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     const attributeManager = this.getAttributeManager();
     const attributeManagerNeedsRedraw =
       attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
-    const modelNeedsRedraw = this._modelNeedsRedraw(clearRedrawFlags);
-    redraw = redraw || attributeManagerNeedsRedraw || modelNeedsRedraw;
-
-    return redraw;
-  }
-
-  _modelNeedsRedraw(clearRedrawFlags) {
-    let redraw = false;
-
-    for (const model of this.getModels()) {
-      let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
-      if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
-        modelNeedsRedraw = `model ${model.id}`;
-      }
-      redraw = redraw || modelNeedsRedraw;
-    }
+    redraw = redraw || attributeManagerNeedsRedraw;
 
     return redraw;
   }
