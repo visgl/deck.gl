@@ -15,9 +15,26 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl v6.3
+## deck.gl v7.0
 
 ### deck.gl v7.0 Prereleases
+
+#### deck.gl [v7.0.0-beta.1] - Mar 25 2019
+
+- Add OpenStreetMap example using TileLayer and BitmapLayer (#2821)
+- Docs and examples update for new submodule structure (#2829)
+- Changes based on mesh layer API audit (#2807)
+- Add widthUnits & sizeUnits to core layers (#2825)
+- H3 layer prop forwarding (#2826)
+- Use meters as size scale in IconLayer and TextLayer (#2810)
+- Improve S2Layer accuracy & docs (#2819)
+- allow width in TripsLayer (#2708)
+- GreatCircleLayer Fixes (#2820)
+- improve bundle size (#2813)
+- Add lint rules for imports (#2812)
+- Add H3 layers (#2808)
+- Fix onAfterUpdate callback in tests (#2801)
+- Fix non-iterable support in tesselators (#2811)
 
 #### deck.gl [v7.0.0-alpha.6] - Mar 18 2019
 - Line layer api update (#2723)
@@ -214,7 +231,175 @@ fe8bb099 fix updateTriggers not being called issue when transitioning between 0 
 - enable website examples to be copied out and run standalone (#2450)
 - Give TileLayer GetPickingInfo Access Only to Its Relevant Tile (#2453)
 
+
+## deck.gl v6.4
+
+#### [6.4.7] - Mar 14 2019
+
+- Don't fire panmove if drag started somewhere else (#2780)
+- Fix module alias error when switching branches (#2754)
+- getViewport -> makeViewport (#2752)
+- Small UI fixes and updates on the website (#2740)
+
+#### [6.4.6] - Feb 21 2019
+
+- Prevent mutation of color variables passed to color setters (#2733)
+
+#### [6.4.5] - Feb 21 2019
+
+- Improve picking color generation (#2697)
+- Add experimental onMetrics callback (#2711)
+
+#### [6.4.4] - Feb 20 2019
+
+- Multi-depth picking fix (#2701)
+
+#### [6.4.3] - Feb 17 2019
+
+- PathLayer: fix rightDeltas attribute generation when using flat vertices (#2694)
+
+#### [6.4.2] - Feb 15 2019
+
+- Match auto-highlight color blending behavior with 6.3
+- Don't use invertPan flag in _onPanRotate method (#2682)
+
+#### [6.4.1] - Feb 7 2019
+
+- specify default props for trips layer (#2644)
+- Polygon tesselation fix (#2659)
+
+#### [6.4.0] - Jan 29 2019
+
+- Remove prefixes for grab and grabbing cursor values. (#2629)
+- bump dev dependencies (#2635)
+- add type for defaultProps in path outline layer (#2521)
+
+### Pre-releases
+
+#### [6.4.0-beta.1] - Jan 28 2019
+
+- fix the visible prop in TileLayer (#2624)
+- OrthographicView bug fixes (#2625)
+- expose font settings as TextLayer props (#2628)
+- fix text-layer per object highlighting (#2633)
+
+#### [6.4.0-alpha.3] - Jan 24 2019
+
+- Generate layer attributes on a worker (PR 1/3) (#2490)
+- Generate layer attributes on a worker (PR 2/3) (#2575)
+- Generate layer attributes on a worker (PR 3/3) (#2576)
+- remove loggoing fontAlas time (#2601)
+- Fix AttributeTransitionManager crash when data is empty (#2605)
+- Fix HexagonLayer constructors (#2590)
+- remove module.exports (#2607)
+- Fix occasional picking failure in mapbox layer (#2606)
+- Document the sublayers of all composite layers (#2599)
+- Update composite layer customization RFC (#2600)
+- check deprecated props in updateTriggers and transitions (#2611)
+- Remove require() (#2613)
+- fix angular (#2615)
+- Update composite layer API (#2612)
+
+#### [6.4.0-alpha.2] - Jan 18 2019
+
+- reset blend params after mapbox render
+- Apply TinySDF to TextLayer (#2549)
+- Flat path data proposal (#2522)
+- Fix layer.clone bug (#2583)
+- PathLayer shader: 2-dimensional vPathPosition (#2515)
+- allow ScatterplotLayer to draw both stroke and fill (#2573)
+- support dynamically load icons (#2526)
+- Add deprecated flag to prop types (#2586)
+- Support flat data input to polygon layer (#2581)
+- Pass the missing startZoomPosition into Orthographic Controller interactiveState (#2587)
+- Fix multiple argument support in ScatterplotLayer (#2593)
+
+#### [6.4.0-alpha.1] - Jan 11 2019
+
+- enable website examples to be copied out and run standalone (#2450)
+- IsoBands Part-1: Add Marching Squares utility methods (#2429)
+- Replace gl packages with original gl-matrix (#2463)
+- Add interaction test (#2407)
+- IsoBands Part-2: Add support in Contour Layer. (#2434)
+- Docs/RFC directory minor cleanup (#2491)
+- Reverse zoom in Orthographic controller (#2466)
+- Fix info-viz render tests (#2502)
+- Fix fp64 shader tests (#2506)
+- fix RFC Readme table formatting (#2512)
+- specify types for defaultProps in bezier curve layer (#2505)
+- specify types for defaultProps in bitmap layer (#2516)
+- specify types for defaultProps in gpu grid layer (#2518)
+- Strip glsl comments (#2517)
+- PathTesselator class (#2493)
+- Refactor PolygonTesselator (#2494)
+- add picking test (#2514)
+- specify types for defaultProps in mesh layer (#2520)
+- modify clearPickingColor in solid-polygon-layer (#2538)
+- Documentation updates (#2536)
+- fix anchor bugs (#2539)
+- add IconManager RFC (#2510)
+- update readme for bezier curve layer (#2542)
+- GPUAggregator: fixes for Min and Mean aggregation (#2554)
+- ScreenGridLayer: add support Min/Max/Mean aggregation (#2560)
+- ScreenGridLayer: fix picking under WebGL1 (#2557)
+- update webpack versions (#2559)
+- Documentation Updates (#2567)
+
+## deck.gl v6.3
+
+#### [6.3.3] - Jan 2 2019
+
+- Fallback to gl.canvas.height when gl.canvas.clientHeight are not available (#2421)
+- Fix pickMultipleObjects in pathLayer (#2534)
+- Fix handling for event callback function return values (#2535)
+
+#### [6.3.2] - Dec 10 2018
+
+- Use default Alpha for picking highlight color (#2479)
+- Fix updateTriggers not being called issue when transitioning between 0 and null (#2475)
+- Add callback function onDataLoaded in TileLayer (#2487)
+- PathLayer: fix various precision issues (#2495)
+
+#### [6.3.1] - Dec 4 2018
+
+- Fix auto-offset mode bug (#2464)
+- Fix PolygonLayer bug: getPolygon update trigger not working (#2473)
+- Fix Mapbox integration bug - do not override canvas size if using external gl context (#2465)
+- Fix event callbacks `this` ref (#2471)
+
+#### [6.3.0] - Nov 19 2018
+
+- Fix async prop comparison bug (#2437)
+- Remove assert dependency from modules (#2438)
+- fixed invalid accessor comparisons in contour layer and grid layer (#2442)
+- Give TileLayer event callbacks access to source layer and tile (#2445)
+- Support generic iterables in `data` prop (#2444)
+- Allow user to change min/max zoom of orthographic controller (#2448)
+- Align parameters passed to all layer callbacks (#2452)
+- Bump luma.gl dependency to 6.3.0 prod version
+
 ### deck.gl v6.3 Prereleases
+
+#### [6.3.0-beta.2] - Nov 13 2018
+
+- Export TileLayer from experimental layers (#2388)
+- Allow layers to implement event handling via class methods (#2427)
+
+#### [6.3.0-beta.1] - Nov 11 2018
+
+- Bump luma.gl to 6.3-beta (#2423)
+- ScreenGridLayer fixes (#2422)
+- Disable randomly failing tests on Intel GPUs (#2420)
+- fix userdata is not present on initial render (#2418)
+- GPUGridAggregator: Add support for MEAN operations (#2417)
+- rename lngLat to coordinate in pickInfo for non-geo use cases (#2416)
+- Bump math.gl version to 2.2.0 (#2415)
+- Support multiple arguments in CompositeLayer constructor (#2410)
+
+#### [6.3.0-alpha.3]
+
+- [@deck.gl/mapbox] Reset context state before drawing non-mapbox layers (#2409)
+- Fallback to canvas.width/height when clientWidth/clientHeight are not available (#2405)
 
 #### [6.3.0-alpha.2] - Nov 2 2018
 
