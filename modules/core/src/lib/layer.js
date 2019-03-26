@@ -803,22 +803,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
     const attributeManagerNeedsRedraw = attributeManager && attributeManager.getNeedsRedraw(opts);
-    const modelNeedsRedraw = this._modelNeedsRedraw(opts);
-    redraw = redraw || attributeManagerNeedsRedraw || modelNeedsRedraw;
-
-    return redraw;
-  }
-
-  _modelNeedsRedraw(opts) {
-    let redraw = false;
-
-    for (const model of this.getModels()) {
-      let modelNeedsRedraw = model.getNeedsRedraw(opts);
-      if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
-        modelNeedsRedraw = `model ${model.id}`;
-      }
-      redraw = redraw || modelNeedsRedraw;
-    }
+    redraw = redraw || attributeManagerNeedsRedraw;
 
     return redraw;
   }
