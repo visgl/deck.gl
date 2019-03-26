@@ -82,6 +82,9 @@ export {createIterable} from './utils/iterable-utils';
 import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 import {count} from './utils/count';
 
+// lighting
+export {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
+
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
