@@ -705,7 +705,7 @@ export default class Deck {
 
   _onPointerDown(event) {
     this._requestPick({
-      callback: this.props.onHover,
+      callback: null,
       event,
       mode: 'hover',
       immediate: true
