@@ -441,14 +441,14 @@ export default class Deck {
     return views;
   }
 
-  _requestPick(options, immediate) {
+  _requestPick({event, callback, mode, immediate}) {
     const {_pickRequest} = this;
-    if (options.event.type === 'pointerleave') {
+    if (event.type === 'pointerleave') {
       _pickRequest.x = -1;
       _pickRequest.y = -1;
       _pickRequest.radius = 0;
     } else {
-      const pos = options.event.offsetCenter;
+      const pos = event.offsetCenter;
       // Do not trigger callbacks when click/hover position is invalid. Doing so will cause a
       // assertion error when attempting to unproject the position.
       if (!pos) {
@@ -459,9 +459,9 @@ export default class Deck {
       _pickRequest.radius = this.props.pickingRadius;
     }
 
-    _pickRequest.callback = options.callback;
-    _pickRequest.event = options.event;
-    _pickRequest.mode = options.mode;
+    _pickRequest.callback = callback;
+    _pickRequest.event = event;
+    _pickRequest.mode = mode;
 
     if (immediate) {
       this._pickAndCallback();
@@ -704,14 +704,12 @@ export default class Deck {
   }
 
   _onPointerDown(event) {
-    this._requestPick(
-      {
-        callback: this.props.onHover,
-        event,
-        mode: 'hover'
-      },
-      true
-    );
+    this._requestPick({
+      callback: this.props.onHover,
+      event,
+      mode: 'hover',
+      immediate: true
+    });
   }
 
   _onPointerMove(event) {
