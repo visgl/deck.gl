@@ -40,7 +40,6 @@ export default class PickLayersPass extends LayersPass {
           layers,
           viewports,
           onViewportActive,
-          drawPickingColors: true,
           pass: 'picking',
           redrawReason,
           parameters: {
