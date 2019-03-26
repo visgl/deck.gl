@@ -152,32 +152,40 @@ Also note that by directly calling `queryObject`, integrating deck.gl into an ex
 
 ## Using the Built-in Event-Handling
 
-For applications that have basic event handling needs, deck.gl has built-in support for handling the two most basic mouse events: `hover` and `click`. When the application registers callbacks, deck.gl automatically tracks these events, runs the picking engine and calls application callbacks with a single parameter `info` which contains the resulting picking info object.
+For applications that have basic event handling needs, deck.gl has built-in support for handling selected pointer events. When the application registers callbacks, deck.gl automatically tracks these events, runs the picking engine and calls application callbacks with a single parameter `info` which contains the resulting picking info object.
+
+The following event handlers are supported:
+
+- `onHover`
+- `onClick`
+- `onDragStart`
+- `onDrag`
+- `onDragEnd`
+
+A event handler function is called with two parameters: `info` that contains the object being interacted with, and `event` that contains the pointer event.
 
 There are two ways to subscribe to the built-in picking event handling:
 
-* Set callback for each pickable layer by setting [`onHover`](/docs/api-reference/layer.md#-onhover-function-optional-) and [`onClick`](/docs/api-reference/layer.md#-onclick-function-optional-) props:
+* Specify callbacks for each pickable layer by passing [event handler props](/docs/api-reference/layer.md#interaction-properties):
 
 ```js
 const layer = new ScatterplotLayer({
     ...
     pickable: true,
-    onHover: info => console.log('Hovered:', info),
-    onClick: info => console.log('Clicked:', info)
+    onHover: (info, event) => console.log('Hovered:', info, event),
+    onClick: (info, event) => console.log('Clicked:', info, event)
 });
 ```
 
-* Set callback for all pickable layers by setting [`onLayerHover`](/docs/api-reference/react/deckgl.md#-onlayerhover-function-optional-) and [`onLayerClick`](/docs/api-reference/react/deckgl.md#-onlayerclick-function-optional-) props of the `DeckGL` canvas:
+* Specify callbacks for all pickable layers by setting [event handler props](/docs/api-reference/react/deckgl.md#event-callbacks) of the `DeckGL` canvas:
 
 ```js
 <DeckGL
     ...
-    onLayerHover={this._onHover}
-    onLayerClick={this._onClick}
+    onHover={this._onHover}
+    onClick={this._onClick}
 />
 ```
-
-The callbacks for `hover` and `click` events are called with a single parameter `info` that contains the mouse or touch event and what was hovered, including which layer was selected. Thus event handlers registered directly on the `DeckGL` components are also able to distinguish between clicks in different layers.
 
 ### Behavior of Built-in Event Handling
 

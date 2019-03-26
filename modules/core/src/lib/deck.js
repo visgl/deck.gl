@@ -68,8 +68,6 @@ function getPropTypes(PropTypes) {
     onViewStateChange: PropTypes.func,
     onBeforeRender: PropTypes.func,
     onAfterRender: PropTypes.func,
-    onLayerClick: PropTypes.func,
-    onLayerHover: PropTypes.func,
     onLoad: PropTypes.func,
 
     // Debug settings
@@ -104,8 +102,6 @@ const defaultProps = {
   onViewStateChange: noop,
   onBeforeRender: noop,
   onAfterRender: noop,
-  onLayerClick: null,
-  onLayerHover: null,
   onLoad: noop,
   _onMetrics: null,
 
@@ -131,6 +127,7 @@ export default class Deck {
     this.deckPicker = null;
 
     this._needsRedraw = true;
+    this._pickRequest = {};
 
     this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
     this.interactiveState = {
@@ -139,7 +136,7 @@ export default class Deck {
 
     // Bind methods
     this._onEvent = this._onEvent.bind(this);
-    this._onClick = this._onClick.bind(this);
+    this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
     this._onPointerLeave = this._onPointerLeave.bind(this);
     this._pickAndCallback = this._pickAndCallback.bind(this);
@@ -190,6 +187,14 @@ export default class Deck {
 
   setProps(props) {
     this.stats.get('setProps Time').timeStart();
+
+    if ('onLayerHover' in props) {
+      log.removed('onLayerHover', 'onHover')();
+    }
+    if ('onLayerClick' in props) {
+      log.removed('onLayerClick', 'onClick')();
+    }
+
     props = Object.assign({}, this.props, props);
     this.props = props;
 
@@ -436,32 +441,55 @@ export default class Deck {
     return views;
   }
 
-  _pickAndCallback(options) {
-    const pos = options.event.offsetCenter;
-    // Do not trigger callbacks when click/hover position is invalid. Doing so will cause a
-    // assertion error when attempting to unproject the position.
-    if (!pos) {
-      return;
+  _requestPick(options, immediate) {
+    const {_pickRequest} = this;
+    if (options.event.type === 'pointerleave') {
+      _pickRequest.x = -1;
+      _pickRequest.y = -1;
+      _pickRequest.radius = 0;
+    } else {
+      const pos = options.event.offsetCenter;
+      // Do not trigger callbacks when click/hover position is invalid. Doing so will cause a
+      // assertion error when attempting to unproject the position.
+      if (!pos) {
+        return;
+      }
+      _pickRequest.x = pos.x;
+      _pickRequest.y = pos.y;
+      _pickRequest.radius = this.props.pickingRadius;
     }
 
-    const radius = this.props.pickingRadius;
-    const layers = this.layerManager.getLayers();
-    const activateViewport = this.layerManager.activateViewport;
-    const selectedInfos = this.deckPicker.pickObject({
-      x: pos.x,
-      y: pos.y,
-      radius,
-      layers,
-      viewports: this.getViewports(pos),
-      activateViewport,
-      mode: options.mode,
-      depth: 1,
-      event: options.event
-    });
-    if (options.callback && selectedInfos) {
-      const firstInfo = selectedInfos.find(info => info.index >= 0) || null;
-      // As per documentation, send null value when no valid object is picked.
-      options.callback(firstInfo, selectedInfos, options.event.srcEvent);
+    _pickRequest.callback = options.callback;
+    _pickRequest.event = options.event;
+    _pickRequest.mode = options.mode;
+
+    if (immediate) {
+      this._pickAndCallback();
+    }
+  }
+
+  _pickAndCallback() {
+    const {_pickRequest} = this;
+
+    if (_pickRequest.mode) {
+      // perform picking
+      const selectedInfos = this.deckPicker.pickObject(
+        Object.assign(
+          {
+            layers: this.layerManager.getLayers(),
+            viewports: this.getViewports(_pickRequest),
+            activateViewport: this.layerManager.activateViewport,
+            depth: 1
+          },
+          _pickRequest
+        )
+      );
+      if (_pickRequest.callback && selectedInfos) {
+        const firstInfo = selectedInfos.find(info => info.index >= 0) || selectedInfos[0];
+        // As per documentation, send null value when no valid object is picked.
+        _pickRequest.callback(firstInfo, _pickRequest.event);
+      }
+      _pickRequest.mode = null;
     }
   }
 
@@ -475,8 +503,6 @@ export default class Deck {
   _updateAnimationProps(animationProps) {
     this.layerManager.context.animationProps = animationProps;
   }
-
-  // Deep integration (Mapbox styles)
 
   _setGLContext(gl) {
     if (this.layerManager) {
@@ -502,7 +528,7 @@ export default class Deck {
     if (!this.props._customRender) {
       this.eventManager = new EventManager(gl.canvas, {
         events: {
-          click: this._onClick,
+          pointerdown: this._onPointerDown,
           pointermove: this._onPointerMove,
           pointerleave: this._onPointerLeave
         }
@@ -612,6 +638,9 @@ export default class Deck {
 
     // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});
+
+    this._pickAndCallback();
+
     if (!redrawReason) {
       return;
     }
@@ -641,17 +670,6 @@ export default class Deck {
     if (isDragging !== this.interactiveState.isDragging) {
       this.interactiveState.isDragging = isDragging;
     }
-  }
-
-  // Route move events to layers. call the `onHover` prop of any picked layer,
-  // and `onLayerHover` is called directly from here with any picking info generated by `pickLayer`.
-  // @param {Object} event  A mjolnir.js event
-  _onClick(event) {
-    this._pickAndCallback({
-      callback: this.props.onLayerClick,
-      event,
-      mode: 'click'
-    });
   }
 
   _onEvent(event) {
@@ -685,33 +703,35 @@ export default class Deck {
     }
   }
 
+  _onPointerDown(event) {
+    this._requestPick(
+      {
+        callback: this.props.onHover,
+        event,
+        mode: 'hover'
+      },
+      true
+    );
+  }
+
   _onPointerMove(event) {
     if (event.leftButton || event.rightButton) {
       // Do not trigger onHover callbacks if mouse button is down.
       return;
     }
-    this._pickAndCallback({
-      callback: this.props.onLayerHover,
+    this._requestPick({
+      callback: this.props.onHover,
       event,
       mode: 'hover'
     });
   }
 
   _onPointerLeave(event) {
-    const layers = this.layerManager.getLayers();
-    const activateViewport = this.layerManager.activateViewport;
-    this.deckPicker.pickObject({
-      x: -1,
-      y: -1,
-      layers,
-      viewports: [],
-      activateViewport,
-      radius: 1,
+    this._requestPick({
+      callback: this.props.onHover,
+      event,
       mode: 'hover'
     });
-    if (this.props.onLayerHover) {
-      this.props.onLayerHover(null, [], event.srcEvent);
-    }
   }
 }
 
