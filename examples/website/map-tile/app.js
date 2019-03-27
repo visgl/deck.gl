@@ -42,12 +42,14 @@ export class App extends PureComponent {
   }
 
   _renderLayers() {
+    const {autoHighlight = true, highlightColor = [60, 60, 60, 40]} = this.props;
+
     return [
       new TileLayer({
         pickable: true,
         onHover: this._onHover,
-        autoHighlight: true,
-        highlightColor: [60, 60, 60, 40],
+        autoHighlight,
+        highlightColor,
         opacity: 1,
         // https://wiki.openstreetmap.org/wiki/Zoom_levels
         minZoom: 0,
