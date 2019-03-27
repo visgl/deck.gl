@@ -32,5 +32,8 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^7.0.0-alpha.3"
+  },
+  "dependencies": {
+    "@luma.gl/addons": "^7.0.0-alpha.19"
   }
 }

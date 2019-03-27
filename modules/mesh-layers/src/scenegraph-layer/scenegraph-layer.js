@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {createGLTFObjects, fp64} from '@luma.gl/core';
+import {fp64} from '@luma.gl/core';
+import {createGLTFObjects} from '@luma.gl/addons';
 import {getMatrixAttributes} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;
@@ -160,10 +161,20 @@ export default class ScenegraphLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
     const numInstances = this.getNumInstances();
+    const modelAttributes = {};
+
+    for (const name in changedAttributes) {
+      const attribute = changedAttributes[name];
+      if (attribute.constant) {
+        modelAttributes[name] = attribute.value;
+      } else {
+        modelAttributes[name] = [attribute.buffer || attribute.externalBuffer, attribute];
+      }
+    }
 
     this.state.sceneGraph.traverse((model, {worldMatrix}) => {
-      model.setAttributes(changedAttributes);
-      model.setInstanceCount(numInstances);
+      model.setAttributes(modelAttributes);
+      model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
         parameters,
