@@ -108,13 +108,13 @@ Converts the given number of pixels to a clipspace offset that can be added to a
 
 Converts screen-space pixels to world distance.
 
-`float project_pixel_to_world_distance(float pixels)`
+`float project_pixel_to_worldspace(float pixels)`
 
 ### project_size_to_pixels
 
 Converts size in meters to screen-space pixels.
 
-`float project_world_distance_to_pixels(float distance)`
+`float project_size_to_pixels(float distance)`
 
 ## Remarks
 
