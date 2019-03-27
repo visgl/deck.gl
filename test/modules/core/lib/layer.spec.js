@@ -279,9 +279,6 @@ test('Layer#use64bitPositions', t => {
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT});
   t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT');
 
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL});
-  t.true(layer.use64bitPositions(), 'returns true for COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL');
-
   layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED});
   t.false(layer.use64bitPositions(), 'returns false for COORDINATE_SYSTEM.LNGLAT_DEPRECATED');
 

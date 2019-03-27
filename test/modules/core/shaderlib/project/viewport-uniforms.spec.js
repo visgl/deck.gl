@@ -47,7 +47,7 @@ const UNIFORMS = {
 
   // Distance at which screen pixels are projected
   project_uFocalDistance: Number,
-  project_uDistancePerUnit: Array,
+  project_uCommonUnitsPerWorldUnit: Array,
   project_uScale: Number, // This is the mercator scale (2 ** zoom)
 
   project_uModelMatrix: Array,

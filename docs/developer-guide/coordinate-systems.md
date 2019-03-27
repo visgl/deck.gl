@@ -1,12 +1,10 @@
 # Coordinate Systems
 
-By default, deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) coordinate system, so when working with geospatial data (i.e with longitude and latitude encoded positions) deck.gl will automatically interpret any positions correctly.
+By default, deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) coordinate system (i.e. `[longitude, latitude, altitude]`), so when working with geospatial data (i.e with longitude and latitude encoded positions) deck.gl will automatically interpret any positions correctly.
 
-In addition, deck.gl layers can be configured to use "meter offset" based local coordinate systems, which can be quite convenient when modelling geographical data on small scales (e.g. city block level).
+In addition, deck.gl layers can be configured to use a selection of alternative coordinate systems, supporting data from e.g. LIDAR sensors, and non-geospatial use cases.
 
-Naturally, non-geospatial coordinates can also be used when working with non-geospatial data sets.
-
-Of note is that each deck.gl layer can define its own coordinate system. Within the data supplied to a single layer, all positions must be specified in the coordinate system, however data supplied to other layers can be specified in other coordinate system.
+Each deck.gl layer can define its own coordinate system. Within the data supplied to a single layer, all positions must be specified in the same coordinate system. Layers using different coordinate systems can be composed together, which is very useful when dealing with datasets from different sources.
 
 
 ## Supported Coordinate Systems

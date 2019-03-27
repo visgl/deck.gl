@@ -113,13 +113,13 @@ void main(void) {
   get_pos_fp64(projected_source_coord, projected_target_coord, nextSegmentRatio,
     next_pos_modelspace);
 
-  vec4 curr_pos_clipspace = project_to_clipspace_fp64(curr_pos_modelspace);
-  vec4 next_pos_clipspace = project_to_clipspace_fp64(next_pos_modelspace);
+  vec4 curr_pos_clipspace = project_common_position_to_clipspace_fp64(curr_pos_modelspace);
+  vec4 next_pos_clipspace = project_common_position_to_clipspace_fp64(next_pos_modelspace);
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
   float widthPixels = clamp(
-    project_size_to_pixels(instanceWidths * widthScale),
+    project_size_to_pixel(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
 

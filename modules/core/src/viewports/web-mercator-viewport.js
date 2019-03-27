@@ -122,8 +122,6 @@ export default class WebMercatorViewport extends Viewport {
     this.bearing = bearing;
     this.altitude = altitude;
 
-    // One mercator world pixel maps to one screen pixel
-    this.pixelScale = 1;
     this.orthographic = orthographic;
 
     // Bind methods

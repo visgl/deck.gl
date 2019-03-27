@@ -57,7 +57,7 @@ void project_position_fp64(vec2 position, vec2 position64xyLow, out vec2 out_val
   project_position_fp64(position64xy, out_val);
 }
 
-vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
+vec4 project_common_position_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
   vec2 vertex_pos_clipspace[4];
   mat4_vec4_mul_fp64(project_uViewProjectionMatrixFP64, vertex_pos_modelspace,
     vertex_pos_clipspace);
@@ -90,7 +90,7 @@ vec4 project_position_to_clipspace(
 
   worldPosition = vec4(projectedPosition64xy[0].x, projectedPosition64xy[1].x, z, 1.0);
 
-  return project_to_clipspace_fp64(worldPosition64);
+  return project_common_position_to_clipspace_fp64(worldPosition64);
 }
 
 vec4 project_position_to_clipspace(
@@ -100,5 +100,10 @@ vec4 project_position_to_clipspace(
   return project_position_to_clipspace(
     position, position64xyLow, offset, worldPosition
   );
+}
+
+// Deprecated, remove in v8
+vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
+  return project_common_position_to_clipspace_fp64(vertex_pos_modelspace);
 }
 `;

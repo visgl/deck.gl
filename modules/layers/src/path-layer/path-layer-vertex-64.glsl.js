@@ -57,9 +57,9 @@ float flipIfTrue(bool flag) {
 
 vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
 
-  float widthPixels = clamp(project_size_to_pixels(instanceStrokeWidths * widthScale),
+  float widthPixels = clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0;
-  float width = project_pixel_to_worldspace(widthPixels);
+  float width = project_pixel_size(widthPixels);
 
   vec2 deltaA64[2];
   vec2 deltaB64[2];
@@ -227,6 +227,6 @@ void main() {
   vertex_pos_modelspace[2] = vec2(pos.z + projected_curr_position_z, 0.0);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
-  gl_Position = project_to_clipspace_fp64(vertex_pos_modelspace);
+  gl_Position = project_common_position_to_clipspace_fp64(vertex_pos_modelspace);
 }
 `;

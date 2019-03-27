@@ -1,6 +1,6 @@
 # project32 (Shader Module)
 
-The `project32` shader module is an extension of the `project` shader module that adds some projection utilities.
+The `project32` shader module is an extension of the [project](/docs/api-reference/shader-modules/project.md) shader module that adds some projection utilities.
 
 ## GLSL Functions
 
@@ -8,9 +8,10 @@ The `project32` shader module is an extension of the `project` shader module tha
 
 32 bit implementation of the `project_position_to_clipspace` interface.
 
-`vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)`
-
-`vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset, out vec4 worldPosition)`
+```glsl
+vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset)
+vec4 project_position_to_clipspace(vec3 position, vec2 position64xyLow, vec3 offset, out vec4 worldPosition)
+```
 
 Parameters:
 

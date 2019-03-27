@@ -93,13 +93,13 @@ void main(void) {
 
   vec3 currPos = getPos(source, target, segmentRatio);
   vec3 nextPos = getPos(source, target, nextSegmentRatio);
-  vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
-  vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
+  vec4 curr = project_common_position_to_clipspace(vec4(currPos, 1.0));
+  vec4 next = project_common_position_to_clipspace(vec4(nextPos, 1.0));
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
   float widthPixels = clamp(
-    project_size_to_pixels(instanceWidths * widthScale),
+    project_size_to_pixel(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
 

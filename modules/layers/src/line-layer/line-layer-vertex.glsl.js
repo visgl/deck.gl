@@ -57,7 +57,7 @@ void main(void) {
 
   // Multiply out width and clamp to limits
   float widthPixels = clamp(
-    project_size_to_pixels(instanceWidths * widthScale),
+    project_size_to_pixel(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
   
