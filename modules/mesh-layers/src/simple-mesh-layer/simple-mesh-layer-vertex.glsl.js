@@ -23,7 +23,7 @@ varying vec4 vColor;
 
 void main(void) {
   vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
-  pos = project_scale(pos);
+  pos = project_size(pos);
 
   vec4 worldPosition;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);

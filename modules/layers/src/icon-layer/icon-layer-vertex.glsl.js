@@ -56,7 +56,7 @@ void main(void) {
  
   // project meters to pixels and clamp to limits 
   float sizePixels = clamp(
-    project_scale(instanceSizes * sizeScale), 
+    project_size_to_pixels(instanceSizes * sizeScale), 
     sizeMinPixels, sizeMaxPixels
   );
 

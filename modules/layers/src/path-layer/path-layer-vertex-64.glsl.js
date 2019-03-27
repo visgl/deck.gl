@@ -57,8 +57,9 @@ float flipIfTrue(bool flag) {
 
 vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
 
-  float width = clamp(project_scale(instanceStrokeWidths * widthScale),
+  float widthPixels = clamp(project_size_to_pixels(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0;
+  float width = project_pixel_to_worldspace(widthPixels);
 
   vec2 deltaA64[2];
   vec2 deltaB64[2];
@@ -199,7 +200,7 @@ void main() {
   vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
   vec2 projected_curr_position[2];
   project_position_fp64(currPosition.xy, currPosition64xyLow, projected_curr_position);
-  float projected_curr_position_z = project_scale(currPosition.z);
+  float projected_curr_position_z = project_size(currPosition.z);
 
   // Calculate previous position
 

@@ -185,13 +185,13 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   bool isEnd = positions.x > EPSILON;
   bool isJoint = positions.z > EPSILON;
 
-  float width = clamp(project_scale(instanceStrokeWidths * widthScale),
+  float widthPixels = clamp(project_size_to_pixels(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0;
 
   return lineJoin(
     prevPoint, currPoint, nextPoint,
     relativePosition, isEnd, isJoint,
-    width
+    project_pixel_to_worldspace(widthPixels)
   );
 }
 

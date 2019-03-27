@@ -72,30 +72,30 @@ const OUT_BUFFER = new Buffer(gl, 16);
 const MAX_FRACTION_DIGITS = 5;
 
 const TRANSFORM_VS = {
-  project_scale: meter => `\
+  project_size: meter => `\
 varying float outValue;
 
 void main()
 {
-  outValue = project_scale(${meter.toFixed(MAX_FRACTION_DIGITS)});
+  outValue = project_size(${meter.toFixed(MAX_FRACTION_DIGITS)});
 }
 `,
-  project_scale_vec2: meter => `\
+  project_size_vec2: meter => `\
   varying vec2 outValue;
 
   void main()
   {
-    outValue = project_scale(vec2(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
+    outValue = project_size(vec2(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
     MAX_FRACTION_DIGITS
   )}));
   }
   `,
-  project_scale_vec3: meter => `\
+  project_size_vec3: meter => `\
   varying vec3 outValue;
 
   void main()
   {
-    outValue = project_scale(vec3(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
+    outValue = project_size(vec3(${meter[0].toFixed(MAX_FRACTION_DIGITS)}, ${meter[1].toFixed(
     MAX_FRACTION_DIGITS
   )}, ${meter[2].toFixed(MAX_FRACTION_DIGITS)}));
   }
@@ -137,22 +137,22 @@ const TEST_CASES = [
     },
     tests: [
       {
-        name: 'project_scale(float)',
-        func: ({project_scale}) => project_scale(1),
+        name: 'project_size(float)',
+        func: ({project_size}) => project_size(1),
         output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter[2],
-        vs: TRANSFORM_VS.project_scale(1)
+        vs: TRANSFORM_VS.project_size(1)
       },
       {
-        name: 'project_scale(vec2)',
-        func: ({project_scale_vec2}) => project_scale_vec2([1, 1]),
+        name: 'project_size(vec2)',
+        func: ({project_size_vec2}) => project_size_vec2([1, 1]),
         output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter.slice(0, 2),
-        vs: TRANSFORM_VS.project_scale_vec2([1, 1])
+        vs: TRANSFORM_VS.project_size_vec2([1, 1])
       },
       {
-        name: 'project_scale(vec3)',
-        func: ({project_scale_vec3}) => project_scale_vec3([1, 1, 1]),
+        name: 'project_size(vec3)',
+        func: ({project_size_vec3}) => project_size_vec3([1, 1, 1]),
         output: TEST_VIEWPORT.getDistanceScales().pixelsPerMeter,
-        vs: TRANSFORM_VS.project_scale_vec3([1, 1, 1])
+        vs: TRANSFORM_VS.project_size_vec3([1, 1, 1])
       },
       {
         name: 'project_position',

@@ -62,7 +62,7 @@ void main(void) {
   vec4 color = mix(minColor, maxColor, step) / 255.;
 
   // TODO: discard when noRender is true
-  float finalCellSize = noRender ? 0.0 : project_scale(cellSize);
+  float finalCellSize = noRender ? 0.0 : project_size(cellSize);
 
 
   float elevation = 0.0;

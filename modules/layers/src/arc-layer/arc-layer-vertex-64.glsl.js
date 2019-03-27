@@ -118,12 +118,12 @@ void main(void) {
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
-  float width = clamp(
-    project_scale(instanceWidths * widthScale),
+  float widthPixels = clamp(
+    project_size_to_pixels(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
 
-  vec2 offset = getExtrusionOffset(next_pos_clipspace.xy - curr_pos_clipspace.xy, positions.y, width);
+  vec2 offset = getExtrusionOffset(next_pos_clipspace.xy - curr_pos_clipspace.xy, positions.y, widthPixels);
 
   gl_Position = curr_pos_clipspace + vec4(offset, 0.0, 0.0);
 

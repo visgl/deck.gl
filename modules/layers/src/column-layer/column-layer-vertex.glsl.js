@@ -63,7 +63,7 @@ void main(void) {
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
-  vec3 pos = vec3(project_scale(rotationMatrix * positions.xy + offset) * dotRadius, 0.);
+  vec3 pos = vec3(project_size(rotationMatrix * positions.xy + offset) * dotRadius, 0.);
 
   vec4 position_worldspace;
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_worldspace);
