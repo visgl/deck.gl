@@ -1,7 +1,7 @@
 /* eslint-disable complexity */
 import assert from '../utils/assert';
 import GL from '@luma.gl/constants';
-import {Buffer, _Attribute as Attribute} from 'luma.gl';
+import {Buffer, hasFeature, FEATURES} from 'luma.gl';
 
 import {createIterable} from '../utils/iterable-utils';
 import log from '../utils/log';
@@ -13,9 +13,35 @@ const DEFAULT_STATE = {
   allocedInstances: -1
 };
 
-export default class LayerAttribute extends Attribute {
+let idCounter = 0;
+
+export default class LayerAttribute {
   constructor(gl, opts = {}) {
-    super(gl, opts);
+    const {id = `attribute-${idCounter++}`, type, isIndexed = false} = opts;
+
+    // Options that cannot be changed later
+    this.gl = gl;
+    this.id = id;
+    this.isIndexed = isIndexed;
+    this.target = isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER;
+    this.type = type;
+
+    if (isIndexed && !type) {
+      // If the attribute is indices, auto infer the correct type
+      // WebGL2 and WebGL1 w/ uint32 index extension support accepts Uint32Array, otherwise Uint16Array
+      this.type =
+        gl && hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? GL.UNSIGNED_INT : GL.UNSIGNED_SHORT;
+    }
+
+    // Initialize the attribute descriptor, with WebGL and metadata fields
+    this.value = null;
+    this.externalBuffer = null;
+    this.buffer = null;
+    this.userData = {}; // Reserved for application
+    this.update(opts);
+
+    // Sanity - no app fields on our attributes. Use userData instead.
+    Object.seal(this);
 
     const {
       // deck.gl fields
@@ -42,6 +68,13 @@ export default class LayerAttribute extends Attribute {
 
     // Check all fields and generate helpful error messages
     this._validateAttributeUpdaters();
+  }
+
+  delete() {
+    if (this.buffer) {
+      this.buffer.delete();
+      this.buffer = null;
+    }
   }
 
   get bufferLayout() {
@@ -236,7 +269,98 @@ export default class LayerAttribute extends Attribute {
     return false;
   }
 
+  update(opts) {
+    const {value, buffer, constant = this.constant || false} = opts;
+
+    this.constant = constant;
+
+    if (buffer) {
+      this.externalBuffer = buffer;
+      this.constant = false;
+
+      this.type = opts.type || buffer.accessor.type;
+      if (buffer.accessor.divisor !== undefined) {
+        this.divisor = buffer.accessor.divisor;
+      }
+      if (opts.divisor !== undefined) {
+        this.divisor = opts.divisor;
+      }
+    } else if (value) {
+      this.externalBuffer = null;
+      this.value = value;
+
+      if (!constant && this.gl) {
+        // Create buffer if needed
+        this.buffer =
+          this.buffer ||
+          new Buffer(
+            this.gl,
+            Object.assign({}, opts, {
+              id: this.id,
+              target: this.target,
+              type: this.type
+            })
+          );
+        this.buffer.setData({data: value});
+        this.type = this.buffer.accessor.type;
+      }
+    }
+
+    this._setAccessor(opts);
+  }
+
+  getBuffer() {
+    if (this.constant) {
+      return null;
+    }
+    return this.externalBuffer || this.buffer;
+  }
+
+  getValue() {
+    if (this.constant) {
+      return this.value;
+    }
+    const buffer = this.externalBuffer || this.buffer;
+    if (buffer) {
+      return [buffer, this];
+    }
+    return null;
+  }
+
   // PRIVATE HELPER METHODS
+
+  // Sets all accessor props except type
+  // TODO - store on `this.accessor`
+  _setAccessor(opts) {
+    const {
+      // accessor props
+      size = this.size,
+      offset = this.offset || 0,
+      stride = this.stride || 0,
+      normalized = this.normalized || false,
+      integer = this.integer || false,
+      divisor = this.divisor || 0,
+      instanced,
+      isInstanced
+    } = opts;
+
+    this.size = size;
+    this.offset = offset;
+    this.stride = stride;
+    this.normalized = normalized;
+    this.integer = integer;
+
+    this.divisor = divisor;
+
+    if (isInstanced !== undefined) {
+      log.deprecated('Attribute.isInstanced')();
+      this.divisor = isInstanced ? 1 : 0;
+    }
+    if (instanced !== undefined) {
+      log.deprecated('Attribute.instanced')();
+      this.divisor = instanced ? 1 : 0;
+    }
+  }
 
   /* check user supplied values and apply fallback */
   _normalizeValue(value, out = [], start = 0) {

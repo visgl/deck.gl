@@ -195,11 +195,6 @@ export default class IconLayer extends Layer {
 
   _getModel(gl) {
     const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
-    // if (!this.state.positionBuffer) {
-    //   this.setState({
-    //     positionBuffer: new Buffer(gl, positions);
-    //   })
-    // }
 
     return new Model(
       gl,
