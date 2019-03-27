@@ -28,3 +28,4 @@ package-lock.json
 *.log
 .exit_code
 *.min.js
+.reify-cache/
