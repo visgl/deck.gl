@@ -239,10 +239,11 @@ function calculateViewportUniforms({
 
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
-    project_uPixelsPerMeter: distanceScales.pixelsPerMeter,
-    project_uPixelsPerDegree: distanceScales.pixelsPerDegree,
-    project_uPixelsPerUnit: distanceScales.pixelsPerMeter,
-    project_uPixelsPerUnit2: DEFAULT_PIXELS_PER_UNIT2,
+    project_uDistancePerMeter: distanceScales.pixelsPerMeter,
+    project_uDistancePerDegree: distanceScales.pixelsPerDegree,
+    project_uDistancePerUnit: distanceScales.pixelsPerMeter,
+    project_uDistancePerUnit2: DEFAULT_PIXELS_PER_UNIT2,
+    project_uPixelsPerDistance: viewport.pixelScale || viewport.scale,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
     project_uViewProjectionMatrix: viewProjectionMatrix,
@@ -255,16 +256,16 @@ function calculateViewportUniforms({
 
   switch (shaderCoordinateSystem) {
     case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
-      uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerMeter;
-      uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
+      uniforms.project_uDistancePerUnit = distanceScalesAtOrigin.pixelsPerMeter;
+      uniforms.project_uDistancePerUnit2 = distanceScalesAtOrigin.pixelsPerMeter2;
       break;
 
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
-      uniforms.project_coordinate_origin = shaderCoordinateOrigin;
+      uniforms.project_uCoordinateOrigin = shaderCoordinateOrigin;
     // eslint-disable-line no-fallthrough
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
-      uniforms.project_uPixelsPerUnit = distanceScalesAtOrigin.pixelsPerDegree;
-      uniforms.project_uPixelsPerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+      uniforms.project_uDistancePerUnit = distanceScalesAtOrigin.pixelsPerDegree;
+      uniforms.project_uDistancePerUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
       break;
 
     default:

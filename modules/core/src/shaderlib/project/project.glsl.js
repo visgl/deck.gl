@@ -32,10 +32,11 @@ uniform float project_uCoordinateSystem;
 uniform float project_uScale;
 uniform bool project_uWrapLongitude;
 uniform float project_uAntimeridian;
-uniform vec3 project_uPixelsPerMeter;
-uniform vec3 project_uPixelsPerDegree;
-uniform vec3 project_uPixelsPerUnit;
-uniform vec3 project_uPixelsPerUnit2;
+uniform vec3 project_uDistancePerMeter;
+uniform vec3 project_uDistancePerDegree;
+uniform vec3 project_uDistancePerUnit;
+uniform vec3 project_uDistancePerUnit2;
+uniform float project_uPixelsPerDistance;
 uniform vec4 project_uCenter;
 uniform mat4 project_uModelMatrix;
 uniform mat4 project_uViewProjectionMatrix;
@@ -43,7 +44,7 @@ uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
 uniform vec3 project_uCameraPosition;
-uniform vec2 project_coordinate_origin;
+uniform vec2 project_uCoordinateOrigin;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -51,23 +52,23 @@ const float WORLD_SCALE = TILE_SIZE / (PI * 2.0);
 const vec2 ZERO_64_XY_LOW = vec2(0.0, 0.0);
 
 //
-// Scaling offsets - scales meters to "pixels"
-// Note the scalar version of project_scale is for scaling the z component only
+// Scaling offsets - scales meters to "world distance"
+// Note the scalar version of project_size is for scaling the z component only
 //
-float project_scale(float meters) {
-  return meters * project_uPixelsPerMeter.z;
+float project_size(float meters) {
+  return meters * project_uDistancePerMeter.z;
 }
 
-vec2 project_scale(vec2 meters) {
-  return meters * project_uPixelsPerMeter.xy;
+vec2 project_size(vec2 meters) {
+  return meters * project_uDistancePerMeter.xy;
 }
 
-vec3 project_scale(vec3 meters) {
-  return meters * project_uPixelsPerMeter;
+vec3 project_size(vec3 meters) {
+  return meters * project_uDistancePerMeter;
 }
 
-vec4 project_scale(vec4 meters) {
-  return vec4(meters.xyz * project_uPixelsPerMeter, meters.w);
+vec4 project_size(vec4 meters) {
+  return vec4(meters.xyz * project_uDistancePerMeter, meters.w);
 }
 
 //
@@ -77,11 +78,11 @@ vec4 project_scale(vec4 meters) {
 vec3 project_normal(vec3 vector) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    return normalize(vector * project_uPixelsPerDegree);
+    return normalize(vector * project_uDistancePerDegree);
   }
   // Apply model matrix
   vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
-  return normalize(normal_modelspace.xyz * project_uPixelsPerMeter);
+  return normalize(normal_modelspace.xyz * project_uDistancePerMeter);
 }
 
 vec4 project_offset_(vec4 offset) {
@@ -89,7 +90,7 @@ vec4 project_offset_(vec4 offset) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
     dy = clamp(dy, -1., 1.);
   }
-  vec3 pixelsPerUnit = project_uPixelsPerUnit + project_uPixelsPerUnit2 * dy;
+  vec3 pixelsPerUnit = project_uDistancePerUnit + project_uDistancePerUnit2 * dy;
   return vec4(offset.xyz * pixelsPerUnit, offset.w);
 }
 
@@ -115,15 +116,15 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT) {
     return project_uModelMatrix * vec4(
       project_mercator_(position.xy) * WORLD_SCALE * project_uScale,
-      project_scale(position.z),
+      project_size(position.z),
       position.w
     );
   }
 
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
     // Subtract high part of 64 bit value. Convert remainder to float32, preserving precision.
-    float X = position.x - project_coordinate_origin.x;
-    float Y = position.y - project_coordinate_origin.y;
+    float X = position.x - project_uCoordinateOrigin.x;
+    float Y = position.y - project_uCoordinateOrigin.y;
     return project_offset_(vec4(X + position64xyLow.x, Y + position64xyLow.y, position.z, position.w));
   }
 
@@ -163,8 +164,8 @@ vec2 project_position(vec2 position) {
 vec4 project_to_clipspace(vec4 position) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
-    // Needs to be divided with project_uPixelsPerMeter
-    position.w *= project_uPixelsPerMeter.z;
+    // Needs to be divided with project_uDistancePerMeter
+    position.w *= project_uDistancePerMeter.z;
   }
   return project_uViewProjectionMatrix * position + project_uCenter;
 }
@@ -173,5 +174,12 @@ vec4 project_to_clipspace(vec4 position) {
 vec4 project_pixel_to_clipspace(vec2 pixels) {
   vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio * 2.0;
   return vec4(offset * project_uFocalDistance, 0.0, 0.0);
+}
+
+float project_size_to_pixels(float meters) {
+  return project_size(meters) * project_uPixelsPerDistance;
+}
+float project_pixel_to_worldspace(float pixels) {
+  return pixels / project_uPixelsPerDistance;
 }
 `;

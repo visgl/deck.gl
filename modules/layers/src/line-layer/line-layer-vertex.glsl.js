@@ -56,9 +56,8 @@ void main(void) {
   vec4 target = project_position_to_clipspace(instanceTargetPositions, instanceSourceTargetPositions64xyLow.zw, vec3(0.));
 
   // Multiply out width and clamp to limits
-  // mercator pixels are interpreted as screen pixels
-  float width = clamp(
-    project_scale(instanceWidths * widthScale),
+  float widthPixels = clamp(
+    project_size_to_pixels(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
   
@@ -67,7 +66,7 @@ void main(void) {
   vec4 p = mix(source, target, segmentIndex);
 
   // extrude
-  vec2 offset = getExtrusionOffset(target.xy - source.xy, positions.y, width);
+  vec2 offset = getExtrusionOffset(target.xy - source.xy, positions.y, widthPixels);
   gl_Position = p + vec4(offset, 0.0, 0.0);
 
   // Color

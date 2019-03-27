@@ -18,7 +18,7 @@ attribute float instanceSize;
 
 void main(void) {
   vec3 center = project_position(instanceCenter);
-  vec3 vertex = positions * project_scale(instanceSize);
+  vec3 vertex = positions * project_size(instanceSize);
   gl_Position = project_to_clipspace(center + vertex);
 }
 ```
@@ -54,8 +54,8 @@ Uniform names are not considered part of the official API of shader modules and 
 | project_uCoordinateSystem | float | COORDINATE_SYSTEM enum |
 | project_uCenter | float | coordinate origin in world space |
 | project_uScale | float | Web Mercator scale (2^zoom) |
-| project_uPixelsPerMeter | vec3 | Web Mercator pixels per meter near the current viewport center |
-| project_uPixelsPerDegree | vec3 | Web Mercator pixels per degree near the current viewport center |
+| project_uDistancePerMeter | vec3 | Web Mercator pixels per meter near the current viewport center |
+| project_uDistancePerDegree | vec3 | Web Mercator pixels per degree near the current viewport center |
 
 
 ## GLSL Functions
@@ -71,12 +71,12 @@ The projection module makes it easy to write vertex shaders that follow deck.gl'
 Projects positions (coordinates) to worldspace coordinates. The coordinates are interpreted according to `coordinateSystem` and `modelMatrix` is applied.
 
 
-### project_scale
+### project_size
 
-`float project_scale(float meters)`
-`vec2 project_scale(vec2 meters)`
-`vec3 project_scale(vec3 meters)`
-`vec4 project_scale(vec4 meters)`
+`float project_size(float meters)`
+`vec2 project_size(vec2 meters)`
+`vec3 project_size(vec3 meters)`
+`vec4 project_size(vec4 meters)`
 
 Projects sizes in meters to worldspace offsets. These offsets can be added directly to values returned by `project_position`.
 
@@ -95,14 +95,26 @@ Projects world space coordinates to clipspace, which can be assigned to `gl_Posi
 `vec4 project_to_clipspace(vec4 position)`
 
 
-### project_pixels_to_clipspace
+### project_pixel_to_clipspace
 
 Converts the given number of pixels to a clipspace offset that can be added to a clipspace position (typically added to values returned by `project_to_clipspace`).
 
-`vec4 project_pixels_to_clipspace(vec2 pixels)`
+`vec4 project_pixel_to_clipspace(vec2 pixels)`
 
 * `pixels` (`vec2`) - adjustment in logical pixels. Returns values in clip space offsets that can be added directly to `gl_Position`
 
+
+### project_pixel_to_worldspace
+
+Converts screen-space pixels to world distance.
+
+`float project_pixel_to_world_distance(float pixels)`
+
+### project_size_to_pixels
+
+Converts size in meters to screen-space pixels.
+
+`float project_world_distance_to_pixels(float distance)`
 
 ## Remarks
 

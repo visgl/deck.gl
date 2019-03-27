@@ -76,7 +76,7 @@ vec4 project_position_to_clipspace(
   vec2 offset64[4];
   vec4_fp64(vec4(offset, 0.0), offset64);
 
-  float z = project_scale(position.z);
+  float z = project_size(position.z);
 
   // Apply web mercator projection (depends on coordinate system imn use)
   vec2 projectedPosition64xy[2];
