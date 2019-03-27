@@ -191,29 +191,6 @@ export const TEST_CASES = [
     referenceImageUrl: './test/render/golden-images/pointcloud-identity.png'
   },
   {
-    name: 'screengrid-infoviz',
-    views: [new OrthographicView()],
-    viewState: {
-      left: -WIDTH / 2,
-      top: -HEIGHT / 2,
-      right: WIDTH / 2,
-      bottom: HEIGHT / 2
-    },
-    layers: [
-      new ScreenGridLayer({
-        id: 'screengrid-infoviz',
-        data: screenSpaceData,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        getPosition: d => d,
-        cellSizePixels: 40,
-        minColor: [0, 0, 0, 0],
-        maxColor: [0, 255, 0, 255],
-        pickable: false
-      })
-    ],
-    referenceImageUrl: './test/render/golden-images/screengrid-infoviz.png'
-  },
-  {
     name: 'contour-infoviz',
     views: [new OrthographicView()],
     viewState: {
@@ -240,32 +217,6 @@ export const TEST_CASES = [
       })
     ],
     referenceImageUrl: './test/render/golden-images/contour-infoviz.png'
-  },
-  {
-    name: 'contour-isobands-infoviz',
-    views: [new OrthographicView()],
-    viewState: {
-      left: -WIDTH / 2,
-      top: -HEIGHT / 2,
-      right: WIDTH / 2,
-      bottom: HEIGHT / 2
-    },
-    layers: [
-      new ContourLayer({
-        id: 'contour-isobands-infoviz',
-        data: screenSpaceData,
-        getPosition: d => d,
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        cellSize: 40,
-        opacity: 1,
-        contours: [
-          {threshold: [1, 2], color: [150, 0, 0]},
-          {threshold: [2, 5], color: [0, 150, 0]}
-        ],
-        gpuAggregation: false
-      })
-    ],
-    referenceImageUrl: './test/render/golden-images/contour-infoviz_border_ref.png'
   },
 
   // GEOSPATIAL

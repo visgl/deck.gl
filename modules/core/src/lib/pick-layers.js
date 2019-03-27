@@ -373,6 +373,8 @@ function processPickInfo({
     layer.setModuleParameters({
       pickingSelectedColor
     });
+
+    layer.setNeedsRedraw();
   });
 
   const unhandledPickInfos = callLayerPickingCallbacks(infos, mode);
