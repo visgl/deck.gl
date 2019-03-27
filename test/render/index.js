@@ -22,22 +22,22 @@ import test from 'tape';
 import {TEST_CASES, WIDTH, HEIGHT} from './test-cases';
 import {SnapshotTestRunner} from '@deck.gl/test-utils';
 
-test('Render Test', t => {
+test.only('Render Test', t => {
   // tape's default timeout is 500ms
   t.timeoutAfter(TEST_CASES.length * 2000);
 
   new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
-    .add(TEST_CASES)
+    .add(TEST_CASES.filter(c => c.name === 'icon-lnglat-facing-up'))
     .run({
       onTestStart: testCase => t.comment(testCase.name),
       onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
       onTestFail: (testCase, result) => t.fail(result.error || `match: ${result.matchPercentage}`),
 
       imageDiffOptions: {
-        threshold: 0.99
+        threshold: 0.99,
         // uncomment to save screenshot to disk
-        // saveOnFail: true
-        // saveAs: '[name].png'
+        saveOnFail: true,
+        saveAs: '[name].png'
       }
     })
     .then(() => t.end());

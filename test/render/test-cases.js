@@ -509,6 +509,40 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-lnglat-facing-up',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat',
+        data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        billboard: false,
+        iconMapping: dataSamples.iconAtlas,
+        sizeScale: 12,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/icon-lnglat-facing-up.png'
+  },
+  {
     name: 'icon-lnglat-64',
     viewState: {
       latitude: 37.751537058389985,

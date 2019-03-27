@@ -37,6 +37,7 @@ uniform float sizeScale;
 uniform vec2 iconsTextureDim;
 uniform float sizeMinPixels;
 uniform float sizeMaxPixels;
+uniform bool billboard;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -66,10 +67,16 @@ void main(void) {
   // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
   vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
-  pixelOffset.y *= -1.0;
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0));
-  gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
+  if (billboard)  {
+    pixelOffset.y *= -1.0;
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0)); 
+    gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
+
+  } else {
+    vec3 offset = vec3(pixelOffset.xy, 0.0);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset); 
+  }
 
   vTextureCoords = mix(
     instanceIconFrames.xy,
