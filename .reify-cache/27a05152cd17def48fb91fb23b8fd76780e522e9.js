@@ -1,0 +1,420 @@
+"use strict";var module1=module;module1.export({default:()=>SolidPolygonLayer});var Layer;module1.link('@deck.gl/core',{Layer(v){Layer=v}},0);var GL;module1.link('@luma.gl/constants',{default(v){GL=v}},1);var Model,Geometry,hasFeature,FEATURES,PhongMaterial;module1.link('@luma.gl/core',{Model(v){Model=v},Geometry(v){Geometry=v},hasFeature(v){hasFeature=v},FEATURES(v){FEATURES=v},PhongMaterial(v){PhongMaterial=v}},2);var PolygonTesselator;module1.link('./polygon-tesselator',{default(v){PolygonTesselator=v}},3);var vsTop;module1.link('./solid-polygon-layer-vertex-top.glsl',{default(v){vsTop=v}},4);var vsSide;module1.link('./solid-polygon-layer-vertex-side.glsl',{default(v){vsSide=v}},5);var fs;module1.link('./solid-polygon-layer-fragment.glsl',{default(v){fs=v}},6);// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+
+
+
+
+// Polygon geometry generation is managed by the polygon tesselator
+
+
+
+
+
+
+const DEFAULT_COLOR = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
+
+const defaultProps = {
+  filled: true,
+  // Whether to extrude
+  extruded: false,
+  // Whether to draw a GL.LINES wireframe of the polygon
+  wireframe: false,
+  fp64: false,
+
+  // elevation multiplier
+  elevationScale: {type: 'number', min: 0, value: 1},
+
+  // Accessor for polygon geometry
+  getPolygon: {type: 'accessor', value: f => f.polygon},
+  // Accessor for extrusion height
+  getElevation: {type: 'accessor', value: 1000},
+  // Accessor for colors
+  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
+
+  // Optional settings for 'lighting' shader module
+  material: defaultMaterial
+};
+
+const ATTRIBUTE_TRANSITION = {
+  enter: (value, chunk) => {
+    return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
+  }
+};
+
+class SolidPolygonLayer extends Layer {
+  getShaders(vs) {
+    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
+    return {
+      vs,
+      fs,
+      modules: [projectModule, 'phong-lighting', 'picking']
+    };
+  }
+
+  initializeState() {
+    const {gl} = this.context;
+    this.setState({
+      numInstances: 0,
+      polygonTesselator: new PolygonTesselator({
+        IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
+      })
+    });
+
+    const attributeManager = this.getAttributeManager();
+    const noAlloc = true;
+
+    attributeManager.remove(['instancePickingColors']);
+
+    /* eslint-disable max-len */
+    attributeManager.add({
+      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
+      positions: {
+        size: 3,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getPolygon',
+        update: this.calculatePositions,
+        shaderAttributes: {
+          positions: {
+            offset: 0,
+            divisor: 0
+          },
+          instancePositions: {
+            offset: 0,
+            divisor: 1
+          },
+          nextPositions: {
+            offset: 12,
+            divisor: 1
+          }
+        }
+      },
+      positions64xyLow: {
+        size: 2,
+        update: this.calculatePositionsLow,
+        shaderAttributes: {
+          positions64xyLow: {
+            offset: 0,
+            divisor: 0
+          },
+          instancePositions64xyLow: {
+            offset: 0,
+            divisor: 1
+          },
+          nextPositions64xyLow: {
+            offset: 8,
+            divisor: 1
+          }
+        }
+      },
+      vertexValid: {
+        size: 1,
+        divisor: 1,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateVertexValid,
+        noAlloc
+      },
+      elevations: {
+        size: 1,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getElevation',
+        update: this.calculateElevations,
+        shaderAttributes: {
+          elevations: {
+            divisor: 0
+          },
+          instanceElevations: {
+            divisor: 1
+          }
+        }
+      },
+      fillColors: {
+        alias: 'colors',
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getFillColor',
+        update: this.calculateFillColors,
+        defaultValue: DEFAULT_COLOR,
+        shaderAttributes: {
+          fillColors: {
+            divisor: 0
+          },
+          instanceFillColors: {
+            divisor: 1
+          }
+        }
+      },
+      lineColors: {
+        alias: 'colors',
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getLineColor',
+        update: this.calculateLineColors,
+        defaultValue: DEFAULT_COLOR,
+        shaderAttributes: {
+          lineColors: {
+            divisor: 0
+          },
+          instanceLineColors: {
+            divisor: 1
+          }
+        }
+      },
+      pickingColors: {
+        size: 3,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculatePickingColors,
+        shaderAttributes: {
+          pickingColors: {
+            divisor: 0
+          },
+          instancePickingColors: {
+            divisor: 1
+          }
+        }
+      }
+    });
+    /* eslint-enable max-len */
+  }
+
+  draw({uniforms}) {
+    const {extruded, filled, wireframe, elevationScale} = this.props;
+    const {topModel, sideModel, polygonTesselator} = this.state;
+
+    const renderUniforms = Object.assign({}, uniforms, {
+      extruded: Boolean(extruded),
+      elevationScale
+    });
+
+    // Note: the order is important
+    if (sideModel) {
+      sideModel.setInstanceCount(polygonTesselator.instanceCount - 1);
+      sideModel.setUniforms(renderUniforms);
+      if (wireframe) {
+        sideModel.setDrawMode(GL.LINE_STRIP);
+        sideModel.render({isWireframe: true});
+      }
+      if (filled) {
+        sideModel.setDrawMode(GL.TRIANGLE_FAN);
+        sideModel.render({isWireframe: false});
+      }
+    }
+
+    if (topModel) {
+      topModel.setVertexCount(polygonTesselator.get('indices').length);
+      topModel.render(renderUniforms);
+    }
+  }
+
+  updateState(updateParams) {
+    super.updateState(updateParams);
+
+    this.updateGeometry(updateParams);
+
+    const {props, oldProps} = updateParams;
+    const attributeManager = this.getAttributeManager();
+
+    const regenerateModels =
+      props.fp64 !== oldProps.fp64 ||
+      props.filled !== oldProps.filled ||
+      props.extruded !== oldProps.extruded;
+
+    if (regenerateModels) {
+      if (this.state.models) {
+        this.state.models.forEach(model => model.delete());
+      }
+
+      this.setState(this._getModels(this.context.gl));
+      attributeManager.invalidateAll();
+    }
+  }
+
+  updateGeometry({props, oldProps, changeFlags}) {
+    const geometryConfigChanged =
+      changeFlags.dataChanged ||
+      props.fp64 !== oldProps.fp64 ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
+
+    // When the geometry config  or the data is changed,
+    // tessellator needs to be invoked
+    if (geometryConfigChanged) {
+      const {polygonTesselator} = this.state;
+      polygonTesselator.updateGeometry({
+        data: props.data,
+        getGeometry: props.getPolygon,
+        positionFormat: props.positionFormat,
+        fp64: this.use64bitPositions()
+      });
+
+      this.setState({
+        numInstances: polygonTesselator.instanceCount
+      });
+
+      this.getAttributeManager().invalidateAll();
+    }
+  }
+
+  _getModels(gl) {
+    const {id, filled, extruded} = this.props;
+
+    let topModel;
+    let sideModel;
+
+    if (filled) {
+      topModel = new Model(
+        gl,
+        Object.assign({}, this.getShaders(vsTop), {
+          id: `${id}-top`,
+          geometry: new Geometry({
+            drawMode: GL.TRIANGLES,
+            attributes: {
+              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])}
+            }
+          }),
+          uniforms: {
+            isWireframe: false,
+            isSideVertex: false
+          },
+          vertexCount: 0,
+          isIndexed: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
+    }
+    if (extruded) {
+      sideModel = new Model(
+        gl,
+        Object.assign({}, this.getShaders(vsSide), {
+          id: `${id}-side`,
+          geometry: new Geometry({
+            drawMode: GL.LINES,
+            vertexCount: 4,
+            attributes: {
+              // top right - top left - bootom left - bottom right
+              vertexPositions: {
+                size: 2,
+                value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])
+              }
+            }
+          }),
+          instanceCount: 0,
+          isInstanced: 1,
+          shaderCache: this.context.shaderCache
+        })
+      );
+
+      sideModel.userData.excludeAttributes = {indices: true};
+    }
+
+    return {
+      models: [sideModel, topModel].filter(Boolean),
+      topModel,
+      sideModel
+    };
+  }
+
+  calculateIndices(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.indexLayout;
+    attribute.value = polygonTesselator.get('indices');
+  }
+
+  calculatePositions(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.get('positions');
+  }
+  calculatePositionsLow(attribute) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
+    attribute.value = this.state.polygonTesselator.get('positions64xyLow');
+  }
+
+  calculateVertexValid(attribute) {
+    attribute.value = this.state.polygonTesselator.get('vertexValid');
+  }
+
+  calculateElevations(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+
+    const {extruded, getElevation} = this.props;
+    if (extruded) {
+      attribute.constant = false;
+      attribute.value = polygonTesselator.get('elevations', attribute.value, getElevation);
+    } else {
+      attribute.constant = true;
+      attribute.value = new Float32Array(1);
+    }
+  }
+
+  calculateFillColors(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.get('colors', attribute.value, this.props.getFillColor);
+  }
+  calculateLineColors(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.bufferLayout = polygonTesselator.bufferLayout;
+    attribute.value = polygonTesselator.get('colors', attribute.value, this.props.getLineColor);
+  }
+
+  // Override the default picking colors calculation
+  calculatePickingColors(attribute) {
+    const {polygonTesselator} = this.state;
+    attribute.value = polygonTesselator.get(
+      'pickingColors',
+      attribute.value,
+      this.encodePickingColor
+    );
+  }
+
+  clearPickingColor(color) {
+    const pickedPolygonIndex = this.decodePickingColor(color);
+    const {bufferLayout} = this.state.polygonTesselator;
+    const numVertices = bufferLayout[pickedPolygonIndex];
+
+    let startInstanceIndex = 0;
+    for (let polygonIndex = 0; polygonIndex < pickedPolygonIndex; polygonIndex++) {
+      startInstanceIndex += bufferLayout[polygonIndex];
+    }
+
+    const {pickingColors} = this.getAttributeManager().attributes;
+
+    const {value} = pickingColors;
+    const endInstanceIndex = startInstanceIndex + numVertices;
+    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
+    pickingColors.update({value});
+  }
+}
+
+SolidPolygonLayer.layerName = 'SolidPolygonLayer';
+SolidPolygonLayer.defaultProps = defaultProps;

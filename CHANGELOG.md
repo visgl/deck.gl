@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.8] - Mar 27 2019
+
+- Remove dependency on model redraw flags
+
 #### [6.4.7] - Mar 14 2019
 
 - Don't fire panmove if drag started somewhere else (#2780)

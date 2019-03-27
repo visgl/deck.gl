@@ -1,0 +1,52 @@
+"use strict";module.export({AGGREGATION_OPERATION:()=>AGGREGATION_OPERATION,DEFAULT_CHANGE_FLAGS:()=>DEFAULT_CHANGE_FLAGS,DEFAULT_RUN_PARAMS:()=>DEFAULT_RUN_PARAMS,MAX_32_BIT_FLOAT:()=>MAX_32_BIT_FLOAT,MIN_BLEND_EQUATION:()=>MIN_BLEND_EQUATION,MAX_BLEND_EQUATION:()=>MAX_BLEND_EQUATION,MAX_MIN_BLEND_EQUATION:()=>MAX_MIN_BLEND_EQUATION,EQUATION_MAP:()=>EQUATION_MAP,ELEMENTCOUNT:()=>ELEMENTCOUNT,DEFAULT_WEIGHT_PARAMS:()=>DEFAULT_WEIGHT_PARAMS,IDENTITY_MATRIX:()=>IDENTITY_MATRIX,PIXEL_SIZE:()=>PIXEL_SIZE,WEIGHT_SIZE:()=>WEIGHT_SIZE},true);var GL;module.link('@luma.gl/constants',{default(v){GL=v}},0);
+
+// public
+
+const AGGREGATION_OPERATION = {
+  SUM: 1,
+  MEAN: 2,
+  MIN: 3,
+  MAX: 4
+};
+
+// private
+
+const DEFAULT_CHANGE_FLAGS = {
+  dataChanged: true,
+  viewportChanged: true,
+  cellSizeChanged: true
+};
+
+const DEFAULT_RUN_PARAMS = {
+  changeFlags: DEFAULT_CHANGE_FLAGS,
+  projectPoints: false,
+  useGPU: true,
+  fp64: false,
+  viewport: null,
+  gridTransformMatrix: null,
+  createBufferObjects: true
+};
+
+const MAX_32_BIT_FLOAT = 3.402823466e38;
+const MIN_BLEND_EQUATION = [GL.MIN, GL.FUNC_ADD];
+const MAX_BLEND_EQUATION = [GL.MAX, GL.FUNC_ADD];
+const MAX_MIN_BLEND_EQUATION = [GL.MAX, GL.MIN];
+const EQUATION_MAP = {
+  [AGGREGATION_OPERATION.SUM]: GL.FUNC_ADD,
+  [AGGREGATION_OPERATION.MEAN]: GL.FUNC_ADD,
+  [AGGREGATION_OPERATION.MIN]: MIN_BLEND_EQUATION,
+  [AGGREGATION_OPERATION.MAX]: MAX_BLEND_EQUATION
+};
+
+const ELEMENTCOUNT = 4;
+const DEFAULT_WEIGHT_PARAMS = {
+  size: 1,
+  operation: AGGREGATION_OPERATION.SUM,
+  needMin: false,
+  needMax: false,
+  combineMaxMin: false
+};
+
+const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+const PIXEL_SIZE = 4; // RGBA32F
+const WEIGHT_SIZE = 3;
