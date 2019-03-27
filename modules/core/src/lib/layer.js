@@ -447,17 +447,28 @@ export default class Layer extends Component {
   }
 
   _setModelAttributes(model, changedAttributes) {
+    const modelAttributes = {};
+
+    for (const name in changedAttributes) {
+      const attribute = changedAttributes[name];
+      if (attribute.constant) {
+        modelAttributes[name] = attribute.value;
+      } else {
+        modelAttributes[name] = [attribute.buffer || attribute.externalBuffer, attribute];
+      }
+    }
+
     if (model.userData.excludeAttributes) {
       const filteredAttributes = {};
       const excludeAttributes = model.userData.excludeAttributes;
-      for (const attributeName in changedAttributes) {
+      for (const attributeName in modelAttributes) {
         if (!excludeAttributes[attributeName]) {
-          filteredAttributes[attributeName] = changedAttributes[attributeName];
+          filteredAttributes[attributeName] = modelAttributes[attributeName];
         }
       }
       model.setAttributes(filteredAttributes);
     } else {
-      model.setAttributes(changedAttributes);
+      model.setAttributes(modelAttributes);
     }
   }
 
@@ -564,7 +575,6 @@ export default class Layer extends Component {
     if (model) {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
-      model.geometry.id = `${this.props.id}-geometry`;
     }
   }
 

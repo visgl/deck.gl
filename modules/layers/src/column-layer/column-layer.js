@@ -20,7 +20,13 @@
 
 import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
+import {
+  Model,
+  CylinderGeometry,
+  fp64,
+  PhongMaterial,
+  Buffer /* getBuffersFromGeometry */
+} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -46,6 +52,22 @@ const defaultProps = {
 
   material: defaultMaterial
 };
+
+// TODO(Tarek): This should be imported from Luma
+export function getBuffersFromGeometry(gl, geometry) {
+  const attributes = geometry.getAttributes();
+  const buffers = {};
+
+  for (const name in attributes) {
+    const attribute = attributes[name];
+    buffers[name] = new Buffer(gl, {
+      data: attribute.value,
+      target: attribute.isIndexed ? GL.ELEMENT_ARRAY_BUFFER : GL.ARRAY_BUFFER
+    });
+  }
+
+  return buffers;
+}
 
 export default class ColumnLayer extends Layer {
   getShaders() {
@@ -103,16 +125,25 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution) {
-    return new CylinderGeometry({
-      radius: 1,
-      topCap: false,
-      bottomCap: true,
-      height: 2,
-      verticalAxis: 'z',
-      nradial: diskResolution,
-      nvertical: 1
-    });
+  getGeometryAttributes(gl, diskResolution) {
+    if (!this.state.geometryBuffers) {
+      this.setState({
+        geometry: new CylinderGeometry({
+          radius: 1,
+          topCap: false,
+          bottomCap: true,
+          height: 2,
+          verticalAxis: 'z',
+          nradial: diskResolution,
+          nvertical: 1
+        })
+      });
+      this.setState({
+        geometryBuffers: getBuffersFromGeometry(gl, this.state.geometry)
+      });
+    }
+
+    return this.state.geometryBuffers;
   }
 
   _getModel(gl) {
@@ -120,7 +151,7 @@ export default class ColumnLayer extends Layer {
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        geometry: this.getGeometry(this.props.diskResolution),
+        attributes: this.getGeometryAttributes(gl, this.props.diskResolution),
         isInstanced: true,
         shaderCache: this.context.shaderCache
       })
@@ -135,8 +166,7 @@ export default class ColumnLayer extends Layer {
     const {diskResolution} = this.props;
     log.assert(vertices.length >= diskResolution);
 
-    const {model} = this.state;
-    const {positions} = model.geometry.attributes;
+    const {positions} = this.state.geometry.attributes;
     let i = 0;
     for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
       for (let j = 0; j <= diskResolution; j++) {
@@ -147,7 +177,8 @@ export default class ColumnLayer extends Layer {
         i++;
       }
     }
-    model.setAttributes({positions});
+
+    this.state.geometryBuffers.positions.setData(positions.value);
   }
 
   draw({uniforms}) {

@@ -612,9 +612,9 @@ export default class Deck {
 
     // Check if we need to redraw
     const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-    if (!redrawReason) {
-      return;
-    }
+    // if (!redrawReason) {
+    //   return;
+    // }
 
     this.stats.get('Redraw Count').incrementCount();
     if (this.props._customRender) {

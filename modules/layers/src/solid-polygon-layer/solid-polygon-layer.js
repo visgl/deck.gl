@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, hasFeature, FEATURES, PhongMaterial} from '@luma.gl/core';
+import {Model, hasFeature, FEATURES, PhongMaterial, Buffer} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
 import PolygonTesselator from './polygon-tesselator';
@@ -287,12 +287,10 @@ export default class SolidPolygonLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(vsTop), {
           id: `${id}-top`,
-          geometry: new Geometry({
-            drawMode: GL.TRIANGLES,
-            attributes: {
-              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])}
-            }
-          }),
+          drawMode: GL.TRIANGLES,
+          attributes: {
+            vertexPositions: new Float32Array([0, 1])
+          },
           uniforms: {
             isWireframe: false,
             isSideVertex: false
@@ -304,21 +302,21 @@ export default class SolidPolygonLayer extends Layer {
       );
     }
     if (extruded) {
+      if (!this.state.sideModelPositionBuffer) {
+        this.setState({
+          sideModelPositionBuffer: new Buffer(gl, new Float32Array([1, 1, 0, 1, 0, 0, 1, 0]))
+        });
+      }
       sideModel = new Model(
         gl,
         Object.assign({}, this.getShaders(vsSide), {
           id: `${id}-side`,
-          geometry: new Geometry({
-            drawMode: GL.LINES,
-            vertexCount: 4,
-            attributes: {
-              // top right - top left - bootom left - bottom right
-              vertexPositions: {
-                size: 2,
-                value: new Float32Array([1, 1, 0, 1, 0, 0, 1, 0])
-              }
-            }
-          }),
+          drawMode: GL.LINES,
+          vertexCount: 4,
+          attributes: {
+            // top right - top left - bootom left - bottom right
+            vertexPositions: [this.state.sideModelPositionBuffer, {size: 2}]
+          },
           instanceCount: 0,
           isInstanced: 1,
           shaderCache: this.context.shaderCache

@@ -194,7 +194,12 @@ export default class IconLayer extends Layer {
   }
 
   _getModel(gl) {
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
+    // if (!this.state.positionBuffer) {
+    //   this.setState({
+    //     positionBuffer: new Buffer(gl, positions);
+    //   })
+    // }
 
     return new Model(
       gl,
@@ -202,6 +207,7 @@ export default class IconLayer extends Layer {
         id: this.props.id,
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
+          vertexCount: 4,
           attributes: {
             positions: new Float32Array(positions)
           }
