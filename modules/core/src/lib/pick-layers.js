@@ -357,14 +357,19 @@ function processPickInfo({
 
     info = getLayerPickingInfo({layer, info, mode});
 
-    let pickingSelectedColor = null;
     if (layer === pickedLayer && mode === 'hover') {
       lastPickedInfo.info = info;
-      pickingSelectedColor = layer.props.autoHighlight ? pickedColor : null;
     }
 
     if (mode === 'hover') {
-      layer.setModuleParameters({pickingSelectedColor});
+      const pickingSelectedColor =
+        layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
+
+      layer.setModuleParameters({
+        pickingSelectedColor
+      });
+      // TODO this needsRedraw logic should be fixed in layer
+      layer.setNeedsRedraw();
     }
 
     // This guarantees that there will be only one copy of info for
@@ -372,8 +377,6 @@ function processPickInfo({
     if (info) {
       infos.set(info.layer.id, info);
     }
-
-    layer.setNeedsRedraw();
   });
 
   const unhandledPickInfos = callLayerPickingCallbacks(infos, mode);
