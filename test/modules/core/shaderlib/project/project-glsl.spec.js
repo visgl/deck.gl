@@ -185,10 +185,10 @@ const TEST_CASES = [
     ]
   },
   {
-    title: 'LNGLAT_EXPERIMENTAL mode - auto offset',
+    title: 'LNGLAT mode - auto offset',
     params: {
       viewport: TEST_VIEWPORT_HIGH_ZOOM,
-      coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
+      coordinateSystem: COORDINATE_SYSTEM.LNGLAT
     },
     tests: [
       {

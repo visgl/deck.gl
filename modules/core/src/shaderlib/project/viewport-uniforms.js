@@ -240,7 +240,7 @@ function calculateViewportUniforms({
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
     project_uCommonUnitsPerMeter: distanceScales.pixelsPerMeter,
-    project_uCommonUnitsPerWorldUnit: distanceScales.pixelsPerMeter,
+    project_uCommonUnitsPerWorldUnit: distanceScales.pixelsPerDegree,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
