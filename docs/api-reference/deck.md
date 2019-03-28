@@ -215,25 +215,23 @@ Returns:
 
 * The application can return an updated view state. If a view state is returned, it will be used instead of the passed in `viewState` to update the application's internal view state (see `initialViewState`).
 
-##### `onLayerHover` (Function, optional)
+##### `onHover` (Function, optional)
 
-Callback - called when the object under the pointer changes.
+Callback - called when the pointer moves over the canvas.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
-* `pickedInfos` - an array of info objects for all pickable layers that are affected.
-* `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `event` - the original gesture event
 
-##### `onLayerClick` (Function, optional)
+##### `onClick` (Function, optional)
 
 Callback - called when clicking on the canvas.
 
 Callback Arguments:
 
-* `info` - the [`info`](/docs/developer-guide/interactivity.md#the-picking-info-object) object for the topmost picked layer at the coordinate, null when no object is picked.
-* `pickedInfos` - an array of info objects for all pickable layers that are affected.
-* `event` - the original [MouseEvent](https://developer.mozilla.org/en-US/docs/Web/API/MouseEvent) object
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `event` - the original gesture event
 
 ##### `onDragStart` (Function, optional)
 
