@@ -46,7 +46,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
   vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
-  vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
+  vec2 offset_clipspace = project_pixel_size_to_clipspace(offset_screenspace);
 
   return offset_clipspace;
 }
@@ -110,13 +110,13 @@ void main(void) {
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
-  float width = clamp(
-    project_scale(instanceWidths * widthScale),
+  float widthPixels = clamp(
+    project_size_to_pixel(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
 
   // extrude
-  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, width);
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, widthPixels);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.0;

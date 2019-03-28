@@ -63,8 +63,8 @@ void calculatePosition(PolygonProps props) {
   }
   pos.z *= elevationScale;
 
-  vec4 position_worldspace;
-  gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_worldspace);
+  vec4 position_commonspace;
+  gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_commonspace);
 
   if (extruded) {
 #ifdef IS_SIDE_VERTEX
@@ -74,7 +74,7 @@ void calculatePosition(PolygonProps props) {
     normal = vec3(0.0, 0.0, 1.0);
 #endif
 
-    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_worldspace.xyz, normal);
+    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_commonspace.xyz, normal);
     vColor = vec4(lightColor, colors.a * opacity) / 255.0;
   } else {
     vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;

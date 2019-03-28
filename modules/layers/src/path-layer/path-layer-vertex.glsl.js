@@ -185,13 +185,13 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   bool isEnd = positions.x > EPSILON;
   bool isJoint = positions.z > EPSILON;
 
-  float width = clamp(project_scale(instanceStrokeWidths * widthScale),
+  float widthPixels = clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0;
 
   return lineJoin(
     prevPoint, currPoint, nextPoint,
     relativePosition, isEnd, isJoint,
-    width
+    project_pixel_size(widthPixels)
   );
 }
 
@@ -229,6 +229,6 @@ void main() {
 
   vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);
 
-  gl_Position = project_to_clipspace(vec4(pos, 1.0));
+  gl_Position = project_common_position_to_clipspace(vec4(pos, 1.0));
 }
 `;

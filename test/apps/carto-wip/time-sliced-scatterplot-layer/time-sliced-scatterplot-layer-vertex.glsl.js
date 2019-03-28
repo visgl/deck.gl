@@ -45,7 +45,7 @@ varying float innerUnitRadius;
 void main(void) {
   // Multiply out radius and clamp to limits
   float outerRadiusPixels = clamp(
-    project_scale(radiusScale * instanceRadius),
+    project_size_to_pixels(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
   // outline is centered at the radius

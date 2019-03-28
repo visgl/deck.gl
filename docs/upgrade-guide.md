@@ -38,6 +38,15 @@
 
 The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/uber/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/effects/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/deck.md#effects).
 
+#### project Shader Module
+
+**Deprecations**
+
+- `project_scale` -> `project_size`
+- `project_to_clipspace` -> `project_common_position_to_clipspace`
+- `project_to_clipspace_fp64` -> `project_common_position_to_clipspace_fp64`
+- `project_pixel_to_clipspace` -> `project_pixel_size_to_clipspace`
+
 
 ## Upgrading from deck.gl v6.3 to v6.4
 
