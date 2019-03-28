@@ -39,12 +39,12 @@ void main(void) {
   unitPosition = positions.xy;
 
   // Find the center of the point and add the current vertex
-  vec4 position_worldspace;
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.), position_worldspace);
+  vec4 position_commonspace;
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.), position_commonspace);
   gl_Position += project_pixel_to_clipspace(positions.xy * radiusPixels);
 
   // Apply lighting
-  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_worldspace.xyz, project_normal(instanceNormals));
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
 
   // Apply opacity to instance color, or return instance picking color
   vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;

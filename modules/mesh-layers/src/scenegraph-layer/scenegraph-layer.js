@@ -54,8 +54,8 @@ const vs = `
     vec3 pos = (instanceModelMatrix * POSITION.xyz) * sizeScale + instanceTranslation;
     pos = project_size(pos);
 
-    vec4 worldPosition;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
+    vec4 position_commonspace;
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
     picking_setPickingColor(instancePickingColors);
   }
 `;
