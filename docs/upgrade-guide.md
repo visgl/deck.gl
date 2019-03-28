@@ -34,7 +34,12 @@ The old experimental prop `lightSettings` in many 3D layers is no longer support
 
 #### project Shader Module
 
-`project_scale` was replaced by `project_size`.
+**Deprecations**
+
+- `project_scale` -> `project_size`
+- `project_to_clipspace` -> `project_common_position_to_clipspace`
+- `project_to_clipspace_fp64` -> `project_common_position_to_clipspace_fp64`
+- `project_pixel_to_clipspace` -> `project_pixel_size_to_clipspace`
 
 
 ## Upgrading from deck.gl v6.3 to v6.4
