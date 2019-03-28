@@ -127,12 +127,7 @@ export default class LayersPass extends Pass {
   }
 
   drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters, effects, effectProps}) {
-    const moduleParameters = this.getModuleParameters(
-      layer,
-      this.props.pixelRatio,
-      effects,
-      effectProps
-    );
+    const moduleParameters = this.getModuleParameters(layer, effects, effectProps);
     const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
     const layerParameters = this.getLayerParameters(layer, layerIndex, glViewport, parameters);
 
