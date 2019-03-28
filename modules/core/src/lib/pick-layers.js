@@ -357,8 +357,10 @@ function processPickInfo({
 
     info = getLayerPickingInfo({layer, info, mode});
 
+    let pickingSelectedColor = null;
     if (layer === pickedLayer && mode === 'hover') {
       lastPickedInfo.info = info;
+      pickingSelectedColor = layer.props.autoHighlight ? pickedColor : null;
     }
 
     // This guarantees that there will be only one copy of info for
@@ -366,9 +368,6 @@ function processPickInfo({
     if (info) {
       infos.set(info.layer.id, info);
     }
-
-    const pickingSelectedColor =
-      layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
 
     layer.setModuleParameters({
       pickingSelectedColor
