@@ -49,25 +49,25 @@ varying float innerUnitRadius;
 void main(void) {
   // Multiply out radius and clamp to limits
   float outerRadiusPixels = clamp(
-    project_scale(radiusScale * instanceRadius),
+    project_size_to_pixel(radiusScale * instanceRadius),
     radiusMinPixels, radiusMaxPixels
   );
   
   // Multiply out line width and clamp to limits
-  float lineWidth = clamp(
-    project_scale(lineWidthScale * instanceLineWidths), 
+  float lineWidthPixels = clamp(
+    project_size_to_pixel(lineWidthScale * instanceLineWidths),
     lineWidthMinPixels, lineWidthMaxPixels
   );
 
   // outer radius needs to offset by half stroke width
-  outerRadiusPixels += stroked * lineWidth / 2.0;
+  outerRadiusPixels += stroked * lineWidthPixels / 2.0;
 
   // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
 
-  innerUnitRadius = 1.0 - stroked * lineWidth / outerRadiusPixels;
+  innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
   
-  vec3 offset = positions * outerRadiusPixels;
+  vec3 offset = positions * project_pixel_size(outerRadiusPixels);
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset);
 
   // Apply opacity to instance color, or return instance picking color

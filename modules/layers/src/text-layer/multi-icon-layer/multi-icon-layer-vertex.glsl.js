@@ -61,7 +61,7 @@ void main(void) {
  
   // project meters to pixels and clamp to limits 
   float sizePixels = clamp(
-    project_scale(instanceSizes * sizeScale),
+    project_size_to_pixel(instanceSizes * sizeScale),
     sizeMinPixels, sizeMaxPixels
   );
 
@@ -76,7 +76,7 @@ void main(void) {
   pixelOffset.y *= -1.0;
 
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0));
-  gl_Position += project_pixel_to_clipspace(pixelOffset);
+  gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
 
   vTextureCoords = mix(
     instanceIconFrames.xy,
