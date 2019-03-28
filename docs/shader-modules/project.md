@@ -48,10 +48,12 @@ The projection module makes it easy to write vertex shaders that follow deck.gl'
 
 The functions converts positions/vectors between 4 coordinate spaces:
 
-* World space (`world`): the [coordinate system](/docs/developer-guide/coordinate-systems.md) defined by the layer, not necessarily linear or uniform.
-* Common space (`common`): an normalized intermediate 3D space that deck.gl uses for consistent processing of geometries. It is safe to add/subtract/scale positions and vectors in this space.
-* Screen space (`pixel`): top-left coordinate system runs from `[0, 0]` to `[viewportWidth, viewportHeight]` (see remarks below).
-* [Clip space](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#Clip_space) (`clipspace`): output of the vertex shader
+| Name | Short Name | Description |
+|------|------|-------------|
+| World space | `world` | The [coordinate system](/docs/developer-guide/coordinate-systems.md) defined by the layer, not necessarily linear or uniform. |
+| Common space | `common` | A normalized intermediate 3D space that deck.gl uses for consistent processing of geometries, guaranteed to be linear and uniform. Therefore, it is safe to add/rotate/scale positions and vectors in this space. |
+| Screen space | `pixel` | Top-left coordinate system runs from `[0, 0]` to `[viewportWidth, viewportHeight]` (see remarks below). |
+| [Clip space](https://developer.mozilla.org/en-US/docs/Web/API/WebGL_API/WebGL_model_view_projection#Clip_space) | `clipspace` | Output of the vertex shader. |
 
 The GLSL functions of the `project` shader module uses the following naming convention:
 
@@ -59,13 +61,13 @@ The GLSL functions of the `project` shader module uses the following naming conv
 project_[<source_space>]_<object_type>_[to_<target_space>]
 ```
 
-* `source_space`: the coordinate space of the input. If not specified, the input is always in the world space.
+* `source_space`: the short name of the coordinate space of the input. If not specified, the input is always in the `world` space.
 * `object_type`: one of the following
   - `position`: absolute position of a point
   - `offset`: the delta between two positions
   - `normal`: the normal vector of a surface
   - `size`: the measurement of a geometry. This is different from `offset` in that `size` is uniform on all axes (e.g. [x, y, z] in meters in `LNGLAT` world space) and `offset` may not be (e.g. [dLon, dLat, dAlt] in degrees, degrees, and meters respectively in `LNGLAT` world space).
-* `target_space`: the coordinate space of the output. If not specified, the output is always in the common space.
+* `target_space`: the short name of the coordinate space of the output. If not specified, the output is always in the `common` space.
 
 ### project_position
 
@@ -134,6 +136,6 @@ Converts the coordinates of a point from the common space to the clip space, whi
 
 ## Remarks
 
-* For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. it multiplies `pixels` with `project_uDevicePixelRatio`.
+* For consistent results, the screen space pixels are logical pixels, not device pixels, i.e. functions in the project module multiply `pixels` with `project_uDevicePixelRatio`.
 * The pixels offsets will be divided by the `w` coordinate of `gl_Position`. This is simply the GPUs standard treatment of any coordinate. This means that there will be more pixels closer to the camera and less pixels further away from the camer. Setting the `focalDistance` uniform controls this.
 * To avoid pixel sizes scaling with distance from camera, simply set `focalDistance` to 1 and multiply clipspace offset with `gl_Position.w`
