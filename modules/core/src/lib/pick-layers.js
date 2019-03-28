@@ -363,15 +363,15 @@ function processPickInfo({
       pickingSelectedColor = layer.props.autoHighlight ? pickedColor : null;
     }
 
+    if (mode === 'hover') {
+      layer.setModuleParameters({pickingSelectedColor});
+    }
+
     // This guarantees that there will be only one copy of info for
     // one composite layer
     if (info) {
       infos.set(info.layer.id, info);
     }
-
-    layer.setModuleParameters({
-      pickingSelectedColor
-    });
 
     layer.setNeedsRedraw();
   });
