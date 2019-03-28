@@ -205,7 +205,10 @@ export default class IconLayer extends Layer {
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           attributes: {
-            positions: new Float32Array(positions)
+            positions: {
+              value: new Float32Array(positions),
+              size: 3
+            }
           }
         }),
         isInstanced: true,

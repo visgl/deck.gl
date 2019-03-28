@@ -1,6 +1,6 @@
 import {Layer} from 'deck.gl';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from '@luma.gl/core';
+import {Model} from '@luma.gl/core';
 
 import surfaceVertex from './surface-vertex.glsl';
 import fragmentShader from './fragment.glsl';
@@ -82,10 +82,7 @@ export default class SurfaceLayer extends Layer {
       vs: surfaceVertex,
       fs: fragmentShader,
       modules: ['picking'],
-      geometry: new Geometry({
-        drawMode: GL.TRIANGLES,
-        attributes: {}
-      }),
+      drawMode: GL.TRIANGLES,
       vertexCount: 0,
       isIndexed: true
     });

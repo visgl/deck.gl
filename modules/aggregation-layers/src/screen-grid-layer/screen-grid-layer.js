@@ -229,7 +229,8 @@ export default class ScreenGridLayer extends Layer {
           drawMode: GL.TRIANGLE_FAN,
           attributes: {
             positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
-          }
+          },
+          vertexCount: 4
         }),
         isInstanced: true,
         shaderCache: this.context.shaderCache

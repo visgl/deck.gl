@@ -159,7 +159,8 @@ export default class ArcLayer extends Layer {
           drawMode: GL.TRIANGLE_STRIP,
           attributes: {
             positions: new Float32Array(positions)
-          }
+          },
+          vertexCount: positions.length / 3
         }),
         isInstanced: true,
         shaderCache: this.context.shaderCache
