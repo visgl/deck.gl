@@ -12,6 +12,12 @@
   + `MeshLayer` is renamed to `SimpleMeshLayer` and moved to `@deck.gl/mesh-layers`.
   + `TileLayer` and `TripsLayer` are moved to `@deck.gl/geo-layers`.
 
+#### Deck Class
+
+**Breaking Changes**
+
+- `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be an [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) object, and the second argument is the pointer event. This change makes these two events consistent with other event callbacks.
+
 #### Layers
 
 **Deprecations**

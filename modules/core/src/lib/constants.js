@@ -45,6 +45,7 @@ export const COORDINATE_SYSTEM = {
 };
 
 export const EVENTS = {
+  click: {handler: 'onClick'},
   panstart: {handler: 'onDragStart'},
   panmove: {handler: 'onDrag'},
   panend: {handler: 'onDragEnd'}

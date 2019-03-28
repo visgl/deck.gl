@@ -291,8 +291,8 @@ export default class App extends PureComponent {
           onViewStateChange={this._onViewStateChange}
           effects={effects ? this._effects : []}
           pickingRadius={pickingRadius}
-          onLayerHover={this._onHover}
-          onLayerClick={this._onClick}
+          onHover={this._onHover}
+          onClick={this._onClick}
           useDevicePixels={useDevicePixels}
           debug={true}
           drawPickingColors={drawPickingColors}
