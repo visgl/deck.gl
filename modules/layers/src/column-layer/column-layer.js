@@ -125,7 +125,7 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometryAttributes(gl, diskResolution) {
+  setGeometryState(gl, diskResolution) {
     if (!this.state.geometryBuffers) {
       this.setState({
         geometry: new CylinderGeometry({
@@ -142,16 +142,17 @@ export default class ColumnLayer extends Layer {
         geometryBuffers: getBuffersFromGeometry(gl, this.state.geometry)
       });
     }
-
-    return this.state.geometryBuffers;
   }
 
   _getModel(gl) {
+    this.setGeometryState(gl, this.props.diskResolution);
     return new Model(
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        attributes: this.getGeometryAttributes(gl, this.props.diskResolution),
+        drawMode: this.state.geometry.drawMode,
+        vertexCount: this.state.geometry.attributes.indices.value.length,
+        attributes: this.state.geometryBuffers,
         isInstanced: true,
         shaderCache: this.context.shaderCache
       })
