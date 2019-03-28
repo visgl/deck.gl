@@ -441,6 +441,9 @@ export default class Deck {
     return views;
   }
 
+  // The `pointermove` event may fire multiple times in between two animation frames,
+  // it's a waste of time to run picking without rerender. Instead we save the last pick
+  // request and only do it once on the next animation frame.
   _requestPick({event, callback, mode, immediate}) {
     const {_pickRequest} = this;
     if (event.type === 'pointerleave') {
@@ -468,6 +471,7 @@ export default class Deck {
     }
   }
 
+  // Actually run picking
   _pickAndCallback() {
     const {_pickRequest} = this;
 
