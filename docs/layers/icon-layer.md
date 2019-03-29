@@ -212,6 +212,12 @@ The maximum size in pixels.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
+##### `billboard` (Boolean, optional)
+
+- Default: `true`
+
+If on, the icon always faces camera. Otherwise the icon faces up (z)
+
 ### Data Accessors
 
 ##### `getIcon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)

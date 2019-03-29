@@ -180,6 +180,9 @@ float project_size_to_pixel(float meters) {
 float project_pixel_size(float pixels) {
   return pixels;
 }
+vec2 project_pixel_size(vec2 pixels) {
+  return pixels;
+}
 
 // Deprecated, remove in v8
 float project_scale(float meters) {

@@ -103,6 +103,7 @@ Converts the size of a geometry from the world space (meters if geospatial, and 
 
 ```glsl
 float project_pixel_size(float pixels)
+float project_pixel_size(vec2 pixels)
 ```
 
 Converts the size of a geometry from the screen space to the common space.
