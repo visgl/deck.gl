@@ -34,13 +34,13 @@ varying float shouldDiscard;
 void main(void) {
 
   // fit into a unit cube that centers at [0, 0, 0]
-  vec4 position_modelspace = vec4(positions.xyz, 1.0);
-  gl_Position = project_to_clipspace(position_modelspace);
+  vec3 position_commonspace = project_position(positions.xyz);
+  gl_Position = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
 
   // cheap way to produce believable front-lit effect.
   // Note: clipsspace depth is nonlinear and deltaZ depends on the near and far values
   // when creating the perspective projection matrix.
-  vec4 position_vector = project_to_clipspace(vec4(positions.xyz, 0.0));
+  vec4 position_vector = project_common_position_to_clipspace(vec4(position_commonspace, 0.0));
   float fadeFactor = 1.0 - position_vector.z * lightStrength;
 
   vColor = vec4(colors.rgb * fadeFactor, colors.a * opacity) / 255.0;;

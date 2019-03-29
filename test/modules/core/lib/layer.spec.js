@@ -327,14 +327,14 @@ test('Layer#project', t => {
   layer.context.viewport = new OrbitView().makeViewport({
     width: 400,
     height: 300,
-    viewState: {distance: 500, rotationOrbit: 30}
+    viewState: {zoom: 0, rotationOrbit: 30}
   });
 
   t.ok(
     equals(layer.project([100, 100, 100]), [
-      182.1119902506377,
-      83.24103876909248,
-      0.9996999699969997
+      1.7748586567448557,
+      96.88573345752961,
+      0.7295077019654882
     ]),
     'returns correct value'
   );

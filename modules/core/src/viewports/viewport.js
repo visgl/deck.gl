@@ -41,13 +41,6 @@ const IDENTITY = createMat4();
 
 const ZERO_VECTOR = [0, 0, 0];
 
-const DEFAULT_DISTANCE_SCALES = {
-  pixelsPerMeter: [1, 1, 1],
-  metersPerPixel: [1, 1, 1],
-  pixelsPerDegree: [1, 1, 1],
-  degreesPerPixel: [1, 1, 1]
-};
-
 const DEFAULT_ZOOM = 0;
 
 const ERR_ARGUMENT = 'Illegal argument to Viewport';
@@ -103,6 +96,7 @@ export default class Viewport {
     return (
       viewport.width === this.width &&
       viewport.height === this.height &&
+      viewport.scale === this.scale &&
       equals(viewport.projectionMatrix, this.projectionMatrix) &&
       equals(viewport.viewMatrix, this.viewMatrix)
     );
@@ -182,7 +176,8 @@ export default class Viewport {
     if (this.isGeospatial) {
       return lngLatToWorld(xyz, scale);
     }
-    return xyz;
+    const {pixelsPerMeter} = this.distanceScales;
+    return [xyz[0] * pixelsPerMeter[0], xyz[1] * pixelsPerMeter[1]];
   }
 
   /**
@@ -197,7 +192,8 @@ export default class Viewport {
     if (this.isGeospatial) {
       return worldToLngLat(xyz, scale);
     }
-    return xyz;
+    const {metersPerPixel} = this.distanceScales;
+    return [xyz[0] * metersPerPixel[0], xyz[1] * metersPerPixel[1]];
   }
 
   getDistanceScales(coordinateOrigin = null) {
@@ -317,12 +313,16 @@ export default class Viewport {
         ? getMeterZoom({latitude}) + Math.log2(focalDistance)
         : DEFAULT_ZOOM;
     }
-    this.scale = Math.pow(2, this.zoom);
+    const scale = Math.pow(2, this.zoom);
+    this.scale = scale;
 
     // Calculate distance scales if lng/lat/zoom are provided
     this.distanceScales = this.isGeospatial
       ? getDistanceScales({latitude, longitude, scale: this.scale})
-      : distanceScales || DEFAULT_DISTANCE_SCALES;
+      : distanceScales || {
+          pixelsPerMeter: [scale, scale, scale],
+          metersPerPixel: [1 / scale, 1 / scale, 1 / scale]
+        };
 
     this.focalDistance = focalDistance;
 

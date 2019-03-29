@@ -240,7 +240,7 @@ function calculateViewportUniforms({
     // Distance at which screen pixels are projected
     project_uFocalDistance: viewport.focalDistance || 1,
     project_uCommonUnitsPerMeter: distanceScales.pixelsPerMeter,
-    project_uCommonUnitsPerWorldUnit: distanceScales.pixelsPerDegree,
+    project_uCommonUnitsPerWorldUnit: distanceScales.pixelsPerMeter,
     project_uCommonUnitsPerWorldUnit2: DEFAULT_PIXELS_PER_UNIT2,
     project_uScale: viewport.scale, // This is the mercator scale (2 ** zoom)
 
@@ -261,6 +261,7 @@ function calculateViewportUniforms({
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
       uniforms.project_uCoordinateOrigin = shaderCoordinateOrigin;
     // eslint-disable-line no-fallthrough
+    case PROJECT_COORDINATE_SYSTEM.LNGLAT:
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.pixelsPerDegree;
       uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;

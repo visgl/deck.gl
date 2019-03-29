@@ -71,7 +71,8 @@ void main(void) {
   // apply offsets
   position_modelspace += gridOffset * gridLineNormal;
 
-  gl_Position = project_to_clipspace(vec4(position_modelspace, 1.0));
+  vec3 position_commonspace = project_position(position_modelspace);
+  gl_Position = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
 
   vColor = strokeColor / 255.0;
 }
