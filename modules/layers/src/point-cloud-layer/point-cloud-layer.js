@@ -48,7 +48,7 @@ const defaultProps = {
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'phong-lighting', 'picking']};
+    return {vs, fs, modules: [projectModule, 'gouraud-lighting', 'picking']};
   }
 
   initializeState() {
