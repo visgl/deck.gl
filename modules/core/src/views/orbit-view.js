@@ -35,7 +35,7 @@ export default class OrbitView extends View {
 
   _getViewMatrix(viewState, height) {
     const {
-      fovy = 50, // From eye position to lookAt
+      fovy, // From eye position to lookAt
       orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
 
       center = [0, 0, 0] // Which point is camera looking at, default origin

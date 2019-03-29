@@ -26,8 +26,8 @@ The `OrthographicView` constructor takes the same parameters as the [View](/docs
 
 * `center` (`Number[3]`, optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
 * `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
-* `near` (`Number`, optional) - Distance of near clipping plane. Default to `1`.
-* `far` (`Number`, optional) - Distance of far clipping plane. Default to `100`.
+* `near` (`Number`, optional) - Distance of near clipping plane. Default to `0.1`.
+* `far` (`Number`, optional) - Distance of far clipping plane. Default to `1000`.
 
 
 ## Methods
