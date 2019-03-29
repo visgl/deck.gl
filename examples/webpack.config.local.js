@@ -18,18 +18,19 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 
 // Support for hot reloading changes to the deck.gl library:
 function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
-
-  const LUMA_ALIASES = true ? {
-    '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
-    '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
-    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
-    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
-  } : {
-    '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/modules/core/src`,
-    '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl/src`,
-    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl-state-tracker/src`,
-    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl2-polyfill/src`
-  };
+  const LUMA_ALIASES = true
+    ? {
+        '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
+        '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
+        '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
+        '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
+      }
+    : {
+        '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/modules/core/src`,
+        '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl/src`,
+        '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl-state-tracker/src`,
+        '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl2-polyfill/src`
+      };
 
   return {
     // TODO - Uncomment when all examples use webpack 4 for faster bundling
