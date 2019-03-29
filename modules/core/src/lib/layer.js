@@ -47,7 +47,7 @@ const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
-  dataTransform: {type: 'functixon', value: data => data, compare: false},
+  dataTransform: {type: 'function', value: data => data, compare: false},
   fetch: {
     type: 'function',
     value: url => fetch(url).then(response => response.json()),

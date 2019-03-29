@@ -18,7 +18,9 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 // Support for hot reloading changes to the deck.gl library:
 function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
   const LUMA_LINK_ALIASES = {
+    '@luma.gl/constants': `${ROOT_DIR}/../luma.gl/modules/constants/src`,
     '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
+    '@luma.gl/debug': `${ROOT_DIR}/../luma.gl/modules/debug/src`,
     '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
     '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
     '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
@@ -32,6 +34,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
 
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
   // console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
+  // require('fs').writeFileSync('/tmp/ocular.log', JSON.stringify(config, null, 2));
 
   return {
     // TODO - Uncomment when all examples use webpack 4 for faster bundling

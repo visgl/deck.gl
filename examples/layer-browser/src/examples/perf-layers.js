@@ -1,14 +1,15 @@
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
-  COORDINATE_SYSTEM,
   ScatterplotLayer,
   LineLayer,
   PointCloudLayer,
-  ScreenGridLayer,
   GeoJsonLayer,
   PathLayer,
   TextLayer
   //  ContourLayer
-} from 'deck.gl';
+} from '@deck.gl/layers';
+
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';

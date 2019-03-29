@@ -1,7 +1,14 @@
 /* global window */
 
 // deck.gl ES6 components
-import {COORDINATE_SYSTEM, View, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
+import {
+  COORDINATE_SYSTEM,
+  View,
+  MapView,
+  FirstPersonView,
+  OrbitView,
+  MapController
+} from '@deck.gl/core';
 import {_OrbitController as OrbitController} from '@deck.gl/core';
 
 // deck.gl react components
