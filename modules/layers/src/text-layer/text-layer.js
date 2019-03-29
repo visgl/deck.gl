@@ -57,6 +57,7 @@ const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
   fp64: false,
+  billboard: true,
   sizeScale: 1,
   sizeUnits: 'pixels',
   sizeMinPixels: 0,
@@ -247,6 +248,7 @@ export default class TextLayer extends CompositeLayer {
       getAlignmentBaseline,
       getPixelOffset,
       fp64,
+      billboard,
       sdf,
       sizeScale,
       sizeUnits,
@@ -272,6 +274,7 @@ export default class TextLayer extends CompositeLayer {
         getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
         getPixelOffset: this._getAccessor(getPixelOffset),
         fp64,
+        billboard,
         sizeScale: sizeScale * scale,
         sizeUnits,
         sizeMinPixels: sizeMinPixels * scale,

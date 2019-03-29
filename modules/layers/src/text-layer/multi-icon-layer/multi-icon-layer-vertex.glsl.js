@@ -42,6 +42,7 @@ uniform float sizeMaxPixels;
 uniform vec2 iconsTextureDim;
 uniform float gamma;
 uniform float opacity;
+uniform bool billboard;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -73,10 +74,16 @@ void main(void) {
 
   pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * instanceScale;
   pixelOffset += instancePixelOffset;
-  pixelOffset.y *= -1.0;
+  
+  if (billboard)  {
+    pixelOffset.y *= -1.0;
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0)); 
+    gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0));
-  gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
+  } else {
+    vec3 offset_common = vec3(project_pixel_size(pixelOffset.xy), 0.0);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset_common); 
+  }
 
   vTextureCoords = mix(
     instanceIconFrames.xy,

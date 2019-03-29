@@ -56,6 +56,7 @@ const defaultProps = {
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   fp64: false,
+  billboard: true,
   sizeUnits: 'pixels',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
@@ -174,7 +175,7 @@ export default class IconLayer extends Layer {
   /* eslint-enable max-statements, complexity */
 
   draw({uniforms}) {
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits} = this.props;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard} = this.props;
     const {iconManager} = this.state;
     const {viewport} = this.context;
 
@@ -187,7 +188,8 @@ export default class IconLayer extends Layer {
           sizeScale:
             sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
           sizeMinPixels,
-          sizeMaxPixels
+          sizeMaxPixels,
+          billboard
         })
       );
     }
