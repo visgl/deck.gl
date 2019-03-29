@@ -1,6 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, setParameters, withParameters} from 'luma.gl';
+import {clear, setParameters, withParameters} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(props) {

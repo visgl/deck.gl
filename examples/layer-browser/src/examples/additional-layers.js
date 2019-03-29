@@ -13,7 +13,7 @@ import {
 import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
-import {CylinderGeometry} from 'luma.gl';
+import {CylinderGeometry} from '@luma.gl/core';
 import {GLTFParser} from '@loaders.gl/gltf';
 import * as dataSamples from '../data-samples';
 

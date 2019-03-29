@@ -155,7 +155,7 @@ export default class ScatterplotLayer extends Layer {
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           attributes: {
-            positions: new Float32Array(positions)
+            positions: {size: 3, value: new Float32Array(positions)}
           }
         }),
         isInstanced: true,

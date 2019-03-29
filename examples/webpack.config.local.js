@@ -8,15 +8,31 @@
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
 
+const ROOT_DIR = resolve(__dirname, '..');
 const LIB_DIR = resolve(__dirname, '..');
-const SRC_DIR = resolve(LIB_DIR, './modules');
 
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   root: resolve(__dirname, '..')
 }).aliases;
 
 // Support for hot reloading changes to the deck.gl library:
-function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
+function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
+  const LUMA_LINK_ALIASES = {
+    '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
+    '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
+    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
+    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
+  };
+  const LUMA_LOCAL_ALIASES = {
+    '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/core/src`,
+    '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl/src`,
+    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/webgl-state-tracker/src`,
+    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/webgl2-polyfill/src`
+  };
+
+  const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
+  // console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
+
   return {
     // TODO - Uncomment when all examples use webpack 4 for faster bundling
     // mode: 'development',
@@ -37,9 +53,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
     resolve: {
       // mainFields: ['esnext', 'module', 'main'],
 
-      alias: Object.assign({}, ALIASES, {
-        // Use luma.gl specified by root package.json
-        'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
+      alias: Object.assign({}, ALIASES, LUMA_ALIASES, {
+        // Use luma.gl installed in parallel with deck.gl
         // Important: ensure shared dependencies come from the main node_modules dir
         // Versions will be controlled by the deck.gl top level package.json
         'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),
@@ -61,28 +76,8 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
   };
 }
 
-const BUBLE_CONFIG = {
-  module: {
-    rules: [
-      {
-        // Compile source using buble
-        test: /\.js$/,
-        loader: 'buble-loader',
-        include: [SRC_DIR],
-        options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
-        }
-      }
-    ]
-  }
-};
-
-function addLocalDevSettings(config, exampleDir) {
-  const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir);
+function addLocalDevSettings(config, exampleDir, linkToLuma) {
+  const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir, linkToLuma);
   config = Object.assign({}, LOCAL_DEV_CONFIG, config);
   config.resolve = Object.assign({}, LOCAL_DEV_CONFIG.resolve, config.resolve || {});
   config.resolve.alias = config.resolve.alias || {};
@@ -95,24 +90,19 @@ function addLocalDevSettings(config, exampleDir) {
   return config;
 }
 
-function addBubleSettings(config) {
-  config.module = config.module || {};
-  Object.assign(config.module, {
-    rules: (config.module.rules || []).concat(BUBLE_CONFIG.module.rules)
-  });
-  return config;
-}
-
 module.exports = (config, exampleDir) => env => {
   // npm run start-local now transpiles the lib
-  if (env && env.local) {
-    config = addLocalDevSettings(config, exampleDir);
-    config = addBubleSettings(config);
+  if (!env) {
+    return config;
+  }
+
+  if (env.local) {
+    config = addLocalDevSettings(config, exampleDir, env['local-luma']);
   }
 
   // npm run start-es6 does not transpile the lib
   if (env && env.es6) {
-    config = addLocalDevSettings(config, exampleDir);
+    config = addLocalDevSettings(config, exampleDir, env['local-luma']);
   }
 
   if (env && env.production) {

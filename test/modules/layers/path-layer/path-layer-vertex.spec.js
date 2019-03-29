@@ -2,7 +2,7 @@ import test from 'tape-catch';
 
 // import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
 import {gl} from '@deck.gl/test-utils';
-import {Transform, Buffer} from 'luma.gl';
+import {Transform, Buffer} from '@luma.gl/core';
 import VS from '../../../../modules/layers/src/path-layer/path-layer-vertex.glsl';
 
 test('path-layer-vertex#flipIfTrue', t => {

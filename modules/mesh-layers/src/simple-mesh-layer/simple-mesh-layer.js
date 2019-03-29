@@ -72,7 +72,10 @@ function getTextureFromData(gl, data, opts) {
 }
 
 function validateGeometryAttributes(attributes) {
-  assert(attributes.positions && attributes.normals && attributes.texCoords);
+  assert(
+    (attributes.positions && attributes.normals && attributes.texCoords) ||
+      (attributes.POSITION && attributes.NORMAL && attributes.TEXCOORD_0)
+  );
 }
 
 /*
@@ -83,7 +86,7 @@ function getGeometry(data) {
   if (data instanceof Geometry) {
     validateGeometryAttributes(data.attributes);
     return data;
-  } else if (data.positions) {
+  } else if (data.positions || data.POSITION) {
     validateGeometryAttributes(data);
     return new Geometry({
       attributes: data

@@ -19,7 +19,7 @@ import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';
 
 import LAYER_CATEGORIES from './examples';
-import 'luma.gl/debug';
+import '@luma.gl/debug';
 
 /* eslint-disable no-process-env */
 const MapboxAccessToken =
