@@ -33,7 +33,20 @@ test('H3HexagonLayer', t => {
       getHexagon: d => d.hexagons[0]
     },
     assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      if (layer._shouldUseHighPrecision()) {
+        t.ok(
+          subLayers.find(l => l.constructor.layerName === 'SolidPolygonLayer'),
+          'renders polygon layer'
+        );
+      } else {
+        t.ok(
+          subLayers.find(l => l.constructor.layerName === 'ColumnLayer'),
+          'renders column layer'
+        );
+      }
+    }
   });
 
   testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});

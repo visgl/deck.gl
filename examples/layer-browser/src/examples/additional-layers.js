@@ -153,7 +153,8 @@ const H3ClusterLayerExample = {
 const H3HexagonLayerExample = {
   layer: H3HexagonLayer,
   props: {
-    data: h3.kRing('882830829bfffff', 4),
+    // data: h3.kRing('891c0000003ffff', 4), // Pentagon sample, [-143.478, 50.103]
+    data: h3.kRing('882830829bfffff', 4), // SF
     getHexagon: d => d,
     getColor: (d, {index}) => [255, index * 5, 0],
     getElevation: d => Math.random() * 1000
