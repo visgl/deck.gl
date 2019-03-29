@@ -30,7 +30,7 @@ new OrbitView({...});
 Projection matrix arguments:
 
 * `orbitAxis` (`String`, optional) - Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
-* `lookAt` (`Number[3]`) - The world position at the center of the viewport. Default `[0, 0, 0]`.
+* `center` (`Number[3]`) - The world position at the center of the viewport. Default `[0, 0, 0]`.
 * `fovy` (`Number`, option) - The field of view, in degrees. Default `50`.
 * `up` (`Number[3]`) - The up direction. Default `[0, 1, 0]`.
 * `near` (`Number`, optional) - Distance of near clipping plane. Default to `0.1`.

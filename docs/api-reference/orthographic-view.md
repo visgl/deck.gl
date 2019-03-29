@@ -24,7 +24,7 @@ new OrthographicView({controller: true});
 
 The `OrthographicView` constructor takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor, plus the following orthographic projection matrix arguments:
 
-* `lookAt` (`Number[3]`, optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
+* `center` (`Number[3]`, optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
 * `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
 * `near` (`Number`, optional) - Distance of near clipping plane. Default to `1`.
 * `far` (`Number`, optional) - Distance of far clipping plane. Default to `100`.

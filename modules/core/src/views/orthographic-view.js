@@ -31,16 +31,11 @@ export default class OrthographicView extends View {
     const scale = Math.pow(2, zoom);
 
     const {
-      lookAt = [0, 0, 0], // Which point is camera looking at, default origin
-      up = [0, 1, 0] // Defines up direction, default positive y axis
+      center = [0, 0, 0] // Which point is camera looking at, default origin
     } = this.props;
 
-    const viewMatrix = new Matrix4().lookAt({
-      eye: [0, 0, 1],
-      lookAt: [0, 0, 0],
-      up
-    });
-    viewMatrix.translate([-lookAt[0] * scale, -lookAt[1] * scale, -lookAt[2] * scale]);
+    const viewMatrix = new Matrix4().lookAt({eye: [0, 0, 1]});
+    viewMatrix.translate([-center[0] * scale, -center[1] * scale, -center[2] * scale]);
     return new Matrix4().translate([-pixelOffset[0], -pixelOffset[1], 0]).multiplyRight(viewMatrix);
   }
 
