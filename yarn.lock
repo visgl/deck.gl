@@ -700,7 +700,7 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.15.tgz#eca7e19466ebfd07d88e18bc966880779a6f9fd4"
   integrity sha512-oH2mN/P3LvNsFNPVO7Lyb1RSf4lF1rsAEcdvpwyg0IKtHXPBwLKJwfk/3f8Leh3eqI6yz2hkK51nGkFJSbe7+A==
 
-"@luma.gl/core@>=7.0.0-alpha.21":
+"@luma.gl/core@^7.0.0-alpha.17":
   version "7.0.0-alpha.21"
   resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-7.0.0-alpha.21.tgz#b6941bf43ccb7b77a1956d49dd8ee02d8a751f23"
   integrity sha512-WXV2igf+ucHedtQ8cLXBJL224p7+bBVMYTHiUiir/4QAHG8/tmzdIilHv0lz9oqVlShc71YMG/OLIkQRA5D+9Q==
