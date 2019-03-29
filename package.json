@@ -44,6 +44,7 @@
     "babel-plugin-remove-glsl-comments": "^0.1.0",
     "babel-preset-minify": "^0.5.0",
     "coveralls": "^3.0.0",
+    "eslint-config-prettier": "^4.1.0",
     "eslint-config-uber-jsx": "^3.3.3",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-react": "^7.10",

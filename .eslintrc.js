@@ -1,6 +1,7 @@
+// prettier-ignore
 module.exports = {
   plugins: ['react'],
-  extends: ['uber-jsx', 'uber-es2015', 'prettier', 'plugin:import/errors'],
+  extends: ['uber-jsx', 'uber-es2015', 'prettier', 'prettier/react', 'plugin:import/errors'],
   overrides: {
     files: ['*.spec.js', 'webpack.config.js', '**/bundle/*.js'],
     rules: {
