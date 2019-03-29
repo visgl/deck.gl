@@ -35,10 +35,11 @@ export default class OrbitView extends View {
 
   _getViewMatrix(viewState, height) {
     const {
-      fovy, // From eye position to lookAt
+      fovy = 50, // From eye position to lookAt
       orbitAxis = 'Z', // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
 
-      center = [0, 0, 0] // Which point is camera looking at, default origin
+      lookAt = [0, 0, 0], // Which point is camera looking at, default origin
+      up = [0, 1, 0] // Defines up direction, default positive y axis
     } = this.props;
     const {
       rotationX = 0, // Rotating angle around X axis
@@ -51,7 +52,11 @@ export default class OrbitView extends View {
     // Distance from camera to center that projects common space 1 unit = 1 screen pixel
     const distance = 0.5 / Math.tan((fovy * DEGREES_TO_RADIANS) / 2);
 
-    const viewMatrix = new Matrix4().lookAt({eye: [0, 0, distance]});
+    const viewMatrix = new Matrix4().lookAt({
+      eye: [0, 0, distance],
+      center: [0, 0, 0],
+      up
+    });
 
     const scale = Math.pow(2, zoom);
     const projectionScale = 1 / (height || 1);
@@ -63,7 +68,7 @@ export default class OrbitView extends View {
       viewMatrix.rotateY(rotationOrbit * DEGREES_TO_RADIANS);
     }
     viewMatrix.scale([projectionScale, projectionScale, projectionScale]);
-    viewMatrix.translate([-center[0] * scale, -center[1] * scale, -center[2] * scale]);
+    viewMatrix.translate([-lookAt[0] * scale, -lookAt[1] * scale, -lookAt[2] * scale]);
 
     return new Matrix4()
       .translate([-pixelOffset[0] * projectionScale, pixelOffset[1] * projectionScale, 0])
