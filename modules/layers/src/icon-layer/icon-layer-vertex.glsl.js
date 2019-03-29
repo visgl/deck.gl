@@ -74,8 +74,8 @@ void main(void) {
     gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
 
   } else {
-    vec3 offset = vec3(pixelOffset.xy, 0.0);
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset); 
+    vec3 offset_common = vec3(project_pixel_size(pixelOffset.xy), 0.0);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset_common); 
   }
 
   vTextureCoords = mix(

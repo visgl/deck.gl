@@ -27,7 +27,7 @@ test('Render Test', t => {
   t.timeoutAfter(TEST_CASES.length * 2000);
 
   new SnapshotTestRunner({width: WIDTH, height: HEIGHT})
-    .add(TEST_CASES.filter(c => c.name === 'icon-lnglat-facing-up'))
+    .add(TEST_CASES)
     .run({
       onTestStart: testCase => t.comment(testCase.name),
       onTestPass: (testCase, result) => t.pass(`match: ${result.matchPercentage}`),
