@@ -36,9 +36,9 @@ test('Render Test', t => {
       imageDiffOptions: {
         threshold: 0.99,
         // uncomment to save screenshot to disk
-        saveOnFail: true
+        saveOnFail: true,
         // uncomment to save to overwrite, if not will be saved as `...-fail...`
-        // saveAs: '[name].png'
+        saveAs: '[name].png'
       }
     })
     .then(() => t.end());
