@@ -118,21 +118,17 @@ export const TEST_CASES = [
     views: [
       new OrbitView({
         fov: 30,
-        near: 0.001,
-        far: 100
+        orbitAxis: 'Y'
       })
     ],
     viewState: {
-      lookAt: [0, 0, 0],
-      distance: 1,
       rotationX: 15,
-      rotationOrbit: 30,
-      orbitAxis: 'Y'
+      rotationOrbit: 30
     },
     layers: [
       new PointCloudLayer({
         id: 'pointcloud-identity',
-        data: [{position: [0, 0.2, 0]}, {position: [-0.2, -0.2, 0]}, {position: [0.2, -0.2, 0]}],
+        data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],

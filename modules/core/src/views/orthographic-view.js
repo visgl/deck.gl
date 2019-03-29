@@ -13,13 +13,11 @@ export default class OrthographicView extends View {
 
   _getViewport({x, y, width, height, viewState}) {
     // Get view matrix parameters from view state
-    const {offset = [0, 0], zoom = 0} = viewState;
+    const {pixelOffset = [0, 0], zoom = 0} = viewState;
 
     // Make sure Matrix4.ortho doesn't crash on 0 width/height
     width = width || 1;
     height = height || 1;
-
-    const scale = Math.pow(2, zoom);
 
     // Get projection matrix parameters from the view itself
     // NOTE: automatically calculated from width and height if not provided
@@ -30,10 +28,10 @@ export default class OrthographicView extends View {
       up = [0, 1, 0], // Defines up direction, default positive y axis,
 
       // projection matrix arguments
-      left = (-width / 2 + offset[0]) / scale, // Left bound of the frustum
-      top = (-height / 2 + offset[1]) / scale, // Top bound of the frustum
-      right = (width / 2 + offset[0]) / scale, // Right bound of the frustum
-      bottom = (height / 2 + offset[1]) / scale, // Bottom bound of the frustum
+      left = -width / 2 + pixelOffset[0], // Left bound of the frustum
+      top = -height / 2 + pixelOffset[1], // Top bound of the frustum
+      right = width / 2 + pixelOffset[0], // Right bound of the frustum
+      bottom = height / 2 + pixelOffset[1], // Bottom bound of the frustum
 
       near = 1, // Distance of near clipping plane
       far = 100 // Distance of far clipping plane
