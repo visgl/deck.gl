@@ -361,20 +361,22 @@ function processPickInfo({
       lastPickedInfo.info = info;
     }
 
+    if (mode === 'hover') {
+      const pickingSelectedColor =
+        layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
+
+      layer.setModuleParameters({
+        pickingSelectedColor
+      });
+      // TODO this needsRedraw logic should be fixed in layer
+      layer.setNeedsRedraw();
+    }
+
     // This guarantees that there will be only one copy of info for
     // one composite layer
     if (info) {
       infos.set(info.layer.id, info);
     }
-
-    const pickingSelectedColor =
-      layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
-
-    layer.setModuleParameters({
-      pickingSelectedColor
-    });
-
-    layer.setNeedsRedraw();
   });
 
   const unhandledPickInfos = callLayerPickingCallbacks(infos, mode);
