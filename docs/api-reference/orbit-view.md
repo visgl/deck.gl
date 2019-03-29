@@ -8,12 +8,12 @@ The [OrbitView`] class is a subclass of [View](/docs/api-reference/view.md) that
 
 To render, `OrbitView` needs to be used together with a `viewState` with the following parameters:
 
-* `lookAt` (`Number[3]`) - The position being looked at.
-* `distance` (`Number`) - The distance from eye position to lookAt.
-* `up` (`Number[3]`) - The up direction.
-* `orbitAxis` (`String`) - Axis with 360 degrees rotating freedom, either 'Y' or 'Z', default to 'Z'.
-* `rotationOrbit` (`Number`) - Rotating angle around orbit axis.
-* `rotationX` (`Number`) - Rotating angle around X axis.
+* `rotationOrbit` (`Number`, optional) - Rotating angle around orbit axis. Default `0`.
+* `rotationX` (`Number`, optional) - Rotating angle around X axis. Default `0`.
+* `pixelOffset` (`Number[2]`, optional) - The offset of the viewport, in screen pixels. Default `[0, 0]` (the `lookAt` position is projected to the center of the viewport).
+* `zoom` (`Number`, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
+* `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `-Infinity`.
+* `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `Infinity`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
@@ -29,9 +29,12 @@ new OrbitView({...});
 
 Projection matrix arguments:
 
-* `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-* `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-* `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
+* `orbitAxis` (`String`, optional) - Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
+* `lookAt` (`Number[3]`) - The world position at the center of the viewport. Default `[0, 0, 0]`.
+* `fovy` (`Number`, option) - The field of view, in degrees. Default `50`.
+* `up` (`Number[3]`) - The up direction. Default `[0, 1, 0]`.
+* `near` (`Number`, optional) - Distance of near clipping plane. Default to `0.1`.
+* `far` (`Number`, optional) - Distance of far clipping plane. Default to `1000`.
 
 
 ## Methods

@@ -19,7 +19,8 @@ export default class App extends Component {
         width="100%"
         height="100%"
         initialViewState={INITIAL_VIEW_STATE}
-        views={[new OrthographicView({controller: true})]}
+        controller={true}
+        views={new OrthographicView()}
         layers={[new BezierGraphLayer({data})]}
       />
     );
