@@ -10,7 +10,6 @@ const resolve = require('path').resolve;
 
 const ROOT_DIR = resolve(__dirname, '..');
 const LIB_DIR = resolve(__dirname, '..');
-const SRC_DIR = resolve(LIB_DIR, './modules');
 
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   root: resolve(__dirname, '..')
@@ -32,7 +31,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
   };
 
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
-  console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
+  // console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
 
   return {
     // TODO - Uncomment when all examples use webpack 4 for faster bundling
