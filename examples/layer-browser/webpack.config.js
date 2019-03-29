@@ -27,17 +27,12 @@ const CONFIG = {
   module: {
     rules: [
       {
-        // Transpile ES6 to ES5 with buble
         // Remove if your app does not use JSX or you don't need to support old browsers
         test: /\.js$/,
-        loader: 'buble-loader',
+        loader: 'babel-loader',
         exclude: [/node_modules/],
         options: {
-          objectAssign: 'Object.assign', // Note: may need polyfill on old browsers
-          transforms: {
-            modules: false, // Let Webpack take care of import/exports
-            dangerousForOf: true // Use for/of in spite of buble's limitations
-          }
+          presets: ['@babel/preset-react']
         }
       }
       // ,

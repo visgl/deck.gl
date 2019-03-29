@@ -2,7 +2,7 @@
 import AttributeTransitionManager from '@deck.gl/core/lib/attribute-transition-manager';
 import Attribute from '@deck.gl/core/lib/attribute';
 import test from 'tape-catch';
-import {isWebGL2} from 'luma.gl';
+import {isWebGL2} from '@luma.gl/core';
 import {gl} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = {

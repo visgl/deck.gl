@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Framebuffer, readPixelsToArray} from 'luma.gl';
+import {Framebuffer, readPixelsToArray} from '@luma.gl/core';
 import getPixelRatio from '../utils/get-pixel-ratio';
 import assert from '../utils/assert';
 import PickLayersPass from '../passes/pick-layers-pass';

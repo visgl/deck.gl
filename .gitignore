@@ -6,6 +6,7 @@ dist.js
 dist.min.js
 node_modules/
 coverage/
+test/**/*-failed.png
 .nyc_output/
 .vscode/
 .reify-cache/

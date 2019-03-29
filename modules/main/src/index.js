@@ -143,7 +143,7 @@ export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 export {default, DeckGL} from '@deck.gl/react';
 
-export {AmbientLight, PointLight, DirectionalLight} from 'luma.gl';
+export {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
 
 //
 // EXPERIMENTAL EXPORTS

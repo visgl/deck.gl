@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import 'luma.gl';
+import '@luma.gl/core';
 
 import DeckGL from 'deck.gl';
 import * as deck from 'deck.gl';

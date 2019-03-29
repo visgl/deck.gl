@@ -29,7 +29,7 @@ import {project, project64} from '@deck.gl/core/shaderlib';
 // import {Matrix4, config} from 'math.gl';
 import {config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
-import {Transform, Buffer, fp64} from 'luma.gl';
+import {Transform, Buffer, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 import {getPixelOffset, clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';
 // import {clipspaceToScreen, runOnGPU, verifyResult} from './project-glsl-test-utils';

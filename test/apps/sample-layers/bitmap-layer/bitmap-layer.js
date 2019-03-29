@@ -20,7 +20,7 @@
 
 import {Layer} from 'deck.gl';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D} from 'luma.gl';
+import {Model, Geometry, Texture2D} from '@luma.gl/core';
 
 import BITMAP_VERTEX_SHADER from './bitmap-layer-vertex.glsl';
 import BITMAP_FRAGMENT_SHADER from './bitmap-layer-fragment.glsl';
