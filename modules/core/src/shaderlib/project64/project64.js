@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp64} from 'luma.gl';
+import {fp64} from '@luma.gl/core';
 const {fp64ify, fp64ifyMatrix4} = fp64;
 import project from '../project/project';
 import memoize from '../../utils/memoize';

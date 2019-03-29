@@ -1,6 +1,6 @@
 import {WebMercatorViewport} from 'deck.gl';
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
-import {fp64} from 'luma.gl';
+import {fp64} from '@luma.gl/core';
 
 const {fp64LowPart} = fp64;
 const viewportProps = {

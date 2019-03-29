@@ -28,7 +28,7 @@ import DeckPicker from './deck-picker';
 import log from '../utils/log';
 
 import GL from '@luma.gl/constants';
-import {AnimationLoop, createGLContext, trackContextState, setParameters} from 'luma.gl';
+import {AnimationLoop, createGLContext, trackContextState, setParameters} from '@luma.gl/core';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 

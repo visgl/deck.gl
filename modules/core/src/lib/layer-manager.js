@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {_ShaderCache as ShaderCache} from 'luma.gl';
+import {_ShaderCache as ShaderCache} from '@luma.gl/core';
 import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';

@@ -1,4 +1,4 @@
-import {Buffer} from 'luma.gl';
+import {Buffer} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 
 const ATTRIBUTE_MAPPING = {
