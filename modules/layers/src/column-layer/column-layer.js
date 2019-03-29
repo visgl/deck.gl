@@ -136,7 +136,8 @@ export default class ColumnLayer extends Layer {
     log.assert(vertices.length >= diskResolution);
 
     const {model} = this.state;
-    const {positions} = model.geometry.attributes;
+    const geometry = this.getGeometry(this.props.diskResolution);
+    const {positions} = geometry.attributes;
     let i = 0;
     for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
       for (let j = 0; j <= diskResolution; j++) {
@@ -147,7 +148,7 @@ export default class ColumnLayer extends Layer {
         i++;
       }
     }
-    model.setAttributes({positions});
+    model.setProps({geometry});
   }
 
   draw({uniforms}) {
