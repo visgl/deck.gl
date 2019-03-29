@@ -98,10 +98,8 @@ export function processPickInfo({
 
     info = getLayerPickingInfo({layer, info, mode});
 
-    let pickingSelectedColor = null;
     if (layer === pickedLayer && mode === 'hover') {
       lastPickedInfo.info = info;
-      pickingSelectedColor = layer.props.autoHighlight ? pickedColor : null;
     }
 
     // This guarantees that there will be only one copy of info for
@@ -110,11 +108,16 @@ export function processPickInfo({
       infos.set(info.layer.id, info);
     }
 
-    layer.setModuleParameters({
-      pickingSelectedColor
-    });
+    if (mode === 'hover') {
+      const pickingSelectedColor =
+        layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
 
-    layer.setNeedsRedraw();
+      layer.setModuleParameters({
+        pickingSelectedColor
+      });
+      // TODO this needsRedraw logic should be fixed in layer
+      layer.setNeedsRedraw();
+    }
   });
 
   return infos;
