@@ -251,7 +251,6 @@ function calculateViewportUniforms({
   };
 
   const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);
-
   switch (shaderCoordinateSystem) {
     case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
       uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.pixelsPerMeter;
@@ -261,7 +260,7 @@ function calculateViewportUniforms({
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
       uniforms.project_uCoordinateOrigin = shaderCoordinateOrigin;
     // eslint-disable-line no-fallthrough
-    case PROJECT_COORDINATE_SYSTEM.LNGLAT:
+    case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.pixelsPerDegree;
       uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
