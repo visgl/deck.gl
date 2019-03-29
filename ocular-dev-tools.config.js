@@ -10,7 +10,7 @@ const LUMA_ALIASES_LOCAL = {
   '@luma.gl/webgl2-polyfill': `${__dirname}/../luma.gl/modules/webgl2-polyfill/src`
 };
 
-const useLocalLuma = true;
+const useLocalLuma = false;
 
 const config = {
   lint: {
