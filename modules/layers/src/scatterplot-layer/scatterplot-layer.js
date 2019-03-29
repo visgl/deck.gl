@@ -146,7 +146,7 @@ export default class ScatterplotLayer extends Layer {
 
   _getModel(gl) {
     // a square that minimally cover the unit circle
-    const positions = [-1, -1, -1, 1, 1, 1, 1, -1];
+    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
     return new Model(
       gl,
@@ -155,7 +155,7 @@ export default class ScatterplotLayer extends Layer {
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           attributes: {
-            positions: {size: 2, value: new Float32Array(positions)}
+            positions: {size: 3, value: new Float32Array(positions)}
           }
         }),
         isInstanced: true,
