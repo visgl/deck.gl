@@ -18,19 +18,21 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 
 // Support for hot reloading changes to the deck.gl library:
 function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
-  const LUMA_ALIASES = true
-    ? {
-        '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
-        '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
-        '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
-        '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
-      }
-    : {
-        '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/modules/core/src`,
-        '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl/src`,
-        '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl-state-tracker/src`,
-        '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/modules/webgl2-polyfill/src`
-      };
+  const LUMA_LINK_ALIASES = {
+    '@luma.gl/core': `${ROOT_DIR}/../luma.gl/modules/core/src`,
+    '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
+    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
+    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
+  };
+  const LUMA_LOCAL_ALIASES = {
+    '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/core/src`,
+    '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl/src`,
+    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/webgl-state-tracker/src`,
+    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/webgl2-polyfill/src`
+  };
+
+  const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
+  console.warn(JSON.stringify(LUMA_ALIASES, null, 2)); // uncomment to debug config
 
   return {
     // TODO - Uncomment when all examples use webpack 4 for faster bundling
@@ -91,13 +93,17 @@ function addLocalDevSettings(config, exampleDir, linkToLuma) {
 
 module.exports = (config, exampleDir) => env => {
   // npm run start-local now transpiles the lib
-  if (env && env.local) {
-    config = addLocalDevSettings(config, exampleDir, env.luma || true);
+  if (!env) {
+    return config;
+  }
+
+  if(env.local) {
+    config = addLocalDevSettings(config, exampleDir, env['local-luma']);
   }
 
   // npm run start-es6 does not transpile the lib
   if (env && env.es6) {
-    config = addLocalDevSettings(config, exampleDir);
+    config = addLocalDevSettings(config, exampleDir, env['local-luma']);
   }
 
   if (env && env.production) {

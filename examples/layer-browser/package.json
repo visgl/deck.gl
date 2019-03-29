@@ -4,6 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start-local": "webpack-dev-server --env.es6 --progress --hot --open",
+    "start-local-luma": "webpack-dev-server --env.es6 --env.local --env.local-luma --progress --hot --open",
     "start-local-es5": "webpack-dev-server --env.local --progress --hot --open",
     "start-local-production": "webpack-dev-server --env.local --env.production --progress --hot --open"
   },
