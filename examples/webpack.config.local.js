@@ -97,7 +97,7 @@ module.exports = (config, exampleDir) => env => {
     return config;
   }
 
-  if(env.local) {
+  if (env.local) {
     config = addLocalDevSettings(config, exampleDir, env['local-luma']);
   }
 
