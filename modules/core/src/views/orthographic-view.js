@@ -47,8 +47,8 @@ export default class OrthographicView extends View {
     // Get projection matrix parameters from the view itself
     // NOTE: automatically calculated from width and height if not provided
     const {
-      near = 1, // Distance of near clipping plane
-      far = 100 // Distance of far clipping plane
+      near, // Distance of near clipping plane
+      far // Distance of far clipping plane
     } = this.props;
 
     return new Matrix4().ortho({
