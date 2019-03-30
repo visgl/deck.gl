@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.9] - Mar 29, 2019
+
+- Set picking color only when hovering (#2851)
+
 #### [6.4.8] - Mar 27 2019
 
 - Remove dependency on model redraw flags
