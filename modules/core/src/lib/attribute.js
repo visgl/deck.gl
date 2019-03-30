@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import GL from '@luma.gl/constants';
-import {Buffer, } from '@luma.gl/core';
+import {Buffer} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {createIterable} from '../utils/iterable-utils';
 import log from '../utils/log';
