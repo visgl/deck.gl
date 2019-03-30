@@ -1,24 +1,27 @@
+import {experimental} from '@deck.gl/core';
+
 import {
-  COORDINATE_SYSTEM,
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
   // PointCloudLayer,
   BitmapLayer,
-  ContourLayer,
-  ScreenGridLayer,
   IconLayer,
-  GridCellLayer,
-  GridLayer,
   ColumnLayer,
-  HexagonLayer,
   GeoJsonLayer,
   PolygonLayer,
   PathLayer,
-  TextLayer,
-  experimental
+  TextLayer
+} from '@deck.gl/layers';
+
+import {
+  GridLayer,
+  HexagonLayer,
+  ContourLayer,
+  ScreenGridLayer
   //  ContourLayer
-} from 'deck.gl';
+} from '@deck.gl/aggregation-layers';
+
 const {flattenVertices} = experimental;
 
 // Demonstrate immutable support
@@ -263,19 +266,6 @@ const LineLayerExample = {
   }
 };
 
-const LineLayerExampleNewCoords = {
-  layer: LineLayer,
-  getData: () => dataSamples.routes,
-  props: {
-    id: 'lineLayer',
-    getSourcePosition: d => d.START,
-    getTargetPosition: d => d.END,
-    getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
-    pickable: true,
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
-  }
-};
-
 const ScatterplotLayerExample = {
   layer: ScatterplotLayer,
   getData: () => dataSamples.points,
@@ -293,8 +283,8 @@ const ScatterplotLayerExample = {
   }
 };
 
-const GridCellLayerExample = {
-  layer: GridCellLayer,
+const ColumnLayerExample = {
+  layer: ColumnLayer,
   props: {
     id: 'gridCellLayer',
     data: dataSamples.worldGrid.data,
@@ -382,6 +372,7 @@ const GridLayerExample = {
   }
 };
 
+/*
 const ColumnLayerExample = {
   layer: ColumnLayer,
   props: {
@@ -398,6 +389,7 @@ const ColumnLayerExample = {
     getElevation: d => d.value * 5000
   }
 };
+*/
 
 const HexagonLayerExample = {
   layer: HexagonLayer,
@@ -523,17 +515,15 @@ export default {
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
-    LineLayerNewCoords: LineLayerExampleNewCoords,
     IconLayer: IconLayerExample,
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
-    GridCellLayer: GridCellLayerExample,
+    TextLayer: TextLayerExample,
+    BitmapLayer: BitmapLayerExample,
+    ColumnLayer: ColumnLayerExample,
     GridLayer: GridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
-    ColumnLayer: ColumnLayerExample,
     HexagonLayer: HexagonLayerExample,
-    TextLayer: TextLayerExample,
     ContourLayer: ContourLayerExample,
-    'ContourLayer (Bands)': ContourLayerBandsExample,
-    BitmapLayer: BitmapLayerExample
+    'ContourLayer (Bands)': ContourLayerBandsExample
   }
 };

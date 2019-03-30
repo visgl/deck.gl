@@ -1,4 +1,4 @@
-import {COORDINATE_SYSTEM} from 'deck.gl';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import PlotLayer from '../../../website/plot/plot-layer';
 
 // TODO - add point cloud layer for COORDINATE_SYSTEM.IDENTITY

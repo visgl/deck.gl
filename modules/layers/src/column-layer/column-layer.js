@@ -137,7 +137,7 @@ export default class ColumnLayer extends Layer {
 
     const {model} = this.state;
     const geometry = this.getGeometry(this.props.diskResolution);
-    const {positions} = geometry.attributes;
+    const positions = geometry.attributes.POSITION;
     let i = 0;
     for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
       for (let j = 0; j <= diskResolution; j++) {

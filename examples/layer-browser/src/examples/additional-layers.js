@@ -1,14 +1,14 @@
 /* global window */
 
+import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
+
 import {
-  SimpleMeshLayer,
-  ScenegraphLayer,
   GreatCircleLayer,
   S2Layer,
   H3ClusterLayer,
   H3HexagonLayer
   // KMLLayer
-} from 'deck.gl';
+} from '@deck.gl/geo-layers';
 
 import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';

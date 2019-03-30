@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import {Layer} from '@deck.gl/core';
-import {createGLTFObjects, fp64} from '@luma.gl/core';
+import {fp64} from '@luma.gl/core';
+import {createGLTFObjects} from '@luma.gl/addons';
 import {getMatrixAttributes} from '../utils/matrix';
 
 const {fp64LowPart} = fp64;
@@ -162,8 +163,8 @@ export default class ScenegraphLayer extends Layer {
     const numInstances = this.getNumInstances();
 
     this.state.sceneGraph.traverse((model, {worldMatrix}) => {
-      model.setAttributes(changedAttributes);
-      model.setInstanceCount(numInstances);
+      this._setModelAttributes(model.model, changedAttributes);
+      model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
         parameters,
