@@ -447,28 +447,17 @@ export default class Layer extends Component {
   }
 
   _setModelAttributes(model, changedAttributes) {
-    const modelAttributes = {};
-
-    for (const name in changedAttributes) {
-      const attribute = changedAttributes[name];
-      if (attribute.constant) {
-        modelAttributes[name] = attribute.value;
-      } else {
-        modelAttributes[name] = [attribute.buffer || attribute.externalBuffer, attribute];
-      }
-    }
-
     if (model.userData.excludeAttributes) {
       const filteredAttributes = {};
       const excludeAttributes = model.userData.excludeAttributes;
-      for (const attributeName in modelAttributes) {
+      for (const attributeName in changedAttributes) {
         if (!excludeAttributes[attributeName]) {
-          filteredAttributes[attributeName] = modelAttributes[attributeName];
+          filteredAttributes[attributeName] = changedAttributes[attributeName];
         }
       }
       model.setAttributes(filteredAttributes);
     } else {
-      model.setAttributes(modelAttributes);
+      model.setAttributes(changedAttributes);
     }
   }
 

@@ -122,8 +122,7 @@ export default class PointCloudLayer extends Layer {
           drawMode: GL.TRIANGLES,
           attributes: {
             positions: new Float32Array(positions)
-          },
-          vertexCount: positions.length / 3
+          }
         }),
         isInstanced: true,
         shaderCache: this.context.shaderCache
