@@ -287,12 +287,10 @@ export default class SolidPolygonLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(vsTop), {
           id: `${id}-top`,
-          geometry: new Geometry({
-            drawMode: GL.TRIANGLES,
-            attributes: {
-              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])}
-            }
-          }),
+          drawMode: GL.TRIANGLES,
+          attributes: {
+            vertexPositions: new Float32Array([0, 1])
+          },
           uniforms: {
             isWireframe: false,
             isSideVertex: false

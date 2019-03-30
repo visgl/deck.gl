@@ -283,7 +283,8 @@ export default class AxesLayer extends Layer {
         attributes: {
           positions: new Float32Array(gridPositions),
           normals: new Float32Array(gridNormals)
-        }
+        },
+        vertexCount: gridPositions.length / 3
       }),
       isInstanced: true
     });

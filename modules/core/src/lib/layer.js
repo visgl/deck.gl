@@ -564,7 +564,6 @@ export default class Layer extends Component {
     if (model) {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
-      model.geometry.id = `${this.props.id}-geometry`;
     }
   }
 
