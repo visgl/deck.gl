@@ -1,6 +1,6 @@
 # LayerManager Class (Internal)
 
-> The `LayerManager` class is an internal class that apps normally would not want to use. It was initially exposed primarily to enable deck.gl to be used without React, however as of deck.gl v5.0 you are more likely to want to use the new `Deck` class (or the [`DeckGL`](/docs/api-reference/react/deckgl.md) React Component). Those classes create a `LayerManager` under the hood to handle layer management, and you do not need to use this class directly.
+> The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](/docs/api-reference/react/deckgl.md) React Component) which creates a `LayerManager` under the hood.
 
 The `LayerManager` class handles updates, drawing and picking for a set of layers.
 
@@ -43,14 +43,14 @@ Returns:
 Returns an list of layers, optionally be filtered by a list of layer ids.
 
 ```js
-const layers = layerManager.getLayers({layerIds=[]});
+const layers = layerManager.getLayers({layerIds = []});
 ```
 
 Parameters:
 
 * `layerIds` (String[], optional) - A list of layer id strings. If supplied, the returned list will only contain layers whose `id` property matches (see note) one of the strings in the list.
 
-Returns: 
+Returns:
 
 * `Layer[]` - array of layer instances.
 
