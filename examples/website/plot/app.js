@@ -9,12 +9,13 @@ const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 const INITIAL_VIEW_STATE = {
   rotationX: 30,
   rotationOrbit: -30,
+  pixelOffset: [0, 0],
   /* global window */
   zoom: Math.log2(window.innerHeight / 3) // fit 3x3x3 box in current viewport
 };
 
 const orbitView = new OrbitView({
-  lookAt: [0.5, 0.5, 0.5],
+  center: [0.5, 0.5, 0.5],
   orbitAxis: 'Y'
 });
 

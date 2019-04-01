@@ -1,8 +1,10 @@
 import {clamp, Vector2} from 'math.gl';
 import Controller from './controller';
 import ViewState from './view-state';
+import LinearInterpolator from '../transitions/linear-interpolator';
+import {TRANSITION_EVENTS} from './transition-manager';
 
-const MOVEMENT_SPEED = 10; // per keyboard click
+const MOVEMENT_SPEED = 50; // per keyboard click
 
 const DEFAULT_STATE = {
   rotationX: 0,
@@ -11,6 +13,18 @@ const DEFAULT_STATE = {
   pixelOffset: [0, 0],
   minZoom: -Infinity,
   maxZoom: Infinity
+};
+
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterpolator: new LinearInterpolator([
+    'pixelOffset',
+    'zoom',
+    'rotationX',
+    'rotationOrbit'
+  ]),
+  transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
 /* Helpers */
@@ -228,7 +242,7 @@ export class OrbitState extends ViewState {
 
   moveLeft() {
     const {pixelOffset} = this._viewportProps;
-    const delta = [MOVEMENT_SPEED, 0];
+    const delta = [-MOVEMENT_SPEED, 0];
     return this._getUpdatedState({
       pixelOffset: new Vector2(pixelOffset).add(delta)
     });
@@ -236,7 +250,7 @@ export class OrbitState extends ViewState {
 
   moveRight() {
     const {pixelOffset} = this._viewportProps;
-    const delta = [-MOVEMENT_SPEED, 0];
+    const delta = [MOVEMENT_SPEED, 0];
     return this._getUpdatedState({
       pixelOffset: new Vector2(pixelOffset).add(delta)
     });
@@ -244,7 +258,7 @@ export class OrbitState extends ViewState {
 
   moveUp() {
     const {pixelOffset} = this._viewportProps;
-    const delta = [0, MOVEMENT_SPEED];
+    const delta = [0, -MOVEMENT_SPEED];
     return this._getUpdatedState({
       pixelOffset: new Vector2(pixelOffset).add(delta)
     });
@@ -252,9 +266,33 @@ export class OrbitState extends ViewState {
 
   moveDown() {
     const {pixelOffset} = this._viewportProps;
-    const delta = [0, -MOVEMENT_SPEED];
+    const delta = [0, MOVEMENT_SPEED];
     return this._getUpdatedState({
       pixelOffset: new Vector2(pixelOffset).add(delta)
+    });
+  }
+
+  rotateLeft() {
+    return this._getUpdatedState({
+      rotationOrbit: this._viewportProps.rotationOrbit - 15
+    });
+  }
+
+  rotateRight() {
+    return this._getUpdatedState({
+      rotationOrbit: this._viewportProps.rotationOrbit + 15
+    });
+  }
+
+  rotateUp() {
+    return this._getUpdatedState({
+      rotationX: this._viewportProps.rotationX - 10
+    });
+  }
+
+  rotateDown() {
+    return this._getUpdatedState({
+      rotationX: this._viewportProps.rotationX + 10
     });
   }
 
@@ -294,5 +332,10 @@ export class OrbitState extends ViewState {
 export default class OrbitController extends Controller {
   constructor(props) {
     super(OrbitState, props);
+  }
+
+  _getTransitionProps() {
+    // Enables Transitions on double-tap and key-down events.
+    return LINEAR_TRANSITION_PROPS;
   }
 }
