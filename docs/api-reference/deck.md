@@ -297,6 +297,12 @@ deck.setProps({...});
 
 See the Properties section on this page for more detail on which props can be set.
 
+##### `redraw`
+
+`deck.redraw()`
+
+Force deck to redraw (if necessary) immediately. By default, deck flushes all changes to the canvas on each animation frame. This behavior might cause the deck canvas to fall out of sync with other components if synchronous updates are required. Only use this method if the render cycle should be managed manually.
+
 
 ##### `pickObject`
 
