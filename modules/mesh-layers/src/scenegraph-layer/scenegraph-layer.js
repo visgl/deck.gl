@@ -18,72 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global fetch */
+
 import {Layer} from '@deck.gl/core';
-import {fp64} from '@luma.gl/core';
-import {createGLTFObjects} from '@luma.gl/addons';
+import {fp64, ScenegraphNode, log} from '@luma.gl/core';
+import {loadFile} from '@loaders.gl/core';
+
 import {getMatrixAttributes} from '../utils/matrix';
 
+import vs from './scenegraph-layer-vertex.glsl';
+import fs from './scenegraph-layer-fragment.glsl';
+
 const {fp64LowPart} = fp64;
-
-const vs = `
-  // Instance attributes
-  attribute vec3 instancePositions;
-  attribute vec2 instancePositions64xy;
-  attribute vec4 instanceColors;
-  attribute vec3 instancePickingColors;
-  attribute mat3 instanceModelMatrix;
-  attribute vec3 instanceTranslation;
-
-  // Uniforms
-  uniform float sizeScale;
-
-  // Attributes
-  attribute vec4 POSITION;
-
-  #ifdef HAS_UV
-    attribute vec2 TEXCOORD_0;
-    varying vec2 vTEXCOORD_0;
-  #endif
-  varying vec4 vColor;
-
-  void main(void) {
-    #ifdef HAS_UV
-      vTEXCOORD_0 = TEXCOORD_0;
-    #endif
-    vColor = instanceColors;
-
-    vec3 pos = (instanceModelMatrix * POSITION.xyz) * sizeScale + instanceTranslation;
-    pos = project_size(pos);
-
-    vec4 position_commonspace;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
-    picking_setPickingColor(instancePickingColors);
-  }
-`;
-
-const fs = `
-  #ifdef HAS_UV
-    varying vec2 vTEXCOORD_0;
-    uniform sampler2D u_BaseColorSampler;
-  #endif
-  varying vec4 vColor;
-
-  void main(void) {
-    #ifdef HAS_UV
-      gl_FragColor = (vColor / 255.) * texture2D(u_BaseColorSampler, vTEXCOORD_0);
-    #else
-      gl_FragColor = vColor / 255.;
-    #endif
-
-    gl_FragColor = picking_filterPickingColor(gl_FragColor);
-  }
-`;
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
+  scenegraph: {type: 'object', value: null, async: true},
+
+  // TODO: find why async does not work in this module
+  fetch: (url, {propName, layer}) => {
+    if (propName === 'scenegraph') {
+      return loadFile(url, layer.getLoadOptions()).then(({scenes}) => scenes[0]);
+    }
+
+    return fetch(url).then(response => response.json());
+  },
+
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
+  // TODO: Fix this to accept array instead of function
   getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
@@ -138,23 +102,29 @@ export default class ScenegraphLayer extends Layer {
   }
 
   updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.propsChanged && props.gltf) {
-      const {scenes} = createGLTFObjects(this.context.gl, props.gltf, {
-        modelOptions: {
-          vs,
-          fs,
-          modules: ['project32', 'picking'],
-          isInstanced: true
-        }
-      });
-      this.setState({
-        sceneGraph: scenes[0]
-      });
+    if (props.scenegraph !== oldProps.scenegraph) {
+      if (props.scenegraph instanceof ScenegraphNode) {
+        this.setState({scenegraph: props.scenegraph});
+      } else if (props.scenegraph !== null) {
+        log.warn('bad scenegraph:', props.scenegraph)();
+      }
     }
   }
 
+  getLoadOptions() {
+    return {
+      gl: this.context.gl,
+      modelOptions: {
+        vs,
+        fs,
+        modules: ['project32', 'picking'],
+        isInstanced: true
+      }
+    };
+  }
+
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
-    if (!this.state.sceneGraph) return;
+    if (!this.state.scenegraph) return;
 
     const {sizeScale} = this.props;
 
@@ -162,7 +132,7 @@ export default class ScenegraphLayer extends Layer {
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
     const numInstances = this.getNumInstances();
 
-    this.state.sceneGraph.traverse((model, {worldMatrix}) => {
+    this.state.scenegraph.traverse((model, {worldMatrix}) => {
       this._setModelAttributes(model.model, changedAttributes);
       model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
