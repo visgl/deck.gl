@@ -10,7 +10,7 @@ To render, `OrbitView` needs to be used together with a `viewState` with the fol
 
 * `orbitAxis` (`String`, optional) - Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
 * `target` (`Number[3]`) - The world position at the center of the viewport. Default `[0, 0, 0]`.
-* `fovy` (`Number`, option) - The field of view, in degrees. Default `50`.
+* `fovy` (`Number`, optional) - The field of view, in degrees. Default `50`.
 * `rotationOrbit` (`Number`, optional) - Rotating angle around orbit axis. Default `0`.
 * `rotationX` (`Number`, optional) - Rotating angle around X axis. Default `0`.
 * `zoom` (`Number`, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
