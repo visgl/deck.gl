@@ -114,7 +114,7 @@ export default class ComponentState {
     if (typeof value === 'string') {
       const {fetch} = this.layer.props;
       const url = value;
-      value = fetch(url);
+      value = fetch(url, {propName, layer: this.layer});
     }
 
     // interprets promise and track the "loading"
