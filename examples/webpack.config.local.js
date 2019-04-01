@@ -23,13 +23,15 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@luma.gl/debug': `${ROOT_DIR}/../luma.gl/modules/debug/src`,
     '@luma.gl/webgl': `${ROOT_DIR}/../luma.gl/modules/webgl/src`,
     '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/../luma.gl/modules/webgl-state-tracker/src`,
-    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`
+    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/../luma.gl/modules/webgl2-polyfill/src`,
+    '@luma.gl/shadertools': `${ROOT_DIR}/../luma.gl/modules/shadertools/src`
   };
   const LUMA_LOCAL_ALIASES = {
-    '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/core/src`,
-    '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl/src`,
-    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/webgl-state-tracker/src`,
-    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/webgl2-polyfill/src`
+    '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/core`,
+    '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
+    '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/webgl-state-tracker`,
+    '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/webgl2-polyfill`,
+    '@luma.gl/shadertools': `${ROOT_DIR}/node_modules/@luma.gl/shadertools`
   };
 
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
@@ -77,15 +79,11 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
         {
           // Compile source using buble
           test: /\.js$/,
-          loader: 'buble-loader',
-          include: [`${ROOT_DIR}/modules`],
+          loader: 'babel-loader',
           options: {
-            objectAssign: 'Object.assign',
-            transforms: {
-              dangerousForOf: true,
-              modules: false
-            }
-          }
+            presets: ['@babel/env']
+          },
+          include: [`${ROOT_DIR}/modules`, `${ROOT_DIR}/../luma.gl/modules`]
         }
       ]
     }
