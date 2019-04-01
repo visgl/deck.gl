@@ -77,7 +77,9 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
           enforce: 'pre'
         },
         {
-          // Compile source using buble
+          // Compile source using babel. This is not necessary for src to run in the browser
+          // However class inheritance cannot happen between transpiled/non-transpiled code
+          // Which affects some examples
           test: /\.js$/,
           loader: 'babel-loader',
           options: {
