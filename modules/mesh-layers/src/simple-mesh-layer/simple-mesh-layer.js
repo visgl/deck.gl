@@ -127,8 +127,7 @@ const defaultProps = {
 export default class SimpleMeshLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    // TODO: add phong-lighting when merged in luma.gl
-    return {vs, fs, modules: [projectModule, 'picking']};
+    return {vs, fs, modules: [projectModule, 'phong-lighting', 'picking']};
   }
 
   initializeState() {

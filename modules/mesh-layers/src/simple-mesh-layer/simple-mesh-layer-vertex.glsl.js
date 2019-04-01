@@ -19,20 +19,21 @@ attribute vec3 instanceTranslation;
 
 // Outputs to fragment shader
 varying vec2 vTexCoord;
+varying vec3 cameraPosition;
+varying vec3 normals_commonspace;
+varying vec4 position_commonspace;
 varying vec4 vColor;
 
 void main(void) {
   vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
   pos = project_size(pos);
 
-  vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
-
-  // TODO - transform normals
-
   vTexCoord = texCoords;
+  cameraPosition = project_uCameraPosition;
+  normals_commonspace = project_normal(instanceModelMatrix * normals);
   vColor = instanceColors;
-  // vLightWeight = lighting_getLightWeight(position_commonspace.xyz, project_normal(normals));
+
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
 
   picking_setPickingColor(instancePickingColors);
 }
