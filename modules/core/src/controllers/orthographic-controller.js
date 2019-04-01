@@ -6,7 +6,7 @@ import {TRANSITION_EVENTS} from './transition-manager';
 const LINEAR_TRANSITION_PROPS = {
   transitionDuration: 300,
   transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(['pixelOffset', 'zoom']),
+  transitionInterpolator: new LinearInterpolator(['target', 'zoom']),
   transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 

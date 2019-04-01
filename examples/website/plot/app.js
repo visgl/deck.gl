@@ -7,17 +7,13 @@ import {scaleLinear} from 'd3-scale';
 const EQUATION = (x, y) => (Math.sin(x * x + y * y) * x) / Math.PI;
 
 const INITIAL_VIEW_STATE = {
+  target: [0.5, 0.5, 0.5],
+  orbitAxis: 'Y',
   rotationX: 30,
   rotationOrbit: -30,
-  pixelOffset: [0, 0],
   /* global window */
   zoom: Math.log2(window.innerHeight / 3) // fit 3x3x3 box in current viewport
 };
-
-const orbitView = new OrbitView({
-  center: [0.5, 0.5, 0.5],
-  orbitAxis: 'Y'
-});
 
 function getScale({min, max}) {
   return scaleLinear()
@@ -87,7 +83,7 @@ export class App extends Component {
     return (
       <DeckGL
         layers={layers}
-        views={orbitView}
+        views={new OrbitView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
       >

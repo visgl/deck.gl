@@ -346,18 +346,16 @@ export default class Viewport {
 
       // Flip Y to match the orientation of the Mercator plane
       this.viewMatrixUncentered = mat4.scale([], viewMatrix, [1, -1, 1]);
-
-      // Make a centered version of the matrix for projection modes without an offset
-      this.viewMatrix = new Matrix4()
-        // Apply the uncentered view matrix
-        .multiplyRight(this.viewMatrixUncentered)
-        // And center it
-        .translate(new Vector3(this.center || ZERO_VECTOR).negate());
     } else {
-      this.center = position;
+      this.center = position ? this.projectPosition(position) : [0, 0, 0];
       this.viewMatrixUncentered = viewMatrix;
-      this.viewMatrix = viewMatrix;
     }
+    // Make a centered version of the matrix for projection modes without an offset
+    this.viewMatrix = new Matrix4()
+      // Apply the uncentered view matrix
+      .multiplyRight(this.viewMatrixUncentered)
+      // And center it
+      .translate(new Vector3(this.center || ZERO_VECTOR).negate());
   }
   /* eslint-enable complexity, max-statements */
 

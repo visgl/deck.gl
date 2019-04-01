@@ -8,7 +8,7 @@ The [`OrthographicView`] class is a subclass of [View](/docs/api-reference/view.
 
 To render, `OrthographicView` needs to be used together with a `viewState` with the following parameters:
 
-* `pixelOffset` (`Number[2]`, optional) - The offset of the viewport, in screen pixels. Default `[0, 0]` (the `lookAt` position is projected to the center of the viewport).
+* `target` (`Number[3]`, optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
 * `zoom` (`Number`, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
 * `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `-Infinity`.
 * `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `Infinity`.
@@ -22,12 +22,7 @@ For more information on using `View` classes, consult the [Views](/docs/develope
 new OrthographicView({controller: true});
 ```
 
-The `OrthographicView` constructor takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor, plus the following orthographic projection matrix arguments:
-
-* `center` (`Number[3]`, optional) - The world position at the center of the viewport. Default `[0, 0, 0]`.
-* `up` (`Number[3]`, optional) - The up direction. Default `[0, 1, 0]`.
-* `near` (`Number`, optional) - Distance of near clipping plane. Default to `0.1`.
-* `far` (`Number`, optional) - Distance of far clipping plane. Default to `1000`.
+The `OrthographicView` constructor takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
 
 
 ## Methods

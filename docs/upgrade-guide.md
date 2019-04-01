@@ -46,10 +46,9 @@ v7.0 includes major bug fixes for [OrbitView](/docs/api-reference/orbit-view.md)
 
 * View state: `zoom` is now logarithmic in all `View` classes. `zoom: 0` maps one unit in world space to one pixel in screen space.
 * View state: `minZoom` and `maxZoom` now default to no limit.
-* View state: `offset` is renamed to `pixelOffset`.
-* Constructor prop: added `center` to specify the viewport center in world position.
+* View state: `offset` is removed, use `target` instead.
+* Constructor prop: added `target` to specify the viewport center in world position.
 * `OrthographicView`'s constructor props `left`, `right`, `top` and `bottom` are removed. Use `center` to specify viewport center.
-* `OrbitView`'s `orbitAxis` is moved from view state to constructor prop.
 * `OrbitView`'s constructor prop `distance` and static method `getDistance` are removed. Use `fovy` and `zoom` instead.
 
 #### project Shader Module
