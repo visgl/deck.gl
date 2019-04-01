@@ -15,8 +15,8 @@ const defaultViewport = {
 };
 
 export default function createLayerDemoClass(settings) {
-  const renderLayer = (data, allowMissingData, params, extraProps = {}) => {
-    if (!data && !allowMissingData) {
+  const renderLayer = (data, params, extraProps = {}) => {
+    if (!data && !settings.allowMissingData) {
       return null;
     }
 
