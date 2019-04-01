@@ -73,6 +73,19 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
           test: /\.js$/,
           use: ['source-map-loader'],
           enforce: 'pre'
+        },
+        {
+          // Compile source using buble
+          test: /\.js$/,
+          loader: 'buble-loader',
+          include: [`${ROOT_DIR}/modules`],
+          options: {
+            objectAssign: 'Object.assign',
+            transforms: {
+              dangerousForOf: true,
+              modules: false
+            }
+          }
         }
       ]
     }
