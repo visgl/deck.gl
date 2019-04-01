@@ -6,7 +6,7 @@ To enable lighting in deck.gl, it is required that both the lighting effect and 
 
 ## Constructing Lighting Effect Instance
 
-A [LightingEffect](/docs/effects/lighting-effect.md) can be instantiated with a `props` object:
+A [LightingEffect](/docs/effects/lighting-effect.md) can be instantiated with a `lights` object:
 
 ```js
 import {AmbientLight, PointLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
@@ -33,7 +33,7 @@ const directionalLight = new DirectionalLight({
 const lightingEffect = new LightingEffect({ambientLight, pointLight, directionalLight});
 ```
 
-The `props` has all the light sources that the lighting effect uses to build the visualization. Users typically specify the following types of light sources:
+The `lights` has all the light sources that the lighting effect uses to build the visualization. Users typically specify the following types of light sources:
 
 * [AmbientLight](/docs/api-reference/lights/ambient-light.md)
 * [PointLight](/docs/api-reference/lights/point-light.md)

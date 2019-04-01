@@ -9,9 +9,9 @@ new LightingEffect({light0, light1, light2, ...});
 ```
 
 Parameters:
-* `props`(Object) - a collection of light sources. Keys can be any arbitrary name and values are instances of [LightSource](https://github.com/uber/luma.gl/tree/master/modules/core/src/lighting/light-source.js).
+* `lights`(Object) - a collection of light sources. Keys can be any arbitrary name and values are instances of [LightSource](https://github.com/uber/luma.gl/tree/master/modules/core/src/lighting/light-source.js).
 
-## Properties
+## Members
 
 ### Light Sources
 
