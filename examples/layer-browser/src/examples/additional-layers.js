@@ -1,5 +1,3 @@
-/* global window */
-
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 
 import {
@@ -14,8 +12,12 @@ import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
 import {CylinderGeometry} from '@luma.gl/core';
-import {GLTFParser} from '@loaders.gl/gltf';
+import {registerLoaders} from '@loaders.gl/core';
+import {GLBScenegraphLoader, GLTFScenegraphLoader} from '@luma.gl/addons';
+
 import * as dataSamples from '../data-samples';
+
+registerLoaders([GLBScenegraphLoader, GLTFScenegraphLoader]);
 
 const SimpleMeshLayerExample = {
   layer: SimpleMeshLayer,
@@ -63,26 +65,17 @@ const SimpleMeshLayerExample = {
 
 const ScenegraphLayerExample = {
   layer: ScenegraphLayer,
-  initialize: () => {
-    const url =
-      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
-    window
-      .fetch(url)
-      .then(res => res.arrayBuffer())
-      .then(data => {
-        const gltfParser = new GLTFParser();
-        ScenegraphLayerExample.props.gltf = gltfParser.parse(data);
-      });
-  },
   props: {
     id: 'scenegraph-layer',
     data: dataSamples.points,
     pickable: true,
     sizeScale: 1,
+    scenegraph:
+      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
     getPosition: d => d.COORDINATES,
     getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
     getTranslation: d => [0, 0, Math.random() * 10000],
-    getScale: [2, 4, 2]
+    getScale: [1, 1, 1]
   }
 };
 
