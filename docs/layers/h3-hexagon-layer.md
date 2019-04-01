@@ -85,6 +85,19 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 ### Render Options
 
+##### `highPrecision` (Boolean, optional)
+
+* Default: `false`
+
+Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems).
+To draw a large number of hexagons efficiently, the `H3HexagonLayer` may choose to use instanced drawing by assuming that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. The discrepancy is usually too small to be visible.
+
+However, there are 12 pentagons world wide at each resolution. The hexagons at and around these odd geolocations cannot be correctly rendered using the above approximation. In this case, `H3HexagonLayer` may choose to switch to high-precision mode, where it trades performance for accuracy.
+
+* if `false`, the layer chooses the mode automatically. High-precision rendering is only used if resolution is at or below `5`, or if a pentagon is found in the data.
+* if `true`, always use high-precision rendering.
+
+
 ##### `coverage` (Number, optional)
 
 * Default: `1`
@@ -151,10 +164,6 @@ The `H3HexagonLayer` renders the following sublayers:
 
 * `hexagon-cell` - a [ColumnLayer](/docs/layers/column-layer.md) rendering all hexagons.
 
-
-## Remarks
-
-* Each hexagon in the H3 indexing system is [slightly different in shape](https://uber.github.io/h3/#/documentation/core-library/coordinate-systems). To draw a large number of hexagons efficiently, the `H3HexagonLayer` assumes that all hexagons within the current viewport have the same shape as the one at the center of the current viewport. This strategy is usually sufficient. However, the discrepancy may become visually significant at rare geolocations. In that case, the [H3ClusterLayer] can be used as an alternative by trading performance for accuracy.
 
 
 ## Source

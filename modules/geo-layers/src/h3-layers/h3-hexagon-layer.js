@@ -1,6 +1,7 @@
-import {h3ToGeoBoundary, h3GetResolution, h3ToGeo, geoToH3} from 'h3-js';
+import {h3ToGeoBoundary, h3GetResolution, h3ToGeo, geoToH3, h3IsPentagon} from 'h3-js';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
-import {ColumnLayer} from '@deck.gl/layers';
+import {PhongMaterial} from '@luma.gl/core';
+import {ColumnLayer, SolidPolygonLayer} from '@deck.gl/layers';
 
 function getHexagonCentroid(getHexagon, object, objectInfo) {
   const hexagonId = getHexagon(object, objectInfo);
@@ -8,12 +9,19 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-const defaultProps = Object.assign(
-  {
-    getHexagon: {type: 'accessor', value: x => x.hexagon}
-  },
-  ColumnLayer.defaultProps
-);
+const defaultProps = {
+  highPrecision: false,
+  coverage: {type: 'number', min: 0, max: 1, value: 1},
+  elevationScale: {type: 'number', min: 0, value: 1},
+  extruded: true,
+  fp64: false,
+
+  getHexagon: {type: 'accessor', value: x => x.hexagon},
+  getColor: {type: 'accessor', value: [255, 0, 255, 255]},
+  getElevation: {type: 'accessor', value: 1000},
+
+  material: new PhongMaterial()
+};
 
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
@@ -28,7 +36,9 @@ const defaultProps = Object.assign(
  */
 export default class H3HexagonLayer extends CompositeLayer {
   shouldUpdateState({changeFlags}) {
-    return changeFlags.somethingChanged;
+    return this._shouldUseHighPrecision()
+      ? changeFlags.propsOrDataChanged
+      : changeFlags.somethingChanged;
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -37,21 +47,37 @@ export default class H3HexagonLayer extends CompositeLayer {
       (changeFlags.updateTriggers && changeFlags.updateTriggers.getHexagon)
     ) {
       let resolution = -1;
+      let hasPentagon = false;
       const {iterable, objectInfo} = createIterable(props.data);
       for (const object of iterable) {
         objectInfo.index++;
-        const sampleHex = props.getHexagon(object, objectInfo);
-        resolution = h3GetResolution(sampleHex);
-        break;
+        const hexId = props.getHexagon(object, objectInfo);
+        // Take the resolution of the first hex
+        resolution = resolution < 0 ? h3GetResolution(hexId) : resolution;
+        if (h3IsPentagon(hexId)) {
+          hasPentagon = true;
+          break;
+        }
       }
-      this.setState({resolution, vertices: null});
+      this.setState({
+        resolution,
+        hasPentagon,
+        vertices: null
+      });
     }
-    if (changeFlags.viewportChanged) {
-      this._updateVertices(this.context.viewport);
-    }
+
+    this._updateVertices(this.context.viewport);
+  }
+
+  _shouldUseHighPrecision() {
+    const {resolution, hasPentagon} = this.state;
+    return this.props.highPrecision || hasPentagon || (resolution >= 0 && resolution <= 5);
   }
 
   _updateVertices(viewport) {
+    if (this._shouldUseHighPrecision()) {
+      return;
+    }
     const {resolution, centerHex} = this.state;
     if (resolution < 0) {
       return;
@@ -78,6 +104,54 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   renderLayers() {
+    return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
+  }
+
+  _renderPolygonLayer() {
+    const {
+      data,
+      getHexagon,
+      updateTriggers,
+
+      elevationScale,
+      extruded,
+      fp64,
+
+      getColor,
+      getElevation,
+      material
+    } = this.props;
+
+    const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', SolidPolygonLayer);
+
+    return new SubLayerClass(
+      {
+        filled: true,
+        elevationScale,
+        extruded,
+        fp64,
+        getFillColor: getColor,
+        getElevation,
+        material
+      },
+      this.getSubLayerProps({
+        id: 'hexagon-cell-hifi',
+        updateTriggers: {
+          getFillColor: updateTriggers.getFillColor,
+          getElevation: updateTriggers.getElevation
+        }
+      }),
+      {
+        data,
+        getPolygon: (object, objectInfo) => {
+          const hexagonId = getHexagon(object, objectInfo);
+          return h3ToGeoBoundary(hexagonId, true);
+        }
+      }
+    );
+  }
+
+  _renderColumnLayer() {
     const {
       data,
       getHexagon,

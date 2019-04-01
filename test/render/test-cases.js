@@ -1241,6 +1241,25 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/h3-hexagon.png'
   },
   {
+    name: 'h3-hexagon-layer-high-precision',
+    viewState: {
+      latitude: 50.103,
+      longitude: -143.478,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('891c0000003ffff', 4),
+        getHexagon: d => d,
+        getColor: (d, {index}) => [255, index * 5, 0],
+        getElevation: (d, {index}) => index * 10
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon-high-precision.png'
+  },
+  {
     name: 'h3-cluster-layer',
     viewState: {
       latitude: 37.78,
