@@ -54,7 +54,10 @@ export default class H3HexagonLayer extends CompositeLayer {
         const hexId = props.getHexagon(object, objectInfo);
         // Take the resolution of the first hex
         resolution = resolution < 0 ? h3GetResolution(hexId) : resolution;
-        hasPentagon = hasPentagon || h3IsPentagon(hexId);
+        if (h3IsPentagon(hexId)) {
+          hasPentagon = true;
+          break;
+        }
       }
       this.setState({
         resolution,
