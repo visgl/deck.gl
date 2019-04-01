@@ -5,7 +5,7 @@ import {App, INITIAL_VIEW_STATE} from 'website-examples/map-tile/app';
 export default class LineDemo extends Component {
   static get parameters() {
     return {
-      autoHighlight: {displayName: 'Enable autoHighlight', type: 'checkbox', value: true}
+      autoHighlight: {displayName: 'Highlight on hover', type: 'checkbox', value: true}
     };
   }
 
@@ -18,7 +18,7 @@ export default class LineDemo extends Component {
   }
 
   static get mapStyle() {
-    return MAPBOX_STYLES.DARK;
+    return MAPBOX_STYLES.BLANK;
   }
 
   static renderInfo() {
