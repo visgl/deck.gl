@@ -35,7 +35,13 @@ const App = ({data, viewport}) => {
     elevationScale: 5000,
     getPosition: d => d.centroid,
     getColor: d => [48, 128, d.value * 255, 255],
-    getElevation: d => d.value 
+    getElevation: d => d.value,
+    onHover: ({object, x, y}) => {
+      const tooltip = `height: ${object.value * 5000}m`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

@@ -46,7 +46,7 @@ const App = ({data, viewport}) => {
     getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128, 128],
     getElevation: d => d.value,
     onHover: ({object, x, y}) => {
-      const tooltip = `${object.zipcode}\nPopulation: ${object.population}`;
+      const tooltip = `${object.token}`;
       /* Update tooltip
          http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
       */

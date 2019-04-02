@@ -288,6 +288,7 @@ export const ContourLayerDemo = createLayerDemoClass({
 export const ColumnLayerDemo = createLayerDemoClass({
   Layer: ColumnLayer,
   dataUrl: `${DATA_URI}/hexagons.json`,
+  formatTooltip: d => `height: ${d.value * 5000}m`,
   props: {
     diskResolution: 12,
     radius: 250,
@@ -303,6 +304,7 @@ export const ColumnLayerDemo = createLayerDemoClass({
 export const GridCellLayerDemo = createLayerDemoClass({
   Layer: GridCellLayer,
   dataUrl: `${DATA_URI}/hexagons.json`,
+  formatTooltip: d => `height: ${d.value * 5000}m`,
   props: {
     pickable: true,
     extruded: true,
@@ -317,6 +319,7 @@ export const GridCellLayerDemo = createLayerDemoClass({
 export const S2LayerDemo = createLayerDemoClass({
   Layer: S2Layer,
   dataUrl: `${DATA_URI}/sf.s2cells.json`,
+  formatTooltip: d => d.token,
   props: {
     opacity: 0.6,
     pickable: true,
