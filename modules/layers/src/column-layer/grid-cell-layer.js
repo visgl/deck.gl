@@ -48,5 +48,5 @@ export default class GridCellLayer extends ColumnLayer {
   }
 }
 
-GridCellLayer.displayName = 'GridCellLayer';
+GridCellLayer.layerName = 'GridCellLayer';
 GridCellLayer.defaultProps = defaultProps;

@@ -18,7 +18,10 @@ import {
   PolygonLayer,
   GeoJsonLayer,
   PointCloudLayer,
-  TileLayer
+  TileLayer,
+  ColumnLayer,
+  GridCellLayer,
+  S2Layer
 } from 'deck.gl';
 import ContourLayer from '@deck.gl/aggregation-layers/contour-layer/contour-layer';
 
@@ -140,9 +143,8 @@ export const GridLayerDemo = createLayerDemoClass({
 export const HexagonLayerDemo = createLayerDemoClass({
   Layer: HexagonLayer,
   dataUrl: `${DATA_URI}/sf-bike-parking.json`,
-  formatTooltip: d => `${d.centroid.join(', ')}\nCount: ${d.points.length}`,
+  formatTooltip: d => `${d.position.join(', ')}\nCount: ${d.count}`,
   props: {
-    pickable: true,
     extruded: true,
     radius: 200,
     elevationScale: 4,
@@ -280,5 +282,50 @@ export const ContourLayerDemo = createLayerDemoClass({
       {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
       {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
     ]
+  }
+});
+
+export const ColumnLayerDemo = createLayerDemoClass({
+  Layer: ColumnLayer,
+  dataUrl: `${DATA_URI}/hexagons.json`,
+  props: {
+    diskResolution: 12,
+    radius: 250,
+    extruded: true,
+    pickable: true,
+    elevationScale: 5000,
+    getPosition: d => d.centroid,
+    getColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value
+  }
+});
+
+export const GridCellLayerDemo = createLayerDemoClass({
+  Layer: GridCellLayer,
+  dataUrl: `${DATA_URI}/hexagons.json`,
+  props: {
+    pickable: true,
+    extruded: true,
+    cellSize: 200,
+    elevationScale: 5000,
+    getPosition: d => d.centroid,
+    getColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value
+  }
+});
+
+export const S2LayerDemo = createLayerDemoClass({
+  Layer: S2Layer,
+  dataUrl: `${DATA_URI}/sf.s2cells.json`,
+  props: {
+    opacity: 0.6,
+    pickable: true,
+    stroked: true,
+    filled: true,
+    extruded: true,
+    elevationScale: 1000,
+    getS2Token: d => d.token,
+    getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128, 128],
+    getElevation: d => d.value
   }
 });
