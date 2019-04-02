@@ -51,10 +51,6 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
 
     devtool: 'source-map',
 
-    node: {
-      fs: 'empty'
-    },
-
     resolve: {
       // mainFields: ['esnext', 'module', 'main'],
 
