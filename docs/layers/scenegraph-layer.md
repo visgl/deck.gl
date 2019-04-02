@@ -69,6 +69,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 The geometry to render for each data object.
 Can be a URL of an object. You need to provide the `fetch` function to load the object.
 Can also be a luma.gl [ScenegraphNode](http://uber.github.io/luma.gl/#/documentation/api-reference/), or a `Promise` that resolves to one.
+The layer calls _delete()_ on _scenegraph_ when a new one is provided or the layer is finalized.
 
 
 ### Render Options

@@ -104,10 +104,22 @@ export default class ScenegraphLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     if (props.scenegraph !== oldProps.scenegraph) {
       if (props.scenegraph instanceof ScenegraphNode) {
+        this._deleteScenegraph();
         this.setState({scenegraph: props.scenegraph});
       } else if (props.scenegraph !== null) {
         log.warn('bad scenegraph:', props.scenegraph)();
       }
+    }
+  }
+
+  finalizeState() {
+    this._deleteScenegraph();
+  }
+
+  _deleteScenegraph() {
+    const {scenegraph} = this.state;
+    if (scenegraph instanceof ScenegraphNode) {
+      scenegraph.delete();
     }
   }
 
