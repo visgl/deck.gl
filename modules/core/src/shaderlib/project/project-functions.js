@@ -85,7 +85,7 @@ export function getWorldPosition(
 
     case COORDINATE_SYSTEM.IDENTITY:
     default:
-      return [x, y, z];
+      return viewport.projectPosition([x, y, z]);
   }
 }
 

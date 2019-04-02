@@ -6,11 +6,18 @@ import assert from '../utils/assert';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
 
+const PITCH_MOUSE_THRESHOLD = 5;
+const PITCH_ACCEL = 1.2;
+
 const LINEAR_TRANSITION_PROPS = {
   transitionDuration: 300,
   transitionEasing: t => t,
   transitionInterpolator: new LinearInterpolator(),
   transitionInterruption: TRANSITION_EVENTS.BREAK
+};
+
+const NO_TRANSITION_PROPS = {
+  transitionDuration: 0
 };
 
 // MAPBOX LIMITS
@@ -424,7 +431,30 @@ export default class MapController extends Controller {
     if (!this.dragRotate) {
       return false;
     }
-    return this._onPanRotateMap(event);
+
+    const {deltaX, deltaY} = event;
+    const [, centerY] = this.getCenter(event);
+    const startY = centerY - deltaY;
+    const {width, height} = this.controllerState.getViewportProps();
+
+    const deltaScaleX = deltaX / width;
+    let deltaScaleY = 0;
+
+    if (deltaY > 0) {
+      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to -1 as we drag upwards
+        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
+      }
+    } else if (deltaY < 0) {
+      if (startY > PITCH_MOUSE_THRESHOLD) {
+        // Move from 0 to 1 as we drag upwards
+        deltaScaleY = 1 - centerY / startY;
+      }
+    }
+    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
+
+    const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
+    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
   }
 }
 
