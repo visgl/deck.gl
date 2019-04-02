@@ -17,8 +17,9 @@
     "react-dom": "^16.3.0"
   },
   "devDependencies": {
-    "buble": "^0.19.3",
-    "buble-loader": "^0.5.0",
+    "@babel/core": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.11"
