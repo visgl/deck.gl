@@ -27,8 +27,6 @@ const NO_TRANSITION_PROPS = {
 };
 
 // EVENT HANDLING PARAMETERS
-const PITCH_MOUSE_THRESHOLD = 5;
-const PITCH_ACCEL = 1.2;
 const ZOOM_ACCEL = 0.01;
 
 const EVENT_TYPES = {
@@ -276,42 +274,12 @@ export default class Controller {
     if (!this.dragRotate) {
       return false;
     }
-    return this._onPanRotateStandard(event);
-  }
 
-  // Normal pan to rotate
-  _onPanRotateStandard(event) {
     const {deltaX, deltaY} = event;
     const {width, height} = this.controllerState.getViewportProps();
 
     const deltaScaleX = deltaX / width;
     const deltaScaleY = deltaY / height;
-
-    const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
-  }
-
-  _onPanRotateMap(event) {
-    const {deltaX, deltaY} = event;
-    const [, centerY] = this.getCenter(event);
-    const startY = centerY - deltaY;
-    const {width, height} = this.controllerState.getViewportProps();
-
-    const deltaScaleX = deltaX / width;
-    let deltaScaleY = 0;
-
-    if (deltaY > 0) {
-      if (Math.abs(height - startY) > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to -1 as we drag upwards
-        deltaScaleY = (deltaY / (startY - height)) * PITCH_ACCEL;
-      }
-    } else if (deltaY < 0) {
-      if (startY > PITCH_MOUSE_THRESHOLD) {
-        // Move from 0 to 1 as we drag upwards
-        deltaScaleY = 1 - centerY / startY;
-      }
-    }
-    deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
 
     const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
     return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
