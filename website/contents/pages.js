@@ -115,6 +115,13 @@ export const examplePages = generatePath([
           demo: 'TextDemo',
           code: getCodeUrl('examples/website/tagmap')
         }
+      },
+      {
+        name: 'TileLayer',
+        content: {
+          demo: 'MapTileDemo',
+          code: getCodeUrl('examples/website/map-tile')
+        }
       }
     ]
   },
