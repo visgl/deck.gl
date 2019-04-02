@@ -19,6 +19,31 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.0 Prereleases
 
+#### deck.gl [v7.0.0-beta.2] - Apr 1 2019
+
+- ScenegraphLayer: Final round of updates
+- New Lighting docs (#2853)
+- Bump dependencies (#2881)
+- Fix pixel projection in shaders (PR 2/2) (#2863)
+- transpile local code (#2872)
+- Add highPrecision prop to H3HexagonLayer (#2866)
+- resolve double luma.gl version error
+- integrate phong lighting to mesh layer (#2864)
+- PROPOSAL: Move Attribute from luma to deck (#2867)
+- Update to attribute and geometry APIs (#2852)
+- Set picking color only when hovering (#2850)
+- Minor fix projection in IconLayer and TextLayer (#2861)
+- Enable running layer-browser with local luma.gl (#2855)
+- Clean up column layer geometry usage (#2862)
+- Fix bitmap artifacts (#2856)
+- Add billboard option (#2846)
+- Fix pixel projection in shaders (PR 1/2) (#2844)
+- Only pick once per animation frame (#2839)
+- Cleanup unused code (#2847)
+- Remove dependency on model redraw flags (#2840)
+- Update lighting of examples (#2835)
+- clean up unused code (#2836)
+
 #### deck.gl [v7.0.0-beta.1] - Mar 25 2019
 
 - Add OpenStreetMap example using TileLayer and BitmapLayer (#2821)
