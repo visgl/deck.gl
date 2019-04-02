@@ -2,7 +2,7 @@
 
 > The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](/docs/api-reference/react/deckgl.md) React Component) which creates a `LayerManager` under the hood.
 
-The `LayerManager` class managers a set of layers' lifecycle.
+The `LayerManager` class manages a set of layers' lifecycle.
 
 For more information consult the [Using Standalone](/docs/get-started/using-standalone.md) article.
 
