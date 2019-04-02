@@ -272,6 +272,22 @@ export default class Deck {
     return redraw;
   }
 
+  redraw(force) {
+    // If force is falsy, check if we need to redraw
+    const redrawReason = force || this.needsRedraw({clearRedrawFlags: true});
+
+    if (!redrawReason) {
+      return;
+    }
+
+    this.stats.get('Redraw Count').incrementCount();
+    if (this.props._customRender) {
+      this.props._customRender();
+    } else {
+      this._drawLayers(redrawReason);
+    }
+  }
+
   getViews() {
     return this.viewManager.views;
   }
@@ -640,21 +656,11 @@ export default class Deck {
     // Needs to be done before drawing
     this._updateAnimationProps(animationProps);
 
-    // Check if we need to redraw
-    const redrawReason = this.needsRedraw({clearRedrawFlags: true});
-
+    // Perform picking request if any
     this._pickAndCallback();
 
-    if (!redrawReason) {
-      return;
-    }
-
-    this.stats.get('Redraw Count').incrementCount();
-    if (this.props._customRender) {
-      this.props._customRender();
-    } else {
-      this._drawLayers(redrawReason);
-    }
+    // Redraw if necessary
+    this.redraw(false);
   }
 
   // Callbacks
