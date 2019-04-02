@@ -17,7 +17,7 @@ This RFC proposes a new module `@deck.gl/google-maps` that handles the synchroni
 The proposed `@deck.gl/google-maps` module will have a single export `DeckOverlay`. This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView) interface and can be used as any other Google Maps overlay:
 
 ```js
-  import DeckOverlay from '@deck.gl/google-maps';
+  import {DeckOverlay} from '@deck.gl/google-maps';
   import {GeoJsonLayer} from '@deck.gl/layers';
 
   // Create map
@@ -44,27 +44,24 @@ The proposed `@deck.gl/google-maps` module will have a single export `DeckOverla
 
 `const deckOverlay = new DeckOverlay(props)`
 
-Parameters:
+`props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
 
-* `props.api` - the client from which we pull the Maps API classes. Default `google.maps`.
-* The following [Deck](/docs/api-reference/deck.md) props are supported:
-  - `layers`
-  - `layerFilter`
-  - `effects`
-  - `parameters`
-  - `pickingRadius`
-  - `useDevicePixels`
-  - `onWebGLInitialized`
-  - `onBeforeRender`
-  - `onAfterRender`
-  - `onLoad`
+- `layers`
+- `effects`
+- `parameters`
+- `pickingRadius`
+- `useDevicePixels`
+- `onWebGLInitialized`
+- `onBeforeRender`
+- `onAfterRender`
+- `onLoad`
 
 
 ##### `setMap`
 
 `deckOverlay.setMap(map)`
 
-Add/remove the overlay from a map.
+Add/remove the overlay from a map. An overlay can be temporarily hidden from a map by calling `setMap(null)`. Removing an overlay does not destroy the WebGL context; use `finalize()` if the overlay should be permanently removed.
 
 ##### `setProps`
 
@@ -103,15 +100,24 @@ Supported features:
 
 - Layers
 - Effects
-- Auto-highliting
+- Auto-highlighting
 - Transitions / Animations
-- Interaction callbacks
+- `onHover` and `onClick` callbacks
 
 Not supported features:
 
 - Multi view
 - Controller
 - React integration (there is no official React wrapper of Google Maps)
+- Gesture event callbacks (e.g. `onDrag*`)
+
+### Support tilting?
+
+According to official docs:
+
+> Controls the automatic switching behavior for the angle of incidence of the map. The only allowed values are 0 and 45. The value 0 causes the map to always use a 0° overhead view regardless of the zoom level and viewport. The value 45 causes the tilt angle to automatically switch to 45 whenever 45° imagery is available for the current zoom level and viewport, and switch back to 0 whenever 45° imagery is not available (this is the default behavior). 45° imagery is only available for satellite and hybrid map types, within some locations, and at some zoom levels.
+
+There is no obvious way to get the fractional tilting of the base map. We will hide the deck.gl layers when tilt is larger than 0.
 
 ### How do we test these features?
 
