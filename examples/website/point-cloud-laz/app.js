@@ -12,7 +12,6 @@ const DATA_URL =
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  // distance: OrbitView.getDistance({boundingBox: [1, 1, 1], fov: 30}),
   rotationX: 0,
   rotationOrbit: 0,
   orbitAxis: 'Y',
