@@ -7,12 +7,14 @@ import OrbitController from '../controllers/orbit-controller';
 const DEGREES_TO_RADIANS = Math.PI / 180;
 
 function getViewMatrix({height, fovy, orbitAxis, rotationX, rotationOrbit, zoom}) {
-  // Distance from camera to target that projects common space 1 unit = 1 screen pixel
+  // We position the camera so that one common space unit (world space unit scaled by zoom)
+  // at the target maps to one screen pixel.
+  // This is a similar technique to that used in web mercator projection
+  // By doing so we are able to convert between common space and screen space sizes efficiently
+  // in the vertex shader.
   const distance = 0.5 / Math.tan((fovy * DEGREES_TO_RADIANS) / 2);
 
   const viewMatrix = new Matrix4().lookAt({eye: [0, 0, distance]});
-
-  const projectionScale = 1 / (height || 1);
 
   viewMatrix.rotateX(rotationX * DEGREES_TO_RADIANS);
   if (orbitAxis === 'Z') {
@@ -20,7 +22,13 @@ function getViewMatrix({height, fovy, orbitAxis, rotationX, rotationOrbit, zoom}
   } else {
     viewMatrix.rotateY(rotationOrbit * DEGREES_TO_RADIANS);
   }
-  // Remove the distortion to the depth field
+
+  // When height increases, we need to increase the distance from the camera to the target to
+  // keep the 1:1 mapping. However, this also changes the projected depth of each position by
+  // moving them further away between the near/far plane.
+  // Without modifying the default near/far planes, we instead scale down the common space to
+  // remove the distortion to the depth field.
+  const projectionScale = 1 / (height || 1);
   viewMatrix.scale([projectionScale, projectionScale, projectionScale]);
 
   return viewMatrix;
