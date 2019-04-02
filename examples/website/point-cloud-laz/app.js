@@ -12,14 +12,14 @@ const DATA_URL =
 
 const INITIAL_VIEW_STATE = {
   lookAt: [0, 0, 0],
-  distance: OrbitView.getDistance({boundingBox: [1, 1, 1], fov: 30}),
+  // distance: OrbitView.getDistance({boundingBox: [1, 1, 1], fov: 30}),
   rotationX: 0,
   rotationOrbit: 0,
   orbitAxis: 'Y',
-  fov: 30,
+  fov: 50,
   minDistance: 0.5,
   maxDistance: 3,
-  zoom: 1
+  zoom: 9
 };
 
 const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
