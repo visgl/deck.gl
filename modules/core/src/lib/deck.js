@@ -272,9 +272,9 @@ export default class Deck {
     return redraw;
   }
 
-  redraw() {
-    // Check if we need to redraw
-    const redrawReason = this.needsRedraw({clearRedrawFlags: true});
+  redraw(force) {
+    // If force is falsy, check if we need to redraw
+    const redrawReason = force || this.needsRedraw({clearRedrawFlags: true});
 
     if (!redrawReason) {
       return;
@@ -659,7 +659,8 @@ export default class Deck {
     // Perform picking request if any
     this._pickAndCallback();
 
-    this.redraw();
+    // Redraw if necessary
+    this.redraw(false);
   }
 
   // Callbacks

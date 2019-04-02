@@ -299,9 +299,15 @@ See the Properties section on this page for more detail on which props can be se
 
 ##### `redraw`
 
-`deck.redraw()`
+Attempt to draw immediately, rather than waiting for the next draw cycle. By default, deck flushes all changes to the canvas on each animation frame. This behavior might cause the deck canvas to fall out of sync with other components if synchronous updates are required.
 
-Force deck to redraw (if necessary) immediately. By default, deck flushes all changes to the canvas on each animation frame. This behavior might cause the deck canvas to fall out of sync with other components if synchronous updates are required. Only use this method if the render cycle should be managed manually.
+Redrawing frequently outside of rAF may cause performance problems. Only use this method if the render cycle must be managed manually.
+
+```js
+deck.redraw(force);
+```
+
+* `force` (Boolean) - if `false`, only redraw if necessary (e.g. changes have been made to views or layers). If `true`, skip the check. Default `false`.
 
 
 ##### `pickObject`
