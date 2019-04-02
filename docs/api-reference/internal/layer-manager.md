@@ -2,7 +2,7 @@
 
 > The `LayerManager` class is gradually being refactor into a `ComponentManager` class and will be made part of the `lifecycle` directory. It is now an internal class, use the `Deck` class (or the [`DeckGL`](/docs/api-reference/react/deckgl.md) React Component) which creates a `LayerManager` under the hood.
 
-The `LayerManager` class handles updates, drawing and picking for a set of layers.
+The `LayerManager` class manages a set of layers' lifecycle.
 
 For more information consult the [Using Standalone](/docs/get-started/using-standalone.md) article.
 
@@ -61,47 +61,6 @@ Notes:
 * layer id matching checks that a layer id *starts with* one of the supplied strings. This ensures that sublayers rendered by a composite layer with the given id will also be included in the matched list.
 
 
-##### `setParameters`
-
-Updates parameters.
-
-```js
-layerManager.setParameters({
-	useDevicePixels,
-    pickingRadius,
-    onLayerClick,
-    onLayerHover
-});
-```
-
-Parameters:
-
-* `useDevicePixels` (`Boolean`, optional) - Whether to use retina/HD display or not.
-* `eventManager` - A source of DOM input events
-* `pickingRadius` (`Number`, optional) - "Fuzziness" of picking (px), to support fat-fingering.
-* `onLayerClick` (`Function`, optional) - A handler to be called when any layer is clicked.
-* `onLayerHover` (`Function`, optional) - A handler to be called when any layer is hovered over.
-
-Notes:
-
-* The event "source" is expected to provide `on()`/`off()` methods for registration, and to call registered handlers with an "Event" object of the following shape:
-  + `offsetCenter` (Object: {x, y}) - center of the event
-  + `srcEvent` (Object) - native JS Event object
-
-
-##### `setViews`
-
-Updates the current views.
-
-```js
-layerManager.setViews(views);
-```
-
-Parameters:
-
-* `views` (`View[]`) - The new [View](/docs/api-reference/view.md) instances.
-
-
 ##### `setLayers`
 
 Provide a new list of layers. Layers will be matched against old layers, and any composite layers will be recursively expanded into primitive layers.
@@ -116,47 +75,6 @@ layerManager.updateLayers({newLayers});
 ##### `updateLayers`
 
 Updates the current list of layers.
-
-
-##### `drawLayers`
-
-Draw all layers.
-
-```js
-layerManager.drawLayers({pass});
-```
-
-Parameters:
-
-* `pass` (String) - The render pass identifier, for debugging purpose
-
-
-##### `pickObject`
-
-Pick the closest info at given coordinate.
-
-```js
-layerManager.pickLayer({x, y, mode, radius = 0, layerIds})
-```
-
-Parameters:
-
-* `x` (Number) - The x position of the pointer
-* `y` (Number) - The y position of the pointer
-* `mode` (String) - One of `hover` or `click`
-
-##### `pickObjects`
-
-Get all unique infos within a bounding box.
-
-```js
-layerManager.queryLayer({x, y, width, height, layerIds});
-```
-
-Parameters:
-
-* `x` (Number) - The x position of the pointer
-* `y` (Number) - The y position of the pointer
 
 
 ## Source
