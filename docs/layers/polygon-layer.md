@@ -196,6 +196,7 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 * Default: `new PhongMaterial()`
 
 This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
+Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
 

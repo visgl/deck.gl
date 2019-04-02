@@ -269,6 +269,10 @@ export const docPages = generatePath([
         content: getDocUrl('developer-guide/viewports.md')
       },
       {
+        name: 'Using Lighting ',
+        content: getDocUrl('developer-guide/using-lighting.md')
+      },
+      {
         name: 'Performance Optimization',
         content: getDocUrl('developer-guide/performance.md')
       },
@@ -582,6 +586,23 @@ export const docPages = generatePath([
           {
             name: 'LightingEffect',
             content: getDocUrl('effects/lighting-effect.md')
+          }
+        ]
+      },
+      {
+        name: 'Lights',
+        children: [
+          {
+            name: 'AmbientLight',
+            content: getDocUrl('api-reference/lights/ambient-light.md')
+          },
+          {
+            name: 'PointLight',
+            content: getDocUrl('api-reference/lights/point-light.md')
+          },
+          {
+            name: 'DirectionalLight',
+            content: getDocUrl('api-reference/lights/directional-light.md')
           }
         ]
       }
