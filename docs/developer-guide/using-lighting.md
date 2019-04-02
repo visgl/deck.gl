@@ -4,7 +4,7 @@ A deck.gl lighting effect is a visual approximation of environment illumination 
 
 To enable lighting in deck.gl, it is required that both the lighting effect and material instances are properly instantiated.
 
-## Constructing Lighting Effect Instance
+## Constructing A Lighting Effect Instance
 
 A [LightingEffect](/docs/effects/lighting-effect.md) can be instantiated with a `lights` object:
 
@@ -40,9 +40,9 @@ The `lights` has all the light sources that the lighting effect uses to build th
 * [DirectionalLight](/docs/api-reference/lights/directional-light.md)
 
 
-## Constructing Material Instance
+## Constructing A Material Instance
 
-A material represents a lighting model specified per layer, a [PhongMaterial](http://uber.github.io/luma.gl/#/documentation/api-reference/phong-material)
+A material represents a lighting model specified per layer, a [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md)
 can be instantiated with model parameters.
 
 ```js
@@ -57,9 +57,7 @@ const material =  new PhongMaterial({
 ```
 
 
-## Using Material Instance
-
-To enable lighting for a layer, material prop is required.
+## Using Materials
 
 ```js
 new GeoJsonLayer({
@@ -74,8 +72,8 @@ new GeoJsonLayer({
 ```
 Refer to each layer's [documentation](/docs/layers/README.md) to see if the material prop is supported.
 
-## Using Effect Instance
-To enable lighting in deck.gl, [effects prop](/docs/api-reference/deck.md#effects-array-) is required
+## Using Effects
+
 ### Pure JS
 
 ```js
