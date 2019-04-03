@@ -28,16 +28,16 @@ export default class LightingEffect extends Effect {
     for (const key in props) {
       const lightSource = props[key];
 
-      switch (lightSource.constructor.name) {
-        case 'AmbientLight':
+      switch (lightSource.type) {
+        case 'ambient':
           this.ambientLight = lightSource;
           break;
 
-        case 'DirectionalLight':
+        case 'directional':
           this.directionalLights.push(lightSource);
           break;
 
-        case 'PointLight':
+        case 'point':
           this.pointLights.push(lightSource);
           break;
         default:
