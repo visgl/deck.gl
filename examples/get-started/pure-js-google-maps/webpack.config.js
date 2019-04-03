@@ -3,7 +3,7 @@
 
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
-const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 const CONFIG = {
   mode: 'development',
@@ -12,7 +12,10 @@ const CONFIG = {
     app: resolve('./app.js')
   },
 
-  plugins: [new HtmlWebpackPlugin({title: 'deck.gl example'})]
+  plugins: [
+    // Read google maps token from environment variable
+    new webpack.EnvironmentPlugin(['GOOGLE_MAPS_API_KEY'])
+  ]
 };
 
 // This line enables bundling against src in this repo rather than installed module
