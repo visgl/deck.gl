@@ -36,7 +36,6 @@ const DEFAULT_COLOR = [255, 255, 255, 255];
 const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
 
-  // TODO: find why async does not work in this module
   fetch: (url, {propName, layer}) => {
     if (propName === 'scenegraph') {
       return loadFile(url, layer.getLoadOptions()).then(({scenes}) => scenes[0]);
@@ -47,8 +46,7 @@ const defaultProps = {
 
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
-  // TODO: Fix this to accept array instead of function
-  getColor: {type: 'accessor', value: x => x.color || DEFAULT_COLOR},
+  getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -105,6 +103,7 @@ export default class ScenegraphLayer extends Layer {
     if (props.scenegraph !== oldProps.scenegraph) {
       if (props.scenegraph instanceof ScenegraphNode) {
         this._deleteScenegraph();
+        this._applyAllAttributes(props.scenegraph);
         this.setState({scenegraph: props.scenegraph});
       } else if (props.scenegraph !== null) {
         log.warn('bad scenegraph:', props.scenegraph)();
@@ -114,6 +113,13 @@ export default class ScenegraphLayer extends Layer {
 
   finalizeState() {
     this._deleteScenegraph();
+  }
+
+  _applyAllAttributes(scenegraph) {
+    const allAttributes = this.getAttributeManager().getAttributes();
+    scenegraph.traverse(model => {
+      this._setModelAttributes(model.model, allAttributes);
+    });
   }
 
   _deleteScenegraph() {
@@ -126,6 +132,7 @@ export default class ScenegraphLayer extends Layer {
   getLoadOptions() {
     return {
       gl: this.context.gl,
+      waitForFullLoad: true,
       modelOptions: {
         vs,
         fs,
@@ -135,17 +142,23 @@ export default class ScenegraphLayer extends Layer {
     };
   }
 
-  drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
+  updateAttributes(props) {
+    super.updateAttributes(props);
     if (!this.state.scenegraph) return;
-
-    const {sizeScale} = this.props;
 
     const attributeManager = this.getAttributeManager();
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-    const numInstances = this.getNumInstances();
-
-    this.state.scenegraph.traverse((model, {worldMatrix}) => {
+    this.state.scenegraph.traverse(model => {
       this._setModelAttributes(model.model, changedAttributes);
+    });
+  }
+
+  draw({moduleParameters = null, parameters = {}}) {
+    if (!this.state.scenegraph) return;
+
+    const {sizeScale} = this.props;
+    const numInstances = this.getNumInstances();
+    this.state.scenegraph.traverse(model => {
       model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
