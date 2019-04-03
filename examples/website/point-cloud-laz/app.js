@@ -32,6 +32,7 @@ export class App extends PureComponent {
       points: null
     };
 
+    this._onLoad = this._onLoad.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._rotateCamera = this._rotateCamera.bind(this);
     this._loadData();
@@ -54,22 +55,24 @@ export class App extends PureComponent {
     });
   }
 
-  _onMetadata(metadata) {
-    const {mins, maxs} = metadata;
+  _onLoad({header, loaderData, attributes, progress}) {
+    // metadata from LAZ file header
+    const {mins, maxs} = loaderData.header;
     const {viewState} = this.state;
 
-    this.setState({
-      viewState: {
-        ...viewState,
-        target: [
-          (mins[0] + maxs[0]) / 2,
-          (mins[1] + maxs[1]) / 2,
-          (mins[2] + maxs[2]) / 2
-        ],
-        /* global window */
-        zoom: Math.log2(window.innerWidth / (maxs[0] - mins[0])) - 1
-      }
-    }, this._rotateCamera);
+    this.setState(
+      {
+        pointsCount: header.vertexCount,
+        points: attributes.POSITION.value,
+        viewState: {
+          ...viewState,
+          target: [(mins[0] + maxs[0]) / 2, (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2],
+          /* global window */
+          zoom: Math.log2(window.innerWidth / (maxs[0] - mins[0])) - 1
+        }
+      },
+      this._rotateCamera
+    );
   }
 
   _loadData() {
@@ -82,31 +85,24 @@ export class App extends PureComponent {
       onLoad({count: header.vertexCount, progress});
     };
 
-    return loadFile(DATA_URL, LASLoader, {skip, onProgress})
-      .then(({header, loaderData, attributes, progress}) => {
-        this._onMetadata(loaderData.header);
-
-        this.setState({
-          pointsCount: header.vertexCount,
-          points: attributes.POSITION.value
-        });
-      });
+    return loadFile(DATA_URL, LASLoader, {skip, onProgress}).then(this._onLoad);
   }
 
   _renderLayers() {
     const {pointsCount, points} = this.state;
 
     return [
-      points && new PointCloudLayer({
-        id: 'laz-point-cloud-layer',
-        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        numInstances: pointsCount,
-        instancePositions: points,
-        getNormal: [0, 1, 0],
-        getColor: [255, 255, 255],
-        opacity: 0.5,
-        pointSize: 0.5
-      })
+      points &&
+        new PointCloudLayer({
+          id: 'laz-point-cloud-layer',
+          coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+          numInstances: pointsCount,
+          instancePositions: points,
+          getNormal: [0, 1, 0],
+          getColor: [255, 255, 255],
+          opacity: 0.5,
+          pointSize: 0.5
+        })
     ];
   }
 
