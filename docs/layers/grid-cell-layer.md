@@ -1,4 +1,6 @@
 
+<!-- INJECT:"GridCellLayerDemo" -->
+
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
@@ -23,18 +25,26 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
+   *   {centroid: [-122.4, 37.7], value: 100},
    *   ...
    * ]
    */
   const layer = new GridCellLayer({
     id: 'grid-cell-layer',
     data,
-    cellSize: 500,
+    pickable: true,
     extruded: true,
-    getPosition: d => d.position,
-    getColor: d => d.color,
-    getElevation: d => d.elevation
+    cellSize: 200,
+    elevationScale: 5000,
+    getPosition: d => d.centroid,
+    getColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value,
+    onHover: ({object, x, y}) => {
+      const tooltip = `height: ${object.value * 5000}m`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
