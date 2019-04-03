@@ -1,3 +1,4 @@
+<!-- INJECT:"ColumnLayerDemo" -->
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
@@ -20,7 +21,7 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {position: [-122.4, 37.7], color: [255, 0, 0], elevation: 100},
+   *   {centroid: [-122.4, 37.7], value: 0.2},
    *   ...
    * ]
    */
@@ -28,12 +29,19 @@ const App = ({data, viewport}) => {
     id: 'column-layer',
     data,
     diskResolution: 12,
-    radius: 500,
-    angle: 0,
+    radius: 250,
     extruded: true,
-    getPosition: d => d.position,
-    getColor: d => d.color,
-    getElevation: d => d.elevation
+    pickable: true,
+    elevationScale: 5000,
+    getPosition: d => d.centroid,
+    getColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value,
+    onHover: ({object, x, y}) => {
+      const tooltip = `height: ${object.value * 5000}m`;
+      /* Update tooltip
+         http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
+      */
+    }
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);

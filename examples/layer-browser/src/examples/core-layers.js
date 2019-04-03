@@ -286,11 +286,11 @@ const ScatterplotLayerExample = {
 const ColumnLayerExample = {
   layer: ColumnLayer,
   props: {
-    id: 'gridCellLayer',
+    id: 'columnLayer',
     data: dataSamples.worldGrid.data,
-    cellSize: dataSamples.worldGrid.cellSize,
     extruded: true,
     pickable: true,
+    radius: 1000,
     opacity: 1,
     getColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000

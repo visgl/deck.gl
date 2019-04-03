@@ -1,3 +1,5 @@
+<!-- INJECT:"S2LayerDemo" -->
+
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
@@ -22,15 +24,11 @@ const App = ({data, viewport}) => {
    *   {
    *     // S2 Cell in SF Bay Area
    *     token: "80858004",
-   *     zipcode: 94107,
-   *     population: 26599,
-   *     area: 6.11
+   *     value: 0.5979242952642347
    *   },
    *   {
    *     token: "8085800c",
-   *     zipcode: 94107,
-   *     population: 26599,
-   *     area: 6.11
+   *     value: 0.5446256069712141
    *   },
    *   ...
    * ]
@@ -38,18 +36,17 @@ const App = ({data, viewport}) => {
   const layer = new S2Layer({
     id: 's2-layer',
     data,
+    opacity: 0.6,
     pickable: true,
     stroked: true,
     filled: true,
-    wireframe: true,
-    lineWidthMinPixels: 1,
+    extruded: true,
+    elevationScale: 1000,
     getS2Token: d => d.token,
-    getElevation: d => d.population / d.area / 10,
-    getFillColor: d => [d.population / d.area / 60, 140, 0],
-    getLineColor: [80, 80, 80],
-    getLineWidth: 1,
+    getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128, 128],
+    getElevation: d => d.value,
     onHover: ({object, x, y}) => {
-      const tooltip = `${object.zipcode}\nPopulation: ${object.population}`;
+      const tooltip = `${object.token}`;
       /* Update tooltip
          http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
       */
