@@ -28,11 +28,13 @@ export class App extends PureComponent {
 
     this.state = {
       viewState: INITIAL_VIEW_STATE,
-      data: this._loadData()
+      pointsCount: 0,
+      points: null
     };
 
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._rotateCamera = this._rotateCamera.bind(this);
+    this._loadData();
   }
 
   _onViewStateChange({viewState}) {
@@ -77,30 +79,29 @@ export class App extends PureComponent {
     onLoad({count: 0, progress: 0});
 
     const onProgress = ({header, progress}) => {
-      onLoad({count: header.totalRead, progress});
+      onLoad({count: header.vertexCount, progress});
     };
 
     return loadFile(DATA_URL, LASLoader, {skip, onProgress})
-      .then(data => {
-        this._onMetadata(data.loaderData.header);
-        return {
-          length: data.header.vertexCount,
-          positions: data.attributes.POSITION.value
-        };
+      .then(({header, loaderData, attributes, progress}) => {
+        this._onMetadata(loaderData.header);
+
+        this.setState({
+          pointsCount: header.vertexCount,
+          points: attributes.POSITION.value
+        });
       });
   }
 
   _renderLayers() {
-    const {data} = this.state;
+    const {pointsCount, points} = this.state;
 
     return [
-      new PointCloudLayer({
+      points && new PointCloudLayer({
         id: 'laz-point-cloud-layer',
-        data,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
-        getPosition: (_, {index, data}) => {
-          return data.positions.subarray(index * 3, index * 3 + 3)
-        },
+        numInstances: pointsCount,
+        instancePositions: points,
         getNormal: [0, 1, 0],
         getColor: [255, 255, 255],
         opacity: 0.5,

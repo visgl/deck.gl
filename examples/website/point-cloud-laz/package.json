@@ -11,8 +11,8 @@
     "build": "npm run build-clean && npm run build-script && npm run build-copy"
   },
   "dependencies": {
-    "@loaders.gl/core": "^1.0.0-alpha",
-    "@loaders.gl/las": "^1.0.0-alpha",
+    "@loaders.gl/core": "^1.0.0-alpha.3",
+    "@loaders.gl/las": "^1.0.0-alpha.3",
     "deck.gl": "^7.0.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"
