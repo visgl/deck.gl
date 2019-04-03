@@ -15,3 +15,5 @@ export {default as HighwayDemo} from './highway-demo';
 export {default as PointCloudDemo} from './point-cloud-demo';
 export {default as MapTileDemo} from './map-tile-demo';
 export * from './layer-demos';
+export * from './aggregation-layer-demos';
+export * from './geo-layer-demos';

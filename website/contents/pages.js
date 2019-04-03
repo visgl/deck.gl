@@ -405,32 +405,8 @@ export const docPages = generatePath([
             content: getDocUrl('layers/column-layer.md')
           },
           {
-            name: 'ContourLayer',
-            content: getDocUrl('layers/contour-layer.md')
-          },
-          {
             name: 'GeoJsonLayer',
             content: getDocUrl('layers/geojson-layer.md')
-          },
-          {
-            name: 'GridLayer',
-            content: getDocUrl('layers/grid-layer.md')
-          },
-          {
-            name: 'GridCellLayer',
-            content: getDocUrl('layers/grid-cell-layer.md')
-          },
-          {
-            name: 'H3HexagonLayer',
-            content: getDocUrl('layers/h3-hexagon-layer.md')
-          },
-          {
-            name: 'H3ClusterLayer',
-            content: getDocUrl('layers/h3-cluster-layer.md')
-          },
-          {
-            name: 'HexagonLayer',
-            content: getDocUrl('layers/hexagon-layer.md')
           },
           {
             name: 'IconLayer',
@@ -453,28 +429,85 @@ export const docPages = generatePath([
             content: getDocUrl('layers/polygon-layer.md')
           },
           {
-            name: 'S2Layer',
-            content: getDocUrl('layers/s2-layer.md')
-          },
-          {
             name: 'ScatterplotLayer',
             content: getDocUrl('layers/scatterplot-layer.md')
-          },
-          {
-            name: 'ScreenGridLayer',
-            content: getDocUrl('layers/screen-grid-layer.md')
           },
           {
             name: 'TextLayer',
             content: getDocUrl('layers/text-layer.md')
           },
           {
-            name: 'TileLayer',
-            content: getDocUrl('layers/tile-layer.md')
+            name: 'Aggregation Layers',
+            children: [
+              {
+                name: 'ContourLayer',
+                content: getDocUrl('layers/contour-layer.md')
+              },
+              // TODO generatePath regex need to be fixed
+              // path suffix for GPUGridLayer is generated as `grid-layer`
+              {
+                name: 'GpuGridLayer',
+                content: getDocUrl('layers/gpu-grid-layer.md')
+              },
+              {
+                name: 'GridLayer',
+                content: getDocUrl('layers/grid-layer.md')
+              },
+              {
+                name: 'GridCellLayer',
+                content: getDocUrl('layers/grid-cell-layer.md')
+              },
+              {
+                name: 'HexagonLayer',
+                content: getDocUrl('layers/hexagon-layer.md')
+              },
+              {
+                name: 'ScreenGridLayer',
+                content: getDocUrl('layers/screen-grid-layer.md')
+              }
+            ]
           },
           {
-            name: 'TripsLayer',
-            content: getDocUrl('layers/trips-layer.md')
+            name: 'Geo Layers',
+            children: [
+              {
+                name: 'GreatCircleLayer',
+                content: getDocUrl('layers/great-circle-layer.md')
+              },
+              {
+                name: 'H3ClusterLayer',
+                content: getDocUrl('layers/h3-cluster-layer.md')
+              },
+              {
+                name: 'H3HexagonLayer',
+                content: getDocUrl('layers/h3-hexagon-layer.md')
+              },
+              {
+                name: 'S2Layer',
+                content: getDocUrl('layers/s2-layer.md')
+              },
+              {
+                name: 'TileLayer',
+                content: getDocUrl('layers/tile-layer.md')
+              },
+              {
+                name: 'TripsLayer',
+                content: getDocUrl('layers/trips-layer.md')
+              }
+            ]
+          },
+          {
+            name: 'Mesh Layers',
+            children: [
+              {
+                name: 'ScenegraphLayer',
+                content: getDocUrl('layers/scenegraph-layer.md')
+              },
+              {
+                name: 'SimpleMeshLayer',
+                content: getDocUrl('layers/simple-mesh-layer.md')
+              }
+            ]
           }
         ]
       },
