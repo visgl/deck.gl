@@ -1,20 +1,14 @@
 /* global document, google */
 import {Deck} from '@deck.gl/core';
 
-export function createDeckInstance(map) {
-  const container = map.getDiv();
-
-  const deckCanvas = document.createElement('canvas');
-  container.appendChild(deckCanvas);
-  Object.assign(deckCanvas.style, {
-    // map container position is always non-static
-    position: 'absolute',
-    pointerEvents: 'none',
-    left: 0,
-    top: 0,
-    width: '100%',
-    height: '100%'
-  });
+export function createDeckInstance(map, overlay, deck) {
+  if (deck) {
+    if (deck.props.userData.map === map) {
+      return deck;
+    }
+    // deck instance was created for a different map
+    destroyDeckInstance(deck);
+  }
 
   const eventListeners = {
     click: null,
@@ -22,8 +16,8 @@ export function createDeckInstance(map) {
     mouseout: null
   };
 
-  const deck = new Deck({
-    canvas: deckCanvas,
+  deck = new Deck({
+    canvas: createDeckCanvas(overlay),
     initialViewState: {
       longitude: 0,
       latitude: 0,
@@ -44,6 +38,33 @@ export function createDeckInstance(map) {
   }
 
   return deck;
+}
+
+function createDeckCanvas(overlay) {
+  // google maps places overlays in a container anchored at the map center.
+  // the container CSS is manipulated during dragging,
+  // making it difficult for our canvas to sync with the map.
+  // As a hack, we find that container and append our canvas as its sibling.
+  let container = overlay.getPanes().overlayLayer;
+  while (container && container.style.left !== '50%') {
+    container = container.offsetParent;
+  }
+  container = container.offsetParent;
+
+  const deckCanvas = document.createElement('canvas');
+  Object.assign(deckCanvas.style, {
+    // map container position is always non-static
+    position: 'absolute',
+    pointerEvents: 'none',
+    left: 0,
+    top: 0,
+    zIndex: 1,
+    width: '100%',
+    height: '100%'
+  });
+
+  container.appendChild(deckCanvas);
+  return deckCanvas;
 }
 
 export function destroyDeckInstance(deck) {

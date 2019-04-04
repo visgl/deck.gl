@@ -8,8 +8,11 @@ export default class GoogleMapsOverlay {
     this.props = {};
 
     this._map = null;
-    this._overlay = new google.maps.OverlayView();
-    this._overlay.draw = this._draw.bind(this);
+
+    const overlay = new google.maps.OverlayView();
+    overlay.onAdd = this._onAdd.bind(this);
+    overlay.draw = this._draw.bind(this);
+    this._overlay = overlay;
 
     this.setProps(props);
   }
@@ -25,11 +28,6 @@ export default class GoogleMapsOverlay {
       this._map = null;
     }
     if (map) {
-      if (this._deck) {
-        destroyDeckInstance(this._deck);
-      }
-      this._deck = createDeckInstance(map);
-      this._deck.setProps(this.props);
       this._map = map;
       this._overlay.setMap(map);
     }
@@ -56,23 +54,28 @@ export default class GoogleMapsOverlay {
     if (this._deck) {
       destroyDeckInstance(this._deck);
     }
-    if (this._map) {
-      this._overlay.setMap(null);
-      this._map = null;
-    }
+    this.setMap(null);
   }
 
   /* Private API */
+  _onAdd() {
+    this._deck = createDeckInstance(this._map, this._overlay, this._deck);
+    this._deck.setProps(this.props);
+  }
 
   _draw() {
+    const deck = this._deck;
     const viewState = getViewState(this._map, this._overlay);
-    this._deck.setProps({
+
+    deck.setProps({
       viewState,
-      layerFilter: viewState.zoom >= 0 && viewState.pitch === 0 ? null : HIDE_ALL_LAYERS
+      // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
+      layerFilter:
+        viewState.zoom >= 0 && viewState.pitch === 0 ? this.props.layerFilter : HIDE_ALL_LAYERS
     });
-    if (this._deck.deckRenderer) {
+    if (deck.deckRenderer) {
       // Deck is initialized
-      this._deck.redraw();
+      deck.redraw();
     }
   }
 }

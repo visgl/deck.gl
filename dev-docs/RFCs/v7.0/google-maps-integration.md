@@ -1,6 +1,6 @@
 # RFC: Google Maps Integration
 
-* **Authors**: Xiaoji Chen, Don MacCurdy
+* **Authors**: Xiaoji Chen, Don McCurdy
 * **Date**: April 2019
 * **Status**: Draft
 
