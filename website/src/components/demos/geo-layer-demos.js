@@ -12,7 +12,7 @@ import {
 
 export const GreatCircleLayerDemo = createLayerDemoClass({
   Layer: GreatCircleLayer,
-  dataUrl: `${DATA_URI}/bart-segments.json`,
+  dataUrl: `${DATA_URI}/flights.json`,
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     getSourcePosition: d => d.from.coordinates,

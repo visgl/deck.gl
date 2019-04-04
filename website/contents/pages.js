@@ -3,6 +3,7 @@ function getDocUrl(filename) {
   // eslint-disable-next-line no-undef
   return `${DOCS_DIR}/docs/${filename}`;
 }
+
 function getCodeUrl(pathname) {
   return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
 }
@@ -195,7 +196,7 @@ export const docPages = generatePath([
       },
       {
         // eslint-disable-next-line
-        name: "What's New",
+        name: 'What\'s New',
         content: getDocUrl('whats-new.md')
       },
       {
@@ -437,77 +438,60 @@ export const docPages = generatePath([
             content: getDocUrl('layers/text-layer.md')
           },
           {
-            name: 'Aggregation Layers',
-            children: [
-              {
-                name: 'ContourLayer',
-                content: getDocUrl('layers/contour-layer.md')
-              },
-              // TODO generatePath regex need to be fixed
-              // path suffix for GPUGridLayer is generated as `grid-layer`
-              {
-                name: 'GpuGridLayer',
-                content: getDocUrl('layers/gpu-grid-layer.md')
-              },
-              {
-                name: 'GridLayer',
-                content: getDocUrl('layers/grid-layer.md')
-              },
-              {
-                name: 'GridCellLayer',
-                content: getDocUrl('layers/grid-cell-layer.md')
-              },
-              {
-                name: 'HexagonLayer',
-                content: getDocUrl('layers/hexagon-layer.md')
-              },
-              {
-                name: 'ScreenGridLayer',
-                content: getDocUrl('layers/screen-grid-layer.md')
-              }
-            ]
+            name: 'ContourLayer',
+            content: getDocUrl('layers/contour-layer.md')
           },
           {
-            name: 'Geo Layers',
-            children: [
-              {
-                name: 'GreatCircleLayer',
-                content: getDocUrl('layers/great-circle-layer.md')
-              },
-              {
-                name: 'H3ClusterLayer',
-                content: getDocUrl('layers/h3-cluster-layer.md')
-              },
-              {
-                name: 'H3HexagonLayer',
-                content: getDocUrl('layers/h3-hexagon-layer.md')
-              },
-              {
-                name: 'S2Layer',
-                content: getDocUrl('layers/s2-layer.md')
-              },
-              {
-                name: 'TileLayer',
-                content: getDocUrl('layers/tile-layer.md')
-              },
-              {
-                name: 'TripsLayer',
-                content: getDocUrl('layers/trips-layer.md')
-              }
-            ]
+            name: 'GPUGridLayer',
+            content: getDocUrl('layers/gpu-grid-layer.md')
           },
           {
-            name: 'Mesh Layers',
-            children: [
-              {
-                name: 'ScenegraphLayer',
-                content: getDocUrl('layers/scenegraph-layer.md')
-              },
-              {
-                name: 'SimpleMeshLayer',
-                content: getDocUrl('layers/simple-mesh-layer.md')
-              }
-            ]
+            name: 'GridLayer',
+            content: getDocUrl('layers/grid-layer.md')
+          },
+          {
+            name: 'GridCellLayer',
+            content: getDocUrl('layers/grid-cell-layer.md')
+          },
+          {
+            name: 'HexagonLayer',
+            content: getDocUrl('layers/hexagon-layer.md')
+          },
+          {
+            name: 'ScreenGridLayer',
+            content: getDocUrl('layers/screen-grid-layer.md')
+          },
+          {
+            name: 'GreatCircleLayer',
+            content: getDocUrl('layers/great-circle-layer.md')
+          },
+          {
+            name: 'H3ClusterLayer',
+            content: getDocUrl('layers/h3-cluster-layer.md')
+          },
+          {
+            name: 'H3HexagonLayer',
+            content: getDocUrl('layers/h3-hexagon-layer.md')
+          },
+          {
+            name: 'S2Layer',
+            content: getDocUrl('layers/s2-layer.md')
+          },
+          {
+            name: 'TileLayer',
+            content: getDocUrl('layers/tile-layer.md')
+          },
+          {
+            name: 'TripsLayer',
+            content: getDocUrl('layers/trips-layer.md')
+          },
+          {
+            name: 'ScenegraphLayer',
+            content: getDocUrl('layers/scenegraph-layer.md')
+          },
+          {
+            name: 'SimpleMeshLayer',
+            content: getDocUrl('layers/simple-mesh-layer.md')
           }
         ]
       },
