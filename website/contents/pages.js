@@ -3,6 +3,7 @@ function getDocUrl(filename) {
   // eslint-disable-next-line no-undef
   return `${DOCS_DIR}/docs/${filename}`;
 }
+
 function getCodeUrl(pathname) {
   return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
 }
@@ -413,26 +414,6 @@ export const docPages = generatePath([
             content: getDocUrl('layers/geojson-layer.md')
           },
           {
-            name: 'GridLayer',
-            content: getDocUrl('layers/grid-layer.md')
-          },
-          {
-            name: 'GridCellLayer',
-            content: getDocUrl('layers/grid-cell-layer.md')
-          },
-          {
-            name: 'H3HexagonLayer',
-            content: getDocUrl('layers/h3-hexagon-layer.md')
-          },
-          {
-            name: 'H3ClusterLayer',
-            content: getDocUrl('layers/h3-cluster-layer.md')
-          },
-          {
-            name: 'HexagonLayer',
-            content: getDocUrl('layers/hexagon-layer.md')
-          },
-          {
             name: 'IconLayer',
             content: getDocUrl('layers/icon-layer.md')
           },
@@ -453,20 +434,56 @@ export const docPages = generatePath([
             content: getDocUrl('layers/polygon-layer.md')
           },
           {
+            name: 'ScatterplotLayer',
+            content: getDocUrl('layers/scatterplot-layer.md')
+          },
+          {
+            name: 'TextLayer',
+            content: getDocUrl('layers/text-layer.md')
+          },
+          {
+            name: 'GPUGridLayer',
+            content: getDocUrl('layers/gpu-grid-layer.md')
+          },
+          {
+            name: 'GreatCircleLayer',
+            content: getDocUrl('layers/great-circle-layer.md')
+          },
+          {
+            name: 'GridLayer',
+            content: getDocUrl('layers/grid-layer.md')
+          },
+          {
+            name: 'GridCellLayer',
+            content: getDocUrl('layers/grid-cell-layer.md')
+          },
+          {
+            name: 'HexagonLayer',
+            content: getDocUrl('layers/hexagon-layer.md')
+          },
+          {
+            name: 'H3ClusterLayer',
+            content: getDocUrl('layers/h3-cluster-layer.md')
+          },
+          {
+            name: 'H3HexagonLayer',
+            content: getDocUrl('layers/h3-hexagon-layer.md')
+          },
+          {
             name: 'S2Layer',
             content: getDocUrl('layers/s2-layer.md')
           },
           {
-            name: 'ScatterplotLayer',
-            content: getDocUrl('layers/scatterplot-layer.md')
+            name: 'ScenegraphLayer',
+            content: getDocUrl('layers/scenegraph-layer.md')
           },
           {
             name: 'ScreenGridLayer',
             content: getDocUrl('layers/screen-grid-layer.md')
           },
           {
-            name: 'TextLayer',
-            content: getDocUrl('layers/text-layer.md')
+            name: 'SimpleMeshLayer',
+            content: getDocUrl('layers/simple-mesh-layer.md')
           },
           {
             name: 'TileLayer',

@@ -1,4 +1,3 @@
-
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/mesh--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/mesh-layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />

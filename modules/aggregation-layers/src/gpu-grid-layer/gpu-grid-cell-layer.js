@@ -143,5 +143,5 @@ export default class GPUGridCellLayer extends Layer {
   }
 }
 
-GPUGridCellLayer.layerName = 'GridCellLayer';
+GPUGridCellLayer.layerName = 'GPUGridCellLayer';
 GPUGridCellLayer.defaultProps = defaultProps;
