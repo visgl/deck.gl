@@ -32,8 +32,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
     '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/webgl-state-tracker`,
     '@luma.gl/webgl2-polyfill': `${ROOT_DIR}/node_modules/@luma.gl/webgl2-polyfill`,
-    '@luma.gl/shadertools': `${ROOT_DIR}/node_modules/@luma.gl/shadertools`,
-    '@luma.gl/addons': `${ROOT_DIR}/node_modules/@luma.gl/addons`
+    '@luma.gl/shadertools': `${ROOT_DIR}/node_modules/@luma.gl/shadertools`
   };
 
   const LUMA_ALIASES = linkToLuma ? LUMA_LINK_ALIASES : LUMA_LOCAL_ALIASES;
