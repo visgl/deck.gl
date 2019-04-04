@@ -196,7 +196,7 @@ export const docPages = generatePath([
       },
       {
         // eslint-disable-next-line
-        name: 'What\'s New',
+        name: "What's New",
         content: getDocUrl('whats-new.md')
       },
       {
@@ -406,6 +406,10 @@ export const docPages = generatePath([
             content: getDocUrl('layers/column-layer.md')
           },
           {
+            name: 'ContourLayer',
+            content: getDocUrl('layers/contour-layer.md')
+          },
+          {
             name: 'GeoJsonLayer',
             content: getDocUrl('layers/geojson-layer.md')
           },
@@ -438,12 +442,12 @@ export const docPages = generatePath([
             content: getDocUrl('layers/text-layer.md')
           },
           {
-            name: 'ContourLayer',
-            content: getDocUrl('layers/contour-layer.md')
-          },
-          {
             name: 'GPUGridLayer',
             content: getDocUrl('layers/gpu-grid-layer.md')
+          },
+          {
+            name: 'GreatCircleLayer',
+            content: getDocUrl('layers/great-circle-layer.md')
           },
           {
             name: 'GridLayer',
@@ -458,14 +462,6 @@ export const docPages = generatePath([
             content: getDocUrl('layers/hexagon-layer.md')
           },
           {
-            name: 'ScreenGridLayer',
-            content: getDocUrl('layers/screen-grid-layer.md')
-          },
-          {
-            name: 'GreatCircleLayer',
-            content: getDocUrl('layers/great-circle-layer.md')
-          },
-          {
             name: 'H3ClusterLayer',
             content: getDocUrl('layers/h3-cluster-layer.md')
           },
@@ -478,20 +474,24 @@ export const docPages = generatePath([
             content: getDocUrl('layers/s2-layer.md')
           },
           {
+            name: 'ScenegraphLayer',
+            content: getDocUrl('layers/scenegraph-layer.md')
+          },
+          {
+            name: 'ScreenGridLayer',
+            content: getDocUrl('layers/screen-grid-layer.md')
+          },
+          {
+            name: 'SimpleMeshLayer',
+            content: getDocUrl('layers/simple-mesh-layer.md')
+          },
+          {
             name: 'TileLayer',
             content: getDocUrl('layers/tile-layer.md')
           },
           {
             name: 'TripsLayer',
             content: getDocUrl('layers/trips-layer.md')
-          },
-          {
-            name: 'ScenegraphLayer',
-            content: getDocUrl('layers/scenegraph-layer.md')
-          },
-          {
-            name: 'SimpleMeshLayer',
-            content: getDocUrl('layers/simple-mesh-layer.md')
           }
         ]
       },

@@ -4,11 +4,7 @@ import Protobuf from 'pbf';
 import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
-import {
-  GreatCircleLayer,
-  S2Layer,
-  TileLayer
-} from 'deck.gl';
+import {GreatCircleLayer, S2Layer, TileLayer} from 'deck.gl';
 
 export const GreatCircleLayerDemo = createLayerDemoClass({
   Layer: GreatCircleLayer,
@@ -55,12 +51,12 @@ export const TileLayerDemo = createLayerDemoClass({
     getLineWidth: f => {
       if (f.properties.layer === 'transportation') {
         switch (f.properties.class) {
-        case 'primary':
-          return 12;
-        case 'motorway':
-          return 16;
-        default:
-          return 6;
+          case 'primary':
+            return 12;
+          case 'motorway':
+            return 16;
+          default:
+            return 6;
         }
       }
       return 1;
