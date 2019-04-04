@@ -1,3 +1,4 @@
+<!-- INJECT:"GreatCircleLayerDemo" -->
 
 <p class="badges">
   <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
@@ -16,17 +17,25 @@ const App = ({data, viewport}) => {
   /**
    * Data format:
    * [
-   *   {
-   *     inbound: 72633,
-   *     outbound: 74735,
-   *     from: {
-   *       name: '19th St. Oakland (19TH)',
-   *       coordinates: [-122.269029, 37.80787]
-   *     },
-   *     to: {
-   *       name: '12th St. Oakland City Center (12TH)',
-   *       coordinates: [-122.271604, 37.803664]
+   * {
+   *   "from": {
+   *     "type": "major",
+   *     "name": "San Francisco Int'l",
+   *     "abbrev": "SFO",
+   *     "coordinates": [
+   *       -122.38347034444931,
+   *       37.61702508680534
+   *     ]
    *   },
+   *   "to": {
+   *     "type": "major",
+   *     "name": "Liverpool John Lennon",
+   *     "abbrev": "LPL",
+   *     "coordinates": [
+   *       -2.858620657849378,
+   *       53.3363751054422
+   *     ]
+   *   }
    *   ...
    * ]
    */
@@ -37,8 +46,8 @@ const App = ({data, viewport}) => {
     getStrokeWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
-    getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
-    getTargetColor: d => [Math.sqrt(d.outbound), 140, 0],
+    getSourceColor: [64, 255, 0],
+    getTargetColor: [0, 128, 200],
     onHover: ({object, x, y}) => {
       const tooltip = `${object.from.name} to ${object.to.name}`;
       /* Update tooltip

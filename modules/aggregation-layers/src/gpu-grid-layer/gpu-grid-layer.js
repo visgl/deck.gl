@@ -159,5 +159,5 @@ export default class GPUGridLayer extends CompositeLayer {
   }
 }
 
-GPUGridLayer.layerName = 'GridLayer';
+GPUGridLayer.layerName = 'GPUGridLayer';
 GPUGridLayer.defaultProps = defaultProps;
