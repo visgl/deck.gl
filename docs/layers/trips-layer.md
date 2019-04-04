@@ -1,3 +1,4 @@
+<!-- INJECT:"TripsLayerDemo" -->
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
@@ -20,7 +21,34 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
 
 ```js
 import {TripsLayer} from '@deck.gl/geo-layers';
-new TripsLayer({});
+
+const App = ({data, viewport}) => {
+
+  /**
+   * Data format:
+   * [
+   *   {
+   *     segments: [
+   *       [-122.269029, 37.80787, 0.0],
+   *       [-122.271604, 37.803664, 0.008]
+   *     ]
+   *   }
+   * ]
+   */
+  const layer = new TripsLayer({
+    id: 'trips-layer',
+    data,
+    getPath: d => d.segments,
+    getColor: [253, 128, 93],
+    opacity: 0.8,
+    widthMinPixels: 5,
+    rounded: true,
+    trailLength: 0.2,
+    currentTime: 0.5
+  });
+
+  return (<DeckGL {...viewport} layers={[layer]} />);
+};
 ```
 
 To use pre-bundled scripts:

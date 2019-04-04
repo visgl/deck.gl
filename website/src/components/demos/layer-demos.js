@@ -13,7 +13,9 @@ import {
   PointCloudLayer,
   PolygonLayer,
   ScatterplotLayer,
-  TextLayer
+  TextLayer,
+  ColumnLayer,
+  TripsLayer
 } from 'deck.gl';
 
 import {colorToRGBArray} from '../../utils/format-utils';
@@ -193,5 +195,19 @@ export const BitmapLayerDemo = createLayerDemoClass({
   props: {
     bounds: [-122.519, 37.7045, -122.355, 37.829],
     image: `${DATA_URI}/sf-districts.png`
+  }
+});
+
+export const TripsLayerDemo = createLayerDemoClass({
+  Layer: TripsLayer,
+  dataUrl: `${DATA_URI}/sf.trips.json`,
+  props: {
+    getPath: d => d.segments,
+    getColor: [253, 128, 93],
+    opacity: 0.8,
+    widthMinPixels: 8,
+    rounded: true,
+    trailLength: 0.2,
+    currentTime: 0.5
   }
 });
