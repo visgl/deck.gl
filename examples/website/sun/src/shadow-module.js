@@ -8,13 +8,12 @@ uniform bool shadow_useShadowMap;
 varying vec3 shadow_vPosition;
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
-  if (shadow_drawShadowMap || shadow_useShadowMap) {
+  if (shadow_drawShadowMap) {
+    return shadow_viewProjectionMatrix * position_commonspace;
+  }
+  if (shadow_useShadowMap) {
     vec4 shadowMap_position = shadow_viewProjectionMatrix * position_commonspace;
     shadow_vPosition = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;
-
-    if (shadow_drawShadowMap) {
-      return shadowMap_position;
-    }
   }
   return gl_Position;
 }
@@ -28,17 +27,21 @@ uniform vec4 shadow_color;
 
 varying vec3 shadow_vPosition;
 
+const vec4 bitPackShift = vec4(1.0, 256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);
+const vec4 bitUnpackShift = 1.0 / bitPackShift;
+const vec4 bitMask = vec4(1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0,  0.0);
+
 float shadow_getShadowWeight(vec2 texCoords) {
-  vec4 shadowColor = texture2D(shadow_shadowMap, texCoords);
-  if (shadowColor.a == 0.0) {
-    return 0.0;
-  }
-  return smoothstep(0.01, 0.02, shadow_vPosition.z - shadowColor.r);
+  vec4 rgbaDepth = texture2D(shadow_shadowMap, texCoords);
+  float z = dot(rgbaDepth, bitUnpackShift);
+  return smoothstep(0.0, 0.01, shadow_vPosition.z - z);
 }
 
 vec4 shadow_filterShadowColor(vec4 color) {
   if (shadow_drawShadowMap) {
-    return vec4(shadow_vPosition.z, 0.0, 0.0, 1.0);
+    vec4 rgbaDepth = fract(gl_FragCoord.z * bitPackShift);
+    rgbaDepth -= rgbaDepth.gbaa * bitMask;
+    return rgbaDepth;
   }
   if (shadow_useShadowMap) {
     /* debug */
@@ -46,8 +49,9 @@ vec4 shadow_filterShadowColor(vec4 color) {
     //   return vec4(1.0, 1.0, 0.0, 1.0);
     // }
 
-    // vec4 shadowColor = texture2D(shadow_shadowMap, shadow_vPosition.xy);
-    // return shadowColor;
+    // vec4 rgbaDepth = texture2D(shadow_shadowMap, shadow_vPosition.xy);
+    // float z = dot(rgbaDepth, bitUnpackShift);
+    // return vec4(z, 0.0, 0.0, 1.0);
     /* end debug */
 
     float shadowAlpha = shadow_getShadowWeight(shadow_vPosition.xy) * shadow_color.a / 255.0;
@@ -79,7 +83,7 @@ export default {
   vs,
   fs,
   getUniforms: (opts = {}, context) => {
-    const shadowMap = opts.shadowMap || opts.drawToShadowMap;
+    const shadowMap = opts.drawToShadowMap || opts.shadowMap;
     if (shadowMap) {
       const light = opts.lightSources && opts.lightSources.directionalLights[0];
 

@@ -1,12 +1,20 @@
 import LayersPass from '@deck.gl/core/src/passes/layers-pass';
-import {Framebuffer, withParameters, copyToTexture} from '@luma.gl/core';
+import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
   constructor(gl, {target}) {
     super(gl);
 
+    this.dummyShadowMap = new Texture2D(gl, {width: 1, height: 1});
     this.target = target;
-    this.fbo = new Framebuffer(gl, {id: 'shadowmap', width: target.width, height: target.height});
+    this.fbo = new Framebuffer(gl, {
+      id: 'shadowmap',
+      width: target.width,
+      height: target.height,
+      attachments: {
+        [gl.COLOR_ATTACHMENT0]: target
+      }
+    });
     this.props.pixelRatio = 2;
   }
 
@@ -14,7 +22,10 @@ export default class ShadowPass extends LayersPass {
     withParameters(
       this.gl,
       {
-        framebuffer: this.fbo
+        framebuffer: this.fbo,
+        depthRange: [0, 1],
+        blend: false,
+        clearColor: [1, 1, 1, 1]
       },
       () => {
         const viewport = params.viewports[0];
@@ -26,7 +37,6 @@ export default class ShadowPass extends LayersPass {
         }
 
         super.render(params);
-        copyToTexture(this.fbo, this.target);
         // this.target.generateMipmap();
       }
     );
@@ -40,7 +50,7 @@ export default class ShadowPass extends LayersPass {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
-      drawToShadowMap: this.target,
+      drawToShadowMap: this.dummyShadowMap,
       devicePixelRatio: this.props.pixelRatio
     });
     for (const effect of effects) {

@@ -62,8 +62,8 @@ export class App extends Component {
       width: 1,
       height: 1,
       parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
-        [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
+        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
         [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
         [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
       }
@@ -79,13 +79,14 @@ export class App extends Component {
     // update shadow map
     const {
       deckRenderer,
+      layerManager,
       props: {effects}
     } = this._deck;
     const effectProps = deckRenderer.prepareEffects(effects);
     this._shadowPass.render({
-      layers: this._deck.layerManager.getLayers(),
+      layers: layerManager.getLayers(),
       viewports,
-      onViewportActive: () => {},
+      onViewportActive: layerManager.activateViewport,
       views: this._deck.getViews(),
       effects,
       effectProps
