@@ -30,7 +30,7 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@luma.gl/core": "^7.0.0-beta.4",
+    "@luma.gl/core": "^7.0.0-beta.5",
     "gl-matrix": "^3.0.0",
     "math.gl": "^2.3.0",
     "mjolnir.js": "^2.0.2",
