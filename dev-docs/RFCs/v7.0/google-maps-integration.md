@@ -1,6 +1,6 @@
 # RFC: Google Maps Integration
 
-* **Authors**: Xiaoji Chen
+* **Authors**: Xiaoji Chen, Don McCurdy
 * **Date**: April 2019
 * **Status**: Draft
 
@@ -12,12 +12,12 @@ This RFC proposes a new module `@deck.gl/google-maps` that handles the synchroni
 
 ## Proposal
 
-### DeckOverlay
+### GoogleMapsOverlay
 
-The proposed `@deck.gl/google-maps` module will have a single export `DeckOverlay`. This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView) interface and can be used as any other Google Maps overlay:
+The proposed `@deck.gl/google-maps` module will have a single export `GoogleMapsOverlay`. This class implements the [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView) interface and can be used as any other Google Maps overlay:
 
 ```js
-  import {DeckOverlay} from '@deck.gl/google-maps';
+  import {GoogleMapsOverlay} from '@deck.gl/google-maps';
   import {GeoJsonLayer} from '@deck.gl/layers';
 
   // Create map
@@ -29,7 +29,7 @@ The proposed `@deck.gl/google-maps` module will have a single export `DeckOverla
   });
 
   // Create overlay instance
-  const overlay = new DeckOverlay({
+  const overlay = new GoogleMapsOverlay({
     layers: [
       new GeoJsonLayer({
         ...
@@ -42,7 +42,7 @@ The proposed `@deck.gl/google-maps` module will have a single export `DeckOverla
 
 ##### `Constructor`
 
-`const deckOverlay = new DeckOverlay(props)`
+`const deckOverlay = new GoogleMapsOverlay(props)`
 
 `props` are forwarded to a `Deck` instance. The following [Deck](/docs/api-reference/deck.md) props are supported:
 
@@ -90,7 +90,7 @@ Remove the overlay and release all resources.
 
 ### How aligned should the API be with the mapbox module?
 
-While `MapboxLayer` from `@deck.gl/mapbox` is a wrapper of a single layer, the `DeckOverlay` class is a wrapper of `Deck`. The `DeckOverlay` API is designed to align with 1) the Google Maps overlay API, and 2) the Deck class. 
+While `MapboxLayer` from `@deck.gl/mapbox` is a wrapper of a single layer, the `GoogleMapsOverlay` class is a wrapper of `Deck`. The `GoogleMapsOverlay` API is designed to align with 1) the Google Maps overlay API, and 2) the Deck class. 
 
 This module will be much simpler than `@deck.gl/mapbox`. Because there is no context sharing, there is no need for WebGL state management, custom rendering order, etc. All layers are rendered once the overlay is redrawn.
 

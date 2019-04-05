@@ -2,7 +2,7 @@
    <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
 </div>
 
-## Example: Use deck.gl without React and Mapbox
+## Example: Use deck.gl with Mapbox
 
 Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
 with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
