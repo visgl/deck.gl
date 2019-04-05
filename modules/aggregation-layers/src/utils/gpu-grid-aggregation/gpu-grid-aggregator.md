@@ -55,7 +55,9 @@ const results = aggregator.run({
 
 ```
 
-### constructor()
+## Methods
+
+### constructor
 
 ‘ScreenGridAggregator’ constructor takes following arguments and constructs an object.
 
@@ -63,7 +65,7 @@ const results = aggregator.run({
 * opts (Object) : Optionally contains and ‘id’ and ‘sahderCache’ object for caching/re-using shaders.
 
 
-### run()
+### run
 
 Performs aggregation either on CPU or GPU based on the provided options and browser’s WebGL capabilities.
 
@@ -110,3 +112,10 @@ Performs aggregation either on CPU or GPU based on the provided options and brow
   NOTE: `minBuffer`, `maxBuffer` and `maxMinBuffer` are usually consumed by setting them as uniform buffer object or read by the CPU.
 
   NOTE: Aggregation result is always in `Buffer` objects to provide common API irrespective of whether aggregation is performed on CPU or GPU. `Texture` objects are provided when aggregation is done on GPU, and `Array` objects are provided when aggregation is performed on CPU.
+
+
+### getData
+
+  * `weights` (Optional, Array of Strings or a String) : Takes one or more weight `id`s and returns their aggregation results in CPU memory (Typed Arrays). When none specified, returns aggregation results of all available weights.
+
+  NOTE: When aggregation is performed on GPU, `getData` performs Buffer read and can potentially an expensive operation due to CPU and GPU sync, in such cases data is also cached to avoid reading from GPU memory for subsequent calls.

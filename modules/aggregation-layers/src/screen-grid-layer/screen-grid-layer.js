@@ -92,8 +92,7 @@ export default class ScreenGridLayer extends Layer {
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
       maxBuffer,
-      weights,
-      aggregationResults: null
+      weights
     });
 
     this._setupUniformBuffer();
@@ -197,21 +196,15 @@ export default class ScreenGridLayer extends Layer {
   getPickingInfo({info, mode}) {
     const {index} = info;
     if (index >= 0) {
-      const {aggregationResults} = this.state;
+      const {gpuGridAggregator} = this.state;
+      // Get color aggregation results
+      const aggregationResults = gpuGridAggregator.getData('color');
 
-      // Cache aggregationResults to avoid multiple buffer reads.
-      aggregationResults.aggregationData =
-        aggregationResults.aggregationData || this.state.aggregationBuffer.getData();
-      aggregationResults.maxData = aggregationResults.maxData || this.state.maxBuffer.getData();
-
-      const {aggregationData, maxData} = aggregationResults;
       // Each instance (one cell) is aggregated into single pixel,
       // Get current instance's aggregation details.
-      info.object = GPUGridAggregator.getAggregationData({
-        aggregationData,
-        maxData,
-        pixelIndex: index
-      });
+      info.object = GPUGridAggregator.getAggregationData(
+        Object.assign({pixelIndex: index}, aggregationResults.color)
+      );
     }
 
     return info;
@@ -361,14 +354,8 @@ export default class ScreenGridLayer extends Layer {
       results.color.maxData && Number.isFinite(results.color.maxData[0])
         ? results.color.maxData[0]
         : 0;
-    // Under WebGL1 results are available in JS Arrays
-    // For WebGL2, data is in Buffer objects and will be read on demand (like picking)
-    const aggregationResults = {
-      aggregationData: results.color.aggregationData,
-      maxData: results.color.maxData
-    };
+
     this.setState({
-      aggregationResults,
       maxWeight // uniform to use under WebGL1
     });
 

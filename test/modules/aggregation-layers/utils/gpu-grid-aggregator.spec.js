@@ -325,3 +325,19 @@ test('GPUGridAggregator#ChangeFlags#viewportChanged', t => {
   t.deepEqual(gpuResultsUpdated, cpuResultsUpdated, 'cpu and gpu results should match');
   t.end();
 });
+
+test('GPUGridAggregator#getData', t => {
+  const aggregator = new GPUGridAggregator(gl);
+  const weight1 = Object.assign({}, fixture.weights.weight1, {size: 3});
+
+  // Run on GPU
+  aggregator.run(Object.assign({}, fixture, {weights: {weight1}, useGPU: true}));
+  const gpuResults = aggregator.getData('weight1');
+
+  // Run on CPU
+  aggregator.run(Object.assign({}, fixture, {weights: {weight1}, useGPU: false}));
+  const cpuResults = aggregator.getData(); // should return results for all weights, which is 'weight1'
+
+  t.deepEqual(gpuResults, cpuResults, 'cpu and gpu results should match');
+  t.end();
+});
