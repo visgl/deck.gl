@@ -25,8 +25,8 @@ export const deck = new Deck({
       filled: true,
       lineWidthMinPixels: 2,
       opacity: 0.4,
-      getLineColor: () => [255, 100, 100],
-      getFillColor: () => [200, 160, 0, 180]
+      getLineColor: [255, 100, 100],
+      getFillColor: [200, 160, 0, 180]
     })
   ]
 });

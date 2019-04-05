@@ -6,10 +6,9 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 const GEOJSON =
   'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_110m_admin_1_states_provinces_shp.geojson'; //eslint-disable-line
 
-// Retrieving GOOGLE_MAPS_API_KEY from the environment variable
-const gmUrl = `https://maps.googleapis.com/maps/api/js?key=${
-  process.env.GOOGLE_MAPS_API_KEY // eslint-disable-line
-}&libraries=visualization&v=3.34`;
+// Set your Google Maps API key here or via environment variable
+const GOOGLE_MAPS_API_KEY = process.env.GoogleMapsAPIKey; // eslint-disable-line
+const GOOGLE_MAPS_API_URL = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&libraries=visualization&v=3.34`;
 
 function loadScript(url) {
   const script = document.createElement('script');
@@ -22,7 +21,7 @@ function loadScript(url) {
   });
 }
 
-loadScript(gmUrl).then(() => {
+loadScript(GOOGLE_MAPS_API_URL).then(() => {
   const map = new google.maps.Map(document.getElementById('map'), {
     center: {lat: 40, lng: -100},
     zoom: 4
