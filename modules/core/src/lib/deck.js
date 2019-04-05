@@ -273,6 +273,10 @@ export default class Deck {
   }
 
   redraw(force) {
+    if (!this.layerManager) {
+      // Not yet initialized
+      return;
+    }
     // If force is falsy, check if we need to redraw
     const redrawReason = force || this.needsRedraw({clearRedrawFlags: true});
 
