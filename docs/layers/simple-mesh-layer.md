@@ -113,6 +113,12 @@ Multiplier to scale each geometry by.
 
 Whether the layer should be rendered in high-precision 64-bit mode.
 
+##### `wireframe` (Boolean, optional)
+
+- Default: `false`
+
+Whether to render the mesh in wireframe mode.
+
 ##### `material` (Object, optional)
 
 * Default: `new PhongMaterial()`

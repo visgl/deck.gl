@@ -108,6 +108,10 @@ const defaultProps = {
     depthFunc: GL.LEQUAL
   },
   fp64: false,
+  // NOTE(Tarek): Quick and dirty wireframe. Just draws
+  // the same mesh with LINE_STRIPS. Won't follow edges
+  // of the original mesh.
+  wireframe: false,
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
   sizeScale: {type: 'number', value: 1, min: 0},
@@ -180,6 +184,10 @@ export default class SimpleMeshLayer extends Layer {
     if (props.texture !== oldProps.texture) {
       this.setTexture(props.texture);
     }
+
+    if (this.state.model) {
+      this.state.model.setDrawMode(this.props.wireframe ? GL.LINE_STRIP : GL.TRIANGLES);
+    }
   }
 
   draw({uniforms}) {
@@ -189,11 +197,11 @@ export default class SimpleMeshLayer extends Layer {
 
     const {sizeScale} = this.props;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
+    this.state.model.draw({
+      uniforms: Object.assign({}, uniforms, {
         sizeScale
       })
-    );
+    });
   }
 
   getModel(mesh) {
