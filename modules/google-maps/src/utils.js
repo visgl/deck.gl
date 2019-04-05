@@ -1,9 +1,15 @@
 /* global document, google */
 import {Deck} from '@deck.gl/core';
 
+/**
+ * Get a new deck instance
+ * @param map (google.maps.Map) - The parent Map instance
+ * @param overlay (google.maps.OverlayView) - A maps Overlay instance
+ * @param [deck] (Deck) - a previously created instances
+ */
 export function createDeckInstance(map, overlay, deck) {
   if (deck) {
-    if (deck.props.userData.map === map) {
+    if (deck.props.userData._googleMap === map) {
       return deck;
     }
     // deck instance was created for a different map
@@ -25,8 +31,8 @@ export function createDeckInstance(map, overlay, deck) {
     },
     controller: false,
     userData: {
-      map,
-      eventListeners
+      _googleMap: map,
+      _eventListeners: eventListeners
     }
   });
 
@@ -67,8 +73,12 @@ function createDeckCanvas(overlay) {
   return deckCanvas;
 }
 
+/**
+ * Safely remove a deck instance
+ * @param deck (Deck) - a previously created instances
+ */
 export function destroyDeckInstance(deck) {
-  const {map, eventListeners} = deck.props.userData;
+  const {_googleMap: map, _eventListeners: eventListeners} = deck.props.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
@@ -78,6 +88,11 @@ export function destroyDeckInstance(deck) {
   deck.finalize();
 }
 
+/**
+ * Get the current view state
+ * @param map (google.maps.Map) - The parent Map instance
+ * @param overlay (google.maps.OverlayView) - A maps Overlay instance
+ */
 export function getViewState(map, overlay) {
   const container = map.getDiv();
   const width = container.offsetWidth;

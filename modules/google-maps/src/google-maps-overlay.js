@@ -43,9 +43,11 @@ export default class GoogleMapsOverlay {
   pickObject(params) {
     return this._deck && this._deck.pickObject(params);
   }
+
   pickMultipleObjects(params) {
     return this._deck && this._deck.pickMultipleObjects(params);
   }
+
   pickObjects(params) {
     return this._deck && this._deck.pickObjects(params);
   }
@@ -66,16 +68,14 @@ export default class GoogleMapsOverlay {
   _draw() {
     const deck = this._deck;
     const viewState = getViewState(this._map, this._overlay);
+    const canSyncWithGoogleMaps = viewState.zoom >= 0 && viewState.pitch === 0;
 
     deck.setProps({
       viewState,
       // deck.gl cannot sync with the base map with zoom < 0 and/or tilt
-      layerFilter:
-        viewState.zoom >= 0 && viewState.pitch === 0 ? this.props.layerFilter : HIDE_ALL_LAYERS
+      layerFilter: canSyncWithGoogleMaps ? this.props.layerFilter : HIDE_ALL_LAYERS
     });
-    if (deck.deckRenderer) {
-      // Deck is initialized
-      deck.redraw();
-    }
+    // Deck is initialized
+    deck.redraw();
   }
 }
