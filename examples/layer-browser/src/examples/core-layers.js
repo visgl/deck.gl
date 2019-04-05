@@ -499,7 +499,7 @@ const BitmapLayerExample = {
   props: {
     id: 'bitmap-layer',
     image: 'data/sf-districts.png',
-    bounds: [-122.5190, 37.7045, -122.355, 37.829]
+    bounds: [-122.519, 37.7045, -122.355, 37.829]
   }
 };
 

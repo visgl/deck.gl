@@ -191,7 +191,7 @@ export const BitmapLayerDemo = createLayerDemoClass({
   Layer: BitmapLayer,
   allowMissingData: true,
   props: {
-    bounds: [-122.5190, 37.7045, -122.355, 37.829],
+    bounds: [-122.519, 37.7045, -122.355, 37.829],
     image: `${DATA_URI}/sf-districts.png`
   }
 });
