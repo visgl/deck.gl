@@ -2,8 +2,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL, {AmbientLight, DirectionalLight, LightingEffect} from 'deck.gl';
-import {PhongMaterial, Texture2D} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
+import {PhongMaterial} from '@luma.gl/core';
 
 import ShadowPolygonLayer from './shadow-polygon-layer';
 import ShadowPass from './shadow-pass';
@@ -58,19 +57,8 @@ export class App extends Component {
   }
 
   _onWebGLInitialized(gl) {
-    const shadowMap = new Texture2D(gl, {
-      width: 1,
-      height: 1,
-      parameters: {
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-        [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-      }
-    });
-    this.setState({shadowMap});
-
-    this._shadowPass = new ShadowPass(gl, {target: shadowMap});
+    this._shadowPass = new ShadowPass(gl);
+    this.setState({shadowMap: this._shadowPass.shadowMap});
   }
 
   _onBeforeRender({gl}) {
@@ -95,6 +83,7 @@ export class App extends Component {
 
   _renderLayers() {
     const {data = DATA_URL} = this.props;
+    // TODO: shadowMap should be populated by ShaddowEffect
     const {shadowMap} = this.state;
 
     return [
