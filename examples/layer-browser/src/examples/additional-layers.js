@@ -11,37 +11,25 @@ import {
 import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
-import {CylinderGeometry} from '@luma.gl/core';
+// import {CylinderGeometry} from '@luma.gl/core';
 import {registerLoaders} from '@loaders.gl/core';
+import {PLYLoader} from '@loaders.gl/ply';
 import {GLBScenegraphLoader, GLTFScenegraphLoader} from '@luma.gl/addons';
 
 import * as dataSamples from '../data-samples';
 
-registerLoaders([GLBScenegraphLoader, GLTFScenegraphLoader]);
+registerLoaders([GLBScenegraphLoader, GLTFScenegraphLoader, PLYLoader]);
 
 const SimpleMeshLayerExample = {
   layer: SimpleMeshLayer,
   props: {
     id: 'mesh-layer',
     data: dataSamples.points,
-    texture: 'data/texture.png',
-    mesh: new Promise(resolve => {
-      resolve(
-        new CylinderGeometry({
-          radius: 1,
-          topRadius: 1,
-          bottomRadius: 1,
-          topCap: true,
-          bottomCap: true,
-          height: 5,
-          nradial: 20,
-          nvertical: 1
-        })
-      );
-    }),
+    mesh:
+      'https://raw.githubusercontent.com/uber-web/loaders.gl/e8e7f724cc1fc1d5882125b13e672e44e5ada14e/modules/ply/test/data/cube_att.ply',
     sizeScale: 40,
     getPosition: d => d.COORDINATES,
-    getColor: d => [0, d.RACKS * 50, d.SPACES * 20],
+    getColor: d => [Math.random() * 255, Math.random() * 255, Math.random() * 255],
     getTransformMatrix: d => [
       Math.random() * 4 - 2,
       Math.random() * 4 - 2,
