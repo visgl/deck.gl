@@ -108,6 +108,9 @@ const defaultProps = {
     depthFunc: GL.LEQUAL
   },
   fp64: false,
+  // NOTE(Tarek): Quick and dirty wireframe. Just draws
+  // the same mesh with LINE_STRIPS. Won't follow edges
+  // of the original mesh.
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
