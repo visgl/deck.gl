@@ -4,6 +4,7 @@ import {DATA_URI} from '../../constants/defaults';
 import {
   COORDINATE_SYSTEM,
   ArcLayer,
+  BitmapLayer,
   ColumnLayer,
   GeoJsonLayer,
   IconLayer,
@@ -183,5 +184,14 @@ export const TextLayerDemo = createLayerDemoClass({
     getAngle: 0,
     getTextAnchor: 'middle',
     getAlignmentBaseline: 'center'
+  }
+});
+
+export const BitmapLayerDemo = createLayerDemoClass({
+  Layer: BitmapLayer,
+  allowMissingData: true,
+  props: {
+    bounds: [-122.5190, 37.7045, -122.355, 37.829],
+    image: `${DATA_URI}/sf-districts.png`
   }
 });

@@ -498,8 +498,8 @@ const BitmapLayerExample = {
   layer: BitmapLayer,
   props: {
     id: 'bitmap-layer',
-    image: 'data/radar.gif',
-    bounds: [-80.425, 37.936, -71.516, 46.437]
+    image: 'data/sf-districts.png',
+    bounds: [-122.5190, 37.7045, -122.355, 37.829]
   }
 };
 

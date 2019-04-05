@@ -1,3 +1,5 @@
+<!-- INJECT:"BitmapLayerDemo" -->
+
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
@@ -15,16 +17,8 @@ const App = ({data, viewport}) => {
 
   const layer = new BitmapLayer({
     id: 'bitmap-layer',
-    bitmap: 'https://docs.mapbox.com/mapbox-gl-js/assets/radar.gif',
-    bounds: [
-      [-71.516, 37.936],
-      [-80.425, 37.936],
-      [-80.425, 46.437],
-      [-71.516, 46.437]
-    ],
-    desaturate: 0,
-    transparentColor: [0, 0, 0, 0],
-    tintColor: [255, 255, 255]
+    bounds: [-122.5190, 37.7045, -122.355, 37.829],
+    image: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/sf-districts.png'
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
