@@ -47,16 +47,7 @@ export function createDeckInstance(map, overlay, deck) {
 }
 
 function createDeckCanvas(overlay) {
-  // google maps places overlays in a container anchored at the map center.
-  // the container CSS is manipulated during dragging,
-  // making it difficult for our canvas to sync with the map.
-  // As a hack, we find that container and append our canvas as its sibling.
-  let container = overlay.getPanes().overlayLayer;
-  while (container && container.style.left !== '50%') {
-    container = container.offsetParent;
-  }
-  container = container.offsetParent;
-
+  const container = overlay.getPanes().overlayLayer;
   const deckCanvas = document.createElement('canvas');
   Object.assign(deckCanvas.style, {
     // map container position is always non-static
@@ -64,9 +55,7 @@ function createDeckCanvas(overlay) {
     pointerEvents: 'none',
     left: 0,
     top: 0,
-    zIndex: 1,
-    width: '100%',
-    height: '100%'
+    zIndex: 1
   });
 
   container.appendChild(deckCanvas);
@@ -109,6 +98,13 @@ export function getViewState(map, overlay) {
   const topRight = projection.fromLatLngToDivPixel(ne);
   const bottomLeft = projection.fromLatLngToDivPixel(sw);
 
+  // google maps places overlays in a container anchored at the map center.
+  // the container CSS is manipulated during dragging.
+  // We need to update left/top of the deck canvas to match the base map.
+  const nwContainerPx = new google.maps.Point(0, 0);
+  const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
+  const nwDivPx = projection.fromLatLngToDivPixel(nw);
+
   // Compute fractional zoom.
   const scale = (topRight.x - bottomLeft.x) / width;
   const zoom = Math.log2(scale) + map.getZoom() - 1;
@@ -120,6 +116,10 @@ export function getViewState(map, overlay) {
   const longitude = centerContainer.lng();
 
   return {
+    width,
+    height,
+    left: nwDivPx.x,
+    top: nwDivPx.y,
     zoom,
     pitch: map.getTilt(),
     latitude,
