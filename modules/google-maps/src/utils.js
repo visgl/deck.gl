@@ -51,11 +51,7 @@ function createDeckCanvas(overlay) {
   const deckCanvas = document.createElement('canvas');
   Object.assign(deckCanvas.style, {
     // map container position is always non-static
-    position: 'absolute',
-    pointerEvents: 'none',
-    left: 0,
-    top: 0,
-    zIndex: 1
+    position: 'absolute'
   });
 
   container.appendChild(deckCanvas);
