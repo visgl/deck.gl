@@ -24,7 +24,7 @@ import {Layer} from '@deck.gl/core';
 import {fp64, ScenegraphNode, log} from '@luma.gl/core';
 import {loadFile} from '@loaders.gl/core';
 
-import {getMatrixAttributes} from '../utils/matrix';
+import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
@@ -76,7 +76,7 @@ export default class ScenegraphLayer extends Layer {
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
       },
-      instanceModelMatrix: getMatrixAttributes(this)
+      instanceModelMatrix: MATRIX_ATTRIBUTES
     });
   }
 
