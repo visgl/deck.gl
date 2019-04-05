@@ -34,7 +34,8 @@ test('PickLayersPass#drawPickingBuffer', t => {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     pickingFBO,
-    deviceRect: {x: 0, y: 0, width: 100, height: 100}
+    deviceRect: {x: 0, y: 0, width: 100, height: 100},
+    effectProps: {lightSources: {}}
   });
 
   const subLayers = layer.getSubLayers();

@@ -286,6 +286,9 @@ export default class DeckPicker {
     }
 
     const pickingFBO = this.pickingFBO;
+    // turn off lighting by adding empty light source object
+    // lights shader module relies on the `lightSources` to turn on/off lighting
+    const effectProps = {lightSources: {}};
 
     this.pickLayersPass.render({
       layers,
@@ -293,7 +296,8 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
-      redrawReason
+      redrawReason,
+      effectProps
     });
 
     // Read from an already rendered picking buffer

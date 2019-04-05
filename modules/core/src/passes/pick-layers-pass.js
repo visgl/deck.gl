@@ -18,9 +18,9 @@ export default class PickLayersPass extends LayersPass {
     viewports,
     onViewportActive,
     pickingFBO,
+    effectProps,
     deviceRect: {x, y, width, height},
-    redrawReason = '',
-    effectProps = {lightSources: {}}
+    redrawReason = ''
   }) {
     const gl = this.gl;
     // Make sure we clear scissor test and fbo bindings in case of exceptions
