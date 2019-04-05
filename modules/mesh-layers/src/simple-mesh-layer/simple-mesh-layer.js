@@ -29,7 +29,7 @@ import {loadImage} from '@loaders.gl/core';
 import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
-import {getMatrixAttributes} from '../utils/matrix';
+import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
 import vs from './simple-mesh-layer-vertex.glsl';
 import fs from './simple-mesh-layer-fragment.glsl';
@@ -150,7 +150,7 @@ export default class SimpleMeshLayer extends Layer {
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
-      instanceModelMatrix: getMatrixAttributes(this)
+      instanceModelMatrix: MATRIX_ATTRIBUTES
     });
 
     this.setState({

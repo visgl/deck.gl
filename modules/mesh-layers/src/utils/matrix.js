@@ -48,61 +48,57 @@ function getMat3FromMat4(mat4) {
   return mat4.subarray(0, 9);
 }
 
-function calculateModelMatrices(layer, attribute) {
-  const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = layer.props;
+export const MATRIX_ATTRIBUTES = {
+  size: 12,
+  accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
+  shaderAttributes: {
+    instanceModelMatrix__LOCATION_0: {
+      size: 3,
+      stride: 48,
+      offset: 0
+    },
+    instanceModelMatrix__LOCATION_1: {
+      size: 3,
+      stride: 48,
+      offset: 12
+    },
+    instanceModelMatrix__LOCATION_2: {
+      size: 3,
+      stride: 48,
+      offset: 24
+    },
+    instanceTranslation: {
+      size: 3,
+      stride: 48,
+      offset: 36
+    }
+  },
 
-  const constantMatrix = Array.isArray(getTransformMatrix);
-  const constantScale = Array.isArray(getScale);
-  const constantOrientation = Array.isArray(getOrientation);
-  const constantTranslation = Array.isArray(getTranslation);
+  update(attribute) {
+    // NOTE(Tarek): "this" will be bound to a layer!
+    const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = this.props;
 
-  const hasMatrix = getTransformMatrix && (constantMatrix || Boolean(getTransformMatrix(data[0])));
+    const constantMatrix = Array.isArray(getTransformMatrix);
+    const constantScale = Array.isArray(getScale);
+    const constantOrientation = Array.isArray(getOrientation);
+    const constantTranslation = Array.isArray(getTranslation);
 
-  if (hasMatrix) {
-    attribute.constant = constantMatrix;
-  } else {
-    attribute.constant = constantOrientation && constantScale && constantTranslation;
-  }
-
-  const instanceModelMatrixData = attribute.value;
-
-  if (attribute.constant) {
-    let matrix;
+    const hasMatrix =
+      getTransformMatrix && (constantMatrix || Boolean(getTransformMatrix(data[0])));
 
     if (hasMatrix) {
-      modelMatrix.set(getTransformMatrix);
-      modelTranslation[0] = modelMatrix[12];
-      modelTranslation[1] = modelMatrix[13];
-      modelTranslation[2] = modelMatrix[14];
-      matrix = getMat3FromMat4(modelMatrix);
+      attribute.constant = constantMatrix;
     } else {
-      matrix = linearTransform;
-
-      const orientation = getOrientation;
-      const scale = getScale;
-
-      calculateTransformMatrix(matrix, orientation, scale);
-      modelTranslation.set(getTranslation);
+      attribute.constant = constantOrientation && constantScale && constantTranslation;
     }
 
-    const valueMatrix = new Float32Array(matrix);
-    const valueTranslation = new Float32Array(modelTranslation);
-    const shaderAttributes = attribute.userData.shaderAttributes;
-    shaderAttributes.instanceModelMatrix__LOCATION_0.value = valueMatrix.subarray(0, 3);
-    shaderAttributes.instanceModelMatrix__LOCATION_1.value = valueMatrix.subarray(3, 6);
-    shaderAttributes.instanceModelMatrix__LOCATION_2.value = valueMatrix.subarray(6, 9);
-    shaderAttributes.instanceTranslation.value = valueTranslation;
-  } else {
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
-    for (const object of iterable) {
-      objectInfo.index++;
+    const instanceModelMatrixData = attribute.value;
+
+    if (attribute.constant) {
       let matrix;
 
       if (hasMatrix) {
-        modelMatrix.set(
-          constantMatrix ? getTransformMatrix : getTransformMatrix(object, objectInfo)
-        );
+        modelMatrix.set(getTransformMatrix);
         modelTranslation[0] = modelMatrix[12];
         modelTranslation[1] = modelMatrix[13];
         modelTranslation[2] = modelMatrix[14];
@@ -110,61 +106,62 @@ function calculateModelMatrices(layer, attribute) {
       } else {
         matrix = linearTransform;
 
-        const orientation = constantOrientation
-          ? getOrientation
-          : getOrientation(object, objectInfo);
-        const scale = constantScale ? getScale : getScale(object, objectInfo);
+        const orientation = getOrientation;
+        const scale = getScale;
 
         calculateTransformMatrix(matrix, orientation, scale);
-        modelTranslation.set(
-          constantTranslation ? getTranslation : getTranslation(object, objectInfo)
-        );
+        modelTranslation.set(getTranslation);
       }
 
-      instanceModelMatrixData[i++] = matrix[0];
-      instanceModelMatrixData[i++] = matrix[1];
-      instanceModelMatrixData[i++] = matrix[2];
-      instanceModelMatrixData[i++] = matrix[3];
-      instanceModelMatrixData[i++] = matrix[4];
-      instanceModelMatrixData[i++] = matrix[5];
-      instanceModelMatrixData[i++] = matrix[6];
-      instanceModelMatrixData[i++] = matrix[7];
-      instanceModelMatrixData[i++] = matrix[8];
-      instanceModelMatrixData[i++] = modelTranslation[0];
-      instanceModelMatrixData[i++] = modelTranslation[1];
-      instanceModelMatrixData[i++] = modelTranslation[2];
+      const valueMatrix = new Float32Array(matrix);
+      const valueTranslation = new Float32Array(modelTranslation);
+      const shaderAttributes = attribute.userData.shaderAttributes;
+      shaderAttributes.instanceModelMatrix__LOCATION_0.value = valueMatrix.subarray(0, 3);
+      shaderAttributes.instanceModelMatrix__LOCATION_1.value = valueMatrix.subarray(3, 6);
+      shaderAttributes.instanceModelMatrix__LOCATION_2.value = valueMatrix.subarray(6, 9);
+      shaderAttributes.instanceTranslation.value = valueTranslation;
+    } else {
+      let i = 0;
+      const {iterable, objectInfo} = createIterable(data);
+      for (const object of iterable) {
+        objectInfo.index++;
+        let matrix;
+
+        if (hasMatrix) {
+          modelMatrix.set(
+            constantMatrix ? getTransformMatrix : getTransformMatrix(object, objectInfo)
+          );
+          modelTranslation[0] = modelMatrix[12];
+          modelTranslation[1] = modelMatrix[13];
+          modelTranslation[2] = modelMatrix[14];
+          matrix = getMat3FromMat4(modelMatrix);
+        } else {
+          matrix = linearTransform;
+
+          const orientation = constantOrientation
+            ? getOrientation
+            : getOrientation(object, objectInfo);
+          const scale = constantScale ? getScale : getScale(object, objectInfo);
+
+          calculateTransformMatrix(matrix, orientation, scale);
+          modelTranslation.set(
+            constantTranslation ? getTranslation : getTranslation(object, objectInfo)
+          );
+        }
+
+        instanceModelMatrixData[i++] = matrix[0];
+        instanceModelMatrixData[i++] = matrix[1];
+        instanceModelMatrixData[i++] = matrix[2];
+        instanceModelMatrixData[i++] = matrix[3];
+        instanceModelMatrixData[i++] = matrix[4];
+        instanceModelMatrixData[i++] = matrix[5];
+        instanceModelMatrixData[i++] = matrix[6];
+        instanceModelMatrixData[i++] = matrix[7];
+        instanceModelMatrixData[i++] = matrix[8];
+        instanceModelMatrixData[i++] = modelTranslation[0];
+        instanceModelMatrixData[i++] = modelTranslation[1];
+        instanceModelMatrixData[i++] = modelTranslation[2];
+      }
     }
   }
-}
-
-export function getMatrixAttributes(layer) {
-  return {
-    size: 12,
-    accessor: ['getOrientation', 'getScale', 'getTranslation', 'getTransformMatrix'],
-    shaderAttributes: {
-      instanceModelMatrix__LOCATION_0: {
-        size: 3,
-        stride: 48,
-        offset: 0
-      },
-      instanceModelMatrix__LOCATION_1: {
-        size: 3,
-        stride: 48,
-        offset: 12
-      },
-      instanceModelMatrix__LOCATION_2: {
-        size: 3,
-        stride: 48,
-        offset: 24
-      },
-      instanceTranslation: {
-        size: 3,
-        stride: 48,
-        offset: 36
-      }
-    },
-    update: function updater(attribute) {
-      calculateModelMatrices(layer, attribute);
-    }
-  };
-}
+};
