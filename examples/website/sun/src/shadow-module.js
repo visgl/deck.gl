@@ -34,7 +34,7 @@ const vec4 bitMask = vec4(1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0,  0.0);
 float shadow_getShadowWeight(vec2 texCoords) {
   vec4 rgbaDepth = texture2D(shadow_shadowMap, texCoords);
   float z = dot(rgbaDepth, bitUnpackShift);
-  return smoothstep(0.0, 0.01, shadow_vPosition.z - z);
+  return smoothstep(0.001, 0.01, shadow_vPosition.z - z);
 }
 
 vec4 shadow_filterShadowColor(vec4 color) {

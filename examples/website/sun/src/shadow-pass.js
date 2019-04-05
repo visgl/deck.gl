@@ -1,11 +1,14 @@
 import LayersPass from '@deck.gl/core/src/passes/layers-pass';
-import {Framebuffer, Texture2D, withParameters} from '@luma.gl/core';
+import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
   constructor(gl) {
     super(gl);
 
+    // The shadowMap uniform will be set to this empty placeholder when we are drawing into
+    // the real shadow map texture
     this.dummyShadowMap = new Texture2D(gl, {width: 1, height: 1});
+    // The shadowMap texture
     this.shadowMap = new Texture2D(gl, {
       width: 1,
       height: 1,
@@ -21,7 +24,13 @@ export default class ShadowPass extends LayersPass {
       width: 1,
       height: 1,
       attachments: {
-        [gl.COLOR_ATTACHMENT0]: this.shadowMap
+        [gl.COLOR_ATTACHMENT0]: this.shadowMap,
+        // Depth attachment has to be specified for depth test to work
+        [gl.DEPTH_ATTACHMENT]: new Renderbuffer(gl, {
+          format: gl.DEPTH_COMPONENT16,
+          width: 1,
+          height: 1
+        })
       }
     });
     this.props.pixelRatio = 2;
@@ -35,6 +44,7 @@ export default class ShadowPass extends LayersPass {
       {
         framebuffer: target,
         depthRange: [0, 1],
+        depthTest: true,
         blend: false,
         clearColor: [1, 1, 1, 1]
       },
@@ -43,6 +53,7 @@ export default class ShadowPass extends LayersPass {
         const width = viewport.width * this.props.pixelRatio;
         const height = viewport.height * this.props.pixelRatio;
         if (width !== target.width || height !== target.height) {
+          // this.shadowMap.resize({width, height});
           target.resize({width, height});
         }
 
