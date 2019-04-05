@@ -25,7 +25,7 @@
 import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial} from '@luma.gl/core';
-import {loadImage} from '@loaders.gl/core';
+import {loadImage, loadFile} from '@loaders.gl/core';
 import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
@@ -73,8 +73,7 @@ function getTextureFromData(gl, data, opts) {
 
 function validateGeometryAttributes(attributes) {
   assert(
-    (attributes.positions && attributes.normals && attributes.texCoords) ||
-      (attributes.POSITION && attributes.NORMAL && attributes.TEXCOORD_0)
+    (attributes.positions && attributes.normals) || (attributes.POSITION && attributes.NORMAL)
   );
 }
 
@@ -83,9 +82,13 @@ function validateGeometryAttributes(attributes) {
  * @returns {Geometry} geometry
  */
 function getGeometry(data) {
-  if (data instanceof Geometry) {
+  if (data.attributes) {
     validateGeometryAttributes(data.attributes);
-    return data;
+    if (data instanceof Geometry) {
+      return data;
+    } else {
+      return new Geometry(data);
+    }
   } else if (data.positions || data.POSITION) {
     validateGeometryAttributes(data);
     return new Geometry({
@@ -99,6 +102,13 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
+  fetch: (url, {propName}) => {
+    if (propName === 'mesh') {
+      return loadFile(url);
+    }
+
+    return fetch(url).then(response => response.json());
+  },
   mesh: {value: null, type: 'object', async: true},
   texture: null,
   sizeScale: {type: 'number', value: 1, min: 0},

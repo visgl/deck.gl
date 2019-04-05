@@ -80,7 +80,9 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 ##### `mesh` (Geometry|Object|Promise)
 
 The geometry to render for each data object.
-Can be a luma.gl [Geometry](http://uber.github.io/luma.gl/#/documentation/api-reference/geometry) instance, or an object of attributes, or a `Promise` that resolves to one of the above.
+Can be a luma.gl [Geometry](http://uber.github.io/luma.gl/#/documentation/api-reference/geometry) instance, or an object of attributes, a `Promise` that resolves to one of the above,
+or a URL to a mesh description file in a format supported by [loaders.gl](https://github.com/uber-web/loaders.gl) (the appropriate loader will have to be registered via the loaders.gl
+`registerLoaders` function for this usage).
 
 The following attributes are expected:
 
