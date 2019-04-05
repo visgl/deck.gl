@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@loaders.gl/core": ">=1.0.0-alpha.2",
+    "@loaders.gl/ply": ">=1.0.0-alpha.2",
     "@luma.gl/addons": "^7.0.0-beta",
     "@luma.gl/debug": "^7.0.0-alpha",
     "colorbrewer": "^1.0.0",
