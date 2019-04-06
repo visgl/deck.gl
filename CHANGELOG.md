@@ -19,6 +19,18 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.0 Prereleases
 
+#### deck.gl [v7.0.0-beta.3] - Apr 5 2019
+
+- fix project normal (#2910)
+- disable lighting in picking pass (#2908)
+- Add google maps submodule (#2899)
+- Loader.gl mesh loading (#2909)
+- SimpleMeshLayer wireframe (#2907)
+- Fix stale layer bug when using matrix attributes (#2901)
+- Fix ScenegraphLayer attribute problem (#2893)
+- use light type instead of constructor name (#2896)
+- ScenegraphLayer delete() Scenegraph (#2887)
+
 #### deck.gl [v7.0.0-beta.2] - Apr 1 2019
 
 - ScenegraphLayer: Final round of updates
