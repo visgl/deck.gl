@@ -8,5 +8,5 @@ Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
 with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
 
 Commands:
-* `npm start` is the development target, and will serves the app on port 3000.
-* `npm run build` is the production target, to create the final bundle.
+* `npm start` is the development target, to serves the app and hot reload.
+* `npm run build` is the production target, to create the final bundle and write to disk.
