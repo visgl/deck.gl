@@ -75,7 +75,8 @@ vec4 project_size(vec4 meters) {
 //
 vec3 project_normal(vec3 vector) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT ||
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS ||
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
     return normalize(vector * project_uCommonUnitsPerWorldUnit);
   }
   // Apply model matrix
