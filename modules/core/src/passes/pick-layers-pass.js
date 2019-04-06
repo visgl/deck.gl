@@ -18,6 +18,7 @@ export default class PickLayersPass extends LayersPass {
     viewports,
     onViewportActive,
     pickingFBO,
+    effectProps,
     deviceRect: {x, y, width, height},
     redrawReason = ''
   }) {
@@ -42,6 +43,7 @@ export default class PickLayersPass extends LayersPass {
           onViewportActive,
           pass: 'picking',
           redrawReason,
+          effectProps,
           parameters: {
             blend: true,
             blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
@@ -64,12 +66,14 @@ export default class PickLayersPass extends LayersPass {
     return shouldDrawLayer;
   }
 
-  getModuleParameters(layer) {
+  getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
       devicePixelRatio: this.props.pixelRatio
     });
+
+    Object.assign(moduleParameters, effectProps);
     return moduleParameters;
   }
 
