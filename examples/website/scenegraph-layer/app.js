@@ -3,8 +3,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 
 import {StaticMap} from 'react-map-gl';
-import DeckGL from '@deck.gl/react';
-import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import DeckGL, {ScenegraphLayer} from 'deck.gl';
 
 import {GLBScenegraphLoader, GLTFScenegraphLoader} from '@luma.gl/addons';
 import {registerLoaders} from '@loaders.gl/core';

@@ -24,7 +24,6 @@ import arcVertex from './arc-brushing-layer-vertex.glsl';
 import arcFragment from './arc-brushing-layer-fragment.glsl';
 
 const defaultProps = {
-  ...ArcLayer.defaultProps,
   // show arc if source is in brush
   brushSource: true,
   // show arc if target is in brush
