@@ -2,18 +2,34 @@
   <img src="https://cdn.pbrd.co/images/vAmSmehU.png" />
 </div>
 
-## Hello World: Browserify
+## Example: Use deck.gl with react-map-gl and Browserify
 
 Uses the [browserify](https://github.com/substack/node-browserify) JavaScript
 bundler and applies the [babelify](https://github.com/babel/babelify) "transform",
 which runs the babel transpiler on the source code, transpiling JSX and ES6
 to ES5 JavaScript.
 
+
+## Usage
+
+To run this example, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
+
+```bash
+export MapboxAccessToken=<mapbox_access_token>
+```
+
+Or set `MAPBOX_TOKEN` directly in `app.js`.
+
+Other options can be found at [using with Mapbox GL](../../../../docs/get-started/using-with-mapbox-gl.md).
+
+To install dependencies:
+
+```bash
+npm install
+# or
+yarn
+```
+
 Commands:
-* `yarn` or `npm install` installs the dependencies.
-* `npm start` is the development target. This builds and serves the app using
-  [budo](https://github.com/mattdesl/budo), which hot reloads when you save
-  changes to the source code.
-* `npm run build` is the build target. It builds a single `dist-bundle.js`
-  JavaScript file containing the transpiled version of your code plus code
-  from all dependent modules.
+* `npm start` is the development target, to serves the app and hot reload.
+* `npm run build` is the production target, to create the final bundle and write to disk.

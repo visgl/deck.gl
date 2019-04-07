@@ -5,7 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "NODE_ENV=production webpack --env.prod=true"
+    "build": "webpack -p"
   },
   "dependencies": {
     "deck.gl": "^7.0.0-beta",

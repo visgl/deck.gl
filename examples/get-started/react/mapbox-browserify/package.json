@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "budo ./app.js --open -- -t babelify -t envify",
-    "build": "browserify ./app.js -o dist-bundle.js -t babelify -t envify"
+    "build": "browserify ./app.js -o dist/app.js -t babelify -t envify"
   },
   "dependencies": {
     "deck.gl": "^7.0.0-beta",
