@@ -18,29 +18,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {ScatterplotLayer} from 'deck.gl';
-
-import scatterplotVertex from './scatterplot-brushing-layer-vertex.glsl';
-import scatterplotFragment from './scatterplot-brushing-layer-fragment.glsl';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import brushingShaderModule from './brushing-shader-module';
 
 const defaultProps = {
   enableBrushing: true,
-  // show point only if source is in brush
+  // show point only if target is in brush
   brushTarget: false,
   // brush radius in meters
   brushRadius: 100000,
-  mousePosition: [0, 0],
+  mousePosition: null,
   getTargetPosition: d => d.target,
   radiusMinPixels: 0
 };
 
 export default class ScatterplotBrushingLayer extends ScatterplotLayer {
   getShaders() {
-    // get customized shaders
-    return Object.assign({}, super.getShaders(), {
-      vs: scatterplotVertex,
-      fs: scatterplotFragment
-    });
+    const shaders = super.getShaders();
+
+    shaders.modules.push(brushingShaderModule);
+
+    shaders.inject = {
+      'vs:#decl': `
+attribute vec3 instanceTargetPositions;
+
+uniform bool enableBrushing;
+uniform bool brushTarget;
+`,
+      'vs:#main-end': `
+  if (enableBrushing) {
+    brushing_setVisible(brushTarget?
+      brushing_isPointInRange(instanceTargetPositions.xy) :
+      brushing_isPointInRange(instancePositions.xy)
+    );
+  }
+`,
+      'fs:#main-start': `
+  brushing_filter();
+`
+    };
+
+    return shaders;
   }
 
   // add instanceSourcePositions as attribute
@@ -52,8 +70,7 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
     this.state.attributeManager.addInstanced({
       instanceTargetPositions: {
         size: 3,
-        accessor: 'getTargetPosition',
-        update: this.calculateInstanceTargetPositions
+        accessor: 'getTargetPosition'
       }
     });
   }
@@ -62,28 +79,10 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
     // add uniforms
     const uniforms = Object.assign({}, opts.uniforms, {
       brushTarget: this.props.brushTarget,
-      brushRadius: this.props.brushRadius,
-      mousePos: this.props.mousePosition
-        ? new Float32Array(this.unproject(this.props.mousePosition))
-        : defaultProps.mousePosition,
-      enableBrushing: Boolean(this.props.enableBrushing)
+      enableBrushing: this.props.enableBrushing
     });
     const newOpts = Object.assign({}, opts, {uniforms});
     super.draw(newOpts);
-  }
-
-  // calculate instanceSourcePositions
-  calculateInstanceTargetPositions(attribute) {
-    const {data, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let point;
-    for (let i = 0; i < data.length; i++) {
-      point = data[i];
-      const position = getTargetPosition(point) || [0, 0, 0];
-      value[i * size + 0] = position[0];
-      value[i * size + 1] = position[1];
-      value[i * size + 2] = position[2];
-    }
   }
 }
 
