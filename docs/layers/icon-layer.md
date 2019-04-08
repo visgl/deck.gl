@@ -196,7 +196,7 @@ The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. Whe
 
 ##### `sizeMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
 The minimum size in pixels.
 

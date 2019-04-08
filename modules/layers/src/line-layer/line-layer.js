@@ -38,7 +38,7 @@ const defaultProps = {
 
   widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
-  widthMinPixels: {type: 'number', value: 1, min: 0},
+  widthMinPixels: {type: 'number', value: 0, min: 0},
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
   // Deprecated, remove in v8
