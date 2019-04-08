@@ -24,15 +24,17 @@
 
 import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial} from '@luma.gl/core';
+import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial, isWebGL2} from '@luma.gl/core';
 import {loadImage, loadFile} from '@loaders.gl/core';
 import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
-import vs from './simple-mesh-layer-vertex.glsl';
-import fs from './simple-mesh-layer-fragment.glsl';
+import vs1 from './simple-mesh-layer-vertex.glsl';
+import fs1 from './simple-mesh-layer-fragment.glsl';
+import vs3 from './simple-mesh-layer-vertex.glsl3';
+import fs3 from './simple-mesh-layer-fragment.glsl3';
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -73,7 +75,8 @@ function getTextureFromData(gl, data, opts) {
 
 function validateGeometryAttributes(attributes) {
   assert(
-    (attributes.positions && attributes.normals) || (attributes.POSITION && attributes.NORMAL)
+    attributes.positions || attributes.POSITION,
+    'SimpleMeshLayer requires "postions" or "POSITION" attribute in mesh property.'
   );
 }
 
@@ -141,6 +144,10 @@ const defaultProps = {
 export default class SimpleMeshLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
+    const gl2 = isWebGL2(this.context.gl);
+    const vs = gl2 ? vs3 : vs1;
+    const fs = gl2 ? fs3 : fs1;
+
     return {vs, fs, modules: [projectModule, 'phong-lighting', 'picking']};
   }
 
@@ -176,6 +183,8 @@ export default class SimpleMeshLayer extends Layer {
         height: 1
       })
     });
+
+    this.context.gl.getExtension('OES_standard_derivatives');
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -187,6 +196,9 @@ export default class SimpleMeshLayer extends Layer {
       }
       if (props.mesh) {
         this.setState({model: this.getModel(props.mesh)});
+        this.setState({
+          hasNormals: Boolean(props.mesh.attributes.NORMAL || props.mesh.attributes.normals)
+        });
       }
       this.getAttributeManager().invalidateAll();
     }
@@ -209,7 +221,8 @@ export default class SimpleMeshLayer extends Layer {
 
     this.state.model.draw({
       uniforms: Object.assign({}, uniforms, {
-        sizeScale
+        sizeScale,
+        flatShade: !this.state.hasNormals
       })
     });
   }
