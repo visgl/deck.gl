@@ -3,13 +3,7 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {
-  COORDINATE_SYSTEM,
-  MapView,
-  ScatterplotLayer,
-  PolygonLayer,
-  MapController
-} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, PolygonLayer, MapController} from 'deck.gl';
 
 import DataGenerator from './data-generator';
 
@@ -83,14 +77,12 @@ class Root extends Component {
     return (
       <div>
         <DeckGL
-          views={new MapView({id: 'map'})}
           controller={MapController}
           viewState={viewState}
           onViewStateChange={evt => this.setState({viewState: evt.viewState})}
           layers={layers}
         >
           <StaticMap
-            viewId="map"
             {...viewState}
             mapStyle="mapbox://styles/mapbox/light-v9"
             mapboxApiAccessToken={MAPBOX_TOKEN}
