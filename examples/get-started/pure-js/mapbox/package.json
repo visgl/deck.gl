@@ -1,16 +1,16 @@
 {
-  "name": "pure-js-google-maps",
+  "name": "pure-js-mapbox",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "NODE_ENV=production webpack --env.prod=true"
+    "build": "webpack -p"
   },
   "dependencies": {
     "@deck.gl/core": "^7.0.0-beta",
-    "@deck.gl/google-maps": "^7.0.0-beta",
-    "@deck.gl/layers": "^7.0.0-beta"
+    "@deck.gl/layers": "^7.0.0-beta",
+    "mapbox-gl": "~0.53.0"
   },
   "devDependencies": {
     "webpack": "^4.20.2",
