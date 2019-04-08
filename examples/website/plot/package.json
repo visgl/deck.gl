@@ -4,12 +4,11 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "start-es6": "webpack-dev-server --env.es6 --progress --hot --open"
+    "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
     "d3-scale": "^1.0.6",
-    "deck.gl": "^7.0.0-alpha",
+    "deck.gl": "^7.0.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"
   },

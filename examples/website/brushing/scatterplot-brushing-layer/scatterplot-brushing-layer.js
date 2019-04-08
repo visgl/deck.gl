@@ -24,7 +24,6 @@ import scatterplotVertex from './scatterplot-brushing-layer-vertex.glsl';
 import scatterplotFragment from './scatterplot-brushing-layer-fragment.glsl';
 
 const defaultProps = {
-  ...ScatterplotLayer.defaultProps,
   enableBrushing: true,
   // show point only if source is in brush
   brushTarget: false,

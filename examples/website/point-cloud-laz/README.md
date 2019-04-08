@@ -1,4 +1,4 @@
-This is a standalone version of the [OpenStreetMap](https://www.openstreetmap.org/) example using TileLayer and BitmapLayer
+This is a minimal standalone version of the Graph Explorer example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -16,4 +16,5 @@ npm start
 
 ### Data Source
 
-The sample tiles are loaded from [OpenStreetMap](https://www.openstreetmap.org).
+The sample data is from [kaarta.com](https://kaarta.com)
+
