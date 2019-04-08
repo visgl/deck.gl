@@ -213,17 +213,17 @@ export default class SolidPolygonLayer extends Layer {
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
         sideModel.setDrawMode(GL.LINE_STRIP);
-        sideModel.render({isWireframe: true});
+        sideModel.setUniforms({isWireframe: true}).draw();
       }
       if (filled) {
         sideModel.setDrawMode(GL.TRIANGLE_FAN);
-        sideModel.render({isWireframe: false});
+        sideModel.setUniforms({isWireframe: false}).draw();
       }
     }
 
     if (topModel) {
       topModel.setVertexCount(polygonTesselator.get('indices').length);
-      topModel.render(renderUniforms);
+      topModel.setUniforms(renderUniforms).draw();
     }
   }
 

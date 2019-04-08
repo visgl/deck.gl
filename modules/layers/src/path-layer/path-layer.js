@@ -158,16 +158,18 @@ export default class PathLayer extends Layer {
 
     const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        jointType: Number(rounded),
-        alignMode: Number(dashJustified),
-        widthScale: widthScale * widthMultiplier,
-        miterLimit,
-        widthMinPixels,
-        widthMaxPixels
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          jointType: Number(rounded),
+          alignMode: Number(dashJustified),
+          widthScale: widthScale * widthMultiplier,
+          miterLimit,
+          widthMinPixels,
+          widthMaxPixels
+        })
+      )
+      .draw();
   }
 
   _getModel(gl) {

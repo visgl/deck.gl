@@ -99,11 +99,13 @@ export default class PointCloudLayer extends Layer {
 
     const sizeMultiplier = sizeUnits === 'meters' ? viewport.distanceScales.pixelsPerMeter[2] : 1;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        radiusPixels: pointSize * sizeMultiplier
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          radiusPixels: pointSize * sizeMultiplier
+        })
+      )
+      .draw();
   }
 
   _getModel(gl) {
