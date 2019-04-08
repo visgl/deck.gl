@@ -2,35 +2,29 @@ This is a minimal standalone version of the 3DHeatmap example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
-- Copy the content of this folder to your project.
 
-- Install Package
+Copy the content of this folder to your project. 
+
+To see the base map, you need a [Mapbox access token](https://docs.mapbox.com/help/how-mapbox-works/access-tokens/). You can either set an environment variable:
+
+```bash
+export MapboxAccessToken=<mapbox_access_token>
 ```
+
+Or set `MAPBOX_TOKEN` directly in `app.js`.
+
+Other options can be found at [using with Mapbox GL](../../../docs/get-started/using-with-mapbox-gl.md).
+
+```bash
+# install dependencies
 npm install
-```
-
-- Delete last line in `webpack.config.js`
-```
-module.exports = require('../webpack.config.local')(module.exports);
-```
-
-- Add [Mapbox access token](https://www.mapbox.com/help/define-access-token/)
-by run this command in your terminal.
-
-```
-export MapboxAccessToken=<Your_Token>
-```
-
-or you can directly add it to `app.js`
-```
-// Set your mapbox token here
-const MAPBOX_TOKEN = <Your_Token>>;
-```
-- Start the app.
-```
+# or
+yarn
+# bundle and serve the app with webpack
 npm start
 ```
 
 ### Data format
+
 Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/3d-heatmap). To use your own data, checkout
 the [documentation of HexagonLayer](../../../docs/layers/hexagon-layer.md)

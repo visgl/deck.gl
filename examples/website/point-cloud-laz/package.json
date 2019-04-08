@@ -4,11 +4,7 @@
   "license": "MIT",
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
-    "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build-clean": "rm -rf dist && mkdir dist",
-    "build-script": "webpack -p",
-    "build-copy": "cp index.html dist",
-    "build": "npm run build-clean && npm run build-script && npm run build-copy"
+    "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
     "@loaders.gl/core": "^1.0.0-alpha.3",

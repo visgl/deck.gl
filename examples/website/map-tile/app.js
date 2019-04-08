@@ -33,9 +33,7 @@ export class App extends PureComponent {
       sourceLayer &&
       tile && (
         <div className="tooltip" style={{left: x, top: y}}>
-          <div className="tooltip-item">
-            tile: x: {tile.x}, y: {tile.y}, z: {tile.z}
-          </div>
+          tile: x: {tile.x}, y: {tile.y}, z: {tile.z}
         </div>
       )
     );

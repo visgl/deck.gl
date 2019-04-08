@@ -137,7 +137,7 @@ export class App extends Component {
         getTargetPosition: d => d.target,
         getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
         getTargetColor: d => (d.gain > 0 ? outFlowColors : inFlowColors)[d.quantile],
-        getStrokeWidth: strokeWidth
+        getWidth: strokeWidth
       })
     ];
   }
