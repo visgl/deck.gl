@@ -2,14 +2,13 @@
 // delete the local development overrides at the bottom of this file
 
 // avoid destructuring for older Node version support
-const resolve = require('path').resolve;
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app.js')
+    app: './app.js'
   },
 
   module: {
