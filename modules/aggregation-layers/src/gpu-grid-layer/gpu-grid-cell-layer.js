@@ -109,21 +109,23 @@ export default class GPUGridCellLayer extends Layer {
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
 
     maxCountBuffer.bind({target: GL.UNIFORM_BUFFER, index: AGGREGATION_DATA_UBO_INDEX});
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        cellSize,
-        extruded,
-        elevationScale,
-        coverage,
-        gridSize,
-        gridOrigin,
-        gridOriginLow,
-        gridOffset,
-        gridOffsetLow,
-        minColor,
-        maxColor
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          cellSize,
+          extruded,
+          elevationScale,
+          coverage,
+          gridSize,
+          gridOrigin,
+          gridOriginLow,
+          gridOffset,
+          gridOffsetLow,
+          minColor,
+          maxColor
+        })
+      )
+      .draw();
     maxCountBuffer.unbind({target: GL.UNIFORM_BUFFER, index: AGGREGATION_DATA_UBO_INDEX});
   }
 

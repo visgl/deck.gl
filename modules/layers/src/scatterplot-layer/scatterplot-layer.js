@@ -130,18 +130,20 @@ export default class ScatterplotLayer extends Layer {
     const widthMultiplier =
       lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        stroked: stroked ? 1 : 0,
-        filled,
-        radiusScale,
-        radiusMinPixels,
-        radiusMaxPixels,
-        lineWidthScale: lineWidthScale * widthMultiplier,
-        lineWidthMinPixels,
-        lineWidthMaxPixels
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          stroked: stroked ? 1 : 0,
+          filled,
+          radiusScale,
+          radiusMinPixels,
+          radiusMaxPixels,
+          lineWidthScale: lineWidthScale * widthMultiplier,
+          lineWidthMinPixels,
+          lineWidthMaxPixels
+        })
+      )
+      .draw();
   }
 
   _getModel(gl) {

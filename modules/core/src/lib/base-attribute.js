@@ -71,7 +71,7 @@ export default class BaseAttribute {
             Object.assign({}, opts, {
               id: this.id,
               target: this.target,
-              type: this.type
+              accessor: {type: this.type}
             })
           );
         this.buffer.setData({data: value});

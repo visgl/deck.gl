@@ -35,16 +35,18 @@ export default class GridCellLayer extends ColumnLayer {
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle} = this.props;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        radius: cellSize / 2,
-        angle,
-        offset,
-        extruded,
-        coverage,
-        elevationScale
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          radius: cellSize / 2,
+          angle,
+          offset,
+          extruded,
+          coverage,
+          elevationScale
+        })
+      )
+      .draw();
   }
 }
 
