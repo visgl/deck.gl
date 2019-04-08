@@ -154,16 +154,18 @@ export default class ColumnLayer extends Layer {
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        radius,
-        angle: (angle / 180) * Math.PI,
-        offset,
-        extruded,
-        coverage,
-        elevationScale
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          radius,
+          angle: (angle / 180) * Math.PI,
+          offset,
+          extruded,
+          coverage,
+          elevationScale
+        })
+      )
+      .draw();
   }
 
   calculateInstancePositions64xyLow(attribute) {

@@ -378,7 +378,7 @@ export default class AttributeManager {
       isIndexed: attribute.isIndexed || attribute.elements,
       size: (attribute.elements && 1) || attribute.size,
       value: attribute.value || null,
-      instanced: attribute.instanced || extraProps.instanced
+      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor
     };
 
     if (forceNoAlloc) {

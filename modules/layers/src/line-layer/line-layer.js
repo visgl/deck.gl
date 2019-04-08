@@ -107,13 +107,15 @@ export default class LineLayer extends Layer {
 
     const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        widthScale: widthScale * widthMultiplier,
-        widthMinPixels,
-        widthMaxPixels
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          widthScale: widthScale * widthMultiplier,
+          widthMinPixels,
+          widthMaxPixels
+        })
+      )
+      .draw();
   }
 
   _getModel(gl) {

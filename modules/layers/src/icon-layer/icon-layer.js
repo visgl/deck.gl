@@ -181,17 +181,19 @@ export default class IconLayer extends Layer {
 
     const iconsTexture = iconManager.getTexture();
     if (iconsTexture) {
-      this.state.model.render(
-        Object.assign({}, uniforms, {
-          iconsTexture,
-          iconsTextureDim: [iconsTexture.width, iconsTexture.height],
-          sizeScale:
-            sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
-          sizeMinPixels,
-          sizeMaxPixels,
-          billboard
-        })
-      );
+      this.state.model
+        .setUniforms(
+          Object.assign({}, uniforms, {
+            iconsTexture,
+            iconsTextureDim: [iconsTexture.width, iconsTexture.height],
+            sizeScale:
+              sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
+            sizeMinPixels,
+            sizeMaxPixels,
+            billboard
+          })
+        )
+        .draw();
     }
   }
 

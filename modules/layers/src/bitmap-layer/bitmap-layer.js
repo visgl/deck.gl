@@ -185,14 +185,16 @@ export default class BitmapLayer extends Layer {
     // // TODO fix zFighting
     // Render the image
     if (bitmapTexture && model) {
-      model.render(
-        Object.assign({}, uniforms, {
-          bitmapTexture,
-          desaturate,
-          transparentColor,
-          tintColor
-        })
-      );
+      model
+        .setUniforms(
+          Object.assign({}, uniforms, {
+            bitmapTexture,
+            desaturate,
+            transparentColor,
+            tintColor
+          })
+        )
+        .draw();
     }
   }
 
