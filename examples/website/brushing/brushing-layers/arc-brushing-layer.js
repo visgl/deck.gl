@@ -18,10 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {ArcLayer} from 'deck.gl';
-
-import arcVertex from './arc-brushing-layer-vertex.glsl';
-import arcFragment from './arc-brushing-layer-fragment.glsl';
+import {ArcLayer} from '@deck.gl/layers';
+import brushingShaderModule from './brushing-shader-module';
 
 const defaultProps = {
   // show arc if source is in brush
@@ -29,31 +27,41 @@ const defaultProps = {
   // show arc if target is in brush
   brushTarget: true,
   enableBrushing: true,
-  getStrokeWidth: d => d.strokeWidth,
   // brush radius in meters
   brushRadius: 100000,
-  mousePosition: [0, 0]
+  mousePosition: null
 };
 
 export default class ArcBrushingLayer extends ArcLayer {
   getShaders() {
-    // use customized shaders
-    return Object.assign({}, super.getShaders(), {
-      vs: arcVertex,
-      fs: arcFragment
-    });
+    const shaders = super.getShaders();
+
+    shaders.modules.push(brushingShaderModule);
+
+    shaders.inject = {
+      'vs:#decl': `
+uniform bool brushSource;
+uniform bool brushTarget;
+`,
+      'vs:#main-end': `
+  brushing_setVisible(
+    (brushSource && brushing_isPointInRange(instancePositions.xy)) ||
+    (brushTarget && brushing_isPointInRange(instancePositions.zw))
+  );
+`,
+      'fs:#main-end': `
+  gl_FragColor = brushing_filterBrushingColor(gl_FragColor);
+`
+    };
+
+    return shaders;
   }
 
   draw(opts) {
     // add uniforms
     const uniforms = Object.assign({}, opts.uniforms, {
       brushSource: this.props.brushSource,
-      brushTarget: this.props.brushTarget,
-      brushRadius: this.props.brushRadius,
-      mousePos: this.props.mousePosition
-        ? new Float32Array(this.unproject(this.props.mousePosition))
-        : defaultProps.mousePosition,
-      enableBrushing: this.props.enableBrushing
+      brushTarget: this.props.brushTarget
     });
     const newOpts = Object.assign({}, opts, {uniforms});
     super.draw(newOpts);
