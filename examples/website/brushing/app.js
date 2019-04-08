@@ -3,8 +3,8 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from 'deck.gl';
-import ArcBrushingLayer from './arc-brushing-layer/arc-brushing-layer';
-import ScatterplotBrushingLayer from './scatterplot-brushing-layer/scatterplot-brushing-layer';
+import ArcBrushingLayer from './brushing-layers/arc-brushing-layer';
+import ScatterplotBrushingLayer from './brushing-layers/scatterplot-brushing-layer';
 import {scaleLinear} from 'd3-scale';
 
 // Set your mapbox token here
@@ -225,7 +225,7 @@ export class App extends Component {
       new ArcBrushingLayer({
         id: 'arc',
         data: arcs,
-        getStrokeWidth: strokeWidth,
+        getWidth: strokeWidth,
         opacity,
         brushRadius,
         enableBrushing: startBrushing,
