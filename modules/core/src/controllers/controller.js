@@ -180,6 +180,10 @@ export default class Controller {
   }
   /* eslint-enable complexity, max-statements */
 
+  updateTransition(timestamp) {
+    this.transitionManager.updateTransition(timestamp);
+  }
+
   toggleEvents(eventNames, enabled) {
     if (this.eventManager) {
       eventNames.forEach(eventName => {

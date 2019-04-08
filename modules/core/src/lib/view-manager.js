@@ -77,6 +77,14 @@ export default class ViewManager {
     this._needsRedraw = this._needsRedraw || reason;
   }
 
+  updateViewStates(animationProps = {}) {
+    if ('time' in animationProps) {
+      for (const viewId in this.controllers) {
+        this.controllers[viewId].updateTransition(animationProps.time);
+      }
+    }
+  }
+
   /** Get a set of viewports for a given width and height
    * TODO - Intention is for deck.gl to autodeduce width and height and drop the need for props
    * @param rect (object, optional) - filter the viewports
