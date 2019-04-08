@@ -92,7 +92,7 @@ export function padBuffer({
   const fromData = fromState.getData({});
 
   const {size, constant} = toState;
-  const toData = constant ? toState.getValue : toState.getBuffer().getData({});
+  const toData = constant ? toState.getValue() : toState.getBuffer().getData({});
 
   const getMissingData = constant
     ? (i, chunk) => getData(toData, chunk)
