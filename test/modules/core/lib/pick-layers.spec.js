@@ -405,12 +405,8 @@ test(`pickingTest`, t => {
     for (const pickingMethod in pickingMethods) {
       for (const pickingCase of pickingMethods[pickingMethod]) {
         pickInfos = deck[pickingMethod](pickingCase.parameters);
-        t.ok(pickInfos, `${testCase.id}: ${pickingMethod} should return non-empty result)`);
-        if (!Array.isArray(pickInfos)) {
-          pickInfos = [pickInfos];
-        }
         t.equal(
-          pickInfos.filter(info => info.index >= 0).length,
+          !pickInfos ? 0 : !Array.isArray(pickInfos) ? 1 : pickInfos.length,
           pickingCase.results.count,
           `${testCase.id}: ${pickingMethod} should find expected number of objects`
         );

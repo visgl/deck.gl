@@ -215,17 +215,12 @@ export default class DeckPicker {
       }
     }
 
-    if (result.length === 0 && infos) {
-      // result should always contain something
-      result.push(infos.get(null));
-    }
-
     // reset only affected buffers
     Object.keys(affectedLayers).forEach(layerId =>
       layers[layerId].restorePickingColors(affectedLayers[layerId])
     );
 
-    return result;
+    return {result, emptyInfo: infos && infos.get(null)};
   }
 
   // Pick all objects within the given bounding box
