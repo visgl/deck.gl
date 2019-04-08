@@ -21,6 +21,7 @@
 const vs = `
   const float R_EARTH = 6371000.; // earth radius in km
 
+  uniform bool brushing_enabled;
   uniform vec2 brushing_mousePos;
   uniform float brushing_radius;
 
@@ -41,6 +42,9 @@ const vs = `
   }
 
   bool brushing_isPointInRange(vec2 position) {
+    if (!brushing_enabled) {
+      return true;
+    }
     return distanceBetweenLatLng(position, brushing_mousePos) <= brushing_radius;
   }
 
@@ -50,12 +54,15 @@ const vs = `
 `;
 
 const fs = `
+  uniform bool brushing_enabled;
+
   varying float brushing_hidden;
   
-  void brushing_filter() {
-    if (brushing_hidden > 0.5) {
+  vec4 brushing_filterBrushingColor(vec4 color) {
+    if (brushing_enabled && brushing_hidden > 0.5) {
       discard;
     }
+    return color;
   }
 `;
 
@@ -69,6 +76,7 @@ export default {
   getUniforms: (opts = INITIAL_MODULE_OPTIONS) => {
     if (opts.viewport) {
       return {
+        brushing_enabled: opts.enableBrushing,
         brushing_radius: opts.brushRadius,
         brushing_mousePos: opts.mousePosition ? opts.viewport.unproject(opts.mousePosition) : [0, 0]
       };

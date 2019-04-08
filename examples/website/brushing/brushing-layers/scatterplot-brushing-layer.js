@@ -42,19 +42,16 @@ export default class ScatterplotBrushingLayer extends ScatterplotLayer {
       'vs:#decl': `
 attribute vec3 instanceTargetPositions;
 
-uniform bool enableBrushing;
 uniform bool brushTarget;
 `,
       'vs:#main-end': `
-  if (enableBrushing) {
-    brushing_setVisible(brushTarget?
-      brushing_isPointInRange(instanceTargetPositions.xy) :
-      brushing_isPointInRange(instancePositions.xy)
-    );
-  }
+  brushing_setVisible(brushTarget?
+    brushing_isPointInRange(instanceTargetPositions.xy) :
+    brushing_isPointInRange(instancePositions.xy)
+  );
 `,
-      'fs:#main-start': `
-  brushing_filter();
+      'fs:#main-end': `
+  gl_FragColor = brushing_filterBrushingColor(gl_FragColor);
 `
     };
 
@@ -78,8 +75,7 @@ uniform bool brushTarget;
   draw(opts) {
     // add uniforms
     const uniforms = Object.assign({}, opts.uniforms, {
-      brushTarget: this.props.brushTarget,
-      enableBrushing: this.props.enableBrushing
+      brushTarget: this.props.brushTarget
     });
     const newOpts = Object.assign({}, opts, {uniforms});
     super.draw(newOpts);

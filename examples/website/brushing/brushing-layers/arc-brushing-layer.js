@@ -40,20 +40,17 @@ export default class ArcBrushingLayer extends ArcLayer {
 
     shaders.inject = {
       'vs:#decl': `
-uniform bool enableBrushing;
 uniform bool brushSource;
 uniform bool brushTarget;
 `,
       'vs:#main-end': `
-  if (enableBrushing) {
-    brushing_setVisible(
-      (brushSource && brushing_isPointInRange(instancePositions.xy)) ||
-      (brushTarget && brushing_isPointInRange(instancePositions.zw))
-    );
-  }
+  brushing_setVisible(
+    (brushSource && brushing_isPointInRange(instancePositions.xy)) ||
+    (brushTarget && brushing_isPointInRange(instancePositions.zw))
+  );
 `,
-      'fs:#main-start': `
-  brushing_filter();
+      'fs:#main-end': `
+  gl_FragColor = brushing_filterBrushingColor(gl_FragColor);
 `
     };
 
@@ -64,8 +61,7 @@ uniform bool brushTarget;
     // add uniforms
     const uniforms = Object.assign({}, opts.uniforms, {
       brushSource: this.props.brushSource,
-      brushTarget: this.props.brushTarget,
-      enableBrushing: this.props.enableBrushing
+      brushTarget: this.props.brushTarget
     });
     const newOpts = Object.assign({}, opts, {uniforms});
     super.draw(newOpts);
