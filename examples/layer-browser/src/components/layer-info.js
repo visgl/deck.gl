@@ -15,22 +15,24 @@ export default class LayerInfo extends PureComponent {
 
     return (
       <div id="layer-info">
-        {hovered && (
-          <div>
-            <h4>Hover</h4>
-            <span>
-              Layer: {hovered.layer.id} Object: {this._infoToString(hovered)}
-            </span>
-          </div>
-        )}
-        {clicked && (
-          <div>
-            <h4>Click</h4>
-            <span>
-              Layer: {clicked.layer.id} Object: {this._infoToString(clicked)}
-            </span>
-          </div>
-        )}
+        {hovered &&
+          hovered.object && (
+            <div>
+              <h4>Hover</h4>
+              <span>
+                Layer: {hovered.layer.id} Object: {this._infoToString(hovered)}
+              </span>
+            </div>
+          )}
+        {clicked &&
+          clicked.object && (
+            <div>
+              <h4>Click</h4>
+              <span>
+                Layer: {clicked.layer.id} Object: {this._infoToString(clicked)}
+              </span>
+            </div>
+          )}
         {queried && (
           <div>
             <h4>Pick Result</h4>

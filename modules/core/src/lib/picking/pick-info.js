@@ -120,6 +120,11 @@ export function processPickInfo({
     }
   });
 
+  if (infos.size === 0) {
+    // Always populate infos, even if no layer is affected
+    infos.set(null, baseInfo);
+  }
+
   return infos;
 }
 

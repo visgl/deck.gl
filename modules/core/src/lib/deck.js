@@ -508,9 +508,8 @@ export default class Deck {
           _pickRequest
         )
       );
-      if (_pickRequest.callback && selectedInfos) {
+      if (_pickRequest.callback && selectedInfos.length) {
         const firstInfo = selectedInfos.find(info => info.index >= 0) || selectedInfos[0];
-        // As per documentation, send null value when no valid object is picked.
         _pickRequest.callback(firstInfo, _pickRequest.event);
       }
       _pickRequest.mode = null;

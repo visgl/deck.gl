@@ -350,11 +350,8 @@ export default class DeckPicker {
     infos.forEach(info => {
       let handled = false;
       switch (mode) {
-        case 'click':
-          handled = info.layer.onClick(info, pickingEvent);
-          break;
         case 'hover':
-          handled = info.layer.onHover(info, pickingEvent);
+          handled = info.layer && info.layer.onHover(info, pickingEvent);
           break;
         case 'query':
           break;
