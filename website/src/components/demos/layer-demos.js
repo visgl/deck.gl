@@ -14,7 +14,6 @@ import {
   PolygonLayer,
   ScatterplotLayer,
   TextLayer,
-  ColumnLayer,
   TripsLayer
 } from 'deck.gl';
 
@@ -201,13 +200,17 @@ export const BitmapLayerDemo = createLayerDemoClass({
 export const TripsLayerDemo = createLayerDemoClass({
   Layer: TripsLayer,
   dataUrl: `${DATA_URI}/sf.trips.json`,
+  propParameters: {
+    currentTime: {displayName: 'currentTime', type: 'range', value: 100, step: 10, min: 0, max: 1200},
+    trailLength: {displayName: 'trailLength', type: 'range', value: 200, step: 10, min: 0, max: 1200}
+  },
   props: {
     getPath: d => d.segments,
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 8,
     rounded: true,
-    trailLength: 0.2,
-    currentTime: 0.5
+    trailLength: 180,
+    currentTime: 500
   }
 });

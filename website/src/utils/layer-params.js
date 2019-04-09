@@ -59,14 +59,18 @@ export function propToParam(key, value) {
  * get array of parameters from a layer's default props
  * sorted by type
  */
-export function getLayerParams(layer) {
+export function getLayerParams(layer, propParameters = {}) {
   const paramsMap = {};
   const paramsArray = [];
 
   for (const key in layer.props) {
-    const param = propToParam(key, layer.props[key]);
-    if (param) {
-      paramsArray.push(param);
+    if (propParameters[key]) {
+      paramsArray.push({name: key, ...propParameters[key]});
+    } else {
+      const param = propToParam(key, layer.props[key]);
+      if (param) {
+        paramsArray.push(param);
+      }
     }
   }
 

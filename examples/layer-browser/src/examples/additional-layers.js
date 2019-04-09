@@ -15,7 +15,6 @@ import * as h3 from 'h3-js';
 import {registerLoaders} from '@loaders.gl/core';
 import {PLYLoader} from '@loaders.gl/ply';
 import {GLBScenegraphLoader, GLTFScenegraphLoader} from '@luma.gl/addons';
-import {registerLoaders} from '@loaders.gl/core';
 
 import * as dataSamples from '../data-samples';
 
@@ -147,8 +146,14 @@ const TripsLayerExample = {
   layer: TripsLayer,
   propTypes: {
     currentTime: {
-      type: 'number',
-      max: 1
+      type: 'range',
+      min: 0,
+      max: 1200
+    },
+    trailLength: {
+      type: 'range',
+      min: 0,
+      max: 1200
     }
   },
   props: {
@@ -159,8 +164,8 @@ const TripsLayerExample = {
     opacity: 0.8,
     widthMinPixels: 5,
     rounded: true,
-    trailLength: 0.2,
-    currentTime: 0.1
+    trailLength: 100,
+    currentTime: 200
   }
 };
 
