@@ -136,6 +136,7 @@ export default class DeckPicker {
   }
 
   // Pick the closest object at the given (x,y) coordinate
+  // eslint-disable-next-line max-statements
   pickClosestObject({layers, viewports, x, y, radius, depth = 1, mode, onViewportActive}) {
     this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
@@ -153,6 +154,7 @@ export default class DeckPicker {
       deviceHeight: height
     });
 
+    let infos;
     const result = [];
     const affectedLayers = {};
 
@@ -188,7 +190,7 @@ export default class DeckPicker {
       }
 
       // This logic needs to run even if no object is picked.
-      const infos = processPickInfo({
+      infos = processPickInfo({
         pickInfo,
         lastPickedInfo: this.lastPickedInfo,
         mode,
@@ -218,7 +220,7 @@ export default class DeckPicker {
       layers[layerId].restorePickingColors(affectedLayers[layerId])
     );
 
-    return result;
+    return {result, emptyInfo: infos && infos.get(null)};
   }
 
   // Pick all objects within the given bounding box
@@ -348,11 +350,12 @@ export default class DeckPicker {
     const pickingEvent = this.pickingEvent;
 
     infos.forEach(info => {
+      if (!info.layer) {
+        return;
+      }
+
       let handled = false;
       switch (mode) {
-        case 'click':
-          handled = info.layer.onClick(info, pickingEvent);
-          break;
         case 'hover':
           handled = info.layer.onHover(info, pickingEvent);
           break;
