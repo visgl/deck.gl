@@ -6,7 +6,7 @@ precision highp float;
 uniform bool hasTexture;
 uniform sampler2D sampler;
 uniform vec4 color;
-uniform bool flatShade;
+uniform bool flatShading;
 
 in vec2 vTexCoord;
 in vec3 cameraPosition;
@@ -18,7 +18,7 @@ out vec4 fragColor;
 
 void main(void) {
   vec3 normal;
-  if (flatShade) {
+  if (flatShading) {
     normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
   } else {
     normal = normals_commonspace;
