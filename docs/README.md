@@ -13,20 +13,8 @@
   <a href="https://github.com/uber/deck.gl/blob/6.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v6.0-green.svg?style=flat-square" />
   </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-5.3-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.2-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-5.2-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-5.1-green.svg?style=flat-square" />
-  </a>
   <a href="https://github.com/uber/deck.gl/blob/5.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/v-5.0-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/4.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-4.1-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/v-4.0-green.svg?style=flat-square" />

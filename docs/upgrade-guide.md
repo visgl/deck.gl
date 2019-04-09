@@ -14,17 +14,17 @@
 
 #### Deck Class
 
-**Breaking Changes**
+Breaking Changes:
 
 - `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be a valid [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) object, and the second argument is the pointer event. This change makes these two events behave consistently with other event callbacks.
 
 #### Layers
 
-**Deprecations**
+Deprecations:
 
 - `ArcLayer` and `LineLayer`'s `getStrokeWidth` props are deprecated. Use `getWidth` instead.
 
-**Breaking Changes**
+Breaking Changes:
 
 - `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/layers/column-layer.md) with `diskResolution: 6` instead.
 - A bug in projecting elevation was fixed in `HexagonLayer`, `GridLayer` and `GridCellLayer`. The resulting heights of extruded grids/hexagons have changed. You may adjust them to match previous behavior by tweaking `elevationScale`.
@@ -43,7 +43,7 @@ Check [Using Lighting](/docs/developer-guide/using-lighting.md) in developer gui
 
 v7.0 includes major bug fixes for [OrbitView](/docs/api-reference/orbit-view.md) and [OrthographicView](/docs/api-reference/orthographic-view.md). Their APIs are also changed for better clarity and consistency.
 
-**Breaking Changes**
+Breaking Changes:
 
 * View state: `zoom` is now logarithmic in all `View` classes. `zoom: 0` maps one unit in world space to one pixel in screen space.
 * View state: `minZoom` and `maxZoom` now default to no limit.
@@ -54,7 +54,7 @@ v7.0 includes major bug fixes for [OrbitView](/docs/api-reference/orbit-view.md)
 
 #### project Shader Module
 
-**Deprecations**
+Deprecations:
 
 - `project_scale` -> `project_size`
 - `project_to_clipspace` -> `project_common_position_to_clipspace`
