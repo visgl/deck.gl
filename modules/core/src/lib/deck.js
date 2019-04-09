@@ -314,7 +314,7 @@ export default class Deck {
       activateViewport,
       mode: 'query',
       depth: 1
-    });
+    }).result;
     this.stats.get('pickObject Time').timeEnd();
     return selectedInfos.length ? selectedInfos[0] : null;
   }
@@ -332,7 +332,7 @@ export default class Deck {
       activateViewport,
       mode: 'query',
       depth
-    });
+    }).result;
     this.stats.get('pickMultipleObjects Time').timeEnd();
     return selectedInfos;
   }
@@ -497,7 +497,7 @@ export default class Deck {
 
     if (_pickRequest.mode) {
       // perform picking
-      const selectedInfos = this.deckPicker.pickObject(
+      const {result, emptyInfo} = this.deckPicker.pickObject(
         Object.assign(
           {
             layers: this.layerManager.getLayers(),
@@ -508,10 +508,9 @@ export default class Deck {
           _pickRequest
         )
       );
-      if (_pickRequest.callback && selectedInfos) {
-        const firstInfo = selectedInfos.find(info => info.index >= 0) || selectedInfos[0];
-        // As per documentation, send null value when no valid object is picked.
-        _pickRequest.callback(firstInfo, _pickRequest.event);
+      if (_pickRequest.callback) {
+        const pickedInfo = result.find(info => info.index >= 0) || emptyInfo;
+        _pickRequest.callback(pickedInfo, _pickRequest.event);
       }
       _pickRequest.mode = null;
     }

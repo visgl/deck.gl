@@ -87,6 +87,9 @@ export function processPickInfo({
   // Please be very careful when changing this pattern
   const infos = new Map();
 
+  // Make sure infos always contain something even if no layer is affected
+  infos.set(null, baseInfo);
+
   affectedLayers.forEach(layer => {
     let info = Object.assign({}, baseInfo);
 
