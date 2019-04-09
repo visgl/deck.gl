@@ -654,7 +654,7 @@ export default class Deck {
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
-    this.layerManager.updateLayers();
+    this.layerManager.updateLayers(animationProps);
 
     // Needs to be done before drawing
     this._updateAnimationProps(animationProps);
@@ -664,6 +664,13 @@ export default class Deck {
 
     // Redraw if necessary
     this.redraw(false);
+
+    // Update viewport transition if needed
+    // Note: this can trigger `onViewStateChange`, and affect layers
+    // We want to defer these changes to the next frame
+    if (this.viewManager) {
+      this.viewManager.updateViewStates(animationProps);
+    }
   }
 
   // Callbacks

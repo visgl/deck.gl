@@ -45,6 +45,7 @@ const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
   deck: null,
   gl: null,
+  time: -1,
 
   // Settings
   useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
@@ -199,7 +200,10 @@ export default class LayerManager {
   }
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
-  updateLayers() {
+  updateLayers(animationProps = {}) {
+    if ('time' in animationProps) {
+      this.context.time = animationProps.time;
+    }
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
@@ -459,7 +463,6 @@ export default class LayerManager {
     }
 
     setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
-    this.updateLayers({newLayers});
+    this.updateLayers();
   }
 }

@@ -266,9 +266,9 @@ export default class AttributeManager {
 
   // Update attribute transition to the current timestamp
   // Returns `true` if any transition is in progress
-  updateTransition() {
+  updateTransition(timestamp) {
     const {attributeTransitionManager} = this;
-    const transitionUpdated = attributeTransitionManager.setCurrentTime(Date.now());
+    const transitionUpdated = attributeTransitionManager.setCurrentTime(timestamp);
     this.needsRedraw = this.needsRedraw || transitionUpdated;
     return transitionUpdated;
   }
