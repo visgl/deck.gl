@@ -28,11 +28,11 @@ const App = ({data, viewport}) => {
    * Data format:
    * [
    *   {
-   *     segments: [
-   *       [-122.269029, 37.80787, 1554772579000], // lng, lat, timestamp
-   *       [-122.269029, 37.80787, 1554772579010],
+   *     waypoints: [
+   *      {coordinates: [-122.3907988, 37.7664413], timestamp: 1554772579000}
+   *      {coordinates: [-122.3908298,37.7667706], timestamp: 1554772579010}
    *       ...,
-   *       [-122.271604, 37.803664, 1554772580200]
+   *      {coordinates: [-122.4485672, 37.8040182], timestamp: 1554772580200}
    *     ]
    *   }
    * ]
@@ -41,7 +41,7 @@ const App = ({data, viewport}) => {
     id: 'trips-layer',
     data,
     // deduct start timestamp from each data point to avoid overflow
-    getPath: d => d.segments.map(p => p[2] = p[2] - 1554772579000),
+    getPath: d => d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 5,
@@ -101,7 +101,7 @@ Called for each data object to retreive paths.
 Returns an array of navigation points on a single path.
 Each navigation point is defined as an array of three numbers: `[longitude, latitude, timestamp]`.
 Points should be sorted by `timestamp`. 
-Because `timestamp` is represented as 32-bits floating number, raw unix epoch can not be used.
+Because `timestamp` is represented as 32-bits floating number, raw unix epoch can not be used. You may test the validity of a timestamp by calling Math.fround(t) to check if there would be any loss of precision.
 
 # Source
 
