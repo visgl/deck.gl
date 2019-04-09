@@ -97,13 +97,13 @@ The path width multiplier that multiplied to all paths.
 
 * Default: `0`
 
-The minimum path width in pixels.
+The minimum path width in pixels. This prop can be used to prevent the path from getting too thin when zoomed out.
 
 ##### `widthMaxPixels` (Number, optional)
 
 * Default: Number.MAX_SAFE_INTEGER
 
-The maximum path width in pixels.
+The maximum path width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
 ##### `rounded` (Boolean, optional)
 
