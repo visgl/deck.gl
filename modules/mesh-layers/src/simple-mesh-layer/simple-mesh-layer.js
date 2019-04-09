@@ -31,10 +31,11 @@ const {fp64LowPart} = fp64;
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
-import vs1 from './simple-mesh-layer-vertex.glsl';
-import fs1 from './simple-mesh-layer-fragment.glsl';
-import vs3 from './simple-mesh-layer-vertex.glsl3';
-import fs3 from './simple-mesh-layer-fragment.glsl3';
+// NOTE(Tarek): Should eventually phase out the glsl1 versions.
+import vs1 from './simple-mesh-layer-vertex.glsl1';
+import fs1 from './simple-mesh-layer-fragment.glsl1';
+import vs3 from './simple-mesh-layer-vertex.glsl';
+import fs3 from './simple-mesh-layer-fragment.glsl';
 
 // Replacement for the external assert method to reduce bundle size
 function assert(condition, message) {
@@ -183,8 +184,6 @@ export default class SimpleMeshLayer extends Layer {
         height: 1
       })
     });
-
-    this.context.gl.getExtension('OES_standard_derivatives');
   }
 
   updateState({props, oldProps, changeFlags}) {
