@@ -77,6 +77,7 @@ export default class ViewManager {
     this._needsRedraw = this._needsRedraw || reason;
   }
 
+  // Checks each viewport for transition updates
   updateViewStates(animationProps = {}) {
     if ('time' in animationProps) {
       for (const viewId in this.controllers) {
