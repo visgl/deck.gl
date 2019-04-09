@@ -80,7 +80,10 @@ export default class ViewManager {
   updateViewStates(animationProps = {}) {
     if ('time' in animationProps) {
       for (const viewId in this.controllers) {
-        this.controllers[viewId].updateTransition(animationProps.time);
+        const controller = this.controllers[viewId];
+        if (controller) {
+          controller.updateTransition(animationProps.time);
+        }
       }
     }
   }
