@@ -5,7 +5,6 @@ import {App, INITIAL_VIEW_STATE} from 'website-examples/3d-heatmap/app';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 
 export default class HeatmapDemo extends Component {
-
   static get data() {
     return {
       url: `${DATA_URI}/heatmap-data.txt`,
@@ -17,8 +16,14 @@ export default class HeatmapDemo extends Component {
     return {
       radius: {displayName: 'Radius', type: 'range', value: 2000, step: 100, min: 500, max: 20000},
       coverage: {displayName: 'Coverage', type: 'range', value: 0.7, step: 0.1, min: 0, max: 1},
-      upperPercentile: {displayName: 'Upper Percentile',
-        type: 'range', value: 100, step: 0.1, min: 80, max: 100}
+      upperPercentile: {
+        displayName: 'Upper Percentile',
+        type: 'range',
+        value: 100,
+        step: 0.1,
+        min: 80,
+        max: 100
+      }
     };
   }
 
@@ -31,9 +36,7 @@ export default class HeatmapDemo extends Component {
   }
 
   static renderInfo(meta) {
-
-    const colorRamp = App.defaultColorRange.slice()
-      .map(color => `rgb(${color.join(',')})`);
+    const colorRamp = App.defaultColorRange.slice().map(color => `rgb(${color.join(',')})`);
 
     return (
       <div>
@@ -43,9 +46,11 @@ export default class HeatmapDemo extends Component {
 
         <div className="layout">
           {colorRamp.map((c, i) => (
-            <div key={i}
-                 className="legend"
-                 style={{background: c, width: `${100 / colorRamp.length}%`}} />
+            <div
+              key={i}
+              className="legend"
+              style={{background: c, width: `${100 / colorRamp.length}%`}}
+            />
           ))}
         </div>
         <p className="layout">
@@ -53,11 +58,14 @@ export default class HeatmapDemo extends Component {
           <span className="col-1-2 text-right">More Accidents</span>
         </p>
 
-        <p>Data source: <a href="https://data.gov.uk">DATA.GOV.UK</a></p>
+        <p>
+          Data source: <a href="https://data.gov.uk">DATA.GOV.UK</a>
+        </p>
 
         <div className="layout">
           <div className="stat col-1-2">
-            Accidents<b>{ readableInteger(meta.count) || 0 }</b>
+            Accidents
+            <b>{readableInteger(meta.count) || 0}</b>
           </div>
         </div>
       </div>
@@ -83,13 +91,12 @@ export default class HeatmapDemo extends Component {
       return null;
     }
 
-    const lat = hoveredObject.centroid[1];
-    const lng = hoveredObject.centroid[0];
+    const lat = hoveredObject.position[1];
+    const lng = hoveredObject.position[0];
     const count = hoveredObject.points.length;
 
     return (
-      <div className="tooltip"
-           style={{left: x, top: y}}>
+      <div className="tooltip" style={{left: x, top: y}}>
         <div>{`latitude: ${Number.isFinite(lat) ? lat.toFixed(6) : ''}`}</div>
         <div>{`longitude: ${Number.isFinite(lng) ? lng.toFixed(6) : ''}`}</div>
         <div>{`${count} Accidents`}</div>
