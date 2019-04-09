@@ -116,27 +116,27 @@ Draw the filled area of a point.
 
 ##### `radiusMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
-The minimum radius in pixels.
+The minimum radius in pixels. This prop can be used to prevent the circle from getting too small when zoomed out.
 
 ##### `radiusMaxPixels` (Number, optional)
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum radius in pixels.
+The maximum radius in pixels. This prop can be used to prevent the circle from getting too big when zoomed in.
 
 ##### `lineWidthMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
-The minimum line width in pixels.
+The minimum line width in pixels. This prop can be used to prevent the stroke from getting too thin when zoomed out.
 
 ##### `lineWidthMaxPixels` (Number, optional)
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum line width in pixels.
+The maximum line width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
 
 ##### `fp64` (Boolean, optional)

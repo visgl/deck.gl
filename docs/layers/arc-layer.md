@@ -108,7 +108,7 @@ The scaling multiplier for the width of each line. This prop is a very efficient
 
 ##### `widthMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
 The minimum line width in pixels. This prop can be used to prevent the line from getting too thin when zoomed out.
 
