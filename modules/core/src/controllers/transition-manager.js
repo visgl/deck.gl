@@ -1,4 +1,3 @@
-/* global requestAnimationFrame, cancelAnimationFrame */
 import LinearInterpolator from '../transitions/linear-interpolator';
 import Transition from '../transitions/transition';
 import assert from '../utils/assert';
@@ -26,19 +25,16 @@ export default class TransitionManager {
     assert(ControllerState);
     this.ControllerState = ControllerState;
     this.props = Object.assign({}, DEFAULT_PROPS, props);
-    this.animation = null;
     this.propsInTransition = null;
+    this.time = 0;
     this.transition = new Transition();
 
     this.onViewStateChange = props.onViewStateChange;
 
-    this._onTransitionFrame = this._onTransitionFrame.bind(this);
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
 
-  finalize() {
-    cancelAnimationFrame(this.animation);
-  }
+  finalize() {}
 
   // Returns current transitioned viewport.
   getViewportInTransition() {
@@ -78,6 +74,11 @@ export default class TransitionManager {
     return transitionTriggered;
   }
 
+  updateTransition(timestamp) {
+    this.time = timestamp;
+    this._updateTransition();
+  }
+
   // Helper methods
 
   _isTransitionEnabled(props) {
@@ -109,8 +110,6 @@ export default class TransitionManager {
   _triggerTransition(startProps, endProps) {
     assert(this._isTransitionEnabled(endProps), 'Transition is not enabled');
 
-    cancelAnimationFrame(this.animation);
-
     const startViewstate = new this.ControllerState(startProps);
     const endViewStateProps = new this.ControllerState(endProps).shortestPathFrom(startViewstate);
 
@@ -134,19 +133,15 @@ export default class TransitionManager {
       onInterrupt: this._onTransitionEnd(endProps.onTransitionInterrupt),
       onEnd: this._onTransitionEnd(endProps.onTransitionEnd)
     });
-
-    this._onTransitionFrame();
+    this._updateTransition();
   }
 
-  _onTransitionFrame() {
-    // _updateViewport() may cancel the animation
-    this.animation = requestAnimationFrame(this._onTransitionFrame);
-    this.transition.update(Date.now());
+  _updateTransition() {
+    this.transition.update(this.time);
   }
 
   _onTransitionEnd(callback) {
     return transition => {
-      cancelAnimationFrame(this.animation);
       this.propsInTransition = null;
       callback(transition);
     };

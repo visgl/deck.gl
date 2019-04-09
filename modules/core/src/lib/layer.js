@@ -404,7 +404,7 @@ export default class Layer extends Component {
   updateTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.updateTransition();
+      attributeManager.updateTransition(this.context.time);
     }
   }
 
