@@ -1,28 +1,28 @@
-export default `#version 300 es
+export default `
 #define SHADER_NAME simple-mesh-layer-vs
 
 // Scale the model
 uniform float sizeScale;
 
 // Primitive attributes
-in vec3 positions;
-in vec3 normals;
-in vec2 texCoords;
+attribute vec3 positions;
+attribute vec3 normals;
+attribute vec2 texCoords;
 
 // Instance attributes
-in vec3 instancePositions;
-in vec2 instancePositions64xy;
-in vec4 instanceColors;
-in vec3 instancePickingColors;
-in mat3 instanceModelMatrix;
-in vec3 instanceTranslation;
+attribute vec3 instancePositions;
+attribute vec2 instancePositions64xy;
+attribute vec4 instanceColors;
+attribute vec3 instancePickingColors;
+attribute mat3 instanceModelMatrix;
+attribute vec3 instanceTranslation;
 
 // Outputs to fragment shader
-out vec2 vTexCoord;
-out vec3 cameraPosition;
-out vec3 normals_commonspace;
-out vec4 position_commonspace;
-out vec4 vColor;
+varying vec2 vTexCoord;
+varying vec3 cameraPosition;
+varying vec3 normals_commonspace;
+varying vec4 position_commonspace;
+varying vec4 vColor;
 
 void main(void) {
   vec3 pos = (instanceModelMatrix * positions) * sizeScale + instanceTranslation;
