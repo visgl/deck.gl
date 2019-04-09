@@ -669,7 +669,9 @@ export default class Deck {
     // Update viewport transition if needed
     // Note: this can trigger `onViewStateChange`, and affect layers
     // We want to defer these changes to the next frame
-    this.viewManager.updateViewStates(animationProps);
+    if (this.viewManager) {
+      this.viewManager.updateViewStates(animationProps);
+    }
   }
 
   // Callbacks
