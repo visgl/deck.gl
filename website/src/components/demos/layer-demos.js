@@ -201,16 +201,30 @@ export const TripsLayerDemo = createLayerDemoClass({
   Layer: TripsLayer,
   dataUrl: `${DATA_URI}/sf.trips.json`,
   propParameters: {
-    currentTime: {displayName: 'currentTime', type: 'range', value: 100, step: 10, min: 0, max: 1200},
-    trailLength: {displayName: 'trailLength', type: 'range', value: 200, step: 10, min: 0, max: 1200}
+    currentTime: {
+      displayName: 'currentTime',
+      type: 'range',
+      value: 500,
+      step: 12,
+      min: 0,
+      max: 1200
+    },
+    trailLength: {
+      displayName: 'trailLength',
+      type: 'range',
+      value: 600,
+      step: 12,
+      min: 0,
+      max: 1200
+    }
   },
   props: {
-    getPath: d => d.segments,
+    getPath: d => d.segments.map(p => [p[0], p[1], p[2] - 1554772579000]),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 8,
     rounded: true,
-    trailLength: 180,
+    trailLength: 600,
     currentTime: 500
   }
 });

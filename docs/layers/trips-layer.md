@@ -29,10 +29,10 @@ const App = ({data, viewport}) => {
    * [
    *   {
    *     segments: [
-   *       [-122.269029, 37.80787, 0.0], // lng, lat, timestamp (timestamp in seconds)
-   *       [-122.269029, 37.80787, 9.88],
+   *       [-122.269029, 37.80787, 1554772579000], // lng, lat, timestamp
+   *       [-122.269029, 37.80787, 1554772579010],
    *       ...,
-   *       [-122.271604, 37.803664, 1200.0]
+   *       [-122.271604, 37.803664, 1554772580200]
    *     ]
    *   }
    * ]
@@ -40,7 +40,8 @@ const App = ({data, viewport}) => {
   const layer = new TripsLayer({
     id: 'trips-layer',
     data,
-    getPath: d => d.segments,
+    // deduct start timestamp from each data point to avoid overflow
+    getPath: d => d.segments.map(p => p[2] = p[2] - 1554772579000),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 5,
@@ -99,8 +100,8 @@ This value should be in the same units as the timestamps from `getPath`.
 Called for each data object to retreive paths.
 Returns an array of navigation points on a single path.
 Each navigation point is defined as an array of three numbers: `[longitude, latitude, timestamp]`.
-Points should be sorted by timestamp.
-
+Points should be sorted by `timestamp`. 
+Because `timestamp` is represented as 32-bits floating number, raw unix epoch can not be used.
 
 # Source
 

@@ -147,11 +147,13 @@ const TripsLayerExample = {
   propTypes: {
     currentTime: {
       type: 'range',
+      step: 12,
       min: 0,
       max: 1200
     },
     trailLength: {
       type: 'range',
+      step: 12,
       min: 0,
       max: 1200
     }
@@ -159,13 +161,13 @@ const TripsLayerExample = {
   props: {
     id: 'trips-layer',
     data: dataSamples.SFTrips,
-    getPath: d => d.segments,
+    getPath: d => d.segments.map(p => [p[0], p[1], p[2] - 1554772579000]),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 5,
     rounded: true,
-    trailLength: 100,
-    currentTime: 200
+    trailLength: 600,
+    currentTime: 500
   }
 };
 
