@@ -29,8 +29,10 @@ const App = ({data, viewport}) => {
    * [
    *   {
    *     segments: [
-   *       [-122.269029, 37.80787, 0.0],
-   *       [-122.271604, 37.803664, 0.008]
+   *       [-122.269029, 37.80787, 0.0], // lng, lat, timestamp (timestamp in seconds)
+   *       [-122.269029, 37.80787, 9.88],
+   *       ...,
+   *       [-122.271604, 37.803664, 1200.0]
    *     ]
    *   }
    * ]
@@ -43,8 +45,8 @@ const App = ({data, viewport}) => {
     opacity: 0.8,
     widthMinPixels: 5,
     rounded: true,
-    trailLength: 0.2,
-    currentTime: 0.5
+    trailLength: 200,
+    currentTime: 100
   });
 
   return (<DeckGL {...viewport} layers={[layer]} />);
