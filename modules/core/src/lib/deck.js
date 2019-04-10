@@ -593,7 +593,7 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers(redrawReason, opts) {
+  _drawLayers(redrawReason, renderOptions) {
     const {gl} = this.layerManager.context;
 
     setParameters(gl, this.props.parameters);
@@ -614,7 +614,7 @@ export default class Deck {
           redrawReason,
           effects: this.effectManager.getEffects()
         },
-        opts
+        renderOptions
       )
     );
 

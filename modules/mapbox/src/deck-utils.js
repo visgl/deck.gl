@@ -61,6 +61,7 @@ export function updateLayer(deck, layer) {
 
 export function drawLayer(deck, layer) {
   deck._drawLayers('mapbox-repaint', {
+    // TODO - accept layerFilter in drawLayers' renderOptions
     layers: getLayers(deck, deckLayer => shouldDrawLayer(layer.id, deckLayer)),
     clearCanvas: false
   });
@@ -93,17 +94,20 @@ function afterRender(deck, map) {
 
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    deck._drawLayers('mapbox-repaint', {
-      layers: getLayers(deck, deckLayer => {
-        for (const id of mapboxLayerIds) {
-          if (shouldDrawLayer(id, deckLayer)) {
-            return false;
-          }
+    const layers = getLayers(deck, deckLayer => {
+      for (const id of mapboxLayerIds) {
+        if (shouldDrawLayer(id, deckLayer)) {
+          return false;
         }
-        return true;
-      }),
-      clearCanvas: false
+      }
+      return true;
     });
+    if (layers.length > 0) {
+      deck._drawLayers('mapbox-repaint', {
+        layers,
+        clearCanvas: false
+      });
+    }
   }
 
   deck.needsRedraw({clearRedrawFlags: true});
