@@ -11,6 +11,8 @@ Our [examples](https://github.com/uber/deck.gl/tree/master/examples/get-started)
 
 The [Deck](/docs/api-reference/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
+You must create a canvas inside the html with the id `my-deck-canvas` for it to work.
+
 ```bash
 npm install @deck.gl/core @deck.gl/layers
 ```
@@ -20,9 +22,9 @@ import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 
 const INITIAL_VIEW_STATE = {
-  latitude: 37.78,
+  latitude: 37.8,
   longitude: -122.45,
-  zoom: 3
+  zoom: 15
 };
 
 const deckgl = new Deck({
@@ -62,7 +64,7 @@ new deck.DeckGL({
   mapStyle: 'mapbox://styles/mapbox/light-v9',
   longitude: -122.45,
   latitude: 37.8,
-  zoom: 12,
+  zoom: 15,
   layers: [
     new deck.ScatterplotLayer({
       data: [
