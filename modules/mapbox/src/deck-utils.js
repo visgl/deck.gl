@@ -62,7 +62,7 @@ export function updateLayer(deck, layer) {
 export function drawLayer(deck, layer) {
   // set layerFilter to only allow the current layer
   deck.deckRenderer.layerFilter = params => shouldDrawLayer(layer.id, params.layer);
-  deck._drawLayers('mapbox-repaint');
+  deck._drawLayers('mapbox-repaint', {clearCanvas: false});
   deck.deckPicker.layerFilter = null;
 }
 
@@ -101,7 +101,7 @@ function afterRender(deck, map) {
       }
       return true;
     };
-    deck._drawLayers('mapbox-repaint');
+    deck._drawLayers('mapbox-repaint', {clearCanvas: false});
     deck.deckPicker.layerFilter = null;
   }
 

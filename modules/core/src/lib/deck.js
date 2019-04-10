@@ -593,7 +593,7 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers(redrawReason) {
+  _drawLayers(redrawReason, opts) {
     const {gl} = this.layerManager.context;
 
     setParameters(gl, this.props.parameters);
@@ -603,16 +603,20 @@ export default class Deck {
     const layers = this.layerManager.getLayers();
     const activateViewport = this.layerManager.activateViewport;
 
-    this.deckRenderer.renderLayers({
-      layers,
-      viewports: this.viewManager.getViewports(),
-      activateViewport,
-      views: this.viewManager.getViews(),
-      pass: 'screen',
-      redrawReason,
-      clearCanvas: !this.props._customRender,
-      effects: this.effectManager.getEffects()
-    });
+    this.deckRenderer.renderLayers(
+      Object.assign(
+        {
+          layers,
+          viewports: this.viewManager.getViewports(),
+          activateViewport,
+          views: this.viewManager.getViews(),
+          pass: 'screen',
+          redrawReason,
+          effects: this.effectManager.getEffects()
+        },
+        opts
+      )
+    );
 
     this.props.onAfterRender({gl});
   }
