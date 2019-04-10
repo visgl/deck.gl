@@ -549,17 +549,15 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
-    if (!this.props._customRender) {
-      this.eventManager = new EventManager(gl.canvas, {
-        events: {
-          pointerdown: this._onPointerDown,
-          pointermove: this._onPointerMove,
-          pointerleave: this._onPointerLeave
-        }
-      });
-      for (const eventType in EVENTS) {
-        this.eventManager.on(eventType, this._onEvent);
+    this.eventManager = new EventManager(gl.canvas, {
+      events: {
+        pointerdown: this._onPointerDown,
+        pointermove: this._onPointerMove,
+        pointerleave: this._onPointerLeave
       }
+    });
+    for (const eventType in EVENTS) {
+      this.eventManager.on(eventType, this._onEvent);
     }
 
     this.viewManager = new ViewManager({
@@ -595,7 +593,7 @@ export default class Deck {
     this.props.onLoad();
   }
 
-  _drawLayers(redrawReason) {
+  _drawLayers(redrawReason, renderOptions) {
     const {gl} = this.layerManager.context;
 
     setParameters(gl, this.props.parameters);
@@ -605,16 +603,20 @@ export default class Deck {
     const layers = this.layerManager.getLayers();
     const activateViewport = this.layerManager.activateViewport;
 
-    this.deckRenderer.renderLayers({
-      layers,
-      viewports: this.viewManager.getViewports(),
-      activateViewport,
-      views: this.viewManager.getViews(),
-      pass: 'screen',
-      redrawReason,
-      customRender: Boolean(this.props._customRender),
-      effects: this.effectManager.getEffects()
-    });
+    this.deckRenderer.renderLayers(
+      Object.assign(
+        {
+          layers,
+          viewports: this.viewManager.getViewports(),
+          activateViewport,
+          views: this.viewManager.getViews(),
+          pass: 'screen',
+          redrawReason,
+          effects: this.effectManager.getEffects()
+        },
+        renderOptions
+      )
+    );
 
     this.props.onAfterRender({gl});
   }

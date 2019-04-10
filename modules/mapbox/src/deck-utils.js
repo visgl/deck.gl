@@ -1,5 +1,4 @@
 import {Deck} from '@deck.gl/core';
-import {withParameters} from '@luma.gl/core';
 
 export function getDeckInstance({map, gl, deck}) {
   // Only create one deck instance per context
@@ -43,8 +42,6 @@ export function getDeckInstance({map, gl, deck}) {
   map.__deck = deck;
   map.on('render', () => afterRender(deck, map));
 
-  initEvents(map, deck);
-
   return deck;
 }
 
@@ -63,9 +60,11 @@ export function updateLayer(deck, layer) {
 }
 
 export function drawLayer(deck, layer) {
-  // set layerFilter to only allow the current layer
-  deck.deckRenderer.layerFilter = params => shouldDrawLayer(layer.id, params.layer);
-  deck._drawLayers('mapbox-repaint');
+  deck._drawLayers('mapbox-repaint', {
+    // TODO - accept layerFilter in drawLayers' renderOptions
+    layers: getLayers(deck, deckLayer => shouldDrawLayer(layer.id, deckLayer)),
+    clearCanvas: false
+  });
 }
 
 export function getViewState(map, extraProps) {
@@ -95,18 +94,28 @@ function afterRender(deck, map) {
 
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    deck.deckRenderer.layerFilter = params => {
+    const layers = getLayers(deck, deckLayer => {
       for (const id of mapboxLayerIds) {
-        if (shouldDrawLayer(id, params.layer)) {
+        if (shouldDrawLayer(id, deckLayer)) {
           return false;
         }
       }
       return true;
-    };
-    deck._drawLayers('mapbox-repaint');
+    });
+    if (layers.length > 0) {
+      deck._drawLayers('mapbox-repaint', {
+        layers,
+        clearCanvas: false
+      });
+    }
   }
 
   deck.needsRedraw({clearRedrawFlags: true});
+}
+
+function getLayers(deck, layerFilter) {
+  const layers = deck.layerManager.getLayers();
+  return layers.filter(layerFilter);
 }
 
 function shouldDrawLayer(id, layer) {
@@ -132,74 +141,4 @@ function updateLayers(deck) {
     layers.push(layer);
   });
   deck.setProps({layers});
-}
-
-// Triggers picking on a mouse event
-function handleMouseEvent(deck, event) {
-  // reset layerFilter to allow all layers during picking
-  deck.deckPicker.layerFilter = null;
-
-  let callback;
-  switch (event.type) {
-    case 'click':
-      callback = deck._onClick;
-      break;
-
-    case 'mousemove':
-    case 'pointermove':
-      callback = deck._onPointerMove;
-      break;
-
-    case 'mouseleave':
-    case 'pointerleave':
-      callback = deck._onPointerLeave;
-      break;
-
-    default:
-      return;
-  }
-
-  if (!event.offsetCenter) {
-    // Map from mapbox's MapMouseEvent object to mjolnir.js' Event object
-    event = {
-      offsetCenter: event.point,
-      srcEvent: event.originalEvent
-    };
-  }
-
-  // Work around for https://github.com/mapbox/mapbox-gl-js/issues/7801
-  const {gl} = deck.layerManager.context;
-  withParameters(
-    gl,
-    {
-      depthMask: true,
-      depthTest: true,
-      depthRange: [0, 1],
-      colorMask: [true, true, true, true]
-    },
-    () => callback(event)
-  );
-}
-
-// Register deck callbacks for pointer events
-function initEvents(map, deck) {
-  const pickingEventHandler = event => handleMouseEvent(deck, event);
-
-  if (deck.eventManager) {
-    // Replace default event handlers with our own ones
-    deck.eventManager.off({
-      click: deck._onClick,
-      pointermove: deck._onPointerMove,
-      pointerleave: deck._onPointerLeave
-    });
-    deck.eventManager.on({
-      click: pickingEventHandler,
-      pointermove: pickingEventHandler,
-      pointerleave: pickingEventHandler
-    });
-  } else {
-    map.on('click', pickingEventHandler);
-    map.on('mousemove', pickingEventHandler);
-    map.on('mouseleave', pickingEventHandler);
-  }
 }
