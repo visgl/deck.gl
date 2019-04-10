@@ -70,22 +70,5 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.1",
     "webworkify-webpack-dropin": "^1.1.9"
-  },
-  "eslintConfig": {
-    "parser": "babel-eslint",
-    "plugins": [
-      "react"
-    ],
-    "extends": [
-      "eslint-config-uber-jsx",
-      "eslint-config-uber-es2015"
-    ],
-    "rules": {
-      "guard-for-in": 0,
-      "camelcase": 0
-    },
-    "globals": {
-      "MapboxAccessToken": false
-    }
   }
 }

@@ -43,7 +43,7 @@ export default function createLayerDemoClass(settings) {
     static mapStyle = MAPBOX_STYLES.LIGHT;
 
     static get parameters() {
-      return getLayerParams(renderLayer([]));
+      return getLayerParams(renderLayer([]), settings.propParameters);
     }
 
     static renderInfo() {
