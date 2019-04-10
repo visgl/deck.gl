@@ -34,7 +34,7 @@ app.get('/deckgl.min.js', (req, resp) => {
 
 app.get('/*', (req, resp) => {
   const name = path.basename(req.path, '.html');
-  const page = utils.getPage(pagesByName[name], {noCache: true});
+  const page = pagesByName[name] && utils.getPage(pagesByName[name], {noCache: true});
 
   if (page) {
     resp.send(page);
