@@ -35,7 +35,9 @@ const deckgl = new Deck({
     new ScatterplotLayer({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
-      ]
+      ],
+      getColor: d => d.color,
+      getRadius: d => d.radius
     })
   ]
 });
@@ -69,7 +71,9 @@ new deck.DeckGL({
     new deck.ScatterplotLayer({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
-      ]
+      ],
+      getColor: d => d.color,
+      getRadius: d => d.radius
     })
   ]
 });
