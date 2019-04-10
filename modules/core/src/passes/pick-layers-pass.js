@@ -48,7 +48,15 @@ export default class PickLayersPass extends LayersPass {
             blend: true,
             blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
             blendEquation: gl.FUNC_ADD,
-            blendColor: [0, 0, 0, 0]
+            blendColor: [0, 0, 0, 0],
+
+            // When used as Mapbox custom layer, the context state may be dirty
+            // TODO - Remove when mapbox fixes this issue
+            // https://github.com/mapbox/mapbox-gl-js/issues/7801
+            depthMask: true,
+            depthTest: true,
+            depthRange: [0, 1],
+            colorMask: [true, true, true, true]
           }
         });
       }

@@ -54,7 +54,7 @@ export default class DeckRenderer {
     activateViewport,
     views,
     redrawReason = 'unknown reason',
-    customRender = false,
+    clearCanvas = true,
     effects = [],
     pass,
     stats
@@ -67,7 +67,7 @@ export default class DeckRenderer {
       views,
       onViewportActive: activateViewport,
       redrawReason,
-      customRender,
+      clearCanvas,
       effects,
       effectProps
     });
