@@ -95,7 +95,7 @@ module.exports = (env = {}) => {
     // Set development mode (no minification)
     config.mode = 'development';
     // Remove .min from the name
-    config.output.filename = 'dist.js';
+    config.output.filename = 'dist/dist.js';
     // Disable transpilation
     config.module.rules = [];
   }

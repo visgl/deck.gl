@@ -19,8 +19,7 @@
   "files": [
     "dist",
     "src",
-    "dist.js",
-    "dist.min.js"
+    "dist.js"
   ],
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
