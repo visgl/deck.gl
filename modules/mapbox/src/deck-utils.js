@@ -60,10 +60,10 @@ export function updateLayer(deck, layer) {
 }
 
 export function drawLayer(deck, layer) {
-  // set layerFilter to only allow the current layer
-  deck.deckRenderer.layerFilter = params => shouldDrawLayer(layer.id, params.layer);
-  deck._drawLayers('mapbox-repaint', {clearCanvas: false});
-  deck.deckPicker.layerFilter = null;
+  deck._drawLayers('mapbox-repaint', {
+    layers: getLayers(deck, deckLayer => shouldDrawLayer(layer.id, deckLayer)),
+    clearCanvas: false
+  });
 }
 
 export function getViewState(map, extraProps) {
@@ -93,19 +93,25 @@ function afterRender(deck, map) {
 
     // Draw non-Mapbox layers
     const mapboxLayerIds = Array.from(mapboxLayers, layer => layer.id);
-    deck.deckRenderer.layerFilter = params => {
-      for (const id of mapboxLayerIds) {
-        if (shouldDrawLayer(id, params.layer)) {
-          return false;
+    deck._drawLayers('mapbox-repaint', {
+      layers: getLayers(deck, deckLayer => {
+        for (const id of mapboxLayerIds) {
+          if (shouldDrawLayer(id, deckLayer)) {
+            return false;
+          }
         }
-      }
-      return true;
-    };
-    deck._drawLayers('mapbox-repaint', {clearCanvas: false});
-    deck.deckPicker.layerFilter = null;
+        return true;
+      }),
+      clearCanvas: false
+    });
   }
 
   deck.needsRedraw({clearRedrawFlags: true});
+}
+
+function getLayers(deck, layerFilter) {
+  const layers = deck.layerManager.getLayers();
+  return layers.filter(layerFilter);
 }
 
 function shouldDrawLayer(id, layer) {
