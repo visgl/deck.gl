@@ -30,6 +30,7 @@ export {COORDINATE_SYSTEM} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting-effect';
+export {default as CameraLight} from './effects/camera-light';
 
 // Experimental Pure JS (non-React) bindings
 export {default as Deck} from './lib/deck';

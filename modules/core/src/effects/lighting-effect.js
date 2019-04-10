@@ -1,7 +1,9 @@
 import {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
+import CameraLight from './camera-light';
 import Effect from '../lib/effect';
 import {projectPosition} from '../shaderlib/project/project-functions';
 import {COORDINATE_SYSTEM} from '../lib';
+import {getUniformsFromViewport} from '../shaderlib/project/viewport-uniforms';
 
 const DefaultAmbientLightProps = {color: [255, 255, 255], intensity: 1.0};
 const DefaultDirectionalLightProps = [
@@ -66,20 +68,31 @@ export default class LightingEffect extends Effect {
 
   getProjectedPointLights(layer) {
     const viewport = layer.context.viewport;
-    const {coordinateSystem, coordinateOrigin} = layer.props;
+    const {coordinateSystem, coordinateOrigin, modelMatrix} = layer.props;
     const projectedPointLights = [];
+    let position;
 
     for (let i = 0; i < this.pointLights.length; i++) {
       const pointLight = this.pointLights[i];
-      const position = projectPosition(pointLight.position, {
-        viewport,
-        coordinateSystem,
-        coordinateOrigin,
-        fromCoordinateSystem: viewport.isGeospatial
-          ? COORDINATE_SYSTEM.LNGLAT
-          : COORDINATE_SYSTEM.IDENTITY,
-        fromCoordinateOrigin: [0, 0, 0]
-      });
+      if (pointLight instanceof CameraLight) {
+        const {project_uCameraPosition} = getUniformsFromViewport({
+          viewport,
+          modelMatrix,
+          coordinateSystem,
+          coordinateOrigin
+        });
+        position = project_uCameraPosition;
+      } else {
+        position = projectPosition(pointLight.position, {
+          viewport,
+          coordinateSystem,
+          coordinateOrigin,
+          fromCoordinateSystem: viewport.isGeospatial
+            ? COORDINATE_SYSTEM.LNGLAT
+            : COORDINATE_SYSTEM.IDENTITY,
+          fromCoordinateOrigin: [0, 0, 0]
+        });
+      }
       projectedPointLights.push(
         new PointLight({
           color: pointLight.color,
@@ -88,7 +101,6 @@ export default class LightingEffect extends Effect {
         })
       );
     }
-
     return projectedPointLights;
   }
 }
