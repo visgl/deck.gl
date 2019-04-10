@@ -18,12 +18,12 @@ export default class LayersPass extends Pass {
     parameters = {},
     pass = 'draw',
     redrawReason = '',
-    customRender,
+    clearCanvas = true,
     effects,
     effectProps
   }) {
     const gl = this.gl;
-    if (!customRender) {
+    if (clearCanvas) {
       this.clearCanvas(gl);
     }
 
