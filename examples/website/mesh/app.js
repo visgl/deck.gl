@@ -5,10 +5,11 @@ import DeckGL, {COORDINATE_SYSTEM, SimpleMeshLayer, OrbitView} from 'deck.gl';
 import {OBJLoader} from '@loaders.gl/obj';
 import {registerLoaders} from '@loaders.gl/core';
 
+// Add the loaders that handle your mesh format here
 registerLoaders([OBJLoader]);
 
 const MESH_URL =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/mesh/alfa147.obj';
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/mesh/minicooper.obj';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],
@@ -34,8 +35,8 @@ const SAMPLE_DATA = (([xCount, yCount], spacing) => {
 })([10, 10], 120);
 
 class Example extends PureComponent {
-  _renderLayers() {
-    return [
+  render() {
+    const layers = [
       new SimpleMeshLayer({
         id: 'mini-coopers',
         data: SAMPLE_DATA,
@@ -46,15 +47,13 @@ class Example extends PureComponent {
         getOrientation: d => d.orientation
       })
     ];
-  }
 
-  render() {
     return (
       <DeckGL
         views={new OrbitView()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
-        layers={this._renderLayers()}
+        layers={layers}
       />
     );
   }
