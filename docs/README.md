@@ -1,9 +1,13 @@
 <p align="center">
   These docs are for
-  <a href="https://github.com/uber/deck.gl/blob/6.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/deck.gl-v6.3-brightgreen.svg?style=flat-square" />
+  <a href="https://github.com/uber/deck.gl/blob/7.0-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v7.0-brightgreen.svg?style=flat-square" />
   </a>
   Looking for an old version?
+  <a href="https://github.com/uber/deck.gl/blob/6.4-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v6.4-green.svg?style=flat-square" />
+  <a href="https://github.com/uber/deck.gl/blob/6.3-release/docs/README.md">
+    <img src="https://img.shields.io/badge/deck.gl-v6.3-green.svg?style=flat-square" />
   <a href="https://github.com/uber/deck.gl/blob/6.2-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v6.2-green.svg?style=flat-square" />
   </a>
@@ -13,20 +17,8 @@
   <a href="https://github.com/uber/deck.gl/blob/6.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/deck.gl-v6.0-green.svg?style=flat-square" />
   </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.3-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-5.3-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.2-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-5.2-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/5.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-5.1-green.svg?style=flat-square" />
-  </a>
   <a href="https://github.com/uber/deck.gl/blob/5.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/v-5.0-green.svg?style=flat-square" />
-  </a>
-  <a href="https://github.com/uber/deck.gl/blob/4.1-release/docs/README.md">
-    <img src="https://img.shields.io/badge/v-4.1-green.svg?style=flat-square" />
   </a>
   <a href="https://github.com/uber/deck.gl/blob/4.0-release/docs/README.md">
     <img src="https://img.shields.io/badge/v-4.0-green.svg?style=flat-square" />
