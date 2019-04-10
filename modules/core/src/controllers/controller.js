@@ -158,7 +158,8 @@ export default class Controller {
       doubleClickZoom = true,
       touchZoom = true,
       touchRotate = false,
-      keyboard = true
+      keyboard = true,
+      zoomTransition = 0
     } = props;
 
     // Register/unregister events
@@ -177,6 +178,7 @@ export default class Controller {
     this.touchZoom = touchZoom;
     this.touchRotate = touchRotate;
     this.keyboard = keyboard;
+    this.zoomTransition = zoomTransition;
   }
   /* eslint-enable complexity, max-statements */
 
@@ -310,7 +312,11 @@ export default class Controller {
     }
 
     const newControllerState = this.controllerState.zoom({pos, scale});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS);
+    const transitionProps =
+      this.zoomTransition > 0
+        ? Object.assign({}, this._getTransitionProps(), {transitionDuration: this.zoomTransition})
+        : NO_TRANSITION_PROPS;
+    return this.updateViewport(newControllerState, transitionProps);
   }
 
   // Default handler for the `pinchstart` event.
