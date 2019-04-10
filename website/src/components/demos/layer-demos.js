@@ -219,7 +219,8 @@ export const TripsLayerDemo = createLayerDemoClass({
     }
   },
   props: {
-    getPath: d => d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
+    getPath: d =>
+      d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 8,
