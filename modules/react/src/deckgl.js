@@ -33,11 +33,7 @@ const defaultProps = Deck.defaultProps;
 export default class DeckGL extends React.PureComponent {
   constructor(props) {
     super(props);
-    this.state = {
-      width: 0,
-      height: 0,
-      viewState: props.initialViewState
-    };
+    this.viewports = null;
     this.children = [];
     autobind(this);
   }
@@ -52,14 +48,16 @@ export default class DeckGL extends React.PureComponent {
       this.deck ||
       new DeckClass(
         Object.assign({}, this.props, {
-          initialViewState: null,
           canvas: this.deckCanvas,
-          viewState: this._getViewState(this.props),
-          // Note: If Deck event handling change size or view state, it calls onResize to update
-          onViewStateChange: this._onViewStateChange,
-          onResize: this._onResize
+          _customRender: this._customRender
         })
       );
+    this._updateFromProps();
+  }
+
+  componentDidUpdate() {
+    this._redrawDeck();
+    this._updateFromProps();
   }
 
   componentWillUnmount() {
@@ -89,25 +87,18 @@ export default class DeckGL extends React.PureComponent {
   }
 
   // Callbacks
-
-  // Forward callback and then call forceUpdate to guarantee that sub components update
-  _onResize(params) {
-    this.setState(params);
-    this.props.onResize(params);
+  _redrawDeck() {
+    this.deck._drawLayers('React update');
   }
 
-  // Forward callback and then call forceUpdate to guarantee that sub components update
-  _onViewStateChange(params) {
-    // Let app know that view state is changing, and give it a chance to change it
-    const viewState = this.props.onViewStateChange(params) || params.viewState;
+  _customRender() {
+    const viewports = this.deck.viewManager.getViewports();
 
-    // If initialViewState was set on creation, auto track position
-    if (this.state.viewState) {
-      this.setState({
-        viewState: Object.assign({}, this.state.viewState, {
-          [params.viewId]: viewState
-        })
-      });
+    if (viewports !== this.viewports) {
+      // Viewports have changed, update children props first
+      this.forceUpdate();
+    } else {
+      this._redrawDeck();
     }
   }
 
@@ -116,45 +107,22 @@ export default class DeckGL extends React.PureComponent {
   // 1. Extract any JSX layers from the react children
   // 2. Handle any backwards compatiblity props for React layer
   // Needs to be called both from initial mount, and when new props arrive
-  _updateFromProps(nextProps) {
+  _updateFromProps() {
     if (!this.deck) {
       return;
     }
 
-    if (nextProps.viewports || nextProps.viewport) {
-      log.removed('DeckGL.viewport(s)', 'DeckGL.views')();
-    }
-
     // extract any deck.gl layers masquerading as react elements from props.children
-    const {layers, views, children} = extractJSXLayers(nextProps);
+    const {layers, views, children} = extractJSXLayers(this.props);
 
-    const deckProps = Object.assign({}, nextProps, {
-      onViewStateChange: this._onViewStateChange,
-      onResize: this._onResize,
+    const deckProps = Object.assign({}, this.props, {
       layers,
       views
     });
 
-    const viewState = this._getViewState(nextProps);
-    if (viewState) {
-      deckProps.viewState = viewState;
-    }
-
     this.deck.setProps(deckProps);
 
     this.children = children;
-  }
-
-  // Supports old "geospatial view state as separate props" style (React only!)
-  _getViewState(props) {
-    if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
-      if ('maxZoom' in props || 'minZoom' in props) {
-        log.removed('maxZoom/minZoom', 'viewState');
-      }
-      const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
-      return {latitude, longitude, zoom, pitch, bearing};
-    }
-    return props.viewState || this.state.viewState;
   }
 
   // Iterate over views and reposition children associated with views
@@ -167,6 +135,8 @@ export default class DeckGL extends React.PureComponent {
     }
 
     const defaultViewId = viewManager.views[0].id;
+    // Save the viewports used for the last render
+    this.viewports = viewManager.getViewports();
 
     return children.map((child, i) => {
       if (child.props.viewportId) {
@@ -211,9 +181,6 @@ export default class DeckGL extends React.PureComponent {
   }
 
   render() {
-    // TODO - expensive to update on every render?
-    this._updateFromProps(this.props);
-
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
     const children = this._positionChildrenUnderViews(this.children);
@@ -230,10 +197,8 @@ export default class DeckGL extends React.PureComponent {
       style
     });
 
-    // Render deck.gl as last child
-    children.push(canvas);
-
-    return createElement('div', {id: 'deckgl-wrapper'}, children);
+    // Render deck.gl as the last child
+    return createElement('div', {id: 'deckgl-wrapper'}, [children, canvas]);
   }
 }
 
