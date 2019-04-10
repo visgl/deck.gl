@@ -11,6 +11,7 @@ export {default as geojson} from '../data/sample.geo.json';
 export {default as hexagons} from '../data/hexagons.json';
 export {default as routes} from '../data/sfmta.routes.json';
 export {default as trips} from '../data/trips.json';
+export {default as SFTrips} from '../data/sf.trips';
 export {default as iconAtlas} from '../data/icon-atlas.json';
 export {default as s2cells} from '../data/sf.s2cells.json';
 export {choropleths};

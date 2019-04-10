@@ -162,7 +162,7 @@ export default class LayerControls extends PureComponent {
     }
 
     if (propType && Number.isFinite(propType.max)) {
-      max = Math.min(propType.max, 100);
+      max = propType.max;
     } else if (/angle/i.test(settingName)) {
       max = 360;
     } else {

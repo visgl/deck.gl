@@ -13,7 +13,8 @@ import {
   PointCloudLayer,
   PolygonLayer,
   ScatterplotLayer,
-  TextLayer
+  TextLayer,
+  TripsLayer
 } from 'deck.gl';
 
 import {colorToRGBArray} from '../../utils/format-utils';
@@ -193,5 +194,38 @@ export const BitmapLayerDemo = createLayerDemoClass({
   props: {
     bounds: [-122.519, 37.7045, -122.355, 37.829],
     image: `${DATA_URI}/sf-districts.png`
+  }
+});
+
+export const TripsLayerDemo = createLayerDemoClass({
+  Layer: TripsLayer,
+  dataUrl: `${DATA_URI}/sf.trips.json`,
+  propParameters: {
+    currentTime: {
+      displayName: 'currentTime',
+      type: 'range',
+      value: 500,
+      step: 12,
+      min: 0,
+      max: 1200
+    },
+    trailLength: {
+      displayName: 'trailLength',
+      type: 'range',
+      value: 600,
+      step: 12,
+      min: 0,
+      max: 1200
+    }
+  },
+  props: {
+    getPath: d =>
+      d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
+    getColor: [253, 128, 93],
+    opacity: 0.8,
+    widthMinPixels: 8,
+    rounded: true,
+    trailLength: 600,
+    currentTime: 500
   }
 });
