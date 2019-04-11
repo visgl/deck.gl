@@ -26,7 +26,6 @@ const INITIAL_VIEW_STATE = {
 };
 
 const deckgl = new Deck({
-  canvas: 'my-deck-canvas', // This is the canvas id in your html (<canvas id="my-deck-canvas">)
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
