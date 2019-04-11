@@ -1,0 +1,1 @@
+import './lighting-effect.spec';
