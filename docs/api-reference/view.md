@@ -39,7 +39,7 @@ A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `height` (String|Number)
+##### `height` (String|Number, optional)
 
 A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
