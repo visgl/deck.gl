@@ -1,6 +1,6 @@
 # DeckGL (Scripting Interface)
 
-`DeckGL` extends the core [Deck](/docs/api-reference/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://obervablehq.com). 
+`DeckGL` extends the core [Deck](/docs/api-reference/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://observablehq.com). 
 
 Make sure to read the [Using deck.gl Scripting API](/docs/get-started/using-standalone.md) article.
 
@@ -18,7 +18,9 @@ new deck.DeckGL({
     new deck.ScatterplotLayer({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
-      ]
+      ],
+      getColor: d => d.color,
+      getRadius: d => d.radius
     })
   ]
 });
