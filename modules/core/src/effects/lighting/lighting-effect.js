@@ -1,9 +1,9 @@
 import {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
 import CameraLight from './camera-light';
-import Effect from '../lib/effect';
-import {projectPosition} from '../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../lib';
-import {getUniformsFromViewport} from '../shaderlib/project/viewport-uniforms';
+import Effect from '../../lib/effect';
+import {projectPosition} from '../../shaderlib/project/project-functions';
+import {COORDINATE_SYSTEM} from '../../lib';
+import {getUniformsFromViewport} from '../../shaderlib/project/viewport-uniforms';
 
 const DefaultAmbientLightProps = {color: [255, 255, 255], intensity: 1.0};
 const DefaultDirectionalLightProps = [

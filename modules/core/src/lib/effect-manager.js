@@ -1,5 +1,5 @@
 import {deepEqual} from '../utils/deep-equal';
-import {default as LightingEffect} from '../effects/lighting-effect';
+import {default as LightingEffect} from '../effects/lighting/lighting-effect';
 
 export default class EffectManager {
   constructor() {

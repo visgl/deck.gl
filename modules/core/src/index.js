@@ -29,8 +29,8 @@ import './shaderlib';
 export {COORDINATE_SYSTEM} from './lib/constants';
 
 // Effects
-export {default as LightingEffect} from './effects/lighting-effect';
-export {default as CameraLight} from './effects/camera-light';
+export {default as LightingEffect} from './effects/lighting/lighting-effect';
+export {default as CameraLight} from './effects/lighting/camera-light';
 
 // Experimental Pure JS (non-React) bindings
 export {default as Deck} from './lib/deck';
