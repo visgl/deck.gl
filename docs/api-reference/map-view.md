@@ -22,18 +22,11 @@ For more information on using `View` classes, consult the [Views](/docs/develope
 
 The default controller of a `MapView` is [MapController](/docs/api-reference/map-controller.md).
 
-## Usage
-
-```js
-const viewport = new MapView({id: 'primary-map'});
-```
-
-
 ## Constructor
 
-Creates a new `MapView` instance.
-
-`new MapView({id, ...});`
+```js
+const view = new MapView({...});
+```
 
 `MapView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
 

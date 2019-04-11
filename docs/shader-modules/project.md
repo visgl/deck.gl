@@ -3,8 +3,8 @@
 The `project` shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
 
 The `project` module has two extensions:
-- [project32](/docs/api-reference/shader-modules/project32.md) shorthand functions for projecting directly from worldspace to clipspace.
-- [project64](/docs/api-reference/shader-modules/project64.md) counterpart of `project32` that enables 64 bit projections, providing an increase in precision, at the cost of performance.
+- [project32](/docs/shader-modules/project32.md) shorthand functions for projecting directly from worldspace to clipspace.
+- [project64](/docs/shader-modules/project64.md) counterpart of `project32` that enables 64 bit projections, providing an increase in precision, at the cost of performance.
 
 
 ## Usage
