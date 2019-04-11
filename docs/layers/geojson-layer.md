@@ -141,7 +141,7 @@ Remarks:
 
 The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
-##### `lineWidthScale` (Boolean, optional)
+##### `lineWidthScale` (Number, optional)
 
 * Default: `1`
 
