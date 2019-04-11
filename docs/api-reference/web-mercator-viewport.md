@@ -4,25 +4,27 @@ The `WebMercatorViewport` class enables 3D rendering to seamlessly overlay on to
 
 When in perspective mode, the `WebMercatorViewport` is carefully tuned to work in synchronization with `mapbox-gl`'s projection matrix.
 
-For more information consult the [Viewports](/docs/developer-guide/viewports.md) article.
+For more information consult the [base Viewport](/docs/api-reference/viewport.md) documentation.
 
 ## Usage
 
-The `WebMercatorViewport` is the default viewport for deck.gl, created under the hood to do geospatial projections in JavaScript.
+The `WebMercatorViewport` is the default viewport for deck.gl, created under the hood by a [MapView](/docs/api-reference/map-view.md).
 
-```jsx
-import DeckGL from 'deck.gl';
+```js
+import {WebMercatorViewport} from '@deck.gl/core';
 
-<DeckGL width={width} heigh={height} longitude={longitude} latitude={latitude} zoom={zoom} pitch={pitch} bearing={bearing} layers=[...]/>
-```
+const viewport = new WebMercatorViewport({
+  width: 600,
+  height: 400,
+  longitude: -122.45,
+  latitude: 37.78,
+  zoom: 12,
+  pitch: 30,
+  bearing: 15
+});
 
-Is equivalent to
-
-```jsx
-import DeckGL, {WebMercatorViewport} from 'deck.gl';
-const viewport = new WebMercatorViewport({width, height, longitude, latitude, zoom, pitch, bearing});
-
-<DeckGL views={[viewport]} layers=[...]/>
+viewport.project([-122.45, 37.78]);
+// [300,200]
 ```
 
 

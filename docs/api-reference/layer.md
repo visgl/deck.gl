@@ -198,13 +198,13 @@ Specifies how layer positions and offsets should be geographically interpreted.
 
 The default is to interpret positions as latitude and longitude, however it is also possible to interpret positions as meter offsets added to projection center specified by the `coordinateOrigin` prop.
 
-See the article on Coordinate Systems for details.
+See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
 
 ##### `coordinateOrigin` ([Number, Number], optional)
 
 Required when the `coordinateSystem` is set to `COORDINATE_SYSTEM.METER_OFFSETS`.
 
-Specifies a longitude and a latitude from which meter offsets are calculated. See the article on Coordinate Systems for details
+Specifies a longitude and a latitude from which meter offsets are calculated. See the article on [Coordinate Systems](/docs/developer-guide/coordinate-systems.md) for details.
 
 ##### `wrapLongitude` (Boolean, optional)
 
@@ -220,7 +220,7 @@ An optional 4x4 matrix that is multiplied into the affine projection matrices us
 
 Allows local coordinate system transformations to be applied to a layer, which is useful when composing data from multiple sources that use different coordinate systems.
 
-Note that the matrix projection is applied after the non-linear mercator projection calculations are resolved, so be careful when using model matrices with longitude/latitude encoded coordinates. They normally work best with non-mercator viewports or meter offset based mercator layers
+Note that the matrix projection is applied after the non-linear mercator projection calculations are resolved, so be careful when using model matrices with longitude/latitude encoded coordinates. They normally work best with non-mercator viewports or meter offset based mercator layers.
 
 
 ### Data Properties

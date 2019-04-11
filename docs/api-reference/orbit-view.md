@@ -23,7 +23,7 @@ For more information on using `View` classes, consult the [Views](/docs/develope
 ## Constructor
 
 ```js
-new OrbitView({...});
+const view = new OrbitView({...});
 ```
 
 `OrbitView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.

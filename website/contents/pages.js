@@ -254,20 +254,12 @@ export const docPages = generatePath([
         content: getDocUrl('developer-guide/interactivity.md')
       },
       {
-        name: 'About View States',
-        content: getDocUrl('developer-guide/view-state.md')
-      },
-      {
-        name: 'Using Views',
-        content: getDocUrl('developer-guide/views.md')
-      },
-      {
         name: 'Coordinate Systems',
         content: getDocUrl('developer-guide/coordinate-systems.md')
       },
       {
-        name: 'Viewports and Projections',
-        content: getDocUrl('developer-guide/viewports.md')
+        name: 'Views and Projections',
+        content: getDocUrl('developer-guide/views.md')
       },
       {
         name: 'Using Lighting ',

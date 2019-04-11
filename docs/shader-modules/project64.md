@@ -1,6 +1,6 @@
 # project64 (Shader Module)
 
-The `project64` shader module is an extension of the [project](/docs/api-reference/shader-modules/project.md) shader module that does projection using 64 bit floating point. It provides an increase in precision, at the cost of performance. Note that starting with deck.gl v6.1, the improved default 32 bit projection mode provides sufficient precision for most use cases.
+The `project64` shader module is an extension of the [project](/docs/shader-modules/project.md) shader module that does projection using 64 bit floating point. It provides an increase in precision, at the cost of performance. Note that starting with deck.gl v6.1, the improved default 32 bit projection mode provides sufficient precision for most use cases.
 
 
 ## getUniforms

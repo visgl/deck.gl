@@ -23,31 +23,13 @@ The `position` vector will then be interpreted as meter offsets from this anchor
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
 
-## Usage
-
-Creating a new `FirstPersonView`
-
-```js
-const viewport = new FirstPersonView({
-  // Projection parameters (perspective projection)
-  fov: 45,
-});
-```
-
 ## Constructor
 
 ```js
 new FirstPersonView({...});
 ```
 
-`FirstPersonView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor, with the following additions:
-
-Projection matrix arguments:
-
-* `fov` (Number, optional) - Field of view covered by camera. Default `75`.
-* `near` (Number, optional) - Distance of near clipping plane. Default `0.1`.
-* `far` (Number, optional) - Distance of far clipping plane. Default `1000`.
-
+`FirstPersonView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
 
 ## Methods
 
