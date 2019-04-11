@@ -1,6 +1,7 @@
 import test from 'tape-catch';
 import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
-import CameraLight from '@deck.gl/core/effects/lighting/camera-light';
+import {experimental} from '@deck.gl/core';
+const {CameraLight} = experimental;
 
 import {MapView, PolygonLayer} from 'deck.gl';
 import * as FIXTURES from 'deck.gl-test/data';

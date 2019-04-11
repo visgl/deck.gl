@@ -30,7 +30,7 @@ export {COORDINATE_SYSTEM} from './lib/constants';
 
 // Effects
 export {default as LightingEffect} from './effects/lighting/lighting-effect';
-export {default as CameraLight} from './effects/lighting/camera-light';
+import {default as CameraLight} from './effects/lighting/camera-light';
 export {default as PointLight} from './effects/lighting/point-light';
 export {default as DirectionalLight} from './effects/lighting/directional-light';
 
@@ -91,6 +91,7 @@ export {AmbientLight} from '@luma.gl/core';
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
+  CameraLight,
   Tesselator,
   flattenVertices,
   fillArray,

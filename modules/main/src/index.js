@@ -66,8 +66,7 @@ export {
   FlyToInterpolator,
   // Effects
   Effect,
-  LightingEffect,
-  CameraLight
+  LightingEffect
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
