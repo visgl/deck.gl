@@ -1,9 +1,6 @@
-import {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
-import CameraLight from './camera-light';
+import {AmbientLight} from '@luma.gl/core';
+import DirectionalLight from './directional-light';
 import Effect from '../../lib/effect';
-import {projectPosition} from '../../shaderlib/project/project-functions';
-import {COORDINATE_SYSTEM} from '../../lib';
-import {getUniformsFromViewport} from '../../shaderlib/project/viewport-uniforms';
 
 const DefaultAmbientLightProps = {color: [255, 255, 255], intensity: 1.0};
 const DefaultDirectionalLightProps = [
@@ -49,8 +46,9 @@ export default class LightingEffect extends Effect {
   }
 
   getParameters(layer) {
-    const {ambientLight, directionalLights} = this;
+    const {ambientLight} = this;
     const pointLights = this.getProjectedPointLights(layer);
+    const directionalLights = this.getProjectedDirectionalLights(layer);
     return {
       lightSources: {ambientLight, directionalLights, pointLights}
     };
@@ -67,40 +65,22 @@ export default class LightingEffect extends Effect {
   }
 
   getProjectedPointLights(layer) {
-    const viewport = layer.context.viewport;
-    const {coordinateSystem, coordinateOrigin, modelMatrix} = layer.props;
     const projectedPointLights = [];
-    let position;
 
     for (let i = 0; i < this.pointLights.length; i++) {
       const pointLight = this.pointLights[i];
-      if (pointLight instanceof CameraLight) {
-        const {project_uCameraPosition} = getUniformsFromViewport({
-          viewport,
-          modelMatrix,
-          coordinateSystem,
-          coordinateOrigin
-        });
-        position = project_uCameraPosition;
-      } else {
-        position = projectPosition(pointLight.position, {
-          viewport,
-          coordinateSystem,
-          coordinateOrigin,
-          fromCoordinateSystem: viewport.isGeospatial
-            ? COORDINATE_SYSTEM.LNGLAT
-            : COORDINATE_SYSTEM.IDENTITY,
-          fromCoordinateOrigin: [0, 0, 0]
-        });
-      }
-      projectedPointLights.push(
-        new PointLight({
-          color: pointLight.color,
-          intensity: pointLight.intensity,
-          position
-        })
-      );
+      projectedPointLights.push(pointLight.getProjectedLight(layer));
     }
     return projectedPointLights;
+  }
+
+  getProjectedDirectionalLights(layer) {
+    const projectedDirectionalLights = [];
+
+    for (let i = 0; i < this.directionalLights.length; i++) {
+      const directionalLight = this.directionalLights[i];
+      projectedDirectionalLights.push(directionalLight.getProjectedLight(layer));
+    }
+    return projectedDirectionalLights;
   }
 }
