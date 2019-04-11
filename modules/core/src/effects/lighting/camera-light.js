@@ -2,7 +2,7 @@ import PointLight from './point-light';
 import {getUniformsFromViewport} from '../../shaderlib/project/viewport-uniforms';
 
 export default class CameraLight extends PointLight {
-  getProjectedLight(layer) {
+  getProjectedLight({layer}) {
     const viewport = layer.context.viewport;
     const {coordinateSystem, coordinateOrigin, modelMatrix} = layer.props;
     const {project_uCameraPosition} = getUniformsFromViewport({

@@ -69,7 +69,7 @@ export default class LightingEffect extends Effect {
 
     for (let i = 0; i < this.pointLights.length; i++) {
       const pointLight = this.pointLights[i];
-      projectedPointLights.push(pointLight.getProjectedLight(layer));
+      projectedPointLights.push(pointLight.getProjectedLight({layer}));
     }
     return projectedPointLights;
   }
@@ -79,7 +79,7 @@ export default class LightingEffect extends Effect {
 
     for (let i = 0; i < this.directionalLights.length; i++) {
       const directionalLight = this.directionalLights[i];
-      projectedDirectionalLights.push(directionalLight.getProjectedLight(layer));
+      projectedDirectionalLights.push(directionalLight.getProjectedLight({layer}));
     }
     return projectedDirectionalLights;
   }

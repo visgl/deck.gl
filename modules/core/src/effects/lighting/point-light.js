@@ -8,7 +8,7 @@ export default class PointLight extends BasePointLight {
     this.projectedLight = new BasePointLight(props);
   }
 
-  getProjectedLight(layer) {
+  getProjectedLight({layer}) {
     const viewport = layer.context.viewport;
     const {coordinateSystem, coordinateOrigin} = layer.props;
     const position = projectPosition(this.position, {
