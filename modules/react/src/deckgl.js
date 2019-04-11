@@ -20,10 +20,11 @@
 
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import {Deck, View, log} from '@deck.gl/core';
+import {Deck, experimental} from '@deck.gl/core';
+const {memoize} = experimental;
+
 import extractJSXLayers from './utils/extract-jsx-layers';
-import {inheritsFrom} from './utils/inherits-from';
-import evaluateChildren from './utils/evaluate-children';
+import positionChildrenUnderViews from './utils/position-children-under-views';
 import autobind from './utils/autobind';
 
 const propTypes = Deck.getPropTypes(PropTypes);
@@ -35,12 +36,15 @@ export default class DeckGL extends React.PureComponent {
     super(props);
 
     this.viewports = null;
-    this.children = [];
 
     // The redraw flag of deck
     this._needsRedraw = null;
 
     autobind(this);
+
+    // Memoized functions
+    this._extractJSXLayers = memoize(extractJSXLayers);
+    this._positionChildrenUnderViews = memoize(positionChildrenUnderViews);
   }
 
   componentDidMount() {
@@ -101,14 +105,6 @@ export default class DeckGL extends React.PureComponent {
     return this.deck.pickObjects({x, y, width, height, layerIds});
   }
 
-  queryObject(opts) {
-    log.removed('queryObject', 'pickObject')();
-  }
-
-  queryVisibleObjects(opts) {
-    log.removed('queryVisibleObjects', 'pickObjects')();
-  }
-
   // Callbacks
   _redrawDeck() {
     if (this._needsRedraw) {
@@ -137,6 +133,14 @@ export default class DeckGL extends React.PureComponent {
 
   // Private Helpers
 
+  _parseJSX() {
+    return this._extractJSXLayers({
+      layers: this.props.layers,
+      views: this.props.views,
+      children: this.props.children
+    });
+  }
+
   // 1. Extract any JSX layers from the react children
   // 2. Handle any backwards compatiblity props for React layer
   // Needs to be called both from initial mount, and when props have changed
@@ -146,77 +150,27 @@ export default class DeckGL extends React.PureComponent {
     }
 
     // extract any deck.gl layers masquerading as react elements from props.children
-    const {layers, views, children} = extractJSXLayers(this.props);
-
+    const {layers, views} = this._parseJSX();
     const deckProps = Object.assign({}, this.props, {
       layers,
       views
     });
 
     this.deck.setProps(deckProps);
-
-    this.children = children;
-  }
-
-  // Iterate over views and reposition children associated with views
-  // TODO - Can we supply a similar function for the non-React case?
-  _positionChildrenUnderViews(children) {
-    const {viewManager} = this.deck || {};
-
-    if (!viewManager || !viewManager.views.length) {
-      return [];
-    }
-
-    const defaultViewId = viewManager.views[0].id;
-    // Save the viewports used for the last render
-    this.viewports = viewManager.getViewports();
-
-    return children.map((child, i) => {
-      if (child.props.viewportId) {
-        log.removed('viewportId', '<View>')();
-      }
-      if (child.props.viewId) {
-        log.removed('viewId', '<View>')();
-      }
-
-      // Unless child is a View, position / render as part of the default view
-      let viewId = defaultViewId;
-      let viewChildren = child;
-      if (inheritsFrom(child.type, View)) {
-        viewId = child.props.id || defaultViewId;
-        viewChildren = child.props.children;
-      }
-
-      const viewport = viewManager.getViewport(viewId);
-      const viewState = viewManager.getViewState(viewId);
-
-      // Drop (auto-hide) elements with viewId that are not matched by any current view
-      if (!viewport) {
-        return null;
-      }
-
-      // Resolve potentially relative dimensions using the deck.gl container size
-      const {x, y, width, height} = viewport;
-
-      viewChildren = evaluateChildren(viewChildren, {
-        x,
-        y,
-        width,
-        height,
-        viewport,
-        viewState
-      });
-
-      const style = {position: 'absolute', left: x, top: y, width, height};
-      const key = `view-child-${viewId}-${i}`;
-      return createElement('div', {key, id: key, style}, viewChildren);
-    });
   }
 
   render() {
+    // Save the viewports used for this render
+    const {viewManager} = this.deck || {};
+    this.viewports = viewManager && viewManager.getViewports();
+
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
-    const children = this._positionChildrenUnderViews(this.children);
+    const children = this._positionChildrenUnderViews({
+      children: this._parseJSX().children,
+      viewports: this.viewports,
+      deck: this.deck
+    });
 
     // TODO - this styling is enforced for correct positioning with children
     // It can override the styling set by `Deck`, this should be consolidated.

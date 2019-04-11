@@ -79,8 +79,9 @@ export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
 export {createIterable} from './utils/iterable-utils';
-import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
+import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 import {count} from './utils/count';
+import memoize from './utils/memoize';
 
 // lighting
 export {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
@@ -91,5 +92,6 @@ export const experimental = {
   Tesselator,
   flattenVertices,
   fillArray,
-  count
+  count,
+  memoize
 };
