@@ -11,8 +11,6 @@ Our [examples](https://github.com/uber/deck.gl/tree/master/examples/get-started)
 
 The [Deck](/docs/api-reference/deck.md) class takes deck.gl layer instances and viewport parameters, and renders those layers as a transparent overlay.
 
-You must create a canvas inside the html with the id `my-deck-canvas` for it to work.
-
 ```bash
 npm install @deck.gl/core @deck.gl/layers
 ```
@@ -28,7 +26,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 const deckgl = new Deck({
-  canvas: 'my-deck-canvas',
+  canvas: 'my-deck-canvas', // This is the canvas id in your html (<canvas id="my-deck-canvas">)
   initialViewState: INITIAL_VIEW_STATE,
   controller: true,
   layers: [
