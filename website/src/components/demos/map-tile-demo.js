@@ -25,7 +25,8 @@ export default class LineDemo extends Component {
     return (
       <div>
         <h3>Raster Map Tiles</h3>
-        <p>Data source:
+        <p>
+          Data source:
           <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a> and
           <a href="https://wiki.openstreetmap.org/wiki/Tile_servers"> Tile Servers </a>
         </p>
@@ -36,6 +37,6 @@ export default class LineDemo extends Component {
   render() {
     // eslint-disable-next-line no-unused-vars
     const {params, data, ...otherProps} = this.props;
-    return <App {...otherProps} autoHighlight={params.autoHighlight.value}/>;
+    return <App {...otherProps} autoHighlight={params.autoHighlight.value} />;
   }
 }
