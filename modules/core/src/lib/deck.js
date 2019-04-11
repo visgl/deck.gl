@@ -286,7 +286,7 @@ export default class Deck {
 
     this.stats.get('Redraw Count').incrementCount();
     if (this.props._customRender) {
-      this.props._customRender();
+      this.props._customRender(redrawReason);
     } else {
       this._drawLayers(redrawReason);
     }
