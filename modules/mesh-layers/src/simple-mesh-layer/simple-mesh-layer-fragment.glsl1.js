@@ -1,6 +1,13 @@
 export default `
 #define SHADER_NAME simple-mesh-layer-fs
 
+// Note(Tarek): headless-gl supports derivatives, but doesn't report it via getExtension. Awesome!
+#ifdef DERIVATIVES
+#define FLAT_SHADE_NORMAL normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)))
+#else
+#define FLAT_SHADE_NORMAL vec3(0.0, 0.0, 1.0)
+#endif
+
 precision highp float;
 
 uniform bool hasTexture;
@@ -17,7 +24,7 @@ varying vec4 vColor;
 void main(void) {
   vec3 normal;
   if (flatShading) {
-    normal = normalize(cross(dFdx(position_commonspace.xyz), dFdy(position_commonspace.xyz)));
+    normal = FLAT_SHADE_NORMAL;
   } else {
     normal = normals_commonspace;
   }
