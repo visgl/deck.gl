@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
 import {LASWorkerLoader} from '@loaders.gl/las';
-import {PLYWorkerLoader} from '@loaders.gl/ply';
+// import {PLYWorkerLoader} from '@loaders.gl/ply';
 import {loadFile, registerLoaders} from '@loaders.gl/core';
 
 // Additional format support can be added here, see
