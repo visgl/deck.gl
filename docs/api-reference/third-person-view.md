@@ -22,36 +22,13 @@ The `position` vector will then be interpreted as meter offsets from this anchor
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
 
-## Usage
-
-```js
-const view = new ThirdPersonView({
-  // Projection parameters (perspective projection)
-  fov: 45
-});
-```
-
-
 ## Constructor
 
 ```js
-new ThirdPersonView({fov: 45, width: 500, height: 500, ...});
+new ThirdPersonView({...});
 ```
 
 `ThirdPersonView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
-
-Parameters:
-
-* `opts` (Object) - Third person view options
-
-  projection matrix arguments:
-
-  + `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-  + `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-  + `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-  + `aspect` (Number, optional) - Aspect ratio. Default to the view's `width/height`.
-
-See [View constructor](/docs/api-reference/view.md#constructor) for additional parameters, especially for specifying alternate projection matrices, geospatial anchor etc.
 
 
 ## Methods
