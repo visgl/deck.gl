@@ -29,7 +29,10 @@ import './shaderlib';
 export {COORDINATE_SYSTEM} from './lib/constants';
 
 // Effects
-export {default as LightingEffect} from './effects/lighting-effect';
+export {default as LightingEffect} from './effects/lighting/lighting-effect';
+import {default as CameraLight} from './effects/lighting/camera-light';
+export {default as PointLight} from './effects/lighting/point-light';
+export {default as DirectionalLight} from './effects/lighting/directional-light';
 
 // Experimental Pure JS (non-React) bindings
 export {default as Deck} from './lib/deck';
@@ -84,11 +87,12 @@ import {count} from './utils/count';
 import memoize from './utils/memoize';
 
 // lighting
-export {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
+export {AmbientLight} from '@luma.gl/core';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
+  CameraLight,
   Tesselator,
   flattenVertices,
   fillArray,
