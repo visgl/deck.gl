@@ -62,7 +62,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
   - [TripsLayer](/docs/layers/trips-layer.md) **New**
 * `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
   - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) **New**
-  - [ScenegraphLayer](/docs/layers/scene-graph-layer.md) **New**
+  - [ScenegraphLayer](/docs/layers/scenegraph-layer.md) **New**
 
 ### Layer API
 

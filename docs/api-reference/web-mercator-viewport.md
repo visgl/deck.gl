@@ -4,7 +4,7 @@ The `WebMercatorViewport` class enables 3D rendering to seamlessly overlay on to
 
 When in perspective mode, the `WebMercatorViewport` is carefully tuned to work in synchronization with `mapbox-gl`'s projection matrix.
 
-For more information consult the [base Viewport](/docs/developer-guide/viewport.md) documentation.
+For more information consult the [base Viewport](/docs/api-reference/viewport.md) documentation.
 
 ## Usage
 

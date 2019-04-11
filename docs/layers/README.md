@@ -52,4 +52,4 @@ The [Geo Layers](https://www.npmjs.com/package/@deck.gl/geo-layers) collects lay
 The [Mesh Layers](https://www.npmjs.com/package/@deck.gl/mesh-layers) visualize 3D models, with experimental support for scenegraph in the glTF format.
 
   - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md)
-  - [ScenegraphLayer](/docs/layers/scene-graph-layer.md)
+  - [ScenegraphLayer](/docs/layers/scenegraph-layer.md)
