@@ -33,8 +33,13 @@ const defaultProps = Deck.defaultProps;
 export default class DeckGL extends React.PureComponent {
   constructor(props) {
     super(props);
+
     this.viewports = null;
     this.children = [];
+
+    // The redraw flag of deck
+    this._needsRedraw = null;
+
     autobind(this);
   }
 
@@ -49,14 +54,32 @@ export default class DeckGL extends React.PureComponent {
       new DeckClass(
         Object.assign({}, this.props, {
           canvas: this.deckCanvas,
+          // The Deck's animation loop is independent from React's render cycle, causing potential
+          // synchronization issues. We provide this custom render function to make sure that React
+          // and Deck update on the same schedule.
           _customRender: this._customRender
         })
       );
     this._updateFromProps();
   }
 
+  // This can be triggered by two scenarios:
+  // 1. Deck's viewports have changed -> _customRender -> this.forceUpdate
+  //    The canvas has not been redrawn to reflect the change.
+  // 2. Props provided to this React component have changed
+  //    We need to update Deck's props
   componentDidUpdate() {
+    // render has just been called. The children are positioned based on the current view state.
+    // Redraw Deck canvas immediately, if necessary, using the current view state, so that it
+    // matches the child components.
     this._redrawDeck();
+
+    // Update Deck's props. The order is important here because setting props may potentially
+    // change Deck's view state. If we call it before redraw Deck canvas will go out of sync with
+    // the children.
+    // If component props have not changed, Deck's redraw flag should not be set.
+    // If component props have changed, this will trigger another call to _customRender in the
+    // next animation frame.
     this._updateFromProps();
   }
 
@@ -88,14 +111,24 @@ export default class DeckGL extends React.PureComponent {
 
   // Callbacks
   _redrawDeck() {
-    this.deck._drawLayers('React update');
+    if (this._needsRedraw) {
+      // Only redraw it we have received a dirty flag
+      this.deck._drawLayers(this._needsRedraw);
+      this._needsRedraw = null;
+    }
   }
 
-  _customRender() {
-    const viewports = this.deck.viewManager.getViewports();
+  _customRender(redrawReason) {
+    // Save the dirty flag for later
+    this._needsRedraw = redrawReason;
 
+    // Viewport/view state is passed to child components as props.
+    // If they have changed, we need to trigger a React rerender to update children props.
+    const viewports = this.deck.viewManager.getViewports();
     if (viewports !== this.viewports) {
-      // Viewports have changed, update children props first
+      // Viewports have changed, update children props first.
+      // This will delay the Deck canvas redraw till after React update (in componentDidUpdate)
+      // so that the canvas does not get rendered before the child components update.
       this.forceUpdate();
     } else {
       this._redrawDeck();
@@ -106,7 +139,7 @@ export default class DeckGL extends React.PureComponent {
 
   // 1. Extract any JSX layers from the react children
   // 2. Handle any backwards compatiblity props for React layer
-  // Needs to be called both from initial mount, and when new props arrive
+  // Needs to be called both from initial mount, and when props have changed
   _updateFromProps() {
     if (!this.deck) {
       return;
