@@ -1,7 +1,7 @@
 import {DirectionalLight} from '@luma.gl/core';
 import {getSunlightDirection} from './suncalc';
 
-export default class Sunlight extends DirectionalLight {
+export default class SunLight extends DirectionalLight {
   constructor({timestamp, ...others}) {
     super(others);
 
