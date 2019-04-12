@@ -78,7 +78,7 @@ The best way to pass additional uniforms to your custom shader is to override
 the `draw()` method:
 
 ```js
-/// my-scatterplot-layer.js
+/// rounded-rectangle-layer.js
 // Example to draw rounded rectangles instead of circles in ScatterplotLayer
 import {ScatterplotLayer} from '@deck.gl/layers';
 import customFragmentShader from './rounded-rectangle-layer-fragment';
@@ -109,6 +109,8 @@ RoundedRectangleLayer.defaultProps = {
   cornerRadius: 0.1
 }
 ```
+
+Modified fragment shader that uses this uniform (learn more in [writing your own shaders](/docs/developer-guide/writing-shaders.md)):
 
 ```js
 /// rounded-rectangle-layer-fragment.js
@@ -176,6 +178,8 @@ MyPointCloudLayer.defaultProps = {
   getRadius: {type: 'accessor', value: 1}
 };
 ```
+
+Modified vertex shader that uses this attribute (learn more in [writing your own shaders](/docs/developer-guide/writing-shaders.md)):
 
 ```js
 // my-point-cloud-layer-vertex.js

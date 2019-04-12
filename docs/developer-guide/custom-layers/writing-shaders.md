@@ -1,42 +1,50 @@
 # Writing Shaders
 
-A shader library facilitates creating shaders that work seamlessly with deck.gl. Use the `modules` parameter to the `Model` class to dynamically include this library into your own GLSL code:
+A shader library facilitates creating shaders that work seamlessly with deck.gl. The `modules` parameter passed to the [Model](https://github.com/uber/luma.gl/blob/master/docs/api-reference/core/model.md) class can dynamically include parts from this library into your own GLSL code:
 
 ```js
 const model = new Model(gl, {
   vs: '// vertex shader GLSL source'
   fs: '// fragment shader GLSL source',
-  modules: ['lighting'] // list of optional module names
+  modules: ['picking', 'project', 'lighting'] // list of optional module names
 });
 ```
 
-
 ## Shader Assembly
 
-Your shaders will be run through the luma.gl shader assembler, which injects code from various module dependencies, The generated shader always contains a prologue of platform defines, and then the modules (see below), and finally your shader code is added.
+Your shaders will be run through the luma.gl [shader assembler](https://github.com/uber/luma.gl/blob/master/docs/api-reference/shadertools/assemble-shaders.md), which injects code from various module dependencies, The generated shader always contains a prologue of platform defines, and then the modules (see below), and finally your shader code is added.
 
 ### Platform defines
 
 This "virtual" module is a dynamically generated prologue containing #defines describing your graphics card and platform. It is designed to work around certain platform-specific issues to allow the same rendering results are different GPUs and platforms. It is automatically injected by `assembleShaders` before any modules are included.
 
 
-## Shader Modules
+### Shader Modules
 
-### Lighting (Vertex and Fragment Shaders)
+#### projection
 
-A simple lighting package is provided in deck.gl, supporting a single directional light in addition to ambient light. Turning on lighting requires normals to be provided for each vertex.
+The [project](/docs/shader-modules/project.md) shader module is part of the core of deck.gl. It makes it easy to write shaders that support all of deck.gl's projection modes and it supports some advanced rendering techniques such as pixel space rendering etc.
+
+The `project` module also has two extensions, [project32](/docs/shader-modules/project32.md) and [project64](/docs/shader-modules/project64.md).
 
 
-### fp64
+#### lighting
+
+A simple lighting package is provided in deck.gl, supporting a single directional light in addition to ambient light. Turning on lighting requires normals to be provided for each vertex. There are two flavors:
+
+- [gouraudlighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the vertex shader
+- [phonglighting](https://github.com/uber/luma.gl/blob/master/modules/shadertools/src/modules/phong-lighting/phong-lighting.js) - for lighting calculated in the fragment shader
+
+
+#### fp64
 
 The fp64 shader math library can be used leveraged by developers to conduct numerical computations that requires high numerical accuracy. This shader math library uses "multiple precision" algorithms to emulate 64-bit double precision floating point numbers, with some limitations, using two 32-bit single precision floating point numbers. To use it, just set the "fp64" key to "true" when calling `assembleShaders`. Please refer to the "64-bit layers" section in the document for more information.
 
 Note that for geospatial projection, deck.gl v6.1 introduced a "hybrid" 32-bit projection mode that provides the precision of 64-bit projection with the performance of 32-bit calculations, so it is recommended that any use of `fp64` be used for non-position-projection related use cases.
 
+#### picking
 
-### picking
-
-Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/tree/5.2-release/src/shadertools/modules/picking).
+Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/blob/master/docs/api-reference/shadertools/shader-module-picking.md).
 
 
 ## Shader Techniques and Ideas

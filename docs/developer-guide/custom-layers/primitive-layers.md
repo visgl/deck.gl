@@ -15,7 +15,7 @@ To describe how a layer's properties relate to WebGL attributes and uniforms you
 
 #### Creating The Model
 
-A layer should create its model during this phase. A model is a [luma.gl](https://github.com/uber/luma.gl) `Model` instance that defines what will be drawn to the WebGL context.
+A layer should create its model during this phase. A model is a [luma.gl](https://github.com/uber/luma.gl) [Model](https://github.com/uber/luma.gl/blob/master/docs/api-reference/core/model.md) instance that defines what will be drawn to the WebGL context.
 
 Most layers are **Single-model layers** - this is the predominant form among all core layers that deck.gl currently provides. In these layers, a single geometry model is created for each layer and saved to `state.model` during initialization. The default implementation of the rest of the lifecycle methods will then look for this model for rendering and picking etc., meaning that you don't have to do anything more to get a working layer.
 
@@ -43,9 +43,10 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
 * **Instanced layer** - This type of layer renders the same geometry many times. Usually the simplest way to go when creating a layer that renders a lot of similar objects (think ScatterplotLayer, ArcLayers etc).
 
 ```js
-  /// modules/experimental-layers/src/mesh-layer/mesh-layer.js
-  import {Model, CubeGeometry} from '@luma.gl/core';
+import {Model, CubeGeometry} from '@luma.gl/core';
 
+export default class CubeLayer extends Layer {
+  ...
   _getModel(gl) {
     return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
@@ -53,14 +54,16 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
       isInstanced: true
     }));
   }
+}
 ```
 
 * **Dynamic geometry layer** - This is needed when dealing with data that needs to be rendered using multiple similar but unique geometries, such as polygons (i.e. the geometries are not copies of each other that that only differ in terms of parameters).
 
 ```js
-  /// modules/experimental-layers/src/trips-layer/trips-layer.js
-  import {Model, Geometry} from '@luma.gl/core';
+import {Model, Geometry} from '@luma.gl/core';
 
+export default class MyLayer extends Layer {
+  ...
   _getModel(gl) {
     return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
@@ -72,6 +75,7 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
       isIndexed: true
     });
   }
+}
 ```
 
 It is sometimes desirable to have a single layer render using multiple geometry primitives (e.g both circles and lines, or triangles and textured meshes etc), rather than creating separate layers. The custom [AxesLayer example](https://github.com/uber/deck.gl/tree/master/examples/website/plot/plot-layer/axes-layer.js) uses this technique to share attributes between grids and labels.
