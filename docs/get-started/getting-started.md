@@ -55,7 +55,7 @@ and then running using:
 npm start
 ```
 
-If the example uses a mapbox base map you need a [Mapbox access token](/docs/get-started/using-with-mapbox-gl.md)
+If the example uses a mapbox base map you need a [Mapbox access token](/docs/get-started/using-with-map.md)
 
 ```bash
 export MapboxAccessToken={Your Token Here} && npm start
