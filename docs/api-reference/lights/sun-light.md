@@ -30,4 +30,4 @@ const sunLight = new SunLight({timestamp, color, intensity});
 
 ## Source
 
-[/modules/core/src/effects/lighting/sunlight.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/sunlight.js)
+[/modules/core/src/effects/lighting/sun-light.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/sun-light.js)
