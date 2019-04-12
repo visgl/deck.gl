@@ -71,6 +71,13 @@
       </a>
     </div>
   </div>
+    <div class="thumb">
+      <div class="bg-black" data-title="Raster Map Tiles" data-name="TileLayer">
+        <a href="#/examples/core-layers/tile-layer">
+          <img src="images/demo-thumb-tile.jpg" />
+        </a>
+      </div>
+    </div>
 </div>
 
 ### Custom Layers

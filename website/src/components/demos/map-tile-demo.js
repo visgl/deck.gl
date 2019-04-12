@@ -24,15 +24,11 @@ export default class LineDemo extends Component {
   static renderInfo() {
     return (
       <div>
+        <h3>Raster Map Tiles</h3>
         <p>
-          OpenStreetsMap
-          <br />
-          <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a>
-          <br />
+          OpenStreetMap data source:
+          <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a> and
           <a href="https://wiki.openstreetmap.org/wiki/Tile_servers"> Tile Servers </a>
-          <br />
-          <a href="https://www.openstreetmap.org/"> Explorer </a>
-          <br />
         </p>
       </div>
     );
