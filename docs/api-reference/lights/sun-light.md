@@ -1,15 +1,15 @@
-# Sunlight (Experimental)
+# SunLight (Experimental)
 
-Sunlight is a directional light source simulating the sun. Sun position calculations are based on [article](http://aa.quae.nl/en/reken/zonpositie.html) and inspired by [SunCalc](https://www.npmjs.com/package/suncalc). 
+SunLight is a directional light source simulating the sun. Sun position calculations are based on [article](http://aa.quae.nl/en/reken/zonpositie.html) and inspired by [SunCalc](https://www.npmjs.com/package/suncalc). 
 
 ## Usage 
 
-Create an sun light source.
+Create a sun light source.
 
 ```js
-import {_Sunlight as Sunlight} from '@deck.gl/core';
+import {_SunLight as SunLight} from '@deck.gl/core';
 
-new Sunlight({
+new SunLight({
   timestamp: 1554927200000, 
   color: [255, 0, 0],
   intensity: 1
@@ -18,10 +18,10 @@ new Sunlight({
 
 ## constructor
 
-The constructor for the `Sunlight` class. Use this to create a new `Sunlight`.
+The constructor for the `SunLight` class. Use this to create a new `SunLight`.
 
 ```js
-const sunlight = new Sunlight({timestamp, color, intensity});
+const sunLight = new SunLight({timestamp, color, intensity});
 ```
 
 * `timestamp` - (*number*) - Unix timestamp in milliseconds.
@@ -30,4 +30,4 @@ const sunlight = new Sunlight({timestamp, color, intensity});
 
 ## Source
 
-[/modules/core/src/effects/lighting/sunlight.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/sunlight.js)
+[/modules/core/src/effects/lighting/sun-light.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/sun-light.js)
