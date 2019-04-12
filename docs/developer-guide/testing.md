@@ -84,7 +84,7 @@ While unit tests are good at capturing issues in layer initialization and prop u
 
 The `@deck.gl/test-utils` module offers a [SnapshotTestRunner](/docs/api-reference/test-utils/snapshot-test-runner.md) that works with the [probe.gl](https://uber-web.github.io/probe.gl) library's [`BrowserTestDriver`](https://github.com/uber-web/probe.gl/blob/master/docs/api-reference/test-utils/browser-test-driver.md) class to perform this task. Together, they enable the following scenario:
 
-* start a Chrome browser instance
+* start a controlled Chromium browser instance
 * start a server (we use a webpack-dev-server) that bundles a test script.
 * the test script renders a set of tests (described below), compares the output against golden images and report the result back to the Node process
 * closes down all processes and browser tabs.
