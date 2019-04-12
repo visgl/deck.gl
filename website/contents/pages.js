@@ -605,53 +605,62 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/lights/sun-light.md')
           }
         ]
-      }
-    ]
-  },
-  {
-    name: 'JSON API Reference (Experimental)',
-    children: [
-      {
-        name: 'JSONDeck (Experimental)',
-        content: getDocUrl('api-reference/json/json-deck.md')
       },
       {
-        name: 'JSONLayer (Experimental)',
-        content: getDocUrl('api-reference/json/json-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'Mapbox API Reference (Experimental)',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/mapbox/overview.md')
+        name: '@deck.gl/json',
+        children: [
+          {
+            name: 'JSONConverter',
+            content: getDocUrl('api-reference/json/json-converter.md')
+          },
+          {
+            name: 'JSONLayer',
+            content: getDocUrl('api-reference/json/json-layer.md')
+          }
+        ]
       },
       {
-        name: 'MapboxLayer',
-        content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'test-utils API Reference',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/test-utils/overview.md')
+        name: '@deck.gl/google-maps',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/google-maps/overview.md')
+          },
+          {
+            name: 'GoogleMapsOverlay',
+            content: getDocUrl('api-reference/google-maps/google-maps-overlay.md')
+          }
+        ]
       },
       {
-        name: 'generateLayerTests',
-        content: getDocUrl('api-reference/test-utils/generate-layer-test.md')
+        name: '@deck.gl/mapbox',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/mapbox/overview.md')
+          },
+          {
+            name: 'MapboxLayer',
+            content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
+          }
+        ]
       },
       {
-        name: 'testLayer',
-        content: getDocUrl('api-reference/test-utils/test-layer.md')
-      },
-      {
-        name: 'SnapshotTestRunner',
-        content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
+        name: '@deck.gl/test-utils',
+        children: [
+          {
+            name: 'generateLayerTests',
+            content: getDocUrl('api-reference/test-utils/generate-layer-tests.md')
+          },
+          {
+            name: 'testLayer',
+            content: getDocUrl('api-reference/test-utils/test-layer.md')
+          },
+          {
+            name: 'SnapshotTestRunner',
+            content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
+          }
+        ]
       }
     ]
   }
