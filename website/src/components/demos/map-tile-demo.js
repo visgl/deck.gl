@@ -26,7 +26,7 @@ export default class LineDemo extends Component {
       <div>
         <h3>Raster Map Tiles</h3>
         <p>
-          Data source:
+          OpenStreetMap data source:
           <a href="https://en.wikipedia.org/wiki/OpenStreetMap"> Wiki </a> and
           <a href="https://wiki.openstreetmap.org/wiki/Tile_servers"> Tile Servers </a>
         </p>
