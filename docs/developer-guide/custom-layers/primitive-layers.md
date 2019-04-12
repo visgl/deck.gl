@@ -20,9 +20,9 @@ A layer should create its model during this phase. A model is a [luma.gl](https:
 Most layers are **Single-model layers** - this is the predominant form among all core layers that deck.gl currently provides. In these layers, a single geometry model is created for each layer and saved to `state.model` during initialization. The default implementation of the rest of the lifecycle methods will then look for this model for rendering and picking etc., meaning that you don't have to do anything more to get a working layer.
 
 ```js
-import {Layer} from 'deck.gl';
+import {Layer} from '@deck.gl/core';
 
-export default class SimpleMeshLayer extends Layer {
+export default class CubeLayer extends Layer {
 
   initializeState() {
     const {gl} = this.context;
@@ -32,7 +32,7 @@ export default class SimpleMeshLayer extends Layer {
   }
 
   _getModel(gl) {
-    // create Model here
+    // TODO: create Model here
   }
 
 }
@@ -44,19 +44,12 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
 
 ```js
   /// modules/experimental-layers/src/mesh-layer/mesh-layer.js
-  import {Model, Geometry} from 'luma.gl';
+  import {Model, CubeGeometry} from '@luma.gl/core';
 
   _getModel(gl) {
-
     return new Model(gl, Object.assign({}, this.getShaders(), {
       id: this.props.id,
-      geometry: new Geometry({
-        drawMode: gl.TRIANGLES,
-        indices: new Uint16Array(this.props.mesh.indices),
-        positions: new Float32Array(this.props.mesh.vertices),
-        normals: new Float32Array(this.props.mesh.vertexNormals),
-        texCoords: new Float32Array(this.props.mesh.textures)
-      }),
+      geometry: new CubeGeometry(),
       isInstanced: true
     }));
   }
@@ -66,7 +59,7 @@ A choice to make is whether your WebGL primitives (draw calls) should be instanc
 
 ```js
   /// modules/experimental-layers/src/trips-layer/trips-layer.js
-  import {Model, Geometry} from 'luma.gl';
+  import {Model, Geometry} from '@luma.gl/core';
 
   _getModel(gl) {
     return new Model(gl, Object.assign({}, this.getShaders(), {
@@ -98,7 +91,9 @@ initializeState() {
   });
 
   this.state.attributeManager.add({
-    instancePositions: {size: 3, accessor: 'getPosition', update: this.calculateInstancePositions},
+    /* this attribute is automatically filled by the return value of `props.getPosition` */
+    instancePositions: {size: 3, accessor: 'getPosition'},
+    /* this attribute is populated by calling `layer.calculateInstanceColors` */
     instanceColors: {size: 4, type: GL.UNSIGNED_BYTE, accessor: 'getColor', update: this.calculateInstanceColors}
   });
 }

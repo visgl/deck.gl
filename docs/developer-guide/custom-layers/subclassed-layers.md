@@ -11,44 +11,40 @@ good technique to add it.
 
 ```js
 // Example to add per-segment color to PathLayer
-import {PathLayer} from 'deck.gl';
+import {PathLayer} from '@deck.gl/layers';
 
 // Accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
-
-export default MultiColorPathLayer extends PathLayer {
+export default class MultiColorPathLayer extends PathLayer {
   calculateColors(attribute) {
-    const {data, getColor} = this.props;
-    const {paths} = this.state;
+    const {data, getPath, getColor} = this.props;
     const {value} = attribute;
 
     let i = 0;
-    paths.forEach((path, index) => {
-      const color = getColor(data[index], index);
+
+    for (const object of data) {
+      const path = getPath(object);
+      const color = getColor(object);
       if (Array.isArray(color[0])) {
-        if (color.length !== path.length) {
+        if (color.length !== path.length - 1) {
           throw new Error('PathLayer getColor() returned a color array, but the number of '
-           `colors returned doesn't match the number of points in the path. Index ${index}`);
+           `colors returned doesn't match the number of segments in the path. Index ${index}`);
         }
-        color.forEach((pointColor) => {
-          const alpha = isNaN(pointColor[3]) ? 255 : pointColor[3];
-          colors[i++] = pointColor[0];
-          colors[i++] = pointColor[1];
-          colors[i++] = pointColor[2];
-          colors[i++] = alpha;
+        color.forEach((segmentColor) => {
+          colors[i++] = segmentColor[0];
+          colors[i++] = segmentColor[1];
+          colors[i++] = segmentColor[2];
+          colors[i++] = isNaN(segmentColor[3]) ? 255 : segmentColor[3];
         });
       } else {
-        if (isNaN(color[3])) {
-          color[3] = 255;
-        }
         for (let ptIndex = 1; ptIndex < path.length; ptIndex++) {
           value[i++] = color[0];
           value[i++] = color[1];
           value[i++] = color[2];
-          value[i++] = color[3];
+          value[i++] = isNaN(color[3]) ? 255 : color[3];
         }
       }
-    });
+    }
   }
 }
 ```
@@ -84,8 +80,8 @@ the `draw()` method:
 ```js
 /// my-scatterplot-layer.js
 // Example to draw rounded rectangles instead of circles in ScatterplotLayer
-import {ScatterplotLayer} from 'deck.gl';
-import customFragmentShader from 'my-scatterplot-layer-fragment';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import customFragmentShader from './rounded-rectangle-layer-fragment';
 
 export default RoundedRectangleLayer extends ScatterplotLayer {
 
@@ -101,14 +97,13 @@ export default RoundedRectangleLayer extends ScatterplotLayer {
 
   getShaders() {
     // use object.assign to make sure we don't overwrite existing fields like `vs`, `modules`...
-    const shaders = Object.assign({}, super.getShaders(), {
+    return Object.assign({}, super.getShaders(), {
       fs: customFragmentShader
     });
-    return shaders;
   }
 }
+
 RoundedRectangleLayer.defaultProps = {
-  ...ScatterplotLayer.defaultProps,
   // cornerRadius: the amount of rounding at the rectangle corners
   // 0 - rectangle. 1 - circle.
   cornerRadius: 0.1
@@ -116,27 +111,34 @@ RoundedRectangleLayer.defaultProps = {
 ```
 
 ```js
-/// my-scatterplot-layer-fragment.js
+/// rounded-rectangle-layer-fragment.js
+// This is copied and adapted from scatterplot-layer-fragment.glsl.js
+// Modifications are annotated
 export default `\
-#define SHADER_NAME my-scatterplot-layer-fragment-shader
+#define SHADER_NAME rounded-rectangle-layer-fragment-shader
 
 precision highp float;
 
 uniform float cornerRadius;
 
-varying vec4 vColor;
+varying vec4 vFillColor;
 varying vec2 unitPosition;
 
 void main(void) {
 
-  float threshold = sqrt(2.0) * (1.0 - cornerRadius) + 1.0 * cornerRadius;
   float distToCenter = length(unitPosition);
 
+  /* Calculate the cutoff radius for the rounded corners */
+  float threshold = sqrt(2.0) * (1.0 - cornerRadius) + 1.0 * cornerRadius;
   if (distToCenter <= threshold) {
-    gl_FragColor = vColor;
+    gl_FragColor = vFillColor;
   } else {
     discard;
   }
+
+  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
 }
 `;
 ```
@@ -158,65 +160,58 @@ export default MyPointCloudLayer extends PointCloudLayer {
     super.initializeState();
 
     this.state.attributeManager.addInstanced({
-      instanceRadiusPixels: {size: 1, accessor: 'getRadius', update: this.calculateInstanceRadiusPixels}
+      instanceRadiusPixels: {size: 1, accessor: 'getRadius'}
     });
   }
 
-  calculateInstanceRadiusPixels({value}) {
-    const {data, getRadiusPixels} = this.props;
-    let i = 0;
-    for (const point of data) {
-      value[i++] = getRadiusPixels(point);
-    }
-  }
-
   getShaders() {
-    return {
+    return Object.assign({}, super.getShaders(), {
       vs: vertexShader,
-      fs: super.getShaders().fs
-    }
+    });
   }
 }
+
 MyPointCloudLayer.defaultProps = {
-  ...PointCloudLayer.defaultProps,
   // returns point radius in pixels
-  getRadiusPixels: d => 1
-}
+  getRadius: {type: 'accessor', value: 1}
+};
 ```
 
 ```js
 // my-point-cloud-layer-vertex.js
+// This is copied and adapted from point-cloud-layer-vertext.glsl.js
+// Modifications are annotated
 export default `\
-#define SHADER_NAME my-point-cloud-layer-vertex-shader
+#define SHADER_NAME point-cloud-layer-vertex-shader
 
 attribute vec3 positions;
-
-attribute vec3 instancePositions;
 attribute vec3 instanceNormals;
 attribute vec4 instanceColors;
-attribute vec3 instanceRadiusPixels;
+attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
+attribute vec3 instancePickingColors;
+
+/* New attribute */
+attribute flat instanceRadiusPixels;
 
 uniform float opacity;
-uniform vec2 viewportSize;
 
 varying vec4 vColor;
 varying vec2 unitPosition;
 
 void main(void) {
-  // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
 
-  // Find the center of the point and add the current vertex
-  vec4 position_worldspace = vec4(project_position(instancePositions), 1.0);
-  vec2 vertex = positions.xy * instanceRadiusPixels / viewportSize * 2.0;
-  gl_Position = project_to_clipspace(position_worldspace) + vec4(vertex, 0.0, 0.0);
+  vec4 position_commonspace;
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.), position_commonspace);
+  /* replaced uniform 'radiusPixels' with 'instanceRadiusPixels' */
+  gl_Position.xy += project_pixel_size_to_clipspace(positions.xy * instanceRadiusPixels);
 
-  // Apply lighting
-  float lightWeight = getLightWeight(position_worldspace.xyz, // the w component is always 1.0
-    instanceNormals);
+  vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, project_normal(instanceNormals));
 
-  // Apply opacity to instance color, or return instance picking color
-  vColor = vec4(lightWeight * instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
+
+  picking_setPickingColor(instancePickingColors);
 }
 `;
 ```
