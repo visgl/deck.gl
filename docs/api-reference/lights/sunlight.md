@@ -1,5 +1,3 @@
-# TODO need update when new light source interface arrives
- 
 # Sunlight (Experimental)
 
 Sunlight is a directional light source simulating the sun. Sun position calculations are based on [article](http://aa.quae.nl/en/reken/zonpositie.html) and inspired by [SunCalc](https://www.npmjs.com/package/suncalc). 
@@ -26,7 +24,6 @@ The constructor for the `Sunlight` class. Use this to create a new `Sunlight`.
 const sunlight = new Sunlight({timestamp, color, intensity});
 ```
 
-#### Parameters
 * `timestamp` - (*number*) - Unix timestamp in milliseconds.
 * `color` - (*array*)  RGB color of directional light source, default value is `[255, 255, 255]`.
 * `intensity` - (*number*) Strength of directional light source, default value is `1.0`.
