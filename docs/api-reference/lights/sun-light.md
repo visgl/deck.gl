@@ -4,7 +4,7 @@ Sunlight is a directional light source simulating the sun. Sun position calculat
 
 ## Usage 
 
-Create an ambient light source.
+Create an sun light source.
 
 ```js
 import {_Sunlight as Sunlight} from '@deck.gl/core';
@@ -25,8 +25,8 @@ const sunlight = new Sunlight({timestamp, color, intensity});
 ```
 
 * `timestamp` - (*number*) - Unix timestamp in milliseconds.
-* `color` - (*array*)  RGB color of directional light source, default value is `[255, 255, 255]`.
-* `intensity` - (*number*) Strength of directional light source, default value is `1.0`.
+* `color` - (*array*)  RGB color of sun light source, default value is `[255, 255, 255]`.
+* `intensity` - (*number*) Strength of sun light source, default value is `1.0`.
 
 ## Source
 

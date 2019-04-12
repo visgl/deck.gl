@@ -33,7 +33,7 @@ export {default as LightingEffect} from './effects/lighting/lighting-effect';
 export {default as PointLight} from './effects/lighting/point-light';
 export {default as DirectionalLight} from './effects/lighting/directional-light';
 export {default as _CameraLight} from './effects/lighting/camera-light';
-export {default as _Sunlight} from './effects/lighting/sunlight';
+export {default as _Sunlight} from './effects/lighting/sun-light';
 
 // Experimental Pure JS (non-React) bindings
 export {default as Deck} from './lib/deck';
