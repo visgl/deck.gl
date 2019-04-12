@@ -19,6 +19,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.0 Prereleases
 
+#### deck.gl [v7.0.0-beta.4] - Apr 11 2019
+
+- Update luma version to beta 8 (#2952)
+- new camera light feature (#2943)
+- improve react perf (#2949)
+- Improve React synchronization (#2939)
+- Move dev scripts out of module roots (#2944)
+- Clean up customRender prop handling (#2936)
+- fix external gl context usage (#2934)
+- Use the same animation loop for render, attribute transitions and viewport transitions (#2921)
+- Flat shading in SimpleMeshLayer when normals aren't available. (#2922)
+- Fix onHover behavior (#2925)
+- Revert min-pixels prop default (#2926)
+- fix console warnings related to luma API changes (#2920)
+- Fix attribute transition (#2919)
+
+
 #### deck.gl [v7.0.0-beta.3] - Apr 5 2019
 
 - fix project normal (#2910)
