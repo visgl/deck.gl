@@ -1,23 +1,25 @@
 // sun position calculations are based on http://aa.quae.nl/en/reken/zonpositie.html formulas
 // and inspired by https://github.com/mourner/suncalc/blob/master/suncalc.js
-const PI = Math.PI;
-const sin = Math.sin;
-const cos = Math.cos;
-const tan = Math.tan;
-const asin = Math.asin;
-const atan = Math.atan2;
-const rad = PI / 180;
+const DEGREES_TO_RADIANS = Math.PI / 180;
 
 const DAY_IN_MS = 1000 * 60 * 60 * 24;
 const JD1970 = 2440588; // Julian Day year 1970
 const JD2000 = 2451545; // Julian Day year 2000
 
 // This angle ε [epsilon] is called the obliquity of the ecliptic and its value at the beginning of 2000 was 23.4397°
-const e = rad * 23.4397; // obliquity of the Earth
+const e = DEGREES_TO_RADIANS * 23.4397; // obliquity of the Earth
+
+// Refer https://www.aa.quae.nl/en/reken/zonpositie.html
+// "The Mean Anomaly" section for explanation
+const M0 = 357.5291; // Earth mean anomaly on start day
+const M1 = 0.98560028; // Earth angle traverses on average per day seen from the sun
+
+const THETA0 = 280.147; // The sidereal time (in degrees) at longitude 0° at the instant defined by JD2000
+const THETA1 = 360.9856235; // The rate of change of the sidereal time, in degrees per day.
 
 export function getSolarPosition(timestamp, latitude, longitude) {
-  const longitudeWestInRadians = rad * -longitude;
-  const phi = rad * latitude;
+  const longitudeWestInRadians = DEGREES_TO_RADIANS * -longitude;
+  const phi = DEGREES_TO_RADIANS * latitude;
   const d = toDays(timestamp);
 
   const c = getSunCoords(d);
@@ -37,10 +39,10 @@ export function getSolarPosition(timestamp, latitude, longitude) {
 export function getSunlightDirection(timestamp, latitude, longitude) {
   const {azimuth, altitude} = getSolarPosition(timestamp, latitude, longitude);
   // convert azimuth from 0 at south to be 0 at north
-  const azimuthN = azimuth + PI;
+  const azimuthN = azimuth + Math.PI;
 
   // solar position to light direction
-  return [-sin(azimuthN), -cos(azimuthN), -sin(altitude)];
+  return [-Math.sin(azimuthN), -Math.cos(azimuthN), -Math.sin(altitude)];
 }
 
 function toJulianDay(timestamp) {
@@ -53,45 +55,47 @@ function toDays(timestamp) {
 
 function getRightAscension(eclipticLongitude, b) {
   const lambda = eclipticLongitude;
-  return atan(sin(lambda) * cos(e) - tan(b) * sin(e), cos(lambda));
+  return Math.atan2(Math.sin(lambda) * Math.cos(e) - Math.tan(b) * Math.sin(e), Math.cos(lambda));
 }
 
 function getDeclination(eclipticLongitude, b) {
   const lambda = eclipticLongitude;
-  return asin(sin(b) * cos(e) + cos(b) * sin(e) * sin(lambda));
+  return Math.asin(Math.sin(b) * Math.cos(e) + Math.cos(b) * Math.sin(e) * Math.sin(lambda));
 }
 
 function getAzimuth(hourAngle, latitudeInRadians, declination) {
   const H = hourAngle;
   const phi = latitudeInRadians;
   const delta = declination;
-  return atan(sin(H), cos(H) * sin(phi) - tan(delta) * cos(phi));
+  return Math.atan2(Math.sin(H), Math.cos(H) * Math.sin(phi) - Math.tan(delta) * Math.cos(phi));
 }
 
 function getAltitude(hourAngle, latitudeInRadians, declination) {
   const H = hourAngle;
   const phi = latitudeInRadians;
   const delta = declination;
-  return asin(sin(phi) * sin(delta) + cos(phi) * cos(delta) * cos(H));
+  return Math.asin(Math.sin(phi) * Math.sin(delta) + Math.cos(phi) * Math.cos(delta) * Math.cos(H));
 }
 
 // https://www.aa.quae.nl/en/reken/zonpositie.html
+// "The Observer section"
 function getSiderealTime(dates, longitudeWestInRadians) {
-  return rad * (280.147 + 360.9856235 * dates) - longitudeWestInRadians;
+  return DEGREES_TO_RADIANS * (THETA0 + THETA1 * dates) - longitudeWestInRadians;
 }
 
 function getSolarMeanAnomaly(days) {
-  return rad * (357.5291 + 0.98560028 * days);
+  return DEGREES_TO_RADIANS * (M0 + M1 * days);
 }
 
 function getEclipticLongitude(meanAnomaly) {
   const M = meanAnomaly;
   // equation of center
-  const C = rad * (1.9148 * sin(M) + 0.02 * sin(2 * M) + 0.0003 * sin(3 * M));
+  const C =
+    DEGREES_TO_RADIANS * (1.9148 * Math.sin(M) + 0.02 * Math.sin(2 * M) + 0.0003 * Math.sin(3 * M));
   // perihelion of the Earth
-  const P = rad * 102.9372;
+  const P = DEGREES_TO_RADIANS * 102.9372;
 
-  return M + C + P + PI;
+  return M + C + P + Math.PI;
 }
 
 function getSunCoords(dates) {
