@@ -196,7 +196,9 @@ export default class SimpleMeshLayer extends Layer {
       if (props.mesh) {
         this.setState({model: this.getModel(props.mesh)});
         this.setState({
-          hasNormals: Boolean(props.mesh.attributes.NORMAL || props.mesh.attributes.normals)
+          hasNormals:
+            props.mesh.attributes &&
+            Boolean(props.mesh.attributes.NORMAL || props.mesh.attributes.normals)
         });
       }
       this.getAttributeManager().invalidateAll();
