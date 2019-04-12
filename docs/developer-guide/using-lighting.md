@@ -38,6 +38,8 @@ The `lights` has all the light sources that the lighting effect uses to build th
 * [AmbientLight](/docs/api-reference/lights/ambient-light.md)
 * [PointLight](/docs/api-reference/lights/point-light.md)
 * [DirectionalLight](/docs/api-reference/lights/directional-light.md)
+* [CameraLight](/docs/api-reference/lights/camera-light.md)
+* [SunLight](/docs/api-reference/lights/sun-light.md)
 
 
 ## Constructing A Material Instance
