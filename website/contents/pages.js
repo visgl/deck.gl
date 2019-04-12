@@ -612,6 +612,14 @@ export const docPages = generatePath([
           {
             name: 'DirectionalLight',
             content: getDocUrl('api-reference/lights/directional-light.md')
+          },
+          {
+            name: 'CameraLight',
+            content: getDocUrl('api-reference/lights/camera-light.md')
+          },
+          {
+            name: 'SunLight',
+            content: getDocUrl('api-reference/lights/sun-light.md')
           }
         ]
       }
