@@ -36,7 +36,7 @@ The picking engine returns "picking info" objects which contains a variety of fi
 
 ```js
 <canvas id="deck-canvas"></canvas>
-<div id="tooltip" style="position: absolute; z-index: 1, pointer-events: none;"></div>
+<div id="tooltip" style="position: absolute; z-index: 1; pointer-events: none;"></div>
 ```
 
 ```js
@@ -68,8 +68,8 @@ function setTooltip(object, x, y) {
   if (object) {
     el.innerHTML = object.message;
     el.style.display = 'block';
-    el.style.left = x;
-    el.style.top = y;
+    el.style.left = x + 'px';
+    el.style.top = y + 'px';
   } else {
     el.style.display = 'none';
   }
