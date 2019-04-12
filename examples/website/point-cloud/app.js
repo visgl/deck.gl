@@ -1,13 +1,23 @@
+/* eslint-disable no-unused-vars */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolator} from 'deck.gl';
 
-import {LASLoader} from '@loaders.gl/las';
-import {loadFile} from '@loaders.gl/core';
+import {LASWorkerLoader} from '@loaders.gl/las';
+// import {PLYWorkerLoader} from '@loaders.gl/ply';
+import {loadFile, registerLoaders} from '@loaders.gl/core';
+
+// Additional format support can be added here, see
+// https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/core/register-loaders.md
+registerLoaders(LASWorkerLoader);
+// registerLoaders(PLYWorkerLoader);
 
 // Data source: kaarta.com
-const DATA_URL =
+const LAZ_SAMPLE =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
+// Data source: The Stanford 3D Scanning Repository
+const PLY_SAMPLE =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy800k.ply';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],
@@ -35,7 +45,8 @@ export class App extends PureComponent {
     this._onLoad = this._onLoad.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._rotateCamera = this._rotateCamera.bind(this);
-    this._loadData();
+
+    loadFile(LAZ_SAMPLE).then(this._onLoad);
   }
 
   _onViewStateChange({viewState}) {
@@ -58,34 +69,26 @@ export class App extends PureComponent {
   _onLoad({header, loaderData, attributes, progress}) {
     // metadata from LAZ file header
     const {mins, maxs} = loaderData.header;
-    const {viewState} = this.state;
+    let {viewState} = this.state;
+
+    if (mins && maxs) {
+      // File contains bounding box info
+      viewState = {
+        ...viewState,
+        target: [(mins[0] + maxs[0]) / 2, (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2],
+        /* global window */
+        zoom: Math.log2(window.innerWidth / (maxs[0] - mins[0])) - 1
+      };
+    }
 
     this.setState(
       {
         pointsCount: header.vertexCount,
         points: attributes.POSITION.value,
-        viewState: {
-          ...viewState,
-          target: [(mins[0] + maxs[0]) / 2, (mins[1] + maxs[1]) / 2, (mins[2] + maxs[2]) / 2],
-          /* global window */
-          zoom: Math.log2(window.innerWidth / (maxs[0] - mins[0])) - 1
-        }
+        viewState
       },
       this._rotateCamera
     );
-  }
-
-  _loadData() {
-    const skip = 1;
-    const {onLoad = () => {}} = this.props;
-
-    onLoad({count: 0, progress: 0});
-
-    const onProgress = ({header, progress}) => {
-      onLoad({count: header.vertexCount, progress});
-    };
-
-    return loadFile(DATA_URL, LASLoader, {skip, onProgress}).then(this._onLoad);
   }
 
   _renderLayers() {

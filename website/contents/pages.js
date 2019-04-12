@@ -107,7 +107,7 @@ export const examplePages = generatePath([
         name: 'PointCloudLayer',
         content: {
           demo: 'PointCloudDemo',
-          code: getCodeUrl('examples/website/point-cloud-laz')
+          code: getCodeUrl('examples/website/point-cloud')
         }
       },
       {
