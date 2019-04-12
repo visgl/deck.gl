@@ -300,20 +300,7 @@ export const docPages = generatePath([
       },
       {
         name: 'Testing',
-        children: [
-          {
-            name: 'Overview',
-            content: getDocUrl('developer-guide/testing/README.md')
-          },
-          {
-            name: 'Testing',
-            content: getDocUrl('developer-guide/testing/testing.md')
-          },
-          {
-            name: 'Using with Unit Test Frameworks',
-            content: getDocUrl('developer-guide/testing/using-with-unit-test-frameworks.md')
-          }
-        ]
+        content: getDocUrl('developer-guide/testing.md')
       },
       {
         name: 'Writing Custom Layers',
@@ -650,6 +637,10 @@ export const docPages = generatePath([
   {
     name: 'test-utils API Reference',
     children: [
+      {
+        name: 'Overview',
+        content: getDocUrl('api-reference/test-utils/overview.md')
+      },
       {
         name: 'generateLayerTests',
         content: getDocUrl('api-reference/test-utils/generate-layer-test.md')
