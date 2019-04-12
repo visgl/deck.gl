@@ -12,7 +12,7 @@ if (!MAPBOX_TOKEN) {
 }
 /* eslint-enable */
 
-const LOCAL_BUNDLE = path.resolve(__dirname, '../../../modules/main/dist.js');
+const LOCAL_BUNDLE = path.resolve(__dirname, '../../../modules/main/dist/dist.dev.js');
 
 module.exports = {
   INPUT_DIR,
