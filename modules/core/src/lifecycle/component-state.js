@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {isPromise, isFetchResponse} from '../utils/type-utils';
 import log from '../utils/log';
 import assert from '../utils/assert';
 
@@ -111,15 +112,16 @@ export default class ComponentState {
     }
 
     // interpret value string as url and start a new load tracked by a promise
+    let url = '';
     if (typeof value === 'string') {
+      url = value;
       const {fetch} = this.layer.props;
-      const url = value;
       value = fetch(url, {propName, layer: this.layer});
     }
 
     // interprets promise and track the "loading"
-    if (value instanceof Promise) {
-      this._watchPromise(propName, value);
+    if (isPromise(value)) {
+      this._watchPromise(propName, value, url);
       return;
     }
 
@@ -167,12 +169,25 @@ export default class ComponentState {
   }
 
   // Tracks a promise, sets the prop when loaded, handles load count
-  _watchPromise(propName, promise) {
+  _watchPromise(propName, promise, url) {
     const asyncProp = this.asyncProps[propName];
     asyncProp.pendingLoadCount++;
     const loadCount = asyncProp.pendingLoadCount;
     promise
-      .then(data => this._setAsyncPropValue(propName, data, loadCount))
+      .then(data => {
+        if (isFetchResponse(data)) {
+          const response = data;
+          const {parse} = this.component ? this.component.props : {};
+          return parse ? parse(response, {url, propName}) : response.json();
+        }
+        // Needed to make tests pass as they don't wait for multiple ticks
+        this._setAsyncPropValue(propName, data, loadCount);
+        return data;
+      })
+      .then(data => {
+        // Duplicate set value will be ignored through loadCount
+        this._setAsyncPropValue(propName, data, loadCount);
+      })
       .catch(error => log.error(error)());
   }
 

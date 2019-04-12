@@ -225,7 +225,21 @@ Note that the matrix projection is applied after the non-linear mercator project
 
 ### Data Properties
 
-There are a number of additional properties that provide extra control over data iteration, comparison and update.
+There are a number of additional properties that provide extra control over data loading, iteration, comparison and update.
+
+##### `fetch` (Function, optional)
+
+When the `data` prop is a `String` deck.gl will load data from the provided URL using the function supplied in the `fetch` prop. This prop, which defaults to calling the browser's `fetch` allows the application to provide a custom function and or options for loading data.
+
+The default function returns the fetch `Response` object returned by `fetch`, in which case the `parse` prop will be invoked, however a user supplied function can also return parsed data, in which case the `parse` prop will not be called.
+
+##### `parse` (Function, optional)
+
+The `parse` property allows the application to control how data loaded by the `fetch` prop is parsed by the layer before being used as `data`. The `parse` function.
+
+The default `parse` function will attempt to parse the fetch response object as JSON using `response.json()`;
+
+Note that a function supplied using the `parse` prop is only called if the return value of the `fetch` prop function is a fetch `Response` object (which is always the case unless the application overrides the `fetch` property).
 
 ##### `dataComparator` (Function, optional)
 

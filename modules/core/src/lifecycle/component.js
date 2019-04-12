@@ -1,6 +1,6 @@
-import {LIFECYCLE} from '../lifecycle/constants';
-import {createProps} from '../lifecycle/create-props';
-// import {diffProps} from '../lifecycle/props';
+import {LIFECYCLE} from './constants';
+import {createProps} from './create-props';
+// import {diffProps} from './props';
 // import log from '../utils/log';
 // import assert from '../utils/assert';
 

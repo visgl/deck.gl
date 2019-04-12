@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 import test from 'tape-catch';
 import ComponentState from '@deck.gl/core/lifecycle/component-state';
 import Component from '@deck.gl/core/lifecycle/component';
@@ -80,31 +81,33 @@ test('ComponentState#asynchronous async props', t => {
       t.equals(
         state.hasAsyncProp('data'),
         true,
-        'ComponentState.hasAsyncProp returned correct value'
+        'ComponentState.hasAsyncProp returned correct value after setting promise'
       );
       state.setAsyncProps({data: loadPromise1});
       t.equals(
         state.isAsyncPropLoading('data'),
         true,
-        'ComponentState.isAsyncPropLoading returned correct value'
+        'ComponentState.isAsyncPropLoading returned correct value after setting promise again'
       );
       loadPromise1.resolve([1]);
       t.equals(
         state.isAsyncPropLoading('data'),
         true,
-        'ComponentState.isAsyncPropLoading returned correct value'
+        'ComponentState.isAsyncPropLoading returned correct value after resolving promise in same tick'
       );
     })
+    // Drive an extra tick
+    .then(_ => _)
     .then(_ => {
       t.equals(
         state.isAsyncPropLoading('data'),
         false,
-        'ComponentState.isAsyncPropLoading returned correct value'
+        'ComponentState.isAsyncPropLoading returned correct value after resolving promise in next tick'
       );
       t.deepEquals(
         state.getAsyncProp('data'),
         [1],
-        'ComponentState.getAsyncProp returned correct value'
+        'ComponentState.getAsyncProp returned correct value after promise resolved'
       );
       state.setAsyncProps({data: loadPromise2});
       state.setAsyncProps({data: loadPromise3});
@@ -112,7 +115,7 @@ test('ComponentState#asynchronous async props', t => {
       t.equals(
         state.isAsyncPropLoading('data'),
         true,
-        'ComponentState.isAsyncPropLoading returned correct value'
+        'ComponentState.isAsyncPropLoading returned correct value after multiple promises added/resolved'
       );
       t.deepEquals(
         state.getAsyncProp('data'),

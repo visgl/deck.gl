@@ -48,12 +48,9 @@ const defaultProps = {
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
   dataTransform: {type: 'function', value: data => data, compare: false},
-  fetch: {
-    type: 'function',
-    value: url => fetch(url).then(response => response.json()),
-    compare: false
-  },
-  updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
+  fetch: {type: 'function', value: (url, options) => fetch(url, options || {}), compare: false},
+  parse: {type: 'function', value: response => response.json(), compare: false},
+  updateTriggers: {},
   numInstances: undefined,
 
   visible: true,
