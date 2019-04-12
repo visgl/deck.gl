@@ -24,9 +24,8 @@
 
 import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, fp64, Buffer, PhongMaterial, isWebGL2} from '@luma.gl/core';
+import {Model, Geometry, Texture2D, fp64, PhongMaterial, isWebGL2} from '@luma.gl/core';
 import {loadImage, loadFile} from '@loaders.gl/core';
-import {Matrix4} from 'math.gl';
 const {fp64LowPart} = fp64;
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -128,7 +127,6 @@ const defaultProps = {
   wireframe: false,
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
-  sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
