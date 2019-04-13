@@ -78,7 +78,7 @@ class DemoLauncher extends Component {
         {...viewState}
         width={width}
         height={height}
-        onViewStateChange={this._updateMapViewState}
+        onViewStateChange={isInteractive && this._updateMapViewState}
       >
         {component}
         {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}

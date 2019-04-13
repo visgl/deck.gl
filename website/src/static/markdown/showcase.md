@@ -1,15 +1,51 @@
+*Would you like us to feature your project? [Let us know](https://github.com/uber/deck.gl/issues)!*
+
 <div>
   <div class="thumb">
     <div class="bg-black" data-title="Autonomous Visualization System" >
-      <a href="http://streetscape.gl/" target="_blank" rel="noopener noreferrer">
+      <a href="https://avs.auto" target="_blank" rel="noopener noreferrer">
         <img src="images/showcase-avs.jpg" />
       </a>
     </div>
   </div>
   <div class="thumb-desc">
     <div>
-      <a href="http://streetscape.gl/" target="_blank" rel="noopener noreferrer"><h2>Autonomous Visualization System</h2></a>
+      <a href="https://avs.auto" target="_blank" rel="noopener noreferrer"><h2>Autonomy Visualization System</h2></a>
       <p>A visualization protocol and toolkit for robotics data in the browser.</p>
+      <p class="credit"><a href="https://github.com/uber/streetscape.gl">GitHub</a> | <a href="https://avs.auto/demo">Demo</a></p>
+    </div>
+  </div>
+
+  <div class="thumb">
+    <div data-title="Escape" >
+      <a href="https://greatescape.co" target="_blank" rel="noopener noreferrer">
+        <img src="images/showcase-escape.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="https://greatescape.co" target="_blank" rel="noopener noreferrer"><h2>Escape</h2></a>
+      <p class="credit">By <a href="http://senseable.mit.edu/">MIT Senseable City Laboratory, Singapore</a></p>
+      <p>Escape is an inspirational flight search engine that helps you choose a destination and find the cheapest flight for your next vacation.</p>
+      <p class="credit"><a href="https://greatescape.co/about">About</a></p>
+    </div>
+  </div>
+
+  <div class="thumb">
+    <div class="bg-black" data-title="BusRouter SG" >
+      <a href="https://busrouter.sg/visualization/" target="_blank" rel="noopener noreferrer">
+        <img src="images/showcase-singapore-bus-route.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="https://busrouter.sg/visualization/" target="_blank" rel="noopener noreferrer"><h2>Singapore Bus Routes Explorer</h2></a>
+      <p class="credit">By <a href="http://twitter.com/cheeaun">@cheeaun</a> | Data © <a href="http://www.mytransport.sg/">Land Transport Authority</a></p>
+      <p>Explore bus stops and routes on the map for all bus services in Singapore, with realtime bus arrival times and per-bus-stop passing routes overview.</p>
+      <p class="credit"><a href="https://github.com/cheeaun/busrouter-sg">GitHub</a></p>
+
     </div>
   </div>
 

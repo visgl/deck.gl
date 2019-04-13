@@ -123,6 +123,13 @@ export const examplePages = generatePath([
           demo: 'MapTileDemo',
           code: getCodeUrl('examples/website/map-tile')
         }
+      },
+      {
+        name: 'TripsLayer',
+        content: {
+          demo: 'TripsDemo',
+          code: getCodeUrl('examples/website/trips')
+        }
       }
     ]
   },
@@ -135,13 +142,6 @@ export const examplePages = generatePath([
         content: {
           demo: 'BrushingDemo',
           code: getCodeUrl('examples/website/brushing')
-        }
-      },
-      {
-        name: 'Trip Routes',
-        content: {
-          demo: 'TripsDemo',
-          code: getCodeUrl('examples/website/trips')
         }
       },
       {
@@ -161,8 +161,16 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
-    name: 'Autonomous Visualization System',
-    external: 'http://streetscape.gl'
+    name: 'Autonomy Visualization System',
+    external: 'http://avs.auto'
+  },
+  {
+    name: 'Escape',
+    external: 'https://greatescape.co'
+  },
+  {
+    name: 'BusRouter SG',
+    external: 'https://busrouter.sg/visualization/'
   },
   {
     name: 'FlightMapper',
@@ -284,19 +292,6 @@ export const docPages = generatePath([
       {
         name: 'Debugging',
         content: getDocUrl('developer-guide/debugging.md')
-      },
-      {
-        name: 'JSON',
-        children: [
-          {
-            name: 'Using the JSON API',
-            content: getDocUrl('developer-guide/json/using-json-api.md')
-          },
-          {
-            name: 'Configuring the JSON API',
-            content: getDocUrl('developer-guide/json/configuring-json-layers.md')
-          }
-        ]
       },
       {
         name: 'Testing',
@@ -475,16 +470,7 @@ export const docPages = generatePath([
         ]
       },
       {
-        name: 'React',
-        children: [
-          {
-            name: 'DeckGL',
-            content: getDocUrl('api-reference/react/deckgl.md')
-          }
-        ]
-      },
-      {
-        name: 'Standalone',
+        name: 'Scripting Interface',
         children: [
           {
             name: 'DeckGL',
@@ -609,49 +595,80 @@ export const docPages = generatePath([
     ]
   },
   {
-    name: 'JSON API Reference (Experimental)',
+    name: 'Submodule API Reference',
     children: [
       {
-        name: 'JSONDeck (Experimental)',
-        content: getDocUrl('api-reference/json/json-deck.md')
+        name: '@deck.gl/google-maps',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/google-maps/overview.md')
+          },
+          {
+            name: 'GoogleMapsOverlay',
+            content: getDocUrl('api-reference/google-maps/google-maps-overlay.md')
+          }
+        ]
       },
       {
-        name: 'JSONLayer (Experimental)',
-        content: getDocUrl('api-reference/json/json-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'Mapbox API Reference (Experimental)',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/mapbox/overview.md')
+        name: '@deck.gl/json',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/json/overview.md')
+          },
+          {
+            name: 'JSONConverter',
+            content: getDocUrl('api-reference/json/json-converter.md')
+          },
+          {
+            name: 'JSONLayer',
+            content: getDocUrl('api-reference/json/json-layer.md')
+          }
+        ]
       },
       {
-        name: 'MapboxLayer',
-        content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'test-utils API Reference',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/test-utils/overview.md')
+        name: '@deck.gl/mapbox',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/mapbox/overview.md')
+          },
+          {
+            name: 'MapboxLayer',
+            content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
+          }
+        ]
       },
       {
-        name: 'generateLayerTests',
-        content: getDocUrl('api-reference/test-utils/generate-layer-test.md')
+        name: '@deck.gl/react',
+        children: [
+          {
+            name: 'DeckGL',
+            content: getDocUrl('api-reference/react/deckgl.md')
+          }
+        ]
       },
       {
-        name: 'testLayer',
-        content: getDocUrl('api-reference/test-utils/test-layer.md')
-      },
-      {
-        name: 'SnapshotTestRunner',
-        content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
+        name: '@deck.gl/test-utils',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/test-utils/overview.md')
+          },
+          {
+            name: 'generateLayerTests',
+            content: getDocUrl('api-reference/test-utils/generate-layer-tests.md')
+          },
+          {
+            name: 'testLayer',
+            content: getDocUrl('api-reference/test-utils/test-layer.md')
+          },
+          {
+            name: 'SnapshotTestRunner',
+            content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
+          }
+        ]
       }
     ]
   }
