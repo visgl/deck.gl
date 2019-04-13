@@ -233,8 +233,8 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/using-with-react.md')
       },
       {
-        name: 'Using With Mapbox GL',
-        content: getDocUrl('get-started/using-with-mapbox-gl.md')
+        name: 'Using With A Base Map',
+        content: getDocUrl('get-started/using-with-map.md')
       },
       {
         name: 'Learning Resources',

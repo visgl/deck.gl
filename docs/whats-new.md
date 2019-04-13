@@ -6,6 +6,12 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Target Release Date: Mar, 2019
 
+### New Effects System
+
+A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](/docs/effects/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers.
+
+### New Layer Catalog
+
 <table style="border: 0;" align="center">
   <tbody>
     <tr>
@@ -15,7 +21,7 @@ Target Release Date: Mar, 2019
       </td>
       <td>
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
-        <p><i>MeshLayer</i></p>
+        <p><i>ScenegraphLayer</i></p>
       </td>
       <td>
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-layer.jpg" />
@@ -25,18 +31,12 @@ Target Release Date: Mar, 2019
   </tbody>
 </table>
 
-### New Effects System
-
-A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](/docs/effects/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers.
-
-### New Layer Catalog
-
 As the number of deck.gl layers grow, we are splitting existing and new layers into multiple submodules for better dependency management. These new layer modules are:
 
 * `@deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
   - [ArcLayer](/docs/layers/arc-layer.md)
-  - [BitmapLayer](/docs/layers/bitmap-layer.md) **New**
-  - [ColumnLayer](/docs/layers/column-layer.md) **New**
+  - [BitmapLayer](/docs/layers/bitmap-layer.md) **<sup>New</sup>**
+  - [ColumnLayer](/docs/layers/column-layer.md) **<sup>New</sup>**
   - [GeoJsonLayer](/docs/layers/geojson-layer.md)
   - [GridCellLayer](/docs/layers/grid-cell-layer.md)
   - [IconLayer](/docs/layers/icon-layer.md)
@@ -54,27 +54,36 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
   - [HexagonLayer](/docs/layers/hexagon-layer.md)
   - [ScreenGridLayer](/docs/layers/screen-grid-layer.md)
 * `@deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
-  - [GreatCircleLayer](/docs/layers/great-circle-layer.md) **New**
-  - [H3ClusterLayer](/docs/layers/h3-cluster-layer.md) **New**
-  - [H3HexagonLayer](/docs/layers/h3-hexagon-layer.md) **New**
-  - [S2Layer](/docs/layers/s2-layer.md) **New**
-  - [TileLayer](/docs/layers/tile-layer.md) **New**
-  - [TripsLayer](/docs/layers/trips-layer.md) **New**
+  - [GreatCircleLayer](/docs/layers/great-circle-layer.md) **<sup>New</sup>**
+  - [H3ClusterLayer](/docs/layers/h3-cluster-layer.md) **<sup>New</sup>**
+  - [H3HexagonLayer](/docs/layers/h3-hexagon-layer.md) **<sup>New</sup>**
+  - [S2Layer](/docs/layers/s2-layer.md) **<sup>New</sup>**
+  - [TileLayer](/docs/layers/tile-layer.md) **<sup>New</sup>**
+  - [TripsLayer](/docs/layers/trips-layer.md) **<sup>New</sup>**
 * `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
-  - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) **New**
-  - [ScenegraphLayer](/docs/layers/scenegraph-layer.md) **New**
+  - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) **<sup>New</sup>**
+  - [ScenegraphLayer](/docs/layers/scenegraph-layer.md) **<sup>New</sup>**
 
 ### Layer API
 
 * **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](/docs/developer-guide/performance.md#on-using-binary-data).
-* **Alignment in core layer API**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
+* **Size units**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
+* **Billboard**: Prior this v7.0, `IconLayer` and `TextLayer` are rendered as billboards (i.e. always facing the camera). A prop `billboard` is added to these layers so that you can place icons and texts relative to the world.
+
+### Google Maps Integration
+
+Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView). See module documentation page for a full list of supported features.
+
+<img height="300" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/google-maps.jpg" />
+<p><i>GoogleMapsOverlay</i></p>
 
 ### Improved Test Utilities
 
 The `@deck.gl/test-utils` module is revamped with two new exports:
-* [`generateLayerTests`](/docs/api-reference/test-utils/generate-layer-tests.md) - automatically create test cases for use with [`testLayer`](/docs/api-reference/test-utils/test-layer.md) to test layer conformance.
-* [`SnapshotTestRunner`](/docs/api-reference/test-utils/snapshot-test-runner.md) - automated integration test for WebGL. Renders deck.gl layers, takes screenshot and compare with golden images in headless Chromium.
+* `generateLayerTests` - automatically create test cases for use with [`testLayer`](/docs/api-reference/test-utils/test-layer.md) to test layer conformance.
+* `SnapshotTestRunner` - automated integration test for WebGL. Renders deck.gl layers, takes screenshot and compare with golden images in headless Chromium.
 
+Read more in [Developer Guide: Testing](/docs/developer-guide/testing.md).
 
 ## deck.gl v6.4
 
