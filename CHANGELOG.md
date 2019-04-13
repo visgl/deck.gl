@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.0 Prereleases
 
+#### deck.gl [v7.0.0-rc.1] - Apr 12 2019
+
+- SimpleMeshLayer bug fixes (#2966)
+- add camera light docs and some sun light clean up (#2960)
+- clean up in mesh layer (#2959)
+- Move CameraLight export (#2957)
+- Add sunlight effect (#2923)
+
 #### deck.gl [v7.0.0-beta.4] - Apr 11 2019
 
 - Update luma version to beta 8 (#2952)
