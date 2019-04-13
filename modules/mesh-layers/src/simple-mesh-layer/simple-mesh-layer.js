@@ -193,8 +193,10 @@ export default class SimpleMeshLayer extends Layer {
       }
       if (props.mesh) {
         this.setState({model: this.getModel(props.mesh)});
+
+        const attributes = props.mesh.attributes || props.mesh;
         this.setState({
-          hasNormals: Boolean(props.mesh.attributes.NORMAL || props.mesh.attributes.normals)
+          hasNormals: Boolean(attributes.NORMAL || attributes.normals)
         });
       }
       this.getAttributeManager().invalidateAll();
