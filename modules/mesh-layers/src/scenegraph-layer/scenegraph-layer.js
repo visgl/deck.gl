@@ -64,7 +64,8 @@ export default class ScenegraphLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        accessor: 'getPosition'
+        accessor: 'getPosition',
+        transition: true
       },
       instancePositions64xy: {
         size: 2,
@@ -74,7 +75,8 @@ export default class ScenegraphLayer extends Layer {
       instanceColors: {
         size: 4,
         accessor: 'getColor',
-        defaultValue: DEFAULT_COLOR
+        defaultValue: DEFAULT_COLOR,
+        transition: true
       },
       instanceModelMatrix: MATRIX_ATTRIBUTES
     });
@@ -99,7 +101,10 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
+  updateState(params) {
+    super.updateState(params);
+    const {props, oldProps} = params;
+
     if (props.scenegraph !== oldProps.scenegraph) {
       if (props.scenegraph instanceof ScenegraphNode) {
         this._deleteScenegraph();
