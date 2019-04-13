@@ -123,6 +123,13 @@ export const examplePages = generatePath([
           demo: 'MapTileDemo',
           code: getCodeUrl('examples/website/map-tile')
         }
+      },
+      {
+        name: 'TripsLayer',
+        content: {
+          demo: 'TripsDemo',
+          code: getCodeUrl('examples/website/trips')
+        }
       }
     ]
   },
@@ -135,13 +142,6 @@ export const examplePages = generatePath([
         content: {
           demo: 'BrushingDemo',
           code: getCodeUrl('examples/website/brushing')
-        }
-      },
-      {
-        name: 'Trip Routes',
-        content: {
-          demo: 'TripsDemo',
-          code: getCodeUrl('examples/website/trips')
         }
       },
       {
@@ -161,8 +161,16 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
-    name: 'Autonomous Visualization System',
-    external: 'http://streetscape.gl'
+    name: 'Autonomy Visualization System',
+    external: 'http://avs.auto'
+  },
+  {
+    name: 'Escape',
+    external: 'https://greatescape.co'
+  },
+  {
+    name: 'BusRouter SG',
+    external: 'https://busrouter.sg/visualization/'
   },
   {
     name: 'FlightMapper',
