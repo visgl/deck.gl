@@ -78,6 +78,13 @@
         </a>
       </div>
     </div>
+    <div class="thumb">
+      <div class="bg-black" data-title="Taxi Trips in NYC" data-name="TripsLayer">
+        <a href="#/examples/custom-layers/trip-routes">
+          <img src="images/demo-thumb-trip.jpg" />
+        </a>
+        </div>
+    </div>
 </div>
 
 ### Custom Layers
@@ -89,13 +96,6 @@
         <img src="images/demo-thumb-brushing.jpg" />
       </a>
     </div>
-  </div>
-  <div class="thumb">
-    <div class="bg-black" data-title="Taxi Trips in NYC" data-name="TripsLayer">
-      <a href="#/examples/custom-layers/trip-routes">
-        <img src="images/demo-thumb-trip.jpg" />
-      </a>
-      </div>
   </div>
   <div class="thumb">
     <div data-title="3D Surface Explorer" data-name="PlotLayer">

@@ -135,6 +135,9 @@ export default class MarkdownPage extends PureComponent {
         this.refs.container.scrollTop = scrollTop;
       }
     }
+    if (!section) {
+      this.refs.container.scrollTop = 0;
+    }
   }
 
   // Find the current section and update the query string.

@@ -81,6 +81,10 @@ export class App extends PureComponent {
       };
     }
 
+    if (this.props.onLoad) {
+      this.props.onLoad({count: header.vertexCount, progress: 1});
+    }
+
     this.setState(
       {
         pointsCount: header.vertexCount,
