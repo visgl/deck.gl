@@ -28,18 +28,44 @@
         z-index: 9;
         pointer-events: none;
       }
+      #control-panel {
+        position: absolute;
+        background: #EFEFEF;
+        top: 0;
+        left: 0;
+        margin: 12px;
+        padding: 10px;
+        font-size: 12px;
+        line-height: 1.5;
+        z-index: 1;
+      }
+      label {
+        display: inline-block;
+        width: 50px;
+      }
     </style>
   </head>
 
   <body>
       <div id="tooltip"></div>
+      <div id="control-panel">
+        <div>
+          <label>Font Size</label>
+          <input id="getSize" type="range" min="0" max="100" step="1" value="16"></input>
+          <span id="getSize-value"></span>
+        </div>
+        <div>
+          <label>Opacity</label>
+          <input id="opacity" type="range" min="0" max="1" step="0.1" value="1"></input>
+          <span id="opacity-value"></span>
+        </div>
   </body>
 
   <script type="text/javascript">
 
     const {DeckGL,TextLayer} = deck;
 
-    new DeckGL({
+    const deckgl = new DeckGL({
         mapboxApiAccessToken: '<mapbox-access-token>',
         mapStyle: 'mapbox://styles/mapbox/dark-v9',
         longitude: -122.4,
@@ -48,7 +74,23 @@
         maxZoom: 15,
         pitch: 30,
         bearing: 0,
-        layers: [ new TextLayer({
+    })
+
+    const OPTIONS = ['getSize', 'opacity'];
+
+    renderLayer();
+    OPTIONS.forEach(key => {
+      document.getElementById(key).oninput = renderLayer;
+    });
+
+    function renderLayer () {
+      const options = {};
+      OPTIONS.forEach(key => {
+        const value = document.getElementById(key).value;
+        document.getElementById(key + '-value').innerHTML = value;
+        options[key] = Number(value);
+      });
+      const textLayer = new TextLayer({
             id: 'text-layer',
             data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json',
             pickable: true,
@@ -60,9 +102,13 @@
             getTextAnchor: 'middle',
             getAlignmentBaseline: 'center',
             onHover: updateTooltip,
-        }),
-    ]
-    });
+            ...options,
+        });
+
+        deckgl.setProps({
+        layers: [textLayer]
+      });
+    }
 
     function updateTooltip({x, y, object}) {
       const tooltip = document.getElementById('tooltip');
