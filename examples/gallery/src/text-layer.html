@@ -1,0 +1,78 @@
+<html>
+  <head>
+    <title>deck.gl TextLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+      <div id="tooltip"></div>
+  </body>
+
+  <script type="text/javascript">
+
+    const {DeckGL,TextLayer} = deck;
+
+    new DeckGL({
+        mapboxApiAccessToken: '<mapbox-access-token>',
+        mapStyle: 'mapbox://styles/mapbox/dark-v9',
+        longitude: -122.4,
+        latitude: 37.74,
+        zoom: 11,
+        maxZoom: 15,
+        pitch: 30,
+        bearing: 0,
+        layers: [ new TextLayer({
+            id: 'text-layer',
+            data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json',
+            pickable: true,
+            getPosition: d => d.coordinates,
+            getText: d => d.name,
+            getSize: 16,
+            getAngle: 0,
+            getColor: [247,248,243],
+            getTextAnchor: 'middle',
+            getAlignmentBaseline: 'center',
+            onHover: updateTooltip,
+        }),
+    ]
+    });
+
+    function updateTooltip({x, y, object}) {
+      const tooltip = document.getElementById('tooltip');
+
+      if (object) {
+        tooltip.style.top = `${y}px`;
+        tooltip.style.left = `${x}px`;
+        tooltip.innerHTML = `${object.name}\n${object.address}`;
+      } else tooltip.innerHTML = '';
+    }
+    
+</script>
+</html>
