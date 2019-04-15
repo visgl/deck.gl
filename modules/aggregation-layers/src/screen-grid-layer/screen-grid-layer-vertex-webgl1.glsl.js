@@ -22,7 +22,7 @@ export default `\
 #define SHADER_NAME screen-grid-layer-vertex-shader-webgl1
 #define RANGE_COUNT 6
 
-attribute vec3 vertices;
+attribute vec3 positions;
 attribute vec3 instancePositions;
 attribute vec4 instanceCounts;
 attribute vec3 instancePickingColors;
@@ -77,6 +77,6 @@ void main(void) {
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
 
-  gl_Position = vec4(instancePositions + vertices * cellScale, 1.);
+  gl_Position = vec4(instancePositions + positions * cellScale, 1.);
 }
 `;
