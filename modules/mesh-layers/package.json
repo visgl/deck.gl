@@ -33,7 +33,7 @@
     "@deck.gl/core": "^7.0.0-beta.1"
   },
   "dependencies": {
-    "@loaders.gl/core": "^1.0.0-alpha.4",
-    "@loaders.gl/images": "^1.0.0-alpha.4"
+    "@loaders.gl/core": "^1.0.0",
+    "@loaders.gl/images": "^1.0.0"
   }
 }
