@@ -248,8 +248,6 @@ const ScreenGridLayerExample = {
     id: 'screenGridLayer',
     getPosition: d => d.COORDINATES,
     cellSizePixels: 40,
-    minColor: [0, 0, 80, 0],
-    maxColor: [100, 255, 0, 128],
     pickable: false
   }
 };

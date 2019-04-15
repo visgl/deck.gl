@@ -154,8 +154,6 @@ export const TEST_CASES = [
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d,
         cellSizePixels: 40,
-        minColor: [0, 0, 0, 0],
-        maxColor: [0, 255, 0, 255],
         pickable: false
       })
     ],
@@ -780,28 +778,6 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/grid-lnglat.png'
   },
   {
-    name: 'screengrid-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new ScreenGridLayer({
-        id: 'screengrid-lnglat',
-        data: dataSamples.points,
-        getPosition: d => d.COORDINATES,
-        cellSizePixels: 40,
-        minColor: [0, 0, 80, 0],
-        maxColor: [100, 255, 0, 128],
-        pickable: false
-      })
-    ],
-    goldenImage: './test/render/golden-images/screengrid-lnglat.png'
-  },
-  {
     name: 'screengrid-lnglat-cpu-aggregation',
     viewState: {
       latitude: 37.751537058389985,
@@ -816,13 +792,11 @@ export const TEST_CASES = [
         data: dataSamples.points,
         getPosition: d => d.COORDINATES,
         cellSizePixels: 40,
-        minColor: [0, 0, 80, 0],
-        maxColor: [100, 255, 0, 128],
         pickable: false,
         gpuAggregation: false
       })
     ],
-    goldenImage: './test/render/golden-images/screengrid-lnglat.png'
+    goldenImage: './test/render/golden-images/screengrid-lnglat-colorRange.png'
   },
   {
     name: 'screengrid-lnglat-colorRange',
