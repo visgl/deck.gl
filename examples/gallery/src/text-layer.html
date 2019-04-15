@@ -59,6 +59,7 @@
           <input id="opacity" type="range" min="0" max="1" step="0.1" value="1"></input>
           <span id="opacity-value"></span>
         </div>
+      </div>
   </body>
 
   <script type="text/javascript">
@@ -66,48 +67,50 @@
     const {DeckGL,TextLayer} = deck;
 
     const deckgl = new DeckGL({
-        mapboxApiAccessToken: '<mapbox-access-token>',
-        mapStyle: 'mapbox://styles/mapbox/dark-v9',
-        longitude: -122.4,
-        latitude: 37.74,
-        zoom: 11,
-        maxZoom: 15,
-        pitch: 30,
-        bearing: 0,
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/dark-v9',
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11,
+      maxZoom: 15,
+      pitch: 30,
+      bearing: 0,
     })
 
     const OPTIONS = ['getSize', 'opacity'];
 
     renderLayer();
+
     OPTIONS.forEach(key => {
       document.getElementById(key).oninput = renderLayer;
     });
 
     function renderLayer () {
+
       const options = {};
+
       OPTIONS.forEach(key => {
         const value = document.getElementById(key).value;
         document.getElementById(key + '-value').innerHTML = value;
         options[key] = Number(value);
       });
-      const textLayer = new TextLayer({
-            id: 'text-layer',
-            data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json',
-            pickable: true,
-            getPosition: d => d.coordinates,
-            getText: d => d.name,
-            getSize: 16,
-            getAngle: 0,
-            getColor: [247,248,243],
-            getTextAnchor: 'middle',
-            getAlignmentBaseline: 'center',
-            onHover: updateTooltip,
-            ...options,
-        });
 
-        deckgl.setProps({
-        layers: [textLayer]
+      const textLayer = new TextLayer({
+        id: 'text-layer',
+        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json',
+        pickable: true,
+        getPosition: d => d.coordinates,
+        getText: d => d.name,
+        getSize: 16,
+        getAngle: 0,
+        getColor: [247,248,243],
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        onHover: updateTooltip,
+        ...options,
       });
+
+      deckgl.setProps({ layers: [textLayer] });
     }
 
     function updateTooltip({x, y, object}) {
@@ -120,5 +123,5 @@
       } else tooltip.innerHTML = '';
     }
     
-</script>
+  </script>
 </html>
