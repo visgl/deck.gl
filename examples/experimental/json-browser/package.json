@@ -12,7 +12,7 @@
     "@deck.gl/json": "^7.0.0-alpha",
     "@deck.gl/layers": "^7.0.0-alpha",
     "@deck.gl/react": "^7.0.0-alpha",
-    "@luma.gl/constants": "^7.0.0-alpha",
+    "@luma.gl/constants": "^7.0.0-rc.1",
     "brace": "^0.11.1",
     "brace": "^0.11.1",
     "react": "~16.7.0",

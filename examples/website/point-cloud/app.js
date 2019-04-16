@@ -5,7 +5,7 @@ import DeckGL, {COORDINATE_SYSTEM, PointCloudLayer, OrbitView, LinearInterpolato
 
 import {LASWorkerLoader} from '@loaders.gl/las';
 // import {PLYWorkerLoader} from '@loaders.gl/ply';
-import {loadFile, registerLoaders} from '@loaders.gl/core';
+import {load, registerLoaders} from '@loaders.gl/core';
 
 // Additional format support can be added here, see
 // https://github.com/uber-web/loaders.gl/blob/master/docs/api-reference/core/register-loaders.md
@@ -16,8 +16,8 @@ registerLoaders(LASWorkerLoader);
 const LAZ_SAMPLE =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-laz/indoor.0.1.laz';
 // Data source: The Stanford 3D Scanning Repository
-const PLY_SAMPLE =
-  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy800k.ply';
+// const PLY_SAMPLE =
+//   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/point-cloud-ply/lucy800k.ply';
 
 const INITIAL_VIEW_STATE = {
   target: [0, 0, 0],
@@ -46,7 +46,7 @@ export class App extends PureComponent {
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._rotateCamera = this._rotateCamera.bind(this);
 
-    loadFile(LAZ_SAMPLE).then(this._onLoad);
+    load(LAZ_SAMPLE).then(this._onLoad);
   }
 
   _onViewStateChange({viewState}) {

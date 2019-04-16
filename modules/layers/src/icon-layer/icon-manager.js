@@ -1,7 +1,7 @@
 /* global document */
 import GL from '@luma.gl/constants';
 import {Texture2D, readPixelsToBuffer} from '@luma.gl/core';
-import {loadImage} from '@loaders.gl/core';
+import {loadImage} from '@loaders.gl/images';
 import {createIterable} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
