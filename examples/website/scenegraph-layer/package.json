@@ -7,7 +7,7 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/core": "1.0.0",
+    "@loaders.gl/core": "1.0.1",
     "@luma.gl/core": "^7.0.0-rc.1",
     "@luma.gl/addons": "^7.0.0-rc.1",
     "deck.gl": "^7.0.0-beta",
