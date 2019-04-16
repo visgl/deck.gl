@@ -525,7 +525,7 @@ export default class PLYParser {
             break;
 
           default:
-            this.raiseError('Unexpeceted token in header');
+            this.raiseError('Unexpected token in header');
             return false;
         }
         break;
