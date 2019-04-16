@@ -22,7 +22,7 @@
 
 import {Layer} from '@deck.gl/core';
 import {fp64, ScenegraphNode, log} from '@luma.gl/core';
-import {loadFile} from '@loaders.gl/core';
+import {load} from '@loaders.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
@@ -38,7 +38,7 @@ const defaultProps = {
 
   fetch: (url, {propName, layer}) => {
     if (propName === 'scenegraph') {
-      return loadFile(url, layer.getLoadOptions()).then(({scenes}) => scenes[0]);
+      return load(url, layer.getLoadOptions()).then(({scenes}) => scenes[0]);
     }
 
     return fetch(url).then(response => response.json());

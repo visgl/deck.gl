@@ -25,7 +25,8 @@
 import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, fp64, PhongMaterial, isWebGL2} from '@luma.gl/core';
-import {loadImage, loadFile} from '@loaders.gl/core';
+import {load} from '@loaders.gl/core';
+import {loadImage} from '@loaders.gl/images';
 const {fp64LowPart} = fp64;
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -107,7 +108,7 @@ const defaultMaterial = new PhongMaterial();
 const defaultProps = {
   fetch: (url, {propName}) => {
     if (propName === 'mesh') {
-      return loadFile(url);
+      return load(url);
     }
 
     return fetch(url).then(response => response.json());

@@ -14,11 +14,11 @@ import * as h3 from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {PLYLoader} from '@loaders.gl/ply';
-import {GLBScenegraphLoader, GLTFScenegraphLoader} from '@luma.gl/addons';
+import {GLTFScenegraphLoader} from '@luma.gl/addons';
 
 import * as dataSamples from '../data-samples';
 
-registerLoaders([GLBScenegraphLoader, GLTFScenegraphLoader, PLYLoader]);
+registerLoaders([GLTFScenegraphLoader, PLYLoader]);
 
 const SimpleMeshLayerExample = {
   layer: SimpleMeshLayer,
