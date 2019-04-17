@@ -240,9 +240,11 @@ export default class ScreenGridLayer extends Layer {
   // Creates and returns a Uniform Buffer object to hold maxCount value.
   _getMaxCountBuffer(gl) {
     return new Buffer(gl, {
-      bytes: 4 * 4, // Four floats
-      size: 4,
-      index: AGGREGATION_DATA_UBO_INDEX
+      byteLength: 4 * 4, // Four floats
+      index: AGGREGATION_DATA_UBO_INDEX,
+      accessor: {
+        size: 4
+      }
     });
   }
 
@@ -407,10 +409,12 @@ export default class ScreenGridLayer extends Layer {
     }
 
     aggregationBuffer = new Buffer(gl, {
-      size: 4,
-      bytes: dataBytes,
-      type: GL.FLOAT,
-      instanced: 1
+      byteLength: dataBytes,
+      accessor: {
+        size: 4,
+        type: GL.FLOAT,
+        divisor: 1
+      }
     });
     this.state.weights.color.aggregationBuffer = aggregationBuffer;
     this.setState({

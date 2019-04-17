@@ -29,8 +29,14 @@ const App = ({data, viewport}) => {
     pickable: false,
     opacity: 0.8,
     cellSizePixels: 50,
-    minColor: [0, 0, 0, 0],
-    maxColor: [0, 180, 0, 255],
+    colorRange: [
+      [0, 25, 0, 25],
+      [0, 85, 0, 85],
+      [0, 127, 0, 127],
+      [0, 170, 0, 170],
+      [0, 190, 0, 190],
+      [0, 255, 0, 255]
+    ],
     getPosition: d => d.COORDINATES,
     getWeight: d => d.SPACES,
     onHover: ({object, x, y}) => {
