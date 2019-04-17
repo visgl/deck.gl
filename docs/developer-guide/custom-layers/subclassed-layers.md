@@ -110,7 +110,7 @@ RoundedRectangleLayer.defaultProps = {
 }
 ```
 
-Modified fragment shader that uses this uniform (learn more in [writing your own shaders](/docs/developer-guide/writing-shaders.md)):
+Modified fragment shader that uses this uniform (learn more in [writing your own shaders](/docs/developer-guide/custom-layers/writing-shaders.md)):
 
 ```js
 /// rounded-rectangle-layer-fragment.js
@@ -179,7 +179,7 @@ MyPointCloudLayer.defaultProps = {
 };
 ```
 
-Modified vertex shader that uses this attribute (learn more in [writing your own shaders](/docs/developer-guide/writing-shaders.md)):
+Modified vertex shader that uses this attribute (learn more in [writing your own shaders](/docs/developer-guide/custom-layers/writing-shaders.md)):
 
 ```js
 // my-point-cloud-layer-vertex.js

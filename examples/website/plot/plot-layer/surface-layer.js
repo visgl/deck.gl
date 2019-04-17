@@ -91,11 +91,12 @@ export default class SurfaceLayer extends Layer {
   draw({uniforms}) {
     const {lightStrength} = this.props;
 
-    this.state.model.render(
+    this.state.model.setUniforms(
       Object.assign({}, uniforms, {
         lightStrength
       })
     );
+    this.state.model.draw();
   }
 
   /*

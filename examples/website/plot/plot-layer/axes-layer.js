@@ -186,8 +186,11 @@ export default class AxesLayer extends Layer {
         modelsByName.labels.updateModuleSettings(moduleParameters);
       }
 
-      modelsByName.grids.render(Object.assign({}, uniforms, baseUniforms));
-      modelsByName.labels.render(Object.assign({}, uniforms, baseUniforms, labelTexture));
+      modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms));
+      modelsByName.labels.setUniforms(Object.assign({}, uniforms, baseUniforms, labelTexture));
+
+      modelsByName.grids.draw();
+      modelsByName.labels.draw();
     }
   }
 
