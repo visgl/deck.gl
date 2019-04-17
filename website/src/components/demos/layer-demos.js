@@ -25,7 +25,7 @@ export const ArcLayerDemo = createLayerDemoClass({
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     pickable: true,
-    getStrokeWidth: 12,
+    getWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getSourceColor: d => [Math.sqrt(d.inbound), 140, 0],
@@ -99,7 +99,7 @@ export const LineLayerDemo = createLayerDemoClass({
   formatTooltip: d => `${d.from.name} to ${d.to.name}`,
   props: {
     pickable: true,
-    getStrokeWidth: 12,
+    getWidth: 12,
     getSourcePosition: d => d.from.coordinates,
     getTargetPosition: d => d.to.coordinates,
     getColor: d => [Math.sqrt(d.inbound + d.outbound), 140, 0]

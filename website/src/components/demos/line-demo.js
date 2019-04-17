@@ -20,8 +20,8 @@ export default class LineDemo extends Component {
 
   static get parameters() {
     return {
-      strokeWidth: {
-        displayName: 'Stroke Width',
+      width: {
+        displayName: 'Width',
         type: 'range',
         value: 3,
         step: 0.1,
@@ -67,7 +67,7 @@ export default class LineDemo extends Component {
         {...otherProps}
         flightPaths={(data && data[0]) || EMPTY_ARRAY}
         airports={(data && data[1]) || EMPTY_ARRAY}
-        getStrokeWidth={params.strokeWidth.value}
+        getWidth={params.width.value}
       />
     );
   }
