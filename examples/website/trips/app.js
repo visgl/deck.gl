@@ -99,7 +99,6 @@ export class App extends Component {
         data: buildings,
         extruded: true,
         wireframe: false,
-        fp64: false,
         opacity: 0.5,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
