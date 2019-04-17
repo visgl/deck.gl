@@ -408,6 +408,10 @@ export const docPages = generatePath([
             content: getDocUrl('layers/polygon-layer.md')
           },
           {
+            name: 'SolidPolygonLayer',
+            content: getDocUrl('layers/solid-polygon-layer.md')
+          },
+          {
             name: 'ScatterplotLayer',
             content: getDocUrl('layers/scatterplot-layer.md')
           },

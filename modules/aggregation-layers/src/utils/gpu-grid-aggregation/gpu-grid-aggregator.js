@@ -609,7 +609,14 @@ export default class GPUGridAggregator {
       drawMode: GL.POINTS,
       isInstanced: true,
       instanceCount: 0,
-      attributes: {position: new Buffer(gl, {size: 2, data: new Float32Array([0, 0])})}
+      attributes: {
+        position: new Buffer(gl, {
+          data: new Float32Array([0, 0]),
+          accessor: {
+            size: 2
+          }
+        })
+      }
     });
   }
 
