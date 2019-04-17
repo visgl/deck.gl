@@ -4,13 +4,13 @@
 
 #### Submodule Structure and Dependency Changes
 
-- `@deck.gl/core` is moved from `dependencies` to `devDependencies` for all submodules. This will reduce the runtime error caused by installing multiple copies of the core.
-- The master module `deck.gl` now include all submodules except `@deck.gl/test-utils`. See [list of submodules](/docs/get-started/getting-started.md#selectively-install-dependencies) for details.
-- `ContourLayer`, `GridLayer`, `HexagonLayer` and `ScreenGridLayer` are moved from `@deck.gl/layers` to `@deck.gl/aggregation-layers`. No action is required if you are importing them from `deck.gl`.
-- `@deck.gl/experimental-layers` is deprecated. Experimental layers will be exported from their respective modules with a `_` prefix.
-  + `BitmapLayer` is moved to `@deck.gl/layers`.
-  + `MeshLayer` is renamed to `SimpleMeshLayer` and moved to `@deck.gl/mesh-layers`.
-  + `TileLayer` and `TripsLayer` are moved to `@deck.gl/geo-layers`.
+- ` @deck.gl/core` is moved from `dependencies` to `devDependencies` for all submodules. This will reduce the runtime error caused by installing multiple copies of the core.
+- The master module `deck.gl` now include all submodules except ` @deck.gl/test-utils`. See [list of submodules](/docs/get-started/getting-started.md#selectively-install-dependencies) for details.
+- `ContourLayer`, `GridLayer`, `HexagonLayer` and `ScreenGridLayer` are moved from ` @deck.gl/layers` to ` @deck.gl/aggregation-layers`. No action is required if you are importing them from `deck.gl`.
+- ` @deck.gl/experimental-layers` is deprecated. Experimental layers will be exported from their respective modules with a `_` prefix.
+  + `BitmapLayer` is moved to ` @deck.gl/layers`.
+  + `MeshLayer` is renamed to `SimpleMeshLayer` and moved to ` @deck.gl/mesh-layers`.
+  + `TileLayer` and `TripsLayer` are moved to ` @deck.gl/geo-layers`.
 
 #### Deck Class
 
@@ -63,7 +63,7 @@ Deprecations:
 
 #### React
 
-If you are using DeckGL with react-map-gl, `@deck.gl/react@^7.0.0` no longer works with react-map-gl v3.x.
+If you are using DeckGL with react-map-gl, ` @deck.gl/react@^7.0.0` no longer works with react-map-gl v3.x.
 
 
 ## Upgrading from deck.gl v6.3 to v6.4

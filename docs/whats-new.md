@@ -33,7 +33,7 @@ A new effects system is written from the ground up for v7.0. This opens the poss
 
 As the number of deck.gl layers grow, we are splitting existing and new layers into multiple submodules for better dependency management. These new layer modules are:
 
-* `@deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
+* ` @deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
   - [ArcLayer](/docs/layers/arc-layer.md)
   - [BitmapLayer](/docs/layers/bitmap-layer.md) **<sup>New</sup>**
   - [ColumnLayer](/docs/layers/column-layer.md) **<sup>New</sup>**
@@ -47,20 +47,20 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
   - [ScatterplotLayer](/docs/layers/scatterplot-layer.md)
   - [SolidPolygonLayer](/docs/layers/solid-polygon-layer.md)
   - [TextLayer](/docs/layers/text-layer.md)
-* `@deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
+* ` @deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
   - [ContourLayer](/docs/layers/contour-layer.md)
   - [GPUGridLayer](/docs/layers/gpu-grid-layer.md)
   - [GridLayer](/docs/layers/grid-layer.md)
   - [HexagonLayer](/docs/layers/hexagon-layer.md)
   - [ScreenGridLayer](/docs/layers/screen-grid-layer.md)
-* `@deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
+* ` @deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
   - [GreatCircleLayer](/docs/layers/great-circle-layer.md) **<sup>New</sup>**
   - [H3ClusterLayer](/docs/layers/h3-cluster-layer.md) **<sup>New</sup>**
   - [H3HexagonLayer](/docs/layers/h3-hexagon-layer.md) **<sup>New</sup>**
   - [S2Layer](/docs/layers/s2-layer.md) **<sup>New</sup>**
   - [TileLayer](/docs/layers/tile-layer.md) **<sup>New</sup>**
   - [TripsLayer](/docs/layers/trips-layer.md) **<sup>New</sup>**
-* `@deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
+* ` @deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
   - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) **<sup>New</sup>**
   - [ScenegraphLayer](/docs/layers/scenegraph-layer.md) **<sup>New</sup>**
 
