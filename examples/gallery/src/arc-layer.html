@@ -1,0 +1,140 @@
+<html>
+  <head>
+    <title>deck.gl ArcLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="tooltip"></div>
+  </body>
+
+  <script type="text/javascript">
+    
+    const {DeckGL, GeoJsonLayer, ArcLayer} = deck;
+    
+    const inFlowColors = [
+      [255, 255, 204],
+      [199, 233, 180],
+      [127, 205, 187],
+      [65, 182, 196],
+      [29, 145, 192],
+      [34, 94, 168],
+      [12, 44, 132]
+    ];
+
+    const outFlowColors = [
+      [255, 255, 178],
+      [254, 217, 118],
+      [254, 178, 76],
+      [253, 141, 60],
+      [252, 78, 42],
+      [227, 26, 28],
+      [177, 0, 38]
+    ];
+    
+    const deckgl = new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/light-v9',
+      longitude: -100,
+      latitude: 40.7,
+      zoom: 3,
+      maxZoom: 15,
+      pitch: 30,
+      bearing: 30,
+      layers: []
+    });
+    
+    function getArcLayer(data, selectedFeature) {
+
+      const {flows, centroid} = selectedFeature.properties;
+      const arcs = Object.keys(flows).map(toId => {
+      const f = data.features[toId];
+      return {
+        source: centroid,
+        target: f.properties.centroid,
+        value: flows[toId]
+      };
+      });
+
+      const scale = d3.scaleQuantile()
+        .domain(arcs.map(a => Math.abs(a.value)))
+        .range(inFlowColors.map((c, i) => i));
+
+        arcs.forEach(a => {
+        a.gain = Math.sign(a.value);
+        a.quantile = scale(Math.abs(a.value));
+      });
+
+      return new ArcLayer({
+        id: 'arc',
+        data: arcs,
+        getSourcePosition: d => d.source,
+        getTargetPosition: d => d.target,
+        getSourceColor: d => (d.gain > 0 ? inFlowColors : outFlowColors)[d.quantile],
+        getTargetColor: d => (d.gain > 0 ? outFlowColors : inFlowColors)[d.quantile],
+        strokeWidth: 4
+      });
+    }
+
+    function updateTooltip({x, y, object}) {
+      const tooltip = document.getElementById('tooltip');
+      if (object) {
+        tooltip.style.top = `${y}px`;
+        tooltip.style.left = `${x}px`;
+        tooltip.innerText = object.properties.name;
+      } else tooltip.innerText = '';
+    }
+
+    function renderLayers(data, selectedFeature) {
+
+      selectedFeature = selectedFeature || data.features.find(f => f.properties.name === 'Los Angeles, CA');
+      const arcLayer = getArcLayer(data, selectedFeature);
+      const countyLayer = new GeoJsonLayer({
+        id: 'geojson',
+        data,
+        stroked: false,
+        filled: true,
+        autoHighlight: true,
+        pickable: true,
+        getFillColor: () => [0, 0, 0, 0],
+        onClick: info => renderLayers(data, info.object),
+        onHover: updateTooltip,
+      });
+
+      deckgl.setProps({ layers: [countyLayer, arcLayer] });
+    }
+
+    fetch('https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/arc/counties.json')
+    .then(res => res.json())
+    .then(data => renderLayers(data))
+
+  </script>
+</html>
