@@ -1,0 +1,143 @@
+<html>
+  <head>
+    <title>deck.gl IconLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/rest.js/15.2.6/octokit-rest.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="tooltip"></div>
+  </body>
+
+  <script type="text/javascript">
+
+    const octokit = new Octokit();
+
+    const {DeckGL, IconLayer, LineLayer, COORDINATE_SYSTEM, ScatterplotLayer, TextLayer} = deck;
+
+    const deckgl =  new DeckGL({
+      views: [new OrthographicView()],
+      viewState: { target: [0, 0, 0], zoom: 2 },
+      controller: false,
+      layers: [],
+    })
+
+    function addTargetPositionToContributor(contributor, linkDistance) {
+      const angle = Math.random() * Math.PI * 2;
+      const x = Math.cos(angle) * linkDistance;
+      const y = Math.sin(angle) * linkDistance;
+      contributor['targetPosition'] = [ x, y ];
+    }
+
+    function updateTooltip({x, y, object}) {
+      const tooltip = document.getElementById('tooltip');
+      if (object) {
+        tooltip.style.top = `${y}px`;
+        tooltip.style.left = `${x}px`;
+        tooltip.innerHTML = `
+        <div><b>${object.login}</b></div>
+        <div>Contributions: ${object.contributions}</div>`;
+      } else tooltip.innerHTML = '';
+    }
+
+    function renderLayers(data) {
+      const sourcePosition = [0, 0];
+      const listOfContributions = data.map(contributor => contributor.contributions);
+
+      listOfContributions.forEach((number, index) => {
+        const linkDistance = 20 * ((number - Math.min(...listOfContributions))
+         / (Math.max(...listOfContributions) - Math.min(...listOfContributions))) + 30;
+
+        addTargetPositionToContributor(data[index], linkDistance);
+      })
+
+      function getSizeOfIcon(contributions) {
+        // Scaled Contributions to 15 - 45
+        return 30 * ((contributions - Math.min(...listOfContributions))
+         / (Math.max(...listOfContributions) - Math.min(...listOfContributions))) + 15;
+      }
+
+      const iconLayer = new IconLayer({
+        id: 'icon-layer',
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        data,
+        getIcon: d => ({
+          url: d.avatar_url,
+          width: 128,
+          height: 128,
+          mask: false,
+        }),
+        getSize : d => getSizeOfIcon(d.contributions),
+        getPosition: d => d.targetPosition,
+        pickable: true,
+        onHover: updateTooltip,
+      })
+
+      const lineLayer = new LineLayer({
+        id: 'line',
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        data,
+        pickable: true,
+        getSourcePosition: d => sourcePosition,
+        getTargetPosition: d => d.targetPosition,
+        getColor: d => [228, 228, 228],
+        getWidth: 3,
+      })
+
+      const scatterPlotLayer = new ScatterplotLayer({
+        id: 'scatter',
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        data: [ {position: [0, 0], color: [23, 38, 42], radius: 12} ],
+        getPosition: d => d.position,
+        getFillColor: d => d.color,
+        getRadius: d => d.radius,
+        opacity: 1,
+      })
+
+      const textLayer = new TextLayer({
+        id: 'text-layer',
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        data: [{position: [0, 0], text: 'Deck.gl', color: [255, 255, 255]}],
+        getSize: 15,
+        getPosition: d => d.position,
+        getText: d => d.text,
+        getColor: d => d.color,
+      })
+
+      deckgl.setProps({ layers: [lineLayer, iconLayer, scatterPlotLayer, textLayer] });
+    }
+
+    octokit.repos.getContributors({
+      owner: 'uber',
+      repo: 'deck.gl' })
+    .then(result => result.data)
+    .then(data => renderLayers(data))
+
+  </script>
+</html>
