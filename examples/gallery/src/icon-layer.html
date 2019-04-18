@@ -63,7 +63,9 @@
         tooltip.innerHTML = `
         <div><b>${object.login}</b></div>
         <div>Contributions: ${object.contributions}</div>`;
-      } else tooltip.innerHTML = '';
+      } else {
+        tooltip.innerHTML = '';
+      }
     }
 
     function renderLayers(data) {
