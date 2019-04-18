@@ -128,7 +128,7 @@ export const PointCloudLayerDemo = createLayerDemoClass({
     pickable: false,
     coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
     coordinateOrigin: [-122.4, 37.74],
-    radiusPixels: 2,
+    pointSize: 2,
     getPosition: d => d.position,
     getNormal: d => d.normal,
     getColor: d => d.color
