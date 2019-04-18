@@ -62,18 +62,26 @@ export default class BaseAttribute {
       this.externalBuffer = null;
       this.value = value;
 
+      // Create buffer if needed
       if (!constant && this.gl) {
-        // Create buffer if needed
-        this.buffer =
-          this.buffer ||
-          new Buffer(
-            this.gl,
-            Object.assign({}, opts, {
-              id: this.id,
-              target: this.target,
-              accessor: {type: this.type}
-            })
-          );
+        // Move accessor fields to accessor object
+        const props = {
+          ...opts,
+          id: this.id,
+          target: this.target,
+          accessor: {
+            type: this.type
+          }
+        };
+        if (Number.isFinite(props.divisor)) {
+          props.accessor.divisor = props.divisor;
+        }
+        delete props.divisor;
+        if (Number.isFinite(props.size)) {
+          props.accessor.size = props.size;
+        }
+        delete props.size;
+        this.buffer = this.buffer || new Buffer(this.gl, props);
         this.buffer.setData({data: value});
         this.type = this.buffer.accessor.type;
       }
