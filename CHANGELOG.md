@@ -15,7 +15,15 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl v7.0
+## deck.gl [v7.0.0] - Apr 19 2019
+
+- Bump luma.gl version to 7.0.0
+- Content and Polish for Whats New 7.0 (#3001)
+- improve babel config for Edge/IE (#3002)
+- Add ArcLayer example to the gallery (#2972)
+- Fix buffer warnings (#2999)
+- fix website warnings (#2998)
+- Remove deprecated APIs and update doc (#2997)
 
 ### deck.gl v7.0 Prereleases
 
