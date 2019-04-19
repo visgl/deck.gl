@@ -1,22 +1,21 @@
-'use strict';
-
 importScripts('./util.js');
-var coordinates = void 0;
-var result = [];
+let coordinates;
+let result = [];
 
-onmessage = function onmessage(e) {
-  var lines = e.data.text.split('\n');
-
+onmessage = function (e) {
+  const lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
     }
+
     if (!coordinates) {
       coordinates = decodePolyline(line, 5);
       return;
     }
 
-    var parts = line.split('\t');
+    const parts = line.split('\t');
+
     if (parts.length < 5) {
       return;
     }
@@ -32,7 +31,9 @@ onmessage = function onmessage(e) {
 
   if (e.data.event === 'load') {
     flush();
-    postMessage({ action: 'end' });
+    postMessage({
+      action: 'end'
+    });
   }
 };
 
@@ -40,7 +41,9 @@ function flush() {
   postMessage({
     action: 'add',
     data: result,
-    meta: { count: result.length }
+    meta: {
+      count: result.length
+    }
   });
   result = [];
 }
