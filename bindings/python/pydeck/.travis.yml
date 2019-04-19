@@ -1,0 +1,75 @@
+language: python
+python:
+  - 3.7
+  - 3.6
+  - 3.5
+  - 2.7
+sudo: false
+dist: xenial
+services:
+  - xvfb
+addons:
+  apt_packages:
+    - pandoc
+env:
+  matrix:
+    - GROUP=python
+matrix:
+  include:
+    - python: 3.5
+      env: GROUP=js
+  include:
+    - python: 3.6
+      env: GROUP=docs
+cache:
+  pip: true
+  directories:
+    - node_modules # NPM packages
+    - $HOME/.npm
+before_install:
+  - pip install -U pip setuptools
+  - nvm install 8
+  - |
+    if [[ $GROUP == python ]]; then
+      pip install codecov
+    elif [[ $GROUP == js ]]; then
+      npm install -g codecov
+    fi
+install:
+  - |
+    if [[ $GROUP == python ]]; then
+      pip install --upgrade ".[test]" -v
+    elif [[ $GROUP == js ]]; then
+      pip install --upgrade -e ".[test]" -v
+    elif [[ $GROUP == docs ]]; then
+      pip install --upgrade ".[test, examples, docs]" -v
+    fi
+before_script:
+  # Set up a virtual screen for Firefox browser testing:
+  - |
+    if [[ $GROUP == js ]]; then
+      export CHROME_BIN=chromium-browser
+    fi
+    git config --global user.email travis@fake.com
+    git config --global user.name "Travis CI"
+script:
+  - |
+    if [[ $GROUP == python ]]; then
+      EXIT_STATUS=0
+      pushd $(mktemp -d)
+      py.test -l --cov-report xml:$TRAVIS_BUILD_DIR/coverage.xml --cov=pydeck --pyargs pydeck || EXIT_STATUS=$?
+      popd
+      (exit $EXIT_STATUS)
+    elif [[ $GROUP == js ]]; then
+      npm test
+    elif [[ $GROUP == docs ]]; then
+      EXIT_STATUS=0
+      cd docs
+      make html || EXIT_STATUS=$?
+      make linkcheck || EXIT_STATUS=$?
+      cd ..
+      python -m pytest_check_links --links-ext=.md -o testpaths=. -o addopts= || EXIT_STATUS=$?
+      (exit $EXIT_STATUS)
+    fi
+after_success:
+  - codecov

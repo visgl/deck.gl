@@ -35,4 +35,4 @@ class DictEncoder(JSONEncoder):
 
 
 def to_json(serializable, remap_function=camel_case_keys):
-    return json.dumps(serializable, cls=DictEncoder)
+    return json.dumps(serializable, sort_keys=True, cls=DictEncoder)

@@ -1,0 +1,62 @@
+# Do not build feature branch with open Pull Requests
+skip_branch_with_pr: true
+
+# environment variables
+environment:
+  nodejs_version: "8"
+  matrix:
+    - PYTHON: "C:\\Miniconda3-x64"
+      PYTHON_VERSION: "3.7"
+      PYTHON_MAJOR: 3
+      PYTHON_ARCH: "64"
+    - PYTHON: "C:\\Miniconda3"
+      PYTHON_VERSION: "3.4"
+      PYTHON_MAJOR: 3
+      PYTHON_ARCH: "32"
+
+# build cache to preserve files/folders between builds
+cache:
+  - '%AppData%/npm-cache'
+  - '%PYTHON%/pkgs'
+  - '%LOCALAPPDATA%\pip\Cache'
+
+# scripts that run after cloning repository
+install:
+  # Install node:
+  - ps: Install-Product node $env:nodejs_version
+  # Ensure python scripts are from right version:
+  - 'SET "PATH=%PYTHON%\Scripts;%PYTHON%;%PATH%"'
+  # Setup conda:
+  - 'conda list'
+  - 'conda update conda -y'
+  # If 32 bit, force conda to use it:
+  - 'IF %PYTHON_ARCH% EQU 32 SET CONDA_FORCE_32BIT=1'
+  - 'conda create -n test_env python=%PYTHON_VERSION% -y'
+  - 'activate test_env'
+  # Update install tools:
+  - 'conda install setuptools pip -y'
+  - 'python -m pip install --upgrade pip'
+  - 'python -m easy_install --upgrade setuptools'
+  # Install coverage utilities:
+  - 'pip install codecov'
+  # Install our package:
+  - 'pip install --upgrade ".[test]" -v'
+
+build: off
+
+# scripts to run before tests
+before_test:
+  - git config --global user.email appveyor@fake.com
+  - git config --global user.name "AppVeyor CI"
+  - set "tmptestdir=%tmp%\DeckGLWidget-%RANDOM%"
+  - mkdir "%tmptestdir%"
+  - cd "%tmptestdir%"
+
+
+# to run your custom scripts instead of automatic tests
+test_script:
+  - 'py.test -l --cov-report xml:"%APPVEYOR_BUILD_FOLDER%\coverage.xml" --cov=DeckGLWidget --pyargs DeckGLWidget'
+
+on_success:
+  - cd "%APPVEYOR_BUILD_FOLDER%"
+  - codecov -X gcov --file "%APPVEYOR_BUILD_FOLDER%\coverage.xml"
