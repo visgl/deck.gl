@@ -146,5 +146,5 @@ Renders one or an array of Layer instances with all the `TileLayer` props and th
 
 # Source
 
-[modules/geo-layers/src/tile-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
+[modules/geo-layers/src/tile-layer](https://github.com/uber/deck.gl/tree/7.0-release/modules/geo-layers/src/tile-layer)
 

@@ -175,5 +175,5 @@ The elevation of each cell in meters.
 
 ## Source
 
-[modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer)
+[modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/7.0-release/modules/layers/src/column-layer)
 

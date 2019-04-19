@@ -143,4 +143,4 @@ Method called to retrieve the position of each point.
 
 ## Source
 
-[modules/aggregation-layers/src/gpu-grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/gpu-grid-layer)
+[modules/aggregation-layers/src/gpu-grid-layer](https://github.com/uber/deck.gl/tree/7.0-release/modules/aggregation-layers/src/gpu-grid-layer)

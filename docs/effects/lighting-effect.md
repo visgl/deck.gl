@@ -9,7 +9,7 @@ new LightingEffect({light0, light1, light2, ...});
 ```
 
 Parameters:
-* `lights`(Object) - a collection of light sources. Keys can be any arbitrary name and values are instances of [LightSource](https://github.com/uber/luma.gl/tree/master/modules/core/src/lighting/light-source.js).
+* `lights`(Object) - a collection of light sources. Keys can be any arbitrary name and values are instances of [LightSource](https://github.com/uber/luma.gl/tree/7.0-release/modules/core/src/lighting/light-source.js).
 
 ## Members
 
@@ -45,4 +45,4 @@ Array of [PointLight](/docs/api-reference/lights/point-light.md) source which em
 
 ## Source
 
-[/modules/core/src/effects/lighting-effect.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/lighting-effect.js)
+[/modules/core/src/effects/lighting-effect.js](https://github.com/uber/deck.gl/tree/7.0-release/modules/core/src/effects/lighting/lighting-effect.js)

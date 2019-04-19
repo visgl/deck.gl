@@ -58,7 +58,7 @@ Group of related RFCs loosely targeted for 7.x releases.
 
 ## v7.x RFCs
 
-RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v7x-rfcs)
+RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs#v7x-rfcs)
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -70,7 +70,7 @@ RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.c
 
 ## v7.0 RFCs
 
-These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v70-rfcs).
+These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs#v70-rfcs).
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -81,7 +81,7 @@ These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://gith
 
 ## v6.3 RFCs
 
-These RFCS were implemented in v6.3. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v63-rfcs).
+These RFCS were implemented in v6.3. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs#v63-rfcs).
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -91,7 +91,7 @@ These RFCS were implemented in v6.3. Also see [luma.gl RFCs](https://github.com/
 
 ## v6.2 RFCs
 
-These RFCS were implemented in v6.2. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v62-rfcs).
+These RFCS were implemented in v6.2. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs#v62-rfcs).
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -100,7 +100,7 @@ These RFCS were implemented in v6.2. Also see [luma.gl RFCs](https://github.com/
 
 ## v6.1 RFCs
 
-These RFCS were implmented in v6.1. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v61-rfcs)
+These RFCS were implmented in v6.1. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs#v61-rfcs)
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -113,7 +113,7 @@ These RFCS were implmented in v6.1. Also see [luma.gl RFCs](https://github.com/u
 
 ## v6.0 RFCs
 
-These RFCS were implemented in v6.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v60-rfcs)
+These RFCS were implemented in v6.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs#v60-rfcs)
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -173,7 +173,7 @@ These RFCs were implemented in v5.0. Also see luma.gl RFCs.
 | [**Viewport Transitions**](v5.0/viewport-transitions-rfc.md) | @1chandu | **Experimental** | Animate Viewport changes ("fly to" effect) through interpolation of Viewport props. (Also used in react-map-gl v3.2). |
 | [**Break out EventManager**](v5.0/break-out-event-manager-rfc.md) | @ibgreen | **Implemented** | Break out event manager module (mjolnir.js) |
 | | | | |
-| **[luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs)** | | | |
+| **[luma.gl RFCs](https://github.com/uber/luma.gl/tree/7.0-release/dev-docs/RFCs)** | | | |
 | **Break out Math Module** | @ibgreen | **Implemented** | Break out luma.gl math module (math.gl) |
 
 

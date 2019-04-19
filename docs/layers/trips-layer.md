@@ -105,4 +105,4 @@ Because `timestamp` is represented as 32-bits floating number, raw unix epoch ca
 
 # Source
 
-[modules/geo-layers/src/trips-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/trips-layer)
+[modules/geo-layers/src/trips-layer](https://github.com/uber/deck.gl/tree/7.0-release/modules/geo-layers/src/trips-layer)
