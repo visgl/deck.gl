@@ -28,4 +28,4 @@ const cameraLight = new CameraLight({color, intensity});
 
 ## Source
 
-[/modules/core/src/effects/lighting/camera-light.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/camera-light.js)
+[/modules/core/src/effects/lighting/camera-light.js](https://github.com/uber/deck.gl/tree/7.0-release/modules/core/src/effects/lighting/camera-light.js)

@@ -171,5 +171,5 @@ Only applies if `extruded: true`.
 
 ## Source
 
-[modules/layers/src/solid-polygon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/solid-polygon-layer)
+[modules/layers/src/solid-polygon-layer](https://github.com/uber/deck.gl/tree/7.0-release/modules/layers/src/solid-polygon-layer)
 

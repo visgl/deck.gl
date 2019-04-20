@@ -167,5 +167,4 @@ The `H3HexagonLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/h3-layers/h3-hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-hexagon-layer.js)
-
+[modules/geo-layers/src/h3-layers/h3-hexagon-layer](https://github.com/uber/deck.gl/tree/7.0-release/modules/geo-layers/src/h3-layers/h3-hexagon-layer.js)
