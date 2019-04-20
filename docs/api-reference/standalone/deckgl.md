@@ -84,4 +84,4 @@ Returns the mapbox-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instan
 
 ## Source
 
-[modules/main/bundle.js](https://github.com/uber/deck.gl/blob/master/modules/main/bundle.js)
+[modules/main/bundle.js](https://github.com/uber/deck.gl/blob/7.0-release/modules/main/bundle.js)

@@ -1,6 +1,6 @@
 // Converts a JSON payload to a deck.gl props object
 // Lightly processes `json` props, transform string values, and extract `views` and `layers`
-// See: https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
+// See: https://github.com/uber/deck.gl/blob/7.0-release/dev-docs/RFCs/v6.1/json-layers-rfc.md
 //
 // NOTES:
 // * This is intended to provide minimal necessary processing required to support
