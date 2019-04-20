@@ -94,7 +94,7 @@ As the number of deck.gl layers grow, we are splitting existing and new layers i
 
 The new [ScenegraphLayer](/docs/layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
 
-We are releasing [loaders.gl](https://uber-web.github.io/loaders.gl/) as a major new companion framework to deck.gl and luma.gl. Loaders.gl provides a suite of 3D file format loaders.  See [What's New in luma.gl v7.0](https://github.com/uber/luma.gl/blob/master/docs/whats-new.md) for more details.
+We are releasing [loaders.gl](https://uber-web.github.io/loaders.gl/) as a major new companion framework to deck.gl and luma.gl. Loaders.gl provides a suite of 3D file format loaders.  See [What's New in luma.gl v7.0](https://github.com/uber/luma.gl/blob/7.0-release/docs/whats-new.md) for more details.
 
 ### New Effects System
 

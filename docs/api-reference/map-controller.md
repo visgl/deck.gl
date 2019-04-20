@@ -40,4 +40,4 @@ For a list of supported options, see [Controller](/docs/api-reference/controller
 
 ## Source
 
-[modules/core/src/controllers/map-controller.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/controllers/map-controller.js)
+[modules/core/src/controllers/map-controller.js](https://github.com/uber/deck.gl/blob/7.0-release/modules/core/src/controllers/map-controller.js)
