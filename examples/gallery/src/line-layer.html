@@ -1,0 +1,52 @@
+<html>
+  <head>
+    <title>deck.gl LineLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@latest/deckgl.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body></body>
+
+  <script type="text/javascript">
+    const {DeckGL, LineLayer} = deck;
+
+    function getColor(d) {
+      const z = d.start[2];
+      const r = z / 10000;
+
+      return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
+    }
+
+    new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/dark-v9',
+      latitude: 51.51,
+      longitude: -0.11,
+      zoom: 8,
+      maxZoom: 16,
+      pitch: 50,
+      bearing: 0,
+      layers: [
+        new LineLayer({
+          id: 'line',
+          data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json',
+          fp64: false,
+          getSourcePosition: d => d.start,
+          getTargetPosition: d => d.end,
+          getColor: d => getColor(d),
+          getStrokeWidth: 5
+        })
+      ]
+    });
+  </script>
+</html>
