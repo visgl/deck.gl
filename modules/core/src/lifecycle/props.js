@@ -76,7 +76,7 @@ export function compareProps({
   for (const key in oldProps) {
     if (!(key in ignoreProps)) {
       if (!(key in newProps)) {
-        return `${triggerName}.${key} dropped: ${oldProps[key]} -> undefined`;
+        return `${triggerName}.${key} dropped`;
       }
       const newProp = newProps[key];
       const oldProp = oldProps[key];
@@ -85,19 +85,19 @@ export function compareProps({
       // If prop type has an equal function, invoke it
       let equal = propType && propType.equal;
       if (equal && !equal(newProp, oldProp, propType)) {
-        return `${triggerName}.${key} changed deeply: ${oldProp} -> ${newProp}`;
+        return `${triggerName}.${key} changed deeply`;
       }
 
       if (!equal) {
         // If object has an equals function, invoke it
         equal = newProp && oldProp && newProp.equals;
         if (equal && !equal.call(newProp, oldProp)) {
-          return `${triggerName}.${key} changed deeply: ${oldProp} -> ${newProp}`;
+          return `${triggerName}.${key} changed deeply`;
         }
       }
 
       if (!equal && oldProp !== newProp) {
-        return `${triggerName}.${key} changed shallowly: ${oldProp} -> ${newProp}`;
+        return `${triggerName}.${key} changed shallowly`;
       }
     }
   }
