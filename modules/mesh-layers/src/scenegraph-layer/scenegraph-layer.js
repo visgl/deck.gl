@@ -38,7 +38,10 @@ const defaultProps = {
 
   fetch: (url, {propName, layer}) => {
     if (propName === 'scenegraph') {
-      return load(url, layer.getLoadOptions()).then(({scenes}) => scenes[0]);
+      return load(url, layer.getLoadOptions()).then(({scenes, animator}) => {
+        scenes[0].animator = animator;
+        return scenes[0];
+      });
     }
 
     return fetch(url).then(response => response.json());
@@ -158,18 +161,23 @@ export default class ScenegraphLayer extends Layer {
     });
   }
 
-  draw({moduleParameters = null, parameters = {}}) {
+  draw({moduleParameters = null, parameters = {}, context}) {
     if (!this.state.scenegraph) return;
+
+    if (this.state.scenegraph.animator) {
+      this.state.scenegraph.animator.animate(context.animationProps.time);
+    }
 
     const {sizeScale} = this.props;
     const numInstances = this.getNumInstances();
-    this.state.scenegraph.traverse(model => {
+    this.state.scenegraph.traverse((model, {worldMatrix}) => {
       model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
         parameters,
         uniforms: {
-          sizeScale
+          sizeScale,
+          sceneModelMatrix: worldMatrix
         }
       });
     });

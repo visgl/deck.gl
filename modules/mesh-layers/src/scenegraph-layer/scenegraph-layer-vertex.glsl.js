@@ -9,6 +9,7 @@ attribute vec3 instanceTranslation;
 
 // Uniforms
 uniform float sizeScale;
+uniform mat4 sceneModelMatrix;
 
 // Attributes
 attribute vec4 POSITION;
@@ -25,7 +26,7 @@ void main(void) {
   #endif
   vColor = instanceColors;
 
-  vec3 pos = (instanceModelMatrix * POSITION.xyz) * sizeScale + instanceTranslation;
+  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
   pos = project_size(pos);
 
   vec4 position_commonspace;
