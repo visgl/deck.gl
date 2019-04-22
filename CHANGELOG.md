@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v6.4
 
+#### [6.4.10] - Apr 22, 2019
+
+- GridAggregation: port grid aggregation changes to 6.4 (#3000)
+- fix compareProps perf (#3011)
+
 #### [6.4.9] - Mar 29, 2019
 
 - Set picking color only when hovering (#2851)
