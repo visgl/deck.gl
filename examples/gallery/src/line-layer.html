@@ -2,8 +2,7 @@
   <head>
     <title>deck.gl LineLayer Example</title>
 
-    <script src="https://unpkg.com/deck.gl@latest/deckgl.min.js"></script>
-
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
     <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
 
     <style type="text/css">
@@ -12,20 +11,32 @@
         height: 100vh;
         margin: 0;
       }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        font-size: 11px;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
     </style>
   </head>
 
-  <body></body>
+  <body>
+    <div id="tooltip"></div>
+  </body>
 
   <script type="text/javascript">
+
     const {DeckGL, LineLayer} = deck;
-
-    function getColor(d) {
-      const z = d.start[2];
-      const r = z / 10000;
-
-      return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
-    }
 
     new DeckGL({
       mapboxApiAccessToken: '<mapbox-access-token>',
@@ -40,13 +51,32 @@
         new LineLayer({
           id: 'line',
           data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json',
-          fp64: false,
+          pickable: true,
           getSourcePosition: d => d.start,
           getTargetPosition: d => d.end,
           getColor: d => getColor(d),
-          getStrokeWidth: 5
+          getWidth: 8,
+          onHover: updateTooltip,
         })
       ]
     });
+
+    function getColor(d) {
+      const z = d.start[2];
+      const r = z / 10000;
+      return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
+    }
+
+    function updateTooltip({x, y, object}) {
+      const tooltip = document.getElementById('tooltip');
+      if (object) {
+        tooltip.style.top = `${y}px`;
+        tooltip.style.left = `${x}px`;
+        tooltip.innerHTML = `Flight ${object.name}`;
+      } else {
+        tooltip.innerHTML = '';
+      }
+    }
+    
   </script>
 </html>
