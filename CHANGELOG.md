@@ -15,7 +15,13 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl [v7.0.0] - Apr 19 2019
+## deck.gl v7.0
+
+#### deck.gl [v7.0.1] - Apr 22 2019
+
+- fix compareProps perf (#3011)
+
+#### deck.gl [v7.0.0] - Apr 19 2019
 
 - Bump luma.gl version to 7.0.0
 - Content and Polish for Whats New 7.0 (#3001)
