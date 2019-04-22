@@ -27,6 +27,60 @@ The key components discussed in this article will be:
 
 ## Batch-Focused Renderable
 
+The core renderable will be built around the [multi_draw](https://www.khronos.org/registry/webgl/extensions/WEBGL_multi_draw_instanced/) API using texture arrays. This will ensure that the engine can batch things maximally to minimize driver overhead. While we can't expect support for multi draw or texture arrays across all platforms, the functionality is straightforward to emulate, and supporting platforms will simply see a boost in performance. Deck's usage is often drawing a particular primitive shape several times based on data, and we can support this usage explicitly in the core renderable class. The API could potentially look something like the following:
+
+```js
+// Add a dataset with "accessors" that describe how to create an array out of them
+engine.addDataSet("dataSetId", data, {
+  positions: object => object.position,
+  colors: object => object.color
+});
+
+// Create a renderable that refers to the dataset
+engine.createRenderable({
+  // Each shape (* drawCount) is one 'draw' in a multi_draw
+  // Will be concatenated if hardware multi_draw is
+  // unavailable.
+  shapes: [
+    {
+      POSITION: [...],
+      NORMAL: [...],
+      INDICES: [...]
+    },
+    {
+      POSITION: [...],
+      NORMAL: [...],
+      INDICES: [...],
+      drawCount: 2
+    }
+  ],
+  // Will use Texture2DArray if available or
+  // multiple samplers
+  textures: [texture0, texture1, texture2, texture3, texture4],
+  // Uniforms are arrays with each element corresponding to
+  // one 'draw' in a multi_draw
+  uniforms: {
+    sizeScale: [10, 3, 4],
+    flatShading: [false, true, false]
+  },
+  // Per instance data
+  // Can reference data set items or be
+  // dynamically defined by a function
+  data: {
+    instancePositions: {
+      dataSet: "dataSetID",
+      item: "positions"
+    },
+    instanceColors: {
+      dataSet: "dataSetID",
+      item: "colors"
+    },
+    // Special property index into 'textures' array.
+    textureIndex: (object) => Math.floor(Math.random() * 5)
+  }
+});
+````
+
 ## Program and Shader Management
 
 ## Buffer and Texture Management
