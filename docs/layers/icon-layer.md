@@ -101,11 +101,10 @@ const App = ({data, viewport}) => {
       url: d.avatar_url,
       width: 128,
       height: 128,
-      anchorY: 128,
+      anchorY: 128
     }),
     // icon size is based on data point's contributions, between 2 - 25 
     getSize: d => Math.max(2, Math.min(d.contributions / 1000 * 25, 25)),
-
     pickable: true,
     sizeScale: 15,
     getPosition: d => d.coordinates,
