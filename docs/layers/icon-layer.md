@@ -91,7 +91,7 @@ const App = ({data, viewport}) => {
    */
   const layer = new IconLayer({
     id: 'icon-layer',
-    data: octokit.repos.listContributors({
+    data: octokit.repos.getContributors({
       owner: 'uber',
       repo: 'deck.gl' 
     }).then(result => result.data),
@@ -101,18 +101,15 @@ const App = ({data, viewport}) => {
       url: d.avatar_url,
       width: 128,
       height: 128,
-      anchorY: 128,
-      mask: true
+      anchorY: 128
     }),
     // icon size is based on data point's contributions, between 2 - 25 
     getSize: d => Math.max(2, Math.min(d.contributions / 1000 * 25, 25)),
-
     pickable: true,
     sizeScale: 15,
     getPosition: d => d.coordinates,
-    getColor: d => [Math.sqrt(d.exits), 140, 0],
     onHover: ({object, x, y}) => {
-      const tooltip = `${object.name}\n${object.address}`;
+      const tooltip = `${object.login}\n${object.contributions}`;
       /* Update tooltip
          http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
       */
