@@ -31,11 +31,12 @@ const propTypes = Deck.getPropTypes(PropTypes);
 
 const defaultProps = Deck.defaultProps;
 
-export default class DeckGL extends React.PureComponent {
+export default class DeckGL extends React.Component {
   constructor(props) {
     super(props);
 
     this.viewports = null;
+    this.children = null;
 
     // The redraw flag of deck
     this._needsRedraw = null;
@@ -64,27 +65,35 @@ export default class DeckGL extends React.PureComponent {
           _customRender: this._customRender
         })
       );
-    this._updateFromProps();
+    this._updateFromProps(this.props);
   }
 
-  // This can be triggered by two scenarios:
-  // 1. Deck's viewports have changed -> _customRender -> this.forceUpdate
-  //    The canvas has not been redrawn to reflect the change.
-  // 2. Props provided to this React component have changed
-  //    We need to update Deck's props
+  // This method checks if React needs to call `render`.
+  // Props changes may lead to 3 types of updates:
+  // 1. Only the WebGL context - updated in to Deck's render cycle (next animation frame)
+  // 2. Only the DOM - updated by calling React's lifecycle method `render` (now)
+  // 3. Both the WebGL context and the DOM - defer React rerender to next animation frame just
+  //    before Deck redraw to ensure perfect synchronization & avoid excessive redraw
+  //    This is because multiple changes may happen to Deck between two frames e.g. transition
+  shouldComponentUpdate(nextProps) {
+    // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
+    // the next animation frame.
+    this._updateFromProps(nextProps);
+
+    // If the child components have changed, React needs to rerender (case 2 or 3)
+    const childrenChanged = this.children !== this._parseJSX(nextProps).children;
+    // If the views have changed, WebGL context needs to redraw (case 1 or 3)
+    const viewsChanged = this.deck.viewManager && this.deck.viewManager.needsRedraw();
+
+    // Only call `render` right away in case 2
+    return childrenChanged && !viewsChanged;
+  }
+
   componentDidUpdate() {
     // render has just been called. The children are positioned based on the current view state.
     // Redraw Deck canvas immediately, if necessary, using the current view state, so that it
     // matches the child components.
     this._redrawDeck();
-
-    // Update Deck's props. The order is important here because setting props may potentially
-    // change Deck's view state. If we call it before redraw Deck canvas will go out of sync with
-    // the children.
-    // If component props have not changed, Deck's redraw flag should not be set.
-    // If component props have changed, this will trigger another call to _customRender in the
-    // next animation frame.
-    this._updateFromProps();
   }
 
   componentWillUnmount() {
@@ -133,25 +142,21 @@ export default class DeckGL extends React.PureComponent {
 
   // Private Helpers
 
-  _parseJSX() {
+  _parseJSX(props) {
     return this._extractJSXLayers({
-      layers: this.props.layers,
-      views: this.props.views,
-      children: this.props.children
+      layers: props.layers,
+      views: props.views,
+      children: props.children
     });
   }
 
   // 1. Extract any JSX layers from the react children
   // 2. Handle any backwards compatiblity props for React layer
-  // Needs to be called both from initial mount, and when props have changed
-  _updateFromProps() {
-    if (!this.deck) {
-      return;
-    }
-
+  // Needs to be called both from initial mount, and when new props are received
+  _updateFromProps(props) {
     // extract any deck.gl layers masquerading as react elements from props.children
-    const {layers, views} = this._parseJSX();
-    const deckProps = Object.assign({}, this.props, {
+    const {layers, views} = this._parseJSX(props);
+    const deckProps = Object.assign({}, props, {
       layers,
       views
     });
@@ -160,14 +165,15 @@ export default class DeckGL extends React.PureComponent {
   }
 
   render() {
-    // Save the viewports used for this render
+    // Save the viewports and children used for this render
     const {viewManager} = this.deck || {};
     this.viewports = viewManager && viewManager.getViewports();
+    this.children = this._parseJSX(this.props).children;
 
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
     const children = this._positionChildrenUnderViews({
-      children: this._parseJSX().children,
+      children: this.children,
       viewports: this.viewports,
       deck: this.deck
     });
