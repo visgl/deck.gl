@@ -2,9 +2,9 @@
 
 from __future__ import print_function
 from setuptools import setup, find_packages, Command
-from setuptools.command.sdist import sdist
-from setuptools.command.build_py import build_py
-from setuptools.command.egg_info import egg_info
+# from setuptools.command.sdist import sdist
+# from setuptools.command.build_py import build_py
+# from setuptools.command.egg_info import egg_info
 from subprocess import check_call
 from glob import glob
 import os
@@ -28,7 +28,7 @@ log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'Jupyter widget for rendering deck.gl in a Jupyter notebook'
+LONG_DESCRIPTION = 'Python wrapper for deck.gl'
 
 def js_prerelease(command, strict=False):
     """decorator for building minified js/css prior to another command"""
@@ -126,7 +126,7 @@ with open(os.path.join(here, 'pydeck', '_version.py')) as f:
 setup_args = {
     'name': 'pydeck',
     'version': version_ns['__version__'],
-    'description': 'Jupyter widget for deck.gl maps',
+    'description': 'Widget for deck.gl maps',
     'long_description': LONG_DESCRIPTION,
     'license': 'MIT License',
     'include_package_data': True,
@@ -176,21 +176,10 @@ setup_args = {
     'extras_require': {
         'test': [
             'pytest>=3.6',
-            'pytest-cov',
-            'nbval',
+            'pytest-cov'
         ],
         'examples': [
             # Any requirements for the examples to run
-        ],
-        'docs': [
-            'sphinx>=1.5',
-            'recommonmark',
-            'sphinx_rtd_theme',
-            'nbsphinx>=0.2.13,<0.4.0',
-            'jupyter_sphinx',
-            'nbsphinx-link',
-            'pytest_check_links',
-            'pypandoc',
         ],
     },
     'entry_points': {}

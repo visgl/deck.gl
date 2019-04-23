@@ -1,32 +1,46 @@
-language: node_js
-dist: precise
-os: linux
-group: stable
-sudo: required
-dist: trusty
-env:
-  - CXX=g++-6
-addons:
-  apt:
-    sources:
-    - ubuntu-toolchain-r-test
-    packages:
-    - g++-6
-    - mesa-utils
-    - xvfb
-    - libgl1-mesa-dri
-    - libglapi-mesa
-    - libosmesa6
-    - libxi-dev
-install:
-  - yarn bootstrap
-node_js:
-  - 8.9.4
-  - 10.4.0
-before_script:
-  - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
-  - ulimit -c unlimited -S       # enable core dumps
-script:
-  - npm run test ci
-after_success:
-  - cat coverage/lcov.info | coveralls
+matrix:
+  include:
+    - language: node_js
+      dist: precise
+      os: linux
+      group: stable
+      sudo: required
+      dist: trusty
+      env:
+        - CXX=g++-6
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-6
+          - mesa-utils
+          - xvfb
+          - libgl1-mesa-dri
+          - libglapi-mesa
+          - libosmesa6
+          - libxi-dev
+      install:
+        - yarn bootstrap
+      node_js:
+        - 8.9.4
+        - 10.4.0
+      before_script:
+        - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+        - ulimit -c unlimited -S       # enable core dumps
+      script:
+        - npm run test ci
+      after_success:
+        - cat coverage/lcov.info | coveralls
+
+    - language: python
+      before_script:
+        - cd bindings/python/pydeck
+      python:
+        - '3.5'
+        - '2.7'
+      install:
+        - pip install -r requirements.txt
+        - pip install -r requirements-dev.txt
+        - pip install .
+      script: pytest
