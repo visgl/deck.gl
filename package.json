@@ -57,7 +57,7 @@
     "raw-loader": "^0.5.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
-    "react-map-gl": "^4.0.14",
+    "react-map-gl": "^4.1.2",
     "reify": "^0.18.1"
   },
   "pre-commit": [

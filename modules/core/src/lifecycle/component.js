@@ -61,4 +61,5 @@ export default class Component {
   }
 }
 
+Component.componentName = 'Component';
 Component.defaultProps = defaultProps;
