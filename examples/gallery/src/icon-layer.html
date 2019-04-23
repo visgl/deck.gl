@@ -17,7 +17,6 @@
       }
       #tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        font-size: 11px;
         position: absolute;
         padding: 4px;
         margin: 8px;
@@ -48,7 +47,7 @@
       viewState: { target: [0, 0, 0], zoom: 2 },
       controller: false,
       layers: [],
-    })
+    });
 
     function range(start, stop, step) {
       step = step || 1;
@@ -105,21 +104,9 @@
       }
     }
 
-    function renderLayers(data) {
-      const sourcePosition = [0, 0];
-      const listOfContributions = data.map(contributor => contributor.contributions);
-      const {firstQuartile, secondQuartile, thirdQuartile} = calculateQuartiles(listOfContributions);
-      const ninetiethPercentile = [...listOfContributions]
-        .sort((a, b) => a - b)[Math.floor(0.90 * listOfContributions.length)];
+    function getSizeOfIcon(contributions, quartiles, ninetiethPercentile) {
+      const {firstQuartile, secondQuartile, thirdQuartile} = quartiles;
 
-      listOfContributions.forEach((number, index) => {
-        const linkDistance = 20 * ((number - Math.min(...listOfContributions))
-         / (Math.max(...listOfContributions) - Math.min(...listOfContributions))) + 30;
-
-        addTargetPositionToContributor(data[index], linkDistance);
-      })
-
-      function getSizeOfIcon(contributions) {
         if (contributions <= firstQuartile) {
           return 15;
         } else if (contributions > firstQuartile && contributions <= secondQuartile) {
@@ -130,7 +117,25 @@
           return 32;
         }
         return 40;
-      }
+    }
+    
+
+    function renderLayers(data) {
+      const sourcePosition = [0, 0];
+      const listOfContributions = data.map(contributor => contributor.contributions);
+      const quartiles = calculateQuartiles(listOfContributions);
+      const ninetiethPercentile = [...listOfContributions]
+        .sort((a, b) => a - b)[Math.floor(0.90 * listOfContributions.length)];
+
+      const maxContributions = Math.max(...listOfContributions);
+      const minContributions = Math.min(...listOfContributions);
+
+      listOfContributions.forEach((number, index) => {
+        const linkDistance = 20 * ((number - minContributions) 
+        / (maxContributions - minContributions)) + 30;
+
+        addTargetPositionToContributor(data[index], linkDistance);
+      })
 
       const iconLayer = new IconLayer({
         id: 'icon-layer',
@@ -141,11 +146,11 @@
           width: 128,
           height: 128
         }),
-        getSize : d => getSizeOfIcon(d.contributions),
+        getSize : d => getSizeOfIcon(d.contributions, quartiles, ninetiethPercentile),
         getPosition: d => d.targetPosition,
         pickable: true,
-        onHover: updateTooltip,
-      })
+        onHover: updateTooltip
+      });
 
       const lineLayer = new LineLayer({
         id: 'line',
@@ -155,8 +160,8 @@
         getSourcePosition: d => sourcePosition,
         getTargetPosition: d => d.targetPosition,
         getColor: d => [228, 228, 228],
-        getWidth: 3,
-      })
+        getWidth: 3
+      });
 
       const scatterPlotLayer = new ScatterplotLayer({
         id: 'scatter',
@@ -165,8 +170,8 @@
         getPosition: d => d.position,
         getFillColor: d => d.color,
         getRadius: d => d.radius,
-        opacity: 1,
-      })
+        opacity: 1
+      });
 
       const textLayer = new TextLayer({
         id: 'text-layer',
@@ -175,8 +180,8 @@
         getSize: 15,
         getPosition: d => d.position,
         getText: d => d.text,
-        getColor: d => d.color,
-      })
+        getColor: d => d.color
+      });
 
       deckgl.setProps({ layers: [lineLayer, iconLayer, scatterPlotLayer, textLayer] });
     }
