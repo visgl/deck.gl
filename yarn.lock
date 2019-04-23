@@ -5853,14 +5853,6 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-mjolnir.js@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.0.2.tgz#bd8f4ee36ce8a05d9643e3b4738436c1df2e3a04"
-  integrity sha512-xNWPIHATqMAgxv3KO1R/c6XfxRJ0eNNlEHXuUKEgN2S3NjuSxQ1Evvqu5DkNdJ7SWwGDpmenUUpi5/Vak+f3+Q==
-  dependencies:
-    "@babel/runtime" "^7.0.0"
-    hammerjs "^2.0.8"
-
 mjolnir.js@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.1.0.tgz#e8a4727e86d8f9352d6b6fe9cdc6faab0dcff15e"
@@ -7150,10 +7142,10 @@ react-dom@^16.2.0:
     object-assign "^4.1.1"
     prop-types "^15.6.0"
 
-react-map-gl@^4.0.14:
-  version "4.0.14"
-  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-4.0.14.tgz#3bd79d9402a40496427791b7d4aa04ce68b3561d"
-  integrity sha512-Ijr0UIQ/wLGJZQgLzNDY2DVCduaLm4ILptEMoaKz66XG+XEEk27SssFWkfs2++E12TlFb7RctxiYRtEi87HyCw==
+react-map-gl@^4.1.2:
+  version "4.1.2"
+  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-4.1.2.tgz#02b5d983c4d08be2f2d8e3ea2b58c87e4ac25ed3"
+  integrity sha512-ECZs8I0ochmCCg1StmbcHIM/8e3nhWuNptB/KlL0Q67sWYmV5joMZsuj9+jlxjtZ59IDg5ZBbK6Dle7TNMZZTw==
   dependencies:
     "@babel/runtime" "^7.0.0"
     mapbox-gl "~0.53.0"
