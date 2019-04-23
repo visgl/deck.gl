@@ -212,6 +212,7 @@ export default class AttributeManager {
   }
 
   // Ensure all attribute buffers are updated from props or data.
+  /* eslint-disable complexity */
   update({data, numInstances, transitions, props = {}, buffers = {}, context = {}} = {}) {
     // keep track of whether some attributes are updated
     let updated = false;
@@ -235,11 +236,13 @@ export default class AttributeManager {
 
       if (attribute.userData.shaderAttributes) {
         const shaderAttributes = attribute.userData.shaderAttributes;
+        // NOTE(Tarek): Primarily for matrix constants
+        const shaderValues = attribute.userData.shaderValues;
         for (const shaderAttributeName in shaderAttributes) {
           const shaderAttribute = shaderAttributes[shaderAttributeName];
           shaderAttribute.update({
-            buffer: attribute.buffer,
-            value: shaderAttribute.value || attribute.value,
+            buffer: attribute.constant ? null : attribute.buffer,
+            value: shaderValues[shaderAttributeName] || attribute.value,
             constant: attribute.constant
           });
         }
@@ -378,7 +381,9 @@ export default class AttributeManager {
       isIndexed: attribute.isIndexed || attribute.elements,
       size: (attribute.elements && 1) || attribute.size,
       value: attribute.value || null,
-      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor
+      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor,
+      // NOTE(Tarek): Use for constant matrix
+      shaderValues: {}
     };
 
     if (forceNoAlloc) {
