@@ -1,4 +1,6 @@
-class ViewState(object):
+from .json_tools import JSONMixin
+
+class ViewState(JSONMixin):
     def __init__(
         self,
         longitude,

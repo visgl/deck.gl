@@ -1,7 +1,5 @@
 import json
 
-from json import JSONEncoder
-
 
 def to_camel_case(snake_case):
     """Makes a snake case string into a camel case one
@@ -24,22 +22,37 @@ def to_camel_case(snake_case):
 
 def camel_case_keys(attrs):
     """Makes all the keys in a dictionary camel-cased"""
-    for k in attrs.keys():
-        camel_key = to_camel_case(k)
-        attrs[camel_key] = attrs[k]
-        if camel_key != k:
-            attrs.pop(k, None)
+    for snake_key in list(attrs.keys()):
+        if '_' not in snake_key:
+            continue
+        camel_key = to_camel_case(snake_key)
+        attrs[camel_key] = attrs.pop(snake_key)
 
 
-class DictEncoder(JSONEncoder):
-    def default(self, o, remap_function=camel_case_keys):
-        attrs = vars(o)
-        attrs = {k: v for k, v in attrs.items() if v is not None}
-        if remap_function:
-            remap_function(attrs)
-        return attrs
+def default_serialize(o, remap_function=camel_case_keys):
+    attrs = vars(o)
+    attrs = {k: v for k, v in attrs.items() if v is not None}
+    if remap_function:
+        remap_function(attrs)
+    return attrs
 
 
-def to_json(serializable, remap_function=camel_case_keys):
+def serialize(serializable):
     """Takes a serializable object and JSONifies it"""
-    return json.dumps(serializable, sort_keys=True, cls=DictEncoder)
+    return json.dumps(serializable, sort_keys=True, default=default_serialize)
+
+
+class JSONMixin(object):
+
+    def __repr__(self):
+        """
+        Override of string representation method to return a JSON-ified version of the
+        Deck object.
+        """
+        return serialize(self)
+
+    def to_json(self):
+        """
+        Return a JSON-ified version of the Deck object.
+        """
+        return serialize(self)

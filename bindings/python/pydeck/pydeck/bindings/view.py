@@ -1,4 +1,6 @@
-class View(object):
+from .json_tools import JSONMixin
+
+class View(JSONMixin):
     """
     Represents a "hard configuration" of a camera location
 

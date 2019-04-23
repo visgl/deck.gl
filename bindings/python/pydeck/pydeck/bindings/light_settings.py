@@ -1,4 +1,6 @@
-class LightSettings(object):
+from .json_tools import JSONMixin
+
+class LightSettings(JSONMixin):
     """
     Configuration of lights on the plane
 
@@ -26,9 +28,9 @@ class LightSettings(object):
         lights_strength=None,
         number_of_lights=2
     ):
-        self.lights_position = lights_position
         self.ambient_ratio = ambient_ratio
         self.diffuse_ratio = diffuse_ratio
-        self.specular_ratio = specular_ratio
+        self.lights_position = lights_position
         self.lights_strength = lights_strength
         self.number_of_lights = number_of_lights
+        self.specular_ratio = specular_ratio

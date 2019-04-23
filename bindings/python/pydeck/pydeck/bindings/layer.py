@@ -1,3 +1,5 @@
+from .json_tools import JSONMixin
+
 DEFAULT_RANGE = [
     [1, 152, 189],
     [73, 227, 206],
@@ -8,7 +10,7 @@ DEFAULT_RANGE = [
 ]
 
 
-class Layer(object):
+class Layer(JSONMixin):
     def __init__(
         self,
         type,
@@ -37,3 +39,4 @@ class Layer(object):
         self.radius = radius
         self.upper_percentile = upper_percentile
         self.color_range = color_range
+        self.light_settings = light_settings
