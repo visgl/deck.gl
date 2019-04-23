@@ -60,3 +60,9 @@ class Deck():
         Deck object.
         """
         return to_json(self)
+
+    def to_json(self):
+        """
+        Return a JSON-ified version of the Deck object.
+        """
+        return to_json(self)
