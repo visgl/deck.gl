@@ -11,6 +11,7 @@ export default class GoogleMapsOverlay {
 
     const overlay = new google.maps.OverlayView();
     overlay.onAdd = this._onAdd.bind(this);
+    overlay.onRemove = this._onRemove.bind(this);
     overlay.draw = this._draw.bind(this);
     this._overlay = overlay;
 
@@ -53,16 +54,22 @@ export default class GoogleMapsOverlay {
   }
 
   finalize() {
+    this.setMap(null);
     if (this._deck) {
       destroyDeckInstance(this._deck);
+      this._deck = null;
     }
-    this.setMap(null);
   }
 
   /* Private API */
   _onAdd() {
     this._deck = createDeckInstance(this._map, this._overlay, this._deck);
     this._deck.setProps(this.props);
+  }
+
+  _onRemove() {
+    // Clear deck canvas
+    this._deck.setProps({layerFilter: HIDE_ALL_LAYERS});
   }
 
   _draw() {

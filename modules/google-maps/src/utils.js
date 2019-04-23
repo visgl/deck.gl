@@ -63,14 +63,17 @@ function createDeckCanvas(overlay) {
  * @param deck (Deck) - a previously created instances
  */
 export function destroyDeckInstance(deck) {
-  const {_googleMap: map, _eventListeners: eventListeners} = deck.props.userData;
+  const {_eventListeners: eventListeners} = deck.props.userData;
 
   // Unregister event listeners
   for (const eventType in eventListeners) {
-    map.removeListener(eventListeners[eventType]);
+    eventListeners[eventType].remove();
   }
 
   deck.finalize();
+
+  // Remove canvas
+  deck.canvas.parentNode.removeChild(deck.canvas);
 }
 
 /**
