@@ -4,7 +4,13 @@ from json import JSONEncoder
 
 
 def to_camel_case(snake_case):
-    """Makes a snake case string into a camel case one"""
+    """Makes a snake case string into a camel case one
+
+    Parameters
+    -----------
+    snake_case : str
+        Snake-cased string (e.g., "snake_cased") to be converted to camel-case (e.g., "camelCase")
+    """
     output_str = ''
     should_upper_case = False
     for c in snake_case:
@@ -35,4 +41,5 @@ class DictEncoder(JSONEncoder):
 
 
 def to_json(serializable, remap_function=camel_case_keys):
+    """Takes a serializable object and JSONifies it"""
     return json.dumps(serializable, sort_keys=True, cls=DictEncoder)
