@@ -21,6 +21,10 @@ const MODEL_URL =
   'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
 const REFRESH_TIME = 30000;
 
+const ANIMATIONS = {
+  '*': {speed: 1}
+};
+
 export const INITIAL_VIEW_STATE = {
   latitude: 39.1,
   longitude: -94.57,
@@ -97,8 +101,9 @@ export class App extends Component {
           id: 'scenegraph-layer',
           data,
           pickable: true,
-          sizeScale: 20,
+          sizeScale: 2000,
           scenegraph: MODEL_URL,
+          _animations: ANIMATIONS,
           getPosition: d => [
             d[DATA_INDEX.LONGITUDE] || 0,
             d[DATA_INDEX.LATITUDE] || 0,
@@ -179,6 +184,7 @@ export class App extends Component {
           initialViewState={INITIAL_VIEW_STATE}
           viewState={viewState}
           controller={controller}
+          _animate
         >
           {baseMap && (
             <StaticMap
