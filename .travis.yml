@@ -34,7 +34,7 @@ matrix:
         - cat coverage/lcov.info | coveralls
 
     - language: python
-      before_script:
+      before_install:
         - cd bindings/python/pydeck
       python:
         - '3.5'
