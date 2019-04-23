@@ -70,8 +70,8 @@ export default class DeckGL extends React.Component {
 
   // This method checks if React needs to call `render`.
   // Props changes may lead to 3 types of updates:
-  // 1. Only the WebGL context - updated in to Deck's render cycle (next animation frame)
-  // 2. Only the DOM - updated by calling React's lifecycle method `render` (now)
+  // 1. Only the WebGL context - updated in Deck's render cycle (next animation frame)
+  // 2. Only the DOM - updated in React's lifecycle (now)
   // 3. Both the WebGL context and the DOM - defer React rerender to next animation frame just
   //    before Deck redraw to ensure perfect synchronization & avoid excessive redraw
   //    This is because multiple changes may happen to Deck between two frames e.g. transition
