@@ -144,12 +144,12 @@ setup_args = {
     ],
     'packages': find_packages(),
     'zip_safe': False,
-    'cmdclass': {
-        'build_py': js_prerelease(build_py),
-        'egg_info': js_prerelease(egg_info),
-        'sdist': js_prerelease(sdist, strict=True),
-        'jsdeps': NPM,
-    },
+    # 'cmdclass': {
+    #     'build_py': js_prerelease(build_py),
+    #     'egg_info': js_prerelease(egg_info),
+    #     'sdist': js_prerelease(sdist, strict=True),
+    #     # 'jsdeps': NPM,
+    # },
     'author': 'Andrew Duberstein',
     'author_email': 'ajduberstein@gmail.com',
     'url': 'https://github.com/uber/deck.gl',
@@ -171,6 +171,8 @@ setup_args = {
         'Framework :: Jupyter',
     ],
     'include_package_data': True,
+    'tests_require': ['pytest'],
+    'setup_requires': ['pytest-runner'],
     'extras_require': {
         'test': [
             'pytest>=3.6',
