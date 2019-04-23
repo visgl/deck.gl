@@ -82,7 +82,7 @@ export default class DeckGL extends React.Component {
 
     // If the child components have changed, React needs to rerender (case 2 or 3)
     const childrenChanged = this.children !== this._parseJSX(nextProps).children;
-    // If the views have changed, WebGL context needs to redraw (case 1 or 3)
+    // If the views have changed, both React and WebGL context need update (case 3)
     const viewsChanged = this.deck.viewManager && this.deck.viewManager.needsRedraw();
 
     // Only call `render` right away in case 2
