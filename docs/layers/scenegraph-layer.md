@@ -80,6 +80,19 @@ The layer calls _delete()_ on _scenegraph_ when a new one is provided or the lay
 
 Multiplier to scale each geometry by.
 
+##### `_animations` (Object, optional)
+
+- Default `undefined`. (No animations are running).
+
+An object used to configure animations playing. _keys_ can be one of the following:
+- _number_ for index number
+- _name_ for animation name
+- `*` to affect all animations
+Each value is an object with:
+- `playing`: _true_ or _false_
+- `speed`: number, `1` for default speed.
+Animations are parsed automatically from `glTF` files. Requires `_animate` on deck object.
+
 ##### `fp64` (Boolean, optional)
 
 - Default: `false`
