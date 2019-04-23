@@ -17,10 +17,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.2] - Apr 23 2019
+
+- More React synchronization fix (#3018)
+- Fix GoogleMapsOverlay remove and finalize (#3019)
+
 #### deck.gl [v7.0.1] - Apr 22 2019
 
 - fix compareProps perf (#3011)
-- Fix GoogleMapsOverlay remove and finalize (#3019)
 
 #### deck.gl [v7.0.0] - Apr 19 2019
 
