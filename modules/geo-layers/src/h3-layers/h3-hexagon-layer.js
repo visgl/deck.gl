@@ -1,6 +1,5 @@
 import {h3ToGeoBoundary, h3GetResolution, h3ToGeo, geoToH3, h3IsPentagon} from 'h3-js';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
-import {PhongMaterial} from '@luma.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 
 function getHexagonCentroid(getHexagon, object, objectInfo) {
@@ -16,10 +15,12 @@ const defaultProps = Object.assign(
     elevationScale: {type: 'number', min: 0, value: 1},
 
     getHexagon: {type: 'accessor', value: x => x.hexagon},
-    getColor: {type: 'accessor', value: [255, 0, 255, 255]},
-    material: new PhongMaterial()
+    getColor: {type: 'accessor', value: [255, 0, 255, 255]}
   },
-  PolygonLayer.defaultProps
+  {
+    ...PolygonLayer.defaultProps,
+    extruded: true
+  }
 );
 
 /**
@@ -102,14 +103,6 @@ export default class H3HexagonLayer extends CompositeLayer {
     this.setState({centerHex: hex, vertices});
   }
 
-  getSubLayerAccessor(accessor) {
-    if (typeof accessor !== 'function') return accessor;
-
-    return (object, objectInfo) => {
-      return accessor(object, objectInfo);
-    };
-  }
-
   renderLayers() {
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
@@ -122,18 +115,15 @@ export default class H3HexagonLayer extends CompositeLayer {
       elevationScale,
       fp64,
       material,
+      extruded,
       stroked,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
-      lineJointRounded,
-      lineMiterLimit,
-      lineDashJustified,
       getColor,
       getElevation,
       getLineColor,
       getLineWidth,
-      getLineDashArray,
       updateTriggers
     } = this.props;
 
@@ -143,22 +133,18 @@ export default class H3HexagonLayer extends CompositeLayer {
       {
         filled: true,
         elevationScale,
-        extruded: true,
+        extruded,
         fp64,
         wireframe,
         stroked,
         lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels,
-        lineJointRounded,
-        lineMiterLimit,
-        lineDashJustified,
         material,
-        getElevation: this.getSubLayerAccessor(getElevation),
-        getFillColor: this.getSubLayerAccessor(getColor),
-        getLineColor: this.getSubLayerAccessor(getLineColor),
-        getLineWidth: this.getSubLayerAccessor(getLineWidth),
-        getLineDashArray: this.getSubLayerAccessor(getLineDashArray)
+        getElevation,
+        getFillColor: getColor,
+        getLineColor,
+        getLineWidth
       },
       this.getSubLayerProps({
         id: 'hexagon-cell-hifi',
@@ -179,11 +165,10 @@ export default class H3HexagonLayer extends CompositeLayer {
       data,
       getHexagon,
       updateTriggers,
-
       coverage,
       elevationScale,
       fp64,
-
+      extruded,
       getColor,
       getElevation,
       material
@@ -195,7 +180,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       {
         coverage,
         elevationScale,
-        extruded: true,
+        extruded,
         fp64,
         getColor,
         getElevation,
