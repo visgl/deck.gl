@@ -279,12 +279,12 @@ export default class AttributeManager {
   getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
-    const changedAttributes = Object.assign({}, attributeTransitionManager.getShaderAttributes());
+    const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       if (attribute.needsRedraw(opts) && !attributeTransitionManager.hasAttribute(attributeName)) {
-        Object.assign(changedAttributes, attribute.getShaderAttributes());
+        changedAttributes[attributeName] = attribute;
       }
     }
 
