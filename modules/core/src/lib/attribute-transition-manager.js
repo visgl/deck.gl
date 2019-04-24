@@ -108,6 +108,21 @@ export default class AttributeTransitionManager {
     return animatedAttributes;
   }
 
+  // Get all the animated attributes
+  getShaderAttributes() {
+    const animatedAttributes = {};
+
+    for (const attributeName in this.attributeTransitions) {
+      const transition = this.attributeTransitions[attributeName];
+
+      if (transition.buffer) {
+        Object.assign(animatedAttributes, transition.attributeInTransition.getShaderAttributes());
+      }
+    }
+
+    return animatedAttributes;
+  }
+
   /* eslint-disable max-statements */
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes

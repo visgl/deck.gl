@@ -279,7 +279,7 @@ export default class AttributeManager {
   getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
-    const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
+    const changedAttributes = Object.assign({}, attributeTransitionManager.getShaderAttributes());
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];

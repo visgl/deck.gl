@@ -116,7 +116,11 @@ test('WebGL#BaseAttribute getValue', t => {
   t.is(attribute.getValue()[0], attribute.buffer, 'getValue returns own buffer');
 
   attribute.update({constant: true, value: value1});
-  t.is(attribute.getValue(), value1, 'getValue returns generic value');
+  t.deepEquals(
+    attribute.getValue(),
+    value1.slice(0, 4),
+    'getValue returns generic value, truncated to size'
+  );
 
   attribute.update({buffer});
   t.is(attribute.getValue()[0], buffer, 'getValue returns user supplied buffer');

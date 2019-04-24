@@ -3,8 +3,7 @@ import {createIterable} from '@deck.gl/core';
 /* eslint-disable max-statements, complexity */
 const RADIAN_PER_DEGREE = Math.PI / 180;
 const modelMatrix = new Float32Array(16);
-const linearTransform = new Float32Array(9);
-const modelTranslation = new Float32Array(3);
+const valueArray = new Float32Array(12);
 
 function calculateTransformMatrix(targetMatrix, orientation, scale) {
   const pitch = orientation[0] * RADIAN_PER_DEGREE;
@@ -34,7 +33,7 @@ function calculateTransformMatrix(targetMatrix, orientation, scale) {
   targetMatrix[8] = scz * cp * cr; // 2,2
 }
 
-function getMat3FromMat4(mat4) {
+function getExtendedMat3FromMat4(mat4) {
   mat4[0] = mat4[0];
   mat4[1] = mat4[1];
   mat4[2] = mat4[2];
@@ -44,8 +43,11 @@ function getMat3FromMat4(mat4) {
   mat4[6] = mat4[8];
   mat4[7] = mat4[9];
   mat4[8] = mat4[10];
+  mat4[9] = mat4[12];
+  mat4[10] = mat4[13];
+  mat4[11] = mat4[14];
 
-  return mat4.subarray(0, 9);
+  return mat4.subarray(0, 12);
 }
 
 export const MATRIX_ATTRIBUTES = {
@@ -78,13 +80,13 @@ export const MATRIX_ATTRIBUTES = {
     // NOTE(Tarek): "this" will be bound to a layer!
     const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = this.props;
 
-    const constantMatrix = Array.isArray(getTransformMatrix);
+    const arrayMatrix = Array.isArray(getTransformMatrix);
+    const constantMatrix = arrayMatrix && getTransformMatrix.length === 16;
     const constantScale = Array.isArray(getScale);
     const constantOrientation = Array.isArray(getOrientation);
     const constantTranslation = Array.isArray(getTranslation);
 
-    const hasMatrix =
-      getTransformMatrix && (constantMatrix || Boolean(getTransformMatrix(data[0])));
+    const hasMatrix = constantMatrix || (!arrayMatrix && Boolean(getTransformMatrix(data[0])));
 
     if (hasMatrix) {
       attribute.constant = constantMatrix;
@@ -99,27 +101,18 @@ export const MATRIX_ATTRIBUTES = {
 
       if (hasMatrix) {
         modelMatrix.set(getTransformMatrix);
-        modelTranslation[0] = modelMatrix[12];
-        modelTranslation[1] = modelMatrix[13];
-        modelTranslation[2] = modelMatrix[14];
-        matrix = getMat3FromMat4(modelMatrix);
+        matrix = getExtendedMat3FromMat4(modelMatrix);
       } else {
-        matrix = linearTransform;
+        matrix = valueArray;
 
         const orientation = getOrientation;
         const scale = getScale;
 
         calculateTransformMatrix(matrix, orientation, scale);
-        modelTranslation.set(getTranslation);
+        matrix.set(getTranslation, 9);
       }
 
-      const valueMatrix = new Float32Array(matrix);
-      const valueTranslation = new Float32Array(modelTranslation);
-
-      attribute.shaderValues.instanceModelMatrix__LOCATION_0 = valueMatrix.subarray(0, 3);
-      attribute.shaderValues.instanceModelMatrix__LOCATION_1 = valueMatrix.subarray(3, 6);
-      attribute.shaderValues.instanceModelMatrix__LOCATION_2 = valueMatrix.subarray(6, 9);
-      attribute.shaderValues.instanceTranslation = valueTranslation;
+      attribute.value = new Float32Array(matrix);
     } else {
       let i = 0;
       const {iterable, objectInfo} = createIterable(data);
@@ -131,12 +124,9 @@ export const MATRIX_ATTRIBUTES = {
           modelMatrix.set(
             constantMatrix ? getTransformMatrix : getTransformMatrix(object, objectInfo)
           );
-          modelTranslation[0] = modelMatrix[12];
-          modelTranslation[1] = modelMatrix[13];
-          modelTranslation[2] = modelMatrix[14];
-          matrix = getMat3FromMat4(modelMatrix);
+          matrix = getExtendedMat3FromMat4(modelMatrix);
         } else {
-          matrix = linearTransform;
+          matrix = valueArray;
 
           const orientation = constantOrientation
             ? getOrientation
@@ -144,9 +134,7 @@ export const MATRIX_ATTRIBUTES = {
           const scale = constantScale ? getScale : getScale(object, objectInfo);
 
           calculateTransformMatrix(matrix, orientation, scale);
-          modelTranslation.set(
-            constantTranslation ? getTranslation : getTranslation(object, objectInfo)
-          );
+          matrix.set(constantTranslation ? getTranslation : getTranslation(object, objectInfo), 9);
         }
 
         instanceModelMatrixData[i++] = matrix[0];
@@ -158,9 +146,9 @@ export const MATRIX_ATTRIBUTES = {
         instanceModelMatrixData[i++] = matrix[6];
         instanceModelMatrixData[i++] = matrix[7];
         instanceModelMatrixData[i++] = matrix[8];
-        instanceModelMatrixData[i++] = modelTranslation[0];
-        instanceModelMatrixData[i++] = modelTranslation[1];
-        instanceModelMatrixData[i++] = modelTranslation[2];
+        instanceModelMatrixData[i++] = matrix[9];
+        instanceModelMatrixData[i++] = matrix[10];
+        instanceModelMatrixData[i++] = matrix[11];
       }
     }
   }

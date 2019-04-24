@@ -39,6 +39,7 @@ export default class BaseAttribute {
     }
   }
 
+  /* eslint-disable max-statements */
   update(opts) {
     const {value, buffer, constant = this.constant || false} = opts;
 
@@ -57,7 +58,17 @@ export default class BaseAttribute {
       }
     } else if (value) {
       this.externalBuffer = null;
-      this.value = value;
+
+      const size = this.size || opts.size || 0;
+      if (constant && value.length !== size) {
+        this.value = new Float32Array(size);
+        const index = this.offset / 4;
+        for (let i = 0; i < this.size; ++i) {
+          this.value[i] = value[index + i];
+        }
+      } else {
+        this.value = value;
+      }
 
       // Create buffer if needed
       if (!constant && this.gl) {

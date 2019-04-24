@@ -30,7 +30,6 @@ export default class Attribute extends BaseAttribute {
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
     this.shaderAttributes = {};
-    this.shaderValues = {};
     this.hasShaderAttributes = false;
 
     if (opts.shaderAttributes) {
@@ -46,7 +45,7 @@ export default class Attribute extends BaseAttribute {
             // Luma fields
             constant: shaderAttribute.constant || false,
             isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
-            size: (shaderAttribute.elements && 1) || shaderAttribute.size,
+            size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
             value: shaderAttribute.value || null,
             divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
             noAlloc: true
@@ -212,6 +211,11 @@ export default class Attribute extends BaseAttribute {
     return updated;
   }
 
+  update(props) {
+    super.update(props);
+    this._updateShaderAttributes();
+  }
+
   // Use generic value
   // Returns true if successful
   setGenericValue(value) {
@@ -363,12 +367,11 @@ export default class Attribute extends BaseAttribute {
   _updateShaderAttributes() {
     const shaderAttributes = this.shaderAttributes;
     // NOTE(Tarek): Primarily for matrix constants
-    const shaderValues = this.shaderValues;
     for (const shaderAttributeName in shaderAttributes) {
       const shaderAttribute = shaderAttributes[shaderAttributeName];
       shaderAttribute.update({
-        buffer: this.constant ? null : this.buffer,
-        value: shaderValues[shaderAttributeName] || this.value,
+        buffer: this.constant ? null : this.buffer || this.externalBuffer,
+        value: this.value,
         constant: this.constant
       });
     }
