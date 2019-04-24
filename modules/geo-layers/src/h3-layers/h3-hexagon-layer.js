@@ -120,7 +120,6 @@ export default class H3HexagonLayer extends CompositeLayer {
       getHexagon,
       wireframe,
       elevationScale,
-      extruded,
       fp64,
       material,
       stroked,
@@ -144,7 +143,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       {
         filled: true,
         elevationScale,
-        extruded,
+        extruded: true,
         fp64,
         wireframe,
         stroked,
@@ -183,7 +182,6 @@ export default class H3HexagonLayer extends CompositeLayer {
 
       coverage,
       elevationScale,
-      extruded,
       fp64,
 
       getColor,
@@ -197,7 +195,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       {
         coverage,
         elevationScale,
-        extruded,
+        extruded: true,
         fp64,
         getColor,
         getElevation,
