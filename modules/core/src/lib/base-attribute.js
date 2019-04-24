@@ -28,9 +28,6 @@ export default class BaseAttribute {
     this.userData = {}; // Reserved for application
     this.update(opts);
 
-    // Sanity - no app fields on our attributes. Use userData instead.
-    Object.seal(this);
-
     // Check all fields and generate helpful error messages
     this._validateAttributeDefinition();
   }

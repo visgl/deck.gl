@@ -29,6 +29,34 @@ export default class Attribute extends BaseAttribute {
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
+    this.shaderAttributes = {};
+    this.shaderValues = {};
+    this.hasShaderAttributes = false;
+
+    if (opts.shaderAttributes) {
+      const shaderAttributes = opts.shaderAttributes;
+      for (const shaderAttributeName in shaderAttributes) {
+        const shaderAttribute = shaderAttributes[shaderAttributeName];
+
+        // Initialize the attribute descriptor, with WebGL and metadata fields
+        this.shaderAttributes[shaderAttributeName] = new Attribute(
+          this.gl,
+          Object.assign({}, shaderAttribute, {
+            id: shaderAttributeName,
+            // Luma fields
+            constant: shaderAttribute.constant || false,
+            isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
+            size: (shaderAttribute.elements && 1) || shaderAttribute.size,
+            value: shaderAttribute.value || null,
+            divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
+            noAlloc: true
+          })
+        );
+
+        this.hasShaderAttributes = true;
+      }
+    }
+
     Object.assign(this.userData, DEFAULT_STATE, opts, {
       transition,
       noAlloc,
@@ -75,6 +103,17 @@ export default class Attribute extends BaseAttribute {
 
   getAccessor() {
     return this.userData.accessor;
+  }
+
+  getShaderAttributes() {
+    const shaderAttributes = {};
+    if (this.hasShaderAttributes) {
+      Object.assign(shaderAttributes, this.shaderAttributes);
+    } else {
+      shaderAttributes[this.id] = this;
+    }
+
+    return shaderAttributes;
   }
 
   supportsTransition() {
@@ -165,6 +204,8 @@ export default class Attribute extends BaseAttribute {
       updated = false;
     }
 
+    this._updateShaderAttributes();
+
     state.needsUpdate = false;
     state.needsRedraw = true;
 
@@ -192,6 +233,7 @@ export default class Attribute extends BaseAttribute {
     state.needsRedraw = state.needsUpdate || hasChanged;
     state.needsUpdate = false;
     state.isExternalBuffer = true;
+    this._updateShaderAttributes();
     return true;
   }
 
@@ -229,6 +271,7 @@ export default class Attribute extends BaseAttribute {
         this.value = buffer;
         state.needsRedraw = true;
       }
+      this._updateShaderAttributes();
       return true;
     }
 
@@ -314,6 +357,20 @@ export default class Attribute extends BaseAttribute {
       if (!valid) {
         throw new Error(`Illegal attribute generated for ${this.id}`);
       }
+    }
+  }
+
+  _updateShaderAttributes() {
+    const shaderAttributes = this.shaderAttributes;
+    // NOTE(Tarek): Primarily for matrix constants
+    const shaderValues = this.shaderValues;
+    for (const shaderAttributeName in shaderAttributes) {
+      const shaderAttribute = shaderAttributes[shaderAttributeName];
+      shaderAttribute.update({
+        buffer: this.constant ? null : this.buffer,
+        value: shaderValues[shaderAttributeName] || this.value,
+        constant: this.constant
+      });
     }
   }
 }

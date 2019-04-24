@@ -234,20 +234,6 @@ export default class AttributeManager {
         this._updateAttribute({attribute, numInstances, data, props, context});
       }
 
-      if (attribute.userData.shaderAttributes) {
-        const shaderAttributes = attribute.userData.shaderAttributes;
-        // NOTE(Tarek): Primarily for matrix constants
-        const shaderValues = attribute.userData.shaderValues;
-        for (const shaderAttributeName in shaderAttributes) {
-          const shaderAttribute = shaderAttributes[shaderAttributeName];
-          shaderAttribute.update({
-            buffer: attribute.constant ? null : attribute.buffer,
-            value: shaderValues[shaderAttributeName] || attribute.value,
-            constant: attribute.constant
-          });
-        }
-      }
-
       this.needsRedraw |= attribute.needsRedraw();
     }
 
@@ -288,36 +274,21 @@ export default class AttributeManager {
   /**
    * Returns changed attribute descriptors
    * This indicates which WebGLBuffers need to be updated
-   * @param opts.clearChangedFlags {Boolean}
    * @return {Object} attributes - descriptors
    */
   getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
     const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
-    const changedShaderAttributes = {};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
       if (attribute.needsRedraw(opts) && !attributeTransitionManager.hasAttribute(attributeName)) {
-        changedAttributes[attributeName] = attribute;
+        Object.assign(changedAttributes, attribute.getShaderAttributes());
       }
     }
 
-    for (const attributeName in changedAttributes) {
-      const attribute = changedAttributes[attributeName];
-
-      if (attribute.userData.shaderAttributes) {
-        const shaderAttributes = attribute.userData.shaderAttributes;
-        for (const shaderAttributeName in shaderAttributes) {
-          changedShaderAttributes[shaderAttributeName] = shaderAttributes[shaderAttributeName];
-        }
-      } else {
-        changedShaderAttributes[attributeName] = attribute;
-      }
-    }
-
-    return changedShaderAttributes;
+    return changedAttributes;
   }
 
   // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
@@ -344,10 +315,6 @@ export default class AttributeManager {
       // Initialize the attribute descriptor, with WebGL and metadata fields
       const newAttribute = this._createAttribute(attributeName, attribute, extraProps);
 
-      if (attribute.shaderAttributes) {
-        this._addShaderAttributes(newAttribute, attribute.shaderAttributes, extraProps);
-      }
-
       newAttributes[attributeName] = newAttribute;
     }
 
@@ -357,23 +324,7 @@ export default class AttributeManager {
   }
   /* eslint-enable max-statements */
 
-  _addShaderAttributes(attribute, shaderAttributes, extraProps) {
-    attribute.userData.shaderAttributes = {};
-
-    for (const shaderAttributeName in shaderAttributes) {
-      const shaderAttribute = shaderAttributes[shaderAttributeName];
-
-      // Initialize the attribute descriptor, with WebGL and metadata fields
-      attribute.userData.shaderAttributes[shaderAttributeName] = this._createAttribute(
-        shaderAttributeName,
-        shaderAttribute,
-        extraProps,
-        true
-      );
-    }
-  }
-
-  _createAttribute(name, attribute, extraProps, forceNoAlloc = false) {
+  _createAttribute(name, attribute, extraProps) {
     const props = {
       id: name,
       // Luma fields
@@ -381,14 +332,8 @@ export default class AttributeManager {
       isIndexed: attribute.isIndexed || attribute.elements,
       size: (attribute.elements && 1) || attribute.size,
       value: attribute.value || null,
-      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor,
-      // NOTE(Tarek): Use for constant matrix
-      shaderValues: {}
+      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor
     };
-
-    if (forceNoAlloc) {
-      props.noAlloc = true;
-    }
 
     return new Attribute(this.gl, Object.assign({}, attribute, props));
   }

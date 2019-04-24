@@ -116,10 +116,10 @@ export const MATRIX_ATTRIBUTES = {
       const valueMatrix = new Float32Array(matrix);
       const valueTranslation = new Float32Array(modelTranslation);
 
-      attribute.userData.shaderValues.instanceModelMatrix__LOCATION_0 = valueMatrix.subarray(0, 3);
-      attribute.userData.shaderValues.instanceModelMatrix__LOCATION_1 = valueMatrix.subarray(3, 6);
-      attribute.userData.shaderValues.instanceModelMatrix__LOCATION_2 = valueMatrix.subarray(6, 9);
-      attribute.userData.shaderValues.instanceTranslation = valueTranslation;
+      attribute.shaderValues.instanceModelMatrix__LOCATION_0 = valueMatrix.subarray(0, 3);
+      attribute.shaderValues.instanceModelMatrix__LOCATION_1 = valueMatrix.subarray(3, 6);
+      attribute.shaderValues.instanceModelMatrix__LOCATION_2 = valueMatrix.subarray(6, 9);
+      attribute.shaderValues.instanceTranslation = valueTranslation;
     } else {
       let i = 0;
       const {iterable, objectInfo} = createIterable(data);
