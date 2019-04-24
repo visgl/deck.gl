@@ -11,21 +11,47 @@ DEFAULT_RANGE = [
 
 
 class Layer(JSONMixin):
+    """
+    A deck.gl Layer for rendering
+
+    Note that some parameters only apply to certain layers
+
+    Parameters
+    ---------
+    type : str
+        Type of layer to render, e.g., `HexagonLayer`
+    id : str
+        Unique name for layer
+    data : list or str
+        Either a URL of data to load in or an array of data
+    get_position : str, default '-'
+        Name of position field
+    coverage : float, default None
+        Valid only on HexagonLayer
+        Hexagon radius multiplier, clamped between 0 - 1.
+        The final radius of hexagon is calculated by coverage * radius.
+    elevation_range : list
+        Valid only on HexagonLayer
+        Elevation scale output range
+    elevation_scale : float
+        Valid only on HexagonLayer
+        Hexagon elevation multiplier
+    """
     def __init__(
         self,
         type,
         id,
         data,
+        get_position="-",
+        color_range=DEFAULT_RANGE,
+        opacity=1,
+        radius=1000,
+        light_settings=None,
         coverage=None,
         elevation_range=None,
         elevation_scale=None,
         extruded=True,
-        get_position="-",
-        opacity=1,
-        radius=1000,
-        light_settings=None,
         upper_percentile=100,
-        color_range=DEFAULT_RANGE
     ):
         self.type = type
         self.id = id

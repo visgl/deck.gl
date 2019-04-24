@@ -6,27 +6,25 @@ class LightSettings(JSONMixin):
 
     Parameters
     ---------
-        lights_position : array
-            TODO
-        ambient_ratio : float
-            TODO
-        diffuse_ratio : float
-            TODO
-        specular_ratio : float
-            TODO
-        lights_strength : array
-            TODO
-        number_of_lights : int
+        lights_position : array, default None
+            Location of lights in an array of X/Y/Z coordinates
+        diffuse_ratio : float, default None
+            Proportion of light at many angles
+        specular_ratio : float, default None
+            Proportion of light reflected in a mirror-like manner
+        lights_strength : array, default None
+            Brightness of lights
+        number_of_lights : int, default None
             Number of lights in visualization
     """
     def __init__(
         self,
+        number_of_lights=2,
         lights_position=None,
-        ambient_ratio=None,
         diffuse_ratio=None,
         specular_ratio=None,
         lights_strength=None,
-        number_of_lights=2
+        ambient_ratio=None
     ):
         self.ambient_ratio = ambient_ratio
         self.diffuse_ratio = diffuse_ratio
