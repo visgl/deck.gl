@@ -41,14 +41,6 @@ export default class H3ClusterLayer extends CompositeLayer {
     });
   }
 
-  getSubLayerAccessor(accessor) {
-    if (typeof accessor !== 'function') return accessor;
-
-    return (object, objectInfo) => {
-      return accessor(object.object, objectInfo);
-    };
-  }
-
   renderLayers() {
     const {
       elevationScale,
@@ -80,10 +72,8 @@ export default class H3ClusterLayer extends CompositeLayer {
         fp64,
         filled,
         wireframe,
-
         extruded,
         elevationScale,
-
         stroked,
         lineWidthScale,
         lineWidthMinPixels,
@@ -91,14 +81,13 @@ export default class H3ClusterLayer extends CompositeLayer {
         lineJointRounded,
         lineMiterLimit,
         lineDashJustified,
-
         material,
 
-        getFillColor: this.getSubLayerAccessor(getFillColor),
-        getLineColor: this.getSubLayerAccessor(getLineColor),
-        getLineWidth: this.getSubLayerAccessor(getLineWidth),
-        getLineDashArray: this.getSubLayerAccessor(getLineDashArray),
-        getElevation: this.getSubLayerAccessor(getElevation)
+        getFillColor,
+        getLineColor,
+        getLineWidth,
+        getLineDashArray,
+        getElevation
       },
       this.getSubLayerProps({
         id: 'cluster-region',
