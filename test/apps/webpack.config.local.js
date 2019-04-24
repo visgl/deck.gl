@@ -50,6 +50,17 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
           test: /\.js$/,
           use: ['source-map-loader'],
           enforce: 'pre'
+        },
+        {
+          // Compile source using babel. This is not necessary for src to run in the browser
+          // However class inheritance cannot happen between transpiled/non-transpiled code
+          // Which affects some examples
+          test: /\.js$/,
+          loader: 'babel-loader',
+          options: {
+            presets: ['@babel/env']
+          },
+          include: [SRC_DIR]
         }
       ]
     },
@@ -57,26 +68,6 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
     plugins: [new webpack.EnvironmentPlugin(['MapboxAccessToken'])]
   };
 }
-
-const BUBLE_CONFIG = {
-  module: {
-    rules: [
-      {
-        // Compile source using buble
-        test: /\.js$/,
-        loader: 'buble-loader',
-        include: [SRC_DIR],
-        options: {
-          objectAssign: 'Object.assign',
-          transforms: {
-            dangerousForOf: true,
-            modules: false
-          }
-        }
-      }
-    ]
-  }
-};
 
 function addLocalDevSettings(config, exampleDir) {
   const LOCAL_DEV_CONFIG = makeLocalDevConfig(exampleDir);
@@ -92,19 +83,10 @@ function addLocalDevSettings(config, exampleDir) {
   return config;
 }
 
-function addBubleSettings(config) {
-  config.module = config.module || {};
-  Object.assign(config.module, {
-    rules: (config.module.rules || []).concat(BUBLE_CONFIG.module.rules)
-  });
-  return config;
-}
-
 module.exports = (config, exampleDir) => env => {
   // npm run start-local now transpiles the lib
   if (env && env.local) {
     config = addLocalDevSettings(config, exampleDir);
-    config = addBubleSettings(config);
   }
 
   // npm run start-es6 does not transpile the lib
