@@ -48,6 +48,7 @@ export default class Attribute extends BaseAttribute {
             size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
             value: shaderAttribute.value || null,
             divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
+            buffer: this.getBuffer(),
             noAlloc: true
           })
         );
@@ -369,7 +370,7 @@ export default class Attribute extends BaseAttribute {
     for (const shaderAttributeName in shaderAttributes) {
       const shaderAttribute = shaderAttributes[shaderAttributeName];
       shaderAttribute.update({
-        buffer: this.constant ? null : this.buffer || this.externalBuffer,
+        buffer: this.getBuffer(),
         value: this.value,
         constant: this.constant
       });

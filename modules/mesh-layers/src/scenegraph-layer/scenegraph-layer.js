@@ -57,7 +57,7 @@ const defaultProps = {
   getOrientation: {type: 'accessor', value: [0, 0, 0]},
   getScale: {type: 'accessor', value: [1, 1, 1]},
   getTranslation: {type: 'accessor', value: [0, 0, 0]},
-  // 3x3 matrix
+  // 4x4 matrix
   getTransformMatrix: {type: 'accessor', value: []}
 };
 

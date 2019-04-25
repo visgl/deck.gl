@@ -69,13 +69,17 @@ test('Attribute#getUpdateTriggers', t => {
   t.end();
 });
 
-test('Attribute#shaderAttributes', t => {
+test.only('Attribute#shaderAttributes', t => {
   const update = () => {};
+
+  const buffer1 = new Buffer(gl, 10);
+  const buffer2 = new Buffer(gl, 10);
 
   const attribute = new Attribute(gl, {
     id: 'positions',
     update,
     size: 3,
+    buffer: buffer1,
     shaderAttributes: {
       positions: {},
       instancePositions: {
@@ -99,6 +103,30 @@ test('Attribute#shaderAttributes', t => {
     attribute.shaderAttributes.instancePositions.divisor,
     1,
     'Shader attribute defines pointer properties'
+  );
+  t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.positions.getBuffer(),
+    'Shader attribute shares parent buffer'
+  );
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.instancePositions.getBuffer(),
+    'Shader attribute shares parent buffer'
+  );
+
+  attribute.update({buffer: buffer2});
+  t.equals(attribute.getBuffer(), buffer2, 'Buffer was updated');
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.positions.getBuffer(),
+    'Shader attribute buffer was updated'
+  );
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.instancePositions.getBuffer(),
+    'Shader attribute buffer was updated'
   );
 
   t.end();
