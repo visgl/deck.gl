@@ -17,6 +17,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.3] - Apr 25 2019
+
+- Various console warning fixes (#3022)
+- Fix shader attribute constants and transitions (#3028)
+
 #### deck.gl [v7.0.2] - Apr 23 2019
 
 - More React synchronization fix (#3018)
