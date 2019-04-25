@@ -8,11 +8,6 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-const polygonProps = Object.assign({}, PolygonLayer.defaultProps, {
-  extruded: true,
-  getColor: null
-});
-
 const defaultProps = Object.assign(
   {
     highPrecision: false,
@@ -20,7 +15,10 @@ const defaultProps = Object.assign(
     elevationScale: {type: 'number', min: 0, value: 1},
     getHexagon: {type: 'accessor', value: x => x.hexagon}
   },
-  polygonProps
+  Object.assign({}, PolygonLayer.defaultProps, {
+    extruded: true,
+    getColor: null
+  })
 );
 
 /**
@@ -150,7 +148,10 @@ export default class H3HexagonLayer extends CompositeLayer {
       this.getSubLayerProps({
         id: 'hexagon-cell-hifi',
         updateTriggers: {
-          getFillColor: updateTriggers.getColor,
+          getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
+          getElevation: updateTriggers.getElevation,
+          getLineColor: updateTriggers.getLineColor,
+          getLineWidth: updateTriggers.getLineWidth,
           getPolygon: updateTriggers.getHexagon
         }
       }),
