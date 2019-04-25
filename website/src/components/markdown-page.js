@@ -148,6 +148,10 @@ export default class MarkdownPage extends PureComponent {
       this._internalScroll = false;
       return;
     }
+    if (evt.target.className !== 'markdown') {
+      // do not react to child element scroll
+      return;
+    }
 
     let {_anchorPositions} = this;
     const top = evt.target.scrollTop;
