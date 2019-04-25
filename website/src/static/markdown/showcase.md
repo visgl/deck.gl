@@ -2,6 +2,22 @@
 
 <div>
   <div class="thumb">
+    <div data-title="SandDance" >
+      <a href="https://microsoft.github.io/SandDance/" target="_blank" rel="noopener noreferrer">
+        <img src="images/showcase-sanddance.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="https://microsoft.github.io/SandDance/" target="_blank" rel="noopener noreferrer"><h2>SandDance</h2></a>
+      <p class="credit">By <a href="https://www.microsoft.com/en-us/research/group/vida/">Microsoft</a></p>
+      <p>SandDance helps you find insights about your data with unit visualizations and smooth animated transitions. It uses deck.gl to render chart layouts described with <a href="https://vega.github.io/">Vega</a>.</p>
+      <p class="credit"><a href="https://github.com/Microsoft/SandDance">GitHub</a> | <a href="https://microsoft.github.io/SandDance/app/">Demo</a></p>
+    </div>
+  </div>
+
+  <div class="thumb">
     <div class="bg-black" data-title="Autonomous Visualization System" >
       <a href="https://avs.auto" target="_blank" rel="noopener noreferrer">
         <img src="images/showcase-avs.jpg" />
