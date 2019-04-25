@@ -366,7 +366,6 @@ export default class Attribute extends BaseAttribute {
 
   _updateShaderAttributes() {
     const shaderAttributes = this.shaderAttributes;
-    // NOTE(Tarek): Primarily for matrix constants
     for (const shaderAttributeName in shaderAttributes) {
       const shaderAttribute = shaderAttributes[shaderAttributeName];
       shaderAttribute.update({
