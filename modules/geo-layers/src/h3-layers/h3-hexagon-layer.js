@@ -8,18 +8,13 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-const defaultProps = Object.assign(
-  {
-    highPrecision: false,
-    coverage: {type: 'number', min: 0, max: 1, value: 1},
-    elevationScale: {type: 'number', min: 0, value: 1},
-    getHexagon: {type: 'accessor', value: x => x.hexagon}
-  },
-  Object.assign({}, PolygonLayer.defaultProps, {
-    extruded: true,
-    getColor: null
-  })
-);
+const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
+  highPrecision: false,
+  coverage: {type: 'number', min: 0, max: 1, value: 1},
+  getHexagon: {type: 'accessor', value: x => x.hexagon},
+  extruded: true,
+  getColor: null
+});
 
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
