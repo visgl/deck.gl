@@ -161,6 +161,10 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'SandDance',
+    external: 'https://microsoft.github.io/SandDance/'
+  },
+  {
     name: 'Autonomy Visualization System',
     external: 'http://avs.auto'
   },
