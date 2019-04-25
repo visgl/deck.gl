@@ -11,7 +11,7 @@
   <div class="thumb-desc">
     <div>
       <a href="https://microsoft.github.io/SandDance/" target="_blank" rel="noopener noreferrer"><h2>SandDance</h2></a>
-      <p class="credit">By <a href="http://senseable.mit.edu/">Microsoft</a></p>
+      <p class="credit">By <a href="https://www.microsoft.com/en-us/research/group/vida/">Microsoft</a></p>
       <p>SandDance helps you find insights about your data with unit visualizations and smooth animated transitions. It uses deck.gl to render chart layouts described with <a href="https://vega.github.io/">Vega</a>.</p>
       <p class="credit"><a href="https://github.com/Microsoft/SandDance">GitHub</a> | <a href="https://microsoft.github.io/SandDance/app/">Demo</a></p>
     </div>
