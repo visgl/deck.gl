@@ -69,7 +69,7 @@ test('Attribute#getUpdateTriggers', t => {
   t.end();
 });
 
-test.only('Attribute#shaderAttributes', t => {
+test('Attribute#shaderAttributes', t => {
   const update = () => {};
 
   const buffer1 = new Buffer(gl, 10);
