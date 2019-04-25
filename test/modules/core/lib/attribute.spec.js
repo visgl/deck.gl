@@ -69,6 +69,41 @@ test('Attribute#getUpdateTriggers', t => {
   t.end();
 });
 
+test('Attribute#shaderAttributes', t => {
+  const update = () => {};
+
+  const attribute = new Attribute(gl, {
+    id: 'positions',
+    update,
+    size: 3,
+    shaderAttributes: {
+      positions: {},
+      instancePositions: {
+        divisor: 1
+      }
+    }
+  });
+  t.ok(attribute.shaderAttributes.positions, 'Shader attribute created');
+  t.equals(
+    attribute.shaderAttributes.positions.size,
+    3,
+    'Shader attribute inherits pointer properties'
+  );
+  t.ok(attribute.shaderAttributes.instancePositions, 'Multiple shader attributes created');
+  t.equals(
+    attribute.shaderAttributes.instancePositions.size,
+    3,
+    'Multiple shader attributes inherit pointer properties'
+  );
+  t.equals(
+    attribute.shaderAttributes.instancePositions.divisor,
+    1,
+    'Shader attribute defines pointer properties'
+  );
+
+  t.end();
+});
+
 // t.ok(attribute.allocate(attributeName, allocCount), 'Attribute.allocate function available');
 // t.ok(attribute._setExternalBuffer(attributeName, buffer, numInstances), 'Attribute._setExternalBuffer function available');
 // t.ok(attribute._analyzeBuffer(attributeName, numInstances), 'Attribute._analyzeBuffer function available');

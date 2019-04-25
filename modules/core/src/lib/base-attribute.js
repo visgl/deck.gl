@@ -61,8 +61,12 @@ export default class BaseAttribute {
 
       const size = this.size || opts.size || 0;
       if (constant && value.length !== size) {
+        // NOTE(Tarek): Assuming float constants.
+        // This is all we currently use, but we'll
+        // have to update this if we start using int
+        // attributes (WebGL 2-only)
         this.value = new Float32Array(size);
-        const index = this.offset / 4;
+        const index = this.offset / 4; // Always 4 bytes/element (float, int or uint)
         for (let i = 0; i < this.size; ++i) {
           this.value[i] = value[index + i];
         }

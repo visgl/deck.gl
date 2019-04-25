@@ -212,7 +212,6 @@ export default class AttributeManager {
   }
 
   // Ensure all attribute buffers are updated from props or data.
-  /* eslint-disable complexity */
   update({data, numInstances, transitions, props = {}, buffers = {}, context = {}} = {}) {
     // keep track of whether some attributes are updated
     let updated = false;
