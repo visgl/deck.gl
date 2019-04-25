@@ -28,9 +28,6 @@ export default class BaseAttribute {
     this.userData = {}; // Reserved for application
     this.update(opts);
 
-    // Sanity - no app fields on our attributes. Use userData instead.
-    Object.seal(this);
-
     // Check all fields and generate helpful error messages
     this._validateAttributeDefinition();
   }
@@ -42,6 +39,7 @@ export default class BaseAttribute {
     }
   }
 
+  /* eslint-disable max-statements */
   update(opts) {
     const {value, buffer, constant = this.constant || false} = opts;
 
@@ -60,7 +58,21 @@ export default class BaseAttribute {
       }
     } else if (value) {
       this.externalBuffer = null;
-      this.value = value;
+
+      const size = this.size || opts.size || 0;
+      if (constant && value.length !== size) {
+        // NOTE(Tarek): Assuming float constants.
+        // This is all we currently use, but we'll
+        // have to update this if we start using int
+        // attributes (WebGL 2-only)
+        this.value = new Float32Array(size);
+        const index = this.offset / 4; // Always 4 bytes/element (float, int or uint)
+        for (let i = 0; i < this.size; ++i) {
+          this.value[i] = value[index + i];
+        }
+      } else {
+        this.value = value;
+      }
 
       // Create buffer if needed
       if (!constant && this.gl) {

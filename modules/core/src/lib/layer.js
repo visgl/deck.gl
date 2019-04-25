@@ -447,18 +447,15 @@ export default class Layer extends Component {
   }
 
   _setModelAttributes(model, changedAttributes) {
-    if (model.userData.excludeAttributes) {
-      const filteredAttributes = {};
-      const excludeAttributes = model.userData.excludeAttributes;
-      for (const attributeName in changedAttributes) {
-        if (!excludeAttributes[attributeName]) {
-          filteredAttributes[attributeName] = changedAttributes[attributeName];
-        }
+    const shaderAttributes = {};
+    const excludeAttributes = model.userData.excludeAttributes || {};
+    for (const attributeName in changedAttributes) {
+      if (!excludeAttributes[attributeName]) {
+        Object.assign(shaderAttributes, changedAttributes[attributeName].getShaderAttributes());
       }
-      model.setAttributes(filteredAttributes);
-    } else {
-      model.setAttributes(changedAttributes);
     }
+
+    model.setAttributes(shaderAttributes);
   }
 
   // Sets the specified instanced picking color to null picking color. Used for multi picking.
