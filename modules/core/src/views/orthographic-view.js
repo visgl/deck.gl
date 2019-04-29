@@ -38,27 +38,19 @@ class OrthographicViewport extends Viewport {
 }
 
 export default class OrthographicView extends View {
+  constructor(props) {
+    super(
+      Object.assign({}, props, {
+        type: OrthographicViewport
+      })
+    );
+  }
+
   get controller() {
     return this._getControllerProps({
       type: OrthographicController,
       ViewportType: OrthographicViewport
     });
-  }
-
-  _getViewport({x, y, width, height, viewState}) {
-    return new OrthographicViewport(
-      Object.assign(
-        {
-          id: this.id,
-          x,
-          y,
-          width,
-          height
-        },
-        this.props,
-        viewState
-      )
-    );
   }
 }
 
