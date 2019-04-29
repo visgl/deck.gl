@@ -2,6 +2,12 @@
 
 Create a point light source which emits from a point in all directions.Point lights attenuation is not available. At most 5 directional lights can be supported.
 
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/point-light.gif" />
+    <p><i>Two spheres with point light</i></p>
+  </div>
+</div>
 
 ## Usage
 

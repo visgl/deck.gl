@@ -2,6 +2,13 @@
 
 CameraLight is a special [point light](/docs/api-reference/lights/point-light.md) source which always emits from the camera position.
 
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/camera-light.gif" />
+    <p><i>Two spheres with camera light</i></p>
+  </div>
+</div>
+
 ## Usage 
 
 Create an camera light source.
