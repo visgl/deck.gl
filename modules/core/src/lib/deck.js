@@ -128,7 +128,9 @@ export default class Deck {
 
     this._needsRedraw = true;
     this._pickRequest = {};
-    this._pickedInfo = null;
+    // Pick and store the object under the pointer on `pointerdown`.
+    // This object is reused for subsequent `onClick` and `onDrag*` callbacks.
+    this._lastPointerDownInfo = null;
 
     this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
     this.interactiveState = {
@@ -164,7 +166,7 @@ export default class Deck {
   finalize() {
     this.animationLoop.stop();
     this.animationLoop = null;
-    this._pickedInfo = null;
+    this._lastPointerDownInfo = null;
 
     if (this.layerManager) {
       this.layerManager.finalize();
@@ -710,7 +712,7 @@ export default class Deck {
         layers,
         viewports: this.getViewports(pos)
       },
-      this._pickedInfo
+      this._lastPointerDownInfo
     );
 
     const {layer} = info;
@@ -729,7 +731,7 @@ export default class Deck {
 
   _onPointerDown(event) {
     const pos = event.offsetCenter;
-    this._pickedInfo = this.pickObject({
+    this._lastPointerDownInfo = this.pickObject({
       x: pos.x,
       y: pos.y
     });
