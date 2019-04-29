@@ -2,6 +2,12 @@
 
 Create a directional light source which emits from a specific direction.A directional light can be considered "infinitely" far away (like the Sun) and does not attenuate with distance. At most 5 directional lights can be supported.
 
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/directional-light.gif" />
+    <p><i>Two spheres with directional light</i></p>
+  </div>
+</div>
 
 ## Usage
 
