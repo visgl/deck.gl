@@ -109,6 +109,11 @@ export default class LayerManager {
   // Method to call when the layer manager is not needed anymore.
   // Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
   finalize() {
+    // Finalize all layers
+    for (const layer of this.layers) {
+      this._finalizeLayer(layer);
+    }
+
     seer.removeListener(this._initSeer);
     seer.removeListener(this._editSeer);
   }
