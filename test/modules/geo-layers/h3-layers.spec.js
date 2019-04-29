@@ -37,7 +37,7 @@ test('H3HexagonLayer', t => {
     onAfterUpdate: ({layer, subLayers}) => {
       if (layer._shouldUseHighPrecision()) {
         t.ok(
-          subLayers.find(l => l.constructor.layerName === 'SolidPolygonLayer'),
+          subLayers.find(l => l.constructor.layerName === 'PolygonLayer'),
           'renders polygon layer'
         );
       } else {
