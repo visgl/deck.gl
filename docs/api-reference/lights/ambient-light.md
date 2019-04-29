@@ -1,7 +1,13 @@
 # AmbientLight
 
-Create an ambient light source which illuminates all the objects equally.Ambient light comes from all directions, adding ambient light ensures that object colors are rendered but does not show structure in 3D objects like directional and point lights do. Only one ambient light is supported.
+Create an ambient light source which illuminates all the objects equally. Ambient light comes from all directions, adding ambient light ensures that object colors are rendered but does not show structure in 3D objects like directional and point lights do. Only one ambient light is supported.
 
+<div align="center">
+  <div>
+    <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/ambient-light.gif" />
+    <p><i>Two spheres with ambient light</i></p>
+  </div>
+</div>
 
 ## Usage
 
