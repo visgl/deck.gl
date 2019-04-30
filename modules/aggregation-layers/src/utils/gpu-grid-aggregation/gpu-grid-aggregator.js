@@ -894,7 +894,7 @@ export default class GPUGridAggregator {
     }
     this.gridAggregationModel = this.getAggregationModel(fp64);
     if (!this.allAggregationModel) {
-      // Model doesn't have to change for when fp64 flag changes
+      // Model doesn't have to change when fp64 flag changes
       this.allAggregationModel = this.getAllAggregationModel();
     }
   }
