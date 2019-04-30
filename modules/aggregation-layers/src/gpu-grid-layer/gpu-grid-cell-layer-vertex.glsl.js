@@ -23,11 +23,13 @@
 export default `\
 #version 300 es
 #define SHADER_NAME gpu-grid-cell-layer-vertex-shader
+#define RANGE_COUNT 6
 
 in vec3 positions;
 in vec3 normals;
 
-in vec4 instanceCounts;
+in vec4 colors;
+in vec4 elevations;
 
 // Custom uniforms
 uniform float extruded;
@@ -43,43 +45,70 @@ uniform vec2 gridOffset;
 uniform vec2 gridOffsetLow;
 uniform vec4 minColor;
 uniform vec4 maxColor;
+uniform vec4 colorRange[RANGE_COUNT];
+uniform vec2 elevationRange;
 layout(std140) uniform;
-uniform AggregationData
+uniform ColorData
 {
-  vec4 maxCount;
-} aggregationData;
+  vec4 maxMinCount;
+} colorData;
+uniform ElevationData
+{
+  vec4 maxMinCount;
+} elevationData;
 
-#define ELEVATION_SCALE 100.
+#define ELEVATION_SCALE 0.8
+
+#define ROUNDING_ERROR 0.00001
 
 // Result
 out vec4 vColor;
 
+vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
+  vec4 outColor = vec4(0., 0., 0., 0.);
+  if (value >= (domain.x - ROUNDING_ERROR) && value <= (domain.y + ROUNDING_ERROR)) {
+    float domainRange = domain.y - domain.x;
+    if (domainRange <= 0.) {
+      outColor = colorRange[0];
+    } else {
+      float rangeCount = float(RANGE_COUNT);
+      float rangeStep = domainRange / rangeCount;
+      float idx = floor((value - domain.x) / rangeStep);
+      idx = clamp(idx, 0., rangeCount - 1.);
+      int intIdx = int(idx);
+      outColor = colorRange[intIdx];
+    }
+  }
+  outColor = outColor / 255.;
+  return outColor;
+}
+
+float linearScale(vec2 domain, vec2 range, float value) {
+  // TODO: use domain and range deltas as uniforms
+  return ((value - domain.x) / (domain.y - domain.x)) * (range.y - range.x) + range.x;
+}
+
 void main(void) {
 
-  bool noRender = instanceCounts.r <= 0.0;
+  bool noRender = colors.r <= 0.0;
 
-  float step = instanceCounts.r / aggregationData.maxCount.r;
-  vec4 color = mix(minColor, maxColor, step) / 255.;
+  vec2 colorDomain = vec2(colorData.maxMinCount.a, colorData.maxMinCount.r);
+  vec4 color = quantizeScale(colorDomain, colorRange, colors.r);
 
   // TODO: discard when noRender is true
   float finalCellSize = noRender ? 0.0 : project_size(cellSize);
 
-
   float elevation = 0.0;
 
   if (extruded > 0.5) {
-    elevation = instanceCounts.r  * (positions.z + 1.0) *
+    vec2 elevationDomain = vec2(elevationData.maxMinCount.a, elevationData.maxMinCount.r);
+    elevation = linearScale(elevationDomain, elevationRange, elevations.r);
+    elevation = elevation  * (positions.z + 1.0) *
       ELEVATION_SCALE * elevationScale;
   }
 
-  float yIndex = floor(float(gl_InstanceID) / gridSize[0]);
+  float yIndex = floor((float(gl_InstanceID) / gridSize[0]) + ROUNDING_ERROR);
   float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
-
-  // Keeping 32-bit calculations for debugging, to be removed.
-  // float instancePositionX = gridOffset[0] * xIndex + gridOrigin[0];
-  // float instancePositionY = gridOffset[1] * yIndex + gridOrigin[1];
-  // vec3 extrudedPosition = vec3(instancePositionX, instancePositionY, elevation);
-  // vec2 extrudedPosition64xyLow = vec2(0., 0.);
 
   vec2 instancePositionXFP64 = mul_fp64(vec2(gridOffset[0], gridOffsetLow[0]), vec2(xIndex, 0.));
   instancePositionXFP64 = sum_fp64(instancePositionXFP64, vec2(gridOrigin[0], gridOriginLow[0]));

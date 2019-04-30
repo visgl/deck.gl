@@ -29,7 +29,6 @@ import {gl} from '@deck.gl/test-utils';
 import * as FIXTURES from 'deck.gl-test/data';
 
 const getPosition = d => d.COORDINATES;
-const CELLSIZE = 500;
 const gpuGridAggregator = new GPUGridAggregator(gl);
 
 test('GridAggregationUtils#alignToCell (CPU)', t => {
@@ -41,27 +40,46 @@ test('GridAggregationUtils#alignToCell (CPU)', t => {
 
 test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
   const opts = {
-    data: FIXTURES.points,
+    data: FIXTURES.points, // allPoints, // FIXTURES.points,
     getPosition,
-    cellSizeMeters: CELLSIZE,
+    weightParams: {weight: {needMax: 1, getWeight: x => 1}},
     gpuGridAggregator,
     aggregationFlags: {dataChanged: true},
-    fp64: false
+    fp64: true // NOTE this tset fails wihtout FP64 gpu aggregation.
   };
-  opts.gpuAggregation = false;
-  const cpuResults = pointToDensityGridData(opts);
-  opts.gpuAggregation = true;
-  opts.fp64 = true; // NOTE this tset fails wihtout FP64 gpu aggregation.
-  const gpuResults = pointToDensityGridData(opts);
+  const CELLSIZES = [5, 10, 15, 25, 50, 100, 200, 500, 1000, 5000];
+  // const CELLSIZES = [5, 200];
+  for (const cellSizeMeters of CELLSIZES) {
+    opts.cellSizeMeters = cellSizeMeters;
+    opts.gpuAggregation = false;
+    const cpuResults = pointToDensityGridData(opts);
+    opts.gpuAggregation = true;
+    const gpuResults = pointToDensityGridData(opts);
 
-  const cpuCountsData = cpuResults.countsBuffer.getData();
-  const gpuCountsData = gpuResults.countsBuffer.getData();
-  t.deepEqual(cpuCountsData, gpuCountsData, 'Cell aggregation data should match');
+    const cpuCountsData = cpuResults.weights.weight.aggregationBuffer.getData();
+    const gpuCountsData = gpuResults.weights.weight.aggregationBuffer.getData();
+    if (cellSizeMeters >= 100) {
+      // takes too long to compare for smaller cell sizes
+      t.deepEqual(
+        cpuCountsData,
+        gpuCountsData,
+        `Cell aggregation data should match for cellSizeMeters:${cellSizeMeters}`
+      );
+    }
 
-  const cpuMaxCountsData = cpuResults.maxCountBuffer.getData();
-  const gpuMaxCountData = gpuResults.maxCountBuffer.getData();
-  t.deepEqual(cpuMaxCountsData[0], gpuMaxCountData[0], 'Max data should match');
-  t.deepEqual(cpuMaxCountsData[3], gpuMaxCountData[3], 'Total count should match');
+    const cpuMaxCountsData = cpuResults.weights.weight.maxBuffer.getData();
+    const gpuMaxCountData = gpuResults.weights.weight.maxBuffer.getData();
+    t.deepEqual(
+      cpuMaxCountsData[0],
+      gpuMaxCountData[0],
+      `Max data should match for cellSizeMeters:${cellSizeMeters}`
+    );
+    t.deepEqual(
+      cpuMaxCountsData[3],
+      gpuMaxCountData[3],
+      `Total count should match for cellSizeMeters:${cellSizeMeters}`
+    );
+  }
 
   t.end();
 });

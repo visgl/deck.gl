@@ -19,23 +19,34 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer} from '@deck.gl/core';
-
+import {
+  CompositeLayer,
+  experimental,
+  _GPUGridAggregator as GPUGridAggregator,
+  _pointToDensityGridData as pointToDensityGridData
+} from '@deck.gl/core';
+const {defaultColorRange} = experimental;
 import GPUGridCellLayer from './gpu-grid-cell-layer';
-
-import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 const MINCOLOR = [0, 0, 0, 255];
 const MAXCOLOR = [0, 255, 0, 255];
 const defaultMaterial = new PhongMaterial();
-
 const defaultProps = {
+  // color
+  colorDomain: null,
+  colorRange: defaultColorRange,
+  getColorWeight: {type: 'accessor', value: x => 1},
+  colorAggregation: {type: 'number', value: 1, min: 1, max: 4}, // AGGREGATION_OPERATION, SUM is default
+
   // elevation
+  elevationDomain: null,
+  elevationRange: [0, 1000],
+  getElevationWeight: {type: 'accessor', value: x => 1},
+  elevationAggregation: {type: 'number', value: 1, min: 1, max: 4}, // AGGREGATION_OPERATION, SUM is default
   elevationScale: {type: 'number', min: 0, value: 1},
 
   // grid
-  cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
+  cellSize: {type: 'number', min: 0, max: 5000, value: 4000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
@@ -91,26 +102,51 @@ export default class GPUGridLayer extends CompositeLayer {
   }
 
   getLayerData(aggregationFlags) {
-    const {data, cellSize: cellSizeMeters, getPosition, gpuAggregation} = this.props;
     const {
-      countsBuffer,
-      maxCountBuffer,
-      gridSize,
-      gridOrigin,
-      cellSize,
-      boundingBox
-    } = pointToDensityGridData({
+      data,
+      cellSize: cellSizeMeters,
+      getPosition,
+      gpuAggregation,
+      getColorWeight,
+      colorAggregation,
+      getElevationWeight,
+      elevationAggregation,
+      fp64
+    } = this.props;
+    const weightParams = {
+      color: {
+        getWeight: getColorWeight,
+        operation: colorAggregation,
+        needMin: true, // TODO: disable if user provides colorDomain
+        needMax: true,
+        combineMaxMin: true
+      },
+      elevation: {
+        getWeight: getElevationWeight,
+        operation: elevationAggregation,
+        needMin: true,
+        needMax: true,
+        combineMaxMin: true
+      }
+    };
+    const {weights, gridSize, gridOrigin, cellSize, boundingBox} = pointToDensityGridData({
       data,
       cellSizeMeters,
       getPosition,
+      weightParams,
       gpuAggregation,
       gpuGridAggregator: this.state.gpuGridAggregator,
       boundingBox: this.state.boundingBox, // avoid parsing data when it is not changed.
-      aggregationFlags
+      aggregationFlags,
+      fp64
     });
-    this.setState({countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize, boundingBox});
+    this.setState({weights, gridSize, gridOrigin, cellSize, boundingBox});
   }
 
+  getPickingInfo({info}) {
+    // TODO: perform picking
+    return info;
+  }
   // for subclassing, override this method to return
   // customized sub layer props
   getSubLayerProps() {
@@ -120,26 +156,35 @@ export default class GPUGridLayer extends CompositeLayer {
       extruded,
       cellSize: cellSizeMeters,
       coverage,
-      material
+      material,
+      elevationRange
     } = this.props;
 
-    const {countsBuffer, maxCountBuffer, gridSize, gridOrigin, cellSize} = this.state;
+    const {weights, gridSize, gridOrigin, cellSize} = this.state;
     const minColor = MINCOLOR;
     const maxColor = MAXCOLOR;
+
+    const colorRange = [];
+    this.props.colorRange.forEach(color => {
+      colorRange.push(color[0], color[1], color[2], color[3] || 255);
+    });
 
     // return props to the sublayer constructor
     return super.getSubLayerProps({
       id: 'grid-cell',
       data: this.state.layerData,
-
-      countsBuffer,
-      maxCountBuffer,
+      colorBuffer: weights.color.aggregationBuffer,
+      colorMaxMinBuffer: weights.color.maxMinBuffer,
+      elevationBuffer: weights.elevation.aggregationBuffer,
+      elevationMaxMinBuffer: weights.elevation.maxMinBuffer,
       gridSize,
       gridOrigin,
       gridOffset: cellSize,
       numInstances: gridSize[0] * gridSize[1],
       minColor,
       maxColor,
+      colorRange,
+      elevationRange,
 
       fp64,
       cellSize: cellSizeMeters,
