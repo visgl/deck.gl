@@ -4,6 +4,13 @@ A deck.gl lighting effect is a visual approximation of environment illumination 
 
 To enable lighting in deck.gl, it is required that both the lighting effect and material instances are properly instantiated.
 
+<iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl LightingEffect Demo" src="https://codepen.io/vis-gl/embed/ZZwrZz/?height=450&theme-id=light&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/vis-gl/pen/ZZwrZz/'>deck.gl LightingEffect Demo</a> by vis.gl
+  (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
+
+*Interactive demo of LightingEffect*
+
 ## Constructing A Lighting Effect Instance
 
 A [LightingEffect](/docs/effects/lighting-effect.md) can be instantiated with a `lights` object:
