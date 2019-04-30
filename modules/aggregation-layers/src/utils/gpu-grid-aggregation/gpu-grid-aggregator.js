@@ -73,15 +73,26 @@ export default class GPUGridAggregator {
   }
 
   // DEBUG ONLY
-  // static logData({aggregationBuffer, minBuffer, maxBuffer, maxMinBuffer}) {
-  //   const agrData = aggregationBuffer.getData();
-  //   for (let index = 0; index < agrData.length; index += 4) {
-  //     if (agrData[index + 3] > 0) {
-  //       console.log(
-  //         `index: ${index} weights: ${agrData[index]} ${agrData[index + 1]} ${
-  //           agrData[index + 2]
-  //         } count: ${agrData[index + 3]}`
-  //       );
+  // static logData({aggregationBuffer, minBuffer, maxBuffer, maxMinBuffer, limit = 10}) {
+  //   if (aggregationBuffer) {
+  //     console.log('Aggregation Data:');
+  //     const agrData = aggregationBuffer.getData();
+  //     for (let index = 0; index < agrData.length && limit > 0; index += 4) {
+  //       if (agrData[index + 3] > 0) {
+  //         console.log(
+  //           `index: ${index} weights: ${agrData[index]} ${agrData[index + 1]} ${
+  //             agrData[index + 2]
+  //           } count: ${agrData[index + 3]}`
+  //         );
+  //         limit--;
+  //       }
+  //     }
+  //   }
+  //   const obj = {minBuffer, maxBuffer, maxMinBuffer};
+  //   for (const key in obj) {
+  //     if (obj[key]) {
+  //       const data = obj[key].getData();
+  //       console.log(`${key} data : R: ${data[0]} G: ${data[1]} B: ${data[2]} A: ${data[3]}`);
   //     }
   //   }
   // }
@@ -285,7 +296,7 @@ export default class GPUGridAggregator {
     );
     log.assert(!changeFlags.cellSizeChanged || opts.cellSize);
 
-    // viewport need only when performing screen space aggregation (projectPoints is true)
+    // viewport is needed only when performing screen space aggregation (projectPoints is true)
     log.assert(!(changeFlags.viewportChanged && projectPoints) || opts.viewport);
 
     if (projectPoints && gridTransformMatrix) {
@@ -618,8 +629,9 @@ export default class GPUGridAggregator {
     });
   }
 
-  getAllAggregationModel(fp64 = false) {
+  getAllAggregationModel() {
     const {gl, shaderCache} = this;
+    const {numCol, numRow} = this.state;
     return new Model(gl, {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
@@ -629,7 +641,7 @@ export default class GPUGridAggregator {
       vertexCount: 1,
       drawMode: GL.POINTS,
       isInstanced: true,
-      instanceCount: 0,
+      instanceCount: numCol * numRow,
       attributes: {
         position: [0, 0]
       }
@@ -881,10 +893,10 @@ export default class GPUGridAggregator {
       this.gridAggregationModel.delete();
     }
     this.gridAggregationModel = this.getAggregationModel(fp64);
-    if (this.allAggregationModel) {
-      this.allAggregationModel.delete();
+    if (!this.allAggregationModel) {
+      // Model doesn't have to change for when fp64 flag changes
+      this.allAggregationModel = this.getAllAggregationModel();
     }
-    this.allAggregationModel = this.getAllAggregationModel(fp64);
   }
 
   // set up buffers for all weights
@@ -915,50 +927,41 @@ export default class GPUGridAggregator {
     const {gl} = this;
     const {positions, positions64xyLow, changeFlags} = opts;
     const {numCol, numRow} = this.state;
-
-    let {positionsBuffer, positions64xyLowBuffer} = this.state;
-
     const aggregationModelAttributes = {};
+    let modelDirty = false;
 
-    let createPos64xyLow = false;
     if (opts.fp64 !== this.state.fp64) {
       this.setupModels(opts.fp64);
       this.setState({fp64: opts.fp64});
-      if (opts.fp64) {
-        createPos64xyLow = true;
-      }
+      modelDirty = true;
     }
 
-    if (changeFlags.dataChanged || !positionsBuffer) {
+    if (changeFlags.dataChanged || !this.state.positionsBuffer) {
+      let {positionsBuffer, positions64xyLowBuffer} = this.state;
       if (positionsBuffer) {
         positionsBuffer.delete();
       }
-      const vertexCount = positions.length / 2;
-      // positionsBuffer = new Buffer(gl, {size: 2, data: new Float32Array(positions)});
-      positionsBuffer = new Buffer(gl, new Float32Array(positions));
-      createPos64xyLow = opts.fp64;
-      Object.assign(aggregationModelAttributes, {
-        positions: positionsBuffer
-      });
-      this.setState({positionsBuffer, vertexCount});
-
-      this.setupWeightAttributes(opts);
-      this.gridAggregationModel.setVertexCount(vertexCount);
-    }
-
-    if (createPos64xyLow) {
-      log.assert(positions64xyLow);
       if (positions64xyLowBuffer) {
         positions64xyLowBuffer.delete();
       }
+      const vertexCount = positions.length / 2;
+      positionsBuffer = new Buffer(gl, new Float32Array(positions));
       positions64xyLowBuffer = new Buffer(gl, {size: 2, data: new Float32Array(positions64xyLow)});
-      Object.assign(aggregationModelAttributes, {
-        positions64xyLow: positions64xyLowBuffer
-      });
-      this.setState({positions64xyLowBuffer});
+      this.setState({positionsBuffer, positions64xyLowBuffer, vertexCount});
+
+      this.setupWeightAttributes(opts);
+      modelDirty = true;
     }
 
-    this.gridAggregationModel.setAttributes(aggregationModelAttributes);
+    if (modelDirty) {
+      const {vertexCount, positionsBuffer, positions64xyLowBuffer} = this.state;
+      aggregationModelAttributes.positions = positionsBuffer;
+      if (opts.fp64) {
+        aggregationModelAttributes.positions64xyLow = positions64xyLowBuffer;
+      }
+      this.gridAggregationModel.setVertexCount(vertexCount);
+      this.gridAggregationModel.setAttributes(aggregationModelAttributes);
+    }
 
     if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
       this.allAggregationModel.setInstanceCount(numCol * numRow);

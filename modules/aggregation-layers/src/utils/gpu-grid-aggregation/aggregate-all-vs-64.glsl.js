@@ -26,6 +26,7 @@ in vec2 position;
 uniform vec2 gridSize;
 
 out vec2 vTextureCoord;
+#define ROUNDING_ERROR 0.00001
 void main(void) {
   // Map each position to single pixel
   vec2 pos = vec2(-1.0, -1.0);
@@ -36,7 +37,7 @@ void main(void) {
 
   gl_Position = vec4(pos, 0.0, 1.0);
 
-  float yIndex = floor(float(gl_InstanceID) / gridSize[0]);
+  float yIndex = floor((float(gl_InstanceID) / gridSize[0]) + ROUNDING_ERROR);
   float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
 
   vec2 yIndexFP64 = vec2(yIndex, 0.);
