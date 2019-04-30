@@ -20,6 +20,8 @@ export default class PointLight extends BasePointLight {
         : COORDINATE_SYSTEM.IDENTITY,
       fromCoordinateOrigin: [0, 0, 0]
     });
+    this.projectedLight.color = this.color;
+    this.projectedLight.intensity = this.intensity;
     this.projectedLight.position = position;
     return this.projectedLight;
   }
