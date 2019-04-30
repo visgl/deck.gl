@@ -17,6 +17,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.4] - Apr 30 2019
+
+- finalize all layers (#3044)
+- Fix bug in click event handling (#3041)
+- update internal props of point lights (#3047)
+- Fix OrbitView and OrthographicView resize bug (#3043)
+- Delete textures on layer finalization (#3045)
+
 #### deck.gl [v7.0.3] - Apr 25 2019
 
 - Various console warning fixes (#3022)
