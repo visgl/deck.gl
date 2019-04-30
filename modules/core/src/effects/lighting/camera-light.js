@@ -11,6 +11,8 @@ export default class CameraLight extends PointLight {
       coordinateSystem,
       coordinateOrigin
     });
+    this.projectedLight.color = this.color;
+    this.projectedLight.intensity = this.intensity;
     this.projectedLight.position = project_uCameraPosition;
     return this.projectedLight;
   }
