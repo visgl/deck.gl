@@ -79,27 +79,19 @@ class OrbitViewport extends Viewport {
 }
 
 export default class OrbitView extends View {
+  constructor(props) {
+    super(
+      Object.assign({}, props, {
+        type: OrbitViewport
+      })
+    );
+  }
+
   get controller() {
     return this._getControllerProps({
       type: OrbitController,
       ViewportType: OrbitViewport
     });
-  }
-
-  _getViewport({x, y, width, height, viewState}) {
-    return new OrbitViewport(
-      Object.assign(
-        {
-          id: this.id,
-          x,
-          y,
-          width,
-          height
-        },
-        this.props,
-        viewState
-      )
-    );
   }
 }
 
