@@ -8,8 +8,8 @@
 // avoid destructuring for older Node version support
 const resolve = require('path').resolve;
 
-const ROOT_DIR = resolve(__dirname, '../../');
-const LIB_DIR = resolve(__dirname, '../../');
+const ROOT_DIR = resolve(__dirname, '../../../');
+const LIB_DIR = resolve(__dirname, '../../../');
 
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   root: ROOT_DIR

@@ -4,7 +4,8 @@ import readline from 'readline';
 import {parseTime, parseColumns, getLineObject} from './utils';
 
 import routes from '../output/routes.json';
-import stops from '../output/stops';
+import stops from '../output/stops.json';
+import shapes from '../output/shapes.json';
 
 let firstTripId = null;
 
@@ -18,10 +19,50 @@ let firstTripId = null;
 //   }, {});
 // }
 
+function getMidTime({arrival_time, departure_time}) {
+  return (parseTime(arrival_time) + parseTime(departure_time)) / 2;
+}
+
 function getWriteStream(outputDir) {
   const writeStream = fs.createWriteStream(`${outputDir}/trips.json`, {encoding: 'utf8'});
   writeStream.write('[\n');
   return writeStream;
+}
+
+function interpolate(waypoints, shape) {
+  let i = 0;
+  let j = 0;
+  let lastShapePoint = 0;
+  const merged = [];
+
+  for (; j < shape.length && i < waypoints.length; j++) {
+    if (i === 0 || shape[j].shape_dist_traveled > waypoints[i].shape_dist_traveled) {
+      merged.push(waypoints[i]);
+    }
+
+    if (i > 0 && shape[j].shape_dist_traveled >= waypoints[i].shape_dist_traveled) {
+      const lastTime = getMidTime(waypoints[i]);
+      const currTime = getMidTime(waypoints[i - 1]);
+      const timeDiff = currTime - lastTime;
+      const distance = shape[j].shape_dist_traveled - shape[lastShapePoint].shape_dist_traveled;
+      for (let k = lastShapePoint; k < j; k++) {
+        // shape_id,shape_pt_lat,shape_pt_lon,shape_pt_sequence,shape_dist_traveled
+        shape[k].timestamp = lastTime + (timeDiff * shape[k].shape_dist_traveled) / distance;
+        shape[k].latitude = shape[k].shape_pt_lat;
+        shape[k].longitude = shape[k].shape_pt_lon;
+        merged.push(shape[k]);
+      }
+      lastShapePoint = j;
+      i++;
+    }
+  }
+
+  while (i < waypoints.length) {
+    merged.push(waypoints[i]);
+    i++;
+  }
+
+  return merged;
 }
 
 async function writeTripToFile({writeStream, writeStreamByRoute, routesMap, tripsMap, tripId}) {
@@ -29,8 +70,26 @@ async function writeTripToFile({writeStream, writeStreamByRoute, routesMap, trip
   const trip = tripsMap[tripId];
   if (trip && trip.waypoints) {
     trip.waypoints.sort((p1, p2) => p1.timestamp - p2.timestamp);
+    trip.waypoints = interpolate(trip.waypoints, shapes[trip.shape_id]);
     const isFirst = !firstTripId;
-    await writeStream.write(`${isFirst ? '' : ',\n'}${JSON.stringify(trip)}`);
+    const {trip_id, route_id, waypoints} = trip;
+
+    const results = waypoints.map((p, i) => {
+      const {latitude, longitude, timestamp} = p;
+      return {
+        latitude,
+        longitude,
+        timestamp
+      };
+    });
+
+    const tripObject = {
+      trip_id,
+      route_id,
+      waypoints: results
+    };
+
+    await writeStream.write(`${isFirst ? '' : ',\n'}${JSON.stringify(tripObject)}`);
     delete trip.waypoints;
 
     if (isFirst) {
@@ -67,8 +126,10 @@ async function parseTripStops({limit, stopTimesFilePath, routesMap, tripsMap, ou
           await writeTripToFile({writeStream, routesMap, tripsMap, tripId: lastTripId});
         }
 
-        if (numOfTrips > limit) {
+        if (numOfTrips >= limit) {
           rl.close();
+          readStream.destroy();
+          break;
         }
 
         if (tripsMap[waypoint.trip_id]) {

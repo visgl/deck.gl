@@ -8,18 +8,20 @@
     "transform": "node transform/index.js"
   },
   "dependencies": {
-    "deck.gl": "^7.0.0-beta",
+    "deck.gl": "^7.0.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^4.1.2"
+    "react-map-gl": "^4.1.2",
+    "math.gl": "^2.3.1",
+    "viewport-mercator-project": "^6.1.1"
   },
   "devDependencies": {
+    "@babel/cli": "^7.0.0-beta",
     "@babel/core": "^7.4.0",
     "@babel/plugin-proposal-class-properties": "^7.4.0",
+    "@babel/preset-env": "^7.0.0-beta",
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.4.0",
-    "@babel/cli": "^7.0.0-beta",
-    "@babel/preset-env": "^7.0.0-beta",
     "babel-loader": "^8.0.5",
     "babel-polyfill": "^6.26.0",
     "webpack": "^4.20.2",

@@ -86,11 +86,12 @@ export class App extends Component {
     return new TripsLayer({
       id: `trips`,
       data: './output/trips.json',
-      getPath: d =>
-        d.waypoints.map(p => {
+      getPath: d => {
+        return d.waypoints.map(p => {
           const startTime = d.waypoints[0].timestamp;
           return [p.longitude, p.latitude, p.timestamp - startTime];
-        }),
+        });
+      },
       getColor: d => getColor(d),
       opacity: 0.3,
       widthMinPixels: 2,

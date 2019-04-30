@@ -24,7 +24,8 @@ export function parseColumns(line) {
     )
   */
 
-  return line.match(/(".*?"|[^",\s]+|[,])(?=\s*,|\s*$)/g).map(col => (col === ',' ? '' : col));
+  const matched = line.match(/(".*?"|[^",\s]+|[,])(?=\s*,|\s*$)/g);
+  return matched && matched.map(col => (col === ',' ? '' : col));
 }
 
 export function getLineObject(header, line) {
