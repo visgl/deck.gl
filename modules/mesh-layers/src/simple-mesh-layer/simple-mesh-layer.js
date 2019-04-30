@@ -212,6 +212,15 @@ export default class SimpleMeshLayer extends Layer {
     }
   }
 
+  finalizeState() {
+    super.finalizeState();
+
+    this.state.emptyTexture.delete();
+    if (this.state.texture) {
+      this.state.texture.delete();
+    }
+  }
+
   draw({uniforms}) {
     if (!this.state.model) {
       return;
@@ -250,6 +259,10 @@ export default class SimpleMeshLayer extends Layer {
   setTexture(src) {
     const {gl} = this.context;
     const {emptyTexture} = this.state;
+
+    if (this.state.texture) {
+      this.state.texture.delete();
+    }
 
     if (src) {
       getTexture(gl, src).then(texture => {

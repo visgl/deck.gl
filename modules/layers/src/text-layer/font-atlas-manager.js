@@ -126,6 +126,10 @@ export default class FontAtlasManager {
     this._texture = new Texture2D(this.gl);
   }
 
+  finalize() {
+    this._texture.delete();
+  }
+
   get texture() {
     return this._texture;
   }
