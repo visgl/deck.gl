@@ -128,6 +128,9 @@ export default class Deck {
 
     this._needsRedraw = true;
     this._pickRequest = {};
+    // Pick and store the object under the pointer on `pointerdown`.
+    // This object is reused for subsequent `onClick` and `onDrag*` callbacks.
+    this._lastPointerDownInfo = null;
 
     this.viewState = props.initialViewState || null; // Internal view state if no callback is supplied
     this.interactiveState = {
@@ -163,6 +166,7 @@ export default class Deck {
   finalize() {
     this.animationLoop.stop();
     this.animationLoop = null;
+    this._lastPointerDownInfo = null;
 
     if (this.layerManager) {
       this.layerManager.finalize();
@@ -465,7 +469,7 @@ export default class Deck {
   // The `pointermove` event may fire multiple times in between two animation frames,
   // it's a waste of time to run picking without rerender. Instead we save the last pick
   // request and only do it once on the next animation frame.
-  _requestPick({event, callback, mode, immediate}) {
+  _requestPick({event, callback, mode}) {
     const {_pickRequest} = this;
     if (event.type === 'pointerleave') {
       _pickRequest.x = -1;
@@ -486,10 +490,6 @@ export default class Deck {
     _pickRequest.callback = callback;
     _pickRequest.event = event;
     _pickRequest.mode = mode;
-
-    if (immediate) {
-      this._pickAndCallback();
-    }
   }
 
   // Actually run picking
@@ -705,12 +705,15 @@ export default class Deck {
 
     // Reuse last picked object
     const layers = this.layerManager.getLayers();
-    const info = this.deckPicker.getLastPickedObject({
-      x: pos.x,
-      y: pos.y,
-      layers,
-      viewports: this.getViewports(pos)
-    });
+    const info = this.deckPicker.getLastPickedObject(
+      {
+        x: pos.x,
+        y: pos.y,
+        layers,
+        viewports: this.getViewports(pos)
+      },
+      this._lastPointerDownInfo
+    );
 
     const {layer} = info;
     const layerHandler =
@@ -727,11 +730,10 @@ export default class Deck {
   }
 
   _onPointerDown(event) {
-    this._requestPick({
-      callback: null,
-      event,
-      mode: 'hover',
-      immediate: true
+    const pos = event.offsetCenter;
+    this._lastPointerDownInfo = this.pickObject({
+      x: pos.x,
+      y: pos.y
     });
   }
 

@@ -102,8 +102,7 @@ export default class DeckPicker {
   }
 
   // Returns a new picking info object by assuming the last picked object is still picked
-  getLastPickedObject({x, y, layers, viewports}) {
-    const lastPickedInfo = this.lastPickedInfo.info;
+  getLastPickedObject({x, y, layers, viewports}, lastPickedInfo = this.lastPickedInfo.info) {
     const lastPickedLayerId = lastPickedInfo && lastPickedInfo.layer && lastPickedInfo.layer.id;
     const layer = lastPickedLayerId ? layers.find(l => l.id === lastPickedLayerId) : null;
     const coordinate = viewports[0] && viewports[0].unproject([x, y]);
