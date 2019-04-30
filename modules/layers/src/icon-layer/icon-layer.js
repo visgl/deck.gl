@@ -174,6 +174,12 @@ export default class IconLayer extends Layer {
   }
   /* eslint-enable max-statements, complexity */
 
+  finalizeState() {
+    super.finalizeState();
+    // Release resources held by the icon manager
+    this.state.iconManager.finalize();
+  }
+
   draw({uniforms}) {
     const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard} = this.props;
     const {iconManager} = this.state;

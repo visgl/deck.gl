@@ -182,6 +182,7 @@ export default class IconManager {
     this._getIcon = null;
 
     this._texture = null;
+    this._externalTexture = null;
     this._mapping = {};
 
     this._autoPacking = false;
@@ -197,8 +198,14 @@ export default class IconManager {
     this._canvas = null;
   }
 
+  finalize() {
+    if (this._texture) {
+      this._texture.delete();
+    }
+  }
+
   getTexture() {
-    return this._texture;
+    return this._texture || this._externalTexture;
   }
 
   getIconMapping(object, objectInfo) {
@@ -232,10 +239,14 @@ export default class IconManager {
   }
 
   _updateIconAtlas(iconAtlas) {
+    if (this._texture) {
+      this._texture.delete();
+      this._texture = null;
+    }
     if (iconAtlas instanceof Texture2D) {
       iconAtlas.setParameters(DEFAULT_TEXTURE_PARAMETERS);
 
-      this._texture = iconAtlas;
+      this._externalTexture = iconAtlas;
       this.onUpdate();
     } else if (typeof iconAtlas === 'string') {
       loadImage(iconAtlas).then(data => {

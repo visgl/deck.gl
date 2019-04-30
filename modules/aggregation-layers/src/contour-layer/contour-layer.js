@@ -82,6 +82,11 @@ export default class ContourLayer extends CompositeLayer {
     }
   }
 
+  finalizeState() {
+    super.finalizeState();
+    this.state.gridAggregator.delete();
+  }
+
   renderLayers() {
     const {contourSegments, contourPolygons} = this.state.contourData;
     const hasIsolines = contourSegments && contourSegments.length > 0;

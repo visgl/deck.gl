@@ -113,9 +113,35 @@ export function testLayer({
   const initialProps = testCases[0].props;
   const layer = new Layer(initialProps);
 
+  const oldResourceCounts = getResourceCounts();
+
   safelyCall(`initializing ${layer.id}`, () => layerManager.setLayers([layer]), onError);
 
   runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onError);
+
+  safelyCall(`finalizing ${layer.id}`, () => layerManager.setLayers([]), onError);
+
+  const resourceCounts = getResourceCounts();
+
+  for (const resourceName in resourceCounts) {
+    if (resourceCounts[resourceName] !== oldResourceCounts[resourceName]) {
+      onError(
+        new Error(
+          `${resourceCounts[resourceName] - oldResourceCounts[resourceName]} ${resourceName}s`
+        ),
+        `${layer.id} should delete all ${resourceName}s`
+      );
+    }
+  }
+}
+
+function getResourceCounts() {
+  /* global luma */
+  const resourceStats = luma.stats.get('Resource Counts');
+  return {
+    Texture2D: resourceStats.get('Texture2Ds Active').count,
+    Buffer: resourceStats.get('Buffers Active').count
+  };
 }
 
 function injectSpies(layer, spies) {

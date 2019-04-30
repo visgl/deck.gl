@@ -113,6 +113,14 @@ export default class BitmapLayer extends Layer {
     }
   }
 
+  finalizeState() {
+    super.finalizeState();
+
+    if (this.state.bitmapTexture) {
+      this.state.bitmapTexture.delete();
+    }
+  }
+
   _getPositionsFromBounds(bounds) {
     const positions = new Array(12);
     // bounds as [minX, minY, maxX, maxY]
@@ -201,6 +209,10 @@ export default class BitmapLayer extends Layer {
   loadTexture() {
     const {gl} = this.context;
     const {image} = this.props;
+
+    if (this.state.bitmapTexture) {
+      this.state.bitmapTexture.delete();
+    }
 
     if (typeof image === 'string') {
       loadImage(image).then(data => {
