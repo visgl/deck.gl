@@ -69,6 +69,11 @@ export default class GPUGridLayer extends CompositeLayer {
     }
   }
 
+  finalizeState() {
+    super.finalizeState();
+    this.state.gpuGridAggregator.delete();
+  }
+
   getAggregationFlags({oldProps, props, changeFlags}) {
     let aggregationFlags = null;
     if (

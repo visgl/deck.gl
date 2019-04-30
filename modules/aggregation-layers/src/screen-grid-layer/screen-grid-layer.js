@@ -119,6 +119,19 @@ export default class ScreenGridLayer extends Layer {
     }
   }
 
+  finalizeState() {
+    super.finalizeState();
+
+    const {aggregationBuffer, maxBuffer, gpuGridAggregator} = this.state;
+    gpuGridAggregator.delete();
+    if (aggregationBuffer) {
+      aggregationBuffer.delete();
+    }
+    if (maxBuffer) {
+      maxBuffer.delete();
+    }
+  }
+
   draw({uniforms}) {
     const {gl} = this.context;
     const {parameters = {}} = this.props;
