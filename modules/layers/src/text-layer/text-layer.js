@@ -101,6 +101,12 @@ export default class TextLayer extends CompositeLayer {
     }
   }
 
+  finalizeState() {
+    super.finalizeState();
+    // Release resources held by the font atlas manager
+    this.state.fontAtlasManager.finalize();
+  }
+
   updateFontAtlas({oldProps, props}) {
     const {characterSet, fontSettings, fontFamily, fontWeight} = props;
 
