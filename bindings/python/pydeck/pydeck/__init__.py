@@ -11,3 +11,5 @@ from .bindings import (  # noqa
     View,
     ViewState
 )
+
+from .widget import DeckGLWidget  # noqa

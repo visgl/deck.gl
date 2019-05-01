@@ -1,6 +1,6 @@
 import json
 
-from ..bindings import (
+from pydeck import (
     Layer,
     LightSettings,
     ViewState,
