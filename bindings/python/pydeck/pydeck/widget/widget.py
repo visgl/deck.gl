@@ -21,6 +21,7 @@ class DeckGLWidget(widgets.DOMWidget):
     _view_name = Unicode('DeckGLView').tag(sync=True)
     _view_module = Unicode(module_name).tag(sync=True)
     _view_module_version = Unicode(module_version).tag(sync=True)
+    # Mapbox key, read on inititialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
     mapbox_key = Unicode(os.getenv('MAPBOX_API_KEY')).tag(sync=True)
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)

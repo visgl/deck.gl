@@ -2,9 +2,10 @@
 # coding: utf-8
 
 """
-Information about the frontend package of the widgets.
+Information about the frontend package of the widget.
 """
 
-module_name = "deckgl-widget"
-# TODO should this be the same version number as the deck.gl release?
-module_version = "^0.1.0"
+# module_name is the name of the NPM package for the widget
+module_name = "@deck.gl/jupyter-widget"
+# module_version is the current version of the module of the JS portion of the widget
+module_version = "^7.0.0-alpha.3"
