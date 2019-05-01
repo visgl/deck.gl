@@ -38,7 +38,7 @@ uniform float coverage;
 uniform float opacity;
 uniform float elevationScale;
 
-uniform vec2 gridSize;
+uniform ivec2 gridSize;
 uniform vec2 gridOrigin;
 uniform vec2 gridOriginLow;
 uniform vec2 gridOffset;
@@ -59,14 +59,14 @@ uniform ElevationData
 
 #define ELEVATION_SCALE 0.8
 
-#define ROUNDING_ERROR 0.00001
+#define EPSILON 0.00001
 
 // Result
 out vec4 vColor;
 
 vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
   vec4 outColor = vec4(0., 0., 0., 0.);
-  if (value >= (domain.x - ROUNDING_ERROR) && value <= (domain.y + ROUNDING_ERROR)) {
+  if (value >= (domain.x - EPSILON) && value <= (domain.y + EPSILON)) {
     float domainRange = domain.y - domain.x;
     if (domainRange <= 0.) {
       outColor = colorRange[0];
@@ -84,7 +84,6 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
 }
 
 float linearScale(vec2 domain, vec2 range, float value) {
-  // TODO: use domain and range deltas as uniforms
   return ((value - domain.x) / (domain.y - domain.x)) * (range.y - range.x) + range.x;
 }
 
@@ -107,12 +106,12 @@ void main(void) {
       ELEVATION_SCALE * elevationScale;
   }
 
-  float yIndex = floor((float(gl_InstanceID) / gridSize[0]) + ROUNDING_ERROR);
-  float xIndex = float(gl_InstanceID) - (yIndex * gridSize[0]);
+  int yIndex = (gl_InstanceID / gridSize[0]);
+  int xIndex = gl_InstanceID - (yIndex * gridSize[0]);
 
-  vec2 instancePositionXFP64 = mul_fp64(vec2(gridOffset[0], gridOffsetLow[0]), vec2(xIndex, 0.));
+  vec2 instancePositionXFP64 = mul_fp64(vec2(gridOffset[0], gridOffsetLow[0]), vec2(float(xIndex), 0.));
   instancePositionXFP64 = sum_fp64(instancePositionXFP64, vec2(gridOrigin[0], gridOriginLow[0]));
-  vec2 instancePositionYFP64 = mul_fp64(vec2(gridOffset[1], gridOffsetLow[1]), vec2(yIndex, 0.));
+  vec2 instancePositionYFP64 = mul_fp64(vec2(gridOffset[1], gridOffsetLow[1]), vec2(float(yIndex), 0.));
   instancePositionYFP64 = sum_fp64(instancePositionYFP64, vec2(gridOrigin[1], gridOriginLow[1]));
   vec3 extrudedPosition = vec3(instancePositionXFP64[0], instancePositionYFP64[0], elevation);
   vec2 extrudedPosition64xyLow = vec2(instancePositionXFP64[1], instancePositionYFP64[1]);
