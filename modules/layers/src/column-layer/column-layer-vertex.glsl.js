@@ -29,6 +29,8 @@ attribute vec3 instancePositions;
 attribute float instanceElevations;
 attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceColors;
+attribute vec4 instanceLineColors;
+
 attribute vec3 instancePickingColors;
 
 // Custom uniforms
@@ -37,6 +39,7 @@ uniform float radius;
 uniform float angle;
 uniform vec2 offset;
 uniform bool extruded;
+uniform bool isWireframe;
 uniform float coverage;
 uniform float elevationScale;
 
@@ -45,6 +48,7 @@ varying vec4 vColor;
 
 void main(void) {
 
+  vec4 colors = isWireframe ? instanceLineColors : instanceColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
@@ -57,7 +61,7 @@ void main(void) {
   }
 
   // if ahpha == 0.0 or z < 0.0, do not render element
-  float shouldRender = float(instanceColors.a > 0.0 && instanceElevations >= 0.0);
+  float shouldRender = float(colors.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = radius * coverage * shouldRender;
 
   // project center of column
@@ -74,10 +78,10 @@ void main(void) {
   vec3 normals_commonspace = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
 
   if (extruded) {
-    vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
-    vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
+    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
+    vColor = vec4(lightColor, colors.a * opacity) / 255.0;
   } else {
-    vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.0;
+    vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;
   }
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

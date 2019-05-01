@@ -20,7 +20,8 @@
 
 import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
+import {Model, fp64, PhongMaterial} from '@luma.gl/core';
+import CylinderGeometry from './cylinder-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -39,9 +40,11 @@ const defaultProps = {
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
   fp64: false,
-
+  wireframe: false,
+  filled: true,
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getElevation: {type: 'accessor', value: 1000},
 
   material: defaultMaterial
@@ -82,6 +85,13 @@ export default class ColumnLayer extends Layer {
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR
+      },
+      instanceLineColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getLineColor',
+        defaultValue: DEFAULT_COLOR
       }
     });
     /* eslint-enable max-len */
@@ -93,10 +103,11 @@ export default class ColumnLayer extends Layer {
       props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution;
     if (regenerateModels) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
+
+      if (this.state.models) {
+        this.state.models.forEach(model => model.delete());
       }
-      this.setState({model: this._getModel(gl)});
+      this.setState(this._getModels(gl));
       this.getAttributeManager().invalidateAll();
     }
 
@@ -117,28 +128,50 @@ export default class ColumnLayer extends Layer {
     });
   }
 
-  _getModel(gl) {
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: this.getGeometry(this.props.diskResolution),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
-      })
-    );
+  _getModels(gl) {
+    const {id, filled, extruded, diskResolution} = this.props;
+
+    let filledModel;
+    let strokeModel;
+
+    if (filled) {
+      filledModel = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-top`,
+          geometry: this.getGeometry(diskResolution),
+          isInstanced: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
+    }
+    if (extruded) {
+      strokeModel = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-side`,
+          geometry: this.getGeometry(diskResolution),
+          isInstanced: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
+    }
+
+    return {
+      models: [strokeModel, filledModel].filter(Boolean),
+      filledModel,
+      strokeModel
+    };
   }
 
   _updateVertices(vertices) {
     if (!vertices) {
       return;
     }
-
     const {diskResolution} = this.props;
     log.assert(vertices.length >= diskResolution);
 
-    const {model} = this.state;
-    const geometry = this.getGeometry(this.props.diskResolution);
+    const geometry = this.getGeometry(diskResolution);
     const positions = geometry.attributes.POSITION;
     let i = 0;
     for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
@@ -150,24 +183,47 @@ export default class ColumnLayer extends Layer {
         i++;
       }
     }
-    model.setProps({geometry});
+
+    this.state.models.forEach(model => {
+      if (model) {
+        model.setProps({geometry});
+      }
+    });
   }
 
   draw({uniforms}) {
-    const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
-
-    this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          radius,
-          angle: (angle / 180) * Math.PI,
-          offset,
-          extruded,
-          coverage,
-          elevationScale
-        })
-      )
-      .draw();
+    const {
+      elevationScale,
+      wireframe,
+      filled,
+      extruded,
+      offset,
+      coverage,
+      radius,
+      angle
+    } = this.props;
+    const {filledModel, strokeModel} = this.state;
+    const renderUniforms = Object.assign({}, uniforms, {
+      radius,
+      angle: (angle / 180) * Math.PI,
+      offset,
+      extruded,
+      coverage,
+      elevationScale
+    });
+    const numInstances = this.getNumInstances();
+    if (strokeModel && wireframe) {
+      strokeModel.setInstanceCount(numInstances);
+      strokeModel.setUniforms(renderUniforms);
+      strokeModel.setDrawMode(GL.LINES);
+      strokeModel.setUniforms({isWireframe: true}).draw();
+    }
+    if (filledModel && filled) {
+      filledModel.setInstanceCount(numInstances);
+      filledModel.setUniforms(renderUniforms);
+      filledModel.setDrawMode(GL.TRIANGLES);
+      filledModel.setUniforms({isWireframe: false}).draw();
+    }
   }
 
   calculateInstancePositions64xyLow(attribute) {
