@@ -1,9 +1,9 @@
 import test from 'tape-catch';
-// import VS from '@deck.gl/experimental-layers/gpu-grid-layer/gpu-grid-cell-layer-vertex.glsl';
+// import VS from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer-vertex.glsl';
+import {getQuantizeScale} from '@deck.gl/aggregation-layers/utils/scale-utils';
 import {gl} from '@deck.gl/test-utils';
 import {Transform, Buffer} from '@luma.gl/core';
-import {experimental} from '@deck.gl/core';
-const {getQuantizeScale} = experimental;
+import {equals, config} from 'math.gl';
 
 test('gpu-grid-cell-layer-vertex#quantizeScale', t => {
   if (!Transform.isSupported(gl)) {
@@ -12,6 +12,7 @@ test('gpu-grid-cell-layer-vertex#quantizeScale', t => {
     return;
   }
 
+  // TODO: remove this duplication using `inject` (blocked due to UBO binding.)
   const vs = `\
 #define RANGE_COUNT 6
 #define ROUNDING_ERROR 0.00001
@@ -34,7 +35,7 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
       outColor = colorRange[intIdx];
     }
   }
-  // outColor = outColor / 255.;
+  outColor = outColor / 255.;
   return outColor;
 }
 
@@ -43,20 +44,15 @@ void main(void) {
 }
 `;
 
-  //    const inject = {
-  //     'vs:#decl': `
-  // attribute vec3 inValue;
+  //      const inject = {
+  //       'vs:#decl': `
+  // in float inValue;
   // uniform vec2 domain;
-  // varying vec4 outColor;
-  // `,
-  //     'vs:#main-start': '  if (true) { outColor = quantizeScale(domain, colorRange, inValue); } else {\n',
-  //     'vs:#main-end': '  }\n'
-  //   };
-  // const values = [0.001, 10.5, 15.0021, 24.9981];
-  /*
-  GPU colorValues: 2,2,2,2,2,2,20.999998092651367,2,20,2,2,2,2,2,4,2,2,2,2
-  gpu-grid-layer.js:173 GPU colorDomain: 2 20.999998092651367
-  */
+  // out vec4 outColor;
+  //   `,
+  //       'vs:#main-start': '  if (true) { outColor = quantizeScale(domain, colorRange, inValue); } else {\n',
+  //       'vs:#main-end': '  }\n'
+  //     };
   const values = [2, 2, 2, 2, 2, 2, 20.999998092651367, 2, 20, 2, 2, 2, 2, 2, 4, 2, 2, 2, 2];
   const valueBuffer = new Buffer(gl, new Float32Array(values));
   const outBuffer = new Buffer(gl, values.length * 4 * 4);
@@ -77,13 +73,14 @@ void main(void) {
   const colorRangeUniform = [];
   colorRange.forEach(color => {
     const c = color.map(v => v);
-    colorRangeUniform.push(c[0], c[1], c[2], c[3]);
+    colorRangeUniform.push(c[0] * 255, c[1] * 255, c[2] * 255, c[3] * 255);
   });
   const transform = new Transform(gl, {
     sourceBuffers: {
       inValue: valueBuffer
     },
     vs,
+    modules: ['project32', 'gouraud-lighting', 'picking', 'fp64'],
     // inject,
     feedbackBuffers: {
       outColor: outBuffer
@@ -93,6 +90,13 @@ void main(void) {
   });
   transform.run({uniforms: {colorRange: colorRangeUniform, domain}});
   const result = transform.getData({varyingName: 'outColor'});
-  t.deepEqual(result, expected, 'quantizeScale: should return correct value');
+  const oldEpsilon = config.EPSILON;
+  config.EPSILON = 1e-6;
+  if (equals(expected, result)) {
+    t.pass(`quantizeScale: returned correct value`);
+  } else {
+    t.fail(`quantizeScale: should return correct value`);
+  }
+  config.EPSILON = oldEpsilon;
   t.end();
 });

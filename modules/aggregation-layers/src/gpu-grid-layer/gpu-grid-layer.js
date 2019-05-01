@@ -19,13 +19,11 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {
-  CompositeLayer,
-  experimental,
-  _GPUGridAggregator as GPUGridAggregator,
-  _pointToDensityGridData as pointToDensityGridData
-} from '@deck.gl/core';
-const {defaultColorRange} = experimental;
+import {CompositeLayer} from '@deck.gl/core';
+
+import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
+import {defaultColorRange} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
 
 const MINCOLOR = [0, 0, 0, 255];
