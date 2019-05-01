@@ -620,14 +620,6 @@ export default class GPUGridAggregator {
 
   getAllAggregationModel(fp64 = false) {
     const {gl, shaderCache} = this;
-    if (!this.state.resources['all-aggregation-buffer']) {
-      this.state.resources['all-aggregation-buffer'] = new Buffer(gl, {
-        data: new Float32Array([0, 0]),
-        accessor: {
-          size: 2
-        }
-      });
-    }
     return new Model(gl, {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
@@ -639,7 +631,7 @@ export default class GPUGridAggregator {
       isInstanced: true,
       instanceCount: 0,
       attributes: {
-        position: this.state.resources['all-aggregation-buffer']
+        position: [0, 0]
       }
     });
   }
