@@ -2,14 +2,16 @@
 
 from __future__ import print_function
 from setuptools import setup, find_packages, Command
+from setuptools.command.sdist import sdist
+from setuptools.command.build_py import build_py
+from setuptools.command.egg_info import egg_info
+
+from distutils import log
 import os
-import platform  # noqa
+from subprocess import check_call
+import sys
 
 here = os.path.dirname(os.path.abspath(__file__))
-
-# TODO add widget
-
-from distutils import log  # noqa
 
 log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
@@ -19,6 +21,11 @@ LONG_DESCRIPTION = 'Python wrapper for deck.gl'
 PATH_TO_WIDGET = '../../../modules/jupyter-widget'
 
 node_root = os.path.join(here, PATH_TO_WIDGET)
+
+npm_path = os.pathsep.join([
+    os.path.join(node_root, 'node_modules', '.bin'),
+    os.environ.get('PATH', os.defpath),
+])
 
 
 def update_package_data(distribution):
@@ -111,7 +118,6 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 
-
 version_ns = {}
 with open(os.path.join(here, 'pydeck', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
@@ -123,12 +129,15 @@ setup_args = {
     'long_description': LONG_DESCRIPTION,
     'license': 'MIT License',
     'include_package_data': True,
-    'install_requires': [
-        'ipywidgets>=7.0.0,<8',
-        'traitlets>=4.3.2'
-    ],
     'packages': find_packages(),
     'zip_safe': False,
+    'cmdclass': {
+        'build_py': js_prerelease(build_py),
+        'egg_info': js_prerelease(egg_info),
+        'sdist': js_prerelease(sdist, strict=True),
+        'jsdeps': NPM,
+    },
+
     'author': 'Andrew Duberstein',
     'author_email': 'ajduberstein@gmail.com',
     'url': 'https://github.com/uber/deck.gl',
@@ -152,6 +161,20 @@ setup_args = {
     'include_package_data': True,
     'tests_require': ['pytest'],
     'setup_requires': ['pytest-runner'],
+    'install_requires': [
+        'ipywidgets>=7.0.0,<8',
+        'traittypes>=0.2.1,<3',
+        'xarray>=0.10',
+        'branca>=0.3.1,<0.4'
+    ],
+    'data_files': [
+        ('share/jupyter/nbextensions/pydeck', [
+            'pydeck/static/extension.js',
+            'pydeck/static/index.js',
+            'pydeck/static/index.js.map'
+        ]),
+        ('etc/jupyter/nbconfig/notebook.d', ['pydeck.json'])
+    ],
     'extras_require': {
         'test': [
             'pytest>=3.6',
