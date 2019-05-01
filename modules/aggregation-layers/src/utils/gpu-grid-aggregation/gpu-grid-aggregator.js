@@ -36,11 +36,7 @@ import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
-import {
-  getFloatTexture,
-  getFramebuffer,
-  getFloatArray,
-} from './gpu-grid-aggregator-utils.js';
+import {getFloatTexture, getFramebuffer, getFloatArray} from './gpu-grid-aggregator-utils.js';
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
@@ -155,7 +151,15 @@ export default class GPUGridAggregator {
 
     positionsBuffer && positionsBuffer.delete();
     position64Buffer && position64Buffer.delete();
-    this.deleteResources([framebuffers, textures, maxMinFramebuffers, minFramebuffers, maxFramebuffers, meanTextures, resources]);
+    this.deleteResources([
+      framebuffers,
+      textures,
+      maxMinFramebuffers,
+      minFramebuffers,
+      maxFramebuffers,
+      meanTextures,
+      resources
+    ]);
   }
 
   // Perform aggregation and retun the results
@@ -499,7 +503,7 @@ export default class GPUGridAggregator {
 
   updateResultBuffer({gl, bufferName, id, data, result}) {
     const {resources} = this.state;
-    const resourceName = `${id}-${bufferName}`
+    const resourceName = `${id}-${bufferName}`;
     result[bufferName] = result[bufferName] || resources[resourceName];
     if (result[bufferName]) {
       result[bufferName].subData({data});
@@ -850,19 +854,28 @@ export default class GPUGridAggregator {
         if (needMin && needMax && combineMaxMin) {
           if (!maxMinFramebuffers[id]) {
             resources[`${id}-maxMin`] = getFloatTexture(this.gl, {id: `${id}-maxMinTex`});
-            maxMinFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-maxMinFb`, texture: resources[`${id}-maxMin`]});
+            maxMinFramebuffers[id] = getFramebuffer(this.gl, {
+              id: `${id}-maxMinFb`,
+              texture: resources[`${id}-maxMin`]
+            });
           }
         } else {
           if (needMin) {
             if (!minFramebuffers[id]) {
               resources[`${id}-min`] = getFloatTexture(this.gl, {id: `${id}-minTex`});
-              minFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-minFb`, texture: resources[`${id}-min`]});
+              minFramebuffers[id] = getFramebuffer(this.gl, {
+                id: `${id}-minFb`,
+                texture: resources[`${id}-min`]
+              });
             }
           }
           if (needMax) {
             if (!maxFramebuffers[id]) {
               resources[`${id}-max`] = getFloatTexture(this.gl, {id: `${id}-maxTex`});
-              maxFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-maxFb`, texture: resources[`${id}-max`]});
+              maxFramebuffers[id] = getFramebuffer(this.gl, {
+                id: `${id}-maxFb`,
+                texture: resources[`${id}-max`]
+              });
             }
           }
         }
