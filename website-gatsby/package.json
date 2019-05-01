@@ -1,7 +1,5 @@
 {
-  "name": "ocular-website-gatsby",
-  "version": "0.0.0",
-  "description": "A website for Ocular, built with Ocular (Gatsby version)",
+  "description": "A website for deck.gl, built with Ocular (Gatsby version)",
   "license": "MIT",
   "keywords": [
     "ocular"
