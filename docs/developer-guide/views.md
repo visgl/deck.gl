@@ -38,7 +38,7 @@ A [View](/docs/api-reference/view.md) instance defines the following information
 
 To summarize, a `View` instance wraps the "hard configuration" of a camera. Once defined, it does not need to change frequently.
 
-deck.gl allows multiple views to be specified, allowing the application to divide the screen into multiple similar or diffenrent views. These views can be synchronized or separately controlled by the user or the application.
+deck.gl allows multiple views to be specified, allowing the application to divide the screen into multiple similar or different views. These views can be synchronized or separately controlled by the user or the application.
 
 ### View State
 
