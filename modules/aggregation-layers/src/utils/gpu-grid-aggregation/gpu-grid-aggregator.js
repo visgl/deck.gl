@@ -146,7 +146,7 @@ export default class GPUGridAggregator {
     const {gridAggregationModel, allAggregationModel, meanTransform} = this;
     const {
       positionsBuffer,
-      position64Buffer,
+      positions64xyLowBuffer,
       textures,
       framebuffers,
       maxMinFramebuffers,
@@ -161,7 +161,7 @@ export default class GPUGridAggregator {
     meanTransform && meanTransform.delete();
 
     positionsBuffer && positionsBuffer.delete();
-    position64Buffer && position64Buffer.delete();
+    positions64xyLowBuffer && positions64xyLowBuffer.delete();
     this.deleteResources([
       framebuffers,
       textures,
