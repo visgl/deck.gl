@@ -60,7 +60,7 @@ test('ContourLayer#renderSubLayer', t => {
   t.end();
 });
 
-test.skip('ContourLayer#updates', t => {
+test('ContourLayer#updates', t => {
   testLayer({
     Layer: ContourLayer,
     onError: t.notOk,
