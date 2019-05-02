@@ -53,7 +53,11 @@ Group of related RFCs loosely targeted for 7.x releases.
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
-| [**Binary Data**](v7.x/binary-data-rfc.md) | @ibgreen | **Draft** | Supporting binary data as input to deck.gl layers. |
+| [**Binary Data RFC**](v7.x-binary/binary-data-rfc.md) | @ibgreen @pessimistress | **Draft** | Support binary data as input to deck.gl layers. |
+| [**GLSL Accessor RFC**](/dev-docs/v7.x-binary/glsl-accessor-rfc.md) | @ibgreen | **Draft** | Allow apps to define GLSL accessors to directly access injected columnar data or implement advanved effects |
+| [**Texture Attribute RFC**](/dev-docs/v7.x-binary/texture-attribute-rfc.md) | @ibgreen | **Draft** | Enable variable-primitive layers_ to read _descriptive attributes_ from a binary column. |
+| [**GPU Data Frame Support**](/dev-docs/v7.x-binary/gpu-data-frame-rfc.md) | @ibgreen | **Draft** | Proposal for enabling deck.gl to apply data frame filters on GPU. |
+| [**Chunked Data Support**](/dev-docs/v7.x-binary/chunked-data-rfc.md) | @ibgreen | **Draft** | Support Chunked Columnar data on the GPU. |
 
 
 ## v7.x RFCs
