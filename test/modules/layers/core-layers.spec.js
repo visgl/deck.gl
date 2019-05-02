@@ -44,7 +44,7 @@ const GRID = [
   {position: [37.1, 122.8]}
 ];
 
-test.skip('ScreenGridLayer', t => {
+test('ScreenGridLayer', t => {
   const testCases = generateLayerTests({
     Layer: ScreenGridLayer,
     sampleProps: {

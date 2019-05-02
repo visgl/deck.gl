@@ -11,8 +11,8 @@
   "dependencies": {
     "@loaders.gl/core": "^1.0.1",
     "@loaders.gl/ply": "^1.0.1",
-    "@luma.gl/addons": "^7.0.0",
-    "@luma.gl/debug": "^7.0.0",
+    "@luma.gl/addons": "^7.0.1",
+    "@luma.gl/debug": "^7.0.1",
     "colorbrewer": "^1.0.0",
     "d3-request": "^1.0.6",
     "d3-scale": "^1.0.6",

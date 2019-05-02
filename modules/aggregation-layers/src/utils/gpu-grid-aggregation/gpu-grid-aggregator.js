@@ -36,12 +36,7 @@ import AGGREGATE_TO_GRID_FS from './aggregate-to-grid-fs.glsl';
 import AGGREGATE_ALL_VS_FP64 from './aggregate-all-vs-64.glsl';
 import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
-import {
-  getFloatTexture,
-  getFramebuffer,
-  getFloatArray,
-  updateBuffer
-} from './gpu-grid-aggregator-utils.js';
+import {getFloatTexture, getFramebuffer, getFloatArray} from './gpu-grid-aggregator-utils.js';
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
@@ -120,7 +115,9 @@ export default class GPUGridAggregator {
       maxMinFramebuffers: {},
       minFramebuffers: {},
       maxFramebuffers: {},
-      equations: {}
+      equations: {},
+      // common resources to be deleted
+      resources: {}
     };
     this._hasGPUSupport =
       isWebGL2(gl) && // gl_InstanceID usage in min/max calculation shaders
@@ -139,11 +136,13 @@ export default class GPUGridAggregator {
     const {
       positionsBuffer,
       position64Buffer,
+      textures,
       framebuffers,
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      meanTextures
+      meanTextures,
+      resources
     } = this.state;
 
     gridAggregationModel && gridAggregationModel.delete();
@@ -152,11 +151,15 @@ export default class GPUGridAggregator {
 
     positionsBuffer && positionsBuffer.delete();
     position64Buffer && position64Buffer.delete();
-    this.deleteResources(framebuffers);
-    this.deleteResources(maxMinFramebuffers);
-    this.deleteResources(minFramebuffers);
-    this.deleteResources(maxFramebuffers);
-    this.deleteResources(meanTextures);
+    this.deleteResources([
+      framebuffers,
+      textures,
+      maxMinFramebuffers,
+      minFramebuffers,
+      maxFramebuffers,
+      meanTextures,
+      resources
+    ]);
   }
 
   // Perform aggregation and retun the results
@@ -175,12 +178,13 @@ export default class GPUGridAggregator {
 
   // PRIVATE
 
-  // Common methods
-
-  deleteResources(obj) {
-    for (const name in obj) {
-      obj[name].delete();
-    }
+  deleteResources(resources) {
+    resources = Array.isArray(resources) ? resources : [resources];
+    resources.forEach(obj => {
+      for (const name in obj) {
+        obj[name].delete();
+      }
+    });
   }
 
   getAggregationParams(opts) {
@@ -497,6 +501,19 @@ export default class GPUGridAggregator {
   }
   /* eslint-disable max-statements */
 
+  updateResultBuffer({gl, bufferName, id, data, result}) {
+    const {resources} = this.state;
+    const resourceName = `${id}-${bufferName}`;
+    result[bufferName] = result[bufferName] || resources[resourceName];
+    if (result[bufferName]) {
+      result[bufferName].subData({data});
+    } else {
+      // save resource for garbage collection
+      resources[resourceName] = new Buffer(gl, data);
+      result[bufferName] = resources[resourceName];
+    }
+  }
+
   updateAggregationBuffers(opts, results) {
     if (!opts.createBufferObjects) {
       return;
@@ -506,32 +523,36 @@ export default class GPUGridAggregator {
       const {aggregationData, minData, maxData, maxMinData} = results[id];
       const {needMin, needMax} = weights[id];
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      updateBuffer({
+      this.updateResultBuffer({
         gl: this.gl,
         bufferName: 'aggregationBuffer',
+        id,
         data: aggregationData,
         result: results[id]
       });
       if (combineMaxMin) {
-        updateBuffer({
+        this.updateResultBuffer({
           gl: this.gl,
           bufferName: 'maxMinBuffer',
+          id,
           data: maxMinData,
           result: results[id]
         });
       } else {
         if (needMin) {
-          updateBuffer({
+          this.updateResultBuffer({
             gl: this.gl,
             bufferName: 'minBuffer',
+            id,
             data: minData,
             result: results[id]
           });
         }
         if (needMax) {
-          updateBuffer({
+          this.updateResultBuffer({
             gl: this.gl,
             bufferName: 'maxBuffer',
+            id,
             data: maxData,
             result: results[id]
           });
@@ -610,12 +631,7 @@ export default class GPUGridAggregator {
       isInstanced: true,
       instanceCount: 0,
       attributes: {
-        position: new Buffer(gl, {
-          data: new Float32Array([0, 0]),
-          accessor: {
-            size: 2
-          }
-        })
+        position: [0, 0]
       }
     });
   }
@@ -791,6 +807,7 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
+      resources,
       meanTextures,
       equations,
       weights
@@ -827,16 +844,31 @@ export default class GPUGridAggregator {
       // For min/max framebuffers will use default size 1X1
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {
-          maxMinFramebuffers[id] =
-            maxMinFramebuffers[id] || getFramebuffer(this.gl, {id: `${id}-maxMinFb`});
+          if (!maxMinFramebuffers[id]) {
+            resources[`${id}-maxMin`] = getFloatTexture(this.gl, {id: `${id}-maxMinTex`});
+            maxMinFramebuffers[id] = getFramebuffer(this.gl, {
+              id: `${id}-maxMinFb`,
+              texture: resources[`${id}-maxMin`]
+            });
+          }
         } else {
           if (needMin) {
-            minFramebuffers[id] =
-              minFramebuffers[id] || getFramebuffer(this.gl, {id: `${id}-minFb`});
+            if (!minFramebuffers[id]) {
+              resources[`${id}-min`] = getFloatTexture(this.gl, {id: `${id}-minTex`});
+              minFramebuffers[id] = getFramebuffer(this.gl, {
+                id: `${id}-minFb`,
+                texture: resources[`${id}-min`]
+              });
+            }
           }
           if (needMax) {
-            maxFramebuffers[id] =
-              maxFramebuffers[id] || getFramebuffer(this.gl, {id: `${id}-maxFb`});
+            if (!maxFramebuffers[id]) {
+              resources[`${id}-max`] = getFloatTexture(this.gl, {id: `${id}-maxTex`});
+              maxFramebuffers[id] = getFramebuffer(this.gl, {
+                id: `${id}-maxFb`,
+                texture: resources[`${id}-max`]
+              });
+            }
           }
         }
       }
@@ -857,7 +889,7 @@ export default class GPUGridAggregator {
 
   // set up buffers for all weights
   setupWeightAttributes(opts) {
-    const {weightAttributes, vertexCount, weights} = this.state;
+    const {weightAttributes, vertexCount, weights, resources} = this.state;
     for (const id in weights) {
       const {values} = weights[id];
       // values can be Array, Float32Array or Buffer
@@ -867,7 +899,8 @@ export default class GPUGridAggregator {
         if (weightAttributes[id] instanceof Buffer) {
           weightAttributes[id].setData(typedArray);
         } else {
-          weightAttributes[id] = new Buffer(this.gl, typedArray);
+          resources[`${id}-buffer`] = new Buffer(this.gl, typedArray);
+          weightAttributes[id] = resources[`${id}-buffer`];
         }
       } else {
         // log.assert((values instanceof Attribute) || (values instanceof Buffer));

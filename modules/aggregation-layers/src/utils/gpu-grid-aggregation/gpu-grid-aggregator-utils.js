@@ -1,6 +1,6 @@
 // Helper methods used by GPUGridAggregator.
 import GL from '@luma.gl/constants';
-import {Buffer, Framebuffer, Texture2D} from '@luma.gl/core';
+import {Framebuffer, Texture2D} from '@luma.gl/core';
 
 export function getFloatTexture(gl, opts) {
   const {width = 1, height = 1} = opts;
@@ -22,8 +22,7 @@ export function getFloatTexture(gl, opts) {
 }
 
 export function getFramebuffer(gl, opts) {
-  const {id, width = 1, height = 1} = opts;
-  const texture = opts.texture || getFloatTexture(gl, opts);
+  const {id, width = 1, height = 1, texture} = opts;
   const fb = new Framebuffer(gl, {
     id,
     width,
@@ -41,12 +40,4 @@ export function getFloatArray(array, size, fillValue = 0) {
     return new Float32Array(size).fill(fillValue);
   }
   return array;
-}
-
-export function updateBuffer({gl, bufferName, data, result}) {
-  if (result[bufferName]) {
-    result[bufferName].subData({data});
-  } else {
-    result[bufferName] = new Buffer(gl, data);
-  }
 }
