@@ -1,6 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, setParameters, withParameters} from 'luma.gl';
+import {clear, setParameters, withParameters} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -18,12 +18,12 @@ export default class LayersPass extends Pass {
     parameters = {},
     pass = 'draw',
     redrawReason = '',
-    customRender,
+    clearCanvas = true,
     effects,
     effectProps
   }) {
     const gl = this.gl;
-    if (!customRender) {
+    if (clearCanvas) {
       this.clearCanvas(gl);
     }
 
@@ -127,12 +127,7 @@ export default class LayersPass extends Pass {
   }
 
   drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters, effects, effectProps}) {
-    const moduleParameters = this.getModuleParameters(
-      layer,
-      this.props.pixelRatio,
-      effects,
-      effectProps
-    );
+    const moduleParameters = this.getModuleParameters(layer, effects, effectProps);
     const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
     const layerParameters = this.getLayerParameters(layer, layerIndex, glViewport, parameters);
 

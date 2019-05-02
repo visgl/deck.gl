@@ -1,83 +1,80 @@
 # Coordinate Systems
 
-By default, deck.gl layers interprets positions in the [Web Mercator](https://en.wikipedia.org/wiki/Web_Mercator) coordinate system, so when working with geospatial data (i.e with longitude and latitude encoded positions) deck.gl will automatically interpret any positions correctly.
+In most deck.gl layers, every data object is expected to contain one or more **positions** (e.g. the center of a point, or the start and end of an arc, the vertices of a polygon, etc). Positions are expected to be supplied as two or three element arrays (`[x, y]` or `[x, y, z]`). Objects can also have **dimensions** (e.g. the radius of a circle, the width of a path, etc), most of which are specified as a single number. Positions and dimensions are used to construct a 3D world with your data.
 
-In addition, deck.gl layers can be configured to use "meter offset" based local coordinate systems, which can be quite convenient when modelling geographical data on small scales (e.g. city block level).
+By default, deck.gl layers interprets positions as geospatial coordinates (i.e. `[longitude, latitude, altitude]`), and dimensions as in meters. So when working with geospatial data sources such as GeoJSON, deck.gl will automatically interpret any positions correctly.
 
-Naturally, non-geospatial coordinates can also be used when working with non-geospatial data sets.
+deck.gl also supports a selection of alternative coordinate systems, supporting data from e.g. LIDAR sensors, and non-geospatial use cases.
 
-Of note is that each deck.gl layer can define its own coordinate system. Within the data supplied to a single layer, all positions must be specified in the coordinate system, however data supplied to other layers can be specified in other coordinate system.
+Each deck.gl layer can define its own coordinate system. Within the data supplied to a single layer, all positions must be specified in the same coordinate system. Layers using different coordinate systems can be composed together, which is very useful when dealing with datasets from different sources.
+
+```js
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import {PointCloudLayer} from '@deck.gl/layers';
+
+new PointCloudLayer({
+  coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+  coordinateOrigin: [-122.4004935, 37.7900486, 0],  // anchor point in longitude/latitude/altitude
+  data: [
+    {position: [33.22, 109.87, 1.455]}, // meter offsets from the coordinate origin
+    ...
+  ],
+  ...
+})
+```
 
 
 ## Supported Coordinate Systems
 
-| Coordinate System Mode               | Coordinates                   | Description |
-| ---                                  | ---                           | --- |
-| `COORDINATE_SYSTEM.LNGLAT` (default) | [longitude, latitude, altitude] | Longitude and latitude are specified as **Web Mercator coordinates** in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
-| `COORDINATE_SYSTEM.METER_OFFSETS`    | [Δx, Δy, Δz]   | Positions are given in meter offsets from a reference point that is specified separately (the `coordinateOrigin` prop) |
-| `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
-| `COORDINATE_SYSTEM.LNGLAT_DEPRECATED`| [longitude, latitude, altitude] | A lower precision version of the `COORDINATE_SYSTEM.LNGLAT` mode, that was the default until deck.gl v6.0. Will be removed in a future release. |
+| Coordinate System Mode               | Positions                   | Dimensions | Notes |
+| ---                                  | ---                           | --- | --- |
+| `COORDINATE_SYSTEM.LNGLAT` (default) | [longitude, latitude, altitude] | meters | Longitude and latitude are specified as [WGS84](https://gisgeography.com/wgs84-world-geodetic-system/) coordinates in degrees from Greenwich meridian / equator respectively, and altitude is specified in meters above sea level. |
+| `COORDINATE_SYSTEM.METER_OFFSETS` *   | [Δx, Δy, Δz]   | meters | Positions are given in meter offsets from a reference geo-location that is specified separately (`coordinateOrigin`). The `x` axis points map east, the `y` axis points map north, and `z` points up. |
+| `COORDINATE_SYSTEM.LNGLAT_OFFSETS`    | [Δlongitude, Δlatitude, Δaltitude]   | meters | Positions are given in meter offsets from a reference geo-location that is specified separately (`coordinateOrigin`). |
+| `COORDINATE_SYSTEM.IDENTITY`         | [x, y, z] | identity units | A linear system with no interpretation for pure info-vis layers. Viewports can be used without supplying geospatial reference points. |
+| `COORDINATE_SYSTEM.LNGLAT_DEPRECATED`| [longitude, latitude, altitude] | meters | A lower precision version of the `COORDINATE_SYSTEM.LNGLAT` mode, that was the default until deck.gl v6.2. Will be removed in a future release. |
+
+* Note that although UTM ([Universal Transverse Mercator](https://en.wikipedia.org/wiki/Universal_Transverse_Mercator_coordinate_system)) coordinates uses similar meter offsets as the deck.gl meters mode, be aware there are subtle differences, so be careful before making assumptions.
 
 
 ## Choosing the Right Coordinate System
 
-The choice of coordinate system is often dictated by your data. If your data is specified in `lng`/`lat`s or meter offsets the natural choice is of course to just configure any layers displaying that data top use the corresponding coordinate system mode in deck.gl.
+The choice of coordinate system is often dictated by your data. Generally speaking, converting data from one coordinate system to another on the CPU is costly and should be avoided, especially when dealing with spherical coordinates. Whether your data comes in `lng`/`lat`s or meter offsets, the best choice is to just configure any deck.gl layers displaying that data to use the corresponding `coordinateSystem`.
 
-The meter offset system is quite performant, but uses a linearized projection that is only locally correct around an "anchor point". So, if your data spans large scales, you will not get the right results, but within 10km or so from the anchor point, the agreement should be quite good.
-
-
-## Combining Different Coordinate Systems
-
-Coordinate systems can be specified per layer, meaning that each layer can have data with positions specified in a "different" coordinate system. If some care is taken, they can all be rendered and drawn (correctly aligned) at the same time.
+Coordinate systems can be specified per layer, meaning that each layer can have data with positions specified in a different coordinate system. If configurated correctly, they can all be rendered aligned at the same time.
 
 An example of a use case where different coordinate systems are combined:
 
 * Render a layer showing 3D buildings could have vertices specified in longitudes and latitudes (simply because available building data sources tend to be encoded this way)
-* Render layer showing cars or pedestrians moving between the buildings with all positions specified using meter offsets from an anchor point somewhere in the city), because meter offsets are more natural encoding for this data.
+* Render layer showing cars or pedestrians moving between the buildings with all positions specified using meter offsets from an anchor point somewhere in the city (e.g. the position of a sensor, in longitude and latitude), because meter offsets are more natural encoding for this data.
 
 
-### About Geospatial Positions
+### Limitations of the Offset Systems
 
-In most deck.gl layers, every data object is expected to contain one or more `position`s (e.g. the center of a point, or the start and end of a line or arc, the vertices of a GeoJson polygon, etc). Positions are expected to be supplied as two or three element arrays ([x,y] or [x,y,z]).
-
-When used with a geospatial coordinate system mode, positions will be interpreted as representing points on (or possibly elevated over) a Web Mercator projected map
+Like most cartographic projections, the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection) is non-linear. The offset system trades accuracy for performance by approximating the projection with a linearized local projection system. When working on local scales, small cities etc, using meter offsets gives a [very high degree of precision](https://github.com/uber-common/viewport-mercator-project/blob/master/docs/articles/offset-accuracy.md#meter-offset-to-pixels). When visualizing data on large scales (countries and continents) results will only be correct if you specify longitude and latitude for every point.
 
 
-### About Meter Offsets and Distances
+## Transforming Positions and Dimensions
 
-When dealing with data sets that are not widely deck.gl supports working in local coordinates (meter offsets) relative to an anchor point (specified in longitude and latitude).
+Raw data do not always align cleanly with one of the provided coordinate systems. Here are some examples:
 
-Like all cartographic projections, the Web Meractor projection is non-linear, and when visualizing data on large scales (countries and large) results will only be correct if you specify longitude and latitude for every point. But when working on local scales, small cities etc, using meter offsets gives a very high degree of precision.
+- Instead of meters, offsets and dimensions may come in millimeters, feet or miles.
+- Instead of `x` aligning with map east and `y` aligning with map north, the offsets may be measured by a device with dynamic orientation. This is common in use cases such as a LIDAR scanner mounted on a moving vehicle.
 
-Distances represent either the distance between two points, or just a general sizes, like a radius, elevation(height) or similar. Distances are specified in meters in mercator mode, and simply in world coordinate deltas in linear mode).
+Again, converting raw data to match the coordinate system expectations can be very expensive if done on the CPU. This should be avoided whenever possible.
 
-Note: deck.gl always calculates a "meters per pixel" scale, allowing the application to specify positions and distances in meters. Whenever the `coordinateOrigin` prop is supplied to a layer (it is expected to contain a `[longitude, latitude]` array, it becomes a base reference point for this scale.
+Instead, in addition to specifying `coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS` and `coordinateOrigin`, a layer could also specify the `modelMatrix` prop as a 4x4 transformation matrix. The [math.gl](https://uber-web.github.io/math.gl/docs/api-reference/matrix4) library (a light wrapper of [gl-matrix](http://glmatrix.net/)) can be used for this purpose, which is already a dependency of deck.gl.
 
+The `modelMatrix` prop is most useful with the `METER_OFFSETS` and `IDENTITY` coordinate systems. It is usually the right solution for pre-processing (flipping, rotating, scaling etc) your data, since these operations will be done very performantly in the GPU. Note that these two coordinate systems are the only ones that are linear and uniform in all directions. Longitude and latitude based positions cannot be scaled/rotated/translated correctly with a 4x4 matrix.
 
-### The modelMatrix
-
-Note that deck.gl only supports **meter** offsets, with y axis aligned with map north. If you like to work in other units (feet, miles etc) or other orientations (y axis pointing south, or at an angle) you should define a `modelMatrix` and build a 4x4 transformation matrix (e.g. using the [math.gl](https://uber-web.github.io/math.gl/#/documentation/overview) library).
-
-The `modelMatrix` is particularly potent when used with meter offset coordinates (and non-geospatial coordinates, of course) and is usually the right solution for pre-processing (flipping, rotating, scaling etc) your data, since these operations will be done essentially for free in the GPU, rather than having to lock up your main thread for seconds after each load to transform your "big data" using JavaScript on the CPU.
+Also note that `modelMatrix` only applies to positions. To transform the dimensions for each object, most layers provide props such as `radiusScale`, `widthScale`, `sizeScale` etc. Check each layer's documentation for what's available.
 
 
-### About Viewports
+## Views and Projections
 
-Viewport parameters, such as zoom level, center point, pitch and bearing affect where things are drawn on the screen. The viewport is independent of the layers' coordinate systems (it is shared by all layers), so all layers will always pan zoom and tilt together, regardless of what coordinate system their positions are specified in.
+The same positions can be drawn differently to screen based on what projection method is used. deck.gl's **views** define how the camera should be set up to look at your data objects. View states, such as zoom level, center point, pitch and bearing affect where things are drawn on the screen.
 
-deck.gl provides Viewports both supporting the traditional third-person view of maps (looking down at a specified center point), as well as first-person cameras allowing you to position the viewer directly inside your visualization as if in a first person computer game.
+The view is independent of the layers' coordinate systems, and is shared by all layers. So all layers will always pan, zoom and tilt together, regardless of what coordinate system their positions are specified in.
 
+The default view used in deck.gl is the [MapView](/docs/api-reference/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). When working with non-geospatial datasets, the `IDENTITY` coordinate system needs to be used in combination with an alternative view. Read about deck.gl's view system in [Views and Projections](/docs/developer-guide/views.md).
 
-### Non-Cartographic Projection Mode
-
-For non-geospatial visualizations, deck.gl supports working in a standard linear
-coordinate system (i.e. cartographically unprojected) which makes it easy to use deck.gl layers without underlying maps.
-
-In this linear mode, positions are simply so called "world" coordinates, i.e. [x, y, z].
-
-This mode does not offer any synchronization with maps, the application simply specifies its view and projection matrices like in any 3D library. The application needs to manage the extents of positions in its data, and adjust view matrices accordingly.
-
-
-## Remarks
-
-* Note that although UTM (Universal Transverse Mercator) coordinates uses similar meter offsets as the deck.gl meters mode, be aware there are subtle differences, so be careful before making assumptions.

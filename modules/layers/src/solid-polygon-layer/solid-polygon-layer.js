@@ -30,6 +30,7 @@ import vsSide from './solid-polygon-layer-vertex-side.glsl';
 import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   filled: true,
@@ -51,7 +52,7 @@ const defaultProps = {
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // Optional settings for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 const ATTRIBUTE_TRANSITION = {
@@ -66,7 +67,7 @@ export default class SolidPolygonLayer extends Layer {
     return {
       vs,
       fs,
-      modules: [projectModule, 'lighting', 'picking']
+      modules: [projectModule, 'gouraud-lighting', 'picking']
     };
   }
 
@@ -212,17 +213,17 @@ export default class SolidPolygonLayer extends Layer {
       sideModel.setUniforms(renderUniforms);
       if (wireframe) {
         sideModel.setDrawMode(GL.LINE_STRIP);
-        sideModel.render({isWireframe: true});
+        sideModel.setUniforms({isWireframe: true}).draw();
       }
       if (filled) {
         sideModel.setDrawMode(GL.TRIANGLE_FAN);
-        sideModel.render({isWireframe: false});
+        sideModel.setUniforms({isWireframe: false}).draw();
       }
     }
 
     if (topModel) {
       topModel.setVertexCount(polygonTesselator.get('indices').length);
-      topModel.render(renderUniforms);
+      topModel.setUniforms(renderUniforms).draw();
     }
   }
 
@@ -286,12 +287,10 @@ export default class SolidPolygonLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(vsTop), {
           id: `${id}-top`,
-          geometry: new Geometry({
-            drawMode: GL.TRIANGLES,
-            attributes: {
-              vertexPositions: {size: 2, constant: true, value: new Float32Array([0, 1])}
-            }
-          }),
+          drawMode: GL.TRIANGLES,
+          attributes: {
+            vertexPositions: new Float32Array([0, 1])
+          },
           uniforms: {
             isWireframe: false,
             isSideVertex: false
@@ -388,9 +387,11 @@ export default class SolidPolygonLayer extends Layer {
 
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
-    const pickingColor = [];
-    attribute.value = this.state.polygonTesselator.get('pickingColors', attribute.value, index =>
-      this.encodePickingColor(index, pickingColor)
+    const {polygonTesselator} = this.state;
+    attribute.value = polygonTesselator.get(
+      'pickingColors',
+      attribute.value,
+      this.encodePickingColor
     );
   }
 

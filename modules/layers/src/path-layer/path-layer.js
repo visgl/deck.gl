@@ -20,7 +20,7 @@
 
 import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from 'luma.gl';
+import {Model, Geometry} from '@luma.gl/core';
 
 import PathTesselator from './path-tesselator';
 
@@ -31,6 +31,7 @@ import fs from './path-layer-fragment.glsl';
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
+  widthUnits: 'meters',
   widthScale: {type: 'number', min: 0, value: 1}, // stroke width in meters
   widthMinPixels: {type: 'number', min: 0, value: 0}, //  min stroke width in pixels
   widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max stroke width in pixels
@@ -144,25 +145,31 @@ export default class PathLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {viewport} = this.context;
     const {
       rounded,
       miterLimit,
+      widthUnits,
       widthScale,
       widthMinPixels,
       widthMaxPixels,
       dashJustified
     } = this.props;
 
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        jointType: Number(rounded),
-        alignMode: Number(dashJustified),
-        widthScale,
-        miterLimit,
-        widthMinPixels,
-        widthMaxPixels
-      })
-    );
+    const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          jointType: Number(rounded),
+          alignMode: Number(dashJustified),
+          widthScale: widthScale * widthMultiplier,
+          miterLimit,
+          widthMinPixels,
+          widthMaxPixels
+        })
+      )
+      .draw();
   }
 
   _getModel(gl) {
@@ -307,10 +314,7 @@ export default class PathLayer extends Layer {
   // Override the default picking colors calculation
   calculatePickingColors(attribute) {
     const {pathTesselator} = this.state;
-    const pickingColor = [];
-    attribute.value = pathTesselator.get('pickingColors', attribute.value, index =>
-      this.encodePickingColor(index, pickingColor)
-    );
+    attribute.value = pathTesselator.get('pickingColors', attribute.value, this.encodePickingColor);
   }
 
   clearPickingColor(color) {

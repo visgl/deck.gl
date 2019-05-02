@@ -146,9 +146,9 @@ export default class AttributeManager {
   //
   // @param {String} [clearRedrawFlags=false] - whether to clear the flag
   // @return {false|String} - reason a redraw is needed.
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
+  getNeedsRedraw(opts = {clearRedrawFlags: false}) {
     const redraw = this.needsRedraw;
-    this.needsRedraw = this.needsRedraw && !clearRedrawFlags;
+    this.needsRedraw = this.needsRedraw && !opts.clearRedrawFlags;
     return redraw && this.id;
   }
 
@@ -218,7 +218,7 @@ export default class AttributeManager {
 
     logFunctions.onUpdateStart({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
     if (this.stats) {
-      this.stats.timeStart('attribute updates', this.id);
+      this.stats.get('Update Attributes').timeStart();
     }
 
     for (const attributeName in this.attributes) {
@@ -233,26 +233,16 @@ export default class AttributeManager {
         this._updateAttribute({attribute, numInstances, data, props, context});
       }
 
-      if (attribute.userData.shaderAttributes) {
-        const shaderAttributes = attribute.userData.shaderAttributes;
-        for (const shaderAttributeName in shaderAttributes) {
-          shaderAttributes[shaderAttributeName].update({
-            buffer: attribute.buffer,
-            value: attribute.value,
-            constant: attribute.constant
-          });
-        }
-      }
-
       this.needsRedraw |= attribute.needsRedraw();
     }
 
     if (updated) {
       // Only initiate alloc/update (and logging) if actually needed
-      if (this.stats) {
-        this.stats.timeEnd('attribute updates', this.id);
-      }
       logFunctions.onUpdateEnd({level: LOG_START_END_PRIORITY, id: this.id, numInstances});
+    }
+
+    if (this.stats) {
+      this.stats.get('Update Attributes').timeEnd();
     }
 
     this.attributeTransitionManager.update({
@@ -264,9 +254,9 @@ export default class AttributeManager {
 
   // Update attribute transition to the current timestamp
   // Returns `true` if any transition is in progress
-  updateTransition() {
+  updateTransition(timestamp) {
     const {attributeTransitionManager} = this;
-    const transitionUpdated = attributeTransitionManager.setCurrentTime(Date.now());
+    const transitionUpdated = attributeTransitionManager.setCurrentTime(timestamp);
     this.needsRedraw = this.needsRedraw || transitionUpdated;
     return transitionUpdated;
   }
@@ -285,36 +275,19 @@ export default class AttributeManager {
    * This indicates which WebGLBuffers need to be updated
    * @return {Object} attributes - descriptors
    */
-  getChangedAttributes({clearChangedFlags = false}) {
+  getChangedAttributes(opts = {clearChangedFlags: false}) {
     const {attributes, attributeTransitionManager} = this;
 
     const changedAttributes = Object.assign({}, attributeTransitionManager.getAttributes());
-    const changedShaderAttributes = {};
 
     for (const attributeName in attributes) {
       const attribute = attributes[attributeName];
-      if (
-        attribute.needsRedraw({clearChangedFlags: true}) &&
-        !attributeTransitionManager.hasAttribute(attributeName)
-      ) {
+      if (attribute.needsRedraw(opts) && !attributeTransitionManager.hasAttribute(attributeName)) {
         changedAttributes[attributeName] = attribute;
       }
     }
 
-    for (const attributeName in changedAttributes) {
-      const attribute = changedAttributes[attributeName];
-
-      if (attribute.userData.shaderAttributes) {
-        const shaderAttributes = attribute.userData.shaderAttributes;
-        for (const shaderAttributeName in shaderAttributes) {
-          changedShaderAttributes[shaderAttributeName] = shaderAttributes[shaderAttributeName];
-        }
-      } else {
-        changedShaderAttributes[attributeName] = attribute;
-      }
-    }
-
-    return changedShaderAttributes;
+    return changedAttributes;
   }
 
   // PROTECTED METHODS - Only to be used by collaborating classes, not by apps
@@ -341,10 +314,6 @@ export default class AttributeManager {
       // Initialize the attribute descriptor, with WebGL and metadata fields
       const newAttribute = this._createAttribute(attributeName, attribute, extraProps);
 
-      if (attribute.shaderAttributes) {
-        this._addShaderAttributes(newAttribute, attribute.shaderAttributes, extraProps);
-      }
-
       newAttributes[attributeName] = newAttribute;
     }
 
@@ -354,23 +323,7 @@ export default class AttributeManager {
   }
   /* eslint-enable max-statements */
 
-  _addShaderAttributes(attribute, shaderAttributes, extraProps) {
-    attribute.userData.shaderAttributes = {};
-
-    for (const shaderAttributeName in shaderAttributes) {
-      const shaderAttribute = shaderAttributes[shaderAttributeName];
-
-      // Initialize the attribute descriptor, with WebGL and metadata fields
-      attribute.userData.shaderAttributes[shaderAttributeName] = this._createAttribute(
-        shaderAttributeName,
-        shaderAttribute,
-        extraProps,
-        true
-      );
-    }
-  }
-
-  _createAttribute(name, attribute, extraProps, forceNoAlloc = false) {
+  _createAttribute(name, attribute, extraProps) {
     const props = {
       id: name,
       // Luma fields
@@ -378,12 +331,8 @@ export default class AttributeManager {
       isIndexed: attribute.isIndexed || attribute.elements,
       size: (attribute.elements && 1) || attribute.size,
       value: attribute.value || null,
-      instanced: attribute.instanced || extraProps.instanced
+      divisor: attribute.instanced || extraProps.instanced ? 1 : attribute.divisor
     };
-
-    if (forceNoAlloc) {
-      props.noAlloc = true;
-    }
 
     return new Attribute(this.gl, Object.assign({}, attribute, props));
   }

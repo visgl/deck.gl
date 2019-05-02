@@ -1,7 +1,8 @@
 <!-- INJECT:"PathLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # PathLayer
@@ -9,7 +10,8 @@
 The Path Layer takes in lists of coordinate points and renders them as extruded lines with mitering.
 
 ```js
-import DeckGL, {PathLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PathLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -45,11 +47,45 @@ const App = ({data, viewport}) => {
 };
 ```
 
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {PathLayer} from '@deck.gl/layers';
+new PathLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.PathLayer({});
+```
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
+
+##### `widthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
 ##### `widthScale` (Number, optional)
 
@@ -61,13 +97,13 @@ The path width multiplier that multiplied to all paths.
 
 * Default: `0`
 
-The minimum path width in pixels.
+The minimum path width in pixels. This prop can be used to prevent the path from getting too thin when zoomed out.
 
 ##### `widthMaxPixels` (Number, optional)
 
 * Default: Number.MAX_SAFE_INTEGER
 
-The maximum path width in pixels.
+The maximum path width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
 ##### `rounded` (Boolean, optional)
 
@@ -96,7 +132,7 @@ Only effective if `getDashArray` is specified. If `true`, adjust gaps for the da
 
 ### Data Accessors
 
-##### `getPath` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPath` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.path`
 
@@ -115,7 +151,7 @@ new PathLayer({
 })
 ```
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default `[0, 0, 0, 255]`
 
@@ -124,16 +160,16 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
-##### `getWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
-The width of each path, in meters.
+The width of each path, in units specified by `widthUnits` (default meters).
 
 * If a number is provided, it is used as the width for all paths.
 * If a function is provided, it is called on each path to retrieve its width.
 
-##### `getDashArray` (Function|Array, optional)
+##### `getDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 * Default: `null`
 

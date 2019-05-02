@@ -28,6 +28,8 @@ attribute vec4 instancePositions;
 attribute vec4 instancePositions64Low;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
+attribute float instanceHeights;
+attribute float instanceTilts;
 
 uniform float numSegments;
 uniform float opacity;
@@ -56,7 +58,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
   vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
-  vec2 offset_clipspace = project_pixel_to_clipspace(offset_screenspace).xy;
+  vec2 offset_clipspace = project_pixel_size_to_clipspace(offset_screenspace);
 
   return offset_clipspace;
 }
@@ -66,11 +68,15 @@ float getSegmentRatio(float index) {
 }
 
 vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
-  float vertex_height = paraboloid(source, target, segmentRatio);
+  float vertexHeight = sqrt(max(0.0, paraboloid(source, target, segmentRatio))) * instanceHeights;
+
+  float tiltAngle = radians(instanceTilts);
+  vec2 tiltDirection = normalize(target - source);
+  vec2 tilt = vec2(-tiltDirection.y, tiltDirection.x) * vertexHeight * sin(tiltAngle);
 
   return vec3(
-    mix(source, target, segmentRatio),
-    sqrt(max(0.0, vertex_height))
+    mix(source, target, segmentRatio) + tilt,
+    vertexHeight * cos(tiltAngle)
   );
 }
 
@@ -87,18 +93,18 @@ void main(void) {
 
   vec3 currPos = getPos(source, target, segmentRatio);
   vec3 nextPos = getPos(source, target, nextSegmentRatio);
-  vec4 curr = project_to_clipspace(vec4(currPos, 1.0));
-  vec4 next = project_to_clipspace(vec4(nextPos, 1.0));
+  vec4 curr = project_common_position_to_clipspace(vec4(currPos, 1.0));
+  vec4 next = project_common_position_to_clipspace(vec4(nextPos, 1.0));
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
-  float width = clamp(
-    project_scale(instanceWidths * widthScale),
+  float widthPixels = clamp(
+    project_size_to_pixel(instanceWidths * widthScale),
     widthMinPixels, widthMaxPixels
   );
 
   // extrude
-  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, width);
+  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, widthPixels);
   gl_Position = curr + vec4(offset, 0.0, 0.0);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;

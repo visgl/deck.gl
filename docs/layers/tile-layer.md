@@ -1,61 +1,115 @@
+<!-- INJECT:"TileLayerDemo" -->
+
+<p class="badges">
+  <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
+</p>
+
 # TileLayer
 
 This TileLayer takes in a function `getTileData` that fetches tiles, and renders it in a GeoJsonLayer or with the layer returned in `renderSubLayers`.
 
 ```js
-import DeckGL from 'deck.gl';
-import {TileLayer} from '@deck.gl/experimental-layers';
+import DeckGL from '@deck.gl/react';
+import {TileLayer} from '@deck.gl/geo-layers';
 import {VectorTile} from '@mapbox/vector-tile';
 import Protobuf from 'pbf';
 
 export const App = ({viewport}) => {
-  function getTileData({x, y, z}) {
-    const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MAPBOX_TOKEN}`;
-    return fetch(mapSource)
-      .then(response => response.arrayBuffer())
-      .then(buffer => vectorTileToGeoJSON(buffer, x, y, z));
-  }
 
-  function vectorTileToGeoJSON(buffer, x, y, z) {
-    const tile = new VectorTile(new Protobuf(buffer));
-    const features = [];
-    for (const layerName in tile.layers) {
-      const vectorTileLayer = tile.layers[layerName];
-      for (let i = 0; i < vectorTileLayer.length; i++) {
-        const vectorTileFeature = vectorTileLayer.feature(i);
-        const feature = vectorTileFeature.toGeoJSON(x, y, z);
-        features.push(feature);
-      }
-    }
-    return features;
-  }
   const layer = new TileLayer({
     stroked: false,
+
     getLineColor: [192, 192, 192],
     getFillColor: [140, 170, 180],
-    getTileData
+
+    getLineWidth: f => {
+      if (f.properties.layer === 'transportation') {
+        switch (f.properties.class) {
+        case 'primary':
+          return 12;
+        case 'motorway':
+          return 16;
+        default:
+          return 6;
+        }
+      }
+      return 1;
+    },
+    lineWidthMinPixels: 1,
+
+    getTileData: ({x, y, z}) => {
+      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MapboxAccessToken}`;
+      return fetch(mapSource)
+        .then(response => response.arrayBuffer())
+        .then(buffer => {
+          const tile = new VectorTile(new Protobuf(buffer));
+          const features = [];
+          for (const layerName in tile.layers) {
+            const vectorTileLayer = tile.layers[layerName];
+            for (let i = 0; i < vectorTileLayer.length; i++) {
+              const vectorTileFeature = vectorTileLayer.feature(i);
+              const feature = vectorTileFeature.toGeoJSON(x, y, z);
+              features.push(feature);
+            }
+          }
+          return features;
+        });
+    }
   });
   return <DeckGL {...viewport} layers={[layer]} />;
 };
 ```
 
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/geo-layers
+```
+
+```js
+import {TileLayer} from '@deck.gl/geo-layers';
+new TileLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.TileLayer({});
+```
+
+
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with `renderSubLayer`, `getTileData`, `onGetTileDataError`, `onDataLoaded`, `maxZoom`, `minZoom` and `maxCacheSize`.
+Inherits from all [Base Layer](/docs/api-reference/layer.md) properties, along with the following props. 
 
-##### `maxZoom` (Number)
+##### `maxZoom` (Number|Null, optional)
 
-The maximum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is greater than `maxZoom`, we will fetch data at `maxZoom` instead of the current zoom level.
-
-- Default: `null`
-
-##### `minZoom` (Number)
-
-The minimum zoom level of the tiles from consumers' data. If provided, and the current map zoom level is smaller than `minZoom`, we will fetch data at `minZoom` instead of the current zoom level.
+Use tiles from this level when over-zoomed.
 
 - Default: `null`
 
-##### `maxCacheSize` (Number)
+##### `minZoom` (Number, optional)
+
+Hide tiles when under-zoomed.
+
+- Default: 0
+
+##### `maxCacheSize` (Number|Null, optional)
 
 The maximum cache size for a tile layer. If not defined, it is calculated using the number of tiles in the current viewport times constant 5 (5 is picked because it's a common zoom range).
 
@@ -63,26 +117,34 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 ### Render Options
 
-##### `onDataLoaded` (Function)
+##### `onViewportLoaded` (Function, optional)
 
-`onDataLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
+`onViewportLoaded` is a function that is called when all tiles in the current viewport are loaded. Data in the viewport is passed in as an array to this callback function.
 
-- Default: `onDataLoaded: (data) => null`
+- Default: `onViewportLoaded: (data) => null`
 
-##### `getTileData` (Function)
+##### `getTileData` (Function,  optional)
 
-`getTileData` is a function that takes `{x, y, z}` as parameters, and returns a promise, which resolves to data in tile z-x-y.
+`getTileData` given x, y, z indices of the tile, returns a Promise that resolves to the decoded tile data.
 
 - Default: `getTileData: ({x, y, z}) => Promise.resolve(null)`
 
-##### `onGetTileDataError` (Function)
+##### `onTileError` (Function, optional)
 
-`onGetTileDataError` called when a tile failed to load.
+`onTileError` called when a tile failed to load.
 
 - Default: `(err) => console.error(err)`
 
-##### `renderSubLayers` (Function)
+##### `renderSubLayers` (Function, optional))
 
-Renders a sub-layer with the `data` prop being the resolved value of `getTileData`, and other props that are passed in the `TileLayer`
+Renders one or an array of Layer instances with all the `TileLayer` props and the following props:
+
+* `data`: Resolved from `getTileData`
+* `tile`: An object containing tile index `x`, `y`, `z`, and `bbox` of the tile. `bbox` is an object of `{west, north, east, south}`.
 
 - Default: `props => new GeoJsonLayer(props)`
+
+# Source
+
+[modules/geo-layers/src/tile-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-layer)
+

@@ -40,7 +40,7 @@ myScatterplotLayer.setProps({
 
 ### Use a Layer from an Existing Deck's Layer Stack
 
-This option allows one to take full advantage of the `Deck` API, e.g. top-level props such as `pickingRadius`, `onLayerHover`, and adding/removing/updating layers in a reactive fashion by setting the `layers` array.
+This option allows one to take full advantage of the `Deck` API, e.g. top-level props such as `pickingRadius`, `onHover`, and adding/removing/updating layers in a reactive fashion by setting the `layers` array.
 
 ```js
 import {MapboxLayer} from '@deck.gl/mapbox';

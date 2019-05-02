@@ -23,19 +23,12 @@ import {PolygonLayer} from '@deck.gl/layers';
 
 import {getS2Polygon} from './s2-utils';
 
-function getDefaultProps() {
-  const defaultProps = {};
-  for (const prop in PolygonLayer.defaultProps) {
-    if (prop !== 'getPolygon') {
-      defaultProps[prop] = PolygonLayer.defaultProps[prop];
-    }
-  }
-
-  defaultProps.getS2Token = {type: 'accessor', value: f => f.token};
-  return defaultProps;
-}
-
-const defaultProps = getDefaultProps();
+const defaultProps = Object.assign(
+  {
+    getS2Token: {type: 'accessor', value: d => d.token}
+  },
+  PolygonLayer.defaultProps
+);
 
 export default class S2Layer extends CompositeLayer {
   renderLayers() {
@@ -49,6 +42,7 @@ export default class S2Layer extends CompositeLayer {
       wireframe,
       filled,
       stroked,
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -78,6 +72,7 @@ export default class S2Layer extends CompositeLayer {
         elevationScale,
 
         stroked,
+        lineWidthUnits,
         lineWidthScale,
         lineWidthMinPixels,
         lineWidthMaxPixels,

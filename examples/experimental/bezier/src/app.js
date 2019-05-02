@@ -7,6 +7,7 @@ import BezierGraphLayer from './bezier-graph-layer';
 import SAMPLE_GRAPH from './sample-graph.json';
 
 const INITIAL_VIEW_STATE = {
+  target: [0, 0, 0],
   zoom: 1
 };
 
@@ -19,7 +20,8 @@ export default class App extends Component {
         width="100%"
         height="100%"
         initialViewState={INITIAL_VIEW_STATE}
-        views={[new OrthographicView({controller: true})]}
+        controller={true}
+        views={new OrthographicView()}
         layers={[new BezierGraphLayer({data})]}
       />
     );

@@ -1,149 +1,73 @@
-import {Layer} from '@deck.gl/core';
+// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
 
-import {Model, Geometry} from 'luma.gl';
-
-import tripsVertex from './trips-layer-vertex.glsl';
-import tripsFragment from './trips-layer-fragment.glsl';
+import {PathLayer} from '@deck.gl/layers';
 
 const defaultProps = {
   trailLength: {type: 'number', value: 120, min: 0},
-  currentTime: {type: 'number', value: 0, min: 0},
-  getPath: {type: 'accessor', value: d => d.path},
-  getColor: {type: 'accessor', value: d => d.color}
+  currentTime: {type: 'number', value: 0, min: 0}
 };
 
-export default class TripsLayer extends Layer {
-  initializeState() {
-    const {gl} = this.context;
-    const attributeManager = this.getAttributeManager();
-
-    const model = this.getModel(gl);
-
-    attributeManager.add({
-      indices: {size: 1, update: this.calculateIndices, isIndexed: true},
-      positions: {size: 3, update: this.calculatePositions},
-      colors: {size: 3, accessor: 'getColor', update: this.calculateColors}
-    });
-
-    gl.getExtension('OES_element_index_uint');
-    this.setState({model});
+export default class TripsLayer extends PathLayer {
+  getShaders() {
+    const shaders = super.getShaders();
+    shaders.inject = {
+      // Timestamp of the vertex
+      'vs:#decl': `\
+uniform float trailLength;
+varying float vTime;
+`,
+      // Remove the z component (timestamp) from position
+      'vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);': 'pos.z = 0.0;',
+      // Apply a small shift to battle z-fighting
+      'vs:#main-end': `\
+float shiftZ = mod(instanceEndPositions.z, trailLength) * 1e-4;
+gl_Position.z += shiftZ;
+vTime = instanceStartPositions.z + (instanceEndPositions.z - instanceStartPositions.z) * vPathPosition.y / vPathLength;
+`,
+      'fs:#decl': `\
+uniform float trailLength;
+uniform float currentTime;
+varying float vTime;
+`,
+      // Drop the segments outside of the time window
+      'fs:#main-start': `\
+if(vTime > currentTime || vTime < currentTime - trailLength) {
+  discard;
+}
+`,
+      // Fade the color (currentTime - 100%, end of trail - 0%)
+      'gl_FragColor = vColor;': 'gl_FragColor.a *= 1.0 - (currentTime - vTime) / trailLength;'
+    };
+    return shaders;
   }
 
-  updateState({props, changeFlags: {dataChanged}}) {
-    if (dataChanged) {
-      this.countVertices(props.data);
-      this.state.attributeManager.invalidateAll();
-    }
-  }
-
-  getModel(gl) {
-    return new Model(gl, {
-      id: this.props.id,
-      vs: tripsVertex,
-      fs: tripsFragment,
-      geometry: new Geometry({
-        id: this.props.id,
-        drawMode: 'LINES'
-      }),
-      vertexCount: 0,
-      isIndexed: true,
-      // TODO-state-management: onBeforeRender can go to settings, onAfterRender, we should
-      // move this settings of corresponding draw.
-      onBeforeRender: () => {
-        gl.enable(gl.BLEND);
-        gl.enable(gl.POLYGON_OFFSET_FILL);
-        gl.polygonOffset(2.0, 1.0);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
-        gl.blendEquation(gl.FUNC_ADD);
-      },
-      onAfterRender: () => {
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-        gl.disable(gl.POLYGON_OFFSET_FILL);
-      }
-    });
-  }
-
-  countVertices(data) {
-    if (!data) {
-      return;
-    }
-
-    const {getPath} = this.props;
-    let vertexCount = 0;
-    const pathLengths = data.reduce((acc, d) => {
-      const l = getPath(d).length;
-      vertexCount += l;
-      return [...acc, l];
-    }, []);
-    this.setState({pathLengths, vertexCount});
-  }
-
-  draw({uniforms}) {
+  draw(params) {
     const {trailLength, currentTime} = this.props;
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        trailLength,
-        currentTime
-      })
-    );
-  }
 
-  calculateIndices(attribute) {
-    const {pathLengths, vertexCount} = this.state;
+    params.uniforms = Object.assign({}, params.uniforms, {
+      trailLength,
+      currentTime
+    });
 
-    const indicesCount = (vertexCount - pathLengths.length) * 2;
-    const indices = new Uint32Array(indicesCount);
-
-    let offset = 0;
-    let index = 0;
-    for (let i = 0; i < pathLengths.length; i++) {
-      const l = pathLengths[i];
-      indices[index++] = offset;
-      for (let j = 1; j < l - 1; j++) {
-        indices[index++] = j + offset;
-        indices[index++] = j + offset;
-      }
-      indices[index++] = offset + l - 1;
-      offset += l;
-    }
-    attribute.value = indices;
-    this.state.model.setVertexCount(indicesCount);
-  }
-
-  calculatePositions(attribute) {
-    const {data, getPath} = this.props;
-    const {vertexCount} = this.state;
-    const positions = new Float32Array(vertexCount * 3);
-
-    let index = 0;
-    for (let i = 0; i < data.length; i++) {
-      const path = getPath(data[i]);
-      for (let j = 0; j < path.length; j++) {
-        const pt = path[j];
-        positions[index++] = pt[0];
-        positions[index++] = pt[1];
-        positions[index++] = pt[2];
-      }
-    }
-    attribute.value = positions;
-  }
-
-  calculateColors(attribute) {
-    const {data, getColor} = this.props;
-    const {pathLengths, vertexCount} = this.state;
-    const colors = new Float32Array(vertexCount * 3);
-
-    let index = 0;
-    for (let i = 0; i < data.length; i++) {
-      const color = getColor(data[i]);
-      const l = pathLengths[i];
-      for (let j = 0; j < l; j++) {
-        colors[index++] = color[0];
-        colors[index++] = color[1];
-        colors[index++] = color[2];
-      }
-    }
-    attribute.value = colors;
+    super.draw(params);
   }
 }
 

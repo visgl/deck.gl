@@ -1,18 +1,24 @@
 # Viewport Class
 
+> Read the article detailing deck.gl's [Views and Projections](/docs/developer-guide/views.md) system.
+
 A deck.gl `Viewport` is essentially a geospatially enabled camera, and combines a number of responsibilities, which can project and unproject 3D coordinates to the screen.
 
-For more information:
+`Viewport` classes are focused on mathematical operations such as coordinate projection/unprojection, and calculation of `view` and `projection` matrices and other uniforms needed by the WebGL vertex shaders. The basic `Viewport` class is a generic geospatially enabled version of the typical 3D "camera" class you would find in most 3D/WebGL/OpenGL library. 
 
-* See the deck.gl [Viewports](/docs/developer-guide/viewports.md) article.
-* See the math.gl article on [View and Projection Matrices](https://uber-web.github.io/math.gl/#/documentation/articles/view-and-projection-matrices)
+While the `Viewport` class can certainly be used directly if you need and are able to calculate your own projection matrices, you typically do not directly create `Viewport` instances. Instead, `Viewport` classes are created using the View](/docs/api-reference/view.md) class descriptors and the current `viewState`.
+
+## Overview of Viewport Classes
+
+| Viewport Class        | Description |
+| ---                   | ---         |
+| [`Viewport`](/docs/api-reference/viewport.md)            | The base viewport has to be supplied view and projection matrices. It is typically only instantiated directly if the application needs to work with viewports that have been supplied from external sources, such as the `WebVR` API. |
+| [`WebMercatorViewport`](/docs/api-reference/web-mercator-viewport.md) | While all `Viewport` subclasses are geospatially enabled, this class renders from a perspective that matches a typical top-down map and is designed to synchronize perfectly with a mapbox-gl base map (even in 3D enabled perspective mode).
 
 
 ## Usage
 
-The `Viewport` class is normally not instantiated directly. The [`View`](/docs/api-reference/view.md) class is more commonly used by applications. Instead, internally deck.gl automatically creates `Viewport`s from `View`s when needed.
-
-However, in cases where the application wants to use "externally" generated view or projection matrices (e.g. when using the WebVR API), the `Viewport` class can be useful.
+The `Viewport` class is normally not instantiated directly. The [`View`](/docs/api-reference/view.md) class is more commonly used by applications. deck.gl automatically creates `Viewport`s from `View`s and `viewState` when needed, using the `View.makeViewport` method.
 
 
 ## Constructor
@@ -23,39 +29,37 @@ new Viewport({width: 500, height: 500, viewMatrix, projectionMatrix, ...});
 
 General Parameters
 
-* `x`=`0` (`Number`) - x position of viewport top-left corner
-* `y`=`0` (`Number`) - y position of viewport top-left corner
-* `width`=`1` (`Number`) - Width of viewport
-* `height`=`1` (`Number`) - Height of viewport
-* `focalDistance`=`1` - Distance at which pixel sized geometry is one pixel
+* `x` (`Number`, optional) - x position of viewport top-left corner. Default `0`.
+* `y` (`Number`, optional) - y position of viewport top-left corner. Default `0`.
+* `width` (`Number`) - Width of viewport. Default `1`.
+* `height` (`Number`) - Height of viewport. Default `1`.
 
 View Matrix Parameters
 
-* `viewMatrix`= (`Array[16]`, optional) - View matrix. Defaults to the identity matrix.
+* `viewMatrix` (`Array[16]`, optional) - 4x4 view matrix. Defaults to the identity matrix.
 
 Position and Geospatial Anchor Options (Optional)
 
-* `latitude` (`Number`, optional) - Center of viewport on map (alternative to center).
-* `longitude` (`Number`, optional) - Center of viewport on map (alternative to center).
+* `latitude` (`Number`, optional) - Center of viewport on map (alternative to center). Must be provided if constructing a geospatial viewport.
+* `longitude` (`Number`, optional) - Center of viewport on map (alternative to center). Must be provided if constructing a geospatial viewport.
 * `zoom` (`Number`, optional) - [zoom level](https://wiki.openstreetmap.org/wiki/Zoom_levels) .
 * `focalDistance` (`Number`, optional) - modifier of viewport scale if `zoom` is not supplied. Corresponds to the number of pixels per meter. Default to `1`.
 
-* `position` - Position of viewport camera
-* `modelMatrix` - Optional model matrix applied to position
+* `position` (`Array[3]`, optional) - Position of viewport camera. Default `[0, 0, 0]`.
+* `modelMatrix` (`Array[16]`, optional) - Optional 4x4 model matrix applied to position.
 
 Projection Matrix Parameters.
 
-* `projectionMatrix`= (`Array[16]`, optional) - Projection matrix.
+* `projectionMatrix` (`Array[16]`, optional) - 4x4 projection matrix.
 
 If `projectionMatrix` is not supplied, an attempt is made to build from the remaining parameters. Otherwise the remaining parameters will be ignored.
 
-* `fovyDegrees`=`75` (`Number`) - Field of view covered by camera, in the perspective case.
-* `aspect`= (`Number`) - Aspect ratio. Defaults to the Viewport's `width/height` ratio.
-* `near`=`0.1` (`Number`) - Distance of near clipping plane.
-* `far`=`1000` (`Number`) - Distance of far clipping plane.
-* `orthographic`=`false` (`Boolean`) - whether to create an orthographic or perspective projection matrix. Default is perspective projection.
-* `focalDistance`=`1` (`Number`) - (orthographic projections only) The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Note: lso used for pixel scale identity distance above.
-* `orthographicFocalDistance` (`Number`) - (orthographic projections only) Can be used to specify different values for pixel scale focal distance and orthographic focal distance.
+* `fovy` (`Number`, optional) - Field of view covered by camera, in the perspective case. In degrees. Default `75`.
+* `aspect` (`Number`, optional) - Aspect ratio. Defaults to the Viewport's `width/height` ratio.
+* `near` (`Number`, optional) - Distance of near clipping plane. Default `0.1`.
+* `far` (`Number`, optional) - Distance of far clipping plane. Default `1000`.
+* `orthographic` (`Boolean`, optional) - whether to create an orthographic or perspective projection matrix. Default `false` (perspective projection).
+* `orthographicFocalDistance` (`Number`, optional) - Used by orthographic projections only. The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Default `1`.
 
 
 ## Methods
@@ -153,4 +157,4 @@ Returns:
 
 ## Source
 
-[modules/core/src/core/viewports/viewport.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/viewports/viewport.js)
+[modules/core/src/viewports/viewport.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/viewports/viewport.js)

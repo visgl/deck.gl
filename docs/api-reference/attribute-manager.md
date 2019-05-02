@@ -11,7 +11,7 @@ Summary:
 * auto updates attributes with registered updater functions
 * allows overriding with application supplied buffers
 
-For more information consult the [Attribute Management](/docs/developer-guide/attribute-management.md) article.
+For more information consult the [Attribute Management](/docs/developer-guide/custom-layers/attribute-management.md) article.
 
 
 ## Static Methods
@@ -141,4 +141,4 @@ Notes:
 
 ## Source
 
-[modules/core/src/core/lib/attribute-manager.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/attribute-manager.js)
+[modules/core/src/lib/attribute-manager.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/attribute-manager.js)

@@ -28,7 +28,7 @@ import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
 import GL from '@luma.gl/constants';
-import {withParameters} from 'luma.gl';
+import {withParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 
@@ -122,8 +122,8 @@ export default class Layer extends Component {
   }
 
   // Checks state of attributes and model
-  getNeedsRedraw({clearRedrawFlags = false} = {}) {
-    return this._getNeedsRedraw(clearRedrawFlags);
+  getNeedsRedraw(opts = {clearRedrawFlags: false}) {
+    return this._getNeedsRedraw(opts);
   }
 
   // Checks if layer attributes needs updating
@@ -404,7 +404,7 @@ export default class Layer extends Component {
   updateTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.updateTransition();
+      attributeManager.updateTransition(this.context.time);
     }
   }
 
@@ -447,18 +447,15 @@ export default class Layer extends Component {
   }
 
   _setModelAttributes(model, changedAttributes) {
-    if (model.userData.excludeAttributes) {
-      const filteredAttributes = {};
-      const excludeAttributes = model.userData.excludeAttributes;
-      for (const attributeName in changedAttributes) {
-        if (!excludeAttributes[attributeName]) {
-          filteredAttributes[attributeName] = changedAttributes[attributeName];
-        }
+    const shaderAttributes = {};
+    const excludeAttributes = model.userData.excludeAttributes || {};
+    for (const attributeName in changedAttributes) {
+      if (!excludeAttributes[attributeName]) {
+        Object.assign(shaderAttributes, changedAttributes[attributeName].getShaderAttributes());
       }
-      model.setAttributes(filteredAttributes);
-    } else {
-      model.setAttributes(changedAttributes);
     }
+
+    model.setAttributes(shaderAttributes);
   }
 
   // Sets the specified instanced picking color to null picking color. Used for multi picking.
@@ -564,7 +561,6 @@ export default class Layer extends Component {
     if (model) {
       model.id = this.props.id;
       model.program.id = `${this.props.id}-program`;
-      model.geometry.id = `${this.props.id}-geometry`;
     }
   }
 
@@ -789,7 +785,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   }
 
   // Checks state of attributes and model
-  _getNeedsRedraw(clearRedrawFlags) {
+  _getNeedsRedraw(opts) {
     // this method may be called by the render loop as soon a the layer
     // has been created, so guard against uninitialized state
     if (!this.internalState) {
@@ -798,28 +794,12 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
     let redraw = false;
     redraw = redraw || (this.internalState.needsRedraw && this.id);
-    this.internalState.needsRedraw = this.internalState.needsRedraw && !clearRedrawFlags;
+    this.internalState.needsRedraw = this.internalState.needsRedraw && !opts.clearRedrawFlags;
 
     // TODO - is attribute manager needed? - Model should be enough.
     const attributeManager = this.getAttributeManager();
-    const attributeManagerNeedsRedraw =
-      attributeManager && attributeManager.getNeedsRedraw({clearRedrawFlags});
-    const modelNeedsRedraw = this._modelNeedsRedraw(clearRedrawFlags);
-    redraw = redraw || attributeManagerNeedsRedraw || modelNeedsRedraw;
-
-    return redraw;
-  }
-
-  _modelNeedsRedraw(clearRedrawFlags) {
-    let redraw = false;
-
-    for (const model of this.getModels()) {
-      let modelNeedsRedraw = model.getNeedsRedraw({clearRedrawFlags});
-      if (modelNeedsRedraw && typeof modelNeedsRedraw !== 'string') {
-        modelNeedsRedraw = `model ${model.id}`;
-      }
-      redraw = redraw || modelNeedsRedraw;
-    }
+    const attributeManagerNeedsRedraw = attributeManager && attributeManager.getNeedsRedraw(opts);
+    redraw = redraw || attributeManagerNeedsRedraw;
 
     return redraw;
   }

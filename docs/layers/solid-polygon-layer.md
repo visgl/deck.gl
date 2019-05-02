@@ -1,6 +1,7 @@
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # SolidPolygonLayer
@@ -8,9 +9,10 @@
 The SolidPolygon Layer renders filled polygons.
 
 ```js
-import DeckGL, {_SolidPolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
-new _SolidPolygonLayer({
+new SolidPolygonLayer({
   data: [
     [[0, 0], [0, 1], [1, 1], [1, 0], [0, 0]],   // Simple polygon (array of coords)
     [                                           // Complex polygon with one hole
@@ -22,6 +24,35 @@ new _SolidPolygonLayer({
   getColor: [255, 0, 0],
   extruded: false
 });
+```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {SolidPolygonLayer} from '@deck.gl/layers';
+new SolidPolygonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.SolidPolygonLayer({});
 ```
 
 ## Properties
@@ -73,14 +104,16 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 * Wireframe and solid extrusions are exclusive, you'll need to create two layers
   with the same data if you want a combined rendering effect.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for extruded polygons.
-Be aware that this prop will likely be changed in a future version of deck.gl.
+* Default: `new PhongMaterial()`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
+Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
 
-##### `getPolygon` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPolygon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.polygon`
 
@@ -96,7 +129,7 @@ A polygon can be one of the following formats:
   - `holeIndices` (Array) - the starting index of each hole in the `positions` array. The first ring is the exterior boundary and the successive rings are the holes.
 
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -105,7 +138,7 @@ The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component 
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -115,7 +148,7 @@ Only applies if `extruded: true`.
 * If an array is provided, it is used as the stroke color for all polygons.
 * If a function is provided, it is called on each object to retrieve its stroke color.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 

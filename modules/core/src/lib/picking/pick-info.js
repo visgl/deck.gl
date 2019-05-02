@@ -87,6 +87,9 @@ export function processPickInfo({
   // Please be very careful when changing this pattern
   const infos = new Map();
 
+  // Make sure infos always contain something even if no layer is affected
+  infos.set(null, baseInfo);
+
   affectedLayers.forEach(layer => {
     let info = Object.assign({}, baseInfo);
 
@@ -108,12 +111,16 @@ export function processPickInfo({
       infos.set(info.layer.id, info);
     }
 
-    const pickingSelectedColor =
-      layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
+    if (mode === 'hover') {
+      const pickingSelectedColor =
+        layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
 
-    layer.setModuleParameters({
-      pickingSelectedColor
-    });
+      layer.setModuleParameters({
+        pickingSelectedColor
+      });
+      // TODO this needsRedraw logic should be fixed in layer
+      layer.setNeedsRedraw();
+    }
   });
 
   return infos;

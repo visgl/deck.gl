@@ -16,11 +16,14 @@ import {
   IconLayer,
   GeoJsonLayer,
   GridCellLayer,
-  HexagonCellLayer,
+  ColumnLayer,
   PointCloudLayer,
   TextLayer
 } from '@deck.gl/layers';
 import {ContourLayer, ScreenGridLayer, GridLayer, HexagonLayer} from '@deck.gl/aggregation-layers';
+import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
+
+import * as h3 from 'h3-js';
 
 const IS_HEADLESS = Boolean(window.browserTestDriver_isHeadless);
 
@@ -115,21 +118,17 @@ export const TEST_CASES = [
     views: [
       new OrbitView({
         fov: 30,
-        near: 0.001,
-        far: 100
+        orbitAxis: 'Y'
       })
     ],
     viewState: {
-      lookAt: [0, 0, 0],
-      distance: 1,
       rotationX: 15,
-      rotationOrbit: 30,
-      orbitAxis: 'Y'
+      rotationOrbit: 30
     },
     layers: [
       new PointCloudLayer({
         id: 'pointcloud-identity',
-        data: [{position: [0, 0.2, 0]}, {position: [-0.2, -0.2, 0]}, {position: [0.2, -0.2, 0]}],
+        data: [{position: [0, 100, 0]}, {position: [-100, -100, 0]}, {position: [100, -100, 0]}],
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
@@ -155,8 +154,6 @@ export const TEST_CASES = [
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         getPosition: d => d,
         cellSizePixels: 40,
-        minColor: [0, 0, 0, 0],
-        maxColor: [0, 255, 0, 255],
         pickable: false
       })
     ],
@@ -437,7 +434,8 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat',
         data: dataSamples.routes,
-        strokeWidth: 2,
+        getWidth: 0,
+        widthMinPixels: 2,
         getSourcePosition: d => d.START,
         getTargetPosition: d => d.END,
         getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
@@ -459,7 +457,8 @@ export const TEST_CASES = [
       new LineLayer({
         id: 'line-lnglat-64',
         data: dataSamples.routes,
-        strokeWidth: 2,
+        getWidth: 0,
+        widthMinPixels: 2,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getSourcePosition: d => d.START,
@@ -504,6 +503,40 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
+    name: 'icon-lnglat-facing-up',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 60,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat',
+        data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        billboard: false,
+        iconMapping: dataSamples.iconAtlas,
+        sizeScale: 12,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
+    goldenImage: './test/render/golden-images/icon-lnglat-facing-up.png'
+  },
+  {
     name: 'icon-lnglat-64',
     viewState: {
       latitude: 37.751537058389985,
@@ -531,6 +564,77 @@ export const TEST_CASES = [
         pickable: true
       })
     ],
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
+    name: 'icon-lnglat-auto',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-lnglat-auto',
+        data: dataSamples.points,
+        sizeScale: 12,
+        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+        fp64: true,
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => {
+          if (d.PLACEMENT === 'SW') {
+            return Object.assign({}, dataSamples.iconAtlas.marker, {
+              url: './test/render/icon-marker.png'
+            });
+          }
+          return Object.assign({}, dataSamples.iconAtlas['marker-warning'], {
+            url: './test/render/icon-warning.png'
+          });
+        },
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/icon-lnglat.png'
+  },
+  {
+    name: 'icon-meters',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    // rendering times
+    renderingTimes: 2,
+    layers: [
+      new IconLayer({
+        id: 'icon-meters',
+        data: dataSamples.points,
+        iconAtlas: ICON_ATLAS,
+        iconMapping: dataSamples.iconAtlas,
+        sizeScale: 256,
+        sizeUnits: 'meters',
+        getPosition: d => d.COORDINATES,
+        getColor: d => [64, 64, 72],
+        getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
+        getSize: d => (d.RACKS > 2 ? 2 : 1),
+        opacity: 0.8,
+        pickable: true
+      })
+    ],
+    onAfterRender: ({layers, done}) => {
+      if (layers[0].state.iconManager.getTexture()) {
+        done();
+      }
+    },
     goldenImage: './test/render/golden-images/icon-lnglat.png'
   },
   {
@@ -674,28 +778,6 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/grid-lnglat.png'
   },
   {
-    name: 'screengrid-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new ScreenGridLayer({
-        id: 'screengrid-lnglat',
-        data: dataSamples.points,
-        getPosition: d => d.COORDINATES,
-        cellSizePixels: 40,
-        minColor: [0, 0, 80, 0],
-        maxColor: [100, 255, 0, 128],
-        pickable: false
-      })
-    ],
-    goldenImage: './test/render/golden-images/screengrid-lnglat.png'
-  },
-  {
     name: 'screengrid-lnglat-cpu-aggregation',
     viewState: {
       latitude: 37.751537058389985,
@@ -710,13 +792,11 @@ export const TEST_CASES = [
         data: dataSamples.points,
         getPosition: d => d.COORDINATES,
         cellSizePixels: 40,
-        minColor: [0, 0, 80, 0],
-        maxColor: [100, 255, 0, 128],
         pickable: false,
         gpuAggregation: false
       })
     ],
-    goldenImage: './test/render/golden-images/screengrid-lnglat.png'
+    goldenImage: './test/render/golden-images/screengrid-lnglat-colorRange.png'
   },
   {
     name: 'screengrid-lnglat-colorRange',
@@ -739,7 +819,7 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/screengrid-lnglat-colorRange.png'
   },
   {
-    name: 'hexagoncell-lnglat',
+    name: 'column-lnglat',
     viewState: {
       latitude: 37.751537058389985,
       longitude: -122.42694203247012,
@@ -749,45 +829,21 @@ export const TEST_CASES = [
       orthographic: true
     },
     layers: [
-      new HexagonCellLayer({
-        id: 'hexagoncell-lnglat',
+      new ColumnLayer({
+        id: 'column-lnglat',
         data: dataSamples.hexagons,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
+        radius: 250,
+        angle: Math.PI / 2,
         coverage: 1,
         extruded: true,
         pickable: true,
         opacity: 1,
+        getPosition: h => h.centroid,
         getColor: h => [48, 128, h.value * 255, 255],
         getElevation: h => h.value * 5000
       })
     ],
-    goldenImage: './test/render/golden-images/hexagoncell-lnglat.png'
-  },
-  {
-    name: 'hexagoncell-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 30,
-      bearing: 0
-    },
-    layers: [
-      new HexagonCellLayer({
-        id: 'hexagoncell-lnglat-64',
-        data: dataSamples.hexagons,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        hexagonVertices: dataSamples.hexagons[0].vertices,
-        coverage: 1,
-        extruded: true,
-        pickable: true,
-        opacity: 1,
-        getColor: h => [48, 128, h.value * 255, 255],
-        getElevation: h => h.value * 5000
-      })
-    ],
-    goldenImage: './test/render/golden-images/hexagoncell-lnglat-64.png'
+    goldenImage: './test/render/golden-images/column-lnglat.png'
   },
   {
     name: 'hexagon-lnglat',
@@ -984,6 +1040,34 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
+    name: 'text-layer-meters',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 50),
+        fontFamily: 'Arial',
+        getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 21,
+        sizeUnits: 'meters',
+        getTextAnchor: x => 'start',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer.png'
+  },
+  {
     name: 'gpu-grid-lnglat',
     viewState: {
       latitude: 37.751537058389985,
@@ -1106,5 +1190,63 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/contour-isobands-lnglat.png'
+  },
+  {
+    name: 'h3-hexagon-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 30,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('882830829bfffff', 4),
+        getHexagon: d => d,
+        getColor: (d, {index}) => [255, index * 5, 0],
+        getElevation: (d, {index}) => index * 100
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon.png'
+  },
+  {
+    name: 'h3-hexagon-layer-high-precision',
+    viewState: {
+      latitude: 50.103,
+      longitude: -143.478,
+      zoom: 13,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('891c0000003ffff', 4),
+        getHexagon: d => d,
+        getColor: (d, {index}) => [255, index * 5, 0],
+        getElevation: (d, {index}) => index * 10
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon-high-precision.png'
+  },
+  {
+    name: 'h3-cluster-layer',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 11,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3ClusterLayer({
+        data: ['882830829bfffff'],
+        getHexagons: d => h3.kRing(d, 6),
+        getLineWidth: 100,
+        stroked: true,
+        filled: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-cluster.png'
   }
 ];

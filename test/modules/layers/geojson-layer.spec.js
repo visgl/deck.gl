@@ -19,42 +19,32 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {GeoJsonLayer} from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
-const data = FIXTURES.choropleths;
+import * as FIXTURES from 'deck.gl-test/data';
 
 test('GeoJsonLayer#tests', t => {
-  testLayer({
+  const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
-    userData: t,
-    testCases: [
-      {props: {data: []}},
-      {props: {data: null}},
-      {props: {data}},
-      {props: {data, pickable: true}},
-      {
-        props: {
-          data: Object.assign({}, data)
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.ok(layer.state.features !== oldState.features, 'should update features');
-        }
-      },
-      {
-        updateProps: {
-          lineWidthScale: 3
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          const subLayers = layer.renderLayers().filter(Boolean);
-          t.equal(subLayers.length, 2, 'should render 2 subLayers');
-        }
-      }
-    ]
+    sampleProps: {
+      data: FIXTURES.choropleths
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      t.ok(layer.state.features, 'should update features');
+      const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
+      t.is(
+        subLayers.length,
+        !hasData ? 0 : layer.props.stroked ? 2 : 1,
+        'correct number of sublayers'
+      );
+    }
   });
+
+  testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
+
   t.end();
 });

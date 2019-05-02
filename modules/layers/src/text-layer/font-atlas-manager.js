@@ -1,6 +1,6 @@
 /* global document */
 
-import {Texture2D} from 'luma.gl';
+import {Texture2D} from '@luma.gl/core';
 import TinySDF from '@mapbox/tiny-sdf';
 import GL from '@luma.gl/constants';
 
@@ -124,6 +124,10 @@ export default class FontAtlasManager {
     // key is used for caching generated fontAtlas
     this._key = null;
     this._texture = new Texture2D(this.gl);
+  }
+
+  finalize() {
+    this._texture.delete();
   }
 
   get texture() {

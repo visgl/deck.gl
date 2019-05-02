@@ -20,26 +20,32 @@
 
 import React, {createElement} from 'react';
 import PropTypes from 'prop-types';
-import {Deck, View, log} from '@deck.gl/core';
+import {Deck, experimental} from '@deck.gl/core';
+const {memoize} = experimental;
+
 import extractJSXLayers from './utils/extract-jsx-layers';
-import {inheritsFrom} from './utils/inherits-from';
-import evaluateChildren from './utils/evaluate-children';
+import positionChildrenUnderViews from './utils/position-children-under-views';
 import autobind from './utils/autobind';
 
 const propTypes = Deck.getPropTypes(PropTypes);
 
 const defaultProps = Deck.defaultProps;
 
-export default class DeckGL extends React.PureComponent {
+export default class DeckGL extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      width: 0,
-      height: 0,
-      viewState: props.initialViewState
-    };
-    this.children = [];
+
+    this.viewports = null;
+    this.children = null;
+
+    // The redraw flag of deck
+    this._needsRedraw = null;
+
     autobind(this);
+
+    // Memoized functions
+    this._extractJSXLayers = memoize(extractJSXLayers);
+    this._positionChildrenUnderViews = memoize(positionChildrenUnderViews);
   }
 
   componentDidMount() {
@@ -52,14 +58,42 @@ export default class DeckGL extends React.PureComponent {
       this.deck ||
       new DeckClass(
         Object.assign({}, this.props, {
-          initialViewState: null,
           canvas: this.deckCanvas,
-          viewState: this._getViewState(this.props),
-          // Note: If Deck event handling change size or view state, it calls onResize to update
-          onViewStateChange: this._onViewStateChange,
-          onResize: this._onResize
+          // The Deck's animation loop is independent from React's render cycle, causing potential
+          // synchronization issues. We provide this custom render function to make sure that React
+          // and Deck update on the same schedule.
+          _customRender: this._customRender
         })
       );
+    this._updateFromProps(this.props);
+  }
+
+  // This method checks if React needs to call `render`.
+  // Props changes may lead to 3 types of updates:
+  // 1. Only the WebGL context - updated in Deck's render cycle (next animation frame)
+  // 2. Only the DOM - updated in React's lifecycle (now)
+  // 3. Both the WebGL context and the DOM - defer React rerender to next animation frame just
+  //    before Deck redraw to ensure perfect synchronization & avoid excessive redraw
+  //    This is because multiple changes may happen to Deck between two frames e.g. transition
+  shouldComponentUpdate(nextProps) {
+    // Update Deck's props. If Deck needs redraw, this will trigger a call to `_customRender` in
+    // the next animation frame.
+    this._updateFromProps(nextProps);
+
+    // If the child components have changed, React needs to rerender (case 2 or 3)
+    const childrenChanged = this.children !== this._parseJSX(nextProps).children;
+    // If the views have changed, both React and WebGL context need update (case 3)
+    const viewsChanged = this.deck.viewManager && this.deck.viewManager.needsRedraw();
+
+    // Only call `render` right away in case 2
+    return childrenChanged && !viewsChanged;
+  }
+
+  componentDidUpdate() {
+    // render has just been called. The children are positioned based on the current view state.
+    // Redraw Deck canvas immediately, if necessary, using the current view state, so that it
+    // matches the child components.
+    this._redrawDeck();
   }
 
   componentWillUnmount() {
@@ -80,143 +114,69 @@ export default class DeckGL extends React.PureComponent {
     return this.deck.pickObjects({x, y, width, height, layerIds});
   }
 
-  queryObject(opts) {
-    log.removed('queryObject', 'pickObject')();
-  }
-
-  queryVisibleObjects(opts) {
-    log.removed('queryVisibleObjects', 'pickObjects')();
-  }
-
   // Callbacks
-
-  // Forward callback and then call forceUpdate to guarantee that sub components update
-  _onResize(params) {
-    this.setState(params);
-    this.props.onResize(params);
+  _redrawDeck() {
+    if (this._needsRedraw) {
+      // Only redraw it we have received a dirty flag
+      this.deck._drawLayers(this._needsRedraw);
+      this._needsRedraw = null;
+    }
   }
 
-  // Forward callback and then call forceUpdate to guarantee that sub components update
-  _onViewStateChange(params) {
-    // Let app know that view state is changing, and give it a chance to change it
-    const viewState = this.props.onViewStateChange(params) || params.viewState;
+  _customRender(redrawReason) {
+    // Save the dirty flag for later
+    this._needsRedraw = redrawReason;
 
-    // If initialViewState was set on creation, auto track position
-    if (this.state.viewState) {
-      this.setState({
-        viewState: Object.assign({}, this.state.viewState, {
-          [params.viewId]: viewState
-        })
-      });
+    // Viewport/view state is passed to child components as props.
+    // If they have changed, we need to trigger a React rerender to update children props.
+    const viewports = this.deck.viewManager.getViewports();
+    if (viewports !== this.viewports) {
+      // Viewports have changed, update children props first.
+      // This will delay the Deck canvas redraw till after React update (in componentDidUpdate)
+      // so that the canvas does not get rendered before the child components update.
+      this.forceUpdate();
+    } else {
+      this._redrawDeck();
     }
   }
 
   // Private Helpers
 
+  _parseJSX(props) {
+    return this._extractJSXLayers({
+      layers: props.layers,
+      views: props.views,
+      children: props.children
+    });
+  }
+
   // 1. Extract any JSX layers from the react children
   // 2. Handle any backwards compatiblity props for React layer
-  // Needs to be called both from initial mount, and when new props arrive
-  _updateFromProps(nextProps) {
-    if (!this.deck) {
-      return;
-    }
-
-    if (nextProps.viewports || nextProps.viewport) {
-      log.removed('DeckGL.viewport(s)', 'DeckGL.views')();
-    }
-
+  // Needs to be called both from initial mount, and when new props are received
+  _updateFromProps(props) {
     // extract any deck.gl layers masquerading as react elements from props.children
-    const {layers, views, children} = extractJSXLayers(nextProps);
-
-    const deckProps = Object.assign({}, nextProps, {
-      onViewStateChange: this._onViewStateChange,
-      onResize: this._onResize,
+    const {layers, views} = this._parseJSX(props);
+    const deckProps = Object.assign({}, props, {
       layers,
       views
     });
 
-    const viewState = this._getViewState(nextProps);
-    if (viewState) {
-      deckProps.viewState = viewState;
-    }
-
     this.deck.setProps(deckProps);
-
-    this.children = children;
-  }
-
-  // Supports old "geospatial view state as separate props" style (React only!)
-  _getViewState(props) {
-    if (!props.viewState && 'latitude' in props && 'longitude' in props && 'zoom' in props) {
-      if ('maxZoom' in props || 'minZoom' in props) {
-        log.removed('maxZoom/minZoom', 'viewState');
-      }
-      const {latitude, longitude, zoom, pitch = 0, bearing = 0} = props;
-      return {latitude, longitude, zoom, pitch, bearing};
-    }
-    return props.viewState || this.state.viewState;
-  }
-
-  // Iterate over views and reposition children associated with views
-  // TODO - Can we supply a similar function for the non-React case?
-  _positionChildrenUnderViews(children) {
-    const {viewManager} = this.deck || {};
-
-    if (!viewManager || !viewManager.views.length) {
-      return [];
-    }
-
-    const defaultViewId = viewManager.views[0].id;
-
-    return children.map((child, i) => {
-      if (child.props.viewportId) {
-        log.removed('viewportId', '<View>')();
-      }
-      if (child.props.viewId) {
-        log.removed('viewId', '<View>')();
-      }
-
-      // Unless child is a View, position / render as part of the default view
-      let viewId = defaultViewId;
-      let viewChildren = child;
-      if (inheritsFrom(child.type, View)) {
-        viewId = child.props.id || defaultViewId;
-        viewChildren = child.props.children;
-      }
-
-      const viewport = viewManager.getViewport(viewId);
-      const viewState = viewManager.getViewState(viewId);
-
-      // Drop (auto-hide) elements with viewId that are not matched by any current view
-      if (!viewport) {
-        return null;
-      }
-
-      // Resolve potentially relative dimensions using the deck.gl container size
-      const {x, y, width, height} = viewport;
-
-      viewChildren = evaluateChildren(viewChildren, {
-        x,
-        y,
-        width,
-        height,
-        viewport,
-        viewState
-      });
-
-      const style = {position: 'absolute', left: x, top: y, width, height};
-      const key = `view-child-${viewId}-${i}`;
-      return createElement('div', {key, id: key, style}, viewChildren);
-    });
   }
 
   render() {
-    // TODO - expensive to update on every render?
-    this._updateFromProps(this.props);
+    // Save the viewports and children used for this render
+    const {viewManager} = this.deck || {};
+    this.viewports = viewManager && viewManager.getViewports();
+    this.children = this._parseJSX(this.props).children;
 
     // Render the background elements (typically react-map-gl instances)
     // using the view descriptors
-    const children = this._positionChildrenUnderViews(this.children);
+    const children = this._positionChildrenUnderViews({
+      children: this.children,
+      viewports: this.viewports,
+      deck: this.deck
+    });
 
     // TODO - this styling is enforced for correct positioning with children
     // It can override the styling set by `Deck`, this should be consolidated.
@@ -230,10 +190,8 @@ export default class DeckGL extends React.PureComponent {
       style
     });
 
-    // Render deck.gl as last child
-    children.push(canvas);
-
-    return createElement('div', {id: 'deckgl-wrapper'}, children);
+    // Render deck.gl as the last child
+    return createElement('div', {id: 'deckgl-wrapper'}, [children, canvas]);
   }
 }
 

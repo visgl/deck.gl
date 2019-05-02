@@ -1,8 +1,9 @@
 <!-- INJECT:"GeoJsonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # GeoJsonLayer
@@ -13,7 +14,8 @@ renders it as interactive polygons, lines and points.
 GeoJsonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
   const {data, viewport} = this.props;
@@ -48,9 +50,46 @@ const App = ({data, viewport}) => {
 };
 ```
 
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {GeoJsonLayer} from '@deck.gl/layers';
+new GeoJsonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.GeoJsonLayer({});
+```
+
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
+
+##### `data`
+
+The `GeoJSONLayer` accepts any of the following formats passed to the `data` prop:
+
+* A valid GeoJSON `FeatureCollection`, `Feature`, `Geometry` or `GeometryCollection` object.
+* An array of GeoJSON `Feature` objects.
 
 ### Render Options
 
@@ -96,7 +135,13 @@ Remarks:
   with the same data if you want a combined rendering effect.
 * This is only effective if the `extruded` prop is set to true.
 
-##### `lineWidthScale` (Boolean, optional)
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `lineWidthScale` (Number, optional)
 
 * Default: `1`
 
@@ -168,15 +213,16 @@ Only works if `getLineDashArray` is specified.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for extruded polygons.
-Be aware that this prop will likely be changed in the future versions of
-deck.gl.
+* Default: `new PhongMaterial()`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
+Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -186,7 +232,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 * If an array is provided, it is used as the line color for all features.
 * If a function is provided, it is called on each feature to retrieve its line color.
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -198,7 +244,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` and `Point` features.
 
-##### `getRadius` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getRadius` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -207,11 +253,11 @@ The radius of `Point` and `MultiPoint` feature, in meters.
 * If a number is provided, it is used as the radius for all point features.
 * If a function is provided, it is called on each point feature to retrieve its radius.
 
-##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
-The width of line string and/or the outline of polygon for a GeoJson feature, depending on its type. Unit is meters.
+The width of line string and/or the outline of polygon for a GeoJson feature, depending on its type. In units specified by `lineWidthUnits` (default meters).
 
 * If a number is provided, it is used as the line width for all features.
 * If a function is provided, it is called on each feature to retrieve its line width.
@@ -220,7 +266,7 @@ Note: This accessor is called for `LineString` and `MultiLineString`
 features. It is called for `Polygon` and `MultiPolygon` features if the
 `stroked` attribute is true.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -234,7 +280,7 @@ otherwise will be in unit coordinates.
 
 Note: This accessor is only called for `Polygon` and `MultiPolygon` features.
 
-##### `getLineDashArray` (Function|Array, optional)
+##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 * Default: `null`
 

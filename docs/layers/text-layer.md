@@ -1,7 +1,8 @@
 <!-- INJECT:"TextLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # TextLayer
@@ -13,11 +14,9 @@ Auto pack required `characterSet` into a shared texture `fontAtlas`.
 TextLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 
-## Example
-
 ```js
-import DeckGL from 'deck.gl';
-import TextLayer from './text-layer';
+import DeckGL from '@deck.gl/react';
+import {TextLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
   /**
@@ -50,6 +49,35 @@ const App = ({data, viewport}) => {
 };
 ```
 
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {TextLayer} from '@deck.gl/layers';
+new TextLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.TextLayer({});
+```
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
@@ -62,11 +90,35 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 Text size multiplier.
 
+##### `sizeUnits` (String, optional)
+
+* Default: `pixels` 
+
+The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `sizeMinPixels` (Number, optional)
+
+* Default: `0`
+
+The minimum size in pixels.
+
+##### `sizeMaxPixels` (Number, optional)
+
+* Default: `Number.MAX_SAFE_INTEGER`
+
+The maximum size in pixels.
+
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
+
+##### `billboard` (Boolean, optional)
+
+- Default: `true`
+
+If on, the text always faces camera. Otherwise the text faces up (z).
 
 ##### `fontFamily` (String, optional)
 
@@ -100,30 +152,30 @@ Options:
 
 ### Data Accessors
 
-##### `getText` (Function, optional)
+##### `getText` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `x => x.text`
 
 Method called to retrieve the content of each text label.
 
-##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `x => x.position || x.coordinates`
 
 Method called to retrieve the location of each text label.
 
 
-##### `getSize` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getSize` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `32`
 
-The font size of each text label, in pixels.
+The font size of each text label, in units specified by `sizeUnits` (default pixels).
 
 * If a number is provided, it is used as the size for all objects.
 * If a function is provided, it is called on each object to retrieve its size.
 
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -133,7 +185,7 @@ The rgba color of each text label, in `r, g, b, [a]`. Each component is in the 0
 * If a function is provided, it is called on each object to retrieve its color.
 
 
-##### `getAngle` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getAngle` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
@@ -144,7 +196,7 @@ The rotating angle of each text label, in degrees.
 
 ### Text Alignment Options
 
-##### `getTextAnchor` (Function|String, optional)
+##### `getTextAnchor` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
 
 * Default: `x => x.textAnchor || 'middle'`
 
@@ -154,7 +206,7 @@ The text anchor. Available options include `'start'`, `'middle'` and `'end'`.
 * If a function is provided, it is called on each object to retrieve its text anchor.
 
 
-##### `getAlignmentBaseline` (Function|String, optional)
+##### `getAlignmentBaseline` ([Function](/docs/developer-guide/using-layers.md#accessors)|String, optional)
 
 * Default: `x => x.alignmentBaseline || 'center'`
 
@@ -164,7 +216,7 @@ The alignment baseline. Available options include `'top'`, `'center'` and `'bott
 * If a function is provided, it is called on each object to retrieve its alignment baseline.
 
 
-##### `getPixelOffset` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPixelOffset` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `x.pixelOffset || [0, 0]`
 

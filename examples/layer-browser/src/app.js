@@ -1,7 +1,14 @@
 /* global window */
 
 // deck.gl ES6 components
-import {COORDINATE_SYSTEM, View, MapView, FirstPersonView, OrbitView, MapController} from 'deck.gl';
+import {
+  COORDINATE_SYSTEM,
+  View,
+  MapView,
+  FirstPersonView,
+  OrbitView,
+  MapController
+} from '@deck.gl/core';
 import {_OrbitController as OrbitController} from '@deck.gl/core';
 
 // deck.gl react components
@@ -19,7 +26,6 @@ import LayerSelector from './components/layer-selector';
 import LayerControls from './components/layer-controls';
 
 import LAYER_CATEGORIES from './examples';
-import 'luma.gl/debug';
 
 /* eslint-disable no-process-env */
 const MapboxAccessToken =
@@ -291,8 +297,8 @@ export default class App extends PureComponent {
           onViewStateChange={this._onViewStateChange}
           effects={effects ? this._effects : []}
           pickingRadius={pickingRadius}
-          onLayerHover={this._onHover}
-          onLayerClick={this._onClick}
+          onHover={this._onHover}
+          onClick={this._onClick}
           useDevicePixels={useDevicePixels}
           debug={true}
           drawPickingColors={drawPickingColors}

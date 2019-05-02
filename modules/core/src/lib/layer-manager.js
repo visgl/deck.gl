@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {_ShaderCache as ShaderCache} from 'luma.gl';
+import {_ShaderCache as ShaderCache} from '@luma.gl/core';
 import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
@@ -43,7 +43,9 @@ const LOG_PRIORITY_LIFECYCLE_MINOR = 4;
 // CONTEXT IS EXPOSED TO LAYERS
 const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
+  deck: null,
   gl: null,
+  time: -1,
 
   // Settings
   useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
@@ -64,7 +66,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {stats, viewport = null} = {}) {
+  constructor(gl, {deck, stats, viewport = null} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -79,7 +81,7 @@ export default class LayerManager {
 
     this.context = Object.assign({}, INITIAL_CONTEXT, {
       layerManager: this,
-
+      deck,
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
       shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
@@ -107,13 +109,18 @@ export default class LayerManager {
   // Method to call when the layer manager is not needed anymore.
   // Currently used in the <DeckGL> componentWillUnmount lifecycle to unbind Seer listeners.
   finalize() {
+    // Finalize all layers
+    for (const layer of this.layers) {
+      this._finalizeLayer(layer);
+    }
+
     seer.removeListener(this._initSeer);
     seer.removeListener(this._editSeer);
   }
 
   // Check if a redraw is needed
-  needsRedraw({clearRedrawFlags = true} = {}) {
-    return this._checkIfNeedsRedraw(clearRedrawFlags);
+  needsRedraw(opts = {clearRedrawFlags: false}) {
+    return this._checkIfNeedsRedraw(opts);
   }
 
   // Check if a deep update of all layers is needed
@@ -198,7 +205,10 @@ export default class LayerManager {
   }
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
-  updateLayers() {
+  updateLayers(animationProps = {}) {
+    if ('time' in animationProps) {
+      this.context.time = animationProps.time;
+    }
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
@@ -214,16 +224,16 @@ export default class LayerManager {
   // PRIVATE METHODS
   //
 
-  _checkIfNeedsRedraw(clearRedrawFlags) {
+  _checkIfNeedsRedraw(opts) {
     let redraw = this._needsRedraw;
-    if (clearRedrawFlags) {
+    if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
     }
 
     // This layers list doesn't include sublayers, relying on composite layers
     for (const layer of this.layers) {
       // Call every layer to clear their flags
-      const layerNeedsRedraw = layer.getNeedsRedraw({clearRedrawFlags});
+      const layerNeedsRedraw = layer.getNeedsRedraw(opts);
       redraw = redraw || layerNeedsRedraw;
     }
 
@@ -286,6 +296,7 @@ export default class LayerManager {
     return {error: firstError, generatedLayers};
   }
 
+  /* eslint-disable complexity,max-statements */
   // Note: adds generated layers to `generatedLayers` array parameter
   _updateSublayersRecursively({newLayers, oldLayerMap, generatedLayers}) {
     let error = null;
@@ -311,11 +322,13 @@ export default class LayerManager {
         }
 
         if (!oldLayer) {
-          this._initializeLayer(newLayer);
+          const err = this._initializeLayer(newLayer);
+          error = error || err;
           initLayerInSeer(newLayer); // Initializes layer in seer chrome extension (if connected)
         } else {
           this._transferLayerState(oldLayer, newLayer);
-          this._updateLayer(newLayer);
+          const err = this._updateLayer(newLayer);
+          error = error || err;
           updateLayerInSeer(newLayer); // Updates layer in seer chrome extension (if connected)
         }
         generatedLayers.push(newLayer);
@@ -329,16 +342,18 @@ export default class LayerManager {
       }
 
       if (sublayers) {
-        this._updateSublayersRecursively({
+        const err = this._updateSublayersRecursively({
           newLayers: sublayers,
           oldLayerMap,
           generatedLayers
         });
+        error = error || err;
       }
     }
 
     return error;
   }
+  /* eslint-enable complexity,max-statements */
 
   // Finalize any old layers that were not matched
   _finalizeOldLayers(oldLayerMap) {
@@ -453,7 +468,6 @@ export default class LayerManager {
     }
 
     setPropOverrides(payload.itemKey, payload.valuePath.slice(1), payload.value);
-    const newLayers = this.layers.map(layer => new layer.constructor(layer.props));
-    this.updateLayers({newLayers});
+    this.updateLayers();
   }
 }

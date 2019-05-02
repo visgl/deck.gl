@@ -9,19 +9,19 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./app.js')
+    app: resolve('./src/app.js')
   },
 
   module: {
     rules: [
       {
-        // Compile ES2015 using buble
+        // Transpile ES6 to ES5 with babel
+        // Remove if your app does not use JSX or you don't need to support old browsers
         test: /\.js$/,
-        loader: 'buble-loader',
-        include: [resolve('.')],
+        loader: 'babel-loader',
         exclude: [/node_modules/],
         options: {
-          objectAssign: 'Object.assign'
+          presets: ['@babel/preset-react']
         }
       }
     ]

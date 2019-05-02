@@ -3,22 +3,22 @@ import {GeoJsonLayer} from '@deck.gl/layers';
 import TileCache from './utils/tile-cache';
 
 const defaultProps = {
-  renderSubLayers: props => new GeoJsonLayer(props),
-  getTileData: ({x, y, z}) => Promise.resolve(null),
-  onDataLoaded: () => {},
+  renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
+  getTileData: {type: 'function', value: ({x, y, z}) => Promise.resolve(null)},
+  onViewportLoaded: {type: 'function', value: () => {}},
   // eslint-disable-next-line
-  onGetTileDataError: err => console.error(err),
+  onTileError: {type: 'function', value: err => console.error(err)},
   maxZoom: null,
-  minZoom: null,
+  minZoom: 0,
   maxCacheSize: null
 };
 
 export default class TileLayer extends CompositeLayer {
   initializeState() {
-    const {maxZoom, minZoom, getTileData, onGetTileDataError} = this.props;
+    const {maxZoom, minZoom, getTileData, onTileError} = this.props;
     this.state = {
       tiles: [],
-      tileCache: new TileCache({getTileData, maxZoom, minZoom, onGetTileDataError}),
+      tileCache: new TileCache({getTileData, maxZoom, minZoom, onTileError}),
       isLoaded: false
     };
   }
@@ -28,7 +28,7 @@ export default class TileLayer extends CompositeLayer {
   }
 
   updateState({props, oldProps, context, changeFlags}) {
-    const {onDataLoaded, onGetTileDataError} = props;
+    const {onViewportLoaded, onTileError} = props;
     if (
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getTileData)
@@ -41,7 +41,7 @@ export default class TileLayer extends CompositeLayer {
           maxSize: maxCacheSize,
           maxZoom,
           minZoom,
-          onGetTileDataError
+          onTileError
         })
       });
     }
@@ -56,10 +56,10 @@ export default class TileLayer extends CompositeLayer {
           if (!allCurrTilesLoaded) {
             Promise.all(currTiles.map(tile => tile.data)).then(() => {
               this.setState({isLoaded: true});
-              onDataLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+              onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
             });
           } else {
-            onDataLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
+            onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
           }
         });
       }
@@ -84,7 +84,6 @@ export default class TileLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    // eslint-disable-next-line no-unused-vars
     const {renderSubLayers, visible} = this.props;
     const z = this.getLayerZoomLevel();
     return this.state.tiles.map(tile => {

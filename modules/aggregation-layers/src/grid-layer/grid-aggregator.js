@@ -68,8 +68,7 @@ function _pointsToGridHashing(points = [], cellSize, getPosition) {
   // calculate count per cell
   const gridHash = {};
   for (const pt of points) {
-    const lat = getPosition(pt)[1];
-    const lng = getPosition(pt)[0];
+    const [lng, lat] = getPosition(pt);
 
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
       const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);

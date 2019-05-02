@@ -25,4 +25,6 @@ import './lifecycle';
 import './lib';
 import './shaderlib';
 import './transitions';
+import './passes';
+import './effects';
 import './experimental';

@@ -1,7 +1,8 @@
 <!-- INJECT:"ScatterplotLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 # ScatterplotLayer
@@ -10,7 +11,8 @@ The Scatterplot Layer takes in paired latitude and longitude coordinated
 points and renders them as circles with a certain radius.
 
 ```js
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScatterplotLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -48,6 +50,34 @@ const App = ({data, viewport}) => {
 };
 ```
 
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {ScatterplotLayer} from '@deck.gl/layers';
+new ScatterplotLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.ScatterplotLayer({});
+```
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
@@ -59,6 +89,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 * Default: `1`
 
 A global radius multiplier for all points.
+
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
 ##### `lineWidthScale` (Number, optional)
 
@@ -80,27 +116,27 @@ Draw the filled area of a point.
 
 ##### `radiusMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
-The minimum radius in pixels.
+The minimum radius in pixels. This prop can be used to prevent the circle from getting too small when zoomed out.
 
 ##### `radiusMaxPixels` (Number, optional)
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum radius in pixels.
+The maximum radius in pixels. This prop can be used to prevent the circle from getting too big when zoomed in.
 
 ##### `lineWidthMinPixels` (Number, optional)
 
-* Default: `1`
+* Default: `0`
 
-The minimum line width in pixels.
+The minimum line width in pixels. This prop can be used to prevent the stroke from getting too thin when zoomed out.
 
 ##### `lineWidthMaxPixels` (Number, optional)
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
-The maximum line width in pixels.
+The maximum line width in pixels. This prop can be used to prevent the path from getting too thick when zoomed in.
 
 
 ##### `fp64` (Boolean, optional)
@@ -111,13 +147,13 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getRadius` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getRadius` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -126,7 +162,7 @@ The radius of each object, in meters.
 * If a number is provided, it is used as the radius for all objects.
 * If a function is provided, it is called on each object to retrieve its radius.
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -137,7 +173,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -147,7 +183,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If a function is provided, it is called on each object to retrieve its color.
 * If not provided, it falls back to `getColor`.
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -157,11 +193,11 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If a function is provided, it is called on each object to retrieve its color.
 * If not provided, it falls back to `getColor`.
 
-##### `getLineWidth` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
-The width of the outline of each object, in meters.
+The width of the outline of each object, in units specified by `lineWidthUnits` (default meters).
 
 * If a number is provided, it is used as the outline width for all objects.
 * If a function is provided, it is called on each object to retrieve its outline width.

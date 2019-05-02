@@ -1,6 +1,9 @@
 function getDocUrl(filename) {
-  return `https://raw.githubusercontent.com/uber/deck.gl/master/docs/${filename}`;
+  // DOCS_DIR specified in webpack config file
+  // eslint-disable-next-line no-undef
+  return `${DOCS_DIR}/docs/${filename}`;
 }
+
 function getCodeUrl(pathname) {
   return `https://github.com/uber/deck.gl/tree/master/${pathname}`;
 }
@@ -17,7 +20,7 @@ function generatePath(tree, parentPath = '', depth = 0) {
   tree.depth = depth;
   if (tree.name) {
     tree.path = tree.name
-      .match(/(GeoJson|3D|API|DeckGL|JSON|[A-Z]?[a-z'0-9\.]+|\d+)/g)
+      .match(/(GeoJson|3D|API|DeckGL|JSON|[A-Z]*[a-z'0-9\.]+|\d+)/g)
       .join('-')
       .toLowerCase()
       .replace(/[^\w-]/g, '');
@@ -104,7 +107,7 @@ export const examplePages = generatePath([
         name: 'PointCloudLayer',
         content: {
           demo: 'PointCloudDemo',
-          code: getCodeUrl('examples/website/point-cloud-laz')
+          code: getCodeUrl('examples/website/point-cloud')
         }
       },
       {
@@ -112,6 +115,20 @@ export const examplePages = generatePath([
         content: {
           demo: 'TextDemo',
           code: getCodeUrl('examples/website/tagmap')
+        }
+      },
+      {
+        name: 'TileLayer',
+        content: {
+          demo: 'MapTileDemo',
+          code: getCodeUrl('examples/website/map-tile')
+        }
+      },
+      {
+        name: 'TripsLayer',
+        content: {
+          demo: 'TripsDemo',
+          code: getCodeUrl('examples/website/trips')
         }
       }
     ]
@@ -125,13 +142,6 @@ export const examplePages = generatePath([
         content: {
           demo: 'BrushingDemo',
           code: getCodeUrl('examples/website/brushing')
-        }
-      },
-      {
-        name: 'Trip Routes',
-        content: {
-          demo: 'TripsDemo',
-          code: getCodeUrl('examples/website/trips')
         }
       },
       {
@@ -151,8 +161,20 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
-    name: 'Autonomous Visualization System',
-    external: 'http://streetscape.gl'
+    name: 'SandDance',
+    external: 'https://microsoft.github.io/SandDance/'
+  },
+  {
+    name: 'Autonomy Visualization System',
+    external: 'http://avs.auto'
+  },
+  {
+    name: 'Escape',
+    external: 'https://greatescape.co'
+  },
+  {
+    name: 'BusRouter SG',
+    external: 'https://busrouter.sg/visualization/'
   },
   {
     name: 'FlightMapper',
@@ -185,6 +207,7 @@ export const docPages = generatePath([
         content: getDocUrl('README.md')
       },
       {
+        // eslint-disable-next-line
         name: "What's New",
         content: getDocUrl('whats-new.md')
       },
@@ -222,8 +245,8 @@ export const docPages = generatePath([
         content: getDocUrl('get-started/using-with-react.md')
       },
       {
-        name: 'Using With Mapbox GL',
-        content: getDocUrl('get-started/using-with-mapbox-gl.md')
+        name: 'Using With A Base Map',
+        content: getDocUrl('get-started/using-with-map.md')
       },
       {
         name: 'Learning Resources',
@@ -236,34 +259,26 @@ export const docPages = generatePath([
     children: [
       {
         name: 'Using Layers',
-        content: getDocUrl('get-started/using-layers.md')
+        content: getDocUrl('developer-guide/using-layers.md')
       },
       {
         name: 'Adding Interactivity',
-        content: getDocUrl('get-started/interactivity.md')
-      },
-      {
-        name: 'About View States',
-        content: getDocUrl('developer-guide/view-state.md')
-      },
-      {
-        name: 'Using Views',
-        content: getDocUrl('developer-guide/views.md')
+        content: getDocUrl('developer-guide/interactivity.md')
       },
       {
         name: 'Coordinate Systems',
         content: getDocUrl('developer-guide/coordinate-systems.md')
       },
       {
-        name: 'Viewports and Projections',
-        content: getDocUrl('developer-guide/viewports.md')
+        name: 'Views and Projections',
+        content: getDocUrl('developer-guide/views.md')
       },
       {
-        name: 'Optimizing Updates',
-        content: getDocUrl('developer-guide/updates.md')
+        name: 'Using Lighting ',
+        content: getDocUrl('developer-guide/using-lighting.md')
       },
       {
-        name: 'Performance Notes',
+        name: 'Performance Optimization',
         content: getDocUrl('developer-guide/performance.md')
       },
       {
@@ -283,73 +298,47 @@ export const docPages = generatePath([
         content: getDocUrl('developer-guide/debugging.md')
       },
       {
-        name: 'JSON',
-        children: [
-          {
-            name: 'Using the JSON API',
-            content: getDocUrl('developer-guide/json/using-json-api.md')
-          },
-          {
-            name: 'Configuring the JSON API',
-            content: getDocUrl('developer-guide/json/configuring-json-layers.md')
-          }
-        ]
-      },
-      {
         name: 'Testing',
-        children: [
-          {
-            name: 'Overview',
-            content: getDocUrl('developer-guide/testing/README.md')
-          },
-          {
-            name: 'Testing',
-            content: getDocUrl('developer-guide/testing/testing.md')
-          },
-          {
-            name: 'Using with Unit Test Frameworks',
-            content: getDocUrl('developer-guide/testing/using-with-unit-test-frameworks.md')
-          }
-        ]
+        content: getDocUrl('developer-guide/testing.md')
       },
       {
         name: 'Writing Custom Layers',
         children: [
           {
             name: 'Writing Your Own Layer',
-            content: getDocUrl('developer-guide/custom-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/README.md')
           },
           {
             name: 'Layer Lifecycle',
-            content: getDocUrl('developer-guide/layer-lifecycle.md')
+            content: getDocUrl('developer-guide/custom-layers/layer-lifecycle.md')
           },
           {
             name: 'Picking',
-            content: getDocUrl('developer-guide/picking.md')
+            content: getDocUrl('developer-guide/custom-layers/picking.md')
           },
           {
             name: 'Composite Layers',
-            content: getDocUrl('developer-guide/composite-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/composite-layers.md')
           },
           {
             name: 'Subclassed Layers',
-            content: getDocUrl('developer-guide/subclassed-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/subclassed-layers.md')
           },
           {
             name: 'Primitive Layers',
-            content: getDocUrl('developer-guide/primitive-layers.md')
+            content: getDocUrl('developer-guide/custom-layers/primitive-layers.md')
           },
           {
             name: 'Layer Prop Types',
-            content: getDocUrl('developer-guide/prop-types.md')
+            content: getDocUrl('developer-guide/custom-layers/prop-types.md')
           },
           {
             name: 'Attribute Management',
-            content: getDocUrl('developer-guide/attribute-management.md')
+            content: getDocUrl('developer-guide/custom-layers/attribute-management.md')
           },
           {
             name: 'Writing Shaders',
-            content: getDocUrl('developer-guide/writing-shaders.md')
+            content: getDocUrl('developer-guide/custom-layers/writing-shaders.md')
           }
         ]
       }
@@ -371,6 +360,10 @@ export const docPages = generatePath([
         name: 'Layers',
         children: [
           {
+            name: 'Overview',
+            content: getDocUrl('layers/README.md')
+          },
+          {
             name: 'Layer',
             content: getDocUrl('api-reference/layer.md')
           },
@@ -387,28 +380,16 @@ export const docPages = generatePath([
             content: getDocUrl('layers/bitmap-layer.md')
           },
           {
+            name: 'ColumnLayer',
+            content: getDocUrl('layers/column-layer.md')
+          },
+          {
             name: 'ContourLayer',
             content: getDocUrl('layers/contour-layer.md')
           },
           {
             name: 'GeoJsonLayer',
             content: getDocUrl('layers/geojson-layer.md')
-          },
-          {
-            name: 'GridLayer',
-            content: getDocUrl('layers/grid-layer.md')
-          },
-          {
-            name: 'GridCellLayer',
-            content: getDocUrl('layers/grid-cell-layer.md')
-          },
-          {
-            name: 'HexagonLayer',
-            content: getDocUrl('layers/hexagon-layer.md')
-          },
-          {
-            name: 'HexagonCellLayer',
-            content: getDocUrl('layers/hexagon-cell-layer.md')
           },
           {
             name: 'IconLayer',
@@ -431,20 +412,60 @@ export const docPages = generatePath([
             content: getDocUrl('layers/polygon-layer.md')
           },
           {
-            name: 'S2Layer',
-            content: getDocUrl('layers/s2-layer.md')
+            name: 'SolidPolygonLayer',
+            content: getDocUrl('layers/solid-polygon-layer.md')
           },
           {
             name: 'ScatterplotLayer',
             content: getDocUrl('layers/scatterplot-layer.md')
           },
           {
+            name: 'TextLayer',
+            content: getDocUrl('layers/text-layer.md')
+          },
+          {
+            name: 'GPUGridLayer',
+            content: getDocUrl('layers/gpu-grid-layer.md')
+          },
+          {
+            name: 'GreatCircleLayer',
+            content: getDocUrl('layers/great-circle-layer.md')
+          },
+          {
+            name: 'GridLayer',
+            content: getDocUrl('layers/grid-layer.md')
+          },
+          {
+            name: 'GridCellLayer',
+            content: getDocUrl('layers/grid-cell-layer.md')
+          },
+          {
+            name: 'HexagonLayer',
+            content: getDocUrl('layers/hexagon-layer.md')
+          },
+          {
+            name: 'H3ClusterLayer',
+            content: getDocUrl('layers/h3-cluster-layer.md')
+          },
+          {
+            name: 'H3HexagonLayer',
+            content: getDocUrl('layers/h3-hexagon-layer.md')
+          },
+          {
+            name: 'S2Layer',
+            content: getDocUrl('layers/s2-layer.md')
+          },
+          {
+            name: 'ScenegraphLayer',
+            content: getDocUrl('layers/scenegraph-layer.md')
+          },
+          {
             name: 'ScreenGridLayer',
             content: getDocUrl('layers/screen-grid-layer.md')
           },
           {
-            name: 'TextLayer',
-            content: getDocUrl('layers/text-layer.md')
+            name: 'SimpleMeshLayer',
+            content: getDocUrl('layers/simple-mesh-layer.md')
           },
           {
             name: 'TileLayer',
@@ -457,16 +478,7 @@ export const docPages = generatePath([
         ]
       },
       {
-        name: 'React',
-        children: [
-          {
-            name: 'DeckGL',
-            content: getDocUrl('api-reference/react/deckgl.md')
-          }
-        ]
-      },
-      {
-        name: 'Standalone',
+        name: 'Scripting Interface',
         children: [
           {
             name: 'DeckGL',
@@ -488,10 +500,6 @@ export const docPages = generatePath([
           {
             name: 'project64',
             content: getDocUrl('shader-modules/project64.md')
-          },
-          {
-            name: 'lighting',
-            content: getDocUrl('shader-modules/lighting.md')
           }
         ]
       },
@@ -557,45 +565,118 @@ export const docPages = generatePath([
             content: getDocUrl('api-reference/map-controller.md')
           }
         ]
+      },
+      {
+        name: 'Effects',
+        children: [
+          {
+            name: 'LightingEffect',
+            content: getDocUrl('effects/lighting-effect.md')
+          }
+        ]
+      },
+      {
+        name: 'Lights',
+        children: [
+          {
+            name: 'AmbientLight',
+            content: getDocUrl('api-reference/lights/ambient-light.md')
+          },
+          {
+            name: 'PointLight',
+            content: getDocUrl('api-reference/lights/point-light.md')
+          },
+          {
+            name: 'DirectionalLight',
+            content: getDocUrl('api-reference/lights/directional-light.md')
+          },
+          {
+            name: 'CameraLight',
+            content: getDocUrl('api-reference/lights/camera-light.md')
+          },
+          {
+            name: 'SunLight',
+            content: getDocUrl('api-reference/lights/sun-light.md')
+          }
+        ]
       }
     ]
   },
   {
-    name: 'JSON API Reference (Experimental)',
+    name: 'Submodule API Reference',
     children: [
       {
-        name: 'JSONDeck (Experimental)',
-        content: getDocUrl('api-reference/json/json-deck.md')
+        name: '@deck.gl/google-maps',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/google-maps/overview.md')
+          },
+          {
+            name: 'GoogleMapsOverlay',
+            content: getDocUrl('api-reference/google-maps/google-maps-overlay.md')
+          }
+        ]
       },
       {
-        name: 'JSONLayer (Experimental)',
-        content: getDocUrl('api-reference/json/json-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'Mapbox API Reference (Experimental)',
-    children: [
-      {
-        name: 'Overview',
-        content: getDocUrl('api-reference/mapbox/overview.md')
+        name: '@deck.gl/json',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/json/overview.md')
+          },
+          {
+            name: 'JSONConverter',
+            content: getDocUrl('api-reference/json/json-converter.md')
+          },
+          {
+            name: 'JSONLayer',
+            content: getDocUrl('api-reference/json/json-layer.md')
+          }
+        ]
       },
       {
-        name: 'MapboxLayer',
-        content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
-      }
-    ]
-  },
-  {
-    name: 'test-utils API Reference',
-    children: [
-      {
-        name: 'testLayer',
-        content: getDocUrl('api-reference/test-utils/test-layer.md')
+        name: '@deck.gl/mapbox',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/mapbox/overview.md')
+          },
+          {
+            name: 'MapboxLayer',
+            content: getDocUrl('api-reference/mapbox/mapbox-layer.md')
+          }
+        ]
       },
       {
-        name: 'SnapshotTestRunner',
-        content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
+        name: '@deck.gl/react',
+        children: [
+          {
+            name: 'DeckGL',
+            content: getDocUrl('api-reference/react/deckgl.md')
+          }
+        ]
+      },
+      {
+        name: '@deck.gl/test-utils',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/test-utils/overview.md')
+          },
+          {
+            name: 'generateLayerTests',
+            content: getDocUrl('api-reference/test-utils/generate-layer-tests.md')
+          },
+          {
+            name: 'testLayer',
+            content: getDocUrl('api-reference/test-utils/test-layer.md')
+          },
+          {
+            name: 'SnapshotTestRunner',
+            content: getDocUrl('api-reference/test-utils/snapshot-test-runner.md')
+          }
+        ]
       }
     ]
   }

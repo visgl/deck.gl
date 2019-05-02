@@ -1,5 +1,9 @@
 <!-- INJECT:"ScreenGridLayerDemo" -->
 
+<p class="badges">
+  <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
+</p>
+
 # ScreenGridLayer
 
 The Screen Grid Layer takes in an array of latitude and longitude
@@ -7,7 +11,8 @@ coordinated points, aggregates them into histogram bins and
 renders as a grid. By default aggregation happens on GPU, aggregation falls back to CPU when browser doesn't support GPU Aggregation or when `gpuAggregation` prop is set to false.
 
 ```js
-import DeckGL, {ScreenGridLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -24,8 +29,14 @@ const App = ({data, viewport}) => {
     pickable: false,
     opacity: 0.8,
     cellSizePixels: 50,
-    minColor: [0, 0, 0, 0],
-    maxColor: [0, 180, 0, 255],
+    colorRange: [
+      [0, 25, 0, 25],
+      [0, 85, 0, 85],
+      [0, 127, 0, 127],
+      [0, 170, 0, 170],
+      [0, 190, 0, 190],
+      [0, 255, 0, 255]
+    ],
     getPosition: d => d.COORDINATES,
     getWeight: d => d.SPACES,
     onHover: ({object, x, y}) => {
@@ -44,6 +55,38 @@ const App = ({data, viewport}) => {
 needs to be reaggregated by the layer whenever the map is zoomed or panned.
 This means that this layer is best used with small data set, however the
 visuals when used with the right data set can be quite effective.
+
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
+```
+
+```js
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
+new ScreenGridLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.ScreenGridLayer({});
+```
+
 
 ## Properties
 
@@ -114,13 +157,13 @@ Defines the type of aggregation operation, valid values are 'SUM', 'MEAN', 'MIN'
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getWeight` (Function, optional)
+##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => 1`
 
@@ -128,4 +171,4 @@ Method called to retrieve the weight of each object.
 
 ## Source
 
-[modules/layers/src/screen-grid-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/screen-grid-layer)
+[modules/aggregation-layers/src/screen-grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/screen-grid-layer)

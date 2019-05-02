@@ -23,14 +23,6 @@ new PerspectiveView({..., fov: 45});
 
 `PerspectiveView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
 
-
-Projection matrix arguments:
-
-* `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-* `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-* `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
-
-
 ## Methods
 
 Inherits all [View methods](/docs/api-reference/view.md#methods).
@@ -38,4 +30,4 @@ Inherits all [View methods](/docs/api-reference/view.md#methods).
 
 ## Source
 
-[modules/core/src/core/views/perspective-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/perspective-view.js)
+[modules/core/src/views/perspective-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/perspective-view.js)

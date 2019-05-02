@@ -1,73 +1,49 @@
 # View Class
 
+> For details about deck.gl's views system and code examples, visit the [Views and Projections](/docs/developer-guide/views.md) article.
+
 The `View` class and it subclasses are used to specify where and how your deck.gl layers should be rendered. Applications typically instantitate at least one `View` subclass.
 
 Views allow you to specify:
 
-* Relative dimensions of viewports
-* Projection Matrix
+* A unique `id`.
+* The position and extent of the view on the canvas: `x`, `y`, `width`, and `height`.
+* Certain camera parameters specifying how your data should be projected into this view, e.g. field of view, near/far planes, perspective vs. orthographic, etc.
+* The [controller](/docs/api-reference/controller.md) to be used for this view. A controller listens to pointer events and touch gestures, and translates user input into changes in the view state. If enabled, the camera becomes interactive.
 
-For more information, consult the [Views](/docs/developer-guide/views.md) article.
-
-
-## Usage
-
-Create a new `View` (note: normally apps use a `View` subclass)
-
-```js
-const view = new View({});
-```
-
-Get the dimensions of a `View`
-
-```js
-const {x, y, width, height} = view.getDimensions({width: 1024, height: 768});
-```
+deck.gl offers a set of `View` classes that package the camera and controller logic that you need to visualize and interact with your data. You may choose one or multiple `View` classes based on the type of data (e.g. geospatial, 2D chart) and the desired perspective (top down, first-person, etc).
 
 
 ## Constructor(props : Object)
 
 ```js
-const view = View(props);
 const view = View({id, x, y, width, height, ...});
 ```
 
 Parameters:
 
-* `props` : Object - See documentation of props below.
+##### `id` (String, optional)
+
+A unique id of the view. In a multi-view use case, this is important for matching view states and place contents into this view.
+
+##### `x` (String|Number, optional)
+
+A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
 
-Note that like layers, Views are immutable once constructed.
+##### `y` (String|Number, optional)
 
+A relative (e.g. `'50%'`) or absolute position. Default `0`.
 
-## Properties
+##### `width` (String|Number, optional)
 
+A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `id : String`
+##### `height` (String|Number, optional)
 
+A relative (e.g. `'50%'`) or absolute extent. Default `'100%'`.
 
-##### `x : String|Number`
-
-A relative (e.g. `'10%'`) or absolute (e.g. `200`) position. Default `0`.
-
-
-##### `y : String|Number`
-
-* `y` (String|Number) - A relative or absolute position. Default `0`.
-
-
-A relative (e.g. `'10%'`) or absolute (e.g. `200`) position. Default `0`.
-
-##### `width` (String|Number)
-
-A relative or absolute extent. Default `'100%'`.
-
-
-##### `height` (String|Number)
-
-A relative or absolute extent. Default `'100%'`.
-
-##### `controller` (Function | Boolean | Object)
+##### `controller` (Function|Boolean|Object, optional)
 
 Options for viewport interactivity.
 
@@ -81,7 +57,7 @@ Options for viewport interactivity.
 Default `null`.
 
 
-##### `viewState` : String | Object | `null`
+##### `viewState` (String|Object, optional)
 
 The optional `viewState` property enables a `View` to specify, select or select-and-modify its view state.
 
@@ -101,7 +77,7 @@ The `viewState` property is intended to support a number of use cases:
 * Overriding a partial set of view state properties from a selected view state.
 
 
-##### `clear`: Boolean | Object
+##### `clear` (Boolean|Object, optional)
 
 Clears the contents (pixels) of the viewport. The value of the `clear` prop is passed as argument to luma.gl's `clear` function. If `true` clears color and depth buffers. If an object, behaviour is controller by the following fields:
 
@@ -111,51 +87,42 @@ Clears the contents (pixels) of the viewport. The value of the `clear` prop is p
 
 Note that deck.gl always clears the screen before each render, and clearing, while cheap, is not totally free. This means that viewports should only specify the `clear` property if they need additional clearing, e.g. because they are rendering on top of another viewport, or want to have a different background color etc.
 
+Default `false`.
 
-##### `projectionMatrix`= (`Array[16]`, optional)
+##### `projectionMatrix` (`Array[16]`, optional)
 
 Projection matrix.
 
-
-## Projection Matrix Props
-
 If `projectionMatrix` is not supplied, the `View` class will build a projection matrix from the following parameters:
 
+##### `fovy` (`Number`, optional)
 
-##### `fovyDegrees`=`75` (`Number`)
+Field of view covered by camera, in the perspective case. In degrees. Default `75`.
 
-Field of view covered by camera, in the perspective case.
-
-
-##### `aspect`= (`Number`)
+##### `aspect` (`Number`, optional)
 
 Aspect ratio. Defaults to the Viewport's `width/height` ratio.
 
+##### `near` (`Number`, optional)
 
-##### `near`=`0.1` (`Number`)
+Distance of near clipping plane. Default `0.1`.
 
-Distance of near clipping plane.
+##### `far` (`Number`, optional)
 
+Distance of far clipping plane. Default `1000`.
 
-##### `far`=`1000` (`Number`)
+##### `orthographic` (`Boolean`)
 
-Distance of far clipping plane.
-
-
-##### `orthographic`=`false` (`Boolean`)
-
-Whether to create an orthographic or perspective projection matrix. Default is perspective projection.
+Whether to create an orthographic or perspective projection matrix. Default is `false` (perspective projection).
 
 
-##### `focalDistance`=`1` (`Number`)
+##### `focalDistance` (`Number`, optional)
 
-Note: Used by orthographic projections only. The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Note: lso used for pixel scale identity distance above.
+Modifier of viewport scale. Corresponds to the number of pixels per meter. Default `1`.
 
+##### `orthographicFocalDistance` (`Number`, optional)
 
-##### `orthographicFocalDistance` (`Number`)
-
-Noe: (orthographic projections only) Can be used to specify different values for pixel scale focal distance and orthographic focal distance.
-
+Used by orthographic projections only. The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Default `1`.
 
 
 ## Methods
@@ -178,21 +145,21 @@ Returns:
 Note: For speed, deck.gl uses shallow equality. This means that a value of `false` does not guarantee that the views are not equivalent.
 
 
-##### `makeViewport({width : Number, height : Number, viewState : Object}) : Viewport`
+##### `makeViewport`
 
 ```js
 View.makeViewport({width, height, viewState})
 ```
 
-Builds a viewport using the viewport type and props in the `View`and provided `width`, `height` and `viewState`. The contents of `viewState` needs to be compatible with the particular `View` sublass in use.
+Builds a [Viewport](/docs/api-reference/viewport.md) using the viewport type and props in the `View`and provided `width`, `height` and `viewState`. The contents of `viewState` needs to be compatible with the particular `View` sublass in use.
 
 
-##### `getDimensions({width : Number, height : Number}) : Object`
+##### `getDimensions`
 
 Returns the actual pixel position and size that this `View` will occupy in a given "canvas" size.
 
 ```js
-const {x, y, width, height} = view.getDimensions({width: ..., height: ...});
+const {x, y, width, height} = view.getDimensions({width, height});
 ```
 
 Parameters:
@@ -208,11 +175,13 @@ Returns:
 * `height` (`Number`) - height in CSS pixels
 
 
-##### `getMatrix({width : Number, height : Number}) : Array`
+##### `getMatrix`
 
 ```js
 View.getMatrix({width, height})
 ```
+
+Returns:
 
 * `viewMatrix` (Array[16], optional) - View matrix. Default to identity matrix. Defaults is to create from `fov`, `near`, `far` opts (aspect is calculated).
 
@@ -226,4 +195,4 @@ A projection matrix depends on the aspect ratio and needs to be recalculated whe
 
 ## Source
 
-[modules/core/src/core/views/view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/view.js)
+[modules/core/src/views/view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/view.js)

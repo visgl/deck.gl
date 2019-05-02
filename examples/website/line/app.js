@@ -72,7 +72,7 @@ export class App extends Component {
     const {
       airports = DATA_URL.AIRPORTS,
       flightPaths = DATA_URL.FLIGHT_PATHS,
-      getStrokeWidth = 3
+      getWidth = 3
     } = this.props;
 
     return [
@@ -93,7 +93,7 @@ export class App extends Component {
         getSourcePosition: d => d.start,
         getTargetPosition: d => d.end,
         getColor,
-        getStrokeWidth,
+        getWidth,
         pickable: true,
         onHover: this._onHover
       })

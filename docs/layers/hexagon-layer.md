@@ -1,8 +1,9 @@
 <!-- INJECT:"HexagonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # HexagonLayer
@@ -11,10 +12,11 @@ The Hexagon Layer renders a hexagon heatmap based on an array of points.
 It takes the radius of hexagon bin, projects points into hexagon bins. The color
 and height of the hexagon is scaled by number of points it contains.
 
-HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and at the moment only works with COORDINATE_SYSTEM.LNGLAT.
+HexagonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
 ```js
-import DeckGL, {HexagonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -44,6 +46,37 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
+```
+
+```js
+import {HexagonLayer} from '@deck.gl/aggregation-layers';
+new HexagonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.HexagonLayer({});
+```
+
 
 ## Properties
 
@@ -160,14 +193,16 @@ smaller than the elevationLowerPercentile will be hidden.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for extruded polygons.
-  Be aware that this prop will likely be changed in a future version of deck.gl.
+* Default: `new PhongMaterial()`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
+Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.position`
 
@@ -236,9 +271,9 @@ This callback will be called when bin elevation domain has been calculated.
 
 The HexagonLayer renders the following sublayers:
 
-* `hexagon-cell` - a [HexagonCellLayer](/docs/layers/hexagon-cell-layer.md) rendering the aggregated columns.
+* `hexagon-cell` - a [ColumnLayer](/docs/layers/column-layer.md) rendering the aggregated columns.
 
 
 ## Source
 
-[modules/layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/hexagon-layer)
+[modules/aggregation-layers/src/hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/hexagon-layer)

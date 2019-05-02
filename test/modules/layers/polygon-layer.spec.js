@@ -19,44 +19,31 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testLayer} from '@deck.gl/test-utils';
+
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {PolygonLayer} from 'deck.gl';
 
-import * as FIXTURES from 'deck.gl/test/data';
-const data = FIXTURES.polygons;
+import * as FIXTURES from 'deck.gl-test/data';
 
-test('PolygonLayer#constructor', t => {
-  testLayer({
+test('PolygonLayer', t => {
+  const testCases = generateLayerTests({
     Layer: PolygonLayer,
-    testCases: [
-      {props: []},
-      {props: null},
-      {
-        props: {
-          data,
-          getPolygon: f => f
-        }
-      },
-      {
-        updateProps: {
-          filled: false
-        },
-        assert({layer, subLayers, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.ok(subLayers.length, 'subLayers rendered');
-        }
-      },
-      {
-        updateProps: {
-          data: data.slice(0, 10)
-        },
-        assert({layer, oldState}) {
-          t.ok(layer.state.paths.length !== oldState.paths.length, 'should update state.paths');
-        }
+    sampleProps: {
+      data: FIXTURES.polygons.slice(0, 3),
+      getPolygon: f => f,
+      getFillColor: (f, {index}) => [index, 0, 0]
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate({layer}) {
+      if (layer.props.data && layer.props.data.length) {
+        t.ok(layer.state.paths.length, 'should update state.paths');
       }
-    ]
+    }
   });
+
+  testLayer({Layer: PolygonLayer, testCases, onError: t.notOk});
 
   t.end();
 });

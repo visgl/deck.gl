@@ -19,5 +19,5 @@
 // THE SOFTWARE.
 /* eslint-disable max-len */
 
-export {default as MeshLayer} from './mesh-layer/mesh-layer';
+export {default as SimpleMeshLayer} from './simple-mesh-layer/simple-mesh-layer';
 export {default as ScenegraphLayer} from './scenegraph-layer/scenegraph-layer';

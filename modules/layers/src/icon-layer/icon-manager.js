@@ -1,16 +1,19 @@
 /* global document */
 import GL from '@luma.gl/constants';
-import {Texture2D, readPixelsToBuffer} from 'luma.gl';
-import {loadImage} from '@loaders.gl/core';
+import {Texture2D, readPixelsToBuffer} from '@luma.gl/core';
+import {loadImage} from '@loaders.gl/images';
+import {createIterable} from '@deck.gl/core';
 
 const DEFAULT_CANVAS_WIDTH = 1024;
 const DEFAULT_BUFFER = 4;
 
-const DEFAULT_TEXTURE_MIN_FILTER = GL.LINEAR_MIPMAP_LINEAR;
-// GL.LINEAR is the default value but explicitly set it here
-const DEFAULT_TEXTURE_MAG_FILTER = GL.LINEAR;
-
 const noop = () => {};
+
+const DEFAULT_TEXTURE_PARAMETERS = {
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  // GL.LINEAR is the default value but explicitly set it here
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR
+};
 
 function nextPowOfTwo(number) {
   return Math.pow(2, Math.ceil(Math.log2(number)));
@@ -65,10 +68,7 @@ function resizeTexture(texture, width, height) {
     y: height - oldHeight,
     width: oldWidth,
     height: oldHeight,
-    parameters: {
-      [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-      [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-    }
+    parameters: DEFAULT_TEXTURE_PARAMETERS
   });
 
   texture.generateMipmap();
@@ -148,8 +148,10 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
 
   cachedIcons = cachedIcons || {};
   const icons = {};
-  for (const point of data) {
-    const icon = getIcon(point);
+  const {iterable, objectInfo} = createIterable(data);
+  for (const object of iterable) {
+    objectInfo.index++;
+    const icon = getIcon(object, objectInfo);
     const id = getIconId(icon);
 
     if (!icon) {
@@ -164,7 +166,6 @@ export function getDiffIcons(data, getIcon, cachedIcons) {
       icons[id] = icon;
     }
   }
-
   return icons;
 }
 
@@ -181,6 +182,7 @@ export default class IconManager {
     this._getIcon = null;
 
     this._texture = null;
+    this._externalTexture = null;
     this._mapping = {};
 
     this._autoPacking = false;
@@ -196,12 +198,18 @@ export default class IconManager {
     this._canvas = null;
   }
 
-  getTexture() {
-    return this._texture;
+  finalize() {
+    if (this._texture) {
+      this._texture.delete();
+    }
   }
 
-  getIconMapping(dataPoint) {
-    const icon = this._getIcon(dataPoint);
+  getTexture() {
+    return this._texture || this._externalTexture;
+  }
+
+  getIconMapping(object, objectInfo) {
+    const icon = this._getIcon(object, objectInfo);
     const id = this._autoPacking ? getIconId(icon) : icon;
     return this._mapping[id] || {};
   }
@@ -223,7 +231,7 @@ export default class IconManager {
       this._updateIconAtlas(iconAtlas);
     }
 
-    if (this._autoPacking && (data || getIcon)) {
+    if (this._autoPacking && (data || getIcon) && typeof document !== 'undefined') {
       this._canvas = this._canvas || document.createElement('canvas');
 
       this._updateAutoPacking(data);
@@ -231,22 +239,20 @@ export default class IconManager {
   }
 
   _updateIconAtlas(iconAtlas) {
+    if (this._texture) {
+      this._texture.delete();
+      this._texture = null;
+    }
     if (iconAtlas instanceof Texture2D) {
-      iconAtlas.setParameters({
-        [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-        [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-      });
+      iconAtlas.setParameters(DEFAULT_TEXTURE_PARAMETERS);
 
-      this._texture = iconAtlas;
+      this._externalTexture = iconAtlas;
       this.onUpdate();
     } else if (typeof iconAtlas === 'string') {
       loadImage(iconAtlas).then(data => {
         this._texture = new Texture2D(this.gl, {
           data,
-          parameters: {
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER
-          }
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         });
         this.onUpdate();
       });
@@ -276,7 +282,8 @@ export default class IconManager {
       if (!this._texture) {
         this._texture = new Texture2D(this.gl, {
           width: this._canvasWidth,
-          height: this._canvasHeight
+          height: this._canvasHeight,
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         });
       }
 
@@ -308,11 +315,9 @@ export default class IconManager {
           y: canvasHeight - y - height, // flip Y as texture stored as reversed Y
           width,
           height,
-          parameters: {
-            [GL.TEXTURE_MIN_FILTER]: DEFAULT_TEXTURE_MIN_FILTER,
-            [GL.TEXTURE_MAG_FILTER]: DEFAULT_TEXTURE_MAG_FILTER,
+          parameters: Object.assign({}, DEFAULT_TEXTURE_PARAMETERS, {
             [GL.UNPACK_FLIP_Y_WEBGL]: true
-          }
+          })
         });
 
         // Call to regenerate mipmaps after modifying texture(s)

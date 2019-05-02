@@ -19,13 +19,14 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, createIterable} from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   stroked: true,
@@ -34,6 +35,7 @@ const defaultProps = {
   elevationScale: 1,
   wireframe: false,
 
+  lineWidthUnits: 'meters',
   lineWidthScale: 1,
   lineWidthMinPixels: 0,
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
@@ -55,7 +57,7 @@ const defaultProps = {
   getElevation: {type: 'accessor', value: 1000},
 
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class PolygonLayer extends CompositeLayer {
@@ -87,8 +89,13 @@ export default class PolygonLayer extends CompositeLayer {
     const paths = [];
     const positionSize = positionFormat === 'XY' ? 2 : 3;
 
-    for (const object of data) {
-      const {positions, holeIndices} = Polygon.normalize(getPolygon(object), positionSize);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const {positions, holeIndices} = Polygon.normalize(
+        getPolygon(object, objectInfo),
+        positionSize
+      );
 
       if (holeIndices) {
         // split the positions array into `holeIndices.length + 1` rings
@@ -122,6 +129,7 @@ export default class PolygonLayer extends CompositeLayer {
 
     // Rendering props underlying layer
     const {
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
@@ -190,6 +198,7 @@ export default class PolygonLayer extends CompositeLayer {
       new StrokeLayer(
         {
           fp64,
+          widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
           widthMaxPixels: lineWidthMaxPixels,

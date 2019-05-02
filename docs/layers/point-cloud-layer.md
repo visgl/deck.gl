@@ -1,7 +1,9 @@
 <!-- INJECT:"PointCloudLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # PointCloudLayer
@@ -10,7 +12,8 @@ The Point Cloud Layer takes in points with 3d positions, normals and colors
 and renders them as spheres with a certain radius.
 
 ```js
-import DeckGL, {PointCloudLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PointCloudLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -31,7 +34,6 @@ const App = ({data, viewport}) => {
     getPosition: d => d.position,
     getNormal: d => d.normal,
     getColor: d => d.color,
-    lightSettings: {},
     onHover: ({object, x, y}) => {
       const tooltip = object.position.join(', ');
       /* Update tooltip
@@ -44,17 +46,51 @@ const App = ({data, viewport}) => {
 };
 ```
 
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {PointCloudLayer} from '@deck.gl/layers';
+new PointCloudLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.PointCloudLayer({});
+```
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-##### `radiusPixels` (Number, optional)
+##### `sizeUnits` (String, optional)
+
+* Default: `'pixels'`
+
+The units of the point size, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `pointSize` (Number, optional)
 
 * Default: `10`
 
-Global radius of all points.
+Global radius of all points, in units specified by `sizeUnits` (default pixels).
 
 ##### `fp64` (Boolean, optional)
 
@@ -62,20 +98,22 @@ Global radius of all points.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for the point cloud.
-Be aware that this prop will likely be changed in a future version of deck.gl.
+* Default: `new PhongMaterial()`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md).
+Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each object.
 
-##### `getNormal` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getNormal` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 1]`
 
@@ -85,7 +123,7 @@ The normal of each object, in `[nx, ny, nz]`.
 * If a function is provided, it is called on each object to retrieve its normal.
 
 
-##### `getColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 

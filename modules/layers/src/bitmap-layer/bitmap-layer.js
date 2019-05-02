@@ -21,13 +21,21 @@
 /* global Image, HTMLCanvasElement */
 import GL from '@luma.gl/constants';
 import {Layer} from '@deck.gl/core';
-import {Model, Geometry, Texture2D, fp64} from 'luma.gl';
-import {loadImage} from '@loaders.gl/core';
+import {Model, Geometry, Texture2D, fp64} from '@luma.gl/core';
+import {loadImage} from '@loaders.gl/images';
 
 const {fp64LowPart} = fp64;
 
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
+
+const DEFAULT_TEXTURE_PARAMETERS = {
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
+  // GL.LINEAR is the default value but explicitly set it here
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+};
 
 const defaultProps = {
   image: null,
@@ -75,6 +83,8 @@ export default class BitmapLayer extends Layer {
         value: new Float32Array(positions)
       }
     });
+
+    this.setState({numInstances: 1});
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -100,6 +110,14 @@ export default class BitmapLayer extends Layer {
       });
       attributeManager.invalidate('positions');
       attributeManager.invalidate('positions64xyLow');
+    }
+  }
+
+  finalizeState() {
+    super.finalizeState();
+
+    if (this.state.bitmapTexture) {
+      this.state.bitmapTexture.delete();
     }
   }
 
@@ -175,14 +193,16 @@ export default class BitmapLayer extends Layer {
     // // TODO fix zFighting
     // Render the image
     if (bitmapTexture && model) {
-      model.render(
-        Object.assign({}, uniforms, {
-          bitmapTexture,
-          desaturate,
-          transparentColor,
-          tintColor
-        })
-      );
+      model
+        .setUniforms(
+          Object.assign({}, uniforms, {
+            bitmapTexture,
+            desaturate,
+            transparentColor,
+            tintColor
+          })
+        )
+        .draw();
     }
   }
 
@@ -190,9 +210,18 @@ export default class BitmapLayer extends Layer {
     const {gl} = this.context;
     const {image} = this.props;
 
+    if (this.state.bitmapTexture) {
+      this.state.bitmapTexture.delete();
+    }
+
     if (typeof image === 'string') {
       loadImage(image).then(data => {
-        this.setState({bitmapTexture: new Texture2D(gl, {data})});
+        this.setState({
+          bitmapTexture: new Texture2D(gl, {
+            data,
+            parameters: DEFAULT_TEXTURE_PARAMETERS
+          })
+        });
       });
     } else if (image instanceof Texture2D) {
       this.setState({bitmapTexture: image});
@@ -201,7 +230,12 @@ export default class BitmapLayer extends Layer {
       image instanceof Image ||
       image instanceof HTMLCanvasElement
     ) {
-      this.setState({bitmapTexture: new Texture2D(gl, {data: image})});
+      this.setState({
+        bitmapTexture: new Texture2D(gl, {
+          data: image,
+          parameters: DEFAULT_TEXTURE_PARAMETERS
+        })
+      });
     }
   }
 

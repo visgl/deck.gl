@@ -19,14 +19,18 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer, experimental} from '@deck.gl/core';
-const {BinSorter, defaultColorRange, getQuantizeScale, getLinearScale} = experimental;
-
+import {CompositeLayer} from '@deck.gl/core';
 import {GridCellLayer} from '@deck.gl/layers';
+
+import BinSorter from '../utils/bin-sorter';
+import {defaultColorRange} from '../utils/color-utils';
+import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
 
 import {pointToDensityGridData} from './grid-aggregator';
 
 function nop() {}
+
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   // color
@@ -54,7 +58,7 @@ const defaultProps = {
   fp64: false,
 
   // Optional material for 'lighting' shader module
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class GridLayer extends CompositeLayer {

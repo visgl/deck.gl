@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp32} from 'luma.gl';
+import {fp32} from '@luma.gl/core';
 import projectShader from './project.glsl';
 import {getUniformsFromViewport} from './viewport-uniforms';
 
@@ -37,29 +37,9 @@ export default {
   vs: projectShader,
   getUniforms,
   deprecations: [
-    // Removed custom picking uinforms
-    // These don't really belong here but we need to check them for all shaders
-    // the project module is by default included for all
-    {type: 'uniform vec3', old: 'selectedPickingColor', new: "luma.gl's picking module"},
-    {type: 'uniform float', old: 'renderPickingBuffer', new: "luma.gl's picking module"},
-    {type: 'uniform float', old: 'pickingEnabled', new: "luma.gl's picking module"},
-
-    // Removed project uniforms
-    {type: 'uniform float', old: 'projectionMode', new: 'project_uCoordinateSystem'},
-    {type: 'uniform vec4', old: 'projectionCenter', new: 'project_uCenter'},
-    {type: 'uniform vec2', old: 'projectionOrigin'},
-    {type: 'uniform mat4', old: 'modelMatrix', new: 'project_uModelMatrix'},
-    {type: 'uniform mat4', old: 'viewMatrix'},
-    {type: 'uniform mat4', old: 'projectionMatrix', new: 'project_uViewProjectionMatrix'},
-    {type: 'uniform vec3', old: 'projectionPixelsPerUnit', new: 'project_uPixelsPerUnit'},
-    {type: 'uniform float', old: 'projectionScale', new: 'project_uScale'},
-    {type: 'uniform vec2', old: 'viewportSize', new: 'project_uViewportSize'},
-    {type: 'uniform float', old: 'devicePixelRatio', new: 'project_uDevicePixelRatio'},
-    {type: 'uniform vec3', old: 'cameraPos', new: 'project_uCameraPosition'},
-
-    // Removed project functions
-    {type: 'function', old: 'scale', new: 'project_scale'},
-    {type: 'function', old: 'preproject', new: 'project_position'},
-    {type: 'function', old: 'project', new: 'project_to_clipspace'}
+    // Deprecated, remove in v8
+    {type: 'function', old: 'project_scale', new: 'project_size'},
+    {type: 'function', old: 'project_to_clipspace', new: 'project_common_position_to_clipspace'},
+    {type: 'function', old: 'project_pixel_to_clipspace', new: 'project_pixel_size_to_clipspace'}
   ]
 };

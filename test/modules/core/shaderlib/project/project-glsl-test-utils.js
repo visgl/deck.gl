@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {equals} from 'math.gl';
-import {Transform} from 'luma.gl';
+import {Transform} from '@luma.gl/core';
 
 export function getPixelOffset(p1, p2, z = 0) {
   return [p1[0] - p2[0], p1[1] - p2[1], z, 1];

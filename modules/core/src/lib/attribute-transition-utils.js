@@ -1,4 +1,4 @@
-import {Buffer} from 'luma.gl';
+import {Buffer} from '@luma.gl/core';
 import {padArray} from '../utils/array-utils';
 
 const ATTRIBUTE_MAPPING = {
@@ -64,7 +64,8 @@ export function getBuffers(transitions) {
   const feedbackBuffers = {};
   for (const attributeName in transitions) {
     const {fromState, toState, buffer} = transitions[attributeName];
-    sourceBuffers[`${attributeName}From`] = fromState;
+    sourceBuffers[`${attributeName}From`] =
+      fromState instanceof Buffer ? [fromState, {divisor: 0}] : fromState;
     sourceBuffers[`${attributeName}To`] = toState;
     feedbackBuffers[`${attributeName}`] = buffer;
   }
@@ -90,11 +91,11 @@ export function padBuffer({
   const data = new Float32Array(toLength);
   const fromData = fromState.getData({});
 
-  const {value, buffer, size, constant} = toState;
-  const toData = value || buffer.getData({});
+  const {size, constant} = toState;
+  const toData = constant ? toState.getValue() : toState.getBuffer().getData({});
 
   const getMissingData = constant
-    ? (i, chunk) => getData(value, chunk)
+    ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 
   padArray({

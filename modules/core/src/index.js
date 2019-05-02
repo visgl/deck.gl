@@ -29,7 +29,11 @@ import './shaderlib';
 export {COORDINATE_SYSTEM} from './lib/constants';
 
 // Effects
-export {default as LightingEffect} from './effects/lighting-effect';
+export {default as LightingEffect} from './effects/lighting/lighting-effect';
+export {default as PointLight} from './effects/lighting/point-light';
+export {default as DirectionalLight} from './effects/lighting/directional-light';
+export {default as _CameraLight} from './effects/lighting/camera-light';
+export {default as _SunLight} from './effects/lighting/sun-light';
 
 // Experimental Pure JS (non-React) bindings
 export {default as Deck} from './lib/deck';
@@ -78,31 +82,20 @@ export {default as FlyToInterpolator} from './transitions/viewport-fly-to-interp
 export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
-import {default as BinSorter} from './utils/bin-sorter';
-import {default as Tesselator} from './utils/tesselator'; // Export? move to luma.gl or math.gl?
-import {defaultColorRange} from './utils/color-utils';
-import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
+export {createIterable} from './utils/iterable-utils';
+import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.gl?
+import {count} from './utils/count';
+import memoize from './utils/memoize';
 
-export {
-  default as _GPUGridAggregator
-} from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator';
-export {
-  AGGREGATION_OPERATION
-} from './experimental/utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
-export {
-  pointToDensityGridData as _pointToDensityGridData
-} from './experimental/utils/gpu-grid-aggregation/grid-aggregation-utils';
+// lighting
+export {AmbientLight} from '@luma.gl/core';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
-  BinSorter,
   Tesselator,
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
-  defaultColorRange,
   flattenVertices,
-  fillArray
+  fillArray,
+  count,
+  memoize
 };

@@ -2,7 +2,7 @@
   "name": "@deck.gl/mesh-layers",
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
-  "version": "7.0.0-alpha.4",
+  "version": "7.0.0-rc.1",
   "publishConfig": {
     "access": "public"
   },
@@ -22,17 +22,18 @@
   "files": [
     "dist",
     "src",
-    "README.md"
+    "dist.min.js"
   ],
   "sideEffects": false,
   "scripts": {
-    "clean": "rm -fr dist dist-es6 && mkdir -p dist/es5 dist/esm dist/es6",
-    "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
-    "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
-    "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
-    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
+    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0-alpha.3"
+    "@deck.gl/core": "^7.0.0-beta.1"
+  },
+  "dependencies": {
+    "@loaders.gl/core": "^1.0.1",
+    "@loaders.gl/images": "^1.0.1"
   }
 }

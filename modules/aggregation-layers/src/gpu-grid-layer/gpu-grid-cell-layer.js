@@ -22,6 +22,7 @@ import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, CubeGeometry, fp64, PhongMaterial} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
+const defaultMaterial = new PhongMaterial();
 
 import vs from './gpu-grid-cell-layer-vertex.glsl';
 import fs from './gpu-grid-cell-layer-fragment.glsl';
@@ -41,12 +42,12 @@ const defaultProps = {
   minColor: {type: 'color', value: DEFAULT_MINCOLOR},
   maxColor: {type: 'color', value: DEFAULT_MAXCOLOR},
 
-  material: new PhongMaterial()
+  material: defaultMaterial
 };
 
 export default class GPUGridCellLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['project32', 'lighting', 'picking', 'fp64']};
+    return {vs, fs, modules: ['project32', 'gouraud-lighting', 'picking', 'fp64']};
   }
 
   initializeState() {
@@ -108,21 +109,23 @@ export default class GPUGridCellLayer extends Layer {
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
 
     maxCountBuffer.bind({target: GL.UNIFORM_BUFFER, index: AGGREGATION_DATA_UBO_INDEX});
-    this.state.model.render(
-      Object.assign({}, uniforms, {
-        cellSize,
-        extruded,
-        elevationScale,
-        coverage,
-        gridSize,
-        gridOrigin,
-        gridOriginLow,
-        gridOffset,
-        gridOffsetLow,
-        minColor,
-        maxColor
-      })
-    );
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          cellSize,
+          extruded,
+          elevationScale,
+          coverage,
+          gridSize,
+          gridOrigin,
+          gridOriginLow,
+          gridOffset,
+          gridOffsetLow,
+          minColor,
+          maxColor
+        })
+      )
+      .draw();
     maxCountBuffer.unbind({target: GL.UNIFORM_BUFFER, index: AGGREGATION_DATA_UBO_INDEX});
   }
 
@@ -142,5 +145,5 @@ export default class GPUGridCellLayer extends Layer {
   }
 }
 
-GPUGridCellLayer.layerName = 'GridCellLayer';
+GPUGridCellLayer.layerName = 'GPUGridCellLayer';
 GPUGridCellLayer.defaultProps = defaultProps;

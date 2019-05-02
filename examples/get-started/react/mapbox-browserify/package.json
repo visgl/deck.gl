@@ -1,0 +1,30 @@
+{
+  "name": "react-mapbox-browserify",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "budo ./app.js --open -- -t babelify -t envify",
+    "build": "browserify ./app.js -o dist/app.js -t babelify -t envify"
+  },
+  "dependencies": {
+    "deck.gl": "^7.0.0-beta",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^4.1.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "@babel/preset-react": "^7.0.0",
+    "babelify": "^10.0.0",
+    "browserify": "^16.0.0",
+    "budo": "^9.2.2",
+    "envify": "^4.0.0"
+  },
+  "babel": {
+    "presets": [
+      "@babel/preset-env",
+      "@babel/preset-react"
+    ]
+  }
+}

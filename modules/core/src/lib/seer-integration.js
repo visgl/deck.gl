@@ -126,7 +126,6 @@ function logPayload(layer) {
     if (layer.getAttributeManager()) {
       const attrs = layer.getAttributeManager().getAttributes();
       data.push({path: 'objects.attributes', data: attrs});
-      badges.push(layer.getAttributeManager().stats.getTimeString());
     }
     // TODO: Seer currently only handles single model layers
     if (layer.state.model) {

@@ -1,20 +1,19 @@
 <!-- INJECT:"ContourLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
 </p>
 
 
 # ContourLayer
 
-## About
-
 `ContourLayer` renders `Isoline`s or `Isoband`s for a given threshold and cell size. `Isoline` represents collection of line segments that separate the area above and below a given threshold. `Isoband` represents a collection of polygons (filled) that fill the area containing values in a given threshold range. To generate an `Isoline` single threshold value is needed, to generate an `Isoband` an Array with two values needed. Data is first aggregated using given cell size and resulting scalar field is used to run [Marching Squares](https://en.wikipedia.org/wiki/Marching_squares) algorithm that generates a set of vertices to form Isolines or Isobands. In below documentation `Isoline` and `Isoband` is referred as `contour`.
 
-## Usage
 
 ```js
-import DeckGL, {ContourLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {ContourLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -40,6 +39,37 @@ const App = ({data, viewport}) => {
   return (<DeckGL {...viewport} layers={[layer]} />);
 };
 ```
+
+
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
+```
+
+```js
+import {ContourLayer} from '@deck.gl/aggregation-layers';
+new ContourLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/aggregation-layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.ContourLayer({});
+```
+
 
 ## Properties
 
@@ -78,7 +108,7 @@ Array of objects with following keys
 
 * `zIndex` (Number, optional) : Defines z order of the contour. Contour with higher `zIndex` value is rendered above contours with lower `zIndex` values. When visualizing overlapping contours, `zIndex` along with `zOffset` (defined below) can be used to precisely layout contours. This also avoids z-fighting rendering issues. If not specified a unique value from `0` to `n` (number of contours) is assigned.
 
-##### `zOffset`: (Number, optional)
+##### `zOffset` (Number, optional)
 
 * Default: `0.005`
 
@@ -92,13 +122,13 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 ### Data Accessors
 
-##### `getPosition` (Function, optional)
+##### `getPosition` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => object.position`
 
 Method called to retrieve the position of each point.
 
-##### `getWeight` (Function, optional)
+##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
 * Default: `object => 1`
 
@@ -106,4 +136,4 @@ Method called to retrieve weight of each point. By default each point will use a
 
 ## Source
 
-[/contour-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/contour-layer)
+[modules/aggregation-layers/src/contour-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/contour-layer)

@@ -1,5 +1,5 @@
 import LayersPass from './layers-pass';
-import {withParameters} from 'luma.gl';
+import {withParameters} from '@luma.gl/core';
 
 export default class PickLayersPass extends LayersPass {
   render(props) {
@@ -18,6 +18,7 @@ export default class PickLayersPass extends LayersPass {
     viewports,
     onViewportActive,
     pickingFBO,
+    effectProps,
     deviceRect: {x, y, width, height},
     redrawReason = ''
   }) {
@@ -40,14 +41,22 @@ export default class PickLayersPass extends LayersPass {
           layers,
           viewports,
           onViewportActive,
-          drawPickingColors: true,
           pass: 'picking',
           redrawReason,
+          effectProps,
           parameters: {
             blend: true,
             blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
             blendEquation: gl.FUNC_ADD,
-            blendColor: [0, 0, 0, 0]
+            blendColor: [0, 0, 0, 0],
+
+            // When used as Mapbox custom layer, the context state may be dirty
+            // TODO - Remove when mapbox fixes this issue
+            // https://github.com/mapbox/mapbox-gl-js/issues/7801
+            depthMask: true,
+            depthTest: true,
+            depthRange: [0, 1],
+            colorMask: [true, true, true, true]
           }
         });
       }
@@ -65,12 +74,14 @@ export default class PickLayersPass extends LayersPass {
     return shouldDrawLayer;
   }
 
-  getModuleParameters(layer) {
+  getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
       devicePixelRatio: this.props.pixelRatio
     });
+
+    Object.assign(moduleParameters, effectProps);
     return moduleParameters;
   }
 

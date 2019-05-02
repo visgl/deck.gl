@@ -1,3 +1,4 @@
+/* eslint import/namespace: ['error', { allowComputed: true }] */
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import autobind from 'autobind-decorator';
@@ -9,7 +10,6 @@ import {updateMapState, updateMeta, loadData, useParams, resetParams} from '../a
 import {MAPBOX_STYLES} from '../constants/defaults';
 
 class DemoLauncher extends Component {
-
   componentWillMount() {
     this._loadDemo(this.props.demo, false);
   }
@@ -30,7 +30,9 @@ class DemoLauncher extends Component {
     const DemoComponent = Demos[demo];
 
     if (DemoComponent) {
-      this.props.loadData(demo, DemoComponent.data);
+      if (!DemoComponent.allowMissingData) {
+        this.props.loadData(demo, DemoComponent.data);
+      }
       this.props.useParams(DemoComponent.parameters);
       let demoViewport = DemoComponent.viewport;
       this._mapStyle = DemoComponent.mapStyle;
@@ -65,11 +67,7 @@ class DemoLauncher extends Component {
     const {viewState, width, height, isInteractive} = this.props;
 
     if (!mapStyle) {
-      return (
-        <div style={{width, height, position: 'relative'}}>
-          {component}
-        </div>
-      );
+      return <div style={{width, height, position: 'relative'}}>{component}</div>;
     }
 
     return (
@@ -77,21 +75,19 @@ class DemoLauncher extends Component {
         mapboxApiAccessToken={MapboxAccessToken}
         mapStyle={mapStyle}
         reuseMap
-
         {...viewState}
         width={width}
         height={height}
-        onViewStateChange={this._updateMapViewState}>
-
+        onViewStateChange={isInteractive && this._updateMapViewState}
+      >
         {component}
         {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
-
       </MapGL>
     );
   }
 
   render() {
-    const {viewState, demo, owner, data, isInteractive} = this.props;
+    const {viewState, demo, owner, data} = this.props;
     const DemoComponent = Demos[demo];
 
     // Params are not initialized in time
@@ -105,23 +101,18 @@ class DemoLauncher extends Component {
       DemoComponent.mapStyle,
       <DemoComponent
         ref="demo"
-
         controller={false}
         baseMap={false}
-
         data={owner === demo ? data : null}
         viewState={viewState}
-
         mapboxApiAccessToken={MapboxAccessToken}
         mapStyle={this._mapStyle || MAPBOX_STYLES.BLANK}
-
         params={params}
         onStateChange={this.props.updateMeta}
         useParams={this.props.useParams}
-        />
+      />
     );
   }
-
 }
 
 const mapStateToProps = state => ({

@@ -1,8 +1,9 @@
 <!-- INJECT:"PolygonLayerDemo" -->
 
 <p class="badges">
-  <img src="https://img.shields.io/badge/64--bit-support-blue.svg?style=flat-square" alt="64-bit" />
-  <img src="https://img.shields.io/badge/extruded-yes-blue.svg?style=flat-square" alt="extruded" />
+  <img src="https://img.shields.io/badge/@deck.gl/layers-lightgrey.svg?style=flat-square" alt="@deck.gl/layers" />
+  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
+  <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
 # PolygonLayer
@@ -12,7 +13,8 @@ The Polygon Layer renders filled and/or stroked polygons.
 PolygonLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
-import DeckGL, {PolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {PolygonLayer} from '@deck.gl/layers';
 
 const App = ({data, viewport}) => {
 
@@ -64,6 +66,34 @@ const App = ({data, viewport}) => {
 };
 ```
 
+## Installation
+
+To install the dependencies from NPM:
+
+```bash
+npm install deck.gl
+# or
+npm install @deck.gl/core @deck.gl/layers
+```
+
+```js
+import {PolygonLayer} from '@deck.gl/layers';
+new PolygonLayer({});
+```
+
+To use pre-bundled scripts:
+
+```html
+<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<!-- or -->
+<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+```
+
+```js
+new deck.PolygonLayer({});
+```
+
 ## Properties
 
 Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
@@ -110,6 +140,12 @@ Elevation multiplier. The final elevation is calculated by
   `elevationScale * getElevation(d)`. `elevationScale` is a handy property to scale
 all elevation without updating the data.
 
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the line width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
 ##### `lineWidthScale` (Boolean, optional)
 
 * Default: `1`
@@ -155,14 +191,16 @@ Only works if `getLineDashArray` is specified.
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
 
-##### `lightSettings` (Object, optional) **EXPERIMENTAL**
+##### `material` (Object, optional)
 
-This is an object that contains light settings for extruded polygons.
-Be aware that this prop will likely be changed in a future version of deck.gl.
+* Default: `new PhongMaterial()`
+
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
+Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
 
-##### `getPolygon` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getPolygon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * default: `object => object.polygon`
 
@@ -204,7 +242,7 @@ If the optional third component `z` is supplied for a position, it specifies the
   <p><i>Polygons with 3D positions, courtesy of <a href="https://github.com/SymbolixAU">@SymbolixAU</a> and <a href="https://github.com/mdsumner">@mdsumner</a></i></p>
 </div>
 
-##### `getFillColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -213,7 +251,7 @@ The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
 
-##### `getLineColor` (Function|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[0, 0, 0, 255]`
 
@@ -223,16 +261,16 @@ The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in 
 * If a function is provided, it is called on each polygon to retrieve its outline color.
 
 
-##### `getLineWidth` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
-The width of the outline of the polygon, in meters. Only applies if `extruded: false`.
+The width of the outline of the polygon, in units specified by `lineWidthUnits` (default meters). Only applies if `extruded: false`.
 
 * If a number is provided, it is used as the outline width for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline width.
 
-##### `getElevation` (Function|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -246,7 +284,7 @@ Only applies if `extruded: true`.
 
 **Note:** If 3D positions are returned by `getPolygon`, the extrusion returned by `getElevation` is added to the base altitude of each vertex.
 
-##### `getLineDashArray` (Function|Array, optional)
+##### `getLineDashArray` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional)
 
 * Default: `null`
 

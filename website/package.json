@@ -7,7 +7,7 @@
   },
   "main": "index.js",
   "scripts": {
-    "start": "webpack-dev-server --env.local --progress --content-base ./src/static --open",
+    "start": "webpack-dev-server --env.local --progress --open",
     "start-local": "yarn start",
     "build-clean": "rm -rf ./dist && mkdir dist",
     "build-static": "cp -r ./src/static/* dist && babel ./src/static/workers --out-dir dist/workers",
@@ -16,7 +16,10 @@
     "lint": "eslint src --ignore-pattern workers"
   },
   "dependencies": {
+    "@mapbox/vector-tile": "^1.3.1",
     "@tweenjs/tween.js": "^16.7.0",
+    "@loaders.gl/core": "^1.0.1",
+    "@loaders.gl/las": "^1.0.1",
     "autobind-decorator": "^1.3.3",
     "d3-color": "^1.0.1",
     "d3-request": "^1.0.2",
@@ -24,6 +27,7 @@
     "expr-eval": "^1.0.0",
     "highlight.js": "^9.7.0",
     "marked": "^0.3.6",
+    "pbf": "^3.2.0",
     "prop-types": "^15.5.8",
     "rbush": "^2.0.1",
     "react": "^16.0.0",
@@ -40,14 +44,14 @@
   },
   "devDependencies": {
     "autoprefixer-loader": "^3.2.0",
-    "babel-cli": "^6.24.0",
-    "babel-core": "^6.25.0",
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
     "babel-eslint": "^7.0.0",
-    "babel-loader": "^7.0.0",
-    "babel-plugin-transform-decorators-legacy": "^1.3.4",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-react": "^6.22.0",
-    "babel-preset-stage-2": "^6.22.0",
+    "babel-loader": "^8.0.0",
+    "@babel/plugin-proposal-class-properties": "^7.0.0",
+    "@babel/plugin-proposal-decorators": "^7.1.2",
+    "@babel/preset-react": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
     "brfs-babel": "^1.0.0",
     "css-loader": "^0.26.1",
     "eslint": "^3.0.0",
@@ -67,39 +71,5 @@
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.1",
     "webworkify-webpack-dropin": "^1.1.9"
-  },
-  "babel": {
-    "presets": [
-      "react",
-      "es2015",
-      "stage-2"
-    ],
-    "plugins": [
-      "transform-decorators-legacy"
-    ],
-    "env": {
-      "test": {
-        "plugins": [
-          "react-hot-loader/babel"
-        ]
-      }
-    }
-  },
-  "eslintConfig": {
-    "parser": "babel-eslint",
-    "plugins": [
-      "react"
-    ],
-    "extends": [
-      "eslint-config-uber-jsx",
-      "eslint-config-uber-es2015"
-    ],
-    "rules": {
-      "guard-for-in": 0,
-      "camelcase": 0
-    },
-    "globals": {
-      "MapboxAccessToken": false
-    }
   }
 }

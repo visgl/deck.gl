@@ -1,7 +1,8 @@
 import GL from '@luma.gl/constants';
-import {Buffer, Transform} from 'luma.gl';
+import {Buffer, Transform} from '@luma.gl/core';
 import {getShaders, getBuffers, padBuffer} from './attribute-transition-utils';
 import Attribute from './attribute';
+import BaseAttribute from './base-attribute';
 import Transition from '../transitions/transition';
 import log from '../utils/log';
 import assert from '../utils/assert';
@@ -226,16 +227,17 @@ export default class AttributeTransitionManager {
 
     let toState;
     if (attribute.constant) {
-      toState = {constant: true, value: attribute.value, size};
+      toState = new BaseAttribute(this.gl, {constant: true, value: attribute.value, size});
     } else {
-      toState = {
+      toState = new BaseAttribute(this.gl, {
         constant: false,
         buffer: attribute.getBuffer(),
+        divisor: 0,
         size,
         // attribute's `value` does not match the content of external buffer,
         // will need to call buffer.getData if needed
         value: attribute.externalBuffer ? null : attribute.value
-      };
+      });
     }
     const fromState = transition.buffer || toState;
     const toLength = this.numInstances * size;

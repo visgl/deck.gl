@@ -1,5 +1,113 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v6.4 to v7.0
+
+#### Submodule Structure and Dependency Changes
+
+- ` @deck.gl/core` is moved from `dependencies` to `devDependencies` for all submodules. This will reduce the runtime error caused by installing multiple copies of the core.
+- The master module `deck.gl` now include all submodules except ` @deck.gl/test-utils`. See [list of submodules](/docs/get-started/getting-started.md#selectively-install-dependencies) for details.
+- `ContourLayer`, `GridLayer`, `HexagonLayer` and `ScreenGridLayer` are moved from ` @deck.gl/layers` to ` @deck.gl/aggregation-layers`. No action is required if you are importing them from `deck.gl`.
+- ` @deck.gl/experimental-layers` is deprecated. Experimental layers will be exported from their respective modules with a `_` prefix.
+  + `BitmapLayer` is moved to ` @deck.gl/layers`.
+  + `MeshLayer` is renamed to `SimpleMeshLayer` and moved to ` @deck.gl/mesh-layers`.
+  + `TileLayer` and `TripsLayer` are moved to ` @deck.gl/geo-layers`.
+
+#### Deck Class
+
+Breaking Changes:
+
+- `onLayerHover` and `onLayerClick` props are replaced with `onHover` and `onClick`. The first argument passed to the callback will always be a valid [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) object, and the second argument is the pointer event. This change makes these two events behave consistently with other event callbacks.
+
+#### Layers
+
+Deprecations:
+
+- `ArcLayer` and `LineLayer`'s `getStrokeWidth` props are deprecated. Use `getWidth` instead.
+
+Breaking Changes:
+
+- `HexagonCellLayer` is removed. Use [ColumnLayer](/docs/layers/column-layer.md) with `diskResolution: 6` instead.
+- A bug in projecting elevation was fixed in `HexagonLayer`, `GridLayer` and `GridCellLayer`. The resulting heights of extruded grids/hexagons have changed. You may adjust them to match previous behavior by tweaking `elevationScale`.
+- The following former experimental layers' APIs are redesigned as they graduate to official layers. Refer to their documentations for details:
+  - [BitmapLayer](/docs/layers/column-layer.md)
+  - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md)
+  - [TileLayer](/docs/layers/tile-layer.md)
+  - [TripsLayer](/docs/layers/trips-layer.md)
+
+#### Lighting
+
+The old experimental prop `lightSettings` in many 3D layers is no longer supported. The new and improved settings are split into two places: a [material](https://github.com/uber/luma.gl/tree/master/docs/api-reference/core/materials) prop for each 3D layer and a shared set of lights specified by [LightingEffect](/docs/effects/lighting-effect.md) with the [effects prop of Deck](/docs/api-reference/deck.md#effects).
+Check [Using Lighting](/docs/developer-guide/using-lighting.md) in developer guide for more details.
+
+#### Views
+
+v7.0 includes major bug fixes for [OrbitView](/docs/api-reference/orbit-view.md) and [OrthographicView](/docs/api-reference/orthographic-view.md). Their APIs are also changed for better clarity and consistency.
+
+Breaking Changes:
+
+* View state: `zoom` is now logarithmic in all `View` classes. `zoom: 0` maps one unit in world space to one pixel in screen space.
+* View state: `minZoom` and `maxZoom` now default to no limit.
+* View state: `offset` (pixel-shift of the viewport center) is removed, use `target` (world position `[x, y, z]` of the viewport center) instead.
+* Constructor prop: added `target` to specify the viewport center in world position.
+* `OrthographicView`'s constructor props `left`, `right`, `top` and `bottom` are removed. Use `target` to specify viewport center.
+* `OrbitView`'s constructor prop `distance` and static method `getDistance` are removed. Use `fovy` and `zoom` instead.
+
+#### project Shader Module
+
+Deprecations:
+
+- `project_scale` -> `project_size`
+- `project_to_clipspace` -> `project_common_position_to_clipspace`
+- `project_to_clipspace_fp64` -> `project_common_position_to_clipspace_fp64`
+- `project_pixel_to_clipspace` -> `project_pixel_size_to_clipspace`
+
+#### React
+
+If you are using DeckGL with react-map-gl, ` @deck.gl/react@^7.0.0` no longer works with react-map-gl v3.x.
+
+
+## Upgrading from deck.gl v6.3 to v6.4
+
+#### OrthographicView
+
+The experimental `OrthographicView` class has the following breaking changes:
+
+- `zoom` is reversed (larger value means zooming in) and switched to logarithmic scale.
+- Changed view state defaults:
+  + `zoom` - `1` -> `0`
+  + `offset` - `[0, 1]` -> `[0, 0]`
+  + `minZoom` - `0.1` -> `-10`
+- `eye`, `lookAt` and `up` are now set in the  `OrthographicView` constructor instead of `viewState`.
+
+#### ScatterplotLayer
+
+Deprecations:
+
+- `outline` is deprecated: use `stroked` instead.
+- `strokeWidth` is deprecated: use `getLineWidth` instead. Note that while `strokeWidth` is in pixels, line width is now pecified in meters. The old appearance can be achieved by using `lineWidthMinPixels` and/or `lineWidthMaxPixels`.
+- `getColor` is deprecated: use `getFillColor` and `getLineColor` instead.
+
+Breaking changes:
+
+- `outline` / `stroked` no longer turns off fill. Use `filled: false` instead.
+
+#### GeoJsonLayer
+
+Breaking changes:
+
+- `stroked`, `getLineWidth` and `getLineColor` props now apply to point features (rendered with a ScatterplotLayer) in addition to polygon features. To revert to the old appearance, supply a `_subLayerProps` override:
+
+```js
+new GeoJsonLayer({
+  // ...other props
+  stroked: true,
+  _subLayerProps: {
+    points: {stroked: false}
+  }
+});
+```
+
+
 ## Upgrading from deck.gl v6.2 to v6.3
 
 #### GridLayer and HexagonLayer
@@ -8,7 +116,7 @@ Shallow changes in `getColorValue` and `getElevationValue` props are now ignored
 
 #### Prop Types in Custom Layers
 
-Although the [prop types system](/docs/developer-guide/prop-types.md) is largely backward-compatible, it is possible that some custom layers may stop updating when a certain prop changes. This is because the automatically deduced prop type from `defaultProps` does not match its desired usage. Switch to explicit descriptors will fix the issue, e.g. from:
+Although the [prop types system](/docs/developer-guide/custom-layers/prop-types.md) is largely backward-compatible, it is possible that some custom layers may stop updating when a certain prop changes. This is because the automatically deduced prop type from `defaultProps` does not match its desired usage. Switch to explicit descriptors will fix the issue, e.g. from:
 
 ```js
 MyLayer.defaultProps = {

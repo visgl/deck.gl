@@ -1,17 +1,18 @@
 build/
 dist/
-dist-es6/
-dist-demo/
+dist.min.js
 node_modules/
 coverage/
+test/**/*-failed.png
 .nyc_output/
-.vscode/
+.reify-cache/
 
+dist-demo/
 dist-bundle.js
+
 examples/winds/data/*.html
 mapbox-token.js
 TODO
-_docs
 
 mapbox-gl.js
 mapbox-gl-dev.js
@@ -20,6 +21,7 @@ mapbox-gl-dev.js
 yarn-error.log
 package-lock.json
 
+.vscode/
 .project
 .idea
 .DS_Store

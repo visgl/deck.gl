@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, log, createIterable} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_CHAR_SET,
@@ -57,7 +57,11 @@ const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
   fp64: false,
+  billboard: true,
   sizeScale: 1,
+  sizeUnits: 'pixels',
+  sizeMinPixels: 0,
+  sizeMaxPixels: Number.MAX_SAFE_INTEGER,
 
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
@@ -95,6 +99,12 @@ export default class TextLayer extends CompositeLayer {
     ) {
       this.transformStringToLetters();
     }
+  }
+
+  finalizeState() {
+    super.finalizeState();
+    // Release resources held by the font atlas manager
+    this.state.fontAtlasManager.finalize();
   }
 
   updateFontAtlas({oldProps, props}) {
@@ -155,9 +165,11 @@ export default class TextLayer extends CompositeLayer {
     const {iconMapping} = this.state;
 
     const transformedData = [];
-    let objectIndex = 0;
-    for (const val of data) {
-      const text = getText(val);
+
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const text = getText(object, objectInfo);
       if (text) {
         const letters = Array.from(text);
         const offsets = [0];
@@ -170,8 +182,8 @@ export default class TextLayer extends CompositeLayer {
             offsets,
             len: text.length,
             // reference of original object and object index
-            object: val,
-            objectIndex
+            object,
+            objectIndex: objectInfo.index
           };
 
           const frame = iconMapping[letter];
@@ -185,8 +197,6 @@ export default class TextLayer extends CompositeLayer {
           transformedData.push(datum);
         });
       }
-
-      objectIndex++;
     }
 
     this.setState({data: transformedData});
@@ -244,8 +254,12 @@ export default class TextLayer extends CompositeLayer {
       getAlignmentBaseline,
       getPixelOffset,
       fp64,
+      billboard,
       sdf,
       sizeScale,
+      sizeUnits,
+      sizeMinPixels,
+      sizeMaxPixels,
       transitions,
       updateTriggers
     } = this.props;
@@ -266,7 +280,11 @@ export default class TextLayer extends CompositeLayer {
         getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
         getPixelOffset: this._getAccessor(getPixelOffset),
         fp64,
+        billboard,
         sizeScale: sizeScale * scale,
+        sizeUnits,
+        sizeMinPixels: sizeMinPixels * scale,
+        sizeMaxPixels: sizeMaxPixels * scale,
 
         transitions: transitions && {
           getPosition: transitions.getPosition,

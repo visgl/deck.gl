@@ -18,72 +18,47 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global fetch */
+
 import {Layer} from '@deck.gl/core';
-import {GLTFInstantiator, fp64} from 'luma.gl';
+import {fp64, ScenegraphNode, log} from '@luma.gl/core';
+import {load} from '@loaders.gl/core';
+
+import {MATRIX_ATTRIBUTES} from '../utils/matrix';
+
+import vs from './scenegraph-layer-vertex.glsl';
+import fs from './scenegraph-layer-fragment.glsl';
 
 const {fp64LowPart} = fp64;
 
-const vs = `
-  // Instance attributes
-  attribute vec3 instancePositions;
-  attribute vec2 instancePositions64xy;
-  attribute vec3 instancePickingColors;
-
-  // Uniforms
-  uniform float sizeScale;
-
-  // Attributes
-  attribute vec4 POSITION;
-
-  #ifdef HAS_UV
-    attribute vec2 TEXCOORD_0;
-    varying vec2 vTEXCOORD_0;
-  #endif
-
-  void main(void) {
-    #ifdef HAS_UV
-      vTEXCOORD_0 = TEXCOORD_0;
-    #endif
-
-    vec3 pos = POSITION.xyz;
-    pos = project_scale(pos * sizeScale);
-
-    vec4 worldPosition;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, worldPosition);
-    picking_setPickingColor(instancePickingColors);
-  }
-`;
-
-const fs = `
-  #ifdef HAS_UV
-    varying vec2 vTEXCOORD_0;
-    uniform sampler2D u_BaseColorSampler;
-  #endif
-
-  void main(void) {
-    #ifdef HAS_UV
-      gl_FragColor = texture2D(u_BaseColorSampler, vTEXCOORD_0);
-    #else
-      gl_FragColor = vec4(0, 0, 0, 1);
-    #endif
-
-    gl_FragColor = picking_filterPickingColor(gl_FragColor);
-  }
-`;
-
-const DEFAULT_COLOR = [0, 0, 0, 255];
+const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
-  sizeScale: {type: 'number', value: 1, min: 0},
+  scenegraph: {type: 'object', value: null, async: true},
 
+  fetch: (url, {propName, layer}) => {
+    if (propName === 'scenegraph') {
+      return load(url, layer.getLoadOptions()).then(({scenes, animator}) => {
+        scenes[0].animator = animator;
+        return scenes[0];
+      });
+    }
+
+    return fetch(url).then(response => response.json());
+  },
+
+  sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
-  getYaw: {type: 'accessor', value: x => x.yaw || x.angle || 0},
-  getPitch: {type: 'accessor', value: x => x.pitch || 0},
-  getRoll: {type: 'accessor', value: x => x.roll || 0}
+  // [pitch, yaw, roll]
+  getOrientation: {type: 'accessor', value: [0, 0, 0]},
+  getScale: {type: 'accessor', value: [1, 1, 1]},
+  getTranslation: {type: 'accessor', value: [0, 0, 0]},
+  // 4x4 matrix
+  getTransformMatrix: {type: 'accessor', value: []}
 };
 
 export default class ScenegraphLayer extends Layer {
@@ -92,13 +67,21 @@ export default class ScenegraphLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        accessor: 'getPosition'
+        accessor: 'getPosition',
+        transition: true
       },
       instancePositions64xy: {
         size: 2,
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
-      }
+      },
+      instanceColors: {
+        size: 4,
+        accessor: 'getColor',
+        defaultValue: DEFAULT_COLOR,
+        transition: true
+      },
+      instanceModelMatrix: MATRIX_ATTRIBUTES
     });
   }
 
@@ -121,41 +104,121 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
-  updateState({props, oldProps, changeFlags}) {
-    if (changeFlags.propsChanged && props.gltf) {
-      const instantiator = new GLTFInstantiator(this.context.gl, {
-        modelOptions: {
-          vs,
-          fs,
-          modules: ['project32', 'picking'],
-          isInstanced: true
-        }
-      });
+  updateState(params) {
+    super.updateState(params);
+    const {props, oldProps} = params;
 
-      const scenes = instantiator.instantiate(props.gltf);
-      this.setState({
-        sceneGraph: scenes[0]
-      });
+    if (props.scenegraph !== oldProps.scenegraph) {
+      if (props.scenegraph instanceof ScenegraphNode) {
+        this._deleteScenegraph();
+        this._applyAllAttributes(props.scenegraph);
+        this._applyAnimationsProp(props.scenegraph, props._animations);
+        this.setState({scenegraph: props.scenegraph});
+      } else if (props.scenegraph !== null) {
+        log.warn('bad scenegraph:', props.scenegraph)();
+      }
+    }
+
+    if (props._animations !== oldProps._animations) {
+      this._applyAnimationsProp(props.scenegraph, props._animations);
     }
   }
 
-  drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
-    if (!this.state.sceneGraph) return;
+  finalizeState() {
+    this._deleteScenegraph();
+  }
 
-    const {sizeScale} = this.props;
+  _applyAllAttributes(scenegraph) {
+    const allAttributes = this.getAttributeManager().getAttributes();
+    scenegraph.traverse(model => {
+      this._setModelAttributes(model.model, allAttributes);
+    });
+  }
+
+  _applyAnimationsProp(scenegraph, animationsProp) {
+    if (!scenegraph || !scenegraph.animator || !animationsProp) {
+      return;
+    }
+
+    const animations = scenegraph.animator.getAnimations();
+
+    Object.keys(animationsProp).forEach(key => {
+      // Key can be:
+      //  - number for index number
+      //  - name for animation name
+      //  - * to affect all animations
+      const value = animationsProp[key];
+
+      if (key === '*') {
+        animations.forEach(animation => {
+          Object.assign(animation, value);
+        });
+      } else if (Number.isFinite(Number(key))) {
+        const number = Number(key);
+        if (number >= 0 && number < animations.length) {
+          Object.assign(animations[number], value);
+        } else {
+          log.warn(`animation ${key} not found`)();
+        }
+      } else {
+        const findResult = animations.find(({name}) => name === key);
+        if (findResult) {
+          Object.assign(findResult, value);
+        } else {
+          log.warn(`animation ${key} not found`)();
+        }
+      }
+    });
+  }
+
+  _deleteScenegraph() {
+    const {scenegraph} = this.state;
+    if (scenegraph instanceof ScenegraphNode) {
+      scenegraph.delete();
+    }
+  }
+
+  getLoadOptions() {
+    return {
+      gl: this.context.gl,
+      waitForFullLoad: true,
+      modelOptions: {
+        vs,
+        fs,
+        modules: ['project32', 'picking'],
+        isInstanced: true
+      }
+    };
+  }
+
+  updateAttributes(props) {
+    super.updateAttributes(props);
+    if (!this.state.scenegraph) return;
 
     const attributeManager = this.getAttributeManager();
     const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-    const numInstances = this.getNumInstances();
+    this.state.scenegraph.traverse(model => {
+      this._setModelAttributes(model.model, changedAttributes);
+    });
+  }
 
-    this.state.sceneGraph.traverse((model, {worldMatrix}) => {
-      model.setAttributes(changedAttributes);
-      model.setInstanceCount(numInstances);
+  draw({moduleParameters = null, parameters = {}, context}) {
+    if (!this.state.scenegraph) return;
+
+    if (this.props._animations && this.state.scenegraph.animator) {
+      this.state.scenegraph.animator.animate(context.animationProps.time);
+    }
+
+    const {sizeScale} = this.props;
+    const numInstances = this.getNumInstances();
+    this.state.scenegraph.traverse((model, {worldMatrix}) => {
+      model.model.setInstanceCount(numInstances);
       model.updateModuleSettings(moduleParameters);
       model.draw({
         parameters,
         uniforms: {
-          sizeScale
+          sizeScale,
+          sceneModelMatrix: worldMatrix
         }
       });
     });

@@ -104,11 +104,12 @@ void main(void) {
   position_modelspace += gridOffset * gridLineNormal;
   position_modelspace += (LABEL_OFFSET + (instanceIsTitle * TITLE_OFFSET)) * gridVertexOffset;
 
-  vec4 position_clipspace = project_to_clipspace(vec4(position_modelspace, 1.0));
+  vec3 position_commonspace = project_position(position_modelspace);
+  vec4 position_clipspace = project_common_position_to_clipspace(vec4(position_commonspace, 1.0));
 
   vec2 labelVertexOffset = vec2(texCoords.x - 0.5, 0.5 - texCoords.y) * textureSize;
   // project to clipspace
-  labelVertexOffset = project_pixel_to_clipspace(labelVertexOffset).xy;
+  labelVertexOffset = project_pixel_size_to_clipspace(labelVertexOffset).xy;
   // scale label to be constant size in pixels
   labelVertexOffset *= fontSize / labelHeight * position_clipspace.w;
 

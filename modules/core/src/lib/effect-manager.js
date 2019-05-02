@@ -1,10 +1,12 @@
 import {deepEqual} from '../utils/deep-equal';
-import {default as LightingEffect} from '../effects/lighting-effect';
+import {default as LightingEffect} from '../effects/lighting/lighting-effect';
 
 export default class EffectManager {
   constructor() {
     this.effects = [];
     this._needsRedraw = 'Initial render';
+    this.defaultLightingEffect = new LightingEffect();
+    this.needApplyDefaultLighting = false;
   }
 
   setProps(props) {
@@ -14,27 +16,32 @@ export default class EffectManager {
         this._needsRedraw = 'effects changed';
       }
     }
-    this.applyDefaultLightingEffect();
+    this.checkLightingEffect();
   }
 
-  needsRedraw(clearRedrawFlags) {
+  needsRedraw(opts = {clearRedrawFlags: false}) {
     const redraw = this._needsRedraw;
-    if (clearRedrawFlags) {
+    if (opts.clearRedrawFlags) {
       this._needsRedraw = false;
     }
     return redraw;
   }
 
+  getEffects() {
+    let effects = this.effects;
+    if (this.needApplyDefaultLighting) {
+      effects = this.effects.slice();
+      effects.push(this.defaultLightingEffect);
+    }
+    return effects;
+  }
+
+  // Private
   setEffects(effects = []) {
     this.effects = effects;
   }
 
-  getEffects() {
-    return this.effects;
-  }
-
-  // Private
-  applyDefaultLightingEffect() {
+  checkLightingEffect() {
     let hasEffect = false;
     for (const effect of this.effects) {
       if (effect instanceof LightingEffect) {
@@ -42,8 +49,6 @@ export default class EffectManager {
         break;
       }
     }
-    if (!hasEffect) {
-      this.effects.push(new LightingEffect());
-    }
+    this.needApplyDefaultLighting = !hasEffect;
   }
 }

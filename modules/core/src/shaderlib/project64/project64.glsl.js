@@ -57,7 +57,7 @@ void project_position_fp64(vec2 position, vec2 position64xyLow, out vec2 out_val
   project_position_fp64(position64xy, out_val);
 }
 
-vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
+vec4 project_common_position_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
   vec2 vertex_pos_clipspace[4];
   mat4_vec4_mul_fp64(project_uViewProjectionMatrixFP64, vertex_pos_modelspace,
     vertex_pos_clipspace);
@@ -70,35 +70,40 @@ vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
 }
 
 vec4 project_position_to_clipspace(
-  vec3 position, vec2 position64xyLow, vec3 offset, out vec4 worldPosition
+  vec3 position, vec2 position64xyLow, vec3 offset, out vec4 commonPosition
 ) {
   // This is the local offset to the instance position
   vec2 offset64[4];
   vec4_fp64(vec4(offset, 0.0), offset64);
 
-  float z = project_scale(position.z);
+  float z = project_size(position.z);
 
   // Apply web mercator projection (depends on coordinate system imn use)
   vec2 projectedPosition64xy[2];
   project_position_fp64(position.xy, position64xyLow, projectedPosition64xy);
 
-  vec2 worldPosition64[4];
-  worldPosition64[0] = sum_fp64(offset64[0], projectedPosition64xy[0]);
-  worldPosition64[1] = sum_fp64(offset64[1], projectedPosition64xy[1]);
-  worldPosition64[2] = sum_fp64(offset64[2], vec2(z, 0.0));
-  worldPosition64[3] = vec2(1.0, 0.0);
+  vec2 commonPosition64[4];
+  commonPosition64[0] = sum_fp64(offset64[0], projectedPosition64xy[0]);
+  commonPosition64[1] = sum_fp64(offset64[1], projectedPosition64xy[1]);
+  commonPosition64[2] = sum_fp64(offset64[2], vec2(z, 0.0));
+  commonPosition64[3] = vec2(1.0, 0.0);
 
-  worldPosition = vec4(projectedPosition64xy[0].x, projectedPosition64xy[1].x, z, 1.0);
+  commonPosition = vec4(projectedPosition64xy[0].x, projectedPosition64xy[1].x, z, 1.0);
 
-  return project_to_clipspace_fp64(worldPosition64);
+  return project_common_position_to_clipspace_fp64(commonPosition64);
 }
 
 vec4 project_position_to_clipspace(
   vec3 position, vec2 position64xyLow, vec3 offset
 ) {
-  vec4 worldPosition;
+  vec4 commonPosition;
   return project_position_to_clipspace(
-    position, position64xyLow, offset, worldPosition
+    position, position64xyLow, offset, commonPosition
   );
+}
+
+// Deprecated, remove in v8
+vec4 project_to_clipspace_fp64(vec2 vertex_pos_modelspace[4]) {
+  return project_common_position_to_clipspace_fp64(vertex_pos_modelspace);
 }
 `;

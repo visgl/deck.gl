@@ -1,9 +1,10 @@
 /* eslint-disable complexity */
-import assert from '../utils/assert';
 import GL from '@luma.gl/constants';
-import {Buffer, _Attribute as Attribute} from 'luma.gl';
-
+import {Buffer} from '@luma.gl/core';
+import assert from '../utils/assert';
+import {createIterable} from '../utils/iterable-utils';
 import log from '../utils/log';
+import BaseAttribute from './base-attribute';
 
 const DEFAULT_STATE = {
   isExternalBuffer: false,
@@ -12,7 +13,7 @@ const DEFAULT_STATE = {
   allocedInstances: -1
 };
 
-export default class LayerAttribute extends Attribute {
+export default class Attribute extends BaseAttribute {
   constructor(gl, opts = {}) {
     super(gl, opts);
 
@@ -27,6 +28,34 @@ export default class LayerAttribute extends Attribute {
 
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
+
+    this.shaderAttributes = {};
+    this.hasShaderAttributes = false;
+
+    if (opts.shaderAttributes) {
+      const shaderAttributes = opts.shaderAttributes;
+      for (const shaderAttributeName in shaderAttributes) {
+        const shaderAttribute = shaderAttributes[shaderAttributeName];
+
+        // Initialize the attribute descriptor, with WebGL and metadata fields
+        this.shaderAttributes[shaderAttributeName] = new Attribute(
+          this.gl,
+          Object.assign({}, shaderAttribute, {
+            id: shaderAttributeName,
+            // Luma fields
+            constant: shaderAttribute.constant || false,
+            isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
+            size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
+            value: shaderAttribute.value || null,
+            divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
+            buffer: this.getBuffer(),
+            noAlloc: true
+          })
+        );
+
+        this.hasShaderAttributes = true;
+      }
+    }
 
     Object.assign(this.userData, DEFAULT_STATE, opts, {
       transition,
@@ -74,6 +103,17 @@ export default class LayerAttribute extends Attribute {
 
   getAccessor() {
     return this.userData.accessor;
+  }
+
+  getShaderAttributes() {
+    const shaderAttributes = {};
+    if (this.hasShaderAttributes) {
+      Object.assign(shaderAttributes, this.shaderAttributes);
+    } else {
+      shaderAttributes[this.id] = this;
+    }
+
+    return shaderAttributes;
   }
 
   supportsTransition() {
@@ -164,10 +204,17 @@ export default class LayerAttribute extends Attribute {
       updated = false;
     }
 
+    this._updateShaderAttributes();
+
     state.needsUpdate = false;
     state.needsRedraw = true;
 
     return updated;
+  }
+
+  update(props) {
+    super.update(props);
+    this._updateShaderAttributes();
   }
 
   // Use generic value
@@ -191,6 +238,7 @@ export default class LayerAttribute extends Attribute {
     state.needsRedraw = state.needsUpdate || hasChanged;
     state.needsUpdate = false;
     state.isExternalBuffer = true;
+    this._updateShaderAttributes();
     return true;
   }
 
@@ -228,6 +276,7 @@ export default class LayerAttribute extends Attribute {
         this.value = buffer;
         state.needsRedraw = true;
       }
+      this._updateShaderAttributes();
       return true;
     }
 
@@ -280,8 +329,10 @@ export default class LayerAttribute extends Attribute {
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
     let i = 0;
-    for (const object of data) {
-      const objectValue = accessorFunc(object);
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const objectValue = accessorFunc(object, objectInfo);
       this._normalizeValue(objectValue, value, i);
       i += size;
     }
@@ -311,6 +362,18 @@ export default class LayerAttribute extends Attribute {
       if (!valid) {
         throw new Error(`Illegal attribute generated for ${this.id}`);
       }
+    }
+  }
+
+  _updateShaderAttributes() {
+    const shaderAttributes = this.shaderAttributes;
+    for (const shaderAttributeName in shaderAttributes) {
+      const shaderAttribute = shaderAttributes[shaderAttributeName];
+      shaderAttribute.update({
+        buffer: this.getBuffer(),
+        value: this.value,
+        constant: this.constant
+      });
     }
   }
 }

@@ -1,6 +1,6 @@
 import {Layer} from 'deck.gl';
 import GL from '@luma.gl/constants';
-import {Model, Geometry} from 'luma.gl';
+import {Model, Geometry} from '@luma.gl/core';
 
 import {textMatrixToTexture} from './utils';
 
@@ -186,8 +186,10 @@ export default class AxesLayer extends Layer {
         modelsByName.labels.updateModuleSettings(moduleParameters);
       }
 
-      modelsByName.grids.render(Object.assign({}, uniforms, baseUniforms));
-      modelsByName.labels.render(Object.assign({}, uniforms, baseUniforms, labelTexture));
+      modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms)).draw();
+      modelsByName.labels
+        .setUniforms(Object.assign({}, uniforms, baseUniforms, labelTexture))
+        .draw();
     }
   }
 
@@ -283,7 +285,8 @@ export default class AxesLayer extends Layer {
         attributes: {
           positions: new Float32Array(gridPositions),
           normals: new Float32Array(gridNormals)
-        }
+        },
+        vertexCount: gridPositions.length / 3
       }),
       isInstanced: true
     });

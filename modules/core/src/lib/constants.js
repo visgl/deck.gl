@@ -27,7 +27,6 @@ export const COORDINATE_SYSTEM = {
   // Positions are interpreted as [lng, lat, elevation]
   // lng lat are degrees, elevation is meters. distances as meters.
   LNGLAT: 1,
-  LNGLAT_EXPERIMENTAL: 1,
   LNGLAT_DEPRECATED: 5,
 
   // Positions are interpreted as meter offsets, distances as meters
@@ -45,6 +44,7 @@ export const COORDINATE_SYSTEM = {
 };
 
 export const EVENTS = {
+  click: {handler: 'onClick'},
   panstart: {handler: 'onDragStart'},
   panmove: {handler: 'onDrag'},
   panend: {handler: 'onDragEnd'}

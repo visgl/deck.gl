@@ -19,10 +19,21 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import 'luma.gl';
+import '@luma.gl/core';
 
 import DeckGL from 'deck.gl';
 import * as deck from 'deck.gl';
+
+import * as layers from '@deck.gl/layers';
+import * as aggregationLayers from '@deck.gl/aggregation-layers';
+import * as geoLayers from '@deck.gl/geo-layers';
+import * as meshLayers from '@deck.gl/mesh-layers';
+
+import * as core from '@deck.gl/core';
+import * as json from '@deck.gl/json';
+import * as mapbox from '@deck.gl/mapbox';
+import * as react from '@deck.gl/react';
+import * as testUtils from '@deck.gl/test-utils';
 
 test('Top-level imports', t0 => {
   const hasEmptyExports = obj => {
@@ -34,12 +45,34 @@ test('Top-level imports', t0 => {
     return false;
   };
 
-  t0.test('import "deck.gl"', t => {
-    t.notOk(hasEmptyExports(deck), 'No empty top-level export');
+  test('import "deck.gl"', t => {
+    t.notOk(hasEmptyExports(deck), 'No empty top-level export in deck.gl');
+    t.notOk(hasEmptyExports(deck.experimental), 'No empty experimental export in deck.gl');
+    t.notOk(hasEmptyExports(core), 'No empty top-level export in @deck.gl/core');
+    t.notOk(hasEmptyExports(core.experimental), 'No empty experimental export in @deck.gl/core');
     t.end();
   });
 
-  t0.test('selected imports', t => {
+  test('import layers', t => {
+    t.notOk(hasEmptyExports(layers), 'No empty top-level export in @deck.gl/layers');
+    t.notOk(
+      hasEmptyExports(aggregationLayers),
+      'No empty top-level export in @deck.gl/aggregation-layers'
+    );
+    t.notOk(hasEmptyExports(geoLayers), 'No empty top-level export in @deck.gl/geo-layers');
+    t.notOk(hasEmptyExports(meshLayers), 'No empty top-level export in @deck.gl/mesh-layers');
+    t.end();
+  });
+
+  test('import utilities', t => {
+    t.notOk(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json');
+    t.notOk(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox');
+    t.notOk(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react');
+    t.notOk(hasEmptyExports(testUtils), 'No empty top-level export in @deck.gl/test-utils');
+    t.end();
+  });
+
+  test('selected imports', t => {
     t.ok(deck.Layer, 'Layer symbol imported');
     t.ok(deck.ScatterplotLayer, 'ScatterplotLayer symbol imported');
     t.ok(deck.ScreenGridLayer, 'ScreenGridLayer symbol imported');
@@ -52,7 +85,7 @@ test('Top-level imports', t0 => {
     t.end();
   });
 
-  t0.test('deck.gl default import', t => {
+  test('deck.gl default import', t => {
     t.ok(DeckGL, 'DeckGL symbol imported from /react');
     t.end();
   });

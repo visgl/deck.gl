@@ -34,7 +34,7 @@ To test all examples with the local version, run:
 
 ```bash
 # rebuild bundle
-cd ../../modules/lite && npm run build && cd -
+cd ../../modules/main && npm run prepublishOnly && cd -
 # start server
 npm run start-local
 ```

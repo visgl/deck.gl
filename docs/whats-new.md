@@ -4,29 +4,187 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v7.0
 
-Target Release Date: Mar, 2019
+Release Date: April 19, 2019
+
+### New Layer Catalog
 
 <table style="border: 0;" align="center">
   <tbody>
     <tr>
       <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/bitmap-layer.png" />
+        <p><i>BitmapLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/column-layer.png" />
+        <p><i>ColumnLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-layer.gif" />
+        <p><i>TileLayer</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
         <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/s2-layer.png" />
         <p><i>S2Layer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/h3-layer.png" />
+        <p><i>H3HexagonLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/h3-cluster-layer.png" />
+        <p><i>H3ClusterLayer</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/trips-layer.gif" />
+        <p><i>TripsLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mesh-layer.gif" />
+        <p><i>ScenegraphLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/great-circle-layer.png" />
+        <p><i>GreatCircleLayer</i></p>
       </td>
     </tr>
   </tbody>
 </table>
 
+As the number of deck.gl layers grow, we are splitting existing and new layers into multiple submodules for better dependency management. These new layer modules are:
 
-### New Layer Catalog: S2 Layers (Experimental)
+* ` @deck.gl/layers` - Primitive layers that are the building blocks of all visualizations
+  - [ArcLayer](/docs/layers/arc-layer.md)
+  - [BitmapLayer](/docs/layers/bitmap-layer.md) **<sup>New</sup>**
+  - [ColumnLayer](/docs/layers/column-layer.md) **<sup>New</sup>**
+  - [GeoJsonLayer](/docs/layers/geojson-layer.md)
+  - [GridCellLayer](/docs/layers/grid-cell-layer.md)
+  - [IconLayer](/docs/layers/icon-layer.md)
+  - [LineLayer](/docs/layers/line-layer.md)
+  - [PathLayer](/docs/layers/path-layer.md)
+  - [PointCloudLayer](/docs/layers/point-cloud-layer.md)
+  - [PolygonLayer](/docs/layers/polygon-layer.md)
+  - [ScatterplotLayer](/docs/layers/scatterplot-layer.md)
+  - [SolidPolygonLayer](/docs/layers/solid-polygon-layer.md)
+  - [TextLayer](/docs/layers/text-layer.md)
+* ` @deck.gl/aggregation-layers` - Advanced layers that aggregate data into alternative representations, e.g. heatmap, contour, hex bins, etc.
+  - [ContourLayer](/docs/layers/contour-layer.md)
+  - [GPUGridLayer](/docs/layers/gpu-grid-layer.md)
+  - [GridLayer](/docs/layers/grid-layer.md)
+  - [HexagonLayer](/docs/layers/hexagon-layer.md)
+  - [ScreenGridLayer](/docs/layers/screen-grid-layer.md)
+* ` @deck.gl/geo-layers` - Additional layers that handle geospatial use cases and GIS formats.
+  - [GreatCircleLayer](/docs/layers/great-circle-layer.md) **<sup>New</sup>**
+  - [H3ClusterLayer](/docs/layers/h3-cluster-layer.md) **<sup>New</sup>**
+  - [H3HexagonLayer](/docs/layers/h3-hexagon-layer.md) **<sup>New</sup>**
+  - [S2Layer](/docs/layers/s2-layer.md) **<sup>New</sup>**
+  - [TileLayer](/docs/layers/tile-layer.md) **<sup>New</sup>**
+  - [TripsLayer](/docs/layers/trips-layer.md) **<sup>New</sup>**
+* ` @deck.gl/mesh-layers` - Additional layers that render 3D meshes and [scene graphs](https://en.wikipedia.org/wiki/Scene_graph).
+  - [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) **<sup>New</sup>**
+  - [ScenegraphLayer](/docs/layers/scenegraph-layer.md) **<sup>New</sup>**
 
-The new `@deck.gl/s2-layers` module contains an `S2Layer` that understands geospatial indices from the [S2 Geometry Library](http://s2geometry.io/).
+### glTF Support and Loaders.gl
 
+<img height=150 src="https://raw.github.com/uber-common/deck.gl-data/master/images/gltf.png" />
+
+The new [ScenegraphLayer](/docs/layers/scenegraph-layer.md) and [SimpleMeshLayer](/docs/layers/simple-mesh-layer.md) support loading 3D models and scenegraphs in the popular [glTF™](https://www.khronos.org/gltf/) asset format.  glTF is a royalty-free specification for the efficient transmission and loading of 3D assets, with a rich ecosystem of tools and extensions.  All variants of glTF 2.0 are supported, including binary `.glb` files as well as JSON `.gltf` files with binary assets in base64 encoding or in separate files.
+
+We are releasing [loaders.gl](https://uber-web.github.io/loaders.gl/) as a major new companion framework to deck.gl and luma.gl. Loaders.gl provides a suite of 3D file format loaders.  See [What's New in luma.gl v7.0](https://github.com/uber/luma.gl/blob/master/docs/whats-new.md) for more details.
+
+### New Effects System
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/ambient-light.gif" />
+        <p><i>Ambient Light</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/point-light.gif" />
+        <p><i>Point Light</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/directional-light.gif" />
+        <p><i>Directional Light</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/camera-light.gif" />
+        <p><i>Camera Light</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+A new effects system is written from the ground up for v7.0. This opens the possibilities for many exciting visual effect features down the road. As a start, we're introducing [LightingEffect](/docs/effects/lighting-effect.md) - an easier, more comprehensive way to control the lighting for your layers. See [Using Lighting](/docs/developer-guide/using-lighting.md) for details.
+### Layer API
+
+* **Binary data support**: In v7.0 we are making binary data a first-class citizen of deck.gl. Whereas the `data` prop of layers only accepted JavaScript arrays in the past, you may now provide a non-iterable object to `data`. See [example](/docs/developer-guide/performance.md#on-using-binary-data).
+* **Size units**: In the past, some deck.gl layers use pixel sizes (e.g. `IconLayer`, `TextLayer`, `LineLayer` and `ArcLayer`) and some layers use meter sizes (e.g. `ScatterplotLayer`, `PathLayer`). In v7.0 we are introducing new props `sizeUnits` and `widthUnits` that allow users to tweak these behaviors. `*MinPixels` and `*MaxPixels` props are also added for layers that previously only support pixel sizes.
+* **Billboard**: Prior this v7.0, `IconLayer` and `TextLayer` are rendered as billboards (i.e. always facing the camera). A prop `billboard` is added to these layers so that you can place icons and texts relative to the world.
+
+### Google Maps Integration
+
+Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.gl/google-maps](/docs/api-reference/google-maps/overview.md) module. It allows you to construct a Deck instance as a custom Google Maps [OverlayView](https://developers.google.com/maps/documentation/javascript/reference/#OverlayView). See module documentation page for a full list of supported features.
+
+<img height="300" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/google-maps.jpg" />
+<p><i>GoogleMapsOverlay</i></p>
+
+### Improved Test Utilities
+
+The ` @deck.gl/test-utils` module is revamped with two new exports:
+* `generateLayerTests` - automatically create test cases for use with [`testLayer`](/docs/api-reference/test-utils/test-layer.md) to test layer conformance.
+* `SnapshotTestRunner` - automated integration test for WebGL. Renders deck.gl layers, takes screenshot and compare with golden images in headless Chromium.
+
+Read more in [Developer Guide: Testing](/docs/developer-guide/testing.md).
 
 ## deck.gl v6.4
 
 Release Date: Jan 29, 2019
 
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-sdf.gif" />
+        <p><i>SDF font in TextLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-scatterplot.jpg" />
+        <p><i>Stroke and fill in ScatterplotLayer</i></p>
+      </td>
+      <td>
+        <img height=200 src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/deck64-isoband.jpg" />
+        <p><i>Isoband in ContourLayer</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### Layer API Improvements
+
+- `ScatterplotLayer` now supports drawing both stroke and fill, and outline width can be controlled per-instance.
+- `ContourLayer` now supports isoband - filling between two thresholds.
+- `ScreenGridLayer` now supports aggregating by min/max/mean.
+- `TextLayer` adds new props that allow better control of the font rendering quality, including font weight and raster size. The layer can also optionally generate a font atlas with [Signed Distance Fields](http://cs.brown.edu/people/pfelzens/papers/dt-final.pdf), which yields a much crisper look when rendering large font sizes.
+- `IconLayer` supports dynamically packed icon atlas. Users can now load programatically generated image urls as icons, for example Facebook profile images.
+- `PathLayer`'s `getPath` and `PolygonLayer`'s `getPolygon` props now support flattened coordinates instead of nested arrays, making it easier for these layers to use binary data.
+
+See each layer's documentation for full API changes.
+
+
+### Composite Layer Customization (experimental)
+
+It is now possible to fine-tune sublayer appearances by passing a new experimental prop `_subLayerProps` to a composite layer. For example, in a `GeoJsonLayer`, one may wish to make only the point features interactive, or replace the circles with icons.
+
+This offers a light alternative to overriding composite layer behaviors without creating a custom class. See [CompositeLayer](/docs/api-reference/composite-layer.md) for details.
 
 ## deck.gl v6.3
 

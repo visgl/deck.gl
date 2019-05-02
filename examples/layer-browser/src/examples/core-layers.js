@@ -1,24 +1,27 @@
+import {experimental} from '@deck.gl/core';
+
 import {
-  COORDINATE_SYSTEM,
   ScatterplotLayer,
   ArcLayer,
   LineLayer,
   // PointCloudLayer,
   BitmapLayer,
-  ContourLayer,
-  ScreenGridLayer,
   IconLayer,
-  GridCellLayer,
-  GridLayer,
-  HexagonCellLayer,
-  HexagonLayer,
+  ColumnLayer,
   GeoJsonLayer,
   PolygonLayer,
   PathLayer,
-  TextLayer,
-  experimental
+  TextLayer
+} from '@deck.gl/layers';
+
+import {
+  GridLayer,
+  HexagonLayer,
+  ContourLayer,
+  ScreenGridLayer
   //  ContourLayer
-} from 'deck.gl';
+} from '@deck.gl/aggregation-layers';
+
 const {flattenVertices} = experimental;
 
 // Demonstrate immutable support
@@ -34,12 +37,25 @@ const MARKER_SIZE_MAP = {
 const ArcLayerExample = {
   layer: ArcLayer,
   getData: () => dataSamples.routes,
+  propTypes: {
+    getHeight: {
+      type: 'number',
+      max: 10
+    },
+    getTilt: {
+      type: 'number',
+      min: -90,
+      max: 90
+    }
+  },
   props: {
     id: 'arcLayer',
     getSourcePosition: d => d.START,
     getTargetPosition: d => d.END,
     getSourceColor: d => [64, 255, 0],
     getTargetColor: d => [0, 128, 200],
+    getHeight: d => 1,
+    getTilt: d => 0,
     pickable: true
   }
 };
@@ -232,8 +248,6 @@ const ScreenGridLayerExample = {
     id: 'screenGridLayer',
     getPosition: d => d.COORDINATES,
     cellSizePixels: 40,
-    minColor: [0, 0, 80, 0],
-    maxColor: [100, 255, 0, 128],
     pickable: false
   }
 };
@@ -247,19 +261,6 @@ const LineLayerExample = {
     getTargetPosition: d => d.END,
     getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
     pickable: true
-  }
-};
-
-const LineLayerExampleNewCoords = {
-  layer: LineLayer,
-  getData: () => dataSamples.routes,
-  props: {
-    id: 'lineLayer',
-    getSourcePosition: d => d.START,
-    getTargetPosition: d => d.END,
-    getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
-    pickable: true,
-    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL
   }
 };
 
@@ -280,14 +281,14 @@ const ScatterplotLayerExample = {
   }
 };
 
-const GridCellLayerExample = {
-  layer: GridCellLayer,
+const ColumnLayerExample = {
+  layer: ColumnLayer,
   props: {
-    id: 'gridCellLayer',
+    id: 'columnLayer',
     data: dataSamples.worldGrid.data,
-    cellSize: dataSamples.worldGrid.cellSize,
     extruded: true,
     pickable: true,
+    radius: 1000,
     opacity: 1,
     getColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000
@@ -369,20 +370,24 @@ const GridLayerExample = {
   }
 };
 
-const HexagonCellLayerExample = {
-  layer: HexagonCellLayer,
+/*
+const ColumnLayerExample = {
+  layer: ColumnLayer,
   props: {
-    id: 'hexagonCellLayer',
+    id: 'ColumnLayer',
     data: dataSamples.hexagons,
-    hexagonVertices: dataSamples.hexagons[0].vertices,
+    radius: 100,
+    diskResolution: 6,
     coverage: 1,
     extruded: true,
     pickable: true,
     opacity: 1,
+    getPosition: d => d.centroid,
     getColor: d => [48, 128, d.value * 255, 255],
     getElevation: d => d.value * 5000
   }
 };
+*/
 
 const HexagonLayerExample = {
   layer: HexagonLayer,
@@ -491,8 +496,8 @@ const BitmapLayerExample = {
   layer: BitmapLayer,
   props: {
     id: 'bitmap-layer',
-    image: 'data/radar.gif',
-    bounds: [-80.425, 37.936, -71.516, 46.437]
+    image: 'data/sf-districts.png',
+    bounds: [-122.519, 37.7045, -122.355, 37.829]
   }
 };
 
@@ -508,17 +513,15 @@ export default {
     ScatterplotLayer: ScatterplotLayerExample,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
-    LineLayerNewCoords: LineLayerExampleNewCoords,
     IconLayer: IconLayerExample,
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
-    GridCellLayer: GridCellLayerExample,
+    TextLayer: TextLayerExample,
+    BitmapLayer: BitmapLayerExample,
+    ColumnLayer: ColumnLayerExample,
     GridLayer: GridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
-    HexagonCellLayer: HexagonCellLayerExample,
     HexagonLayer: HexagonLayerExample,
-    TextLayer: TextLayerExample,
     ContourLayer: ContourLayerExample,
-    'ContourLayer (Bands)': ContourLayerBandsExample,
-    BitmapLayer: BitmapLayerExample
+    'ContourLayer (Bands)': ContourLayerBandsExample
   }
 };

@@ -2,7 +2,11 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {PolygonLayer, TripsLayer} from 'deck.gl';
+import {PhongMaterial} from '@luma.gl/core';
+import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
+import DeckGL from '@deck.gl/react';
+import {PolygonLayer} from '@deck.gl/layers';
+import {TripsLayer} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -15,11 +19,30 @@ const DATA_URL = {
     'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
 };
 
+const ambientLight = new AmbientLight({
+  color: [255, 255, 255],
+  intensity: 1.0
+});
+
+const pointLight = new PointLight({
+  color: [255, 255, 255],
+  intensity: 2.0,
+  position: [-74.05, 40.7, 8000]
+});
+
+const lightingEffect = new LightingEffect({ambientLight, pointLight});
+
+const material = new PhongMaterial({
+  ambient: 0.1,
+  diffuse: 0.6,
+  shininess: 32,
+  specularColor: [60, 64, 70]
+});
+
 export const INITIAL_VIEW_STATE = {
   longitude: -74,
   latitude: 40.72,
   zoom: 13,
-  maxZoom: 16,
   pitch: 45,
   bearing: 0
 };
@@ -66,7 +89,8 @@ export class App extends Component {
         getPath: d => d.segments,
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
-        strokeWidth: 2,
+        widthMinPixels: 2,
+        rounded: true,
         trailLength,
         currentTime: this.state.time
       }),
@@ -75,11 +99,11 @@ export class App extends Component {
         data: buildings,
         extruded: true,
         wireframe: false,
-        fp64: true,
         opacity: 0.5,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
-        getFillColor: [74, 80, 87]
+        getFillColor: [74, 80, 87],
+        material
       })
     ];
   }
@@ -90,6 +114,7 @@ export class App extends Component {
     return (
       <DeckGL
         layers={this._renderLayers()}
+        effects={[lightingEffect]}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}

@@ -21,7 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 import Attribute from '@deck.gl/core/lib/attribute';
 import GL from '@luma.gl/constants';
-import {Buffer} from 'luma.gl';
+import {Buffer} from '@luma.gl/core';
 import test from 'tape-catch';
 import {gl} from '@deck.gl/test-utils';
 
@@ -64,6 +64,69 @@ test('Attribute#getUpdateTriggers', t => {
     attribute.getUpdateTriggers(),
     ['instancePositions', 'getPosition', 'getElevation'],
     'returns correct update triggers'
+  );
+
+  t.end();
+});
+
+test('Attribute#shaderAttributes', t => {
+  const update = () => {};
+
+  const buffer1 = new Buffer(gl, 10);
+  const buffer2 = new Buffer(gl, 10);
+
+  const attribute = new Attribute(gl, {
+    id: 'positions',
+    update,
+    size: 3,
+    buffer: buffer1,
+    shaderAttributes: {
+      positions: {},
+      instancePositions: {
+        divisor: 1
+      }
+    }
+  });
+  t.ok(attribute.shaderAttributes.positions, 'Shader attribute created');
+  t.equals(
+    attribute.shaderAttributes.positions.size,
+    3,
+    'Shader attribute inherits pointer properties'
+  );
+  t.ok(attribute.shaderAttributes.instancePositions, 'Multiple shader attributes created');
+  t.equals(
+    attribute.shaderAttributes.instancePositions.size,
+    3,
+    'Multiple shader attributes inherit pointer properties'
+  );
+  t.equals(
+    attribute.shaderAttributes.instancePositions.divisor,
+    1,
+    'Shader attribute defines pointer properties'
+  );
+  t.equals(attribute.getBuffer(), buffer1, 'Attribute has buffer');
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.positions.getBuffer(),
+    'Shader attribute shares parent buffer'
+  );
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.instancePositions.getBuffer(),
+    'Shader attribute shares parent buffer'
+  );
+
+  attribute.update({buffer: buffer2});
+  t.equals(attribute.getBuffer(), buffer2, 'Buffer was updated');
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.positions.getBuffer(),
+    'Shader attribute buffer was updated'
+  );
+  t.equals(
+    attribute.getBuffer(),
+    attribute.shaderAttributes.instancePositions.getBuffer(),
+    'Shader attribute buffer was updated'
   );
 
   t.end();

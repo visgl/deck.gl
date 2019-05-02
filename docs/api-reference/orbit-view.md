@@ -8,12 +8,14 @@ The [OrbitView`] class is a subclass of [View](/docs/api-reference/view.md) that
 
 To render, `OrbitView` needs to be used together with a `viewState` with the following parameters:
 
-* `lookAt` (`Number[3]`) - The position being looked at.
-* `distance` (`Number`) - The distance from eye position to lookAt.
-* `up` (`Number[3]`) - The up direction.
-* `orbitAxis` (`String`) - Axis with 360 degrees rotating freedom, either 'Y' or 'Z', default to 'Z'.
-* `rotationOrbit` (`Number`) - Rotating angle around orbit axis.
-* `rotationX` (`Number`) - Rotating angle around X axis.
+* `orbitAxis` (`String`, optional) - Axis with 360 degrees rotating freedom, either `'Y'` or `'Z'`, default to `'Z'`.
+* `target` (`Number[3]`) - The world position at the center of the viewport. Default `[0, 0, 0]`.
+* `fovy` (`Number`, optional) - The field of view, in degrees. Default `50`.
+* `rotationOrbit` (`Number`, optional) - Rotating angle around orbit axis. Default `0`.
+* `rotationX` (`Number`, optional) - Rotating angle around X axis. Default `0`.
+* `zoom` (`Number`, optional) - The zoom level of the viewport. `zoom: 0` maps one unit distance to one pixel on screen, and increasing `zoom` by `1` scales the same object to twice as large. Default `0`.
+* `minZoom` (`Number`, optional) - The min zoom level of the viewport. Default `-Infinity`.
+* `maxZoom` (`Number`, optional) - The max zoom level of the viewport. Default `Infinity`.
 
 For more information on using `View` classes, consult the [Views](/docs/developer-guide/views.md) article.
 
@@ -21,17 +23,10 @@ For more information on using `View` classes, consult the [Views](/docs/develope
 ## Constructor
 
 ```js
-new OrbitView({...});
+const view = new OrbitView({...});
 ```
 
 `OrbitView` takes the same parameters as the [View](/docs/api-reference/view.md) superclass constructor.
-
-
-Projection matrix arguments:
-
-* `fov` (Number, optional) - Field of view covered by camera. Default to `75`.
-* `near` (Number, optional) - Distance of near clipping plane. Default to `1`.
-* `far` (Number, optional) - Distance of far clipping plane. Default to `100`.
 
 
 ## Methods
@@ -41,4 +36,4 @@ Inherits all [View methods](/docs/api-reference/view.md#methods).
 
 ## Source
 
-[modules/core/src/core/views/orbit-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/orbit-view.js)
+[modules/core/src/views/orbit-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/orbit-view.js)

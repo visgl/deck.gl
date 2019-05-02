@@ -135,6 +135,9 @@ export default class MarkdownPage extends PureComponent {
         this.refs.container.scrollTop = scrollTop;
       }
     }
+    if (!section) {
+      this.refs.container.scrollTop = 0;
+    }
   }
 
   // Find the current section and update the query string.
@@ -143,6 +146,10 @@ export default class MarkdownPage extends PureComponent {
     if (this._internalScroll) {
       // do not react to scrolling set by _jumpTo
       this._internalScroll = false;
+      return;
+    }
+    if (evt.target.className !== 'markdown') {
+      // do not react to child element scroll
       return;
     }
 

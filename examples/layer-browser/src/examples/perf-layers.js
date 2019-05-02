@@ -1,14 +1,15 @@
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import {
-  COORDINATE_SYSTEM,
   ScatterplotLayer,
   LineLayer,
   PointCloudLayer,
-  ScreenGridLayer,
   GeoJsonLayer,
   PathLayer,
   TextLayer
   //  ContourLayer
-} from 'deck.gl';
+} from '@deck.gl/layers';
+
+import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
@@ -174,8 +175,6 @@ const ScreenGridLayerPerfExample = (id, getData) => ({
     id: `screenGridLayerPerf-${id}`,
     getPosition: d => d,
     cellSizePixels: 40,
-    minColor: [0, 0, 80, 0],
-    maxColor: [100, 255, 0, 128],
     pickable: false
   }
 });

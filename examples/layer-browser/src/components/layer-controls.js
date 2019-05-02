@@ -152,10 +152,17 @@ export default class LayerControls extends PureComponent {
   }
 
   _renderSlider({settingName, value, propType}) {
+    let min;
     let max;
 
+    if (propType && Number.isFinite(propType.min)) {
+      min = propType.min;
+    } else {
+      min = 0;
+    }
+
     if (propType && Number.isFinite(propType.max)) {
-      max = Math.min(propType.max, 100);
+      max = propType.max;
     } else if (/angle/i.test(settingName)) {
       max = 360;
     } else {
@@ -166,7 +173,7 @@ export default class LayerControls extends PureComponent {
       <input
         type="range"
         id={settingName}
-        min={0}
+        min={min}
         max={max}
         step={max / 100}
         value={value}

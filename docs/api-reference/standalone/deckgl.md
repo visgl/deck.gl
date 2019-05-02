@@ -1,6 +1,6 @@
 # DeckGL (Scripting Interface)
 
-`DeckGL` extends the core [Deck](/docs/api-reference/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://www.obervablehq.com). 
+`DeckGL` extends the core [Deck](/docs/api-reference/deck.md) class with some additional features such as Mapbox integration. It offers a convenient way to use deck.gl in prototype environments such as [Codepen](https://codepen.io), [JSFiddle](https://jsfiddle.net) and [Observable](https://observablehq.com). 
 
 Make sure to read the [Using deck.gl Scripting API](/docs/get-started/using-standalone.md) article.
 
@@ -18,7 +18,9 @@ new deck.DeckGL({
     new deck.ScatterplotLayer({
       data: [
         {position: [-122.45, 37.8], color: [255, 0, 0], radius: 100}
-      ]
+      ],
+      getColor: d => d.color,
+      getRadius: d => d.radius
     })
   ]
 });
@@ -41,8 +43,8 @@ Default: `window.mapboxgl`
 The scripting API offers out-of-the-box integration with Mapbox. To add a base map to your visualization, you need to include the Mapbox library and stylesheet:
 
 ```html
-<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.js'></script>
-<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl.css' rel='stylesheet' />
+<script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.css' rel='stylesheet' />
 ```
 
 To disable the base map, simply exclude the mapbox script or set `map` to false.
@@ -82,4 +84,4 @@ Returns the mapbox-gl [Map](https://www.mapbox.com/mapbox-gl-js/api/#map) instan
 
 ## Source
 
-[modules/lite/src/deckgl.js](https://github.com/uber/deck.gl/blob/master/modules/lite/src/deckgl.js)
+[modules/main/bundle.js](https://github.com/uber/deck.gl/blob/master/modules/main/bundle.js)

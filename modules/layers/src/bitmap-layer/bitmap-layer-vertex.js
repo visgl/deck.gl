@@ -4,6 +4,7 @@ export default `
 attribute vec2 texCoords;
 attribute vec3 positions;
 attribute vec2 positions64xyLow;
+attribute vec3 instancePickingColors;
 
 varying vec2 vTexCoord;
 
@@ -12,6 +13,6 @@ void main(void) {
  
   vTexCoord = texCoords;
  
-  picking_setPickingColor(vec3(0., 0., 1.));
+  picking_setPickingColor(instancePickingColors);
 }
 `;

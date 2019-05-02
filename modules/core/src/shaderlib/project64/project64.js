@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {fp64} from 'luma.gl';
+import {fp64} from '@luma.gl/core';
 const {fp64ify, fp64ifyMatrix4} = fp64;
 import project from '../project/project';
 import memoize from '../../utils/memoize';
@@ -31,8 +31,11 @@ export default {
   vs: project64Shader,
   getUniforms,
   deprecations: [
-    {type: 'uniform vec2', old: 'projectionFP64[16]', new: 'project_uViewProjectionMatrixFP64'},
-    {type: 'uniform vec2', old: 'projectionScaleFP64', new: 'project64_uScale'}
+    {
+      type: 'function',
+      old: 'project_to_clipspace_fp64',
+      new: 'project_common_position_to_clipspace_fp64'
+    }
   ]
 };
 

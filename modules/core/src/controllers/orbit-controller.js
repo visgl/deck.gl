@@ -1,116 +1,85 @@
-import {clamp} from 'math.gl';
+import {clamp, Vector2} from 'math.gl';
 import Controller from './controller';
-import OrbitViewport from '../deprecated/orbit-viewport';
-import assert from '../utils/assert';
+import ViewState from './view-state';
 import LinearInterpolator from '../transitions/linear-interpolator';
 import {TRANSITION_EVENTS} from './transition-manager';
 
-const ZOOM_TRANSITION_PROPS = {
-  transitionDuration: 300,
-  transitionEasing: t => t,
-  transitionInterpolator: new LinearInterpolator(['zoom']),
-  transitionInterruption: TRANSITION_EVENTS.BREAK
-};
+const MOVEMENT_SPEED = 50; // per keyboard click
 
-const defaultState = {
-  lookAt: [0, 0, 0],
+const DEFAULT_STATE = {
+  orbitAxis: 'Z',
   rotationX: 0,
   rotationOrbit: 0,
-  fov: 50,
-  near: 1,
-  far: 100,
-  translationX: 0,
-  translationY: 0,
-  zoom: 1
+  fovy: 50,
+  zoom: 0,
+  target: [0, 0, 0],
+  minZoom: -Infinity,
+  maxZoom: Infinity
 };
 
-const defaultConstraints = {
-  minZoom: 0,
-  maxZoom: Infinity
+const LINEAR_TRANSITION_PROPS = {
+  transitionDuration: 300,
+  transitionEasing: t => t,
+  transitionInterpolator: new LinearInterpolator(['target', 'zoom', 'rotationX', 'rotationOrbit']),
+  transitionInterruption: TRANSITION_EVENTS.BREAK
 };
 
 /* Helpers */
 
-function ensureFinite(value, fallbackValue) {
-  return Number.isFinite(value) ? value : fallbackValue;
-}
+const zoom2Scale = zoom => Math.pow(2, zoom);
 
-class OrbitState {
+export class OrbitState extends ViewState {
   constructor({
+    ViewportType,
+
     /* Viewport arguments */
     width, // Width of viewport
     height, // Height of viewport
-    distance, // From eye to target
-    rotationX, // Rotation around x axis
-    rotationOrbit, // Rotation around orbit axis
-    orbitAxis, // Orbit axis with 360 degrees rotating freedom, can only be 'Y' or 'Z'
-    // Bounding box of the model, in the shape of {minX, maxX, minY, maxY, minZ, maxZ}
-    bounds,
-
-    /* View matrix arguments */
-    lookAt, // Which point is camera looking at, default origin
-
-    /* Projection matrix arguments */
-    fov, // Field of view covered by camera
-    near, // Distance of near clipping plane
-    far, // Distance of far clipping plane
-
-    /* After projection */
-    translationX, // in pixels
-    translationY, // in pixels
-    zoom,
+    orbitAxis = DEFAULT_STATE.orbitAxis,
+    rotationX = DEFAULT_STATE.rotationX, // Rotation around x axis
+    rotationOrbit = DEFAULT_STATE.rotationOrbit, // Rotation around orbit axis
+    target = DEFAULT_STATE.target,
+    zoom = DEFAULT_STATE.zoom,
+    fovy = DEFAULT_STATE.fovy,
 
     /* Viewport constraints */
-    minZoom,
-    maxZoom,
+    minZoom = DEFAULT_STATE.minZoom,
+    maxZoom = DEFAULT_STATE.maxZoom,
 
     /** Interaction states, required to calculate change during transform */
     // Model state when the pan operation first started
-    startPanViewport,
-    startPanPos,
-    isPanning,
+    startPanPosition,
+    startTarget,
     // Model state when the rotate operation first started
-    startRotateViewport,
-    isRotating,
+    startRotationX,
+    startRotationOrbit,
     // Model state when the zoom operation first started
-    startZoomViewport,
-    startZoomPos
+    startZoomPosition,
+    startZoom
   }) {
-    assert(Number.isFinite(width), '`width` must be supplied');
-    assert(Number.isFinite(height), '`height` must be supplied');
-    assert(Number.isFinite(distance), '`distance` must be supplied');
-
-    this._viewportProps = this._applyConstraints({
+    super({
       width,
       height,
-      distance,
-      rotationX: ensureFinite(rotationX, defaultState.rotationX),
-      rotationOrbit: ensureFinite(rotationOrbit, defaultState.rotationOrbit),
       orbitAxis,
-
-      bounds,
-      lookAt: lookAt || defaultState.lookAt,
-
-      fov: ensureFinite(fov, defaultState.fov),
-      near: ensureFinite(near, defaultState.near),
-      far: ensureFinite(far, defaultState.far),
-      translationX: ensureFinite(translationX, defaultState.translationX),
-      translationY: ensureFinite(translationY, defaultState.translationY),
-      zoom: ensureFinite(zoom, defaultState.zoom),
-
-      minZoom: ensureFinite(minZoom, defaultConstraints.minZoom),
-      maxZoom: ensureFinite(maxZoom, defaultConstraints.maxZoom)
+      rotationX,
+      rotationOrbit,
+      target,
+      fovy,
+      zoom,
+      minZoom,
+      maxZoom
     });
 
     this._interactiveState = {
-      startPanViewport,
-      startPanPos,
-      isPanning,
-      startRotateViewport,
-      isRotating,
-      startZoomViewport,
-      startZoomPos
+      startPanPosition,
+      startTarget,
+      startRotationX,
+      startRotationOrbit,
+      startZoomPosition,
+      startZoom
     };
+
+    this.ViewportType = ViewportType;
   }
 
   /* Public API */
@@ -128,11 +97,11 @@ class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   panStart({pos}) {
-    const viewport = new OrbitViewport(this._viewportProps);
+    const {target} = this._viewportProps;
 
-    return this._getUpdatedOrbitState({
-      startPanPos: pos,
-      startPanViewport: viewport
+    return this._getUpdatedState({
+      startPanPosition: pos,
+      startTarget: target
     });
   }
 
@@ -141,25 +110,11 @@ class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   pan({pos, startPos}) {
-    if (this._interactiveState.isRotating) {
-      return this._getUpdatedOrbitState();
-    }
+    const {startPanPosition, startTarget} = this._interactiveState;
+    const delta = new Vector2(pos).subtract(startPanPosition);
 
-    const startPanPos = this._interactiveState.startPanPos || startPos;
-    assert(startPanPos, '`startPanPos` props is required');
-
-    const viewport =
-      this._interactiveState.startPanViewport || new OrbitViewport(this._viewportProps);
-
-    const deltaX = pos[0] - startPanPos[0];
-    const deltaY = pos[1] - startPanPos[1];
-
-    const center = viewport.project(viewport.lookAt);
-    const newLookAt = viewport.unproject([center[0] - deltaX, center[1] - deltaY, center[2]]);
-
-    return this._getUpdatedOrbitState({
-      lookAt: newLookAt,
-      isPanning: true
+    return this._getUpdatedState({
+      target: this._calculateNewTarget({startTarget, pixelOffset: delta})
     });
   }
 
@@ -168,10 +123,9 @@ class OrbitState {
    * Must call if `panStart()` was called
    */
   panEnd() {
-    return this._getUpdatedOrbitState({
-      startPanViewport: null,
-      startPanPos: null,
-      isPanning: null
+    return this._getUpdatedState({
+      startPanPosition: null,
+      startTarget: null
     });
   }
 
@@ -180,12 +134,9 @@ class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   rotateStart({pos}) {
-    // Rotation center should be the worldspace position at the center of the
-    // the screen. If not found, use the last one.
-    const viewport = new OrbitViewport(this._viewportProps);
-
-    return this._getUpdatedOrbitState({
-      startRotateViewport: viewport
+    return this._getUpdatedState({
+      startRotationX: this._viewportProps.rotationX,
+      startRotationOrbit: this._viewportProps.rotationOrbit
     });
   }
 
@@ -194,20 +145,16 @@ class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer is
    */
   rotate({deltaScaleX, deltaScaleY}) {
-    if (this._interactiveState.isPanning) {
-      return this._getUpdatedOrbitState();
+    const {startRotationX, startRotationOrbit} = this._interactiveState;
+
+    if (!Number.isFinite(startRotationX) || !Number.isFinite(startRotationOrbit)) {
+      return this;
     }
 
-    const {startRotateViewport} = this._interactiveState;
+    const newRotationX = clamp(startRotationX + deltaScaleY * 180, -89.999, 89.999);
+    const newRotationOrbit = (startRotationOrbit + deltaScaleX * 180) % 360;
 
-    let {rotationX, rotationOrbit} = startRotateViewport || {};
-    rotationX = ensureFinite(rotationX, this._viewportProps.rotationX);
-    rotationOrbit = ensureFinite(rotationOrbit, this._viewportProps.rotationOrbit);
-
-    const newRotationX = clamp(rotationX - deltaScaleY * 180, -89.999, 89.999);
-    const newRotationOrbit = (rotationOrbit - deltaScaleX * 180) % 360;
-
-    return this._getUpdatedOrbitState({
+    return this._getUpdatedState({
       rotationX: newRotationX,
       rotationOrbit: newRotationOrbit,
       isRotating: true
@@ -219,9 +166,9 @@ class OrbitState {
    * Must call if `rotateStart()` was called
    */
   rotateEnd() {
-    return this._getUpdatedOrbitState({
-      startRotateViewport: null,
-      isRotating: null
+    return this._getUpdatedState({
+      startRotationX: null,
+      startRotationOrbit: null
     });
   }
 
@@ -236,43 +183,46 @@ class OrbitState {
    * @param {[Number, Number]} pos - position on screen where the pointer grabs
    */
   zoomStart({pos}) {
-    const viewport = new OrbitViewport(this._viewportProps);
-    return this._getUpdatedOrbitState({
-      startZoomViewport: viewport,
-      startZoomPos: pos
+    return this._getUpdatedState({
+      startZoomPosition: pos,
+      startTarget: this._viewportProps.target,
+      startZoom: this._viewportProps.zoom
     });
   }
 
   /**
    * Zoom
-   * @param {[Number, Number]} pos - position on screen where the current center is
-   * @param {[Number, Number]} startPos - the center position at
+   * @param {[Number, Number]} pos - position on screen where the current target is
+   * @param {[Number, Number]} startPos - the target position at
    *   the start of the operation. Must be supplied of `zoomStart()` was not called
    * @param {Number} scale - a number between [0, 1] specifying the accumulated
    *   relative scale.
    */
   zoom({pos, startPos, scale}) {
-    const {zoom, minZoom, maxZoom, width, height} = this._viewportProps;
-    const startZoomPos = this._interactiveState.startZoomPos || startPos || pos;
-    const viewport =
-      this._interactiveState.startZoomViewport || new OrbitViewport(this._viewportProps);
+    const {zoom, width, height, target} = this._viewportProps;
+    let {startZoom, startZoomPosition, startTarget} = this._interactiveState;
+    if (!Number.isFinite(startZoom)) {
+      // We have two modes of zoom:
+      // scroll zoom that are discrete events (transform from the current zoom level),
+      // and pinch zoom that are continuous events (transform from the zoom level when
+      // pinch started).
+      // If startZoom state is defined, then use the startZoom state;
+      // otherwise assume discrete zooming
+      startZoom = zoom;
+      startTarget = target;
+      startZoomPosition = startPos || pos;
+    }
 
-    const newZoom = clamp(zoom * scale, minZoom, maxZoom);
-    const deltaX = pos[0] - startZoomPos[0];
-    const deltaY = pos[1] - startZoomPos[1];
+    const newZoom = this._calculateNewZoom({scale, startZoom});
+    const startScale = zoom2Scale(startZoom);
+    const newScale = zoom2Scale(newZoom);
 
-    // Zoom around the center position
-    const cx = startZoomPos[0] - width / 2;
-    const cy = height / 2 - startZoomPos[1];
-    const center = viewport.project(viewport.lookAt);
-    const newCenterX = center[0] - cx + (cx * newZoom) / zoom + deltaX;
-    const newCenterY = center[1] + cy - (cy * newZoom) / zoom - deltaY;
+    const dX = (width / 2 - startZoomPosition[0]) * (newScale / startScale - 1);
+    const dY = (height / 2 - startZoomPosition[1]) * (newScale / startScale - 1);
 
-    const newLookAt = viewport.unproject([newCenterX, newCenterY, center[2]]);
-
-    return this._getUpdatedOrbitState({
-      lookAt: newLookAt,
-      zoom: newZoom
+    return this._getUpdatedState({
+      zoom: newZoom,
+      target: this._calculateNewTarget({startTarget, zoom: newZoom, pixelOffset: [dX, dY]})
     });
   }
 
@@ -281,14 +231,103 @@ class OrbitState {
    * Must call if `zoomStart()` was called
    */
   zoomEnd() {
-    return this._getUpdatedOrbitState({
-      startZoomPos: null
+    return this._getUpdatedState({
+      startZoomPosition: null,
+      startTarget: null,
+      startZoom: null
+    });
+  }
+
+  zoomIn() {
+    return this._getUpdatedState({
+      zoom: this._calculateNewZoom({scale: 2})
+    });
+  }
+
+  zoomOut() {
+    return this._getUpdatedState({
+      zoom: this._calculateNewZoom({scale: 0.5})
+    });
+  }
+
+  moveLeft() {
+    const pixelOffset = [-MOVEMENT_SPEED, 0];
+    return this._getUpdatedState({
+      target: this._calculateNewTarget({pixelOffset})
+    });
+  }
+
+  moveRight() {
+    const pixelOffset = [MOVEMENT_SPEED, 0];
+    return this._getUpdatedState({
+      target: this._calculateNewTarget({pixelOffset})
+    });
+  }
+
+  moveUp() {
+    const pixelOffset = [0, -MOVEMENT_SPEED];
+    return this._getUpdatedState({
+      target: this._calculateNewTarget({pixelOffset})
+    });
+  }
+
+  moveDown() {
+    const pixelOffset = [0, MOVEMENT_SPEED];
+    return this._getUpdatedState({
+      target: this._calculateNewTarget({pixelOffset})
+    });
+  }
+
+  rotateLeft() {
+    return this._getUpdatedState({
+      rotationOrbit: this._viewportProps.rotationOrbit - 15
+    });
+  }
+
+  rotateRight() {
+    return this._getUpdatedState({
+      rotationOrbit: this._viewportProps.rotationOrbit + 15
+    });
+  }
+
+  rotateUp() {
+    return this._getUpdatedState({
+      rotationX: this._viewportProps.rotationX - 10
+    });
+  }
+
+  rotateDown() {
+    return this._getUpdatedState({
+      rotationX: this._viewportProps.rotationX + 10
     });
   }
 
   /* Private methods */
 
-  _getUpdatedOrbitState(newProps) {
+  // Calculates new zoom
+  _calculateNewZoom({scale, startZoom}) {
+    const {maxZoom, minZoom} = this._viewportProps;
+    if (!Number.isFinite(startZoom)) {
+      startZoom = this._viewportProps.zoom;
+    }
+    const zoom = startZoom + Math.log2(scale);
+    return clamp(zoom, minZoom, maxZoom);
+  }
+
+  _calculateNewTarget({startTarget, zoom, pixelOffset}) {
+    const viewportProps = Object.assign({}, this._viewportProps);
+    if (Number.isFinite(zoom)) {
+      viewportProps.zoom = zoom;
+    }
+    if (startTarget) {
+      viewportProps.target = startTarget;
+    }
+    const viewport = new this.ViewportType(viewportProps);
+    const center = viewport.project(viewportProps.target);
+    return viewport.unproject([center[0] - pixelOffset[0], center[1] - pixelOffset[1], center[2]]);
+  }
+
+  _getUpdatedState(newProps) {
     // Update _viewportProps
     return new OrbitState(Object.assign({}, this._viewportProps, this._interactiveState, newProps));
   }
@@ -310,7 +349,7 @@ export default class OrbitController extends Controller {
   }
 
   _getTransitionProps() {
-    // Enable transitions for zoom change
-    return ZOOM_TRANSITION_PROPS;
+    // Enables Transitions on double-tap and key-down events.
+    return LINEAR_TRANSITION_PROPS;
   }
 }

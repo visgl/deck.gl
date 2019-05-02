@@ -1,0 +1,25 @@
+{
+  "name": "point-cloud-laz",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "webpack-dev-server --progress --hot --open",
+    "start-local": "webpack-dev-server --env.local --progress --hot --open"
+  },
+  "dependencies": {
+    "@loaders.gl/core": "^1.0.1",
+    "@loaders.gl/las": "^1.0.1",
+    "@loaders.gl/ply": "^1.0.1",
+    "deck.gl": "^7.0.0-beta",
+    "react": "^16.3.0",
+    "react-dom": "^16.3.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "babel-loader": "^8.0.5",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.11"
+  }
+}

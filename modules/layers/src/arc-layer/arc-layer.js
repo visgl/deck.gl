@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from 'luma.gl';
+import {Model, Geometry, fp64} from '@luma.gl/core';
 const {fp64LowPart} = fp64;
 
 import vs from './arc-layer-vertex.glsl';
@@ -38,12 +38,15 @@ const defaultProps = {
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
   getTargetColor: {type: 'accessor', value: DEFAULT_COLOR},
   getWidth: {type: 'accessor', value: 1},
+  getHeight: {type: 'accessor', value: 1},
+  getTilt: {type: 'accessor', value: 0},
+
+  widthUnits: 'pixels',
   widthScale: {type: 'number', value: 1, min: 0},
-  widthMinPixels: {type: 'number', value: 1, min: 0},
+  widthMinPixels: {type: 'number', value: 0, min: 0},
   widthMaxPixels: {type: 'number', value: Number.MAX_SAFE_INTEGER, min: 0},
 
-  // deprecated
-  strokeWidth: {deprecatedFor: 'getWidth'},
+  // Deprecated, remove in v8
   getStrokeWidth: {deprecatedFor: 'getWidth'}
 };
 
@@ -89,6 +92,18 @@ export default class ArcLayer extends Layer {
         transition: true,
         accessor: 'getWidth',
         defaultValue: 1
+      },
+      instanceHeights: {
+        size: 1,
+        transition: true,
+        accessor: 'getHeight',
+        defaultValue: 1
+      },
+      instanceTilts: {
+        size: 1,
+        transition: true,
+        accessor: 'getTilt',
+        defaultValue: 0
       }
     });
     /* eslint-enable max-len */
@@ -105,12 +120,23 @@ export default class ArcLayer extends Layer {
       this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
+  }
 
-    this.state.model.setUniforms({
-      widthScale: props.widthScale,
-      widthMinPixels: props.widthMinPixels,
-      widthMaxPixels: props.widthMaxPixels
-    });
+  draw({uniforms}) {
+    const {viewport} = this.context;
+    const {widthUnits, widthScale, widthMinPixels, widthMaxPixels} = this.props;
+
+    const widthMultiplier = widthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          widthScale: widthScale * widthMultiplier,
+          widthMinPixels,
+          widthMaxPixels
+        })
+      )
+      .draw();
   }
 
   _getModel(gl) {
@@ -149,16 +175,17 @@ export default class ArcLayer extends Layer {
 
   calculateInstancePositions(attribute) {
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = sourcePosition[0];
-      value[i + 1] = sourcePosition[1];
-      value[i + 2] = targetPosition[0];
-      value[i + 3] = targetPosition[1];
-      i += size;
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const sourcePosition = getSourcePosition(object, objectInfo);
+      const targetPosition = getTargetPosition(object, objectInfo);
+      value[i++] = sourcePosition[0];
+      value[i++] = sourcePosition[1];
+      value[i++] = targetPosition[0];
+      value[i++] = targetPosition[1];
     }
   }
 
@@ -172,16 +199,17 @@ export default class ArcLayer extends Layer {
     }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
+    const {value} = attribute;
     let i = 0;
-    for (const object of data) {
-      const sourcePosition = getSourcePosition(object);
-      const targetPosition = getTargetPosition(object);
-      value[i + 0] = fp64LowPart(sourcePosition[0]);
-      value[i + 1] = fp64LowPart(sourcePosition[1]);
-      value[i + 2] = fp64LowPart(targetPosition[0]);
-      value[i + 3] = fp64LowPart(targetPosition[1]);
-      i += size;
+    const {iterable, objectInfo} = createIterable(data);
+    for (const object of iterable) {
+      objectInfo.index++;
+      const sourcePosition = getSourcePosition(object, objectInfo);
+      const targetPosition = getTargetPosition(object, objectInfo);
+      value[i++] = fp64LowPart(sourcePosition[0]);
+      value[i++] = fp64LowPart(sourcePosition[1]);
+      value[i++] = fp64LowPart(targetPosition[0]);
+      value[i++] = fp64LowPart(targetPosition[1]);
     }
   }
 }
