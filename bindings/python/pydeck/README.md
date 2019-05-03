@@ -1,6 +1,6 @@
 # pydeck: A Python wrapper for deck.gl
 
-[![Build Status](https://travis-ci.org/uber/pydeck.svg?branch=master)](https://travis-ci.org/uber/deck.gl)
+[![Build Status](https://travis-ci.org/uber/deck.gl.svg?branch=master)](https://travis-ci.org/uber/deck.gl)
 
 Experimental Python bindings for deck.gl
 
@@ -34,6 +34,21 @@ virtualenv env
 pip install -r requirements.txt
 pip install -r requirements-dev.txt
 pip install .
+```
+
+To install the Jupyter extension,
+
+When developing your extensions, you need to manually enable your extensions with the notebook / lab frontend. For lab, this is done by the command:
+
+```
+jupyter labextension install .
+```
+
+For classic notebook, you can run:
+
+```
+jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
+jupyter nbextension enable --sys-prefix --py pydeck
 ```
 
 To test, run
