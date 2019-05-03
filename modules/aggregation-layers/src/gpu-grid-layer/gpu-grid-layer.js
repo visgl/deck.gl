@@ -44,7 +44,7 @@ const defaultProps = {
   elevationScale: {type: 'number', min: 0, value: 1},
 
   // grid
-  cellSize: {type: 'number', min: 0, max: 5000, value: 4000},
+  cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
@@ -115,7 +115,7 @@ export default class GPUGridLayer extends CompositeLayer {
       color: {
         getWeight: getColorWeight,
         operation: colorAggregation,
-        needMin: true, // TODO: disable if user provides colorDomain
+        needMin: true,
         needMax: true,
         combineMaxMin: true
       },

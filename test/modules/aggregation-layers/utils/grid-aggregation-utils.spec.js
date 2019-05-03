@@ -40,15 +40,14 @@ test('GridAggregationUtils#alignToCell (CPU)', t => {
 
 test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
   const opts = {
-    data: FIXTURES.points, // allPoints, // FIXTURES.points,
+    data: FIXTURES.points,
     getPosition,
     weightParams: {weight: {needMax: 1, getWeight: x => 1}},
     gpuGridAggregator,
     aggregationFlags: {dataChanged: true},
-    fp64: true // NOTE this tset fails wihtout FP64 gpu aggregation.
+    fp64: true // NOTE this test fails wihtout FP64 gpu aggregation.
   };
   const CELLSIZES = [5, 10, 15, 25, 50, 100, 200, 500, 1000, 5000];
-  // const CELLSIZES = [5, 200];
   for (const cellSizeMeters of CELLSIZES) {
     opts.cellSizeMeters = cellSizeMeters;
     opts.gpuAggregation = false;
