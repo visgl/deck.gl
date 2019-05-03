@@ -47,8 +47,8 @@ uniform float elevationScale;
 varying vec4 vColor;
 
 void main(void) {
-
-  vec4 colors = isWireframe ? instanceLineColors : instanceColors;
+  
+  vec4 color = isWireframe ? instanceLineColors : instanceColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
@@ -60,8 +60,8 @@ void main(void) {
     elevation = instanceElevations * (positions.z + 1.0) / 2.0 * elevationScale;
   }
 
-  // if ahpha == 0.0 or z < 0.0, do not render element
-  float shouldRender = float(colors.a > 0.0 && instanceElevations >= 0.0);
+  // if alpha == 0.0 or z < 0.0, do not render element
+  float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = radius * coverage * shouldRender;
 
   // project center of column
@@ -78,10 +78,14 @@ void main(void) {
   vec3 normals_commonspace = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
 
   if (extruded) {
-    vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
-    vColor = vec4(lightColor, colors.a * opacity) / 255.0;
+    if (isWireframe) {
+      vColor = vec4(color.rgb, color.a * opacity) / 255.0;
+    } else {
+      vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
+      vColor = vec4(lightColor, color.a * opacity) / 255.0;
+    }
   } else {
-    vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;
+    vColor = vec4(color.rgb, color.a * opacity) / 255.0;
   }
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

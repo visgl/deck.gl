@@ -21,7 +21,7 @@
 import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, fp64, PhongMaterial} from '@luma.gl/core';
-import CylinderGeometry from './cylinder-geometry';
+import ColumnGeometry from './column-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -29,6 +29,7 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
+const drawLines = {stroke: true, filled: false};
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -103,7 +104,6 @@ export default class ColumnLayer extends Layer {
       props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution;
     if (regenerateModels) {
       const {gl} = this.context;
-
       if (this.state.models) {
         this.state.models.forEach(model => model.delete());
       }
@@ -116,11 +116,12 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution) {
-    return new CylinderGeometry({
+  getGeometry(diskResolution, outline = false) {
+    return new ColumnGeometry({
       radius: 1,
       topCap: false,
       bottomCap: true,
+      outline,
       height: 2,
       verticalAxis: 'z',
       nradial: diskResolution,
@@ -139,7 +140,7 @@ export default class ColumnLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-top`,
-          geometry: this.getGeometry(diskResolution),
+          geometry: this.getGeometry(diskResolution, drawLines.filled),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -150,7 +151,7 @@ export default class ColumnLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-side`,
-          geometry: this.getGeometry(diskResolution),
+          geometry: this.getGeometry(diskResolution, drawLines.stroke),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -169,6 +170,7 @@ export default class ColumnLayer extends Layer {
       return;
     }
     const {diskResolution} = this.props;
+    // const {filledModel, strokeModel} = this.state;
     log.assert(vertices.length >= diskResolution);
 
     const geometry = this.getGeometry(diskResolution);
@@ -184,11 +186,23 @@ export default class ColumnLayer extends Layer {
       }
     }
 
-    this.state.models.forEach(model => {
+    const geometries = Object.keys(drawLines).map(mode => {
+      return this.getGeometry(diskResolution, mode);
+    });
+
+    this.state.models.forEach((model, index) => {
       if (model) {
-        model.setProps({geometry});
+        model.setProps({geometry: geometries[index]});
       }
     });
+    // const strokeGeometry = this.getGeometry(diskResolution, drawLines.stroke);
+    // const filledGeometry = this.getGeometry(diskResolution, drawLines.filled);
+    // if (filledModel) {
+    //   filledModel.setProps({filledGeometry});
+    // }
+    // if (strokeModel) {
+    //   strokeModel.setProps({strokeGeometry});
+    // }
   }
 
   draw({uniforms}) {
@@ -202,7 +216,7 @@ export default class ColumnLayer extends Layer {
       radius,
       angle
     } = this.props;
-    const {filledModel, strokeModel} = this.state;
+    const {filledModel, strokeModel, models} = this.state;
     const renderUniforms = Object.assign({}, uniforms, {
       radius,
       angle: (angle / 180) * Math.PI,
@@ -212,15 +226,19 @@ export default class ColumnLayer extends Layer {
       elevationScale
     });
     const numInstances = this.getNumInstances();
+
+    models.forEach(model => {
+      if (model) {
+        model.setInstanceCount(numInstances);
+        model.setUniforms(renderUniforms);
+      }
+    });
+
     if (strokeModel && wireframe) {
-      strokeModel.setInstanceCount(numInstances);
-      strokeModel.setUniforms(renderUniforms);
       strokeModel.setDrawMode(GL.LINES);
       strokeModel.setUniforms({isWireframe: true}).draw();
     }
     if (filledModel && filled) {
-      filledModel.setInstanceCount(numInstances);
-      filledModel.setUniforms(renderUniforms);
       filledModel.setDrawMode(GL.TRIANGLES);
       filledModel.setUniforms({isWireframe: false}).draw();
     }
