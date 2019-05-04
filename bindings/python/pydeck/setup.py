@@ -105,10 +105,12 @@ class NPM(Command):
             copy(dist_file, static_folder)
 
 
-    def should_run_npm_install(self):
-        package_json = os.path.join(node_root, 'package.json')  # noqa
-        node_modules_exists = os.path.exists(self.node_modules)  # noqa
-        return self.has_npm()
+    def clean_js(self):
+        """Deletes any previously existing JS in pydeck/pydeck/nbextension/static/ and
+        modules/jupyter-widget/dist/
+        """
+        pass
+
 
     def run(self):
         has_npm = self.has_npm()
@@ -119,10 +121,12 @@ class NPM(Command):
         env = os.environ.copy()
         env['PATH'] = npm_path
 
-        if self.should_run_npm_install():
-            log.info("Installing build dependencies with npm. This may take a while...")
-            check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
-            os.utime(self.node_modules, None)
+        self.clean_js()
+
+        log.info("Installing build dependencies with npm. This may take a while...")
+        print('NODE_ROOT', node_root)
+        check_call(['npm', 'run', 'build-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
+        os.utime(self.node_modules, None)
 
         self.copy_js()
 
