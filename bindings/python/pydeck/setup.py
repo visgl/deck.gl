@@ -93,16 +93,20 @@ class NPM(Command):
     def copy_js(self):
         """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder.
            Overwrites destination files."""
+        # Compiled JS files for copying
         js_dist_dir = os.path.join(node_root, 'dist', 'pydeck_embeddable')
-        js_dist_files = [
-            os.path.join(js_dist_dir, 'extension.js'),
+        # Uncompiled JS files for copying
+        # See https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/%7B%7Bcookiecutter.python_package_name%7D%7D/nbextension/static/extension.js
+        js_src_dir = os.path.join(node_root, 'src')
+        js_files = [
+            os.path.join(js_src_dir, 'extension.js'),
             os.path.join(js_dist_dir, 'index.js'),
             os.path.join(js_dist_dir, 'index.js.map')
         ]
         static_folder = os.path.join(here, 'pydeck', 'nbextension', 'static')
-        for js_dist_file in js_dist_files:
-            log.debug('Copying %s to %s' % (js_dist_file, static_folder))
-            copy(js_dist_file, static_folder)
+        for js_file in js_files:
+            log.debug('Copying %s to %s' % (js_file, static_folder))
+            copy(js_file, static_folder)
 
 
     def run(self):
@@ -113,8 +117,6 @@ class NPM(Command):
 
         env = os.environ.copy()
         env['PATH'] = npm_path
-
-        self.clean_js()
 
         log.info("Installing build dependencies with npm. This may take a while...")
         check_call(['npm', 'run', 'notebook-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)

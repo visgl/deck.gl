@@ -1,4 +1,4 @@
 #!/bin/bash
 
-jupyter labextension install @jupyter-widgets/jupyterlab-manager@0.38
-jupyter labextension install pydeck
+jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
+jupyter nbextension enable --sys-prefix --py pydeck
