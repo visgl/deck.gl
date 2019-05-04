@@ -74,7 +74,8 @@ class NPM(Command):
 
     targets = [
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'extension.js'),
-        os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js')
+        os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js'),
+        os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js.map'),
     ]
 
 
@@ -94,15 +95,16 @@ class NPM(Command):
 
     def copy_js(self):
         """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder"""
-        dist_path = os.path.join(node_root, 'dist', 'esm')
-        dist_files = [
-            os.path.join(dist_path, 'extension.js'),
-            os.path.join(dist_path, 'index.js')
+        js_dist_dir = os.path.join(node_root, 'dist', 'pydeck_embeddable')
+        js_dist_files = [
+            os.path.join(js_dist_dir, 'extension.js'),
+            os.path.join(js_dist_dir, 'index.js'),
+            os.path.join(js_dist_dir, 'index.js.map')
         ]
-        print(dist_files)
         static_folder = os.path.join(here, 'pydeck', 'nbextension', 'static')
-        for dist_file in dist_files:
-            copy(dist_file, static_folder)
+        for js_dist_file in js_dist_files:
+            log.debug('Copying %s to %s' % (js_dist_file, static_folder))
+            copy(js_dist_file, static_folder)
 
 
     def clean_js(self):
@@ -124,8 +126,7 @@ class NPM(Command):
         self.clean_js()
 
         log.info("Installing build dependencies with npm. This may take a while...")
-        print('NODE_ROOT', node_root)
-        check_call(['npm', 'run', 'build-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
+        check_call(['npm', 'run', 'notebook-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
         os.utime(self.node_modules, None)
 
         self.copy_js()
