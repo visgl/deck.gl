@@ -8,6 +8,7 @@ from setuptools.command.egg_info import egg_info
 
 from distutils import log
 import os
+from shutil import copy
 from subprocess import check_call
 import sys
 
@@ -26,6 +27,7 @@ npm_path = os.pathsep.join([
     os.path.join(node_root, 'node_modules', '.bin'),
     os.environ.get('PATH', os.defpath),
 ])
+
 
 
 def update_package_data(distribution):
@@ -71,9 +73,11 @@ class NPM(Command):
     node_modules = os.path.join(node_root, 'node_modules')
 
     targets = [
-        os.path.join(here, 'pydeck', 'static', 'extension.js'),
-        os.path.join(here, 'pydeck', 'static', 'index.js')
+        os.path.join(here, 'pydeck', 'nbextension', 'static', 'extension.js'),
+        os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js')
     ]
+
+
 
     def initialize_options(self):
         pass
@@ -87,6 +91,19 @@ class NPM(Command):
             return True
         except Exception:
             return False
+
+    def copy_js(self):
+        """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder"""
+        dist_path = os.path.join(node_root, 'dist', 'esm')
+        dist_files = [
+            os.path.join(dist_path, 'extension.js'),
+            os.path.join(dist_path, 'index.js')
+        ]
+        print(dist_files)
+        static_folder = os.path.join(here, 'pydeck', 'nbextension', 'static')
+        for dist_file in dist_files:
+            copy(dist_file, static_folder)
+
 
     def should_run_npm_install(self):
         package_json = os.path.join(node_root, 'package.json')  # noqa
@@ -106,6 +123,8 @@ class NPM(Command):
             log.info("Installing build dependencies with npm. This may take a while...")
             check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
             os.utime(self.node_modules, None)
+
+        self.copy_js()
 
         for t in self.targets:
             if not os.path.exists(t):
@@ -169,9 +188,9 @@ setup_args = {
     ],
     'data_files': [
         ('share/jupyter/nbextensions/pydeck', [
-            'pydeck/static/extension.js',
-            'pydeck/static/index.js',
-            'pydeck/static/index.js.map'
+            'pydeck/nbextension/static/extension.js',
+            'pydeck/nbextension/static/index.js',
+            'pydeck/nbextension/static/index.js.map'
         ]),
         ('etc/jupyter/nbconfig/notebook.d', ['pydeck.json'])
     ],

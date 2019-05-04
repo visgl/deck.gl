@@ -13,3 +13,5 @@ from .bindings import (  # noqa
 )
 
 from .widget import DeckGLWidget  # noqa
+
+from .nbextension import _jupyter_nbextension_paths  # noqa
