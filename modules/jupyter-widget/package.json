@@ -7,7 +7,8 @@
     "jupyter",
     "jupyterlab",
     "jupyterlab-extension",
-    "widgets"
+    "widgets",
+    "geospatial"
   ],
   "repository": {
     "type": "git",
@@ -19,23 +20,23 @@
   "files": [
     "dist",
     "src",
+    "dist.min.js",
     "README.md"
   ],
   "sideEffects": false,
   "scripts": {
-    "clean": "rm -fr dist dist-es6 && mkdir -p dist/es5 dist/esm dist/es6",
-    "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
-    "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
-    "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
-    "build": "npm run clean && npm run build-es6 && npm run build-esm && npm run build-es5"
+    "build-bundle": "webpack --config ../../scripts/bundle.config.js",
+    "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@deck.gl/json": "7.0.0-beta.2",
-    "@deck.gl/aggregation-layers": "7.0.0-beta.2",
-    "@deck.gl/layers": "7.0.0-beta.2",
     "@jupyter-widgets/base": "^1.1.10",
     "@types/mapbox-gl": "^0.51.4",
     "@deck.gl/core": "7.0.0-beta.2",
     "mapbox-gl": "^0.53.1"
+  },
+  "peerDependencies": {
+    "@deck.gl/json": "7.0.0-beta.2",
+    "@deck.gl/aggregation-layers": "7.0.0-beta.2",
+    "@deck.gl/layers": "7.0.0-beta.2"
   }
 }
