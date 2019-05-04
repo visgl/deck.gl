@@ -70,14 +70,11 @@ class NPM(Command):
 
     user_options = []
 
-    node_modules = os.path.join(node_root, 'node_modules')
-
     targets = [
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'extension.js'),
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js'),
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js.map'),
     ]
-
 
 
     def initialize_options(self):
@@ -94,7 +91,8 @@ class NPM(Command):
             return False
 
     def copy_js(self):
-        """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder"""
+        """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder.
+           Overwrites destination files."""
         js_dist_dir = os.path.join(node_root, 'dist', 'pydeck_embeddable')
         js_dist_files = [
             os.path.join(js_dist_dir, 'extension.js'),
@@ -105,13 +103,6 @@ class NPM(Command):
         for js_dist_file in js_dist_files:
             log.debug('Copying %s to %s' % (js_dist_file, static_folder))
             copy(js_dist_file, static_folder)
-
-
-    def clean_js(self):
-        """Deletes any previously existing JS in pydeck/pydeck/nbextension/static/ and
-        modules/jupyter-widget/dist/
-        """
-        pass
 
 
     def run(self):
@@ -127,7 +118,6 @@ class NPM(Command):
 
         log.info("Installing build dependencies with npm. This may take a while...")
         check_call(['npm', 'run', 'notebook-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
-        os.utime(self.node_modules, None)
 
         self.copy_js()
 
