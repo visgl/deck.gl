@@ -5,6 +5,7 @@ from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
+from distutils.command.install import install
 
 from distutils import log
 import os
@@ -58,8 +59,8 @@ def js_prerelease(command, strict=False):
                         log.error('missing files: %s' % missing)
                     raise e
                 else:
-                    log.warn('rebuilding js and css failed (not a problem)')
-                    log.warn(str(e))
+                    log.error('rebuilding js and css failed')
+                    log.error(str(e))
             command.run(self)
             update_package_data(self.distribution)
     return DecoratedCommand
@@ -70,6 +71,7 @@ class NPM(Command):
 
     user_options = []
 
+    # Files to copy into the Python side of the widget
     targets = [
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'extension.js'),
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js'),
@@ -148,12 +150,12 @@ setup_args = {
     'packages': find_packages(),
     'zip_safe': False,
     'cmdclass': {
+        'install': js_prerelease(install),
         'build_py': js_prerelease(build_py),
         'egg_info': js_prerelease(egg_info),
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
-
     'author': 'Andrew Duberstein',
     'author_email': 'ajduberstein@gmail.com',
     'url': 'https://github.com/uber/deck.gl',

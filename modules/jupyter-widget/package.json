@@ -24,12 +24,12 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "clean": "rm -fr dist dist-es6 && rm -f dist.min.js && mkdir -p dist/es5 dist/esm dist/es6",
+    "clean": "rm -fr dist && mkdir -p dist/es5 dist/esm dist/es6",
     "build-es6": "BABEL_ENV=es6 babel src --out-dir dist/es6 --source-maps --ignore 'node_modules/'",
     "build-esm": "BABEL_ENV=esm babel src --out-dir dist/esm --source-maps --ignore 'node_modules/'",
     "build-es5": "BABEL_ENV=es5 babel src --out-dir dist/es5 --source-maps --ignore 'node_modules/'",
     "webpack-bundle": "webpack",
-    "notebook-bundle": "npm run clean && npm run webpack-bundle && npm run build-esm"
+    "notebook-bundle": "npm run clean && npm run webpack-bundle"
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10",
@@ -39,5 +39,8 @@
     "@deck.gl/json": "7.0.0-beta.2",
     "@deck.gl/aggregation-layers": "7.0.0-beta.2",
     "@deck.gl/layers": "7.0.0-beta.2"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.3.2"
   }
 }
