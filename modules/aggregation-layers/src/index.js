@@ -29,9 +29,6 @@ export {default as _GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
 
 export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 export {AGGREGATION_OPERATION} from './utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
-export {
-  pointToDensityGridData as _pointToDensityGridData
-} from './utils/gpu-grid-aggregation/grid-aggregation-utils';
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
