@@ -125,6 +125,7 @@ export default class Deck {
     this.effectManager = null;
     this.deckRenderer = null;
     this.deckPicker = null;
+    this.gl = null;
 
     this._needsRedraw = true;
     this._pickRequest = {};
@@ -180,6 +181,12 @@ export default class Deck {
 
     if (this.eventManager) {
       this.eventManager.destroy();
+    }
+
+    if (this.gl) {
+      // force context loss
+      const extension = this.gl.getExtension('WEBGL_lose_context').loseContext();
+      if (extension) extension.loseContext();
     }
 
     if (!this.props.canvas && !this.props.gl && this.canvas) {
@@ -586,6 +593,8 @@ export default class Deck {
     this.deckRenderer = new DeckRenderer(gl);
 
     this.deckPicker = new DeckPicker(gl);
+
+    this.gl = gl;
 
     this.setProps(this.props);
 
