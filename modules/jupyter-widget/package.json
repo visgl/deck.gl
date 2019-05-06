@@ -34,11 +34,11 @@
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10",
     "@types/mapbox-gl": "^0.51.4",
-    "@deck.gl/core": "7.0.0-beta.2",
     "mapbox-gl": "^0.53.1",
-    "@deck.gl/json": "7.0.0-beta.2",
-    "@deck.gl/aggregation-layers": "7.0.0-beta.2",
-    "@deck.gl/layers": "7.0.0-beta.2"
+    "@deck.gl/aggregation-layers": "7.0.0",
+    "@deck.gl/core": "7.0.0",
+    "@deck.gl/json": "7.0.0",
+    "@deck.gl/layers": "7.0.0"
   },
   "devDependencies": {
     "webpack-cli": "^3.3.2"
