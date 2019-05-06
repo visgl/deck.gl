@@ -131,6 +131,11 @@ function handleMouseEvent(deck, type, event) {
   let callback;
   switch (type) {
     case 'click':
+      // Hack: because we do not listen to pointer down, perform picking now
+      deck._lastPointerDownInfo = deck.pickObject({
+        x: event.pixel.x,
+        y: event.pixel.y
+      });
       callback = deck._onEvent;
       break;
 
