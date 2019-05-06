@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.5] - May 6 2019
+
+- GPUAggregator: Fix Texture/Buffer resource leaks. (#3054)
+- fix onClick callback in GoogleMapsOverlay (#3067)
+- fix bundle size (#3069)
+
 #### deck.gl [v7.0.4] - Apr 30 2019
 
 - finalize all layers (#3044)
