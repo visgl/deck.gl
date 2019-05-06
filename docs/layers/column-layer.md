@@ -123,7 +123,7 @@ Radius multiplier, between 0 - 1. The radius of the disk is calculated by
 
 * Default: `true`
 
-Whether to draw a filled polygon (solid fill). Note that only
+Whether to draw a filled column (solid fill). Note that only
 the area between the outer polygon and any holes will be filled.
 
 ##### `elevationScale` (Number, optional)
@@ -144,7 +144,7 @@ Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
 * Default: `false`
 
-Whether to generate a line wireframe of the hexagon. The outline will have
+Whether to generate a line wireframe of the column. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
@@ -171,6 +171,17 @@ Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-
 
 Method called to retrieve the position of each column, in `[x, y]`. An optional third component can be used to set the elevation of the bottom.
 
+##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `[255, 0, 255, 255]`
+
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
+
+It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
+
 ##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `[255, 0, 255, 255]`
@@ -179,6 +190,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
+* If not provided, it falls back to `getColor`.
 
 ##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -188,6 +200,7 @@ The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in 
 
 * If an array is provided, it is used as the outline color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline color.
+* If not provided, it falls back to `getColor`.
 
 ##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -202,8 +215,8 @@ The elevation of each cell in meters.
 
 The PolygonLayer renders the following sublayers:
 
-* `filled` - Renders the surface of all polygons with `GL.TRIANGLES` as `drawMode`. Only rendered if `filled:true`.
-* `stroked` - Renders the outline of all polygons with `GL.LINES` as `drawMode`.
+* `filled` - Renders the surface of all polygons. Only rendered if `filled:true`.
+* `stroked` - Renders the outline of all polygons.
 
 ## Source
 

@@ -28,7 +28,7 @@ attribute vec3 normals;
 attribute vec3 instancePositions;
 attribute float instanceElevations;
 attribute vec2 instancePositions64xyLow;
-attribute vec4 instanceColors;
+attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
 
 attribute vec3 instancePickingColors;
@@ -48,7 +48,7 @@ varying vec4 vColor;
 
 void main(void) {
   
-  vec4 color = isWireframe ? instanceLineColors : instanceColors;
+  vec4 color = isWireframe ? instanceLineColors : instanceFillColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
@@ -77,13 +77,9 @@ void main(void) {
 
   vec3 normals_commonspace = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
 
-  if (extruded) {
-    if (isWireframe) {
-      vColor = vec4(color.rgb, color.a * opacity) / 255.0;
-    } else {
-      vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
-      vColor = vec4(lightColor, color.a * opacity) / 255.0;
-    }
+  if (extruded && !isWireframe) {
+    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
+    vColor = vec4(lightColor, color.a * opacity) / 255.0;
   } else {
     vColor = vec4(color.rgb, color.a * opacity) / 255.0;
   }

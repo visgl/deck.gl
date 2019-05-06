@@ -29,7 +29,8 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
-const drawLines = {stroke: true, filled: false};
+const FILL_MODE = 'filled';
+const OUTLINE_MODE = 'stroke';
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -44,10 +45,10 @@ const defaultProps = {
   wireframe: false,
   filled: true,
   getPosition: {type: 'accessor', value: x => x.position},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getElevation: {type: 'accessor', value: 1000},
-
+  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']},
   material: defaultMaterial
 };
 
@@ -80,11 +81,11 @@ export default class ColumnLayer extends Layer {
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
       },
-      instanceColors: {
+      instanceFillColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
-        accessor: 'getColor',
+        accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
@@ -100,8 +101,12 @@ export default class ColumnLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
+
     const regenerateModels =
-      props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution;
+      props.fp64 !== oldProps.fp64 ||
+      props.diskResolution !== oldProps.diskResolution ||
+      props.wireframe !== oldProps.wireframe;
+
     if (regenerateModels) {
       const {gl} = this.context;
       if (this.state.models) {
@@ -116,12 +121,12 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution, outline = false) {
+  getGeometry(diskResolution, mode = FILL_MODE) {
     return new ColumnGeometry({
       radius: 1,
       topCap: false,
       bottomCap: true,
-      outline,
+      mode,
       height: 2,
       verticalAxis: 'z',
       nradial: diskResolution,
@@ -130,7 +135,7 @@ export default class ColumnLayer extends Layer {
   }
 
   _getModels(gl) {
-    const {id, filled, extruded, diskResolution} = this.props;
+    const {id, filled, wireframe, diskResolution} = this.props;
 
     let filledModel;
     let strokeModel;
@@ -140,18 +145,18 @@ export default class ColumnLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-top`,
-          geometry: this.getGeometry(diskResolution, drawLines.filled),
+          geometry: this.getGeometry(diskResolution, FILL_MODE),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
       );
     }
-    if (extruded) {
+    if (wireframe) {
       strokeModel = new Model(
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-side`,
-          geometry: this.getGeometry(diskResolution, drawLines.stroke),
+          geometry: this.getGeometry(diskResolution, OUTLINE_MODE),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -170,11 +175,12 @@ export default class ColumnLayer extends Layer {
       return;
     }
     const {diskResolution} = this.props;
-    // const {filledModel, strokeModel} = this.state;
     log.assert(vertices.length >= diskResolution);
+    const {filledModel, strokeModel} = this.state;
 
-    const geometry = this.getGeometry(diskResolution);
-    const positions = geometry.attributes.POSITION;
+    const strokeGeometry = this.getGeometry(diskResolution, OUTLINE_MODE);
+    const filledGeometry = this.getGeometry(diskResolution, FILL_MODE);
+    const positions = filledGeometry.attributes.POSITION;
     let i = 0;
     for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
       for (let j = 0; j <= diskResolution; j++) {
@@ -185,24 +191,12 @@ export default class ColumnLayer extends Layer {
         i++;
       }
     }
-
-    const geometries = Object.keys(drawLines).map(mode => {
-      return this.getGeometry(diskResolution, mode);
-    });
-
-    this.state.models.forEach((model, index) => {
-      if (model) {
-        model.setProps({geometry: geometries[index]});
-      }
-    });
-    // const strokeGeometry = this.getGeometry(diskResolution, drawLines.stroke);
-    // const filledGeometry = this.getGeometry(diskResolution, drawLines.filled);
-    // if (filledModel) {
-    //   filledModel.setProps({filledGeometry});
-    // }
-    // if (strokeModel) {
-    //   strokeModel.setProps({strokeGeometry});
-    // }
+    if (filledModel) {
+      filledModel.setProps({filledGeometry});
+    }
+    if (strokeModel) {
+      strokeModel.setProps({strokeGeometry});
+    }
   }
 
   draw({uniforms}) {
