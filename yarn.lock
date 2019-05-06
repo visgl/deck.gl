@@ -788,17 +788,17 @@
   dependencies:
     text-encoding "^0.6.4"
 
-"@loaders.gl/core@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.0.1.tgz#3575dd2e057e6c777dd8ae240fc4206f3301d078"
-  integrity sha512-xjgcU4qZaOnkAut4uZRUxx+DdaspeTTNukDXaB2FKokfWN6Y4ItAn/lryGSBwW+lzpH6BtZRxDzXUdP+jlN/Bg==
+"@loaders.gl/core@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.0.3.tgz#60a1467e583f28d974a72f947cf2c7c2bc266393"
+  integrity sha512-ENyW3UqPgtOx81iY23Y8jD7FJ6miNduOzV6Z1xY7pXwoOGrF2BXTJ3P7KPLXTIBN98mh67jUax0fouBhrQL2Kw==
   dependencies:
     "@babel/runtime" "^7.3.1"
 
-"@loaders.gl/images@^1.0.1":
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-1.0.1.tgz#794c7f51753f8f300986ea7d3a8fd077d28d95ff"
-  integrity sha512-D44wIap9LRBbSvObkS1SJ0LMBa0mDBytU5Ui4JsqTETD/URiNQHkTfj+5RV4PrY1XlVrHsUDgyut+jliJZ9Apg==
+"@loaders.gl/images@^1.0.3":
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-1.0.3.tgz#f2d4d75f53a84289b30900c44711ab4fd32e25bd"
+  integrity sha512-S3UV2/apkWkf+ULT/nt8+SYFh7WYir/mCL5VK/dYUnOgNs+0JLyG+0i35bMWg/GsHN683Z9Ja1m9zRsIz/EOdA==
   dependencies:
     canvas-to-blob "0.0.0"
     get-pixels "^3.3.2"
