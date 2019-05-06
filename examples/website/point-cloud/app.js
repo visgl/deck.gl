@@ -34,7 +34,7 @@ const INITIAL_VIEW_STATE = {
 
 const transitionInterpolator = new LinearInterpolator(['rotationOrbit']);
 
-export class App extends PureComponent {
+export default class App extends PureComponent {
   constructor(props) {
     super(props);
 

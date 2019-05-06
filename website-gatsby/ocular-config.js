@@ -56,6 +56,7 @@ module.exports = {
     },
     {
       text: 'High-Precision Computations in the GPU',
+      // eslint-disable-next-line
       desc: 'Using polynomial expansions of geospatial projections, \
 and through emulation of 64 bit floating point computations in the GPU, \
 deck.gl renders datasets with unparalleled accuracy and performance.',
@@ -63,6 +64,7 @@ deck.gl renders datasets with unparalleled accuracy and performance.',
     },
     {
       text: 'A Layered Approach to Data Visualization',
+      // eslint-disable-next-line
       desc: 'deck.gl allows complex visualizations to be constructed by \
 composing existing layers, and makes it easy to package and \
 share new visualizations as reusable layers. We already offer \
@@ -71,6 +73,7 @@ a catalog of proven layers and we have many more in the works.',
     },
     {
       text: 'Rich Base Map Support',
+      // eslint-disable-next-line
       desc: 'Geospatial visualizations can use vector tile layers to render maps, \
 or use Mapbox GL or Google Maps as base maps with automatically synchronized camera systems. \
 When used with Mapbox GL it automatically coordinates with the Mapbox perspective camera system \
@@ -80,6 +83,7 @@ Mapbox base maps.',
     },
     {
       text: 'Deep React Integration',
+      // eslint-disable-next-line
       desc: 'The optional React integration provides highly performant WebGL rendering \
 under React\'s functional programming paradigm.',
       img: 'images/icon-react.svg'
@@ -91,22 +95,107 @@ under React\'s functional programming paradigm.',
   ADDITIONAL_LINKS: [],
 
   EXAMPLES: [
+    {
+      title: 'LineLayer',
+      path: 'examples/line',
+      image: 'images/examples/demo-thumb-line.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/line/app.js')
+    },
+    {
+      title: 'HexagonLayer',
+      path: 'examples/heatmap',
+      image: 'images/examples/demo-thumb-heatmap.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/3d-heatmap/app.js')
+    },
+    {
+      title: 'IconLayer',
+      path: 'examples/icon',
+      image: 'images/examples/demo-thumb-icon.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/icon/app.js')
+    },
+    {
+      title: 'GeoJsonLayer (Polygons)',
+      path: 'examples/geojson',
+      image: 'images/examples/demo-thumb-geojson.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/geojson/app.js')
+    },
+    {
+      title: 'GeoJsonLayer (Paths)',
+      path: 'examples/highway',
+      image: 'images/examples/demo-thumb-highway.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/highway/app.js')
+    },
+    {
+      title: 'ScreenGridLayer',
+      path: 'examples/screengrid',
+      image: 'images/examples/demo-thumb-screengrid.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/screen-grid/app.js')
+    },
+    {
+      title: 'ArcLayer',
+      path: 'examples/arc',
+      image: 'images/examples/demo-thumb-arc.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/arc/app.js')
+    },
+    {
+      title: 'ScatterplotLayer',
+      path: 'examples/scatterplot',
+      image: 'images/examples/demo-thumb-scatterplot.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/scatterplot/app.js')
+    },
+    {
+      title: 'PointCloudLayer',
+      path: 'examples/pointcloud',
+      image: 'images/examples/demo-thumb-point-cloud.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/point-cloud/app.js')
+    },
+    {
+      title: 'TextLayer',
+      path: 'examples/text',
+      image: 'images/examples/demo-thumb-text.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/tagmap/app.js')
+    },
+    {
+      title: 'TileLayer',
+      path: 'examples/maptile',
+      image: 'images/examples/demo-thumb-tile.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/map-tile/app.js')
+    },
+    {
+      title: 'TripsLayer',
+      path: 'examples/trips',
+      image: 'images/examples/demo-thumb-trip.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/trips/app.js')
+    },
+    {
+      title: 'Brushing Layer',
+      path: 'examples/brushing',
+      image: 'images/examples/demo-thumb-brushing.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/brushing/app.js')
+    },
+    {
+      title: '3D Surface Explorer',
+      path: 'examples/plot',
+      image: 'images/examples/demo-thumb-plot.jpg',
+      componentUrl: resolve(__dirname, '../examples/website/plot/app.js')
+    }
+
     // {
     //   title: 'Point Clouds & Meshes',
     //   image: 'images/example-pointcloud.png',
-    //   componentUrl: resolve(__dirname, './examples/pointcloud/app.js'),
+    //   componentUrl: resolve(__dirname, './examples/pointcloud/app.js')
     //   path: 'examples/pointcloud'
     // },
     // {
     //   title: '3D Tiles',
     //   image: 'images/example-gltf.jpg',
-    //   componentUrl: resolve(__dirname, './examples/3d-tiles/app.js'),
+    //   componentUrl: resolve(__dirname, './examples/3d-tiles/app.js')
     //   path: 'examples/3d-tiles'
     // },
     // {
     //   title: 'GLTF',
     //   image: 'images/example-gltf.jpg',
-    //   componentUrl: resolve(__dirname, './templates/example-gltf.jsx'),
+    //   componentUrl: resolve(__dirname, './templates/example-gltf.jsx')
     //   path: 'examples/gltf'
     // }
   ],
@@ -115,16 +204,7 @@ under React\'s functional programming paradigm.',
   // Ocular adds this to gatsby's webpack config
   webpack: {
     resolve: {
-      // modules: [resolve(__dirname, './node_modules')],
-      alias: Object.assign({}, ALIASES, dependencyAliases, {
-        //   '@luma.gl/addons': `${__dirname}/node_modules/@luma.gl/addons/src`,
-        //   '@luma.gl/core': `${__dirname}/node_modules/@luma.gl/core/src`,
-        //   '@luma.gl/constants': `${__dirname}/node_modules/@luma.gl/constants/src`,
-        //   '@luma.gl/webgl': `${__dirname}/node_modules/@luma.gl/webgl/src`,
-        //   '@deck.gl/core': `${__dirname}/node_modules/@deck.gl/core/src`,
-        //   '@deck.gl/layers': `${__dirname}/node_modules/@deck.gl/layers/src`,
-        //   '@deck.gl/react': `${__dirname}/node_modules/@deck.gl/react/src`
-      })
+      alias: Object.assign({}, ALIASES, dependencyAliases)
     }
   }
 };

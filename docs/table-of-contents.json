@@ -63,8 +63,8 @@
         {
           "title": "Core Classes",
           "entries": [
-            {"entry": "docs/api-reference/deck"}
-            {"entry": "docs/api-reference/attribute-manager"},
+            {"entry": "docs/api-reference/deck"},
+            {"entry": "docs/api-reference/attribute-manager"}
           ]
         },
         {

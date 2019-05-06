@@ -61,7 +61,7 @@ const background = [
   [[-1000.0, -1000.0, -40], [1000.0, -1000.0, -40], [1000.0, 1000.0, -40], [-1000.0, 1000.0, -40]]
 ];
 
-class Example extends PureComponent {
+export default class App extends PureComponent {
   render() {
     const layers = [
       new SimpleMeshLayer({
@@ -103,5 +103,5 @@ class Example extends PureComponent {
 }
 
 export function renderToDOM(container) {
-  render(<Example />, container);
+  render(<App />, container);
 }

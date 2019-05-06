@@ -69,12 +69,12 @@ callbacks.onCreateWebpackConfig = function onCreateWebpackConfigOverride(opts) {
     },
     node: {
       fs: 'empty'
+    },
+    resolve: {
+      alias: Object.assign(ocularConfig.webpack.resolve.alias)
     }
   };
 
-  // Completely replace the webpack config for the current stage.
-  // This can be dangerous and break Gatsby if certain configuration options are changed.
-  // Generally only useful for cases where you need to handle config merging logic yourself,
-  // in which case consider using webpack-merge.
+  // Merges into the webpack config
   actions.setWebpackConfig(newConfig);
 };

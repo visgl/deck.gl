@@ -23,7 +23,7 @@ const INITIAL_VIEW_STATE = {
 };
 
 /* eslint-disable react/no-deprecated */
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
