@@ -22,8 +22,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _model_module_version: DeckGLModel.model_module_version,
       _view_name: DeckGLModel.view_name,
       _view_module: DeckGLModel.view_module,
-      _view_module_version: DeckGLModel.view_module_version,
-      json_input: null
+      _view_module_version: DeckGLModel.view_module_version
     };
   }
 
@@ -90,15 +89,15 @@ export class DeckGLView extends DOMWidgetView {
 
   value_changed() {
     this.json_input = this.model.get('json_input');
+    const parsedJSONInput = JSON.parse(this.json_input);
     this.initJSElements();
 
     const jsonConverter = new deckJson._JSONConverter({
       configuration: {
-        layers: [...deckglLayers, ...deckAggregationLayers]
+        layers: {...deckglLayers, ...deckAggregationLayers}
       }
     });
-
-    const results = jsonConverter.convertJsonToDeckProps(JSON.parse(this.json_input));
+    const results = jsonConverter.convertJsonToDeckProps(parsedJSONInput);
     this.deck.setProps(results);
     hideMapboxCSSWarning();
     setMapProps(this.mapLayer, this.deck.props);

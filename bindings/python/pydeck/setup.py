@@ -44,10 +44,10 @@ def js_prerelease(command, strict=False):
     class DecoratedCommand(command):
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
-            if all(os.path.exists(t) for t in jsdeps.targets):
-                # sdist, nothing to do
-                command.run(self)
-                return
+            # if all(os.path.exists(t) for t in jsdeps.targets):
+            #     # sdist, nothing to do
+            #     command.run(self)
+            #     return
 
             try:
                 self.distribution.run_command('jsdeps')
