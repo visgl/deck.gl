@@ -26,3 +26,16 @@ export const defaultColorRange = [
   [240, 59, 32],
   [189, 0, 38]
 ];
+
+// Converts a colorRange array to a flat array with 4 components per color
+export function colorRangeToFlatArray(colorRange, ArrayType, defaultValue) {
+  const flatArray = new ArrayType(colorRange.length * 4);
+  colorRange.forEach((color, index) => {
+    const flatArrayIdnex = index * 4;
+    flatArray[flatArrayIdnex] = color[0];
+    flatArray[flatArrayIdnex + 1] = color[1];
+    flatArray[flatArrayIdnex + 2] = color[2];
+    flatArray[flatArrayIdnex + 3] = Number.isFinite(color[3]) ? color[3] : defaultValue;
+  });
+  return flatArray;
+}

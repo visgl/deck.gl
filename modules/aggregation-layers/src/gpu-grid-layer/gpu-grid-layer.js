@@ -23,7 +23,7 @@ import {CompositeLayer} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
-import {defaultColorRange} from '../utils/color-utils';
+import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
 
 const MINCOLOR = [0, 0, 0, 255];
@@ -162,14 +162,7 @@ export default class GPUGridLayer extends CompositeLayer {
     const minColor = MINCOLOR;
     const maxColor = MAXCOLOR;
 
-    const colorRange = new Float32Array(this.props.colorRange.length * 4);
-    this.props.colorRange.forEach((color, index) => {
-      const colorRangeIdnex = index * 4;
-      colorRange[colorRangeIdnex] = color[0];
-      colorRange[colorRangeIdnex + 1] = color[1];
-      colorRange[colorRangeIdnex + 2] = color[2];
-      colorRange[colorRangeIdnex + 3] = color[3] || 255;
-    });
+    const colorRange = colorRangeToFlatArray(this.props.colorRange, Float32Array, 255);
 
     // return props to the sublayer constructor
     return super.getSubLayerProps({

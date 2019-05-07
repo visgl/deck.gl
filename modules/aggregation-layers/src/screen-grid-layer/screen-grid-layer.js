@@ -20,7 +20,7 @@
 
 import {Layer, WebMercatorViewport, createIterable, log, experimental} from '@deck.gl/core';
 const {count} = experimental;
-import {defaultColorRange} from '../utils/color-utils';
+import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
 
@@ -382,11 +382,7 @@ export default class ScreenGridLayer extends Layer {
     }
 
     if (oldProps.colorRange !== props.colorRange) {
-      const colorRangeUniform = [];
-      props.colorRange.forEach(color => {
-        colorRangeUniform.push(color[0], color[1], color[2], color[3] || 255);
-      });
-      newState.colorRange = colorRangeUniform;
+      newState.colorRange = colorRangeToFlatArray(props.colorRange, Float32Array, 255);
     }
 
     if (
