@@ -3,7 +3,7 @@
 
 """
 DeckGLWidget renders JSON into a deck.gl plot
-It requires a mapbox API key to be set as an environment variable
+You may set a Mapbox API key as an environment variable to use Mapbox maps in your visualization
 """
 from __future__ import unicode_literals
 import os
@@ -23,6 +23,7 @@ class DeckGLWidget(widgets.DOMWidget):
     _view_module_version = Unicode(module_version).tag(sync=True)
     # Mapbox key, read on inititialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
     mapbox_key = Unicode(os.getenv('MAPBOX_API_KEY')).tag(sync=True)
+    # JSON as a string meant for reading into deck.gl JSON API
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Int(500).tag(sync=True)

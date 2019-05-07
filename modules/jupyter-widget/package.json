@@ -2,7 +2,7 @@
   "name": "@deck.gl/jupyter-widget",
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
-  "version": "7.0.0-beta.2",
+  "version": "7.0.0",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -14,9 +14,7 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "esnext": "dist/es6/index.js",
+  "main": "dist/pydeck_embeddable/index.js",
   "files": [
     "dist",
     "src",
@@ -31,10 +29,10 @@
     "@jupyter-widgets/base": "^1.1.10",
     "@types/mapbox-gl": "^0.51.4",
     "mapbox-gl": "^0.53.1",
-    "@deck.gl/aggregation-layers": "7.0.0",
-    "@deck.gl/core": "7.0.0",
-    "@deck.gl/json": "7.0.0",
-    "@deck.gl/layers": "7.0.0"
+    "@deck.gl/aggregation-layers": "^7.0.0",
+    "@deck.gl/core": "^7.0.0",
+    "@deck.gl/json": "^7.0.0",
+    "@deck.gl/layers": "^7.0.0"
   },
   "devDependencies": {
     "webpack-cli": "^3.3.2"
