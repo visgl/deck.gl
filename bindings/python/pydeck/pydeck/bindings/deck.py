@@ -3,6 +3,7 @@ from .json_tools import JSONMixin
 from .layer import Layer
 from .view import View
 from .view_state import ViewState
+from ..widget import DeckGLWidget
 
 
 class Deck(JSONMixin):
@@ -46,3 +47,11 @@ class Deck(JSONMixin):
             self.initial_view_state = obj
         obj_type = type(obj).__name__
         raise TypeError("Cannot join object of type", obj_type)
+
+    def show(self):
+        """
+        Displays current Deck object for a Jupyter notebook
+        """
+        w = DeckGLWidget()
+        w.json_input = self.to_json()
+        return w

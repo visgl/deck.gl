@@ -30,6 +30,7 @@ def camel_case_keys(attrs):
 
 
 def default_serialize(o, remap_function=camel_case_keys):
+    """Default method for rendering JSON from a dictionary"""
     attrs = vars(o)
     attrs = {k: v for k, v in attrs.items() if v is not None}
     if remap_function:
