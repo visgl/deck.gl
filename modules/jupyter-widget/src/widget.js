@@ -17,7 +17,6 @@ const deckAggregationLayers = require('@deck.gl/aggregation-layers');
 const deckJson = require('@deck.gl/json');
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
-const MAPBOX_TILE_URL = 'mapbox://styles/mapbox/light-v9';
 
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
@@ -97,7 +96,7 @@ export class DeckGLView extends DOMWidgetView {
       this.mapLayer = new mapboxgl.Map({
         container: `map-${this.modelId}`,
         interactive: false,
-        style: MAPBOX_TILE_URL
+        style: null
       });
     }
   }
