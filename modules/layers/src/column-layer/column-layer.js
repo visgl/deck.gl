@@ -48,8 +48,8 @@ const defaultProps = {
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getElevation: {type: 'accessor', value: 1000},
-  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']},
-  material: defaultMaterial
+  material: defaultMaterial,
+  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
 export default class ColumnLayer extends Layer {
@@ -121,12 +121,13 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution, mode = FILL_MODE) {
+  getGeometry(diskResolution, mode = FILL_MODE, drawMode = GL.TRIANGLES) {
     return new ColumnGeometry({
       radius: 1,
       topCap: false,
       bottomCap: true,
       mode,
+      drawMode,
       height: 2,
       verticalAxis: 'z',
       nradial: diskResolution,
@@ -145,6 +146,7 @@ export default class ColumnLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-top`,
+          uniforms: {isWireframe: false},
           geometry: this.getGeometry(diskResolution, FILL_MODE),
           isInstanced: true,
           shaderCache: this.context.shaderCache
@@ -156,7 +158,8 @@ export default class ColumnLayer extends Layer {
         gl,
         Object.assign({}, this.getShaders(), {
           id: `${id}-side`,
-          geometry: this.getGeometry(diskResolution, OUTLINE_MODE),
+          uniforms: {isWireframe: true},
+          geometry: this.getGeometry(diskResolution, OUTLINE_MODE, GL.LINES),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -178,19 +181,25 @@ export default class ColumnLayer extends Layer {
     log.assert(vertices.length >= diskResolution);
     const {filledModel, strokeModel} = this.state;
 
-    const strokeGeometry = this.getGeometry(diskResolution, OUTLINE_MODE);
+    const strokeGeometry = this.getGeometry(diskResolution, OUTLINE_MODE, GL.LINES);
     const filledGeometry = this.getGeometry(diskResolution, FILL_MODE);
-    const positions = filledGeometry.attributes.POSITION;
-    let i = 0;
-    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
-      for (let j = 0; j <= diskResolution; j++) {
-        const p = vertices[j] || vertices[0]; // auto close loop
-        // replace x and y in geometry
-        positions.value[i++] = p[0];
-        positions.value[i++] = p[1];
-        i++;
+    const filledPositions = filledGeometry.attributes.POSITION;
+    const strokePositions = strokeGeometry.attributes.POSITION;
+    const positions = [filledPositions, strokePositions];
+
+    positions.forEach(position => {
+      let i = 0;
+      for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
+        for (let j = 0; j <= diskResolution; j++) {
+          const p = vertices[j] || vertices[0]; // auto close loop
+          // replace x and y in geometry
+          position.value[i++] = p[0];
+          position.value[i++] = p[1];
+          i++;
+        }
       }
-    }
+    });
+
     if (filledModel) {
       filledModel.setProps({filledGeometry});
     }
@@ -229,12 +238,10 @@ export default class ColumnLayer extends Layer {
     });
 
     if (strokeModel && wireframe) {
-      strokeModel.setDrawMode(GL.LINES);
-      strokeModel.setUniforms({isWireframe: true}).draw();
+      strokeModel.draw();
     }
     if (filledModel && filled) {
-      filledModel.setDrawMode(GL.TRIANGLES);
-      filledModel.setUniforms({isWireframe: false}).draw();
+      filledModel.draw();
     }
   }
 
