@@ -3,9 +3,9 @@ from .json_tools import JSONMixin
 class ViewState(JSONMixin):
     def __init__(
         self,
-        longitude,
-        latitude,
-        zoom,
+        longitude=0.0,
+        latitude=0.0,
+        zoom=10,
         min_zoom=1,
         max_zoom=20,
         pitch=0,

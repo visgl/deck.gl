@@ -57,15 +57,21 @@ export class DeckGLModel extends DOMWidgetModel {
   }
 }
 
+const TICK_RATE_MILLISECONDS = 100;
+
 export class DeckGLView extends DOMWidgetView {
   render() {
+    this.modelId = this.model.model_id;
     super.render();
     this.listenTo(this.model, 'change:json_input', this.value_changed);
     loadCss(MAPBOX_CSS_URL);
     const [width, height] = [this.model.get('width'), this.model.get('height')];
-    createDeckScaffold(this.el, width, height);
-    waitForElementToDisplay('#deck-map-wrapper', 100, this.initJSElements.bind(this));
-    waitForElementToDisplay('#deckgl-overlay', 100, this.value_changed.bind(this));
+    createDeckScaffold(this.el, this.modelId, width, height);
+    waitForElementToDisplay(
+      `#deck-map-wrapper-${this.modelId}`,
+      TICK_RATE_MILLISECONDS,
+      this.initJSElements.bind(this)
+    );
   }
 
   _onViewStateChange({viewState}) {
@@ -77,9 +83,10 @@ export class DeckGLView extends DOMWidgetView {
     if (!this.deck) {
       mapboxgl.accessToken = this.model.get('mapbox_key');
       this.deck = new deckgl.Deck({
-        canvas: 'deck-map-container',
+        canvas: `deck-map-container-${this.modelId}`,
         height: '100%',
         width: '100%',
+        onLoad: this.value_changed.bind(this),
         mapboxApiAccessToken: mapboxgl.accessToken,
         views: [new deckgl.MapView()],
         onViewStateChange: this._onViewStateChange.bind(this)
@@ -88,7 +95,7 @@ export class DeckGLView extends DOMWidgetView {
 
     if (!this.mapLayer) {
       this.mapLayer = new mapboxgl.Map({
-        container: 'map',
+        container: `map-${this.modelId}`,
         interactive: false,
         style: MAPBOX_TILE_URL
       });
@@ -98,7 +105,7 @@ export class DeckGLView extends DOMWidgetView {
   value_changed() {
     this.json_input = this.model.get('json_input');
     const parsedJSONInput = JSON.parse(this.json_input);
-
+    this.initJSElements();
     const jsonConverter = new deckJson._JSONConverter({
       configuration: {
         layers: {...deckglLayers, ...deckAggregationLayers}
