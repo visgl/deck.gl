@@ -10,8 +10,11 @@ This RFC suggests a new property to deck.gl layers that activates a regular poll
 
 ## Background
 
-Implementing polling in a deck.gl application can require quite a bit of logic. As usual this has two down-sides:
-- Makes a rather
+Implementing polling in a deck.gl application can require quite a bit of logic (see code example below):
+- Makes implementing real-time applications harder and less obvious than it needs to be for users
+- Makes real-time usage almost impossible in declarative APIs like `@deck.gl/json`.
+
+Being able to talk about "real time" support in our documentation could also be powerful, and we could implement additional features that support this use case (see extensions below).
 
 ### Example of Current API
 
@@ -19,7 +22,7 @@ This is a cleaned-up version of the `ScenegraphLayer` demo app that regularly pu
 
 ```js
 const DATA_URL = '...';
-const REFRESH_TIME_MS = 5000;
+const REFRESH_TIME_MS = 30000;
 
 export class App extends React.Component {
   constructor(props) {
@@ -59,7 +62,7 @@ export class App extends React.Component {
 
 ```js
 const DATA_URL = '...';
-const REFRESH_TIME_MS = 5000;
+const REFRESH_TIME_MS = 30000;
 
 export class App extends React.Component {
   _renderLayers() {
@@ -87,13 +90,14 @@ Note: this property only has an effect if the `data` prop is a URL (`String`).
 
 ### Support Cache Defeater Parameters?
 
-Can we assume that services that apps want to regularly poll do not get cached?
+In this RFC we assume that services that apps want to regularly poll do not get cached. If this becomes an issue. A typical way to defeat caching is to add an unused parameter with a unique value. We can easily maintain a counter under the hood, but how would we add it to the URL?
 
-A typical way to defeat caching is to add an unused parameter with a unique value.
-
-Is it worth defining new semantics for the data prop, or additional props, to support this case?
+Is it worth defining new semantics for the data prop, or additional props, to support this case? E.g:
 
 ```js
+const DATA_URL = '...';
+const REFRESH_TIME_MS = 30000;
+
 export class App extends React.Component {
   _renderLayers() {
     return [
