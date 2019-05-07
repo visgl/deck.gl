@@ -1,0 +1,125 @@
+<html>
+  <head>
+    <title>deck.gl TextLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
+      #control-panel {
+        position: absolute;
+        top: 0;
+        left: 0;
+        margin: 12px;
+        padding: 10px;
+        font-size: 11px;
+        line-height: 1.5;
+        z-index: 1;
+        font-family: Helvetica, Arial, sans-serif;
+        background: #fff;
+        box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
+      }
+      label {
+        display: inline-block;
+        width: 50px;
+      }
+    </style>
+  </head>
+
+  <body>
+      <div id="tooltip"></div>
+      <div id="control-panel">
+        <div>
+          <label>Font Size</label>
+          <input id="getSize" type="range" min="0" max="100" step="1" value="16"></input>
+          <span id="getSize-value"></span>
+        </div>
+        <div>
+          <label>Opacity</label>
+          <input id="opacity" type="range" min="0" max="1" step="0.1" value="1"></input>
+          <span id="opacity-value"></span>
+        </div>
+      </div>
+  </body>
+
+  <script type="text/javascript">
+
+    const {DeckGL,TextLayer} = deck;
+
+    const deckgl = new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/dark-v9',
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 11,
+      maxZoom: 15,
+      pitch: 30,
+      bearing: 0,
+    });
+    
+    const OPTIONS = ['getSize', 'opacity'];
+    OPTIONS.forEach(key => {
+      document.getElementById(key).oninput = renderLayer;
+    });
+
+    renderLayer();
+
+    function renderLayer() {
+      const options = {};
+      OPTIONS.forEach(key => {
+        const value = document.getElementById(key).value;
+        document.getElementById(key + '-value').innerHTML = value;
+        options[key] = Number(value);
+      });
+
+      const textLayer = new TextLayer({
+        id: 'text-layer',
+        data: 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/bart-stations.json',
+        pickable: true,
+        getPosition: d => d.coordinates,
+        getText: d => d.name,
+        getSize: 16,
+        getColor: [247,248,243],
+        getTextAnchor: 'middle',
+        getAlignmentBaseline: 'center',
+        onHover: updateTooltip,
+        ...options
+      });
+      
+      deckgl.setProps({ layers: [textLayer] });
+    }
+
+    function updateTooltip({x, y, object}) {
+      const tooltip = document.getElementById('tooltip');
+      if (object) {
+        tooltip.style.top = `${y}px`;
+        tooltip.style.left = `${x}px`;
+        tooltip.innerHTML = `${object.name}\n${object.address}`;
+      } else {
+        tooltip.innerHTML = '';
+      }
+    }
+    
+  </script>
+</html>
