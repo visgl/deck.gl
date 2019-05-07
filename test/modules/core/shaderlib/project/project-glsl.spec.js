@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 
-import {COORDINATE_SYSTEM, Viewport, WebMercatorViewport} from 'deck.gl';
+import {COORDINATE_SYSTEM, WebMercatorViewport, OrthographicView} from 'deck.gl';
 import {project} from '@deck.gl/core/shaderlib';
 import {Matrix4, config} from 'math.gl';
 import {gl} from '@deck.gl/test-utils';
@@ -51,18 +51,13 @@ const TEST_VIEWPORT_HIGH_ZOOM = new WebMercatorViewport({
   height: 600
 });
 
-const TEST_VIEWPORT_ORTHO = new Viewport({
+const TEST_VIEWPORT_ORTHO = new OrthographicView().makeViewport({
   width: 800,
   height: 600,
-  viewMatrix: new Matrix4().lookAt({eye: [0, 0, 1], lookAt: [0, 0, 0], up: [0, 1, 0]}),
-  projectionMatrix: new Matrix4().ortho({
-    left: -400,
-    right: 400,
-    bottom: 300,
-    top: -300,
-    near: 1,
-    far: 100
-  })
+  viewState: {
+    target: [50, 50, 0],
+    zoom: 1
+  }
 });
 
 const DUMMY_SOURCE_BUFFER = new Buffer(gl, 1);
@@ -195,8 +190,8 @@ const TEST_CASES = [
         name: 'project_position',
         func: ({project_position}) => project_position([-122.05, 37.92, 0, 1], [0, 0]),
         output: getPixelOffset(
-          TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122.05, 37.92]),
-          TEST_VIEWPORT_HIGH_ZOOM.projectFlat([-122, 38])
+          TEST_VIEWPORT_HIGH_ZOOM.projectPosition([-122.05, 37.92, 0]),
+          TEST_VIEWPORT_HIGH_ZOOM.projectPosition([-122, 38, 0])
         ),
         precision: PIXEL_TOLERANCE,
         vs: TRANSFORM_VS.project_position([-122.05, 37.92, 0, 1])
@@ -236,9 +231,8 @@ const TEST_CASES = [
         // @turf/destination
         // destination([-122.05, 37.92], 1 * Math.sqrt(2), 45) -> [ -122.0385984916185, 37.92899265369385 ]
         output: getPixelOffset(
-          TEST_VIEWPORT.projectFlat([-122.0385984916185, 37.92899265369385]),
-          TEST_VIEWPORT.projectFlat([-122.05, 37.92]),
-          100 * TEST_VIEWPORT.distanceScales.pixelsPerMeter[2]
+          TEST_VIEWPORT.projectPosition([-122.0385984916185, 37.92899265369385, 100]),
+          TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
         ),
         precision: PIXEL_TOLERANCE,
         vs: TRANSFORM_VS.project_position([1000, 1000, 0, 1])
@@ -266,8 +260,8 @@ const TEST_CASES = [
         name: 'project_position',
         func: ({project_position}) => project_position([0.05, 0.08, 0, 1], [0, 0]),
         output: getPixelOffset(
-          TEST_VIEWPORT.projectFlat([-122, 38]),
-          TEST_VIEWPORT.projectFlat([-122.05, 37.92])
+          TEST_VIEWPORT.projectPosition([-122, 38, 0]),
+          TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
         ),
         precision: PIXEL_TOLERANCE,
         vs: TRANSFORM_VS.project_position([0.05, 0.08, 0, 1])
@@ -294,7 +288,12 @@ const TEST_CASES = [
       {
         name: 'project_position',
         func: ({project_position}) => project_position([200, 200, 0, 1], [0, 0]),
-        output: [-200, 200, 10, 1],
+        // output: [-200, 200, 10, 1],
+        output: getPixelOffset(
+          TEST_VIEWPORT_ORTHO.projectPosition([-200, 200, 10]),
+          TEST_VIEWPORT_ORTHO.projectPosition([50, 50, 0])
+        ),
+        precision: PIXEL_TOLERANCE,
         vs: TRANSFORM_VS.project_position([200, 200, 0, 1])
       },
       {

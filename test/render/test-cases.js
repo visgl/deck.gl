@@ -113,6 +113,27 @@ export const TEST_CASES = [
     ],
     goldenImage: './test/render/golden-images/first-person.png'
   },
+  // Info vis
+  {
+    name: 'orthographic-64bit',
+    views: new OrthographicView(),
+    viewState: {
+      target: [10000 - 122.4, 10000 + 37.75, 0],
+      zoom: 14
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'orthographic-64',
+        opacity: 0.1,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        data: dataSamples.getPoints100K().map(p => [p[0] + 10000, p[1] + 10000]),
+        getPosition: d => d,
+        getRadius: 0,
+        radiusMinPixels: 6
+      })
+    ],
+    goldenImage: './test/render/golden-images/orthographic-64.png'
+  },
   {
     name: 'pointcloud-identity',
     views: [

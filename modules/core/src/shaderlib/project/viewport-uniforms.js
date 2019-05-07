@@ -96,9 +96,13 @@ function calculateMatrixAndOffset({
       shaderCoordinateOrigin = [lng, lat];
     }
   }
+  if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.IDENTITY) {
+    // we only support 2D 64-bit positions for now
+    shaderCoordinateOrigin = [Math.fround(viewport.position[0]), Math.fround(viewport.position[1])];
+  }
 
   switch (shaderCoordinateSystem) {
-    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
+    // case PROJECT_COORDINATE_SYSTEM.IDENTITY:
     case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
       projectionCenter = ZERO_VECTOR;
       break;
@@ -107,27 +111,27 @@ function calculateMatrixAndOffset({
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
     case PROJECT_COORDINATE_SYSTEM.METER_OFFSETS:
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET:
+    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
       // Calculate transformed projectionCenter (using 64 bit precision JS)
       // This is the key to offset mode precision
       // (avoids doing this addition in 32 bit precision in GLSL)
-      const positionPixels = viewport.projectFlat(
+      const positionCommonSpace = viewport.projectPosition(
         shaderCoordinateOrigin,
         Math.pow(2, coordinateZoom)
       );
 
       cameraPos = [
-        cameraPos[0] - positionPixels[0],
-        cameraPos[1] - positionPixels[1],
+        cameraPos[0] - positionCommonSpace[0],
+        cameraPos[1] - positionCommonSpace[1],
         cameraPos[2]
       ];
 
+      positionCommonSpace[2] = 0;
+      positionCommonSpace[3] = 1;
+
       // projectionCenter = new Matrix4(viewProjectionMatrix)
       //   .transformVector([positionPixels[0], positionPixels[1], 0.0, 1.0]);
-      projectionCenter = vec4.transformMat4(
-        [],
-        [positionPixels[0], positionPixels[1], 0.0, 1.0],
-        viewProjectionMatrix
-      );
+      projectionCenter = vec4.transformMat4([], positionCommonSpace, viewProjectionMatrix);
 
       // Always apply uncentered projection matrix if available (shader adds center)
       viewMatrix = viewMatrixUncentered || viewMatrix;
@@ -264,6 +268,10 @@ function calculateViewportUniforms({
     case PROJECT_COORDINATE_SYSTEM.LNGLAT_OFFSETS:
       uniforms.project_uCommonUnitsPerWorldUnit = distanceScalesAtOrigin.pixelsPerDegree;
       uniforms.project_uCommonUnitsPerWorldUnit2 = distanceScalesAtOrigin.pixelsPerDegree2;
+      break;
+
+    case PROJECT_COORDINATE_SYSTEM.IDENTITY:
+      uniforms.project_uCoordinateOrigin = shaderCoordinateOrigin;
       break;
 
     default:
