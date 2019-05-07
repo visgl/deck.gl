@@ -49,7 +49,8 @@ export class App extends React.Component {
     const {refreshCount} = this.state;
     return [
       new Layer({
-        data: DATA_URL
+        // NOTE: the parameter is not for cache busting, but to trigger the diff engine to reload
+        data: `${DATA_URL}?refreshCount=${refreshCount}`
       })
     ];
   }
