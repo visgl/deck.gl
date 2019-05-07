@@ -2,7 +2,13 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {createDeckScaffold, loadCss, hideMapboxCSSWarning, setMapProps} from './utils';
+import {
+  createDeckScaffold,
+  loadCss,
+  hideMapboxCSSWarning,
+  setMapProps,
+  waitForElementToDisplay
+} from './utils';
 
 const mapboxgl = require('mapbox-gl');
 const deckgl = require('@deck.gl/core');
@@ -58,6 +64,8 @@ export class DeckGLView extends DOMWidgetView {
     loadCss(MAPBOX_CSS_URL);
     const [width, height] = [this.model.get('width'), this.model.get('height')];
     createDeckScaffold(this.el, width, height);
+    waitForElementToDisplay('#deck-map-wrapper', 100, this.initJSElements.bind(this));
+    waitForElementToDisplay('#deckgl-overlay', 100, this.value_changed.bind(this));
   }
 
   _onViewStateChange({viewState}) {
@@ -90,7 +98,6 @@ export class DeckGLView extends DOMWidgetView {
   value_changed() {
     this.json_input = this.model.get('json_input');
     const parsedJSONInput = JSON.parse(this.json_input);
-    this.initJSElements();
 
     const jsonConverter = new deckJson._JSONConverter({
       configuration: {

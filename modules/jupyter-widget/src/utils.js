@@ -1,4 +1,4 @@
-/* global document */
+/* global document,setTimeout */
 /**
  * Gets CSS from a given URL and appends it to the document head
  * @param url URL of CSS page
@@ -87,6 +87,22 @@ function createDeckScaffold(rootElement, width = 500, height = 500) {
 }
 
 /**
+ * Awaits an element to display before running another action
+ * @param selector Attribute to await
+ * @param time Check interval in milliseconds
+ * @param cb Callback to execute when the element is found
+ */
+function waitForElementToDisplay(selector, time, cb) {
+  if (document.querySelector(selector) !== null) {
+    cb();
+    return;
+  }
+  setTimeout(() => {
+    waitForElementToDisplay(selector, time, cb);
+  }, time);
+}
+
+/**
  * Sets common properties for basemap
  * @param map ID attribute of div
  * @param props ID attribute of div
@@ -111,4 +127,4 @@ function setMapProps(map, props) {
   }
 }
 
-export {createDeckScaffold, loadCss, hideMapboxCSSWarning, setMapProps};
+export {createDeckScaffold, loadCss, hideMapboxCSSWarning, setMapProps, waitForElementToDisplay};
