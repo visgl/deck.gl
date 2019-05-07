@@ -47,7 +47,7 @@ Possible other animation related RFCs:
 | [**Unified ViewState**](vNext/view-state-rfc.md) | @ibgreen | **Deferred** | Controversial proposal for an even more Unified View/Controller Architecture. Review again after all Controller/Multiview RFCs have been approved/implemented |
 
 
-## v7.x Binary Data RFCs
+## v7.x Binary Data and Data Loading RFCs
 
 Group of related RFCs loosely targeted for 7.x releases.
 
@@ -58,6 +58,7 @@ Group of related RFCs loosely targeted for 7.x releases.
 | [**Texture Attribute RFC**](/dev-docs/v7.x-binary/texture-attribute-rfc.md) | @ibgreen | **Draft** | Enable variable-primitive layers_ to read _descriptive attributes_ from a binary column. |
 | [**GPU Data Frame Support**](/dev-docs/v7.x-binary/gpu-data-frame-rfc.md) | @ibgreen | **Draft** | Proposal for enabling deck.gl to apply data frame filters on GPU. |
 | [**Chunked Data Support**](/dev-docs/v7.x-binary/chunked-data-rfc.md) | @ibgreen | **Draft** | Support Chunked Columnar data on the GPU. |
+| [**Real-Time Data Support**](/dev-docs/v7.x-binary/real-time-data-rfc.md) | @ibgreen | **Draft** | Built-in support for polling data sources. |
 
 
 ## v7.x RFCs
