@@ -34,6 +34,7 @@ matrix:
         - cat coverage/lcov.info | coveralls
 
     - language: python
+      dist: precise
       before_install:
         - cd bindings/python/pydeck
       python:
@@ -44,7 +45,9 @@ matrix:
         directories:
           - ~/.npm  # NPM cache
       install:
-        - pip install -r requirements.txt
+        - sudo apt install nodejs
+        - npm install -g webpack
+k       - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
         - pip install .
       script: pytest --cov=pydeck
