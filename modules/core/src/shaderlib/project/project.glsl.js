@@ -133,13 +133,14 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
 
   // METER_OFFSETS or IDENTITY
   // Apply model matrix
-  vec4 position_modelspace = project_uModelMatrix * position;
+  vec4 position_world = project_uModelMatrix * position;
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_IDENTITY) {
-    position_modelspace.xy -= project_uCoordinateOrigin;
-    position_modelspace += project_uModelMatrix * vec4(position64xyLow, 0.0, 0.0);
+    position_world.xy -= project_uCoordinateOrigin;
+    // Translation is already added to the high parts
+    position_world += project_uModelMatrix * vec4(position64xyLow, 0.0, 0.0);
   }
 
-  return project_offset_(position_modelspace);
+  return project_offset_(position_world);
 }
 
 vec4 project_position(vec4 position) {

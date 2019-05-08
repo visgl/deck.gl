@@ -81,7 +81,7 @@ function calculateMatrixAndOffset({
   let {viewProjectionMatrix} = viewport;
 
   let projectionCenter;
-  let cameraPos = viewport.cameraPosition;
+  let cameraPosCommon = viewport.cameraPosition;
   let shaderCoordinateSystem = getShaderCoordinateSystem(coordinateSystem);
   let shaderCoordinateOrigin = coordinateOrigin;
 
@@ -97,12 +97,11 @@ function calculateMatrixAndOffset({
     }
   }
   if (shaderCoordinateSystem === PROJECT_COORDINATE_SYSTEM.IDENTITY) {
-    // we only support 2D 64-bit positions for now
+    // We only support 64-bit precision in the X and Y components of positions for now
     shaderCoordinateOrigin = [Math.fround(viewport.position[0]), Math.fround(viewport.position[1])];
   }
 
   switch (shaderCoordinateSystem) {
-    // case PROJECT_COORDINATE_SYSTEM.IDENTITY:
     case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
       projectionCenter = ZERO_VECTOR;
       break;
@@ -120,10 +119,10 @@ function calculateMatrixAndOffset({
         Math.pow(2, coordinateZoom)
       );
 
-      cameraPos = [
-        cameraPos[0] - positionCommonSpace[0],
-        cameraPos[1] - positionCommonSpace[1],
-        cameraPos[2]
+      cameraPosCommon = [
+        cameraPosCommon[0] - positionCommonSpace[0],
+        cameraPosCommon[1] - positionCommonSpace[1],
+        cameraPosCommon[2]
       ];
 
       positionCommonSpace[2] = 0;
@@ -151,7 +150,7 @@ function calculateMatrixAndOffset({
     viewMatrix,
     viewProjectionMatrix,
     projectionCenter,
-    cameraPos,
+    cameraPosCommon,
     shaderCoordinateSystem,
     shaderCoordinateOrigin
   };
@@ -213,7 +212,7 @@ function calculateViewportUniforms({
   const {
     projectionCenter,
     viewProjectionMatrix,
-    cameraPos,
+    cameraPosCommon,
     shaderCoordinateSystem,
     shaderCoordinateOrigin
   } = calculateMatrixAndOffset({
@@ -251,7 +250,7 @@ function calculateViewportUniforms({
     project_uViewProjectionMatrix: viewProjectionMatrix,
 
     // This is for lighting calculations
-    project_uCameraPosition: cameraPos
+    project_uCameraPosition: cameraPosCommon
   };
 
   const distanceScalesAtOrigin = viewport.getDistanceScales(shaderCoordinateOrigin);

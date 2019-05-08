@@ -189,6 +189,7 @@ const TEST_CASES = [
       {
         name: 'project_position',
         func: ({project_position}) => project_position([-122.05, 37.92, 0, 1], [0, 0]),
+        // common space position is offset from viewport center
         output: getPixelOffset(
           TEST_VIEWPORT_HIGH_ZOOM.projectPosition([-122.05, 37.92, 0]),
           TEST_VIEWPORT_HIGH_ZOOM.projectPosition([-122, 38, 0])
@@ -228,6 +229,7 @@ const TEST_CASES = [
       {
         name: 'project_position',
         func: ({project_position}) => project_position([1000, 1000, 0, 1], [0, 0]),
+        // common space position is offset from coordinateOrigin
         // @turf/destination
         // destination([-122.05, 37.92], 1 * Math.sqrt(2), 45) -> [ -122.0385984916185, 37.92899265369385 ]
         output: getPixelOffset(
@@ -259,6 +261,7 @@ const TEST_CASES = [
       {
         name: 'project_position',
         func: ({project_position}) => project_position([0.05, 0.08, 0, 1], [0, 0]),
+        // common space position is offset from coordinateOrigin
         output: getPixelOffset(
           TEST_VIEWPORT.projectPosition([-122, 38, 0]),
           TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
@@ -288,7 +291,7 @@ const TEST_CASES = [
       {
         name: 'project_position',
         func: ({project_position}) => project_position([200, 200, 0, 1], [0, 0]),
-        // output: [-200, 200, 10, 1],
+        // common space position is offset from viewport center
         output: getPixelOffset(
           TEST_VIEWPORT_ORTHO.projectPosition([-200, 200, 10]),
           TEST_VIEWPORT_ORTHO.projectPosition([50, 50, 0])
