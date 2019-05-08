@@ -46,7 +46,7 @@ matrix:
           - ~/.npm  # NPM cache
       install:
         - sudo apt-get update
-        - curl -sL https://deb.nodesource.com/setup_6.x | bash -
+        - curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
         - sudo apt-get install -y nodejs
         - npm install -g webpack
         - pip install -r requirements.txt
