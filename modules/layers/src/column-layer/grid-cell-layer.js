@@ -34,7 +34,7 @@ export default class GridCellLayer extends ColumnLayer {
 
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle} = this.props;
-    const {filledModel} = this.state;
+    const {fillModel} = this.state;
     const numInstances = this.getNumInstances();
     const renderUniforms = Object.assign({}, uniforms, {
       radius: cellSize / 2,
@@ -44,9 +44,9 @@ export default class GridCellLayer extends ColumnLayer {
       coverage,
       elevationScale
     });
-    filledModel.setInstanceCount(numInstances);
-    filledModel.setDrawMode(GL.TRIANGLES);
-    filledModel.setUniforms(renderUniforms).draw();
+    fillModel.setInstanceCount(numInstances);
+    fillModel.setDrawMode(GL.TRIANGLES);
+    fillModel.setUniforms(renderUniforms).draw();
   }
 }
 

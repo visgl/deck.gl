@@ -21,7 +21,7 @@
 import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, fp64, PhongMaterial} from '@luma.gl/core';
-import ColumnGeometry from './column-geometry';
+import {ColumnGeometry, FILL_MODE, STROKE_MODE} from './column-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -29,8 +29,6 @@ import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [255, 0, 255, 255];
-const FILL_MODE = 'filled';
-const OUTLINE_MODE = 'stroke';
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -125,7 +123,7 @@ export default class ColumnLayer extends Layer {
     return new ColumnGeometry({
       radius: 1,
       topCap: false,
-      bottomCap: true,
+      bottomCap: mode === FILL_MODE,
       mode,
       drawMode,
       height: 2,
@@ -137,15 +135,14 @@ export default class ColumnLayer extends Layer {
 
   _getModels(gl) {
     const {id, filled, wireframe, diskResolution} = this.props;
-
-    let filledModel;
+    let fillModel;
     let strokeModel;
 
     if (filled) {
-      filledModel = new Model(
+      fillModel = new Model(
         gl,
         Object.assign({}, this.getShaders(), {
-          id: `${id}-top`,
+          id: `${id}-${FILL_MODE}`,
           uniforms: {isWireframe: false},
           geometry: this.getGeometry(diskResolution, FILL_MODE),
           isInstanced: true,
@@ -157,9 +154,9 @@ export default class ColumnLayer extends Layer {
       strokeModel = new Model(
         gl,
         Object.assign({}, this.getShaders(), {
-          id: `${id}-side`,
+          id: `${id}-${STROKE_MODE}`,
           uniforms: {isWireframe: true},
-          geometry: this.getGeometry(diskResolution, OUTLINE_MODE, GL.LINES),
+          geometry: this.getGeometry(diskResolution, STROKE_MODE, GL.LINES),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -167,8 +164,8 @@ export default class ColumnLayer extends Layer {
     }
 
     return {
-      models: [strokeModel, filledModel].filter(Boolean),
-      filledModel,
+      models: [fillModel, strokeModel].filter(Boolean),
+      fillModel,
       strokeModel
     };
   }
@@ -179,33 +176,28 @@ export default class ColumnLayer extends Layer {
     }
     const {diskResolution} = this.props;
     log.assert(vertices.length >= diskResolution);
-    const {filledModel, strokeModel} = this.state;
 
-    const strokeGeometry = this.getGeometry(diskResolution, OUTLINE_MODE, GL.LINES);
-    const filledGeometry = this.getGeometry(diskResolution, FILL_MODE);
-    const filledPositions = filledGeometry.attributes.POSITION;
-    const strokePositions = strokeGeometry.attributes.POSITION;
-    const positions = [filledPositions, strokePositions];
+    const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
+    const strokeGeometry = this.getGeometry(diskResolution, STROKE_MODE, GL.LINES);
+    const geometries = [fillGeometry, strokeGeometry];
 
-    positions.forEach(position => {
-      let i = 0;
-      for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
-        for (let j = 0; j <= diskResolution; j++) {
-          const p = vertices[j] || vertices[0]; // auto close loop
-          // replace x and y in geometry
-          position.value[i++] = p[0];
-          position.value[i++] = p[1];
-          i++;
+    geometries.forEach((geometry, index) => {
+      const model = this.state.models[index];
+      if (model) {
+        const positions = geometry.attributes.POSITION;
+        let i = 0;
+        for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
+          for (let j = 0; j <= diskResolution; j++) {
+            const p = vertices[j] || vertices[0]; // auto close loop
+            // replace x and y in geometry
+            positions.value[i++] = p[0];
+            positions.value[i++] = p[1];
+            i++;
+          }
         }
+        model.setProps({geometry});
       }
     });
-
-    if (filledModel) {
-      filledModel.setProps({filledGeometry});
-    }
-    if (strokeModel) {
-      strokeModel.setProps({strokeGeometry});
-    }
   }
 
   draw({uniforms}) {
@@ -219,7 +211,7 @@ export default class ColumnLayer extends Layer {
       radius,
       angle
     } = this.props;
-    const {filledModel, strokeModel, models} = this.state;
+    const {fillModel, strokeModel, models} = this.state;
     const renderUniforms = Object.assign({}, uniforms, {
       radius,
       angle: (angle / 180) * Math.PI,
@@ -240,8 +232,8 @@ export default class ColumnLayer extends Layer {
     if (strokeModel && wireframe) {
       strokeModel.draw();
     }
-    if (filledModel && filled) {
-      filledModel.draw();
+    if (fillModel && filled) {
+      fillModel.draw();
     }
   }
 
