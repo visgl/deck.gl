@@ -77,6 +77,41 @@ export class App extends React.Component {
 }
 ```
 
+### Example where data requires post-processing
+
+Using the `dataTransform` property and `onDataLoaded` callbacks from a separate RFC, it is possible to do more advanced processing, e.g. match keys to make animations work.
+
+```js
+export class App extends React.Component {
+  // In order to make animations WORK we need to always return the same
+  // objects in the exact same order. This function will discard new objects
+  // and only update existing ones.
+  _sortForTransitions(data, layer) {
+    const oldData = layer.props.data;
+    if (oldData.length === 0) {
+      return data;
+    }
+    const dataAsObj = {};
+    data.forEach(row => (dataAsObj[row.UNIQUE_ID] = row));
+    return oldData.map(row => dataAsObj[row.UNIQUE_ID] || row);
+  }
+
+  _renderLayers() {
+    return [
+      new Layer({
+        data: DATA_URL,
+        dataRefreshIntervalMs: REFRESH_TIME_MS,
+        dataTransform: this._sortForTransitions,
+        transitions: {
+          getPosition: REFRESH_TIME_MS * 0.9
+        },
+      })
+    ];
+  }
+}
+```
+
+
 ### Documentation Changes
 
 api-reference/layer.md:
@@ -86,6 +121,8 @@ api-reference/layer.md:
 Supplying this property will trigger the layer to reload data from the `data` URL at the specified interval.
 
 Note: this property only has an effect if the `data` prop is a URL (`String`).
+
+
 
 ## Future Extensions
 
