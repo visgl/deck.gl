@@ -77,7 +77,7 @@ export class App extends React.Component {
 }
 ```
 
-### Example where data requires post-processing
+### Example: Data requires post-processing, merge with previous data
 
 Using the `dataTransform` property and `onDataLoaded` callbacks from a separate RFC, it is possible to do more advanced processing, e.g. match keys to make animations work.
 
@@ -111,6 +111,40 @@ export class App extends React.Component {
 }
 ```
 
+### Example: Response affects next query
+
+This can be handle with the `onDataLoaded` callback proposed in separate RFC.
+
+```js
+export class App extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      reloadIntervalMs: 5000,
+      queryLimit: 1000
+    };
+  }
+
+  // Assumes data indicates when next poll should be made and how much data needs to be polled.
+  _updateQueryParamsFromResponse(data) {
+    this.setState({
+      reloadIntervalMs: data.header.nextInterval,
+      queryLimit: data.headerlengh
+    });
+  }
+
+  _renderLayers() {
+    return [
+      new Layer({
+        data: `${DATA_URL}?limit=${this.state.queryLimit}`,
+        dataRefreshIntervalMs: this.state.reloadIntervalMs,
+
+        onDataLoaded: this._updateQueryParamsFromResponse,
+      })
+    ];
+  }
+}
+```
 
 ### Documentation Changes
 
