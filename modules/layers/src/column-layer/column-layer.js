@@ -89,7 +89,9 @@ export default class ColumnLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
-    if (props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution) {
+    const regenerateModels =
+      props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution;
+    if (regenerateModels) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();
@@ -98,7 +100,7 @@ export default class ColumnLayer extends Layer {
       this.getAttributeManager().invalidateAll();
     }
 
-    if (props.vertices !== oldProps.vertices) {
+    if (regenerateModels || props.vertices !== oldProps.vertices) {
       this._updateVertices(props.vertices);
     }
   }
