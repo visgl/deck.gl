@@ -103,6 +103,7 @@ export default class ColumnLayer extends Layer {
     const regenerateModels =
       props.fp64 !== oldProps.fp64 ||
       props.diskResolution !== oldProps.diskResolution ||
+      props.filled !== oldProps.filled ||
       props.wireframe !== oldProps.wireframe;
 
     if (regenerateModels) {
@@ -119,13 +120,13 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution, mode = FILL_MODE, drawMode = GL.TRIANGLES) {
+  getGeometry(diskResolution, mode = FILL_MODE) {
     return new ColumnGeometry({
       radius: 1,
       topCap: false,
       bottomCap: mode === FILL_MODE,
       mode,
-      drawMode,
+      drawMode: mode === FILL_MODE ? GL.TRIANGLES : GL.LINES,
       height: 2,
       verticalAxis: 'z',
       nradial: diskResolution,
@@ -156,7 +157,7 @@ export default class ColumnLayer extends Layer {
         Object.assign({}, this.getShaders(), {
           id: `${id}-${STROKE_MODE}`,
           uniforms: {isWireframe: true},
-          geometry: this.getGeometry(diskResolution, STROKE_MODE, GL.LINES),
+          geometry: this.getGeometry(diskResolution, STROKE_MODE),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -177,13 +178,12 @@ export default class ColumnLayer extends Layer {
     const {diskResolution} = this.props;
     log.assert(vertices.length >= diskResolution);
 
-    const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
-    const strokeGeometry = this.getGeometry(diskResolution, STROKE_MODE, GL.LINES);
-    const geometries = [fillGeometry, strokeGeometry];
+    const modes = [FILL_MODE, STROKE_MODE];
 
-    geometries.forEach((geometry, index) => {
+    modes.forEach((mode, index) => {
       const model = this.state.models[index];
       if (model) {
+        const geometry = this.getGeometry(diskResolution, mode);
         const positions = geometry.attributes.POSITION;
         let i = 0;
         for (let loopIndex = 0; loopIndex < 3; loopIndex++) {

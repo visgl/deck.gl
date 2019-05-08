@@ -211,13 +211,6 @@ The elevation of each cell in meters.
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
 
-## Sub Layers
-
-The PolygonLayer renders the following sublayers:
-
-* `filled` - Renders the surface of all polygons. Only rendered if `filled:true`.
-* `stroked` - Renders the outline of all polygons.
-
 ## Source
 
 [modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer)
