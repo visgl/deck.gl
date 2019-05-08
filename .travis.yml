@@ -45,9 +45,9 @@ matrix:
         directories:
           - ~/.npm  # NPM cache
       install:
-        - sudo apt update
-        - sudo apt install nodejs
-        - npm install webpack
+        - sudo apt-get update
+        - sudo apt-get install nodejs
+        - npm install -g webpack
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
         - pip install .
