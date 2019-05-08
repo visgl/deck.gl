@@ -20,20 +20,42 @@
 
 import test from 'tape-catch';
 
-import {COORDINATE_SYSTEM, WebMercatorViewport} from 'deck.gl';
+import {COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
 import {project, project64} from '@deck.gl/core/shaderlib';
 
-const TEST_DATA = {
-  mapState: {
-    width: 793,
-    height: 775,
-    latitude: 37.751537058389985,
-    longitude: -122.42694203247012,
-    zoom: 11.5,
-    bearing: -44.48928121059271,
-    pitch: 43.670797287818566
-    // altitude: undefined
-  }
+const TEST_VIEWPORTS = {
+  map: new MapView().makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11,
+      bearing: -30,
+      pitch: 40
+    }
+  }),
+  mapHighZoom: new MapView().makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 13,
+      bearing: -30,
+      pitch: 40
+    }
+  }),
+  infoVis: new OrbitView().makeViewport({
+    width: 800,
+    height: 600,
+    viewState: {
+      rotationX: -30,
+      rotationOrbit: 40,
+      target: [10.285714285714, -3.14159265359],
+      zoom: 8
+    }
+  })
 };
 
 const UNIFORMS = {
@@ -64,31 +86,64 @@ const UNIFORMS_64 = {
   project64_uScale: Number
 };
 
-test('project#getUniforms', t => {
-  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
-
-  let uniforms = project.getUniforms({viewport});
-
-  for (const uniform in UNIFORMS) {
-    t.ok(uniforms[uniform] !== undefined, `Returned ${uniform}`);
+function getUniformsError(uniforms, formats) {
+  for (const name in UNIFORMS) {
+    const value = uniforms[name];
+    const type = formats[name];
+    if (type === Number && !Number.isFinite(value)) {
+      return `${name} is not a number`;
+    }
+    if (type === Array && !value.length) {
+      return `${name} is not an array`;
+    }
   }
+  return null;
+}
+
+test('project#getUniforms', t => {
+  let uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.map});
+  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
+  t.notOk(uniforms.project_uCoordinateOrigin, 'Should not return shader coordinate origin');
+  t.deepEqual(uniforms.project_uCenter, [0, 0, 0, 0], 'Returned zero projection center');
+
+  uniforms = project.getUniforms({viewport: TEST_VIEWPORTS.mapHighZoom});
+  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
+  t.deepEqual(
+    uniforms.project_uCoordinateOrigin,
+    [-122.42694091796875, 37.75153732299805],
+    'Returned shader coordinate origin'
+  );
+  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
 
   uniforms = project.getUniforms({
-    viewport,
-    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS
+    viewport: TEST_VIEWPORTS.mapHighZoom,
+    coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
+    coordinateOrigin: [-122.4, 37.7]
   });
+  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
+  t.notOk(uniforms.project_uCoordinateOrigin, 'Should not returned shader coordinate origin');
+  t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
+
+  uniforms = project.getUniforms({
+    viewport: TEST_VIEWPORTS.infoVis,
+    coordinateSystem: COORDINATE_SYSTEM.IDENTITY
+  });
+  t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
+  t.deepEqual(
+    uniforms.project_uCoordinateOrigin,
+    [10.285714149475098, -3.1415927410125732],
+    'Returned shader coordinate origin'
+  );
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
 
   t.end();
 });
 
 test('project64#getUniforms', t => {
-  const viewport = new WebMercatorViewport(TEST_DATA.mapState);
+  const viewport = TEST_VIEWPORTS.map;
   const uniforms = project.getUniforms({viewport});
   const uniforms64 = project64.getUniforms({viewport}, uniforms);
 
-  for (const uniform in UNIFORMS_64) {
-    t.ok(uniforms64[uniform] !== undefined, `Return ${uniform}`);
-  }
+  t.notOk(getUniformsError(uniforms64, UNIFORMS_64), 'Uniforms validated');
   t.end();
 });

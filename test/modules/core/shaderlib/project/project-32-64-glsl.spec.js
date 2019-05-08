@@ -218,8 +218,8 @@ const TEST_CASES = [
           return worldPosition;
         },
         output: getPixelOffset(
-          TEST_VIEWPORT.projectFlat([-122, 38]),
-          TEST_VIEWPORT.projectFlat([-122.05, 37.92])
+          TEST_VIEWPORT.projectPosition([-122, 38, 0]),
+          TEST_VIEWPORT.projectPosition([-122.05, 37.92, 0])
         ),
         precision: PIXEL_TOLERANCE,
         gpu64BitPrecision: 1e-7,
