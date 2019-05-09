@@ -25,3 +25,4 @@ import './hexagon-aggregator.spec';
 import './contour-layer/marching-squares.spec';
 import './contour-layer/contour-layer.spec';
 import './utils/scale-utils.spec';
+import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';

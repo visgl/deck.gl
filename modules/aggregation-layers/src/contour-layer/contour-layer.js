@@ -110,18 +110,11 @@ export default class ContourLayer extends CompositeLayer {
       fp64,
       coordinateSystem
     } = this.props;
-    const {
-      countsData,
-      countsBuffer,
-      gridSize,
-      gridOrigin,
-      cellSize,
-      boundingBox
-    } = pointToDensityGridData({
+    const {weights, gridSize, gridOrigin, cellSize, boundingBox} = pointToDensityGridData({
       data,
       cellSizeMeters,
       getPosition,
-      getWeight,
+      weightParams: {count: {getWeight}},
       gpuAggregation,
       gpuGridAggregator: this.state.gridAggregator,
       fp64,
@@ -131,7 +124,14 @@ export default class ContourLayer extends CompositeLayer {
       aggregationFlags
     });
 
-    this.setState({countsData, countsBuffer, gridSize, gridOrigin, cellSize, boundingBox});
+    this.setState({
+      countsData: weights.count.aggregationData,
+      countsBuffer: weights.count.aggregationBuffer,
+      gridSize,
+      gridOrigin,
+      cellSize,
+      boundingBox
+    });
   }
 
   _generateContours() {
