@@ -44,23 +44,7 @@ def js_prerelease(command, strict=False):
     class DecoratedCommand(command):
         def run(self):
             jsdeps = self.distribution.get_command_obj('jsdeps')
-            # if all(os.path.exists(t) for t in jsdeps.targets):
-            #     # sdist, nothing to do
-            #     command.run(self)
-            #     return
-
-            try:
-                self.distribution.run_command('jsdeps')
-            except Exception as e:
-                missing = [t for t in jsdeps.targets if not os.path.exists(t)]
-                if strict or missing:
-                    log.warn('rebuilding js and css failed')
-                    if missing:
-                        log.error('missing files: %s' % missing)
-                    raise e
-                else:
-                    log.error('rebuilding js and css failed')
-                    log.error(str(e))
+            self.distribution.run_command('jsdeps')
             command.run(self)
             update_package_data(self.distribution)
     return DecoratedCommand

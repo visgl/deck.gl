@@ -23,7 +23,7 @@
   "sideEffects": false,
   "scripts": {
     "webpack-bundle": "webpack",
-    "notebook-bundle": "npm run webpack-bundle"
+    "notebook-bundle": "npm install --save-dev && npm run webpack-bundle"
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10",

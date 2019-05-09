@@ -47,8 +47,8 @@ matrix:
       install:
         - sudo apt-get update
         - curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
-        - npm install -g webpack
+        - which npm
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
-        - pip install .
+        - python setup.py install
       script: pytest --cov=pydeck
