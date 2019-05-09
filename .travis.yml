@@ -46,9 +46,7 @@ matrix:
           - ~/.npm  # NPM cache
       install:
         - sudo apt-get update
-        - curl -sL https://deb.nodesource.com/setup_6.x | sudo bash -
-        - sudo apt-get install -y nodejs
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
-        - python setup.py install
+        - pip install -e .
       script: pytest --cov=pydeck
