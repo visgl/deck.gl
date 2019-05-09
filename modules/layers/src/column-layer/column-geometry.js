@@ -7,7 +7,7 @@ const INDEX_OFFSETS = {
 };
 
 export const FILL_MODE = 'fill';
-export const STROKE_MODE = 'stroke';
+export const WIREFRAME_MODE = 'wireframe';
 
 export class ColumnGeometry extends Geometry {
   constructor(props = {}) {
@@ -99,7 +99,7 @@ function tesselateTruncatedCone(props) {
     }
   }
 
-  if (mode === STROKE_MODE) {
+  if (mode === WIREFRAME_MODE) {
     for (let i = 0; i < nvertical + extra; i++) {
       for (let j = 0; j < nradial; j++) {
         const index = (i * nradial + j) * 6;

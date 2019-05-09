@@ -21,7 +21,7 @@
 import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, fp64, PhongMaterial} from '@luma.gl/core';
-import {ColumnGeometry, FILL_MODE, STROKE_MODE} from './column-geometry';
+import {ColumnGeometry, FILL_MODE, WIREFRAME_MODE} from './column-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -137,7 +137,7 @@ export default class ColumnLayer extends Layer {
   _getModels(gl) {
     const {id, filled, wireframe, diskResolution} = this.props;
     let fillModel;
-    let strokeModel;
+    let wireframeModel;
 
     if (filled) {
       fillModel = new Model(
@@ -152,12 +152,12 @@ export default class ColumnLayer extends Layer {
       );
     }
     if (wireframe) {
-      strokeModel = new Model(
+      wireframeModel = new Model(
         gl,
         Object.assign({}, this.getShaders(), {
-          id: `${id}-${STROKE_MODE}`,
+          id: `${id}-${WIREFRAME_MODE}`,
           uniforms: {isWireframe: true},
-          geometry: this.getGeometry(diskResolution, STROKE_MODE),
+          geometry: this.getGeometry(diskResolution, WIREFRAME_MODE),
           isInstanced: true,
           shaderCache: this.context.shaderCache
         })
@@ -165,9 +165,9 @@ export default class ColumnLayer extends Layer {
     }
 
     return {
-      models: [fillModel, strokeModel].filter(Boolean),
+      models: [fillModel, wireframeModel].filter(Boolean),
       fillModel,
-      strokeModel
+      wireframeModel
     };
   }
 
@@ -177,41 +177,38 @@ export default class ColumnLayer extends Layer {
     }
     const {diskResolution} = this.props;
     log.assert(vertices.length >= diskResolution);
+    const {fillModel, wireframeModel} = this.state;
 
-    const modes = [FILL_MODE, STROKE_MODE];
+    if (fillModel) {
+      const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
+      this.updateGeometry(fillGeometry, vertices, diskResolution);
+      fillModel.setProps({geometry: fillGeometry});
+    }
 
-    modes.forEach((mode, index) => {
-      const model = this.state.models[index];
-      if (model) {
-        const geometry = this.getGeometry(diskResolution, mode);
-        const positions = geometry.attributes.POSITION;
-        let i = 0;
-        for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
-          for (let j = 0; j <= diskResolution; j++) {
-            const p = vertices[j] || vertices[0]; // auto close loop
-            // replace x and y in geometry
-            positions.value[i++] = p[0];
-            positions.value[i++] = p[1];
-            i++;
-          }
-        }
-        model.setProps({geometry});
+    if (wireframeModel) {
+      const wireframeGeometry = this.getGeometry(diskResolution, WIREFRAME_MODE);
+      this.updateGeometry(wireframeGeometry, vertices, diskResolution);
+      wireframeModel.setProps({geometry: wireframeGeometry});
+    }
+  }
+
+  updateGeometry(geometry, vertices, diskResolution) {
+    const positions = geometry.attributes.POSITION;
+    let i = 0;
+    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
+      for (let j = 0; j <= diskResolution; j++) {
+        const p = vertices[j] || vertices[0]; // auto close loop
+        // replace x and y in geometry
+        positions.value[i++] = p[0];
+        positions.value[i++] = p[1];
+        i++;
       }
-    });
+    }
   }
 
   draw({uniforms}) {
-    const {
-      elevationScale,
-      wireframe,
-      filled,
-      extruded,
-      offset,
-      coverage,
-      radius,
-      angle
-    } = this.props;
-    const {fillModel, strokeModel, models} = this.state;
+    const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
+    const {models} = this.state;
     const renderUniforms = Object.assign({}, uniforms, {
       radius,
       angle: (angle / 180) * Math.PI,
@@ -222,18 +219,10 @@ export default class ColumnLayer extends Layer {
     });
     const numInstances = this.getNumInstances();
 
-    models.forEach(model => {
-      if (model) {
-        model.setInstanceCount(numInstances);
-        model.setUniforms(renderUniforms);
-      }
-    });
-
-    if (strokeModel && wireframe) {
-      strokeModel.draw();
-    }
-    if (fillModel && filled) {
-      fillModel.draw();
+    for (const model of models) {
+      model.setInstanceCount(numInstances);
+      model.setUniforms(renderUniforms);
+      model.draw();
     }
   }
 
