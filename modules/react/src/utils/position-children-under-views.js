@@ -5,7 +5,7 @@ import evaluateChildren from './evaluate-children';
 
 // Iterate over views and reposition children associated with views
 // TODO - Can we supply a similar function for the non-React case?
-export default function positionChildrenUnderViews({children, viewports, deck}) {
+export default function positionChildrenUnderViews({children, viewports, deck, ContextProvider}) {
   const {viewManager} = deck || {};
 
   if (!viewManager || !viewManager.views.length) {
@@ -25,6 +25,8 @@ export default function positionChildrenUnderViews({children, viewports, deck}) 
     // Unless child is a View, position / render as part of the default view
     let viewId = defaultViewId;
     let viewChildren = child;
+    const childStyle = child.props.style;
+
     if (inheritsFrom(child.type, View)) {
       viewId = child.props.id || defaultViewId;
       viewChildren = child.props.children;
@@ -50,8 +52,28 @@ export default function positionChildrenUnderViews({children, viewports, deck}) 
       viewState
     });
 
-    const style = {position: 'absolute', left: x, top: y, width, height};
+    const style = {
+      position: 'absolute',
+      // Use child's z-index for ordering
+      zIndex: childStyle && childStyle.zIndex,
+      // If this container is on top, it will block interaction with the deck canvas
+      pointerEvents: 'none',
+      left: x,
+      top: y,
+      width,
+      height
+    };
     const key = `view-child-${viewId}-${i}`;
+
+    if (ContextProvider) {
+      const contextValue = {
+        viewport,
+        container: deck.canvas.offsetParent,
+        eventManager: deck.eventManager
+      };
+      viewChildren = createElement(ContextProvider, {value: contextValue}, viewChildren);
+    }
+
     return createElement('div', {key, id: key, style}, viewChildren);
   });
 }

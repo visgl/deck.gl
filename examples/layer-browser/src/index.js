@@ -18,7 +18,7 @@ class Root extends Component {
 
     return (
       <div>
-        <FPSStats isActive />
+        <FPSStats isActive left={100} />
         <AppComponent state={this._appState} onStateChange={this._onAppStateChange.bind(this)} />
       </div>
     );

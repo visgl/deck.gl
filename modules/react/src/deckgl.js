@@ -175,7 +175,8 @@ export default class DeckGL extends React.Component {
     const children = this._positionChildrenUnderViews({
       children: this.children,
       viewports: this.viewports,
-      deck: this.deck
+      deck: this.deck,
+      ContextProvider: this.props.ContextProvider
     });
 
     // TODO - this styling is enforced for correct positioning with children

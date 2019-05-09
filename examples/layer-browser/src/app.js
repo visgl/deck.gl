@@ -17,7 +17,7 @@ import DeckGL from '@deck.gl/react';
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
 
-import {StaticMap} from 'react-map-gl';
+import {StaticMap, _MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 import {Matrix4} from 'math.gl';
 
@@ -40,6 +40,12 @@ const VIEW_LABEL_STYLES = {
   fontSize: 12,
   backgroundColor: '#282727',
   color: '#FFFFFF'
+};
+
+const NAVIGATION_CONTROL_STYLES = {
+  margin: 10,
+  position: 'absolute',
+  zIndex: 1
 };
 
 const ViewportLabel = props => (
@@ -302,6 +308,7 @@ export default class App extends PureComponent {
           useDevicePixels={useDevicePixels}
           debug={true}
           drawPickingColors={drawPickingColors}
+          ContextProvider={MapContext.Provider}
         >
           <View id="basemap">
             <StaticMap
@@ -319,6 +326,10 @@ export default class App extends PureComponent {
           <View id="infovis">
             <ViewportLabel>Orbit View (PlotLayer only, No Navigation)</ViewportLabel>
           </View>
+
+          <div style={NAVIGATION_CONTROL_STYLES}>
+            <NavigationControl onViewStateChange={this._onViewStateChange} />
+          </div>
         </DeckGL>
       </div>
     );

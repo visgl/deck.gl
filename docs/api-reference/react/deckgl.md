@@ -47,6 +47,27 @@ const App = (data) => (
 
 `DeckGL` accepts all [Deck](/docs/api-reference/deck.md#properties) properties, with these additional semantics:
 
+### React Context
+
+##### `ContextProvider` (React.Component, optional)
+
+A [Context.Provider](https://reactjs.org/docs/context.html#contextprovider) component. If supplied, will be rendered as the ancester to all children. The passed through context contains the following values:
+
+- `viewport` ([Viewport](/docs/api-reference/viewport.md)) - the current viewport
+- `container` (DOMElement) - the DOM element containing the deck canvas
+- `eventManager` ([EventManager](https://github.com/uber-web/mjolnir.js/blob/master/docs/api-reference/event-manager.md))
+
+```jsx
+/// Example using react-map-gl controls with deck.gl
+import DeckGL from '@deck.gl/react';
+import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
+
+<DeckGL ... ContextProvider={MapContext.Provider}>
+  <div style={NAVIGATION_CONTROL_STYLES}>
+    <NavigationControl onViewStateChange={...} />
+  </div>
+</DeckGL>
+```
 
 ### View State Properties
 
