@@ -136,7 +136,7 @@ setup_args = {
     'cmdclass': {
         'install': js_prerelease(install),
         'build_py': js_prerelease(build_py),
-        'egg_info': js_prerelease(egg_info),
+        'egg_info': egg_info,
         'sdist': js_prerelease(sdist, strict=True),
         'jsdeps': NPM,
     },
