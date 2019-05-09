@@ -54,7 +54,9 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
 
     const style = {
       position: 'absolute',
+      // Use child's z-index for ordering
       zIndex: childStyle && childStyle.zIndex,
+      // If this container is on top, it will block interaction with the deck canvas
       pointerEvents: 'none',
       left: x,
       top: y,
