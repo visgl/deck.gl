@@ -122,8 +122,8 @@ Whether to extrude hexagon. If set to false, all hexagons will be set to flat.
 * Default: `false`
 
 Whether to generate a line wireframe of the hexagon. The outline will have
-"horizontal" lines closing the top and bottom polygons and a vertical line
-(a "strut") for each vertex on the polygon.
+"horizontal" lines closing the top and bottom hexagons and a vertical line
+(a "strut") for each vertex on the hexagon.
 
 ##### `fp64` (Boolean, optional)
 
@@ -135,7 +135,7 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 * Default: `new PhongMaterial()`
 
-This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded polygons.
+This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded hexagons.
 Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
 
 ### Data Accessors
@@ -171,10 +171,10 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba outline color of each hexagon, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-* If an array is provided, it is used as the outline color for all polygons.
-* If a function is provided, it is called on each polygon to retrieve its outline color.
+* If an array is provided, it is used as the outline color for all hexagons.
+* If a function is provided, it is called on each hexagon to retrieve its outline color.
 * If not provided, it falls back to `getColor`.
 
 ##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
