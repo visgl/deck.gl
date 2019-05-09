@@ -169,7 +169,10 @@ export default class H3HexagonLayer extends CompositeLayer {
       elevationScale,
       fp64,
       extruded,
+      wireframe,
       getColor,
+      getFillColor,
+      getLineColor,
       getElevation,
       material
     } = this.props;
@@ -181,8 +184,10 @@ export default class H3HexagonLayer extends CompositeLayer {
         coverage,
         elevationScale,
         extruded,
+        wireframe,
         fp64,
-        getColor,
+        getFillColor: getColor || getFillColor,
+        getLineColor,
         getElevation,
         material
       },

@@ -148,8 +148,6 @@ Whether to generate a line wireframe of the column. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
 (a "strut") for each vertex on the polygon.
 
-Requires the `extruded` prop to be true.
-
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`
