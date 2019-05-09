@@ -119,6 +119,13 @@ Disk offset from the position, relative to the radius. By default, the disk is c
 Radius multiplier, between 0 - 1. The radius of the disk is calculated by
 `coverage * radius`
 
+##### `filled` (Boolean, optional)
+
+* Default: `true`
+
+Whether to draw a filled column (solid fill). Note that only
+the area between the outer polygon and any holes will be filled.
+
 ##### `elevationScale` (Number, optional)
 
 * Default: `1`
@@ -132,6 +139,16 @@ to scale all hexagon elevations without updating the data.
 * Default: `true`
 
 Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
+
+##### `wireframe` (Boolean, optional)
+
+* Default: `false`
+
+Whether to generate a line wireframe of the column. The outline will have
+"horizontal" lines closing the top and bottom polygons and a vertical line
+(a "strut") for each vertex on the polygon.
+
+Requires the `extruded` prop to be true.
 
 ##### `fp64` (Boolean, optional)
 
@@ -163,6 +180,28 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
 
+It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
+
+##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `[255, 0, 255, 255]`
+
+The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the color for all objects.
+* If a function is provided, it is called on each object to retrieve its color.
+* If not provided, it falls back to `getColor`.
+
+##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `[255, 0, 0, 255]`
+
+The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+
+* If an array is provided, it is used as the outline color for all polygons.
+* If a function is provided, it is called on each polygon to retrieve its outline color.
+* If not provided, it falls back to `getColor`.
+
 ##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
@@ -171,7 +210,6 @@ The elevation of each cell in meters.
 
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
-
 
 ## Source
 

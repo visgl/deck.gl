@@ -20,7 +20,8 @@
 
 import {Layer, log, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CylinderGeometry, fp64, PhongMaterial} from '@luma.gl/core';
+import {Model, fp64, PhongMaterial} from '@luma.gl/core';
+import {ColumnGeometry, FILL_MODE, WIREFRAME_MODE} from './column-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -39,12 +40,14 @@ const defaultProps = {
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
   fp64: false,
-
+  wireframe: false,
+  filled: true,
   getPosition: {type: 'accessor', value: x => x.position},
-  getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
   getElevation: {type: 'accessor', value: 1000},
-
-  material: defaultMaterial
+  material: defaultMaterial,
+  getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
 };
 
 export default class ColumnLayer extends Layer {
@@ -76,11 +79,18 @@ export default class ColumnLayer extends Layer {
         accessor: 'getPosition',
         update: this.calculateInstancePositions64xyLow
       },
-      instanceColors: {
+      instanceFillColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
-        accessor: 'getColor',
+        accessor: 'getFillColor',
+        defaultValue: DEFAULT_COLOR
+      },
+      instanceLineColors: {
+        size: 4,
+        type: GL.UNSIGNED_BYTE,
+        transition: true,
+        accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR
       }
     });
@@ -89,14 +99,19 @@ export default class ColumnLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
+
     const regenerateModels =
-      props.fp64 !== oldProps.fp64 || props.diskResolution !== oldProps.diskResolution;
+      props.fp64 !== oldProps.fp64 ||
+      props.diskResolution !== oldProps.diskResolution ||
+      props.filled !== oldProps.filled ||
+      props.wireframe !== oldProps.wireframe;
+
     if (regenerateModels) {
       const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
+      if (this.state.models) {
+        this.state.models.forEach(model => model.delete());
       }
-      this.setState({model: this._getModel(gl)});
+      this.setState(this._getModels(gl));
       this.getAttributeManager().invalidateAll();
     }
 
@@ -105,11 +120,13 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution) {
-    return new CylinderGeometry({
+  getGeometry(diskResolution, mode = FILL_MODE) {
+    return new ColumnGeometry({
       radius: 1,
       topCap: false,
-      bottomCap: true,
+      bottomCap: mode === FILL_MODE,
+      mode,
+      drawMode: mode === FILL_MODE ? GL.TRIANGLES : GL.LINES,
       height: 2,
       verticalAxis: 'z',
       nradial: diskResolution,
@@ -117,28 +134,65 @@ export default class ColumnLayer extends Layer {
     });
   }
 
-  _getModel(gl) {
-    return new Model(
-      gl,
-      Object.assign({}, this.getShaders(), {
-        id: this.props.id,
-        geometry: this.getGeometry(this.props.diskResolution),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
-      })
-    );
+  _getModels(gl) {
+    const {id, filled, wireframe, diskResolution} = this.props;
+    let fillModel;
+    let wireframeModel;
+
+    if (filled) {
+      fillModel = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-${FILL_MODE}`,
+          uniforms: {isWireframe: false},
+          geometry: this.getGeometry(diskResolution, FILL_MODE),
+          isInstanced: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
+    }
+    if (wireframe) {
+      wireframeModel = new Model(
+        gl,
+        Object.assign({}, this.getShaders(), {
+          id: `${id}-${WIREFRAME_MODE}`,
+          uniforms: {isWireframe: true},
+          geometry: this.getGeometry(diskResolution, WIREFRAME_MODE),
+          isInstanced: true,
+          shaderCache: this.context.shaderCache
+        })
+      );
+    }
+
+    return {
+      models: [fillModel, wireframeModel].filter(Boolean),
+      fillModel,
+      wireframeModel
+    };
   }
 
   _updateVertices(vertices) {
     if (!vertices) {
       return;
     }
-
     const {diskResolution} = this.props;
     log.assert(vertices.length >= diskResolution);
+    const {fillModel, wireframeModel} = this.state;
 
-    const {model} = this.state;
-    const geometry = this.getGeometry(this.props.diskResolution);
+    if (fillModel) {
+      const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
+      this.updateGeometry(fillGeometry, vertices, diskResolution);
+      fillModel.setProps({geometry: fillGeometry});
+    }
+
+    if (wireframeModel) {
+      const wireframeGeometry = this.getGeometry(diskResolution, WIREFRAME_MODE);
+      this.updateGeometry(wireframeGeometry, vertices, diskResolution);
+      wireframeModel.setProps({geometry: wireframeGeometry});
+    }
+  }
+
+  updateGeometry(geometry, vertices, diskResolution) {
     const positions = geometry.attributes.POSITION;
     let i = 0;
     for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
@@ -150,24 +204,26 @@ export default class ColumnLayer extends Layer {
         i++;
       }
     }
-    model.setProps({geometry});
   }
 
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
+    const {models} = this.state;
+    const renderUniforms = Object.assign({}, uniforms, {
+      radius,
+      angle: (angle / 180) * Math.PI,
+      offset,
+      extruded,
+      coverage,
+      elevationScale
+    });
+    const numInstances = this.getNumInstances();
 
-    this.state.model
-      .setUniforms(
-        Object.assign({}, uniforms, {
-          radius,
-          angle: (angle / 180) * Math.PI,
-          offset,
-          extruded,
-          coverage,
-          elevationScale
-        })
-      )
-      .draw();
+    for (const model of models) {
+      model.setInstanceCount(numInstances);
+      model.setUniforms(renderUniforms);
+      model.draw();
+    }
   }
 
   calculateInstancePositions64xyLow(attribute) {
