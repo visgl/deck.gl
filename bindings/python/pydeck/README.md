@@ -4,9 +4,7 @@
 
 The pydeck module is a set of experimental Python bindings for deck.gl
 
-A series of lightweight objects that can be combined to create a JSON blob that
-is compliant with the deck.gl JSON API viewable in this repo at `modules/json`.
-
+For a quick example, install pydeck and try the following in a Jupyter notebook:
 ```python
 UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
 layer = pdk.Layer(
@@ -28,6 +26,8 @@ view_state = pdk.ViewState(
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
 r.show()
 ```
+
+For more, open the `examples/` directory in a Jupyter notebook.
 
 ## Installation
 
