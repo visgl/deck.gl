@@ -6,6 +6,8 @@ The pydeck module is a set of experimental Python bindings for deck.gl
 
 For a quick example, install pydeck and try the following in a Jupyter notebook:
 ```python
+import pydeck as pdk
+
 UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
 layer = pdk.Layer(
     'HexagonLayer',                 # Type of layer, see https://deck.gl/#/documentation/deckgl-api-reference/layers/overview
