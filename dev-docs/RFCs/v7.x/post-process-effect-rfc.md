@@ -56,7 +56,7 @@ export default {
 ```
 ### Workflow
 <pre>Layers ----->frame buffer
-<pre>                       \
-<pre>                        DeckRenderer -----> Screen
-<pre>                       /
-<pre>Effects -----> ScreenPasses
+                       \
+                        DeckRenderer -----> Screen
+                       /
+Effects -----> ScreenPasses</pre>
