@@ -1,4 +1,4 @@
-/* global document */
+/* global document,setTimeout */
 /**
  * Gets CSS from a given URL and appends it to the document head
  * @param url URL of CSS page
@@ -74,16 +74,35 @@ function hideMapboxCSSWarning() {
 /**
  * Creates and appends all DOM elements for the deck.gl widget at the specified root node
  * @param rootElement ID attribute of div
+ * @uid Unique tag for the element ID
+ * @width Width of widget div element, in pixels
+ * @height Height of widget div element, in pixels
  */
-function createDeckScaffold(rootElement, width = 500, height = 500) {
-  const mapNode = createMapDiv('map');
-  const canvasNode = createCanvas('deck-map-container');
-  const mapWrapperNode = createWidgetDiv('deck-map-wrapper', width, height);
+function createDeckScaffold(rootElement, uid, width = 500, height = 500) {
+  const mapNode = createMapDiv(`map-${uid}`);
+  const canvasNode = createCanvas(`deck-map-container-${uid}`);
+  const mapWrapperNode = createWidgetDiv(`deck-map-wrapper-${uid}`, width, height);
   mapWrapperNode.appendChild(canvasNode);
   mapWrapperNode.appendChild(mapNode);
   rootElement
-    .appendChild(createWidgetDiv('deck-container', width, height))
+    .appendChild(createWidgetDiv(`deck-container-${uid}`, width, height))
     .appendChild(mapWrapperNode);
+}
+
+/**
+ * Awaits an element to display before running another action
+ * @param selector Attribute to await
+ * @param time Check interval in milliseconds
+ * @param cb Callback to execute when the element is found
+ */
+function waitForElementToDisplay(selector, time, cb) {
+  if (document.querySelector(selector) !== null) {
+    cb();
+    return;
+  }
+  setTimeout(() => {
+    waitForElementToDisplay(selector, time, cb);
+  }, time);
 }
 
 /**
@@ -111,4 +130,22 @@ function setMapProps(map, props) {
   }
 }
 
-export {createDeckScaffold, loadCss, hideMapboxCSSWarning, setMapProps};
+/**
+ * Creates a v4 UUID
+ */
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+export {
+  createDeckScaffold,
+  loadCss,
+  hideMapboxCSSWarning,
+  setMapProps,
+  waitForElementToDisplay,
+  uuidv4
+};

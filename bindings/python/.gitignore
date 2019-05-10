@@ -142,20 +142,12 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-
-# NPM
-# ----
-
-**/node_modules/
-pydeck/pydeck/nbextension/static/index.js.map
 *.tgz
 
 # Coverage data
 # -------------
 **/coverage/
 
-# Packed lab extensions
-*pydeck/labextension
-*pydeck/docs/source/_static/embed-bundle.js
-*pydeck/docs/source/_static/embed-bundle.js.map
-pydeck/pydeck/nbextension/static/index.js
+# Cut JS files created in build process
+**/pydeck/nbextension/static/*.js
+**/pydeck/nbextension/static/*.js.map

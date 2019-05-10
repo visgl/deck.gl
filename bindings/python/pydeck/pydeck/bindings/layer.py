@@ -1,6 +1,8 @@
+import uuid
+
 from .json_tools import JSONMixin
 
-DEFAULT_RANGE = [
+DEFAULT_COLOR_RANGE = [
     [1, 152, 189],
     [73, 227, 206],
     [216, 254, 181],
@@ -8,6 +10,16 @@ DEFAULT_RANGE = [
     [254, 173, 84],
     [209, 55, 78]
 ]
+
+
+AGGREGATE_LAYERS = [
+    'HexagonLayer',
+    'ScreenGridLayer',
+]
+
+
+def is_aggregate_layer(layer_name):
+    return layer_name in AGGREGATE_LAYERS
 
 
 class Layer(JSONMixin):
@@ -24,8 +36,14 @@ class Layer(JSONMixin):
         Unique name for layer
     data : list or str
         Either a URL of data to load in or an array of data
+    get_color : str or list of float
+        String representing field name of color or float representing the desired color
     get_position : str, default '-'
         Name of position field
+    radius : int
+        Size of circle in a HexagonLayer or other aggregation layer
+    get_radius : int or str
+        Radius of a circle as either an integer or a data field name
     coverage : float, default None
         Valid only on HexagonLayer
         Hexagon radius multiplier, clamped between 0 - 1.
@@ -36,25 +54,29 @@ class Layer(JSONMixin):
     elevation_scale : float
         Valid only on HexagonLayer
         Hexagon elevation multiplier
+    extruded : bool
+        Boolean to determine if layer rises from map. Defaults to `True` for aggregate layers.
     """
     def __init__(
         self,
         type,
-        id,
         data,
+        id=None,
         get_position="-",
-        color_range=DEFAULT_RANGE,
+        color_range=None,
         opacity=1,
         radius=1000,
+        get_radius=None,
         light_settings=None,
         coverage=None,
         elevation_range=None,
         elevation_scale=None,
-        extruded=True,
+        extruded=None,
         upper_percentile=100,
+        get_color=None,
     ):
         self.type = type
-        self.id = id
+        self.id = id or str(uuid.uuid4())
         self.data = data
         self.coverage = coverage
         self.elevation_range = elevation_range
@@ -62,7 +84,11 @@ class Layer(JSONMixin):
         self.extruded = extruded
         self.get_position = get_position
         self.opacity = opacity
-        self.radius = radius
-        self.upper_percentile = upper_percentile
-        self.color_range = color_range
-        self.light_settings = light_settings
+        self.get_radius = get_radius or radius
+        self.get_color = get_color
+        if is_aggregate_layer(type):
+            self.radius = radius
+            self.upper_percentile = upper_percentile
+            self.color_range = color_range or DEFAULT_COLOR_RANGE
+            self.light_settings = light_settings
+            self.extruded = extruded if extruded is not None else True

@@ -1,0 +1,4 @@
+#!/bin/bash
+
+jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
+jupyter nbextension enable --sys-prefix --py pydeck

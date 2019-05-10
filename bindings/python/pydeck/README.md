@@ -1,23 +1,37 @@
 # pydeck: A Python wrapper for deck.gl
 
-[![Build Status](https://travis-ci.org/uber/pydeck.svg?branch=master)](https://travis-ci.org/uber/deck.gl)
+[![Build Status](https://travis-ci.org/uber/deck.gl.svg?branch=master)](https://travis-ci.org/uber/deck.gl)
 
-Experimental Python bindings for deck.gl
+The pydeck module is a set of experimental Python bindings for deck.gl
 
 A series of lightweight objects that can be combined to create a JSON blob that
 is compliant with the deck.gl JSON API viewable in this repo at `modules/json`.
 
+```python
+UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
+layer = pdk.Layer(
+    'HexagonLayer',                 # Type of layer, see https://deck.gl/#/documentation/deckgl-api-reference/layers/overview
+    UK_ACCIDENTS_DATA,              # URL for the data. Can also be a list of Python dictionaries.
+    elevation_scale=50,             # Layer-specific parameters, e.g., range of hexagon bar height
+    elevation_range=[0, 3000],      
+    extruded=True,                 
+    coverage=1)
+# A viewport to zoom to
+view_state = pdk.ViewState(
+    longitude=-1.415,
+    latitude=52.2323,
+    zoom=6.6,
+    min_zoom=5,
+    max_zoom=15,
+    pitch=40.5,
+    bearing=-27.396)
+r = pdk.Deck(layers=[layer], initial_view_state=view_state)
+r.show()
+```
+
 ## Installation
 
 This package is not yet published on PyPI but you can install it locally.
-
-```bash
-pip install -e .
-```
-
-## Development
-
-Clone and install pydeck:
 
 ```bash
 # Clone the deck.gl repo
@@ -30,13 +44,27 @@ cd deck.gl/bindings/python/pydeck
 virtualenv env
 . env/bin/activate
 
-# Install dependencies and the library itself
-pip install -r requirements.txt
-pip install -r requirements-dev.txt
-pip install .
+python setup.py install
 ```
 
-To test, run
+## Development
+
+Clone and install pydeck as above.
+
+To install the Jupyter extension, you can run:
+
+```
+jupyter labextension install .
+```
+
+For classic notebook, you can run:
+
+```
+jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
+jupyter nbextension enable --sys-prefix --py pydeck
+```
+
+To test the Python module, run:
 
 ```bash
 pytest

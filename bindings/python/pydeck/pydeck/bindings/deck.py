@@ -3,6 +3,7 @@ from .json_tools import JSONMixin
 from .layer import Layer
 from .view import View
 from .view_state import ViewState
+from ..widget import DeckGLWidget
 
 
 class Deck(JSONMixin):
@@ -15,19 +16,19 @@ class Deck(JSONMixin):
     ---------
     layers : array, default []
         list of pydeck.Layer objects to render
-    views : array, default []
+    views : array, default [View()]
         list of pydeck.View objects to render
     map_style : str, default "mapbox://styles/mapbox/dark-v9"
         Style of basemap
-    initial_view_state : pydeck.ViewState, default None
+    initial_view_state : pydeck.ViewState, default [pydeck.ViewState()]
         Initial camera angle relative to the map
     """
     def __init__(
         self,
         layers=[],
-        views=[],
+        views=[View()],
         map_style='mapbox://styles/mapbox/dark-v9',
-        initial_view_state=None
+        initial_view_state=ViewState(),
     ):
         self.layers = layers
         self.views = views
@@ -46,3 +47,11 @@ class Deck(JSONMixin):
             self.initial_view_state = obj
         obj_type = type(obj).__name__
         raise TypeError("Cannot join object of type", obj_type)
+
+    def show(self):
+        """
+        Displays current Deck object for a Jupyter notebook
+        """
+        deck_widget = DeckGLWidget()
+        deck_widget.json_input = self.to_json()
+        return deck_widget
