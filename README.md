@@ -2,8 +2,8 @@
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/v/deck.gl.svg?style=flat-square" alt="version" />
   </a>
-  <a href="https://travis-ci.org/uber/deck.gl">
-    <img src="https://img.shields.io/travis/uber/deck.gl/master.svg?style=flat-square" alt="build" />
+  <a href="https://travis-ci.com/uber/deck.gl">
+    <img src="https://api.travis-ci.com/uber/deck.gl.svg?branch=master" alt="build" />
   </a>
   <a href="https://npmjs.org/package/deck.gl">
     <img src="https://img.shields.io/npm/dm/deck.gl.svg?style=flat-square" alt="downloads" />
