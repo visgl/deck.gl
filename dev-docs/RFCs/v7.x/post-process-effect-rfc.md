@@ -9,29 +9,29 @@ Post-processing effect rendering is part of deck.gl effect rendering pipeline, f
 
 ## Design
 
-A post-processing effect is created from **PostProcessEffect** class and **Shader module**.
+A post-processing effect is created from `PostProcessEffect` class and `Shader module`.
 ```js
-import {Convolution} from @luma.gl/Effects;
+import {convolution} from @luma.gl/Effects;
 import {PostProcessEffect} from @deck.gl/core;
 
-const postProcessEffect = new PostProcessEffect(Convolution, {  
-  kernel: Convolution.KERNEL.EMBOSS,  
-  kernelWeight: Convolution.KERNEL.EMBOSS.reduce((sum, x) => sum + x, 0)  
+const postProcessEffect = new PostProcessEffect(convolution, {
+  kernel: convolution.KERNEL.EMBOSS,
+  kernelWeight: convolution.KERNEL.EMBOSS.reduce((sum, x) => sum + x, 0)
 });
 ```
 
 ### API
 
-PostProcessEffect class is the public interface to create post-processing effects, it only has two params.
-* module (Object): GLSL shader code and default uniforms for rendering
-* props (Object): parameters to tune effects
+`PostProcessEffect` class is the public interface to create post-processing effects, it only has two params.
+* `module`(Object): GLSL shader code and default uniforms for rendering
+* `props`(Object): parameters to tune effects
 
-ScreenPass class is the internal interface to handle the rendering of one pass, it is created by PostProcessEffect dynamically from shader module.
-* inputBuffer(Object): frame buffer object as input data
-* outputBuffer(Object): frame buffer object as out
+`ScreenPass` class is the internal interface to handle the rendering of one pass, it is created by PostProcessEffect dynamically from shader module.
+* `inputBuffer`(Object): frame buffer object as input data
+* `outputBuffer`(Object): frame buffer object as out
 
 ### Shader Module
-@luma.gl/Effects lib will host all the post-processing effect shader modules, currently most of them are sitting in @luma.gl/glfx. A typical shader module defines **name**, **uniforms** and **Shader Func**.
+`@luma.gl/Effects` lib will host all the post-processing effect shader modules, currently most of them are sitting in `@luma.gl/glfx`. A typical shader module defines `name`, `uniforms` and `Shader Func`.
 ```js
 const fs = `\  
 uniform float brightness;  
@@ -55,7 +55,7 @@ export default {
 };
 ```
 ### Workflow
-<pre>Layers ----->frame buffer
+<pre>Layers -----> Framebuffer
                        \
                         DeckRenderer -----> Screen
                        /
