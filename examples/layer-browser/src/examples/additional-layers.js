@@ -10,6 +10,7 @@ import {
 } from '@deck.gl/geo-layers';
 
 import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {_NewGridLayer as NewGridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
@@ -67,8 +68,7 @@ const ScenegraphLayerExample = {
   }
 };
 
-const GPUGridLayerExample = {
-  layer: GPUGridLayer,
+const GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
   props: {
     id: 'gpu-grid-layer',
@@ -79,6 +79,9 @@ const GPUGridLayerExample = {
     getPosition: d => d.COORDINATES
   }
 };
+
+const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GRID_LAYER_PROPS);
+const NewGridLayerExample = Object.assign({}, {layer: NewGridLayer}, GRID_LAYER_PROPS);
 
 const GPUGridLayerPerfExample = (id, getData) => ({
   layer: GPUGridLayer,
@@ -187,6 +190,7 @@ export default {
   },
   'Experimental Core Layers': {
     GPUGridLayer: GPUGridLayerExample,
+    NewGridLayer: NewGridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
   }

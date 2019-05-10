@@ -2,7 +2,11 @@
 /* global window */
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {
+  _GPUGridLayer as GPUGridLayer,
+  _NewGridLayer as NewGridLayer,
+  AGGREGATION_OPERATION
+} from '@deck.gl/aggregation-layers';
 import {COORDINATE_SYSTEM, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
@@ -31,6 +35,25 @@ const MARKER_SIZE_MAP = {
   small: 200,
   medium: 500,
   large: 1000
+};
+
+const GRID_LAYER_INFO = {
+  viewState: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11.5,
+    pitch: 0,
+    bearing: 0
+  },
+  props: {
+    data: dataSamples.points,
+    cellSize: 200,
+    opacity: 1,
+    extruded: true,
+    pickable: true,
+    getPosition: d => d.COORDINATES
+  },
+  goldenImage: './test/render/golden-images/grid-lnglat.png'
 };
 
 function getMean(pts, key) {
@@ -776,27 +799,51 @@ export const TEST_CASES = [
   },
   {
     name: 'grid-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
+    viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new GridLayer({
-        id: 'grid-lnglat',
-        data: dataSamples.points,
-        cellSize: 200,
-        opacity: 1,
-        extruded: true,
-        pickable: true,
-        getPosition: d => d.COORDINATES,
-        getColorValue,
-        getElevationValue
-      })
+      new GridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'grid-lnglat',
+          getColorValue,
+          getElevationValue
+        })
+      )
     ],
-    goldenImage: './test/render/golden-images/grid-lnglat.png'
+    goldenImage: GRID_LAYER_INFO.goldenImage
+  },
+  {
+    name: 'new-grid-lnglat-cpu',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new NewGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'new-grid-lnglat-cpu',
+          getColorWeight: x => x.SPACES,
+          colorAggregation: AGGREGATION_OPERATION.MEAN,
+          getElevationWeight: x => x.SPACES,
+          elevationAggregation: AGGREGATION_OPERATION.MAX,
+          gpuAggregation: false
+        })
+      )
+    ],
+    goldenImage: GRID_LAYER_INFO.goldenImage
+  },
+  {
+    name: 'new-grid-lnglat-gpu',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new NewGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'new-grid-lnglat-gpu',
+          getColorWeight: x => x.SPACES,
+          colorAggregation: AGGREGATION_OPERATION.MEAN,
+          getElevationWeight: x => x.SPACES,
+          elevationAggregation: AGGREGATION_OPERATION.MAX,
+          gpuAggregation: true
+        })
+      )
+    ],
+    goldenImage: GRID_LAYER_INFO.goldenImage
   },
   {
     name: 'screengrid-lnglat-cpu-aggregation',
@@ -1120,47 +1167,27 @@ export const TEST_CASES = [
   },
   {
     name: 'gpu-grid-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
+    viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new GPUGridLayer({
-        id: 'gpu-grid-lnglat',
-        data: dataSamples.points,
-        cellSize: 200,
-        opacity: 1,
-        extruded: true,
-        pickable: true,
-        getPosition: d => d.COORDINATES,
-        gpuAggregation: true
-      })
+      new GPUGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'gpu-grid-lnglat',
+          gpuAggregation: true
+        })
+      )
     ],
     goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
   },
   {
     name: 'gpu-grid-lnglat-cpu-aggregation',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
+    viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new GPUGridLayer({
-        id: 'gpu-grid-lnglat-cpu-aggregation',
-        data: dataSamples.points,
-        cellSize: 200,
-        opacity: 1,
-        extruded: true,
-        pickable: false,
-        getPosition: d => d.COORDINATES,
-        gpuAggregation: false
-      })
+      new GPUGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'gpu-grid-lnglat-cpu-aggregation',
+          gpuAggregation: false
+        })
+      )
     ],
     goldenImage: './test/render/golden-images/gpu-grid-lnglat.png'
   },

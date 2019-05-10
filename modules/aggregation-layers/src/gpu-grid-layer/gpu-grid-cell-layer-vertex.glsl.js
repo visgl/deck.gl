@@ -32,6 +32,7 @@ in vec4 colors;
 in vec4 elevations;
 
 // Custom uniforms
+uniform vec2 offset;
 uniform float extruded;
 uniform float cellSize;
 uniform float coverage;
@@ -57,8 +58,6 @@ uniform ElevationData
   vec4 maxMinCount;
 } elevationData;
 
-#define ELEVATION_SCALE 0.8
-
 #define EPSILON 0.00001
 
 // Result
@@ -79,7 +78,6 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
       outColor = colorRange[intIdx];
     }
   }
-  outColor = outColor / 255.;
   return outColor;
 }
 
@@ -89,22 +87,20 @@ float linearScale(vec2 domain, vec2 range, float value) {
 
 void main(void) {
 
-  bool noRender = colors.r <= 0.0;
-
   vec2 colorDomain = vec2(colorData.maxMinCount.a, colorData.maxMinCount.r);
   vec4 color = quantizeScale(colorDomain, colorRange, colors.r);
-
-  // TODO: discard when noRender is true
-  float finalCellSize = noRender ? 0.0 : project_size(cellSize);
 
   float elevation = 0.0;
 
   if (extruded > 0.5) {
     vec2 elevationDomain = vec2(elevationData.maxMinCount.a, elevationData.maxMinCount.r);
     elevation = linearScale(elevationDomain, elevationRange, elevations.r);
-    elevation = elevation  * (positions.z + 1.0) *
-      ELEVATION_SCALE * elevationScale;
+    elevation = elevation  * (positions.z + 1.0) / 2.0 * elevationScale;
   }
+
+  // if aggregated color or elevation is 0 do not render
+  float shouldRender = float(color.r > 0.0 && elevations.r >= 0.0);
+  float dotRadius = cellSize / 2. * coverage * shouldRender;
 
   int yIndex = (gl_InstanceID / gridSize[0]);
   int xIndex = gl_InstanceID - (yIndex * gridSize[0]);
@@ -113,21 +109,22 @@ void main(void) {
   instancePositionXFP64 = sum_fp64(instancePositionXFP64, vec2(gridOrigin[0], gridOriginLow[0]));
   vec2 instancePositionYFP64 = mul_fp64(vec2(gridOffset[1], gridOffsetLow[1]), vec2(float(yIndex), 0.));
   instancePositionYFP64 = sum_fp64(instancePositionYFP64, vec2(gridOrigin[1], gridOriginLow[1]));
-  vec3 extrudedPosition = vec3(instancePositionXFP64[0], instancePositionYFP64[0], elevation);
-  vec2 extrudedPosition64xyLow = vec2(instancePositionXFP64[1], instancePositionYFP64[1]);
 
-  vec3 offset = vec3(
-    (positions.x * coverage + 1.0) / 2.0 * finalCellSize,
-    (positions.y * coverage - 1.0) / 2.0 * finalCellSize,
-    1.0);
+  vec3 centroidPosition = vec3(instancePositionXFP64[0], instancePositionYFP64[0], elevation);
+  vec2 centroidPosition64xyLow = vec2(instancePositionXFP64[1], instancePositionYFP64[1]);
+  vec3 pos = vec3(project_size(positions.xy + offset) * dotRadius, 0.);
 
-  // extrude positions
   vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(extrudedPosition, extrudedPosition64xyLow, offset, position_commonspace);
+  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_commonspace);
+
+  // Light calculations
+  // Worldspace is the linear space after Mercator projection
+
+  vec3 normals_commonspace = project_normal(normals);
 
    if (extruded > 0.5) {
-    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals);
-    vColor = vec4(lightColor, color.a * opacity);
+    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
+    vColor = vec4(lightColor, color.a * opacity) / 255.;
   } else {
     vColor = vec4(color.rgb, color.a * opacity);
   }

@@ -34,6 +34,7 @@ const ELEVATION_DATA_UBO_INDEX = 1;
 
 const defaultProps = {
   cellSize: {type: 'number', min: 0, max: 1000, value: 1000},
+  offset: {type: 'array', min: 0, value: [1, 1]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
@@ -103,6 +104,7 @@ export default class GPUGridCellLayer extends Layer {
   draw({uniforms}) {
     const {
       cellSize,
+      offset,
       extruded,
       elevationScale,
       coverage,
@@ -126,6 +128,7 @@ export default class GPUGridCellLayer extends Layer {
       .setUniforms(
         Object.assign({}, uniforms, {
           cellSize,
+          offset,
           extruded,
           elevationScale,
           coverage,

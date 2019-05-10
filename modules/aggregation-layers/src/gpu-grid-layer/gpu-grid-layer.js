@@ -187,7 +187,7 @@ export default class GPUGridLayer extends CompositeLayer {
 
     // return props to the sublayer constructor
     return super.getSubLayerProps({
-      id: 'grid-cell',
+      id: 'gpu-grid-cell',
       data: this.state.layerData,
       colorBuffer: weights.color.aggregationBuffer,
       colorMaxMinBuffer: weights.color.maxMinBuffer,
