@@ -60,3 +60,7 @@ export default {
                         DeckRenderer -----> Screen
                        /
 Effects -----> ScreenPasses</pre>
+
+## Limitation
+* Only support postprocessing on the entire screen, not per viewport.
+* Only support pure screen space effects from luma.gl
