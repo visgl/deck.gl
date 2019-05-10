@@ -690,39 +690,40 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
-"@deck.gl/aggregation-layers@7.0.0-beta.2":
-  version "7.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@deck.gl/aggregation-layers/-/aggregation-layers-7.0.0-beta.2.tgz#dd73baaf312bd664190239cea49af7316a3105f3"
-  integrity sha512-+ac5jx14PaFRB/7Yk/9mcw8HSWL6BH4lPQD8DsmwK6AJzbF17jJQaHy33QCoAF1OjHdrB0DY8k20eit84dHS7w==
+"@deck.gl/aggregation-layers@^7.0.0":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@deck.gl/aggregation-layers/-/aggregation-layers-7.0.5.tgz#f3cb4adffd7bb2b3d6c2b956c863bb77faefa5a4"
+  integrity sha512-xMzoNyYLChu3L5+ruMPSS1GQzjXfNDBR9Sdsm9vM6FcBpKbRJELKIvOvgVnt7bxqTTWp2oowDM7X8YUX+dFrsg==
   dependencies:
     d3-hexbin "^0.2.1"
 
-"@deck.gl/core@7.0.0-beta.2":
-  version "7.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-7.0.0-beta.2.tgz#642955187e3057ce18435d9cac83b0594e98ed4c"
-  integrity sha512-r6ssiLktWOkKCwIvmb/291WAzYy5pU53v/2jtUGd58d/T4lsRhoS27EtqQZzygzHvjgayNtp4zqq93YVIzV3uQ==
+"@deck.gl/core@^7.0.0":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-7.0.5.tgz#bd2cf3d944d61f14dfc9538480567bdf0bb33a7d"
+  integrity sha512-P3NIZ93EA1bBwJK9A36oU+Bnemzbrha/WAWC0Rzqsh5DBfzkTZMnLi9EokxTAdOarS0usRlc3q+XuhwTnpsuRg==
   dependencies:
-    "@luma.gl/core" "^7.0.0-beta.3"
+    "@luma.gl/core" "^7.0.1"
     gl-matrix "^3.0.0"
     math.gl "^2.3.0"
-    mjolnir.js "^2.0.2"
+    mjolnir.js "^2.1.0"
     probe.gl "^3.0.1"
     seer "^0.2.4"
     viewport-mercator-project "^6.1.0"
 
-"@deck.gl/json@7.0.0-beta.2":
-  version "7.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@deck.gl/json/-/json-7.0.0-beta.2.tgz#bbd43584cf6d070c80523a6243659d723b6618f7"
-  integrity sha512-QmJoTnfULy9hkMgMBE/B37gCcHW/Aip0V6Y0Ynj+O3VRTv+99oH9RCF/+JQBxHRLcJ7BsIJpQvt7j5nqRfqm+w==
+"@deck.gl/json@^7.0.0":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@deck.gl/json/-/json-7.0.5.tgz#42f74c7e1d1e45a579b1986df793d9f87ce8c248"
+  integrity sha512-JJOU6kMHo/NzNWmejPNmN6BynUo0DluPZPq0LWco1nVpZfRoDwln8cGdWN3hNOSRupPs7G9cZjjobvS4gPaqmQ==
   dependencies:
     d3-dsv "^1.0.8"
 
-"@deck.gl/layers@7.0.0-beta.2":
-  version "7.0.0-beta.2"
-  resolved "https://registry.yarnpkg.com/@deck.gl/layers/-/layers-7.0.0-beta.2.tgz#32498a22dbff61063fe5decc944f681cb77ac303"
-  integrity sha512-ffbkDzggamx4GAhlP7rvQTh+DU43UUdQMMrMRBkwOItQuxjpZVAzg5Aia4gVdtorxpqknrYV/5FaL7Qg5Fpwaw==
+"@deck.gl/layers@^7.0.0":
+  version "7.0.5"
+  resolved "https://registry.yarnpkg.com/@deck.gl/layers/-/layers-7.0.5.tgz#879d6e48c9d41ffaac2c0b2d4a0d8d565672b189"
+  integrity sha512-kBK8LLX6RHH+PGqVjCp6Dkk3MXf0twrsT7yDt7ubMGWMxswRkk0kkeAjH6Yj4rZyG2Yi8Ef+zQz30PnOfK52aw==
   dependencies:
-    "@loaders.gl/core" "^0.6.2"
+    "@loaders.gl/core" "^1.0.3"
+    "@loaders.gl/images" "^1.0.3"
     "@mapbox/tiny-sdf" "^1.1.0"
     earcut "^2.0.6"
 
@@ -781,13 +782,6 @@
     "@phosphor/disposable" "^1.1.2"
     "@phosphor/signaling" "^1.2.2"
 
-"@loaders.gl/core@^0.6.2":
-  version "0.6.2"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-0.6.2.tgz#d4260e27c367e4c41ea7ba69a2d9525ee608511b"
-  integrity sha512-dG8mTy+c+xqgkYKe/We6mgLfesCy3ITlEdfWccKjWupIa6iKPBnf/CgDQE8+C4IOzKR5njDCMMKKOM0kZIdDQw==
-  dependencies:
-    text-encoding "^0.6.4"
-
 "@loaders.gl/core@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.0.3.tgz#60a1467e583f28d974a72f947cf2c7c2bc266393"
@@ -816,7 +810,7 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.19.tgz#f9dcb21ebb53d1736be27aad68073c1562bc3d81"
   integrity sha512-7vxAjPSX80eRkDiAp5ro8NWZS5syIgHiaNfG6yhvHDXFfR8nghks1EHA3CqToUy8RDZn7p08pv4P2V8dFhs64Q==
 
-"@luma.gl/core@^7.0.0-beta.3", "@luma.gl/core@^7.0.1":
+"@luma.gl/core@^7.0.1":
   version "7.0.1"
   resolved "https://registry.yarnpkg.com/@luma.gl/core/-/core-7.0.1.tgz#f1612238ebc84182558b709652aadc8759e8d939"
   integrity sha512-+C6DtwJO6ORUa4BIh6VvCTxU+9fFkeuCjxj2ndPAuZfOVzAJMGOp3Zghm+tCPy6imvIU5+Ea+qYOQwVvd9uhVw==
@@ -6143,7 +6137,7 @@ mixin-deep@^1.2.0:
     for-in "^1.0.2"
     is-extendable "^1.0.1"
 
-mjolnir.js@^2.0.2, mjolnir.js@^2.1.0:
+mjolnir.js@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.1.0.tgz#e8a4727e86d8f9352d6b6fe9cdc6faab0dcff15e"
   integrity sha512-XVvwByhXGvgWJs/mFsekE1cmg3l/KrRIqaJ5oO5DFEyG//NbQssPIuFOjKrZYQ4rFkRZRq+FN4EcecUPSGR89g==
@@ -8756,11 +8750,6 @@ test-exclude@^5.0.0, test-exclude@^5.1.0:
     read-pkg-up "^4.0.0"
     require-main-filename "^1.0.1"
 
-text-encoding@^0.6.4:
-  version "0.6.4"
-  resolved "https://registry.yarnpkg.com/text-encoding/-/text-encoding-0.6.4.tgz#e399a982257a276dae428bb92845cb71bdc26d19"
-  integrity sha1-45mpgiV6J22uQou5KEXLcb3CbRk=
-
 text-extensions@^1.0.0:
   version "1.9.0"
   resolved "https://registry.yarnpkg.com/text-extensions/-/text-extensions-1.9.0.tgz#1853e45fee39c945ce6f6c36b2d659b5aabc2a26"
@@ -9274,6 +9263,23 @@ webpack-cli@^3.2.1:
     supports-color "^5.5.0"
     v8-compile-cache "^2.0.2"
     yargs "^12.0.4"
+
+webpack-cli@^3.3.2:
+  version "3.3.2"
+  resolved "https://registry.yarnpkg.com/webpack-cli/-/webpack-cli-3.3.2.tgz#aed2437b0db0a7faa2ad28484e166a5360014a91"
+  integrity sha512-FLkobnaJJ+03j5eplxlI0TUxhGCOdfewspIGuvDVtpOlrAuKMFC57K42Ukxqs1tn8947/PM6tP95gQc0DCzRYA==
+  dependencies:
+    chalk "^2.4.1"
+    cross-spawn "^6.0.5"
+    enhanced-resolve "^4.1.0"
+    findup-sync "^2.0.0"
+    global-modules "^1.0.0"
+    import-local "^2.0.0"
+    interpret "^1.1.0"
+    loader-utils "^1.1.0"
+    supports-color "^5.5.0"
+    v8-compile-cache "^2.0.2"
+    yargs "^12.0.5"
 
 webpack-dev-middleware@^3.5.1:
   version "3.6.0"
