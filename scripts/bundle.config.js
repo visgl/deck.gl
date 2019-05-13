@@ -70,9 +70,10 @@ const config = {
         loader: 'babel-loader',
         include: /src/,
         options: {
-          presets: [
-            ['@babel/preset-env', {forceAllTransforms: true}]
-          ]
+          presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+          // all of the helpers will reference the module @babel/runtime to avoid duplication
+          // across the compiled output.
+          plugins: ['@babel/transform-runtime']
         }
       }
     ]
@@ -88,7 +89,13 @@ const config = {
     new webpack.DefinePlugin({
       __VERSION__: JSON.stringify(PACKAGE_INFO.version)
     })
+    // Uncomment for bundle size debug
+    // ,new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()
   ],
+
+  node: {
+    Buffer: false
+  },
 
   devtool: false
 };
