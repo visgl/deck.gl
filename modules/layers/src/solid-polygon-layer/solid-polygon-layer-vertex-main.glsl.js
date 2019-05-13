@@ -59,9 +59,8 @@ void calculatePosition(PolygonProps props) {
 #endif
 
   if (extruded) {
-    pos.z += props.elevations * vertexPositions.y;
+    pos.z += props.elevations * vertexPositions.y * elevationScale;
   }
-  pos.z *= elevationScale;
 
   vec4 position_commonspace;
   gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_commonspace);
