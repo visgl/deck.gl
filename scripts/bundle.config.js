@@ -68,7 +68,12 @@ const config = {
         // Compile ES2015 using babel
         test: /\.js$/,
         loader: 'babel-loader',
-        include: /src/
+        include: /src/,
+        options: {
+          presets: [
+            ['@babel/preset-env', {forceAllTransforms: true}]
+          ]
+        }
       }
     ]
   },
