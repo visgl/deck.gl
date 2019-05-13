@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.6] - May 13 2019
+
+- Ensure UMD bundles are ES5 (#3085)
+
 #### deck.gl [v7.0.5] - May 6 2019
 
 - GPUAggregator: Fix Texture/Buffer resource leaks. (#3054)
