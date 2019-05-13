@@ -3,6 +3,7 @@ import GL from '@luma.gl/constants';
 import {Buffer} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {createIterable} from '../utils/iterable-utils';
+import {fillArray} from '../utils/flatten';
 import log from '../utils/log';
 import BaseAttribute from './base-attribute';
 
@@ -60,7 +61,7 @@ export default class Attribute extends BaseAttribute {
     Object.assign(this.userData, DEFAULT_STATE, opts, {
       transition,
       noAlloc,
-      update,
+      update: update || (accessor && this._standardAccessor),
       accessor,
       defaultValue,
       bufferLayout
@@ -98,7 +99,7 @@ export default class Attribute extends BaseAttribute {
     const {accessor} = this.userData;
 
     // Backards compatibility: allow attribute name to be used as update trigger key
-    return [this.id].concat(accessor || []);
+    return [this.id].concat((typeof accessor !== 'function' && accessor) || []);
   }
 
   getAccessor() {
@@ -178,27 +179,23 @@ export default class Attribute extends BaseAttribute {
     return false;
   }
 
-  updateBuffer({numInstances, data, props, context}) {
+  updateBuffer({numInstances, bufferLayout, data, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
 
     const state = this.userData;
 
-    const {update, accessor} = state;
+    const {update} = state;
 
     let updated = true;
     if (update) {
       // Custom updater - typically for non-instanced layers
-      update.call(context, this, {data, props, numInstances});
+      update.call(context, this, {data, props, numInstances, bufferLayout});
       this.update({
         value: this.value,
         constant: this.constant
       });
-      this._checkAttributeArray();
-    } else if (accessor) {
-      // Standard updater
-      this._updateBufferViaStandardAccessor(data, props);
       this._checkAttributeArray();
     } else {
       updated = false;
@@ -319,12 +316,12 @@ export default class Attribute extends BaseAttribute {
     return true;
   }
 
-  _updateBufferViaStandardAccessor(data, props) {
-    const state = this.userData;
+  _standardAccessor(attribute, {data, props, numInstances, bufferLayout}) {
+    const state = attribute.userData;
 
     const {accessor} = state;
-    const {value, size} = this;
-    const accessorFunc = props[accessor];
+    const {value, size} = attribute;
+    const accessorFunc = typeof accessor === 'function' ? accessor : props[accessor];
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
@@ -333,10 +330,24 @@ export default class Attribute extends BaseAttribute {
     for (const object of iterable) {
       objectInfo.index++;
       const objectValue = accessorFunc(object, objectInfo);
-      this._normalizeValue(objectValue, value, i);
-      i += size;
+
+      if (bufferLayout) {
+        attribute._normalizeValue(objectValue, objectInfo.target);
+        const numVertices = bufferLayout[objectInfo.index];
+        fillArray({
+          target: attribute.value,
+          source: objectInfo.target,
+          start: i,
+          count: numVertices
+        });
+        i += numVertices * size;
+      } else {
+        attribute._normalizeValue(objectValue, value, i);
+        i += size;
+      }
     }
-    this.update({value});
+    attribute.constant = false;
+    attribute.bufferLayout = bufferLayout;
   }
 
   // Validate deck.gl level fields

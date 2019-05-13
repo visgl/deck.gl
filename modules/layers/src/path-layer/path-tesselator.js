@@ -42,53 +42,8 @@ export default class PathTesselator extends Tesselator {
   }
 
   /* Getters */
-  get(attributeName, target, accessor) {
-    if (this.attributes[attributeName]) {
-      return this.attributes[attributeName];
-    }
-
-    switch (attributeName) {
-      case 'strokeWidths':
-        return this._updateAttribute({
-          target,
-          size: 1,
-          getValue: (object, objectInfo) => {
-            objectInfo.target[0] = accessor(object, objectInfo);
-            return objectInfo.target;
-          }
-        });
-
-      case 'dashArrays':
-        return this._updateAttribute({target, size: 2, getValue: accessor});
-
-      case 'colors':
-        return this._updateAttribute({
-          target,
-          size: 4,
-          getValue: (object, objectInfo) => {
-            const color = accessor(object, objectInfo);
-            if (color.length === 4) {
-              return color;
-            }
-            const value = objectInfo.target;
-            value[0] = color[0];
-            value[1] = color[1];
-            value[2] = color[2];
-            value[3] = 255;
-            return value;
-          }
-        });
-
-      case 'pickingColors':
-        return this._updateAttribute({
-          target,
-          size: 3,
-          getValue: (object, {index, target: value}) => accessor(index, value)
-        });
-
-      default:
-        return null;
-    }
+  get(attributeName) {
+    return this.attributes[attributeName];
   }
 
   /* Implement base Tesselator interface */

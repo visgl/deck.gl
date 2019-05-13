@@ -101,7 +101,12 @@ export default class PathLayer extends Layer {
         update: this.calculateColors,
         defaultValue: DEFAULT_COLOR
       },
-      instancePickingColors: {size: 3, type: GL.UNSIGNED_BYTE, update: this.calculatePickingColors}
+      instancePickingColors: {
+        size: 3,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculatePickingColors,
+        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
+      }
     });
     /* eslint-enable max-len */
 
@@ -122,14 +127,16 @@ export default class PathLayer extends Layer {
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
 
     if (geometryChanged) {
-      this.state.pathTesselator.updateGeometry({
+      const {pathTesselator} = this.state;
+      pathTesselator.updateGeometry({
         data: props.data,
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
         fp64: this.use64bitPositions()
       });
       this.setState({
-        numInstances: this.state.pathTesselator.instanceCount
+        numInstances: pathTesselator.instanceCount,
+        bufferLayout: pathTesselator.bufferLayout
       });
       attributeManager.invalidateAll();
     }
@@ -286,35 +293,6 @@ export default class PathLayer extends Layer {
   calculateRightDeltas(attribute) {
     const {pathTesselator} = this.state;
     attribute.value = pathTesselator.get('rightDeltas');
-  }
-
-  calculateStrokeWidths(attribute) {
-    const {getWidth} = this.props;
-    const {pathTesselator} = this.state;
-
-    attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.get('strokeWidths', attribute.value, getWidth);
-  }
-
-  calculateDashArrays(attribute) {
-    const {getDashArray} = this.props;
-    const {pathTesselator} = this.state;
-
-    attribute.value = pathTesselator.get('dashArrays', attribute.value, getDashArray);
-  }
-
-  calculateColors(attribute) {
-    const {getColor} = this.props;
-    const {pathTesselator} = this.state;
-
-    attribute.bufferLayout = pathTesselator.bufferLayout;
-    attribute.value = pathTesselator.get('colors', attribute.value, getColor);
-  }
-
-  // Override the default picking colors calculation
-  calculatePickingColors(attribute) {
-    const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('pickingColors', attribute.value, this.encodePickingColor);
   }
 
   clearPickingColor(color) {
