@@ -89,22 +89,19 @@ export default class PathLayer extends Layer {
         size: 1,
         accessor: 'getWidth',
         transition: ATTRIBUTE_TRANSITION,
-        update: this.calculateStrokeWidths,
         defaultValue: 1
       },
-      instanceDashArrays: {size: 2, accessor: 'getDashArray', update: this.calculateDashArrays},
+      instanceDashArrays: {size: 2, accessor: 'getDashArray'},
       instanceColors: {
         size: 4,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
         transition: ATTRIBUTE_TRANSITION,
-        update: this.calculateColors,
         defaultValue: DEFAULT_COLOR
       },
       instancePickingColors: {
         size: 3,
         type: GL.UNSIGNED_BYTE,
-        update: this.calculatePickingColors,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value)
       }
     });

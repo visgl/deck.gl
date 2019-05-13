@@ -139,7 +139,6 @@ export default class SolidPolygonLayer extends Layer {
         size: 1,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getElevation',
-        update: this.calculateElevations,
         shaderAttributes: {
           elevations: {
             divisor: 0
@@ -155,7 +154,6 @@ export default class SolidPolygonLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
-        update: this.calculateFillColors,
         defaultValue: DEFAULT_COLOR,
         shaderAttributes: {
           fillColors: {
@@ -172,7 +170,6 @@ export default class SolidPolygonLayer extends Layer {
         type: GL.UNSIGNED_BYTE,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',
-        update: this.calculateLineColors,
         defaultValue: DEFAULT_COLOR,
         shaderAttributes: {
           lineColors: {
@@ -186,7 +183,6 @@ export default class SolidPolygonLayer extends Layer {
       pickingColors: {
         size: 3,
         type: GL.UNSIGNED_BYTE,
-        update: this.calculatePickingColors,
         accessor: (object, {index, target: value}) => this.encodePickingColor(index, value),
         shaderAttributes: {
           pickingColors: {
