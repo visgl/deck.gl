@@ -217,6 +217,7 @@ test('PathLayer', t => {
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );
+      t.ok(layer.getBufferLayout(), 'should have buffer layout');
     }
   });
 

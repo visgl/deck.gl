@@ -212,7 +212,15 @@ export default class AttributeManager {
   }
 
   // Ensure all attribute buffers are updated from props or data.
-  update({data, numInstances, transitions, props = {}, buffers = {}, context = {}} = {}) {
+  update({
+    data,
+    numInstances,
+    bufferLayout,
+    transitions,
+    props = {},
+    buffers = {},
+    context = {}
+  } = {}) {
     // keep track of whether some attributes are updated
     let updated = false;
 
@@ -230,7 +238,7 @@ export default class AttributeManager {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;
-        this._updateAttribute({attribute, numInstances, data, props, context});
+        this._updateAttribute({attribute, numInstances, bufferLayout, data, props, context});
       }
 
       this.needsRedraw |= attribute.needsRedraw();
@@ -373,7 +381,7 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  _updateAttribute({attribute, numInstances, data, props, context}) {
+  _updateAttribute({attribute, numInstances, bufferLayout, data, props, context}) {
     if (attribute.allocate(numInstances)) {
       logFunctions.onUpdate({
         level: LOG_DETAIL_PRIORITY,
@@ -385,7 +393,7 @@ export default class AttributeManager {
     // Calls update on any buffers that need update
     const timeStart = Date.now();
 
-    const updated = attribute.updateBuffer({numInstances, data, props, context});
+    const updated = attribute.updateBuffer({numInstances, bufferLayout, data, props, context});
     if (updated) {
       this.needsRedraw = true;
 
