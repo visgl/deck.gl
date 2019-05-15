@@ -256,7 +256,9 @@ test('Attribute#updateBuffer - partial', t => {
 
   const TEST_PROPS = {
     data: [{id: 'A'}, {id: 'B'}, {id: 'C'}, {id: 'D'}],
-    getValue: d => accessorCalled++
+    // This accessor checks two things: how many times an accessor is called,
+    // and whether `index` is consistently populated for each object
+    getValue: (d, {index}) => accessorCalled++ + index * 10
   };
 
   const ATTRIBUTE_1 = new Attribute(gl, {
@@ -280,7 +282,7 @@ test('Attribute#updateBuffer - partial', t => {
       params: {
         numInstances: 4
       },
-      value: [0, 1, 2, 3]
+      value: [0, 11, 22, 33]
     },
     {
       title: 'update with startIndex only',
@@ -289,7 +291,7 @@ test('Attribute#updateBuffer - partial', t => {
         numInstances: 4,
         startIndex: 3
       },
-      value: [0, 1, 2, 0]
+      value: [0, 11, 22, 30]
     },
     {
       title: 'update with index range',
@@ -299,7 +301,7 @@ test('Attribute#updateBuffer - partial', t => {
         startIndex: 1,
         endIndex: 3
       },
-      value: [0, 0, 1, 0]
+      value: [0, 10, 21, 30]
     },
     {
       title: 'full update - variable size',
@@ -308,7 +310,7 @@ test('Attribute#updateBuffer - partial', t => {
         numInstances: 10,
         bufferLayout: [2, 1, 4, 3]
       },
-      value: [0, 0, 1, 2, 2, 2, 2, 3, 3, 3]
+      value: [0, 0, 11, 22, 22, 22, 22, 33, 33, 33]
     },
     {
       title: 'update with startIndex only - variable size',
@@ -318,7 +320,7 @@ test('Attribute#updateBuffer - partial', t => {
         bufferLayout: [2, 1, 4, 3],
         startIndex: 3
       },
-      value: [0, 0, 1, 2, 2, 2, 2, 0, 0, 0]
+      value: [0, 0, 11, 22, 22, 22, 22, 30, 30, 30]
     },
     {
       title: 'update with index range - variable size',
@@ -329,7 +331,7 @@ test('Attribute#updateBuffer - partial', t => {
         startIndex: 1,
         endIndex: 3
       },
-      value: [0, 0, 0, 1, 1, 1, 1, 0, 0, 0]
+      value: [0, 0, 10, 21, 21, 21, 21, 30, 30, 30]
     }
   ];
 

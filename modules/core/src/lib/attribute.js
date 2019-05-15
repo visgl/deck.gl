@@ -341,10 +341,7 @@ export default class Attribute extends BaseAttribute {
     return true;
   }
 
-  _standardAccessor(
-    attribute,
-    {data, startIndex = 0, endIndex = Infinity, props, numInstances, bufferLayout}
-  ) {
+  _standardAccessor(attribute, {data, startIndex, endIndex, props, numInstances, bufferLayout}) {
     const state = attribute.userData;
 
     const {accessor} = state;
@@ -353,24 +350,16 @@ export default class Attribute extends BaseAttribute {
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    let i = attribute._getVertexOffset(startIndex || 0, bufferLayout);
+    const {iterable, objectInfo} = createIterable(data, startIndex, endIndex);
     for (const object of iterable) {
-      const objectIndex = ++objectInfo.index;
-
-      if (objectIndex < startIndex) {
-        i += (bufferLayout ? bufferLayout[objectIndex] : 1) * size;
-        continue; // eslint-disable-line
-      }
-      if (objectIndex >= endIndex) {
-        break;
-      }
+      objectInfo.index++;
 
       const objectValue = accessorFunc(object, objectInfo);
 
       if (bufferLayout) {
         attribute._normalizeValue(objectValue, objectInfo.target);
-        const numVertices = bufferLayout[objectIndex];
+        const numVertices = bufferLayout[objectInfo.index];
         fillArray({
           target: attribute.value,
           source: objectInfo.target,

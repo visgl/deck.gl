@@ -26,7 +26,7 @@ const placeholderArray = [];
  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Iteration_protocols
  * and a "context" tracker from the given data
  */
-export function createIterable(data) {
+export function createIterable(data, startIndex = 0, endIndex) {
   let iterable = EMPTY_ARRAY;
 
   const objectInfo = {
@@ -44,6 +44,14 @@ export function createIterable(data) {
   } else if (data.length > 0) {
     placeholderArray.length = data.length;
     iterable = placeholderArray;
+  }
+
+  if (startIndex > 0 || Number.isFinite(endIndex)) {
+    iterable = (Array.isArray(iterable) ? iterable : Array.from(iterable)).slice(
+      startIndex,
+      endIndex
+    );
+    objectInfo.index = startIndex - 1;
   }
 
   return {iterable, objectInfo};
