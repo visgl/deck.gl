@@ -111,7 +111,11 @@ export default class ColumnLayer extends Layer {
       this.getAttributeManager().invalidateAll();
     }
 
-    if (regenerateModels || props.diskResolution !== oldProps.diskResolution || props.vertices !== oldProps.vertices) {
+    if (
+      regenerateModels ||
+      props.diskResolution !== oldProps.diskResolution ||
+      props.vertices !== oldProps.vertices
+    ) {
       this._updateGeometry(props);
     }
   }
