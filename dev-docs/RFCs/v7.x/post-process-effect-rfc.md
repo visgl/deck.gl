@@ -18,6 +18,17 @@ const postProcessEffect = new PostProcessEffect(brightnessContrast, {
   brightness: 0.5,
   contrast: 0.5
 });
+
+const deckgl = new Deck({
+  canvas: 'my-deck-canvas',
+  initialViewState,
+  controller: true,
+  // add effect to deck
+  effects: [postProcessEffect],
+  layers: [new GeoJsonLayer({
+    ...
+  })]
+});
 ```
 
 ### API
@@ -62,5 +73,6 @@ export default {
 Effects -----> ScreenPasses</pre>
 
 ## Limitation
-* Only support postprocessing on the entire screen, not per viewport.
+* At launch post-processing effect is applied to the entire canvas. Multi-view support will be implemented in future iterations.
 * Only support pure screen space effects from luma.gl
+* Post-processing effect won't apply to mapbox base map.
