@@ -392,7 +392,9 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  _updateAttribute({attribute, numInstances, bufferLayout, data, props, context}) {
+  _updateAttribute(opts) {
+    const {attribute, numInstances} = opts;
+
     if (attribute.allocate(numInstances)) {
       logFunctions.onUpdate({
         level: LOG_DETAIL_PRIORITY,
@@ -404,7 +406,7 @@ export default class AttributeManager {
     // Calls update on any buffers that need update
     const timeStart = Date.now();
 
-    const updated = attribute.updateBuffer({numInstances, bufferLayout, data, props, context});
+    const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
 
