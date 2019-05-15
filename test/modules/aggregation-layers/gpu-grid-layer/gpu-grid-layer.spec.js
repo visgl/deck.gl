@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,13 +18,36 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './contour-layer/contour-layer.spec';
-import './contour-layer/marching-squares.spec';
-import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
-import './gpu-grid-layer/gpu-grid-layer.spec';
-import './grid-layer/grid-layer.spec';
-import './grid-aggregator.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
-import './screen-grid-layer.spec';
-import './utils/scale-utils.spec';
+import test from 'tape-catch';
+import * as FIXTURES from 'deck.gl-test/data';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {gl} from '@deck.gl/test-utils';
+import {isWebGL2} from '@luma.gl/core';
+
+const getPosition = d => d.COORDINATES;
+
+test('GPUGridLayer', t => {
+  if (!isWebGL2(gl)) {
+    t.comment('GPUGridLayer not supported, skipping');
+    t.end();
+    return;
+  }
+  const sampleProps = {
+    data: FIXTURES.points.slice(0, 3),
+    getPosition
+  };
+  const testCases = generateLayerTests({
+    Layer: GPUGridLayer,
+    sampleProps,
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate({layer}) {
+      t.ok(layer.state.weights, 'should update state.weights');
+    }
+  });
+
+  testLayer({Layer: GPUGridLayer, testCases, onError: t.notOk});
+
+  t.end();
+});

@@ -512,9 +512,9 @@ export default class GPUGridAggregator {
   }
   /* eslint-disable max-statements */
 
-  updateResultBuffer({gl, bufferName, id, data, result}) {
+  updateCPUResultBuffer({gl, bufferName, id, data, result}) {
     const {resources} = this.state;
-    const resourceName = `${id}-${bufferName}`;
+    const resourceName = `cpu-result-${id}-${bufferName}`;
     result[bufferName] = result[bufferName] || resources[resourceName];
     if (result[bufferName]) {
       result[bufferName].subData({data});
@@ -534,7 +534,7 @@ export default class GPUGridAggregator {
       const {aggregationData, minData, maxData, maxMinData} = results[id];
       const {needMin, needMax} = weights[id];
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      this.updateResultBuffer({
+      this.updateCPUResultBuffer({
         gl: this.gl,
         bufferName: 'aggregationBuffer',
         id,
@@ -542,7 +542,7 @@ export default class GPUGridAggregator {
         result: results[id]
       });
       if (combineMaxMin) {
-        this.updateResultBuffer({
+        this.updateCPUResultBuffer({
           gl: this.gl,
           bufferName: 'maxMinBuffer',
           id,
@@ -551,7 +551,7 @@ export default class GPUGridAggregator {
         });
       } else {
         if (needMin) {
-          this.updateResultBuffer({
+          this.updateCPUResultBuffer({
             gl: this.gl,
             bufferName: 'minBuffer',
             id,
@@ -560,7 +560,7 @@ export default class GPUGridAggregator {
           });
         }
         if (needMax) {
-          this.updateResultBuffer({
+          this.updateCPUResultBuffer({
             gl: this.gl,
             bufferName: 'maxBuffer',
             id,
@@ -613,6 +613,7 @@ export default class GPUGridAggregator {
         }
       }
     }
+    this.trackGPUResultBuffers(results, weights);
     return results;
   }
 
@@ -918,6 +919,27 @@ export default class GPUGridAggregator {
         // log.assert((values instanceof Attribute) || (values instanceof Buffer));
         log.assert(values instanceof Buffer);
         weightAttributes[id] = values;
+      }
+    }
+  }
+
+  // GPU Aggregation results are provided in Buffers, if new Buffer objects are created track them for later deletion.
+  trackGPUResultBuffers(results, weights) {
+    const bufferNames = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
+    const {resources} = this.state;
+    for (const id in results) {
+      if (results[id]) {
+        bufferNames.forEach(bufferName => {
+          if (results[id][bufferName] && weights[id][bufferName] !== results[id][bufferName]) {
+            // No result buffer is provided in weights object, `readPixelsToBuffer` has created a new Buffer object
+            // collect the new buffer for garabge collection
+            const name = `gpu-result-${id}-${bufferName}`;
+            if (resources[name]) {
+              resources[name].delete();
+            }
+            resources[name] = results[id][bufferName];
+          }
+        });
       }
     }
   }

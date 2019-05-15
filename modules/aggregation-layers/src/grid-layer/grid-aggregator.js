@@ -17,6 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+
+import {createIterable} from '@deck.gl/core';
+
 const R_EARTH = 6378000;
 
 /**
@@ -43,14 +46,17 @@ export function pointToDensityGridData(points, cellSize, getPosition) {
  * @param {function} getPosition - position accessor
  * @returns {object} - grid hash and cell dimension
  */
+/* eslint-disable max-statements */
 function _pointsToGridHashing(points = [], cellSize, getPosition) {
   // find the geometric center of sample points
   let latMin = Infinity;
   let latMax = -Infinity;
   let pLat;
 
-  for (const pt of points) {
-    pLat = getPosition(pt)[1];
+  const {iterable, objectInfo} = createIterable(points);
+  for (const pt of iterable) {
+    objectInfo.index++;
+    pLat = getPosition(pt, objectInfo)[1];
     if (Number.isFinite(pLat)) {
       latMin = pLat < latMin ? pLat : latMin;
       latMax = pLat > latMax ? pLat : latMax;
@@ -67,8 +73,12 @@ function _pointsToGridHashing(points = [], cellSize, getPosition) {
 
   // calculate count per cell
   const gridHash = {};
-  for (const pt of points) {
-    const [lng, lat] = getPosition(pt);
+
+  // Iterating over again, reset index
+  objectInfo.index = -1;
+  for (const pt of iterable) {
+    objectInfo.index++;
+    const [lng, lat] = getPosition(pt, objectInfo);
 
     if (Number.isFinite(lat) && Number.isFinite(lng)) {
       const latIdx = Math.floor((lat + 90) / gridOffset.yOffset);
@@ -83,6 +93,7 @@ function _pointsToGridHashing(points = [], cellSize, getPosition) {
 
   return {gridHash, gridOffset};
 }
+/* eslint-enable max-statements */
 
 function _getGridLayerDataFromGridHash(gridHash, gridOffset) {
   return Object.keys(gridHash).reduce((accu, key, i) => {
