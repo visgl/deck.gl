@@ -6,7 +6,7 @@ export const WIREFRAME_MODE = 'wireframe';
 export class ColumnGeometry extends Geometry {
   constructor(props = {}) {
     const {id = uid('column-geometry')} = props;
-    const {indices, attributes} = tesselateCylinder(props);
+    const {indices, attributes} = tesselateColumn(props);
     super({
       ...props,
       id,
@@ -17,7 +17,7 @@ export class ColumnGeometry extends Geometry {
 }
 
 /* eslint-disable max-statements, complexity */
-function tesselateCylinder(props) {
+function tesselateColumn(props) {
   const {radius, height = 1, nradial = 10, mode, vertices} = props;
 
   const vertsAroundEdge = nradial + 1; // loop
@@ -32,7 +32,30 @@ function tesselateCylinder(props) {
   const normals = new Float32Array(numVertices * 3);
 
   let i = 0;
-  let v = 0;
+
+  // side tesselation: 0, 1, 2, 3, 4, 5, ...
+  //
+  // 0 - 2 - 4  ... top
+  // | / | / |
+  // 1 - 3 - 5  ... bottom
+  //
+  for (let j = 0; j < vertsAroundEdge; j++) {
+    const a = j * stepAngle;
+    const vertex = vertices && vertices[j % nradial];
+    const sin = Math.sin(a);
+    const cos = Math.cos(a);
+
+    for (let k = 0; k < 2; k++) {
+      positions[i + 0] = vertex ? vertex[0] : cos * radius;
+      positions[i + 1] = vertex ? vertex[1] : sin * radius;
+      positions[i + 2] = (1 / 2 - k) * height;
+
+      normals[i + 0] = cos;
+      normals[i + 1] = sin;
+
+      i += 3;
+    }
+  }
 
   // top tesselation: 0, -1, 1, -2, 2, -3, 3, ...
   //
@@ -45,7 +68,7 @@ function tesselateCylinder(props) {
   //   -3 -- 4
   //
   for (let j = 0; j < vertsAroundEdge; j++) {
-    v = Math.floor(j / 2) * Math.sign((j % 2) - 0.5);
+    const v = Math.floor(j / 2) * Math.sign((j % 2) - 0.5);
     const a = v * stepAngle;
     const vertex = vertices && vertices[(v + nradial) % nradial];
     const sin = Math.sin(a);
@@ -60,45 +83,18 @@ function tesselateCylinder(props) {
     i += 3;
   }
 
-  // side tesselation: 0, 1, 2, 3, 4, 5, ...
-  //
-  // 0 - 2 - 4  ... top
-  // | / | / |
-  // 1 - 3 - 5  ... bottom
-  //
-  for (let j = 0; j < vertsAroundEdge; j++) {
-    const a = v * stepAngle;
-    const vertex = vertices && vertices[(v + nradial) % nradial];
-    const sin = Math.sin(a);
-    const cos = Math.cos(a);
-
-    for (let k = 0; k < 2; k++) {
-      positions[i + 0] = vertex ? vertex[0] : cos * radius;
-      positions[i + 1] = vertex ? vertex[1] : sin * radius;
-      positions[i + 2] = (1 / 2 - k) * height;
-
-      normals[i + 0] = cos;
-      normals[i + 1] = sin;
-
-      i += 3;
-    }
-    v++;
-  }
-
   if (mode === WIREFRAME_MODE) {
     let index = 0;
     for (let j = 0; j < nradial; j++) {
-      // start index of the side vertices
-      const j2 = vertsAroundEdge + j * 2;
       // top loop
-      indices[index++] = j2 + 0;
-      indices[index++] = j2 + 2;
+      indices[index++] = j * 2 + 0;
+      indices[index++] = j * 2 + 2;
       // side vertical
-      indices[index++] = j2 + 0;
-      indices[index++] = j2 + 1;
+      indices[index++] = j * 2 + 0;
+      indices[index++] = j * 2 + 1;
       // bottom loop
-      indices[index++] = j2 + 1;
-      indices[index++] = j2 + 3;
+      indices[index++] = j * 2 + 1;
+      indices[index++] = j * 2 + 3;
     }
   } else if (mode === FILL_MODE) {
     indices = null;
