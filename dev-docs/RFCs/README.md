@@ -72,6 +72,17 @@ RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.c
 | [**Layer Operations**](v7.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Property Animation**](v7.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
 
+## v7.2 RFCs
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**Layer Culling**](v7.x/layer-culling-rfc.md) | @ibgreen | **Draft** | Implement Frustum Culling for deck.gl layers, initially as opt-in system|
+
+## v7.1 RFCs
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+
 ## v7.0 RFCs
 
 These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v70-rfcs).
