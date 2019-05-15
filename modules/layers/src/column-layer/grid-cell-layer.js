@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import {CubeGeometry} from '@luma.gl/core';
-import GL from '@luma.gl/constants';
 import ColumnLayer from './column-layer';
 
 const defaultProps = {
@@ -34,19 +33,19 @@ export default class GridCellLayer extends ColumnLayer {
 
   draw({uniforms}) {
     const {elevationScale, extruded, offset, coverage, cellSize, angle} = this.props;
-    const {fillModel} = this.state;
-    const numInstances = this.getNumInstances();
-    const renderUniforms = Object.assign({}, uniforms, {
-      radius: cellSize / 2,
-      angle,
-      offset,
-      extruded,
-      coverage,
-      elevationScale
-    });
-    fillModel.setInstanceCount(numInstances);
-    fillModel.setDrawMode(GL.TRIANGLES);
-    fillModel.setUniforms(renderUniforms).draw();
+    this.state.model
+      .setUniforms(
+        Object.assign({}, uniforms, {
+          radius: cellSize / 2,
+          angle,
+          offset,
+          extruded,
+          coverage,
+          elevationScale,
+          isWireframe: false
+        })
+      )
+      .draw();
   }
 }
 
