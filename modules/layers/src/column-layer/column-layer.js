@@ -18,10 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log, createIterable} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, fp64, PhongMaterial} from '@luma.gl/core';
-import {ColumnGeometry, FILL_MODE, WIREFRAME_MODE} from './column-geometry';
+import ColumnGeometry from './column-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
@@ -100,129 +100,94 @@ export default class ColumnLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const regenerateModels =
-      props.fp64 !== oldProps.fp64 ||
-      props.diskResolution !== oldProps.diskResolution ||
-      props.filled !== oldProps.filled ||
-      props.wireframe !== oldProps.wireframe;
+    const regenerateModels = props.fp64 !== oldProps.fp64;
 
     if (regenerateModels) {
       const {gl} = this.context;
-      if (this.state.models) {
-        this.state.models.forEach(model => model.delete());
+      if (this.state.model) {
+        this.state.model.delete();
       }
-      this.setState(this._getModels(gl));
+      this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
 
-    if (regenerateModels || props.vertices !== oldProps.vertices) {
-      this._updateVertices(props.vertices);
+    if (
+      regenerateModels ||
+      props.diskResolution !== oldProps.diskResolution ||
+      props.vertices !== oldProps.vertices
+    ) {
+      this._updateGeometry(props);
     }
   }
 
-  getGeometry(diskResolution, mode = FILL_MODE) {
-    return new ColumnGeometry({
+  getGeometry(diskResolution, vertices) {
+    const geometry = new ColumnGeometry({
       radius: 1,
-      topCap: false,
-      bottomCap: mode === FILL_MODE,
-      mode,
-      drawMode: mode === FILL_MODE ? GL.TRIANGLES : GL.LINES,
       height: 2,
-      verticalAxis: 'z',
-      nradial: diskResolution,
-      nvertical: 1
+      vertices,
+      nradial: diskResolution
     });
+
+    return geometry;
   }
 
-  _getModels(gl) {
-    const {id, filled, wireframe, diskResolution} = this.props;
-    let fillModel;
-    let wireframeModel;
-
-    if (filled) {
-      fillModel = new Model(
-        gl,
-        Object.assign({}, this.getShaders(), {
-          id: `${id}-${FILL_MODE}`,
-          uniforms: {isWireframe: false},
-          geometry: this.getGeometry(diskResolution, FILL_MODE),
-          isInstanced: true,
-          shaderCache: this.context.shaderCache
-        })
-      );
-    }
-    if (wireframe) {
-      wireframeModel = new Model(
-        gl,
-        Object.assign({}, this.getShaders(), {
-          id: `${id}-${WIREFRAME_MODE}`,
-          uniforms: {isWireframe: true},
-          geometry: this.getGeometry(diskResolution, WIREFRAME_MODE),
-          isInstanced: true,
-          shaderCache: this.context.shaderCache
-        })
-      );
-    }
-
-    return {
-      models: [fillModel, wireframeModel].filter(Boolean),
-      fillModel,
-      wireframeModel
-    };
+  _getModel(gl) {
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
   }
 
-  _updateVertices(vertices) {
-    if (!vertices) {
-      return;
-    }
-    const {diskResolution} = this.props;
-    log.assert(vertices.length >= diskResolution);
-    const {fillModel, wireframeModel} = this.state;
+  _updateGeometry({diskResolution, vertices}) {
+    const geometry = this.getGeometry(diskResolution, vertices);
 
-    if (fillModel) {
-      const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
-      this.updateGeometry(fillGeometry, vertices, diskResolution);
-      fillModel.setProps({geometry: fillGeometry});
-    }
+    this.setState({
+      fillVertexCount: geometry.attributes.POSITION.value.length / 3,
+      wireframeVertexCount: geometry.indices.value.length
+    });
 
-    if (wireframeModel) {
-      const wireframeGeometry = this.getGeometry(diskResolution, WIREFRAME_MODE);
-      this.updateGeometry(wireframeGeometry, vertices, diskResolution);
-      wireframeModel.setProps({geometry: wireframeGeometry});
-    }
-  }
-
-  updateGeometry(geometry, vertices, diskResolution) {
-    const positions = geometry.attributes.POSITION;
-    let i = 0;
-    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
-      for (let j = 0; j <= diskResolution; j++) {
-        const p = vertices[j] || vertices[0]; // auto close loop
-        // replace x and y in geometry
-        positions.value[i++] = p[0];
-        positions.value[i++] = p[1];
-        i++;
-      }
-    }
+    this.state.model.setProps({geometry});
   }
 
   draw({uniforms}) {
-    const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
-    const {models} = this.state;
-    const renderUniforms = Object.assign({}, uniforms, {
-      radius,
-      angle: (angle / 180) * Math.PI,
-      offset,
+    const {
+      elevationScale,
       extruded,
+      filled,
+      wireframe,
+      offset,
       coverage,
-      elevationScale
-    });
-    const numInstances = this.getNumInstances();
+      radius,
+      angle
+    } = this.props;
+    const {model, fillVertexCount, wireframeVertexCount} = this.state;
 
-    for (const model of models) {
-      model.setInstanceCount(numInstances);
-      model.setUniforms(renderUniforms);
-      model.draw();
+    model.setUniforms(
+      Object.assign({}, uniforms, {
+        radius,
+        angle: (angle / 180) * Math.PI,
+        offset,
+        extruded,
+        coverage,
+        elevationScale
+      })
+    );
+
+    if (wireframe) {
+      model.setProps({isIndexed: true});
+      model.setVertexCount(wireframeVertexCount);
+      model.setDrawMode(GL.LINES);
+      model.setUniforms({isWireframe: true}).draw();
+    }
+    if (filled) {
+      model.setProps({isIndexed: false});
+      model.setVertexCount(fillVertexCount);
+      model.setDrawMode(GL.TRIANGLE_STRIP);
+      model.setUniforms({isWireframe: false}).draw();
     }
   }
 
