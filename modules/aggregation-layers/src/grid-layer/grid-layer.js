@@ -351,4 +351,3 @@ export default class GridLayer extends CompositeLayer {
 
 GridLayer.layerName = 'GridLayer';
 GridLayer.defaultProps = defaultProps;
-GridLayer.DEFAULT_GETVALUE = DEFAULT_GETVALUE;
