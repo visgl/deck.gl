@@ -1,9 +1,7 @@
+import {log} from '@deck.gl/core';
 import {Geometry, uid} from '@luma.gl/core';
 
-export const FILL_MODE = 'fill';
-export const WIREFRAME_MODE = 'wireframe';
-
-export class ColumnGeometry extends Geometry {
+export default class ColumnGeometry extends Geometry {
   constructor(props = {}) {
     const {id = uid('column-geometry')} = props;
     const {indices, attributes} = tesselateColumn(props);
@@ -18,7 +16,8 @@ export class ColumnGeometry extends Geometry {
 
 /* eslint-disable max-statements, complexity */
 function tesselateColumn(props) {
-  const {radius, height = 1, nradial = 10, mode, vertices} = props;
+  const {radius, height = 1, nradial = 10, vertices} = props;
+  log.assert(!vertices || vertices.length >= nradial);
 
   const vertsAroundEdge = nradial + 1; // loop
   const numVertices = vertsAroundEdge * 3; // top, side top edge, side bottom edge
@@ -26,7 +25,7 @@ function tesselateColumn(props) {
   const stepAngle = (Math.PI * 2) / nradial;
 
   // Used for wireframe
-  let indices = new Uint16Array(nradial * 3 * 2); // top loop, side vertical, bottom loop
+  const indices = new Uint16Array(nradial * 3 * 2); // top loop, side vertical, bottom loop
 
   const positions = new Float32Array(numVertices * 3);
   const normals = new Float32Array(numVertices * 3);
@@ -83,21 +82,17 @@ function tesselateColumn(props) {
     i += 3;
   }
 
-  if (mode === WIREFRAME_MODE) {
-    let index = 0;
-    for (let j = 0; j < nradial; j++) {
-      // top loop
-      indices[index++] = j * 2 + 0;
-      indices[index++] = j * 2 + 2;
-      // side vertical
-      indices[index++] = j * 2 + 0;
-      indices[index++] = j * 2 + 1;
-      // bottom loop
-      indices[index++] = j * 2 + 1;
-      indices[index++] = j * 2 + 3;
-    }
-  } else if (mode === FILL_MODE) {
-    indices = null;
+  let index = 0;
+  for (let j = 0; j < nradial; j++) {
+    // top loop
+    indices[index++] = j * 2 + 0;
+    indices[index++] = j * 2 + 2;
+    // side vertical
+    indices[index++] = j * 2 + 0;
+    indices[index++] = j * 2 + 1;
+    // bottom loop
+    indices[index++] = j * 2 + 1;
+    indices[index++] = j * 2 + 3;
   }
 
   return {
