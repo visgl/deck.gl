@@ -251,6 +251,108 @@ test('Attribute#updateBuffer', t => {
   t.end();
 });
 
+test('Attribute#updateBuffer - partial', t => {
+  let accessorCalled = 0;
+
+  const TEST_PROPS = {
+    data: [{id: 'A'}, {id: 'B'}, {id: 'C'}, {id: 'D'}],
+    getValue: d => accessorCalled++
+  };
+
+  const ATTRIBUTE_1 = new Attribute(gl, {
+    id: 'values-1',
+    type: GL.FLOAT,
+    size: 1,
+    accessor: 'getValue'
+  });
+
+  const ATTRIBUTE_2 = new Attribute(gl, {
+    id: 'values-2',
+    type: GL.FLOAT,
+    size: 1,
+    accessor: 'getValue'
+  });
+
+  const TEST_CASES = [
+    {
+      title: 'full update',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4
+      },
+      value: [0, 1, 2, 3]
+    },
+    {
+      title: 'update with startIndex only',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4,
+        startIndex: 3
+      },
+      value: [0, 1, 2, 0]
+    },
+    {
+      title: 'update with index range',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4,
+        startIndex: 1,
+        endIndex: 3
+      },
+      value: [0, 0, 1, 0]
+    },
+    {
+      title: 'full update - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3]
+      },
+      value: [0, 0, 1, 2, 2, 2, 2, 3, 3, 3]
+    },
+    {
+      title: 'update with startIndex only - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3],
+        startIndex: 3
+      },
+      value: [0, 0, 1, 2, 2, 2, 2, 0, 0, 0]
+    },
+    {
+      title: 'update with index range - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3],
+        startIndex: 1,
+        endIndex: 3
+      },
+      value: [0, 0, 0, 1, 1, 1, 1, 0, 0, 0]
+    }
+  ];
+
+  for (const testCase of TEST_CASES) {
+    const {attribute} = testCase;
+    attribute.setNeedsUpdate(true);
+
+    // reset stats
+    accessorCalled = 0;
+
+    attribute.allocate(testCase.params.numInstances);
+    attribute.updateBuffer({
+      ...testCase.params,
+      data: TEST_PROPS.data,
+      props: TEST_PROPS
+    });
+
+    t.deepEqual(attribute.value, testCase.value, `${testCase.title} yields correct result`);
+  }
+
+  t.end();
+});
+
 // t.ok(attribute.allocate(attributeName, allocCount), 'Attribute.allocate function available');
 // t.ok(attribute._setExternalBuffer(attributeName, buffer, numInstances), 'Attribute._setExternalBuffer function available');
 // t.ok(attribute._analyzeBuffer(attributeName, numInstances), 'Attribute._analyzeBuffer function available');

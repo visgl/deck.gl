@@ -184,29 +184,35 @@ export default class Attribute extends BaseAttribute {
     return false;
   }
 
-  updateBuffer({numInstances, bufferLayout, data, props, context}) {
+  updateBuffer({numInstances, bufferLayout, data, startIndex, endIndex, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
 
     const state = this.userData;
 
-    const {update, noAlloc} = state;
+    const {update} = state;
 
     let updated = true;
     if (update) {
       // Custom updater - typically for non-instanced layers
-      update.call(context, this, {data, props, numInstances, bufferLayout});
-      if (noAlloc || this.constant || !this.buffer) {
+      update.call(context, this, {data, startIndex, endIndex, props, numInstances, bufferLayout});
+      if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
         // Full update
         this.update({
           value: this.value,
           constant: this.constant
         });
       } else {
+        const startOffset = Number.isFinite(startIndex) ? this._getVertexOffset(startIndex) : 0;
+        const endOffset = Number.isFinite(endIndex)
+          ? this._getVertexOffset(endIndex)
+          : numInstances * this.size;
+
         // Only update the changed part of the attribute
         this.buffer.subData({
-          data: this.value.subarray(0, numInstances * this.size)
+          data: this.value.subarray(startOffset, endOffset),
+          offset: startOffset * this.value.BYTES_PER_ELEMENT
         });
       }
       this._checkAttributeArray();
@@ -295,6 +301,12 @@ export default class Attribute extends BaseAttribute {
   }
 
   // PRIVATE HELPER METHODS
+  _getVertexOffset(index, bufferLayout = this.bufferLayout) {
+    if (bufferLayout) {
+      return bufferLayout.reduce((sum, cur, idx) => (idx < index ? sum + cur : sum), 0) * this.size;
+    }
+    return index * this.size;
+  }
 
   /* check user supplied values and apply fallback */
   _normalizeValue(value, out = [], start = 0) {
@@ -329,7 +341,10 @@ export default class Attribute extends BaseAttribute {
     return true;
   }
 
-  _standardAccessor(attribute, {data, props, numInstances, bufferLayout}) {
+  _standardAccessor(
+    attribute,
+    {data, startIndex = 0, endIndex = Infinity, props, numInstances, bufferLayout}
+  ) {
     const state = attribute.userData;
 
     const {accessor} = state;
@@ -341,12 +356,21 @@ export default class Attribute extends BaseAttribute {
     let i = 0;
     const {iterable, objectInfo} = createIterable(data);
     for (const object of iterable) {
-      objectInfo.index++;
+      const objectIndex = ++objectInfo.index;
+
+      if (objectIndex < startIndex) {
+        i += (bufferLayout ? bufferLayout[objectIndex] : 1) * size;
+        continue; // eslint-disable-line
+      }
+      if (objectIndex >= endIndex) {
+        break;
+      }
+
       const objectValue = accessorFunc(object, objectInfo);
 
       if (bufferLayout) {
         attribute._normalizeValue(objectValue, objectInfo.target);
-        const numVertices = bufferLayout[objectInfo.index];
+        const numVertices = bufferLayout[objectIndex];
         fillArray({
           target: attribute.value,
           source: objectInfo.target,

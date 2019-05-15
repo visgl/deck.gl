@@ -61,7 +61,7 @@ Takes a single parameter as a map of attribute descriptor objects:
 * keys are attribute names
 * values are objects with attribute definitions:
   + `size` (Number) - number of elements per object
-  + `accessor` (String | Array of strings) - accessor name(s) that will
+  + `accessor` (String | Array of strings | Function) - accessor name(s) that will
     trigger an update of this attribute when changed. Used with
     [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
   + `update` (Function) - the function to be called when data changes
@@ -118,6 +118,8 @@ attributeManager.update({
     data,
     numInstances,
     transitions,
+    startIndex,
+    endIndex,
     props = {},
     buffers = {},
     context = {},
@@ -132,6 +134,8 @@ Parameters:
 * `buffers` (Object) - pre-allocated buffers
 * `props` (Object) - passed to updaters
 * `context` (Object) - Used as "this" context for updaters
+* `startIndex` (Number) - start index in the data object, if only a subset of data needs to be considered in the update
+* `endIndex` (Number) - end index in the data object, if only a subset of data needs to be considered in the update
 
 Notes:
 

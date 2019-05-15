@@ -217,6 +217,8 @@ export default class AttributeManager {
     numInstances,
     bufferLayout,
     transitions,
+    startIndex,
+    endIndex,
     props = {},
     buffers = {},
     context = {}
@@ -238,7 +240,16 @@ export default class AttributeManager {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;
-        this._updateAttribute({attribute, numInstances, bufferLayout, data, props, context});
+        this._updateAttribute({
+          attribute,
+          numInstances,
+          bufferLayout,
+          data,
+          startIndex,
+          endIndex,
+          props,
+          context
+        });
       }
 
       this.needsRedraw |= attribute.needsRedraw();
