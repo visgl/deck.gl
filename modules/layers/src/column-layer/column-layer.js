@@ -123,14 +123,10 @@ export default class ColumnLayer extends Layer {
   getGeometry(diskResolution, mode = FILL_MODE) {
     return new ColumnGeometry({
       radius: 1,
-      topCap: false,
-      bottomCap: mode === FILL_MODE,
       mode,
-      drawMode: mode === FILL_MODE ? GL.TRIANGLES : GL.LINES,
+      drawMode: mode === FILL_MODE ? GL.TRIANGLE_STRIP : GL.LINES,
       height: 2,
-      verticalAxis: 'z',
-      nradial: diskResolution,
-      nvertical: 1
+      nradial: diskResolution
     });
   }
 
