@@ -120,12 +120,13 @@ export default class ColumnLayer extends Layer {
     }
   }
 
-  getGeometry(diskResolution, mode = FILL_MODE) {
+  getGeometry(diskResolution, mode = FILL_MODE, vertices) {
     return new ColumnGeometry({
       radius: 1,
       mode,
       drawMode: mode === FILL_MODE ? GL.TRIANGLE_STRIP : GL.LINES,
       height: 2,
+      vertices,
       nradial: diskResolution
     });
   }
@@ -176,29 +177,13 @@ export default class ColumnLayer extends Layer {
     const {fillModel, wireframeModel} = this.state;
 
     if (fillModel) {
-      const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
-      this.updateGeometry(fillGeometry, vertices, diskResolution);
+      const fillGeometry = this.getGeometry(diskResolution, FILL_MODE, vertices);
       fillModel.setProps({geometry: fillGeometry});
     }
 
     if (wireframeModel) {
-      const wireframeGeometry = this.getGeometry(diskResolution, WIREFRAME_MODE);
-      this.updateGeometry(wireframeGeometry, vertices, diskResolution);
+      const wireframeGeometry = this.getGeometry(diskResolution, WIREFRAME_MODE, vertices);
       wireframeModel.setProps({geometry: wireframeGeometry});
-    }
-  }
-
-  updateGeometry(geometry, vertices, diskResolution) {
-    const positions = geometry.attributes.POSITION;
-    let i = 0;
-    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
-      for (let j = 0; j <= diskResolution; j++) {
-        const p = vertices[j] || vertices[0]; // auto close loop
-        // replace x and y in geometry
-        positions.value[i++] = p[0];
-        positions.value[i++] = p[1];
-        i++;
-      }
     }
   }
 
