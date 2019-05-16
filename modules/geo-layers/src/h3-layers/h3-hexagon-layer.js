@@ -1,6 +1,20 @@
-import {h3ToGeoBoundary, h3GetResolution, h3ToGeo, geoToH3, h3IsPentagon} from 'h3-js';
+import {
+  h3ToGeoBoundary,
+  h3GetResolution,
+  h3ToGeo,
+  geoToH3,
+  h3IsPentagon,
+  h3Distance,
+  edgeLength,
+  UNITS
+} from 'h3-js';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
+
+// There is a cost to updating the instanced geometries when using highPrecision: false
+// This constant defines the distance between two hexagons that leads to "significant
+// distortion." Smaller value makes the column layer more sensitive to viewport change.
+const UPDATE_THRESHOLD = 10000; // 10km
 
 function getHexagonCentroid(getHexagon, object, objectInfo) {
   const hexagonId = getHexagon(object, objectInfo);
@@ -54,6 +68,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       }
       this.setState({
         resolution,
+        meanEdgeLength: resolution >= 0 ? edgeLength(resolution, UNITS.m) : 0,
         hasPentagon,
         vertices: null
       });
@@ -71,12 +86,15 @@ export default class H3HexagonLayer extends CompositeLayer {
     if (this._shouldUseHighPrecision()) {
       return;
     }
-    const {resolution, centerHex} = this.state;
+    const {resolution, meanEdgeLength, centerHex} = this.state;
     if (resolution < 0) {
       return;
     }
     const hex = geoToH3(viewport.latitude, viewport.longitude, resolution);
-    if (centerHex === hex) {
+    if (
+      centerHex === hex ||
+      (centerHex && h3Distance(centerHex, hex) * meanEdgeLength < UPDATE_THRESHOLD)
+    ) {
       return;
     }
 
