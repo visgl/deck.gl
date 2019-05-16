@@ -14,7 +14,7 @@ export default class PostProcessEffect extends Effect {
 
   prepare(gl) {
     if (!this.passes) {
-      this.passes = normalizePasses(gl, this.module, this.id, this.props);
+      this.passes = createPasses(gl, this.module, this.id, this.props);
     }
   }
 
@@ -37,29 +37,27 @@ export default class PostProcessEffect extends Effect {
   }
 }
 
-function normalizePasses(gl, module, id, props) {
+function createPasses(gl, module, id, props) {
   if (module.filter || module.sampler) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(gl, {
       id,
-      model: getModel(gl, module, fs, id, props),
-      uniforms: null
+      model: getModel(gl, module, fs, id, props)
     });
     return [pass];
   }
 
   const passes = module.passes || [];
-  return passes.map(pass => {
+  return passes.map((pass, index) => {
     const fs = getFragmentShaderForRenderPass(module, pass);
-    const idn = `${id}-${passes.length + 1}`;
+    const idn = `${id}-${index}`;
 
     return new ScreenPass(
       gl,
       Object.assign(
         {
           id: idn,
-          model: getModel(gl, module, fs, idn, props),
-          uniforms: pass.uniforms
+          model: getModel(gl, module, fs, idn, props)
         },
         props
       )
