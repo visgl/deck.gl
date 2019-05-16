@@ -28,7 +28,7 @@ const defaultMaterial = new PhongMaterial();
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
