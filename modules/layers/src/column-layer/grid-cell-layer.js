@@ -42,6 +42,7 @@ export default class GridCellLayer extends ColumnLayer {
           extruded,
           coverage,
           elevationScale,
+          edgeDistance: 1,
           isWireframe: false
         })
       )

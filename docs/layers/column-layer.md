@@ -119,26 +119,31 @@ Disk offset from the position, relative to the radius. By default, the disk is c
 Radius multiplier, between 0 - 1. The radius of the disk is calculated by
 `coverage * radius`
 
-##### `filled` (Boolean, optional)
-
-* Default: `true`
-
-Whether to draw a filled column (solid fill). Note that only
-the area between the outer polygon and any holes will be filled.
-
 ##### `elevationScale` (Number, optional)
 
 * Default: `1`
 
 Column elevation multiplier. The elevation of column is calculated by
 `elevationScale * getElevation(d)`. `elevationScale` is a handy property
-to scale all hexagon elevations without updating the data.
+to scale all column elevations without updating the data.
+
+##### `filled` (Boolean, optional)
+
+* Default: `true`
+
+Whether to draw a filled column (solid fill).
+
+##### `stroked` (Boolean, optional)
+
+* Default: `false`
+
+Whether to draw an outline around the disks. Only applies if `extruded: false`.
 
 ##### `extruded` (Boolean, optional)
 
 * Default: `true`
 
-Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
+Whether to extrude the columns. If set to `false`, all columns will be rendered as flat polygons.
 
 ##### `wireframe` (Boolean, optional)
 
@@ -146,13 +151,38 @@ Whether to extrude hexagon. If se to false, all hexagons will be set to flat.
 
 Whether to generate a line wireframe of the column. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
-(a "strut") for each vertex on the polygon.
+(a "strut") for each vertex around the disk. Only applies if `extruded: true`.
 
 ##### `fp64` (Boolean, optional)
 
 * Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
+
+##### `lineWidthUnits` (String, optional)
+
+* Default: `'meters'`
+
+The units of the outline width, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
+
+##### `lineWidthScale` (Boolean, optional)
+
+* Default: `1`
+
+The line width multiplier that multiplied to all outlines if the `stroked` attribute is `true`.
+
+##### `lineWidthMinPixels` (Number, optional)
+
+* Default: `0`
+
+The minimum outline width in pixels.
+
+##### `lineWidthMaxPixels` (Number, optional)
+
+* Default: Number.MAX_SAFE_INTEGER
+
+The maximum outline width in pixels.
+
 
 ##### `material` (Object, optional)
 
@@ -169,20 +199,9 @@ Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-
 
 Method called to retrieve the position of each column, in `[x, y]`. An optional third component can be used to set the elevation of the bottom.
 
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `[255, 0, 255, 255]`
-
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
-
-* If an array is provided, it is used as the color for all objects.
-* If a function is provided, it is called on each object to retrieve its color.
-
-It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
-
 ##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `[255, 0, 255, 255]`
+* Default: `[0, 0, 0, 255]`
 
 The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
@@ -192,12 +211,12 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 ##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-* Default: `[255, 0, 0, 255]`
+* Default: `[0, 0, 0, 255]`
 
-The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba outline color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
 
-* If an array is provided, it is used as the outline color for all polygons.
-* If a function is provided, it is called on each polygon to retrieve its outline color.
+* If an array is provided, it is used as the outline color for all columns.
+* If a function is provided, it is called on each object to retrieve its outline color.
 * If not provided, it falls back to `getColor`.
 
 ##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
@@ -208,6 +227,16 @@ The elevation of each cell in meters.
 
 * If a number is provided, it is used as the elevation for all objects.
 * If a function is provided, it is called on each object to retrieve its elevation.
+
+
+##### `getLineWidth` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `1`
+
+The width of the outline of the column, in units specified by `lineWidthUnits` (default meters). Only applies if `extruded: false` and `stroked: true`.
+
+* If a number is provided, it is used as the outline width for all columns.
+* If a function is provided, it is called on each object to retrieve its outline width.
 
 ## Source
 

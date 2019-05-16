@@ -156,7 +156,10 @@ test('ColumnLayer', t => {
       getPosition: d => d.position
     },
     assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer}) => {
+      t.ok(layer.state.edgeDistance, 'edgeDistance is populated');
+    }
   });
 
   testLayer({Layer: ColumnLayer, testCases, onError: t.notOk});

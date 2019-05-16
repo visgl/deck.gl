@@ -28,7 +28,7 @@ const defaultMaterial = new PhongMaterial();
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -38,13 +38,22 @@ const defaultProps = {
   offset: {type: 'array', value: [0, 0]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
+
+  lineWidthUnits: 'meters',
+  lineWidthScale: 1,
+  lineWidthMinPixels: 0,
+  lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
+
   extruded: true,
   fp64: false,
   wireframe: false,
   filled: true,
+  stroked: false,
+
   getPosition: {type: 'accessor', value: x => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
   material: defaultMaterial,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
@@ -92,6 +101,11 @@ export default class ColumnLayer extends Layer {
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR
+      },
+      instanceStrokeWidths: {
+        size: 1,
+        accessor: 'getLineWidth',
+        transition: true
       }
     });
     /* eslint-enable max-len */
@@ -128,6 +142,20 @@ export default class ColumnLayer extends Layer {
       nradial: diskResolution
     });
 
+    let meanVertexDistance = 0;
+    if (vertices) {
+      for (let i = 0; i < diskResolution; i++) {
+        const p = vertices[i];
+        const d = Math.sqrt(p[0] * p[0] + p[1] * p[1]);
+        meanVertexDistance += d / diskResolution;
+      }
+    } else {
+      meanVertexDistance = 1;
+    }
+    this.setState({
+      edgeDistance: Math.cos(Math.PI / diskResolution) * meanVertexDistance
+    });
+
     return geometry;
   }
 
@@ -154,17 +182,27 @@ export default class ColumnLayer extends Layer {
   }
 
   draw({uniforms}) {
+    const {viewport} = this.context;
     const {
+      lineWidthUnits,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+
       elevationScale,
       extruded,
       filled,
+      stroked,
       wireframe,
       offset,
       coverage,
       radius,
       angle
     } = this.props;
-    const {model, fillVertexCount, wireframeVertexCount} = this.state;
+    const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
+
+    const widthMultiplier =
+      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
 
     model.setUniforms(
       Object.assign({}, uniforms, {
@@ -173,21 +211,41 @@ export default class ColumnLayer extends Layer {
         offset,
         extruded,
         coverage,
-        elevationScale
+        elevationScale,
+        edgeDistance,
+        widthScale: lineWidthScale * widthMultiplier,
+        widthMinPixels: lineWidthMinPixels,
+        widthMaxPixels: lineWidthMaxPixels
       })
     );
 
-    if (wireframe) {
+    // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
+    if (extruded && wireframe) {
       model.setProps({isIndexed: true});
-      model.setVertexCount(wireframeVertexCount);
-      model.setDrawMode(GL.LINES);
-      model.setUniforms({isWireframe: true}).draw();
+      model
+        .setVertexCount(wireframeVertexCount)
+        .setDrawMode(GL.LINES)
+        .setUniforms({isStroke: true})
+        .draw();
     }
     if (filled) {
       model.setProps({isIndexed: false});
-      model.setVertexCount(fillVertexCount);
-      model.setDrawMode(GL.TRIANGLE_STRIP);
-      model.setUniforms({isWireframe: false}).draw();
+      model
+        .setVertexCount(fillVertexCount)
+        .setDrawMode(GL.TRIANGLE_STRIP)
+        .setUniforms({isStroke: false})
+        .draw();
+    }
+    // When drawing 2d: draw fill before stroke so that the outline is always on top
+    if (!extruded && stroked) {
+      model.setProps({isIndexed: false});
+      // The width of the stroke is achieved by flattening the side of the cylinder.
+      // Skip the last 1/3 of the vertices which is the top.
+      model
+        .setVertexCount((fillVertexCount * 2) / 3)
+        .setDrawMode(GL.TRIANGLE_STRIP)
+        .setUniforms({isStroke: true})
+        .draw();
     }
   }
 

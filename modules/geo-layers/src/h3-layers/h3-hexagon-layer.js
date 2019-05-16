@@ -100,20 +100,21 @@ export default class H3HexagonLayer extends CompositeLayer {
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
 
-  _renderPolygonLayer() {
+  _getForwardProps() {
     const {
-      data,
-      getHexagon,
-      wireframe,
       elevationScale,
       fp64,
       material,
       extruded,
+      wireframe,
       stroked,
+      filled,
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
-      getColor, // Deprecate getColor Prop in the next major release
+      // TODO - Deprecate getColor Prop in v8.0
+      getColor,
       getFillColor,
       getElevation,
       getLineColor,
@@ -121,34 +122,43 @@ export default class H3HexagonLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
+    return {
+      elevationScale,
+      fp64,
+      extruded,
+      wireframe,
+      stroked,
+      filled,
+      lineWidthUnits,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      material,
+      getElevation,
+      getFillColor: getColor || getFillColor,
+      getLineColor,
+      getLineWidth,
+      updateTriggers: {
+        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
+        getElevation: updateTriggers.getElevation,
+        getLineColor: updateTriggers.getLineColor,
+        getLineWidth: updateTriggers.getLineWidth
+      }
+    };
+  }
+
+  _renderPolygonLayer() {
+    const {data, getHexagon, updateTriggers} = this.props;
+
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
+    const forwardProps = this._getForwardProps();
+    forwardProps.updateTriggers.getPolygon = updateTriggers.getHexagon;
 
     return new SubLayerClass(
-      {
-        filled: true,
-        elevationScale,
-        extruded,
-        fp64,
-        wireframe,
-        stroked,
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels,
-        material,
-        getElevation,
-        getFillColor: getColor || getFillColor,
-        getLineColor,
-        getLineWidth
-      },
+      forwardProps,
       this.getSubLayerProps({
         id: 'hexagon-cell-hifi',
-        updateTriggers: {
-          getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
-          getElevation: updateTriggers.getElevation,
-          getLineColor: updateTriggers.getLineColor,
-          getLineWidth: updateTriggers.getLineWidth,
-          getPolygon: updateTriggers.getHexagon
-        }
+        updateTriggers: forwardProps.updateTriggers
       }),
       {
         data,
@@ -161,39 +171,17 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _renderColumnLayer() {
-    const {
-      data,
-      getHexagon,
-      updateTriggers,
-      coverage,
-      elevationScale,
-      fp64,
-      extruded,
-      wireframe,
-      getColor,
-      getFillColor,
-      getLineColor,
-      getElevation,
-      material
-    } = this.props;
+    const {data, getHexagon, updateTriggers} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
+    const forwardProps = this._getForwardProps();
+    forwardProps.updateTriggers.getPosition = updateTriggers.getHexagon;
 
     return new SubLayerClass(
-      {
-        coverage,
-        elevationScale,
-        extruded,
-        wireframe,
-        fp64,
-        getFillColor: getColor || getFillColor,
-        getLineColor,
-        getElevation,
-        material
-      },
+      forwardProps,
       this.getSubLayerProps({
         id: 'hexagon-cell',
-        updateTriggers
+        updateTriggers: forwardProps.updateTriggers
       }),
       {
         data,

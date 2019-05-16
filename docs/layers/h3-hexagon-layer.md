@@ -80,7 +80,8 @@ new deck.H3HexagonLayer({});
 
 ## Properties
 
-Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer](/docs/api-reference/composite-layer.md) properties.
+Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/docs/api-reference/composite-layer.md), and [PolygonLayer](/docs/layers/polygon-layer.md) properties, plus the following:
+
 
 ### Render Options
 
@@ -96,48 +97,6 @@ However, there are 12 pentagons world wide at each resolution. The hexagons at a
 * if `false`, the layer chooses the mode automatically. High-precision rendering is only used if resolution is at or below `5`, or if a pentagon is found in the data.
 * if `true`, always use high-precision rendering.
 
-
-##### `coverage` (Number, optional)
-
-* Default: `1`
-
-Hexagon size multiplier, between 0 - 1. When a number smaller than `1` is provided, the hexagon is scaled down around the centroid.
-
-##### `elevationScale` (Number, optional)
-
-* Default: `1`
-
-Column elevation multiplier. The elevation of column is calculated by
-`elevationScale * getElevation(d)`. `elevationScale` is a handy property
-to scale all hexagon elevations without updating the data.
-
-##### `extruded` (Boolean, optional)
-
-* Default: `true`
-
-Whether to extrude hexagon. If set to false, all hexagons will be set to flat.
-
-##### `wireframe` (Boolean, optional)
-
-* Default: `false`
-
-Whether to generate a line wireframe of the hexagon. The outline will have
-"horizontal" lines closing the top and bottom hexagons and a vertical line
-(a "strut") for each vertex on the hexagon.
-
-##### `fp64` (Boolean, optional)
-
-* Default: `false`
-
-Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
-
-##### `material` (Object, optional)
-
-* Default: `new PhongMaterial()`
-
-This is an object that contains material props for [lighting effect](/docs/effects/lighting-effect.md) applied on extruded hexagons.
-Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-reference/core/materials/phong-material.md) for more details.
-
 ### Data Accessors
 
 ##### `getHexagon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
@@ -145,46 +104,6 @@ Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-
 * Default: `object => object.hexagon`
 
 Method called to retrieve the [H3](https://uber.github.io/h3/) hexagon index of each object. Note that all hexagons within one `H3HexagonLayer` must use the same [resolution](https://uber.github.io/h3/#/documentation/core-library/resolution-table).
-
-##### `getColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `[0, 0, 0, 255]`
-
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
-
-* If an array is provided, it is used as the color for all objects.
-* If a function is provided, it is called on each object to retrieve its color.
-
-It will be overridden by `getLineColor` and `getFillColor` if these new accessors are specified.
-
-##### `getFillColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `[0, 0, 0, 255]`
-
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
-
-* If an array is provided, it is used as the color for all objects.
-* If a function is provided, it is called on each object to retrieve its color.
-* If not provided, it falls back to `getColor`.
-
-##### `getLineColor` ([Function](/docs/developer-guide/using-layers.md#accessors)|Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `[0, 0, 0, 255]`
-
-The rgba outline color of each hexagon, in `r, g, b, [a]`. Each component is in the 0-255 range.
-
-* If an array is provided, it is used as the outline color for all hexagons.
-* If a function is provided, it is called on each hexagon to retrieve its outline color.
-* If not provided, it falls back to `getColor`.
-
-##### `getElevation` ([Function](/docs/developer-guide/using-layers.md#accessors)|Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
-
-* Default: `1000`
-
-The elevation of each cell in meters.
-
-* If a number is provided, it is used as the elevation for all objects.
-* If a function is provided, it is called on each object to retrieve its elevation.
 
 
 ## Sub Layers

@@ -154,7 +154,7 @@ export const TEST_CASES = [
         getPosition: d => d.position,
         getNormal: d => [0, 0.5, 0.2],
         getColor: d => [255, 255, 0, 128],
-        radiusPixels: 50
+        pointSize: 50
       })
     ],
     goldenImage: './test/render/golden-images/pointcloud-identity.png'
@@ -350,7 +350,7 @@ export const TEST_CASES = [
         id: 'scatterplot-lnglat',
         data: dataSamples.points,
         getPosition: d => d.COORDINATES,
-        getColor: d => [255, 128, 0],
+        getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
         opacity: 1,
         pickable: true,
@@ -377,7 +377,7 @@ export const TEST_CASES = [
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
         fp64: true,
         getPosition: d => d.COORDINATES,
-        getColor: d => [255, 128, 0],
+        getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
         opacity: 1,
         pickable: true,
@@ -743,7 +743,7 @@ export const TEST_CASES = [
         extruded: true,
         pickable: true,
         opacity: 1,
-        getColor: g => [245, 166, g.value * 255, 255],
+        getFillColor: g => [245, 166, g.value * 255, 255],
         getElevation: h => h.value * 5000
       })
     ],
@@ -768,7 +768,7 @@ export const TEST_CASES = [
         fp64: true,
         pickable: true,
         opacity: 1,
-        getColor: g => [245, 166, g.value * 255, 255],
+        getFillColor: g => [245, 166, g.value * 255, 255],
         getElevation: h => h.value * 5000
       })
     ],
@@ -860,11 +860,41 @@ export const TEST_CASES = [
         pickable: true,
         opacity: 1,
         getPosition: h => h.centroid,
-        getColor: h => [48, 128, h.value * 255, 255],
+        getFillColor: h => [48, 128, h.value * 255, 255],
         getElevation: h => h.value * 5000
       })
     ],
     goldenImage: './test/render/golden-images/column-lnglat.png'
+  },
+  {
+    name: 'column-lnglat-stroke',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0,
+      orthographic: true
+    },
+    layers: [
+      new ColumnLayer({
+        id: 'column-lnglat',
+        data: dataSamples.hexagons,
+        radius: 250,
+        angle: Math.PI / 2,
+        coverage: 1,
+        extruded: false,
+        stroked: true,
+        pickable: true,
+        opacity: 1,
+        lineWidthUnits: 'pixels',
+        getPosition: h => h.centroid,
+        getFillColor: h => [48, 128, h.value * 255, 255],
+        getLineColor: [255, 255, 255],
+        getLineWidth: 4
+      })
+    ],
+    goldenImage: './test/render/golden-images/column-lnglat-stroke.png'
   },
   {
     name: 'hexagon-lnglat',
@@ -912,7 +942,7 @@ export const TEST_CASES = [
         getNormal: d => d.normal,
         getColor: d => d.color,
         opacity: 1,
-        radiusPixels: 2,
+        pointSize: 2,
         pickable: true
       })
     ],
@@ -942,7 +972,7 @@ export const TEST_CASES = [
         getNormal: d => d.normal,
         getColor: d => d.color,
         opacity: 1,
-        radiusPixels: 2,
+        pointSize: 2,
         pickable: true
       })
     ],
@@ -967,7 +997,7 @@ export const TEST_CASES = [
         getNormal: d => d.normal,
         getColor: d => d.color,
         opacity: 1,
-        radiusPixels: 2,
+        pointSize: 2,
         pickable: true
       })
     ],
@@ -1225,7 +1255,7 @@ export const TEST_CASES = [
       new H3HexagonLayer({
         data: h3.kRing('882830829bfffff', 4),
         getHexagon: d => d,
-        getColor: (d, {index}) => [255, index * 5, 0],
+        getFillColor: (d, {index}) => [255, index * 5, 0],
         getElevation: (d, {index}) => index * 100
       })
     ],
@@ -1244,11 +1274,56 @@ export const TEST_CASES = [
       new H3HexagonLayer({
         data: h3.kRing('891c0000003ffff', 4),
         getHexagon: d => d,
-        getColor: (d, {index}) => [255, index * 5, 0],
+        getFillColor: (d, {index}) => [255, index * 5, 0],
         getElevation: (d, {index}) => index * 10
       })
     ],
     goldenImage: './test/render/golden-images/h3-hexagon-high-precision.png'
+  },
+  {
+    name: 'h3-hexagon-layer-flat',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('882830829bfffff', 4),
+        getHexagon: d => d,
+        extruded: false,
+        stroked: true,
+        getFillColor: (d, {index}) => [255, index * 5, 0],
+        getLineColor: [255, 255, 255],
+        lineWidthMinPixels: 2
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon-flat.png'
+  },
+  {
+    name: 'h3-hexagon-layer-flat-high-precision',
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3.kRing('882830829bfffff', 4),
+        getHexagon: d => d,
+        extruded: false,
+        stroked: true,
+        highPrecision: true,
+        getFillColor: (d, {index}) => [255, index * 5, 0],
+        getLineColor: [255, 255, 255],
+        lineWidthMinPixels: 2
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon-flat.png'
   },
   {
     name: 'h3-cluster-layer',

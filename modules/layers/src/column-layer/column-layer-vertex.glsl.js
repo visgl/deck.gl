@@ -30,6 +30,7 @@ attribute float instanceElevations;
 attribute vec2 instancePositions64xyLow;
 attribute vec4 instanceFillColors;
 attribute vec4 instanceLineColors;
+attribute float instanceStrokeWidths;
 
 attribute vec3 instancePickingColors;
 
@@ -39,25 +40,35 @@ uniform float radius;
 uniform float angle;
 uniform vec2 offset;
 uniform bool extruded;
-uniform bool isWireframe;
+uniform bool isStroke;
 uniform float coverage;
 uniform float elevationScale;
+uniform float edgeDistance;
+uniform float widthScale;
+uniform float widthMinPixels;
+uniform float widthMaxPixels;
 
 // Result
 varying vec4 vColor;
 
 void main(void) {
   
-  vec4 color = isWireframe ? instanceLineColors : instanceFillColors;
+  vec4 color = isStroke ? instanceLineColors : instanceFillColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
 
   // calculate elevation, if 3d not enabled set to 0
   // cylindar gemoetry height are between -1.0 to 1.0, transform it to between 0, 1
   float elevation = 0.0;
+  // calculate stroke offset
+  float strokeOffsetRatio = 1.0;
 
   if (extruded) {
     elevation = instanceElevations * (positions.z + 1.0) / 2.0 * elevationScale;
+  } else if (isStroke) {
+    float widthPixels = clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
+      widthMinPixels, widthMaxPixels) / 2.0;
+    strokeOffsetRatio += sign(positions.z) * project_pixel_size(widthPixels) / project_size(edgeDistance * coverage * radius);
   }
 
   // if alpha == 0.0 or z < 0.0, do not render element
@@ -67,7 +78,7 @@ void main(void) {
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
-  vec3 pos = vec3(project_size(rotationMatrix * positions.xy + offset) * dotRadius, 0.);
+  vec3 pos = vec3(project_size(rotationMatrix * positions.xy * strokeOffsetRatio + offset) * dotRadius, 0.);
 
   vec4 position_commonspace;
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_commonspace);
@@ -77,7 +88,7 @@ void main(void) {
 
   vec3 normals_commonspace = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
 
-  if (extruded && !isWireframe) {
+  if (extruded && !isStroke) {
     vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
     vColor = vec4(lightColor, color.a * opacity) / 255.0;
   } else {
