@@ -6,9 +6,14 @@ export function getDeckInstance({map, gl, deck}) {
     return map.__deck;
   }
 
+  const customRender = (deck && deck.props._customRender) || (() => {});
+
   const deckProps = {
     useDevicePixels: true,
-    _customRender: () => map.triggerRepaint(),
+    _customRender: () => {
+      map.triggerRepaint();
+      customRender();
+    },
     // TODO: import these defaults from a single source of truth
     parameters: {
       depthMask: true,
