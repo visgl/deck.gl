@@ -143,7 +143,7 @@ Whether to draw an outline around the disks. Only applies if `extruded: false`.
 
 * Default: `true`
 
-Whether to extrude the columns. If se to `false`, all columns will be set to flat.
+Whether to extrude the columns. If set to `false`, all columns will be rendered as flat polygons.
 
 ##### `wireframe` (Boolean, optional)
 
@@ -151,7 +151,7 @@ Whether to extrude the columns. If se to `false`, all columns will be set to fla
 
 Whether to generate a line wireframe of the column. The outline will have
 "horizontal" lines closing the top and bottom polygons and a vertical line
-(a "strut") for each vertex on the polygon. Only applies if `extruded: true`.
+(a "strut") for each vertex around the disk. Only applies if `extruded: true`.
 
 ##### `fp64` (Boolean, optional)
 
