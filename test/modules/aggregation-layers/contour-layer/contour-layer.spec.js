@@ -29,7 +29,7 @@ import {ContourLayer} from '@deck.gl/aggregation-layers';
 
 const getPosition = d => d.COORDINATES;
 
-test('GridLayer', t => {
+test('ContourLayer', t => {
   const testCases = generateLayerTests({
     Layer: ContourLayer,
     sampleProps: {
