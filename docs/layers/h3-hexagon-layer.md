@@ -96,13 +96,6 @@ However, there are 12 pentagons world wide at each resolution. The hexagons at a
 * if `false`, the layer chooses the mode automatically. High-precision rendering is only used if resolution is at or below `5`, or if a pentagon is found in the data.
 * if `true`, always use high-precision rendering.
 
-
-##### `coverage` (Number, optional)
-
-* Default: `1`
-
-Hexagon size multiplier, between 0 - 1. When a number smaller than `1` is provided, the hexagon is scaled down around the centroid.
-
 ##### `elevationScale` (Number, optional)
 
 * Default: `1`
