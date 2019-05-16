@@ -22,7 +22,7 @@ import test from 'tape-catch';
 import {makeSpy} from '@probe.gl/test-utils';
 
 import * as data from 'deck.gl-test/data';
-import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {ColumnLayer} from '@deck.gl/layers';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
@@ -30,6 +30,27 @@ import {HexagonLayer} from '@deck.gl/aggregation-layers';
 const getColorValue = points => points.length;
 const getElevationValue = points => points.length;
 const getPosition = d => d.COORDINATES;
+
+test('HexagonLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: HexagonLayer,
+    sampleProps: {
+      data: data.points.slice(0, 3),
+      getPosition
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate({layer}) {
+      if (layer.props.data && layer.props.data.length) {
+        t.ok(layer.state.hexagons.length > 0, 'should update state.hexagons');
+      }
+    }
+  });
+
+  testLayer({Layer: HexagonLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
 
 // props to initialize layer with
 // update props
