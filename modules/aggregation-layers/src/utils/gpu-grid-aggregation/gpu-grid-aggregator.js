@@ -38,6 +38,8 @@ import AGGREGATE_ALL_FS from './aggregate-all-fs.glsl';
 import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
 import {getFloatTexture, getFramebuffer, getFloatArray} from './gpu-grid-aggregator-utils.js';
 
+const BUFFER_NAMES = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
+
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
   static getAggregationData({aggregationData, maxData, pixelIndex}) {
@@ -924,12 +926,12 @@ export default class GPUGridAggregator {
   }
 
   // GPU Aggregation results are provided in Buffers, if new Buffer objects are created track them for later deletion.
+  /* eslint-disable max-depth */
   trackGPUResultBuffers(results, weights) {
-    const bufferNames = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
     const {resources} = this.state;
     for (const id in results) {
       if (results[id]) {
-        bufferNames.forEach(bufferName => {
+        for (const bufferName of BUFFER_NAMES) {
           if (results[id][bufferName] && weights[id][bufferName] !== results[id][bufferName]) {
             // No result buffer is provided in weights object, `readPixelsToBuffer` has created a new Buffer object
             // collect the new buffer for garabge collection
@@ -939,10 +941,11 @@ export default class GPUGridAggregator {
             }
             resources[name] = results[id][bufferName];
           }
-        });
+        }
       }
     }
   }
+  /* eslint-enable max-depth */
 
   /* eslint-disable max-statements */
   updateModels(opts) {
