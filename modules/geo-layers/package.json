@@ -2,7 +2,7 @@
   "name": "@deck.gl/geo-layers",
   "description": "deck.gl layers supporting geospatial use cases and GIS formats",
   "license": "MIT",
-  "version": "7.0.6",
+  "version": "7.0.7",
   "publishConfig": {
     "access": "public"
   },

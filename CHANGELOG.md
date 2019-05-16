@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.7] - May 16 2019
+
+- Optimize bundle size (#3092)
+- Fix elevationScale behavior (#3093)
+- Fix react integration of mapbox layers (#3108)
+
 #### deck.gl [v7.0.6] - May 13 2019
 
 - Ensure UMD bundles are ES5 (#3085)
