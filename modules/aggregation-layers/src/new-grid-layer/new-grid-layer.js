@@ -5,7 +5,6 @@ import GPUGridLayer from '../gpu-grid-layer/gpu-grid-layer';
 import GridLayer from '../grid-layer/grid-layer';
 
 const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, GridLayer.defaultProps);
-// Function to convert from getWeight/aggregation props to getValue prop for Color and Elevation
 
 function sumReducer(accu, cur) {
   return accu + cur;
@@ -43,6 +42,7 @@ function getMin(pts, accessor) {
   return filtered.length ? filtered.reduce(minReducer, Infinity) : null;
 }
 
+// Function to convert from getWeight/aggregation props to getValue prop for Color and Elevation
 function getValueFunc(aggregation, accessor) {
   switch (aggregation) {
     case AGGREGATION_OPERATION.MIN:
@@ -78,15 +78,17 @@ export default class NewGPULayer extends CompositeLayer {
 
   renderLayers() {
     let gridLayer = null;
-
+    const {data, updateTriggers} = this.props;
     if (this.state.useGPUAggregation) {
       gridLayer = new GPUGridLayer(
         this.props,
         this.getSubLayerProps({
           id: 'GPU',
-          // Note: data has to be passed explicitly like this to avoid being empty
-          data: this.props.data
-        })
+          updateTriggers
+        }),
+        {
+          data
+        }
       );
     } else {
       const buildColorElevationProps = this.buildColorElevationProps(this.props);
@@ -95,9 +97,11 @@ export default class NewGPULayer extends CompositeLayer {
         buildColorElevationProps,
         this.getSubLayerProps({
           id: 'CPU',
-          // Note: data has to be passed explicitly like this to avoid being empty
-          data: this.props.data
-        })
+          updateTriggers
+        }),
+        {
+          data
+        }
       );
     }
     return gridLayer;
