@@ -18,7 +18,7 @@ export default class PostProcessEffect extends Effect {
     }
   }
 
-  render(gl, params) {
+  render(params) {
     const {target = null} = params;
     let switchBuffer = false;
     for (let index = 0; index < this.passes.length; index++) {
@@ -54,13 +54,10 @@ function createPasses(gl, module, id, props) {
 
     return new ScreenPass(
       gl,
-      Object.assign(
-        {
-          id: idn,
-          model: getModel(gl, module, fs, idn, props)
-        },
-        props
-      )
+      Object.assign({
+        id: idn,
+        model: getModel(gl, module, fs, idn, props)
+      })
     );
   });
 }

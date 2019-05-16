@@ -1,13 +1,12 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, setParameters, withParameters, Framebuffer} from '@luma.gl/core';
+import {clear, setParameters, withParameters} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(params) {
     const gl = this.gl;
-    const {outputBuffer = Framebuffer.getDefaultFramebuffer(gl)} = params;
 
-    return withParameters(gl, {framebuffer: outputBuffer}, () => this.drawLayers(params));
+    return withParameters(gl, {framebuffer: params.outputBuffer}, () => this.drawLayers(params));
   }
 
   // PRIVATE

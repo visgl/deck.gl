@@ -138,7 +138,7 @@ export default class DeckRenderer {
       if (index === effects.length - 1) {
         Object.assign(params, {target: Framebuffer.getDefaultFramebuffer(this.gl)});
       }
-      params = effects[index].render(this.gl, params);
+      params = effects[index].render(params);
     }
   }
 

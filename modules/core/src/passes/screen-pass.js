@@ -4,16 +4,14 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import {Framebuffer, withParameters} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/core';
 import Pass from './pass';
 
 export default class ScreenPass extends Pass {
   render(params) {
     const gl = this.gl;
 
-    const {outputBuffer = Framebuffer.getDefaultFramebuffer(gl)} = params;
-
-    withParameters(gl, {framebuffer: outputBuffer}, () => this._renderPass(gl, params));
+    withParameters(gl, {framebuffer: params.outputBuffer}, () => this._renderPass(gl, params));
   }
 
   /**
