@@ -149,6 +149,8 @@ export default class ColumnLayer extends Layer {
         const d = Math.sqrt(p[0] * p[0] + p[1] * p[1]);
         meanVertexDistance += d / diskResolution;
       }
+    } else {
+      meanVertexDistance = 1;
     }
     this.setState({
       edgeDistance: Math.cos(Math.PI / diskResolution) * meanVertexDistance
@@ -197,7 +199,7 @@ export default class ColumnLayer extends Layer {
       radius,
       angle
     } = this.props;
-    const {model, edgeDistance} = this.state;
+    const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
 
     const widthMultiplier =
       lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
@@ -217,46 +219,33 @@ export default class ColumnLayer extends Layer {
       })
     );
 
-    // When drawing 2d: draw fill first so stroke is always on top
-    if (!extruded && filled) {
-      this._drawModel('fill');
-    }
-    if (!extruded && stroked) {
-      this._drawModel('stroke');
-    }
-    // When drawing 3d: draw wireframe first so it doesn't get clipped by depth test
+    // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
     if (extruded && wireframe) {
-      this._drawModel('wireframe');
+      model.setProps({isIndexed: true});
+      model
+        .setVertexCount(wireframeVertexCount)
+        .setDrawMode(GL.LINES)
+        .setUniforms({isStroke: true})
+        .draw();
     }
-    if (extruded && filled) {
-      this._drawModel('fill');
+    if (filled) {
+      model.setProps({isIndexed: false});
+      model
+        .setVertexCount(fillVertexCount)
+        .setDrawMode(GL.TRIANGLE_STRIP)
+        .setUniforms({isStroke: false})
+        .draw();
     }
-  }
-
-  _drawModel(mode) {
-    const {model, fillVertexCount, wireframeVertexCount} = this.state;
-
-    switch (mode) {
-      case 'wireframe':
-        model.setProps({isIndexed: true});
-        model.setVertexCount(wireframeVertexCount);
-        model.setDrawMode(GL.LINES);
-        model.setUniforms({isStroke: true}).draw();
-        break;
-
-      case 'stroke':
-        model.setProps({isIndexed: false});
-        model.setVertexCount((fillVertexCount * 2) / 3);
-        model.setDrawMode(GL.TRIANGLE_STRIP);
-        model.setUniforms({isStroke: true}).draw();
-        break;
-
-      case 'fill':
-      default:
-        model.setProps({isIndexed: false});
-        model.setVertexCount(fillVertexCount);
-        model.setDrawMode(GL.TRIANGLE_STRIP);
-        model.setUniforms({isStroke: false}).draw();
+    // When drawing 2d: draw fill before stroke so that the outline is always on top
+    if (!extruded && stroked) {
+      model.setProps({isIndexed: false});
+      // The width of the stroke is achieved by flattening the side of the cylinder.
+      // Skip the last 1/3 of the vertices which is the top.
+      model
+        .setVertexCount((fillVertexCount * 2) / 3)
+        .setDrawMode(GL.TRIANGLE_STRIP)
+        .setUniforms({isStroke: true})
+        .draw();
     }
   }
 
