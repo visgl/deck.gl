@@ -119,6 +119,14 @@ Disk offset from the position, relative to the radius. By default, the disk is c
 Radius multiplier, between 0 - 1. The radius of the disk is calculated by
 `coverage * radius`
 
+##### `elevationScale` (Number, optional)
+
+* Default: `1`
+
+Column elevation multiplier. The elevation of column is calculated by
+`elevationScale * getElevation(d)`. `elevationScale` is a handy property
+to scale all column elevations without updating the data.
+
 ##### `filled` (Boolean, optional)
 
 * Default: `true`
@@ -150,14 +158,6 @@ Whether to generate a line wireframe of the column. The outline will have
 * Default: `false`
 
 Whether the layer should be rendered in high-precision 64-bit mode. Note that since deck.gl v6.1, the default 32-bit projection uses a hybrid mode that matches 64-bit precision with significantly better performance.
-
-##### `elevationScale` (Number, optional)
-
-* Default: `1`
-
-Column elevation multiplier. The elevation of column is calculated by
-`elevationScale * getElevation(d)`. `elevationScale` is a handy property
-to scale all column elevations without updating the data.
 
 ##### `lineWidthUnits` (String, optional)
 
