@@ -101,6 +101,15 @@ export default class DeckRenderer {
     return redraw;
   }
 
+  finalize() {
+    if (this.screenBuffer) {
+      this.offscreenBuffer.delete();
+    }
+    if (this.offscreenBuffer) {
+      this.offscreenBuffer.delete();
+    }
+  }
+
   // Private
   prepareEffects(effects) {
     const effectProps = {};

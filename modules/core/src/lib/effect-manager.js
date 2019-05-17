@@ -12,6 +12,7 @@ export default class EffectManager {
   setProps(props) {
     if ('effects' in props) {
       if (props.effects.length !== this.effects.length || !deepEqual(props.effects, this.effects)) {
+        this.finalize();
         this.setEffects(props.effects);
         this._needsRedraw = 'effects changed';
       }
@@ -34,6 +35,14 @@ export default class EffectManager {
       effects.push(this.defaultLightingEffect);
     }
     return effects;
+  }
+
+  finalize() {
+    if (this.effects) {
+      for (const effect of this.effects) {
+        effect.finalize();
+      }
+    }
   }
 
   // Private

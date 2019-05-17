@@ -14,6 +14,12 @@ export default class ScreenPass extends Pass {
     withParameters(gl, {framebuffer: params.outputBuffer}, () => this._renderPass(gl, params));
   }
 
+  finalize() {
+    if (this.props && this.props.model) {
+      this.props.model.delete();
+    }
+  }
+
   /**
    * Renders the pass.
    * This is an abstract method that should be overridden.
@@ -21,15 +27,17 @@ export default class ScreenPass extends Pass {
    * @param {Framebuffer} outputBuffer - Frame buffer that serves as the output render target
    */
   _renderPass(gl, {inputBuffer, outputBuffer}) {
-    this.props.model.draw({
-      uniforms: {
-        texture: inputBuffer,
-        texSize: [inputBuffer.width, inputBuffer.height]
-      },
-      parameters: {
-        depthWrite: false,
-        depthTest: false
-      }
-    });
+    if (this.props && this.props.model) {
+      this.props.model.draw({
+        uniforms: {
+          texture: inputBuffer,
+          texSize: [inputBuffer.width, inputBuffer.height]
+        },
+        parameters: {
+          depthWrite: false,
+          depthTest: false
+        }
+      });
+    }
   }
 }

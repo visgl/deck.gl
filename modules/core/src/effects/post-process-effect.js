@@ -35,6 +35,14 @@ export default class PostProcessEffect extends Effect {
       outputBuffer: switchBuffer ? params.inputBuffer : params.outputBuffer
     };
   }
+
+  finalize() {
+    if (this.passes) {
+      for (const pass of this.passes) {
+        pass.finalize();
+      }
+    }
+  }
 }
 
 function createPasses(gl, module, id, props) {
