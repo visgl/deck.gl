@@ -92,6 +92,7 @@ function mergeTriggers(getHexagon, coverage) {
 const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
   highPrecision: false,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
+  centerHexagon: null,
   getHexagon: {type: 'accessor', value: x => x.hexagon},
   extruded: true
 });
@@ -158,7 +159,8 @@ export default class H3HexagonLayer extends CompositeLayer {
     if (resolution < 0) {
       return;
     }
-    const hex = geoToH3(viewport.latitude, viewport.longitude, resolution);
+    const hex =
+      this.props.centerHexagon || geoToH3(viewport.latitude, viewport.longitude, resolution);
     if (centerHex === hex) {
       return;
     }
