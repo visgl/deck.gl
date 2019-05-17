@@ -99,6 +99,20 @@ Animations are parsed automatically from `glTF` files. Requires `_animate` on de
 
 Not supported. Please do not use this option.
 
+##### `getScene` (Function, optional)
+
+- Default: `scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph)`
+
+If you have multiple scenes you can select the scene you want to use.
+Only triggers when scenegraph property changes.
+
+##### `getAnimator` (Function, optional)
+
+- Default: `scenegraph => scenegraph && scenegraph.animator`
+
+Return `null` to disable animation or provide your custom animator.
+Only triggers when scenegraph property changes.
+
 
 ### Data Accessors
 
