@@ -26,7 +26,7 @@ import BinSorter from '../utils/bin-sorter';
 import {defaultColorRange} from '../utils/color-utils';
 import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
 
-import {pointToDensityGridData} from './grid-aggregator';
+import {pointToDensityGridDataCPU} from './grid-aggregator';
 
 function nop() {}
 
@@ -211,7 +211,7 @@ export default class GridLayer extends CompositeLayer {
 
   getLayerData() {
     const {data, cellSize, getPosition} = this.props;
-    const {layerData} = pointToDensityGridData(data, cellSize, getPosition);
+    const {layerData} = pointToDensityGridDataCPU(data, cellSize, getPosition);
 
     this.setState({layerData});
     this.getSortedBins();
