@@ -207,7 +207,7 @@ export default class Deck {
 
     // We need to overwrite CSS style width and height with actual, numeric values
     const newProps = Object.assign({}, props, {
-      views: this._getViews(props),
+      views: this._getViews(this.props),
       width: this.width,
       height: this.height
     });

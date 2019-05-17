@@ -1,11 +1,4 @@
-import {
-  getDeckInstance,
-  addLayer,
-  removeLayer,
-  updateLayer,
-  drawLayer,
-  getViewState
-} from './deck-utils';
+import {getDeckInstance, addLayer, removeLayer, updateLayer, drawLayer} from './deck-utils';
 
 export default class MapboxLayer {
   /* eslint-disable no-this-before-super */
@@ -44,19 +37,6 @@ export default class MapboxLayer {
   }
 
   render(gl, matrix) {
-    this.deck.setProps({
-      viewState: this._getViewState()
-    });
-    drawLayer(this.deck, this);
-  }
-
-  /* Private API */
-
-  _getViewState() {
-    const {map, deck} = this;
-    return getViewState(map, {
-      nearZMultiplier: deck.height ? 1 / deck.height : 1,
-      farZMultiplier: 1
-    });
+    drawLayer(this.deck, this.map, this);
   }
 }
