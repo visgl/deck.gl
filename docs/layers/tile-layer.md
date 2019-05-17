@@ -129,6 +129,13 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 - Default: `getTileData: ({x, y, z}) => Promise.resolve(null)`
 
+Receives arguments:
+
+- `x` (Number) - X of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
+- `y` (Number) - Y of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
+- `z` (Number) - Z of [the OSM tile index](https://wiki.openstreetmap.org/wiki/Slippy_map_tilenames)
+- `bbox` (Object) - bounding box of the tile, in the shape of `{west, north, east, south}`.
+
 ##### `onTileError` (Function, optional)
 
 `onTileError` called when a tile failed to load.
