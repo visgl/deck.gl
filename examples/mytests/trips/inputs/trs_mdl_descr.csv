@@ -1,4 +1,4 @@
-Tourid,Legseqidx,Source,Target,Direction,Timeperiod,Purpose,Odpairid,Distance,Traveltime,Departtime,SourceX,SourceY,TargetX,TargetY
+Tourid,Legseqidx,Source,Target,Direction,Timeperiod,Purpose,Odpairid,Distance,Traveltime,Departtime,Xsource,Ysource,Xtarget,Ytarget
 1,0,E01014387,E01014370,FromHome,AM,HBO,51,470.9,470.9,08:49:07,-2.3586667759999997,51.35911178,-2.35958041,51.38328426
 1,1,E01014370,E01014379,NonHomeBased,PM,NHBO,1,951.8,951.8,18:05:30,-2.35958041,51.38328426,-2.4267162019999997,51.3474509
 1,2,E01014379,E01014387,ToHome,PM,HBO,22,606.1,606.1,18:41:35,-2.4267162019999997,51.3474509,-2.3586667759999997,51.35911178
