@@ -17,7 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {fillArray} from './flatten';
 import {createIterable} from './iterable-utils';
 
 class TypedArrayManager {
@@ -114,22 +113,6 @@ export default class Tesselator {
       const geometry = getGeometry(object, objectInfo);
       visitor(geometry, objectInfo.index);
     }
-  }
-
-  _updateAttribute({target, size, getValue}) {
-    const {data, bufferLayout} = this;
-
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
-    for (const object of iterable) {
-      objectInfo.index++;
-      const value = getValue(object, objectInfo);
-      const numVertices = bufferLayout[objectInfo.index];
-
-      fillArray({target, source: value, start: i, count: numVertices});
-      i += numVertices * size;
-    }
-    return target;
   }
 
   _rebuildGeometry() {

@@ -1,6 +1,20 @@
-import {h3ToGeoBoundary, h3GetResolution, h3ToGeo, geoToH3, h3IsPentagon} from 'h3-js';
+import {
+  h3ToGeoBoundary,
+  h3GetResolution,
+  h3ToGeo,
+  geoToH3,
+  h3IsPentagon,
+  h3Distance,
+  edgeLength,
+  UNITS
+} from 'h3-js';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
+
+// There is a cost to updating the instanced geometries when using highPrecision: false
+// This constant defines the distance between two hexagons that leads to "significant
+// distortion." Smaller value makes the column layer more sensitive to viewport change.
+const UPDATE_THRESHOLD_KM = 10;
 
 function getHexagonCentroid(getHexagon, object, objectInfo) {
   const hexagonId = getHexagon(object, objectInfo);
@@ -54,6 +68,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       }
       this.setState({
         resolution,
+        edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
         hasPentagon,
         vertices: null
       });
@@ -71,12 +86,15 @@ export default class H3HexagonLayer extends CompositeLayer {
     if (this._shouldUseHighPrecision()) {
       return;
     }
-    const {resolution, centerHex} = this.state;
+    const {resolution, edgeLengthKM, centerHex} = this.state;
     if (resolution < 0) {
       return;
     }
     const hex = geoToH3(viewport.latitude, viewport.longitude, resolution);
-    if (centerHex === hex) {
+    if (
+      centerHex === hex ||
+      (centerHex && h3Distance(centerHex, hex) * edgeLengthKM < UPDATE_THRESHOLD_KM)
+    ) {
       return;
     }
 
@@ -100,20 +118,21 @@ export default class H3HexagonLayer extends CompositeLayer {
     return this._shouldUseHighPrecision() ? this._renderPolygonLayer() : this._renderColumnLayer();
   }
 
-  _renderPolygonLayer() {
+  _getForwardProps() {
     const {
-      data,
-      getHexagon,
-      wireframe,
       elevationScale,
       fp64,
       material,
       extruded,
+      wireframe,
       stroked,
+      filled,
+      lineWidthUnits,
       lineWidthScale,
       lineWidthMinPixels,
       lineWidthMaxPixels,
-      getColor, // Deprecate getColor Prop in the next major release
+      // TODO - Deprecate getColor Prop in v8.0
+      getColor,
       getFillColor,
       getElevation,
       getLineColor,
@@ -121,34 +140,43 @@ export default class H3HexagonLayer extends CompositeLayer {
       updateTriggers
     } = this.props;
 
+    return {
+      elevationScale,
+      fp64,
+      extruded,
+      wireframe,
+      stroked,
+      filled,
+      lineWidthUnits,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
+      material,
+      getElevation,
+      getFillColor: getColor || getFillColor,
+      getLineColor,
+      getLineWidth,
+      updateTriggers: {
+        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
+        getElevation: updateTriggers.getElevation,
+        getLineColor: updateTriggers.getLineColor,
+        getLineWidth: updateTriggers.getLineWidth
+      }
+    };
+  }
+
+  _renderPolygonLayer() {
+    const {data, getHexagon, updateTriggers} = this.props;
+
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
+    const forwardProps = this._getForwardProps();
+    forwardProps.updateTriggers.getPolygon = updateTriggers.getHexagon;
 
     return new SubLayerClass(
-      {
-        filled: true,
-        elevationScale,
-        extruded,
-        fp64,
-        wireframe,
-        stroked,
-        lineWidthScale,
-        lineWidthMinPixels,
-        lineWidthMaxPixels,
-        material,
-        getElevation,
-        getFillColor: getColor || getFillColor,
-        getLineColor,
-        getLineWidth
-      },
+      forwardProps,
       this.getSubLayerProps({
         id: 'hexagon-cell-hifi',
-        updateTriggers: {
-          getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
-          getElevation: updateTriggers.getElevation,
-          getLineColor: updateTriggers.getLineColor,
-          getLineWidth: updateTriggers.getLineWidth,
-          getPolygon: updateTriggers.getHexagon
-        }
+        updateTriggers: forwardProps.updateTriggers
       }),
       {
         data,
@@ -161,39 +189,17 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _renderColumnLayer() {
-    const {
-      data,
-      getHexagon,
-      updateTriggers,
-      coverage,
-      elevationScale,
-      fp64,
-      extruded,
-      wireframe,
-      getColor,
-      getFillColor,
-      getLineColor,
-      getElevation,
-      material
-    } = this.props;
+    const {data, getHexagon, updateTriggers} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
+    const forwardProps = this._getForwardProps();
+    forwardProps.updateTriggers.getPosition = updateTriggers.getHexagon;
 
     return new SubLayerClass(
-      {
-        coverage,
-        elevationScale,
-        extruded,
-        wireframe,
-        fp64,
-        getFillColor: getColor || getFillColor,
-        getLineColor,
-        getElevation,
-        material
-      },
+      forwardProps,
       this.getSubLayerProps({
         id: 'hexagon-cell',
-        updateTriggers
+        updateTriggers: forwardProps.updateTriggers
       }),
       {
         data,

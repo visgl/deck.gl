@@ -22,7 +22,7 @@ import {makeSpy} from '@probe.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {GridCellLayer} from '@deck.gl/layers';
 import {GridLayer} from '@deck.gl/aggregation-layers';
@@ -30,6 +30,25 @@ import {GridLayer} from '@deck.gl/aggregation-layers';
 const getColorValue = points => points.length;
 const getElevationValue = points => points.length;
 const getPosition = d => d.COORDINATES;
+
+test('GridLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: GridLayer,
+    sampleProps: {
+      data: FIXTURES.points.slice(0, 3),
+      getPosition
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate({layer}) {
+      t.ok(layer.state.layerData, 'should update state.layerData');
+    }
+  });
+
+  testLayer({Layer: GridLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
 
 test('GridLayer#renderSubLayer', t => {
   makeSpy(GridLayer.prototype, '_onGetSublayerColor');

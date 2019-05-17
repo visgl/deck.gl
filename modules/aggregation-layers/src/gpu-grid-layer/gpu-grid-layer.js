@@ -85,18 +85,39 @@ export default class GPUGridLayer extends CompositeLayer {
 
   getAggregationFlags({oldProps, props, changeFlags}) {
     let aggregationFlags = null;
-    if (
-      changeFlags.dataChanged ||
-      oldProps.gpuAggregation !== props.gpuAggregation ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
-    ) {
+    if (this.isDataChanged({oldProps, props, changeFlags})) {
       aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
     }
     if (oldProps.cellSize !== props.cellSize) {
       aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
     }
     return aggregationFlags;
+  }
+
+  isDataChanged({oldProps, props, changeFlags}) {
+    // Flags affecting aggregation data
+    if (changeFlags.dataChanged) {
+      return true;
+    }
+    if (oldProps.gpuAggregation !== props.gpuAggregation) {
+      return true;
+    }
+    if (
+      oldProps.colorAggregation !== props.colorAggregation ||
+      oldProps.elevationAggregation !== props.elevationAggregation
+    ) {
+      return true;
+    }
+    if (
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.all ||
+        changeFlags.updateTriggersChanged.getPosition ||
+        changeFlags.updateTriggersChanged.getColorWeight ||
+        changeFlags.updateTriggersChanged.getElevationWeight)
+    ) {
+      return true;
+    }
+    return false;
   }
 
   getLayerData(aggregationFlags) {

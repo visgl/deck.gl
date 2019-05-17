@@ -19,10 +19,18 @@ function shuffle(a) {
   return a;
 }
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+function getRgbFromStr(strRgb) {
+  var color = d3.color(strRgb);
+  return [color.r, color.g, color.b]
+  
+}
 
-let trsData = require('./inputs/data-original.json');
+// Set your mapbox token here
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+
+const startTime = Date.now() / 1000
+
+let trsData = require('./inputs/data2.json');
 let trIds = Object.keys(trsData);
 let colors = d3.scaleSequential()
                .domain(shuffle([...trIds]))
@@ -30,7 +38,7 @@ let colors = d3.scaleSequential()
 
 let lsoasData = require('./inputs/lsoas.json');
 
-const data = {trs: trsData, lsoas: lsoasData};
+let data = {trs: trsData, lsoas: lsoasData};
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -53,9 +61,9 @@ const material = new PhongMaterial({
 });
 
 export const INITIAL_VIEW_STATE = {
-  longitude: -74,
-  latitude: 40.72,
-  zoom: 13,
+  longitude: -2.358666776,
+  latitude: 51.35911178,
+  zoom: 14,
   pitch: 45,
   bearing: 0
 };
@@ -80,30 +88,28 @@ export class App extends Component {
 
   _animate() {
     const {
-      loopLength = 1800, // unit corresponds to the timestamp in source data
-      animationSpeed = 30 // unit time per second
+      animationSpeed = 20 // unit time per second
     } = this.props;
     const timestamp = Date.now() / 1000;
-    const loopTime = loopLength / animationSpeed;
-
+    
     this.setState({
-      time: ((timestamp % loopTime) / loopTime) * loopLength
+      time: (timestamp - startTime) * animationSpeed 
     });
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
 
   _renderLayers() {
-    const {trips = data.trs, trailLength = 180} = this.props;
+    const {trips = data.trs, trailLength = 2000} = this.props;
 
     return [
       new TripsLayer({
         id: 'trips',
         data: trips,
-        getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+        getPath: d => d.Segments,
+        getColor: [255, 0, 0],// getRgbFromStr(colors(d.Tourid)),
         opacity: 0.3,
-        widthMinPixels: 2,
-        rounded: true,
+        widthMinPixels: 20,
+        rounded: false,
         trailLength,
         currentTime: this.state.time
       })

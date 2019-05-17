@@ -132,6 +132,125 @@ test('Attribute#shaderAttributes', t => {
   t.end();
 });
 
+test('Attribute#updateBuffer', t => {
+  const TEST_PROPS = {
+    data: [
+      {id: 'A', value: 10, color: [255, 0, 0]},
+      {id: 'B', value: 20, color: [128, 128, 128, 128]},
+      {id: 'C', value: 7, color: [255, 255, 255]},
+      {id: 'D', value: 0, color: [0, 0, 0, 128]}
+    ],
+    getColor: d => d.color,
+    getValue: d => d.value
+  };
+
+  const TEST_PARAMS = [
+    {
+      title: 'standard',
+      numInstances: 4
+    },
+    {
+      title: 'variable size',
+      numInstances: 10,
+      bufferLayout: [2, 1, 4, 3]
+    }
+  ];
+
+  const TEST_CASES = [
+    {
+      title: 'standard accessor',
+      attribute: new Attribute(gl, {
+        id: 'values',
+        type: GL.FLOAT,
+        size: 1,
+        accessor: 'getValue'
+      }),
+      standard: [10, 20, 7, 0],
+      'variable size': [10, 10, 20, 7, 7, 7, 7, 0, 0, 0]
+    },
+    {
+      title: 'standard accessor with default value',
+      attribute: new Attribute(gl, {
+        id: 'colors',
+        type: GL.UNSIGNED_BYTE,
+        size: 4,
+        accessor: 'getColor',
+        defaultValue: [0, 0, 0, 255]
+      }),
+      // prettier-ignore
+      standard: [
+        255, 0, 0, 255,
+        128, 128, 128, 128,
+        255, 255, 255, 255,
+        0, 0, 0, 128
+      ],
+      // prettier-ignore
+      'variable size': [
+        255, 0, 0, 255, 255, 0, 0, 255,
+        128, 128, 128, 128,
+        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
+        0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128
+      ]
+    },
+    {
+      title: 'custom accessor',
+      attribute: new Attribute(gl, {
+        id: 'values',
+        size: 3,
+        accessor: (_, {index}) => [index, 0, 0]
+      }),
+      // prettier-ignore
+      standard: [
+        0, 0, 0,
+        1, 0, 0,
+        2, 0, 0,
+        3, 0, 0
+      ],
+      // prettier-ignore
+      'variable size': [
+        0, 0, 0, 0, 0, 0,
+        1, 0, 0,
+        2, 0, 0, 2, 0, 0, 2, 0, 0, 2, 0, 0,
+        3, 0, 0, 3, 0, 0, 3, 0, 0
+      ]
+    },
+    {
+      title: 'custom update',
+      attribute: new Attribute(gl, {
+        id: 'values',
+        size: 3,
+        update: attribute => {
+          attribute.constant = true;
+          attribute.value = new Float32Array([1, 0, 0]);
+        }
+      }),
+      standard: [1, 0, 0],
+      'variable size': [1, 0, 0]
+    }
+  ];
+
+  for (const testCase of TEST_CASES) {
+    for (const param of TEST_PARAMS) {
+      const {attribute} = testCase;
+      attribute.allocate(param.numInstances);
+      attribute.updateBuffer({
+        numInstances: param.numInstances,
+        bufferLayout: param.bufferLayout,
+        data: TEST_PROPS.data,
+        props: TEST_PROPS
+      });
+
+      t.deepEqual(
+        attribute.value,
+        testCase[param.title],
+        `${testCase.title} updates attribute buffer`
+      );
+    }
+  }
+
+  t.end();
+});
+
 // t.ok(attribute.allocate(attributeName, allocCount), 'Attribute.allocate function available');
 // t.ok(attribute._setExternalBuffer(attributeName, buffer, numInstances), 'Attribute._setExternalBuffer function available');
 // t.ok(attribute._analyzeBuffer(attributeName, numInstances), 'Attribute._analyzeBuffer function available');

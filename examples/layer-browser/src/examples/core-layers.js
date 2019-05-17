@@ -290,7 +290,7 @@ const ColumnLayerExample = {
     pickable: true,
     radius: 1000,
     opacity: 1,
-    getColor: d => [245, 166, d.value * 255, 255],
+    getFillColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000
   }
 };

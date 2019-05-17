@@ -6,6 +6,10 @@ const {fp64LowPart} = fp64Utils;
 
 const R_EARTH = 6378000;
 
+function toFinite(n) {
+  return Number.isFinite(n) ? n : 0;
+}
+
 // Takes data and aggregation params and returns aggregated data.
 export function pointToDensityGridData({
   data,
@@ -131,7 +135,12 @@ function parseGridData(data, getPosition, weightParams) {
     }
   }
 
-  const boundingBox = {xMin, xMax, yMin, yMax};
+  const boundingBox = {
+    xMin: toFinite(xMin),
+    xMax: toFinite(xMax),
+    yMin: toFinite(yMin),
+    yMax: toFinite(yMax)
+  };
   return {
     positions,
     positions64xyLow,

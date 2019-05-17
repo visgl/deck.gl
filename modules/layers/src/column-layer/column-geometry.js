@@ -1,136 +1,105 @@
+import {log} from '@deck.gl/core';
 import {Geometry, uid} from '@luma.gl/core';
 
-const INDEX_OFFSETS = {
-  x: [2, 0, 1],
-  y: [0, 1, 2],
-  z: [1, 2, 0]
-};
-
-export const FILL_MODE = 'fill';
-export const WIREFRAME_MODE = 'wireframe';
-
-export class ColumnGeometry extends Geometry {
+export default class ColumnGeometry extends Geometry {
   constructor(props = {}) {
     const {id = uid('column-geometry')} = props;
-    const {indices, attributes} = tesselateTruncatedCone(props);
+    const {indices, attributes} = tesselateColumn(props);
     super({
       ...props,
       id,
       indices,
-      attributes: {...attributes, ...props.attributes}
+      attributes
     });
   }
 }
 
-// Primitives inspired by TDL http://code.google.com/p/webglsamples/,
-// copyright 2011 Google Inc. new BSD License
-// (http://www.opensource.org/licenses/bsd-license.php).
 /* eslint-disable max-statements, complexity */
-function tesselateTruncatedCone(props) {
-  const {
-    radius,
-    height = 1,
-    nradial = 10,
-    nvertical = 10,
-    verticalAxis = 'y',
-    topCap = false,
-    bottomCap = false,
-    mode
-  } = props;
+function tesselateColumn(props) {
+  const {radius, height = 1, nradial = 10, vertices} = props;
+  log.assert(!vertices || vertices.length >= nradial);
 
-  const extra = (topCap ? 2 : 0) + (bottomCap ? 2 : 0);
-  const numVertices = (nradial + 1) * (nvertical + 1 + extra);
+  const vertsAroundEdge = nradial + 1; // loop
+  const numVertices = vertsAroundEdge * 3; // top, side top edge, side bottom edge
 
-  const slant = 0; // As Top Radius and Bottom Radius are of same values
-  const msin = Math.sin;
-  const mcos = Math.cos;
-  const mpi = Math.PI;
-  const cosSlant = mcos(slant);
-  const sinSlant = msin(slant);
-  const start = topCap ? -2 : 0;
-  const end = nvertical + (bottomCap ? 2 : 0);
-  const vertsAroundEdge = nradial + 1;
+  const stepAngle = (Math.PI * 2) / nradial;
 
-  const indices = new Uint16Array(nradial * (nvertical + extra) * 6);
-  const indexOffset = INDEX_OFFSETS[verticalAxis];
+  // Used for wireframe
+  const indices = new Uint16Array(nradial * 3 * 2); // top loop, side vertical, bottom loop
 
   const positions = new Float32Array(numVertices * 3);
   const normals = new Float32Array(numVertices * 3);
-  const texCoords = new Float32Array(numVertices * 2);
 
-  let i3 = 0;
-  let i2 = 0;
-  for (let i = start; i <= end; i++) {
-    let v = i / nvertical;
-    let y = height * v;
-    let ringRadius = radius;
+  let i = 0;
 
-    if (i < 0) {
-      y = 0;
-      v = 1;
-    } else if (i > nvertical) {
-      y = height;
-      v = 1;
-    }
+  // side tesselation: 0, 1, 2, 3, 4, 5, ...
+  //
+  // 0 - 2 - 4  ... top
+  // | / | / |
+  // 1 - 3 - 5  ... bottom
+  //
+  for (let j = 0; j < vertsAroundEdge; j++) {
+    const a = j * stepAngle;
+    const vertex = vertices && vertices[j % nradial];
+    const sin = Math.sin(a);
+    const cos = Math.cos(a);
 
-    if (i === -2 || i === nvertical + 2) {
-      ringRadius = 0;
-      v = 0;
-    }
-    y -= height / 2;
+    for (let k = 0; k < 2; k++) {
+      positions[i + 0] = vertex ? vertex[0] : cos * radius;
+      positions[i + 1] = vertex ? vertex[1] : sin * radius;
+      positions[i + 2] = (1 / 2 - k) * height;
 
-    for (let j = 0; j < vertsAroundEdge; j++) {
-      const sin = msin((j * mpi * 2) / nradial);
-      const cos = mcos((j * mpi * 2) / nradial);
+      normals[i + 0] = cos;
+      normals[i + 1] = sin;
 
-      positions[i3 + indexOffset[0]] = sin * ringRadius;
-      positions[i3 + indexOffset[1]] = y;
-      positions[i3 + indexOffset[2]] = cos * ringRadius;
-
-      normals[i3 + indexOffset[0]] = i < 0 || i > nvertical ? 0 : sin * cosSlant;
-      normals[i3 + indexOffset[1]] = i < 0 ? -1 : i > nvertical ? 1 : sinSlant;
-      normals[i3 + indexOffset[2]] = i < 0 || i > nvertical ? 0 : cos * cosSlant;
-
-      texCoords[i2 + 0] = j / nradial;
-      texCoords[i2 + 1] = v;
-
-      i2 += 2;
-      i3 += 3;
+      i += 3;
     }
   }
 
-  if (mode === WIREFRAME_MODE) {
-    for (let i = 0; i < nvertical + extra; i++) {
-      for (let j = 0; j < nradial; j++) {
-        const index = (i * nradial + j) * 6;
-        indices[index + 0] = vertsAroundEdge * (i + 0) + 0 + j;
-        indices[index + 1] = vertsAroundEdge * (i + 0) + 1 + j;
-        indices[index + 2] = vertsAroundEdge * (i + 1) + 0 + j;
-        indices[index + 3] = vertsAroundEdge * (i + 0) + 0 + j;
-        indices[index + 4] = vertsAroundEdge * (i + 1) + 1 + j;
-        indices[index + 5] = vertsAroundEdge * (i + 1) + 0 + j;
-      }
-    }
-  } else if (mode === FILL_MODE) {
-    for (let i = 0; i < nvertical + extra; i++) {
-      for (let j = 0; j < nradial; j++) {
-        const index = (i * nradial + j) * 6;
-        indices[index + 0] = vertsAroundEdge * (i + 0) + 0 + j;
-        indices[index + 1] = vertsAroundEdge * (i + 0) + 1 + j;
-        indices[index + 2] = vertsAroundEdge * (i + 1) + 1 + j;
-        indices[index + 3] = vertsAroundEdge * (i + 0) + 0 + j;
-        indices[index + 4] = vertsAroundEdge * (i + 1) + 1 + j;
-        indices[index + 5] = vertsAroundEdge * (i + 1) + 0 + j;
-      }
-    }
+  // top tesselation: 0, -1, 1, -2, 2, -3, 3, ...
+  //
+  //    0 -- 1
+  //   /      \
+  // -1        2
+  //  |        |
+  // -2        3
+  //   \      /
+  //   -3 -- 4
+  //
+  for (let j = 0; j < vertsAroundEdge; j++) {
+    const v = Math.floor(j / 2) * Math.sign((j % 2) - 0.5);
+    const a = v * stepAngle;
+    const vertex = vertices && vertices[(v + nradial) % nradial];
+    const sin = Math.sin(a);
+    const cos = Math.cos(a);
+
+    positions[i + 0] = vertex ? vertex[0] : cos * radius;
+    positions[i + 1] = vertex ? vertex[1] : sin * radius;
+    positions[i + 2] = height / 2;
+
+    normals[i + 2] = 1;
+
+    i += 3;
+  }
+
+  let index = 0;
+  for (let j = 0; j < nradial; j++) {
+    // top loop
+    indices[index++] = j * 2 + 0;
+    indices[index++] = j * 2 + 2;
+    // side vertical
+    indices[index++] = j * 2 + 0;
+    indices[index++] = j * 2 + 1;
+    // bottom loop
+    indices[index++] = j * 2 + 1;
+    indices[index++] = j * 2 + 3;
   }
 
   return {
     indices,
     attributes: {
       POSITION: {size: 3, value: positions},
-      NORMAL: {size: 3, value: normals},
-      TEXCOORD_0: {size: 2, value: texCoords}
+      NORMAL: {size: 3, value: normals}
     }
   };
 }

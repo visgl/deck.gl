@@ -101,7 +101,7 @@ export default class GridLayer extends CompositeLayer {
     // be called. e.g. if ColorValue needs to be updated, getColorValueDomain and getColorScale
     // will automatically be called
     return {
-      getColor: [
+      getFillColor: [
         {
           id: 'value',
           triggers: ['getColorValue'],
@@ -329,10 +329,10 @@ export default class GridLayer extends CompositeLayer {
         elevationScale,
         extruded,
 
-        getColor: this._onGetSublayerColor.bind(this),
+        getFillColor: this._onGetSublayerColor.bind(this),
         getElevation: this._onGetSublayerElevation.bind(this),
         transitions: transitions && {
-          getColor: transitions.getColorValue,
+          getFillColor: transitions.getColorValue,
           getElevation: transitions.getElevationValue
         }
       },
