@@ -22,7 +22,15 @@ function shuffle(a) {
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 
-let trsData = require('./inputs/data-original.json');
+// Source data CSV
+const DATA_URL = {
+  BUILDINGS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
+  TRIPS:
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
+};
+
+let trsData = require('./inputs/data.json');
 let trIds = Object.keys(trsData);
 let colors = d3.scaleSequential()
                .domain(shuffle([...trIds]))
@@ -30,7 +38,7 @@ let colors = d3.scaleSequential()
 
 let lsoasData = require('./inputs/lsoas.json');
 
-const data = {trs: trsData, lsoas: lsoasData};
+let data = {trs: trsData, lsoas: lsoasData};
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -93,14 +101,14 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {trips = data.trs, trailLength = 180} = this.props;
+    const {buildings = DATA_URL.BUILDINGS, trips = data.trs, trailLength = 180} = this.props;
 
     return [
       new TripsLayer({
         id: 'trips',
         data: trips,
-        getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+        getPath: d => d.Segments,
+        getColor: d => (d.Tourid === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
         widthMinPixels: 2,
         rounded: true,
