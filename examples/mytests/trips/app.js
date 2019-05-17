@@ -61,8 +61,8 @@ const material = new PhongMaterial({
 });
 
 export const INITIAL_VIEW_STATE = {
-  longitude: -2.358666776,
-  latitude: 51.35911178,
+  longitude: -74.20986, //-2.5893897,
+  latitude: 40.81773,// 51.4516883,
   zoom: 14,
   pitch: 45,
   bearing: 0
@@ -88,7 +88,7 @@ export class App extends Component {
 
   _animate() {
     const {
-      animationSpeed = 20 // unit time per second
+      animationSpeed = 300 // unit time per second
     } = this.props;
     const timestamp = Date.now() / 1000;
     
@@ -99,16 +99,16 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {trips = data.trs, trailLength = 2000} = this.props;
+    const {trips = data.trs, trailLength = 1800} = this.props;
 
     return [
       new TripsLayer({
         id: 'trips',
         data: trips,
         getPath: d => d.Segments,
-        getColor: [255, 0, 0],// getRgbFromStr(colors(d.Tourid)),
-        opacity: 0.3,
-        widthMinPixels: 20,
+        getColor: [255, 0, 0], // d => getRgbFromStr(colors(d.Tourid)),
+        opacity: 1.0,
+        widthMinPixels: 2,
         rounded: false,
         trailLength,
         currentTime: this.state.time
