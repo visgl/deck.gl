@@ -57,7 +57,7 @@ const ScenegraphLayerExample = {
     id: 'scenegraph-layer',
     data: dataSamples.points,
     pickable: true,
-    sizeScale: 1,
+    sizeScale: 50,
     scenegraph:
       'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
     getPosition: d => d.COORDINATES,
