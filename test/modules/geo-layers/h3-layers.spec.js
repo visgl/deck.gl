@@ -34,17 +34,13 @@ test('H3HexagonLayer', t => {
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer, subLayers}) => {
+    onAfterUpdate: ({layer, subLayer}) => {
+      t.is(subLayer.props.stroked, layer.props.stroked, 'stroked prop is forwarded');
+
       if (layer._shouldUseHighPrecision()) {
-        t.ok(
-          subLayers.find(l => l.constructor.layerName === 'PolygonLayer'),
-          'renders polygon layer'
-        );
+        t.ok(subLayer.constructor.layerName, 'PolygonLayer', 'renders polygon layer');
       } else {
-        t.ok(
-          subLayers.find(l => l.constructor.layerName === 'ColumnLayer'),
-          'renders column layer'
-        );
+        t.ok(subLayer.constructor.layerName, 'ColumnLayer', 'renders column layer');
       }
     }
   });

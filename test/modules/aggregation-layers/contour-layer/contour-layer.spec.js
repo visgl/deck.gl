@@ -22,12 +22,31 @@ import {makeSpy} from '@probe.gl/test-utils';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
+import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {LineLayer, SolidPolygonLayer} from '@deck.gl/layers';
 import {ContourLayer} from '@deck.gl/aggregation-layers';
 
 const getPosition = d => d.COORDINATES;
+
+test('ContourLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: ContourLayer,
+    sampleProps: {
+      data: FIXTURES.points.slice(0, 3),
+      getPosition
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate({layer}) {
+      t.ok(layer.state.countsData, 'should update state.countsData');
+    }
+  });
+
+  testLayer({Layer: ContourLayer, testCases, onError: t.notOk});
+
+  t.end();
+});
 
 test('ContourLayer#renderSubLayer', t => {
   makeSpy(ContourLayer.prototype, '_onGetSublayerColor');

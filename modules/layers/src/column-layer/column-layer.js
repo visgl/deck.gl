@@ -18,17 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, log, createIterable} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, fp64, PhongMaterial} from '@luma.gl/core';
-import {ColumnGeometry, FILL_MODE, WIREFRAME_MODE} from './column-geometry';
+import ColumnGeometry from './column-geometry';
 const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
 import vs from './column-layer-vertex.glsl';
 import fs from './column-layer-fragment.glsl';
 
-const DEFAULT_COLOR = [255, 0, 255, 255];
+const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   diskResolution: {type: 'number', min: 4, value: 20},
@@ -38,13 +38,22 @@ const defaultProps = {
   offset: {type: 'array', value: [0, 0]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   elevationScale: {type: 'number', min: 0, value: 1},
+
+  lineWidthUnits: 'meters',
+  lineWidthScale: 1,
+  lineWidthMinPixels: 0,
+  lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
+
   extruded: true,
   fp64: false,
   wireframe: false,
   filled: true,
+  stroked: false,
+
   getPosition: {type: 'accessor', value: x => x.position},
   getFillColor: {type: 'accessor', value: DEFAULT_COLOR},
   getLineColor: {type: 'accessor', value: DEFAULT_COLOR},
+  getLineWidth: {type: 'accessor', value: 1},
   getElevation: {type: 'accessor', value: 1000},
   material: defaultMaterial,
   getColor: {deprecatedFor: ['getFillColor', 'getLineColor']}
@@ -92,6 +101,11 @@ export default class ColumnLayer extends Layer {
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR
+      },
+      instanceStrokeWidths: {
+        size: 1,
+        accessor: 'getLineWidth',
+        transition: true
       }
     });
     /* eslint-enable max-len */
@@ -100,129 +114,138 @@ export default class ColumnLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const regenerateModels =
-      props.fp64 !== oldProps.fp64 ||
-      props.diskResolution !== oldProps.diskResolution ||
-      props.filled !== oldProps.filled ||
-      props.wireframe !== oldProps.wireframe;
+    const regenerateModels = props.fp64 !== oldProps.fp64;
 
     if (regenerateModels) {
       const {gl} = this.context;
-      if (this.state.models) {
-        this.state.models.forEach(model => model.delete());
+      if (this.state.model) {
+        this.state.model.delete();
       }
-      this.setState(this._getModels(gl));
+      this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
     }
 
-    if (regenerateModels || props.vertices !== oldProps.vertices) {
-      this._updateVertices(props.vertices);
+    if (
+      regenerateModels ||
+      props.diskResolution !== oldProps.diskResolution ||
+      props.vertices !== oldProps.vertices
+    ) {
+      this._updateGeometry(props);
     }
   }
 
-  getGeometry(diskResolution, mode = FILL_MODE) {
-    return new ColumnGeometry({
+  getGeometry(diskResolution, vertices) {
+    const geometry = new ColumnGeometry({
       radius: 1,
-      topCap: false,
-      bottomCap: mode === FILL_MODE,
-      mode,
-      drawMode: mode === FILL_MODE ? GL.TRIANGLES : GL.LINES,
       height: 2,
-      verticalAxis: 'z',
-      nradial: diskResolution,
-      nvertical: 1
+      vertices,
+      nradial: diskResolution
     });
-  }
 
-  _getModels(gl) {
-    const {id, filled, wireframe, diskResolution} = this.props;
-    let fillModel;
-    let wireframeModel;
-
-    if (filled) {
-      fillModel = new Model(
-        gl,
-        Object.assign({}, this.getShaders(), {
-          id: `${id}-${FILL_MODE}`,
-          uniforms: {isWireframe: false},
-          geometry: this.getGeometry(diskResolution, FILL_MODE),
-          isInstanced: true,
-          shaderCache: this.context.shaderCache
-        })
-      );
-    }
-    if (wireframe) {
-      wireframeModel = new Model(
-        gl,
-        Object.assign({}, this.getShaders(), {
-          id: `${id}-${WIREFRAME_MODE}`,
-          uniforms: {isWireframe: true},
-          geometry: this.getGeometry(diskResolution, WIREFRAME_MODE),
-          isInstanced: true,
-          shaderCache: this.context.shaderCache
-        })
-      );
-    }
-
-    return {
-      models: [fillModel, wireframeModel].filter(Boolean),
-      fillModel,
-      wireframeModel
-    };
-  }
-
-  _updateVertices(vertices) {
-    if (!vertices) {
-      return;
-    }
-    const {diskResolution} = this.props;
-    log.assert(vertices.length >= diskResolution);
-    const {fillModel, wireframeModel} = this.state;
-
-    if (fillModel) {
-      const fillGeometry = this.getGeometry(diskResolution, FILL_MODE);
-      this.updateGeometry(fillGeometry, vertices, diskResolution);
-      fillModel.setProps({geometry: fillGeometry});
-    }
-
-    if (wireframeModel) {
-      const wireframeGeometry = this.getGeometry(diskResolution, WIREFRAME_MODE);
-      this.updateGeometry(wireframeGeometry, vertices, diskResolution);
-      wireframeModel.setProps({geometry: wireframeGeometry});
-    }
-  }
-
-  updateGeometry(geometry, vertices, diskResolution) {
-    const positions = geometry.attributes.POSITION;
-    let i = 0;
-    for (let loopIndex = 0; loopIndex < 3; loopIndex++) {
-      for (let j = 0; j <= diskResolution; j++) {
-        const p = vertices[j] || vertices[0]; // auto close loop
-        // replace x and y in geometry
-        positions.value[i++] = p[0];
-        positions.value[i++] = p[1];
-        i++;
+    let meanVertexDistance = 0;
+    if (vertices) {
+      for (let i = 0; i < diskResolution; i++) {
+        const p = vertices[i];
+        const d = Math.sqrt(p[0] * p[0] + p[1] * p[1]);
+        meanVertexDistance += d / diskResolution;
       }
+    } else {
+      meanVertexDistance = 1;
     }
+    this.setState({
+      edgeDistance: Math.cos(Math.PI / diskResolution) * meanVertexDistance
+    });
+
+    return geometry;
+  }
+
+  _getModel(gl) {
+    return new Model(
+      gl,
+      Object.assign({}, this.getShaders(), {
+        id: this.props.id,
+        isInstanced: true,
+        shaderCache: this.context.shaderCache
+      })
+    );
+  }
+
+  _updateGeometry({diskResolution, vertices}) {
+    const geometry = this.getGeometry(diskResolution, vertices);
+
+    this.setState({
+      fillVertexCount: geometry.attributes.POSITION.value.length / 3,
+      wireframeVertexCount: geometry.indices.value.length
+    });
+
+    this.state.model.setProps({geometry});
   }
 
   draw({uniforms}) {
-    const {elevationScale, extruded, offset, coverage, radius, angle} = this.props;
-    const {models} = this.state;
-    const renderUniforms = Object.assign({}, uniforms, {
-      radius,
-      angle: (angle / 180) * Math.PI,
-      offset,
-      extruded,
-      coverage,
-      elevationScale
-    });
-    const numInstances = this.getNumInstances();
+    const {viewport} = this.context;
+    const {
+      lineWidthUnits,
+      lineWidthScale,
+      lineWidthMinPixels,
+      lineWidthMaxPixels,
 
-    for (const model of models) {
-      model.setInstanceCount(numInstances);
-      model.setUniforms(renderUniforms);
-      model.draw();
+      elevationScale,
+      extruded,
+      filled,
+      stroked,
+      wireframe,
+      offset,
+      coverage,
+      radius,
+      angle
+    } = this.props;
+    const {model, fillVertexCount, wireframeVertexCount, edgeDistance} = this.state;
+
+    const widthMultiplier =
+      lineWidthUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1;
+
+    model.setUniforms(
+      Object.assign({}, uniforms, {
+        radius,
+        angle: (angle / 180) * Math.PI,
+        offset,
+        extruded,
+        coverage,
+        elevationScale,
+        edgeDistance,
+        widthScale: lineWidthScale * widthMultiplier,
+        widthMinPixels: lineWidthMinPixels,
+        widthMaxPixels: lineWidthMaxPixels
+      })
+    );
+
+    // When drawing 3d: draw wireframe first so it doesn't get occluded by depth test
+    if (extruded && wireframe) {
+      model.setProps({isIndexed: true});
+      model
+        .setVertexCount(wireframeVertexCount)
+        .setDrawMode(GL.LINES)
+        .setUniforms({isStroke: true})
+        .draw();
+    }
+    if (filled) {
+      model.setProps({isIndexed: false});
+      model
+        .setVertexCount(fillVertexCount)
+        .setDrawMode(GL.TRIANGLE_STRIP)
+        .setUniforms({isStroke: false})
+        .draw();
+    }
+    // When drawing 2d: draw fill before stroke so that the outline is always on top
+    if (!extruded && stroked) {
+      model.setProps({isIndexed: false});
+      // The width of the stroke is achieved by flattening the side of the cylinder.
+      // Skip the last 1/3 of the vertices which is the top.
+      model
+        .setVertexCount((fillVertexCount * 2) / 3)
+        .setDrawMode(GL.TRIANGLE_STRIP)
+        .setUniforms({isStroke: true})
+        .draw();
     }
   }
 
