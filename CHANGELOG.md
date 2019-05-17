@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.8] - May 17 2019
+
+- Fix view state handling in mapbox integration (#3113)
+
 #### deck.gl [v7.0.7] - May 16 2019
 
 - Optimize bundle size (#3092)
