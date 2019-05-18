@@ -1,36 +1,110 @@
 export default `\
+#if (__VERSION__ < 300)
+  #define _attribute attribute
+  #define _varying varying
+#else
+  #define _attribute in
+#define _varying out
+#endif
+
 // Instance attributes
-attribute vec3 instancePositions;
-attribute vec2 instancePositions64xy;
-attribute vec4 instanceColors;
-attribute vec3 instancePickingColors;
-attribute mat3 instanceModelMatrix;
-attribute vec3 instanceTranslation;
+_attribute vec3 instancePositions;
+_attribute vec2 instancePositions64xy;
+_attribute vec4 instanceColors;
+_attribute vec3 instancePickingColors;
+_attribute mat3 instanceModelMatrix;
+_attribute vec3 instanceTranslation;
 
 // Uniforms
 uniform float sizeScale;
 uniform mat4 sceneModelMatrix;
 
 // Attributes
-attribute vec4 POSITION;
+_attribute vec4 POSITION;
 
 #ifdef HAS_UV
-  attribute vec2 TEXCOORD_0;
-  varying vec2 vTEXCOORD_0;
+  _attribute vec2 TEXCOORD_0;
 #endif
-varying vec4 vColor;
 
-void main(void) {
+#if defined(HAS_NORMALS) && defined(MODULE_LIGHTS)
+  _attribute vec4 NORMAL;
+#endif
+
+#if defined(HAS_TANGENTS) && defined(MODULE_PBR)
+  _attribute vec4 TANGENT;
+#endif
+
+// Varying
+// MODULE_PBR contains all the varying definitions needed
+#ifndef MODULE_PBR
+  _varying vec4 vColor;
+
   #ifdef HAS_UV
+    _varying vec2 vTEXCOORD_0;
+  #endif
+
+  #if defined(HAS_NORMALS) && defined(MODULE_PHONG)
+    _varying vec3 vNormal;
+    _varying vec3 vPosition;
+  #endif
+#endif
+
+// Utils
+#if defined(HAS_NORMALS) && defined(MODULE_LIGHTS)
+  vec3 getProjectedNormal() {
+    return project_normal(instanceModelMatrix * (sceneModelMatrix * NORMAL).xyz);
+  }
+#endif
+
+
+// Main
+void main(void) {
+  #if defined(HAS_UV) && !defined(MODULE_PBR)
     vTEXCOORD_0 = TEXCOORD_0;
   #endif
-  vColor = instanceColors;
 
   vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
   pos = project_size(pos);
 
   vec4 position_commonspace;
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
+
+  #ifndef MODULE_PBR
+    #if defined(HAS_NORMALS) && defined(MODULE_GOURAUD)
+      vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, position_commonspace.xyz, getProjectedNormal());
+      vColor = vec4(lightColor, instanceColors.a) / 255.0;
+    #else
+      vColor = instanceColors / 255.0;
+    #endif
+
+    #if defined(HAS_NORMALS) && defined(MODULE_PHONG)
+      vNormal = getProjectedNormal();
+      vPosition = position_commonspace.xyz;
+    #endif
+  #else
+    // set PBR data
+    pbr_vPosition = position_commonspace.xyz;
+
+    #ifdef HAS_NORMALS
+      #ifdef HAS_TANGENTS___TODO_FIX_ME___
+        vec3 normalW = normalize(vec3(u_NormalMatrix * vec4(NORMAL.xyz, 0.0)));
+        vec3 tangentW = normalize(vec3(u_ModelMatrix * vec4(TANGENT.xyz, 0.0)));
+        vec3 bitangentW = cross(normalW, tangentW) * TANGENT.w;
+        pbr_vTBN = mat3(tangentW, bitangentW, normalW);
+      #else // HAS_TANGENTS != 1
+        // pbr_vNormal = normalize(vec3(u_ModelMatrix * vec4(NORMAL.xyz, 0.0)));
+        // TODO: Check this
+        pbr_vNormal = getProjectedNormal();
+      #endif
+    #endif
+
+    #ifdef HAS_UV
+      pbr_vUV = TEXCOORD_0;
+    #else
+      pbr_vUV = vec2(0., 0.);
+    #endif
+  #endif
+
   picking_setPickingColor(instancePickingColors);
 }
 `;

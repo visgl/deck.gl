@@ -113,6 +113,21 @@ Only triggers when scenegraph property changes.
 Return `null` to disable animation or provide your custom animator.
 Only triggers when scenegraph property changes.
 
+##### `_lighting` (String, optional)
+
+- Default: `flat`
+
+**Experimental** lighting support, can be:
+- `flat`: Fastest: No light calculation. Works well with textured objects.
+- `gouraud`: Very Fast: Per-vertex lighting.
+- `phong` Fast: Per-pixel lighting.
+- `pbr` Slow: Uses `glTF` PBR model. Works well with `glTF` models.
+
+Only read when scenegraph property changes.
+Uses [global light configuration](../developer-guide/using-lighting.md) from deck.
+For `gouraud` and `phong` you can provide `material` property. `pbr` uses material
+specified in the loaded `glTF` model.
+
 
 ### Data Accessors
 

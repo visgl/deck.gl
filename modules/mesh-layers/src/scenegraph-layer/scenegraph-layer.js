@@ -21,7 +21,7 @@
 /* global fetch */
 
 import {Layer} from '@deck.gl/core';
-import {fp64, ScenegraphNode, log} from '@luma.gl/core';
+import {fp64, ScenegraphNode, PhongMaterial, isWebGL2, pbr, log} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -32,6 +32,7 @@ import fs from './scenegraph-layer-fragment.glsl';
 const {fp64LowPart} = fp64;
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
+const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
@@ -50,6 +51,10 @@ const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
+
+  // flat, gouraud, phong, pbr
+  _lighting: 'flat',
+  material: defaultMaterial,
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -179,14 +184,32 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
+  addVersionToShader(source) {
+    if (isWebGL2(this.context.gl)) {
+      return `#version 300 es\n${source}`;
+    }
+
+    return source;
+  }
+
   getLoadOptions() {
+    const modules = ['project32', 'picking'];
+
+    if (this.props._lighting === 'gouraud') {
+      modules.push('gouraud-lighting');
+    } else if (this.props._lighting === 'phong') {
+      modules.push('phong-lighting');
+    } else if (this.props._lighting === 'pbr') {
+      modules.push(pbr);
+    }
+
     return {
       gl: this.context.gl,
       waitForFullLoad: true,
       modelOptions: {
-        vs,
-        fs,
-        modules: ['project32', 'picking'],
+        vs: this.addVersionToShader(vs),
+        fs: this.addVersionToShader(fs),
+        modules,
         isInstanced: true
       }
     };

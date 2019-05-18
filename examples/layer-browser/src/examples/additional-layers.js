@@ -63,7 +63,8 @@ const ScenegraphLayerExample = {
     getPosition: d => d.COORDINATES,
     getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
     getTranslation: d => [0, 0, Math.random() * 10000],
-    getScale: [1, 1, 1]
+    getScale: [1, 1, 1],
+    _lighting: 'flat'
   }
 };
 
