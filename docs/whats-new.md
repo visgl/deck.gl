@@ -2,6 +2,15 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v7.1
+
+Release Date: 2019
+
+### ScenegraphLayer
+
+- Added `getScene` and `getAnimator` to allow more flexibility when loading models.
+- Experimental `_lighting` property for PBR lighting.
+
 ## deck.gl v7.0
 
 Release Date: April 19, 2019

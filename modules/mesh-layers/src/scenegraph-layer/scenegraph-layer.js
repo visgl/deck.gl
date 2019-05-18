@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 /* global fetch */
-
 import {Layer, createIterable} from '@deck.gl/core';
-import {fp64, ScenegraphNode, log} from '@luma.gl/core';
+import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -50,6 +49,11 @@ const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
+
+  // flat or pbr
+  _lighting: 'flat',
+  // _lighting must be pbr for this to work
+  _imageBasedLightingEnvironment: null,
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -183,14 +187,39 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
+  addVersionToShader(source) {
+    if (isWebGL2(this.context.gl)) {
+      return `#version 300 es\n${source}`;
+    }
+
+    return source;
+  }
+
   getLoadOptions() {
+    const modules = ['project32', 'picking'];
+    const {_lighting, _imageBasedLightingEnvironment} = this.props;
+
+    if (_lighting === 'pbr') {
+      modules.push(pbr);
+    }
+
+    let env = null;
+    if (_imageBasedLightingEnvironment) {
+      if (typeof _imageBasedLightingEnvironment === 'function') {
+        env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
+      } else {
+        env = _imageBasedLightingEnvironment;
+      }
+    }
+
     return {
       gl: this.context.gl,
       waitForFullLoad: true,
+      imageBasedLightingEnvironment: env,
       modelOptions: {
-        vs,
-        fs,
-        modules: ['project32', 'picking'],
+        vs: this.addVersionToShader(vs),
+        fs: this.addVersionToShader(fs),
+        modules,
         isInstanced: true
       }
     };
@@ -224,7 +253,9 @@ export default class ScenegraphLayer extends Layer {
         parameters,
         uniforms: {
           sizeScale,
-          sceneModelMatrix: worldMatrix
+          sceneModelMatrix: worldMatrix,
+          // Needed for PBR (TODO: find better way to get it)
+          u_Camera: model.model.program.uniforms.project_uCameraPosition
         }
       });
     });
