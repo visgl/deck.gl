@@ -247,7 +247,7 @@ export default class Attribute extends BaseAttribute {
     this._updateShaderAttributes();
 
     this.clearNeedsUpdate();
-    this.setNeedsRedraw(true);
+    state.needsRedraw = true;
 
     return updated;
   }
@@ -275,7 +275,7 @@ export default class Attribute extends BaseAttribute {
     if (hasChanged) {
       this.update({constant: true, value});
     }
-    this.setNeedsRedraw(state.needsUpdate || hasChanged);
+    state.needsRedraw = state.needsUpdate || hasChanged;
     this.clearNeedsUpdate();
     state.isExternalBuffer = true;
     this._updateShaderAttributes();
