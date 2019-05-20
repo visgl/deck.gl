@@ -251,6 +251,110 @@ test('Attribute#updateBuffer', t => {
   t.end();
 });
 
+test('Attribute#updateBuffer - partial', t => {
+  let accessorCalled = 0;
+
+  const TEST_PROPS = {
+    data: [{id: 'A'}, {id: 'B'}, {id: 'C'}, {id: 'D'}],
+    // This accessor checks two things: how many times an accessor is called,
+    // and whether `index` is consistently populated for each object
+    getValue: (d, {index}) => accessorCalled++ + index * 10
+  };
+
+  const ATTRIBUTE_1 = new Attribute(gl, {
+    id: 'values-1',
+    type: GL.FLOAT,
+    size: 1,
+    accessor: 'getValue'
+  });
+
+  const ATTRIBUTE_2 = new Attribute(gl, {
+    id: 'values-2',
+    type: GL.FLOAT,
+    size: 1,
+    accessor: 'getValue'
+  });
+
+  const TEST_CASES = [
+    {
+      title: 'full update',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4
+      },
+      value: [0, 11, 22, 33]
+    },
+    {
+      title: 'update with startRow only',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4,
+        startRow: 3
+      },
+      value: [0, 11, 22, 30]
+    },
+    {
+      title: 'update with partial range',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4,
+        startRow: 1,
+        endRow: 3
+      },
+      value: [0, 10, 21, 30]
+    },
+    {
+      title: 'full update - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3]
+      },
+      value: [0, 0, 11, 22, 22, 22, 22, 33, 33, 33]
+    },
+    {
+      title: 'update with startRow only - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3],
+        startRow: 3
+      },
+      value: [0, 0, 11, 22, 22, 22, 22, 30, 30, 30]
+    },
+    {
+      title: 'update with partial range - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3],
+        startRow: 1,
+        endRow: 3
+      },
+      value: [0, 0, 10, 21, 21, 21, 21, 30, 30, 30]
+    }
+  ];
+
+  for (const testCase of TEST_CASES) {
+    const {attribute} = testCase;
+    attribute.setNeedsUpdate(true);
+
+    // reset stats
+    accessorCalled = 0;
+
+    attribute.allocate(testCase.params.numInstances);
+    attribute.updateBuffer({
+      ...testCase.params,
+      data: TEST_PROPS.data,
+      props: TEST_PROPS
+    });
+
+    t.deepEqual(attribute.value, testCase.value, `${testCase.title} yields correct result`);
+  }
+
+  t.end();
+});
+
 // t.ok(attribute.allocate(attributeName, allocCount), 'Attribute.allocate function available');
 // t.ok(attribute._setExternalBuffer(attributeName, buffer, numInstances), 'Attribute._setExternalBuffer function available');
 // t.ok(attribute._analyzeBuffer(attributeName, numInstances), 'Attribute._analyzeBuffer function available');
