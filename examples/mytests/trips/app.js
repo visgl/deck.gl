@@ -30,7 +30,7 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTB
 
 const startTime = Date.now() / 1000
 
-let trsData = require('./inputs/data.json');
+let trsData = require('./inputs/data-example.json');
 let trIds = Object.keys(trsData);
 let colors = d3.scaleSequential()
                .domain(shuffle([...trIds]))
@@ -61,9 +61,9 @@ const material = new PhongMaterial({
 });
 
 export const INITIAL_VIEW_STATE = {
-  longitude: -2.730, //-2.5893897,
-  latitude: 51.468,// 51.4516883,
-  zoom: 11,
+  longitude: -2.3645695, //-2.5893897,
+  latitude: 51.3801056,// 51.4516883,
+  zoom: 13,
   pitch: 45,
   bearing: 0
 };
@@ -88,7 +88,7 @@ export class App extends Component {
 
   _animate() {
     const {
-      animationSpeed = 300 // unit time per second
+      animationSpeed = 1000 // unit time per second
     } = this.props;
     const timestamp = Date.now() / 1000;
     
@@ -99,7 +99,7 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {trips = data.trs, trailLength = 1800} = this.props;
+    const {trips = data.trs, trailLength = 16000} = this.props;
 
     return [
       new TripsLayer({
@@ -108,7 +108,7 @@ export class App extends Component {
         getPath: d => d.Segments,
         getColor: [255, 0, 0], // d => getRgbFromStr(colors(d.Tourid)),
         opacity: 1.0,
-        widthMinPixels: 2,
+        widthMinPixels: 4,
         rounded: false,
         trailLength,
         currentTime: this.state.time,

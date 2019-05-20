@@ -38,8 +38,8 @@ varying float vTime;
       'vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);': 'pos.z = 0.0;',
       // Apply a small shift to battle z-fighting
       'vs:#main-end': `\
-float shiftZ = mod(instanceEndPositions.z, trailLength) * 1e-4;
-gl_Position.z += shiftZ;
+//float shiftZ = mod(instanceEndPositions.z, trailLength) * 1e-4;
+//gl_Position.z += shiftZ;
 vTime = instanceStartPositions.z + (instanceEndPositions.z - instanceStartPositions.z) * vPathPosition.y / vPathLength;
 `,
       'fs:#decl': `\
