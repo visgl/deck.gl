@@ -184,7 +184,7 @@ export default class Attribute extends BaseAttribute {
     return false;
   }
 
-  updateBuffer({numInstances, bufferLayout, data, startIndex, endIndex, props, context}) {
+  updateBuffer({numInstances, bufferLayout, data, startRow, endRow, props, context}) {
     if (!this.needsUpdate()) {
       return false;
     }
@@ -196,7 +196,7 @@ export default class Attribute extends BaseAttribute {
     let updated = true;
     if (update) {
       // Custom updater - typically for non-instanced layers
-      update.call(context, this, {data, startIndex, endIndex, props, numInstances, bufferLayout});
+      update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
         // Full update
         this.update({
@@ -204,10 +204,13 @@ export default class Attribute extends BaseAttribute {
           constant: this.constant
         });
       } else {
-        const startOffset = Number.isFinite(startIndex) ? this._getVertexOffset(startIndex) : 0;
-        const endOffset = Number.isFinite(endIndex)
-          ? this._getVertexOffset(endIndex)
-          : numInstances * this.size;
+        const startOffset = Number.isFinite(startRow)
+          ? this._getVertexOffset(startRow, this.bufferLayout)
+          : 0;
+        const endOffset =
+          Number.isFinite(endRow) || !Number.isFinite(numInstances)
+            ? this._getVertexOffset(endRow, this.bufferLayout)
+            : numInstances * this.size;
 
         // Only update the changed part of the attribute
         this.buffer.subData({
@@ -301,11 +304,20 @@ export default class Attribute extends BaseAttribute {
   }
 
   // PRIVATE HELPER METHODS
-  _getVertexOffset(index, bufferLayout = this.bufferLayout) {
+  _getVertexOffset(row, bufferLayout) {
     if (bufferLayout) {
-      return bufferLayout.reduce((sum, cur, idx) => (idx < index ? sum + cur : sum), 0) * this.size;
+      let offset = 0;
+      let index = 0;
+      for (const geometrySize of bufferLayout) {
+        if (index >= row) {
+          break;
+        }
+        offset += geometrySize * this.size;
+        index++;
+      }
+      return offset;
     }
-    return index * this.size;
+    return row * this.size;
   }
 
   /* check user supplied values and apply fallback */
@@ -341,7 +353,7 @@ export default class Attribute extends BaseAttribute {
     return true;
   }
 
-  _standardAccessor(attribute, {data, startIndex, endIndex, props, numInstances, bufferLayout}) {
+  _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, bufferLayout}) {
     const state = attribute.userData;
 
     const {accessor} = state;
@@ -350,8 +362,8 @@ export default class Attribute extends BaseAttribute {
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute._getVertexOffset(startIndex || 0, bufferLayout);
-    const {iterable, objectInfo} = createIterable(data, startIndex, endIndex);
+    let i = attribute._getVertexOffset(startRow || 0, bufferLayout);
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
 

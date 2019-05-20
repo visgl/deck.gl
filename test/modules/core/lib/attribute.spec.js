@@ -285,21 +285,21 @@ test('Attribute#updateBuffer - partial', t => {
       value: [0, 11, 22, 33]
     },
     {
-      title: 'update with startIndex only',
+      title: 'update with startRow only',
       attribute: ATTRIBUTE_1,
       params: {
         numInstances: 4,
-        startIndex: 3
+        startRow: 3
       },
       value: [0, 11, 22, 30]
     },
     {
-      title: 'update with index range',
+      title: 'update with partial range',
       attribute: ATTRIBUTE_1,
       params: {
         numInstances: 4,
-        startIndex: 1,
-        endIndex: 3
+        startRow: 1,
+        endRow: 3
       },
       value: [0, 10, 21, 30]
     },
@@ -313,23 +313,23 @@ test('Attribute#updateBuffer - partial', t => {
       value: [0, 0, 11, 22, 22, 22, 22, 33, 33, 33]
     },
     {
-      title: 'update with startIndex only - variable size',
+      title: 'update with startRow only - variable size',
       attribute: ATTRIBUTE_2,
       params: {
         numInstances: 10,
         bufferLayout: [2, 1, 4, 3],
-        startIndex: 3
+        startRow: 3
       },
       value: [0, 0, 11, 22, 22, 22, 22, 30, 30, 30]
     },
     {
-      title: 'update with index range - variable size',
+      title: 'update with partial range - variable size',
       attribute: ATTRIBUTE_2,
       params: {
         numInstances: 10,
         bufferLayout: [2, 1, 4, 3],
-        startIndex: 1,
-        endIndex: 3
+        startRow: 1,
+        endRow: 3
       },
       value: [0, 0, 10, 21, 21, 21, 21, 30, 30, 30]
     }

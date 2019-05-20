@@ -217,8 +217,6 @@ export default class AttributeManager {
     numInstances,
     bufferLayout,
     transitions,
-    startIndex,
-    endIndex,
     props = {},
     buffers = {},
     context = {}
@@ -245,8 +243,6 @@ export default class AttributeManager {
           numInstances,
           bufferLayout,
           data,
-          startIndex,
-          endIndex,
           props,
           context
         });
