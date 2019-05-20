@@ -173,11 +173,11 @@ export default class ArcLayer extends Layer {
     return model;
   }
 
-  calculateInstancePositions(attribute) {
+  calculateInstancePositions(attribute, {startRow, endRow}) {
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
@@ -189,7 +189,7 @@ export default class ArcLayer extends Layer {
     }
   }
 
-  calculateInstancePositions64Low(attribute) {
+  calculateInstancePositions64Low(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
@@ -199,9 +199,9 @@ export default class ArcLayer extends Layer {
     }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);

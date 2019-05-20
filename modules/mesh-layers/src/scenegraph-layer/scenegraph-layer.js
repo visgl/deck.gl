@@ -20,7 +20,7 @@
 
 /* global fetch */
 
-import {Layer} from '@deck.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
 import {fp64, ScenegraphNode, log} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 
@@ -85,7 +85,7 @@ export default class ScenegraphLayer extends Layer {
     });
   }
 
-  calculateInstancePositions64xyLow(attribute) {
+  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
@@ -95,10 +95,12 @@ export default class ScenegraphLayer extends Layer {
     }
 
     const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const point of iterable) {
+      objectInfo.index++;
+      const position = getPosition(point, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
