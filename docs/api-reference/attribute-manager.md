@@ -134,8 +134,6 @@ Parameters:
 * `buffers` (Object) - pre-allocated buffers
 * `props` (Object) - passed to updaters
 * `context` (Object) - Used as "this" context for updaters
-* `startIndex` (Number) - start index in the data object, if only a subset of data needs to be considered in the update
-* `endIndex` (Number) - end index in the data object, if only a subset of data needs to be considered in the update
 
 Notes:
 
