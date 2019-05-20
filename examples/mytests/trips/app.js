@@ -30,7 +30,7 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTB
 
 const startTime = Date.now() / 1000
 
-let trsData = require('./inputs/data2.json');
+let trsData = require('./inputs/data.json');
 let trIds = Object.keys(trsData);
 let colors = d3.scaleSequential()
                .domain(shuffle([...trIds]))
@@ -61,9 +61,9 @@ const material = new PhongMaterial({
 });
 
 export const INITIAL_VIEW_STATE = {
-  longitude: -74.20986, //-2.5893897,
-  latitude: 40.81773,// 51.4516883,
-  zoom: 14,
+  longitude: -2.730, //-2.5893897,
+  latitude: 51.468,// 51.4516883,
+  zoom: 11,
   pitch: 45,
   bearing: 0
 };
@@ -111,7 +111,10 @@ export class App extends Component {
         widthMinPixels: 2,
         rounded: false,
         trailLength,
-        currentTime: this.state.time
+        currentTime: this.state.time,
+        pickable: true,
+        autoHighlight: true,
+        highlightColor: [0, 255, 255]
       })
     ];
   }
