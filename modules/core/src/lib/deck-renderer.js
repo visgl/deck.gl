@@ -103,10 +103,12 @@ export default class DeckRenderer {
 
   finalize() {
     if (this.screenBuffer) {
-      this.offscreenBuffer.delete();
+      this.screenBuffer.delete();
+      this.screenBuffer = null;
     }
     if (this.offscreenBuffer) {
       this.offscreenBuffer.delete();
+      this.offscreenBuffer = null;
     }
   }
 
