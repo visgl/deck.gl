@@ -14,9 +14,10 @@ export default class ScreenPass extends Pass {
     withParameters(gl, {framebuffer: params.outputBuffer}, () => this._renderPass(gl, params));
   }
 
-  finalize() {
+  cleanup() {
     if (this.props && this.props.model) {
       this.props.model.delete();
+      this.props.model = null;
     }
   }
 

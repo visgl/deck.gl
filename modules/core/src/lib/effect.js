@@ -10,5 +10,5 @@ export default class Effect {
 
   getParameters() {}
 
-  finalize() {}
+  cleanup() {}
 }

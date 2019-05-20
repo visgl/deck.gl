@@ -36,11 +36,12 @@ export default class PostProcessEffect extends Effect {
     };
   }
 
-  finalize() {
+  cleanup() {
     if (this.passes) {
       for (const pass of this.passes) {
-        pass.finalize();
+        pass.cleanup();
       }
+      this.passes = null;
     }
   }
 }
