@@ -83,8 +83,8 @@ export default class Tesselator {
     this._rebuildGeometry();
   }
 
-  updatePartialGeometry({start, count, objects}) {
-    // TODO
+  updatePartialGeometry({startRow, endRow}) {
+    this._rebuildGeometry({startRow, endRow});
   }
 
   /* Subclass interface */
@@ -105,9 +105,9 @@ export default class Tesselator {
    * Visit all objects
    * `data` is expected to be an iterable consistent with the base Layer expectation
    */
-  _forEachGeometry(visitor) {
+  _forEachGeometry(visitor, startRow, endRow) {
     const {data, getGeometry} = this;
-    const {iterable, objectInfo} = createIterable(data);
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const geometry = getGeometry(object, objectInfo);
@@ -115,25 +115,40 @@ export default class Tesselator {
     }
   }
 
-  _rebuildGeometry() {
+  _rebuildGeometry(dataRange) {
     if (!this.data || !this.getGeometry) {
       return;
     }
 
+    let {indexLayout, bufferLayout} = this;
+
+    if (!dataRange) {
+      // Full update - regenerate buffer layout from scratch
+      indexLayout = [];
+      bufferLayout = [];
+    }
+
+    const {startRow = 0, endRow = Infinity} = dataRange || {};
+    this._forEachGeometry(
+      (geometry, dataIndex) => {
+        bufferLayout[dataIndex] = this.getGeometrySize(geometry);
+      },
+      startRow,
+      endRow
+    );
+
     // count instances
-    const indexLayout = [];
-    const bufferLayout = [];
     let instanceCount = 0;
-    this._forEachGeometry((geometry, dataIndex) => {
-      const count = this.getGeometrySize(geometry);
+    for (const count of bufferLayout) {
       instanceCount += count;
-      bufferLayout[dataIndex] = count;
-    });
+    }
 
     // allocate attributes
     const {attributes, _attributeDefs, typedArrayManager, fp64} = this;
     for (const name in _attributeDefs) {
       const def = _attributeDefs[name];
+      // if partial update, copy the old array into the new one
+      def.copy = Boolean(dataRange);
 
       // do not create fp64-only attributes unless in fp64 mode
       if (!def.fp64Only || fp64) {
@@ -149,15 +164,29 @@ export default class Tesselator {
       vertexStart: 0,
       indexStart: 0
     };
-    this._forEachGeometry((geometry, dataIndex) => {
-      const geometrySize = bufferLayout[dataIndex];
-      context.geometryIndex = dataIndex;
-      context.geometrySize = geometrySize;
-      this.updateGeometryAttributes(geometry, context);
-      context.vertexStart += geometrySize;
-      context.indexStart += indexLayout[dataIndex] || 0;
-    });
+    for (let i = 0; i < startRow; i++) {
+      context.vertexStart += bufferLayout[i];
+      context.indexStart += indexLayout[i] || 0;
+    }
 
-    this.vertexCount = context.indexStart;
+    this._forEachGeometry(
+      (geometry, dataIndex) => {
+        const geometrySize = bufferLayout[dataIndex];
+        context.geometryIndex = dataIndex;
+        context.geometrySize = geometrySize;
+        this.updateGeometryAttributes(geometry, context);
+        context.vertexStart += geometrySize;
+        context.indexStart += indexLayout[dataIndex] || 0;
+      },
+      startRow,
+      endRow
+    );
+
+    // count vertices
+    let vertexCount = context.indexStart;
+    for (let i = endRow; i < indexLayout.length; i++) {
+      vertexCount += indexLayout[i];
+    }
+    this.vertexCount = vertexCount;
   }
 }

@@ -197,3 +197,65 @@ test('PolygonTesselator#tesselation', t => {
 
   t.end();
 });
+
+test('PolygonTesselator#partial update', t => {
+  let accessorCalled = new Set();
+  const sampleData = [
+    {polygon: [[1, 1], [2, 2], [3, 0]], id: 'A'},
+    {polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]]], id: 'B'}
+  ];
+  const tesselator = new PolygonTesselator({
+    data: sampleData,
+    getGeometry: d => {
+      accessorCalled.add(d.id);
+      return d.polygon;
+    },
+    positionFormat: 'XY'
+  });
+
+  let positions = tesselator.get('positions').slice(0, 27);
+  let indices = tesselator.get('indices');
+  t.is(tesselator.instanceCount, 9, 'Initial instance count');
+  t.is(tesselator.vertexCount, 9, 'Initial vertex count');
+  // prettier-ignore
+  t.deepEquals(positions, [
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0,
+    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0
+  ], 'positions');
+  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7], 'incides');
+  t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
+
+  sampleData[2] = {polygon: [[4, 4], [5, 5], [6, 4]], id: 'C'};
+  accessorCalled.clear();
+  tesselator.updatePartialGeometry({startRow: 2});
+  positions = tesselator.get('positions').slice(0, 39);
+  indices = tesselator.get('indices');
+  t.is(tesselator.instanceCount, 13, 'Updated instance count');
+  t.is(tesselator.vertexCount, 12, 'Updated vertex count');
+  // prettier-ignore
+  t.deepEquals(positions, [
+    1, 1, 0, 2, 2, 0, 3, 0, 0, 1, 1, 0,
+    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0,
+    4, 4, 0, 5, 5, 0, 6, 4, 0, 4, 4, 0
+  ], 'positions');
+  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
+  t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
+
+  sampleData[0] = {polygon: [[2, 2], [3, 0], [1, 1]], id: 'A'};
+  accessorCalled.clear();
+  tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
+  positions = tesselator.get('positions').slice(0, 39);
+  indices = tesselator.get('indices').slice(0, 12);
+  t.is(tesselator.instanceCount, 13, 'Updated instance count');
+  t.is(tesselator.vertexCount, 12, 'Updated vertex count');
+  // prettier-ignore
+  t.deepEquals(positions, [
+    2, 2, 0, 3, 0, 0, 1, 1, 0, 2, 2, 0,
+    0, 0, 0, 2, 0, 0, 2, 2, 0, 0, 2, 0, 0, 0, 0,
+    4, 4, 0, 5, 5, 0, 6, 4, 0, 4, 4, 0
+  ], 'positions');
+  t.deepEquals(indices, [1, 3, 2, 7, 4, 5, 5, 6, 7, 10, 12, 11], 'incides');
+  t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
+
+  t.end();
+});
