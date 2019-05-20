@@ -303,6 +303,7 @@ export default class App extends PureComponent {
           onViewStateChange={this._onViewStateChange}
           effects={effects ? this._effects : []}
           pickingRadius={pickingRadius}
+          onWebGLInitialized={gl => {window.gl = gl;}}
           onHover={this._onHover}
           onClick={this._onClick}
           useDevicePixels={useDevicePixels}

@@ -12,7 +12,7 @@ import {
 import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
-import {registerLoaders} from '@loaders.gl/core';
+import {registerLoaders, parse} from '@loaders.gl/core';
 import {PLYLoader} from '@loaders.gl/ply';
 import {GLTFScenegraphLoader} from '@luma.gl/addons';
 
@@ -51,15 +51,33 @@ const SimpleMeshLayerExample = {
   }
 };
 
+
+const DUCK_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
+let scenegraph = null;
+/* global fetch, window */
+fetch(DUCK_URL).then(response => response.arrayBuffer()).then(arrayBuffer => {
+  return parse(arrayBuffer, GLTFScenegraphLoader, {gl: window.gl});
+}).then(data => {
+  scenegraph = data.scenes[0];
+});
+
 const ScenegraphLayerExample = {
   layer: ScenegraphLayer,
+  getData() {
+    if (!scenegraph) {
+      throw new Error("Scenegraph not loaded");
+    }
+    console.log('Static Scenegraph') // eslint-disable-line
+    return scenegraph;
+  },
   props: {
     id: 'scenegraph-layer',
     data: dataSamples.points,
     pickable: true,
     sizeScale: 50,
-    scenegraph:
-      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
+    scenegraph,
+    // scenegraph:
+      // 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
     getPosition: d => d.COORDINATES,
     getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
     getTranslation: d => [0, 0, Math.random() * 10000],
