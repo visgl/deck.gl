@@ -75,7 +75,7 @@ export default class DeckRenderer {
 
     if (log.priority >= LOG_PRIORITY_DRAW) {
       renderStats.forEach(status => {
-        this.logRenderStats({status, pass, redrawReason, stats});
+        this.logRenderStats({status, pass, redrawReason, stats, renderStats});
       });
     }
   }
