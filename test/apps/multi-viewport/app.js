@@ -1,4 +1,4 @@
-/* global document, fetch */
+/* global document */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -9,10 +9,9 @@ import DeckGL, {
   PointCloudLayer,
   MapView,
   FirstPersonView,
-  ThirdPersonView
+  // ThirdPersonView,
+  TripsLayer
 } from 'deck.gl';
-
-import TripsLayer from '../../../examples/website/trips/trips-layer';
 
 // Source data CSV
 const DATA_URL = {
@@ -40,42 +39,16 @@ const DEFAULT_VIEWPORT_PROPS = {
   zoom: 13,
   maxZoom: 16,
   pitch: 60,
-  bearing: 270,
-
-  // view matrix arguments
-  position: [0, 0, 2], // Defines eye position
-  // direction: [-0.9, 0.5, 0], // Which direction is camera looking at, default origin
-  up: [0, 0, 1] // Defines up direction, default positive y axis
+  bearing: 270
 };
 
 class Root extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      position: DEFAULT_VIEWPORT_PROPS.position,
-      buildings: null,
-      trips: null,
-      time: 0,
+      time: 1000,
       trailLength: 50
     };
-
-    fetch(DATA_URL.BUILDINGS)
-      .then(response => response.json())
-      .then(data => this.setState({buildings: data}));
-
-    fetch(DATA_URL.TRIPS)
-      .then(response => response.json())
-      .then(data => this.setState({trips: data}));
-
-    this._onViewStateChange = this._onViewStateChange.bind(this);
-  }
-
-  _onViewStateChange({viewId, viewState}) {
-    if (viewId === '3rd-person') {
-      this.setState({
-        position: viewState.position
-      });
-    }
   }
 
   _onValueChange(settingName, newValue) {
@@ -86,25 +59,23 @@ class Root extends Component {
 
   _renderLayers() {
     const {longitude, latitude} = DEFAULT_VIEWPORT_PROPS;
-    const {position} = this.state;
-
-    const {buildings, trips} = this.state;
     const {trailLength, time} = this.state;
 
     return [
       new TripsLayer({
         id: 'trips',
-        data: trips,
+        data: DATA_URL.TRIPS,
         getPath: d => d.segments,
         getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
         opacity: 0.3,
-        strokeWidth: 2,
+        getWidth: 2,
+        widthMinPixels: 2,
         trailLength,
         currentTime: time
       }),
       new PolygonLayer({
         id: 'buildings',
-        data: buildings,
+        data: DATA_URL.BUILDINGS,
         extruded: true,
         wireframe: false,
         fp64: true,
@@ -115,32 +86,18 @@ class Root extends Component {
         lightSettings: LIGHT_SETTINGS
       }),
       new PointCloudLayer({
-        id: 'player',
-        data: [
-          {
-            position,
-            color: [0, 255, 255, 255],
-            normal: [1, 0, 0]
-          }
-        ],
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: [longitude, latitude],
-        opacity: 1,
-        radiusPixels: 20
-      }),
-      new PointCloudLayer({
         id: 'ref-point',
         data: [
           {
-            position: [-1, 0, 2],
-            color: [255, 0, 0, 255],
-            normal: [1, 0, 0]
+            position: [0, 0, 2],
+            color: [255, 0, 0, 255]
           }
         ],
+        getColor: d => d.color,
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [longitude, latitude],
         opacity: 1,
-        radiusPixels: 20
+        pointSize: 5
       })
     ];
   }
@@ -164,23 +121,17 @@ class Root extends Component {
         width="100%"
         height="100%"
         initialViewState={DEFAULT_VIEWPORT_PROPS}
-        onViewStateChange={this._onViewStateChange}
         layers={this._renderLayers()}
       >
-        <FirstPersonView id="1st-person" controller={true} height="33.33%" fovy={50} />
-
-        <ThirdPersonView
-          id="3rd-person"
+        <FirstPersonView
+          id="1st-person"
           controller={true}
-          y="33.33%"
-          height="33.33%"
-          near={1}
-          far={10000}
-        >
-          {this._renderMap}
-        </ThirdPersonView>
+          height="50%"
+          fovy={50}
+          position={[0, 0, 2]}
+        />
 
-        <MapView id="basemap" controller={true} y="66.67%" height="33.33%">
+        <MapView id="basemap" controller={true} y="50%" height="50%" position={[0, 0, 0]}>
           {this._renderMap}
         </MapView>
       </DeckGL>
