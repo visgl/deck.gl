@@ -11,7 +11,9 @@ export default class ScreenPass extends Pass {
   render(params) {
     const gl = this.gl;
 
-    withParameters(gl, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () => this._renderPass(gl, params));
+    withParameters(gl, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
+      this._renderPass(gl, params)
+    );
   }
 
   cleanup() {
