@@ -24,7 +24,6 @@ import * as vec4 from 'gl-matrix/vec4';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
-import log from '../../utils/log';
 import assert from '../../utils/assert';
 
 import {PROJECT_COORDINATE_SYSTEM} from './constants';
