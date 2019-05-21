@@ -33,7 +33,7 @@ in vec4 elevations;
 
 // Custom uniforms
 uniform vec2 offset;
-uniform float extruded;
+uniform bool extruded;
 uniform float cellSize;
 uniform float coverage;
 uniform float opacity;
@@ -44,8 +44,6 @@ uniform vec2 gridOrigin;
 uniform vec2 gridOriginLow;
 uniform vec2 gridOffset;
 uniform vec2 gridOffsetLow;
-uniform vec4 minColor;
-uniform vec4 maxColor;
 uniform vec4 colorRange[RANGE_COUNT];
 uniform vec2 elevationRange;
 layout(std140) uniform;
@@ -92,7 +90,7 @@ void main(void) {
 
   float elevation = 0.0;
 
-  if (extruded > 0.5) {
+  if (extruded) {
     vec2 elevationDomain = vec2(elevationData.maxMinCount.a, elevationData.maxMinCount.r);
     elevation = linearScale(elevationDomain, elevationRange, elevations.r);
     elevation = elevation  * (positions.z + 1.0) / 2.0 * elevationScale;
@@ -122,7 +120,7 @@ void main(void) {
 
   vec3 normals_commonspace = project_normal(normals);
 
-   if (extruded > 0.5) {
+   if (extruded) {
     vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
     vColor = vec4(lightColor, color.a * opacity) / 255.;
   } else {

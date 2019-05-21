@@ -27,8 +27,6 @@ const defaultMaterial = new PhongMaterial();
 import vs from './gpu-grid-cell-layer-vertex.glsl';
 import fs from './gpu-grid-cell-layer-fragment.glsl';
 
-const DEFAULT_MINCOLOR = [0, 0, 0, 255];
-const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
 const COLOR_DATA_UBO_INDEX = 0;
 const ELEVATION_DATA_UBO_INDEX = 1;
 
@@ -40,9 +38,6 @@ const defaultProps = {
   extruded: true,
   fp64: false,
   pickable: false, // TODO: add picking support (read from aggregated texture)
-
-  minColor: {type: 'color', value: DEFAULT_MINCOLOR},
-  maxColor: {type: 'color', value: DEFAULT_MAXCOLOR},
 
   material: defaultMaterial
 };
@@ -111,8 +106,6 @@ export default class GPUGridCellLayer extends Layer {
       gridSize,
       gridOrigin,
       gridOffset,
-      minColor,
-      maxColor,
       colorRange,
       colorMaxMinBuffer,
       elevationRange,
@@ -137,8 +130,6 @@ export default class GPUGridCellLayer extends Layer {
           gridOriginLow,
           gridOffset,
           gridOffsetLow,
-          minColor,
-          maxColor,
           colorRange,
           elevationRange
         })
