@@ -33,6 +33,6 @@
     "d3-dsv": "^1.0.8"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0-beta.1"
+    "@deck.gl/core": "^7.0.0"
   }
 }
