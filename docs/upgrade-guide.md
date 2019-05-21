@@ -1,5 +1,11 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v7.0 to v7.1
+
+Breaking Changes:
+
+- Fixed a bug where `coordinateOrigin`'s `z` is not applied in `METER_OFFSETS` and `LNGLAT_OFFSETS` coordinate systems.
+
 ## Upgrading from deck.gl v6.4 to v7.0
 
 #### Submodule Structure and Dependency Changes
