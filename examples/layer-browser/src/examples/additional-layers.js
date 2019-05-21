@@ -61,7 +61,7 @@ fetch(DUCK_URL).then(response => response.arrayBuffer()).then(arrayBuffer => {
   scenegraph = data.scenes[0];
 });
 
-const ScenegraphLayerExample = {
+const ScenegraphLayerStaticExample = {
   layer: ScenegraphLayer,
   getData() {
     if (!scenegraph) {
@@ -78,6 +78,22 @@ const ScenegraphLayerExample = {
     scenegraph,
     // scenegraph:
       // 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
+    getPosition: d => d.COORDINATES,
+    getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
+    getTranslation: d => [0, 0, Math.random() * 10000],
+    getScale: [1, 1, 1]
+  }
+};
+
+const ScenegraphLayerExample = {
+  layer: ScenegraphLayer,
+  props: {
+    id: 'scenegraph-layer',
+    data: dataSamples.points,
+    pickable: true,
+    sizeScale: 50,
+    scenegraph:
+      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
     getPosition: d => d.COORDINATES,
     getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
     getTranslation: d => [0, 0, Math.random() * 10000],
@@ -194,7 +210,8 @@ const TripsLayerExample = {
 export default {
   'Mesh Layers': {
     SimpleMeshLayer: SimpleMeshLayerExample,
-    ScenegraphLayer: ScenegraphLayerExample
+    'ScenegraphLayer (URL scenegraph)': ScenegraphLayerExample,
+    'ScenegraphLayer (Static scenegraph)': ScenegraphLayerStaticExample
   },
   'Geo Layers': {
     S2Layer: S2LayerExample,
