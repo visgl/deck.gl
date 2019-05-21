@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.9] - May 21 2019
+
+- Fix logging (#3126)
+- Update peer dependency versions (#3128)
+- Remove force override of position parameter in WebMercatorViewport (#3127)
+
 #### deck.gl [v7.0.8] - May 17 2019
 
 - Fix view state handling in mapbox integration (#3113)
