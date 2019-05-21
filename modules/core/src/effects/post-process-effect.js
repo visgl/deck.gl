@@ -92,7 +92,7 @@ void main() {
   vec2 texCoord = coordinate;
 
   gl_FragColor = texture2D(texture, texCoord);
-  gl_FragColor = ${func}(texture, texSize, texCoord);
+  gl_FragColor = ${func}(gl_FragColor, texSize, texCoord);
 }
 `;
 
