@@ -115,6 +115,7 @@ export default class Tesselator {
     }
   }
 
+  /* eslint-disable complexity,max-statements */
   _rebuildGeometry(dataRange) {
     if (!this.data || !this.getGeometry) {
       return;

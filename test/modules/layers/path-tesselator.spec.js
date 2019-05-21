@@ -136,8 +136,9 @@ test('PathTesselator#constructor', t => {
   t.end();
 });
 
+/* eslint-disable max-statements */
 test('PathTesselator#partial update', t => {
-  let accessorCalled = new Set();
+  const accessorCalled = new Set();
   const sampleData = [
     {path: [[1, 1], [2, 2], [3, 3]], id: 'A'},
     {path: [[1, 1], [2, 2], [3, 3], [1, 1]], id: 'B'}

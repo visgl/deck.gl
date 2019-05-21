@@ -198,8 +198,9 @@ test('PolygonTesselator#tesselation', t => {
   t.end();
 });
 
+/* eslint-disable max-statements */
 test('PolygonTesselator#partial update', t => {
-  let accessorCalled = new Set();
+  const accessorCalled = new Set();
   const sampleData = [
     {polygon: [[1, 1], [2, 2], [3, 0]], id: 'A'},
     {polygon: [[[0, 0], [2, 0], [2, 2], [0, 2]]], id: 'B'}
