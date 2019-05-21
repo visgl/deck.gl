@@ -33,7 +33,7 @@
     "d3-hexbin": "^0.2.1"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0-beta.1",
-    "@deck.gl/layers": "^7.0.0-beta.1"
+    "@deck.gl/core": "^7.0.0",
+    "@deck.gl/layers": "^7.0.0"
   }
 }
