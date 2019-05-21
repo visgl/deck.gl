@@ -24,7 +24,6 @@ import * as vec4 from 'gl-matrix/vec4';
 import {COORDINATE_SYSTEM} from '../../lib/constants';
 
 import memoize from '../../utils/memoize';
-import log from '../../utils/log';
 import assert from '../../utils/assert';
 
 import {PROJECT_COORDINATE_SYSTEM} from './constants';
@@ -101,6 +100,8 @@ function calculateMatrixAndOffset({
     shaderCoordinateOrigin = [Math.fround(viewport.position[0]), Math.fround(viewport.position[1])];
   }
 
+  shaderCoordinateOrigin[2] = shaderCoordinateOrigin[2] || 0;
+
   switch (shaderCoordinateSystem) {
     case PROJECT_COORDINATE_SYSTEM.LNG_LAT:
       projectionCenter = ZERO_VECTOR;
@@ -122,10 +123,9 @@ function calculateMatrixAndOffset({
       cameraPosCommon = [
         cameraPosCommon[0] - positionCommonSpace[0],
         cameraPosCommon[1] - positionCommonSpace[1],
-        cameraPosCommon[2]
+        cameraPosCommon[2] - positionCommonSpace[2]
       ];
 
-      positionCommonSpace[2] = 0;
       positionCommonSpace[3] = 1;
 
       // projectionCenter = new Matrix4(viewProjectionMatrix)
@@ -178,13 +178,6 @@ export function getUniformsFromViewport({
   positionOrigin
 } = {}) {
   assert(viewport);
-
-  if (projectionMode !== undefined) {
-    log.removed('projectionMode', 'coordinateSystem')();
-  }
-  if (positionOrigin !== undefined) {
-    log.removed('positionOrigin', 'coordinateOrigin')();
-  }
 
   return Object.assign(
     {
