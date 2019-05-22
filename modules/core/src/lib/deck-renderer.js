@@ -149,6 +149,7 @@ export default class DeckRenderer {
       if (effect instanceof PostProcessEffect) {
         if (effect === this.lastPostProcessEffect) {
           Object.assign(params, {target: Framebuffer.getDefaultFramebuffer(this.gl)});
+          params = effect.render(params);
           break;
         }
         params = effect.render(params);
