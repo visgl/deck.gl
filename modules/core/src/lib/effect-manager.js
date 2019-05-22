@@ -47,11 +47,10 @@ export default class EffectManager {
   }
 
   cleanup() {
-    if (this.effects) {
-      for (const effect of this.effects) {
-        effect.cleanup();
-      }
+    for (const effect of this.effects) {
+      effect.cleanup();
     }
+    this.effects = [];
   }
 
   checkLightingEffect() {

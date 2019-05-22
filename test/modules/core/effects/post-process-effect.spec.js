@@ -17,17 +17,18 @@ const testModule = {
   passes: [{sampler: true}]
 };
 
-test('PostProcessEfect#constructor', t => {
+test('PostProcessEffect#constructor', t => {
   const effect = new PostProcessEffect(testModule);
 
   t.ok(effect, 'post-processing effect created');
   t.end();
 });
 
-test('PostProcessEfect#prepare', t => {
+test('PostProcessEffect#prepare', t => {
   const effect = new PostProcessEffect(testModule);
   effect.prepare(gl);
   t.ok(effect.passes, 'post-processing pass created');
   t.equal(effect.passes.length, 1, 'post-processing pass length is right');
+  effect.cleanup();
   t.end();
 });

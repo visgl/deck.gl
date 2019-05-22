@@ -2,7 +2,6 @@ import Effect from '../lib/effect';
 import ScreenPass from '../passes/screen-pass';
 /* eslint-disable import/no-extraneous-dependencies */
 import {normalizeShaderModule} from '@luma.gl/shadertools';
-import {ClipSpace} from '@luma.gl/core';
 
 export default class PostProcessEffect extends Effect {
   constructor(module, props = {}) {
@@ -39,19 +38,21 @@ export default class PostProcessEffect extends Effect {
   cleanup() {
     if (this.passes) {
       for (const pass of this.passes) {
-        pass.cleanup();
+        pass.delete();
       }
       this.passes = null;
     }
   }
 }
 
-function createPasses(gl, module, id, props) {
+function createPasses(gl, module, id, moduleProps) {
   if (module.filter || module.sampler) {
     const fs = getFragmentShaderForRenderPass(module);
     const pass = new ScreenPass(gl, {
       id,
-      model: getModel(gl, module, fs, id, props)
+      module,
+      fs,
+      moduleProps
     });
     return [pass];
   }
@@ -61,23 +62,13 @@ function createPasses(gl, module, id, props) {
     const fs = getFragmentShaderForRenderPass(module, pass);
     const idn = `${id}-${index}`;
 
-    return new ScreenPass(
-      gl,
-      Object.assign({
-        id: idn,
-        model: getModel(gl, module, fs, idn, props)
-      })
-    );
+    return new ScreenPass(gl, {
+      id: idn,
+      module,
+      fs,
+      moduleProps
+    });
   });
-}
-
-function getModel(gl, module, fs, id, props) {
-  const model = new ClipSpace(gl, {id, fs, modules: [module]});
-
-  const uniforms = Object.assign(module.getUniforms(), module.getUniforms(props));
-
-  model.setUniforms(uniforms);
-  return model;
 }
 
 const FILTER_FS_TEMPLATE = func => `\

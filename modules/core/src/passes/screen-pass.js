@@ -4,23 +4,38 @@
 // Attribution: This class and the multipass system were inspired by
 // the THREE.js EffectComposer and *Pass classes
 
-import {withParameters} from '@luma.gl/core';
+import {ClipSpace, withParameters} from '@luma.gl/core';
 import Pass from './pass';
 
 export default class ScreenPass extends Pass {
+  constructor(gl, props = {}) {
+    super(gl, props);
+    const {module, fs, id, moduleProps} = props;
+    this.model = this.getModel(gl, module, fs, id, moduleProps);
+  }
+
   render(params) {
     const gl = this.gl;
 
     withParameters(gl, {framebuffer: params.outputBuffer, clearColor: [0, 0, 0, 0]}, () =>
-      this._renderPass(gl, params)
+      this.renderPass(gl, params)
     );
   }
 
-  cleanup() {
-    if (this.props && this.props.model) {
-      this.props.model.delete();
-      this.props.model = null;
-    }
+  delete() {
+    this.model.delete();
+    this.model = null;
+  }
+
+  // Private method
+
+  getModel(gl, module, fs, id, userProps) {
+    const model = new ClipSpace(gl, {id, fs, modules: [module]});
+
+    const uniforms = Object.assign(module.getUniforms(), module.getUniforms(userProps));
+
+    model.setUniforms(uniforms);
+    return model;
   }
 
   /**
@@ -29,19 +44,17 @@ export default class ScreenPass extends Pass {
    * @param {Framebuffer} inputBuffer - Frame buffer that contains the result of the previous pass
    * @param {Framebuffer} outputBuffer - Frame buffer that serves as the output render target
    */
-  _renderPass(gl, {inputBuffer, outputBuffer}) {
-    if (this.props && this.props.model) {
-      outputBuffer.clear();
-      this.props.model.draw({
-        uniforms: {
-          texture: inputBuffer,
-          texSize: [inputBuffer.width, inputBuffer.height]
-        },
-        parameters: {
-          depthWrite: false,
-          depthTest: false
-        }
-      });
-    }
+  renderPass(gl, {inputBuffer, outputBuffer}) {
+    outputBuffer.clear();
+    this.model.draw({
+      uniforms: {
+        texture: inputBuffer,
+        texSize: [inputBuffer.width, inputBuffer.height]
+      },
+      parameters: {
+        depthWrite: false,
+        depthTest: false
+      }
+    });
   }
 }
