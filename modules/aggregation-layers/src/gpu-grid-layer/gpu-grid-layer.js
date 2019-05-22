@@ -166,9 +166,8 @@ export default class GPUGridLayer extends CompositeLayer {
     // TODO: perform picking
     return info;
   }
-  // for subclassing, override this method to return
-  // customized sub layer props
-  getSubLayerProps() {
+
+  renderLayers() {
     const {
       elevationScale,
       fp64,
@@ -185,43 +184,38 @@ export default class GPUGridLayer extends CompositeLayer {
 
     const colorRange = colorRangeToFlatArray(this.props.colorRange, Float32Array, 255);
 
-    // return props to the sublayer constructor
-    return super.getSubLayerProps({
-      id: 'grid-cell',
-      data: this.state.layerData,
-      colorBuffer: weights.color.aggregationBuffer,
-      colorMaxMinBuffer: weights.color.maxMinBuffer,
-      elevationBuffer: weights.elevation.aggregationBuffer,
-      elevationMaxMinBuffer: weights.elevation.maxMinBuffer,
-      gridSize,
-      gridOrigin,
-      gridOffset: cellSize,
-      numInstances: gridSize[0] * gridSize[1],
-      minColor,
-      maxColor,
-      colorRange,
-      elevationRange,
+    const SubLayerClass = this.getSubLayerClass('gpu-grid-cell', GPUGridCellLayer);
 
-      fp64,
-      cellSize: cellSizeMeters,
-      coverage,
-      material,
-      elevationScale,
-      extruded,
-      pickable: false
-    });
-  }
+    return new SubLayerClass(
+      {
+        colorBuffer: weights.color.aggregationBuffer,
+        colorMaxMinBuffer: weights.color.maxMinBuffer,
+        elevationBuffer: weights.elevation.aggregationBuffer,
+        elevationMaxMinBuffer: weights.elevation.maxMinBuffer,
+        gridSize,
+        gridOrigin,
+        gridOffset: cellSize,
+        numInstances: gridSize[0] * gridSize[1],
+        minColor,
+        maxColor,
+        colorRange,
+        elevationRange,
 
-  // for subclassing, override this method to return
-  // customized sub layer class
-  getSubLayerClass() {
-    return GPUGridCellLayer;
-  }
-
-  renderLayers() {
-    const SubLayerClass = this.getSubLayerClass();
-
-    return new SubLayerClass(this.getSubLayerProps());
+        fp64,
+        cellSize: cellSizeMeters,
+        coverage,
+        material,
+        elevationScale,
+        extruded,
+        pickable: false
+      },
+      this.getSubLayerProps({
+        id: 'gpu-grid-cell'
+      }),
+      {
+        data: this.state.layerData
+      }
+    );
   }
 }
 

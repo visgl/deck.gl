@@ -31,12 +31,14 @@ import {pointToDensityGridData} from './grid-aggregator';
 function nop() {}
 
 const defaultMaterial = new PhongMaterial();
+// To detect a default value vs custom value, used in new-grid-layer
+const DEFAULT_GETVALUE = points => points.length;
 
 const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: {type: 'accessor', value: points => points.length},
+  getColorValue: {type: 'accessor', value: DEFAULT_GETVALUE},
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   onSetColorDomain: nop,
@@ -44,7 +46,7 @@ const defaultProps = {
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: {type: 'accessor', value: points => points.length},
+  getElevationValue: {type: 'accessor', value: DEFAULT_GETVALUE},
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   elevationScale: 1,

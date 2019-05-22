@@ -74,6 +74,18 @@ export default class GPUGridAggregator {
     return {cellCounts, cellWeights};
   }
 
+  static isSupported(gl) {
+    return (
+      isWebGL2(gl) &&
+      hasFeatures(
+        gl,
+        FEATURES.BLEND_EQUATION_MINMAX,
+        FEATURES.COLOR_ATTACHMENT_RGBA32F,
+        FEATURES.TEXTURE_FLOAT
+      )
+    );
+  }
+
   // DEBUG ONLY
   // static logData({aggregationBuffer, minBuffer, maxBuffer, maxMinBuffer, limit = 10}) {
   //   if (aggregationBuffer) {

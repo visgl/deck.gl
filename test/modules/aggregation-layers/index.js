@@ -26,5 +26,6 @@ import './grid-layer/grid-layer.spec';
 import './grid-aggregator.spec';
 import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';
+import './new-grid-layer.spec';
 import './screen-grid-layer.spec';
 import './utils/scale-utils.spec';

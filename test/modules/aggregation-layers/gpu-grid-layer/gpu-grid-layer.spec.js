@@ -22,10 +22,12 @@ import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests, testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {
+  _GPUGridLayer as GPUGridLayer,
+  _GPUGridAggregator as GPUGridAggregator
+} from '@deck.gl/aggregation-layers';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
 import {gl} from '@deck.gl/test-utils';
-import {isWebGL2} from '@luma.gl/core';
 
 const SAMPLE_PROPS = {
   data: FIXTURES.points.slice(0, 3),
@@ -33,7 +35,7 @@ const SAMPLE_PROPS = {
 };
 
 test('GPUGridLayer', t => {
-  if (!isWebGL2(gl)) {
+  if (!GPUGridAggregator.isSupported(gl)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
     return;
@@ -54,7 +56,7 @@ test('GPUGridLayer', t => {
 });
 
 test('GPUGridLayer#renderLayers', t => {
-  if (!isWebGL2(gl)) {
+  if (!GPUGridAggregator.isSupported(gl)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
     return;
@@ -81,7 +83,7 @@ test('GPUGridLayer#renderLayers', t => {
 });
 
 test('GPUGridLayer#updates', t => {
-  if (!isWebGL2(gl)) {
+  if (!GPUGridAggregator.isSupported(gl)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
     return;
