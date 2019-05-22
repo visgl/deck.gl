@@ -50,7 +50,7 @@ export default class EffectManager {
     for (const effect of this.effects) {
       effect.cleanup();
     }
-    this.effects = [];
+    this.effects.length = 0;
   }
 
   checkLightingEffect() {
