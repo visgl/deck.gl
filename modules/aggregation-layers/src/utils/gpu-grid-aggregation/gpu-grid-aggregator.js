@@ -39,6 +39,11 @@ import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
 import {getFloatTexture, getFramebuffer, getFloatArray} from './gpu-grid-aggregator-utils.js';
 
 const BUFFER_NAMES = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
+const ARRAY_BUFFER_MAP = {
+  maxData: 'maxBuffer',
+  minData: 'minBuffer',
+  maxMinData: 'maxMinBuffer'
+};
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
@@ -217,42 +222,28 @@ export default class GPUGridAggregator {
   // Reads aggregation data into JS Array object
   // For WebGL1, data is available in JS Array objects already.
   // For WebGL2, data is read from Buffer objects and cached for subsequent queries.
-  /* eslint-disable max-depth */
-  getData(weights = null) {
-    weights = weights && (Array.isArray(weights) ? weights : [weights]);
+  getData(weightId) {
     const data = {};
     const results = this.state.results;
-    const ARRAY_BUFFER_MAP = {
-      maxData: 'maxBuffer',
-      minData: 'minBuffer',
-      maxMinData: 'maxMinBuffer'
-    };
-    for (const weight in results) {
-      if (!weights || weights.includes(weight)) {
-        data[weight] = {};
+    if (!results[weightId].aggregationData) {
+      // cache the results if reading from the buffer (WebGL2 path)
+      results[weightId].aggregationData = results[weightId].aggregationBuffer.getData();
+    }
+    data.aggregationData = results[weightId].aggregationData;
 
-        if (!results[weight].aggregationData) {
-          // cache the results if reading from the buffer (WebGL2 path)
-          results[weight].aggregationData = results[weight].aggregationBuffer.getData();
-        }
-        data[weight].aggregationData = results[weight].aggregationData;
+    // Check for optional results
+    for (const arrayName in ARRAY_BUFFER_MAP) {
+      const bufferName = ARRAY_BUFFER_MAP[arrayName];
 
-        // Check for optional results
-        for (const arrayName in ARRAY_BUFFER_MAP) {
-          const bufferName = ARRAY_BUFFER_MAP[arrayName];
-
-          if (results[weight][arrayName] || results[weight][bufferName]) {
-            // cache the result
-            results[weight][arrayName] =
-              results[weight][arrayName] || results[weight][bufferName].getData();
-            data[weight][arrayName] = results[weight][arrayName];
-          }
-        }
+      if (results[weightId][arrayName] || results[weightId][bufferName]) {
+        // cache the result
+        results[weightId][arrayName] =
+          results[weightId][arrayName] || results[weightId][bufferName].getData();
+        data[arrayName] = results[weightId][arrayName];
       }
     }
     return data;
   }
-  /* eslint-enable max-depth */
 
   // PRIVATE
 

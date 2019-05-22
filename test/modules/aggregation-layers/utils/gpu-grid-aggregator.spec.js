@@ -336,7 +336,7 @@ test('GPUGridAggregator#getData', t => {
 
   // Run on CPU
   aggregator.run(Object.assign({}, fixture, {weights: {weight1}, useGPU: false}));
-  const cpuResults = aggregator.getData(); // should return results for all weights, which is 'weight1'
+  const cpuResults = aggregator.getData('weight1');
 
   t.deepEqual(gpuResults, cpuResults, 'cpu and gpu results should match');
   t.end();
