@@ -2,7 +2,7 @@
   "name": "@deck.gl/test-utils",
   "description": "Test utilities for deck.gl layers",
   "license": "MIT",
-  "version": "7.0.0-rc.1",
+  "version": "7.1.0-alpha.1",
   "publishConfig": {
     "access": "public"
   },
