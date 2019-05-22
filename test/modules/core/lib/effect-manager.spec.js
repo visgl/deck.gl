@@ -24,8 +24,33 @@ import Effect from '@deck.gl/core/lib/effect';
 import LayerManager from '@deck.gl/core/lib/layer-manager';
 
 import {gl} from '@deck.gl/test-utils';
+import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
 
 const layerManager = new LayerManager(gl);
+
+function getResourceCounts() {
+  /* global luma */
+  const resourceStats = luma.stats.get('Resource Counts');
+  return {
+    Texture2D: resourceStats.get('Texture2Ds Active').count,
+    Buffer: resourceStats.get('Buffers Active').count
+  };
+}
+
+const fs = `\
+  vec4 testEffect_sampleColor(sampler2D texture, vec2 texSize, vec2 texCoord) {
+    return vec4(1.0, 0.0, 0.0, 0.0);
+  }
+  `;
+
+const uniforms = {};
+
+const testModule = {
+  name: 'testEffect',
+  uniforms,
+  fs,
+  passes: [{sampler: true}]
+};
 
 test('EffectManager#constructor', t => {
   const effectManager = new EffectManager({gl, layerManager});
@@ -40,5 +65,31 @@ test('EffectManager#set and get Effects', t => {
   effectManager.setEffects([effect1, effect2]);
   const effects = effectManager.getEffects();
   t.equal(effects.length, 2, 'Effect set and get successfully');
+  t.end();
+});
+
+test('EffectManager#cleanup resource', t => {
+  const effect = new PostProcessEffect(testModule);
+  const effectManager = new EffectManager({gl, layerManager});
+  effectManager.setEffects([effect]);
+  const resBegin = getResourceCounts();
+  effect.prepare(gl);
+  effectManager.setEffects([]);
+  const resEnd = getResourceCounts();
+
+  t.deepEqual(resBegin, resEnd, 'All resources are cleaned up');
+  t.end();
+});
+
+test('EffectManager#finalize', t => {
+  const effect = new PostProcessEffect(testModule);
+  const effectManager = new EffectManager({gl, layerManager});
+  effectManager.setEffects([effect]);
+  const resBegin = getResourceCounts();
+  effect.prepare(gl);
+  effectManager.finalize();
+  const resEnd = getResourceCounts();
+
+  t.deepEqual(resBegin, resEnd, 'Effect manager is finalized well');
   t.end();
 });

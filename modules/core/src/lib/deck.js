@@ -178,6 +178,16 @@ export default class Deck {
       this.viewManager = null;
     }
 
+    if (this.effectManager) {
+      this.effectManager.finalize();
+      this.effectManager = null;
+    }
+
+    if (this.deckRenderer) {
+      this.deckRenderer.finalize();
+      this.deckRenderer = null;
+    }
+
     if (this.eventManager) {
       this.eventManager.destroy();
     }
