@@ -1353,6 +1353,30 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/h3-hexagon-flat.png'
   },
   {
+    name: 'h3-hexagon-layer-low-zoom',
+    viewState: {
+      latitude: 0,
+      longitude: 0,
+      zoom: 0,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new H3HexagonLayer({
+        data: h3
+          .polyfill([[-90, -180], [90, -180], [90, 0], [-90, 0]], 0)
+          .concat(h3.polyfill([[-90, 180], [90, 180], [90, 0], [-90, 0]], 0)),
+        getHexagon: d => d,
+        extruded: false,
+        filled: false,
+        stroked: true,
+        getLineColor: [0, 0, 0],
+        lineWidthMinPixels: 2
+      })
+    ],
+    goldenImage: './test/render/golden-images/h3-hexagon-low-zoom.png'
+  },
+  {
     name: 'h3-cluster-layer',
     viewState: {
       latitude: 37.78,
