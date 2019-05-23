@@ -132,7 +132,7 @@ Returns:
 Reads aggregation results from GPU memory (Buffer) to CPU memory (Typed Arrays).
 
 ```js
-const aggregationResults = gpuGridAggregator.getData('color');
+const aggregationResults = gpuGridAggregator.getData('weightId');
 ```
 
 Parameters:
