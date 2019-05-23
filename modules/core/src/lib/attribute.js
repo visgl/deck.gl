@@ -189,7 +189,9 @@ export default class Attribute extends BaseAttribute {
 
       if (state.updateRanges !== range.FULL) {
         this.value.set(oldValue);
-        // TODO - copy on the GPU
+        // Upload the full existing attribute value to the GPU, so that updateBuffer
+        // can choose to only update a partial range.
+        // TODO - copy old buffer to new buffer on the GPU
         this.buffer.subData(oldValue);
       }
 
@@ -217,7 +219,7 @@ export default class Attribute extends BaseAttribute {
         update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
       }
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
-        // Full update
+        // call base clas `update` method to upload value to GPU
         this.update({
           value: this.value,
           constant: this.constant
