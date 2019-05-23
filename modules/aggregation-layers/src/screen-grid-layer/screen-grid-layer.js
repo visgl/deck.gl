@@ -203,7 +203,7 @@ export default class ScreenGridLayer extends Layer {
       // Each instance (one cell) is aggregated into single pixel,
       // Get current instance's aggregation details.
       info.object = GPUGridAggregator.getAggregationData(
-        Object.assign({pixelIndex: index}, aggregationResults.color)
+        Object.assign({pixelIndex: index}, aggregationResults)
       );
     }
 
