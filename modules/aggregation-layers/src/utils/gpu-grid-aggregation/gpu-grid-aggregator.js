@@ -39,23 +39,35 @@ import TRANSFORM_MEAN_VS from './transform-mean-vs.glsl';
 import {getFloatTexture, getFramebuffer, getFloatArray} from './gpu-grid-aggregator-utils.js';
 
 const BUFFER_NAMES = ['aggregationBuffer', 'maxMinBuffer', 'minBuffer', 'maxBuffer'];
+const ARRAY_BUFFER_MAP = {
+  maxData: 'maxBuffer',
+  minData: 'minBuffer',
+  maxMinData: 'maxMinBuffer'
+};
 
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
-  static getAggregationData({aggregationData, maxData, pixelIndex}) {
-    log.assert(aggregationData.length >= (pixelIndex + 1) * PIXEL_SIZE);
-    log.assert(maxData.length === PIXEL_SIZE);
+  static getAggregationData({aggregationData, maxData, minData, maxMinData, pixelIndex}) {
     const index = pixelIndex * PIXEL_SIZE;
-    const cellCount = aggregationData[index + 3];
-    const cellWeight = aggregationData[index];
-    const totalCount = maxData[3];
-    const maxCellWieght = maxData[0];
-    return {
-      cellCount,
-      cellWeight,
-      totalCount,
-      maxCellWieght
-    };
+    const results = {};
+    if (aggregationData) {
+      results.cellCount = aggregationData[index + 3];
+      results.cellWeight = aggregationData[index];
+    }
+    if (maxMinData) {
+      results.maxCellWieght = maxMinData[0];
+      results.minCellWeight = maxMinData[3];
+    } else {
+      if (maxData) {
+        results.maxCellWieght = maxData[0];
+        results.totalCount = maxData[3];
+      }
+      if (minData) {
+        results.minCellWeight = minData[0];
+        results.totalCount = maxData[3];
+      }
+    }
+    return results;
   }
 
   // Decodes and retuns counts and weights of all cells
@@ -141,8 +153,12 @@ export default class GPUGridAggregator {
       minFramebuffers: {},
       maxFramebuffers: {},
       equations: {},
+
       // common resources to be deleted
-      resources: {}
+      resources: {},
+
+      // results
+      results: {}
     };
     this._hasGPUSupport =
       isWebGL2(gl) && // gl_InstanceID usage in min/max calculation shaders
@@ -189,6 +205,8 @@ export default class GPUGridAggregator {
 
   // Perform aggregation and retun the results
   run(opts = {}) {
+    // reset results
+    this.setState({results: {}});
     const aggregationParams = this.getAggregationParams(opts);
     this.updateGridSize(aggregationParams);
     const {useGPU} = aggregationParams;
@@ -199,6 +217,32 @@ export default class GPUGridAggregator {
       log.warn('ScreenGridAggregator: GPU Aggregation not supported, falling back to CPU')();
     }
     return this.runAggregationOnCPU(aggregationParams);
+  }
+
+  // Reads aggregation data into JS Array object
+  // For WebGL1, data is available in JS Array objects already.
+  // For WebGL2, data is read from Buffer objects and cached for subsequent queries.
+  getData(weightId) {
+    const data = {};
+    const results = this.state.results;
+    if (!results[weightId].aggregationData) {
+      // cache the results if reading from the buffer (WebGL2 path)
+      results[weightId].aggregationData = results[weightId].aggregationBuffer.getData();
+    }
+    data.aggregationData = results[weightId].aggregationData;
+
+    // Check for optional results
+    for (const arrayName in ARRAY_BUFFER_MAP) {
+      const bufferName = ARRAY_BUFFER_MAP[arrayName];
+
+      if (results[weightId][arrayName] || results[weightId][bufferName]) {
+        // cache the result
+        results[weightId][arrayName] =
+          results[weightId][arrayName] || results[weightId][bufferName].getData();
+        data[arrayName] = results[weightId][arrayName];
+      }
+    }
+    return data;
   }
 
   // PRIVATE
@@ -522,6 +566,8 @@ export default class GPUGridAggregator {
 
     // Update buffer objects.
     this.updateAggregationBuffers(opts, results);
+
+    this.setState({results});
     return results;
   }
   /* eslint-disable max-statements */
@@ -820,7 +866,9 @@ export default class GPUGridAggregator {
     this.updateModels(opts);
     this.setupFramebuffers(opts);
     this.renderAggregateData(opts);
-    return this.getAggregateData(opts);
+    const results = this.getAggregateData(opts);
+    this.setState({results});
+    return results;
   }
 
   // set up framebuffer for each weight
