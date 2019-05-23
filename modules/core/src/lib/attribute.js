@@ -385,7 +385,7 @@ export default class Attribute extends BaseAttribute {
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute._getVertexOffset(startRow || 0, bufferLayout);
+    let i = attribute._getVertexOffset(startRow, bufferLayout);
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;

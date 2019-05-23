@@ -247,12 +247,12 @@ export default class IconLayer extends Layer {
     }
   }
 
-  calculateInstanceOffsets(attribute) {
+  calculateInstanceOffsets(attribute, {startRow, endRow}) {
     const {data} = this.props;
     const {iconManager} = this.state;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const rect = iconManager.getIconMapping(object, objectInfo);
@@ -261,12 +261,12 @@ export default class IconLayer extends Layer {
     }
   }
 
-  calculateInstanceColorMode(attribute) {
+  calculateInstanceColorMode(attribute, {startRow, endRow}) {
     const {data} = this.props;
     const {iconManager} = this.state;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const mapping = iconManager.getIconMapping(object, objectInfo);
@@ -275,12 +275,12 @@ export default class IconLayer extends Layer {
     }
   }
 
-  calculateInstanceIconFrames(attribute) {
+  calculateInstanceIconFrames(attribute, {startRow, endRow}) {
     const {data} = this.props;
     const {iconManager} = this.state;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const rect = iconManager.getIconMapping(object, objectInfo);

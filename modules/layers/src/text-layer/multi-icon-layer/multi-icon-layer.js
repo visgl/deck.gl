@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {createIterable} from '@deck.gl/core';
 import IconLayer from '../../icon-layer/icon-layer';
 
 import vs from './multi-icon-layer-vertex.glsl';
@@ -86,7 +87,7 @@ export default class MultiIconLayer extends IconLayer {
     });
   }
 
-  calculateInstanceOffsets(attribute) {
+  calculateInstanceOffsets(attribute, {startRow, endRow}) {
     const {
       data,
       iconMapping,
@@ -96,9 +97,11 @@ export default class MultiIconLayer extends IconLayer {
       getLengthOfQueue,
       getShiftInQueue
     } = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const object of data) {
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable} = createIterable(data, startRow, endRow);
+
+    for (const object of iterable) {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
       const len = getLengthOfQueue(object);
@@ -109,12 +112,14 @@ export default class MultiIconLayer extends IconLayer {
     }
   }
 
-  calculateInstancePickingColors(attribute) {
+  calculateInstancePickingColors(attribute, {startRow, endRow}) {
     const {data, getPickingIndex} = this.props;
-    const {value} = attribute;
-    let i = 0;
+    const {value, size} = attribute;
+    let i = startRow * size;
     const pickingColor = [];
-    for (const point of data) {
+    const {iterable} = createIterable(data, startRow, endRow);
+
+    for (const point of iterable) {
       const index = getPickingIndex(point);
       this.encodePickingColor(index, pickingColor);
 

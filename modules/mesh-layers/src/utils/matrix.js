@@ -76,7 +76,7 @@ export const MATRIX_ATTRIBUTES = {
     }
   },
 
-  update(attribute) {
+  update(attribute, {startRow, endRow}) {
     // NOTE(Tarek): "this" will be bound to a layer!
     const {data, getOrientation, getScale, getTranslation, getTransformMatrix} = this.props;
 
@@ -114,8 +114,8 @@ export const MATRIX_ATTRIBUTES = {
 
       attribute.value = new Float32Array(matrix);
     } else {
-      let i = 0;
-      const {iterable, objectInfo} = createIterable(data);
+      let i = startRow * attribute.size;
+      const {iterable, objectInfo} = createIterable(data, startRow, endRow);
       for (const object of iterable) {
         objectInfo.index++;
         let matrix;
