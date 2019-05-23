@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {AmbientLight, DirectionalLight, LightingEffect} from 'deck.gl';
+import DeckGL from 'deck.gl';
+import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {PhongMaterial} from '@luma.gl/core';
 
 import ShadowPolygonLayer from './shadow-polygon-layer';

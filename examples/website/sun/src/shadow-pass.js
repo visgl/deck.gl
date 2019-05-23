@@ -1,4 +1,4 @@
-import LayersPass from '@deck.gl/core/src/passes/layers-pass';
+import {LayersPass} from '@deck.gl/core';
 import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
