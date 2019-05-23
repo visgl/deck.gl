@@ -124,7 +124,13 @@ export {
   TextLayer
 } from '@deck.gl/layers';
 
-export {ScreenGridLayer, GridLayer, HexagonLayer, ContourLayer} from '@deck.gl/aggregation-layers';
+export {
+  ScreenGridLayer,
+  GridLayer,
+  HexagonLayer,
+  ContourLayer,
+  _NewGridLayer
+} from '@deck.gl/aggregation-layers';
 
 export {
   GreatCircleLayer,

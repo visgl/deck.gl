@@ -577,7 +577,7 @@ export default class GPUGridAggregator {
     const resourceName = `cpu-result-${id}-${bufferName}`;
     result[bufferName] = result[bufferName] || resources[resourceName];
     if (result[bufferName]) {
-      result[bufferName].subData({data});
+      result[bufferName].setData({data});
     } else {
       // save resource for garbage collection
       resources[resourceName] = new Buffer(gl, data);

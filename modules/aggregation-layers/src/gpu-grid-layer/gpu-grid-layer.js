@@ -25,9 +25,8 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
+import {pointToDensityGridDataCPU} from './../grid-layer/grid-aggregator';
 
-const MINCOLOR = [0, 0, 0, 255];
-const MAXCOLOR = [0, 255, 0, 255];
 const defaultMaterial = new PhongMaterial();
 const defaultProps = {
   // color
@@ -49,7 +48,6 @@ const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
   fp64: false,
-  pickable: false, // TODO: Enable picking with GPU Aggregation
 
   // Optional material for 'lighting' shader module
   material: defaultMaterial,
@@ -73,8 +71,10 @@ export default class GPUGridLayer extends CompositeLayer {
   updateState(opts) {
     const aggregationFlags = this.getAggregationFlags(opts);
     if (aggregationFlags) {
-      // project data into grid cells
+      // aggregate points into grid cells
       this.getLayerData(aggregationFlags);
+      // reset cached CPU Aggregation results (used for picking)
+      this.setState({gridHash: null});
     }
   }
 
@@ -120,6 +120,71 @@ export default class GPUGridLayer extends CompositeLayer {
     return false;
   }
 
+  getHashKeyForIndex(index) {
+    const {gridSize, gridOrigin, cellSize} = this.state;
+    const yIndex = Math.floor(index / gridSize[0]);
+    const xIndex = index - yIndex * gridSize[0];
+    // This will match the index to the hash-key to access aggregation data from CPU aggregation results.
+    const latIdx = Math.floor(
+      (yIndex * cellSize[1] + gridOrigin[1] + 90 + cellSize[1] / 2) / cellSize[1]
+    );
+    const lonIdx = Math.floor(
+      (xIndex * cellSize[0] + gridOrigin[0] + 180 + cellSize[0] / 2) / cellSize[0]
+    );
+    return `${latIdx}-${lonIdx}`;
+  }
+
+  getPositionForIndex(index) {
+    const {gridSize, gridOrigin, cellSize} = this.state;
+    const yIndex = Math.floor(index / gridSize[0]);
+    const xIndex = index - yIndex * gridSize[0];
+    const yPos = yIndex * cellSize[1] + gridOrigin[1];
+    const xPos = xIndex * cellSize[0] + gridOrigin[0];
+    return [xPos, yPos];
+  }
+
+  getPickingInfo({info, mode}) {
+    const {index} = info;
+    let object = null;
+    if (index >= 0) {
+      const {gpuGridAggregator} = this.state;
+      const position = this.getPositionForIndex(index);
+      const colorInfo = GPUGridAggregator.getAggregationData(
+        Object.assign({pixelIndex: index}, gpuGridAggregator.getData('color'))
+      );
+      const elevationInfo = GPUGridAggregator.getAggregationData(
+        Object.assign({pixelIndex: index}, gpuGridAggregator.getData('elevation'))
+      );
+
+      object = {
+        colorValue: colorInfo.cellWeight,
+        elevationValue: elevationInfo.cellWeight,
+        count: colorInfo.cellCount || elevationInfo.cellCount,
+        position,
+        totalCount: colorInfo.totalCount || elevationInfo.totalCount
+      };
+      if (mode !== 'hover') {
+        // perform CPU aggregation for full list of points for each cell
+        const {data, getPosition} = this.props;
+        let {gridHash} = this.state;
+        if (!gridHash) {
+          const cpuAggregation = pointToDensityGridDataCPU(data, this.props.cellSize, getPosition);
+          gridHash = cpuAggregation.gridHash;
+          this.setState({gridHash});
+        }
+        const key = this.getHashKeyForIndex(index);
+        const cpuAggregationData = gridHash[key];
+        Object.assign(object, cpuAggregationData);
+      }
+    }
+
+    return Object.assign(info, {
+      picked: Boolean(object),
+      // override object with picked cell
+      object
+    });
+  }
+
   getLayerData(aggregationFlags) {
     const {
       data,
@@ -162,11 +227,6 @@ export default class GPUGridLayer extends CompositeLayer {
     this.setState({weights, gridSize, gridOrigin, cellSize, boundingBox});
   }
 
-  getPickingInfo({info}) {
-    // TODO: perform picking
-    return info;
-  }
-
   renderLayers() {
     const {
       elevationScale,
@@ -179,8 +239,6 @@ export default class GPUGridLayer extends CompositeLayer {
     } = this.props;
 
     const {weights, gridSize, gridOrigin, cellSize} = this.state;
-    const minColor = MINCOLOR;
-    const maxColor = MAXCOLOR;
 
     const colorRange = colorRangeToFlatArray(this.props.colorRange, Float32Array, 255);
 
@@ -188,16 +246,9 @@ export default class GPUGridLayer extends CompositeLayer {
 
     return new SubLayerClass(
       {
-        colorBuffer: weights.color.aggregationBuffer,
-        colorMaxMinBuffer: weights.color.maxMinBuffer,
-        elevationBuffer: weights.elevation.aggregationBuffer,
-        elevationMaxMinBuffer: weights.elevation.maxMinBuffer,
         gridSize,
         gridOrigin,
         gridOffset: cellSize,
-        numInstances: gridSize[0] * gridSize[1],
-        minColor,
-        maxColor,
         colorRange,
         elevationRange,
 
@@ -206,14 +257,14 @@ export default class GPUGridLayer extends CompositeLayer {
         coverage,
         material,
         elevationScale,
-        extruded,
-        pickable: false
+        extruded
       },
       this.getSubLayerProps({
         id: 'gpu-grid-cell'
       }),
       {
-        data: this.state.layerData
+        data: weights,
+        numInstances: gridSize[0] * gridSize[1]
       }
     );
   }

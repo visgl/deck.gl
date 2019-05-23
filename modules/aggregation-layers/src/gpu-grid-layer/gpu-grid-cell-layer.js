@@ -37,8 +37,6 @@ const defaultProps = {
   elevationScale: {type: 'number', min: 0, value: 1},
   extruded: true,
   fp64: false,
-  pickable: false, // TODO: add picking support (read from aggregated texture)
-
   material: defaultMaterial
 };
 
@@ -48,6 +46,7 @@ export default class GPUGridCellLayer extends Layer {
   }
 
   initializeState() {
+    const {gl} = this.context;
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       colors: {
@@ -61,27 +60,9 @@ export default class GPUGridCellLayer extends Layer {
         noAlloc: true
       }
     });
-  }
-
-  updateState({props, oldProps, changeFlags}) {
-    super.updateState({props, oldProps, changeFlags});
-    // Re-generate model if geometry changed
-    if (props.fp64 !== oldProps.fp64) {
-      const {gl} = this.context;
-      if (this.state.model) {
-        this.state.model.delete();
-      }
-      const model = this._getModel(gl);
-      this._setupUniformBuffer(model);
-      this.setState({model});
-      this.state.attributeManager.invalidateAll();
-    }
-    if (props.colorBuffer !== oldProps.colorBuffer) {
-      this.state.attributeManager.invalidate('colors');
-    }
-    if (props.elevationBuffer !== oldProps.elevationBuffer) {
-      this.state.attributeManager.invalidate('elevations');
-    }
+    const model = this._getModel(gl);
+    this._setupUniformBuffer(model);
+    this.setState({model});
   }
 
   _getModel(gl) {
@@ -98,6 +79,7 @@ export default class GPUGridCellLayer extends Layer {
 
   draw({uniforms}) {
     const {
+      data,
       cellSize,
       offset,
       extruded,
@@ -107,13 +89,13 @@ export default class GPUGridCellLayer extends Layer {
       gridOrigin,
       gridOffset,
       colorRange,
-      colorMaxMinBuffer,
-      elevationRange,
-      elevationMaxMinBuffer
+      elevationRange
     } = this.props;
 
     const gridOriginLow = [fp64LowPart(gridOrigin[0]), fp64LowPart(gridOrigin[1])];
     const gridOffsetLow = [fp64LowPart(gridOffset[0]), fp64LowPart(gridOffset[1])];
+    const colorMaxMinBuffer = data.color.maxMinBuffer;
+    const elevationMaxMinBuffer = data.elevation.maxMinBuffer;
 
     colorMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: COLOR_DATA_UBO_INDEX});
     elevationMaxMinBuffer.bind({target: GL.UNIFORM_BUFFER, index: ELEVATION_DATA_UBO_INDEX});
@@ -140,16 +122,16 @@ export default class GPUGridCellLayer extends Layer {
   }
 
   calculateColors(attribute) {
-    const {colorBuffer} = this.props;
+    const {data} = this.props;
     attribute.update({
-      buffer: colorBuffer
+      buffer: data.color.aggregationBuffer
     });
   }
 
   calculateElevations(attribute) {
-    const {elevationBuffer} = this.props;
+    const {data} = this.props;
     attribute.update({
-      buffer: elevationBuffer
+      buffer: data.elevation.aggregationBuffer
     });
   }
 

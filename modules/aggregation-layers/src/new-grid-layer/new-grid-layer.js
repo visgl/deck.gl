@@ -58,16 +58,11 @@ function getValueFunc(aggregation, accessor) {
   }
 }
 
-export default class NewGPULayer extends CompositeLayer {
+export default class NewGridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       useGPUAggregation: true
     };
-  }
-
-  getPickingInfo(opts) {
-    // TODO: implement picking.
-    return Object.assign({}, opts.info, {picked: false, object: null});
   }
 
   updateState({oldProps, props, changeFlags}) {
@@ -161,5 +156,5 @@ export default class NewGPULayer extends CompositeLayer {
   }
 }
 
-NewGPULayer.layerName = 'NewGPULayer';
-NewGPULayer.defaultProps = defaultProps;
+NewGridLayer.layerName = 'NewGridLayer';
+NewGridLayer.defaultProps = defaultProps;
