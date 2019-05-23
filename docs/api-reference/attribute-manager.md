@@ -102,11 +102,16 @@ Mark an attribute as need update.
 Parameters:
 
 * `name` (String) - Either the name of the attribute, or the name of an accessor. If an name of accessor is provided, all attributes with that accessor are invalidated.
+* `dataRange` (Object, optional) - A partial range of the attribute to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attribute for all data.
 
 
 ##### `invalidateAll`
 
 Mark all attributes as need update.
+
+Parameters:
+
+* `dataRange` (Object, optional) - A partial range of the attributes to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attributes for all data.
 
 
 ##### `update`

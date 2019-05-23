@@ -191,8 +191,8 @@ export default class AttributeManager {
   }
 
   // Marks an attribute for update
-  invalidate(triggerName) {
-    const invalidatedAttributes = this._invalidateTrigger(triggerName);
+  invalidate(triggerName, dataRange) {
+    const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
     logFunctions.onLog({
       level: LOG_DETAIL_PRIORITY,
@@ -200,9 +200,9 @@ export default class AttributeManager {
     });
   }
 
-  invalidateAll() {
+  invalidateAll(dataRange) {
     for (const attributeName in this.attributes) {
-      this.attributes[attributeName].setNeedsUpdate();
+      this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
     logFunctions.onLog({
@@ -369,7 +369,7 @@ export default class AttributeManager {
     this.updateTriggers = triggers;
   }
 
-  _invalidateTrigger(triggerName) {
+  _invalidateTrigger(triggerName, dataRange) {
     const {attributes, updateTriggers} = this;
     const invalidatedAttributes = updateTriggers[triggerName];
 
@@ -377,7 +377,7 @@ export default class AttributeManager {
       invalidatedAttributes.forEach(name => {
         const attribute = attributes[name];
         if (attribute) {
-          attribute.setNeedsUpdate();
+          attribute.setNeedsUpdate(attribute.id, dataRange);
         }
       });
     } else {
