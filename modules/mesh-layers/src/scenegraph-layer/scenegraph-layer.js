@@ -130,10 +130,12 @@ export default class ScenegraphLayer extends Layer {
   }
 
   _applyAllAttributes(scenegraph) {
-    const allAttributes = this.getAttributeManager().getAttributes();
-    scenegraph.traverse(model => {
-      this._setModelAttributes(model.model, allAttributes);
-    });
+    if (this.state.attributesAvailable) {
+      const allAttributes = this.getAttributeManager().getAttributes();
+      scenegraph.traverse(model => {
+        this._setModelAttributes(model.model, allAttributes);
+      });
+    }
   }
 
   _applyAnimationsProp(scenegraph, animator, animationsProp) {
@@ -194,6 +196,7 @@ export default class ScenegraphLayer extends Layer {
 
   updateAttributes(props) {
     super.updateAttributes(props);
+    this.setState({attributesAvailable: true});
     if (!this.state.scenegraph) return;
 
     const attributeManager = this.getAttributeManager();
