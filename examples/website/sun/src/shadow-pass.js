@@ -42,7 +42,6 @@ export default class ShadowPass extends LayersPass {
     withParameters(
       this.gl,
       {
-        framebuffer: target,
         depthRange: [0, 1],
         depthTest: true,
         blend: false,
@@ -57,7 +56,7 @@ export default class ShadowPass extends LayersPass {
           target.resize({width, height});
         }
 
-        super.render(params);
+        super.render(Object.assign(params, {outputBuffer: target}));
         // this.target.generateMipmap();
       }
     );
