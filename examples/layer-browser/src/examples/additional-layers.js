@@ -51,33 +51,14 @@ const SimpleMeshLayerExample = {
   }
 };
 
-
-const DUCK_URL = 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
-let scenegraph = null;
-/* global fetch, window */
-fetch(DUCK_URL).then(response => response.arrayBuffer()).then(arrayBuffer => {
-  return parse(arrayBuffer, GLTFScenegraphLoader, {gl: window.gl});
-}).then(data => {
-  scenegraph = data.scenes[0];
-});
-
 const ScenegraphLayerStaticExample = {
   layer: ScenegraphLayer,
-  getData() {
-    if (!scenegraph) {
-      throw new Error("Scenegraph not loaded");
-    }
-    console.log('Static Scenegraph') // eslint-disable-line
-    return scenegraph;
-  },
   props: {
     id: 'scenegraph-layer',
     data: dataSamples.points,
     pickable: true,
     sizeScale: 50,
-    scenegraph,
-    // scenegraph:
-      // 'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
+    scenegraph: null,
     getPosition: d => d.COORDINATES,
     getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
     getTranslation: d => [0, 0, Math.random() * 10000],
@@ -85,10 +66,32 @@ const ScenegraphLayerStaticExample = {
   }
 };
 
+const DUCK_URL =
+  'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb';
+/* global fetch, window */
+fetch(DUCK_URL)
+  .then(response => response.arrayBuffer())
+  .then(arrayBuffer => {
+    const loadOptions = {
+      gl: window.gl,
+      waitForFullLoad: true,
+      modelOptions: {
+        vs: require('../../../../modules/mesh-layers/src/scenegraph-layer/scenegraph-layer-vertex.glsl.js').default,
+        fs: require('../../../../modules/mesh-layers/src/scenegraph-layer/scenegraph-layer-fragment.glsl.js').default,
+        modules: ['project32', 'picking'],
+        isInstanced: true
+      }
+    };
+    return parse(arrayBuffer, GLTFScenegraphLoader, loadOptions);
+  })
+  .then(data => {
+    ScenegraphLayerStaticExample.props.scenegraph = data.scenes[0];
+  });
+
 const ScenegraphLayerExample = {
   layer: ScenegraphLayer,
   props: {
-    id: 'scenegraph-layer',
+    id: 'scenegraph-layer-static',
     data: dataSamples.points,
     pickable: true,
     sizeScale: 50,
