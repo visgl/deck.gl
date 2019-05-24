@@ -94,7 +94,7 @@ import memoize from './utils/memoize';
 // lighting
 export {AmbientLight} from '@luma.gl/core';
 
-export {extendLayer, LayerExtension} from './lib/layer-extension';
+export {LayerExtension} from './lib/layer-extension';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)

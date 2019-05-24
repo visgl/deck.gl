@@ -76,5 +76,7 @@ void main(void) {
   
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
+
+  DECKGL_VERTEX_END();
 }
 `;

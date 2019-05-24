@@ -73,6 +73,7 @@ const defaultProps = {
 
   parameters: {},
   uniforms: {},
+  extensions: [],
   framebuffer: null,
 
   animation: null, // Passed prop animation functions to evaluate props
@@ -96,6 +97,13 @@ export default class Layer extends Component {
   toString() {
     const className = this.constructor.layerName || this.constructor.name;
     return `${className}({id: '${this.props.id}'})`;
+  }
+
+  getShaders(shaders) {
+    for (const extension of this.props.extensions) {
+      shaders = extension.getShaders(this, shaders);
+    }
+    return shaders;
   }
 
   // Public API
@@ -574,6 +582,11 @@ export default class Layer extends Component {
     this.initializeState(this.context);
     // End subclass lifecycle methods
 
+    // Initialize extensions
+    for (const extension of this.props.extensions) {
+      extension.initializeState(this, this.context);
+    }
+
     // TODO deprecated, for backwards compatibility with older layers
     // in case layer resets state
     this.state.attributeManager = this.getAttributeManager();
@@ -616,6 +629,10 @@ export default class Layer extends Component {
       } catch (error) {
         // ignore error if gl context is missing
       }
+    }
+    // Execute extension updates
+    for (const extension of this.props.extensions) {
+      extension.updateState(this, updateParams);
     }
     // End subclass lifecycle methods
 

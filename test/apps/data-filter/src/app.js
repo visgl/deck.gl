@@ -8,10 +8,8 @@ import DataFilterExtension from './data-filter-extension';
 import POINTS from './data-sample';
 
 import {extendLayer} from '@deck.gl/core';
-const FilteredScatterplotLayer = extendLayer(
-  ScatterplotLayer,
-  new DataFilterExtension({filterSize: 2})
-);
+
+const dataFilterExtension = new DataFilterExtension({filterSize: 2});
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.45,
@@ -48,7 +46,7 @@ class Root extends Component {
     ];
 
     return [
-      new FilteredScatterplotLayer({
+      new ScatterplotLayer({
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
         data: POINTS,
@@ -60,7 +58,9 @@ class Root extends Component {
         getFilterValue: d => d,
 
         // Filter
-        filterRange
+        filterRange,
+
+        extensions: [dataFilterExtension]
       })
     ];
   }

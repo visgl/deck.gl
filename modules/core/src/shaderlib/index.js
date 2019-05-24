@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {registerShaderModules, setDefaultShaderModules} from '@luma.gl/core';
+import {registerShaderModules, setDefaultShaderModules, setShaderHook} from '@luma.gl/core';
 import {fp32, fp64, picking, gouraudlighting, phonglighting} from '@luma.gl/core';
 import project from '../shaderlib/project/project';
 import project32 from '../shaderlib/project32/project32';
@@ -37,6 +37,14 @@ export function initializeShaderModules() {
   ]);
 
   setDefaultShaderModules([project]);
+
+  setShaderHook('vs', {
+    signature: 'DECKGL_VERTEX_END()'
+  });
+
+  setShaderHook('fs', {
+    signature: 'DECKGL_FILTER_COLOR(inout vec4 color, vec2 texCoords)'
+  });
 }
 
 initializeShaderModules();

@@ -23,63 +23,11 @@ export class LayerExtension {
     this.opts = opts;
   }
 
-  getDefaultProps() {
-    return {};
-  }
-
-  getShaders(layer) {
-    return {};
+  getShaders(layer, shaders) {
+    return shaders;
   }
 
   initializeState(layer, params) {}
 
   updateState(layer, params) {}
-}
-
-export function extendLayer(Layer, ...extensions) {
-  class NewLayer extends Layer {
-    getShaders() {
-      const shaders = super.getShaders();
-      shaders.modules = shaders.modules || [];
-      shaders.inject = shaders.inject || {};
-      shaders.defines = shaders.defines || {};
-
-      for (const extension of extensions) {
-        const extShaders = extension.getShaders(this);
-        if (extShaders.modules) {
-          shaders.modules.push(...extShaders.modules);
-        }
-        Object.assign(shaders.inject, extShaders.inject);
-        Object.assign(shaders.defines, extShaders.defines);
-      }
-      return shaders;
-    }
-
-    initializeState(params) {
-      super.initializeState(params);
-
-      for (const extension of extensions) {
-        extension.initializeState(this, params);
-      }
-    }
-
-    updateState(params) {
-      super.updateState(params);
-
-      for (const extension of extensions) {
-        extension.updateState(this, params);
-      }
-    }
-  }
-
-  NewLayer.defaultProps = Object.assign(
-    {},
-    ...extensions.map(extension => extension.getDefaultProps())
-  );
-  NewLayer.layerName = extensions.reduce(
-    (name, extension) => `${extension.name}${name}`,
-    Layer.layerName
-  );
-
-  return NewLayer;
 }

@@ -1,10 +1,16 @@
 import {LayerExtension} from '@deck.gl/core';
+import {setModuleInjection} from '@luma.gl/shadertools';
 
 const DATA_TYPE_FROM_SIZE = {
   1: 'float',
   2: 'vec2',
   3: 'vec3',
   4: 'vec4'
+};
+
+const defaultProps = {
+  getFilterValue: 1,
+  filterRange: [0, 2]
 };
 
 export default class DataFilterExtension extends LayerExtension {
@@ -15,35 +21,13 @@ export default class DataFilterExtension extends LayerExtension {
     super({filterSize});
   }
 
-  get name() {
-    return 'DataFilter';
-  }
-
-  getDefaultProps() {
-    return {
-      getFilterValue: 1,
-      filterRange: [0, 2]
-    };
-  }
-
-  getShaders() {
+  getShaders(layer, shaders) {
     const {filterSize} = this.opts;
     const dataType = DATA_TYPE_FROM_SIZE[filterSize];
 
-    return {
-      modules: [getDataFilterShaderModule(filterSize)],
-      inject: {
-        'vs:#decl': `
-  attribute ${dataType} instanceFilterValue;
-  `,
-        'vs:#main-end': `
-  filter_setValue(instanceFilterValue);
-  `,
-        'fs:#main-end': `
-  gl_FragColor = filter_filterColor(gl_FragColor);
-  `
-      }
-    };
+    shaders.modules.push(getDataFilterShaderModule(filterSize));
+
+    return shaders;
   }
 
   initializeState(layer) {
@@ -68,33 +52,25 @@ function getDataFilterShaderModule(filterSize) {
   const vs = `
   uniform ${dataType} filter_min;
   uniform ${dataType} filter_max;
+
+  attribute ${dataType} instanceFilterValue;
+
   varying float filter_isVisible;
 
   void filter_setValue(bool visible) {
     filter_isVisible = float(visible);
   }
-
-  void filter_setValue(${dataType} value) {
-    filter_setValue(${
-      filterSize === 1
-        ? 'value <= filter_max && value >= filter_min'
-        : 'all(lessThanEqual(value, filter_max)) && all(greaterThanEqual(value, filter_min))'
-    });
-  }
   `;
 
   const fs = `
   varying float filter_isVisible;
-  vec4 filter_filterColor(vec4 color) {
-    if (filter_isVisible < 0.5) {
-      discard;
-    }
-    return color;
-  }
   `;
 
+  // filter_setValue(instanceFilterValue);
+  const moduleName = `data-filter-${filterSize}`;
+
   const dataFilterModule = {
-    name: `data-filter-${filterSize}`,
+    name: moduleName,
     vs,
     fs,
     getUniforms: (opts = {}) => {
@@ -112,6 +88,22 @@ function getDataFilterShaderModule(filterSize) {
           };
     }
   };
+
+  setModuleInjection('vs', moduleName, {
+    shaderHook: 'DECKGL_VERTEX_END',
+    injection: filterSize === 1 ? `
+      filter_setValue(value <= filter_max && value >= filter_min);
+    ` : `
+      filter_setValue(all(lessThanEqual(value, filter_max)) && all(greaterThanEqual(value, filter_min)));
+    `
+  })
+
+  setModuleInjection('fs', moduleName, {
+    shaderHook: 'DECKGL_DISCARD',
+    injection: `
+    if (filter_isVisible < 0.5) discard;
+    `,
+  })
 
   // Save generated shader module
   dataFilterShaderModules[filterSize] = dataFilterModule;
