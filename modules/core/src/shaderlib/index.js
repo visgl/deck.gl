@@ -39,9 +39,14 @@ export function initializeShaderModules() {
   setDefaultShaderModules([project]);
 
   setShaderHook('vs', {
-    signature: 'DECKGL_VERTEX_END()'
+    signature: 'DECKGL_MAIN_START()'
   });
-
+  setShaderHook('vs', {
+    signature: 'DECKGL_FILTER_SIZE(inout vec3 size)'
+  });
+  setShaderHook('vs', {
+    signature: 'DECKGL_MAIN_END()'
+  });
   setShaderHook('fs', {
     signature: 'DECKGL_FILTER_COLOR(inout vec4 color, vec2 texCoords)'
   });

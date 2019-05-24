@@ -45,7 +45,7 @@ void main(void) {
     discard;
   }
 
-  DECKGL_FILTER_COLOR(gl_FragColor, innerUnitRadius);
+  DECKGL_FILTER_COLOR(gl_FragColor, unitPosition);
 
   // use highlight color if this fragment belongs to the selected object.
   gl_FragColor = picking_filterHighlightColor(gl_FragColor);

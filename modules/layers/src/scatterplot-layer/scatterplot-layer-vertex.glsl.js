@@ -47,6 +47,8 @@ varying vec2 unitPosition;
 varying float innerUnitRadius;
 
 void main(void) {
+  DECKGL_MAIN_START();
+
   // Multiply out radius and clamp to limits
   float outerRadiusPixels = clamp(
     project_size_to_pixel(radiusScale * instanceRadius),
@@ -68,6 +70,7 @@ void main(void) {
   innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
   
   vec3 offset = positions * project_pixel_size(outerRadiusPixels);
+  DECKGL_FILTER_SIZE(offset);
   gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset);
 
   // Apply opacity to instance color, or return instance picking color
@@ -77,6 +80,6 @@ void main(void) {
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
 
-  DECKGL_VERTEX_END();
+  DECKGL_MAIN_END();
 }
 `;

@@ -7,14 +7,12 @@ import DeckGL, {ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import DataFilterExtension from './data-filter-extension';
 import POINTS from './data-sample';
 
-import {extendLayer} from '@deck.gl/core';
-
-const dataFilterExtension = new DataFilterExtension({filterSize: 2});
+const dataFilterExtension = new DataFilterExtension({filterSize: 2, margin: 1000});
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.45,
   latitude: 37.78,
-  zoom: 11
+  zoom: 14
 };
 
 class Root extends Component {
@@ -54,7 +52,7 @@ class Root extends Component {
         // Data accessors
         getPosition: d => d,
         getFillColor: [0, 180, 255],
-        getRadius: 4,
+        getRadius: 10,
         getFilterValue: d => d,
 
         // Filter
