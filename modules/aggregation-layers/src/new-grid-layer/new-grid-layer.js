@@ -3,7 +3,9 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import GPUGridLayer from '../gpu-grid-layer/gpu-grid-layer';
 import GridLayer from '../grid-layer/grid-layer';
 
-const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, GridLayer.defaultProps);
+const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, GridLayer.defaultProps, {
+  gpuAggregation: false
+});
 
 export default class NewGridLayer extends CompositeLayer {
   initializeState() {
@@ -21,7 +23,9 @@ export default class NewGridLayer extends CompositeLayer {
   renderLayers() {
     const {data, updateTriggers} = this.props;
     const id = this.state.useGPUAggregation ? 'GPU' : 'CPU';
-    const LayerType = this.state.useGPUAggregation ? GPUGridLayer : GridLayer;
+    const LayerType = this.state.useGPUAggregation
+      ? this.getSubLayerClass('GPU', GPUGridLayer)
+      : this.getSubLayerClass('CPU', GridLayer);
     return new LayerType(
       this.props,
       this.getSubLayerProps({
