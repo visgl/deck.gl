@@ -47,6 +47,13 @@ uniform vec2 gridOffset;
 uniform vec2 gridOffsetLow;
 uniform vec4 colorRange[RANGE_COUNT];
 uniform vec2 elevationRange;
+
+// Domain uniforms
+uniform vec2 colorDomain;
+uniform bool colorDomainValid;
+uniform vec2 elevationDomain;
+uniform bool elevationDomainValid;
+
 layout(std140) uniform;
 uniform ColorData
 {
@@ -81,19 +88,22 @@ vec4 quantizeScale(vec2 domain, vec4 range[RANGE_COUNT], float value) {
 }
 
 float linearScale(vec2 domain, vec2 range, float value) {
-  return ((value - domain.x) / (domain.y - domain.x)) * (range.y - range.x) + range.x;
+  if (value >= (domain.x - EPSILON) && value <= (domain.y + EPSILON)) {
+    return ((value - domain.x) / (domain.y - domain.x)) * (range.y - range.x) + range.x;
+  }
+  return -1.;
 }
 
 void main(void) {
 
-  vec2 colorDomain = vec2(colorData.maxMinCount.a, colorData.maxMinCount.r);
-  vec4 color = quantizeScale(colorDomain, colorRange, colors.r);
+  vec2 clrDomain = colorDomainValid ? colorDomain : vec2(colorData.maxMinCount.a, colorData.maxMinCount.r);
+  vec4 color = quantizeScale(clrDomain, colorRange, colors.r);
 
   float elevation = 0.0;
 
   if (extruded) {
-    vec2 elevationDomain = vec2(elevationData.maxMinCount.a, elevationData.maxMinCount.r);
-    elevation = linearScale(elevationDomain, elevationRange, elevations.r);
+    vec2 elvDomain = elevationDomainValid ? elevationDomain : vec2(elevationData.maxMinCount.a, elevationData.maxMinCount.r);
+    elevation = linearScale(elvDomain, elevationRange, elevations.r);
     elevation = elevation  * (positions.z + 1.0) / 2.0 * elevationScale;
   }
 

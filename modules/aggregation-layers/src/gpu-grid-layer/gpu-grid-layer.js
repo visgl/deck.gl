@@ -240,7 +240,9 @@ export default class GPUGridLayer extends CompositeLayer {
       cellSize: cellSizeMeters,
       coverage,
       material,
-      elevationRange
+      elevationRange,
+      colorDomain,
+      elevationDomain
     } = this.props;
 
     const {weights, gridSize, gridOrigin, cellSize} = this.state;
@@ -256,6 +258,8 @@ export default class GPUGridLayer extends CompositeLayer {
         gridOffset: cellSize,
         colorRange,
         elevationRange,
+        colorDomain,
+        elevationDomain,
 
         fp64,
         cellSize: cellSizeMeters,
