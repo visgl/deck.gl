@@ -25,9 +25,9 @@ import {GridCellLayer} from '@deck.gl/layers';
 import BinSorter from '../utils/bin-sorter';
 import {defaultColorRange} from '../utils/color-utils';
 import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
-
 import {pointToDensityGridDataCPU} from './grid-aggregator';
-
+import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
+import {getMean, getSum, getMax, getMin} from '../utils/aggregation-operation-utils';
 function nop() {}
 
 const defaultMaterial = new PhongMaterial();
@@ -39,6 +39,8 @@ const defaultProps = {
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorValue: {type: 'accessor', value: DEFAULT_GETVALUE},
+  getColorWeight: {type: 'accessor', value: x => 1},
+  colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   onSetColorDomain: nop,
@@ -47,6 +49,8 @@ const defaultProps = {
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationValue: {type: 'accessor', value: DEFAULT_GETVALUE},
+  getElevationWeight: {type: 'accessor', value: x => 1},
+  elevationAggregation: 'SUM',
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   elevationScale: 1,
@@ -62,6 +66,23 @@ const defaultProps = {
   // Optional material for 'lighting' shader module
   material: defaultMaterial
 };
+
+// Function to convert from getWeight/aggregation props to getValue prop for Color and Elevation
+function getValueFunc(aggregation, accessor) {
+  const op = AGGREGATION_OPERATION[aggregation.toUpperCase()] || AGGREGATION_OPERATION.SUM;
+  switch (op) {
+    case AGGREGATION_OPERATION.MIN:
+      return pts => getMin(pts, accessor);
+    case AGGREGATION_OPERATION.SUM:
+      return pts => getSum(pts, accessor);
+    case AGGREGATION_OPERATION.MEAN:
+      return pts => getMean(pts, accessor);
+    case AGGREGATION_OPERATION.MAX:
+      return pts => getMax(pts, accessor);
+    default:
+      return null;
+  }
+}
 
 export default class GridLayer extends CompositeLayer {
   initializeState() {
@@ -89,6 +110,28 @@ export default class GridLayer extends CompositeLayer {
     }
   }
 
+  deduceGetColorValueFunc() {
+    let {getColorValue} = this.props;
+    const {colorAggregation, getColorWeight} = this.props;
+
+    // If a custom `getColorValue` is provided (other than default) use it
+    if (getColorValue === GridLayer.defaultProps.getColorValue.value) {
+      getColorValue = getValueFunc(colorAggregation, getColorWeight);
+    }
+    return getColorValue;
+  }
+
+  deduceGetElevationValueFunc() {
+    let {getElevationValue} = this.props;
+    const {elevationAggregation, getElevationWeight} = this.props;
+
+    // If a custom `getElevationValue` is provided (other than default) use it
+    if (getElevationValue === GridLayer.defaultProps.getColorValue.value) {
+      getElevationValue = getValueFunc(elevationAggregation, getElevationWeight);
+    }
+    return getElevationValue;
+  }
+
   needsReProjectPoints(oldProps, props, changeFlags) {
     return (
       oldProps.cellSize !== props.cellSize ||
@@ -106,7 +149,7 @@ export default class GridLayer extends CompositeLayer {
       getFillColor: [
         {
           id: 'value',
-          triggers: ['getColorValue'],
+          triggers: ['getColorValue', 'getColorWeight', 'colorAggregation'],
           updater: this.getSortedColorBins
         },
         {
@@ -123,7 +166,7 @@ export default class GridLayer extends CompositeLayer {
       getElevation: [
         {
           id: 'value',
-          triggers: ['getElevationValue'],
+          triggers: ['getElevationValue', 'getElevationWeight', 'elevationAggregation'],
           updater: this.getSortedElevationBins
         },
         {
@@ -228,7 +271,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   getSortedColorBins() {
-    const {getColorValue} = this.props;
+    const getColorValue = this.deduceGetColorValueFunc();
     const sortedColorBins = new BinSorter(this.state.layerData || [], getColorValue);
 
     this.setState({sortedColorBins});
@@ -236,7 +279,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   getSortedElevationBins() {
-    const {getElevationValue} = this.props;
+    const getElevationValue = this.deduceGetElevationValueFunc();
     const sortedElevationBins = new BinSorter(this.state.layerData || [], getElevationValue);
     this.setState({sortedElevationBins});
     this.getElevationValueDomain();

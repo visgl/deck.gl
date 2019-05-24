@@ -201,14 +201,18 @@ export default class GPUGridLayer extends CompositeLayer {
     const weightParams = {
       color: {
         getWeight: getColorWeight,
-        operation: AGGREGATION_OPERATION[colorAggregation] || AGGREGATION_OPERATION[defaultProps.colorAggregation],
+        operation:
+          AGGREGATION_OPERATION[colorAggregation] ||
+          AGGREGATION_OPERATION[defaultProps.colorAggregation],
         needMin: true,
         needMax: true,
         combineMaxMin: true
       },
       elevation: {
         getWeight: getElevationWeight,
-        operation: AGGREGATION_OPERATION[elevationAggregation] || AGGREGATION_OPERATION[defaultProps.elevationAggregation],
+        operation:
+          AGGREGATION_OPERATION[elevationAggregation] ||
+          AGGREGATION_OPERATION[defaultProps.elevationAggregation],
         needMin: true,
         needMax: true,
         combineMaxMin: true

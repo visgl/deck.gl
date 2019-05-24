@@ -49,7 +49,7 @@ test('NewGridLayer', t => {
   t.end();
 });
 
-test.only('NewGridLayer#updates', t => {
+test('NewGridLayer#updates', t => {
   if (!GPUGridAggregator.isSupported(gl)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
