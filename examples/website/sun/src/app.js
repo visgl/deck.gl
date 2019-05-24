@@ -6,7 +6,6 @@ import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {PhongMaterial} from '@luma.gl/core';
 
 import ShadowPolygonLayer from './shadow-polygon-layer';
-import ShadowPass from './shadow-pass';
 import ShadowEffect from './shadow-effect';
 
 // Set your mapbox token here
@@ -56,12 +55,6 @@ export class App extends Component {
     this.state = {};
 
     this._deck = null;
-    this._onWebGLInitialized = this._onWebGLInitialized.bind(this);
-  }
-
-  _onWebGLInitialized(gl) {
-    this._shadowPass = new ShadowPass(gl);
-    this.setState({shadowMap: this._shadowPass.shadowMap});
   }
 
   _renderLayers() {
@@ -103,7 +96,6 @@ export class App extends Component {
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}
-        onWebGLInitialized={this._onWebGLInitialized}
       >
         {baseMap && (
           <StaticMap
