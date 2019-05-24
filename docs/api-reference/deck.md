@@ -379,6 +379,10 @@ Notes:
 
 ## Member Variables
 
+#### metrics
+
+A map of various performance statistics for the last 60 frames of rendering.
+
 
 ## Remarks
 
