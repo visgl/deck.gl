@@ -148,7 +148,9 @@ export default class Tesselator {
     const {attributes, _attributeDefs, typedArrayManager, fp64} = this;
     for (const name in _attributeDefs) {
       const def = _attributeDefs[name];
-      // if partial update, copy the old array into the new one
+      // If dataRange is supplied, this is a partial update.
+      // In case we need to reallocate the typed array, it will need the old values copied
+      // before performing partial update.
       def.copy = Boolean(dataRange);
 
       // do not create fp64-only attributes unless in fp64 mode
