@@ -107,6 +107,16 @@ export const zigzag = [
       [positionOrigin[0] - 0.005, positionOrigin[1] + 0.005],
       [positionOrigin[0] - 0.005, positionOrigin[1] - 0.005]
     ]
+  },
+  {
+    // Big zigzag - 3D
+    path: new Array(12)
+      .fill(0)
+      .map((d, i) => [
+        positionOrigin[0] - 0.02 - i * i * 0.001 * (i % 2 ? 1 : -1),
+        positionOrigin[1] + (Math.cos(i * Math.PI) * 0.2) / (i + 4),
+        i * 1000
+      ])
   }
 ];
 
