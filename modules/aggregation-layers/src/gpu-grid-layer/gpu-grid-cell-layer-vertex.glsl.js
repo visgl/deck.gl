@@ -128,7 +128,7 @@ void main(void) {
     vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
     vColor = vec4(lightColor, color.a * opacity) / 255.;
   } else {
-    vColor = vec4(color.rgb, color.a * opacity);
+    vColor = vec4(color.rgb, color.a * opacity) / 255.;
   }
 }
 `;
