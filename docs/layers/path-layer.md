@@ -111,6 +111,13 @@ The maximum path width in pixels. This prop can be used to prevent the path from
 
 Type of joint. If `true`, draw round joints. Otherwise draw miter joints.
 
+##### `billboard` (Boolean, optional)
+
+* Default: `false`
+
+If `true`, extrude the path in screen space (width always faces the camera).
+If `false`, the width always faces up.
+
 ##### `miterLimit` (Number, optional)
 
 * Default: `4`
