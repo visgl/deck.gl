@@ -18,6 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+export const AGGREGATION_OPERATION = {
+  SUM: 1,
+  MEAN: 2,
+  MIN: 3,
+  MAX: 4
+};
+
 function sumReducer(accu, cur) {
   return accu + cur;
 }

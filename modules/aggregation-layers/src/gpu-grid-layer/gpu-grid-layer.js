@@ -22,7 +22,7 @@ import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
+import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';

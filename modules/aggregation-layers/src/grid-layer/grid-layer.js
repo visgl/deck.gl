@@ -26,8 +26,13 @@ import BinSorter from '../utils/bin-sorter';
 import {defaultColorRange} from '../utils/color-utils';
 import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
-import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
-import {getMean, getSum, getMax, getMin} from '../utils/aggregation-operation-utils';
+import {
+  getMean,
+  getSum,
+  getMax,
+  getMin,
+  AGGREGATION_OPERATION
+} from '../utils/aggregation-operation-utils';
 function nop() {}
 
 const defaultMaterial = new PhongMaterial();

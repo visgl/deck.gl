@@ -22,7 +22,7 @@ import {Layer, WebMercatorViewport, createIterable, log, experimental} from '@de
 const {count} = experimental;
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
+import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Buffer, isWebGL2} from '@luma.gl/core';
