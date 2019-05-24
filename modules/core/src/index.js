@@ -37,7 +37,7 @@ export {default as _SunLight} from './effects/lighting/sun-light';
 export {default as PostProcessEffect} from './effects/post-process-effect';
 
 // Passes
-export {default as LayersPass} from './passes/layers-pass';
+export {default as _LayersPass} from './passes/layers-pass';
 
 // Experimental Pure JS (non-React) bindings
 export {default as Deck} from './lib/deck';

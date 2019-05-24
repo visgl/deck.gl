@@ -1,6 +1,6 @@
 import {SolidPolygonLayer} from '@deck.gl/layers';
 
-import shadowModule from './shadow-module';
+import shadowModule from './shadow-effect/shadow-module';
 
 export default class ShadowPolygonLayer extends SolidPolygonLayer {
   getShaders(params) {

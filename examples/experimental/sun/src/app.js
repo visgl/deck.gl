@@ -6,7 +6,7 @@ import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {PhongMaterial} from '@luma.gl/core';
 
 import ShadowPolygonLayer from './shadow-polygon-layer';
-import ShadowEffect from './shadow-effect';
+import ShadowEffect from './shadow-effect/shadow-effect';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
