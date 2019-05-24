@@ -56,6 +56,27 @@ const GRID_LAYER_INFO = {
   goldenImage: './test/render/golden-images/grid-lnglat.png'
 };
 
+const HEXAGON_LAYER_INFO = {
+  viewState: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11.5,
+    pitch: 20,
+    bearing: 0
+  },
+  props: {
+    data: dataSamples.points,
+    extruded: true,
+    pickable: true,
+    radius: 1000,
+    opacity: 1,
+    elevationScale: 1,
+    elevationRange: [0, 3000],
+    coverage: 1,
+    getPosition: d => d.COORDINATES
+  }
+};
+
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
@@ -991,28 +1012,31 @@ export const TEST_CASES = [
   },
   {
     name: 'hexagon-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 20,
-      bearing: 0
-    },
+    viewState: HEXAGON_LAYER_INFO.viewState,
     layers: [
-      new HexagonLayer({
-        id: 'hexagon-lnglat',
-        data: dataSamples.points,
-        extruded: true,
-        pickable: true,
-        radius: 1000,
-        opacity: 1,
-        elevationScale: 1,
-        elevationRange: [0, 3000],
-        coverage: 1,
-        getPosition: d => d.COORDINATES,
-        getColorValue,
-        getElevationValue
-      })
+      new HexagonLayer(
+        Object.assign({}, HEXAGON_LAYER_INFO.props, {
+          id: 'hexagon-lnglat',
+          getColorValue,
+          getElevationValue
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/hexagon-lnglat.png'
+  },
+  {
+    name: 'hexagon-lnglat-2',
+    viewState: HEXAGON_LAYER_INFO.viewState,
+    layers: [
+      new HexagonLayer(
+        Object.assign({}, HEXAGON_LAYER_INFO.props, {
+          id: 'hexagon-lnglat',
+          getColorWeight,
+          colorAggregation,
+          getElevationWeight,
+          elevationAggregation
+        })
+      )
     ],
     goldenImage: './test/render/golden-images/hexagon-lnglat.png'
   },

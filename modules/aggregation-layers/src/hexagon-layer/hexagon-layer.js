@@ -25,18 +25,23 @@ import {ColumnLayer} from '@deck.gl/layers';
 import BinSorter from '../utils/bin-sorter';
 import {defaultColorRange} from '../utils/color-utils';
 import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
+import {getValueFunc} from '../utils/aggregation-operation-utils';
 
 import {pointToHexbin} from './hexagon-aggregator';
 
 function nop() {}
 
 const defaultMaterial = new PhongMaterial();
+// To detect a default value vs custom value, used in new-grid-layer
+const DEFAULT_GETVALUE = points => points.length;
 
 const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: {type: 'accessor', value: points => points.length},
+  getColorValue: {type: 'accessor', value: DEFAULT_GETVALUE},
+  getColorWeight: {type: 'accessor', value: x => 1},
+  colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
   upperPercentile: {type: 'number', value: 100, min: 0, max: 100},
   onSetColorDomain: nop,
@@ -44,7 +49,9 @@ const defaultProps = {
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: {type: 'accessor', value: points => points.length},
+  getElevationValue: {type: 'accessor', value: DEFAULT_GETVALUE},
+  getElevationWeight: {type: 'accessor', value: x => 1},
+  elevationAggregation: 'SUM',
   elevationLowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
   elevationUpperPercentile: {type: 'number', value: 100, min: 0, max: 100},
   elevationScale: {type: 'number', min: 0, value: 1},
@@ -75,6 +82,7 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
+    this.updateGetValueFuncs(props);
     const dimensionChanges = this.getDimensionChanges(oldProps, props);
 
     if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
@@ -83,6 +91,21 @@ export default class HexagonLayer extends CompositeLayer {
     } else if (dimensionChanges) {
       dimensionChanges.forEach(f => typeof f === 'function' && f.apply(this));
     }
+  }
+
+  updateGetValueFuncs(props) {
+    let {getColorValue, getElevationValue} = props;
+    const {colorAggregation, getColorWeight, elevationAggregation, getElevationWeight} = this.props;
+
+    // If a custom `getColorValue` is provided (other than default) use it
+    if (getColorValue === defaultProps.getColorValue.value) {
+      getColorValue = getValueFunc(colorAggregation, getColorWeight);
+    }
+    // If a custom `getElevationValue` is provided (other than default) use it
+    if (getElevationValue === defaultProps.getColorValue.value) {
+      getElevationValue = getValueFunc(elevationAggregation, getElevationWeight);
+    }
+    this.setState({getColorValue, getElevationValue});
   }
 
   needsReProjectPoints(oldProps, props) {
@@ -100,7 +123,7 @@ export default class HexagonLayer extends CompositeLayer {
       getFillColor: [
         {
           id: 'value',
-          triggers: ['getColorValue'],
+          triggers: ['getColorValue', 'getColorWeight', 'colorAggregation'],
           updater: this.getSortedColorBins
         },
         {
@@ -117,7 +140,7 @@ export default class HexagonLayer extends CompositeLayer {
       getElevation: [
         {
           id: 'value',
-          triggers: ['getElevationValue'],
+          triggers: ['getElevationValue', 'getElevationWeight', 'elevationAggregation'],
           updater: this.getSortedElevationBins
         },
         {
@@ -254,7 +277,7 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getSortedColorBins() {
-    const {getColorValue} = this.props;
+    const {getColorValue} = this.state;
     const sortedColorBins = new BinSorter(this.state.hexagons || [], getColorValue);
 
     this.setState({sortedColorBins});
@@ -262,7 +285,7 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getSortedElevationBins() {
-    const {getElevationValue} = this.props;
+    const {getElevationValue} = this.state;
     const sortedElevationBins = new BinSorter(this.state.hexagons || [], getElevationValue);
     this.setState({sortedElevationBins});
     this.getElevationValueDomain();
@@ -367,8 +390,8 @@ export default class HexagonLayer extends CompositeLayer {
         getFillColor: this._onGetSublayerColor.bind(this),
         getElevation: this._onGetSublayerElevation.bind(this),
         transitions: transitions && {
-          getFillColor: transitions.getColorValue,
-          getElevation: transitions.getElevationValue
+          getFillColor: transitions.getColorValue || transitions.getColorWeight,
+          getElevation: transitions.getElevationValue || transitions.getElevationWeight
         }
       },
       this.getSubLayerProps({

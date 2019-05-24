@@ -26,13 +26,7 @@ import BinSorter from '../utils/bin-sorter';
 import {defaultColorRange} from '../utils/color-utils';
 import {getQuantizeScale, getLinearScale} from '../utils/scale-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
-import {
-  getMean,
-  getSum,
-  getMax,
-  getMin,
-  AGGREGATION_OPERATION
-} from '../utils/aggregation-operation-utils';
+import {getValueFunc} from '../utils/aggregation-operation-utils';
 function nop() {}
 
 const defaultMaterial = new PhongMaterial();
@@ -72,23 +66,6 @@ const defaultProps = {
   material: defaultMaterial
 };
 
-// Function to convert from getWeight/aggregation props to getValue prop for Color and Elevation
-function getValueFunc(aggregation, accessor) {
-  const op = AGGREGATION_OPERATION[aggregation.toUpperCase()] || AGGREGATION_OPERATION.SUM;
-  switch (op) {
-    case AGGREGATION_OPERATION.MIN:
-      return pts => getMin(pts, accessor);
-    case AGGREGATION_OPERATION.SUM:
-      return pts => getSum(pts, accessor);
-    case AGGREGATION_OPERATION.MEAN:
-      return pts => getMean(pts, accessor);
-    case AGGREGATION_OPERATION.MAX:
-      return pts => getMax(pts, accessor);
-    default:
-      return null;
-  }
-}
-
 export default class GridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -104,6 +81,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
+    this.updateGetValueFuncs(props);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
 
     if (changeFlags.dataChanged || reprojectNeeded) {
@@ -115,26 +93,19 @@ export default class GridLayer extends CompositeLayer {
     }
   }
 
-  deduceGetColorValueFunc() {
-    let {getColorValue} = this.props;
-    const {colorAggregation, getColorWeight} = this.props;
+  updateGetValueFuncs(props) {
+    let {getColorValue, getElevationValue} = props;
+    const {colorAggregation, getColorWeight, elevationAggregation, getElevationWeight} = this.props;
 
     // If a custom `getColorValue` is provided (other than default) use it
-    if (getColorValue === GridLayer.defaultProps.getColorValue.value) {
+    if (getColorValue === defaultProps.getColorValue.value) {
       getColorValue = getValueFunc(colorAggregation, getColorWeight);
     }
-    return getColorValue;
-  }
-
-  deduceGetElevationValueFunc() {
-    let {getElevationValue} = this.props;
-    const {elevationAggregation, getElevationWeight} = this.props;
-
     // If a custom `getElevationValue` is provided (other than default) use it
-    if (getElevationValue === GridLayer.defaultProps.getColorValue.value) {
+    if (getElevationValue === defaultProps.getColorValue.value) {
       getElevationValue = getValueFunc(elevationAggregation, getElevationWeight);
     }
-    return getElevationValue;
+    this.setState({getColorValue, getElevationValue});
   }
 
   needsReProjectPoints(oldProps, props, changeFlags) {
@@ -276,7 +247,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   getSortedColorBins() {
-    const getColorValue = this.deduceGetColorValueFunc();
+    const {getColorValue} = this.state;
     const sortedColorBins = new BinSorter(this.state.layerData || [], getColorValue);
 
     this.setState({sortedColorBins});
@@ -284,7 +255,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   getSortedElevationBins() {
-    const getElevationValue = this.deduceGetElevationValueFunc();
+    const {getElevationValue} = this.state;
     const sortedElevationBins = new BinSorter(this.state.layerData || [], getElevationValue);
     this.setState({sortedElevationBins});
     this.getElevationValueDomain();
@@ -382,8 +353,8 @@ export default class GridLayer extends CompositeLayer {
         getFillColor: this._onGetSublayerColor.bind(this),
         getElevation: this._onGetSublayerElevation.bind(this),
         transitions: transitions && {
-          getFillColor: transitions.getColorValue,
-          getElevation: transitions.getElevationValue
+          getFillColor: transitions.getColorValue || transitions.getColorWeight,
+          getElevation: transitions.getElevationValue || transitions.getElevationWeight
         }
       },
       this.getSubLayerProps({

@@ -218,6 +218,26 @@ You should pass in the function defined outside the render function so it doesn'
  }
 ```
 
+
+##### `getColorWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `point => 1`
+
+`getColorWeight` is the accessor function to get the weight of a point used to calcuate the color value for a cell.
+It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getColorWeight` should be set to `point => point.SPACES`.
+By default `getColorWeight` returns `1`.
+
+Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` has changed to recalculate the value for each bin that its color based on.
+
+
+##### `colorAggregation` (String, optional)
+
+* Default: 'SUM'
+
+`colorAggregation` defines, operation used to aggregate all data point weights to calculate a cell's color value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+
+Note: `getColorWeight` and `colorAggregation` together define how color value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
+
 ##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `points => points.length`
@@ -228,6 +248,27 @@ By default `getElevationValue` returns the length of the points array.
 
 Note: grid layer compares whether `getElevationValue` has changed to recalculate the value for each cell for its elevation.
 You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
+
+
+##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `point => 1`
+
+`getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
+It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getElevationWeight` should be set to `point => point.SPACES`.
+By default `getElevationWeight` returns `1`.
+
+Note: similar to `getElevationValue`, grid layer compares whether `getElevationWeight` has changed to recalculate the value for each bin that its color based on.
+
+
+##### `elevationAggregation` (String, optional)
+
+* Default: 'SUM'
+
+`elevationAggregation` defines, operation used to aggregate all data point weights to calculate a cell's elevation value. Valid values are 'SUM', 'MEAN', 'MIN' and 'MAX'. 'SUM' is used when an invalid value is provided.
+
+Note: `getElevationWeight` and `elevationAggregation` together define how elevation value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
+
 
 ##### `onSetColorDomain` (Function, optional)
 

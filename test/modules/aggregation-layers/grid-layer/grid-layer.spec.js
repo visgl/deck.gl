@@ -80,6 +80,33 @@ test('GridLayer#renderSubLayer', t => {
 });
 
 test('GridLayer#updates', t => {
+  function onAfterUpdateColor({layer, oldState}) {
+    t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
+
+    t.ok(oldState.sortedColorBins !== layer.state.sortedColorBins, 'should update sortedColorBins');
+
+    t.ok(
+      oldState.sortedElevationBins === layer.state.sortedElevationBins,
+      'should not update sortedElevationBins'
+    );
+
+    t.ok(
+      oldState.colorValueDomain !== layer.state.colorValueDomain,
+      'should re calculate colorValueDomain'
+    );
+
+    t.ok(
+      oldState.elevationValueDomain === layer.state.elevationValueDomain,
+      'should not update elevationValueDomain'
+    );
+
+    t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+
+    t.ok(
+      oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+      'should not update colorScaleFunc'
+    );
+  }
   testLayer({
     Layer: GridLayer,
     onError: t.notOk,
@@ -240,39 +267,7 @@ test('GridLayer#updates', t => {
             getColorValue: 1
           }
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: onAfterUpdateColor
       },
       {
         updateProps: {
@@ -281,39 +276,7 @@ test('GridLayer#updates', t => {
             getColorWeight: 1
           }
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: onAfterUpdateColor
       },
       {
         updateProps: {
