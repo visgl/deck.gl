@@ -83,8 +83,7 @@ export default {
   vs,
   fs,
   getUniforms: (opts = {}, context) => {
-    const shadowMap = opts.drawToShadowMap || opts.shadowMap;
-    if (shadowMap) {
+    if (opts.drawToShadowMap || opts.shadowMap) {
       const light = opts.lightSources && opts.lightSources.directionalLights[0];
 
       if (!light) {
@@ -104,7 +103,7 @@ export default {
       return {
         shadow_drawShadowMap: Boolean(opts.drawToShadowMap),
         shadow_useShadowMap: !context.picking_uActive && Boolean(opts.shadowMap),
-        shadow_shadowMap: shadowMap,
+        shadow_shadowMap: opts.shadowMap || true,
         shadow_color: opts.shadowColor || DEFAULT_SHADOW_COLOR,
         shadow_viewProjectionMatrix: projectionMatrix.clone().multiplyRight(viewMatrix)
       };

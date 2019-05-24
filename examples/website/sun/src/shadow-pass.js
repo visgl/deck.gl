@@ -5,9 +5,6 @@ export default class ShadowPass extends LayersPass {
   constructor(gl) {
     super(gl);
 
-    // The shadowMap uniform will be set to this empty placeholder when we are drawing into
-    // the real shadow map texture
-    this.dummyShadowMap = new Texture2D(gl, {width: 1, height: 1});
     // The shadowMap texture
     this.shadowMap = new Texture2D(gl, {
       width: 1,
@@ -70,12 +67,18 @@ export default class ShadowPass extends LayersPass {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
-      drawToShadowMap: this.dummyShadowMap,
+      drawToShadowMap: true,
       devicePixelRatio: this.props.pixelRatio
     });
     for (const effect of effects) {
       Object.assign(moduleParameters, effect.getParameters(layer));
     }
     return moduleParameters;
+  }
+
+  delete() {
+    if (this.fbo) {
+      this.fbo.delete();
+    }
   }
 }

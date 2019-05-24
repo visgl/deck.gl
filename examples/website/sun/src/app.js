@@ -7,6 +7,7 @@ import {PhongMaterial} from '@luma.gl/core';
 
 import ShadowPolygonLayer from './shadow-polygon-layer';
 import ShadowPass from './shadow-pass';
+import ShadowEffect from './shadow-effect';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -35,8 +36,10 @@ const material = new PhongMaterial({
   specularColor: [60, 64, 70]
 });
 
-const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 const shadowColor = [2, 0, 5, 200];
+const shadowEffect = new ShadowEffect({shadowColor});
+
+const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 
 export const INITIAL_VIEW_STATE = {
   longitude: -74.01,
@@ -54,7 +57,6 @@ export class App extends Component {
 
     this._deck = null;
     this._onWebGLInitialized = this._onWebGLInitialized.bind(this);
-    this._onBeforeRender = this._onBeforeRender.bind(this);
   }
 
   _onWebGLInitialized(gl) {
@@ -62,43 +64,10 @@ export class App extends Component {
     this.setState({shadowMap: this._shadowPass.shadowMap});
   }
 
-  _onBeforeRender({gl}) {
-    const viewports = this._deck.viewManager.getViewports();
-
-    // update shadow map
-    const {
-      deckRenderer,
-      layerManager,
-      props: {effects}
-    } = this._deck;
-    const effectProps = deckRenderer.prepareEffects(effects);
-    this._shadowPass.render({
-      layers: layerManager.getLayers(),
-      viewports,
-      onViewportActive: layerManager.activateViewport,
-      views: this._deck.getViews(),
-      effects,
-      effectProps
-    });
-  }
-
   _renderLayers() {
     const {data = DATA_URL} = this.props;
-    // TODO: shadowMap should be populated by ShaddowEffect
-    const {shadowMap} = this.state;
 
     return [
-      // new BitmapLayer({
-      //   id: 'debug',
-      //   opacity: 1,
-      //   image: shadowMap,
-      //   bounds: [
-      //     -74.0,
-      //     40.72,
-      //     -74.02,
-      //     40.7
-      //   ]
-      // }),
       new ShadowPolygonLayer({
         id: 'buildings',
         data,
@@ -108,10 +77,7 @@ export class App extends Component {
         getElevation: f => f.height,
         getFillColor: [74, 80, 87],
         material,
-
-        shadowColor,
-        castShadow: true,
-        shadowMap
+        castShadow: true
       }),
       new ShadowPolygonLayer({
         id: 'land',
@@ -119,10 +85,7 @@ export class App extends Component {
         opacity: 1,
         extruded: false,
         getPolygon: f => f,
-        getFillColor: [0, 0, 0, 0],
-
-        shadowColor,
-        shadowMap
+        getFillColor: [0, 0, 0, 0]
       })
     ];
   }
@@ -136,12 +99,11 @@ export class App extends Component {
           this._deck = ref && ref.deck;
         }}
         layers={this._renderLayers()}
-        effects={[lightingEffect]}
+        effects={[lightingEffect, shadowEffect]}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}
         onWebGLInitialized={this._onWebGLInitialized}
-        onBeforeRender={this._onBeforeRender}
       >
         {baseMap && (
           <StaticMap
