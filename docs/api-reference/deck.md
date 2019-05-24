@@ -377,6 +377,9 @@ Notes:
 * The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
 
 
+## Member Variables
+
+
 ## Remarks
 
 * Since deck.gl is based on WebGL and uses a single WebGL context, it can only render into a single canvas. Thus all its `View`s will render into the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).

@@ -157,6 +157,7 @@ export default class Deck {
     this.animationLoop = this._createAnimationLoop(props);
 
     this.stats = new Stats({id: 'deck.gl'});
+    this.metrics = {};
 
     this.setProps(props);
 
@@ -643,9 +644,8 @@ export default class Deck {
 
     // Log perf stats every second
     if (animationProps.tick % 60 === 0) {
-      const table = {};
       this.stats.forEach(stat => {
-        table[stat.name] = {
+        this.metrics[stat.name] = {
           time: stat.time || 0,
           count: stat.count || 0,
           average: stat.getAverageTime() || 0,
@@ -653,11 +653,11 @@ export default class Deck {
         };
       });
       this.stats.reset();
-      log.table(3, table)();
+      log.table(3, this.metrics)();
 
       // Experimental: report metrics
       if (this.props._onMetrics) {
-        this.props._onMetrics(table);
+        this.props._onMetrics(this.metrics);
       }
     }
 
