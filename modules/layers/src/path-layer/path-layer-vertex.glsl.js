@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME path-layer-vertex-shader-64
+#define SHADER_NAME path-layer-vertex-shader
 
 attribute vec3 positions;
 
