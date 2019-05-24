@@ -103,31 +103,41 @@ test('PathTesselator#constructor', t => {
         'endPositions is handling loop correctly'
       );
 
-      t.ok(ArrayBuffer.isView(tesselator.get('leftDeltas')), 'PathTesselator.get leftDeltas');
-      t.ok(tesselator.get('leftDeltas').every(Number.isFinite), 'Valid leftDeltas attribute');
+      t.ok(ArrayBuffer.isView(tesselator.get('leftPositions')), 'PathTesselator.get leftPositions');
+      t.ok(tesselator.get('leftPositions').every(Number.isFinite), 'Valid leftPositions attribute');
       t.deepEquals(
-        tesselator.get('leftDeltas').slice(0, 6),
-        [0, 0, 0, 1, 1, 0],
-        'leftDeltas are filled'
+        tesselator.get('leftPositions').slice(0, 6),
+        [1, 1, 0, 1, 1, 0],
+        'leftPositions are filled'
       );
 
-      t.ok(ArrayBuffer.isView(tesselator.get('rightDeltas')), 'PathTesselator.get rightDeltas');
-      t.deepEquals(
-        tesselator.get('rightDeltas').slice(0, 6),
-        [1, 1, 0, 0, 0, 0],
-        'rightDeltas are filled'
+      t.ok(
+        ArrayBuffer.isView(tesselator.get('rightPositions')),
+        'PathTesselator.get rightPositions'
       );
-      t.ok(tesselator.get('rightDeltas').every(Number.isFinite), 'Valid rightDeltas attribute');
       t.deepEquals(
-        tesselator.get('rightDeltas').slice(-3),
-        [1, 1, 0],
-        'rightDeltas is handling loop correctly'
+        tesselator.get('rightPositions').slice(0, 6),
+        [3, 3, 0, 3, 3, 0],
+        'rightPositions are filled'
+      );
+      t.ok(
+        tesselator.get('rightPositions').every(Number.isFinite),
+        'Valid rightPositions attribute'
+      );
+      t.deepEquals(
+        tesselator.get('rightPositions').slice(-3),
+        [2, 2, 0],
+        'rightPositions is handling loop correctly'
       );
 
       if (testCase.params.fp64) {
         t.ok(
           ArrayBuffer.isView(tesselator.get('startEndPositions64XyLow')),
           'PathTesselator.get startEndPositions64XyLow'
+        );
+        t.ok(
+          ArrayBuffer.isView(tesselator.get('neighborPositions64XyLow')),
+          'PathTesselator.get neighborPositions64XyLow'
         );
       }
     });

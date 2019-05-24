@@ -84,8 +84,25 @@ export default class PathLayer extends Layer {
         update: this.calculateInstanceStartEndPositions64xyLow,
         noAlloc
       },
-      instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas, noAlloc},
-      instanceRightDeltas: {size: 3, update: this.calculateRightDeltas, noAlloc},
+      instanceLeftPositions: {
+        size: 3,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getPath',
+        update: this.calculateLeftPositions,
+        noAlloc
+      },
+      instanceRightPositions: {
+        size: 3,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getPath',
+        update: this.calculateRightPositions,
+        noAlloc
+      },
+      instanceNeighborPositions64xyLow: {
+        size: 4,
+        update: this.calculateInstanceNeighborPositions64xyLow,
+        noAlloc
+      },
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
@@ -285,14 +302,25 @@ export default class PathLayer extends Layer {
     }
   }
 
-  calculateLeftDeltas(attribute) {
+  calculateLeftPositions(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('leftDeltas');
+    attribute.value = pathTesselator.get('leftPositions');
   }
 
-  calculateRightDeltas(attribute) {
+  calculateRightPositions(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('rightDeltas');
+    attribute.value = pathTesselator.get('rightPositions');
+  }
+
+  calculateInstanceNeighborPositions64xyLow(attribute) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (isFP64) {
+      attribute.value = this.state.pathTesselator.get('neighborPositions64XyLow');
+    } else {
+      attribute.value = new Float32Array(4);
+    }
   }
 
   clearPickingColor(color) {

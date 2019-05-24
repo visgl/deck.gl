@@ -27,8 +27,9 @@ attribute vec3 positions;
 attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec4 instanceStartEndPositions64xyLow;
-attribute vec3 instanceLeftDeltas;
-attribute vec3 instanceRightDeltas;
+attribute vec3 instanceLeftPositions;
+attribute vec3 instanceRightPositions;
+attribute vec4 instanceNeighborPositions64xyLow;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -204,20 +205,22 @@ void main() {
 
   // Calculate previous position
 
-  vec3 prevPosition = mix(-instanceLeftDeltas, vec3(0.0), isEnd) + instanceStartPositions;
+  vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
+  vec2 prevPosition64xyLow = mix(instanceNeighborPositions64xyLow.xy, instanceStartEndPositions64xyLow.xy, isEnd);
 
   // Calculate prev position 64bit
 
   vec2 projected_prev_position[2];
-  project_position_fp64(prevPosition.xy, instanceStartEndPositions64xyLow.xy, projected_prev_position);
+  project_position_fp64(prevPosition.xy, prevPosition64xyLow, projected_prev_position);
 
   // Calculate next positions
-  vec3 nextPosition = mix(vec3(0.0), instanceRightDeltas, isEnd) + instanceEndPositions;
+  vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
+  vec2 nextPosition64xyLow = mix(instanceStartEndPositions64xyLow.zw, instanceNeighborPositions64xyLow.zw, isEnd);
 
   // Calculate next position 64bit
 
   vec2 projected_next_position[2];
-  project_position_fp64(nextPosition.xy, instanceStartEndPositions64xyLow.zw, projected_next_position);
+  project_position_fp64(nextPosition.xy, nextPosition64xyLow, projected_next_position);
 
   vec3 pos = lineJoin(projected_prev_position, projected_curr_position, projected_next_position);
   vec2 vertex_pos_modelspace[4];
