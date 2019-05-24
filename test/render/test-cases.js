@@ -360,6 +360,28 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/path-lnglat.png'
   },
   {
+    name: 'path-billboard',
+    viewState: {
+      latitude: 37.7518488,
+      longitude: -122.427699,
+      zoom: 16.5,
+      pitch: 55,
+      bearing: -20
+    },
+    layers: [
+      new PathLayer({
+        id: 'path-lnglat',
+        data: dataSamples.zigzag3D,
+        opacity: 0.6,
+        billboard: true,
+        getPath: f => f.path,
+        getColor: f => [128, 0, 0],
+        getWidth: f => 10
+      })
+    ],
+    goldenImage: './test/render/golden-images/path-billboard.png'
+  },
+  {
     name: 'scatterplot-lnglat',
     viewState: {
       latitude: 37.751537058389985,
