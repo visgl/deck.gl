@@ -44,7 +44,8 @@ function getMin(pts, accessor) {
 
 // Function to convert from getWeight/aggregation props to getValue prop for Color and Elevation
 function getValueFunc(aggregation, accessor) {
-  switch (aggregation) {
+  const op = AGGREGATION_OPERATION[aggregation.toUpperCase()] || AGGREGATION_OPERATION.SUM;
+  switch (op) {
     case AGGREGATION_OPERATION.MIN:
       return pts => getMin(pts, accessor);
     case AGGREGATION_OPERATION.SUM:

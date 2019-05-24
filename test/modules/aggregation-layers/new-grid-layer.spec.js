@@ -49,7 +49,7 @@ test('NewGridLayer', t => {
   t.end();
 });
 
-test('NewGridLayer#updates', t => {
+test.only('NewGridLayer#updates', t => {
   if (!GPUGridAggregator.isSupported(gl)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
@@ -101,6 +101,17 @@ test('NewGridLayer#updates', t => {
       {
         updateProps: {
           gpuAggregation: true
+        },
+        onAfterUpdate({layer, subLayers, spies}) {
+          t.ok(
+            layer.state.useGPUAggregation === true,
+            'Should use GPU Aggregation (gpuAggregation: true)'
+          );
+        }
+      },
+      {
+        updateProps: {
+          colorAggregation: 'Mean'
         },
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(

@@ -22,6 +22,7 @@ import {PhongMaterial} from '@luma.gl/core';
 import {CompositeLayer} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
+import {AGGREGATION_OPERATION} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
@@ -33,13 +34,13 @@ const defaultProps = {
   colorDomain: null,
   colorRange: defaultColorRange,
   getColorWeight: {type: 'accessor', value: x => 1},
-  colorAggregation: {type: 'number', value: 1, min: 1, max: 4}, // AGGREGATION_OPERATION, SUM is default
+  colorAggregation: 'SUM',
 
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
   getElevationWeight: {type: 'accessor', value: x => 1},
-  elevationAggregation: {type: 'number', value: 1, min: 1, max: 4}, // AGGREGATION_OPERATION, SUM is default
+  elevationAggregation: 'SUM',
   elevationScale: {type: 'number', min: 0, value: 1},
 
   // grid
@@ -200,14 +201,14 @@ export default class GPUGridLayer extends CompositeLayer {
     const weightParams = {
       color: {
         getWeight: getColorWeight,
-        operation: colorAggregation,
+        operation: AGGREGATION_OPERATION[colorAggregation] || AGGREGATION_OPERATION[defaultProps.colorAggregation],
         needMin: true,
         needMax: true,
         combineMaxMin: true
       },
       elevation: {
         getWeight: getElevationWeight,
-        operation: elevationAggregation,
+        operation: AGGREGATION_OPERATION[elevationAggregation] || AGGREGATION_OPERATION[defaultProps.elevationAggregation],
         needMin: true,
         needMax: true,
         combineMaxMin: true
