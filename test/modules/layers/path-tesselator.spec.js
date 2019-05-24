@@ -135,3 +135,65 @@ test('PathTesselator#constructor', t => {
 
   t.end();
 });
+
+/* eslint-disable max-statements */
+test('PathTesselator#partial update', t => {
+  const accessorCalled = new Set();
+  const sampleData = [
+    {path: [[1, 1], [2, 2], [3, 3]], id: 'A'},
+    {path: [[1, 1], [2, 2], [3, 3], [1, 1]], id: 'B'}
+  ];
+  const tesselator = new PathTesselator({
+    data: sampleData,
+    getGeometry: d => {
+      accessorCalled.add(d.id);
+      return d.path;
+    },
+    positionFormat: 'XY'
+  });
+
+  let startPositions = tesselator.get('startPositions').slice(0, 15);
+  let leftDeltas = tesselator.get('leftDeltas').slice(0, 15);
+  t.is(tesselator.instanceCount, 5, 'Initial instance count');
+  t.deepEquals(startPositions, [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0], 'startPositions');
+  t.deepEquals(leftDeltas, [0, 0, 0, 1, 1, 0, -2, -2, 0, 1, 1, 0, 1, 1, 0], 'leftDeltas');
+  t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
+
+  sampleData[2] = {path: [[4, 4], [5, 5], [6, 6]], id: 'C'};
+  accessorCalled.clear();
+  tesselator.updatePartialGeometry({startRow: 2});
+  startPositions = tesselator.get('startPositions').slice(0, 21);
+  leftDeltas = tesselator.get('leftDeltas').slice(0, 21);
+  t.is(tesselator.instanceCount, 7, 'Updated instance count');
+  t.deepEquals(
+    startPositions,
+    [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0],
+    'startPositions'
+  );
+  t.deepEquals(
+    leftDeltas,
+    [0, 0, 0, 1, 1, 0, -2, -2, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+    'leftDeltas'
+  );
+  t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
+
+  sampleData[0] = {path: [[6, 6], [5, 5], [4, 4]], id: 'A'};
+  accessorCalled.clear();
+  tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
+  startPositions = tesselator.get('startPositions').slice(0, 21);
+  leftDeltas = tesselator.get('leftDeltas').slice(0, 21);
+  t.is(tesselator.instanceCount, 7, 'Updated instance count');
+  t.deepEquals(
+    startPositions,
+    [6, 6, 0, 5, 5, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0],
+    'startPositions'
+  );
+  t.deepEquals(
+    leftDeltas,
+    [0, 0, 0, -1, -1, 0, -2, -2, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
+    'leftDeltas'
+  );
+  t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
+
+  t.end();
+});
