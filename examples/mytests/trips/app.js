@@ -8,6 +8,32 @@ import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from 'deck.gl';
 import {TripsLayer} from '@deck.gl/geo-layers';
 
+// Set your mapbox token here
+const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+
+let actType = 'Work';
+let trailLength = 86400;
+let animationSpeed = 1800 // unit time per second
+
+const startTime = Date.now() / 1000
+
+let trsData = require('./inputs/data.json');
+let zonesData = require('./inputs/zones.json');
+let actsCntUpdsData = require('./inputs/activities_count.json');
+let trIds = Object.keys(trsData);
+let initActsCnt = actsCntUpdsData[0];
+let maxResidents = Math.max(...Object.values(initActsCnt['Home']))
+
+var colorsTrs = d3.scaleSequential()
+                  .domain(shuffle([...trIds]))
+                  .interpolator(d3.interpolateRainbow);
+
+var colorsActs = d3.scaleSequential()
+                   .domain(([0, maxResidents]))
+                   .interpolator(d3.interpolatePuRd);
+
+let data = {zonesData: zonesData, trs: trsData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
+
 function shuffle(a) {
   var j, x, i;
   for (i = a.length - 1; i > 0; i--) {
@@ -47,30 +73,6 @@ function filterBySourceZone(trs, zone, prop='Sources') {
   return filtered
 }
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
-
-
-const startTime = Date.now() / 1000
-
-let trsData = require('./inputs/data.json');
-let zonesData = require('./inputs/zones.json');
-let actsCntUpdsData = require('./inputs/activities_count.json');
-let trIds = Object.keys(trsData);
-let zoneIds = getZoneIds(zonesData.features);
-
-var colorsTrs = d3.scaleSequential()
-                  .domain(shuffle([...trIds]))
-                  .interpolator(d3.interpolateRainbow);
-
-var colorsActs = d3.scaleSequential()
-                   .domain(([0, 20]))
-                   .interpolator(d3.interpolatePuRd);
-
-var initActsCnt = actsCntUpdsData[0];
-
-var data = {zonesData: zonesData, trs: trsData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
-
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
   intensity: 1.0
@@ -92,9 +94,9 @@ const material = new PhongMaterial({
 });
 
 export const INITIAL_VIEW_STATE = {
-  longitude: -2.358666776, //-2.5893897,
-  latitude: 51.35911178,// 51.4516883,
-  zoom: 11,
+  longitude: -2.50, //-2.5893897,
+  latitude: 51.45,// 51.4516883,
+  zoom: 10,
   pitch: 45,
   bearing: 0
 };
@@ -105,7 +107,6 @@ export class App extends Component {
     this.state = {
       time: 0,
       trs: data.trs,
-      zones: data.zones,
       selectedZone: null
     };
 
@@ -126,7 +127,7 @@ export class App extends Component {
           <div>
             <b>ActCnt</b>
           </div>
-          <div>{data.actsCnt['Home'][hoveredObject.properties.lsoa11cd]}</div>
+          <div>{data.actsCnt[actType][hoveredObject.properties.lsoa11cd]}</div>
         </div>
       )
     );
@@ -151,20 +152,19 @@ export class App extends Component {
   
   _animate() {
     const {
-      animationSpeed = 3000 // unit time per second
+      
     } = this.props;
     const timestamp = Date.now() / 1000;
 
     this.setState({ 
-      time: (timestamp - startTime) * animationSpeed
-    }, () => this._updateActsCnt(data.actsCnt, ['Home'], this.state.time));
+      time: (timestamp - startTime) * this.props.animationSpeed
+    }, () => this._updateActsCnt(this.props.data.actsCnt, [actType], this.state.time));
     
-    //this._updateActsCnt(data.actsCnt, 'Home', this.state.time)
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
     
   _updateActsCnt(actsCnt, actTypes, currentTime) {
-    const {actsCntUpds = data.actsCntUpds} = this.props;
+    const {actsCntUpds = this.props.data.actsCntUpds} = this.props;
 
     for (const updTime of Object.keys(actsCntUpds)) {
       if (updTime > currentTime) {
@@ -174,11 +174,11 @@ export class App extends Component {
         break
       }
     }
-    data.actsCnt = actsCnt
+    this.props.data.actsCnt = actsCnt
   }
   
   _recalculateTrs(selectedZone) {
-    const {allTrs = data.trs} = this.props;
+    const {allTrs = this.props.data.trs} = this.props;
     
     if (!allTrs) {
       return;
@@ -186,7 +186,6 @@ export class App extends Component {
     
     if (!selectedZone) {
       var filtTrs = allTrs
-      //selectedZone = data.zones.features.find(f => f.properties.lsoa11cd === 'E01014370');
     } else {
       var filtTrs = filterBySourceZone(allTrs, selectedZone, 'Sources')
     }
@@ -202,36 +201,41 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {trailLength = 86400, actType = 'Home'} = this.props;
+    const {zones = this.props.data.zonesData,
+           actsCnt = this.props.data.actsCnt,
+           trailLength = this.props.trailLength,
+           actType = this.props.actType
+          } = this.props;
     
     return [
       new GeoJsonLayer({
         id: 'boundaries',
         //data:this.state.zones,
-        data: data.zonesData,
+        data: zones,
         stroked: true,
         filled: true,
         pickable: true,
         extruded: false,
-        // getFillColor: d => getRgbFromStr(colorsActs(data.actsCnt[actType][d.properties.lsoa11cd])), // ? [255,255,0] : [0,255,255], 
-        //getFillColor: d => (actsCnt[actType][d.properties.lsoa11cd] > 0) ? [255,255,0] : [0,255,255], 
-        getFillColor: d => getRgbFromStr(colorsActs(getActsCnt(data.actsCnt, actType, d.properties.lsoa11cd))), 
+        getFillColor: d => getRgbFromStr(colorsActs(getActsCnt(actsCnt, actType, d.properties.lsoa11cd))), 
         onClick: this._onSelectZone,
-        onHover: this._onHover
-        //autoHighlight: true,
-        //highlightColor: [0, 255, 255]
+        onHover: this._onHover,
+        updateTriggers: {
+          getFillColor: this.state.time
+        },
+        autoHighlight: true,
+        highlightColor: [0, 255, 255]
       }),
       new TripsLayer({
         id: 'trips',
         data: this.state.trs,
         getPath: d => d.Segments,
         getColor: d => getRgbFromStr(colorsTrs(d.Tourid)),
-        opacity: 0.1,
+        opacity: 0.0,
         widthMinPixels: 4,
         rounded: false,
         trailLength,
         currentTime: this.state.time,
-        pickable: true,
+        pickable: false,
         autoHighlight: true,
         highlightColor: [0, 255, 255]
       })
@@ -267,5 +271,8 @@ export class App extends Component {
 }
 
 export function renderToDOM(container) {
-  render(<App />, container);
+  render(<App actType={actType} 
+              data={data} 
+              animationSpeed={animationSpeed}
+              trailLength={trailLength}/>, container);
 }
