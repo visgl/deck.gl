@@ -30,14 +30,12 @@ import {getValueFunc} from '../utils/aggregation-operation-utils';
 function nop() {}
 
 const defaultMaterial = new PhongMaterial();
-// To detect a default value vs custom value, used in new-grid-layer
-const DEFAULT_GETVALUE = points => points.length;
 
 const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: {type: 'accessor', value: DEFAULT_GETVALUE},
+  getColorValue: {type: 'accessor', value: null}, // default value is calcuated from `getColorWeight` and `colorAggregation`
   getColorWeight: {type: 'accessor', value: x => 1},
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
@@ -47,7 +45,7 @@ const defaultProps = {
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: {type: 'accessor', value: DEFAULT_GETVALUE},
+  getElevationValue: {type: 'accessor', value: null}, // default value is calcuated from `getElevationWeight` and `elevationAggregation`
   getElevationWeight: {type: 'accessor', value: x => 1},
   elevationAggregation: 'SUM',
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
@@ -66,6 +64,9 @@ const defaultProps = {
   material: defaultMaterial
 };
 
+const COLOR_PROPS = ['getColorValue', 'colorAggregation', 'getColorWeight'];
+const ELEVATION_PROPS = ['getElevationValue', 'elevationAggregation', 'getElevationWeight'];
+
 export default class GridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -81,7 +82,7 @@ export default class GridLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    this.updateGetValueFuncs(props);
+    this.updateGetValueFuncs(oldProps, props);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
 
     if (changeFlags.dataChanged || reprojectNeeded) {
@@ -93,19 +94,41 @@ export default class GridLayer extends CompositeLayer {
     }
   }
 
-  updateGetValueFuncs(props) {
+  colorElevationPropsChanged(oldProps, props) {
+    let colorChanged = false;
+    let elevationChanged = false;
+    for (const p of COLOR_PROPS) {
+      if (oldProps[p] !== props[p]) {
+        colorChanged = true;
+      }
+    }
+    for (const p of ELEVATION_PROPS) {
+      if (oldProps[p] !== props[p]) {
+        elevationChanged = true;
+      }
+    }
+    return {colorChanged, elevationChanged};
+  }
+
+  updateGetValueFuncs(oldProps, props) {
     let {getColorValue, getElevationValue} = props;
     const {colorAggregation, getColorWeight, elevationAggregation, getElevationWeight} = this.props;
+    const {colorChanged, elevationChanged} = this.colorElevationPropsChanged(oldProps, props);
 
-    // If a custom `getColorValue` is provided (other than default) use it
-    if (getColorValue === defaultProps.getColorValue.value) {
+    if (colorChanged && getColorValue === null) {
+      // If `getColorValue` is not provided, build it.
       getColorValue = getValueFunc(colorAggregation, getColorWeight);
     }
-    // If a custom `getElevationValue` is provided (other than default) use it
-    if (getElevationValue === defaultProps.getColorValue.value) {
+    if (elevationChanged && getElevationValue === null) {
+      // If `getElevationValue` is not provided, build it.
       getElevationValue = getValueFunc(elevationAggregation, getElevationWeight);
     }
-    this.setState({getColorValue, getElevationValue});
+    if (getColorValue) {
+      this.setState({getColorValue});
+    }
+    if (getElevationValue) {
+      this.setState({getElevationValue});
+    }
   }
 
   needsReProjectPoints(oldProps, props, changeFlags) {

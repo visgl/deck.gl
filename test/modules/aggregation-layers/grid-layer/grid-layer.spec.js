@@ -27,8 +27,8 @@ import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-
 import {GridCellLayer} from '@deck.gl/layers';
 import {GridLayer} from '@deck.gl/aggregation-layers';
 
-const getColorValue = points => points.length;
-const getElevationValue = points => points.length;
+const GET_COLOR_VALUE = points => points.length;
+const GET_ELEVATION_VALUE = points => points.length;
 const getPosition = d => d.COORDINATES;
 
 test('GridLayer', t => {
@@ -106,6 +106,18 @@ test('GridLayer#updates', t => {
       oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
       'should not update colorScaleFunc'
     );
+
+    // color porps changed
+    t.ok(
+      layer.state.getColorValue !== oldState.getColorValue,
+      'getColorValue should get re-calculated'
+    );
+
+    // elevation porps didn't change
+    t.ok(
+      layer.state.getElevationValue === oldState.getElevationValue,
+      'getElevationValue should not get re-calculated'
+    );
   }
   testLayer({
     Layer: GridLayer,
@@ -124,7 +136,9 @@ test('GridLayer#updates', t => {
             sortedColorBins,
             sortedElevationBins,
             colorValueDomain,
-            elevationValueDomain
+            elevationValueDomain,
+            getColorValue,
+            getElevationValue
           } = layer.state;
 
           t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
@@ -132,6 +146,11 @@ test('GridLayer#updates', t => {
           t.ok(sortedElevationBins, 'GridLayer.state.sortedColorBins calculated');
           t.ok(Array.isArray(colorValueDomain), 'GridLayer.state.valueDomain calculated');
           t.ok(Array.isArray(elevationValueDomain), 'GridLayer.state.valueDomain calculated');
+          t.ok(typeof getColorValue === 'function', 'GridLayer.state.getColorValue calculated');
+          t.ok(
+            typeof getElevationValue === 'function',
+            'GridLayer.state.getElevationValue calculated'
+          );
 
           t.ok(
             Array.isArray(sortedColorBins.sortedBins),
@@ -167,9 +186,18 @@ test('GridLayer#updates', t => {
           pickable: true
         },
         spies: ['_onGetSublayerColor', '_onGetSublayerElevation'],
-        onAfterUpdate({layer, subLayer, spies}) {
+        onAfterUpdate({layer, subLayer, spies, oldState}) {
           t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
+          // color or elevation porps didn't change
+          t.ok(
+            layer.state.getColorValue === oldState.getColorValue,
+            'getColorValue should not get re-calculated'
+          );
+          t.ok(
+            layer.state.getElevationValue === oldState.getElevationValue,
+            'getElevationValue should not get re-calculated'
+          );
           // should call attribute updater twice
           // because test util calls both initialize and update layer
           t.ok(spies._onGetSublayerColor.called, 'should call _onGetSublayerColor');
@@ -262,18 +290,18 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getColorValue,
+          getColorWeight: x => 2,
           updateTriggers: {
-            getColorValue: 1
+            getColorWeight: 1
           }
         },
         onAfterUpdate: onAfterUpdateColor
       },
       {
         updateProps: {
-          getColorWeight: x => 2,
+          getColorValue: GET_COLOR_VALUE,
           updateTriggers: {
-            getColorWeight: 1
+            getColorValue: 1
           }
         },
         onAfterUpdate: onAfterUpdateColor
@@ -313,6 +341,18 @@ test('GridLayer#updates', t => {
           t.ok(
             oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
             'should update colorScaleFunc'
+          );
+
+          // color porps didn't changed
+          t.ok(
+            layer.state.getColorValue === oldState.getColorValue,
+            'getColorValue should not get re-calculated'
+          );
+
+          // elevation porps changed
+          t.ok(
+            layer.state.getElevationValue !== oldState.getElevationValue,
+            'getElevationValue should get re-calculated'
           );
         }
       },
@@ -394,7 +434,7 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getElevationValue,
+          getElevationValue: GET_ELEVATION_VALUE,
           updateTriggers: {
             getElevationValue: 1
           }
@@ -560,7 +600,7 @@ test('GridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          getColorValue,
+          getColorValue: GET_COLOR_VALUE,
           updateTriggers: {
             getColorValue: 1
           }
@@ -593,7 +633,7 @@ test('GridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          getElevationValue,
+          getElevationValue: GET_ELEVATION_VALUE,
           updateTriggers: {
             getElevationValue: 1
           }

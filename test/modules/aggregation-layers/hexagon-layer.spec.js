@@ -88,6 +88,18 @@ test('HexagonLayer#updateLayer', t => {
       oldState.colorScaleFunc === layer.state.colorScaleFunc,
       'should not update colorScaleFunc'
     );
+
+    // color porps didn't change
+    t.ok(
+      layer.state.getColorValue === oldState.getColorValue,
+      'getColorValue should not get re-calculated'
+    );
+
+    // elevation porps changed
+    t.ok(
+      layer.state.getElevationValue !== oldState.getElevationValue,
+      'getElevationValue should get re-calculated'
+    );
   }
   function onAfterUpdateColor({layer, oldState}) {
     t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
@@ -118,6 +130,18 @@ test('HexagonLayer#updateLayer', t => {
       oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
       'should not update colorScaleFunc'
     );
+
+    // color porps changed
+    t.ok(
+      layer.state.getColorValue !== oldState.getColorValue,
+      'getColorValue should get re-calculated'
+    );
+
+    // elevation porps didn't change
+    t.ok(
+      layer.state.getElevationValue === oldState.getElevationValue,
+      'getElevationValue should not get re-calculated'
+    );
   }
 
   testLayer({
@@ -130,6 +154,16 @@ test('HexagonLayer#updateLayer', t => {
           data: data.points,
           radius: 400,
           getPosition
+        },
+        onAfterUpdate({layer}) {
+          t.ok(
+            typeof layer.state.getColorValue === 'function',
+            'GridLayer.state.getColorValue calculated'
+          );
+          t.ok(
+            typeof layer.state.getElevationValue === 'function',
+            'GridLayer.state.getElevationValue calculated'
+          );
         }
       },
       {
@@ -172,19 +206,19 @@ test('HexagonLayer#updateLayer', t => {
         }
       },
       {
+        title: 'Update colorAggregation',
+        updateProps: {
+          colorAggregation: 'MAX'
+        },
+        onAfterUpdate: onAfterUpdateColor
+      },
+      {
         title: 'Update getColorValue accessor',
         updateProps: {
           getColorValue,
           updateTriggers: {
             getColorValue: 1
           }
-        },
-        onAfterUpdate: onAfterUpdateColor
-      },
-      {
-        title: 'Update colorAggregation',
-        updateProps: {
-          colorAggregation: 'MAX'
         },
         onAfterUpdate: onAfterUpdateColor
       },
