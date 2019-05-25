@@ -306,7 +306,7 @@ export default class App extends PureComponent {
 
   _renderMap() {
     const {orbitViewState, mapViewState, settings} = this.state;
-    const {infovis, pickingRadius, drawPickingColors, useDevicePixels} = settings;
+    const {infovis, effects, pickingRadius, drawPickingColors, useDevicePixels} = settings;
 
     const views = this._getViews();
 
@@ -320,8 +320,7 @@ export default class App extends PureComponent {
           views={views}
           viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
           onViewStateChange={this._onViewStateChange}
-          // effects={effects ? this._effects : []}
-          effects={[GLOBAL_LIGHTING]}
+          effects={effects ? [...this._effects, GLOBAL_LIGHTING] : [GLOBAL_LIGHTING]}
           pickingRadius={pickingRadius}
           onHover={this._onHover}
           onClick={this._onClick}
