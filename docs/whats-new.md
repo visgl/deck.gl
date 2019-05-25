@@ -10,6 +10,7 @@ Release Date: 2019
 
 - Added `getScene` and `getAnimator` to allow more flexibility when loading models.
 - Experimental `_lighting` property for PBR lighting.
+- Experimental `_imageBasedLightingEnvironment` property for image-based lighting.
 
 ## deck.gl v7.0
 
