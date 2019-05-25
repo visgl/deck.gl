@@ -19,14 +19,26 @@ function shuffle(a) {
   return a;
 }
 
+function getZoneIds(zonesDataFeats, idName='lsoa11cd'){
+  let zoneIds = new Set()
+  for (const [k, f] of Object.entries(zonesDataFeats)) {
+    zoneIds.add(f.properties[idName])
+  }
+  zoneIds = Array.from(zoneIds);
+  return zoneIds
+}
+
 function getRgbFromStr(strRgb) {
   var color = d3.color(strRgb);
-  return [color.r, color.g, color.b]
+  return [color.r, color.g, color.b]  
+}
   
+function getActsCnt(actsCnt, actType, zoneId) {
+      return _.get(actsCnt, `${actType}.${zoneId}`, 0);   
 }
 
 function filterBySourceZone(trs, zone, prop='Sources') {
-  var filtered = Array()
+  let filtered = Array()
   for (const [trid, attrs] of Object.entries(trs)) {
     if (attrs[prop][0] === zone["properties"]["lsoa11cd"]) {
       filtered.push(trs[trid])
@@ -36,19 +48,28 @@ function filterBySourceZone(trs, zone, prop='Sources') {
 }
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+
 
 const startTime = Date.now() / 1000
 
 let trsData = require('./inputs/data.json');
+let zonesData = require('./inputs/zones.json');
+let actsCntUpdsData = require('./inputs/activities_count.json');
 let trIds = Object.keys(trsData);
-let colors = d3.scaleSequential()
-               .domain(shuffle([...trIds]))
-               .interpolator(d3.interpolateRainbow);
+let zoneIds = getZoneIds(zonesData.features);
 
-let lsoasData = require('./inputs/lsoas.json');
+var colorsTrs = d3.scaleSequential()
+                  .domain(shuffle([...trIds]))
+                  .interpolator(d3.interpolateRainbow);
 
-let data = {trs: trsData, lsoas: lsoasData};
+var colorsActs = d3.scaleSequential()
+                   .domain(([0, 20]))
+                   .interpolator(d3.interpolatePuRd);
+
+var initActsCnt = actsCntUpdsData[0];
+
+var data = {zonesData: zonesData, trs: trsData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -84,12 +105,31 @@ export class App extends Component {
     this.state = {
       time: 0,
       trs: data.trs,
+      zones: data.zones,
       selectedZone: null
     };
 
+    this._onHover = this._onHover.bind(this);
+    this._renderTooltip = this._renderTooltip.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
-    
-    //this._recalculateTrs(data);
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
+  _renderTooltip() {
+    const {x, y, hoveredObject} = this.state;
+    return (
+      hoveredObject && (
+        <div className="tooltip" style={{top: y, left: x}}>
+          <div>
+            <b>ActCnt</b>
+          </div>
+          <div>{data.actsCnt['Home'][hoveredObject.properties.lsoa11cd]}</div>
+        </div>
+      )
+    );
   }
 
   componentDidMount() {
@@ -108,19 +148,35 @@ export class App extends Component {
     }
     this._recalculateTrs(object);
   }
-
+  
   _animate() {
     const {
-      animationSpeed = 2000 // unit time per second
+      animationSpeed = 3000 // unit time per second
     } = this.props;
     const timestamp = Date.now() / 1000;
+
+    this.setState({ 
+      time: (timestamp - startTime) * animationSpeed
+    }, () => this._updateActsCnt(data.actsCnt, ['Home'], this.state.time));
     
-    this.setState({
-      time: (timestamp - startTime) * animationSpeed 
-    });
+    //this._updateActsCnt(data.actsCnt, 'Home', this.state.time)
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
+    
+  _updateActsCnt(actsCnt, actTypes, currentTime) {
+    const {actsCntUpds = data.actsCntUpds} = this.props;
 
+    for (const updTime of Object.keys(actsCntUpds)) {
+      if (updTime > currentTime) {
+        for (const actType of actTypes) {
+          actsCnt[actType] = Object.assign(actsCnt[actType], actsCntUpds[updTime][actType])
+        }
+        break
+      }
+    }
+    data.actsCnt = actsCnt
+  }
+  
   _recalculateTrs(selectedZone) {
     const {allTrs = data.trs} = this.props;
     
@@ -130,7 +186,7 @@ export class App extends Component {
     
     if (!selectedZone) {
       var filtTrs = allTrs
-      //selectedZone = data.lsoas.features.find(f => f.properties.lsoa11cd === 'E01014370');
+      //selectedZone = data.zones.features.find(f => f.properties.lsoa11cd === 'E01014370');
     } else {
       var filtTrs = filterBySourceZone(allTrs, selectedZone, 'Sources')
     }
@@ -142,19 +198,35 @@ export class App extends Component {
     //}
 
     this.setState({trs: filtTrs, selectedZone: selectedZone });
-    var a = 1;
+
   }
 
   _renderLayers() {
-    const {trailLength = 84600, lsoas = data.lsoas} = this.props;
-
+    const {trailLength = 86400, actType = 'Home'} = this.props;
+    
     return [
+      new GeoJsonLayer({
+        id: 'boundaries',
+        //data:this.state.zones,
+        data: data.zonesData,
+        stroked: true,
+        filled: true,
+        pickable: true,
+        extruded: false,
+        // getFillColor: d => getRgbFromStr(colorsActs(data.actsCnt[actType][d.properties.lsoa11cd])), // ? [255,255,0] : [0,255,255], 
+        //getFillColor: d => (actsCnt[actType][d.properties.lsoa11cd] > 0) ? [255,255,0] : [0,255,255], 
+        getFillColor: d => getRgbFromStr(colorsActs(getActsCnt(data.actsCnt, actType, d.properties.lsoa11cd))), 
+        onClick: this._onSelectZone,
+        onHover: this._onHover
+        //autoHighlight: true,
+        //highlightColor: [0, 255, 255]
+      }),
       new TripsLayer({
         id: 'trips',
         data: this.state.trs,
         getPath: d => d.Segments,
-        getColor: [255, 0, 0], // d => getRgbFromStr(colors(d.Tourid)),
-        opacity: 1.0,
+        getColor: d => getRgbFromStr(colorsTrs(d.Tourid)),
+        opacity: 0.1,
         widthMinPixels: 4,
         rounded: false,
         trailLength,
@@ -162,18 +234,7 @@ export class App extends Component {
         pickable: true,
         autoHighlight: true,
         highlightColor: [0, 255, 255]
-      }),
-      new GeoJsonLayer({
-        id: 'boundaries',
-        data:lsoas,
-        stroked: true,
-        filled: true,
-        getFillColor: [0, 255, 255, 0],
-        onClick: this._onSelectZone,
-        pickable: true,
-        autoHighlight: true,
-        highlightColor: [0, 255, 255]
-      }),
+      })
     ];
   }
 
@@ -199,6 +260,7 @@ export class App extends Component {
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
         )}
+        {this._renderTooltip}
       </DeckGL>
     );
   }
