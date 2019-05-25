@@ -30,3 +30,4 @@ import './path-layer/path-layer-vertex.spec';
 import './icon-manager.spec';
 import './text-layer/font-atlas-utils.spec';
 import './text-layer/lru-cache.spec';
+import './column-geometry.spec';
