@@ -22,7 +22,7 @@ import './contour-layer/contour-layer.spec';
 import './contour-layer/marching-squares.spec';
 import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
 import './gpu-grid-layer/gpu-grid-layer.spec';
-import './grid-layer/grid-layer.spec';
+import './cpu-grid-layer/cpu-grid-layer.spec';
 import './grid-aggregator.spec';
 import './hexagon-layer.spec';
 import './hexagon-aggregator.spec';

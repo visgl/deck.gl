@@ -67,7 +67,7 @@ const defaultProps = {
 const COLOR_PROPS = ['getColorValue', 'colorAggregation', 'getColorWeight'];
 const ELEVATION_PROPS = ['getElevationValue', 'elevationAggregation', 'getElevationWeight'];
 
-export default class GridLayer extends CompositeLayer {
+export default class CPUGridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       layerData: [],
@@ -391,5 +391,5 @@ export default class GridLayer extends CompositeLayer {
   }
 }
 
-GridLayer.layerName = 'GridLayer';
-GridLayer.defaultProps = defaultProps;
+CPUGridLayer.layerName = 'CPUGridLayer';
+CPUGridLayer.defaultProps = defaultProps;

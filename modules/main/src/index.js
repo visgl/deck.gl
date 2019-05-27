@@ -126,7 +126,7 @@ export {
 
 export {
   ScreenGridLayer,
-  GridLayer,
+  CPUGridLayer,
   HexagonLayer,
   ContourLayer,
   _NewGridLayer,

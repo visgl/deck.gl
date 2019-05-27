@@ -1,4 +1,4 @@
-<!-- INJECT:"GridLayerDemo" -->
+<!-- INJECT:"CPUGridLayerDemo" -->
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
@@ -6,17 +6,17 @@
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
-# GridLayer
+# CPUGridLayer
 
 The Grid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
 
-GridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+CPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {GridLayer} from '@deck.gl/aggregation-layers';
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -27,7 +27,7 @@ const App = ({data, viewport}) => {
    *   ...
    * ]
    */
-  const layer = new GridLayer({
+  const layer = new CPUGridLayer({
     id: 'grid-layer',
     data,
     pickable: true,
@@ -47,7 +47,7 @@ const App = ({data, viewport}) => {
 };
 ```
 
-**Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
+**Note:** The `CPUGridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
 
 ## Installation
@@ -61,8 +61,8 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
 ```js
-import {GridLayer} from '@deck.gl/aggregation-layers';
-new GridLayer({});
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
+new CPUGridLayer({});
 ```
 
 To use pre-bundled scripts:
@@ -76,7 +76,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck.GridLayer({});
+new deck.CPUGridLayer({});
 ```
 
 
@@ -208,7 +208,7 @@ You should pass in the function defined outside the render function so it doesn'
     }
 
     renderLayers() {
-      return new GridLayer({
+      return new CPUGridLayer({
         id: 'grid-layer',
         getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
         data,
@@ -242,7 +242,7 @@ function getCount(points) {
   return points.length;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getColorValue: getCount,
@@ -256,7 +256,7 @@ function getWeight(point) {
   return 1;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getColorWeight: getWeight,
@@ -273,7 +273,7 @@ function getMean(points) {
   return points.reduce((sum, p) => sum += p.SPACES, 0) / points.length;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getColorValue: getMean,
@@ -287,7 +287,7 @@ function getWeight(point) {
   return point.SPACES;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getColorWeight: getWeight,
@@ -336,7 +336,7 @@ function getCount(points) {
   return points.length;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getElevationValue: getCount,
@@ -350,7 +350,7 @@ function getWeight(point) {
   return 1;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getElevationWeight: getWeight,
@@ -367,7 +367,7 @@ function getMax(points) {
   return points.reduce((max, p) => p.SPACES > max ? p.SPACES : max, -Infinity);
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getElevationValue: getMax,
@@ -381,7 +381,7 @@ function getWeight(point) {
   return point.SPACES;
 }
 ...
-const layer = new GridLayer({
+const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
   getElevationWeight: getWeight,
@@ -407,10 +407,10 @@ This callback will be called when bin elevation domain has been calculated.
 
 ## Sub Layers
 
-The GridLayer renders the following sublayers:
+The CPUGridLayer renders the following sublayers:
 
 * `grid-cell` - a [GridCellLayer](/docs/layers/grid-cell-layer.md) rendering the aggregated columns.
 
 ## Source
 
-[modules/aggregation-layers/src/grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/grid-layer)
+[modules/aggregation-layers/src/cpu-grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/cpu-grid-layer)

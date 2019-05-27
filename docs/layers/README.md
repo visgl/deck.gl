@@ -31,8 +31,9 @@ The core layers are the most stable and supported deck.gl layers.
 The [Aggregation Layers](https://www.npmjs.com/package/@deck.gl/aggregation-layers) are layers that aggregate the input data and visualize them in alternative representations, such as grid and hexagon binning, contour, and heatmap.
 
   - [ContourLayer](/docs/layers/contour-layer.md)
+  - [NewGridLayer](/docs/layers/new-grid-layer.md)
   - [GPUGridLayer](/docs/layers/gpu-grid-layer.md)
-  - [GridLayer](/docs/layers/grid-layer.md)
+  - [CPUGridLayer](/docs/layers/cpu-grid-layer.md)
   - [HexagonLayer](/docs/layers/hexagon-layer.md)
   - [ScreenGridLayer](/docs/layers/screen-grid-layer.md)
 

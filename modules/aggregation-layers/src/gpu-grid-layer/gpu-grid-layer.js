@@ -26,7 +26,7 @@ import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 import {pointToDensityGridData} from '../utils/gpu-grid-aggregation/grid-aggregation-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridCellLayer from './gpu-grid-cell-layer';
-import {pointToDensityGridDataCPU} from './../grid-layer/grid-aggregator';
+import {pointToDensityGridDataCPU} from './../cpu-grid-layer/grid-aggregator';
 
 const defaultMaterial = new PhongMaterial();
 const defaultProps = {

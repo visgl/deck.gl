@@ -20,7 +20,7 @@
 /* eslint-disable max-len */
 
 export {default as ScreenGridLayer} from './screen-grid-layer/screen-grid-layer';
-export {default as GridLayer} from './grid-layer/grid-layer';
+export {default as CPUGridLayer} from './cpu-grid-layer/cpu-grid-layer';
 export {default as HexagonLayer} from './hexagon-layer/hexagon-layer';
 export {default as ContourLayer} from './contour-layer/contour-layer';
 

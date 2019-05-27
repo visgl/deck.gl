@@ -1,9 +1,9 @@
 import {CompositeLayer} from '@deck.gl/core';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import GPUGridLayer from '../gpu-grid-layer/gpu-grid-layer';
-import GridLayer from '../grid-layer/grid-layer';
+import CPUGridLayer from '../cpu-grid-layer/cpu-grid-layer';
 
-const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, GridLayer.defaultProps, {
+const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, CPUGridLayer.defaultProps, {
   gpuAggregation: false
 });
 
@@ -25,7 +25,7 @@ export default class NewGridLayer extends CompositeLayer {
     const id = this.state.useGPUAggregation ? 'GPU' : 'CPU';
     const LayerType = this.state.useGPUAggregation
       ? this.getSubLayerClass('GPU', GPUGridLayer)
-      : this.getSubLayerClass('CPU', GridLayer);
+      : this.getSubLayerClass('CPU', CPUGridLayer);
     return new LayerType(
       this.props,
       this.getSubLayerProps({
@@ -59,10 +59,7 @@ export default class NewGridLayer extends CompositeLayer {
       // percentile calculations requires sorting not supported on GPU
       return false;
     }
-    if (
-      (getColorValue && getColorValue !== GridLayer.defaultProps.getColorValue.value) ||
-      (getElevationValue && getElevationValue !== GridLayer.defaultProps.getElevationValue.value)
-    ) {
+    if (getColorValue !== null || getElevationValue !== null) {
       // accessor for custom color or elevation calculation is specified
       return false;
     }

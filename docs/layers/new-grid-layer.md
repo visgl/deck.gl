@@ -449,7 +449,7 @@ When using GPU Aggregation, `onSetColorDomain` and `onSetElevationDomain` are no
 
 The NewGridLayer renders the following sublayers:
 
-* `CPU` - a [GridLayer](/docs/layers/grid-layer.md) when using CPU aggregatoin.
+* `CPU` - a [CPUGridLayer](/docs/layers/cpu-grid-layer.md) when using CPU aggregatoin.
 
 * `GPU` - a [GPUGridLayer](/docs/layers/grid-layer.md) when using GPU aggregatoin.
 

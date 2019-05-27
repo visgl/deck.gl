@@ -4,7 +4,7 @@ import {DATA_URI} from '../../constants/defaults';
 
 import {
   ContourLayer,
-  GridLayer,
+  CPUGridLayer,
   GridCellLayer,
   HexagonLayer,
   ScreenGridLayer,
@@ -67,8 +67,8 @@ export const NewGridLayerDemo = createLayerDemoClass({
   ...GRID_LAYER_INFO
 });
 
-export const GridLayerDemo = createLayerDemoClass({
-  Layer: GridLayer,
+export const CPUGridLayerDemo = createLayerDemoClass({
+  Layer: CPUGridLayer,
   ...GRID_LAYER_INFO
 });
 
