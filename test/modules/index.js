@@ -33,6 +33,7 @@ if (typeof document !== 'undefined') {
   require('./react/deckgl.spec');
 
   require('./main/bundle');
+  require('./jupyter-widget');
   require('./aggregation-layers/utils/gpu-grid-aggregator.spec');
   require('./aggregation-layers/utils/grid-aggregation-utils.spec');
   require('./core/lib/pick-layers.spec');

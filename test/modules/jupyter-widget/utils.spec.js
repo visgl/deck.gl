@@ -1,6 +1,6 @@
+/* global window, console */
 // Copyright (c) Jupyter Development Team.
 // Distributed under the terms of the Modified BSD License.
-/* eslint-disable no-console, no-undef */
 
 import * as widgets from '@jupyter-widgets/base';
 
@@ -52,7 +52,7 @@ export class DummyManager extends widgets.ManagerBase {
     // TODO: return an html element
     return Promise.resolve(view).then(v => {
       this.el.appendChild(v.el);
-      v.on('remove', () => console.log('view removed', v));
+      v.on('remove', () => console.log('view removed', v)); //eslint-disable-line
       return v.el;
     });
   }
