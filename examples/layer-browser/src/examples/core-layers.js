@@ -19,7 +19,6 @@ import {
   HexagonLayer,
   ContourLayer,
   ScreenGridLayer
-  //  ContourLayer
 } from '@deck.gl/aggregation-layers';
 
 const {flattenVertices} = experimental;

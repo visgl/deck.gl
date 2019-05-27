@@ -1,4 +1,4 @@
-<!-- INJECT:"NewGridLayerDemo" -->
+<!-- INJECT:"GridLayerDemo" -->
 
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/aggregation--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/aggregation-layers" />
@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
-# NewGridLayer
+# GridLayer
 
 The NewGrid Layer renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
@@ -14,7 +14,7 @@ and height of the cell is scaled by number of points it contains.
 
 It functions similar to `GridLayer` and supports aggregation on GPU. This layer supports all of the `GridLayer` props, in addition, it has `gpuAggregation` prop that can be used to control whether aggregation to happen on CPU or GPU. For more details check `GPU Aggregation` section below.
 
-NewGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+GridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -29,7 +29,7 @@ const App = ({data, viewport}) => {
    *   ...
    * ]
    */
-  const layer = new NewGridLayer({
+  const layer = new GridLayer({
     id: 'new-grid-layer',
     data,
     pickable: true,
@@ -49,7 +49,7 @@ const App = ({data, viewport}) => {
 };
 ```
 
-**Note:** The `NewGridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
+**Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
 
 ## Installation
@@ -63,8 +63,8 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
 ```js
-import {_NewGridLayer as NewGridLayer} from '@deck.gl/aggregation-layers';
-new NewGridLayer({});
+import {GridLayer} from '@deck.gl/aggregation-layers';
+new GridLayer({});
 ```
 
 To use pre-bundled scripts:
@@ -78,7 +78,7 @@ To use pre-bundled scripts:
 ```
 
 ```js
-new deck._NewGridLayer({});
+new deck.GridLayer({});
 ```
 
 
@@ -447,7 +447,7 @@ When using GPU Aggregation, `onSetColorDomain` and `onSetElevationDomain` are no
 
 ## Sub Layers
 
-The NewGridLayer renders the following sublayers:
+The GridLayer renders the following sublayers:
 
 * `CPU` - a [CPUGridLayer](/docs/layers/cpu-grid-layer.md) when using CPU aggregatoin.
 
@@ -455,4 +455,4 @@ The NewGridLayer renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/new-grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/new-grid-layer)
+[modules/aggregation-layers/src/grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/grid-layer)

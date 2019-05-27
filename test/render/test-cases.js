@@ -4,7 +4,7 @@ import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {
   _GPUGridLayer as GPUGridLayer,
-  _NewGridLayer as NewGridLayer
+  GridLayer
   // AGGREGATION_OPERATION
 } from '@deck.gl/aggregation-layers';
 import {COORDINATE_SYSTEM, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
@@ -887,7 +887,7 @@ export const TEST_CASES = [
     name: 'new-grid-lnglat-cpu',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new NewGridLayer(
+      new GridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'new-grid-lnglat-cpu',
           getColorWeight: x => x.SPACES,
@@ -904,7 +904,7 @@ export const TEST_CASES = [
     name: 'new-grid-lnglat-gpu',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new NewGridLayer(
+      new GridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'new-grid-lnglat-gpu',
           getColorWeight: x => x.SPACES,

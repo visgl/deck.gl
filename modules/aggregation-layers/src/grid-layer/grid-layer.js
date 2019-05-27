@@ -7,7 +7,7 @@ const defaultProps = Object.assign({}, GPUGridLayer.defaultProps, CPUGridLayer.d
   gpuAggregation: false
 });
 
-export default class NewGridLayer extends CompositeLayer {
+export default class GridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
       useGPUAggregation: true
@@ -67,5 +67,5 @@ export default class NewGridLayer extends CompositeLayer {
   }
 }
 
-NewGridLayer.layerName = 'NewGridLayer';
-NewGridLayer.defaultProps = defaultProps;
+GridLayer.layerName = 'GridLayer';
+GridLayer.defaultProps = defaultProps;

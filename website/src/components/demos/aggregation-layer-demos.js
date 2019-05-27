@@ -9,7 +9,7 @@ import {
   HexagonLayer,
   ScreenGridLayer,
   _GPUGridLayer as GPUGridLayer,
-  _NewGridLayer as NewGridLayer
+  GridLayer
 } from '@deck.gl/aggregation-layers';
 
 export const ContourLayerDemo = createLayerDemoClass({
@@ -62,8 +62,8 @@ export const GPUGridLayerDemo = createLayerDemoClass({
   ...GRID_LAYER_INFO
 });
 
-export const NewGridLayerDemo = createLayerDemoClass({
-  Layer: NewGridLayer,
+export const GridLayerDemo = createLayerDemoClass({
+  Layer: GridLayer,
   ...GRID_LAYER_INFO
 });
 

@@ -23,10 +23,10 @@ export {default as ScreenGridLayer} from './screen-grid-layer/screen-grid-layer'
 export {default as CPUGridLayer} from './cpu-grid-layer/cpu-grid-layer';
 export {default as HexagonLayer} from './hexagon-layer/hexagon-layer';
 export {default as ContourLayer} from './contour-layer/contour-layer';
+export {default as GridLayer} from './grid-layer/grid-layer';
 
 // Experimental layer exports
 export {default as _GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
-export {default as _NewGridLayer} from './new-grid-layer/new-grid-layer';
 
 export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
 export {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';

@@ -129,7 +129,7 @@ export {
   CPUGridLayer,
   HexagonLayer,
   ContourLayer,
-  _NewGridLayer,
+  GridLayer,
   _GPUGridLayer
 } from '@deck.gl/aggregation-layers';
 
