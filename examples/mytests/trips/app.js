@@ -11,15 +11,16 @@ import {TripsLayer} from '@deck.gl/geo-layers';
 // Set your mapbox token here
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
-let actType = 'Other';
-let trailLength = 86400;
-let animationSpeed = 900 // unit time per second
+let sampleSize = 10;
+let actType = 'Home';
+let trailLength = 20000;//86400;
+let animationSpeed = 450 // unit time per second
 
 const startTime = Date.now() / 1000
 
-let trsData = require('./inputs/tours.json');
+let trsData = require(`./inputs/tours_${sampleSize}pct.json`);
+let actsCntUpdsData = require(`./inputs/activities_count_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
-let actsCntUpdsData = require('./inputs/activities_count.json');
 let trIds = Object.keys(trsData);
 let initActsCnt = actsCntUpdsData[0];
 let maxResidents = Math.max(...Object.values(initActsCnt['Home']))
@@ -35,7 +36,7 @@ var colorsActs = d3.scaleSequential()
 let data = {zonesData: zonesData, trs: trsData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
 
 function shuffle(a) {
-  var j, x, i;
+  let j, x, i;
   for (i = a.length - 1; i > 0; i--) {
       j = Math.floor(Math.random() * (i + 1));
       x = a[i];
@@ -106,7 +107,7 @@ export class App extends Component {
     super(props);
     this.state = {
       time: 0,
-      trs: data.trs,
+      trs: this.props.data.trs,
       selectedZone: null
     };
 
@@ -160,6 +161,10 @@ export class App extends Component {
       time: (timestamp - startTime) * this.props.animationSpeed
     }, () => this._updateActsCnt(this.props.data.actsCnt, [actType], this.state.time));
     
+    //this.setState({ 
+    //  time: (timestamp - startTime) * this.props.animationSpeed
+    //});
+    
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
     
@@ -208,6 +213,21 @@ export class App extends Component {
           } = this.props;
     
     return [
+      
+      new TripsLayer({
+        id: 'trips',
+        data: this.state.trs,
+        getPath: d => d.Segments,
+        getColor: d => getRgbFromStr(colorsTrs(d.Tourid)),
+        opacity: 0.5,
+        widthMinPixels: 2,
+        rounded: false,
+        trailLength,
+        currentTime: this.state.time,
+        pickable: false,
+        autoHighlight: false,
+        highlightColor: [0, 255, 255]
+      }),
       new GeoJsonLayer({
         id: 'boundaries',
         //data:this.state.zones,
@@ -223,20 +243,6 @@ export class App extends Component {
         updateTriggers: {
           getFillColor: this.state.time
         },
-        autoHighlight: true,
-        highlightColor: [0, 255, 255]
-      }),
-      new TripsLayer({
-        id: 'trips',
-        data: this.state.trs,
-        getPath: d => d.Segments,
-        getColor: d => getRgbFromStr(colorsTrs(d.Tourid)),
-        opacity: 0.5,
-        widthMinPixels: 4,
-        rounded: false,
-        trailLength,
-        currentTime: this.state.time,
-        pickable: false,
         autoHighlight: true,
         highlightColor: [0, 255, 255]
       })
