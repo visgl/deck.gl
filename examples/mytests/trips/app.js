@@ -9,15 +9,15 @@ import {GeoJsonLayer} from 'deck.gl';
 import {TripsLayer} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
-let actType = 'Work';
+let actType = 'Other';
 let trailLength = 86400;
-let animationSpeed = 1800 // unit time per second
+let animationSpeed = 900 // unit time per second
 
 const startTime = Date.now() / 1000
 
-let trsData = require('./inputs/data.json');
+let trsData = require('./inputs/tours.json');
 let zonesData = require('./inputs/zones.json');
 let actsCntUpdsData = require('./inputs/activities_count.json');
 let trIds = Object.keys(trsData);
@@ -216,7 +216,8 @@ export class App extends Component {
         filled: true,
         pickable: true,
         extruded: false,
-        getFillColor: d => getRgbFromStr(colorsActs(getActsCnt(actsCnt, actType, d.properties.lsoa11cd))), 
+        getFillColor: d => getRgbFromStr(colorsActs(getActsCnt(actsCnt, actType, d.properties.lsoa11cd))),
+        opacity: 0.10,
         onClick: this._onSelectZone,
         onHover: this._onHover,
         updateTriggers: {
@@ -230,7 +231,7 @@ export class App extends Component {
         data: this.state.trs,
         getPath: d => d.Segments,
         getColor: d => getRgbFromStr(colorsTrs(d.Tourid)),
-        opacity: 0.0,
+        opacity: 0.5,
         widthMinPixels: 4,
         rounded: false,
         trailLength,
