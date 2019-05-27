@@ -11,6 +11,7 @@ dist-demo/
 dist-bundle.js
 
 examples/winds/data/*.html
+examples/mytests/trips/inputs/*.*
 mapbox-token.js
 TODO
 
