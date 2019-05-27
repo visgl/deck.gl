@@ -3,7 +3,7 @@
 import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {
-  _GPUGridLayer as GPUGridLayer,
+  GPUGridLayer,
   GridLayer
   // AGGREGATION_OPERATION
 } from '@deck.gl/aggregation-layers';

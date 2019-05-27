@@ -16,7 +16,7 @@ GPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -64,7 +64,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
 ```js
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer} from '@deck.gl/aggregation-layers';
 new GPUGridLayer({});
 ```
 

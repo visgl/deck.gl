@@ -8,7 +8,7 @@ import {
   GridCellLayer,
   HexagonLayer,
   ScreenGridLayer,
-  _GPUGridLayer as GPUGridLayer,
+  GPUGridLayer,
   GridLayer
 } from '@deck.gl/aggregation-layers';
 

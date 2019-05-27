@@ -130,7 +130,7 @@ export {
   HexagonLayer,
   ContourLayer,
   GridLayer,
-  _GPUGridLayer
+  GPUGridLayer
 } from '@deck.gl/aggregation-layers';
 
 export {
