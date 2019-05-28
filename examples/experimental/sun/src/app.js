@@ -35,8 +35,7 @@ const material = new PhongMaterial({
   specularColor: [60, 64, 70]
 });
 
-const shadowColor = [2, 0, 5, 200];
-const shadowEffect = new ShadowEffect({shadowColor});
+const shadowEffect = new ShadowEffect({shadowColor: [2, 0, 5, 200]});
 
 const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 

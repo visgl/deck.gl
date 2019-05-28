@@ -16,6 +16,13 @@ export default class ShadowPass extends LayersPass {
         [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
       }
     });
+
+    this.depthBuffer = new Renderbuffer(gl, {
+      format: gl.DEPTH_COMPONENT16,
+      width: 1,
+      height: 1
+    });
+
     this.fbo = new Framebuffer(gl, {
       id: 'shadowmap',
       width: 1,
@@ -23,11 +30,7 @@ export default class ShadowPass extends LayersPass {
       attachments: {
         [gl.COLOR_ATTACHMENT0]: this.shadowMap,
         // Depth attachment has to be specified for depth test to work
-        [gl.DEPTH_ATTACHMENT]: new Renderbuffer(gl, {
-          format: gl.DEPTH_COMPONENT16,
-          width: 1,
-          height: 1
-        })
+        [gl.DEPTH_ATTACHMENT]: this.depthBuffer
       }
     });
     this.props.pixelRatio = 2;
@@ -85,6 +88,11 @@ export default class ShadowPass extends LayersPass {
     if (this.shadowMap) {
       this.shadowMap.delete();
       this.shadowMap = null;
+    }
+
+    if (this.depthBuffer) {
+      this.depthBuffer.delete();
+      this.depthBuffer = null;
     }
   }
 }
