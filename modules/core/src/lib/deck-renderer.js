@@ -65,7 +65,13 @@ export default class DeckRenderer {
     stats
   }) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
-    const effectProps = this.prepareEffects(effects);
+    const effectProps = this.prepareEffects({
+      layers,
+      viewports,
+      onViewportActive: activateViewport,
+      views,
+      effects
+    });
     const outputBuffer = this.lastPostProcessEffect
       ? this.screenBuffer
       : Framebuffer.getDefaultFramebuffer(this.gl);
@@ -113,12 +119,13 @@ export default class DeckRenderer {
   }
 
   // Private
-  prepareEffects(effects) {
+  prepareEffects(params) {
+    const {effects} = params;
     const effectProps = {};
     this.lastPostProcessEffect = null;
 
     for (const effect of effects) {
-      Object.assign(effectProps, effect.prepare(this.gl));
+      Object.assign(effectProps, effect.prepare(this.gl, params));
       if (effect instanceof PostProcessEffect) {
         this.lastPostProcessEffect = effect;
       }
