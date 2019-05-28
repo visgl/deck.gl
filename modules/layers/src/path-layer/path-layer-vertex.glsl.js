@@ -26,8 +26,9 @@ attribute vec3 positions;
 attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec4 instanceStartEndPositions64xyLow;
-attribute vec3 instanceLeftDeltas;
-attribute vec3 instanceRightDeltas;
+attribute vec3 instanceLeftPositions;
+attribute vec3 instanceRightPositions;
+attribute vec4 instanceNeighborPositions64xyLow;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -213,26 +214,14 @@ void main() {
 
   float isEnd = positions.x;
 
-  vec3 prevPosition = instanceStartPositions;
-  vec2 prevPosition64xyLow = instanceStartEndPositions64xyLow.xy;
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
-    // In auto offset mode, add delta to low part of the positions for better precision
-    prevPosition64xyLow += mix(-instanceLeftDeltas, vec3(0.0), isEnd).xy;
-  } else {
-    prevPosition += mix(-instanceLeftDeltas, vec3(0.0), isEnd);
-  }
+  vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
+  vec2 prevPosition64xyLow = mix(instanceNeighborPositions64xyLow.xy, instanceStartEndPositions64xyLow.xy, isEnd);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
   vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
 
-  vec3 nextPosition = instanceEndPositions;
-  vec2 nextPosition64xyLow = instanceStartEndPositions64xyLow.zw;
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
-    // In auto offset mode, add delta to low part of the positions for better precision
-    nextPosition64xyLow += mix(vec3(0.0), instanceRightDeltas, isEnd).xy;
-  } else {
-    nextPosition += mix(vec3(0.0), instanceRightDeltas, isEnd);
-  }
+  vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
+  vec2 nextPosition64xyLow = mix(instanceStartEndPositions64xyLow.zw, instanceNeighborPositions64xyLow.zw, isEnd);
 
   if (billboard) {
     // Extrude in clipspace
