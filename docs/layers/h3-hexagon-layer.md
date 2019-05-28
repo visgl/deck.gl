@@ -1,3 +1,5 @@
+<!-- INJECT:"H3HexagonLayerDemo" -->
+
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
@@ -20,8 +22,8 @@ const App = ({data, viewport}) => {
    * Data format:
    * [
    *   {
-   *     hexagonId: '882830829bfffff',
-   *     eventCount: 14030
+   *     hex: '88283082b9fffff',
+   *     count: 96
    *   },
    *   ...
    * ]
@@ -29,13 +31,16 @@ const App = ({data, viewport}) => {
   const layer = new H3HexagonLayer({
     id: 'h3-hexagon-layer',
     data,
-    extruded: true,
     pickable: true,
-    getHexagon: d => d.hexagonId,
-    getElevation: d => d.eventCount / 3,
-    getColor: d => [255, (1 - d.eventCount / 20000) * 255, 0],
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 20,
+    getHexagon: d => d.hex,
+    getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
+    getElevation: d => d.count,
     onHover: ({object, x, y}) => {
-      const tooltip = `${object.hexagonId}\nEvents: ${object.eventCount}`;
+      const tooltip = `${object.hex} count: ${object.count}`;
       /* Update tooltip
          http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
       */
