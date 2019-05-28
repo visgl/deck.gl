@@ -36,17 +36,16 @@ const App = ({data, viewport}) => {
   const layer = new S2Layer({
     id: 's2-layer',
     data,
-    opacity: 0.6,
     pickable: true,
-    stroked: true,
+    wireframe: false,
     filled: true,
     extruded: true,
     elevationScale: 1000,
     getS2Token: d => d.token,
-    getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128, 128],
+    getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
     getElevation: d => d.value,
     onHover: ({object, x, y}) => {
-      const tooltip = `${object.token}`;
+      const tooltip = `${object.token} value: ${object.value}`;
       /* Update tooltip
          http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
       */

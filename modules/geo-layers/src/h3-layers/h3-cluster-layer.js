@@ -26,7 +26,7 @@ export default class H3ClusterLayer extends CompositeLayer {
         const multiPolygon = h3SetToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
-          polygons.push({polygon, object, index: objectInfo.index});
+          polygons.push({polygon, _obj: object, _idx: objectInfo.index});
         }
       }
 
@@ -36,8 +36,8 @@ export default class H3ClusterLayer extends CompositeLayer {
 
   getPickingInfo({info}) {
     return Object.assign(info, {
-      object: info.object && info.object.object,
-      index: info.object && info.object.index
+      object: info.object && info.object._obj,
+      index: info.object && info.object._idx
     });
   }
 
@@ -45,7 +45,7 @@ export default class H3ClusterLayer extends CompositeLayer {
     if (typeof accessor !== 'function') return accessor;
 
     return (object, objectInfo) => {
-      return accessor(object.object, objectInfo);
+      return accessor(object._obj, objectInfo);
     };
   }
 
