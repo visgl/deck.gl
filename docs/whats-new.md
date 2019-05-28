@@ -12,6 +12,11 @@ Release Date: 2019
 - Experimental `_lighting` property for PBR lighting.
 - Experimental `_imageBasedLightingEnvironment` property for image-based lighting.
 
+### GridLayer
+
+`GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](/docs/layers/grid-layer.md). Two new layers [GPUGridLayer](/docs/layers/gpu-grid-layer.md) and [CPUGridLayer](/docs/layers/cpu-grid-layer.md) are also offered, which perform aggregation on CPU and GPU respectively.
+
+
 ## deck.gl v7.0
 
 Release Date: April 19, 2019
