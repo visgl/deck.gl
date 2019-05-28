@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 export default `\
-#define SHADER_NAME path-layer-vertex-shader-64
+#define SHADER_NAME path-layer-vertex-shader
 
 attribute vec3 positions;
 
@@ -38,6 +38,7 @@ uniform float widthMinPixels;
 uniform float widthMaxPixels;
 uniform float jointType;
 uniform float miterLimit;
+uniform bool billboard;
 
 uniform float opacity;
 
@@ -49,6 +50,7 @@ varying vec2 vPathPosition;
 varying float vPathLength;
 
 const float EPSILON = 0.001;
+const vec3 ZERO_OFFSET = vec3(1.0);
 
 float flipIfTrue(bool flag) {
   return -(float(flag) * 2. - 1.);
@@ -58,18 +60,18 @@ float flipIfTrue(bool flag) {
 vec3 lineJoin(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   float relativePosition, bool isEnd, bool isJoint,
-  float width
+  vec2 width
 ) {
-  vec2 deltaA = currPoint.xy - prevPoint.xy;
-  vec2 deltaB = nextPoint.xy - currPoint.xy;
+  vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
+  vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
 
   float lenA = length(deltaA);
   float lenB = length(deltaB);
 
   // when two points are closer than PIXEL_EPSILON in pixels,
   // assume they are the same point to avoid precision issue
-  lenA = lenA / width > EPSILON ? lenA : 0.0;
-  lenB = lenB / width > EPSILON ? lenB : 0.0;
+  lenA = lenA > EPSILON ? lenA : 0.0;
+  lenB = lenB > EPSILON ? lenB : 0.0;
 
   vec2 dirA = lenA > 0. ? normalize(deltaA) : vec2(0.0, 0.0);
   vec2 dirB = lenB > 0. ? normalize(deltaB) : vec2(0.0, 0.0);
@@ -100,11 +102,11 @@ vec3 lineJoin(
 
   // do not bevel if line segment is too short
   cornerPosition *=
-    float(cornerPosition <= 0.0 || sinHalfA < min(lenA, lenB) / width * cosHalfA);
+    float(cornerPosition <= 0.0 || sinHalfA < min(lenA, lenB) * cosHalfA);
 
   // trim if inside corner extends further than the line segment
   if (cornerPosition < 0.0) {
-    offsetScale = min(offsetScale, L / width / max(cosHalfA, EPSILON));
+    offsetScale = min(offsetScale, L / max(cosHalfA, EPSILON));
   }
 
   vMiterLength = cornerPosition >= 0.0 ?
@@ -157,11 +159,11 @@ vec3 lineJoin(
 
   // Generate variables for dash calculation
   vDashArray = instanceDashArrays;
-  vPathLength = L / width;
-  // vec2 offsetFromStartOfPath = isEnd ? vCornerOffset + deltaA / width : vCornerOffset;
+  vPathLength = L;
+  // vec2 offsetFromStartOfPath = isEnd ? vCornerOffset + deltaA : vCornerOffset;
   vec2 offsetFromStartOfPath = vCornerOffset;
   if (isEnd) {
-    offsetFromStartOfPath += deltaA / width;
+    offsetFromStartOfPath += deltaA;
   }
   vec2 dir = isEnd ? dirA : dirB;
   vPathPosition = vec2(
@@ -185,14 +187,22 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   bool isEnd = positions.x > EPSILON;
   bool isJoint = positions.z > EPSILON;
 
-  float widthPixels = clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
-    widthMinPixels, widthMaxPixels) / 2.0;
+  vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
+    widthMinPixels, widthMaxPixels) / 2.0);
 
   return lineJoin(
     prevPoint, currPoint, nextPoint,
     relativePosition, isEnd, isJoint,
-    project_pixel_size(widthPixels)
+    billboard ? project_pixel_size_to_clipspace(widthPixels) : project_pixel_size(widthPixels)
   );
+}
+
+// In clipspace extrusion, if a line extends behind the camera, clip it to avoid visual artifacts
+void clipLine(inout vec4 position, vec4 refPosition) {
+  if (position.w < EPSILON) {
+    float r = (EPSILON - refPosition.w) / (position.w - refPosition.w);
+    position = refPosition + (position - refPosition) * r;
+  }
 }
 
 void main() {
@@ -211,11 +221,9 @@ void main() {
   } else {
     prevPosition += mix(-instanceLeftDeltas, vec3(0.0), isEnd);
   }
-  prevPosition = project_position(prevPosition, prevPosition64xyLow);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
   vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
-  currPosition = project_position(currPosition, currPosition64xyLow);
 
   vec3 nextPosition = instanceEndPositions;
   vec2 nextPosition64xyLow = instanceStartEndPositions64xyLow.zw;
@@ -225,10 +233,32 @@ void main() {
   } else {
     nextPosition += mix(vec3(0.0), instanceRightDeltas, isEnd);
   }
-  nextPosition = project_position(nextPosition, nextPosition64xyLow);
 
-  vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);
+  if (billboard) {
+    // Extrude in clipspace
+    vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64xyLow, ZERO_OFFSET);
+    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64xyLow, ZERO_OFFSET);
+    vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64xyLow, ZERO_OFFSET);
 
-  gl_Position = project_common_position_to_clipspace(vec4(pos, 1.0));
+    clipLine(prevPositionScreen, currPositionScreen);
+    clipLine(nextPositionScreen, currPositionScreen);
+    clipLine(currPositionScreen, mix(nextPositionScreen, prevPositionScreen, isEnd));
+
+    vec3 pos = lineJoin(
+      prevPositionScreen.xyz / prevPositionScreen.w,
+      currPositionScreen.xyz / currPositionScreen.w,
+      nextPositionScreen.xyz / nextPositionScreen.w
+    );
+
+    gl_Position = vec4(pos * currPositionScreen.w, currPositionScreen.w);
+  } else {
+    // Extrude in commonspace
+    prevPosition = project_position(prevPosition, prevPosition64xyLow);
+    currPosition = project_position(currPosition, currPosition64xyLow);
+    nextPosition = project_position(nextPosition, nextPosition64xyLow);
+
+    vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);
+    gl_Position = project_common_position_to_clipspace(vec4(pos, 1.0));
+  }
 }
 `;

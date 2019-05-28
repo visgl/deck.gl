@@ -39,6 +39,7 @@ const defaultProps = {
   miterLimit: {type: 'number', min: 0, value: 4},
   fp64: false,
   dashJustified: false,
+  billboard: false,
 
   getPath: {type: 'accessor', value: object => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -56,7 +57,7 @@ export default class PathLayer extends Layer {
   getShaders() {
     return this.use64bitProjection()
       ? {vs: vs64, fs, modules: ['project64', 'picking']}
-      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
+      : {vs, fs, modules: ['project32', 'picking']}; // 'project' module added by default.
   }
 
   initializeState() {
@@ -152,6 +153,7 @@ export default class PathLayer extends Layer {
     const {viewport} = this.context;
     const {
       rounded,
+      billboard,
       miterLimit,
       widthUnits,
       widthScale,
@@ -166,6 +168,7 @@ export default class PathLayer extends Layer {
       .setUniforms(
         Object.assign({}, uniforms, {
           jointType: Number(rounded),
+          billboard,
           alignMode: Number(dashJustified),
           widthScale: widthScale * widthMultiplier,
           miterLimit,
