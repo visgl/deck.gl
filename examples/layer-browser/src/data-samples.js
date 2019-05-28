@@ -133,29 +133,6 @@ export const zigzag3D = [
   }
 ];
 
-export const zigzag3D = [
-  {
-    // Big zigzag - 3D
-    path: new Array(12)
-      .fill(0)
-      .map((d, i) => [
-        positionOrigin[0] - i * i * 0.001 * (i % 2 ? 1 : -1),
-        positionOrigin[1] + (Math.cos(i * Math.PI) * 0.2) / (i + 4),
-        i * 1000
-      ])
-  },
-  {
-    // Tiny zigzag
-    path: new Array(12)
-      .fill(0)
-      .map((d, i) => [
-        positionOrigin[0] - 0.001 - i * i * 1e-5,
-        positionOrigin[1] + (Math.cos(i * Math.PI) * 2e-3) / (i + 4),
-        i * 10
-      ])
-  }
-];
-
 export const greatCircles = [
   {source: [120, 0], target: [-60, 0]},
   {source: [120, 10], target: [-60, -10]},

@@ -163,17 +163,17 @@ test('PathTesselator#partial update', t => {
   });
 
   let startPositions = tesselator.get('startPositions').slice(0, 15);
-  let leftDeltas = tesselator.get('leftDeltas').slice(0, 15);
+  let leftPositions = tesselator.get('leftPositions').slice(0, 15);
   t.is(tesselator.instanceCount, 5, 'Initial instance count');
   t.deepEquals(startPositions, [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0], 'startPositions');
-  t.deepEquals(leftDeltas, [0, 0, 0, 1, 1, 0, -2, -2, 0, 1, 1, 0, 1, 1, 0], 'leftDeltas');
+  t.deepEquals(leftPositions, [1, 1, 0, 1, 1, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0], 'leftPositions');
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
   sampleData[2] = {path: [[4, 4], [5, 5], [6, 6]], id: 'C'};
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
   startPositions = tesselator.get('startPositions').slice(0, 21);
-  leftDeltas = tesselator.get('leftDeltas').slice(0, 21);
+  leftPositions = tesselator.get('leftPositions').slice(0, 21);
   t.is(tesselator.instanceCount, 7, 'Updated instance count');
   t.deepEquals(
     startPositions,
@@ -181,9 +181,9 @@ test('PathTesselator#partial update', t => {
     'startPositions'
   );
   t.deepEquals(
-    leftDeltas,
-    [0, 0, 0, 1, 1, 0, -2, -2, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
-    'leftDeltas'
+    leftPositions,
+    [1, 1, 0, 1, 1, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 4, 4, 0],
+    'leftPositions'
   );
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
@@ -191,7 +191,7 @@ test('PathTesselator#partial update', t => {
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
   startPositions = tesselator.get('startPositions').slice(0, 21);
-  leftDeltas = tesselator.get('leftDeltas').slice(0, 21);
+  leftPositions = tesselator.get('leftPositions').slice(0, 21);
   t.is(tesselator.instanceCount, 7, 'Updated instance count');
   t.deepEquals(
     startPositions,
@@ -199,9 +199,9 @@ test('PathTesselator#partial update', t => {
     'startPositions'
   );
   t.deepEquals(
-    leftDeltas,
-    [0, 0, 0, -1, -1, 0, -2, -2, 0, 1, 1, 0, 1, 1, 0, 0, 0, 0, 1, 1, 0],
-    'leftDeltas'
+    leftPositions,
+    [6, 6, 0, 6, 6, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 4, 4, 0],
+    'leftPositions'
   );
   t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
 
