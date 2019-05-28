@@ -41,6 +41,7 @@ function tesselateColumn(props) {
   for (let j = 0; j < vertsAroundEdge; j++) {
     const a = j * stepAngle;
     const vertex = vertices && vertices[j % nradial];
+    const nextVertex = vertices && vertices[(j + 1) % nradial];
     const sin = Math.sin(a);
     const cos = Math.cos(a);
 
@@ -49,8 +50,8 @@ function tesselateColumn(props) {
       positions[i + 1] = vertex ? vertex[1] : sin * radius;
       positions[i + 2] = (1 / 2 - k) * height;
 
-      normals[i + 0] = cos;
-      normals[i + 1] = sin;
+      normals[i + 0] = vertex ? nextVertex[0] - vertex[0] : cos;
+      normals[i + 1] = vertex ? nextVertex[1] - vertex[1] : sin;
 
       i += 3;
     }
