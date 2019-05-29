@@ -1,19 +1,19 @@
 {
   "lerna": "3.0.0",
-  "version": "7.0.9",
-  "commands": {
+  "version": "7.0.10",
+  "npmClient": "yarn",
+  "useWorkspaces": true,
+  "packages": [
+    "modules/*"
+  ],
+  "command": {
     "publish": {
-      "ignore": [
+      "ignoreChanges": [
         "@deck.gl/lite",
         "test",
         "*.md"
       ]
     },
     "bootstrap": {}
-  },
-  "npmClient": "yarn",
-  "useWorkspaces": true,
-  "packages": [
-    "modules/*"
-  ]
+  }
 }

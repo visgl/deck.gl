@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.10] - May 29 2019
+
+- Include LICENSE in submodules
+
 #### deck.gl [v7.0.9] - May 21 2019
 
 - Fix logging (#3126)
