@@ -62,7 +62,18 @@ test('NewGridLayer#updates', t => {
       {
         props: SAMPLE_PROPS,
         onAfterUpdate({layer}) {
-          t.ok(layer.state.useGPUAggregation === true, 'Should use GPU Aggregation');
+          t.ok(layer.state.useGPUAggregation === false, 'By default should use CPU Aggregation');
+        }
+      },
+      {
+        updateProps: {
+          gpuAggregation: true
+        },
+        onAfterUpdate({layer}) {
+          t.ok(
+            layer.state.useGPUAggregation === true,
+            'Should use GPU Aggregation (gpuAggregation: true)'
+          );
         }
       },
       {

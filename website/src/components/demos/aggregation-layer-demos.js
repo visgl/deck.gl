@@ -1,7 +1,16 @@
+/* eslint-disable import/namespace, import/default, import/no-extraneous-dependencies */
 import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
-import {ContourLayer, GridLayer, GridCellLayer, HexagonLayer, ScreenGridLayer} from 'deck.gl';
+import {
+  ContourLayer,
+  GridLayer,
+  GridCellLayer,
+  HexagonLayer,
+  ScreenGridLayer,
+  _GPUGridLayer as GPUGridLayer,
+  _NewGridLayer as NewGridLayer
+} from '@deck.gl/aggregation-layers';
 
 export const ContourLayerDemo = createLayerDemoClass({
   Layer: ContourLayer,
@@ -36,8 +45,7 @@ export const GridCellLayerDemo = createLayerDemoClass({
   }
 });
 
-export const GridLayerDemo = createLayerDemoClass({
-  Layer: GridLayer,
+const GRID_LAYER_INFO = {
   dataUrl: `${DATA_URI}/sf-bike-parking.json`,
   formatTooltip: d => `${d.position.join(', ')}\nCount: ${d.count}`,
   props: {
@@ -47,6 +55,21 @@ export const GridLayerDemo = createLayerDemoClass({
     elevationScale: 4,
     getPosition: d => d.COORDINATES
   }
+};
+
+export const GPUGridLayerDemo = createLayerDemoClass({
+  Layer: GPUGridLayer,
+  ...GRID_LAYER_INFO
+});
+
+export const NewGridLayerDemo = createLayerDemoClass({
+  Layer: NewGridLayer,
+  ...GRID_LAYER_INFO
+});
+
+export const GridLayerDemo = createLayerDemoClass({
+  Layer: GridLayer,
+  ...GRID_LAYER_INFO
 });
 
 export const HexagonLayerDemo = createLayerDemoClass({
