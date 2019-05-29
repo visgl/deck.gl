@@ -28,7 +28,13 @@ import DeckPicker from './deck-picker';
 import log from '../utils/log';
 
 import GL from '@luma.gl/constants';
-import {AnimationLoop, createGLContext, trackContextState, setParameters} from '@luma.gl/core';
+import {
+  AnimationLoop,
+  createGLContext,
+  trackContextState,
+  setParameters,
+  lumaStats
+} from '@luma.gl/core';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
@@ -162,8 +168,17 @@ export default class Deck {
       setPropsTime: 0,
       updateAttributesTime: 0,
       drawCount: 0,
-      layersRedrawn: 0
+      layersRedrawn: 0,
+      gpuTime: 0,
+      gpuTimePerFrame: 0,
+      cpuTime: 0,
+      cpuTimePerFrame: 0,
+      bufferMemory: 0,
+      textureMemory: 0,
+      renderbufferMemory: 0,
+      gpuMemory: 0
     };
+    this._metricsCounter = 0;
 
     this.setProps(props);
 
@@ -645,11 +660,10 @@ export default class Deck {
   }
 
   _onRenderFrame(animationProps) {
-    this.stats.get('frameRate').timeEnd();
-    this.stats.get('frameRate').timeStart();
+    this._getFrameStats();
 
     // Log perf stats every second
-    if (animationProps.tick % 60 === 0) {
+    if (this._metricsCounter++ % 60 === 0) {
       this._getMetrics();
       this.stats.reset();
       log.table(3, this.metrics)();
@@ -766,6 +780,25 @@ export default class Deck {
     });
   }
 
+  _getFrameStats() {
+    this.stats.get('frameRate').timeEnd();
+    this.stats.get('frameRate').timeStart();
+
+    // Get individual stats from luma.gl so reset works
+    const animationLoopStats = this.animationLoop.stats;
+    this.stats
+      .get('GPU Time')
+      .addTime(
+        animationLoopStats.get('GPU Time') ? animationLoopStats.get('GPU Time').lastTiming : 0
+      );
+    this.stats
+      .get('CPU Time')
+      .addTime(
+        animationLoopStats.get('CPU Time') ? animationLoopStats.get('CPU Time').lastTiming : 0
+      );
+  }
+
+  /* eslint-disable complexity */
   _getMetrics() {
     this.metrics.fps = this.stats.get('frameRate') ? this.stats.get('frameRate').getHz() : 0;
     this.metrics.setPropsTime = this.stats.get('setProps Time')
@@ -779,6 +812,28 @@ export default class Deck {
       : 0;
     this.metrics.layersRedrawn = this.stats.get('Redraw Layers')
       ? this.stats.get('Redraw Layers').count
+      : 0;
+    this.metrics.gpuTime = this.stats.get('GPU Time') ? this.stats.get('GPU Time').time : 0;
+    this.metrics.cpuTime = this.stats.get('CPU Time') ? this.stats.get('CPU Time').time : 0;
+    this.metrics.gpuTimePerFrame = this.stats.get('GPU Time')
+      ? this.stats.get('GPU Time').getAverageTime()
+      : 0;
+    this.metrics.cpuTimePerFrame = this.stats.get('CPU Time')
+      ? this.stats.get('CPU Time').getAverageTime()
+      : 0;
+
+    const memoryStats = lumaStats.get('Memory Usage');
+    this.metrics.bufferMemory = memoryStats.get('Buffer Memory')
+      ? memoryStats.get('Buffer Memory').count
+      : 0;
+    this.metrics.textureMemory = memoryStats.get('Texture Memory')
+      ? memoryStats.get('Texture Memory').count
+      : 0;
+    this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory')
+      ? memoryStats.get('Renderbuffer Memory').count
+      : 0;
+    this.metrics.gpuMemory = memoryStats.get('Memory Usage')
+      ? memoryStats.get('Memory Usage').count
       : 0;
   }
 }

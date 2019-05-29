@@ -387,6 +387,14 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 - 'layersRedrawn': number of layers drawn
 - 'setPropsTime': time spent setting layer properties
 - 'drawCount': number of times the scene was rendered
+- 'gpuTime': total time spent on GPU processing
+- 'gpuTimePerFrame': average time spent on GPU processing per frame
+- 'cpuTime': total time spent on CPU processing
+- 'cpuTimePerFrame': average time spent on CPU processing per frame
+- 'bufferMemory': total GPU memory allocated for buffers
+- 'textureMemory': total GPU memory allocated for textures
+- 'renderbufferMemory': total GPU memory allocated for renderbuffers
+- 'gpuMemory': total allocated GPU memory
 
 
 ## Remarks
