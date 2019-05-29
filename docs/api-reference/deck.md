@@ -381,21 +381,12 @@ Notes:
 
 #### metrics
 
-A map of various performance statistics for the last 60 frames of rendering. Statistics generally fall into two categories, count and time, and the relevancy of data provided for
-statistic will depend on it's category (e.g. "time"-based values are only relevant for statistics that include timing). Data provided for each statistic are:
-- `time`: total time spent on an operation (relevant for time statistics)
-- `count`: number or amount of some metric (relevant for count statistics)
-- `average`: average time spent per operation (relevant for time statistics)
-- `hz`: number of operations per second (relevant for time statistics)
-
-Some metrics gathered in deck.gl include:
-- 'Update Attributes': time spent updating attributes
-- 'Redraw Layers': number of layers drawn
-- 'setProps Time': time spent setting properties
-- 'Redraw Count': number of times the scene was rendered
-- 'pickObject Time': time spent picking an object
-- 'pickMultipleObjects Time': time spent picking multiple objects
-- 'frameRate': number of frames rendered per second
+A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
+- 'fps': average number of frames rendered per second
+- 'updateAttributesTime': time spent updating layer attributes
+- 'layersRedrawn': number of layers drawn
+- 'setPropsTime': time spent setting layer properties
+- 'drawCount': number of times the scene was rendered
 
 
 ## Remarks

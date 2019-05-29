@@ -157,7 +157,13 @@ export default class Deck {
     this.animationLoop = this._createAnimationLoop(props);
 
     this.stats = new Stats({id: 'deck.gl'});
-    this.metrics = {};
+    this.metrics = {
+      fps: 0,
+      setPropsTime: 0,
+      updateAttributesTime: 0,
+      drawCount: 0,
+      layersRedrawn: 0
+    };
 
     this.setProps(props);
 
@@ -644,14 +650,7 @@ export default class Deck {
 
     // Log perf stats every second
     if (animationProps.tick % 60 === 0) {
-      this.stats.forEach(stat => {
-        this.metrics[stat.name] = {
-          time: stat.time || 0,
-          count: stat.count || 0,
-          average: stat.getAverageTime() || 0,
-          hz: stat.getHz() || 0
-        };
-      });
+      this._getMetrics();
       this.stats.reset();
       log.table(3, this.metrics)();
 
@@ -765,6 +764,22 @@ export default class Deck {
       event,
       mode: 'hover'
     });
+  }
+
+  _getMetrics() {
+    this.metrics.fps = this.stats.get('frameRate') ? this.stats.get('frameRate').getHz() : 0;
+    this.metrics.setPropsTime = this.stats.get('setProps Time')
+      ? this.stats.get('setProps Time').time
+      : 0;
+    this.metrics.updateAttributesTime = this.stats.get('Update Attributes')
+      ? this.stats.get('Update Attributes').time
+      : 0;
+    this.metrics.drawCount = this.stats.get('Redraw Count')
+      ? this.stats.get('Redraw Count').count
+      : 0;
+    this.metrics.layersRedrawn = this.stats.get('Redraw Layers')
+      ? this.stats.get('Redraw Layers').count
+      : 0;
   }
 }
 
