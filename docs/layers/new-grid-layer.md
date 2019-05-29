@@ -178,7 +178,7 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 ##### `gpuAggregation` (bool, optional)
 
-* Default: false
+* Default: `false`
 
 When set to true, aggregation is performed on GPU, provided other conditions are met, for more details check `GPU Aggregation` section below. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
 
