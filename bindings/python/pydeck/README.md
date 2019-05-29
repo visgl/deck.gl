@@ -1,7 +1,5 @@
 # pydeck: A Python wrapper for deck.gl
 
-[![Build Status](https://travis-ci.org/uber/deck.gl.svg?branch=master)](https://travis-ci.org/uber/deck.gl)
-
 The pydeck module is a set of experimental Python bindings for deck.gl
 
 For a quick example, install pydeck and try the following in a Jupyter notebook:
