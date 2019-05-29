@@ -1031,7 +1031,10 @@ export default class GPUGridAggregator {
       }
       const vertexCount = positions.length / 2;
       positionsBuffer = new Buffer(gl, new Float32Array(positions));
-      positions64xyLowBuffer = new Buffer(gl, {size: 2, data: new Float32Array(positions64xyLow)});
+      positions64xyLowBuffer = new Buffer(gl, {
+        data: new Float32Array(positions64xyLow),
+        accessor: {size: 2}
+      });
       this.setState({positionsBuffer, positions64xyLowBuffer, vertexCount});
 
       this.setupWeightAttributes(opts);

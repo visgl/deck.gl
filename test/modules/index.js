@@ -32,8 +32,6 @@ if (typeof document !== 'undefined') {
   require('./react');
   require('./main/bundle');
   require('./aggregation-layers/utils/gpu-grid-aggregator.spec');
-  // TODO - This is failing in headless browser test. Might be related to
-  // https://github.com/uber/luma.gl/issues/906
-  // require('./aggregation-layers/utils/grid-aggregation-utils.spec');
+  require('./aggregation-layers/utils/grid-aggregation-utils.spec');
   require('./core/lib/pick-layers.spec');
 }
