@@ -37,6 +37,9 @@ const myGridLayer = new GridLayer({
 
 If your application is not subclassing `GridLayer`, no additional changes are needed.
 
+- When using GPU Aggregation, `onSetColorDomain` and `onSetElevationDomain` are not fired, if those callbacks are needed set `gpuAggregation` to `false` (which is the default getElevationValue)
+
+
 ## Upgrading from deck.gl v6.4 to v7.0
 
 #### Submodule Structure and Dependency Changes
