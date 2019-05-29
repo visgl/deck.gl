@@ -225,8 +225,6 @@ You should pass in the function defined outside the render function so it doesn'
 
 `getColorWeight` is the accessor function to get the weight of a point used to calcuate the color value for a cell.
 
-Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` has changed to recalculate the value for each bin that its color based on.
-
 
 ##### `colorAggregation` (String, optional)
 
@@ -237,6 +235,8 @@ Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` h
 Note: `getColorWeight` and `colorAggregation` together define how color value of cell is determined, same can be done by setting `getColorValue` prop. But to enable GPU aggregation, former props must be provided instead of later.
 
 ###### Example1 : Using count of data elements that fall into a cell to encode the its color
+
+####### Using `getColorValue`
 ```js
 function getCount(points) {
   return points.length;
@@ -315,8 +315,6 @@ You should pass in the function defined outside the render function so it doesn'
 * Default: `point => 1`
 
 `getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
-
-Note: similar to `getElevationValue`, grid layer compares whether `getElevationWeight` has changed to recalculate the value for each bin that its color based on.
 
 
 ##### `elevationAggregation` (String, optional)
