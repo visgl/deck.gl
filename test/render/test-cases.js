@@ -4,8 +4,8 @@ import * as dataSamples from '../../examples/layer-browser/src/data-samples';
 import {parseColor, setOpacity} from '../../examples/layer-browser/src/utils/color';
 import {
   _GPUGridLayer as GPUGridLayer,
-  _NewGridLayer as NewGridLayer,
-  AGGREGATION_OPERATION
+  _NewGridLayer as NewGridLayer
+  // AGGREGATION_OPERATION
 } from '@deck.gl/aggregation-layers';
 import {COORDINATE_SYSTEM, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
 
@@ -56,6 +56,27 @@ const GRID_LAYER_INFO = {
   goldenImage: './test/render/golden-images/grid-lnglat.png'
 };
 
+const HEXAGON_LAYER_INFO = {
+  viewState: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 11.5,
+    pitch: 20,
+    bearing: 0
+  },
+  props: {
+    data: dataSamples.points,
+    extruded: true,
+    pickable: true,
+    radius: 1000,
+    opacity: 1,
+    elevationScale: 1,
+    elevationRange: [0, 3000],
+    coverage: 1,
+    getPosition: d => d.COORDINATES
+  }
+};
+
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
@@ -75,10 +96,18 @@ function getMax(pts, key) {
 function getColorValue(points) {
   return getMean(points, 'SPACES');
 }
+function getColorWeight(point) {
+  return point.SPACES;
+}
+const colorAggregation = 'mean';
 
 function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
+function getElevationWeight(point) {
+  return point.SPACES;
+}
+const elevationAggregation = 'max';
 
 export const WIDTH = 800;
 export const HEIGHT = 450;
@@ -834,6 +863,22 @@ export const TEST_CASES = [
     goldenImage: GRID_LAYER_INFO.goldenImage
   },
   {
+    name: 'grid-lnglat-2',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new GridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'grid-lnglat',
+          getColorWeight,
+          colorAggregation,
+          getElevationWeight,
+          elevationAggregation
+        })
+      )
+    ],
+    goldenImage: GRID_LAYER_INFO.goldenImage
+  },
+  {
     name: 'new-grid-lnglat-cpu',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
@@ -841,9 +886,9 @@ export const TEST_CASES = [
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'new-grid-lnglat-cpu',
           getColorWeight: x => x.SPACES,
-          colorAggregation: AGGREGATION_OPERATION.MEAN,
+          colorAggregation: 'MEAN',
           getElevationWeight: x => x.SPACES,
-          elevationAggregation: AGGREGATION_OPERATION.MAX,
+          elevationAggregation: 'MAX',
           gpuAggregation: false
         })
       )
@@ -858,9 +903,9 @@ export const TEST_CASES = [
         Object.assign({}, GRID_LAYER_INFO.props, {
           id: 'new-grid-lnglat-gpu',
           getColorWeight: x => x.SPACES,
-          colorAggregation: AGGREGATION_OPERATION.MEAN,
+          colorAggregation: 'MEAN',
           getElevationWeight: x => x.SPACES,
-          elevationAggregation: AGGREGATION_OPERATION.MAX,
+          elevationAggregation: 'MAX',
           gpuAggregation: true
         })
       )
@@ -967,28 +1012,31 @@ export const TEST_CASES = [
   },
   {
     name: 'hexagon-lnglat',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 20,
-      bearing: 0
-    },
+    viewState: HEXAGON_LAYER_INFO.viewState,
     layers: [
-      new HexagonLayer({
-        id: 'hexagon-lnglat',
-        data: dataSamples.points,
-        extruded: true,
-        pickable: true,
-        radius: 1000,
-        opacity: 1,
-        elevationScale: 1,
-        elevationRange: [0, 3000],
-        coverage: 1,
-        getPosition: d => d.COORDINATES,
-        getColorValue,
-        getElevationValue
-      })
+      new HexagonLayer(
+        Object.assign({}, HEXAGON_LAYER_INFO.props, {
+          id: 'hexagon-lnglat',
+          getColorValue,
+          getElevationValue
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/hexagon-lnglat.png'
+  },
+  {
+    name: 'hexagon-lnglat-2',
+    viewState: HEXAGON_LAYER_INFO.viewState,
+    layers: [
+      new HexagonLayer(
+        Object.assign({}, HEXAGON_LAYER_INFO.props, {
+          id: 'hexagon-lnglat',
+          getColorWeight,
+          colorAggregation,
+          getElevationWeight,
+          elevationAggregation
+        })
+      )
     ],
     goldenImage: './test/render/golden-images/hexagon-lnglat.png'
   },

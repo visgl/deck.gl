@@ -111,6 +111,17 @@ test('NewGridLayer#updates', t => {
       },
       {
         updateProps: {
+          colorAggregation: 'Mean'
+        },
+        onAfterUpdate({layer, subLayers, spies}) {
+          t.ok(
+            layer.state.useGPUAggregation === true,
+            'Should use GPU Aggregation (gpuAggregation: true)'
+          );
+        }
+      },
+      {
+        updateProps: {
           getElevationValue: points => points.length,
           updateTriggers: {
             getElevationValue: 1

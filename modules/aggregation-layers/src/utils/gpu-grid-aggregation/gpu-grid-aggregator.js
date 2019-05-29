@@ -15,7 +15,6 @@ import {worldToPixels} from 'viewport-mercator-project';
 const {fp64ifyMatrix4} = fp64Utils;
 
 import {
-  AGGREGATION_OPERATION,
   DEFAULT_CHANGE_FLAGS,
   DEFAULT_RUN_PARAMS,
   MAX_32_BIT_FLOAT,
@@ -29,6 +28,7 @@ import {
   PIXEL_SIZE,
   WEIGHT_SIZE
 } from './gpu-grid-aggregator-constants';
+import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 
 import AGGREGATE_TO_GRID_VS from './aggregate-to-grid-vs.glsl';
 import AGGREGATE_TO_GRID_VS_FP64 from './aggregate-to-grid-vs-64.glsl';
