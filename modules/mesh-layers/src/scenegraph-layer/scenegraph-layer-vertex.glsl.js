@@ -49,7 +49,7 @@ _attribute vec4 POSITION;
 // Utils
 #if defined(HAS_NORMALS) && defined(MODULE_PBR)
   vec3 getProjectedNormal() {
-    return project_normal(instanceModelMatrix * (sceneModelMatrix * NORMAL).xyz);
+    return project_normal(instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz);
   }
 #endif
 
