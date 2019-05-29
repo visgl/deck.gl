@@ -111,3 +111,27 @@ export function getQuantileScale(domain, range) {
   }
   return value => quantileScale(thresholds, range, value);
 }
+
+// ordinal
+function ordinalScale(domain, domainMap, range, value) {
+  const key = `${value}`;
+  let d = domainMap.get(key);
+  if (d === undefined) {
+    // update the domain
+    d = domain.push(value);
+    domainMap.set(key, d);
+  }
+  return range[(d - 1) % range.length];
+}
+
+export function getOrdinalScale(domain, range) {
+  const domainMap = new Map();
+  const uniqueDomain = [];
+  for (const d of domain) {
+    const key = `${d}`;
+    if (!domainMap.has(key)) {
+      domainMap.set(key, uniqueDomain.push(d));
+    }
+  }
+  return value => ordinalScale(uniqueDomain, domainMap, range, value);
+}
