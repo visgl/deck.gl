@@ -18,13 +18,13 @@ A new `PostProcessEffect` class, working with `@luma.gl/effects` module,  offers
 
 `GridLayer` is enhanced to support GPU Aggregation. By default GPU Aggregation is disabled, and can be enabled using `gpuAggregation` prop. For more details check [GridLayer](/docs/layers/grid-layer.md). Two new layers [GPUGridLayer](/docs/layers/gpu-grid-layer.md) and [CPUGridLayer](/docs/layers/cpu-grid-layer.md) are also offered, which perform aggregation on CPU and GPU respectively.
 
-The following table compares the performance between CPU and GPU aggregations on random data points:
+The following table compares the performance between CPU and GPU aggregations using random data points:
 
 | #points | CPU #iternations/sec | GPU #iterations/sec | Notes |
 | ---- | --- | --- | --- |
-| 25K | 548 | 322 | GPU is <b style="color:red">41%</b> slower |
-| 100K | 95.3 | 283 | GPU is <b style="color:green">197%</b> faster |
-| 1M | 13.9 | 103 | GPU is <b style="color:green">641%</b> faster |
+| 25K | 535 | 359 | GPU is <b style="color:red">33%</b> slower |
+| 100K | 119 | 437 | GPU is <b style="color:green">267%</b> faster |
+| 1M | 12.7 | 158 | GPU is <b style="color:green">1144%</b> faster |
 
 *Numbers are collected on a 2018 15-inch Macbook Pro (CPU: 2.6 GHz Intel Core i7 and GPU: Radeon Pro 560X 4 GB)*
 

@@ -8,13 +8,13 @@
 
 # GridLayer
 
-The NewGrid Layer renders a grid heatmap based on an array of points.
+The `GridLayer` renders a grid heatmap based on an array of points.
 It takes the constant size all each cell, projects points into cells. The color
 and height of the cell is scaled by number of points it contains.
 
-It functions similar to `GridLayer` and supports aggregation on GPU. This layer supports all of the `GridLayer` props, in addition, it has `gpuAggregation` prop that can be used to control whether aggregation to happen on CPU or GPU. For more details check `GPU Aggregation` section below.
+This layer renders either a [GPUGridLayer](/docs/layers/gpu-grid-layer.md) or a [CPUGridLayer](/docs/layers/cpu-grid-layer.md), depending on its props and whether GPU aggregation is supported. For more details check the `GPU Aggregation` section below.
 
-GridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+`GridLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -180,9 +180,9 @@ Whether the layer should be rendered in high-precision 64-bit mode. Note that si
 
 * Default: `false`
 
-When set to true, aggregation is performed on GPU, provided other conditions are met, for more details check `GPU Aggregation` section below. GPU aggregation can be 2 to 3 times faster depending upon number of points and number of cells.
+When set to true, aggregation is performed on GPU, provided other conditions are met, for more details check the `GPU Aggregation` section below. GPU aggregation can be a lot faster than CPU depending upon the number of points and number of cells.
 
-**Note:** GPU Aggregation is faster only when using large data sets (point count is more than 500K), for smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
+**Note:** GPU Aggregation is faster only when using large data sets. For smaller data sets GPU Aggregation could be potentially slower than CPU Aggregation.
 
 ##### `material` (Object, optional)
 
@@ -413,22 +413,33 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 * Default: `() => {}`
 
-This callback will be called when bin color domain has been calculated.
+This callback will be called when bin color domain has been calculated. 
+Note that this is only fired when using CPU Aggregation (`gpuAggregation: false`).
 
 ##### `onSetElevationDomain` (Function, optional)
 
 * Default: `() => {}`
 
 This callback will be called when bin elevation domain has been calculated.
-
+Note that this is only fired when using CPU Aggregation (`gpuAggregation: false`).
 
 ## GPU Aggregation
 
-This layer performs aggregation on GPU when browser is using `WebGL2` and `gpuAggregation` prop is set to true, but with following exceptions.
+### Performance Metrics
 
-### Fallback cases:
+The following table compares the performance between CPU and GPU aggregations using random data points:
 
-Aggregation will fallback to CPU in following cases :
+| #points | CPU #iternations/sec | GPU #iterations/sec | Notes |
+| ---- | --- | --- | --- |
+| 25K | 535 | 359 | GPU is <b style="color:red">33%</b> slower |
+| 100K | 119 | 437 | GPU is <b style="color:green">267%</b> faster |
+| 1M | 12.7 | 158 | GPU is <b style="color:green">1144%</b> faster |
+
+*Numbers are collected on a 2016 15-inch Macbook Pro (CPU: 2.8 GHz Intel Core i7 and GPU: AMD Radeon R9 M370X 2 GB)*
+
+### Fallback Cases
+
+This layer performs aggregation on GPU when the browser is using `WebGL2` and the `gpuAggregation` prop is set to `true`, but will fallback to CPU in the following cases:
 
 #### Percentile Props
 
