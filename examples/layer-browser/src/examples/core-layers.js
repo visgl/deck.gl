@@ -15,11 +15,10 @@ import {
 } from '@deck.gl/layers';
 
 import {
-  GridLayer,
+  CPUGridLayer,
   HexagonLayer,
   ContourLayer,
   ScreenGridLayer
-  //  ContourLayer
 } from '@deck.gl/aggregation-layers';
 
 const {flattenVertices} = experimental;
@@ -355,8 +354,8 @@ function getElevationValue(points) {
   return getMax(points, 'SPACES');
 }
 
-const GridLayerExample = {
-  layer: GridLayer,
+const CPUGridLayerExample = {
+  layer: CPUGridLayer,
   props: {
     id: 'gridLayer',
     data: dataSamples.points,
@@ -518,7 +517,7 @@ export default {
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
     ColumnLayer: ColumnLayerExample,
-    GridLayer: GridLayerExample,
+    CPUGridLayer: CPUGridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonLayer: HexagonLayerExample,
     ContourLayer: ContourLayerExample,

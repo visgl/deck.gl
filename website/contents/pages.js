@@ -432,8 +432,8 @@ export const docPages = generatePath([
             content: getDocUrl('layers/great-circle-layer.md')
           },
           {
-            name: 'GridLayer',
-            content: getDocUrl('layers/grid-layer.md')
+            name: 'CPUGridLayer',
+            content: getDocUrl('layers/cpu-grid-layer.md')
           },
           {
             name: 'GridCellLayer',
@@ -452,8 +452,8 @@ export const docPages = generatePath([
             content: getDocUrl('layers/h3-hexagon-layer.md')
           },
           {
-            name: 'NewGridLayer',
-            content: getDocUrl('layers/new-grid-layer.md')
+            name: 'GridLayer',
+            content: getDocUrl('layers/grid-layer.md')
           },
           {
             name: 'S2Layer',

@@ -20,10 +20,7 @@
 
 import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
-import {
-  _NewGridLayer as NewGridLayer,
-  _GPUGridAggregator as GPUGridAggregator
-} from '@deck.gl/aggregation-layers';
+import {GridLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl} from '@deck.gl/test-utils';
 
@@ -33,9 +30,9 @@ const SAMPLE_PROPS = {
   // gpuAggregation: false
 };
 
-test('NewGridLayer', t => {
+test('GridLayer', t => {
   const testCases = generateLayerTests({
-    Layer: NewGridLayer,
+    Layer: GridLayer,
     sampleProps: SAMPLE_PROPS,
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -44,19 +41,19 @@ test('NewGridLayer', t => {
     }
   });
 
-  testLayer({Layer: NewGridLayer, testCases, onError: t.notOk});
+  testLayer({Layer: GridLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
-test('NewGridLayer#updates', t => {
+test('GridLayer#updates', t => {
   if (!GPUGridAggregator.isSupported(gl)) {
     t.comment('GPUGridLayer not supported, skipping');
     t.end();
     return;
   }
   testLayer({
-    Layer: NewGridLayer,
+    Layer: GridLayer,
     onError: t.notOk,
     testCases: [
       {

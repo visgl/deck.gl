@@ -16,7 +16,7 @@ GPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer} from '@deck.gl/aggregation-layers';
 
 const App = ({data, viewport}) => {
 
@@ -50,7 +50,7 @@ const App = ({data, viewport}) => {
 
 **Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-**Note:** This layer is similar to [GridLayer](/docs/layers/grid-layer.md) but supports aggregation on GPU when possible. Check below for more detailed differences of this layer compared to `GridLayer`.
+**Note:** This layer is similar to [CPUGridLayer](/docs/layers/cpu-grid-layer.md) but supports aggregation on GPU when possible. Check below for more detailed differences of this layer compared to `GridLayer`.
 
 
 ## Installation
@@ -64,7 +64,7 @@ npm install @deck.gl/core @deck.gl/layers @deck.gl/aggregation-layers
 ```
 
 ```js
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer} from '@deck.gl/aggregation-layers';
 new GPUGridLayer({});
 ```
 

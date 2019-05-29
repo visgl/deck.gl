@@ -22,10 +22,7 @@ import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests, testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {
-  _GPUGridLayer as GPUGridLayer,
-  _GPUGridAggregator as GPUGridAggregator
-} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
 import {gl} from '@deck.gl/test-utils';
 

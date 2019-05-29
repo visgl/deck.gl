@@ -4,12 +4,12 @@ import {DATA_URI} from '../../constants/defaults';
 
 import {
   ContourLayer,
-  GridLayer,
+  CPUGridLayer,
   GridCellLayer,
   HexagonLayer,
   ScreenGridLayer,
-  _GPUGridLayer as GPUGridLayer,
-  _NewGridLayer as NewGridLayer
+  GPUGridLayer,
+  GridLayer
 } from '@deck.gl/aggregation-layers';
 
 export const ContourLayerDemo = createLayerDemoClass({
@@ -62,13 +62,13 @@ export const GPUGridLayerDemo = createLayerDemoClass({
   ...GRID_LAYER_INFO
 });
 
-export const NewGridLayerDemo = createLayerDemoClass({
-  Layer: NewGridLayer,
+export const GridLayerDemo = createLayerDemoClass({
+  Layer: GridLayer,
   ...GRID_LAYER_INFO
 });
 
-export const GridLayerDemo = createLayerDemoClass({
-  Layer: GridLayer,
+export const CPUGridLayerDemo = createLayerDemoClass({
+  Layer: CPUGridLayer,
   ...GRID_LAYER_INFO
 });
 

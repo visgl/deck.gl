@@ -21,14 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
 import test from 'tape-catch';
-import {
-  MapView,
-  ScatterplotLayer,
-  Deck,
-  PolygonLayer,
-  PathLayer,
-  _NewGridLayer as NewGridLayer
-} from 'deck.gl';
+import {MapView, ScatterplotLayer, Deck, PolygonLayer, PathLayer, GridLayer} from 'deck.gl';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 
 const VIEW_STATE = {
@@ -457,7 +450,7 @@ const TEST_CASES = [
     id: 'newgridlayer - cpu',
     props: {
       layers: [
-        new NewGridLayer({
+        new GridLayer({
           data: DATA.points,
           getPosition: d => d.COORDINATES,
           pickable: true,
@@ -473,7 +466,7 @@ const TEST_CASES = [
     id: 'newgridlayer - gpu',
     props: {
       layers: [
-        new NewGridLayer({
+        new GridLayer({
           data: DATA.points,
           getPosition: d => d.COORDINATES,
           pickable: true,

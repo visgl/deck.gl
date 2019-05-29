@@ -126,11 +126,11 @@ export {
 
 export {
   ScreenGridLayer,
-  GridLayer,
+  CPUGridLayer,
   HexagonLayer,
   ContourLayer,
-  _NewGridLayer,
-  _GPUGridLayer
+  GridLayer,
+  GPUGridLayer
 } from '@deck.gl/aggregation-layers';
 
 export {
