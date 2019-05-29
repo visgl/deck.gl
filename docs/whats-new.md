@@ -63,7 +63,7 @@ import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
     <NavigationControl />
   </div>
 </DeckGL>
-
+```
 
 ## deck.gl v7.0
 
