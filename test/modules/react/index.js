@@ -18,5 +18,6 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './deckgl.spec';
+import './utils/evaluate-children.spec';
 import './utils/extract-jsx-layers.spec';
+import './utils/position-children-under-views.spec';

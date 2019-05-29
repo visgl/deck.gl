@@ -25,7 +25,6 @@ const {memoize} = experimental;
 
 import extractJSXLayers from './utils/extract-jsx-layers';
 import positionChildrenUnderViews from './utils/position-children-under-views';
-import autobind from './utils/autobind';
 
 const propTypes = Deck.getPropTypes(PropTypes);
 
@@ -41,7 +40,10 @@ export default class DeckGL extends React.Component {
     // The redraw flag of deck
     this._needsRedraw = null;
 
-    autobind(this);
+    // Bind public methods
+    this.pickObject = this.pickObject.bind(this);
+    this.pickMultipleObjects = this.pickObject.bind(this);
+    this.pickObjects = this.pickObject.bind(this);
 
     // Memoized functions
     this._extractJSXLayers = memoize(extractJSXLayers);
@@ -62,7 +64,7 @@ export default class DeckGL extends React.Component {
           // The Deck's animation loop is independent from React's render cycle, causing potential
           // synchronization issues. We provide this custom render function to make sure that React
           // and Deck update on the same schedule.
-          _customRender: this._customRender
+          _customRender: this._customRender.bind(this)
         })
       );
     this._updateFromProps(this.props);
