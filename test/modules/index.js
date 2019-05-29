@@ -26,10 +26,12 @@ import './aggregation-layers';
 import './geo-layers';
 
 import './json';
+import './react';
 
 // TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
-  require('./react');
+  require('./react/deckgl.spec');
+
   require('./main/bundle');
   require('./aggregation-layers/utils/gpu-grid-aggregator.spec');
   // TODO - This is failing in headless browser test. Might be related to

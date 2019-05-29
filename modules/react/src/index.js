@@ -20,5 +20,3 @@
 
 export {default as DeckGL} from './deckgl';
 export {default} from './deckgl';
-
-export {default as autobind} from './utils/autobind';
