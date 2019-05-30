@@ -7,14 +7,16 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from 'deck.gl';
 import {TripsLayer} from '@deck.gl/geo-layers';
+import Slider from '@material-ui/lab/Slider';
+//import './style.css';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
-let sampleSize = 10;
-let actType = 'Home';
-let trailLength = 20000;//86400;
-let animationSpeed = 450 // unit time per second
+let sampleSize = 1;
+let actType = 'Other';
+let trailLength = 84600;//86400;
+let animationSpeed = 1800 // unit time per second
 
 const startTime = Date.now() / 1000
 
@@ -114,6 +116,7 @@ export class App extends Component {
     this._onHover = this._onHover.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
+    this._onTimerChange = this._onTimerChange.bind(this);
   }
 
   _onHover({x, y, object}) {
@@ -151,10 +154,15 @@ export class App extends Component {
     this._recalculateTrs(object);
   }
   
+  _onTimerChange(evnt, changedTime) {
+    let jumpTime = changedTime - this.state.time
+    let timestamp = Date.now() / 1000
+    //const {allTrs = this.props.data.trs} = this.props;
+    this.setState({ time: (timestamp - startTime + jumpTime) * this.props.animationSpeed });
+  };
+
   _animate() {
-    const {
-      
-    } = this.props;
+    
     const timestamp = Date.now() / 1000;
 
     this.setState({ 
@@ -248,31 +256,45 @@ export class App extends Component {
       })
     ];
   }
-
+  
   render() {
     const {viewState, controller = true, baseMap = true} = this.props;
 
     return (
-      <DeckGL
-        layers={this._renderLayers()}
-        effects={[lightingEffect]}
-        initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
-        controller={controller}
-        onClick={(object) => { if ((!object.layer) || (object.layer.id != 'boundaries')) {
-          this._recalculateTrs(null)}
-        }}
-      >
-        {baseMap && (
-          <StaticMap
-            reuseMaps
-            mapStyle="mapbox://styles/mapbox/dark-v9"
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
+      <div>
+        <div>
+          <DeckGL
+            layers={this._renderLayers()}
+            effects={[lightingEffect]}
+            initialViewState={INITIAL_VIEW_STATE}
+            viewState={viewState}
+            controller={controller}
+            onClick={(object) => { if ((!object.layer) || (object.layer.id != 'boundaries')) {
+              this._recalculateTrs(null)}
+            }}
+          >
+            {baseMap && (
+              <StaticMap
+                reuseMaps
+                mapStyle="mapbox://styles/mapbox/dark-v9"
+                preventStyleDiffing={true}
+                mapboxApiAccessToken={MAPBOX_TOKEN}
+              />
+            )}
+            {this._renderTooltip}        
+          </DeckGL>
+        </div>
+        
+        <div className='timeslider'>
+          <Slider
+            value={1000}
+            min={0}
+            max={86400}
+            onChange={this._onTimerChange}
           />
-        )}
-        {this._renderTooltip}
-      </DeckGL>
+        </div>
+      
+      </div>
     );
   }
 }

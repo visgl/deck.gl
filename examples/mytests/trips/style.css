@@ -1,0 +1,13 @@
+.timeslider{
+    position: absolute;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 800px;
+    max-width: 815px;
+    left: 2rem;
+    bottom: 2rem;
+    padding: 1rem 1.5rem .5rem 1.5rem;
+    background-color: red;
+    border: 1.5px blue;
+    border-radius: .25rem;
+}
