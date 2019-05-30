@@ -66,7 +66,12 @@ export {
   FlyToInterpolator,
   // Effects
   Effect,
-  LightingEffect
+  LightingEffect,
+  PostProcessEffect,
+  // Lights
+  AmbientLight,
+  PointLight,
+  DirectionalLight
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)
@@ -149,8 +154,6 @@ export {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 //
 
 export {default, DeckGL} from '@deck.gl/react';
-
-export {AmbientLight, PointLight, DirectionalLight} from '@luma.gl/core';
 
 //
 // EXPERIMENTAL EXPORTS

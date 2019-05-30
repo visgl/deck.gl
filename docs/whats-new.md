@@ -8,7 +8,7 @@ Release Date: 2019
 
 ### Post-processing Effects
 
-A new `PostProcessEffect` class, working with `@luma.gl/effects` module,  offers screen-space post-processing effects such as blur, noise, halftone, ink, etc.
+A new [PostProcessEffect](/docs/effects/post-process-effect.md) class, working with `@luma.gl/effects` module,  offers screen-space post-processing effects such as blur, noise, halftone, ink, etc.
 
 <table style="border: 0;" align="center">
   <tbody>
