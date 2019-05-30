@@ -5,7 +5,6 @@ import {DATA_URI} from '../../constants/defaults';
 import {
   ContourLayer,
   CPUGridLayer,
-  GridCellLayer,
   HexagonLayer,
   ScreenGridLayer,
   GPUGridLayer,
@@ -27,21 +26,6 @@ export const ContourLayerDemo = createLayerDemoClass({
       {threshold: 5, color: [0, 255, 0], strokeWidth: 6, zIndex: 2},
       {threshold: 15, color: [0, 0, 255], strokeWidth: 4, zIndex: 3}
     ]
-  }
-});
-
-export const GridCellLayerDemo = createLayerDemoClass({
-  Layer: GridCellLayer,
-  dataUrl: `${DATA_URI}/hexagons.json`,
-  formatTooltip: d => `height: ${d.value * 5000}m`,
-  props: {
-    pickable: true,
-    extruded: true,
-    cellSize: 200,
-    elevationScale: 5000,
-    getPosition: d => d.centroid,
-    getColor: d => [48, 128, d.value * 255, 255],
-    getElevation: d => d.value
   }
 });
 

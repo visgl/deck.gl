@@ -7,6 +7,7 @@ import {
   BitmapLayer,
   ColumnLayer,
   GeoJsonLayer,
+  GridCellLayer,
   IconLayer,
   LineLayer,
   PathLayer,
@@ -65,6 +66,21 @@ export const GeoJsonLayerDemo = createLayerDemoClass({
     getRadius: 100,
     getLineWidth: 1,
     getElevation: 30
+  }
+});
+
+export const GridCellLayerDemo = createLayerDemoClass({
+  Layer: GridCellLayer,
+  dataUrl: `${DATA_URI}/hexagons.json`,
+  formatTooltip: d => `height: ${d.value * 5000}m`,
+  props: {
+    pickable: true,
+    extruded: true,
+    cellSize: 200,
+    elevationScale: 5000,
+    getPosition: d => d.centroid,
+    getColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value
   }
 });
 
