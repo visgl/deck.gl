@@ -8,9 +8,32 @@ Release Date: 2019
 
 ### Post-processing Effects
 
-A new `PostProcessEffect` class, working with `@luma.gl/effects` module,  offers screen-space post-processing effects such as blur, noise, halftone, edge, etc.
+A new `PostProcessEffect` class, working with `@luma.gl/effects` module,  offers screen-space post-processing effects such as blur, noise, halftone, ink, etc.
 
-<!-- Screenshots -->
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img height=240 src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/noise.jpg" />
+        <p><i>noise effect</i></p>
+      </td>
+      <td>
+        <img height=240 src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/colorhalftone.gif" />
+        <p><i>colorHalftone effect</i></p>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img height=240 src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/tiltshift.jpg" />
+        <p><i>tiltShift effect</i></p>
+      </td>
+      <td>
+        <img height=240 src="https://raw.github.com/uber-common/deck.gl-data/master/images/samples/post-processing/zoomblur.jpg" />
+        <p><i>zoomBlur effect</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
 ### Layer Enhancements
 
@@ -51,7 +74,7 @@ The following table compares the performance between CPU and GPU aggregations us
 
 ### Use react-map-gl Components with DeckGL
 
-For React users, it is now easy to use [react-map-gl](http://uber.github.io/react-map-gl/#/Examples/markers-popups) components with DeckGL, including DOM-based markers and popups, navigation control, fullscreen control and geolocate control. This can be done by supplying the `ContextProvider` prop on `DeckGL`:
+For React users, it is now easy to use [react-map-gl](http://uber.github.io/react-map-gl/#/Examples/markers-popups) components with DeckGL, including DOM-based [marker](https://uber.github.io/react-map-gl/#/Documentation/api-reference/marker), [popup](https://uber.github.io/react-map-gl/#/Documentation/api-reference/popup), [navigation control](https://uber.github.io/react-map-gl/#/Documentation/api-reference/navigation-control), [fullscreen control](https://uber.github.io/react-map-gl/#/Documentation/api-reference/fullscreen-control) and [geolocate control](https://uber.github.io/react-map-gl/#/Documentation/api-reference/geolocate-control). This can be done by supplying the `ContextProvider` prop on `DeckGL`:
 
 ```jsx
 /// Example using react-map-gl controls with deck.gl
