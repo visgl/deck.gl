@@ -19,6 +19,30 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.1 Prereleases
 
+#### deck.gl [v7.1.0-alpha.2] - May 30 2019
+
+- fix normal projection (#3134)
+- GPUGridAggregator: Add `getData` method (#3110)
+- GPU GridLayer PART-4: Add support for picking (#3115)
+- H3HexagonLayer: fix render bug cross the 180th meridian (#3133)
+- support multiple ranges in attribute partial update (#3119)
+- Fix scenegraph-layer attribute issue with static scenegraph (#3135)
+- Support partial update in layer attribute updaters (#3122)
+- Handle partial update in Tesselator (#3121)
+- Add PBR & IBL lighting option to scenegraph-layer (#3116)
+- Fix ColumnGeometry normals calculation (#3145)
+- improve sun/shadow example to use effect rendering pipeline (#3142)
+- Add billboard mode to PathLayer (#3140)
+- Add h3 layer embedded demos (#3150)
+- Improve PathLayer precision (#3141)
+- GPU GridLayer PART 5: Add new color/elevation props to Grid and Hexagon layers (#3137)
+- GPU GridLyer Part 6: GPUGridLayer fixes and docs. (#3143)
+- Fix abnormal normals in scenegraph-layer-vertex shader (#3154)
+- GPU GridLayer Part 7: Rename NewGridLayer to GridLayer. (#3149)
+- GPU Aggregator : enable partial test (#3157)
+- Improve react module test coverage (#3155)
+- Bump luma.gl to v7.1.0-alpha.5
+
 #### deck.gl [v7.1.0-alpha.1] - May 22 2019
 
 - GLTF Animation support in scenegraph-layer (#3010)

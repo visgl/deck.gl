@@ -22,6 +22,10 @@ const config = {
     'deck.gl-test': resolve(__dirname, './test')
   },
 
+  browserTest: {
+    server: {wait: 5000}
+  },
+
   entry: {
     test: 'test/modules/index.js',
     'test-browser': 'test/browser.js',
