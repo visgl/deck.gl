@@ -8,18 +8,19 @@ Breaking Changes:
 
 - Fixed a bug where `coordinateOrigin`'s `z` is not applied in `METER_OFFSETS` and `LNGLAT_OFFSETS` coordinate systems.
 
+Deprecations:
+
+- `getColor` props in `ColumnLayer` and `H3HexagonLayer` are deprecated. Use `getLineColor` and `getFillColor` instead.
 
 ### GridLayer
 
 Breaking Changes:
 
-- `GridLayer` is enhanced to support GPU Aggregation, based on props it either renders a `CPUGridLayer` or `GPUGridLayer`. If you are subclassing `GridLayer`, those use cases will break, instead you should subclass `CPUGridLayer` and provide it as subclass for `GridLayer` for `CPU` key using `_subLayerProps`.
+- If your application is not subclassing `GridLayer`, no additional changes are needed. If you are subclassing `GridLayer`, you should now subclass `CPUGridLayer` instead, and either use it directly, or provide it as the sublayer class for `GridLayer` using `_subLayerProps`:
 
 ```js
 class EnhancedCPUGridLayer extends CPUGridLayer {
-
 // enhancments
-
 }
 
 // Code initilizing GridLayer
@@ -28,16 +29,12 @@ const myGridLayer = new GridLayer({
   ...
   // Override sublayer type for 'CPU'
   _subLayerProps: {
-    ['CPU'] : {
+    CPU: {
       type: EnhancedCPUGridLayer
     }
   }
 });
 ```
-
-If your application is not subclassing `GridLayer`, no additional changes are needed.
-
-- When using GPU Aggregation, `onSetColorDomain` and `onSetElevationDomain` are not fired, if those callbacks are needed set `gpuAggregation` to `false` (which is the default getElevationValue)
 
 
 ## Upgrading from deck.gl v6.4 to v7.0

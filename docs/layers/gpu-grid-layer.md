@@ -6,7 +6,7 @@
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
-# GPUGridLayer (Experimental)
+# GPUGridLayer
 
 The GPUGridLayer renders a grid heatmap based on an array of points.
 It takes the constant cell size, aggregates input points in world space (lng/lat space).The color
@@ -48,9 +48,9 @@ const App = ({data, viewport}) => {
 };
 ```
 
-**Note:** The `GridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
+**Note:** The `GPUGridLayer` at the moment only works with `COORDINATE_SYSTEM.LNGLAT`.
 
-**Note:** This layer is similar to [CPUGridLayer](/docs/layers/cpu-grid-layer.md) but supports aggregation on GPU when possible. Check below for more detailed differences of this layer compared to `GridLayer`.
+**Note:** This layer is similar to [CPUGridLayer](/docs/layers/cpu-grid-layer.md) but supports aggregation on GPU when possible. Check below for more detailed differences of this layer compared to `CPUGridLayer`.
 
 
 ## Installation
@@ -207,19 +207,19 @@ Note: similar to `getElevationValue`, grid layer compares whether `getElevationW
 Note: `getElevationWeight` and `elevationAggregation` together define how elevation value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
 
 
-## Differences compared to GridLayer
+## Differences compared to CPUGridLayer
 
 ### Unsupported props
 
-Due to the nature of GPU Aggregation implementation following GridLayer props are not supported by this layer.
+Due to the nature of GPU Aggregation implementation following CPUGridLayer props are not supported by this layer.
 
 `upperPercentile` `lowerPercentile` `elevationUpperPercentile`, `elevationLowerPercentile`, `getColorValue`, `getElevationValue`, `onSetColorDomain` and `onSetElevationDomain`
 
-Instead of `getColorValue`, `getColorWeight` and `colorAggregation` should be used. Instead of `getElevationValue`, `getElevationWeight` and `elevationAggregation` should be used. There is no alternate for all other unsupported props, if they are needed `GridLayer` should be used instead of this layer.
+Instead of `getColorValue`, `getColorWeight` and `colorAggregation` should be used. Instead of `getElevationValue`, `getElevationWeight` and `elevationAggregation` should be used. There is no alternate for all other unsupported props, if they are needed `CPUGridLayer` should be used instead of this layer.
 
 ### Picking
 
-When picking mode is `hover`, only the elevation value, color value of selected cell are included in picking result. Array of all points that aggregated into that cell is not provided. For all other modes, picking results match with `GridLayer`, for these cases data is aggregated on CPU to provide array of all points that aggregated to the cell.
+When picking mode is `hover`, only the elevation value, color value of selected cell are included in picking result. Array of all points that aggregated into that cell is not provided. For all other modes, picking results match with `CPUGridLayer`, for these cases data is aggregated on CPU to provide array of all points that aggregated to the cell.
 
 
 ## Source
