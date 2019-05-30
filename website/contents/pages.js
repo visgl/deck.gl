@@ -576,6 +576,10 @@ export const docPages = generatePath([
           {
             name: 'LightingEffect',
             content: getDocUrl('effects/lighting-effect.md')
+          },
+          {
+            name: 'PostProcessEffect',
+            content: getDocUrl('effects/post-process-effect.md')
           }
         ]
       },

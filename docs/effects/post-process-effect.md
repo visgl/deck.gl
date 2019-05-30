@@ -1,4 +1,4 @@
-# Post-processing Effect
+# PostProcessEffect
 
 The post-processing Effect applies kinds of screen space pixel manipulation effects to deck.gl layers.
 
