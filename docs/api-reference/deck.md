@@ -384,9 +384,10 @@ Notes:
 A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
 - 'fps': average number of frames rendered per second
 - 'updateAttributesTime': time spent updating layer attributes
-- 'layersRedrawn': number of layers drawn
-- 'setPropsTime': time spent setting layer properties
-- 'drawCount': number of times the scene was rendered
+- 'setPropsTime': time spent setting deck properties
+- 'framesRedrawn': number of times the scene was rendered
+- 'pickTime': total time spent on picking operations
+- 'pickCount': number of times a pick operation was performed
 - 'gpuTime': total time spent on GPU processing
 - 'gpuTimePerFrame': average time spent on GPU processing per frame
 - 'cpuTime': total time spent on CPU processing

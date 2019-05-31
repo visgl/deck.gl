@@ -167,8 +167,9 @@ export default class Deck {
       fps: 0,
       setPropsTime: 0,
       updateAttributesTime: 0,
-      drawCount: 0,
-      layersRedrawn: 0,
+      framesRedrawn: 0,
+      pickTime: 0,
+      pickCount: 0,
       gpuTime: 0,
       gpuTimePerFrame: 0,
       cpuTime: 0,
@@ -338,6 +339,7 @@ export default class Deck {
   }
 
   pickObject({x, y, radius = 0, layerIds = null}) {
+    this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickObject Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
@@ -356,6 +358,7 @@ export default class Deck {
   }
 
   pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
+    this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickMultipleObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
@@ -374,6 +377,7 @@ export default class Deck {
   }
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
+    this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
@@ -798,43 +802,28 @@ export default class Deck {
       );
   }
 
-  /* eslint-disable complexity */
   _getMetrics() {
-    this.metrics.fps = this.stats.get('frameRate') ? this.stats.get('frameRate').getHz() : 0;
-    this.metrics.setPropsTime = this.stats.get('setProps Time')
-      ? this.stats.get('setProps Time').time
-      : 0;
-    this.metrics.updateAttributesTime = this.stats.get('Update Attributes')
-      ? this.stats.get('Update Attributes').time
-      : 0;
-    this.metrics.drawCount = this.stats.get('Redraw Count')
-      ? this.stats.get('Redraw Count').count
-      : 0;
-    this.metrics.layersRedrawn = this.stats.get('Redraw Layers')
-      ? this.stats.get('Redraw Layers').count
-      : 0;
-    this.metrics.gpuTime = this.stats.get('GPU Time') ? this.stats.get('GPU Time').time : 0;
-    this.metrics.cpuTime = this.stats.get('CPU Time') ? this.stats.get('CPU Time').time : 0;
-    this.metrics.gpuTimePerFrame = this.stats.get('GPU Time')
-      ? this.stats.get('GPU Time').getAverageTime()
-      : 0;
-    this.metrics.cpuTimePerFrame = this.stats.get('CPU Time')
-      ? this.stats.get('CPU Time').getAverageTime()
-      : 0;
+    this.metrics.fps = this.stats.get('frameRate').getHz();
+    this.metrics.setPropsTime = this.stats.get('setProps Time').time;
+    this.metrics.updateAttributesTime = this.stats.get('Update Attributes').time;
+    this.metrics.framesRedrawn = this.stats.get('Redraw Count').count;
+    this.metrics.pickTime =
+      this.stats.get('pickObject Time').time +
+      this.stats.get('pickMultipleObjects Time').time +
+      this.stats.get('pickObjects Time').time;
+    this.metrics.pickCount = this.stats.get('Pick Count').count;
+
+    // Luma stats
+    this.metrics.gpuTime = this.stats.get('GPU Time').time;
+    this.metrics.cpuTime = this.stats.get('CPU Time').time;
+    this.metrics.gpuTimePerFrame = this.stats.get('GPU Time').getAverageTime();
+    this.metrics.cpuTimePerFrame = this.stats.get('CPU Time').getAverageTime();
 
     const memoryStats = lumaStats.get('Memory Usage');
-    this.metrics.bufferMemory = memoryStats.get('Buffer Memory')
-      ? memoryStats.get('Buffer Memory').count
-      : 0;
-    this.metrics.textureMemory = memoryStats.get('Texture Memory')
-      ? memoryStats.get('Texture Memory').count
-      : 0;
-    this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory')
-      ? memoryStats.get('Renderbuffer Memory').count
-      : 0;
-    this.metrics.gpuMemory = memoryStats.get('Memory Usage')
-      ? memoryStats.get('Memory Usage').count
-      : 0;
+    this.metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
+    this.metrics.textureMemory = memoryStats.get('Texture Memory').count;
+    this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
+    this.metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
 }
 
