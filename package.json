@@ -36,6 +36,7 @@
     "update-release-branch": "scripts/update-release-branch.sh"
   },
   "devDependencies": {
+    "@luma.gl/effects": "^7.1.0-alpha.5",
     "@babel/polyfill": "^7.0.0",
     "@probe.gl/bench": "^3.0.1",
     "@probe.gl/test-utils": "^3.0.1",

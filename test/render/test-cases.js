@@ -7,7 +7,17 @@ import {
   GridLayer
   // AGGREGATION_OPERATION
 } from '@deck.gl/aggregation-layers';
-import {COORDINATE_SYSTEM, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  OrbitView,
+  OrthographicView,
+  FirstPersonView,
+  PostProcessEffect
+} from '@deck.gl/core';
+import {noise, vignette} from '@luma.gl/effects';
+
+const effect1 = new PostProcessEffect(noise);
+const effect2 = new PostProcessEffect(vignette);
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
@@ -1470,5 +1480,41 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/h3-cluster.png'
+  },
+  {
+    name: 'post-process-effects',
+    effects: [effect1, effect2],
+    viewState: {
+      latitude: 37.78,
+      longitude: -122.45,
+      zoom: 12,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new GeoJsonLayer({
+        id: 'post-process-effects',
+        data: dataSamples.geojson,
+        extruded: true,
+        wireframe: true,
+        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
+        getFillColor: f => {
+          const color = parseColor(f.properties.fill || f.properties['marker-color']);
+          const opacity = (f.properties['fill-opacity'] || 1) * 255;
+          return setOpacity(color, opacity);
+        },
+        getLineColor: f => {
+          const color = parseColor(f.properties.stroke);
+          const opacity = (f.properties['stroke-opacity'] || 1) * 255;
+          return setOpacity(color, opacity);
+        },
+        getLineWidth: f => f.properties['stroke-width'],
+        getElevation: f => 500,
+        lineWidthScale: 10,
+        lineWidthMinPixels: 1,
+        pickable: true
+      })
+    ],
+    goldenImage: './test/render/golden-images/post-process-effects.png'
   }
 ];

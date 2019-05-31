@@ -788,6 +788,13 @@
     probe.gl "^3.0.2"
     seer "^0.2.4"
 
+"@luma.gl/effects@^7.1.0-alpha.5":
+  version "7.1.0-alpha.5"
+  resolved "https://registry.yarnpkg.com/@luma.gl/effects/-/effects-7.1.0-alpha.5.tgz#8f072e9ab8db0f9aeb03cb4bda9c117440184dfd"
+  integrity sha512-BolefXSnc6D0KFbEDC23qDhpw/es7DQgGAKx0DVbtrFSJ8tRSnTXUCOCDl45UL3mHz4oamhw4zzfUKfm3IBGYA==
+  dependencies:
+    "@luma.gl/constants" "7.1.0-alpha.5"
+
 "@luma.gl/shadertools@7.1.0-alpha.5":
   version "7.1.0-alpha.5"
   resolved "https://registry.yarnpkg.com/@luma.gl/shadertools/-/shadertools-7.1.0-alpha.5.tgz#2e30eec9a336a363214d6bbf8efea29cffc15723"
