@@ -790,16 +790,8 @@ export default class Deck {
 
     // Get individual stats from luma.gl so reset works
     const animationLoopStats = this.animationLoop.stats;
-    this.stats
-      .get('GPU Time')
-      .addTime(
-        animationLoopStats.get('GPU Time') ? animationLoopStats.get('GPU Time').lastTiming : 0
-      );
-    this.stats
-      .get('CPU Time')
-      .addTime(
-        animationLoopStats.get('CPU Time') ? animationLoopStats.get('CPU Time').lastTiming : 0
-      );
+    this.stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
+    this.stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
   }
 
   _getMetrics() {
