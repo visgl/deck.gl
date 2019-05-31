@@ -211,15 +211,6 @@ export default class App extends PureComponent {
     return new Layer(layerProps);
   }
 
-  // Flatten layer props
-  _getLayerSettings(props) {
-    const settings = {};
-    for (const key in props) {
-      settings[key] = props[key];
-    }
-    return settings;
-  }
-
   /* eslint-disable max-depth */
   _renderExamples() {
     let index = 1;
@@ -235,7 +226,7 @@ export default class App extends PureComponent {
           const layer = this._renderExampleLayer(example, settings, index++);
 
           if (typeof settings !== 'object') {
-            activeExamples[exampleName] = this._getLayerSettings(layer.props);
+            activeExamples[exampleName] = LayerControls.getSettingValues(layer.props);
           }
 
           layers.push(layer);
