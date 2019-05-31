@@ -7,7 +7,17 @@ import {
   GridLayer
   // AGGREGATION_OPERATION
 } from '@deck.gl/aggregation-layers';
-import {COORDINATE_SYSTEM, OrbitView, OrthographicView, FirstPersonView} from '@deck.gl/core';
+import {
+  COORDINATE_SYSTEM,
+  OrbitView,
+  OrthographicView,
+  FirstPersonView,
+  PostProcessEffect
+} from '@deck.gl/core';
+import {noise, vignette} from '@luma.gl/effects';
+
+const effect1 = new PostProcessEffect(noise);
+const effect2 = new PostProcessEffect(vignette);
 
 const ICON_ATLAS = './test/render/icon-atlas.png';
 
@@ -1470,5 +1480,31 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/h3-cluster.png'
+  },
+  {
+    name: 'post-process-effects',
+    effects: [effect1, effect2],
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new ScatterplotLayer({
+        id: 'post-process-effects',
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        getFillColor: d => [255, 128, 0],
+        getRadius: d => d.SPACES,
+        opacity: 1,
+        pickable: true,
+        radiusScale: 30,
+        radiusMinPixels: 1,
+        radiusMaxPixels: 30
+      })
+    ],
+    goldenImage: './test/render/golden-images/post-process-effects.png'
   }
 ];

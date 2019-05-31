@@ -39,6 +39,7 @@
     "lerna": "3.14.1"
   },
   "devDependencies": {
+    "@luma.gl/effects": "^7.1.0-alpha.5",
     "@babel/polyfill": "^7.0.0",
     "@probe.gl/bench": "^3.0.1",
     "@probe.gl/test-utils": "^3.0.1",
