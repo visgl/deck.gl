@@ -1485,34 +1485,24 @@ export const TEST_CASES = [
     name: 'post-process-effects',
     effects: [effect1, effect2],
     viewState: {
-      latitude: 37.78,
-      longitude: -122.45,
-      zoom: 12,
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
       pitch: 0,
       bearing: 0
     },
     layers: [
-      new GeoJsonLayer({
+      new ScatterplotLayer({
         id: 'post-process-effects',
-        data: dataSamples.geojson,
-        extruded: true,
-        wireframe: true,
-        getRadius: f => MARKER_SIZE_MAP[f.properties['marker-size']],
-        getFillColor: f => {
-          const color = parseColor(f.properties.fill || f.properties['marker-color']);
-          const opacity = (f.properties['fill-opacity'] || 1) * 255;
-          return setOpacity(color, opacity);
-        },
-        getLineColor: f => {
-          const color = parseColor(f.properties.stroke);
-          const opacity = (f.properties['stroke-opacity'] || 1) * 255;
-          return setOpacity(color, opacity);
-        },
-        getLineWidth: f => f.properties['stroke-width'],
-        getElevation: f => 500,
-        lineWidthScale: 10,
-        lineWidthMinPixels: 1,
-        pickable: true
+        data: dataSamples.points,
+        getPosition: d => d.COORDINATES,
+        getFillColor: d => [255, 128, 0],
+        getRadius: d => d.SPACES,
+        opacity: 1,
+        pickable: true,
+        radiusScale: 30,
+        radiusMinPixels: 1,
+        radiusMaxPixels: 30
       })
     ],
     goldenImage: './test/render/golden-images/post-process-effects.png'
