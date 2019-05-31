@@ -1,4 +1,10 @@
-.timeslider{
+
+.timer{
+    position: absolute;
+    background-color: red;
+}
+
+.time-slider{
     position: absolute;
     align-items: center;
     justify-content: flex-end;
@@ -10,4 +16,5 @@
     background-color: red;
     border: 1.5px blue;
     border-radius: .25rem;
+    z-index: 2;
 }

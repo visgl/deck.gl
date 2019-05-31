@@ -7,18 +7,20 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from 'deck.gl';
 import {TripsLayer} from '@deck.gl/geo-layers';
+import Input from '@material-ui/core/Input';
 import Slider from '@material-ui/lab/Slider';
-//import './style.css';
+import './style.css';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 let sampleSize = 1;
 let actType = 'Other';
-let trailLength = 84600;//86400;
-let animationSpeed = 1800 // unit time per second
+let trailLength = 86400;//86400;
+let animationSpeed = 2000 // unit time per second
 
-const startTime = Date.now() / 1000
+let simTime = 0;
+let anchorTime = Date.now() / 1000;
 
 let trsData = require(`./inputs/tours_${sampleSize}pct.json`);
 let actsCntUpdsData = require(`./inputs/activities_count_${sampleSize}pct.json`);
@@ -154,11 +156,13 @@ export class App extends Component {
     this._recalculateTrs(object);
   }
   
-  _onTimerChange(evnt, changedTime) {
-    let jumpTime = changedTime - this.state.time
-    let timestamp = Date.now() / 1000
-    //const {allTrs = this.props.data.trs} = this.props;
-    this.setState({ time: (timestamp - startTime + jumpTime) * this.props.animationSpeed });
+  _onAnimationSpeedChange(evnt) {
+    this.props.animationSpeed = evnt.target.value
+  }
+
+  _onTimerChange(evnt, newSimTime) {
+    anchorTime = Date.now() / 1000
+    simTime = newSimTime
   };
 
   _animate() {
@@ -166,7 +170,7 @@ export class App extends Component {
     const timestamp = Date.now() / 1000;
 
     this.setState({ 
-      time: (timestamp - startTime) * this.props.animationSpeed
+      time: simTime + (timestamp - anchorTime) * this.props.animationSpeed
     }, () => this._updateActsCnt(this.props.data.actsCnt, [actType], this.state.time));
     
     //this.setState({ 
@@ -285,15 +289,18 @@ export class App extends Component {
           </DeckGL>
         </div>
         
-        <div className='timeslider'>
+        <div className='timer'>
+            ({this.state.time})
+        </div>
+
+        <div className='time-slider'>
           <Slider
-            value={1000}
+            value={this.state.time}
             min={0}
             max={86400}
             onChange={this._onTimerChange}
           />
         </div>
-      
       </div>
     );
   }
