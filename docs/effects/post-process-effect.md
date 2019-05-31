@@ -1,6 +1,11 @@
 # PostProcessEffect
 
-The post-processing Effect applies screen space pixel manipulation effects to deck.gl layers.
+The `PostProcessEffect` applies screen space pixel manipulation effects to deck.gl layers.
+
+<iframe height="450" style="width: 100%;" scrolling="no" title="deck.gl PostProcessEffect Demo" src="https://codepen.io/vis-gl/embed/YbRGvv/?height=450&theme-id=light&default-tab=result" frameborder="no" allowtransparency="true" allowfullscreen="true">
+  See the Pen <a href='https://codepen.io/vis-gl/pen/YbRGvv/'>deck.gl PostProcessEffect Demo</a> by vis.gl
+  (<a href='https://codepen.io/vis-gl'>@vis-gl</a>) on <a href='https://codepen.io'>CodePen</a>.
+</iframe>
 
 ## Constructor
 
