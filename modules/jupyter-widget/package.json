@@ -14,7 +14,7 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/index.js",
+  "main": "src/index.js",
   "files": [
     "dist",
     "src",
