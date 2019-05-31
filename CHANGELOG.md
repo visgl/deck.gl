@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.1 Prereleases
 
+#### deck.gl [v7.1.0-beta.1] - May 31 2019
+
+- fix post-processing effect framebuffer binding bug (#3164)
+- bump lerna version (#3161)
+- Metrics-tracking Deck property (#3139)
+- Remove dead code from scenegraph-layer shader (#3167)
+- Support react-map-gl's new MapContext format (#3168)
+
 #### deck.gl [v7.1.0-alpha.2] - May 30 2019
 
 - fix normal projection (#3134)
