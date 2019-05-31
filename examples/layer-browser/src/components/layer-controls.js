@@ -27,7 +27,8 @@ const PROP_BLACK_LIST = new Set([
   'onClick',
   'highlightedObjectIndex',
   'parameters',
-  'uniforms'
+  'uniforms',
+  'scenegraph'
 ]);
 
 function isAccessor(settingName) {
@@ -35,6 +36,22 @@ function isAccessor(settingName) {
 }
 
 export default class LayerControls extends PureComponent {
+  static getSettings(props) {
+    const keys = [];
+    for (const key in props) {
+      if (!PROP_BLACK_LIST.has(key)) {
+        keys.push(key);
+      }
+    }
+    keys.sort();
+
+    const settings = {};
+    for (const key of keys) {
+      settings[key] = props[key];
+    }
+    return settings;
+  }
+
   constructor(props) {
     super(props);
     autobind(this);
@@ -50,17 +67,6 @@ export default class LayerControls extends PureComponent {
   _getPropTypes() {
     const {layer, propTypes} = this.props;
     return Object.assign({}, layer && layer._propTypes, propTypes);
-  }
-
-  // Get all inherited property keys
-  _getAllPropKeys(object) {
-    const keys = [];
-    for (const key in object) {
-      if (!PROP_BLACK_LIST.has(key)) {
-        keys.push(key);
-      }
-    }
-    return keys.sort();
   }
 
   _onToggleTransition(settingName, transitioned) {
@@ -269,7 +275,7 @@ export default class LayerControls extends PureComponent {
     return (
       <div className="layer-controls">
         {title && <h4>{title}</h4>}
-        {this._getAllPropKeys(settings).map(key =>
+        {Object.keys(settings).map(key =>
           this._renderSetting({
             settingName: key,
             value: settings[key],
