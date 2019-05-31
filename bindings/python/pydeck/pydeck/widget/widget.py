@@ -23,8 +23,6 @@ class DeckGLWidget(widgets.DOMWidget):
     mapbox_key (str) - Read on inititialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
     json_input (str) - JSON as a string meant for reading into deck.gl JSON API
     """
-    if not os.getenv('MAPBOX_API_KEY'):
-        warnings.warn('MAPBOX_API_KEY is not set. This may impact available features of the pydeck library.')
     _model_name = Unicode('DeckGLModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
     _model_module_version = Unicode(module_version).tag(sync=True)
@@ -35,3 +33,9 @@ class DeckGLWidget(widgets.DOMWidget):
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Int(500).tag(sync=True)
+
+    def __init__(self, suppress_warning=False):
+        super()
+        if not os.environ.get('MAPBOX_API_KEY') and not suppress_warning:
+            warnings.warn('MAPBOX_API_KEY is not set. This may impact available features of the pydeck library.', UserWarning)
+
