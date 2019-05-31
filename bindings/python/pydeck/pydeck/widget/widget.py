@@ -3,6 +3,7 @@
 
 from __future__ import unicode_literals
 import os
+import warnings
 
 import ipywidgets as widgets
 from traitlets import Int, Unicode
@@ -22,6 +23,8 @@ class DeckGLWidget(widgets.DOMWidget):
     mapbox_key (str) - Read on inititialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
     json_input (str) - JSON as a string meant for reading into deck.gl JSON API
     """
+    if not os.getenv('MAPBOX_API_KEY'):
+        warnings.warn('MAPBOX_API_KEY is not set. This may impact available features of the pydeck library.')
     _model_name = Unicode('DeckGLModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
     _model_module_version = Unicode(module_version).tag(sync=True)
