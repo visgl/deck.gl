@@ -338,7 +338,7 @@ export default class App extends PureComponent {
           </View>
 
           <div style={NAVIGATION_CONTROL_STYLES}>
-            <NavigationControl onViewStateChange={this._onViewStateChange} />
+            <NavigationControl />
           </div>
         </DeckGL>
       </div>
