@@ -69,7 +69,8 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
       const contextValue = {
         viewport,
         container: deck.canvas.offsetParent,
-        eventManager: deck.eventManager
+        eventManager: deck.eventManager,
+        onViewStateChange: deck._onViewStateChange
       };
       viewChildren = createElement(ContextProvider, {value: contextValue}, viewChildren);
     }
