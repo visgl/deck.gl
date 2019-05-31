@@ -377,6 +377,27 @@ Notes:
 * The query methods offer more flexibility for developers to handle events compared to the built-in hover and click callbacks.
 
 
+## Member Variables
+
+#### metrics
+
+A map of various performance statistics for the last 60 frames of rendering. Metrics gathered in deck.gl are the following:
+- 'fps': average number of frames rendered per second
+- 'updateAttributesTime': time spent updating layer attributes
+- 'setPropsTime': time spent setting deck properties
+- 'framesRedrawn': number of times the scene was rendered
+- 'pickTime': total time spent on picking operations
+- 'pickCount': number of times a pick operation was performed
+- 'gpuTime': total time spent on GPU processing
+- 'gpuTimePerFrame': average time spent on GPU processing per frame
+- 'cpuTime': total time spent on CPU processing
+- 'cpuTimePerFrame': average time spent on CPU processing per frame
+- 'bufferMemory': total GPU memory allocated for buffers
+- 'textureMemory': total GPU memory allocated for textures
+- 'renderbufferMemory': total GPU memory allocated for renderbuffers
+- 'gpuMemory': total allocated GPU memory
+
+
 ## Remarks
 
 * Since deck.gl is based on WebGL and uses a single WebGL context, it can only render into a single canvas. Thus all its `View`s will render into the same canvas (unless you use multiple DeckGL instances, but that can have significant resource and performance impact).

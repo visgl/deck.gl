@@ -28,7 +28,13 @@ import DeckPicker from './deck-picker';
 import log from '../utils/log';
 
 import GL from '@luma.gl/constants';
-import {AnimationLoop, createGLContext, trackContextState, setParameters} from '@luma.gl/core';
+import {
+  AnimationLoop,
+  createGLContext,
+  trackContextState,
+  setParameters,
+  lumaStats
+} from '@luma.gl/core';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
@@ -157,6 +163,23 @@ export default class Deck {
     this.animationLoop = this._createAnimationLoop(props);
 
     this.stats = new Stats({id: 'deck.gl'});
+    this.metrics = {
+      fps: 0,
+      setPropsTime: 0,
+      updateAttributesTime: 0,
+      framesRedrawn: 0,
+      pickTime: 0,
+      pickCount: 0,
+      gpuTime: 0,
+      gpuTimePerFrame: 0,
+      cpuTime: 0,
+      cpuTimePerFrame: 0,
+      bufferMemory: 0,
+      textureMemory: 0,
+      renderbufferMemory: 0,
+      gpuMemory: 0
+    };
+    this._metricsCounter = 0;
 
     this.setProps(props);
 
@@ -316,6 +339,7 @@ export default class Deck {
   }
 
   pickObject({x, y, radius = 0, layerIds = null}) {
+    this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickObject Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
@@ -334,6 +358,7 @@ export default class Deck {
   }
 
   pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
+    this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickMultipleObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
@@ -352,6 +377,7 @@ export default class Deck {
   }
 
   pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
+    this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
     const activateViewport = this.layerManager.activateViewport;
@@ -638,26 +664,17 @@ export default class Deck {
   }
 
   _onRenderFrame(animationProps) {
-    this.stats.get('frameRate').timeEnd();
-    this.stats.get('frameRate').timeStart();
+    this._getFrameStats();
 
     // Log perf stats every second
-    if (animationProps.tick % 60 === 0) {
-      const table = {};
-      this.stats.forEach(stat => {
-        table[stat.name] = {
-          time: stat.time || 0,
-          count: stat.count || 0,
-          average: stat.getAverageTime() || 0,
-          hz: stat.getHz() || 0
-        };
-      });
+    if (this._metricsCounter++ % 60 === 0) {
+      this._getMetrics();
       this.stats.reset();
-      log.table(3, table)();
+      log.table(3, this.metrics)();
 
       // Experimental: report metrics
       if (this.props._onMetrics) {
-        this.props._onMetrics(table);
+        this.props._onMetrics(this.metrics);
       }
     }
 
@@ -765,6 +782,40 @@ export default class Deck {
       event,
       mode: 'hover'
     });
+  }
+
+  _getFrameStats() {
+    this.stats.get('frameRate').timeEnd();
+    this.stats.get('frameRate').timeStart();
+
+    // Get individual stats from luma.gl so reset works
+    const animationLoopStats = this.animationLoop.stats;
+    this.stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
+    this.stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
+  }
+
+  _getMetrics() {
+    this.metrics.fps = this.stats.get('frameRate').getHz();
+    this.metrics.setPropsTime = this.stats.get('setProps Time').time;
+    this.metrics.updateAttributesTime = this.stats.get('Update Attributes').time;
+    this.metrics.framesRedrawn = this.stats.get('Redraw Count').count;
+    this.metrics.pickTime =
+      this.stats.get('pickObject Time').time +
+      this.stats.get('pickMultipleObjects Time').time +
+      this.stats.get('pickObjects Time').time;
+    this.metrics.pickCount = this.stats.get('Pick Count').count;
+
+    // Luma stats
+    this.metrics.gpuTime = this.stats.get('GPU Time').time;
+    this.metrics.cpuTime = this.stats.get('CPU Time').time;
+    this.metrics.gpuTimePerFrame = this.stats.get('GPU Time').getAverageTime();
+    this.metrics.cpuTimePerFrame = this.stats.get('CPU Time').getAverageTime();
+
+    const memoryStats = lumaStats.get('Memory Usage');
+    this.metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
+    this.metrics.textureMemory = memoryStats.get('Texture Memory').count;
+    this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
+    this.metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
 }
 
