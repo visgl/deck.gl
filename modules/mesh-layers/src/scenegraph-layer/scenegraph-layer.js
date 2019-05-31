@@ -221,7 +221,9 @@ export default class ScenegraphLayer extends Layer {
         fs: this.addVersionToShader(fs),
         modules,
         isInstanced: true
-      }
+      },
+      // tangents are not supported
+      useTangents: false
     };
   }
 

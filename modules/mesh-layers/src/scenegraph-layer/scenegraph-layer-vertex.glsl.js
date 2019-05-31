@@ -30,10 +30,6 @@ _attribute vec4 POSITION;
   #ifdef HAS_NORMALS
     _attribute vec4 NORMAL;
   #endif
-
-  #ifdef HAS_TANGENTS
-    _attribute vec4 TANGENT;
-  #endif
 #endif
 
 // Varying
@@ -45,14 +41,6 @@ _attribute vec4 POSITION;
     _varying vec2 vTEXCOORD_0;
   #endif
 #endif
-
-// Utils
-#if defined(HAS_NORMALS) && defined(MODULE_PBR)
-  vec3 getProjectedNormal() {
-    return project_normal(instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz);
-  }
-#endif
-
 
 // Main
 void main(void) {
@@ -71,16 +59,7 @@ void main(void) {
     pbr_vPosition = position_commonspace.xyz;
 
     #ifdef HAS_NORMALS
-      #ifdef HAS_TANGENTS___TODO_FIX_ME___
-        vec3 normalW = normalize(vec3(u_NormalMatrix * vec4(NORMAL.xyz, 0.0)));
-        vec3 tangentW = normalize(vec3(u_ModelMatrix * vec4(TANGENT.xyz, 0.0)));
-        vec3 bitangentW = cross(normalW, tangentW) * TANGENT.w;
-        pbr_vTBN = mat3(tangentW, bitangentW, normalW);
-      #else // HAS_TANGENTS != 1
-        // pbr_vNormal = normalize(vec3(u_ModelMatrix * vec4(NORMAL.xyz, 0.0)));
-        // TODO: Check this
-        pbr_vNormal = getProjectedNormal();
-      #endif
+      pbr_vNormal = project_normal(instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz);
     #endif
 
     #ifdef HAS_UV
