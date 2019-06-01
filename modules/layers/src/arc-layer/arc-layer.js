@@ -181,9 +181,9 @@ export default class ArcLayer extends Layer {
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
-      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = sourcePosition[0];
       value[i++] = sourcePosition[1];
+      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = targetPosition[0];
       value[i++] = targetPosition[1];
     }
@@ -205,9 +205,9 @@ export default class ArcLayer extends Layer {
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
-      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = fp64LowPart(sourcePosition[0]);
       value[i++] = fp64LowPart(sourcePosition[1]);
+      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = fp64LowPart(targetPosition[0]);
       value[i++] = fp64LowPart(targetPosition[1]);
     }
