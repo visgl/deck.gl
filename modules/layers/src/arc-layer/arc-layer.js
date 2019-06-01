@@ -183,6 +183,8 @@ export default class ArcLayer extends Layer {
       const sourcePosition = getSourcePosition(object, objectInfo);
       value[i++] = sourcePosition[0];
       value[i++] = sourcePosition[1];
+      // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
+      // the same temp array
       const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = targetPosition[0];
       value[i++] = targetPosition[1];
@@ -207,6 +209,8 @@ export default class ArcLayer extends Layer {
       const sourcePosition = getSourcePosition(object, objectInfo);
       value[i++] = fp64LowPart(sourcePosition[0]);
       value[i++] = fp64LowPart(sourcePosition[1]);
+      // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
+      // the same temp array
       const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = fp64LowPart(targetPosition[0]);
       value[i++] = fp64LowPart(targetPosition[1]);
