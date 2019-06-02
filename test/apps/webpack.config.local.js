@@ -34,7 +34,15 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR) {
     resolve: {
       alias: Object.assign({}, ALIASES, {
         // Use luma.gl specified by root package.json
-        'luma.gl': resolve(LIB_DIR, './node_modules/luma.gl'),
+        '@luma.gl/core': resolve(LIB_DIR, './node_modules/@luma.gl/core'),
+        '@luma.gl/webgl': resolve(LIB_DIR, './node_modules/@luma.gl/webgl'),
+        '@luma.gl/webgl-state-tracker': resolve(
+          LIB_DIR,
+          './node_modules/@luma.gl/webgl-state-tracker'
+        ),
+        '@luma.gl/webgl2-polyfill': resolve(LIB_DIR, './node_modules/@luma.gl/webgl2-polyfill'),
+        '@luma.gl/shadertools': resolve(LIB_DIR, './node_modules/@luma.gl/shadertools'),
+
         // Important: ensure shared dependencies come from the main node_modules dir
         // Versions will be controlled by the deck.gl top level package.json
         'math.gl': resolve(LIB_DIR, './node_modules/math.gl'),

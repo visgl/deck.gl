@@ -7,7 +7,7 @@ import DeckGL, {ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import DataFilterExtension from './data-filter-extension';
 import POINTS from './data-sample';
 
-const dataFilterExtension = new DataFilterExtension({filterSize: 2, margin: 1000});
+const dataFilterExtension = new DataFilterExtension({filterSize: 2, softMargin: true});
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.45,
@@ -42,6 +42,10 @@ class Root extends Component {
       [-cos * 5000, cos * 5000], // x
       [-sin * 5000, sin * 5000] // y
     ];
+    const filterSoftRange = [
+      [-cos * 5000 + 1000, cos * 5000 - 1000], // x
+      [-sin * 5000 + 1000, sin * 5000 - 1000] // y
+    ];
 
     return [
       new ScatterplotLayer({
@@ -57,6 +61,7 @@ class Root extends Component {
 
         // Filter
         filterRange,
+        filterSoftRange,
 
         extensions: [dataFilterExtension]
       })

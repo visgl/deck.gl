@@ -47,8 +47,6 @@ varying vec2 unitPosition;
 varying float innerUnitRadius;
 
 void main(void) {
-  DECKGL_MAIN_START();
-
   // Multiply out radius and clamp to limits
   float outerRadiusPixels = clamp(
     project_size_to_pixel(radiusScale * instanceRadius),
@@ -79,7 +77,5 @@ void main(void) {
   
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
-
-  DECKGL_MAIN_END();
 }
 `;

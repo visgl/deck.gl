@@ -1,5 +1,5 @@
 import {LayerExtension} from '@deck.gl/core';
-import {setModuleInjection} from '@luma.gl/shadertools';
+import {createModuleInjection} from '@luma.gl/shadertools';
 
 const DATA_TYPE_FROM_SIZE = {
   1: 'float',
@@ -10,28 +10,35 @@ const DATA_TYPE_FROM_SIZE = {
 
 const defaultProps = {
   getFilterValue: 0,
-  filterRange: [-1, 1]
+
+  filterEnabled: true,
+  filterRange: [-1, 1],
+  filterSoftRange: null,
+  filterTransformSize: true,
+  filterTransformColor: true
 };
 
 // Cache generated shader modules
 const dataFilterShaderModule = getDataFilterShaderModule();
 
 export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1, margin = 0} = {}) {
+  constructor({filterSize = 1, softMargin = false} = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
-    super({filterSize, margin});
+
+    super({filterSize, softMargin});
   }
 
   getShaders(layer, shaders) {
-    const {filterSize, margin} = this.opts;
+    const {filterSize, softMargin} = this.opts;
 
     shaders.defines = Object.assign({}, shaders.defines, {
-      DATAFILTER_MARGIN: margin % 1 ? margin.toString() : margin.toFixed(1),
-      DATAFILTER_SIZE: filterSize,
       DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize]
     });
+    if (softMargin) {
+      shaders.defines.DATAFILTER_SOFT_MARGIN = '1';
+    }
     shaders.modules.push(dataFilterShaderModule);
 
     return shaders;
@@ -44,13 +51,20 @@ export default class DataFilterExtension extends LayerExtension {
   }
 }
 
+DataFilterExtension.extensionName = 'DataFilterExtension';
+DataFilterExtension.defaultProps = defaultProps;
+
 /*
  * data filter shader module
  */
 function getDataFilterShaderModule() {
   const vs = `
   uniform DATAFILTER_TYPE filter_min;
+  uniform DATAFILTER_TYPE filter_softMin;
+  uniform DATAFILTER_TYPE filter_softMax;
   uniform DATAFILTER_TYPE filter_max;
+  uniform bool filter_enabled;
+  uniform bool filter_transformSize;
   attribute DATAFILTER_TYPE instanceFilterValue;
   varying float dataFilter_value;
 
@@ -69,6 +83,7 @@ function getDataFilterShaderModule() {
   `;
 
   const fs = `
+  uniform bool filter_transformColor;
   varying float dataFilter_value;
   `;
 
@@ -76,47 +91,73 @@ function getDataFilterShaderModule() {
     if (!opts || !opts.extensions) {
       return {};
     }
-    const {filterRange = defaultProps.filterRange} = opts;
+    const {
+      filterRange = defaultProps.filterRange,
+      filterEnabled = defaultProps.filterEnabled,
+      filterTransformSize = defaultProps.filterTransformSize,
+      filterTransformColor = defaultProps.filterTransformColor
+    } = opts;
+    const filterSoftRange = opts.filterSoftRange || filterRange;
 
-    return Number.isFinite(filterRange[0])
+    const uniforms = Number.isFinite(filterRange[0])
       ? {
           filter_min: filterRange[0],
+          filter_softMin: filterSoftRange[0],
+          filter_softMax: filterSoftRange[1],
           filter_max: filterRange[1]
         }
       : {
           filter_min: filterRange.map(r => r[0]),
+          filter_softMin: filterSoftRange.map(r => r[0]),
+          filter_softMax: filterSoftRange.map(r => r[1]),
           filter_max: filterRange.map(r => r[1])
         };
+    uniforms.filter_enabled = filterEnabled;
+    uniforms.filter_transformSize = filterEnabled && filterTransformSize;
+    uniforms.filter_transformColor = filterEnabled && filterTransformColor;
+
+    return uniforms;
   };
 
   // filter_setValue(instanceFilterValue);
   const moduleName = 'data-filter';
 
-  setModuleInjection(moduleName, {
-    shaderStage: 'vs',
-    shaderHook: 'DECKGL_MAIN_START',
+  createModuleInjection(moduleName, {
+    hook: 'vs:#main-start',
     injection: `
+  if (filter_enabled) {
+  #ifdef DATAFILTER_SOFT_MARGIN
     dataFilter_setValue(
-      smoothstep(filter_min, filter_min + DATAFILTER_MARGIN, instanceFilterValue) *
-      (1.0 - smoothstep(filter_max - DATAFILTER_MARGIN, filter_max, instanceFilterValue))
+      smoothstep(filter_min, filter_softMin, instanceFilterValue) *
+      (1.0 - smoothstep(filter_softMax, filter_max, instanceFilterValue))
     );
+  #else
+    dataFilter_setValue(
+      step(filter_min, instanceFilterValue) * step(instanceFilterValue, filter_max)
+    );
+  #endif
+  } else {
+    dataFilter_setValue(1.0);
+  }
     `
   });
 
-  setModuleInjection(moduleName, {
-    shaderStage: 'vs',
-    shaderHook: 'DECKGL_FILTER_SIZE',
+  createModuleInjection(moduleName, {
+    hook: 'vs:DECKGL_FILTER_SIZE',
     injection: `
+  if (filter_transformSize) {
     size = size * dataFilter_value;
+  }
     `
   });
 
-  setModuleInjection(moduleName, {
-    shaderStage: 'fs',
-    shaderHook: 'DECKGL_FILTER_COLOR',
+  createModuleInjection(moduleName, {
+    hook: 'fs:DECKGL_FILTER_COLOR',
     injection: `
-    if (dataFilter_value == 0.0) discard;
+  if (dataFilter_value == 0.0) discard;
+  if (filter_transformColor) {
     color.a *= dataFilter_value;
+  }
     `
   });
 
