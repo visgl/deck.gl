@@ -129,6 +129,9 @@ export const PathLayerDemo = createLayerDemoClass({
   dataUrl: `${DATA_URI}/bart-lines.json`,
   formatTooltip: d => d.name,
   props: {
+    parameters: {
+      depthMask: false
+    },
     pickable: true,
     widthScale: 20,
     widthMinPixels: 2,

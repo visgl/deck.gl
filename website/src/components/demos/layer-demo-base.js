@@ -110,6 +110,7 @@ export default function createLayerDemoClass(settings) {
             layers={layers} >
             <StaticMap reuseMaps
               mapStyle={MAPBOX_STYLES.LIGHT}
+              preventStyleDiffing={true}
               mapboxApiAccessToken={process.env.MapboxAccessToken} />
           </DeckGL>
           {this._renderTooltip()}
