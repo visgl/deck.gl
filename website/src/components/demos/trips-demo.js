@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, INITIAL_VIEW_STATE} from 'website-examples/trips/app';
+import {App} from 'website-examples/trips/app';
 
 const EMPTY_ARRAY = [];
 
@@ -25,10 +25,6 @@ export default class TripsDemo extends Component {
     return {
       trail: {displayName: 'Trail', type: 'range', value: 180, step: 1, min: 10, max: 200}
     };
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

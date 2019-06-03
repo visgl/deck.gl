@@ -86,9 +86,7 @@ const COMMON_CONFIG = {
   plugins: [
     // Uncomment to analyze bundle size
     // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)(),
-    new webpack.DefinePlugin({
-      MapboxAccessToken: `"${process.env.MapboxAccessToken}"` // eslint-disable-line
-    })
+    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ]
 };
 

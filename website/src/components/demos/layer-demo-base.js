@@ -1,11 +1,12 @@
 import React, {Component} from 'react';
 import DeckGL from 'deck.gl';
+import {StaticMap} from 'react-map-gl';
 import autobind from 'autobind-decorator';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {getLayerParams} from '../../utils/layer-params';
 
-const defaultViewport = {
+const INITIAL_VIEW_STATE = {
   longitude: -122.4,
   latitude: 37.74,
   zoom: 11,
@@ -37,10 +38,6 @@ export default function createLayerDemoClass(settings) {
         url: settings.dataUrl
       };
     }
-
-    static viewport = defaultViewport;
-
-    static mapStyle = MAPBOX_STYLES.LIGHT;
 
     static get parameters() {
       return getLayerParams(renderLayer([]), settings.propParameters);
@@ -98,7 +95,7 @@ export default function createLayerDemoClass(settings) {
     }
 
     render() {
-      const {viewState, params, data} = this.props;
+      const {params, data} = this.props;
       const layers = [
         renderLayer(data, params, {
           onHover: this._onHover
@@ -107,7 +104,14 @@ export default function createLayerDemoClass(settings) {
 
       return (
         <div>
-          <DeckGL pickingRadius={5} viewState={viewState} layers={layers} />
+          <DeckGL pickingRadius={5}
+            initialViewState={INITIAL_VIEW_STATE}
+            controller={true}
+            layers={layers} >
+            <StaticMap reuseMaps
+              mapStyle={MAPBOX_STYLES.LIGHT}
+              mapboxApiAccessToken={process.env.MapboxAccessToken} />
+          </DeckGL>
           {this._renderTooltip()}
         </div>
       );

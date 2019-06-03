@@ -39,7 +39,7 @@ const WIDTH_SCALE = scaleLinear()
   .domain([0, 200])
   .range([10, 2000]);
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   latitude: 38,
   longitude: -100,
   zoom: 4,
@@ -175,24 +175,21 @@ export class App extends Component {
   }
 
   render() {
-    const {viewState, controller = true, baseMap = true} = this.props;
+    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
         pickingRadius={5}
         initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
-        controller={controller}
+        controller={true}
       >
-        {baseMap && (
-          <StaticMap
-            reuseMaps
-            mapStyle="mapbox://styles/mapbox/dark-v9"
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        )}
+        <StaticMap
+          reuseMaps
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
 
         {this._renderTooltip}
       </DeckGL>

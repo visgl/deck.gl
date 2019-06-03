@@ -1,10 +1,7 @@
 /* eslint import/namespace: ['error', { allowComputed: true }] */
 import React, {Component} from 'react';
 import {connect} from 'react-redux';
-import autobind from 'autobind-decorator';
-import {FlyToInterpolator} from 'react-map-gl';
 
-import MapGL from 'react-map-gl';
 import * as Demos from './demos';
 import {updateMapState, updateMeta, loadData, useParams, resetParams} from '../actions/app-actions';
 import {MAPBOX_STYLES} from '../constants/defaults';
@@ -34,20 +31,9 @@ class DemoLauncher extends Component {
         this.props.loadData(demo, DemoComponent.data);
       }
       this.props.useParams(DemoComponent.parameters);
-      let demoViewport = DemoComponent.viewport;
       this._mapStyle = DemoComponent.mapStyle;
 
-      if (demoViewport) {
-        demoViewport = {
-          transitionDuration: useTransition ? 2000 : 0,
-          transitionInterpolator: new FlyToInterpolator(),
-          minZoom: 0,
-          maxZoom: 20,
-          ...demoViewport
-        };
-
-        this.props.updateMapState(demoViewport);
-      }
+      this.props.updateMapState(DemoComponent.viewport);
     }
   }
 
@@ -57,37 +43,20 @@ class DemoLauncher extends Component {
     }
   }
 
-  @autobind
-  _updateMapViewState({viewState}) {
-    this.props.updateMapState(viewState);
-  }
-
-  // Add map wrapper, use for examples that havn't yet been updated to render their own maps
+  // Add map tooltip
   _renderMap(mapStyle, component) {
-    const {viewState, width, height, isInteractive} = this.props;
-
-    if (!mapStyle) {
-      return <div style={{width, height, position: 'relative'}}>{component}</div>;
-    }
+    const {width, height, isInteractive} = this.props;
 
     return (
-      <MapGL
-        mapboxApiAccessToken={MapboxAccessToken}
-        mapStyle={mapStyle}
-        reuseMap
-        {...viewState}
-        width={width}
-        height={height}
-        onViewStateChange={isInteractive && this._updateMapViewState}
-      >
+      <div style={{width, height, position: 'relative'}}>
         {component}
-        {isInteractive && <div className="mapbox-tip">Hold down shift to rotate</div>}
-      </MapGL>
+        {isInteractive && mapStyle && <div className="mapbox-tip">Hold down shift to rotate</div>}
+      </div>
     );
   }
 
   render() {
-    const {viewState, demo, owner, data} = this.props;
+    const {demo, owner, data, viewState} = this.props;
     const DemoComponent = Demos[demo];
 
     // Params are not initialized in time
@@ -101,11 +70,8 @@ class DemoLauncher extends Component {
       DemoComponent.mapStyle,
       <DemoComponent
         ref="demo"
-        controller={false}
-        baseMap={false}
         data={owner === demo ? data : null}
         viewState={viewState}
-        mapboxApiAccessToken={MapboxAccessToken}
         mapStyle={this._mapStyle || MAPBOX_STYLES.BLANK}
         params={params}
         onStateChange={this.props.updateMeta}

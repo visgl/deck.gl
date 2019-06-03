@@ -30,7 +30,7 @@ export const COLOR_SCALE = scaleThreshold()
     [128, 0, 38]
   ]);
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   latitude: 49.254,
   longitude: -123.13,
   zoom: 11,
@@ -100,23 +100,16 @@ export class App extends Component {
   }
 
   render() {
-    const {viewState, controller = true, baseMap = true} = this.props;
+    const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
 
     return (
-      <DeckGL
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
-        controller={controller}
-      >
-        {baseMap && (
-          <StaticMap
-            reuseMaps
-            mapStyle="mapbox://styles/mapbox/light-v9"
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        )}
+      <DeckGL layers={this._renderLayers()} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+        <StaticMap
+          reuseMaps
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
 
         {this._renderTooltip}
       </DeckGL>
