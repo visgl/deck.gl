@@ -38,7 +38,7 @@ const DEFAULT_TEXTURE_PARAMETERS = {
 };
 
 const defaultProps = {
-  image: null,
+  image: {type: 'object', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   fp64: false,
 

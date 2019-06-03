@@ -2,6 +2,7 @@ import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 
 import DeckGL, {TileLayer, BitmapLayer} from 'deck.gl';
+import {loadImage} from '@loaders.gl/images';
 
 const INITIAL_VIEW_STATE = {
   latitude: 47.65,
@@ -53,12 +54,16 @@ export class App extends PureComponent {
         minZoom: 0,
         maxZoom: 19,
 
+        getTileData: ({x, y, z}) => loadImage(`${tileServer}/${z}/${x}/${y}.png`),
+
         renderSubLayers: props => {
-          const {x, y, z, bbox} = props.tile;
-          const {west, south, east, north} = bbox;
+          const {
+            bbox: {west, south, east, north}
+          } = props.tile;
 
           return new BitmapLayer(props, {
-            image: `${tileServer}/${z}/${x}/${y}.png`,
+            data: null,
+            image: props.data,
             bounds: [west, south, east, north]
           });
         }
