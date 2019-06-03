@@ -12,11 +12,11 @@ export default class HomeDemo extends TripsDemo {
 
   static get viewport() {
     return {
-      ...TripsDemo.viewport,
       longitude: -74.01,
       latitude: 40.707,
       zoom: 14,
-      pitch: 40
+      pitch: 40,
+      bearing: 0
     };
   }
 }

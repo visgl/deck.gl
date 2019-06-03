@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App, INITIAL_VIEW_STATE, COLOR_SCALE} from 'website-examples/highway/app';
+import {App, COLOR_SCALE} from 'website-examples/highway/app';
 
 const EMPTY_ARRAY = [];
 
@@ -24,10 +24,6 @@ export default class HighwayDemo extends Component {
     return {
       year: {displayName: 'Year', type: 'range', value: 1990, step: 5, min: 1990, max: 2015}
     };
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

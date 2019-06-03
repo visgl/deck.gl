@@ -33,7 +33,7 @@ const SOURCE_COLOR = [166, 3, 3];
 // migrate in
 const TARGET_COLOR = [35, 181, 184];
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   longitude: -100,
   latitude: 40.7,
   zoom: 3,
@@ -239,7 +239,7 @@ export class App extends Component {
   }
 
   render() {
-    const {viewState, controller = true, baseMap = true} = this.props;
+    const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
 
     return (
       <div onMouseMove={this._onMouseMove} onMouseLeave={this._onMouseLeave}>
@@ -248,17 +248,14 @@ export class App extends Component {
         <DeckGL
           layers={this._renderLayers()}
           initialViewState={INITIAL_VIEW_STATE}
-          viewState={viewState}
-          controller={controller}
+          controller={true}
         >
-          {baseMap && (
-            <StaticMap
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          )}
+          <StaticMap
+            reuseMaps
+            mapStyle={mapStyle}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
         </DeckGL>
       </div>
     );

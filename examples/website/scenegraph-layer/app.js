@@ -25,7 +25,7 @@ const ANIMATIONS = {
   '*': {speed: 1}
 };
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   latitude: 39.1,
   longitude: -94.57,
   zoom: 3.8,
@@ -175,25 +175,22 @@ export class App extends Component {
   }
 
   render() {
-    const {viewState, controller = true, baseMap = true} = this.props;
+    const {mapStyle = MAPBOX_STYLE} = this.props;
 
     return (
       <Fragment>
         <DeckGL
           layers={this._renderLayers()}
           initialViewState={INITIAL_VIEW_STATE}
-          viewState={viewState}
-          controller={controller}
+          controller={true}
           _animate
         >
-          {baseMap && (
-            <StaticMap
-              reuseMaps
-              mapStyle={MAPBOX_STYLE}
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          )}
+          <StaticMap
+            reuseMaps
+            mapStyle={mapStyle}
+            preventStyleDiffing={true}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
         </DeckGL>
         {/* this._renderInfoBox() */}
       </Fragment>

@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, INITIAL_VIEW_STATE} from 'website-examples/scatterplot/app';
+import {App} from 'website-examples/scatterplot/app';
 
 export default class ScatterPlotDemo extends Component {
 
@@ -18,10 +18,6 @@ export default class ScatterPlotDemo extends Component {
       colorF: {displayName: 'Female', type: 'color', value: [255, 0, 128]},
       radius: {displayName: 'Radius', type: 'range', value: 10, step: 0.1, min: 1, max: 20}
     };
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

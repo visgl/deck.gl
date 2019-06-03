@@ -3,7 +3,7 @@ import {render} from 'react-dom';
 
 import DeckGL, {TileLayer, BitmapLayer} from 'deck.gl';
 
-export const INITIAL_VIEW_STATE = {
+const INITIAL_VIEW_STATE = {
   latitude: 47.65,
   longitude: 7,
   zoom: 4.5,
@@ -67,15 +67,8 @@ export class App extends PureComponent {
   }
 
   render() {
-    const {viewState, controller = true} = this.props;
-
     return (
-      <DeckGL
-        layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        viewState={viewState}
-        controller={controller}
-      >
+      <DeckGL layers={this._renderLayers()} initialViewState={INITIAL_VIEW_STATE} controller={true}>
         {this._renderTooltip}
       </DeckGL>
     );

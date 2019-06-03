@@ -18,7 +18,7 @@
     "react": "~16.7.0",
     "react-ace": "^6.1.4",
     "react-dom": "~16.7.0",
-    "react-map-gl": "^4.1.2",
+    "react-map-gl": "^5.0.0",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
   "devDependencies": {
