@@ -17,6 +17,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.0
 
+#### deck.gl [v7.0.11] - May 29 2019
+
+- Fix ArcLayer bug when using non-iterable data with pre-allocated target array (#3170)
+
 #### deck.gl [v7.0.10] - May 29 2019
 
 - Include LICENSE in submodules
