@@ -97,7 +97,7 @@
     right: 0;
     z-index: -1;
     border-top: solid 200px transparent;
-    background-image: url(../static/images/maps.jpg);
+    background-image: url('../images/maps.jpg');
     background-size: contain;
     background-repeat: no-repeat;
     background-position: right top;
@@ -138,7 +138,7 @@
   }
 }
 #footer {
-  background-image: url('../static/images/footer-pattern.gif');
+  background-image: url('../images/footer-pattern.gif');
   background-size: 32px;
   background-repeat: repeat;
   color: $white;
