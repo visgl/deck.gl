@@ -9,7 +9,7 @@
 # GridLayer
 
 The `GridLayer` renders a grid heatmap based on an array of points.
-It takes the constant size all each cell, projects points into cells. The color
+It takes the constant cell size, aggregates input points into cells. The color
 and height of the cell is scaled by number of points it contains.
 
 This layer renders either a [GPUGridLayer](/docs/layers/gpu-grid-layer.md) or a [CPUGridLayer](/docs/layers/cpu-grid-layer.md), depending on its props and whether GPU aggregation is supported. For more details check the `GPU Aggregation` section below.
@@ -250,6 +250,8 @@ Note: similar to `getColorValue`, grid layer compares whether `getColorWeight` h
 Note: `getColorWeight` and `colorAggregation` together define how color value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
 
 ###### Example1 : Using count of data elements that fall into a cell to encode the its color
+
+* Using `getColorValue`
 ```js
 function getCount(points) {
   return points.length;
@@ -263,7 +265,7 @@ const layer = new GridLayer({
 });
 ```
 
-####### Using `getColorWeight` and `colorAggregation`
+* Using `getColorWeight` and `colorAggregation`
 ```js
 function getWeight(point) {
   return 1;
@@ -280,7 +282,7 @@ const layer = new GridLayer({
 
 ###### Example2 : Using mean value of 'SPACES' field of data elements to encode the color of the cell
 
-####### Using `getColorValue`
+* Using `getColorValue`
 ```js
 function getMean(points) {
   return points.reduce((sum, p) => sum += p.SPACES, 0) / points.length;
@@ -294,7 +296,7 @@ const layer = new GridLayer({
 });
 ```
 
-####### Using `getColorWeight` and `colorAggregation`
+* Using `getColorWeight` and `colorAggregation`
 ```js
 function getWeight(point) {
   return point.SPACES;
@@ -346,8 +348,7 @@ Note: `getElevationWeight` and `elevationAggregation` together define how elevat
 
 ###### Example1 : Using count of data elements that fall into a cell to encode the its elevation
 
-####### Using `getElevationValue`
-
+* Using `getElevationValue`
 ```js
 function getCount(points) {
   return points.length;
@@ -361,7 +362,7 @@ const layer = new GridLayer({
 });
 ```
 
-####### Using `getElevationWeight` and `elevationAggregation`
+* Using `getElevationWeight` and `elevationAggregation`
 ```js
 function getWeight(point) {
   return 1;
@@ -378,7 +379,7 @@ const layer = new GridLayer({
 
 ###### Example2 : Using maximum value of 'SPACES' field of data elements to encode the elevation of the cell
 
-####### Using `getElevationValue`
+* Using `getElevationValue`
 ```js
 function getMax(points) {
   return points.reduce((max, p) => p.SPACES > max ? p.SPACES : max, -Infinity);
@@ -392,7 +393,7 @@ const layer = new GridLayer({
 });
 ```
 
-####### Using `getElevationWeight` and `elevationAggregation`
+* Using `getElevationWeight` and `elevationAggregation`
 ```js
 function getWeight(point) {
   return point.SPACES;
@@ -413,7 +414,7 @@ If your use case requires aggregating using an operation that is not one of 'SUM
 
 * Default: `() => {}`
 
-This callback will be called when bin color domain has been calculated. 
+This callback will be called when bin color domain has been calculated.
 Note that this is only fired when using CPU Aggregation (`gpuAggregation: false`).
 
 ##### `onSetElevationDomain` (Function, optional)
@@ -462,7 +463,7 @@ The GridLayer renders the following sublayers:
 
 * `CPU` - a [CPUGridLayer](/docs/layers/cpu-grid-layer.md) when using CPU aggregatoin.
 
-* `GPU` - a [GPUGridLayer](/docs/layers/grid-layer.md) when using GPU aggregatoin.
+* `GPU` - a [GPUGridLayer](/docs/layers/gpu-grid-layer.md) when using GPU aggregatoin.
 
 ## Source
 
