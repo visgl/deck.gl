@@ -9,7 +9,7 @@
 # CPUGridLayer
 
 The Grid Layer renders a grid heatmap based on an array of points.
-It takes the constant size all each cell, projects points into cells. The color
+It takes the constant cell size, aggregates input points into cells. Aggregation is performed on CPU. The color
 and height of the cell is scaled by number of points it contains.
 
 CPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
@@ -236,7 +236,7 @@ Note: `getColorWeight` and `colorAggregation` together define how color value of
 
 ###### Example1 : Using count of data elements that fall into a cell to encode the its color
 
-####### Using `getColorValue`
+* Using `getColorValue`
 ```js
 function getCount(points) {
   return points.length;
@@ -250,7 +250,7 @@ const layer = new CPUGridLayer({
 });
 ```
 
-####### Using `getColorWeight` and `colorAggregation`
+* Using `getColorWeight` and `colorAggregation`
 ```js
 function getWeight(point) {
   return 1;
@@ -267,7 +267,7 @@ const layer = new CPUGridLayer({
 
 ###### Example2 : Using mean value of 'SPACES' field of data elements to encode the color of the cell
 
-####### Using `getColorValue`
+* Using `getColorValue`
 ```js
 function getMean(points) {
   return points.reduce((sum, p) => sum += p.SPACES, 0) / points.length;
@@ -281,7 +281,7 @@ const layer = new CPUGridLayer({
 });
 ```
 
-####### Using `getColorWeight` and `colorAggregation`
+* Using `getColorWeight` and `colorAggregation`
 ```js
 function getWeight(point) {
   return point.SPACES;
@@ -329,7 +329,7 @@ Note: `getElevationWeight` and `elevationAggregation` together define how elevat
 
 ###### Example1 : Using count of data elements that fall into a cell to encode the its elevation
 
-####### Using `getElevationValue`
+* Using `getElevationValue`
 
 ```js
 function getCount(points) {
@@ -344,7 +344,7 @@ const layer = new CPUGridLayer({
 });
 ```
 
-####### Using `getElevationWeight` and `elevationAggregation`
+* Using `getElevationWeight` and `elevationAggregation`
 ```js
 function getWeight(point) {
   return 1;
@@ -361,7 +361,7 @@ const layer = new CPUGridLayer({
 
 ###### Example2 : Using maximum value of 'SPACES' field of data elements to encode the elevation of the cell
 
-####### Using `getElevationValue`
+* Using `getElevationValue`
 ```js
 function getMax(points) {
   return points.reduce((max, p) => p.SPACES > max ? p.SPACES : max, -Infinity);
@@ -375,7 +375,7 @@ const layer = new CPUGridLayer({
 });
 ```
 
-####### Using `getElevationWeight` and `elevationAggregation`
+* Using `getElevationWeight` and `elevationAggregation`
 ```js
 function getWeight(point) {
   return point.SPACES;

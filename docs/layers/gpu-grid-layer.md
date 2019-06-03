@@ -8,9 +8,9 @@
 
 # GPUGridLayer
 
-The GPUGridLayer renders a grid heatmap based on an array of points.
-It takes the constant cell size, aggregates input points in world space (lng/lat space).The color
-and height of the cell is a linear function of number of points it contains.
+The `GPUGridLayer` renders a grid heatmap based on an array of points.
+It takes the constant cell size, aggregates input points into cells. When possible aggregation is performed on GPU. The color
+and height of the cell is scaled by number of points it contains.
 
 GPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
