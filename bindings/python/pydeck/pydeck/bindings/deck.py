@@ -34,6 +34,8 @@ class Deck(JSONMixin):
         self.views = views
         self.map_style = map_style
         self.initial_view_state = initial_view_state
+        self.deck_widget = DeckGLWidget()
+
 
     def __add__(self, obj):
         """
@@ -45,13 +47,16 @@ class Deck(JSONMixin):
             self.views.append(obj)
         elif isinstance(ViewState, obj):
             self.initial_view_state = obj
-        obj_type = type(obj).__name__
-        raise TypeError("Cannot join object of type", obj_type)
+        else:
+            obj_type = type(obj).__name__
+            raise TypeError("Cannot join object of type", obj_type)
 
     def show(self):
         """
         Displays current Deck object for a Jupyter notebook
         """
-        deck_widget = DeckGLWidget()
-        deck_widget.json_input = self.to_json()
-        return deck_widget
+        self.update()
+        return self.deck_widget
+
+    def update(self):
+        self.deck_widget.json_input = self.to_json()
