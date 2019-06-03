@@ -23,6 +23,7 @@ const ICON_ATLAS = './test/render/icon-atlas.png';
 
 import {
   ScatterplotLayer,
+  BitmapLayer,
   PolygonLayer,
   PathLayer,
   ArcLayer,
@@ -1480,6 +1481,23 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/h3-cluster.png'
+  },
+  {
+    name: 'bitmap-layer',
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.4,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new BitmapLayer({
+        bounds: [-122.45, 37.7, -122.35, 37.8],
+        image: ICON_ATLAS
+      })
+    ],
+    goldenImage: './test/render/golden-images/bitmap.png'
   },
   {
     name: 'post-process-effects',
