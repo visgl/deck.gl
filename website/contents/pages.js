@@ -161,6 +161,11 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'The Bad Bet',
+    external:
+      'https://features.propublica.org/the-bad-bet/how-illinois-bet-on-video-gambling-and-lost/'
+  },
+  {
     name: 'SandDance',
     external: 'https://microsoft.github.io/SandDance/'
   },

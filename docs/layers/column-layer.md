@@ -34,7 +34,8 @@ const App = ({data, viewport}) => {
     pickable: true,
     elevationScale: 5000,
     getPosition: d => d.centroid,
-    getColor: d => [48, 128, d.value * 255, 255],
+    getFillColor: d => [48, 128, d.value * 255, 255],
+    getLineColor: [0, 0, 0],
     getElevation: d => d.value,
     onHover: ({object, x, y}) => {
       const tooltip = `height: ${object.value * 5000}m`;

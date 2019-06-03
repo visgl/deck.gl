@@ -2,14 +2,19 @@ import {rgb} from 'd3-color';
 
 export const normalizeParam = p => {
   if (p.type === 'function') {
-    let displayValue = p.value.toString();
-    // pretty print function code:
-    // convert `function funcName(d) {...}` to `d => {...}`
-    displayValue = displayValue.replace(/^function (\w+)?\((\w*?)\)/, '$2 =>');
-    // convert `function funcName(d, i) {...}` to `(d, i) => {...}`
-    displayValue = displayValue.replace(/^function (\w+)?(\(.*?\))/, '$2 =>');
-    // convert `d => {return 1}` to `d => 1`
-    displayValue = displayValue.replace(/\{\s*return\s*(.*?);?\s*\}$/, '$1');
+    let displayValue = String(p.value);
+    if (Array.isArray(p.value)) {
+      displayValue = `[${displayValue}]`;
+    }
+    if (typeof p.value === 'function') {
+      // pretty print function code:
+      // convert `function funcName(d) {...}` to `d => {...}`
+      displayValue = displayValue.replace(/^function (\w+)?\((\w*?)\)/, '$2 =>');
+      // convert `function funcName(d, i) {...}` to `(d, i) => {...}`
+      displayValue = displayValue.replace(/^function (\w+)?(\(.*?\))/, '$2 =>');
+      // convert `d => {return 1}` to `d => 1`
+      displayValue = displayValue.replace(/\{\s*return\s*(.*?);?\s*\}$/, '$1');
+    }
     return {...p, displayValue};
   }
   if (p.type === 'json') {
@@ -37,11 +42,8 @@ export const readableInteger = x => {
   return `${x.toFixed(1)}M`;
 };
 
-export function rgbToHex(rgb) {
-  return rgb.slice(0, 3).reduce(
-    (acc, v) => `${acc}${v < 16 ? '0' : ''}${v.toString(16)}`,
-    '#'
-  );
+export function rgbToHex(rgbArr) {
+  return rgbArr.slice(0, 3).reduce((acc, v) => `${acc}${v < 16 ? '0' : ''}${v.toString(16)}`, '#');
 }
 
 export function colorToRGBArray(color) {

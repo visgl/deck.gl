@@ -117,6 +117,9 @@
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
   margin: 24px;
   padding: 12px 24px;
+  max-height: 96%;
+  overflow-x: hidden;
+  overflow-y: auto;
   outline: none;
 
   hr {
