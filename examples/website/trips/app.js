@@ -68,7 +68,7 @@ export class App extends Component {
   _animate() {
     const {
       loopLength = 1800, // unit corresponds to the timestamp in source data
-      animationSpeed = 30 // unit time per second
+      animationSpeed = 60 // unit time per second
     } = this.props;
     const timestamp = Date.now() / 1000;
     const loopTime = loopLength / animationSpeed;

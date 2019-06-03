@@ -12,24 +12,24 @@ import Slider from '@material-ui/lab/Slider';
 import './style.css';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 let sampleSize = 1;
 let actType = 'Other';
-let trailLength = 86400;//86400;
-let animationSpeed = 2000 // unit time per second
+let trailLength = 86400;
+let animationSpeed = 500 // unit time per second
 
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
 
-let trsData = require(`./inputs/tours_${sampleSize}pct.json`);
+let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let actsCntUpdsData = require(`./inputs/activities_count_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
-let trIds = Object.keys(trsData);
+let trIds = Object.keys(toursData);
 let initActsCnt = actsCntUpdsData[0];
 let maxResidents = Math.max(...Object.values(initActsCnt['Home']))
 
-var colorsTrs = d3.scaleSequential()
+var colorstours = d3.scaleSequential()
                   .domain(shuffle([...trIds]))
                   .interpolator(d3.interpolateRainbow);
 
@@ -37,7 +37,7 @@ var colorsActs = d3.scaleSequential()
                    .domain(([0, maxResidents]))
                    .interpolator(d3.interpolatePuRd);
 
-let data = {zonesData: zonesData, trs: trsData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
+let data = {zonesData: zonesData, tours: toursData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
 
 function shuffle(a) {
   let j, x, i;
@@ -50,15 +50,6 @@ function shuffle(a) {
   return a;
 }
 
-function getZoneIds(zonesDataFeats, idName='lsoa11cd'){
-  let zoneIds = new Set()
-  for (const [k, f] of Object.entries(zonesDataFeats)) {
-    zoneIds.add(f.properties[idName])
-  }
-  zoneIds = Array.from(zoneIds);
-  return zoneIds
-}
-
 function getRgbFromStr(strRgb) {
   var color = d3.color(strRgb);
   return [color.r, color.g, color.b]  
@@ -68,15 +59,26 @@ function getActsCnt(actsCnt, actType, zoneId) {
       return _.get(actsCnt, `${actType}.${zoneId}`, 0);   
 }
 
-function filterBySourceZone(trs, zone, prop='Sources') {
-  let filtered = Array()
-  for (const [trid, attrs] of Object.entries(trs)) {
-    if (attrs[prop][0] === zone["properties"]["lsoa11cd"]) {
-      filtered.push(trs[trid])
-    }
-  }
+function filterToursBySource(tours, zone, prop='Sources') {
+  let filtered = Array();
+  const filterZone = zone["properties"]["lsoa11cd"];
+  filtered = tours.filter(x => x[prop][0] === filterZone);
   return filtered
 }
+
+function filterIncompleteTours(tours, currentTime, delay=0.1) {
+  
+  let fadeOutTime = -Infinity;
+
+  if (delay){
+    fadeOutTime = (1 + delay) * currentTime;
+  }
+  
+  let filtered = Array();
+  filtered = tours.filter(x => x.Segments[x.Segments.length-1][2] > fadeOutTime)
+  return filtered
+}
+
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -111,12 +113,14 @@ export class App extends Component {
     super(props);
     this.state = {
       time: 0,
-      trs: this.props.data.trs,
+      tours: this.props.data.tours,
       selectedZone: null
     };
 
-    this._onHover = this._onHover.bind(this);
+    this._filterTours = this._filterTours.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
+    
+    this._onHover = this._onHover.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
     this._onTimerChange = this._onTimerChange.bind(this);
   }
@@ -149,11 +153,15 @@ export class App extends Component {
     }
   }
 
-  _onSelectZone({object}) {
-    if (!object) {
-      this.state.selectedZone = null;
+  _onSelectZone(object) {
+    if (object.layer) {
+      if (object.layer.id == 'boundaries') {
+        this.setState({selectedZone: object.object})  
+      }
+    } else {
+        this.setState({selectedZone: null})
     }
-    this._recalculateTrs(object);
+    this._filterTours();
   }
   
   _onAnimationSpeedChange(evnt) {
@@ -166,16 +174,11 @@ export class App extends Component {
   };
 
   _animate() {
-    
     const timestamp = Date.now() / 1000;
 
     this.setState({ 
       time: simTime + (timestamp - anchorTime) * this.props.animationSpeed
-    }, () => this._updateActsCnt(this.props.data.actsCnt, [actType], this.state.time));
-    
-    //this.setState({ 
-    //  time: (timestamp - startTime) * this.props.animationSpeed
-    //});
+    }, () => this._filterTours());
     
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
@@ -194,27 +197,31 @@ export class App extends Component {
     this.props.data.actsCnt = actsCnt
   }
   
-  _recalculateTrs(selectedZone) {
-    const {allTrs = this.props.data.trs} = this.props;
+  _filterTours() {
+    const {allTours: allTours = this.props.data.tours} = this.props;
     
-    if (!allTrs) {
+    // I should probably split tours and activities
+    this._updateActsCnt(this.props.data.actsCnt, [actType], this.state.time)
+
+    let filteredTours = allTours;
+    let incompleteTours;
+    let sourceTours;
+
+    if (!allTours) {
       return;
     }
     
-    if (!selectedZone) {
-      var filtTrs = allTrs
+    incompleteTours = filterIncompleteTours(allTours, this.state.time);
+    //incompleteTours = allTours;
+    
+    if (!this.state.selectedZone) {
+      sourceTours = incompleteTours
     } else {
-      var filtTrs = filterBySourceZone(allTrs, selectedZone, 'Sources')
+      sourceTours = filterToursBySource(allTours, this.state.selectedZone, 'Sources')
     }
-
-    //const {lsoa11cd} = selectedZone.properties;
-
-    //if (this.props.onSelectZone) {
-    //  this.props.onSelectZone(selectedZone);
-    //}
-
-    this.setState({trs: filtTrs, selectedZone: selectedZone });
-
+    
+    filteredTours = incompleteTours.filter(x => sourceTours.includes(x));
+    this.setState({ tours: filteredTours });
   }
 
   _renderLayers() {
@@ -228,9 +235,9 @@ export class App extends Component {
       
       new TripsLayer({
         id: 'trips',
-        data: this.state.trs,
+        data: this.state.tours,
         getPath: d => d.Segments,
-        getColor: d => getRgbFromStr(colorsTrs(d.Tourid)),
+        getColor: d => getRgbFromStr(colorstours(d.Tourid)),
         opacity: 0.5,
         widthMinPixels: 2,
         rounded: false,
@@ -273,9 +280,7 @@ export class App extends Component {
             initialViewState={INITIAL_VIEW_STATE}
             viewState={viewState}
             controller={controller}
-            onClick={(object) => { if ((!object.layer) || (object.layer.id != 'boundaries')) {
-              this._recalculateTrs(null)}
-            }}
+            onClick={(object) => { this._onSelectZone(object)}}
           >
             {baseMap && (
               <StaticMap
