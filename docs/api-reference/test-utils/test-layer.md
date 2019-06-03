@@ -22,7 +22,7 @@ test('GeoJsonLayer#tests', t => {
       props: {
         data: SAMPLE_GEOJSON
       },
-      assert({layer, oldState}) {
+      onAfterUpdate({layer, oldState}) {
         t.ok(layer.state.features !== oldState.features, 'should update features');
         t.is(subLayers.length, 2, 'should render 2 subLayers');
       }
@@ -33,7 +33,7 @@ test('GeoJsonLayer#tests', t => {
         // will be merged with the previous props
         lineWidthScale: 3
       },
-      assert({subLayers}) {
+      onAfterUpdate({subLayers}) {
         const pathLayer = subLayers.find(layer => layer.id.endsWith('linestrings'));
         t.is(pathLayer.props.widthScale, 3, 'widthScale is passed to sub layer');
       }
