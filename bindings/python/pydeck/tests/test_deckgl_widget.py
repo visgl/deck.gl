@@ -17,13 +17,14 @@ def test_example_creation_blank():
 def test_warning():
     _environ = dict(os.environ)
     try:
-        print(os.environ.get('MAPBOX_API_KEY'))
-        del os.environ['MAPBOX_API_KEY']
+        if os.environ.get('MAPBOX_API_KEY'):
+            del os.environ['MAPBOX_API_KEY']
         with pytest.warns(UserWarning) as record:
             w = DeckGLWidget()
+            os.environ['MAPBOX_API_KEY'] = 'pk.xx'
+            w = DeckGLWidget()
+        # Assert that only one warning has been raised
         assert len(record) == 1
-        os.environ['MAPBOX_API_KEY'] = 'pk.xx'
-        w = DeckGLWidget()
     finally:
         os.environ.clear()
         os.environ.update(_environ)
