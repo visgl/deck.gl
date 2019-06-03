@@ -45,7 +45,9 @@ export const ColumnLayerDemo = createLayerDemoClass({
     pickable: true,
     elevationScale: 5000,
     getPosition: d => d.centroid,
-    getColor: d => [48, 128, d.value * 255, 255],
+    getFillColor: d => [48, 128, d.value * 255, 255],
+    getLineColor: [0, 0, 0],
+    getLineWidth: 20,
     getElevation: d => d.value
   }
 });
