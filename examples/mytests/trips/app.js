@@ -66,17 +66,16 @@ function filterToursBySource(tours, zone, prop='Sources') {
   return filtered
 }
 
-function filterIncompleteTours(tours, currentTime, delay=0.1) {
+function filterIncompleteTours(tours, currentTime, delay=10.1) {
   
-  let fadeOutTime = -Infinity;
-
-  if (delay){
-    fadeOutTime = (1 + delay) * currentTime;
+  for (const tour of tours) {
+    tour['Completed'] = false;
+    if (tour.Segments[tour.Segments.length-1][2] < currentTime) {
+      tour['Completed'] = true;
+    }
   }
-  
-  let filtered = Array();
-  filtered = tours.filter(x => x.Segments[x.Segments.length-1][2] > fadeOutTime)
-  return filtered
+  //return filtered
+  return tours
 }
 
 
@@ -237,7 +236,7 @@ export class App extends Component {
         id: 'trips',
         data: this.state.tours,
         getPath: d => d.Segments,
-        getColor: d => getRgbFromStr(colorstours(d.Tourid)),
+        getColor: d => d.Completed ? [255, 0, 0] : getRgbFromStr(colorstours(d.Tourid)),
         opacity: 0.5,
         widthMinPixels: 2,
         rounded: false,
@@ -246,6 +245,9 @@ export class App extends Component {
         pickable: false,
         autoHighlight: false,
         highlightColor: [0, 255, 255]
+        //updateTriggers: {
+        //  getColor: this.state.time
+       // }
       }),
       new GeoJsonLayer({
         id: 'boundaries',
