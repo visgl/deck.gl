@@ -18,7 +18,6 @@ export const ContourLayerDemo = createLayerDemoClass({
   props: {
     pickable: true,
     cellSize: 200,
-    elevationScale: 4,
     getPosition: d => d.COORDINATES,
     contours: [
       {threshold: 1, color: [255, 0, 0], strokeWidth: 2, zIndex: 1},
