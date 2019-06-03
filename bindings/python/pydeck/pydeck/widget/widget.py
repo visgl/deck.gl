@@ -35,7 +35,7 @@ class DeckGLWidget(widgets.DOMWidget):
     width = Int(500).tag(sync=True)
 
     def __init__(self, suppress_warning=False):
-        super()
+        super(DeckGLWidget, self).__init__()
         if not os.environ.get('MAPBOX_API_KEY') and not suppress_warning:
             warnings.warn('MAPBOX_API_KEY is not set. This may impact available features of the pydeck library.', UserWarning)
 
