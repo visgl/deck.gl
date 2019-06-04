@@ -98,14 +98,14 @@
 
   <div class="thumb">
     <div class="bg-black" data-title="Kepler.gl" >
-      <a href="https://uber.github.io/kepler.gl/" target="_blank" rel="noopener noreferrer">
+      <a href="https://kepler.gl/" target="_blank" rel="noopener noreferrer">
         <img src="images/showcase-kepler-gl.jpg" />
       </a>
     </div>
   </div>
   <div class="thumb-desc">
     <div>
-      <a href="https://uber.github.io/kepler.gl/" target="_blank" rel="noopener noreferrer"><h2>Kepler.gl</h2></a>
+      <a href="https://kepler.gl/" target="_blank" rel="noopener noreferrer"><h2>Kepler.gl</h2></a>
       <p>Kepler.gl is a powerful web-based geospatial data analysis tool. Built on a high performance rendering engine and designed for large-scale data sets.</p>
       <p class="credit"><a href="https://github.com/uber/kepler.gl" target="_blank" rel="noopener noreferrer">GitHub</a> | <a href="https://kepler.gl/demo/sfcontour" target="_blank" rel="noopener noreferrer">Example Map</a></p>
     </div>
