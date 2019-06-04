@@ -8,7 +8,7 @@
 // * Optionally, error checking could be applied, but ideally should leverage
 //   non-JSON specific mechanisms like prop types.
 
-import {MapView, FirstPersonView, OrbitView, OrthographicView, log} from '@deck.gl/core';
+import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import JSONLayer from '../json-layer/json-layer';
 import convertJSONExpression from './convert-json-expression';
 // TODO - replace with loaders.gl
