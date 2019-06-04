@@ -147,17 +147,17 @@ function getJSONLayerProps(Layer, jsonProps, configuration) {
   return replacedProps;
 }
 
-const SINGLE_IDENTIFIER_REGEX = /^\s*[A-Za-z]+\s*$/
+const SINGLE_IDENTIFIER_REGEX = /^\s*[A-Za-z]+\s*$/;
 
 const cachedExpressionMap = {
-  '-': object => object,
+  '-': object => object
 };
 
 // Calculates an accessor function from a JSON string
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
 function parseJSONFunction(propValue, configuration, isAccessor) {
-  let func  = cachedExpressionMap[propValue];
+  let func = cachedExpressionMap[propValue];
   if (!func) {
     // TODO - backwards compatibility
     if (isAccessor && SINGLE_IDENTIFIER_REGEX.test(propValue)) {
@@ -165,10 +165,12 @@ function parseJSONFunction(propValue, configuration, isAccessor) {
     }
     try {
       const compiledFunc = expressionEval.compile(propValue);
-      func = isAccessor ? row => {
-        const value = compiledFunc({row});
-        return value;
-      } : args => compiledFunc({args});
+      func = isAccessor
+        ? row => {
+            const value = compiledFunc({row});
+            return value;
+          }
+        : args => compiledFunc({args});
     } catch (error) {
       console.log(error);
       func = object => {
