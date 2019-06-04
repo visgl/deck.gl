@@ -29,7 +29,7 @@
     "marked": "^0.3.6",
     "pbf": "^3.2.0",
     "prop-types": "^15.5.8",
-    "rbush": "^2.0.1",
+    "supercluster": "^6.0.1",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^5.0.0",
