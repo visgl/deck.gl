@@ -21,8 +21,6 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const stopPropagation = evt => evt.stopPropagation();
-
 /* eslint-disable react/no-deprecated */
 export class App extends Component {
   constructor(props) {
@@ -31,8 +29,8 @@ export class App extends Component {
     this.state = {
       x: 0,
       y: 0,
-      hoveredItems: null,
-      expanded: false
+      hoveredObject: null,
+      expandedObjects: null
     };
     this._onHover = this._onHover.bind(this);
     this._onClick = this._onClick.bind(this);
@@ -41,58 +39,38 @@ export class App extends Component {
   }
 
   _onHover(info) {
-    if (this.state.expanded) {
+    if (this.state.expandedObjects) {
       return;
     }
 
     const {x, y, object} = info;
-    const z = info.layer.state.z;
+    this.setState({x, y, hoveredObject: object});
+  }
+
+  _onClick(info) {
     const {showCluster = true} = this.props;
+    const {x, y, objects, object} = info;
 
-    let hoveredItems = null;
-
-    if (object) {
-      if (showCluster) {
-        hoveredItems = object.zoomLevels[z].points.sort((m1, m2) => m1.year - m2.year);
-      } else {
-        hoveredItems = [object];
-      }
-    }
-
-    this.setState({x, y, hoveredItems, expanded: false});
-  }
-
-  _onClick() {
-    this.setState({expanded: true});
-  }
-
-  _onPopupLoad(ref) {
-    if (ref) {
-      // React events are triggered after native events
-      ref.addEventListener('wheel', stopPropagation);
+    if (object && showCluster) {
+      this.setState({x, y, expandedObjects: objects || [object]});
+    } else {
+      this._closePopup();
     }
   }
 
   _closePopup() {
-    this.setState({expanded: false, hoveredItems: null});
+    if (this.state.expandedObjects) {
+      this.setState({expandedObjects: null, hoveredObject: null});
+    }
   }
 
   _renderhoveredItems() {
-    const {x, y, hoveredItems, expanded} = this.state;
+    const {x, y, hoveredObject, expandedObjects} = this.state;
 
-    if (!hoveredItems) {
-      return null;
-    }
-
-    if (expanded) {
+    if (expandedObjects) {
       return (
-        <div
-          className="tooltip interactive"
-          ref={this._onPopupLoad}
-          style={{left: x, top: y}}
-          onMouseLeave={this._closePopup}
-        >
-          {hoveredItems.map(({name, year, mass, class: meteorClass}) => {
+        <div className="tooltip interactive" style={{left: x, top: y}}>
+          {expandedObjects.map(({name, year, mass, class: meteorClass}) => {
             return (
               <div key={name}>
                 <h5>{name}</h5>
@@ -106,15 +84,19 @@ export class App extends Component {
       );
     }
 
-    return (
+    if (!hoveredObject) {
+      return null;
+    }
+
+    return hoveredObject.cluster ? (
       <div className="tooltip" style={{left: x, top: y}}>
-        {hoveredItems.slice(0, 20).map(({name, year}) => (
-          <div key={name}>
-            <h5>
-              {name} {year ? `(${year})` : ''}
-            </h5>
-          </div>
-        ))}
+        <h5>{hoveredObject.point_count} records</h5>
+      </div>
+    ) : (
+      <div className="tooltip" style={{left: x, top: y}}>
+        <h5>
+          {hoveredObject.name} {hoveredObject.year ? `(${hoveredObject.year})` : ''}
+        </h5>
       </div>
     );
   }
@@ -124,8 +106,7 @@ export class App extends Component {
       data = DATA_URL,
       iconMapping = 'data/location-icon-mapping.json',
       iconAtlas = 'data/location-icon-atlas.png',
-      showCluster = true,
-      viewState
+      showCluster = true
     } = this.props;
 
     const layerProps = {
@@ -135,20 +116,18 @@ export class App extends Component {
       getPosition: d => d.coordinates,
       iconAtlas,
       iconMapping,
-      onHover: this._onHover,
-      onClick: this._onClick,
-      sizeScale: 60
+      onHover: this._onHover
     };
 
-    const size = viewState ? Math.min(Math.pow(1.5, viewState.zoom - 10), 1) : 0.1;
-
     const layer = showCluster
-      ? new IconClusterLayer({...layerProps, id: 'icon-cluster'})
+      ? new IconClusterLayer({...layerProps, id: 'icon-cluster', sizeScale: 60})
       : new IconLayer({
           ...layerProps,
           id: 'icon',
           getIcon: d => 'marker',
-          getSize: size
+          sizeUnits: 'meters',
+          sizeScale: 2000,
+          sizeMinPixels: 6
         });
 
     return [layer];
@@ -162,6 +141,8 @@ export class App extends Component {
         layers={this._renderLayers()}
         initialViewState={INITIAL_VIEW_STATE}
         controller={{dragRotate: false}}
+        onViewStateChange={this._closePopup}
+        onClick={this._onClick}
       >
         <StaticMap
           reuseMaps
