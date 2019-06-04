@@ -10,7 +10,6 @@ from traitlets import Int, Unicode
 
 from ._frontend import module_name, module_version
 
-
 class DeckGLWidget(widgets.DOMWidget):
     """
     DeckGLWidget accepts JSON encoded deck.gl layers and layer properties
