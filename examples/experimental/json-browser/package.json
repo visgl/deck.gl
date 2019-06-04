@@ -1,5 +1,5 @@
 {
-  "name": "pure-js",
+  "name": "json-browser",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -14,9 +14,9 @@
     "@deck.gl/react": "^7.1.0",
     "@luma.gl/constants": "^7.0.1",
     "brace": "^0.11.1",
-    "react": "~16.7.0",
-    "react-ace": "^6.1.4",
-    "react-dom": "~16.7.0",
+    "react": "~16.8.0",
+    "react-ace": "^7.0.0",
+    "react-dom": "~16.8.0",
     "react-map-gl": "^5.0.0",
     "react-virtualized-auto-sizer": "^1.0.2"
   },
@@ -25,8 +25,11 @@
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
     "html-webpack-plugin": "^3.0.7",
-    "webpack": "^4.20.2",
-    "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.1"
+    "webpack": "^4.32.2",
+    "webpack-cli": "^3.3.2",
+    "webpack-dev-server": "^3.5.1"
+  },
+  "resolutions": {
+    "fsevents": "^1.2.9"
   }
 }
