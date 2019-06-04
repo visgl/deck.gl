@@ -64,27 +64,21 @@ export default class BitmapLayer extends Layer {
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
-    /*
-      -1,1  ---  1,1
-        |         |
-      -1,-1 --- 1,-1
-     */
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
 
     attributeManager.add({
       positions: {
         size: 3,
         update: this.calculatePositions,
-        value: new Float32Array(positions)
+        value: new Float32Array(12)
       },
       positions64xyLow: {
         size: 3,
         update: this.calculatePositions64xyLow,
-        value: new Float32Array(positions)
+        value: new Float32Array(12)
       }
     });
 
-    this.setState({numInstances: 1});
+    this.setState({numInstances: 4}); // 4 corners
   }
 
   updateState({props, oldProps, changeFlags}) {
