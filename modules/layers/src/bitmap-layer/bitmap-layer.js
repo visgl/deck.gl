@@ -93,7 +93,7 @@ export default class BitmapLayer extends Layer {
     }
 
     if (props.image !== oldProps.image) {
-      this.loadTexture();
+      this.loadTexture(props.image);
     }
 
     const attributeManager = this.getAttributeManager();
@@ -200,24 +200,22 @@ export default class BitmapLayer extends Layer {
     }
   }
 
-  loadTexture() {
+  loadTexture(image) {
+    if (typeof image === 'string') {
+      image = loadImage(image);
+    }
+    if (image instanceof Promise) {
+      image.then(data => this.loadTexture(data));
+      return;
+    }
+
     const {gl} = this.context;
-    const {image} = this.props;
 
     if (this.state.bitmapTexture) {
       this.state.bitmapTexture.delete();
     }
 
-    if (typeof image === 'string') {
-      loadImage(image).then(data => {
-        this.setState({
-          bitmapTexture: new Texture2D(gl, {
-            data,
-            parameters: DEFAULT_TEXTURE_PARAMETERS
-          })
-        });
-      });
-    } else if (image instanceof Texture2D) {
+    if (image instanceof Texture2D) {
       this.setState({bitmapTexture: image});
     } else if (
       // browser object
