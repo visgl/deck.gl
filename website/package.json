@@ -10,7 +10,7 @@
     "start": "webpack-dev-server --env.local --progress --open",
     "start-local": "yarn start",
     "build-clean": "rm -rf ./dist && mkdir dist",
-    "build-static": "cp -r ./src/static/* dist && babel ./src/static/workers --out-dir dist/workers",
+    "build-static": "cp -r ./src/static/* dist && BABEL_ENV=es5 babel --config-file ../babel.config.js ./src/static/workers --out-dir dist/workers",
     "build-script": "webpack -p --env.prod",
     "build": "node scripts/validate-token.js && npm run build-clean && npm run build-static && npm run build-script",
     "lint": "eslint src --ignore-pattern workers"
