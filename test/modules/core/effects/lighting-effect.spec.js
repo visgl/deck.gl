@@ -34,6 +34,9 @@ test('LightingEffect#CameraLight', t => {
   const projectedLights = lightEffect.getProjectedPointLights(layer);
   t.ok(projectedLights[0], 'Camera light is ok');
   t.deepEqual(projectedLights[0].position, [0, 0, 150], 'Camera light projection is ok');
+
+  const parameters = lightEffect.getParameters(layer);
+  t.ok(parameters, 'Camera light getParameters is ok');
   t.end();
 });
 

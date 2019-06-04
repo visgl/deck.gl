@@ -25,6 +25,7 @@ import LayerManager from '@deck.gl/core/lib/layer-manager';
 
 import {gl} from '@deck.gl/test-utils';
 import PostProcessEffect from '@deck.gl/core/effects/post-process-effect';
+import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 
 const layerManager = new LayerManager(gl);
 
@@ -63,7 +64,11 @@ test('EffectManager#set and get Effects', t => {
   const effect1 = new Effect();
   const effect2 = new Effect();
   effectManager.setEffects([effect1, effect2]);
-  const effects = effectManager.getEffects();
+  let effects = effectManager.getEffects();
+  t.equal(effects.length, 2, 'Effect set and get successfully');
+
+  effectManager.setProps({effects: [effect1]});
+  effects = effectManager.getEffects();
   t.equal(effects.length, 2, 'Effect set and get successfully');
   t.end();
 });
@@ -91,5 +96,40 @@ test('EffectManager#finalize', t => {
   const resEnd = getResourceCounts();
 
   t.deepEqual(resBegin, resEnd, 'Effect manager is finalized well');
+  t.end();
+});
+
+test('EffectManager#setProps', t => {
+  const effect = new LightingEffect();
+  const effectManager = new EffectManager({gl, layerManager});
+  effectManager.setProps({effects: [effect]});
+
+  t.deepEqual(effectManager.effects, [effect], 'Effect manager setProps is ok');
+  t.equal(
+    effectManager.needApplyDefaultLighting,
+    false,
+    'Effect Manager needApplyDefaultLighting is ok'
+  );
+  t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager needsRedraw is ok');
+
+  effectManager.setProps({effects: [effect]});
+  t.equal(
+    effectManager.needsRedraw({clearRedrawFlags: true}),
+    'effects changed',
+    'Effect Manager needsRedraw is ok'
+  );
+  t.equal(
+    effectManager.needsRedraw({clearRedrawFlags: true}),
+    false,
+    'Effect Manager needsRedraw is ok'
+  );
+
+  effectManager.setProps({effects: []});
+  t.equal(
+    effectManager.needApplyDefaultLighting,
+    true,
+    'Effect Manager needApplyDefaultLighting is ok'
+  );
+
   t.end();
 });
