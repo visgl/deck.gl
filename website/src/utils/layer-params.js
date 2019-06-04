@@ -15,14 +15,14 @@ export function propToParam(key, propType, value) {
     value
   };
 
-  const type = propType.type === 'unknown' ? typeof value : propType.type;
+  const type = !propType || propType.type === 'unknown' ? typeof value : propType.type;
 
   switch (type) {
     case 'boolean':
       return {...param, type: 'checkbox'};
     case 'number':
-      param.min = 'min' in propType ? propType.min : 0;
-      param.max = 'max' in propType ? propType.max : 100;
+      param.min = propType && 'min' in propType ? propType.min : 0;
+      param.max = propType && 'max' in propType ? propType.max : 100;
       return {...param, type: 'range', step: param.max === 100 ? 1 : 0.01};
     case 'accessor':
       return {...param, type: 'function'};

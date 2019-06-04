@@ -95,7 +95,9 @@ export const TileLayerDemo = createLayerDemoClass({
     lineWidthMinPixels: 1,
 
     getTileData: ({x, y, z}) => {
-      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MapboxAccessToken}`;
+      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${
+        process.env.MapboxAccessToken // eslint-disable-line
+      }`;
       return fetch(mapSource)
         .then(response => response.arrayBuffer())
         .then(buffer => {

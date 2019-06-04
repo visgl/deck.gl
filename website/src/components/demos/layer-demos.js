@@ -81,7 +81,7 @@ export const GridCellLayerDemo = createLayerDemoClass({
     cellSize: 200,
     elevationScale: 5000,
     getPosition: d => d.centroid,
-    getColor: d => [48, 128, d.value * 255, 255],
+    getFillColor: d => [48, 128, d.value * 255, 255],
     getElevation: d => d.value
   }
 });
