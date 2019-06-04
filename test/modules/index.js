@@ -21,9 +21,9 @@
 import './imports-spec';
 import './core';
 
-import './layers';
-import './aggregation-layers';
-import './geo-layers';
+// import './layers';
+// import './aggregation-layers';
+// import './geo-layers';
 
 import './google-maps';
 import './mapbox';

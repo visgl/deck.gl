@@ -8,13 +8,11 @@
 // * Optionally, error checking could be applied, but ideally should leverage
 //   non-JSON specific mechanisms like prop types.
 
-import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
+import {MapView, FirstPersonView, OrbitView, OrthographicView, log} from '@deck.gl/core';
 import JSONLayer from '../json-layer/json-layer';
-import {get} from '../utils/get';
-import expressionEval from 'expression-eval';
-
+import convertJSONExpression from './convert-json-expression';
 // TODO - replace with loaders.gl
-import {csvParseRows} from 'd3-dsv';
+import enhancedFetch from './enhanced-fetch';
 
 // Support all `@deck.gl/core` Views by default
 const DEFAULT_VIEW_CATALOG = {MapView, FirstPersonView, OrbitView, OrthographicView};
@@ -133,85 +131,19 @@ function getJSONLayerProps(Layer, jsonProps, configuration) {
       switch (type) {
         case 'accessor':
           const isAccessor = true;
-          propValue = parseJSONFunction(propValue, configuration, isAccessor);
+          propValue = convertJSONExpression(propValue, configuration, isAccessor);
           break;
         case 'function':
-          propValue = parseJSONFunction(propValue, configuration);
+          propValue = convertJSONExpression(propValue, configuration);
           break;
         default:
       }
     }
 
-    replacedProps[propName] = propValue;
+    // Invalid functions return null, show default value instead.
+    if (propValue) {
+      replacedProps[propName] = propValue;
+    }
   }
   return replacedProps;
-}
-
-const SINGLE_IDENTIFIER_REGEX = /^\s*[A-Za-z]+\s*$/;
-
-const cachedExpressionMap = {
-  '-': object => object
-};
-
-// Calculates an accessor function from a JSON string
-// '-' : x => x
-// 'a.b.c': x => x.a.b.c
-function parseJSONFunction(propValue, configuration, isAccessor) {
-  let func = cachedExpressionMap[propValue];
-  if (!func) {
-    // TODO - backwards compatibility
-    if (isAccessor && SINGLE_IDENTIFIER_REGEX.test(propValue)) {
-      return row => get(row, propValue);
-    }
-    try {
-      const compiledFunc = expressionEval.compile(propValue);
-      func = isAccessor
-        ? row => {
-            const value = compiledFunc({row});
-            return value;
-          }
-        : args => compiledFunc({args});
-    } catch (error) {
-      console.log(error);
-      func = object => {
-        return row => get(row, propValue);
-      };
-    }
-  }
-  return func;
-}
-
-// HELPERS
-
-function enhancedFetch(url) {
-  /* global fetch */
-  return fetch(url)
-    .then(response => response.text())
-    .then(text => {
-      try {
-        return JSON.parse(text);
-      } catch (error) {
-        return parseCSV(text);
-      }
-    });
-}
-
-function parseCSV(text) {
-  const csv = csvParseRows(text);
-
-  // Remove header
-  if (csv.length > 0) {
-    csv.shift();
-  }
-
-  for (const row of csv) {
-    for (const key in row) {
-      const number = parseFloat(row[key]);
-      if (!Number.isNaN(number)) {
-        row[key] = number;
-      }
-    }
-  }
-
-  return csv;
 }

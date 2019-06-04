@@ -53,5 +53,6 @@ test('deck.gl', t => {
 
   require('./render');
 
+  // require('./render');
   t.end();
 });
