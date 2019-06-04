@@ -14,6 +14,7 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 // Seems to be a Babel bug
 // https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
 const BABEL_CONFIG = {
+  // https://babeljs.io/docs/en/babel-polyfill#size
   presets: [['@babel/preset-env', {useBuiltIns: 'usage'}], '@babel/preset-react'],
   plugins: [
     ['@babel/plugin-proposal-decorators', {legacy: true}],
