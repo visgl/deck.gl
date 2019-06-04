@@ -108,7 +108,7 @@ test('EffectManager#setProps', t => {
   t.equal(
     effectManager.needApplyDefaultLighting,
     false,
-    'Effect Manager needApplyDefaultLighting is ok'
+    'Effect Manager should not need to apply default lighting'
   );
   t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager needsRedraw is ok');
 
@@ -128,7 +128,7 @@ test('EffectManager#setProps', t => {
   t.equal(
     effectManager.needApplyDefaultLighting,
     true,
-    'Effect Manager needApplyDefaultLighting is ok'
+    'Effect Manager should not need to apply default lighting'
   );
 
   t.end();
