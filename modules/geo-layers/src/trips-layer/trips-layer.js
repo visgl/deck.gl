@@ -39,6 +39,7 @@ attribute vec2 instanceTimestamps;
 varying float vTime;
 `,
       // Remove the z component (timestamp) from position
+      // TODO - Legacy use case, remove in v8
       'vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);': `\
 vec2 timestamps = instanceTimestamps;
 if (!isPath3D) {
@@ -90,6 +91,7 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
     params.uniforms = Object.assign({}, params.uniforms, {
       trailLength,
       currentTime,
+      // TODO - remove in v8
       isPath3D: Boolean(getTimestamps)
     });
 
