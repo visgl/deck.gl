@@ -314,5 +314,5 @@ The PolygonLayer renders the following sublayers:
 
 ## Source
 
-[modules/layers/src/polygon-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/polygon-layer)
+[modules/layers/src/polygon-layer](https://github.com/uber/deck.gl/tree/7.1-release/modules/layers/src/polygon-layer)
 

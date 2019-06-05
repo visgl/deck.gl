@@ -122,7 +122,7 @@ const addProdConfig = config => {
   config.plugins = config.plugins.concat(
     new webpack.DefinePlugin({
       __VERSION__: JSON.stringify(packageVersion),
-      DOCS_DIR: JSON.stringify('https://raw.githubusercontent.com/uber/deck.gl/master')
+      DOCS_DIR: JSON.stringify('https://raw.githubusercontent.com/uber/deck.gl/7.1-release')
     })
   );
 

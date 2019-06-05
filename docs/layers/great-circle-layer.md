@@ -66,4 +66,4 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [ArcLayer](/doc
 
 ## Source
 
-[great-circle-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/great-circle-layer)
+[great-circle-layer](https://github.com/uber/deck.gl/tree/7.1-release/modules/geo-layers/src/great-circle-layer)

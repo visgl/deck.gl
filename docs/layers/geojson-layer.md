@@ -312,5 +312,5 @@ The GeoJsonLayer renders the following sublayers:
 
 ## Source
 
-[modules/layers/src/geojson-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/geojson-layer)
+[modules/layers/src/geojson-layer](https://github.com/uber/deck.gl/tree/7.1-release/modules/layers/src/geojson-layer)
 

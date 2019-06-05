@@ -111,5 +111,5 @@ The `H3ClusterLayer` renders the following sublayers:
 
 ## Source
 
-[modules/geo-layers/src/h3-layers/h3-cluster-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-cluster-layer.js)
+[modules/geo-layers/src/h3-layers/h3-cluster-layer](https://github.com/uber/deck.gl/tree/7.1-release/modules/geo-layers/src/h3-layers/h3-cluster-layer.js)
 

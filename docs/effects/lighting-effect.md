@@ -50,4 +50,4 @@ Array of [PointLight](/docs/api-reference/lights/point-light.md) source which em
 
 ## Source
 
-[/modules/core/src/effects/lighting/lighting-effect.js](https://github.com/uber/deck.gl/tree/master/modules/core/src/effects/lighting/lighting-effect.js)
+[/modules/core/src/effects/lighting/lighting-effect.js](https://github.com/uber/deck.gl/tree/7.1-release/modules/core/src/effects/lighting/lighting-effect.js)

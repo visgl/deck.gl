@@ -235,4 +235,4 @@ The TextLayer renders the following sublayers:
 
 ## Source
 
-[modules/layers/src/text-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/text-layer)
+[modules/layers/src/text-layer](https://github.com/uber/deck.gl/tree/7.1-release/modules/layers/src/text-layer)

@@ -36,4 +36,4 @@ Inherits all [View methods](/docs/api-reference/view.md#methods).
 
 ## Source
 
-[modules/core/src/views/orbit-view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/orbit-view.js)
+[modules/core/src/views/orbit-view.js](https://github.com/uber/deck.gl/tree/7.1-release/modules/core/src/views/orbit-view.js)

@@ -198,4 +198,4 @@ Constructor for this sublayer. The base class implementation checks if `type` is
 
 ## Source
 
-[modules/core/src/lib/composite-layer.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/composite-layer.js)
+[modules/core/src/lib/composite-layer.js](https://github.com/uber/deck.gl/tree/7.1-release/modules/core/src/lib/composite-layer.js)
