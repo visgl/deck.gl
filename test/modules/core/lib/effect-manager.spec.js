@@ -104,31 +104,31 @@ test('EffectManager#setProps', t => {
   const effectManager = new EffectManager({gl, layerManager});
   effectManager.setProps({effects: [effect]});
 
-  t.deepEqual(effectManager.effects, [effect], 'Effect manager setProps is ok');
+  t.deepEqual(effectManager.effects, [effect], 'Effect manager set props correctly');
   t.equal(
     effectManager.needApplyDefaultLighting,
     false,
     'Effect Manager should not need to apply default lighting'
   );
-  t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager needsRedraw is ok');
+  t.equal(effectManager.needsRedraw(), 'effects changed', 'Effect Manager should need redraw');
 
   effectManager.setProps({effects: [effect]});
   t.equal(
     effectManager.needsRedraw({clearRedrawFlags: true}),
     'effects changed',
-    'Effect Manager needsRedraw is ok'
+    'Effect Manager should need redraw'
   );
   t.equal(
     effectManager.needsRedraw({clearRedrawFlags: true}),
     false,
-    'Effect Manager needsRedraw is ok'
+    'Effect Manager should not need redraw'
   );
 
   effectManager.setProps({effects: []});
   t.equal(
     effectManager.needApplyDefaultLighting,
     true,
-    'Effect Manager should not need to apply default lighting'
+    'Effect Manager should need to apply default lighting'
   );
 
   t.end();
