@@ -17,6 +17,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.0] - June 5 2019
+
+- Fix ArcLayer bug when using non-iterable data with pre-allocated target array (#3170)
+- Fix BitmapLayer (#3181)
+- GPUGridLayer: make it exclusive for WebGL2 (#3195)
+
 ### deck.gl v7.1 Prereleases
 
 #### deck.gl [v7.1.0-beta.1] - May 31 2019
