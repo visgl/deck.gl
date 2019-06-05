@@ -40,8 +40,9 @@ const App = ({data, viewport}) => {
   const layer = new TripsLayer({
     id: 'trips-layer',
     data,
+    getPath: d => d.waypoints.map(p => p.coordinates),
     // deduct start timestamp from each data point to avoid overflow
-    getPath: d => d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
+    getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 5,
@@ -99,9 +100,19 @@ This value should be in the same units as the timestamps from `getPath`.
 
 Called for each data object to retreive paths.
 Returns an array of navigation points on a single path.
-Each navigation point is defined as an array of three numbers: `[longitude, latitude, timestamp]`.
-Points should be sorted by `timestamp`. 
-Because `timestamp` is represented as 32-bits floating number, raw unix epoch can not be used. You may test the validity of a timestamp by calling Math.fround(t) to check if there would be any loss of precision.
+
+See [PathLayer](/docs/layers/path-layer.md) documentation for supported path formats.
+
+##### `getTimestamps` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
+
+Returns an array of timestamps, one for each navigation point in the geometry returned by `getPath`, representing the time that the point is visited.
+
+Because timestamps are stored as 32-bit floating numbers, raw unix epoch time can not be used. You may test the validity of a timestamp by calling `Math.fround(t)` to check if there would be any loss of precision.
+
+> **<span style="color:red">Legacy API, removing in a future major release:</span>**
+>
+> If `getTimestamps` is not supplied, each navigation point in the path is interpreted as `[longitude, latitude, timestamp]`, and the paths will always be rendered flat against the ground.
+
 
 # Source
 
