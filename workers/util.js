@@ -1,8 +1,10 @@
-function decodeNumberArr(str, b, shift, length) {
-  const result = [];
+"use strict";
 
-  for (let j = 0; j < str.length; j += length) {
-    const token = str.slice(j, j + length);
+function decodeNumberArr(str, b, shift, length) {
+  var result = [];
+
+  for (var j = 0; j < str.length; j += length) {
+    var token = str.slice(j, j + length);
     result.push(decodeNumber(token, b, shift));
   }
 
@@ -10,33 +12,19 @@ function decodeNumberArr(str, b, shift, length) {
 }
 
 function decodeNumber(str, b, shift) {
-  let x = 0;
-  let p = 1;
+  var x = 0;
+  var p = 1;
 
-  for (let i = str.length; i--;) {
+  for (var i = str.length; i--;) {
     x += (str.charCodeAt(i) - shift) * p;
     p *= b;
   }
 
   return x;
 }
-/**
- * https://github.com/mapbox/polyline
- *
- * Decodes to a [longitude, latitude] coordinates array.
- *
- * This is adapted from the implementation in Project-OSRM.
- *
- * @param {String} str
- * @param {Number} precision
- * @returns {Array}
- *
- * @see https://github.com/Project-OSRM/osrm-frontend/blob/master/WebContent/routing/OSRM.RoutingGeometry.js
- */
-
 
 function decodePolyline(str, precision) {
-  let index = 0,
+  var index = 0,
       lat = 0,
       lng = 0,
       coordinates = [],
@@ -45,12 +33,9 @@ function decodePolyline(str, precision) {
       byte = null,
       latitude_change,
       longitude_change,
-      factor = Math.pow(10, precision || 5); // Coordinates have variable length when encoded, so just keep
-  // track of whether we've hit the end of the string. In each
-  // loop iteration, a single coordinate is decoded.
+      factor = Math.pow(10, precision || 5);
 
   while (index < str.length) {
-    // Reset shift, result, and byte
     byte = null;
     shift = 0;
     result = 0;

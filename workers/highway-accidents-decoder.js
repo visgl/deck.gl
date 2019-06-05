@@ -1,25 +1,29 @@
-importScripts('./util.js');
-let result = [];
-const ID_PATTERN = /(\w\w)(I|US|SR)(.*)/;
+"use strict";
 
-onmessage = function (e) {
-  const lines = e.data.text.split('\n');
+importScripts('./util.js');
+var result = [];
+var ID_PATTERN = /(\w\w)(I|US|SR)(.*)/;
+
+onmessage = function onmessage(e) {
+  var lines = e.data.text.split('\n');
   lines.forEach(function (line) {
     if (!line) {
       return;
     }
 
-    const parts = line.split('\x01');
-    const match = parts[0].match(ID_PATTERN);
-    const state = match[1];
-    const type = match[2];
-    const id = match[3];
+    var parts = line.split('\x01');
+    var match = parts[0].match(ID_PATTERN);
+    var state = match[1];
+    var type = match[2];
+    var id = match[3];
     parts.slice(1).forEach(function (str) {
-      const items = str.split('\t').map(x => decodeNumber(x, 90, 32));
+      var items = str.split('\t').map(function (x) {
+        return decodeNumber(x, 90, 32);
+      });
       result.push({
-        state,
-        type,
-        id,
+        state: state,
+        type: type,
+        id: id,
         year: 1990 + items[0] * 5,
         incidents: items[1],
         fatalities: items[1] + (items[2] || 0)
