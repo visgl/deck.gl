@@ -48,14 +48,16 @@ class InfoPanel extends Component {
 
         {Object.keys(params).length > 0 && <hr />}
 
-        {Object.keys(params).map((name, i) => (
-          <GenericInput
-            key={`${i}-${name}`}
-            name={name}
-            {...params[name]}
-            onChange={this.props.updateParam}
-          />
-        ))}
+        {Object.keys(params)
+          .sort()
+          .map((name, i) => (
+            <GenericInput
+              key={`${i}-${name}`}
+              name={name}
+              {...params[name]}
+              onChange={this.props.updateParam}
+            />
+          ))}
 
         {this.props.children}
 
