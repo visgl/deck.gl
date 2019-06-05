@@ -21,7 +21,13 @@ def to_camel_case(snake_case):
 
 
 def camel_case_keys(attrs):
-    """Makes all the keys in a dictionary camel-cased"""
+    """Makes all the keys in a dictionary camel-cased
+
+    Parameters
+    ----------
+    attrs : dict
+        Dictionary for which all the keys should be converted to camel-case
+    """
     for snake_key in list(attrs.keys()):
         if '_' not in snake_key:
             continue

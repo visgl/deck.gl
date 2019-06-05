@@ -12,10 +12,7 @@ DEFAULT_COLOR_RANGE = [
 ]
 
 
-AGGREGATE_LAYERS = [
-    'HexagonLayer',
-    'ScreenGridLayer',
-]
+AGGREGATE_LAYERS = ['HexagonLayer', 'ScreenGridLayer']
 
 
 def is_aggregate_layer(layer_name):
@@ -28,34 +25,6 @@ class Layer(JSONMixin):
 
     Note that some parameters only apply to certain layers
 
-    Parameters
-    ---------
-    type : str
-        Type of layer to render, e.g., `HexagonLayer`
-    id : str
-        Unique name for layer
-    data : list or str
-        Either a URL of data to load in or an array of data
-    get_color : str or list of float
-        String representing field name of color or float representing the desired color
-    get_position : str, default '-'
-        Name of position field
-    radius : int
-        Size of circle in a HexagonLayer or other aggregation layer
-    get_radius : int or str
-        Radius of a circle as either an integer or a data field name
-    coverage : float, default None
-        Valid only on HexagonLayer
-        Hexagon radius multiplier, clamped between 0 - 1.
-        The final radius of hexagon is calculated by coverage * radius.
-    elevation_range : list
-        Valid only on HexagonLayer
-        Elevation scale output range
-    elevation_scale : float
-        Valid only on HexagonLayer
-        Hexagon elevation multiplier
-    extruded : bool
-        Boolean to determine if layer rises from map. Defaults to `True` for aggregate layers.
     """
     def __init__(
         self,
@@ -76,6 +45,37 @@ class Layer(JSONMixin):
         get_fill_color=None,
         get_color=None,
     ):
+        """Constructs a Layer object
+
+        Parameters
+        ---------
+        type : str
+            Type of layer to render, e.g., `HexagonLayer`
+        id : str
+            Unique name for layer
+        data : list or str
+            Either a URL of data to load in or an array of data
+        get_color : str or list of float
+            String representing field name of color or float representing the desired color
+        get_position : str, default '-'
+            Name of position field
+        radius : int
+            Size of circle in a HexagonLayer or other aggregation layer
+        get_radius : int or str
+            Radius of a circle as either an integer or a data field name
+        coverage : float, default None
+            *Valid only on HexagonLayer.* Hexagon radius multiplier,
+            clamped between 0 - 1.
+            The final radius of hexagon is calculated by coverage * radius.
+        elevation_range : :obj:`list` :obj:`int`
+            *Valid only on HexagonLayer.* Elevation scale output range
+        elevation_scale : float
+            *Valid only on HexagonLayer.* Hexagon elevation multiplier.
+        extruded : bool
+            Boolean to determine if layer rises from map. Defaults to `True` for aggregate layers.
+        get_fill_color : :obj:`list` of `float` or str
+            *Not valid on all deck.gl layers.* Specifies fill color as an RGBA value or field name in the data.
+        """
         self.type = type
         self.id = id or str(uuid.uuid4())
         self.data = data
