@@ -7,22 +7,7 @@ from ..widget import DeckGLWidget
 
 
 class Deck(JSONMixin):
-    """
-    Data visualization configuration
-
-    Wrapper around deck.gl JSON API bindings
-
-    Parameters
-    ---------
-    layers : array, default []
-        list of pydeck.Layer objects to render
-    views : array, default [View()]
-        list of pydeck.View objects to render
-    map_style : str, default "mapbox://styles/mapbox/dark-v9"
-        Style of basemap
-    initial_view_state : pydeck.ViewState, default [pydeck.ViewState()]
-        Initial camera angle relative to the map
-    """
+    """The renderer and configuration for a visualization"""
     def __init__(
         self,
         layers=[],
@@ -30,6 +15,22 @@ class Deck(JSONMixin):
         map_style='mapbox://styles/mapbox/dark-v9',
         initial_view_state=ViewState(),
     ):
+        """Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
+
+        Parameters
+        ----------
+        layers : :obj:`list` of :obj:`pydeck.Layer`, default []
+            List of pydeck.Layer objects to render
+        views : :obj:`list` of :obj:`pydeck.View`, default [pydeck.View()]
+            List of pydeck.View objects to render
+        map_style : str, default "mapbox://styles/mapbox/dark-v9"
+            URI for Mapbox basemap style
+        initial_view_state : pydeck.ViewState, default pydeck.ViewState()
+            Initial camera angle relative to the map
+
+        .. _Deck:
+            https://deck.gl/#/documentation/deckgl-api-reference/deck
+        """
         self.layers = layers
         self.views = views
         self.map_style = map_style
@@ -40,23 +41,39 @@ class Deck(JSONMixin):
     def __add__(self, obj):
         """
         Override of the addition operator to add attributes to the Deck object
+
+        Parameters
+        ----------
+        obj : object
+            pydeck.Layer, pydeck.View, or pydeck.ViewState
+
+        Examples
+        --------
+        >>> pydeck.Deck() + pydeck.View(controller=False)
+        >>> pydeck.Deck()
+        {"initialViewState": {"bearing": 0, ... , "views": [{"controller": false, "type": "MapView"}}... }
         """
-        if isinstance(Layer, obj):
+        if isinstance(obj, Layer):
             self.layers.append(obj)
-        elif isinstance(View, obj):
-            self.views.append(obj)
-        elif isinstance(ViewState, obj):
+        elif isinstance(obj, View):
+            self.views = [obj]
+        elif isinstance(obj, ViewState):
             self.initial_view_state = obj
         else:
             obj_type = type(obj).__name__
             raise TypeError("Cannot join object of type", obj_type)
 
     def show(self):
-        """
-        Displays current Deck object for a Jupyter notebook
-        """
+        """Displays current Deck object for a Jupyter notebook"""
         self.update()
         return self.deck_widget
 
     def update(self):
+        """Updates a deck.gl map to reflect the current state of the configuration
+
+        For example, if you've modified data passed to Layer and rendered the map using `.show()`,
+        you can call `update` to pass the new configuration to the map
+
+        Intended for use in a Jupyter notebook
+        """
         self.deck_widget.json_input = self.to_json()
