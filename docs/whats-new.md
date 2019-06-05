@@ -88,6 +88,11 @@ import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 </DeckGL>
 ```
 
+### Performance Metrics
+
+- Added a `metrics` property to `Deck` instances that tracks performance statistics like fps, CPU/GPU render time and memory usage. See [Deck](/docs/api-reference/deck.md) class documention for details.
+
+
 ## deck.gl v7.0
 
 Release Date: April 19, 2019
