@@ -1,4 +1,3 @@
-/* global document */
 import React, {PureComponent} from 'react';
 
 /*
@@ -48,26 +47,20 @@ export function getColorArray(str) {
 }
 
 export default class ColorPicker extends PureComponent {
-  _onClick(color) {
-    const {onChange} = this.props;
-    const input = document.createElement('input');
-    input.type = 'color';
-    input.value = color;
-    input.onchange = () => onChange(getColorArray(input.value));
-    input.onblur = () => document.body.removeChild(input);
-
-    document.body.appendChild(input);
-    input.click();
-  }
-
   render() {
     const color = getColorHex(this.props.value);
+    const {onChange} = this.props;
+
     return (
-      <div
-        className="color-picker"
-        style={{background: color}}
-        onClick={this._onClick.bind(this, color)}
-      />
+      <div className="color-picker" style={{background: color}} onClick={() => this._input.click()}>
+        <input
+          ref={_input => (this._input = _input)}
+          onChange={e => onChange(getColorArray(e.target.value))}
+          type="color"
+          value={color}
+          style={{display: 'none'}}
+        />
+      </div>
     );
   }
 }
