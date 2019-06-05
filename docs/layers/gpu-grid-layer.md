@@ -6,13 +6,13 @@
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
-# GPUGridLayer
+# GPUGridLayer (WebGL2)
 
 The `GPUGridLayer` renders a grid heatmap based on an array of points.
 It takes the constant cell size, aggregates input points into cells. When possible aggregation is performed on GPU. The color
 and height of the cell is scaled by number of points it contains.
 
-GPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+GPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and is only supported when using `WebGL2` enabled browsers, for browsers that don't support `WebGL2`, use [GridLayer](/docs/layers/grid-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
