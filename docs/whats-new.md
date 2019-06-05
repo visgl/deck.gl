@@ -61,6 +61,10 @@ The following table compares the performance between CPU and GPU aggregations us
 - Added `billboard` prop for screen space extrusion when rendering 3D paths
 - Improved precision of joint calculation
 
+#### TripsLayer
+
+- Now support 3D paths by adding a `getTimestamps` accessor. See layer documentation for details.
+
 #### ScenegraphLayer
 
 - Added `getScene` and `getAnimator` to allow more flexibility when loading models.
