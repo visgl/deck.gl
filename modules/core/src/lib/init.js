@@ -20,6 +20,7 @@
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
+import {initializeShaderModules} from '../shaderlib';
 
 // Version detection using babel plugin
 // Fallback for tests and SSR since global variable is defined by Webpack.
@@ -43,6 +44,8 @@ if (!global.deck) {
     version,
     log
   };
+
+  initializeShaderModules();
 }
 
 // TODO - Hack, remove when luma.gl 4.1.0-alpha.5 is published

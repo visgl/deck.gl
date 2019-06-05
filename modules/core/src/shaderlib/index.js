@@ -39,6 +39,4 @@ export function initializeShaderModules() {
   setDefaultShaderModules([project]);
 }
 
-initializeShaderModules();
-
 export {fp32, fp64, picking, project, project64, gouraudlighting, phonglighting};
