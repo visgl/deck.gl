@@ -187,7 +187,7 @@ export const showcasePages = generatePath([
   },
   {
     name: 'Kepler.gl',
-    external: 'https://uber.github.io/kepler.gl/'
+    external: 'https://kepler.gl/'
   },
   {
     name: 'Wind Map',
