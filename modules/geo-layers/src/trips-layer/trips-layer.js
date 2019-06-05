@@ -19,10 +19,12 @@
 // THE SOFTWARE.
 
 import {PathLayer} from '@deck.gl/layers';
+import {createIterable} from '@deck.gl/core';
 
 const defaultProps = {
   trailLength: {type: 'number', value: 120, min: 0},
-  currentTime: {type: 'number', value: 0, min: 0}
+  currentTime: {type: 'number', value: 0, min: 0},
+  getTimestamps: {type: 'accessor', value: null}
 };
 
 export default class TripsLayer extends PathLayer {
@@ -32,15 +34,26 @@ export default class TripsLayer extends PathLayer {
       // Timestamp of the vertex
       'vs:#decl': `\
 uniform float trailLength;
+uniform bool isPath3D;
+attribute vec2 instanceTimestamps;
 varying float vTime;
 `,
       // Remove the z component (timestamp) from position
-      'vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);': 'pos.z = 0.0;',
+      'vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);': `\
+vec2 timestamps = instanceTimestamps;
+if (!isPath3D) {
+  prevPosition.z = 0.0;
+  currPosition.z = 0.0;
+  nextPosition.z = 0.0;
+  timestamps.x = instanceStartPositions.z;
+  timestamps.y = instanceEndPositions.z;
+}
+`,
       // Apply a small shift to battle z-fighting
       'vs:#main-end': `\
-float shiftZ = mod(instanceEndPositions.z, trailLength) * 1e-4;
+float shiftZ = sin(timestamps.x) * 1e-4;
 gl_Position.z += shiftZ;
-vTime = instanceStartPositions.z + (instanceEndPositions.z - instanceStartPositions.z) * vPathPosition.y / vPathLength;
+vTime = timestamps.x + (timestamps.y - timestamps.x) * vPathPosition.y / vPathLength;
 `,
       'fs:#decl': `\
 uniform float trailLength;
@@ -59,15 +72,65 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
     return shaders;
   }
 
+  initializeState(params) {
+    super.initializeState(params);
+
+    const attributeManager = this.getAttributeManager();
+    attributeManager.addInstanced({
+      instanceTimestamps: {
+        size: 2,
+        update: this.calculateInstanceTimestamps
+      }
+    });
+  }
+
   draw(params) {
-    const {trailLength, currentTime} = this.props;
+    const {trailLength, currentTime, getTimestamps} = this.props;
 
     params.uniforms = Object.assign({}, params.uniforms, {
       trailLength,
-      currentTime
+      currentTime,
+      isPath3D: Boolean(getTimestamps)
     });
 
     super.draw(params);
+  }
+
+  calculateInstanceTimestamps(attribute, {startRow, endRow}) {
+    const {data, getTimestamps} = this.props;
+
+    if (!getTimestamps) {
+      // TODO - Legacy use case, remove in v8
+      attribute.constant = true;
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
+    const {
+      pathTesselator: {bufferLayout, instanceCount}
+    } = this.state;
+    const value = new Float32Array(instanceCount * 2);
+
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    let i = 0;
+
+    for (let objectIndex = 0; objectIndex < startRow; objectIndex++) {
+      i += bufferLayout[objectIndex] * 2;
+    }
+
+    for (const object of iterable) {
+      objectInfo.index++;
+
+      const geometrySize = bufferLayout[objectInfo.index];
+      const timestamps = getTimestamps(object, objectInfo);
+      // For each line segment, we have [startTimestamp, endTimestamp]
+      for (let j = 0; j < geometrySize; j++) {
+        value[i++] = timestamps[j];
+        value[i++] = timestamps[j + 1];
+      }
+    }
+    attribute.constant = false;
+    attribute.value = value;
   }
 }
 
