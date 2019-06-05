@@ -12,7 +12,9 @@ The `GPUGridLayer` renders a grid heatmap based on an array of points.
 It takes the constant cell size, aggregates input points into cells. When possible aggregation is performed on GPU. The color
 and height of the cell is scaled by number of points it contains.
 
-GPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md) and is only supported when using `WebGL2` enabled browsers, for browsers that don't support `WebGL2`, use [GridLayer](/docs/layers/grid-layer.md).
+`GPUGridLayer` is one of the sublayers for [GridLayer](/docs/layers/grid-layer.md) and is only supported when using `WebGL2` enabled browsers. It is provided to customize GPU Aggregation for advanced use cases. For any regular use case, [GridLayer](/docs/layers/grid-layer.md) is recommended.
+
+`GPUGridLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';

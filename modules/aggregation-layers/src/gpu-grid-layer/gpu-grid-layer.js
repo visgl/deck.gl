@@ -60,10 +60,9 @@ const defaultProps = {
 export default class GPUGridLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
-    let isSupported = true;
-    if (!GPUGridAggregator.isSupported(gl)) {
+    const isSupported = GPUGridAggregator.isSupported(gl);
+    if (!isSupported) {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
-      isSupported = false;
     }
     const options = {
       id: `${this.id}-gpu-aggregator`,
