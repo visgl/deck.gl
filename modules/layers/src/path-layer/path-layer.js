@@ -67,6 +67,9 @@ export default class PathLayer extends Layer {
     attributeManager.addInstanced({
       startPositions: {
         size: 3,
+        // Hack - Attribute class needs this to properly apply partial update
+        // The first 3 numbers of the value is just padding
+        offset: 12,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateStartPositions,
