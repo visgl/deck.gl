@@ -51,5 +51,6 @@ def test_is_pandas_df():
 def test_autocompute_viewport():
     actual = autocompute_viewport(ViewState, POINTS, 0.95)
     actual_pandas = autocompute_viewport(ViewState, pd.DataFrame(POINTS), 0.95)
-    EXPECTED = '{"bearing": 0, "latitude": 20, "longitude": 20, "maxZoom": 21, "minZoom": 1, "pitch": 0, "zoom": 7}'
-    assert str(actual) == str(actual_pandas) == EXPECTED
+    EXPECTED = '{"bearing": 0, "latitude": 20.0, "longitude": 20.0, "maxZoom": 21, "minZoom": 1, "pitch": 0, "zoom": 7}'
+    assert str(actual) == str(actual_pandas)
+    assert str(actual) == str(EXPECTED)

@@ -41,8 +41,8 @@ def geometric_mean(points):
     -------
         tuple : The centroid of a list of points
     """
-    avg_x = sum([p[0] for p in points]) / len(points)
-    avg_y = sum([p[1] for p in points]) / len(points)
+    avg_x = sum([float(p[0]) for p in points]) / len(points)
+    avg_y = sum([float(p[1]) for p in points]) / len(points)
     return (avg_x, avg_y)
 
 
