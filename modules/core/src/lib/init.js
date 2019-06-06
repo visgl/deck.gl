@@ -35,8 +35,6 @@ if (global.deck && global.deck.VERSION !== version) {
 }
 
 if (!global.deck) {
-  /* global console */
-  /* eslint-disable no-console */
   log.log(0, `deck.gl ${version} - ${STARTUP_MESSAGE}`)();
 
   global.deck = global.deck || {
@@ -46,9 +44,4 @@ if (!global.deck) {
   };
 
   initializeShaderModules();
-}
-
-// TODO - Hack, remove when luma.gl 4.1.0-alpha.5 is published
-if (!console.table) {
-  console.table = () => {};
 }
