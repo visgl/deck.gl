@@ -315,7 +315,7 @@ const TEST_CASES = [
             height: 400
           },
           results: {
-            count: 3
+            count: 4
           }
         },
         {
@@ -409,7 +409,7 @@ const TEST_CASES = [
             height: 400
           },
           results: {
-            count: 32
+            count: 33
           }
         },
         {
@@ -481,7 +481,7 @@ const TEST_CASES = [
   }
 ];
 
-test(`pickingTest`, t => {
+test.only(`pickingTest`, t => {
   const deck = new Deck();
   t.ok(deck, 'Deck should be constructed');
 

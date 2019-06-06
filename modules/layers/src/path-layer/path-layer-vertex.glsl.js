@@ -170,11 +170,8 @@ vec3 lineJoin(
     dot(offsetFromStartOfPath, dir)
   );
 
-  if (instanceTypes < 0.0) {
-    // invalid
-    vCornerOffset *= 0.0;
-  }
-  return currPoint + vec3(vCornerOffset * width, 0.0);
+  float isValid = step(0.0, instanceTypes);
+  return currPoint + vec3(vCornerOffset * width * isValid, 0.0);
 }
 
 // calculate line join positions
