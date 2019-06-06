@@ -2,6 +2,8 @@
 
 All notable changes to deck.gl will be documented in this file.
 
+For a human readable version, visit https://deck.gl/#/documentation/overview/upgrade-guide
+
 <!--
 Each version should:
   List its release date in the above format.
