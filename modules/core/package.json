@@ -24,6 +24,11 @@
     "src",
     "dist.min.js"
   ],
+  "sideEffects": [
+    "dist/es5/lib/init.js",
+    "dist/esm/lib/init.js",
+    "dist/es6/lib/init.js"
+  ],
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
