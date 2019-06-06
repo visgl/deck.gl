@@ -31,7 +31,7 @@ class Deck(JSONMixin):
 
         Examples
         -------
-        >>> scatterplot = Layer('ScatterplotLayer',  #TODO finish
+        >>> scatterplot = ScatterplotLayer()
         pydeck.Deck(layers=)
 
         .. _Deck:
