@@ -8,6 +8,7 @@ import {
   edgeLength,
   UNITS
 } from 'h3-js';
+import {lerp} from 'math.gl';
 import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 
@@ -22,9 +23,27 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-function h3ToPolygon(hexId) {
+function scalePolygon(hexId, vertices, factor) {
+  const [lat, lng] = h3ToGeo(hexId);
+  // get distinct vertex objects,
+  // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon)
+  const uniqueVertices = [...new Set(vertices)];
+  for (const vertex of uniqueVertices) {
+    const scaledPt = lerp([lng, lat], vertex, factor);
+    vertex[0] = scaledPt[0];
+    vertex[1] = scaledPt[1];
+  }
+}
+
+function h3ToPolygon(hexId, coverage = 1) {
   const vertices = h3ToGeoBoundary(hexId, true);
   const refLng = vertices[0][0];
+
+  if (coverage !== 1) {
+    // updates array object elements of vertices array.
+    scalePolygon(hexId, vertices, coverage);
+  }
+
   for (const pt of vertices) {
     const deltaLng = pt[0] - refLng;
     if (deltaLng > 180) {
@@ -34,6 +53,18 @@ function h3ToPolygon(hexId) {
     }
   }
   return vertices;
+}
+
+function mergeTriggers(currentTrigger, newTrigger) {
+  let trigger;
+  if (!currentTrigger) {
+    trigger = newTrigger;
+  } else if (Array.isArray(currentTrigger)) {
+    trigger = [...currentTrigger, newTrigger];
+  } else {
+    trigger = [currentTrigger, newTrigger];
+  }
+  return trigger;
 }
 
 const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
@@ -137,6 +168,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       elevationScale,
       fp64,
       material,
+      coverage,
       extruded,
       wireframe,
       stroked,
@@ -158,6 +190,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       elevationScale,
       fp64,
       extruded,
+      coverage,
       wireframe,
       stroked,
       filled,
@@ -180,11 +213,12 @@ export default class H3HexagonLayer extends CompositeLayer {
   }
 
   _renderPolygonLayer() {
-    const {data, getHexagon, updateTriggers} = this.props;
+    const {data, getHexagon, updateTriggers, coverage} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
     const forwardProps = this._getForwardProps();
-    forwardProps.updateTriggers.getPolygon = updateTriggers.getHexagon;
+
+    forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, coverage);
 
     return new SubLayerClass(
       forwardProps,
@@ -196,7 +230,7 @@ export default class H3HexagonLayer extends CompositeLayer {
         data,
         getPolygon: (object, objectInfo) => {
           const hexagonId = getHexagon(object, objectInfo);
-          return h3ToPolygon(hexagonId);
+          return h3ToPolygon(hexagonId, coverage);
         }
       }
     );

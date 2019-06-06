@@ -102,6 +102,13 @@ However, there are 12 pentagons world wide at each resolution. The hexagons at a
 * if `false`, the layer chooses the mode automatically. High-precision rendering is only used if resolution is at or below `5`, or if a pentagon is found in the data.
 * if `true`, always use high-precision rendering.
 
+##### `coverage` (Number, optional)
+
+* Default: `1`
+
+Hexagon radius multiplier, between 0 - 1. When `coverage` = 1, hexagon is rendered with actual size, by specifying a different value (between 0 and 1) hexagon can be scaled down.
+
+
 ### Data Accessors
 
 ##### `getHexagon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
@@ -123,4 +130,3 @@ The `H3HexagonLayer` renders the following sublayers:
 ## Source
 
 [modules/geo-layers/src/h3-layers/h3-hexagon-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/h3-layers/h3-hexagon-layer.js)
-
