@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.1] - June 6 2019
+
+- Support 3D paths with TripsLayer (#3192)
+- fix path layer vertex shader (#3206)
+- Attribute buffer handling bug fixes (#3207)
+- Add sideEffects field to core package.json (#3202)
+
 #### deck.gl [v7.1.0] - June 5 2019
 
 - Fix ArcLayer bug when using non-iterable data with pre-allocated target array (#3170)
