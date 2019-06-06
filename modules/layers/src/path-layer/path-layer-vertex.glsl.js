@@ -51,7 +51,7 @@ varying vec2 vPathPosition;
 varying float vPathLength;
 
 const float EPSILON = 0.001;
-const vec3 ZERO_OFFSET = vec3(1.0);
+const vec3 ZERO_OFFSET = vec3(0.0);
 
 float flipIfTrue(bool flag) {
   return -(float(flag) * 2. - 1.);
