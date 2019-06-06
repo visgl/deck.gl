@@ -56,6 +56,94 @@ test('HexagonLayer', t => {
 // update props
 // asserts on the resulting layer
 test('HexagonLayer#updateLayer', t => {
+  function onAfterUpdateElevation({layer, oldState}) {
+    t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+
+    t.ok(
+      oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+      'should update sortedElevationBins'
+    );
+
+    t.ok(
+      oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+      'should re calculate elevationValueDomain'
+    );
+
+    t.ok(
+      oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
+      'should update elevationScaleFunc'
+    );
+
+    t.ok(
+      oldState.sortedColorBins === layer.state.sortedColorBins,
+      'should not update sortedColorBins'
+    );
+
+    t.ok(
+      oldState.colorValueDomain === layer.state.colorValueDomain,
+      'should not re calculate colorValueDomain'
+    );
+
+    t.ok(
+      oldState.colorScaleFunc === layer.state.colorScaleFunc,
+      'should not update colorScaleFunc'
+    );
+
+    // color porps didn't change
+    t.ok(
+      layer.state.getColorValue === oldState.getColorValue,
+      'getColorValue should not get re-calculated'
+    );
+
+    // elevation porps changed
+    t.ok(
+      layer.state.getElevationValue !== oldState.getElevationValue,
+      'getElevationValue should get re-calculated'
+    );
+  }
+  function onAfterUpdateColor({layer, oldState}) {
+    t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+
+    t.ok(
+      oldState.sortedColorBins !== layer.state.sortedColorBins,
+      'should not update sortedColorBins'
+    );
+
+    t.ok(
+      oldState.sortedElevationBins === layer.state.sortedElevationBins,
+      'should update sortedElevationBins'
+    );
+
+    t.ok(
+      oldState.colorValueDomain !== layer.state.colorValueDomain,
+      'should re calculate colorValueDomain'
+    );
+
+    t.ok(
+      oldState.elevationValueDomain === layer.state.elevationValueDomain,
+      'should not update elevationValueDomain'
+    );
+
+    t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+
+    t.ok(
+      oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+      'should not update colorScaleFunc'
+    );
+
+    // color porps changed
+    t.ok(
+      layer.state.getColorValue !== oldState.getColorValue,
+      'getColorValue should get re-calculated'
+    );
+
+    // elevation porps didn't change
+    t.ok(
+      layer.state.getElevationValue === oldState.getElevationValue,
+      'getElevationValue should not get re-calculated'
+    );
+  }
+
   testLayer({
     Layer: HexagonLayer,
     onError: t.notOk,
@@ -66,6 +154,16 @@ test('HexagonLayer#updateLayer', t => {
           data: data.points,
           radius: 400,
           getPosition
+        },
+        onAfterUpdate({layer}) {
+          t.ok(
+            typeof layer.state.getColorValue === 'function',
+            'GridLayer.state.getColorValue calculated'
+          );
+          t.ok(
+            typeof layer.state.getElevationValue === 'function',
+            'GridLayer.state.getElevationValue calculated'
+          );
         }
       },
       {
@@ -108,6 +206,13 @@ test('HexagonLayer#updateLayer', t => {
         }
       },
       {
+        title: 'Update colorAggregation',
+        updateProps: {
+          colorAggregation: 'MAX'
+        },
+        onAfterUpdate: onAfterUpdateColor
+      },
+      {
         title: 'Update getColorValue accessor',
         updateProps: {
           getColorValue,
@@ -115,42 +220,10 @@ test('HexagonLayer#updateLayer', t => {
             getColorValue: 1
           }
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: onAfterUpdateColor
       },
       {
-        title: 'Update getColorValue accessor',
+        title: 'Update upperPercentile',
         updateProps: {
           upperPercentile: 90
         },
@@ -228,46 +301,24 @@ test('HexagonLayer#updateLayer', t => {
         }
       },
       {
-        title: 'Update getElevationValue accessor',
+        title: 'Update getElevationWeight accessor',
+        updateProps: {
+          getElevationWeight: x => 2,
+          updateTriggers: {
+            getElevationWeight: 1
+          }
+        },
+        onAfterUpdate: onAfterUpdateElevation
+      },
+      {
+        title: 'Update getElevationWeight accessor',
         updateProps: {
           getElevationValue,
           updateTriggers: {
             getElevationValue: 1
           }
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-            'should re calculate elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update elevationScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc === layer.state.colorScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: onAfterUpdateElevation
       },
       {
         title: 'Update elevation lower percentile',

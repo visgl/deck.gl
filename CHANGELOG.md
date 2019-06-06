@@ -15,7 +15,126 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v7.1
+
+### deck.gl v7.1 Prereleases
+
+#### deck.gl [v7.1.0-beta.1] - May 31 2019
+
+- fix post-processing effect framebuffer binding bug (#3164)
+- bump lerna version (#3161)
+- Metrics-tracking Deck property (#3139)
+- Remove dead code from scenegraph-layer shader (#3167)
+- Support react-map-gl's new MapContext format (#3168)
+
+#### deck.gl [v7.1.0-alpha.2] - May 30 2019
+
+- fix normal projection (#3134)
+- GPUGridAggregator: Add `getData` method (#3110)
+- GPU GridLayer PART-4: Add support for picking (#3115)
+- H3HexagonLayer: fix render bug cross the 180th meridian (#3133)
+- support multiple ranges in attribute partial update (#3119)
+- Fix scenegraph-layer attribute issue with static scenegraph (#3135)
+- Support partial update in layer attribute updaters (#3122)
+- Handle partial update in Tesselator (#3121)
+- Add PBR & IBL lighting option to scenegraph-layer (#3116)
+- Fix ColumnGeometry normals calculation (#3145)
+- improve sun/shadow example to use effect rendering pipeline (#3142)
+- Add billboard mode to PathLayer (#3140)
+- Add h3 layer embedded demos (#3150)
+- Improve PathLayer precision (#3141)
+- GPU GridLayer PART 5: Add new color/elevation props to Grid and Hexagon layers (#3137)
+- GPU GridLyer Part 6: GPUGridLayer fixes and docs. (#3143)
+- Fix abnormal normals in scenegraph-layer-vertex shader (#3154)
+- GPU GridLayer Part 7: Rename NewGridLayer to GridLayer. (#3149)
+- GPU Aggregator : enable partial test (#3157)
+- Improve react module test coverage (#3155)
+- Bump luma.gl to v7.1.0-alpha.5
+
+#### deck.gl [v7.1.0-alpha.1] - May 22 2019
+
+- GLTF Animation support in scenegraph-layer (#3010)
+- Add JSON bindings Python library (#3013)
+- Add stroke functionality for the H3Hexagon Layer (#3024)
+- Add Jupyter notebook widget JS module (#3035)
+- GPUGridLayer PART-1: Fix world space aggregation (#3051)
+- Fix update vertices when regenerate models (#3078)
+- Support 64-bit position in IDENTITY mode (#3071)
+- [React] Add the ability to use react-map-gl controls (#3075)
+- GPUGridLayer PART-2: Add support for multiple weights (#3057)
+- Add Jupyter widget to pydeck library (#3050)
+- Support variable attribute size with standard accessors (#3094)
+- Prep Attribute class for partial update (#3091)
+- Use a single model for stroke and fill in ColumnLayer (#3097)
+- Aggregation-layers: Add unit tests, fix bugs. (#3101)
+- Support stroke width in ColumnLayer and H3HexagonLayer (#3102)
+- Improve H3HexagonLayer perf (#3103)
+- ScenegraphLayer: add getScene and getAnimator properties (#3109)
+- Fix TileLayer bug at low zoom levels (#3111)
+- Add partial update support to AttributeManager (#3099)
+- Fix coordinate origin z bug (#3131)
+- GPU GridLayer PART-3: Add NewGridLayer. (#3095)
+- post-processing effect rendering pipeline (#3107)
+
 ## deck.gl v7.0
+
+#### deck.gl [v7.0.9] - May 21 2019
+
+- Fix logging (#3126)
+- Update peer dependency versions (#3128)
+- Remove force override of position parameter in WebMercatorViewport (#3127)
+
+#### deck.gl [v7.0.8] - May 17 2019
+
+- Fix view state handling in mapbox integration (#3113)
+
+#### deck.gl [v7.0.7] - May 16 2019
+
+- Optimize bundle size (#3092)
+- Fix elevationScale behavior (#3093)
+- Fix react integration of mapbox layers (#3108)
+
+#### deck.gl [v7.0.6] - May 13 2019
+
+- Ensure UMD bundles are ES5 (#3085)
+
+#### deck.gl [v7.0.5] - May 6 2019
+
+- GPUAggregator: Fix Texture/Buffer resource leaks. (#3054)
+- fix onClick callback in GoogleMapsOverlay (#3067)
+- fix bundle size (#3069)
+
+#### deck.gl [v7.0.4] - Apr 30 2019
+
+- finalize all layers (#3044)
+- Fix bug in click event handling (#3041)
+- update internal props of point lights (#3047)
+- Fix OrbitView and OrthographicView resize bug (#3043)
+- Delete textures on layer finalization (#3045)
+
+#### deck.gl [v7.0.3] - Apr 25 2019
+
+- Various console warning fixes (#3022)
+- Fix shader attribute constants and transitions (#3028)
+
+#### deck.gl [v7.0.2] - Apr 23 2019
+
+- More React synchronization fix (#3018)
+- Fix GoogleMapsOverlay remove and finalize (#3019)
+
+#### deck.gl [v7.0.1] - Apr 22 2019
+
+- fix compareProps perf (#3011)
+
+#### deck.gl [v7.0.0] - Apr 19 2019
+
+- Bump luma.gl version to 7.0.0
+- Content and Polish for Whats New 7.0 (#3001)
+- improve babel config for Edge/IE (#3002)
+- Add ArcLayer example to the gallery (#2972)
+- Fix buffer warnings (#2999)
+- fix website warnings (#2998)
+- Remove deprecated APIs and update doc (#2997)
 
 ### deck.gl v7.0 Prereleases
 

@@ -4,6 +4,7 @@ import {Buffer} from '@luma.gl/core';
 import assert from '../utils/assert';
 import {createIterable} from '../utils/iterable-utils';
 import {fillArray} from '../utils/flatten';
+import * as range from '../utils/range';
 import log from '../utils/log';
 import BaseAttribute from './base-attribute';
 
@@ -11,6 +12,7 @@ const DEFAULT_STATE = {
   isExternalBuffer: false,
   needsUpdate: true,
   needsRedraw: false,
+  updateRanges: range.FULL,
   allocedInstances: -1
 };
 
@@ -141,11 +143,19 @@ export default class Attribute extends BaseAttribute {
     return null;
   }
 
-  // Checks that typed arrays for attributes are big enough
-  // sets alloc flag if not
-  // @return {Boolean} whether any updates are needed
-  setNeedsUpdate(reason = this.id) {
+  setNeedsUpdate(reason = this.id, dataRange) {
     this.userData.needsUpdate = this.userData.needsUpdate || reason;
+    if (dataRange) {
+      const {startRow = 0, endRow = Infinity} = dataRange;
+      this.userData.updateRanges = range.add(this.userData.updateRanges, [startRow, endRow]);
+    } else {
+      this.userData.updateRanges = range.FULL;
+    }
+  }
+
+  clearNeedsUpdate() {
+    this.userData.needsUpdate = false;
+    this.userData.updateRanges = range.EMPTY;
   }
 
   setNeedsRedraw(reason = this.id) {
@@ -168,6 +178,7 @@ export default class Attribute extends BaseAttribute {
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
+      const oldValue = this.value;
 
       this.constant = false;
       this.value = new ArrayType(this.size * allocCount);
@@ -176,7 +187,15 @@ export default class Attribute extends BaseAttribute {
         this.buffer.reallocate(this.value.byteLength);
       }
 
-      state.needsUpdate = true;
+      if (state.updateRanges !== range.FULL) {
+        this.value.set(oldValue);
+        // Upload the full existing attribute value to the GPU, so that updateBuffer
+        // can choose to only update a partial range.
+        // TODO - copy old buffer to new buffer on the GPU
+        this.buffer.subData(oldValue);
+      }
+
+      this.setNeedsUpdate(true, {startRow: instanceCount});
       state.allocedInstances = allocCount;
       return true;
     }
@@ -191,23 +210,36 @@ export default class Attribute extends BaseAttribute {
 
     const state = this.userData;
 
-    const {update, noAlloc} = state;
+    const {update, updateRanges} = state;
 
     let updated = true;
     if (update) {
       // Custom updater - typically for non-instanced layers
-      update.call(context, this, {data, props, numInstances, bufferLayout});
-      if (noAlloc || this.constant || !this.buffer) {
-        // Full update
+      for (const [startRow, endRow] of updateRanges) {
+        update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
+      }
+      if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
+        // call base clas `update` method to upload value to GPU
         this.update({
           value: this.value,
           constant: this.constant
         });
       } else {
-        // Only update the changed part of the attribute
-        this.buffer.subData({
-          data: this.value.subarray(0, numInstances * this.size)
-        });
+        for (const [startRow, endRow] of updateRanges) {
+          const startOffset = Number.isFinite(startRow)
+            ? this._getVertexOffset(startRow, this.bufferLayout)
+            : 0;
+          const endOffset =
+            Number.isFinite(endRow) || !Number.isFinite(numInstances)
+              ? this._getVertexOffset(endRow, this.bufferLayout)
+              : numInstances * this.size;
+
+          // Only update the changed part of the attribute
+          this.buffer.subData({
+            data: this.value.subarray(startOffset, endOffset),
+            offset: startOffset * this.value.BYTES_PER_ELEMENT
+          });
+        }
       }
       this._checkAttributeArray();
     } else {
@@ -216,7 +248,7 @@ export default class Attribute extends BaseAttribute {
 
     this._updateShaderAttributes();
 
-    state.needsUpdate = false;
+    this.clearNeedsUpdate();
     state.needsRedraw = true;
 
     return updated;
@@ -246,7 +278,7 @@ export default class Attribute extends BaseAttribute {
       this.update({constant: true, value});
     }
     state.needsRedraw = state.needsUpdate || hasChanged;
-    state.needsUpdate = false;
+    this.clearNeedsUpdate();
     state.isExternalBuffer = true;
     this._updateShaderAttributes();
     return true;
@@ -259,7 +291,7 @@ export default class Attribute extends BaseAttribute {
 
     if (buffer) {
       state.isExternalBuffer = true;
-      state.needsUpdate = false;
+      this.clearNeedsUpdate();
 
       if (buffer instanceof Buffer) {
         if (this.externalBuffer !== buffer) {
@@ -295,6 +327,21 @@ export default class Attribute extends BaseAttribute {
   }
 
   // PRIVATE HELPER METHODS
+  _getVertexOffset(row, bufferLayout) {
+    if (bufferLayout) {
+      let offset = 0;
+      let index = 0;
+      for (const geometrySize of bufferLayout) {
+        if (index >= row) {
+          break;
+        }
+        offset += geometrySize * this.size;
+        index++;
+      }
+      return offset;
+    }
+    return row * this.size;
+  }
 
   /* check user supplied values and apply fallback */
   _normalizeValue(value, out = [], start = 0) {
@@ -329,7 +376,7 @@ export default class Attribute extends BaseAttribute {
     return true;
   }
 
-  _standardAccessor(attribute, {data, props, numInstances, bufferLayout}) {
+  _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, bufferLayout}) {
     const state = attribute.userData;
 
     const {accessor} = state;
@@ -338,10 +385,11 @@ export default class Attribute extends BaseAttribute {
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    let i = attribute._getVertexOffset(startRow, bufferLayout);
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
+
       const objectValue = accessorFunc(object, objectInfo);
 
       if (bufferLayout) {

@@ -11,8 +11,8 @@ Post-processing effect rendering is part of deck.gl effect rendering pipeline, f
 
 A post-processing effect is created from `PostProcessEffect` class and Shader module.
 ```js
-import {brightnessContrast} from @luma.gl/effects;
-import {PostProcessEffect} from @deck.gl/core;
+import {brightnessContrast} from '@luma.gl/effects';
+import {PostProcessEffect} from '@deck.gl/core';
 
 const postProcessEffect = new PostProcessEffect(brightnessContrast, {
   brightness: 0.5,

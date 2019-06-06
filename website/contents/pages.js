@@ -161,6 +161,11 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'The Bad Bet',
+    external:
+      'https://features.propublica.org/the-bad-bet/how-illinois-bet-on-video-gambling-and-lost/'
+  },
+  {
     name: 'SandDance',
     external: 'https://microsoft.github.io/SandDance/'
   },
@@ -182,7 +187,7 @@ export const showcasePages = generatePath([
   },
   {
     name: 'Kepler.gl',
-    external: 'https://uber.github.io/kepler.gl/'
+    external: 'https://kepler.gl/'
   },
   {
     name: 'Wind Map',
@@ -425,6 +430,7 @@ export const docPages = generatePath([
           },
           {
             name: 'GPUGridLayer',
+            tag: 'advanced',
             content: getDocUrl('layers/gpu-grid-layer.md')
           },
           {
@@ -432,8 +438,9 @@ export const docPages = generatePath([
             content: getDocUrl('layers/great-circle-layer.md')
           },
           {
-            name: 'GridLayer',
-            content: getDocUrl('layers/grid-layer.md')
+            name: 'CPUGridLayer',
+            tag: 'advanced',
+            content: getDocUrl('layers/cpu-grid-layer.md')
           },
           {
             name: 'GridCellLayer',
@@ -450,6 +457,10 @@ export const docPages = generatePath([
           {
             name: 'H3HexagonLayer',
             content: getDocUrl('layers/h3-hexagon-layer.md')
+          },
+          {
+            name: 'GridLayer',
+            content: getDocUrl('layers/grid-layer.md')
           },
           {
             name: 'S2Layer',
@@ -572,6 +583,10 @@ export const docPages = generatePath([
           {
             name: 'LightingEffect',
             content: getDocUrl('effects/lighting-effect.md')
+          },
+          {
+            name: 'PostProcessEffect',
+            content: getDocUrl('effects/post-process-effect.md')
           }
         ]
       },

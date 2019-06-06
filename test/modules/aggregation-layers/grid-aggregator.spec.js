@@ -22,15 +22,15 @@ import test from 'tape-catch';
 
 import * as FIXTURES from 'deck.gl-test/data';
 
-import {pointToDensityGridData} from '@deck.gl/aggregation-layers/grid-layer/grid-aggregator';
+import {pointToDensityGridDataCPU} from '@deck.gl/aggregation-layers/cpu-grid-layer/grid-aggregator';
 
 const getPosition = d => d.COORDINATES;
 const iterableData = new Set(FIXTURES.points);
 const cellSize = 500;
 
-test('pointToDensityGridData', t => {
+test('pointToDensityGridDataCPU', t => {
   t.ok(
-    typeof pointToDensityGridData(iterableData, cellSize, getPosition) === 'object',
+    typeof pointToDensityGridDataCPU(iterableData, cellSize, getPosition) === 'object',
     'should work with iterables'
   );
   t.end();

@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import autobind from 'autobind-decorator';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App, INITIAL_VIEW_STATE} from 'website-examples/screen-grid/app';
+import {App} from 'website-examples/screen-grid/app';
 
 export default class ScreenGridDemo extends Component {
 
@@ -17,13 +17,6 @@ export default class ScreenGridDemo extends Component {
     return {
       gpuAggregation: {displayName: 'GPU Acceleration', type: 'checkbox', value: true},
       cellSize: {displayName: 'Cell Size', type: 'range', value: 5, step: 1, min: 1, max: 20}
-    };
-  }
-
-  static get viewport() {
-    return {
-      ...INITIAL_VIEW_STATE,
-      dragToRotate: false
     };
   }
 

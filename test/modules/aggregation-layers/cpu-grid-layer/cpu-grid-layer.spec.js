@@ -25,15 +25,15 @@ import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {GridCellLayer} from '@deck.gl/layers';
-import {GridLayer} from '@deck.gl/aggregation-layers';
+import {CPUGridLayer} from '@deck.gl/aggregation-layers';
 
-const getColorValue = points => points.length;
-const getElevationValue = points => points.length;
+const GET_COLOR_VALUE = points => points.length;
+const GET_ELEVATION_VALUE = points => points.length;
 const getPosition = d => d.COORDINATES;
 
-test('GridLayer', t => {
+test('CPUGridLayer', t => {
   const testCases = generateLayerTests({
-    Layer: GridLayer,
+    Layer: CPUGridLayer,
     sampleProps: {
       data: FIXTURES.points.slice(0, 3),
       getPosition
@@ -45,16 +45,16 @@ test('GridLayer', t => {
     }
   });
 
-  testLayer({Layer: GridLayer, testCases, onError: t.notOk});
+  testLayer({Layer: CPUGridLayer, testCases, onError: t.notOk});
 
   t.end();
 });
 
-test('GridLayer#renderSubLayer', t => {
-  makeSpy(GridLayer.prototype, '_onGetSublayerColor');
-  makeSpy(GridLayer.prototype, '_onGetSublayerElevation');
+test('CPUGridLayer#renderSubLayer', t => {
+  makeSpy(CPUGridLayer.prototype, '_onGetSublayerColor');
+  makeSpy(CPUGridLayer.prototype, '_onGetSublayerElevation');
 
-  const layer = new GridLayer({
+  const layer = new CPUGridLayer({
     data: FIXTURES.points,
     cellSize: 500,
     getPosition,
@@ -71,17 +71,59 @@ test('GridLayer#renderSubLayer', t => {
 
   // should call attribute updater twice
   // because test util calls both initialize and update layer
-  t.ok(GridLayer.prototype._onGetSublayerColor.called, 'should call _onGetSublayerColor');
-  t.ok(GridLayer.prototype._onGetSublayerElevation.called, 'should call _onGetSublayerElevation');
-  GridLayer.prototype._onGetSublayerColor.restore();
-  GridLayer.prototype._onGetSublayerElevation.restore();
+  t.ok(CPUGridLayer.prototype._onGetSublayerColor.called, 'should call _onGetSublayerColor');
+  t.ok(
+    CPUGridLayer.prototype._onGetSublayerElevation.called,
+    'should call _onGetSublayerElevation'
+  );
+  CPUGridLayer.prototype._onGetSublayerColor.restore();
+  CPUGridLayer.prototype._onGetSublayerElevation.restore();
 
   t.end();
 });
 
-test('GridLayer#updates', t => {
+test('CPUGridLayer#updates', t => {
+  function onAfterUpdateColor({layer, oldState}) {
+    t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
+
+    t.ok(oldState.sortedColorBins !== layer.state.sortedColorBins, 'should update sortedColorBins');
+
+    t.ok(
+      oldState.sortedElevationBins === layer.state.sortedElevationBins,
+      'should not update sortedElevationBins'
+    );
+
+    t.ok(
+      oldState.colorValueDomain !== layer.state.colorValueDomain,
+      'should re calculate colorValueDomain'
+    );
+
+    t.ok(
+      oldState.elevationValueDomain === layer.state.elevationValueDomain,
+      'should not update elevationValueDomain'
+    );
+
+    t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+
+    t.ok(
+      oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+      'should not update colorScaleFunc'
+    );
+
+    // color porps changed
+    t.ok(
+      layer.state.getColorValue !== oldState.getColorValue,
+      'getColorValue should get re-calculated'
+    );
+
+    // elevation porps didn't change
+    t.ok(
+      layer.state.getElevationValue === oldState.getElevationValue,
+      'getElevationValue should not get re-calculated'
+    );
+  }
   testLayer({
-    Layer: GridLayer,
+    Layer: CPUGridLayer,
     onError: t.notOk,
     testCases: [
       {
@@ -97,30 +139,37 @@ test('GridLayer#updates', t => {
             sortedColorBins,
             sortedElevationBins,
             colorValueDomain,
-            elevationValueDomain
+            elevationValueDomain,
+            getColorValue,
+            getElevationValue
           } = layer.state;
 
-          t.ok(layerData.length > 0, 'GridLayer.state.layerDate calculated');
-          t.ok(sortedColorBins, 'GridLayer.state.sortedColorBins calculated');
-          t.ok(sortedElevationBins, 'GridLayer.state.sortedColorBins calculated');
-          t.ok(Array.isArray(colorValueDomain), 'GridLayer.state.valueDomain calculated');
-          t.ok(Array.isArray(elevationValueDomain), 'GridLayer.state.valueDomain calculated');
+          t.ok(layerData.length > 0, 'CPUGridLayer.state.layerDate calculated');
+          t.ok(sortedColorBins, 'CPUGridLayer.state.sortedColorBins calculated');
+          t.ok(sortedElevationBins, 'CPUGridLayer.state.sortedColorBins calculated');
+          t.ok(Array.isArray(colorValueDomain), 'CPUGridLayer.state.valueDomain calculated');
+          t.ok(Array.isArray(elevationValueDomain), 'CPUGridLayer.state.valueDomain calculated');
+          t.ok(typeof getColorValue === 'function', 'CPUGridLayer.state.getColorValue calculated');
+          t.ok(
+            typeof getElevationValue === 'function',
+            'CPUGridLayer.state.getElevationValue calculated'
+          );
 
           t.ok(
             Array.isArray(sortedColorBins.sortedBins),
-            'GridLayer.state.sortedColorBins.sortedBins calculated'
+            'CPUGridLayer.state.sortedColorBins.sortedBins calculated'
           );
           t.ok(
             Array.isArray(sortedElevationBins.sortedBins),
-            'GridLayer.state.sortedColorBins.sortedBins calculated'
+            'CPUGridLayer.state.sortedColorBins.sortedBins calculated'
           );
           t.ok(
             Number.isFinite(sortedColorBins.maxCount),
-            'GridLayer.state.sortedColorBins.maxCount calculated'
+            'CPUGridLayer.state.sortedColorBins.maxCount calculated'
           );
           t.ok(
             Number.isFinite(sortedElevationBins.maxCount),
-            'GridLayer.state.sortedColorBins.maxCount calculated'
+            'CPUGridLayer.state.sortedColorBins.maxCount calculated'
           );
 
           const firstSortedBin = sortedColorBins.sortedBins[0];
@@ -128,7 +177,7 @@ test('GridLayer#updates', t => {
 
           t.ok(
             sortedColorBins.binMap[binTocell.index] === firstSortedBin,
-            'Correct GridLayer.state.sortedColorBins.binMap created'
+            'Correct CPUGridLayer.state.sortedColorBins.binMap created'
           );
         }
       },
@@ -140,9 +189,18 @@ test('GridLayer#updates', t => {
           pickable: true
         },
         spies: ['_onGetSublayerColor', '_onGetSublayerElevation'],
-        onAfterUpdate({layer, subLayer, spies}) {
+        onAfterUpdate({layer, subLayer, spies, oldState}) {
           t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
+          // color or elevation porps didn't change
+          t.ok(
+            layer.state.getColorValue === oldState.getColorValue,
+            'getColorValue should not get re-calculated'
+          );
+          t.ok(
+            layer.state.getElevationValue === oldState.getElevationValue,
+            'getElevationValue should not get re-calculated'
+          );
           // should call attribute updater twice
           // because test util calls both initialize and update layer
           t.ok(spies._onGetSublayerColor.called, 'should call _onGetSublayerColor');
@@ -235,42 +293,69 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getColorValue,
+          getColorWeight: x => 2,
+          updateTriggers: {
+            getColorWeight: 1
+          }
+        },
+        onAfterUpdate: onAfterUpdateColor
+      },
+      {
+        updateProps: {
+          getColorValue: GET_COLOR_VALUE,
           updateTriggers: {
             getColorValue: 1
           }
+        },
+        onAfterUpdate: onAfterUpdateColor
+      },
+      {
+        updateProps: {
+          elevationAggregation: 'Mean'
         },
         onAfterUpdate({layer, oldState}) {
           t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
 
           t.ok(
-            oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should update sortedColorBins'
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'should not update sortedColorBins'
           );
 
           t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
+            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
+            'should update sortedElevationBins'
           );
 
           t.ok(
-            oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should re calculate colorValueDomain'
+            oldState.colorValueDomain === layer.state.colorValueDomain,
+            'should not re calculate colorValueDomain'
           );
 
           t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
+            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
+            'should update elevationValueDomain'
           );
 
           t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+            oldState.colorScaleFunc === layer.state.colorScaleFunc,
+            'should not update colorScaleFunc'
+          );
+
+          t.ok(
+            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
             'should update colorScaleFunc'
           );
 
+          // color porps didn't changed
           t.ok(
-            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update colorScaleFunc'
+            layer.state.getColorValue === oldState.getColorValue,
+            'getColorValue should not get re-calculated'
+          );
+
+          // elevation porps changed
+          t.ok(
+            layer.state.getElevationValue !== oldState.getElevationValue,
+            'getElevationValue should get re-calculated'
           );
         }
       },
@@ -352,7 +437,7 @@ test('GridLayer#updates', t => {
       },
       {
         updateProps: {
-          getElevationValue,
+          getElevationValue: GET_ELEVATION_VALUE,
           updateTriggers: {
             getElevationValue: 1
           }
@@ -473,12 +558,12 @@ test('GridLayer#updates', t => {
   t.end();
 });
 
-test('GridLayer#updateTriggers', t => {
+test('CPUGridLayer#updateTriggers', t => {
   // setup spies
   const SPIES = ['_onGetSublayerColor', '_onGetSublayerElevation'];
 
   testLayer({
-    Layer: GridLayer,
+    Layer: CPUGridLayer,
     spies: SPIES,
     onError: t.notOk,
     testCases: [
@@ -518,7 +603,7 @@ test('GridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          getColorValue,
+          getColorValue: GET_COLOR_VALUE,
           updateTriggers: {
             getColorValue: 1
           }
@@ -551,7 +636,7 @@ test('GridLayer#updateTriggers', t => {
       },
       {
         updateProps: {
-          getElevationValue,
+          getElevationValue: GET_ELEVATION_VALUE,
           updateTriggers: {
             getElevationValue: 1
           }

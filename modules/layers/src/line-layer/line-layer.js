@@ -144,7 +144,7 @@ export default class LineLayer extends Layer {
     );
   }
 
-  calculateInstanceSourceTargetPositions64xyLow(attribute) {
+  calculateInstanceSourceTargetPositions64xyLow(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
@@ -154,9 +154,9 @@ export default class LineLayer extends Layer {
     }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);

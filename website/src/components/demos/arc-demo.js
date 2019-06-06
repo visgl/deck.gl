@@ -3,7 +3,7 @@ import autobind from 'autobind-decorator';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, INITIAL_VIEW_STATE, inFlowColors, outFlowColors} from 'website-examples/arc/app';
+import {App, inFlowColors, outFlowColors} from 'website-examples/arc/app';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
@@ -21,10 +21,6 @@ export default class ArcDemo extends Component {
     return {
       lineWidth: {displayName: 'Width', type: 'range', value: 1, step: 0.1, min: 0, max: 10}
     };
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

@@ -39,6 +39,7 @@ const defaultProps = {
   miterLimit: {type: 'number', min: 0, value: 4},
   fp64: false,
   dashJustified: false,
+  billboard: false,
 
   getPath: {type: 'accessor', value: object => object.path},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -56,7 +57,7 @@ export default class PathLayer extends Layer {
   getShaders() {
     return this.use64bitProjection()
       ? {vs: vs64, fs, modules: ['project64', 'picking']}
-      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
+      : {vs, fs, modules: ['project32', 'picking']}; // 'project' module added by default.
   }
 
   initializeState() {
@@ -83,8 +84,25 @@ export default class PathLayer extends Layer {
         update: this.calculateInstanceStartEndPositions64xyLow,
         noAlloc
       },
-      instanceLeftDeltas: {size: 3, update: this.calculateLeftDeltas, noAlloc},
-      instanceRightDeltas: {size: 3, update: this.calculateRightDeltas, noAlloc},
+      instanceLeftPositions: {
+        size: 3,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getPath',
+        update: this.calculateLeftPositions,
+        noAlloc
+      },
+      instanceRightPositions: {
+        size: 3,
+        transition: ATTRIBUTE_TRANSITION,
+        accessor: 'getPath',
+        update: this.calculateRightPositions,
+        noAlloc
+      },
+      instanceNeighborPositions64xyLow: {
+        size: 4,
+        update: this.calculateInstanceNeighborPositions64xyLow,
+        noAlloc
+      },
       instanceStrokeWidths: {
         size: 1,
         accessor: 'getWidth',
@@ -152,6 +170,7 @@ export default class PathLayer extends Layer {
     const {viewport} = this.context;
     const {
       rounded,
+      billboard,
       miterLimit,
       widthUnits,
       widthScale,
@@ -166,6 +185,7 @@ export default class PathLayer extends Layer {
       .setUniforms(
         Object.assign({}, uniforms, {
           jointType: Number(rounded),
+          billboard,
           alignMode: Number(dashJustified),
           widthScale: widthScale * widthMultiplier,
           miterLimit,
@@ -282,14 +302,25 @@ export default class PathLayer extends Layer {
     }
   }
 
-  calculateLeftDeltas(attribute) {
+  calculateLeftPositions(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('leftDeltas');
+    attribute.value = pathTesselator.get('leftPositions');
   }
 
-  calculateRightDeltas(attribute) {
+  calculateRightPositions(attribute) {
     const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('rightDeltas');
+    attribute.value = pathTesselator.get('rightPositions');
+  }
+
+  calculateInstanceNeighborPositions64xyLow(attribute) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (isFP64) {
+      attribute.value = this.state.pathTesselator.get('neighborPositions64XyLow');
+    } else {
+      attribute.value = new Float32Array(4);
+    }
   }
 
   clearPickingColor(color) {

@@ -12,4 +12,6 @@ export default class Pass {
   }
 
   render() {}
+
+  cleanup() {}
 }

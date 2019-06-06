@@ -3,8 +3,10 @@ import Pass from './pass';
 import {clear, setParameters, withParameters} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
-  render(props) {
-    return this.drawLayers(props);
+  render(params) {
+    const gl = this.gl;
+
+    return withParameters(gl, {framebuffer: params.outputBuffer}, () => this.drawLayers(params));
   }
 
   // PRIVATE

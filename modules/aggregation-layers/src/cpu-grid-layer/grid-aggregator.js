@@ -29,11 +29,12 @@ const R_EARTH = 6378000;
  * @param {function} getPosition - position accessor
  * @returns {object} - grid data, cell dimension
  */
-export function pointToDensityGridData(points, cellSize, getPosition) {
+export function pointToDensityGridDataCPU(points, cellSize, getPosition) {
   const {gridHash, gridOffset} = _pointsToGridHashing(points, cellSize, getPosition);
   const layerData = _getGridLayerDataFromGridHash(gridHash, gridOffset);
 
   return {
+    gridHash,
     gridOffset,
     layerData
   };

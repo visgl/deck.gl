@@ -173,23 +173,25 @@ export default class ArcLayer extends Layer {
     return model;
   }
 
-  calculateInstancePositions(attribute) {
+  calculateInstancePositions(attribute, {startRow, endRow}) {
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
-      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = sourcePosition[0];
       value[i++] = sourcePosition[1];
+      // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
+      // the same temp array
+      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = targetPosition[0];
       value[i++] = targetPosition[1];
     }
   }
 
-  calculateInstancePositions64Low(attribute) {
+  calculateInstancePositions64Low(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
@@ -199,15 +201,17 @@ export default class ArcLayer extends Layer {
     }
 
     const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const sourcePosition = getSourcePosition(object, objectInfo);
-      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = fp64LowPart(sourcePosition[0]);
       value[i++] = fp64LowPart(sourcePosition[1]);
+      // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
+      // the same temp array
+      const targetPosition = getTargetPosition(object, objectInfo);
       value[i++] = fp64LowPart(targetPosition[0]);
       value[i++] = fp64LowPart(targetPosition[1]);
     }

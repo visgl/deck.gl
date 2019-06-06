@@ -20,7 +20,7 @@
     "react": "^16.3.0",
     "react-autobind": "^1.0.6",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^4.1.2",
+    "react-map-gl": "^5.0.0",
     "react-stats-zavatta": "^0.0.6"
   },
   "devDependencies": {

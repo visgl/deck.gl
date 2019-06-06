@@ -1,16 +1,5 @@
 import GL from '@luma.gl/constants';
-
-// public
-
-export const AGGREGATION_OPERATION = {
-  SUM: 1,
-  MEAN: 2,
-  MIN: 3,
-  MAX: 4
-};
-
-// private
-
+import {AGGREGATION_OPERATION} from '../aggregation-operation-utils';
 export const DEFAULT_CHANGE_FLAGS = {
   dataChanged: true,
   viewportChanged: true,

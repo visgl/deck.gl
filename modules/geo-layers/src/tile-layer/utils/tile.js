@@ -38,11 +38,11 @@ export default class Tile {
   }
 
   _loadData() {
-    const {x, y, z} = this;
+    const {x, y, z, bbox} = this;
     if (!this.getTileData) {
       return null;
     }
-    const getTileDataPromise = this.getTileData({x, y, z});
+    const getTileDataPromise = this.getTileData({x, y, z, bbox});
     return getTileDataPromise
       .then(buffers => {
         this._data = buffers;

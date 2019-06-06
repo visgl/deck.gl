@@ -35,8 +35,11 @@
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
     "update-release-branch": "scripts/update-release-branch.sh"
   },
+  "resolutions": {
+    "lerna": "3.14.1"
+  },
   "devDependencies": {
-    "@babel/polyfill": "^7.0.0",
+    "@luma.gl/effects": "^7.1.0-beta.1",
     "@probe.gl/bench": "^3.0.1",
     "@probe.gl/test-utils": "^3.0.1",
     "babel-loader": "^8.0.0",

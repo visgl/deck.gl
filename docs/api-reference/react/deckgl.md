@@ -64,7 +64,7 @@ import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
 
 <DeckGL ... ContextProvider={MapContext.Provider}>
   <div style={NAVIGATION_CONTROL_STYLES}>
-    <NavigationControl onViewStateChange={...} />
+    <NavigationControl />
   </div>
 </DeckGL>
 ```

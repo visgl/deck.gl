@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, INITIAL_VIEW_STATE} from 'website-examples/icon/app';
+import {App} from 'website-examples/icon/app';
 
 import autobind from 'autobind-decorator';
 
@@ -21,13 +21,6 @@ export default class IconDemo extends Component {
   static get parameters() {
     return {
       cluster: {displayName: 'Cluster', type: 'checkbox', value: true}
-    };
-  }
-
-  static get viewport() {
-    return {
-      ...INITIAL_VIEW_STATE,
-      dragToRotate: false
     };
   }
 

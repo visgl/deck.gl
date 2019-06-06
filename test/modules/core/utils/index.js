@@ -25,4 +25,6 @@ import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';
 import './array-utils.spec';
+import './iterable-utils.spec';
+import './range.spec';
 // import './compare-objects.spec';

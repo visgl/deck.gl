@@ -55,7 +55,9 @@ const results = aggregator.run({
 
 ```
 
-### constructor()
+## Methods
+
+### constructor
 
 ‘ScreenGridAggregator’ constructor takes following arguments and constructs an object.
 
@@ -63,13 +65,26 @@ const results = aggregator.run({
 * opts (Object) : Optionally contains and ‘id’ and ‘sahderCache’ object for caching/re-using shaders.
 
 
-### run()
+### run
 
 Performs aggregation either on CPU or GPU based on the provided options and browser’s WebGL capabilities.
 
-#### Input:
+```js
+const results = gpuGridAggregator.run({
+  positions,
+  weights,
+  cellSize: [5, 5],
+  viewport,
+  changeFlags,
+  useGPU: true,
+  projectPoints: true,
+  gridTransformMatrix
+});
+```
+
+Parameters:
 * positions (Array) : Array of points in world space (lng, lat).
-* positions64xyLow (Array) : Array of low precision values of points in world space (lng, lat).
+* positions64xyLow (Array, Optional) : Array of low precision values of points in world space (lng, lat).
 * weights  (Object) : Object contains one or more weights. Key represents id and corresponding object represents the weight. Each weight object contains following values:
 
   * `values` (Array, Float32Array or Buffer) : Contains weight values for all points, there should be 3 floats for each point, un-used values can be 0.
@@ -94,8 +109,8 @@ Performs aggregation either on CPU or GPU based on the provided options and brow
 * gridTransformMatrix (Mat4) : used to transform input positions before aggregating them (for example, lng/lat can be moved to +ve range, when doing world space aggregation, projectPoints=false).
 * createBufferObjects (Bool, options, default: true) : Only applicable when aggregation is performed on CPU. When set to false, aggregated data is not uploaded into Buffer objects. In a typical use case, Applications need data in `Buffer` objects to use them in next rendering cycle, hence by default its value is true, but if needed this step can be avoided by setting this flag to false.
 
-#### Output
-* results(Object): An object, where key represents `id` of the weight and value contains following aggregated data.
+Returns:
+* An object, where key represents `id` of the weight and value contains following aggregated data.
 
   * `aggregationBuffer` (Buffer) : Aggregated values per grid cell, aggregation is performed as per specified `operation`. Size of the buffer is 4, with R, G and B channel corresponds to aggregated weights. When input `size` is < 3, G or B channels contain undefined values. Alpha channel contains count of points aggregated into this cell. (R: weight#1 G: weight#2 B: weight#3 A: count)
 
@@ -110,3 +125,26 @@ Performs aggregation either on CPU or GPU based on the provided options and brow
   NOTE: `minBuffer`, `maxBuffer` and `maxMinBuffer` are usually consumed by setting them as uniform buffer object or read by the CPU.
 
   NOTE: Aggregation result is always in `Buffer` objects to provide common API irrespective of whether aggregation is performed on CPU or GPU. `Texture` objects are provided when aggregation is done on GPU, and `Array` objects are provided when aggregation is performed on CPU.
+
+
+### getData
+
+Reads aggregation results from GPU memory (Buffer) to CPU memory (Typed Arrays).
+
+```js
+const aggregationResults = gpuGridAggregator.getData('weightId');
+```
+
+Parameters:
+  * `weightId` (String) : `id` of the weight for which aggregation data is needed.
+
+Returns:
+An object with aggregation results in CPU memory (Typed Arrays). Returned object contains following values :
+  * `aggregationData` : Aggregated data per grid cell.
+    Following additional arrays exist if they were requested when aggregation is performed.
+  * `minData` : Min aggregation results.
+  * `maxData` : Max aggregation results.
+  * `maxMinData` : Combined max min aggregation results.
+
+Note:
+When aggregation is performed on GPU, `getData` performs Buffer read and can potentially an expensive operation due to CPU and GPU sync, in such cases data is also cached to avoid reading from GPU memory for subsequent calls.

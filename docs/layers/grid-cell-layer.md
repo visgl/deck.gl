@@ -9,7 +9,7 @@
 
 # GridCellLayer
 
-> This is the primitive layer rendered by [GridLayer](/docs/layers/grid-layer.md) after aggregation. Unlike the GridLayer, it renders one column for each data object.
+> This is the primitive layer rendered by [CPUGridLayer](/docs/layers/cpu-grid-layer.md) after aggregation. Unlike the CPUGridLayer, it renders one column for each data object.
 
 The GridCellLayer can render a grid-based heatmap.
 It is a variation of the [ColumnLayer](/docs/layers/column-layer.md).
@@ -37,7 +37,7 @@ const App = ({data, viewport}) => {
     cellSize: 200,
     elevationScale: 5000,
     getPosition: d => d.centroid,
-    getColor: d => [48, 128, d.value * 255, 255],
+    getFillColor: d => [48, 128, d.value * 255, 255],
     getElevation: d => d.value,
     onHover: ({object, x, y}) => {
       const tooltip = `height: ${object.value * 5000}m`;
@@ -158,4 +158,3 @@ The elevation of each cell in meters.
 ## Source
 
 [modules/layers/src/grid-cell-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer/grid-cell-layer.js)
-

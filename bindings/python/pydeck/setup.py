@@ -142,7 +142,7 @@ setup_args = {
     },
     'author': 'Andrew Duberstein',
     'author_email': 'ajduberstein@gmail.com',
-    'url': 'https://github.com/uber/deck.gl',
+    'url': 'https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck',
     'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', 'GIS'],
     'classifiers': [
         'Development Status :: 4 - Beta',

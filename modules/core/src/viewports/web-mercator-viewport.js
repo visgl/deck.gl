@@ -87,9 +87,6 @@ export default class WebMercatorViewport extends Viewport {
       altitude
     });
 
-    // TODO / hack - prevent vertical offsets if not FirstPersonViewport
-    const position = opts.position && [opts.position[0], opts.position[1], 0];
-
     const viewportOpts = Object.assign({}, opts, {
       // x, y,
       width,
@@ -100,7 +97,6 @@ export default class WebMercatorViewport extends Viewport {
       longitude,
       latitude,
       zoom,
-      position,
 
       // projection matrix parameters
       orthographic,

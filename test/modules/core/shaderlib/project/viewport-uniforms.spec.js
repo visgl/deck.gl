@@ -110,7 +110,7 @@ test('project#getUniforms', t => {
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(
     uniforms.project_uCoordinateOrigin,
-    [-122.42694091796875, 37.75153732299805],
+    [-122.42694091796875, 37.75153732299805, 0],
     'Returned shader coordinate origin'
   );
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');
@@ -131,7 +131,7 @@ test('project#getUniforms', t => {
   t.notOk(getUniformsError(uniforms, UNIFORMS), 'Uniforms validated');
   t.deepEqual(
     uniforms.project_uCoordinateOrigin,
-    [10.285714149475098, -3.1415927410125732],
+    [10.285714149475098, -3.1415927410125732, 0],
     'Returned shader coordinate origin'
   );
   t.ok(uniforms.project_uCenter.some(x => x), 'Returned non-trivial projection center');

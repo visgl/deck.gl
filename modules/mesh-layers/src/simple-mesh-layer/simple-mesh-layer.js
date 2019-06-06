@@ -280,7 +280,7 @@ export default class SimpleMeshLayer extends Layer {
     }
   }
 
-  calculateInstancePositions64xyLow(attribute) {
+  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
@@ -290,9 +290,9 @@ export default class SimpleMeshLayer extends Layer {
     }
 
     const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    const {iterable, objectInfo} = createIterable(data);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const position = getPosition(object, objectInfo);

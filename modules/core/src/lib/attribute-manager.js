@@ -191,8 +191,8 @@ export default class AttributeManager {
   }
 
   // Marks an attribute for update
-  invalidate(triggerName) {
-    const invalidatedAttributes = this._invalidateTrigger(triggerName);
+  invalidate(triggerName, dataRange) {
+    const invalidatedAttributes = this._invalidateTrigger(triggerName, dataRange);
     // For performance tuning
     logFunctions.onLog({
       level: LOG_DETAIL_PRIORITY,
@@ -200,9 +200,9 @@ export default class AttributeManager {
     });
   }
 
-  invalidateAll() {
+  invalidateAll(dataRange) {
     for (const attributeName in this.attributes) {
-      this.attributes[attributeName].setNeedsUpdate();
+      this.attributes[attributeName].setNeedsUpdate(attributeName, dataRange);
     }
     // For performance tuning
     logFunctions.onLog({
@@ -238,7 +238,14 @@ export default class AttributeManager {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;
-        this._updateAttribute({attribute, numInstances, bufferLayout, data, props, context});
+        this._updateAttribute({
+          attribute,
+          numInstances,
+          bufferLayout,
+          data,
+          props,
+          context
+        });
       }
 
       this.needsRedraw |= attribute.needsRedraw();
@@ -362,7 +369,7 @@ export default class AttributeManager {
     this.updateTriggers = triggers;
   }
 
-  _invalidateTrigger(triggerName) {
+  _invalidateTrigger(triggerName, dataRange) {
     const {attributes, updateTriggers} = this;
     const invalidatedAttributes = updateTriggers[triggerName];
 
@@ -370,7 +377,7 @@ export default class AttributeManager {
       invalidatedAttributes.forEach(name => {
         const attribute = attributes[name];
         if (attribute) {
-          attribute.setNeedsUpdate();
+          attribute.setNeedsUpdate(attribute.id, dataRange);
         }
       });
     } else {
@@ -381,7 +388,9 @@ export default class AttributeManager {
     return invalidatedAttributes;
   }
 
-  _updateAttribute({attribute, numInstances, bufferLayout, data, props, context}) {
+  _updateAttribute(opts) {
+    const {attribute, numInstances} = opts;
+
     if (attribute.allocate(numInstances)) {
       logFunctions.onUpdate({
         level: LOG_DETAIL_PRIORITY,
@@ -393,7 +402,7 @@ export default class AttributeManager {
     // Calls update on any buffers that need update
     const timeStart = Date.now();
 
-    const updated = attribute.updateBuffer({numInstances, bufferLayout, data, props, context});
+    const updated = attribute.updateBuffer(opts);
     if (updated) {
       this.needsRedraw = true;
 

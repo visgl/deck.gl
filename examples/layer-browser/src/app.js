@@ -7,7 +7,10 @@ import {
   MapView,
   FirstPersonView,
   OrbitView,
-  MapController
+  MapController,
+  AmbientLight,
+  DirectionalLight,
+  LightingEffect
 } from '@deck.gl/core';
 import {_OrbitController as OrbitController} from '@deck.gl/core';
 
@@ -47,6 +50,22 @@ const NAVIGATION_CONTROL_STYLES = {
   position: 'absolute',
   zIndex: 1
 };
+
+const AMBIENT_LIGHT = new AmbientLight({
+  color: [255, 255, 255],
+  intensity: 1.2
+});
+
+const DIRECTIONAL_LIGHT = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 3.0,
+  direction: [-3, -9, -1]
+});
+
+const GLOBAL_LIGHTING = new LightingEffect({
+  AMBIENT_LIGHT,
+  DIRECTIONAL_LIGHT
+});
 
 const ViewportLabel = props => (
   <div style={{position: 'absolute'}}>
@@ -192,15 +211,6 @@ export default class App extends PureComponent {
     return new Layer(layerProps);
   }
 
-  // Flatten layer props
-  _getLayerSettings(props) {
-    const settings = {};
-    for (const key in props) {
-      settings[key] = props[key];
-    }
-    return settings;
-  }
-
   /* eslint-disable max-depth */
   _renderExamples() {
     let index = 1;
@@ -216,7 +226,7 @@ export default class App extends PureComponent {
           const layer = this._renderExampleLayer(example, settings, index++);
 
           if (typeof settings !== 'object') {
-            activeExamples[exampleName] = this._getLayerSettings(layer.props);
+            activeExamples[exampleName] = LayerControls.getSettings(layer.props);
           }
 
           layers.push(layer);
@@ -301,7 +311,7 @@ export default class App extends PureComponent {
           views={views}
           viewState={infovis ? orbitViewState : {...mapViewState, position: [0, 0, 50]}}
           onViewStateChange={this._onViewStateChange}
-          effects={effects ? this._effects : []}
+          effects={effects ? [...this._effects, GLOBAL_LIGHTING] : [GLOBAL_LIGHTING]}
           pickingRadius={pickingRadius}
           onHover={this._onHover}
           onClick={this._onClick}
@@ -328,7 +338,7 @@ export default class App extends PureComponent {
           </View>
 
           <div style={NAVIGATION_CONTROL_STYLES}>
-            <NavigationControl onViewStateChange={this._onViewStateChange} />
+            <NavigationControl />
           </div>
         </DeckGL>
       </div>

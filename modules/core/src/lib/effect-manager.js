@@ -36,9 +36,21 @@ export default class EffectManager {
     return effects;
   }
 
+  finalize() {
+    this.cleanup();
+  }
+
   // Private
   setEffects(effects = []) {
+    this.cleanup();
     this.effects = effects;
+  }
+
+  cleanup() {
+    for (const effect of this.effects) {
+      effect.cleanup();
+    }
+    this.effects.length = 0;
   }
 
   checkLightingEffect() {

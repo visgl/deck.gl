@@ -1,5 +1,3 @@
-import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
-
 import {
   GreatCircleLayer,
   S2Layer,
@@ -9,66 +7,18 @@ import {
   // KMLLayer
 } from '@deck.gl/geo-layers';
 
-import {_GPUGridLayer as GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer} from '@deck.gl/aggregation-layers';
+import {GridLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
 import {PLYLoader} from '@loaders.gl/ply';
-import {GLTFScenegraphLoader} from '@luma.gl/addons';
 
 import * as dataSamples from '../data-samples';
 
-registerLoaders([GLTFScenegraphLoader, PLYLoader]);
+registerLoaders([PLYLoader]);
 
-const SimpleMeshLayerExample = {
-  layer: SimpleMeshLayer,
-  props: {
-    id: 'mesh-layer',
-    data: dataSamples.points,
-    mesh:
-      'https://raw.githubusercontent.com/uber-web/loaders.gl/e8e7f724cc1fc1d5882125b13e672e44e5ada14e/modules/ply/test/data/cube_att.ply',
-    sizeScale: 40,
-    getPosition: d => d.COORDINATES,
-    getColor: d => [Math.random() * 255, Math.random() * 255, Math.random() * 255],
-    getTransformMatrix: d => [
-      Math.random() * 4 - 2,
-      Math.random() * 4 - 2,
-      Math.random() * 4 - 2,
-      0,
-      Math.random() * 4 - 2,
-      Math.random() * 4 - 2,
-      Math.random() * 4 - 2,
-      0,
-      Math.random() * 4 - 2,
-      Math.random() * 4 - 2,
-      Math.random() * 4 - 2,
-      0,
-      0,
-      0,
-      Math.random() * 10000,
-      1
-    ]
-  }
-};
-
-const ScenegraphLayerExample = {
-  layer: ScenegraphLayer,
-  props: {
-    id: 'scenegraph-layer',
-    data: dataSamples.points,
-    pickable: true,
-    sizeScale: 1,
-    scenegraph:
-      'https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Duck/glTF-Binary/Duck.glb',
-    getPosition: d => d.COORDINATES,
-    getOrientation: d => [Math.random() * 360, Math.random() * 360, Math.random() * 360],
-    getTranslation: d => [0, 0, Math.random() * 10000],
-    getScale: [1, 1, 1]
-  }
-};
-
-const GPUGridLayerExample = {
-  layer: GPUGridLayer,
+const GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
   props: {
     id: 'gpu-grid-layer',
@@ -79,6 +29,9 @@ const GPUGridLayerExample = {
     getPosition: d => d.COORDINATES
   }
 };
+
+const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GRID_LAYER_PROPS);
+const GridLayerExample = Object.assign({}, {layer: GridLayer}, GRID_LAYER_PROPS);
 
 const GPUGridLayerPerfExample = (id, getData) => ({
   layer: GPUGridLayer,
@@ -174,10 +127,6 @@ const TripsLayerExample = {
 
 /* eslint-disable quote-props */
 export default {
-  'Mesh Layers': {
-    SimpleMeshLayer: SimpleMeshLayerExample,
-    ScenegraphLayer: ScenegraphLayerExample
-  },
   'Geo Layers': {
     S2Layer: S2LayerExample,
     H3ClusterLayer: H3ClusterLayerExample,
@@ -187,6 +136,7 @@ export default {
   },
   'Experimental Core Layers': {
     GPUGridLayer: GPUGridLayerExample,
+    GridLayer: GridLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
   }

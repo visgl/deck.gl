@@ -3,6 +3,7 @@ const webpack = require('webpack');
 
 const rootDir = join(__dirname, '..');
 const libSources = join(rootDir, 'modules');
+const packageVersion = require('../lerna.json').version;
 
 const ALIASES = require('ocular-dev-tools/config/ocular.config')({
   aliasMode: 'src',
@@ -13,7 +14,8 @@ const ALIASES = require('ocular-dev-tools/config/ocular.config')({
 // Seems to be a Babel bug
 // https://github.com/babel/babel-loader/issues/149#issuecomment-191991686
 const BABEL_CONFIG = {
-  presets: ['@babel/preset-env', '@babel/preset-react'],
+  // https://babeljs.io/docs/en/babel-polyfill#size
+  presets: [['@babel/preset-env', {useBuiltIns: 'usage'}], '@babel/preset-react'],
   plugins: [
     ['@babel/plugin-proposal-decorators', {legacy: true}],
     ['@babel/plugin-proposal-class-properties', {loose: true}]
@@ -32,6 +34,10 @@ const COMMON_CONFIG = {
     filename: 'bundle.js'
   },
 
+  externals: {
+    'highlight.js': 'hljs'
+  },
+
   module: {
     rules: [
       {
@@ -44,11 +50,19 @@ const COMMON_CONFIG = {
       },
       {
         test: /\.scss$/,
-        loaders: ['style-loader', 'css-loader', 'sass-loader']
-      },
-      {
-        test: /\.(eot|svg|ttf|woff|woff2|gif|jpe?g|png)$/,
-        loader: 'url-loader'
+        use: [
+          // style-loader
+          {loader: 'style-loader'},
+          // css-loader
+          {
+            loader: 'css-loader',
+            options: {
+              url: false
+            }
+          },
+          // sass-loader
+          {loader: 'sass-loader'}
+        ]
       }
     ],
 
@@ -71,9 +85,9 @@ const COMMON_CONFIG = {
   },
 
   plugins: [
-    new webpack.DefinePlugin({
-      MapboxAccessToken: `"${process.env.MapboxAccessToken}"` // eslint-disable-line
-    })
+    // Uncomment to analyze bundle size
+    // new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)(),
+    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ]
 };
 
@@ -107,6 +121,7 @@ const addDevConfig = config => {
 const addProdConfig = config => {
   config.plugins = config.plugins.concat(
     new webpack.DefinePlugin({
+      __VERSION__: JSON.stringify(packageVersion),
       DOCS_DIR: JSON.stringify('https://raw.githubusercontent.com/uber/deck.gl/master')
     })
   );

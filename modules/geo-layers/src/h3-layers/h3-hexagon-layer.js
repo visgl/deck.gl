@@ -22,6 +22,20 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
+function h3ToPolygon(hexId) {
+  const vertices = h3ToGeoBoundary(hexId, true);
+  const refLng = vertices[0][0];
+  for (const pt of vertices) {
+    const deltaLng = pt[0] - refLng;
+    if (deltaLng > 180) {
+      pt[0] -= 360;
+    } else if (deltaLng < -180) {
+      pt[0] += 360;
+    }
+  }
+  return vertices;
+}
+
 const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
   highPrecision: false,
   coverage: {type: 'number', min: 0, max: 1, value: 1},
@@ -100,7 +114,7 @@ export default class H3HexagonLayer extends CompositeLayer {
 
     const {pixelsPerMeter} = viewport.distanceScales;
 
-    let vertices = h3ToGeoBoundary(hex, true);
+    let vertices = h3ToPolygon(hex);
     const [centerLat, centerLng] = h3ToGeo(hex);
 
     const [centerX, centerY] = viewport.projectFlat([centerLng, centerLat]);
@@ -182,7 +196,7 @@ export default class H3HexagonLayer extends CompositeLayer {
         data,
         getPolygon: (object, objectInfo) => {
           const hexagonId = getHexagon(object, objectInfo);
-          return h3ToGeoBoundary(hexagonId, true);
+          return h3ToPolygon(hexagonId);
         }
       }
     );

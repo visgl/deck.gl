@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
-import {App, INITIAL_VIEW_STATE} from 'website-examples/3d-heatmap/app';
+import {App} from 'website-examples/3d-heatmap/app';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 
@@ -25,10 +25,6 @@ export default class HeatmapDemo extends Component {
         max: 100
       }
     };
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

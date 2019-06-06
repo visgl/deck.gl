@@ -232,6 +232,7 @@ test('Attribute#updateBuffer', t => {
   for (const testCase of TEST_CASES) {
     for (const param of TEST_PARAMS) {
       const {attribute} = testCase;
+      attribute.setNeedsUpdate(true);
       attribute.allocate(param.numInstances);
       attribute.updateBuffer({
         numInstances: param.numInstances,
@@ -246,6 +247,169 @@ test('Attribute#updateBuffer', t => {
         `${testCase.title} updates attribute buffer`
       );
     }
+  }
+
+  t.end();
+});
+
+test('Attribute#updateBuffer - partial', t => {
+  let accessorCalled = 0;
+
+  const TEST_PROPS = {
+    data: [{id: 'A'}, {id: 'B'}, {id: 'C'}, {id: 'D'}, {id: 'E'}, {id: 'F'}],
+    // This accessor checks two things: how many times an accessor is called,
+    // and whether `index` is consistently populated for each object
+    getValue: (d, {index}) => accessorCalled++ + index * 10
+  };
+
+  const ATTRIBUTE_1 = new Attribute(gl, {
+    id: 'values-1',
+    type: GL.FLOAT,
+    size: 1,
+    accessor: 'getValue'
+  });
+
+  const ATTRIBUTE_2 = new Attribute(gl, {
+    id: 'values-2',
+    type: GL.FLOAT,
+    size: 1,
+    accessor: 'getValue'
+  });
+
+  const TEST_CASES = [
+    {
+      title: 'full update',
+      attribute: ATTRIBUTE_1,
+      params: {
+        numInstances: 4
+      },
+      value: [0, 11, 22, 33]
+    },
+    {
+      title: 'update with startRow only',
+      attribute: ATTRIBUTE_1,
+      dataRanges: [
+        {
+          startRow: 3
+        }
+      ],
+      params: {
+        numInstances: 4
+      },
+      value: [0, 11, 22, 30]
+    },
+    {
+      title: 'update with partial range',
+      attribute: ATTRIBUTE_1,
+      dataRanges: [
+        {
+          startRow: 1,
+          endRow: 3
+        }
+      ],
+      params: {
+        numInstances: 4
+      },
+      value: [0, 10, 21, 30]
+    },
+    {
+      title: 'multiple partial updates with reallocation',
+      attribute: ATTRIBUTE_1,
+      dataRanges: [
+        {
+          startRow: 2,
+          endRow: 3
+        },
+        {
+          startRow: 4
+        }
+      ],
+      params: {
+        numInstances: 6
+      },
+      value: [0, 10, 20, 30, 41, 52]
+    },
+    {
+      title: 'full update - variable size',
+      attribute: ATTRIBUTE_2,
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3, 1]
+      },
+      value: [0, 0, 11, 22, 22, 22, 22, 33, 33, 33]
+    },
+    {
+      title: 'update with startRow only - variable size',
+      attribute: ATTRIBUTE_2,
+      dataRanges: [
+        {
+          startRow: 3
+        }
+      ],
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3]
+      },
+      value: [0, 0, 11, 22, 22, 22, 22, 30, 30, 30]
+    },
+    {
+      title: 'update with partial range - variable size',
+      attribute: ATTRIBUTE_2,
+      dataRanges: [
+        {
+          startRow: 1,
+          endRow: 3
+        }
+      ],
+      params: {
+        numInstances: 10,
+        bufferLayout: [2, 1, 4, 3]
+      },
+      value: [0, 0, 10, 21, 21, 21, 21, 30, 30, 30]
+    },
+    {
+      title: 'multiple partial updates with reallocation - variable size',
+      attribute: ATTRIBUTE_2,
+      dataRanges: [
+        {
+          startRow: 2,
+          endRow: 3
+        },
+        {
+          startRow: 4
+        }
+      ],
+      params: {
+        numInstances: 13,
+        bufferLayout: [2, 1, 4, 3, 1, 2]
+      },
+      value: [0, 0, 10, 20, 20, 20, 20, 30, 30, 30, 41, 52, 52]
+    }
+  ];
+
+  for (const testCase of TEST_CASES) {
+    const {attribute, dataRanges} = testCase;
+
+    if (dataRanges) {
+      for (const range of dataRanges) {
+        attribute.setNeedsUpdate(true, range);
+      }
+    } else {
+      // full update
+      attribute.setNeedsUpdate(true);
+    }
+
+    // reset stats
+    accessorCalled = 0;
+
+    attribute.allocate(testCase.params.numInstances);
+    attribute.updateBuffer({
+      ...testCase.params,
+      data: TEST_PROPS.data,
+      props: TEST_PROPS
+    });
+
+    t.deepEqual(attribute.value, testCase.value, `${testCase.title} yields correct result`);
   }
 
   t.end();

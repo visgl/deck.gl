@@ -21,7 +21,7 @@
 /* eslint-disable dot-notation, max-statements, no-unused-vars */
 
 import test from 'tape-catch';
-import {MapView, ScatterplotLayer, Deck, PolygonLayer, PathLayer} from 'deck.gl';
+import {MapView, ScatterplotLayer, Deck, PolygonLayer, PathLayer, GridLayer} from 'deck.gl';
 import * as DATA from '../../../../examples/layer-browser/src/data-samples';
 
 const VIEW_STATE = {
@@ -32,12 +32,89 @@ const VIEW_STATE = {
   bearing: 0
 };
 
+const DECK_PROPS = {
+  width: 500,
+  height: 550,
+  views: [new MapView()],
+  viewState: VIEW_STATE,
+  useDevicePixels: false
+};
+
+const NEW_GRID_LAYER_PICK_METHODS = {
+  pickObject: [
+    {
+      parameters: {
+        x: 60,
+        y: 160
+      },
+      results: {
+        count: 0
+      }
+    },
+    {
+      parameters: {
+        x: 300,
+        y: 300
+      },
+      results: {
+        count: 1,
+        // point count in the aggregated cell for each pickInfo object
+        cellCounts: [1]
+      }
+    }
+  ],
+  pickObjects: [
+    {
+      parameters: {
+        x: 300,
+        y: 300,
+        width: 100,
+        height: 100
+      },
+      results: {
+        count: 23,
+        cellCounts: [1, 3, 1, 2, 3, 1, 1, 1, 1, 2, 2, 5, 1, 2, 5, 1, 3, 4, 1, 2, 1, 1, 1]
+      }
+    },
+    {
+      parameters: {
+        x: 50,
+        y: 50,
+        width: 10,
+        height: 10
+      },
+      results: {
+        count: 0
+      }
+    }
+  ],
+  pickMultipleObjects: [
+    {
+      parameters: {
+        x: 86,
+        y: 216
+      },
+      results: {
+        count: 4,
+        cellCounts: [4, 22, 3, 4]
+      }
+    },
+    {
+      parameters: {
+        x: 90,
+        y: 350
+      },
+      results: {
+        count: 0
+      }
+    }
+  ]
+};
+
 const TEST_CASES = [
   {
     id: 'scatterplotLayer',
     props: {
-      width: 500,
-      height: 550,
       layers: [
         new ScatterplotLayer({
           data: DATA.points,
@@ -48,10 +125,7 @@ const TEST_CASES = [
           radiusMinPixels: 1,
           radiusMaxPixels: 30
         })
-      ],
-      views: [new MapView()],
-      viewState: VIEW_STATE,
-      useDevicePixels: false
+      ]
     },
     pickingMethods: {
       pickObject: [
@@ -123,18 +197,13 @@ const TEST_CASES = [
   {
     id: 'polygonLayer',
     props: {
-      width: 500,
-      height: 550,
       layers: [
         new PolygonLayer({
           data: DATA.polygons,
           getPolygon: f => f,
           pickable: true
         })
-      ],
-      views: [new MapView()],
-      viewState: VIEW_STATE,
-      useDevicePixels: false
+      ]
     },
     pickingMethods: {
       pickObject: [
@@ -206,8 +275,6 @@ const TEST_CASES = [
   {
     id: 'pathLayer',
     props: {
-      width: 500,
-      height: 550,
       layers: [
         new PathLayer({
           data: DATA.zigzag,
@@ -216,10 +283,7 @@ const TEST_CASES = [
           widthMinPixels: 1,
           pickable: true
         })
-      ],
-      views: [new MapView()],
-      viewState: VIEW_STATE,
-      useDevicePixels: false
+      ]
     },
     pickingMethods: {
       pickObject: [
@@ -291,8 +355,6 @@ const TEST_CASES = [
   {
     id: 'multiLayers',
     props: {
-      width: 500,
-      height: 550,
       layers: [
         new ScatterplotLayer({
           data: DATA.points,
@@ -315,10 +377,7 @@ const TEST_CASES = [
           widthMinPixels: 1,
           pickable: true
         })
-      ],
-      views: [new MapView()],
-      viewState: VIEW_STATE,
-      useDevicePixels: false
+      ]
     },
     pickingMethods: {
       pickObject: [
@@ -386,6 +445,39 @@ const TEST_CASES = [
         }
       ]
     }
+  },
+  {
+    id: 'newgridlayer - cpu',
+    props: {
+      layers: [
+        new GridLayer({
+          data: DATA.points,
+          getPosition: d => d.COORDINATES,
+          pickable: true,
+          cellSize: 200,
+          gpuAggregation: false,
+          extruded: true
+        })
+      ]
+    },
+    pickingMethods: NEW_GRID_LAYER_PICK_METHODS
+  },
+  {
+    id: 'newgridlayer - gpu',
+    props: {
+      layers: [
+        new GridLayer({
+          data: DATA.points,
+          getPosition: d => d.COORDINATES,
+          pickable: true,
+          cellSize: 200,
+          gpuAggregation: true,
+          extruded: true,
+          fp64: true
+        })
+      ]
+    },
+    pickingMethods: NEW_GRID_LAYER_PICK_METHODS
   }
 ];
 
@@ -410,6 +502,16 @@ test(`pickingTest`, t => {
           pickingCase.results.count,
           `${testCase.id}: ${pickingMethod} should find expected number of objects`
         );
+        if (pickingCase.results.cellCounts) {
+          const cellCounts = Array.isArray(pickInfos)
+            ? pickInfos.map(x => x.object.count)
+            : [pickInfos.object.count];
+          t.deepEqual(
+            pickingCase.results.cellCounts,
+            cellCounts,
+            'Aggregation count for individual cells should match'
+          );
+        }
       }
     }
     if (index === len) {
@@ -420,5 +522,5 @@ test(`pickingTest`, t => {
     }
   }
 
-  deck.setProps(Object.assign({}, TEST_CASES[0].props, {onAfterRender: runTests}));
+  deck.setProps(Object.assign({}, DECK_PROPS, TEST_CASES[0].props, {onAfterRender: runTests}));
 });

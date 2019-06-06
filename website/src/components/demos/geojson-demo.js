@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
-import {App, INITIAL_VIEW_STATE, COLOR_SCALE} from 'website-examples/geojson/app';
+import {App, COLOR_SCALE} from 'website-examples/geojson/app';
 
 export default class GeoJsonDemo extends Component {
 
@@ -14,10 +14,6 @@ export default class GeoJsonDemo extends Component {
 
   static get parameters() {
     return {};
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

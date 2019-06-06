@@ -19,9 +19,8 @@
 // THE SOFTWARE.
 
 /* global fetch */
-
-import {Layer} from '@deck.gl/core';
-import {fp64, ScenegraphNode, log} from '@luma.gl/core';
+import {Layer, createIterable} from '@deck.gl/core';
+import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -38,18 +37,23 @@ const defaultProps = {
 
   fetch: (url, {propName, layer}) => {
     if (propName === 'scenegraph') {
-      return load(url, layer.getLoadOptions()).then(({scenes, animator}) => {
-        scenes[0].animator = animator;
-        return scenes[0];
-      });
+      return load(url, layer.getLoadOptions());
     }
 
     return fetch(url).then(response => response.json());
   },
 
+  getScene: scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph),
+  getAnimator: scenegraph => scenegraph && scenegraph.animator,
+
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
+
+  // flat or pbr
+  _lighting: 'flat',
+  // _lighting must be pbr for this to work
+  _imageBasedLightingEnvironment: null,
 
   // yaw, pitch and roll are in degrees
   // https://en.wikipedia.org/wiki/Euler_angles
@@ -85,7 +89,7 @@ export default class ScenegraphLayer extends Layer {
     });
   }
 
-  calculateInstancePositions64xyLow(attribute) {
+  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
@@ -95,10 +99,12 @@ export default class ScenegraphLayer extends Layer {
     }
 
     const {data, getPosition} = this.props;
-    const {value} = attribute;
-    let i = 0;
-    for (const point of data) {
-      const position = getPosition(point);
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const point of iterable) {
+      objectInfo.index++;
+      const position = getPosition(point, objectInfo);
       value[i++] = fp64LowPart(position[0]);
       value[i++] = fp64LowPart(position[1]);
     }
@@ -109,18 +115,19 @@ export default class ScenegraphLayer extends Layer {
     const {props, oldProps} = params;
 
     if (props.scenegraph !== oldProps.scenegraph) {
-      if (props.scenegraph instanceof ScenegraphNode) {
-        this._deleteScenegraph();
-        this._applyAllAttributes(props.scenegraph);
-        this._applyAnimationsProp(props.scenegraph, props._animations);
-        this.setState({scenegraph: props.scenegraph});
-      } else if (props.scenegraph !== null) {
-        log.warn('bad scenegraph:', props.scenegraph)();
-      }
-    }
+      const scenegraph = props.getScene(props.scenegraph);
+      const animator = props.getAnimator(props.scenegraph);
 
-    if (props._animations !== oldProps._animations) {
-      this._applyAnimationsProp(props.scenegraph, props._animations);
+      if (scenegraph instanceof ScenegraphNode) {
+        this._deleteScenegraph();
+        this._applyAllAttributes(scenegraph);
+        this._applyAnimationsProp(scenegraph, animator, props._animations);
+        this.setState({scenegraph, animator});
+      } else if (scenegraph !== null) {
+        log.warn('invalid scenegraph:', scenegraph)();
+      }
+    } else if (props._animations !== oldProps._animations) {
+      this._applyAnimationsProp(this.state.scenegraph, this.state.animator, props._animations);
     }
   }
 
@@ -129,18 +136,20 @@ export default class ScenegraphLayer extends Layer {
   }
 
   _applyAllAttributes(scenegraph) {
-    const allAttributes = this.getAttributeManager().getAttributes();
-    scenegraph.traverse(model => {
-      this._setModelAttributes(model.model, allAttributes);
-    });
+    if (this.state.attributesAvailable) {
+      const allAttributes = this.getAttributeManager().getAttributes();
+      scenegraph.traverse(model => {
+        this._setModelAttributes(model.model, allAttributes);
+      });
+    }
   }
 
-  _applyAnimationsProp(scenegraph, animationsProp) {
-    if (!scenegraph || !scenegraph.animator || !animationsProp) {
+  _applyAnimationsProp(scenegraph, animator, animationsProp) {
+    if (!scenegraph || !animator || !animationsProp) {
       return;
     }
 
-    const animations = scenegraph.animator.getAnimations();
+    const animations = animator.getAnimations();
 
     Object.keys(animationsProp).forEach(key => {
       // Key can be:
@@ -178,21 +187,49 @@ export default class ScenegraphLayer extends Layer {
     }
   }
 
+  addVersionToShader(source) {
+    if (isWebGL2(this.context.gl)) {
+      return `#version 300 es\n${source}`;
+    }
+
+    return source;
+  }
+
   getLoadOptions() {
+    const modules = ['project32', 'picking'];
+    const {_lighting, _imageBasedLightingEnvironment} = this.props;
+
+    if (_lighting === 'pbr') {
+      modules.push(pbr);
+    }
+
+    let env = null;
+    if (_imageBasedLightingEnvironment) {
+      if (typeof _imageBasedLightingEnvironment === 'function') {
+        env = _imageBasedLightingEnvironment({gl: this.context.gl, layer: this});
+      } else {
+        env = _imageBasedLightingEnvironment;
+      }
+    }
+
     return {
       gl: this.context.gl,
       waitForFullLoad: true,
+      imageBasedLightingEnvironment: env,
       modelOptions: {
-        vs,
-        fs,
-        modules: ['project32', 'picking'],
+        vs: this.addVersionToShader(vs),
+        fs: this.addVersionToShader(fs),
+        modules,
         isInstanced: true
-      }
+      },
+      // tangents are not supported
+      useTangents: false
     };
   }
 
   updateAttributes(props) {
     super.updateAttributes(props);
+    this.setState({attributesAvailable: true});
     if (!this.state.scenegraph) return;
 
     const attributeManager = this.getAttributeManager();
@@ -205,8 +242,8 @@ export default class ScenegraphLayer extends Layer {
   draw({moduleParameters = null, parameters = {}, context}) {
     if (!this.state.scenegraph) return;
 
-    if (this.props._animations && this.state.scenegraph.animator) {
-      this.state.scenegraph.animator.animate(context.animationProps.time);
+    if (this.props._animations && this.state.animator) {
+      this.state.animator.animate(context.animationProps.time);
     }
 
     const {sizeScale} = this.props;
@@ -218,7 +255,9 @@ export default class ScenegraphLayer extends Layer {
         parameters,
         uniforms: {
           sizeScale,
-          sceneModelMatrix: worldMatrix
+          sceneModelMatrix: worldMatrix,
+          // Needed for PBR (TODO: find better way to get it)
+          u_Camera: model.model.program.uniforms.project_uCameraPosition
         }
       });
     });

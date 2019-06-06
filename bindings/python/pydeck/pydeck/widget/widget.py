@@ -3,12 +3,12 @@
 
 from __future__ import unicode_literals
 import os
+import warnings
 
 import ipywidgets as widgets
 from traitlets import Int, Unicode
 
 from ._frontend import module_name, module_version
-
 
 class DeckGLWidget(widgets.DOMWidget):
     """
@@ -32,3 +32,9 @@ class DeckGLWidget(widgets.DOMWidget):
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Int(500).tag(sync=True)
+
+    def __init__(self, suppress_warning=False):
+        super(DeckGLWidget, self).__init__()
+        if not os.environ.get('MAPBOX_API_KEY') and not suppress_warning:
+            warnings.warn('MAPBOX_API_KEY is not set. This may impact available features of the pydeck library.', UserWarning)
+

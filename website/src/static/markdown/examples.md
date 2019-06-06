@@ -80,7 +80,7 @@
     </div>
     <div class="thumb">
       <div class="bg-black" data-title="Taxi Trips in NYC" data-name="TripsLayer">
-        <a href="#/examples/custom-layers/trip-routes">
+        <a href="#/examples/core-layers/trips-layer">
           <img src="images/demo-thumb-trip.jpg" />
         </a>
         </div>

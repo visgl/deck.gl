@@ -25,12 +25,12 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
     // Unless child is a View, position / render as part of the default view
     let viewId = defaultViewId;
     let viewChildren = child;
-    const childStyle = child.props.style;
 
     if (inheritsFrom(child.type, View)) {
       viewId = child.props.id || defaultViewId;
       viewChildren = child.props.children;
     }
+    const childStyle = viewChildren && viewChildren.props && viewChildren.props.style;
 
     const viewport = viewManager.getViewport(viewId);
     const viewState = viewManager.getViewState(viewId);
@@ -69,7 +69,8 @@ export default function positionChildrenUnderViews({children, viewports, deck, C
       const contextValue = {
         viewport,
         container: deck.canvas.offsetParent,
-        eventManager: deck.eventManager
+        eventManager: deck.eventManager,
+        onViewStateChange: deck._onViewStateChange
       };
       viewChildren = createElement(ContextProvider, {value: contextValue}, viewChildren);
     }

@@ -61,7 +61,7 @@ Takes a single parameter as a map of attribute descriptor objects:
 * keys are attribute names
 * values are objects with attribute definitions:
   + `size` (Number) - number of elements per object
-  + `accessor` (String | Array of strings) - accessor name(s) that will
+  + `accessor` (String | Array of strings | Function) - accessor name(s) that will
     trigger an update of this attribute when changed. Used with
     [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
   + `update` (Function) - the function to be called when data changes
@@ -102,11 +102,16 @@ Mark an attribute as need update.
 Parameters:
 
 * `name` (String) - Either the name of the attribute, or the name of an accessor. If an name of accessor is provided, all attributes with that accessor are invalidated.
+* `dataRange` (Object, optional) - A partial range of the attribute to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attribute for all data.
 
 
 ##### `invalidateAll`
 
 Mark all attributes as need update.
+
+Parameters:
+
+* `dataRange` (Object, optional) - A partial range of the attributes to invalidate, in the shape of `{startRow, endRow}`. Start (included) and end (excluded) are indices into the data array. If not provided, recalculate the  attributes for all data.
 
 
 ##### `update`
@@ -118,6 +123,8 @@ attributeManager.update({
     data,
     numInstances,
     transitions,
+    startIndex,
+    endIndex,
     props = {},
     buffers = {},
     context = {},

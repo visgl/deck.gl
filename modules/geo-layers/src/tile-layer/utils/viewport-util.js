@@ -19,7 +19,7 @@ function getBoundingBox(viewport) {
 }
 
 function pixelsToTileIndex(a) {
-  return Math.floor(a / TILE_SIZE);
+  return a / TILE_SIZE;
 }
 
 /**
@@ -41,13 +41,23 @@ export function getTileIndices(viewport, maxZoom, minZoom) {
 
   const bbox = getBoundingBox(viewport);
 
-  const [minX, minY] = lngLatToWorld([bbox[0], bbox[3]], viewport.scale).map(pixelsToTileIndex);
-  const [maxX, maxY] = lngLatToWorld([bbox[2], bbox[1]], viewport.scale).map(pixelsToTileIndex);
+  let [minX, minY] = lngLatToWorld([bbox[0], bbox[3]], viewport.scale).map(pixelsToTileIndex);
+  let [maxX, maxY] = lngLatToWorld([bbox[2], bbox[1]], viewport.scale).map(pixelsToTileIndex);
+
+  /*
+      |  TILE  |  TILE  |  TILE  |
+        |(minPixel)           |(maxPixel)
+      |(minIndex)                |(maxIndex)  
+   */
+  minX = Math.max(0, Math.floor(minX));
+  maxX = Math.min(viewport.scale, Math.ceil(maxX));
+  minY = Math.max(0, Math.floor(minY));
+  maxY = Math.min(viewport.scale, Math.ceil(maxY));
 
   const indices = [];
 
-  for (let x = minX; x <= maxX; x++) {
-    for (let y = minY; y <= maxY; y++) {
+  for (let x = minX; x < maxX; x++) {
+    for (let y = minY; y < maxY; y++) {
       if (maxZoom && z > maxZoom) {
         indices.push(getAdjustedTileIndex({x, y, z}, maxZoom));
       } else {

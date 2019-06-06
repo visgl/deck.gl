@@ -99,6 +99,40 @@ Animations are parsed automatically from `glTF` files. Requires `_animate` on de
 
 Not supported. Please do not use this option.
 
+##### `getScene` (Function, optional)
+
+- Default: `scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph)`
+
+If you have multiple scenes you can select the scene you want to use.
+Only triggers when scenegraph property changes.
+
+##### `getAnimator` (Function, optional)
+
+- Default: `scenegraph => scenegraph && scenegraph.animator`
+
+Return `null` to disable animation or provide your custom animator.
+Only triggers when scenegraph property changes.
+
+##### `_lighting` (String, optional)
+
+- Default: `flat`
+
+**Experimental** lighting support, can be:
+- `flat`: No light calculation. Works well with any textured object.
+- `pbr` Uses `glTF` PBR model. Works well with `glTF` models.
+
+Only read when scenegraph property changes.
+Uses [global light configuration](/docs/developer-guide/using-lighting.md) from deck.
+
+##### `_imageBasedLightingEnvironment` (Function or GLTFEnvironment, optional)
+
+- Default: `null`
+
+**Experimental** Can be:
+- A `GLTFEnvironment` object.
+- A function that takes `{gl, layer}` as first argument and returns a `GLTFEnvironment`.
+
+Only read when scenegraph property changes.
 
 ### Data Accessors
 

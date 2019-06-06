@@ -4,7 +4,7 @@ import Protobuf from 'pbf';
 import createLayerDemoClass from './layer-demo-base';
 import {DATA_URI} from '../../constants/defaults';
 
-import {GreatCircleLayer, S2Layer, TileLayer} from 'deck.gl';
+import {GreatCircleLayer, S2Layer, TileLayer, H3HexagonLayer, H3ClusterLayer} from 'deck.gl';
 
 export const GreatCircleLayerDemo = createLayerDemoClass({
   Layer: GreatCircleLayer,
@@ -23,17 +23,48 @@ export const GreatCircleLayerDemo = createLayerDemoClass({
 export const S2LayerDemo = createLayerDemoClass({
   Layer: S2Layer,
   dataUrl: `${DATA_URI}/sf.s2cells.json`,
-  formatTooltip: d => d.token,
+  formatTooltip: d => `${d.token} value: ${d.value}`,
   props: {
-    opacity: 0.6,
     pickable: true,
-    stroked: true,
+    wireframe: false,
     filled: true,
     extruded: true,
     elevationScale: 1000,
     getS2Token: d => d.token,
-    getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128, 128],
+    getFillColor: d => [d.value * 255, (1 - d.value) * 255, (1 - d.value) * 128],
     getElevation: d => d.value
+  }
+});
+
+export const H3HexagonLayerDemo = createLayerDemoClass({
+  Layer: H3HexagonLayer,
+  dataUrl: `${DATA_URI}/sf.h3cells.json`,
+  formatTooltip: d => `${d.hex} count: ${d.count}`,
+  props: {
+    pickable: true,
+    wireframe: false,
+    filled: true,
+    extruded: true,
+    elevationScale: 20,
+    getHexagon: d => d.hex,
+    getFillColor: d => [255, (1 - d.count / 500) * 255, 0],
+    getElevation: d => d.count
+  }
+});
+
+export const H3ClusterLayerDemo = createLayerDemoClass({
+  Layer: H3ClusterLayer,
+  dataUrl: `${DATA_URI}/sf.h3clusters.json`,
+  formatTooltip: d => `density: ${d.mean}`,
+  props: {
+    pickable: true,
+    stroked: true,
+    filled: true,
+    extruded: false,
+    getHexagons: d => d.hexIds,
+    getFillColor: d => [255, (1 - d.mean / 500) * 255, 0],
+    getLineColor: [255, 255, 255],
+    lineWidthMinPixels: 2
   }
 });
 
@@ -64,7 +95,9 @@ export const TileLayerDemo = createLayerDemoClass({
     lineWidthMinPixels: 1,
 
     getTileData: ({x, y, z}) => {
-      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${MapboxAccessToken}`;
+      const mapSource = `https://a.tiles.mapbox.com/v4/mapbox.mapbox-streets-v7/${z}/${x}/${y}.vector.pbf?access_token=${
+        process.env.MapboxAccessToken // eslint-disable-line
+      }`;
       return fetch(mapSource)
         .then(response => response.arrayBuffer())
         .then(buffer => {

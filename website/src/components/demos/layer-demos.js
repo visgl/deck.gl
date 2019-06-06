@@ -7,6 +7,7 @@ import {
   BitmapLayer,
   ColumnLayer,
   GeoJsonLayer,
+  GridCellLayer,
   IconLayer,
   LineLayer,
   PathLayer,
@@ -44,7 +45,9 @@ export const ColumnLayerDemo = createLayerDemoClass({
     pickable: true,
     elevationScale: 5000,
     getPosition: d => d.centroid,
-    getColor: d => [48, 128, d.value * 255, 255],
+    getFillColor: d => [48, 128, d.value * 255, 255],
+    getLineColor: [0, 0, 0],
+    getLineWidth: 20,
     getElevation: d => d.value
   }
 });
@@ -65,6 +68,21 @@ export const GeoJsonLayerDemo = createLayerDemoClass({
     getRadius: 100,
     getLineWidth: 1,
     getElevation: 30
+  }
+});
+
+export const GridCellLayerDemo = createLayerDemoClass({
+  Layer: GridCellLayer,
+  dataUrl: `${DATA_URI}/hexagons.json`,
+  formatTooltip: d => `height: ${d.value * 5000}m`,
+  props: {
+    pickable: true,
+    extruded: true,
+    cellSize: 200,
+    elevationScale: 5000,
+    getPosition: d => d.centroid,
+    getFillColor: d => [48, 128, d.value * 255, 255],
+    getElevation: d => d.value
   }
 });
 
@@ -111,6 +129,9 @@ export const PathLayerDemo = createLayerDemoClass({
   dataUrl: `${DATA_URI}/bart-lines.json`,
   formatTooltip: d => d.name,
   props: {
+    parameters: {
+      depthMask: false
+    },
     pickable: true,
     widthScale: 20,
     widthMinPixels: 2,
@@ -219,8 +240,8 @@ export const TripsLayerDemo = createLayerDemoClass({
     }
   },
   props: {
-    getPath: d =>
-      d.waypoints.map(p => [p.coordinates[0], p.coordinates[1], p.timestamp - 1554772579000]),
+    getPath: d => d.waypoints.map(p => p.coordinates),
+    getTimestamps: d => d.waypoints.map(p => p.timestamp - 1554772579000),
     getColor: [253, 128, 93],
     opacity: 0.8,
     widthMinPixels: 8,

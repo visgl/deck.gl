@@ -27,7 +27,7 @@ varying float result;
       inFlag
     },
     vs: VS,
-    modules: ['picking'],
+    modules: ['picking', 'project32'],
     inject,
     feedbackMap: {
       inFlag: 'result'

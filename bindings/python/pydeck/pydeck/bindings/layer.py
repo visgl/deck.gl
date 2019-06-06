@@ -73,6 +73,7 @@ class Layer(JSONMixin):
         elevation_scale=None,
         extruded=None,
         upper_percentile=100,
+        get_fill_color=None,
         get_color=None,
     ):
         self.type = type
@@ -86,6 +87,7 @@ class Layer(JSONMixin):
         self.opacity = opacity
         self.get_radius = get_radius or radius
         self.get_color = get_color
+        self.get_fill_color = get_fill_color
         if is_aggregate_layer(type):
             self.radius = radius
             self.upper_percentile = upper_percentile

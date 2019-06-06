@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {readableInteger} from '../../utils/format-utils';
-import {App, INITIAL_VIEW_STATE, inFlowColors, outFlowColors} from 'website-examples/brushing/app';
+import {App, inFlowColors, outFlowColors} from 'website-examples/brushing/app';
 
 const colorRamp = inFlowColors.slice().reverse().concat(outFlowColors)
   .map(color => `rgb(${color.join(',')})`);
@@ -24,10 +24,6 @@ export default class BrushingDemo extends Component {
       brushRadius: {displayName: 'Brush Radius', type: 'range', value: 200000, step: 1000,
         min: 50000, max: 1000000}
     };
-  }
-
-  static get viewport() {
-    return INITIAL_VIEW_STATE;
   }
 
   static get mapStyle() {

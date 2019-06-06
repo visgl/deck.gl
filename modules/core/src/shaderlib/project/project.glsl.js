@@ -42,7 +42,7 @@ uniform vec2 project_uViewportSize;
 uniform float project_uDevicePixelRatio;
 uniform float project_uFocalDistance;
 uniform vec3 project_uCameraPosition;
-uniform vec2 project_uCoordinateOrigin;
+uniform vec3 project_uCoordinateOrigin;
 
 const float TILE_SIZE = 512.0;
 const float PI = 3.1415926536;
@@ -74,11 +74,6 @@ vec4 project_size(vec4 meters) {
 // normals in the worldspace
 //
 vec3 project_normal(vec3 vector) {
-  if (project_uCoordinateSystem == COORDINATE_SYSTEM_LNG_LAT ||
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS ||
-    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_AUTO_OFFSET) {
-    return normalize(vector * project_uCommonUnitsPerWorldUnit);
-  }
   // Apply model matrix
   vec4 normal_modelspace = project_uModelMatrix * vec4(vector, 0.0);
   return normalize(normal_modelspace.xyz * project_uCommonUnitsPerMeter);
@@ -135,7 +130,7 @@ vec4 project_position(vec4 position, vec2 position64xyLow) {
   // Apply model matrix
   vec4 position_world = project_uModelMatrix * position;
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_IDENTITY) {
-    position_world.xy -= project_uCoordinateOrigin;
+    position_world.xyz -= project_uCoordinateOrigin;
     // Translation is already added to the high parts
     position_world += project_uModelMatrix * vec4(position64xyLow, 0.0, 0.0);
   }

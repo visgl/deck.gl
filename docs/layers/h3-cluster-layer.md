@@ -1,3 +1,5 @@
+<!-- INJECT:"H3ClusterLayerDemo" -->
+
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/geo--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/geo-layers" />
   <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
@@ -20,17 +22,16 @@ const App = ({data, viewport}) => {
    * Data format:
    * [
    *   {
-   *     name: 'Downtown',
-   *     hexagonIds: [
-   *       '882830829bfffff',
-   *       '8828308299fffff',
-   *       '8828308291fffff',
-   *       '8828308293fffff',
-   *       '882830874dfffff',
-   *       '88283095a7fffff',
-   *       '88283095a5fffff'
-         ],
-   *     population: 4780
+   *     mean: 73.333,
+   *     count: 440,
+   *     hexIds: [
+   *       '88283082b9fffff',
+   *       '88283082b1fffff',
+   *       '88283082b5fffff',
+   *       '88283082b7fffff',
+   *       '88283082bbfffff',
+   *       '882830876dfffff'
+   *     ]
    *   },
    *   ...
    * ]
@@ -38,16 +39,16 @@ const App = ({data, viewport}) => {
   const layer = new H3ClusterLayer({
     id: 'h3-cluster-layer',
     data,
+    pickable: true,
     stroked: true,
     filled: true,
     extruded: false,
-    pickable: true,
-    getHexagons: d => d.hexagonIds,
-    getLineWidth: 30,
-    getLineColor: [0, 0, 0],
-    getFillColor: d => [d.population / 10000 * 255, 255, 0],
+    getHexagons: d => d.hexIds,
+    getFillColor: d => [255, (1 - d.mean / 500) * 255, 0],
+    getLineColor: [255, 255, 255],
+    lineWidthMinPixels: 2,
     onHover: ({object, x, y}) => {
-      const tooltip = `${object.name}\nPopulation: ${object.population}`;
+      const tooltip = `density: ${object.mean}`;
       /* Update tooltip
          http://deck.gl/#/documentation/developer-guide/adding-interactivity?section=example-display-a-tooltip-for-hovered-object
       */
