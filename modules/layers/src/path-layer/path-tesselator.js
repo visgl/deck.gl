@@ -22,11 +22,9 @@ const {Tesselator} = experimental;
 import {fp64 as fp64Module} from '@luma.gl/core';
 const {fp64LowPart} = fp64Module;
 
-const POSITION_TYPE = {
-  START_CAP: 1,
-  END_CAP: 2,
-  INVALID: -4
-};
+const START_CAP = 1;
+const END_CAP = 2;
+const INVALID = -4;
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
@@ -94,16 +92,16 @@ export default class PathTesselator extends Tesselator {
       segmentTypes[i] = 0;
       if (ptIndex === 0) {
         if (isPathClosed) {
-          segmentTypes[i] += POSITION_TYPE.INVALID;
+          segmentTypes[i] += INVALID;
         } else {
-          segmentTypes[i] += POSITION_TYPE.START_CAP;
+          segmentTypes[i] += START_CAP;
         }
       }
       if (ptIndex === geometrySize - 1) {
         if (isPathClosed) {
-          segmentTypes[i] += POSITION_TYPE.INVALID;
+          segmentTypes[i] += INVALID;
         } else {
-          segmentTypes[i] += POSITION_TYPE.END_CAP;
+          segmentTypes[i] += END_CAP;
         }
       }
 

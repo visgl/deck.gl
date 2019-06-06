@@ -24,12 +24,13 @@ export default `\
 
 attribute vec3 positions;
 
+attribute float instanceTypes;
 attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
-attribute vec4 instanceStartEndPositions64xyLow;
 attribute vec3 instanceLeftPositions;
 attribute vec3 instanceRightPositions;
-attribute vec4 instanceNeighborPositions64xyLow;
+attribute vec4 instanceLeftStartPositions64xyLow;
+attribute vec4 instanceEndRightPositions64xyLow;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -145,8 +146,9 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
 
   // special treatment for start cap and end cap
   // using a small number as the limit for determining if the lenA or lenB is 0
-  float isStartCap = step(lenA, 1.0e-5);
-  float isEndCap = step(lenB, 1.0e-5);
+  float isEnd = positions.x;
+  float isStartCap = isEnd * float(instanceTypes == 1.0 || instanceTypes == 3.0);
+  float isEndCap = (1.0 - isEnd) * float(instanceTypes >= 2.0);
   float isCap = max(isStartCap, isEndCap);
 
   // 0: center, 1: side
@@ -176,7 +178,6 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
   // Generate variables for dash calculation
   vDashArray = instanceDashArrays;
   vPathLength = L / width;
-  float isEnd = positions.x;
   vec2 offsetFromStartOfPath = mix(vCornerOffset, vCornerOffset + deltaA / width, isEnd);
   vec2 dir = mix(dirB, dirA, isEnd);
   vPathPosition = vec2(
@@ -184,7 +185,8 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
     dot(offsetFromStartOfPath, dir)
   );
 
-  return vec3(vCornerOffset * width, 0.0);
+  float isValid = step(0.0, instanceTypes);
+  return vec3(vCornerOffset * width * isValid, 0.0);
 }
 
 void main() {
@@ -198,7 +200,7 @@ void main() {
   // Calculate current position 64bit
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
+  vec2 currPosition64xyLow = mix(instanceLeftStartPositions64xyLow.zw, instanceEndRightPositions64xyLow.xy, isEnd);
   vec2 projected_curr_position[2];
   project_position_fp64(currPosition.xy, currPosition64xyLow, projected_curr_position);
   float projected_curr_position_z = project_size(currPosition.z);
@@ -206,7 +208,7 @@ void main() {
   // Calculate previous position
 
   vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
-  vec2 prevPosition64xyLow = mix(instanceNeighborPositions64xyLow.xy, instanceStartEndPositions64xyLow.xy, isEnd);
+  vec2 prevPosition64xyLow = mix(instanceLeftStartPositions64xyLow.xy, instanceLeftStartPositions64xyLow.zw, isEnd);
 
   // Calculate prev position 64bit
 
@@ -215,7 +217,7 @@ void main() {
 
   // Calculate next positions
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
-  vec2 nextPosition64xyLow = mix(instanceStartEndPositions64xyLow.zw, instanceNeighborPositions64xyLow.zw, isEnd);
+  vec2 nextPosition64xyLow = mix(instanceEndRightPositions64xyLow.xy, instanceEndRightPositions64xyLow.zw, isEnd);
 
   // Calculate next position 64bit
 
