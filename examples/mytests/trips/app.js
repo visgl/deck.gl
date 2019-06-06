@@ -12,7 +12,7 @@ import Slider from '@material-ui/lab/Slider';
 import './style.css';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 let sampleSize = 1;
 let actType = 'Other';
@@ -244,10 +244,14 @@ export class App extends Component {
         currentTime: this.state.time,
         pickable: false,
         autoHighlight: false,
-        highlightColor: [0, 255, 255]
-        //updateTriggers: {
-        //  getColor: this.state.time
-       // }
+        highlightColor: [0, 255, 255],
+        transitions: {
+          getColors: {
+            duration: 2000,
+            easing: d3.easeLinear,
+            enter: value => [value[0], ]
+          }
+        }
       }),
       new GeoJsonLayer({
         id: 'boundaries',
