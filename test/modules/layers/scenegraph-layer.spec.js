@@ -18,17 +18,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './bitmap-layer.spec';
-import './path-tesselator.spec';
-import './polygon-tesselation.spec';
-import './core-layers.spec';
-import './polygon-layer.spec';
-import './geojson.spec';
-import './geojson-layer.spec';
-import './simple-mesh-layer.spec';
-import './scenegraph-layer.spec';
-import './path-layer/path-layer-vertex.spec';
-import './icon-manager.spec';
-import './text-layer/font-atlas-utils.spec';
-import './text-layer/lru-cache.spec';
-import './column-geometry.spec';
+import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+
+import * as FIXTURES from 'deck.gl-test/data';
+
+test('ScenegraphLayer#tests', t => {
+  const testCases = generateLayerTests({
+    Layer: ScenegraphLayer,
+    sampleProps: {
+      data: FIXTURES.points,
+      getPosition: d => d.COORDINATES,
+      scenegraph: ''
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      // if (layer.props.mesh) {
+      //   t.ok(layer.getModels().length > 0, 'Layer should have models');
+      // }
+    },
+    runDefaultAsserts: false
+  });
+
+  testLayer({Layer: ScenegraphLayer, testCases, onError: t.notOk});
+
+  t.end();
+});

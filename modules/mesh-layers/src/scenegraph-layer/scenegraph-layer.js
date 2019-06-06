@@ -132,6 +132,7 @@ export default class ScenegraphLayer extends Layer {
   }
 
   finalizeState() {
+    super.finalizeState();
     this._deleteScenegraph();
   }
 
