@@ -53,7 +53,7 @@ class Layer(JSONMixin):
             Type of layer to render, e.g., `HexagonLayer`
         id : str
             Unique name for layer
-        data : list or str
+        data : str or :obj:`list` of :obj:`dict` 
             Either a URL of data to load in or an array of data
         get_color : str or list of float
             String representing field name of color or float representing the desired color

@@ -25,8 +25,14 @@ class Deck(JSONMixin):
             List of pydeck.View objects to render
         map_style : str, default "mapbox://styles/mapbox/dark-v9"
             URI for Mapbox basemap style
-        initial_view_state : pydeck.ViewState, default pydeck.ViewState()
-            Initial camera angle relative to the map
+        initial_view_state : pydeck.ViewState, default ViewState()
+            Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
+            To compute a viewport from data, see `pydeck.data_utils.autocompute_viewport`
+
+        Examples
+        -------
+        >>> scatterplot = Layer('ScatterplotLayer',  #TODO finish
+        pydeck.Deck(layers=)
 
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
@@ -34,9 +40,9 @@ class Deck(JSONMixin):
         self.layers = layers
         self.views = views
         self.map_style = map_style
+        # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
-
 
     def __add__(self, obj):
         """
