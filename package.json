@@ -53,6 +53,7 @@
     "eslint-plugin-react": "^7.10",
     "gl": "^4.2.2",
     "glsl-transpiler": "^1.8.3",
+    "jsdom": "^15.0.0",
     "ocular-dev-tools": "0.0.18",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",

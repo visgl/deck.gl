@@ -27,6 +27,7 @@ import './geo-layers';
 
 import './json';
 import './react';
+import './jupyter-widget';
 
 // TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
