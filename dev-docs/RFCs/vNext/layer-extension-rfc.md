@@ -26,7 +26,6 @@ To mitigate this, we can of course add as many customizable functionalities to t
 ### fp64
 
 * Shader module: `project64` (replaces `project32`)
-* Uniforms: `projectionFP64[16]`, `projectionScaleFP64`
 
 ### Picking
 
@@ -35,7 +34,6 @@ Components:
 * Props: `pickable`, `autoHighlight`, `highlightedObjectIndex`, `highlightColor`
 * Shader module: `picking`
 * Attribute: `instancePickingColors` (generated regardless of the `pickable` setting)
-* Uniforms: `picking_uActive`, `picking_uHighlightColor`, `picking_uSelectedColor`
 * Shader injection:
   - Vertex shader: `picking_setPickingColor(instancePickingColors);`
   - Fragment shader: `gl_FragColor = picking_filterHighlightColor(gl_FragColor); gl_FragColor = picking_filterPickingColor(gl_FragColor);`
@@ -49,7 +47,6 @@ Components:
 * Props: `getFilterValue`, `filterRange`
 * Shader module: `filter`
 * Attributes: `instanceFilterValue`
-* Uniforms: `filterRange`
 * Shader injection:
   - Vertex shader: `filter_setVisibility(instanceFilterValue);`
   - Frament shader: `gl_FragColor = filter_filterColor(gl_FragColor);`
@@ -61,8 +58,7 @@ See [ArcBrushingLayer example](https://gist.github.com/Pessimistress/dc2becf3809
 A generic version of this functionality would need the following components:
 
 * Props: `enableBrush`, `brushRadius`
-* Shader module: `brush`
-* Uniforms: `mousePosition`, `enableBrush`, `brushRadius`
+* Shader module: `brushing`
 * Shader injection:
   - Vertex shader: `brush_setVisibility(instancePositions);`
   - Frament shader: `gl_FragColor = brush_filterColor(gl_FragColor);`
@@ -70,56 +66,23 @@ A generic version of this functionality would need the following components:
 
 ## Proposal
 
-### Layer Class
+### Layer Class Changes
 
 Some changes to the base Layer class are needed to make a generic, reusable extension system work:
 
-* New interface that each sublayer must implement. During a layer update, these will be invoked by the base layer lifecycle instead of the current ad-hoc implementation:
-  - `getShaders()`
-  - `createModels(shaders)`
-* New method that an extension can call:
-  - `invalidateModels()`
-* official `bufferLayout` (*API audit needed*) support in attribute management. The `bufferLayout` state is used in PathLayer and PolygonLayer to describe the number of instance for each data object. Currently, `AttributeManager`'s auto-update feature always assumes 1:1 mapping between an instance and a data object. Without supporting variable layout, an extension will have to implement layer-specific updaters for these layers.
+* A base layer `getShaders` method that each layer can utilize to augment their shaders with extensions.
+* (Implemented in v7.1) Official `bufferLayout` support in attribute management. The `bufferLayout` state is used in PathLayer and PolygonLayer to describe the number of instance for each data object. Currently, `AttributeManager`'s auto-update feature always assumes 1:1 mapping between an instance and a data object. Without supporting variable layout, an extension will have to implement layer-specific updaters for these layers.
 
+### New LayerExtension Class
 
-### Idea 1: Higher-Order Layers
+Add a `LayerExtension` interface. All layer extensions should extend this class. It contains the following methods:
 
-This is inspired by React's [Higher-Order Components](https://reactjs.org/docs/higher-order-components.html) concept.
+- `getShaders(shaders)` - called after a layer's own `getShaders`, a hook to inject additional modules/code into the shaders
+- `initializeState(layer, initParams)` - called after a layer's own `initializeState`, a hook to add attributes and/or initial states
+- `updateState(layer, initParams)` - called after a layer's own `updateState`, a hook to update layer state from props
+- `finalizeState(layer)` - called after a layer's own `finalizeState`, a hook to clean up resources
 
-```js
-import {Deck} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
-import {brushing, filterable} from '@deck.gl/layer-extensions';
-
-const BrushingFiterableScatterplotLayer = brushing(filterable(ScatterplotLayer, {size: 2}));
-
-new Deck({
-  layers: [
-    new BrushingFiterableScatterplotLayer({
-      // props for brushing
-      enableBrush: false,
-      // props for filtering
-      getFilterValue: d => [d.time, d.count],
-      filterRange: [1545000000, 1545002000, 10, 20],
-      ...
-    })
-  ]
-});
-```
-
-When used, these extensions wrap the original layer and return a new class with the additional functionality.
-
-Pros:
-
-- The extension system can be implemented entirely independently from the core.
-
-Cons:
-
-- Composite layers are difficult to extend in this fashion. Sub layer classes need to be extended individually and overriden with `subLayerProps`.
-- Using multiple extensions will wrap a layer in nested classes, making it harder to debug.
-
-
-### Idea 2: Extensions Prop
+### New extensions Prop
 
 Add a new `extensions` prop to the base `Layer` class which accepts an array of `LayerExtension` objects.
 
@@ -155,16 +118,45 @@ Pros:
 - Composite layers can directly pass extensions to sub layers
 - Flat structure, easy to read
 
+Challenges:
+
+- The layers need to watch the extensions prop and recbuild their models if it changes.
+- The layer cannot utilize the current propTypes system to apply fallback, validate or compare the new props added by an extension.
+
+
+#### Alternative option: Higher-Order Layers
+
+This is inspired by React's [Higher-Order Components](https://reactjs.org/docs/higher-order-components.html) concept.
+
+```js
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import {brushing, filterable} from '@deck.gl/layer-extensions';
+
+const BrushingFiterableScatterplotLayer = brushing(filterable(ScatterplotLayer, {size: 2}));
+
+new Deck({
+  layers: [
+    new BrushingFiterableScatterplotLayer({
+      // props for brushing
+      enableBrush: false,
+      // props for filtering
+      getFilterValue: d => [d.time, d.count],
+      filterRange: [1545000000, 1545002000, 10, 20],
+      ...
+    })
+  ]
+});
+```
+
+When used, these extensions wrap the original layer and return a new class with the additional functionality.
+
+Pros:
+
+- The extension system can be implemented entirely independently from the core.
+
 Cons:
 
-- The base layer class need to handle the shallow/deep change of the prop and recompile the shader on change.
+- Composite layers are difficult to extend in this fashion. Sub layer classes need to be extended individually and overriden with `subLayerProps`.
+- Using multiple extensions will wrap a layer in nested classes, making it harder to debug.
 
-
-#### LayerExtension Class
-
-The LayerExtension class is a partial implementation of a Layer:
-
-* `static defaultProps = {}` - will be merged with the layer's default props.
-* `getShaders()` - returns necessary shader modules and injections that will be merged with the layer's own
-* `initializeState()` - called in addition to the layer's own
-* `updateState()` - called in addition to the layer's own
