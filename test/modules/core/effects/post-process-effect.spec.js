@@ -42,7 +42,7 @@ test('PostProcessEffect#render', t => {
   const outputBuffer = new Framebuffer(gl);
 
   const params1 = effect.render({inputBuffer, outputBuffer});
-  t.ok(params1, 'post-processing effect rendered well');
+  t.ok(params1, 'post-processing effect rendered without throwing');
   t.deepEqual(
     params1,
     {inputBuffer: outputBuffer, outputBuffer: inputBuffer},
@@ -54,7 +54,7 @@ test('PostProcessEffect#render', t => {
     outputBuffer,
     target: Framebuffer.getDefaultFramebuffer(gl)
   });
-  t.ok(params2, 'post-processing effect rendered well');
+  t.ok(params2, 'post-processing effect rendered without throwing');
   t.deepEqual(
     params2,
     {inputBuffer: outputBuffer, outputBuffer: inputBuffer},
