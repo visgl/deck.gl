@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.2] - June 7 2019
+
+- Fix tree shaking in pre-bundled version (#3214)
+
 #### deck.gl [v7.1.1] - June 6 2019
 
 - Support 3D paths with TripsLayer (#3192)
