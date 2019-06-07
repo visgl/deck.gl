@@ -8,7 +8,6 @@ from .bindings import (  # noqa
     Deck,
     Layer,
     LightSettings,
-    ScatterplotLayer,
     View,
     ViewState
 )
