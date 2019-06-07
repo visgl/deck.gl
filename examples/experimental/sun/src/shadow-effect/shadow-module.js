@@ -27,9 +27,9 @@ uniform vec4 shadow_color;
 
 varying vec3 shadow_vPosition;
 
-const vec4 bitPackShift = vec4(1.0, 256.0, 256.0 * 256.0, 256.0 * 256.0 * 256.0);
+const vec4 bitPackShift = vec4(1.0, 255.0, 65025.0, 16581375.0);
 const vec4 bitUnpackShift = 1.0 / bitPackShift;
-const vec4 bitMask = vec4(1.0 / 256.0, 1.0 / 256.0, 1.0 / 256.0,  0.0);
+const vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);
 
 float shadow_getShadowWeight(vec2 texCoords) {
   vec4 rgbaDepth = texture2D(shadow_shadowMap, texCoords);
