@@ -25,7 +25,8 @@
     "dist.min.js"
   ],
   "sideEffects": [
-    "**/init.js"
+    "./dist/**/init.js",
+    "./src/lib/init.js"
   ],
   "scripts": {
     "build-bundle": "webpack --config ../../scripts/bundle.config.js",
