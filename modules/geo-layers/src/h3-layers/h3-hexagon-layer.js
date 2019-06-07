@@ -9,7 +9,7 @@ import {
   UNITS
 } from 'h3-js';
 import {lerp} from 'math.gl';
-import {CompositeLayer, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable, log} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
@@ -25,13 +25,12 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
 
 function scalePolygon(hexId, vertices, factor) {
   const [lat, lng] = h3ToGeo(hexId);
-  // get distinct vertex objects,
-  // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon)
-  const uniqueVertices = [...new Set(vertices)];
-  for (const vertex of uniqueVertices) {
-    const scaledPt = lerp([lng, lat], vertex, factor);
-    vertex[0] = scaledPt[0];
-    vertex[1] = scaledPt[1];
+  // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon),
+  // hence skip scaling the last vertex
+  log.assert(vertices[0] === vertices[vertices.length - 1]);
+  for (let i = 0; i < vertices.length - 1; i++) {
+    vertices[i][0] = lerp(lng, vertices[i][0], factor);
+    vertices[i][1] = lerp(lat, vertices[i][1], factor);
   }
 }
 
@@ -57,12 +56,14 @@ function h3ToPolygon(hexId, coverage = 1) {
 
 function mergeTriggers(currentTrigger, newTrigger) {
   let trigger;
-  if (!currentTrigger) {
-    trigger = newTrigger;
+  if (currentTrigger === undefined || currentTrigger === null) {
+    trigger = newTrigger.coverage;
   } else if (Array.isArray(currentTrigger)) {
-    trigger = [...currentTrigger, newTrigger];
+    trigger = [].concat(currentTrigger, newTrigger.coverage);
+  } else if (typeof currentTrigger === 'object') {
+    trigger = Object.assign({}, currentTrigger, newTrigger);
   } else {
-    trigger = [currentTrigger, newTrigger];
+    trigger = [currentTrigger, newTrigger.coverage];
   }
   return trigger;
 }
@@ -218,7 +219,7 @@ export default class H3HexagonLayer extends CompositeLayer {
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
     const forwardProps = this._getForwardProps();
 
-    forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, coverage);
+    forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, {coverage});
 
     return new SubLayerClass(
       forwardProps,

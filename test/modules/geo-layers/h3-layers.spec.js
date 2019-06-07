@@ -25,13 +25,15 @@ import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
 import data from 'deck.gl-test/data/h3-sf.json';
 
+const SAMPLE_PROPS = {
+  data,
+  getHexagon: d => d.hexagons[0]
+};
+
 test('H3HexagonLayer', t => {
   const testCases = generateLayerTests({
     Layer: H3HexagonLayer,
-    sampleProps: {
-      data,
-      getHexagon: d => d.hexagons[0]
-    },
+    sampleProps: SAMPLE_PROPS,
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer, subLayer}) => {
@@ -47,6 +49,75 @@ test('H3HexagonLayer', t => {
 
   testLayer({Layer: H3HexagonLayer, testCases, onError: t.notOk});
 
+  t.end();
+});
+
+test('H3HexagonLayer#mergeTriggers', t => {
+  testLayer({
+    Layer: H3HexagonLayer,
+    onError: t.notOk,
+    testCases: [
+      {
+        props: Object.assign({}, SAMPLE_PROPS, {highPrecision: true}),
+        onAfterUpdate({layer}) {
+          t.equal(
+            layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
+            1,
+            'With no other triggers, should use coverage as trigger'
+          );
+        }
+      },
+      {
+        updateProps: {
+          coverage: 0
+        },
+        onAfterUpdate({layer}) {
+          t.equal(
+            layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
+            0,
+            'SubLayer update trigger should be updated to new coverage value'
+          );
+        }
+      },
+      {
+        updateProps: {
+          updateTriggers: {getHexagon: 0}
+        },
+        onAfterUpdate({layer}) {
+          t.deepEqual(
+            layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
+            [0, 0],
+            'SubLayer update trigger should be merged correctly'
+          );
+        }
+      },
+      {
+        updateProps: {
+          updateTriggers: {getHexagon: ['A', 1]}
+        },
+        onAfterUpdate({layer}) {
+          t.deepEqual(
+            layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
+            ['A', 1, 0],
+            'SubLayer update trigger should be merged correctly with Array'
+          );
+        }
+      },
+      {
+        updateProps: {
+          coverage: 0.75,
+          updateTriggers: {getHexagon: {a: 'abc'}}
+        },
+        onAfterUpdate({layer}) {
+          t.deepEqual(
+            layer.internalState.subLayers[0].props.updateTriggers.getPolygon,
+            {a: 'abc', coverage: 0.75},
+            'SubLayer update trigger should be merged correctly with Object'
+          );
+        }
+      }
+    ]
+  });
   t.end();
 });
 
