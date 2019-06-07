@@ -27,17 +27,6 @@ To mitigate this, we can of course add as many customizable functionalities to t
 
 * Shader module: `project64` (replaces `project32`)
 
-### Picking
-
-Components:
-
-* Props: `pickable`, `autoHighlight`, `highlightedObjectIndex`, `highlightColor`
-* Shader module: `picking`
-* Attribute: `instancePickingColors` (generated regardless of the `pickable` setting)
-* Shader injection:
-  - Vertex shader: `picking_setPickingColor(instancePickingColors);`
-  - Fragment shader: `gl_FragColor = picking_filterHighlightColor(gl_FragColor); gl_FragColor = picking_filterPickingColor(gl_FragColor);`
-
 ### Data Filter
 
 See [Data Filter RFC](/dev-docs/RFCs/v6.0/data-filter-rfc.md)
@@ -62,7 +51,7 @@ A generic version of this functionality would need the following components:
 * Shader injection:
   - Vertex shader: `brush_setVisibility(instancePositions);`
   - Frament shader: `gl_FragColor = brush_filterColor(gl_FragColor);`
-
+* Subscribe to hover events and store the mouse position in layer state
 
 ## Proposal
 
@@ -111,7 +100,7 @@ new Deck({
 })
 ```
 
-The default value of `extensions` is `[new Picking()]`.
+The default value of `extensions` is `[]`.
 
 Pros:
 
