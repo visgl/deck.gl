@@ -23,7 +23,7 @@ See our [live demo](https://deck.gl/json).
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
