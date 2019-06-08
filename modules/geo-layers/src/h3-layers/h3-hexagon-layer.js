@@ -23,12 +23,13 @@ function getHexagonCentroid(getHexagon, object, objectInfo) {
   return [lng, lat];
 }
 
-function scalePolygon(hexId, vertices, factor) {
+export function scalePolygon(hexId, vertices, factor) {
   const [lat, lng] = h3ToGeo(hexId);
+  const vertexCount = vertices.length;
+  log.assert(vertices[0] === vertices[vertexCount - 1]);
   // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon),
   // hence skip scaling the last vertex
-  log.assert(vertices[0] === vertices[vertices.length - 1]);
-  for (let i = 0; i < vertices.length - 1; i++) {
+  for (let i = 0; i < vertexCount - 1; i++) {
     vertices[i][0] = lerp(lng, vertices[i][0], factor);
     vertices[i][1] = lerp(lat, vertices[i][1], factor);
   }
@@ -54,16 +55,14 @@ function h3ToPolygon(hexId, coverage = 1) {
   return vertices;
 }
 
-function mergeTriggers(currentTrigger, newTrigger) {
+function mergeTriggers(getHexagon, coverage) {
   let trigger;
-  if (currentTrigger === undefined || currentTrigger === null) {
-    trigger = newTrigger.coverage;
-  } else if (Array.isArray(currentTrigger)) {
-    trigger = [].concat(currentTrigger, newTrigger.coverage);
-  } else if (typeof currentTrigger === 'object') {
-    trigger = Object.assign({}, currentTrigger, newTrigger);
+  if (getHexagon === undefined || getHexagon === null) {
+    trigger = coverage;
+  } else if (typeof getHexagon === 'object') {
+    trigger = Object.assign({}, getHexagon, {coverage});
   } else {
-    trigger = [currentTrigger, newTrigger.coverage];
+    trigger = {getHexagon, coverage};
   }
   return trigger;
 }
@@ -219,7 +218,7 @@ export default class H3HexagonLayer extends CompositeLayer {
     const SubLayerClass = this.getSubLayerClass('hexagon-cell-hifi', PolygonLayer);
     const forwardProps = this._getForwardProps();
 
-    forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, {coverage});
+    forwardProps.updateTriggers.getPolygon = mergeTriggers(updateTriggers.getHexagon, coverage);
 
     return new SubLayerClass(
       forwardProps,
