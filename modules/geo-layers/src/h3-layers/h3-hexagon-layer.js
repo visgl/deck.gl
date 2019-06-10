@@ -17,7 +17,7 @@ import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 // distortion." Smaller value makes the column layer more sensitive to viewport change.
 const UPDATE_THRESHOLD_KM = 10;
 
-// normalize longitudes w.r.t center `refLng`, when not provided first vertex
+// normalize longitudes w.r.t center (refLng), when not provided first vertex
 export function normalizeLongitudes(vertices, refLng) {
   refLng = refLng === undefined ? vertices[0][0] : refLng;
   for (const pt of vertices) {
