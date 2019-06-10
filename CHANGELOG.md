@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.3] - June 10 2019
+
+- H3Hexagon: add support for coverage. (#3210)
+- fix react method binding (#3219)
+- Fix unpkg links in layer documentations (#3216)
+
 #### deck.gl [v7.1.2] - June 7 2019
 
 - Fix tree shaking in pre-bundled version (#3214)
