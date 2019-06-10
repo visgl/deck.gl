@@ -20,7 +20,6 @@ const NAVIGATION_CONTROL_STYLES = {
 
 const VIEW_LABEL_STYLES = {
   zIndex: 10,
-  // position: 'relative',
   padding: 5,
   margin: 20,
   fontSize: 12,
@@ -88,7 +87,6 @@ export default class Map extends PureComponent {
     if (viewState.pitch > 60) {
       viewState.pitch = 60;
     }
-    viewState.position = [0, 0, 50];
     this.setState({mapViewState: viewState});
   }
 

@@ -194,7 +194,7 @@ export default class App extends PureComponent {
       });
     } else if (multiview) {
       views = [
-        new FirstPersonView({id: 'first-person', height: '50%'}),
+        new FirstPersonView({id: 'first-person', height: '50%', position: [0, 0, 50]}),
         new MapView({
           id: 'basemap',
           controller: true,
