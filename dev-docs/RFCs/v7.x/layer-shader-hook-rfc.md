@@ -1,4 +1,4 @@
-# RFC: Using Binary Data
+# RFC: Layer Shader Hooks
 
 * Authors: Xiaoji Chen
 * Date: June 7, 2019
@@ -21,14 +21,14 @@ While the second approach is a little more robust by dynamically adding custom c
 - The subclass is difficult to read, as it does not contain the full shader code.
 - The injection usually depends on certain assumptions about the base layer implementation, e.g. attribute names and varyings, which is prone to breakage in a future release.
 - Because each layer's attributes are different, the injection code cannot be ported to other layers easily.
-- The standard injection points (`decl`, `main-start`, `main-end`) is very limiting. If the subclass wishes to manipulate intermediate values in the shader, e.g. `offset` in `ScatterplotLayer`'s vertex shader before projection is performed, custom code must be injected using key strings in the base shader, which is even more fragile.
+- The standard injection points (`decl`, `main-start`, `main-end`) are very limiting. If the subclass wishes to manipulate intermediate values in the shader, e.g. `offset` in `ScatterplotLayer`'s vertex shader before projection is performed, custom code must be injected using key strings in the base shader, which is even more fragile.
 
 ## Target Use Cases
 
 Publicly documented shader hooks make it possible to:
 
 - Standardize layer shaders and make them easier to tweak for people who are less familiar with WebGL.
-- Write one set of injection that works for many layers.
+- Write one set of injections that works for many layers.
 - Write custom layers that remain working for future releases of the same major version.
 - As a result of the above, package and distribute layers and layer extensions as reusable components.
 
@@ -65,7 +65,7 @@ Shader hook names follow the pattern `DECKGL_<action>_<target>`.
 
 Modify the commonspace dimensions associated with the current vertex, before it's projected.
 
-Sementic meanings:
+Semantic meanings:
 
 - ScatterplotLayer/IconLayer/PointCloudLayer/ColumnLayer: the offset from center
 - PathLayer/ArcLayer/LineLayer: the extrusion from the current vertex
@@ -75,9 +75,9 @@ Sementic meanings:
 
 #### vs:DECKGL_USE_POSITION(vec3 worldPosition)
 
-Observe the world space position associated with a point-link object.
+Observe the world space position associated with a point-like object.
 
-Sementic meanings:
+Semantic meanings:
 
 - SolidPolygonLayer (top): the vertex position (from `getPolygon`)
 - BitmapLayer: the vertex position (from `bounds`)
@@ -89,7 +89,7 @@ Sementic meanings:
 
 Observe the world space source and target positions associated with an edge-like object.
 
-Sementic meanings:
+Semantic meanings:
 
 - ArcLayer/LineLayer: the source/target positions (from `getSourcePosition` and `getTargetPosition`)
 - PathLayer: the start/end of the current leg (from `getPath`)
