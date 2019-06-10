@@ -37,7 +37,11 @@ class Deck(JSONMixin):
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
         """
-        self.layers = layers
+        # Allow user to pass a single layer outside of a list
+        if isinstance(layers, Layer):
+            self.layers.append(layers)
+        else:
+            self.layers = layers
         self.views = views
         self.map_style = map_style
         # Use passed view state

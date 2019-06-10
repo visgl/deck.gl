@@ -3,6 +3,8 @@ Functions that make it easier to provide a default centering
 for the Viewport, rather than having to toggle parameters
 """
 import math
+from ..bindings.view_state import ViewState
+from .type_checking import is_pandas_df
 
 def _squared_diff(x, x0):
     return (x0 - x) * (x0 - x)
@@ -137,17 +139,17 @@ def bbox_to_zoom_level(bbox):
     return zoom_level
 
 
-def autocompute_viewport(viewport_type, points, view_proportion):
+def autocompute_viewport(points, view_proportion=1, viewport_type=ViewState):
     """Automatically computes a zoom level for the points passed in.
 
     Parameters
     ----------
-    viewport_type : pydeck.ViewState
-        Class constructor for a viewport
-    points : :obj:`list` of :obj:`list` of :obj:`float` or :obj:`pandas.DataFrame`
+    points : :obj:`list` of :obj:`list` of :obj:`float` or :obj:`pandas.core.frame`
         A list of points
     view_propotion : float
         Proportion of the data that is meaningful to plot
+    viewport_type : pydeck.ViewState
+        Class constructor for a viewport
 
     Returns
     -------
@@ -160,14 +162,3 @@ def autocompute_viewport(viewport_type, points, view_proportion):
     center = geometric_mean(points)
     instance = viewport_type(latitude=center[1], longitude=center[0], zoom=zoom)
     return instance
-
-
-def is_pandas_df(obj):
-    """Check if an object is a Pandas dataframe
-
-    The benefit here is that Pandas doesn't have to be included
-    in the dependencies for PyDeck
-
-    The drawback of course is that the Pandas API might change and break this function
-    """
-    return obj.__class__.__module__ == 'pandas.core.frame' and obj.to_records

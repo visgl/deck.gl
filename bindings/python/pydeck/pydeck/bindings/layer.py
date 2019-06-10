@@ -1,6 +1,7 @@
 import uuid
 
 from .colors import BLACK_RGBA, COLOR_BREWER
+from ..data_utils import is_pandas_df
 from .json_tools import JSONMixin
 
 AGGREGATE_LAYERS = ['HexagonLayer', 'ScreenGridLayer']
@@ -101,7 +102,8 @@ class Layer(JSONMixin):
         """
         self.type = type
         self.id = id or str(uuid.uuid4())
-        self.data = data
+        self._data = None
+        self.data = data.to_dict(orient='records') if is_pandas_df(data) else data
         self.coverage = coverage
         self.elevation_range = elevation_range
         self.elevation_scale = elevation_scale
@@ -110,8 +112,8 @@ class Layer(JSONMixin):
         self.opacity = opacity
         self.get_radius = get_radius or radius
         self.get_color = get_color or BLACK_RGBA
-        self.get_fill_color = get_fill_color
-        self.get_line_color = get_line_color
+        self.get_fill_color = get_fill_color or BLACK_RGBA
+        self.get_line_color = get_line_color or BLACK_RGBA
         self.get_line_width = get_line_width
         # ScatterplotLayer
         self.radius_scale = radius_scale
@@ -145,3 +147,14 @@ class Layer(JSONMixin):
             self.color_range = color_range or COLOR_BREWER['BuRd']
             self.light_settings = light_settings
             self.extruded = extruded if extruded is not None else True
+
+    @property
+    def data(self):
+        return self._data
+
+    @data.setter
+    def data(self, data_set):
+        if is_pandas_df(data_set):
+            self._data = data_set.to_dict(orient='records')
+        else:
+            self._data = data_set
