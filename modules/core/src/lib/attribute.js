@@ -187,7 +187,7 @@ export default class Attribute extends BaseAttribute {
         this.buffer.reallocate(this.value.byteLength);
       }
 
-      if (state.updateRanges !== range.FULL) {
+      if (this.buffer && state.updateRanges !== range.FULL) {
         this.value.set(oldValue);
         // Upload the full existing attribute value to the GPU, so that updateBuffer
         // can choose to only update a partial range.

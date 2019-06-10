@@ -47,6 +47,7 @@ const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
+  dataDiff: null,
   dataTransform: {type: 'function', value: data => data, compare: false},
   fetch: {
     type: 'function',
@@ -311,7 +312,15 @@ export default class Layer extends Component {
   updateState({oldProps, props, context, changeFlags}) {
     const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged && attributeManager) {
-      attributeManager.invalidateAll();
+      const {dataChanged} = changeFlags;
+      if (Array.isArray(dataChanged)) {
+        // is partial update
+        for (const dataRange of dataChanged) {
+          attributeManager.invalidateAll(dataRange);
+        }
+      } else {
+        attributeManager.invalidateAll();
+      }
     }
   }
 

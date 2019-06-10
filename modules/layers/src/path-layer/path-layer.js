@@ -145,13 +145,18 @@ export default class PathLayer extends Layer {
         data: props.data,
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        dataChanged: changeFlags.dataChanged
       });
       this.setState({
         numInstances: pathTesselator.instanceCount,
         bufferLayout: pathTesselator.bufferLayout
       });
-      attributeManager.invalidateAll();
+      if (!changeFlags.dataChanged) {
+        // Base `layer.updateState` only invalidates all attributes on data change
+        // Cover the rest of the scenarios here
+        attributeManager.invalidateAll();
+      }
     }
 
     if (props.fp64 !== oldProps.fp64) {
