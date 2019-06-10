@@ -9,7 +9,7 @@ import {
   UNITS
 } from 'h3-js';
 import {lerp} from 'math.gl';
-import {CompositeLayer, createIterable, log} from '@deck.gl/core';
+import {CompositeLayer, createIterable} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
@@ -17,33 +17,9 @@ import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 // distortion." Smaller value makes the column layer more sensitive to viewport change.
 const UPDATE_THRESHOLD_KM = 10;
 
-function getHexagonCentroid(getHexagon, object, objectInfo) {
-  const hexagonId = getHexagon(object, objectInfo);
-  const [lat, lng] = h3ToGeo(hexagonId);
-  return [lng, lat];
-}
-
-export function scalePolygon(hexId, vertices, factor) {
-  const [lat, lng] = h3ToGeo(hexId);
-  const vertexCount = vertices.length;
-  log.assert(vertices[0] === vertices[vertexCount - 1]);
-  // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon),
-  // hence skip scaling the last vertex
-  for (let i = 0; i < vertexCount - 1; i++) {
-    vertices[i][0] = lerp(lng, vertices[i][0], factor);
-    vertices[i][1] = lerp(lat, vertices[i][1], factor);
-  }
-}
-
-function h3ToPolygon(hexId, coverage = 1) {
-  const vertices = h3ToGeoBoundary(hexId, true);
-  const refLng = vertices[0][0];
-
-  if (coverage !== 1) {
-    // updates array object elements of vertices array.
-    scalePolygon(hexId, vertices, coverage);
-  }
-
+// normalize longitudes w.r.t center `refLng`, when not provided first vertex
+export function normalizeLongitudes(vertices, refLng = null) {
+  refLng = refLng || vertices[0][0];
   for (const pt of vertices) {
     const deltaLng = pt[0] - refLng;
     if (deltaLng > 180) {
@@ -52,6 +28,42 @@ function h3ToPolygon(hexId, coverage = 1) {
       pt[0] += 360;
     }
   }
+}
+
+// scale polygon vertices w.r.t center (hexId)
+export function scalePolygon(hexId, vertices, factor) {
+  const [lat, lng] = h3ToGeo(hexId);
+  const actualCount = vertices.length;
+
+  // normalize with respect to center
+  normalizeLongitudes(vertices, lng);
+
+  // `h3ToGeoBoundary` returns same array object for first and last vertex (closed polygon),
+  // if so skip scaling the last vertex
+  const vertexCount = vertices[0] === vertices[actualCount - 1] ? actualCount - 1 : actualCount;
+  for (let i = 0; i < vertexCount; i++) {
+    vertices[i][0] = lerp(lng, vertices[i][0], factor);
+    vertices[i][1] = lerp(lat, vertices[i][1], factor);
+  }
+}
+
+function getHexagonCentroid(getHexagon, object, objectInfo) {
+  const hexagonId = getHexagon(object, objectInfo);
+  const [lat, lng] = h3ToGeo(hexagonId);
+  return [lng, lat];
+}
+
+function h3ToPolygon(hexId, coverage = 1) {
+  const vertices = h3ToGeoBoundary(hexId, true);
+
+  if (coverage !== 1) {
+    // updates array object elements of vertices array.
+    scalePolygon(hexId, vertices, coverage);
+  }
+
+  // normalize with respect start vertex
+  normalizeLongitudes(vertices);
+
   return vertices;
 }
 

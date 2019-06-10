@@ -24,7 +24,7 @@ import {experimental} from '@deck.gl/core';
 const {count} = experimental;
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {H3HexagonLayer, H3ClusterLayer} from '@deck.gl/geo-layers';
-import {scalePolygon} from '@deck.gl/geo-layers/h3-layers/h3-hexagon-layer';
+import {scalePolygon, normalizeLongitudes} from '@deck.gl/geo-layers/h3-layers/h3-hexagon-layer';
 import data from 'deck.gl-test/data/h3-sf.json';
 
 const SAMPLE_PROPS = {
@@ -54,7 +54,7 @@ test('H3HexagonLayer', t => {
   t.end();
 });
 
-test.only('H3HexagonLayer#mergeTriggers', t => {
+test('H3HexagonLayer#mergeTriggers', t => {
   testLayer({
     Layer: H3HexagonLayer,
     onError: t.notOk,
@@ -164,6 +164,72 @@ test('H3HexagonLayer#scalePolygon', t => {
     t.ok(
       testCase.verify(vertices, HEXID),
       `vertices should match for coverage: ${testCase.coverage}`
+    );
+  }
+  t.end();
+});
+
+test('H3HexagonLayer#normalizeLongitudes', t => {
+  const TEST_CASES = [
+    {
+      vertices: [[-180, 30], [90, 76], [180, -90], [-110, -21]],
+      expected: [[-180, 30], [-270, 76], [-180, -90], [-110, -21]],
+      info: 'Vertices should get normalized with first vertex longitude',
+      refLng: null
+    },
+    {
+      vertices: [[-180, 30], [90, 76], [180, -90], [-110, -21]],
+      expected: [[180, 30], [90, 76], [180, -90], [250, -21]],
+      refLng: 180,
+      info: 'Vertices should get normalized with reference longitude'
+    },
+    {
+      hexId: '88283082e1fffff',
+      info: 'Vertices should get normalized with first vertex longitude',
+      refLng: null
+    },
+    {
+      hexId: '88283082e1fffff',
+      info: 'Vertices should get normalized for longitude 1',
+      refLng: 1
+    },
+    {
+      hexId: '88283082e1fffff',
+      info: 'Vertices should get normalized for longitude 98',
+      refLng: 98
+    },
+    {
+      hexId: '88283082e1fffff',
+      info: 'Vertices should get normalized for longitude 170',
+      refLng: 170
+    },
+    {
+      hexId: '88283082e1fffff',
+      info: 'Vertices should get normalized with first vertex longitude',
+      refLng: -70
+    },
+    {
+      hexId: '88283082e1fffff',
+      info: 'Vertices should get normalized with first vertex longitude',
+      refLng: -150
+    }
+  ];
+  for (const testCase of TEST_CASES) {
+    let {vertices, refLng} = testCase;
+    const {expected, hexId} = testCase;
+    vertices = vertices || h3ToGeoBoundary(hexId, true);
+    normalizeLongitudes(vertices, refLng);
+    if (expected) {
+      t.deepEqual(
+        vertices,
+        expected,
+        `Vertices should get normailized for ${refLng ? refLng : 'first vertex'}`
+      );
+    }
+    refLng = refLng || vertices[0][0];
+    t.ok(
+      !vertices.find(vertex => refLng - vertex[0] > 180 || refLng - vertex[0] < -180),
+      `vertices should get normaized for ${refLng}`
     );
   }
   t.end();
