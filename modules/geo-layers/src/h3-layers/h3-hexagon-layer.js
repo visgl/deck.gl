@@ -18,8 +18,8 @@ import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 const UPDATE_THRESHOLD_KM = 10;
 
 // normalize longitudes w.r.t center `refLng`, when not provided first vertex
-export function normalizeLongitudes(vertices, refLng = null) {
-  refLng = refLng || vertices[0][0];
+export function normalizeLongitudes(vertices, refLng) {
+  refLng = refLng === undefined ? vertices[0][0] : refLng;
   for (const pt of vertices) {
     const deltaLng = pt[0] - refLng;
     if (deltaLng > 180) {
@@ -57,12 +57,12 @@ function h3ToPolygon(hexId, coverage = 1) {
   const vertices = h3ToGeoBoundary(hexId, true);
 
   if (coverage !== 1) {
-    // updates array object elements of vertices array.
+    // scale and normalize vertices w.r.t to center
     scalePolygon(hexId, vertices, coverage);
+  } else {
+    // normalize w.r.t to start vertex
+    normalizeLongitudes(vertices);
   }
-
-  // normalize with respect start vertex
-  normalizeLongitudes(vertices);
 
   return vertices;
 }

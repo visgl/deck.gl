@@ -173,44 +173,34 @@ test('H3HexagonLayer#normalizeLongitudes', t => {
   const TEST_CASES = [
     {
       vertices: [[-180, 30], [90, 76], [180, -90], [-110, -21]],
-      expected: [[-180, 30], [-270, 76], [-180, -90], [-110, -21]],
-      info: 'Vertices should get normalized with first vertex longitude',
-      refLng: null
+      expected: [[-180, 30], [-270, 76], [-180, -90], [-110, -21]]
     },
     {
       vertices: [[-180, 30], [90, 76], [180, -90], [-110, -21]],
       expected: [[180, 30], [90, 76], [180, -90], [250, -21]],
-      refLng: 180,
-      info: 'Vertices should get normalized with reference longitude'
+      refLng: 180
+    },
+    {
+      hexId: '88283082e1fffff'
     },
     {
       hexId: '88283082e1fffff',
-      info: 'Vertices should get normalized with first vertex longitude',
-      refLng: null
-    },
-    {
-      hexId: '88283082e1fffff',
-      info: 'Vertices should get normalized for longitude 1',
       refLng: 1
     },
     {
       hexId: '88283082e1fffff',
-      info: 'Vertices should get normalized for longitude 98',
       refLng: 98
     },
     {
       hexId: '88283082e1fffff',
-      info: 'Vertices should get normalized for longitude 170',
       refLng: 170
     },
     {
       hexId: '88283082e1fffff',
-      info: 'Vertices should get normalized with first vertex longitude',
       refLng: -70
     },
     {
       hexId: '88283082e1fffff',
-      info: 'Vertices should get normalized with first vertex longitude',
       refLng: -150
     }
   ];
