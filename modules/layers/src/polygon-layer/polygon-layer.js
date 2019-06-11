@@ -76,18 +76,14 @@ export default class PolygonLayer extends CompositeLayer {
 
     if (geometryChanged && Array.isArray(changeFlags.dataChanged)) {
       const paths = this.state.paths.slice();
-      const pathsDiff = [];
-
-      for (const dataRange of changeFlags.dataChanged) {
-        pathsDiff.push(
-          replaceInRange({
-            data: paths,
-            getIndex: p => p._i,
-            dataRange,
-            replace: this._getPaths(dataRange)
-          })
-        );
-      }
+      const pathsDiff = changeFlags.dataChanged.map(dataRange =>
+        replaceInRange({
+          data: paths,
+          getIndex: p => p._i,
+          dataRange,
+          replace: this._getPaths(dataRange)
+        })
+      );
       this.setState({paths, pathsDiff});
     } else if (geometryChanged) {
       this.setState({
@@ -146,7 +142,16 @@ export default class PolygonLayer extends CompositeLayer {
   /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
-    const {data, stroked, filled, extruded, wireframe, elevationScale, transitions} = this.props;
+    const {
+      data,
+      dataDiff,
+      stroked,
+      filled,
+      extruded,
+      wireframe,
+      elevationScale,
+      transitions
+    } = this.props;
 
     // Rendering props underlying layer
     const {
@@ -182,6 +187,7 @@ export default class PolygonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('fill', paths) &&
       new FillLayer(
         {
+          dataDiff,
           extruded,
           elevationScale,
 
@@ -218,6 +224,7 @@ export default class PolygonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('stroke', paths) &&
       new StrokeLayer(
         {
+          dataDiff: pathsDiff && (() => pathsDiff),
           fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
@@ -247,7 +254,6 @@ export default class PolygonLayer extends CompositeLayer {
         }),
         {
           data: paths,
-          dataDiff: pathsDiff && (() => pathsDiff),
           getPath: x => x.path
         }
       );

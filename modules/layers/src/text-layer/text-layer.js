@@ -100,18 +100,14 @@ export default class TextLayer extends CompositeLayer {
 
     if (textChanged && Array.isArray(changeFlags.dataChanged)) {
       const data = this.state.data.slice();
-      const dataDiff = [];
-
-      for (const dataRange of changeFlags.dataChanged) {
-        dataDiff.push(
-          replaceInRange({
-            data,
-            getIndex: p => p.objectIndex,
-            dataRange,
-            replace: this.transformStringToLetters(dataRange)
-          })
-        );
-      }
+      const dataDiff = changeFlags.dataChanged.map(dataRange =>
+        replaceInRange({
+          data,
+          getIndex: p => p.objectIndex,
+          dataRange,
+          replace: this.transformStringToLetters(dataRange)
+        })
+      );
       this.setState({data, dataDiff});
     } else if (textChanged) {
       this.setState({
@@ -306,6 +302,8 @@ export default class TextLayer extends CompositeLayer {
         iconAtlas,
         iconMapping,
 
+        dataDiff: dataDiff && (() => dataDiff),
+
         getPosition: this._getAccessor(getPosition),
         getColor: this._getAccessor(getColor),
         getSize: this._getAccessor(getSize),
@@ -342,7 +340,6 @@ export default class TextLayer extends CompositeLayer {
       }),
       {
         data,
-        dataDiff: dataDiff && (() => dataDiff),
 
         getIcon: d => d.text,
         getShiftInQueue: d => this.getLetterOffset(d),

@@ -188,6 +188,8 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('polygons-fill', polygonFeatures) &&
       new PolygonFillLayer(
         {
+          dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
+
           fp64,
           extruded,
           elevationScale,
@@ -215,7 +217,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonFeatures,
-          dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
           getPolygon: getCoordinates
         }
       );
@@ -226,6 +227,9 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('polygons-stroke', polygonOutlineFeatures) &&
       new PolygonStrokeLayer(
         {
+          dataDiff:
+            featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
+
           fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
@@ -255,8 +259,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonOutlineFeatures,
-          dataDiff:
-            featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
           getPath: getCoordinates
         }
       );
@@ -265,6 +267,8 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('linestrings', lineFeatures) &&
       new LineStringsLayer(
         {
+          dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
+
           fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
@@ -294,7 +298,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: lineFeatures,
-          dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
           getPath: getCoordinates
         }
       );
@@ -303,6 +306,8 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('points', pointFeatures) &&
       new PointsLayer(
         {
+          dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
+
           fp64,
           stroked,
           filled,
@@ -338,7 +343,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: pointFeatures,
-          dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
           getPosition: getCoordinates
         }
       );
