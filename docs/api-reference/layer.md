@@ -235,6 +235,39 @@ Used to override the default shallow comparison of the `data` object.
 
 As an illustration, the app could set this to e.g. 'lodash.isequal', enabling deep comparison of the data structure. This particular examples would obviously have considerable performance impact and should only be used as a temporary solution for small data sets until the application can be refactored to avoid the need.
 
+##### `_dataDiff` (Function, optional) **Experimental**
+
+This function is called when the data changes, either shallowly when `dataComparator` is not supplied or because `dataComparator` returns `false`, to retrieve the indices of the changed objects. By default, when data changes, the attributes of all objects are recalculated. If this prop is supplied, only the attributes of the specified objects will be updated. This can lead to significant performance improvement if a few rows in a large data table need to change frequently:
+
+```js
+let data = [...];
+
+function updateData(index, item) {
+  // make a shallow copy
+  data = data.slice();
+  data.splice(index, 1, item);
+  const layer = new ScatterplotLayer({
+    data,
+    // Only update the attributes at `index``
+    _dataDiff: (oldData, newData) => [{startRow: index, endRow: index + 1}],
+    ...
+  });
+  deck.setProps({layers: [layer]});
+}
+```
+
+The function receives two arguments:
+
+- `oldData` - the data prop before the update
+- `newData` - the new data prop
+
+And is expected to return an array of "ranges", in the form of `{startRow, endRow}`:
+- `startRow` (Number) - the beginning index of a changed chunk in the new data.
+- `endRow` (Number) - the end index of a changed chunk in the new data (excluded).
+
+**This feature is experimental and intended for advanced use cases.** Note that it only rewrites part of a buffer, not remove or insert, therefore the user of this prop is responsible of making sure that all the unchanged objects remain at the same indices between `oldData` and `newData`. This becomes trickier when dealing with data of dynamic lengths, for example `PathLayer`, `PolygonLayer` and `GeoJsonLayer`. Generally speaking, it is not recommended to use this feature when the count of vertices in the paths/polygons may change.
+
+
 ##### `numInstances` (Number, optional)
 
 deck.gl automatically derives the number of drawing instances from the `data` prop by counting the number of objects in `data`. However, the developer might want to manually override it using this prop.

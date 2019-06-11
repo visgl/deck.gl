@@ -47,7 +47,7 @@ const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
-  dataDiff: null,
+  _dataDiff: null,
   dataTransform: {type: 'function', value: data => data, compare: false},
   fetch: {
     type: 'function',
