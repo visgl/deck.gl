@@ -24,6 +24,7 @@ import PathLayer from '../path-layer/path-layer';
 import {PhongMaterial} from '@luma.gl/core';
 // Use primitive layer to avoid "Composite Composite" layers for now
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
+import {replaceInRange} from '../utils';
 
 import {
   getGeojsonFeatures,
@@ -94,11 +95,40 @@ export default class GeoJsonLayer extends CompositeLayer {
     };
   }
 
-  updateState({oldProps, props, changeFlags}) {
-    if (changeFlags.dataChanged) {
-      const {data} = props;
-      const features = getGeojsonFeatures(data);
-      this.state.features = separateGeojsonFeatures(features);
+  updateState({props, changeFlags}) {
+    if (!changeFlags.dataChanged) {
+      return;
+    }
+    const features = getGeojsonFeatures(props.data);
+
+    if (Array.isArray(changeFlags.dataChanged)) {
+      const oldFeatures = this.state.features;
+      const newFeatures = {};
+      const featuresDiff = {};
+      for (const key in oldFeatures) {
+        newFeatures[key] = oldFeatures[key].slice();
+        featuresDiff[key] = [];
+      }
+
+      for (const dataRange of changeFlags.dataChanged) {
+        const partialFeatures = separateGeojsonFeatures(features, dataRange);
+        for (const key in oldFeatures) {
+          featuresDiff[key].push(
+            replaceInRange({
+              data: newFeatures[key],
+              getIndex: unwrapSourceFeatureIndex,
+              dataRange,
+              replace: partialFeatures[key]
+            })
+          );
+        }
+      }
+      this.setState({features: newFeatures, featuresDiff});
+    } else {
+      this.setState({
+        features: separateGeojsonFeatures(features),
+        featuresDiff: {}
+      });
     }
   }
 
@@ -115,7 +145,7 @@ export default class GeoJsonLayer extends CompositeLayer {
 
   /* eslint-disable complexity */
   renderLayers() {
-    const {features} = this.state;
+    const {features, featuresDiff} = this.state;
     const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = features;
 
     // Layer composition props
@@ -185,6 +215,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonFeatures,
+          dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
           getPolygon: getCoordinates
         }
       );
@@ -224,6 +255,8 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: polygonOutlineFeatures,
+          dataDiff:
+            featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
           getPath: getCoordinates
         }
       );
@@ -261,6 +294,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: lineFeatures,
+          dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
           getPath: getCoordinates
         }
       );
@@ -304,6 +338,7 @@ export default class GeoJsonLayer extends CompositeLayer {
         }),
         {
           data: pointFeatures,
+          dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
           getPosition: getCoordinates
         }
       );
