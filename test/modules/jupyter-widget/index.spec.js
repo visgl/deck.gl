@@ -1,34 +1,11 @@
 import test from 'tape-catch';
 
 function getDeckModel(state) {
-  let polyfilled = false;
-  /* global global */
-  if (typeof document === 'undefined' && typeof global !== 'undefined') {
-    // Running in Node
-    const {JSDOM} = require('jsdom');
-    const dom = new JSDOM(`<!DOCTYPE html>`);
-    // These globals are required prior to importing @jupyter-widgets/base
-    global.window = dom.window;
-    global.navigator = dom.window.navigator;
-    global.document = dom.window.document;
-    global.Element = dom.window.Element;
-
-    polyfilled = true;
-  }
-
+  // Require at runtime, after the environment is polyfilled
   const {DeckGLModel} = require('@deck.gl/jupyter-widget');
   const {createTestModel} = require('./utils.spec');
 
   const model = createTestModel(DeckGLModel, state);
-
-  if (polyfilled) {
-    // Reset to avoid polluting the environment for other tests
-    delete global.window;
-    delete global.navigator;
-    delete global.document;
-    delete global.Element;
-  }
-
   return model;
 }
 
