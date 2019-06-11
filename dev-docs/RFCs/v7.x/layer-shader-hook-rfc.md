@@ -53,17 +53,50 @@ Shader hook names follow the pattern `DECKGL_<action>_<target>`.
 - All hooks start with the `DECKGL_` prefix
 - Actions:
   + `FILTER`: if the hook can modify the input value(s).
-  + `USE`: if the hook does not expect any output.
 - Targets:
   + Colors are normalized to the WebGL color space.
   + Coordinates are presumed to be in common space.
   + Non-commonspace coordinates must contain modifiers in their names, e.g. `worldPosition`, `pixelSize`.
 
+### Shader Interface Module
+
+#### VertexGeometry struct
+
+Provides a single interface for a collection of vertex shader variables.
+
+- `vec3 worldPosition` - the primary world space position associated with the current vertex.
+- `vec3 worldPositionAlt` - the secondary world space position associated with the current vertex, available if the shader renders an edge-like instance.
+- `vec4 position` - the common space position of this vertex. Only available after projection.
+- `vec4 normal` - the common space normal of this vertex.
+- `vec2 uv` - the uv of this vertex.
+
+Semantic meanings of `worldPosition`:
+
+- SolidPolygonLayer: the vertex position (from `getPolygon`)
+- BitmapLayer: the vertex position (from `bounds`)
+- PathLayer: the start of the current line segment (from `getPath`)
+- ArcLayer/LineLayer: the source position (from `getSourcePosition`)
+- All other layers: the object center (from `getPosition`)
+
+Semantic meanings of `worldPositionAlt`:
+
+- ArcLayer/LineLayer: the target position (from `getTargetPosition`)
+- PathLayer: the end of the current line segment (from `getPath`)
+- SolidPolygonLayer (side): the next vertex position (from `getPolygon`)
+- All other layers: (empty)
+
+#### FragmentGeometry struct
+
+Provides a single interface for a collection of fragment shader variables.
+
+- `vec2 uv` - the uv of this fragment.
+
+
 ### Standard Layer Hooks
 
-#### vs:DECKGL_FILTER_SIZE(inout vec3 size)
+#### vs:DECKGL_FILTER_SIZE(inout vec3 size, VertexGeometry geometry)
 
-Modify the commonspace dimensions associated with the current vertex, before it's projected.
+Modify the commonspace dimensions associated with the current vertex, called before projection.
 
 Semantic meanings:
 
@@ -72,36 +105,15 @@ Semantic meanings:
 - SimpleMeshLayer: the local position
 - SolidPolygonLayer/BitmapLayer: (not applicable)
 
+#### vs:DECKGL_FILTER_GL_POSITION(inout vec4 position, VertexGeometry geometry)
 
-#### vs:DECKGL_USE_POSITION(vec3 worldPosition)
+Modify the clipspace position (`gl_Position`) of the current vertex, called after projection.
 
-Observe the world space position associated with a point-like object.
+#### vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)
 
-Semantic meanings:
-
-- SolidPolygonLayer (top): the vertex position (from `getPolygon`)
-- BitmapLayer: the vertex position (from `bounds`)
-- PathLayer/ArcLayer/LineLayer: (not applicable)
-- All other layers: the object center (from `getPosition`)
+Modify the color of the current vertex, called after projection.
 
 
-#### vs:DECKGL_USE_POSITIONS(vec3 sourceWorldPosition, vec3 targetWorldPosition)
-
-Observe the world space source and target positions associated with an edge-like object.
-
-Semantic meanings:
-
-- ArcLayer/LineLayer: the source/target positions (from `getSourcePosition` and `getTargetPosition`)
-- PathLayer: the start/end of the current leg (from `getPath`)
-- SolidPolygonLayer (side): the two vertices that form the current edge (from `getPolygon`)
-- All other layers: (not applicable)
-
-
-#### vs:DECKGL_FILTER_COLOR(inout vec4 color, vec3 position, vec3 normal)
-
-Modify the color of the current vertex. `position` and `normal` are in common space.
-
-
-#### fs:DECKGL_FILTER_COLOR(inout vec4 color, vec2 texCoord)
+#### fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)
 
 Modify the color of the current fragment.
