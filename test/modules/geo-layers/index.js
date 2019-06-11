@@ -41,5 +41,6 @@ test('Top-level imports', t => {
 
 import './tile-layer';
 import './s2-layer.spec';
+import './trips-layer.spec';
 import './great-circle-layer.spec';
 import './h3-layers.spec';
