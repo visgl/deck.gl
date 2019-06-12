@@ -105,7 +105,7 @@ test('CompositeLayer#getSubLayerProps', t => {
   t.end();
 });
 
-test.only('CompositeLayer#getSubLayerProps(override)', t => {
+test('CompositeLayer#getSubLayerProps(override)', t => {
   const TEST_CASES = [
     {
       name: 'No sublayer props',
@@ -154,8 +154,6 @@ test.only('CompositeLayer#getSubLayerProps(override)', t => {
 
   for (const tc of TEST_CASES) {
     const {name, sublayerProps, baseLayerProps, overrideProps, expected} = tc;
-
-    //
     const layer = new TestCompositeLayer(
       Object.assign(
         {id: BASE_LAYER_ID},
@@ -167,11 +165,6 @@ test.only('CompositeLayer#getSubLayerProps(override)', t => {
     const combinedSublayerProps = layer.getSubLayerProps(
       sublayerProps && Object.assign({id: SUB_LAYER_ID}, sublayerProps)
     );
-    // t.deepEqual(
-    //   Object.keys(combinedSublayerProps).sort(),
-    //   Object.keys(expected).sort(),
-    //   `${name}: should receive expected props`
-    // );
     for (const propName in expected) {
       t.deepEqual(
         combinedSublayerProps[propName],

@@ -78,25 +78,37 @@ new GeoJsonLayer({
 });
 ```
 
-Example: use customized `ColumnLayer` with a additional updateTrigger (required for the added customization)
+Example: Use customized `IconLayer` instead of `ScatterplotLayer` to render the point features in a `GeoJsonLayer`.
+
+`IconLayer` is customized by subclassing it, adding a new attribute `instanceElevation` and corresponding accessor prop `getElevation`. For this customization we also need to add an updateTrigger for `getElevation` prop.
 
 ```js
-import {ColumnLayer} from '@deck.gl/layers';
-import {H3HexagonLayer} from '@deck.gl/geo-layers';
+import {IconLayer, GeoJsonLayer} from '@deck.gl/layers';
 
-class CustomizedColumnLayer extends ColumnLayer {
-  // customization that adds new accessor prop `getCoverage` and hence requires new updateTrigger
-  // following code show how to provide this update trigger
-  // ...
+class CustomizedIconLayer extends IconLayer {
+  getShaders() {
+    // provide updated shaders that use new attribute `instanceElevation`
+  }
+
+  // Add new attribute
+  initializeState() {
+    super.initializeState();
+
+    this.getAttributeManager().addInstanced({
+      instanceElevation: {size: 1, accessor: 'getElevation'}
+    });
+  }
+
+  // ... any other customization code
 }
 
-new H3HexagonLayer({
+new GeoJsonLayer({
   // ...other props
   _subLayerProps: {
-    'hexagon-cell': {
-      type: CustomizedColumnLayer,
-      getCoverage: data.getCoverage,
-      updateTriggers: {getCoverage: getCoverageTrigger}
+    points: {
+      type: CustomizedIconLayer,
+      getElevation: getElevationValue, // newly added prop
+      updateTriggers: {getElevation: getElevationTrigger} // update trigger for new attribute
     }
   }
 });
