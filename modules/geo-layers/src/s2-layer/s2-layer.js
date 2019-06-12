@@ -100,7 +100,7 @@ export default class S2Layer extends CompositeLayer {
       }),
       {
         data,
-        getPolygon: x => getS2Polygon(getS2Token(x))
+        getPolygon: (x, objectInfo) => getS2Polygon(getS2Token(x, objectInfo))
       }
     );
   }
