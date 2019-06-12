@@ -188,7 +188,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('polygons-fill', polygonFeatures) &&
       new PolygonFillLayer(
         {
-          dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
+          _dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
 
           fp64,
           extruded,
@@ -227,7 +227,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('polygons-stroke', polygonOutlineFeatures) &&
       new PolygonStrokeLayer(
         {
-          dataDiff:
+          _dataDiff:
             featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
 
           fp64,
@@ -267,7 +267,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('linestrings', lineFeatures) &&
       new LineStringsLayer(
         {
-          dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
+          _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
 
           fp64,
           widthUnits: lineWidthUnits,
@@ -306,7 +306,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('points', pointFeatures) &&
       new PointsLayer(
         {
-          dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
+          _dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
 
           fp64,
           stroked,

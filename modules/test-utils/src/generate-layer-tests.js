@@ -163,12 +163,12 @@ function makeAltDataTestCases(props, propTypes) {
   // partial update
   const partialUpdateProps = {
     data: originalData.slice(),
-    dataDiff: () => [{startRow: 0, endRow: 2}]
+    _dataDiff: () => [{startRow: 0, endRow: 2}]
   };
   // data should support any iterable
   const genIterableProps = {
     data: new Set(originalData),
-    dataDiff: null
+    _dataDiff: null
   };
   // data in non-iterable form
   const nonIterableProps = {

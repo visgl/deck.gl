@@ -48,7 +48,7 @@ test('GeoJsonLayer#tests', t => {
   testCases.push({
     title: 'GeoJsonLayer#',
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer}) => {
+    onAfterUpdate: ({layer, subLayers}) => {
       const {featuresDiff} = layer.state;
       t.deepEquals(
         featuresDiff,
@@ -60,10 +60,11 @@ test('GeoJsonLayer#tests', t => {
         },
         'created diff for subLayers'
       );
+      t.ok(subLayers.every(l => l.props._dataDiff), "sublayers' dataDiff prop is populated");
     },
     updateProps: {
       data: Object.assign({}, FIXTURES.choropleths),
-      dataDiff: () => [{startRow: 0, endRow: 3}]
+      _dataDiff: () => [{startRow: 0, endRow: 3}]
     }
   });
 

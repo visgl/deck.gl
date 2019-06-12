@@ -302,7 +302,7 @@ export default class TextLayer extends CompositeLayer {
         iconAtlas,
         iconMapping,
 
-        dataDiff: dataDiff && (() => dataDiff),
+        _dataDiff: dataDiff && (() => dataDiff),
 
         getPosition: this._getAccessor(getPosition),
         getColor: this._getAccessor(getColor),

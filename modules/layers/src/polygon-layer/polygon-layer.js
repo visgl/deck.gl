@@ -144,7 +144,7 @@ export default class PolygonLayer extends CompositeLayer {
     // Layer composition props
     const {
       data,
-      dataDiff,
+      _dataDiff,
       stroked,
       filled,
       extruded,
@@ -187,7 +187,7 @@ export default class PolygonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('fill', paths) &&
       new FillLayer(
         {
-          dataDiff,
+          _dataDiff,
           extruded,
           elevationScale,
 
@@ -224,7 +224,7 @@ export default class PolygonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('stroke', paths) &&
       new StrokeLayer(
         {
-          dataDiff: pathsDiff && (() => pathsDiff),
+          _dataDiff: pathsDiff && (() => pathsDiff),
           fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
