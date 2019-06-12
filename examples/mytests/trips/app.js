@@ -16,11 +16,13 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTB
 
 let sampleSize = 1;
 let actType = 'Other';
-let trailLength = 86400;
+let trailLength = 1000;
 let animationSpeed = 500 // unit time per second
 
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
+let completedTourColor = [255, 0, 0]
+let incompleteTourColor = [255, 255, 0]
 
 let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let actsCntUpdsData = require(`./inputs/activities_count_${sampleSize}pct.json`);
@@ -70,7 +72,7 @@ function filterIncompleteTours(tours, currentTime, delay=10.1) {
   
   for (const tour of tours) {
     tour['Completed'] = false;
-    if (tour.Segments[tour.Segments.length-1][2] < currentTime) {
+    if (tour.Timestamps[tour.Timestamps.length-1] < currentTime) {
       tour['Completed'] = true;
     }
   }
@@ -236,22 +238,18 @@ export class App extends Component {
         id: 'trips',
         data: this.state.tours,
         getPath: d => d.Segments,
-        getColor: d => d.Completed ? [255, 0, 0] : getRgbFromStr(colorstours(d.Tourid)),
+        getTimestamps: d => d.Timestamps,
+        //getColor: d => d.Completed ? completedTourColor : incompleteTourColor, //getRgbFromStr(colorstours(d.Tourid)),
+        getColor: d => getRgbFromStr(colorstours(d.Tourid)),
+        billboard: false,
         opacity: 0.5,
         widthMinPixels: 2,
         rounded: false,
-        trailLength,
+        trailLength: trailLength,
         currentTime: this.state.time,
         pickable: false,
         autoHighlight: false,
-        highlightColor: [0, 255, 255],
-        transitions: {
-          getColors: {
-            duration: 2000,
-            easing: d3.easeLinear,
-            enter: value => [value[0], ]
-          }
-        }
+        highlightColor: [0, 255, 255]
       }),
       new GeoJsonLayer({
         id: 'boundaries',
