@@ -140,6 +140,14 @@ Canvas ID to allow style customization in CSS.
 
 Css styles for the deckgl-canvas.
 
+##### `touchAction` (String, optional)
+
+Allow browser default touch actions. See [hammer.js doc](http://hammerjs.github.io/touch-action/).
+
+Default: `none`.
+
+By default, the deck canvas captures all touch interactions. This prop is useful for mobile applications to unblock default scrolling behavior. For example, use the combination `controller: {dragPan: false}` and `touchAction: 'pan-y'` to allow vertical page scroll when dragging over the canvas.
+
 ##### `pickingRadius` (Number, optional)
 
 Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
