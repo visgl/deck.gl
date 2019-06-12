@@ -33,10 +33,10 @@ _attribute vec4 POSITION;
 #endif
 
 // Varying
+_varying vec4 vColor;
+
 // MODULE_PBR contains all the varying definitions needed
 #ifndef MODULE_PBR
-  _varying vec4 vColor;
-
   #ifdef HAS_UV
     _varying vec2 vTEXCOORD_0;
   #endif
@@ -66,11 +66,10 @@ void main(void) {
       pbr_vUV = TEXCOORD_0;
     #else
       pbr_vUV = vec2(0., 0.);
-    #endif
-  #else
-    // Flat shading
-    vColor = instanceColors / 255.0;
+    #endif    
   #endif
+
+  vColor = instanceColors / 255.0;
 
   picking_setPickingColor(instancePickingColors);
 }

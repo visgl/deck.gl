@@ -14,7 +14,9 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/pydeck_embeddable/index.js",
+  "main": "dist/es5/index.js",
+  "module": "dist/esm/index.js",
+  "esnext": "dist/es6/index.js",
   "files": [
     "dist",
     "src",

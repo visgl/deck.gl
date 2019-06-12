@@ -86,14 +86,12 @@ export default class PathLayer extends Layer {
       },
       instanceLeftPositions: {
         size: 3,
-        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateLeftPositions,
         noAlloc
       },
       instanceRightPositions: {
         size: 3,
-        transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateRightPositions,
         noAlloc

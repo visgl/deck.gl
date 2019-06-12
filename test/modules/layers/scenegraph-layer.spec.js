@@ -18,25 +18,32 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {registerShaderModules, setDefaultShaderModules} from '@luma.gl/core';
-import {fp32, fp64, picking, gouraudlighting, phonglighting} from '@luma.gl/core';
-import project from '../shaderlib/project/project';
-import project32 from '../shaderlib/project32/project32';
-import project64 from '../shaderlib/project64/project64';
+import test from 'tape-catch';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
-export function initializeShaderModules() {
-  registerShaderModules([
-    fp32,
-    fp64,
-    project,
-    project32,
-    project64,
-    gouraudlighting,
-    phonglighting,
-    picking
-  ]);
+import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
-  setDefaultShaderModules([project]);
-}
+import * as FIXTURES from 'deck.gl-test/data';
 
-export {fp32, fp64, picking, project, project64, gouraudlighting, phonglighting};
+test('ScenegraphLayer#tests', t => {
+  const testCases = generateLayerTests({
+    Layer: ScenegraphLayer,
+    sampleProps: {
+      data: FIXTURES.points,
+      getPosition: d => d.COORDINATES,
+      scenegraph: ''
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      // if (layer.props.mesh) {
+      //   t.ok(layer.getModels().length > 0, 'Layer should have models');
+      // }
+    },
+    runDefaultAsserts: false
+  });
+
+  testLayer({Layer: ScenegraphLayer, testCases, onError: t.notOk});
+
+  t.end();
+});

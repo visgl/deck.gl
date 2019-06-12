@@ -27,13 +27,25 @@ import './geo-layers';
 
 import './json';
 import './react';
+import './jupyter-widget';
 
-// TODO - Tests currently only work in browser
 if (typeof document !== 'undefined') {
+  // Tests currently only work in browser
   require('./react/deckgl.spec');
+  require('./json/json-render.spec');
 
   require('./main/bundle');
   require('./aggregation-layers/utils/gpu-grid-aggregator.spec');
   require('./aggregation-layers/utils/grid-aggregation-utils.spec');
   require('./core/lib/pick-layers.spec');
+} else if (typeof global !== 'undefined') {
+  // Running in Node
+  const {JSDOM} = require('jsdom');
+  const dom = new JSDOM(`<!DOCTYPE html>`);
+  // These globals are required by @jupyter-widgets/base
+  /* global global */
+  global.window = dom.window;
+  global.navigator = dom.window.navigator;
+  global.document = dom.window.document;
+  global.Element = dom.window.Element;
 }

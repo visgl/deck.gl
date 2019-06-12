@@ -42,8 +42,8 @@ export default class DeckGL extends React.Component {
 
     // Bind public methods
     this.pickObject = this.pickObject.bind(this);
-    this.pickMultipleObjects = this.pickObject.bind(this);
-    this.pickObjects = this.pickObject.bind(this);
+    this.pickMultipleObjects = this.pickMultipleObjects.bind(this);
+    this.pickObjects = this.pickObjects.bind(this);
 
     // Memoized functions
     this._extractJSXLayers = memoize(extractJSXLayers);
