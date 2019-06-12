@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import color from '@deck.gl/core/utils/color';
-const {parseColor} = color;
+const {parseColor, applyOpacity} = color;
 
 const TEST_CASES = [
   {
@@ -45,15 +45,26 @@ const TEST_CASES = [
   }
 ];
 
-test('color#import', t => {
-  t.ok(typeof parseColor === 'function', 'parseColor imported OK');
+test('color#parseColor', t => {
+  for (const tc of TEST_CASES) {
+    const arg = tc.argument.slice();
+    const result = parseColor(arg);
+    t.deepEqual(result, tc.result, `parseColor ${tc.title} returned expected result`);
+    const target = [];
+    parseColor(arg, target);
+    t.deepEqual(target, tc.result, `parseColor ${tc.title} returned expected result`);
+    t.deepEqual(arg, tc.argument, `parseColor ${tc.title} did not mutate input`);
+  }
   t.end();
 });
 
-test('color#parseColor', t => {
-  for (const tc of TEST_CASES) {
-    const result = parseColor(tc.argument);
-    t.deepEqual(result, tc.result, `parseColor ${tc.title} returned expected result`);
-  }
+test('color#applyOpacity', t => {
+  const rgb = [255, 245, 235];
+  let result = applyOpacity(rgb);
+  t.deepEqual(result, [255, 245, 235, 127], 'applyOpacity added default opacity');
+  result = applyOpacity(rgb, 255);
+  t.deepEqual(result, [255, 245, 235, 255], 'applyOpacity added opacity');
+  t.deepEqual(rgb, [255, 245, 235], 'applyOpacity did not mutate input');
+
   t.end();
 });

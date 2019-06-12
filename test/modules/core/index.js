@@ -27,4 +27,3 @@ import './shaderlib';
 import './transitions';
 import './passes';
 import './effects';
-import './experimental';
