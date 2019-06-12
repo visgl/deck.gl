@@ -204,9 +204,5 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
       testCase.interactionStates,
       `${testCase.title} interaction state updated`
     );
-    t.ok(
-      Array.from(affectedStates).every(key => !controller._state[key]),
-      `${testCase.title} interaction state reset`
-    );
   }
 }

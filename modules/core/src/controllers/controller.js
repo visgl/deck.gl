@@ -325,9 +325,6 @@ export default class Controller {
       isZooming: true,
       isPanning: true
     });
-    // This is a one-off event, state should not persist
-    this._state.isPanning = false;
-    this._state.isZooming = false;
     return true;
   }
 
@@ -407,13 +404,10 @@ export default class Controller {
       isZooming: true,
       isPanning: true
     });
-    // This is a one-off event, state should not persist
-    this._state.isPanning = false;
-    this._state.isZooming = false;
     return true;
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-statements */
   // Default handler for the `keydown` event
   _onKeyDown(event) {
     if (!this.keyboard) {
@@ -436,30 +430,45 @@ export default class Controller {
         interactionState.isZooming = true;
         break;
       case 37: // left
-        newControllerState = funcKey ? controllerState.rotateLeft() : controllerState.moveLeft();
-        interactionState.isPanning = true;
+        if (funcKey) {
+          newControllerState = controllerState.rotateLeft();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveLeft();
+          interactionState.isPanning = true;
+        }
         break;
       case 39: // right
-        newControllerState = funcKey ? controllerState.rotateRight() : controllerState.moveRight();
-        interactionState.isPanning = true;
+        if (funcKey) {
+          newControllerState = controllerState.rotateRight();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveRight();
+          interactionState.isPanning = true;
+        }
         break;
       case 38: // up
-        newControllerState = funcKey ? controllerState.rotateUp() : controllerState.moveUp();
-        interactionState.isRotating = true;
+        if (funcKey) {
+          newControllerState = controllerState.rotateUp();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveUp();
+          interactionState.isPanning = true;
+        }
         break;
       case 40: // down
-        newControllerState = funcKey ? controllerState.rotateDown() : controllerState.moveDown();
-        interactionState.isRotating = true;
+        if (funcKey) {
+          newControllerState = controllerState.rotateDown();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveDown();
+          interactionState.isPanning = true;
+        }
         break;
       default:
         return false;
     }
     this.updateViewport(newControllerState, this._getTransitionProps(), interactionState);
-
-    // This is a one-off event, state should not persist
-    for (const key in interactionState) {
-      this._state[key] = false;
-    }
     return true;
   }
   /* eslint-enable complexity */
