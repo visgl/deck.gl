@@ -7206,6 +7206,14 @@ mjolnir.js@^2.1.0:
     "@babel/runtime" "^7.0.0"
     hammerjs "^2.0.8"
 
+mjolnir.js@^2.1.2:
+  version "2.1.2"
+  resolved "https://registry.yarnpkg.com/mjolnir.js/-/mjolnir.js-2.1.2.tgz#db89819c418b6f3d200b1c51386fc7487f98bd5a"
+  integrity sha512-OjvkNzTCdJd/I7XxgIomNozYS6me6OWY+t8I6SZlINaFmNmgAW3I5x+Hd8sgA+WxAjFvBf576lD7N1MGo89/WA==
+  dependencies:
+    "@babel/runtime" "^7.0.0"
+    hammerjs "^2.0.8"
+
 mkdirp@0.5.1, mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0:
   version "0.5.1"
   resolved "http://registry.npmjs.org/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
