@@ -161,19 +161,9 @@ const TEST_CASES = [
 export default function testController(t, ViewClass, defaultProps, blackList = []) {
   let onViewStateChangeCalled = 0;
   let onStateChangeCalled = 0;
-  const onViewStateChange = () => onViewStateChangeCalled++;
-  const onStateChange = () => onStateChangeCalled++;
 
   const controllerProps = new ViewClass({controller: true}).controller;
-  Object.assign(
-    defaultProps,
-    BASE_PROPS,
-    {
-      onViewStateChange,
-      onStateChange
-    },
-    controllerProps
-  );
+  Object.assign(defaultProps, BASE_PROPS, controllerProps);
   const ControllerClass = controllerProps.type;
   const controller = new ControllerClass(defaultProps);
 
@@ -185,7 +175,20 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
     onViewStateChangeCalled = 0;
     onStateChangeCalled = 0;
 
-    controller.setProps(Object.assign({}, defaultProps, testCase.props));
+    /* eslint-disable no-loop-func */
+    controller.setProps(
+      Object.assign(
+        {
+          onViewStateChange: ({viewState}) => {
+            onViewStateChangeCalled++;
+            controller.setProps(Object.assign({}, defaultProps, testCase.props, viewState));
+          },
+          onStateChange: () => onStateChangeCalled++
+        },
+        defaultProps,
+        testCase.props
+      )
+    );
     for (const event of testCase.events) {
       controller.handleEvent(event);
     }

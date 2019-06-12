@@ -7,7 +7,9 @@ test('MapController', t => {
   testController(t, MapView, {
     longitude: -122.45,
     latitude: 37.78,
-    zoom: 10
+    zoom: 10,
+    pitch: 30,
+    bearing: -45
   });
 
   t.end();
@@ -16,6 +18,8 @@ test('MapController', t => {
 test('OrbitController', t => {
   testController(t, OrbitView, {
     orbitAxis: 'Y',
+    rotationX: 30,
+    rotationOrbit: -45,
     target: [1, 1, 0],
     zoom: 1
   });
