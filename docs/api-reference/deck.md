@@ -207,9 +207,16 @@ Callback arguments:
 
 The `onViewStateChange` callback is fired when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
 
-`onViewStateChange({viewState})`
+`onViewStateChange({viewState, interactionState, oldViewState})`
 
-* `viewState` - An updated [view state](/docs/developer-guide/views.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
+* `viewState` - An updated [view state](/docs/developer-guide/views.md) object.
+* `interactionState` - Describes the interaction that invoked the view state change. May include the following fields:
+  + `inTransition` (Boolean)
+  + `isDragging` (Boolean)
+  + `isPanning` (Boolean)
+  + `isRotating` (Boolean)
+  + `isZooming` (Boolean)
+* `oldViewState` - The previous [view state](/docs/developer-guide/views.md) object.
 
 Returns:
 
