@@ -72,43 +72,10 @@ new GeoJsonLayer({
       iconMapping: './icon-mapping.json',
       getIcon: d => d.sourceFeature.feature.properties.marker,
       getColor: [255, 200, 0],
-      getSize: 32
-    }
-  }
-});
-```
-
-Example: Use customized `IconLayer` instead of `ScatterplotLayer` to render the point features in a `GeoJsonLayer`.
-
-`IconLayer` is customized by subclassing it, adding a new attribute `instanceElevation` and corresponding accessor prop `getElevation`. For this customization we also need to add an updateTrigger for `getElevation` prop.
-
-```js
-import {IconLayer, GeoJsonLayer} from '@deck.gl/layers';
-
-class CustomizedIconLayer extends IconLayer {
-  getShaders() {
-    // provide updated shaders that use new attribute `instanceElevation`
-  }
-
-  // Add new attribute
-  initializeState() {
-    super.initializeState();
-
-    this.getAttributeManager().addInstanced({
-      instanceElevation: {size: 1, accessor: 'getElevation'}
-    });
-  }
-
-  // ... any other customization code
-}
-
-new GeoJsonLayer({
-  // ...other props
-  _subLayerProps: {
-    points: {
-      type: CustomizedIconLayer,
-      getElevation: getElevationValue, // newly added prop
-      updateTriggers: {getElevation: getElevationTrigger} // update trigger for new attribute
+      getSize: 32,
+      updateTriggers: {
+        getIcon: triggerValue
+      }
     }
   }
 });
