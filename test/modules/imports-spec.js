@@ -31,6 +31,7 @@ import * as meshLayers from '@deck.gl/mesh-layers';
 
 import * as core from '@deck.gl/core';
 import * as json from '@deck.gl/json';
+import * as googleMaps from '@deck.gl/google-maps';
 import * as mapbox from '@deck.gl/mapbox';
 import * as react from '@deck.gl/react';
 import * as testUtils from '@deck.gl/test-utils';
@@ -66,6 +67,7 @@ test('Top-level imports', t0 => {
 
   test('import utilities', t => {
     t.notOk(hasEmptyExports(json), 'No empty top-level export in @deck.gl/json');
+    t.notOk(hasEmptyExports(googleMaps), 'No empty top-level export in @deck.gl/google-maps');
     t.notOk(hasEmptyExports(mapbox), 'No empty top-level export in @deck.gl/mapbox');
     t.notOk(hasEmptyExports(react), 'No empty top-level export in @deck.gl/react');
     t.notOk(hasEmptyExports(testUtils), 'No empty top-level export in @deck.gl/test-utils');
