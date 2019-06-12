@@ -29,7 +29,7 @@ function parseColor(color, target, index = 0) {
     target[index + 0] = color[0];
     target[index + 1] = color[1];
     target[index + 2] = color[2];
-    target[index + 3] = color.length === 4 ? color[4] : 255;
+    target[index + 3] = color.length === 4 ? color[3] : 255;
     return target;
   }
 
@@ -60,14 +60,10 @@ function parseHexColor(color, target, index) {
   return index + 4;
 }
 
-function setOpacity(color, opacity = 127) {
-  return [color[0], color[1], color[2], opacity];
-}
-
 function applyOpacity(color, opacity = 127) {
   return [color[0], color[1], color[2], opacity];
 }
 
 // Named exports have a small perf hit in webpack, normally OK
 // but for utils that will be called in tight inner loops, export as object
-export default {parseColor, setOpacity, applyOpacity};
+export default {parseColor, applyOpacity};

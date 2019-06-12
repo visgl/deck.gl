@@ -57,6 +57,22 @@ const FLATTEN_TEST_CASES = [
   }
 ];
 
+const FLATTEN_VERTICES_TEST_CASES = [
+  {
+    title: 'test array',
+    argument: [[1, 0], [[2, 0], [2, 1, 0, 0]], [[[3, 0, 0], [3, 0, 1]]]],
+    result: [1, 0, 0, 2, 0, 0, 2, 1, 0, 3, 0, 0, 3, 0, 1]
+  },
+  {
+    title: 'test array of typed array',
+    argument: [new Float32Array([1, 0, 0]), new Float32Array([1, 1, 0])],
+    opts: {
+      dimensions: 2
+    },
+    result: [1, 0, 1, 1]
+  }
+];
+
 const FILL_ARRAY_TEST_CASES = [
   {
     title: 'test array',
@@ -65,14 +81,7 @@ const FILL_ARRAY_TEST_CASES = [
   }
 ];
 
-test('flatten#import', t => {
-  t.ok(typeof flatten === 'function', 'flatten imported OK');
-  t.ok(typeof flattenVertices === 'function', 'flattenVertices imported OK');
-  t.ok(typeof fillArray === 'function', 'fillArray imported OK');
-  t.end();
-});
-
-test('flatten#tests', t => {
+test('flatten', t => {
   for (const tc of FLATTEN_TEST_CASES) {
     t.comment(tc.title + JSON.stringify(tc.opts));
     const result = tc.opts ? flatten(tc.argument, tc.opts) : flatten(tc.argument);
@@ -81,7 +90,15 @@ test('flatten#tests', t => {
   t.end();
 });
 
-test('fillArray#tests', t => {
+test('flattenVertices', t => {
+  for (const tc of FLATTEN_VERTICES_TEST_CASES) {
+    const result = flattenVertices(tc.argument, tc.opts);
+    t.deepEqual(result, tc.result, `flattenVertices ${tc.title} returned expected result`);
+  }
+  t.end();
+});
+
+test('fillArray', t => {
   for (const tc of FILL_ARRAY_TEST_CASES) {
     const result = fillArray(tc.arguments);
     t.deepEqual(result, tc.result, `fillArray ${tc.title} returned expected result`);

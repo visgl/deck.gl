@@ -1,19 +1,5 @@
 // Extensions to math.gl library. Intended to be folded back.
 
-import * as vec4 from 'gl-matrix/vec4';
-import assert from '../utils/assert';
-
-export function transformVector(matrix, vector) {
-  // Handle non-invertible matrix
-  if (!matrix) {
-    return null;
-  }
-  const result = vec4.transformMat4([0, 0, 0, 0], vector, matrix);
-  const scale = 1 / result[3];
-  vec4.multiply(result, result, [scale, scale, scale, scale]);
-  return result;
-}
-
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4() {
   return [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
@@ -29,8 +15,8 @@ export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
   };
 }
 
-export function mod(value, divisor) {
-  assert(Number.isFinite(value) && Number.isFinite(divisor));
-  const modulus = value % divisor;
-  return modulus < 0 ? divisor + modulus : modulus;
-}
+// export function mod(value, divisor) {
+//   assert(Number.isFinite(value) && Number.isFinite(divisor));
+//   const modulus = value % divisor;
+//   return modulus < 0 ? divisor + modulus : modulus;
+// }

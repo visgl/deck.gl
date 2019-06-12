@@ -20,7 +20,6 @@
 
 import './color.spec';
 import './deep-equal.spec';
-import './get.spec';
 import './flatten.spec';
 import './positions.spec';
 import './memoize.spec';
