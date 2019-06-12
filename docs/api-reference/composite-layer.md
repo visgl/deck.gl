@@ -78,6 +78,30 @@ new GeoJsonLayer({
 });
 ```
 
+Example: use customized `ColumnLayer` with a additional updateTrigger (required for the added customization)
+
+```js
+import {ColumnLayer} from '@deck.gl/layers';
+import {H3HexagonLayer} from '@deck.gl/geo-layers';
+
+class CustomizedColumnLayer extends ColumnLayer {
+  // customization that adds new accessor prop `getCoverage` and hence requires new updateTrigger
+  // following code show how to provide this update trigger
+  // ...
+}
+
+new H3HexagonLayer({
+  // ...other props
+  _subLayerProps: {
+    'hexagon-cell': {
+      type: CustomizedColumnLayer,
+      getCoverage: data.getCoverage,
+      updateTriggers: {getCoverage: getCoverageTrigger}
+    }
+  }
+});
+```
+
 
 ## Methods
 
