@@ -106,7 +106,7 @@ class Root extends Component {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: MAP_CENTER,
         data: points,
-        dataDiff: isDragging ? diffGeometries : null,
+        _dataDiff: isDragging ? diffGeometries : null,
 
         getPosition: d => d.position,
         getFillColor: d => (isDragging ? [255, 200, 0] : d.color),
@@ -116,7 +116,7 @@ class Root extends Component {
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: MAP_CENTER,
         data: polygons,
-        dataDiff: isDragging ? diffGeometries : null,
+        _dataDiff: isDragging ? diffGeometries : null,
         stroked: true,
         filled: true,
         getPolygon: d => d.polygon,
