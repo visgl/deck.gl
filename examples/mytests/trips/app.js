@@ -241,7 +241,7 @@ export class App extends Component {
         getTimestamps: d => d.Timestamps,
         //getColor: d => d.Completed ? completedTourColor : incompleteTourColor, //getRgbFromStr(colorstours(d.Tourid)),
         getColor: d => getRgbFromStr(colorstours(d.Tourid)),
-        billboard: false,
+        billboard: true,
         opacity: 0.5,
         widthMinPixels: 2,
         rounded: false,
