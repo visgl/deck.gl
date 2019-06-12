@@ -247,6 +247,9 @@ export default class Controller {
 
   // Default handler for the `panmove` event.
   _onPan(event) {
+    if (!this.isDragging()) {
+      return false;
+    }
     let alternateMode = this.isFunctionKeyPressed(event) || event.rightButton;
     alternateMode = this.invertPan ? !alternateMode : alternateMode;
     return alternateMode ? this._onPanMove(event) : this._onPanRotate(event);
@@ -265,9 +268,6 @@ export default class Controller {
       return false;
     }
     const pos = this.getCenter(event);
-    if (!this.isDragging()) {
-      return false;
-    }
     const newControllerState = this.controllerState.pan({pos});
     return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
   }
@@ -329,6 +329,9 @@ export default class Controller {
   // Default handler for the `pinch` event.
   _onPinch(event) {
     if (!this.touchZoom && !this.touchRotate) {
+      return false;
+    }
+    if (!this.isDragging()) {
       return false;
     }
 
