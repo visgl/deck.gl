@@ -148,7 +148,7 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
   // using a small number as the limit for determining if the lenA or lenB is 0
   float isEnd = positions.x;
   float isStartCap = isEnd * float(instanceTypes == 1.0 || instanceTypes == 3.0);
-  float isEndCap = (1.0 - isEnd) * float(instanceTypes >= 2.0);
+  float isEndCap = (1.0 - isEnd) * float(instanceTypes == 2.0 || instanceTypes == 3.0);
   float isCap = max(isStartCap, isEndCap);
 
   // 0: center, 1: side
@@ -185,7 +185,7 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
     dot(offsetFromStartOfPath, dir)
   );
 
-  float isValid = step(0.0, instanceTypes);
+  float isValid = step(instanceTypes, 3.5);
   return vec3(vCornerOffset * width * isValid, 0.0);
 }
 

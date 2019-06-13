@@ -112,6 +112,7 @@ export default class PathLayer extends Layer {
       },
       instanceTypes: {
         size: 1,
+        type: GL.UNSIGNED_BYTE,
         update: this.calculateSegmentTypes,
         noAlloc
       },

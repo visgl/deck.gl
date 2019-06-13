@@ -271,7 +271,7 @@ export default class AttributeTransitionManager {
       toLength,
       fromBufferLayout: transition.bufferLayout,
       toBufferLayout: attribute.bufferLayout,
-      offset: offset / 4,
+      offset: attribute.elementOffset,
       getData: settings.enter
     });
 

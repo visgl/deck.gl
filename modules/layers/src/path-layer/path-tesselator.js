@@ -24,7 +24,7 @@ const {fp64LowPart} = fp64Module;
 
 const START_CAP = 1;
 const END_CAP = 2;
-const INVALID = -4;
+const INVALID = 4;
 
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
@@ -38,7 +38,7 @@ export default class PathTesselator extends Tesselator {
       attributes: {
         startPositions: {size: 3, padding: 3},
         endPositions: {size: 3, padding: 3},
-        segmentTypes: {size: 1},
+        segmentTypes: {size: 1, type: Uint8ClampedArray},
         startPositions64XyLow: {size: 2, padding: 2, fp64Only: true},
         endPositions64XyLow: {size: 2, padding: 2, fp64Only: true}
       }
@@ -84,7 +84,7 @@ export default class PathTesselator extends Tesselator {
 
     // startPositions   --  A0  B0 B1 B2 B3 B0 B1
     // endPositions         A1  B1 B2 B3 B0 B1 B2  --
-    // segmentTypes         3   -4 0  0  0  0  -4
+    // segmentTypes         3   4  0  0  0  0  4
     for (let i = context.vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
       startPoint = endPoint || this.getPointOnPath(path, 0);
       endPoint = this.getPointOnPath(path, ptIndex + 1);

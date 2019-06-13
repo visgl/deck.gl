@@ -329,7 +329,7 @@ export default class Attribute extends BaseAttribute {
 
   // PRIVATE HELPER METHODS
   _getVertexOffset(row, bufferLayout) {
-    let offset = this.offset / 4; // Always 4 bytes/element (float, int or uint)
+    let offset = this.elementOffset;
     if (bufferLayout) {
       let index = 0;
       for (const geometrySize of bufferLayout) {

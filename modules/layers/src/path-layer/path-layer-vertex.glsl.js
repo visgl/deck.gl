@@ -131,7 +131,7 @@ vec3 lineJoin(
 
   // special treatment for start cap and end cap
   bool isStartCap = !isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0);
-  bool isEndCap = isEnd && instanceTypes >= 2.0;
+  bool isEndCap = isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0);
   bool isCap = isStartCap || isEndCap;
 
   // 0: center, 1: side
@@ -170,7 +170,7 @@ vec3 lineJoin(
     dot(offsetFromStartOfPath, dir)
   );
 
-  float isValid = step(0.0, instanceTypes);
+  float isValid = step(instanceTypes, 3.5);
   return currPoint + vec3(vCornerOffset * width * isValid, 0.0);
 }
 
