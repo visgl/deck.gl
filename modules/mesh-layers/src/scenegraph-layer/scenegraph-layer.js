@@ -45,6 +45,7 @@ const defaultProps = {
 
   getScene: scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph),
   getAnimator: scenegraph => scenegraph && scenegraph.animator,
+  _animations: null,
 
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
@@ -115,8 +116,9 @@ export default class ScenegraphLayer extends Layer {
     const {props, oldProps} = params;
 
     if (props.scenegraph !== oldProps.scenegraph) {
-      const scenegraph = props.getScene(props.scenegraph);
-      const animator = props.getAnimator(props.scenegraph);
+      const getParams = {layer: this, gl: this.context.gl};
+      const scenegraph = props.getScene(props.scenegraph, getParams);
+      const animator = props.getAnimator(props.scenegraph, getParams);
 
       if (scenegraph instanceof ScenegraphNode) {
         this._deleteScenegraph();
@@ -152,33 +154,36 @@ export default class ScenegraphLayer extends Layer {
 
     const animations = animator.getAnimations();
 
-    Object.keys(animationsProp).forEach(key => {
-      // Key can be:
-      //  - number for index number
-      //  - name for animation name
-      //  - * to affect all animations
-      const value = animationsProp[key];
+    // sort() to ensure '*' comes first so that other values can override
+    Object.keys(animationsProp)
+      .sort()
+      .forEach(key => {
+        // Key can be:
+        //  - number for index number
+        //  - name for animation name
+        //  - * to affect all animations
+        const value = animationsProp[key];
 
-      if (key === '*') {
-        animations.forEach(animation => {
-          Object.assign(animation, value);
-        });
-      } else if (Number.isFinite(Number(key))) {
-        const number = Number(key);
-        if (number >= 0 && number < animations.length) {
-          Object.assign(animations[number], value);
+        if (key === '*') {
+          animations.forEach(animation => {
+            Object.assign(animation, value);
+          });
+        } else if (Number.isFinite(Number(key))) {
+          const number = Number(key);
+          if (number >= 0 && number < animations.length) {
+            Object.assign(animations[number], value);
+          } else {
+            log.warn(`animation ${key} not found`)();
+          }
         } else {
-          log.warn(`animation ${key} not found`)();
+          const findResult = animations.find(({name}) => name === key);
+          if (findResult) {
+            Object.assign(findResult, value);
+          } else {
+            log.warn(`animation ${key} not found`)();
+          }
         }
-      } else {
-        const findResult = animations.find(({name}) => name === key);
-        if (findResult) {
-          Object.assign(findResult, value);
-        } else {
-          log.warn(`animation ${key} not found`)();
-        }
-      }
-    });
+      });
   }
 
   _deleteScenegraph() {
