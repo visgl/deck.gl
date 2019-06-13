@@ -256,3 +256,27 @@ test('BaseAttribute#missing component', t => {
 
   t.end();
 });
+
+test('BaseAttribute#offset', t => {
+  const IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+
+  let attribute = new BaseAttribute(gl, {size: 4, constant: true, value: IDENTITY_MATRIX});
+  t.deepEqual(attribute.getValue(), [1, 0, 0, 0], 'Constant value set without offset');
+  t.is(attribute.elementOffset, 0, 'elementOffset is set');
+
+  attribute = new BaseAttribute(gl, {size: 4, offset: 16, constant: true, value: IDENTITY_MATRIX});
+  t.deepEqual(attribute.getValue(), [0, 1, 0, 0], 'Constant value set with offset');
+  t.is(attribute.elementOffset, 4, 'elementOffset is set');
+
+  attribute = new BaseAttribute(gl, {
+    size: 4,
+    type: GL.UNSIGNED_BYTE,
+    offset: 8,
+    constant: true,
+    value: IDENTITY_MATRIX
+  });
+  t.deepEqual(attribute.getValue(), [0, 0, 1, 0], 'Constant value set with offset');
+  t.is(attribute.elementOffset, 8, 'elementOffset is set');
+
+  t.end();
+});
