@@ -454,7 +454,10 @@ export default class MapController extends Controller {
     deltaScaleY = Math.min(1, Math.max(-1, deltaScaleY));
 
     const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isRotating: true
+    });
   }
 }
 

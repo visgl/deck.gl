@@ -224,14 +224,11 @@ export default class Controller {
       }
     }
 
-    Object.assign(
-      this._state,
-      Object.assign({}, newControllerState.getInteractiveState(), interactionState)
-    );
+    Object.assign(this._state, newControllerState.getInteractiveState(), interactionState);
+
     if (this.onStateChange) {
       this.onStateChange(this._state);
     }
-    // this.setState(Object.assign({}, newControllerState.getInteractiveState(), extraState));
   }
 
   /* Event handlers */
@@ -242,7 +239,8 @@ export default class Controller {
       return false;
     }
     const newControllerState = this.controllerState.panStart({pos}).rotateStart({pos});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    return true;
   }
 
   // Default handler for the `panmove` event.
@@ -258,7 +256,12 @@ export default class Controller {
   // Default handler for the `panend` event.
   _onPanEnd(event) {
     const newControllerState = this.controllerState.panEnd().rotateEnd();
-    return this.updateViewport(newControllerState, null, {isDragging: false});
+    this.updateViewport(newControllerState, null, {
+      isDragging: false,
+      isPanning: false,
+      isRotating: false
+    });
+    return true;
   }
 
   // Default handler for panning to move.
@@ -269,7 +272,11 @@ export default class Controller {
     }
     const pos = this.getCenter(event);
     const newControllerState = this.controllerState.pan({pos});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isPanning: true
+    });
+    return true;
   }
 
   // Default handler for panning to rotate.
@@ -286,7 +293,11 @@ export default class Controller {
     const deltaScaleY = deltaY / height;
 
     const newControllerState = this.controllerState.rotate({deltaScaleX, deltaScaleY});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isRotating: true
+    });
+    return true;
   }
 
   // Default handler for the `wheel` event.
@@ -310,7 +321,11 @@ export default class Controller {
     }
 
     const newControllerState = this.controllerState.zoom({pos, scale});
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS);
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isZooming: true,
+      isPanning: true
+    });
+    return true;
   }
 
   // Default handler for the `pinchstart` event.
@@ -323,7 +338,8 @@ export default class Controller {
     const newControllerState = this.controllerState.zoomStart({pos}).rotateStart({pos});
     // hack - hammer's `rotation` field doesn't seem to produce the correct angle
     this._state.startPinchRotation = event.rotation;
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    return true;
   }
 
   // Default handler for the `pinch` event.
@@ -349,14 +365,26 @@ export default class Controller {
       });
     }
 
-    return this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {isDragging: true});
+    this.updateViewport(newControllerState, NO_TRANSITION_PROPS, {
+      isDragging: true,
+      isPanning: this.touchZoom,
+      isZooming: this.touchZoom,
+      isRotating: this.touchRotate
+    });
+    return true;
   }
 
   // Default handler for the `pinchend` event.
   _onPinchEnd(event) {
     const newControllerState = this.controllerState.zoomEnd().rotateEnd();
     this._state.startPinchRotation = 0;
-    return this.updateViewport(newControllerState, null, {isDragging: false});
+    this.updateViewport(newControllerState, null, {
+      isDragging: false,
+      isPanning: false,
+      isZooming: false,
+      isRotating: false
+    });
+    return true;
   }
 
   // Default handler for the `doubletap` event.
@@ -372,10 +400,14 @@ export default class Controller {
     const isZoomOut = this.isFunctionKeyPressed(event);
 
     const newControllerState = this.controllerState.zoom({pos, scale: isZoomOut ? 0.5 : 2});
-    return this.updateViewport(newControllerState, this._getTransitionProps());
+    this.updateViewport(newControllerState, this._getTransitionProps(), {
+      isZooming: true,
+      isPanning: true
+    });
+    return true;
   }
 
-  /* eslint-disable complexity */
+  /* eslint-disable complexity, max-statements */
   // Default handler for the `keydown` event
   _onKeyDown(event) {
     if (!this.keyboard) {
@@ -384,32 +416,60 @@ export default class Controller {
     const funcKey = this.isFunctionKeyPressed(event);
     const {controllerState} = this;
     let newControllerState;
+    const interactionState = {};
 
     switch (event.srcEvent.keyCode) {
       case 189: // -
         newControllerState = funcKey
           ? controllerState.zoomOut().zoomOut()
           : controllerState.zoomOut();
+        interactionState.isZooming = true;
         break;
       case 187: // +
         newControllerState = funcKey ? controllerState.zoomIn().zoomIn() : controllerState.zoomIn();
+        interactionState.isZooming = true;
         break;
       case 37: // left
-        newControllerState = funcKey ? controllerState.rotateLeft() : controllerState.moveLeft();
+        if (funcKey) {
+          newControllerState = controllerState.rotateLeft();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveLeft();
+          interactionState.isPanning = true;
+        }
         break;
       case 39: // right
-        newControllerState = funcKey ? controllerState.rotateRight() : controllerState.moveRight();
+        if (funcKey) {
+          newControllerState = controllerState.rotateRight();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveRight();
+          interactionState.isPanning = true;
+        }
         break;
       case 38: // up
-        newControllerState = funcKey ? controllerState.rotateUp() : controllerState.moveUp();
+        if (funcKey) {
+          newControllerState = controllerState.rotateUp();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveUp();
+          interactionState.isPanning = true;
+        }
         break;
       case 40: // down
-        newControllerState = funcKey ? controllerState.rotateDown() : controllerState.moveDown();
+        if (funcKey) {
+          newControllerState = controllerState.rotateDown();
+          interactionState.isRotating = true;
+        } else {
+          newControllerState = controllerState.moveDown();
+          interactionState.isPanning = true;
+        }
         break;
       default:
         return false;
     }
-    return this.updateViewport(newControllerState, this._getTransitionProps());
+    this.updateViewport(newControllerState, this._getTransitionProps(), interactionState);
+    return true;
   }
   /* eslint-enable complexity */
 

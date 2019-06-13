@@ -24,7 +24,7 @@ const BASE_PROPS = {
   dragRotate: true,
   doubleClickZoom: true,
   touchZoom: true,
-  touchRotate: false,
+  touchRotate: true,
   keyboard: true
 };
 
@@ -34,35 +34,35 @@ const TEST_CASES = [
     props: {},
     events: makeEvents(['panstart', 'panmove', 'panend']),
     viewStateChanges: 3,
-    interactionStateChanges: 3
+    interactionStates: 2 // isDragging, isPanning/isRotating
   },
   {
     title: 'pan#function key',
     props: {},
     events: makeEvents(['panstart', 'panmove', 'panend'], {metaKey: true}),
     viewStateChanges: 3,
-    interactionStateChanges: 3
+    interactionStates: 2 // isDragging, isPanning/isRotating
   },
   {
     title: 'pan#out of bounds',
     props: {x: 200},
     events: makeEvents(['panstart', 'panmove', 'panend']),
     viewStateChanges: 1,
-    interactionStateChanges: 1
+    interactionStates: 0
   },
   {
     title: 'pan#disabled',
     props: {dragPan: false, dragRotate: false},
     events: makeEvents(['panstart', 'panmove', 'panend']),
     viewStateChanges: 2,
-    interactionStateChanges: 2
+    interactionStates: 1 // isDragging
   },
   {
     title: 'pan#function key#disabled',
     props: {dragPan: false, dragRotate: false},
     events: makeEvents(['panstart', 'panmove', 'panend'], {metaKey: true}),
     viewStateChanges: 2,
-    interactionStateChanges: 2
+    interactionStates: 1 // isDragging
   },
 
   {
@@ -70,21 +70,21 @@ const TEST_CASES = [
     props: {},
     events: makeEvents(['pinchstart', 'pinchmove', 'pinchend']),
     viewStateChanges: 3,
-    interactionStateChanges: 3
+    interactionStates: 4 // isDragging, isPanning, isRotating, isZooming
   },
   {
     title: 'pinch#out of bounds',
     props: {x: 200},
     events: makeEvents(['pinchstart', 'pinchmove', 'pinchend']),
     viewStateChanges: 1,
-    interactionStateChanges: 1
+    interactionStates: 0
   },
   {
     title: 'pinch#disabled',
     props: {touchZoom: false, touchRotate: false},
     events: makeEvents(['pinchstart', 'pinchmove', 'pinchend']),
     viewStateChanges: 2,
-    interactionStateChanges: 2
+    interactionStates: 1 // isDragging
   },
 
   {
@@ -92,21 +92,21 @@ const TEST_CASES = [
     props: {},
     events: makeEvents(['wheel']),
     viewStateChanges: 1,
-    interactionStateChanges: 1
+    interactionStates: 2
   },
   {
     title: 'wheel#out of bounds',
     props: {x: 200},
     events: makeEvents(['wheel']),
     viewStateChanges: 0,
-    interactionStateChanges: 0
+    interactionStates: 0
   },
   {
     title: 'wheel#disabled',
     props: {scrollZoom: false},
     events: makeEvents(['wheel']),
     viewStateChanges: 0,
-    interactionStateChanges: 0
+    interactionStates: 0
   },
 
   {
@@ -114,21 +114,21 @@ const TEST_CASES = [
     props: {},
     events: makeEvents(['doubletap']),
     viewStateChanges: 1,
-    interactionStateChanges: 1
+    interactionStates: 2
   },
   {
     title: 'doubletap#out of bounds',
     props: {x: 200},
     events: makeEvents(['doubletap']),
     viewStateChanges: 0,
-    interactionStateChanges: 0
+    interactionStates: 0
   },
   {
     title: 'doubletap#disabled',
     props: {doubleClickZoom: false},
     events: makeEvents(['doubletap']),
     viewStateChanges: 0,
-    interactionStateChanges: 0
+    interactionStates: 0
   },
 
   {
@@ -147,20 +147,20 @@ const TEST_CASES = [
       .concat(makeEvents(['keydown'], {keyCode: 40}))
       .concat(makeEvents(['keydown'], {keyCode: 40, shiftKey: true})),
     viewStateChanges: 12,
-    interactionStateChanges: 12
+    interactionStates: 3
   },
   {
     title: 'keyboard#disabled',
     props: {keyboard: false},
     events: makeEvents(['keydown'], {keyCode: 189}),
     viewStateChanges: 0,
-    interactionStateChanges: 0
+    interactionStates: 0
   }
 ];
 
 export default function testController(t, ViewClass, defaultProps, blackList = []) {
   let onViewStateChangeCalled = 0;
-  let onStateChangeCalled = 0;
+  let affectedStates = null;
 
   const controllerProps = new ViewClass({controller: true}).controller;
   Object.assign(defaultProps, BASE_PROPS, controllerProps);
@@ -173,7 +173,7 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
     }
     // reset
     onViewStateChangeCalled = 0;
-    onStateChangeCalled = 0;
+    affectedStates = new Set();
 
     /* eslint-disable no-loop-func */
     controller.setProps(
@@ -183,7 +183,13 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
             onViewStateChangeCalled++;
             controller.setProps(Object.assign({}, defaultProps, testCase.props, viewState));
           },
-          onStateChange: () => onStateChangeCalled++
+          onStateChange: state => {
+            for (const key in state) {
+              if (state[key] && key.startsWith('is')) {
+                affectedStates.add(key);
+              }
+            }
+          }
         },
         defaultProps,
         testCase.props
@@ -193,6 +199,10 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
       controller.handleEvent(event);
     }
     t.is(onViewStateChangeCalled, testCase.viewStateChanges, `${testCase.title} onViewStateChange`);
-    t.is(onStateChangeCalled, testCase.interactionStateChanges, `${testCase.title} onStateChange`);
+    t.is(
+      affectedStates.size,
+      testCase.interactionStates,
+      `${testCase.title} interaction state updated`
+    );
   }
 }
