@@ -481,7 +481,7 @@ const TEST_CASES = [
   }
 ];
 
-test.only(`pickingTest`, t => {
+test(`pickingTest`, t => {
   const deck = new Deck();
   t.ok(deck, 'Deck should be constructed');
 
