@@ -51,7 +51,7 @@ A generic version of this functionality would need the following components:
 * Shader injection:
   - Vertex shader: `brush_setVisibility(instancePositions);`
   - Frament shader: `gl_FragColor = brush_filterColor(gl_FragColor);`
-* Subscribe to hover events and store the mouse position in layer state
+* Redraw when the pointer moves (Add mouse position to the layer context? To standard uniforms?)
 
 ## Proposal
 
@@ -59,7 +59,8 @@ A generic version of this functionality would need the following components:
 
 Some changes to the base Layer class are needed to make a generic, reusable extension system work:
 
-* A base layer `getShaders` method that each layer can utilize to augment their shaders with extensions.
+* Add official lifecycle methods `getShaders`, `createModels` that each layer must implement.
+* Base layer handles the creation and deletion of models. Models need to be invalidated when extensions change.
 * (Implemented in v7.1) Official `bufferLayout` support in attribute management. The `bufferLayout` state is used in PathLayer and PolygonLayer to describe the number of instance for each data object. Currently, `AttributeManager`'s auto-update feature always assumes 1:1 mapping between an instance and a data object. Without supporting variable layout, an extension will have to implement layer-specific updaters for these layers.
 
 ### New LayerExtension Class
@@ -67,9 +68,14 @@ Some changes to the base Layer class are needed to make a generic, reusable exte
 Add a `LayerExtension` interface. All layer extensions should extend this class. It contains the following methods:
 
 - `getShaders(shaders)` - called after a layer's own `getShaders`, a hook to inject additional modules/code into the shaders
-- `initializeState(layer, initParams)` - called after a layer's own `initializeState`, a hook to add attributes and/or initial states
-- `updateState(layer, initParams)` - called after a layer's own `updateState`, a hook to update layer state from props
+- `initializeState(context, layer)` - called after a layer's own `initializeState`, a hook to add attributes and/or initial states.
+  + `context` (Object) - same object passed to `layer.initializeState`.
+  + `layer` (Layer) - the parent layer.
+- `updateState(params, layer)` - called after a layer's own `updateState`, a hook to update layer state from props.
+  + `params` (Object) - same object passed to `layer.updateState`.
+  + `layer` (Layer) - the parent layer.
 - `finalizeState(layer)` - called after a layer's own `finalizeState`, a hook to clean up resources
+  + `layer` (Layer) - the parent layer.
 
 ### New extensions Prop
 
