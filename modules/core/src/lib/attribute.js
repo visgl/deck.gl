@@ -329,8 +329,8 @@ export default class Attribute extends BaseAttribute {
 
   // PRIVATE HELPER METHODS
   _getVertexOffset(row, bufferLayout) {
+    let offset = this.elementOffset;
     if (bufferLayout) {
-      let offset = 0;
       let index = 0;
       for (const geometrySize of bufferLayout) {
         if (index >= row) {
@@ -341,7 +341,7 @@ export default class Attribute extends BaseAttribute {
       }
       return offset;
     }
-    return row * this.size;
+    return offset + row * this.size;
   }
 
   /* check user supplied values and apply fallback */

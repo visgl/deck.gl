@@ -24,8 +24,8 @@ class TypedArrayManager {
     this.overAlloc = overAlloc;
   }
 
-  allocate(typedArray, count, {size, type, copy = false}) {
-    const newSize = count * size;
+  allocate(typedArray, count, {size, type, padding = 0, copy = false}) {
+    const newSize = count * size + padding;
     if (typedArray && newSize <= typedArray.length) {
       return typedArray;
     }
