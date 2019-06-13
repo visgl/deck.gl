@@ -72,7 +72,10 @@ new GeoJsonLayer({
       iconMapping: './icon-mapping.json',
       getIcon: d => d.sourceFeature.feature.properties.marker,
       getColor: [255, 200, 0],
-      getSize: 32
+      getSize: 32,
+      updateTriggers: {
+        getIcon: triggerValue
+      }
     }
   }
 });

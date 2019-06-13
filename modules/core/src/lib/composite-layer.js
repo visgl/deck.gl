@@ -104,18 +104,22 @@ export default class CompositeLayer extends Layer {
     };
 
     if (sublayerProps) {
+      const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
+      const overridingSublayerTriggers =
+        overridingSublayerProps && overridingSublayerProps.updateTriggers;
       Object.assign(
         newProps,
         sublayerProps,
         // experimental feature that allows users to override sublayer props via parent layer prop
-        overridingProps && overridingProps[sublayerProps.id],
+        overridingSublayerProps,
         {
           id: `${this.props.id}-${sublayerProps.id}`,
           updateTriggers: Object.assign(
             {
               all: this.props.updateTriggers.all
             },
-            sublayerProps.updateTriggers
+            sublayerProps.updateTriggers,
+            overridingSublayerTriggers
           )
         }
       );
