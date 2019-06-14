@@ -24,14 +24,12 @@ const cameraRight = new Vector3();
 const nearCenter = new Vector3();
 const farCenter = new Vector3();
 const a = new Vector3();
-const DEG_TO_RADIAN = Math.PI / 180;
 
 /* eslint-disable max-statements */
-export function getFrustumPlanes({aspect, near, far, fovy, position, direction, up}) {
+export function getFrustumPlanes({aspect, near, far, fovyRadians, position, direction, up}) {
   cameraPosition.copy(position);
   cameraDirection.copy(direction).normalize();
   cameraUp.copy(up);
-  fovy *= DEG_TO_RADIAN;
 
   cameraRight
     .copy(cameraDirection)
@@ -39,7 +37,7 @@ export function getFrustumPlanes({aspect, near, far, fovy, position, direction, 
     .normalize();
   cameraUp.copy(cameraRight).cross(cameraDirection); // Orthogonalize
 
-  const nearHeight = 2 * Math.tan(fovy / 2) * near;
+  const nearHeight = 2 * Math.tan(fovyRadians / 2) * near;
   const nearWidth = nearHeight * aspect;
 
   nearCenter

@@ -1,8 +1,8 @@
 import test from 'tape-catch';
+import {floatEquals, vecEquals} from '../../../utils/utils';
 import {getFrustumPlanes} from '@deck.gl/core/utils/math-utils';
 
 const ROOT2 = 0.7071;
-const EPSILON = 0.0001;
 
 const EXPECTED_PLANES = {
   near: {
@@ -40,7 +40,7 @@ test('getFrustumPlanes#tests', t => {
     up: [0, 1, 0],
     near: 1,
     far: 10,
-    fovy: 90,
+    fovyRadians: Math.PI / 2,
     aspect: 1
   });
 
@@ -53,17 +53,3 @@ test('getFrustumPlanes#tests', t => {
 
   t.end();
 });
-
-function floatEquals(x, y) {
-  return Math.abs(x - y) < EPSILON;
-}
-
-function vecEquals(v1, v2) {
-  for (let i = 0; i < v1.length; ++i) {
-    if (!floatEquals(v1[i], v2[i])) {
-      return false;
-    }
-  }
-
-  return v1.length === v2.length;
-}

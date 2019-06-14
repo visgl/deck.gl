@@ -24,7 +24,6 @@ import View from '../views/view';
 import Viewport from '../viewports/viewport';
 import log from '../utils/log';
 import {flatten} from '../utils/flatten';
-import {getFrustumPlanes} from '../utils/math-utils';
 
 export default class ViewManager {
   constructor(props = {}) {
@@ -133,26 +132,6 @@ export default class ViewManager {
 
   getViewport(viewId) {
     return this._viewportMap[viewId];
-  }
-
-  /* eslint-disable max-statements */
-  getFrustumPlanes(viewId) {
-    const {width, height} = this;
-    const view = this.getView(viewId);
-    const viewState = this.getViewState(view);
-    const viewport = view.makeViewport({width, height, viewState});
-    const {near, far, fovy} = view.props;
-    const aspect = width / height;
-
-    return getFrustumPlanes({
-      aspect,
-      near,
-      far,
-      fovy,
-      position: viewport.cameraPosition,
-      direction: viewport.cameraDirection,
-      up: viewport.cameraUp
-    });
   }
 
   /**
