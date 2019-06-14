@@ -57,6 +57,10 @@ class Layer(JSONMixin):
         font_weight=None,
         get_text=None,
         get_angle=None,
+        # PointCloudLayer
+        coordinate_system=None,
+        get_normal=None,
+        radius_pixels=None,
         **kwargs
     ):
         """Constructs a Layer object
@@ -135,6 +139,11 @@ class Layer(JSONMixin):
         self.font_weight = font_weight
         self.get_text = get_text
         self.get_angle = get_angle
+        # PointCloudLayer
+        self.coordinate_system = coordinate_system
+        self.get_normal = get_normal
+        self.radius_pixels = radius_pixels
+
 
         # Add any other kwargs to the JSON output
         if kwargs:

@@ -30,7 +30,8 @@ class ViewState(JSONMixin):
         min_zoom=1,
         max_zoom=21,
         pitch=0,
-        bearing=0
+        bearing=0,
+        **kwargs
     ):
         self.longitude = longitude
         self.latitude = latitude
@@ -39,3 +40,6 @@ class ViewState(JSONMixin):
         self.max_zoom = max_zoom
         self.pitch = pitch
         self.bearing = bearing
+
+        if kwargs:
+            self.__dict__.update(kwargs)

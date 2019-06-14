@@ -19,25 +19,21 @@ class Deck(JSONMixin):
 
         Parameters
         ----------
-        layers : :obj:`list` of :obj:`pydeck.Layer`, default []
+        layers : :obj:`pydeck.Layer` or :obj:`list` of :obj:`pydeck.Layer`, default []
             List of pydeck.Layer objects to render
         views : :obj:`list` of :obj:`pydeck.View`, default [pydeck.View()]
-            List of pydeck.View objects to render
+            List of `pydeck.View` objects to render
         map_style : str, default "mapbox://styles/mapbox/dark-v9"
             URI for Mapbox basemap style
-        initial_view_state : pydeck.ViewState, default ViewState()
+        initial_view_state : pydeck.ViewState, default pydeck.ViewState()
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see `pydeck.data_utils.autocompute_viewport`
 
-        Examples
-        -------
-        >>> scatterplot = ScatterplotLayer()
-        pydeck.Deck(layers=)
 
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
         """
-        # Allow user to pass a single layer outside of a list
+        self.layers = []
         if isinstance(layers, Layer):
             self.layers.append(layers)
         else:
