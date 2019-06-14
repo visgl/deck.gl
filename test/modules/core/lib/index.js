@@ -23,6 +23,7 @@ import './attribute.spec';
 import './attribute-manager.spec';
 import './attribute-transition-manager.spec';
 import './deck.spec';
+import './deck-picker.spec';
 import './layer.spec';
 import './composite-layer.spec';
 import './layer-manager.spec';

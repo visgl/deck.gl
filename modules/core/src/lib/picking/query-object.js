@@ -43,7 +43,7 @@ export function getClosestObject({
     // Traverse all pixels in picking results and find the one closest to the supplied
     // [deviceX, deviceY]
     const {x, y, width, height} = deviceRect;
-    let minSquareDistanceToCenter = deviceRadius * deviceRadius;
+    let minSquareDistanceToCenter = deviceRadius ? deviceRadius * deviceRadius : 1;
     let closestPixelIndex = -1;
     let i = 0;
 

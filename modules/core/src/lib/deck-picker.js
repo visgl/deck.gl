@@ -176,6 +176,7 @@ export default class DeckPicker {
         deviceRadius,
         deviceRect
       });
+
       // Only exclude if we need to run picking again.
       // We need to run picking again if an object is detected AND
       // we have not exhausted the requested depth.
@@ -318,18 +319,17 @@ export default class DeckPicker {
   // Calculate a picking rect centered on deviceX and deviceY and clipped to device
   // Returns null if pixel is outside of device
   getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
-    const valid = deviceX >= 0 && deviceY >= 0 && deviceX < deviceWidth && deviceY < deviceHeight;
+    // radius === 0: Create a 1x1 box whose top left corner is [deviceX, deviceY]
+    // Otherwise create a box of size `radius * 2` centered at [deviceX, deviceY]
+    const x = Math.max(0, deviceX - deviceRadius);
+    const y = Math.max(0, deviceY - (deviceRadius || 1));
+    const width = Math.min(deviceWidth, deviceX + (deviceRadius || 1)) - x;
+    const height = Math.min(deviceHeight, deviceY + deviceRadius) - y;
 
     // x, y out of bounds.
-    if (!valid) {
+    if (width <= 0 || height <= 0) {
       return null;
     }
-
-    // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
-    const x = Math.max(0, deviceX - deviceRadius);
-    const y = Math.max(0, deviceY - deviceRadius);
-    const width = Math.min(deviceWidth, deviceX + deviceRadius) - x + 1;
-    const height = Math.min(deviceHeight, deviceY + deviceRadius) - y + 1;
 
     return {x, y, width, height};
   }
