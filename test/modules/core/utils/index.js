@@ -26,4 +26,5 @@ import './memoize.spec';
 import './array-utils.spec';
 import './iterable-utils.spec';
 import './range.spec';
+import './math-utils.spec';
 // import './compare-objects.spec';

@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import log from '../utils/log';
-import {createMat4, extractCameraVectors} from '../utils/math-utils';
+import {createMat4, extractCameraVectors, getFrustumPlanes} from '../utils/math-utils';
 
 import {Matrix4, Vector3, equals} from 'math.gl';
 import * as mat4 from 'gl-matrix/mat4';
@@ -246,6 +246,20 @@ export default class Viewport {
     );
   }
 
+  getFrustumPlanes(viewId) {
+    const {near, far, fovyRadians, aspect} = this.projectionProps;
+
+    return getFrustumPlanes({
+      aspect,
+      near,
+      far,
+      fovyRadians,
+      position: this.cameraPosition,
+      direction: this.cameraDirection,
+      up: this.cameraUp
+    });
+  }
+
   // EXPERIMENTAL METHODS
 
   getCameraPosition() {
@@ -394,16 +408,16 @@ export default class Viewport {
 
     const radians = fovyRadians || (fovyDegrees || fovy || 75) * DEGREES_TO_RADIANS;
 
-    this.projectionMatrix =
-      projectionMatrix ||
-      this._createProjectionMatrix({
-        orthographic,
-        fovyRadians: radians,
-        aspect: this.width / this.height,
-        focalDistance: orthographicFocalDistance || focalDistance,
-        near,
-        far
-      });
+    this.projectionProps = {
+      orthographic,
+      fovyRadians: radians,
+      aspect: this.width / this.height,
+      focalDistance: orthographicFocalDistance || focalDistance,
+      near,
+      far
+    };
+
+    this.projectionMatrix = projectionMatrix || this._createProjectionMatrix(this.projectionProps);
   }
 
   _initPixelMatrices() {

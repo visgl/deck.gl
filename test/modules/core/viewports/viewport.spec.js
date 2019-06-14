@@ -1,4 +1,5 @@
 import test from 'tape-catch';
+import {vecFinite} from '../../../utils/utils';
 import {Viewport} from 'deck.gl';
 import * as mat4 from 'gl-matrix/mat4';
 
@@ -96,6 +97,19 @@ test('Viewport.containsPixel', t => {
   t.ok(viewport.containsPixel({x: 9, y: 0, width: 2, height: 2}), 'rectangle overlaps');
   t.ok(viewport.containsPixel({x: 0, y: 9, width: 2, height: 2}), 'rectangle overlaps');
   t.notOk(viewport.containsPixel({x: 11, y: 11, width: 2, height: 2}), 'rectangle is outside');
+
+  t.end();
+});
+
+test('Viewport.getFrustumPlanes', t => {
+  const viewport = new Viewport(TEST_VIEWPORTS[0].mapState);
+  const planes = viewport.getFrustumPlanes();
+
+  for (const side in planes) {
+    const plane = planes[side];
+    t.ok(Number.isFinite(plane.d), 'd is defined');
+    t.ok(vecFinite(plane.n), 'n is defined');
+  }
 
   t.end();
 });
