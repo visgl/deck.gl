@@ -38,6 +38,9 @@
   "resolutions": {
     "lerna": "3.14.1"
   },
+  "browser": {
+    "jsdom": false
+  },
   "devDependencies": {
     "@luma.gl/effects": "^7.1.0-beta.1",
     "@probe.gl/bench": "^3.0.1",

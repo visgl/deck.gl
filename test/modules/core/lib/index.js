@@ -22,6 +22,7 @@ import './base-attribute.spec';
 import './attribute.spec';
 import './attribute-manager.spec';
 import './attribute-transition-manager.spec';
+import './deck.spec';
 import './layer.spec';
 import './composite-layer.spec';
 import './layer-manager.spec';
