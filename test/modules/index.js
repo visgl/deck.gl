@@ -48,4 +48,11 @@ if (typeof document !== 'undefined') {
   global.navigator = dom.window.navigator;
   global.document = dom.window.document;
   global.Element = dom.window.Element;
+
+  const {gl} = require('@deck.gl/test-utils');
+  // Create a dummy canvas for the headless gl context
+  const canvas = global.document.createElement('canvas');
+  canvas.width = gl.drawingBufferWidth;
+  canvas.height = gl.drawingBufferHeight;
+  gl.canvas = canvas;
 }
