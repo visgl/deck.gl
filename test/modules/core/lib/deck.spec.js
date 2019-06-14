@@ -1,4 +1,5 @@
 import test from 'tape-catch';
+import {Deck} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {gl} from '@deck.gl/test-utils';
 
