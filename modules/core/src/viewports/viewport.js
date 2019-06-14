@@ -70,6 +70,7 @@ export default class Viewport {
     // Silently allow apps to send in w,h = 0,0
     this.width = width || 1;
     this.height = height || 1;
+    this.frustumPlanes = {};
 
     this._initViewMatrix(opts);
     this._initProjectionMatrix(opts);
@@ -247,17 +248,26 @@ export default class Viewport {
   }
 
   getFrustumPlanes(viewId) {
+    if (this.frustumPlanes.near) {
+      return this.frustumPlanes;
+    }
+
     const {near, far, fovyRadians, aspect} = this.projectionProps;
 
-    return getFrustumPlanes({
-      aspect,
-      near,
-      far,
-      fovyRadians,
-      position: this.cameraPosition,
-      direction: this.cameraDirection,
-      up: this.cameraUp
-    });
+    Object.assign(
+      this.frustumPlanes,
+      getFrustumPlanes({
+        aspect,
+        near,
+        far,
+        fovyRadians,
+        position: this.cameraPosition,
+        direction: this.cameraDirection,
+        up: this.cameraUp
+      })
+    );
+
+    return this.frustumPlanes;
   }
 
   // EXPERIMENTAL METHODS
