@@ -54,12 +54,12 @@ const NEW_GRID_LAYER_PICK_METHODS = {
     {
       parameters: {
         x: 300,
-        y: 300
+        y: 209
       },
       results: {
         count: 1,
         // point count in the aggregated cell for each pickInfo object
-        cellCounts: [1]
+        cellCounts: [8]
       }
     }
   ],
@@ -92,7 +92,7 @@ const NEW_GRID_LAYER_PICK_METHODS = {
     {
       parameters: {
         x: 86,
-        y: 216
+        y: 215
       },
       results: {
         count: 4,
