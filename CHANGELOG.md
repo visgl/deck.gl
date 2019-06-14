@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.4] - June 13 2019
+
+- CompositeLayer: add ability to override sublayer updateTriggers (#3234)
+- Add touchAction prop to Deck (#3231)
+
 #### deck.gl [v7.1.3] - June 10 2019
 
 - H3Hexagon: add support for coverage. (#3210)
