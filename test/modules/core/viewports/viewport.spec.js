@@ -101,7 +101,7 @@ test('Viewport.containsPixel', t => {
   t.end();
 });
 
-test.only('Viewport.getFrustumPlanes', t => {
+test('Viewport.getFrustumPlanes', t => {
   const viewport = new Viewport(TEST_VIEWPORTS[0].mapState);
   let planes = viewport.getFrustumPlanes();
 
