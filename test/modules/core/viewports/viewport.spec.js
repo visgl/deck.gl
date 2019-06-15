@@ -103,12 +103,20 @@ test('Viewport.containsPixel', t => {
 
 test('Viewport.getFrustumPlanes', t => {
   const viewport = new Viewport(TEST_VIEWPORTS[0].mapState);
-  const planes = viewport.getFrustumPlanes();
+  let planes = viewport.getFrustumPlanes();
 
   for (const side in planes) {
     const plane = planes[side];
     t.ok(Number.isFinite(plane.d), 'd is defined');
     t.ok(vecFinite(plane.n), 'n is defined');
+  }
+
+  planes = viewport.getFrustumPlanes();
+
+  for (const side in planes) {
+    const plane = planes[side];
+    t.ok(Number.isFinite(plane.d), 'cached d is defined');
+    t.ok(vecFinite(plane.n), 'cached n is defined');
   }
 
   t.end();
