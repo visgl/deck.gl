@@ -247,7 +247,7 @@ export default class Viewport {
     );
   }
 
-  getFrustumPlanes(viewId) {
+  getFrustumPlanes() {
     if (this._frustumPlanes.near) {
       return this._frustumPlanes;
     }
