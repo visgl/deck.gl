@@ -430,6 +430,7 @@ export const docPages = generatePath([
           },
           {
             name: 'GPUGridLayer',
+            tag: 'advanced',
             content: getDocUrl('layers/gpu-grid-layer.md')
           },
           {
@@ -438,6 +439,7 @@ export const docPages = generatePath([
           },
           {
             name: 'CPUGridLayer',
+            tag: 'advanced',
             content: getDocUrl('layers/cpu-grid-layer.md')
           },
           {

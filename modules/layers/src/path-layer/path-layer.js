@@ -65,42 +65,55 @@ export default class PathLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     /* eslint-disable max-len */
     attributeManager.addInstanced({
-      instanceStartPositions: {
+      startPositions: {
         size: 3,
+        // Hack - Attribute class needs this to properly apply partial update
+        // The first 3 numbers of the value is just padding
+        offset: 12,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateStartPositions,
-        noAlloc
+        noAlloc,
+        shaderAttributes: {
+          instanceLeftPositions: {
+            offset: 0
+          },
+          instanceStartPositions: {
+            offset: 12
+          }
+        }
       },
-      instanceEndPositions: {
+      endPositions: {
         size: 3,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateEndPositions,
-        noAlloc
+        noAlloc,
+        shaderAttributes: {
+          instanceEndPositions: {
+            offset: 0
+          },
+          instanceRightPositions: {
+            offset: 12
+          }
+        }
       },
-      instanceStartEndPositions64xyLow: {
+      instanceLeftStartPositions64xyLow: {
         size: 4,
-        update: this.calculateInstanceStartEndPositions64xyLow,
+        stride: 8,
+        update: this.calculateLeftStartPositions64xyLow,
         noAlloc
       },
-      instanceLeftPositions: {
-        size: 3,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPath',
-        update: this.calculateLeftPositions,
-        noAlloc
-      },
-      instanceRightPositions: {
-        size: 3,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPath',
-        update: this.calculateRightPositions,
-        noAlloc
-      },
-      instanceNeighborPositions64xyLow: {
+      instanceEndRightPositions64xyLow: {
         size: 4,
-        update: this.calculateInstanceNeighborPositions64xyLow,
+        stride: 8,
+        update: this.calculateEndRightPositions64xyLow,
+        noAlloc
+      },
+      instanceTypes: {
+        size: 1,
+        type: GL.UNSIGNED_BYTE,
+        update: this.calculateSegmentTypes,
         noAlloc
       },
       instanceStrokeWidths: {
@@ -291,33 +304,30 @@ export default class PathLayer extends Layer {
     attribute.value = pathTesselator.get('endPositions');
   }
 
-  calculateInstanceStartEndPositions64xyLow(attribute) {
+  calculateSegmentTypes(attribute) {
+    const {pathTesselator} = this.state;
+
+    attribute.bufferLayout = pathTesselator.bufferLayout;
+    attribute.value = pathTesselator.get('segmentTypes');
+  }
+
+  calculateLeftStartPositions64xyLow(attribute) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
     if (isFP64) {
-      attribute.value = this.state.pathTesselator.get('startEndPositions64XyLow');
+      attribute.value = this.state.pathTesselator.get('startPositions64XyLow');
     } else {
       attribute.value = new Float32Array(4);
     }
   }
 
-  calculateLeftPositions(attribute) {
-    const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('leftPositions');
-  }
-
-  calculateRightPositions(attribute) {
-    const {pathTesselator} = this.state;
-    attribute.value = pathTesselator.get('rightPositions');
-  }
-
-  calculateInstanceNeighborPositions64xyLow(attribute) {
+  calculateEndRightPositions64xyLow(attribute) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
 
     if (isFP64) {
-      attribute.value = this.state.pathTesselator.get('neighborPositions64XyLow');
+      attribute.value = this.state.pathTesselator.get('endPositions64XyLow');
     } else {
       attribute.value = new Float32Array(4);
     }

@@ -213,33 +213,46 @@ export default class TextLayer extends CompositeLayer {
 
   _getAccessor(accessor) {
     if (typeof accessor === 'function') {
-      return x => accessor(x.object);
+      const objectInfo = {
+        data: this.props.data,
+        target: []
+      };
+      return x => {
+        objectInfo.index = x.objectIndex;
+        return accessor(x.object, objectInfo);
+      };
     }
     return accessor;
   }
 
   getAnchorXFromTextAnchor(getTextAnchor) {
-    return x => {
-      const textAnchor =
-        typeof getTextAnchor === 'function' ? getTextAnchor(x.object) : getTextAnchor;
-      if (!TEXT_ANCHOR.hasOwnProperty(textAnchor)) {
-        throw new Error(`Invalid text anchor parameter: ${textAnchor}`);
-      }
-      return TEXT_ANCHOR[textAnchor];
-    };
+    if (typeof getTextAnchor === 'function') {
+      const objectInfo = {
+        data: this.props.data,
+        target: []
+      };
+      return x => {
+        objectInfo.index = x.objectIndex;
+        const textAnchor = getTextAnchor(x.object, objectInfo);
+        return TEXT_ANCHOR[textAnchor] || 0;
+      };
+    }
+    return () => TEXT_ANCHOR[getTextAnchor] || 0;
   }
 
   getAnchorYFromAlignmentBaseline(getAlignmentBaseline) {
-    return x => {
-      const alignmentBaseline =
-        typeof getAlignmentBaseline === 'function'
-          ? getAlignmentBaseline(x.object)
-          : getAlignmentBaseline;
-      if (!ALIGNMENT_BASELINE.hasOwnProperty(alignmentBaseline)) {
-        throw new Error(`Invalid alignment baseline parameter: ${alignmentBaseline}`);
-      }
-      return ALIGNMENT_BASELINE[alignmentBaseline];
-    };
+    if (typeof getAlignmentBaseline === 'function') {
+      const objectInfo = {
+        data: this.props.data,
+        target: []
+      };
+      return x => {
+        objectInfo.index = x.objectIndex;
+        const alignmentBaseline = getAlignmentBaseline(x.object, objectInfo);
+        return ALIGNMENT_BASELINE[alignmentBaseline] || 0;
+      };
+    }
+    return () => ALIGNMENT_BASELINE[getAlignmentBaseline] || 0;
   }
 
   renderLayers() {
@@ -272,7 +285,7 @@ export default class TextLayer extends CompositeLayer {
         iconAtlas,
         iconMapping,
 
-        getPosition: d => getPosition(d.object),
+        getPosition: this._getAccessor(getPosition),
         getColor: this._getAccessor(getColor),
         getSize: this._getAccessor(getSize),
         getAngle: this._getAccessor(getAngle),

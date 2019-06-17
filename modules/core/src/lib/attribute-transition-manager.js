@@ -223,24 +223,25 @@ export default class AttributeTransitionManager {
   // get current values of an attribute, clipped/padded to the size of the new buffer
   _getNextTransitionStates(transition, settings) {
     const {attribute} = transition;
-    const {size} = attribute;
+    const {size, offset} = attribute;
 
     let toState;
     if (attribute.constant) {
-      toState = new BaseAttribute(this.gl, {constant: true, value: attribute.value, size});
+      toState = new BaseAttribute(this.gl, {constant: true, value: attribute.value, size, offset});
     } else {
       toState = new BaseAttribute(this.gl, {
         constant: false,
         buffer: attribute.getBuffer(),
         divisor: 0,
         size,
+        offset,
         // attribute's `value` does not match the content of external buffer,
         // will need to call buffer.getData if needed
         value: attribute.externalBuffer ? null : attribute.value
       });
     }
     const fromState = transition.buffer || toState;
-    const toLength = this.numInstances * size;
+    const toLength = attribute.userData.noAlloc ? attribute.value.length : this.numInstances * size;
     const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
 
     // Alternate between two buffers when new transitions start.
@@ -270,6 +271,7 @@ export default class AttributeTransitionManager {
       toLength,
       fromBufferLayout: transition.bufferLayout,
       toBufferLayout: attribute.bufferLayout,
+      offset: attribute.elementOffset,
       getData: settings.enter
     });
 

@@ -1,11 +1,10 @@
 import test from 'tape-catch';
-import {Deck} from '@deck.gl/core';
 import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
-const configuration = {
+export const configuration = {
   // a map of all layers that should be exposes as JSONLayers
   layers: Object.assign({}, require('@deck.gl/layers')),
   // Any non-standard views
@@ -18,7 +17,7 @@ const configuration = {
   }
 };
 
-const JSON_DATA = {
+export const JSON_DATA = {
   initialViewState: {
     longitude: -122.45,
     latitude: 37.8,
@@ -56,31 +55,4 @@ test('JSONConverter#convert', t => {
   const deckProps = jsonConverter.convertJsonToDeckProps(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
   t.end();
-});
-
-test('JSONConverter#render', t => {
-  if (typeof document === 'undefined') {
-    t.comment('test only available in browser');
-    t.end();
-    return;
-  }
-
-  const jsonConverter = new JSONConverter({configuration});
-  t.ok(jsonConverter, 'JSONConverter created');
-
-  const deckProps = jsonConverter.convertJsonToDeckProps(JSON_DATA);
-  t.ok(deckProps, 'JSONConverter converted correctly');
-
-  const jsonDeck = new Deck(
-    Object.assign(
-      {
-        onAfterRender: () => {
-          t.ok(jsonDeck, 'JSONConverter rendered');
-          jsonDeck.finalize();
-          t.end();
-        }
-      },
-      deckProps
-    )
-  );
 });

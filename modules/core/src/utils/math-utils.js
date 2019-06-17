@@ -1,18 +1,6 @@
 // Extensions to math.gl library. Intended to be folded back.
 
-import * as vec4 from 'gl-matrix/vec4';
-import assert from '../utils/assert';
-
-export function transformVector(matrix, vector) {
-  // Handle non-invertible matrix
-  if (!matrix) {
-    return null;
-  }
-  const result = vec4.transformMat4([0, 0, 0, 0], vector, matrix);
-  const scale = 1 / result[3];
-  vec4.multiply(result, result, [scale, scale, scale, scale]);
-  return result;
-}
+import {Vector3} from 'math.gl';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
 export function createMat4() {
@@ -29,8 +17,90 @@ export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
   };
 }
 
-export function mod(value, divisor) {
-  assert(Number.isFinite(value) && Number.isFinite(divisor));
-  const modulus = value % divisor;
-  return modulus < 0 ? divisor + modulus : modulus;
+const cameraPosition = new Vector3();
+const cameraDirection = new Vector3();
+const cameraUp = new Vector3();
+const cameraRight = new Vector3();
+const nearCenter = new Vector3();
+const farCenter = new Vector3();
+const a = new Vector3();
+
+/* eslint-disable max-statements */
+export function getFrustumPlanes({aspect, near, far, fovyRadians, position, direction, up}) {
+  cameraPosition.copy(position);
+  cameraDirection.copy(direction).normalize();
+  cameraUp.copy(up);
+
+  cameraRight
+    .copy(cameraDirection)
+    .cross(cameraUp)
+    .normalize();
+  cameraUp.copy(cameraRight).cross(cameraDirection); // Orthogonalize
+
+  const nearHeight = 2 * Math.tan(fovyRadians / 2) * near;
+  const nearWidth = nearHeight * aspect;
+
+  nearCenter
+    .copy(cameraDirection)
+    .scale(near)
+    .add(cameraPosition);
+  farCenter
+    .copy(cameraDirection)
+    .scale(far)
+    .add(cameraPosition);
+
+  const planes = {
+    near: {
+      d: cameraDirection.dot(nearCenter),
+      n: cameraDirection.clone().negate()
+    },
+    far: {
+      d: cameraDirection.dot(farCenter),
+      n: cameraDirection.clone()
+    }
+  };
+
+  a.copy(cameraRight)
+    .scale(nearWidth * 0.5)
+    .add(nearCenter)
+    .subtract(cameraPosition)
+    .normalize();
+  let n = new Vector3(a).cross(cameraUp);
+  let d = cameraPosition.dot(n);
+  planes.right = {n, d};
+
+  a.copy(cameraRight)
+    .scale(-nearWidth * 0.5)
+    .add(nearCenter)
+    .subtract(cameraPosition)
+    .normalize();
+  n = new Vector3(cameraUp).cross(a);
+  d = cameraPosition.dot(n);
+  planes.left = {n, d};
+
+  a.copy(cameraUp)
+    .scale(nearHeight * 0.5)
+    .add(nearCenter)
+    .subtract(cameraPosition)
+    .normalize();
+  n = new Vector3(cameraRight).cross(a);
+  d = cameraPosition.dot(n);
+  planes.top = {n, d};
+
+  a.copy(cameraUp)
+    .scale(-nearHeight * 0.5)
+    .add(nearCenter)
+    .subtract(cameraPosition)
+    .normalize();
+  n = new Vector3(a).cross(cameraRight);
+  d = cameraPosition.dot(n);
+  planes.bottom = {n, d};
+
+  return planes;
 }
+
+// export function mod(value, divisor) {
+//   assert(Number.isFinite(value) && Number.isFinite(divisor));
+//   const modulus = value % divisor;
+//   return modulus < 0 ? divisor + modulus : modulus;
+// }

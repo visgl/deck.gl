@@ -61,6 +61,10 @@ The following table compares the performance between CPU and GPU aggregations us
 - Added `billboard` prop for screen space extrusion when rendering 3D paths
 - Improved precision of joint calculation
 
+#### TripsLayer
+
+- Now support 3D paths by adding a `getTimestamps` accessor. See layer documentation for details.
+
 #### ScenegraphLayer
 
 - Added `getScene` and `getAnimator` to allow more flexibility when loading models.
@@ -87,6 +91,11 @@ import {_MapContext as MapContext, NavigationControl} from 'react-map-gl';
   </div>
 </DeckGL>
 ```
+
+### Performance Metrics
+
+- Added a `metrics` property to `Deck` instances that tracks performance statistics like fps, CPU/GPU render time and memory usage. See [Deck](/docs/api-reference/deck.md) class documention for details.
+
 
 ## deck.gl v7.0
 

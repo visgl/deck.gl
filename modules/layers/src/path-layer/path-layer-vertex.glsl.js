@@ -23,12 +23,13 @@ export default `\
 
 attribute vec3 positions;
 
+attribute float instanceTypes;
 attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
-attribute vec4 instanceStartEndPositions64xyLow;
 attribute vec3 instanceLeftPositions;
 attribute vec3 instanceRightPositions;
-attribute vec4 instanceNeighborPositions64xyLow;
+attribute vec4 instanceLeftStartPositions64xyLow;
+attribute vec4 instanceEndRightPositions64xyLow;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -51,7 +52,7 @@ varying vec2 vPathPosition;
 varying float vPathLength;
 
 const float EPSILON = 0.001;
-const vec3 ZERO_OFFSET = vec3(1.0);
+const vec3 ZERO_OFFSET = vec3(0.0);
 
 float flipIfTrue(bool flag) {
   return -(float(flag) * 2. - 1.);
@@ -129,11 +130,8 @@ vec3 lineJoin(
   offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
 
   // special treatment for start cap and end cap
-  // TODO - This has an issue. len is always positive because it is length.
-  // Step returns zero if -lenA<0, so practically this is a comparison of
-  // lenA with zero, with lots of problems because of the -lenA. Can we use EPSILON?
-  bool isStartCap = step(0.0, -lenA) > 0.5;
-  bool isEndCap = step(0.0, -lenB) > 0.5;
+  bool isStartCap = !isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0);
+  bool isEndCap = isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0);
   bool isCap = isStartCap || isEndCap;
 
   // 0: center, 1: side
@@ -172,7 +170,8 @@ vec3 lineJoin(
     dot(offsetFromStartOfPath, dir)
   );
 
-  return currPoint + vec3(vCornerOffset * width, 0.0);
+  float isValid = step(instanceTypes, 3.5);
+  return currPoint + vec3(vCornerOffset * width * isValid, 0.0);
 }
 
 // calculate line join positions
@@ -215,13 +214,13 @@ void main() {
   float isEnd = positions.x;
 
   vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
-  vec2 prevPosition64xyLow = mix(instanceNeighborPositions64xyLow.xy, instanceStartEndPositions64xyLow.xy, isEnd);
+  vec2 prevPosition64xyLow = mix(instanceLeftStartPositions64xyLow.xy, instanceLeftStartPositions64xyLow.zw, isEnd);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  vec2 currPosition64xyLow = mix(instanceStartEndPositions64xyLow.xy, instanceStartEndPositions64xyLow.zw, isEnd);
+  vec2 currPosition64xyLow = mix(instanceLeftStartPositions64xyLow.zw, instanceEndRightPositions64xyLow.xy, isEnd);
 
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
-  vec2 nextPosition64xyLow = mix(instanceStartEndPositions64xyLow.zw, instanceNeighborPositions64xyLow.zw, isEnd);
+  vec2 nextPosition64xyLow = mix(instanceEndRightPositions64xyLow.xy, instanceEndRightPositions64xyLow.zw, isEnd);
 
   if (billboard) {
     // Extrude in clipspace

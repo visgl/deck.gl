@@ -21,6 +21,9 @@
 import test from 'tape-catch';
 import {CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
 
+const SUB_LAYER_ID = 'sub-layer-id';
+const BASE_LAYER_ID = 'composite-layer-id';
+
 const BASE_LAYER_PROPS = {
   opacity: 0.2,
   pickable: true,
@@ -32,7 +35,27 @@ const BASE_LAYER_PROPS = {
   highlightColor: [1, 1, 1],
   coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
   coordinateOrigin: [1, 1, 1],
+  wrapLongitude: false,
   modelMatrix: [1]
+};
+
+const SUB_LAYER_PROPS = {
+  opacity: 0.3,
+  newForwardProp: 'NFP',
+  updateTriggers: {
+    getColor: 'c',
+    getPosition: 10
+  }
+};
+
+// used for _subLayerProps to override sublayer props
+const OVERRIDE_PROPS = {
+  opacity: 0.5,
+  newProp: 'abc',
+  updateTriggers: {
+    getColor: 'b',
+    getCoverage: 100
+  }
 };
 
 class TestLayer extends Layer {}
@@ -48,15 +71,15 @@ class TestCompositeLayer extends CompositeLayer {
 TestCompositeLayer.layerName = 'TestCompositeLayer';
 
 test('CompositeLayer#constructor', t => {
-  const layer = new TestCompositeLayer(Object.assign({id: 'composite-layer'}, BASE_LAYER_PROPS));
+  const layer = new TestCompositeLayer(Object.assign({id: BASE_LAYER_ID}, BASE_LAYER_PROPS));
   t.ok(layer, 'CompositeLayer created');
-  t.equal(layer.id, 'composite-layer', 'CompositeLayer id set correctly');
+  t.equal(layer.id, BASE_LAYER_ID, 'CompositeLayer id set correctly');
   t.ok(layer.props, 'CompositeLayer props not null');
   t.end();
 });
 
 test('CompositeLayer#getSubLayerProps', t => {
-  const layer = new TestCompositeLayer(Object.assign({id: 'composite-layer'}, BASE_LAYER_PROPS));
+  const layer = new TestCompositeLayer(Object.assign({id: BASE_LAYER_ID}, BASE_LAYER_PROPS));
 
   // TODO - add table driven test cases for all forwarded sublayer props
   const baseProps = layer.getSubLayerProps();
@@ -77,6 +100,78 @@ test('CompositeLayer#getSubLayerProps', t => {
       BASE_LAYER_PROPS[propName],
       `CompositeLayer subLayerProp ${propName} ok`
     );
+  }
+
+  t.end();
+});
+
+test('CompositeLayer#getSubLayerProps(override)', t => {
+  const TEST_CASES = [
+    {
+      name: 'No sublayer props',
+      baseLayerProps: BASE_LAYER_PROPS,
+      // sublayerProps not defined
+      overrideProps: OVERRIDE_PROPS,
+      // result just contains base layer props
+      expected: BASE_LAYER_PROPS
+    },
+    {
+      name: 'With sub layer props and no override props',
+      baseLayerProps: BASE_LAYER_PROPS,
+      sublayerProps: SUB_LAYER_PROPS,
+      // overrideProps not defined
+      // sub layer props take precendence
+      expected: Object.assign(
+        {id: `${BASE_LAYER_ID}-${SUB_LAYER_ID}`},
+        BASE_LAYER_PROPS,
+        SUB_LAYER_PROPS,
+        {
+          updateTriggers: Object.assign({all: undefined}, SUB_LAYER_PROPS.updateTriggers)
+        }
+      )
+    },
+    {
+      name: 'With overriding sub layer props',
+      baseLayerProps: BASE_LAYER_PROPS,
+      sublayerProps: SUB_LAYER_PROPS,
+      overrideProps: OVERRIDE_PROPS,
+      // overriding sub layer props take precendence
+      expected: Object.assign(
+        {id: `${BASE_LAYER_ID}-${SUB_LAYER_ID}`},
+        BASE_LAYER_PROPS,
+        SUB_LAYER_PROPS,
+        OVERRIDE_PROPS,
+        {
+          updateTriggers: Object.assign(
+            {all: undefined},
+            SUB_LAYER_PROPS.updateTriggers,
+            OVERRIDE_PROPS.updateTriggers
+          )
+        }
+      )
+    }
+  ];
+
+  for (const tc of TEST_CASES) {
+    const {name, sublayerProps, baseLayerProps, overrideProps, expected} = tc;
+    const layer = new TestCompositeLayer(
+      Object.assign(
+        {id: BASE_LAYER_ID},
+        Object.assign({}, baseLayerProps, {
+          _subLayerProps: {[SUB_LAYER_ID]: overrideProps}
+        })
+      )
+    );
+    const combinedSublayerProps = layer.getSubLayerProps(
+      sublayerProps && Object.assign({id: SUB_LAYER_ID}, sublayerProps)
+    );
+    for (const propName in expected) {
+      t.deepEqual(
+        combinedSublayerProps[propName],
+        expected[propName],
+        `${name} : ${propName} sub layer prop should get set correctly`
+      );
+    }
   }
 
   t.end();

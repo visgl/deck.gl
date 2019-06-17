@@ -140,6 +140,14 @@ Canvas ID to allow style customization in CSS.
 
 Css styles for the deckgl-canvas.
 
+##### `touchAction` (String, optional)
+
+Allow browser default touch actions. See [hammer.js doc](http://hammerjs.github.io/touch-action/).
+
+Default: `none`.
+
+By default, the deck canvas captures all touch interactions. This prop is useful for mobile applications to unblock default scrolling behavior. For example, use the combination `controller: {dragPan: false}` and `touchAction: 'pan-y'` to allow vertical page scroll when dragging over the canvas.
+
 ##### `pickingRadius` (Number, optional)
 
 Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
@@ -207,9 +215,16 @@ Callback arguments:
 
 The `onViewStateChange` callback is fired when the user has interacted with the deck.gl canvas, e.g. using mouse, touch or keyboard.
 
-`onViewStateChange({viewState})`
+`onViewStateChange({viewState, interactionState, oldViewState})`
 
-* `viewState` - An updated [view state](/docs/developer-guide/views.md) object containing parameters such as `longitude`, `latitude`, `zoom` etc.
+* `viewState` - An updated [view state](/docs/developer-guide/views.md) object.
+* `interactionState` - Describes the interaction that invoked the view state change. May include the following fields:
+  + `inTransition` (Boolean)
+  + `isDragging` (Boolean)
+  + `isPanning` (Boolean)
+  + `isRotating` (Boolean)
+  + `isZooming` (Boolean)
+* `oldViewState` - The previous [view state](/docs/developer-guide/views.md) object.
 
 Returns:
 

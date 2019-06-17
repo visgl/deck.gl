@@ -8,11 +8,13 @@
 
 # CPUGridLayer
 
-The Grid Layer renders a grid heatmap based on an array of points.
+The `CPUGridLayer` renders a grid heatmap based on an array of points.
 It takes the constant cell size, aggregates input points into cells. Aggregation is performed on CPU. The color
 and height of the cell is scaled by number of points it contains.
 
-CPUGridLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md).
+`CPUGridLayer` is one of the sublayers for [GridLayer](/docs/layers/grid-layer.md), and is provided to customize CPU Aggregation for advanced use cases. For any regular use case, [GridLayer](/docs/layers/grid-layer.md) is recommended.
+
+`CPUGridLayer` is a [CompositeLayer](/docs/api-reference/composite-layer.md).
 
 ```js
 import DeckGL from '@deck.gl/react';
@@ -68,7 +70,7 @@ new CPUGridLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/@deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
 <!-- or -->
 <script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
 <script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>

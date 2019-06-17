@@ -29,7 +29,7 @@ const SAMPLE_DATA = [
   {path: new Float64Array([1, 1, 2, 2, 3, 3]), width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1], [2, 2], [3, 3], [1, 1]], width: 3, dashArray: [2, 1], color: [0, 0, 255]}
 ];
-const INSTANCE_COUNT = 7;
+const INSTANCE_COUNT = 9;
 
 const TEST_DATA = [
   {
@@ -86,58 +86,31 @@ test('PathTesselator#constructor', t => {
         'PathTesselator.get startPositions'
       );
       t.deepEquals(
-        tesselator.get('startPositions').slice(0, 6),
-        [1, 1, 0, 2, 2, 0],
+        tesselator.get('startPositions').slice(0, 9),
+        [0, 0, 0, 1, 1, 0, 2, 2, 0],
         'startPositions are filled'
       );
 
       t.ok(ArrayBuffer.isView(tesselator.get('endPositions')), 'PathTesselator.get endPositions');
       t.deepEquals(
-        tesselator.get('endPositions').slice(0, 6),
-        [2, 2, 0, 3, 3, 0],
+        tesselator.get('endPositions').slice(0, 9),
+        [2, 2, 0, 3, 3, 0, 2, 2, 0],
         'endPositions are filled'
       );
       t.deepEquals(
-        tesselator.get('endPositions').slice(-3),
-        [1, 1, 0],
+        tesselator.get('endPositions').slice(-9),
+        [2, 2, 0, 3, 3, 0, 0, 0, 0],
         'endPositions is handling loop correctly'
-      );
-
-      t.ok(ArrayBuffer.isView(tesselator.get('leftPositions')), 'PathTesselator.get leftPositions');
-      t.ok(tesselator.get('leftPositions').every(Number.isFinite), 'Valid leftPositions attribute');
-      t.deepEquals(
-        tesselator.get('leftPositions').slice(0, 6),
-        [1, 1, 0, 1, 1, 0],
-        'leftPositions are filled'
-      );
-
-      t.ok(
-        ArrayBuffer.isView(tesselator.get('rightPositions')),
-        'PathTesselator.get rightPositions'
-      );
-      t.deepEquals(
-        tesselator.get('rightPositions').slice(0, 6),
-        [3, 3, 0, 3, 3, 0],
-        'rightPositions are filled'
-      );
-      t.ok(
-        tesselator.get('rightPositions').every(Number.isFinite),
-        'Valid rightPositions attribute'
-      );
-      t.deepEquals(
-        tesselator.get('rightPositions').slice(-3),
-        [2, 2, 0],
-        'rightPositions is handling loop correctly'
       );
 
       if (testCase.params.fp64) {
         t.ok(
-          ArrayBuffer.isView(tesselator.get('startEndPositions64XyLow')),
-          'PathTesselator.get startEndPositions64XyLow'
+          ArrayBuffer.isView(tesselator.get('startPositions64XyLow')),
+          'PathTesselator.get startPositions64XyLow'
         );
         t.ok(
-          ArrayBuffer.isView(tesselator.get('neighborPositions64XyLow')),
-          'PathTesselator.get neighborPositions64XyLow'
+          ArrayBuffer.isView(tesselator.get('endPositions64XyLow')),
+          'PathTesselator.get endPositions64XyLow'
         );
       }
     });
@@ -162,46 +135,36 @@ test('PathTesselator#partial update', t => {
     positionFormat: 'XY'
   });
 
-  let startPositions = tesselator.get('startPositions').slice(0, 15);
-  let leftPositions = tesselator.get('leftPositions').slice(0, 15);
-  t.is(tesselator.instanceCount, 5, 'Initial instance count');
-  t.deepEquals(startPositions, [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0], 'startPositions');
-  t.deepEquals(leftPositions, [1, 1, 0, 1, 1, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0], 'leftPositions');
+  let startPositions = tesselator.get('startPositions').slice(0, 18);
+  t.is(tesselator.instanceCount, 7, 'Initial instance count');
+  t.deepEquals(
+    startPositions,
+    [0, 0, 0, 1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0],
+    'startPositions'
+  );
   t.deepEquals(Array.from(accessorCalled), ['A', 'B'], 'Accessor called on all data');
 
   sampleData[2] = {path: [[4, 4], [5, 5], [6, 6]], id: 'C'};
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
-  startPositions = tesselator.get('startPositions').slice(0, 21);
-  leftPositions = tesselator.get('leftPositions').slice(0, 21);
-  t.is(tesselator.instanceCount, 7, 'Updated instance count');
+  startPositions = tesselator.get('startPositions').slice(0, 30);
+  t.is(tesselator.instanceCount, 9, 'Updated instance count');
   t.deepEquals(
     startPositions,
-    [1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0],
+    [0, 0, 0, 1, 1, 0, 2, 2, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 5, 5, 0],
     'startPositions'
-  );
-  t.deepEquals(
-    leftPositions,
-    [1, 1, 0, 1, 1, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 4, 4, 0],
-    'leftPositions'
   );
   t.deepEquals(Array.from(accessorCalled), ['C'], 'Accessor called only on partial data');
 
   sampleData[0] = {path: [[6, 6], [5, 5], [4, 4]], id: 'A'};
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
-  startPositions = tesselator.get('startPositions').slice(0, 21);
-  leftPositions = tesselator.get('leftPositions').slice(0, 21);
-  t.is(tesselator.instanceCount, 7, 'Updated instance count');
+  startPositions = tesselator.get('startPositions').slice(0, 30);
+  t.is(tesselator.instanceCount, 9, 'Updated instance count');
   t.deepEquals(
     startPositions,
-    [6, 6, 0, 5, 5, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 4, 4, 0, 5, 5, 0],
+    [0, 0, 0, 6, 6, 0, 5, 5, 0, 1, 1, 0, 2, 2, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 5, 5, 0],
     'startPositions'
-  );
-  t.deepEquals(
-    leftPositions,
-    [6, 6, 0, 6, 6, 0, 3, 3, 0, 1, 1, 0, 2, 2, 0, 4, 4, 0, 4, 4, 0],
-    'leftPositions'
   );
   t.deepEquals(Array.from(accessorCalled), ['A'], 'Accessor called only on partial data');
 

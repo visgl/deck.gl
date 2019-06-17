@@ -110,6 +110,10 @@ export function testLayer({
   const layerManager = new LayerManager(gl, {viewport});
   const deckRenderer = new DeckRenderer(gl);
 
+  layerManager.context.animationProps = {
+    time: 0
+  };
+
   const initialProps = testCases[0].props;
   const layer = new Layer(initialProps);
 

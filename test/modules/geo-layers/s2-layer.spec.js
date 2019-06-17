@@ -19,41 +19,33 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {testLayer} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {S2Layer} from '@deck.gl/geo-layers';
 import data from 'deck.gl-test/data/s2-sf.json';
 
-test('S2Layer#constructor', t => {
-  testLayer({
+test('S2Layer', t => {
+  const testCases = generateLayerTests({
     Layer: S2Layer,
-    onError: t.notOk,
-    testCases: [
-      {props: []},
-      {props: null},
-      {
-        props: {
-          data,
-          getPolygon: f => f
-        }
-      },
-      {
-        updateProps: {
-          filled: false
-        },
-        onAfterUpdate({layer, subLayers, oldState}) {
-          t.ok(layer.state, 'should update layer state');
-          t.ok(subLayers.length, 'subLayers rendered');
+    sampleProps: {
+      data,
+      getS2Token: d => d.token
+    },
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayer}) => {
+      t.ok(subLayer, 'subLayers rendered');
 
-          const polygonLayer = layer.internalState.subLayers[0];
-          t.equal(
-            polygonLayer.state.paths.length,
-            data.length,
-            'should update PolygonLayers state.paths'
-          );
-        }
+      if (layer.props.data.length) {
+        t.equal(
+          subLayer.state.paths.length,
+          data.length,
+          'should update PolygonLayers state.paths'
+        );
       }
-    ]
+    }
   });
+
+  testLayer({Layer: S2Layer, testCases, onError: t.notOk});
 
   t.end();
 });

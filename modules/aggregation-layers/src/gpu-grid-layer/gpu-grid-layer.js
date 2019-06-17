@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {PhongMaterial} from '@luma.gl/core';
-import {CompositeLayer} from '@deck.gl/core';
+import {CompositeLayer, log} from '@deck.gl/core';
 
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
@@ -60,12 +60,17 @@ const defaultProps = {
 export default class GPUGridLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
+    const isSupported = GPUGridAggregator.isSupported(gl);
+    if (!isSupported) {
+      log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
+    }
     const options = {
       id: `${this.id}-gpu-aggregator`,
       shaderCache: this.context.shaderCache
     };
     this.state = {
-      gpuGridAggregator: new GPUGridAggregator(gl, options)
+      gpuGridAggregator: new GPUGridAggregator(gl, options),
+      isSupported
     };
   }
 
@@ -86,6 +91,10 @@ export default class GPUGridLayer extends CompositeLayer {
 
   getAggregationFlags({oldProps, props, changeFlags}) {
     let aggregationFlags = null;
+    if (!this.state.isSupported) {
+      // Skip update, layer not supported
+      return false;
+    }
     if (this.isDataChanged({oldProps, props, changeFlags})) {
       aggregationFlags = Object.assign({}, aggregationFlags, {dataChanged: true});
     }
@@ -233,6 +242,9 @@ export default class GPUGridLayer extends CompositeLayer {
   }
 
   renderLayers() {
+    if (!this.state.isSupported) {
+      return null;
+    }
     const {
       elevationScale,
       fp64,

@@ -1,6 +1,6 @@
 /* eslint-disable complexity */
 import GL from '@luma.gl/constants';
-import {Buffer, hasFeature, FEATURES} from '@luma.gl/core';
+import {Buffer, hasFeature, FEATURES, _Accessor as Accessor} from '@luma.gl/core';
 import {log, uid} from '@luma.gl/core';
 
 export default class BaseAttribute {
@@ -61,12 +61,10 @@ export default class BaseAttribute {
 
       const size = this.size || opts.size || 0;
       if (constant && value.length !== size) {
-        // NOTE(Tarek): Assuming float constants.
-        // This is all we currently use, but we'll
-        // have to update this if we start using int
-        // attributes (WebGL 2-only)
         this.value = new Float32Array(size);
-        const index = this.offset / 4; // Always 4 bytes/element (float, int or uint)
+        // initiate offset values
+        this._setAccessor(opts);
+        const index = this.elementOffset;
         for (let i = 0; i < this.size; ++i) {
           this.value[i] = value[index + i];
         }
@@ -141,6 +139,7 @@ export default class BaseAttribute {
 
     this.size = size;
     this.offset = offset;
+    this.elementOffset = offset / Accessor.getBytesPerElement(this);
     this.stride = stride;
     this.normalized = normalized;
     this.integer = integer;

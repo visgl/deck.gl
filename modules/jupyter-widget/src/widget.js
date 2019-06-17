@@ -10,7 +10,6 @@ import {
   waitForElementToDisplay
 } from './utils';
 
-const mapboxgl = require('mapbox-gl');
 const deckgl = require('@deck.gl/core');
 const deckglLayers = require('@deck.gl/layers');
 const deckAggregationLayers = require('@deck.gl/aggregation-layers');
@@ -86,25 +85,31 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   initJSElements() {
-    if (!this.deck) {
-      mapboxgl.accessToken = this.model.get('mapbox_key');
-      this.deck = new deckgl.Deck({
-        canvas: `deck-map-container-${this.modelId}`,
-        height: '100%',
-        width: '100%',
-        onLoad: this.value_changed.bind(this),
-        mapboxApiAccessToken: mapboxgl.accessToken,
-        views: [new deckgl.MapView()],
-        onViewStateChange: this._onViewStateChange.bind(this)
-      });
-    }
+    try {
+      if (!this.deck) {
+        this.deck = new deckgl.Deck({
+          canvas: `deck-map-container-${this.modelId}`,
+          height: '100%',
+          width: '100%',
+          onLoad: this.value_changed.bind(this),
+          views: [new deckgl.MapView()],
+          onViewStateChange: this._onViewStateChange.bind(this)
+        });
+      }
 
-    if (!this.mapLayer) {
-      this.mapLayer = new mapboxgl.Map({
-        container: `map-${this.modelId}`,
-        interactive: false,
-        style: null
-      });
+      if (!this.mapLayer) {
+        const mapboxgl = require('mapbox-gl');
+        mapboxgl.accessToken = this.model.get('mapbox_key');
+        this.mapLayer = new mapboxgl.Map({
+          container: `map-${this.modelId}`,
+          interactive: false,
+          style: null
+        });
+      }
+    } catch (err) {
+      // This will fail in node tests
+      // eslint-disable-next-line
+      console.error(err);
     }
   }
 

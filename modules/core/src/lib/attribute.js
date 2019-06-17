@@ -210,7 +210,7 @@ export default class Attribute extends BaseAttribute {
 
     const state = this.userData;
 
-    const {update, updateRanges} = state;
+    const {update, updateRanges, noAlloc} = state;
 
     let updated = true;
     if (update) {
@@ -229,9 +229,10 @@ export default class Attribute extends BaseAttribute {
           const startOffset = Number.isFinite(startRow)
             ? this._getVertexOffset(startRow, this.bufferLayout)
             : 0;
-          const endOffset =
-            Number.isFinite(endRow) || !Number.isFinite(numInstances)
-              ? this._getVertexOffset(endRow, this.bufferLayout)
+          const endOffset = Number.isFinite(endRow)
+            ? this._getVertexOffset(endRow, this.bufferLayout)
+            : noAlloc || !Number.isFinite(numInstances)
+              ? this.value.length
               : numInstances * this.size;
 
           // Only update the changed part of the attribute
@@ -328,8 +329,8 @@ export default class Attribute extends BaseAttribute {
 
   // PRIVATE HELPER METHODS
   _getVertexOffset(row, bufferLayout) {
+    let offset = this.elementOffset;
     if (bufferLayout) {
-      let offset = 0;
       let index = 0;
       for (const geometrySize of bufferLayout) {
         if (index >= row) {
@@ -340,7 +341,7 @@ export default class Attribute extends BaseAttribute {
       }
       return offset;
     }
-    return row * this.size;
+    return offset + row * this.size;
   }
 
   /* check user supplied values and apply fallback */

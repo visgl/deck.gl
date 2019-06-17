@@ -53,20 +53,6 @@ function flattenArray(array, filter, map, result) {
   return result;
 }
 
-export function countVertices(nestedArray) {
-  let count = 0;
-  let index = -1;
-  while (++index < nestedArray.length) {
-    const value = nestedArray[index];
-    if (Array.isArray(value) || ArrayBuffer.isView(value)) {
-      count += countVertices(value);
-    } else {
-      count++;
-    }
-  }
-  return count;
-}
-
 // Flattens nested array of vertices, padding third coordinate as needed
 export function flattenVertices(nestedArray, {result = [], dimensions = 3} = {}) {
   let index = -1;
@@ -113,32 +99,3 @@ export function fillArray({target, source, start = 0, count = 1}) {
 
   return target;
 }
-
-// Flattens nested array of vertices, padding third coordinate as needed
-/*
-export function flattenTypedVertices(nestedArray, {
-  result = [],
-  Type = Float32Array,
-  start = 0,
-  dimensions = 3
-} = {}) {
-  let index = -1;
-  let vertexLength = 0;
-  while (++index < nestedArray.length) {
-    const value = nestedArray[index];
-    if (Array.isArray(value) || ArrayBuffer.isView(value)) {
-      start = flattenTypedVertices(value, {result, start, dimensions});
-    } else {
-      if (vertexLength < dimensions) { // eslint-disable-line
-        result[start++] = value;
-        vertexLength++;
-      }
-    }
-  }
-  // Add a third coordinate if needed
-  if (vertexLength > 0 && vertexLength < dimensions) {
-    result[start++] = 0;
-  }
-  return start;
-}
-*/
