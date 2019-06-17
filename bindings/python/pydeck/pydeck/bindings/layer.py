@@ -144,11 +144,9 @@ class Layer(JSONMixin):
         self.get_normal = get_normal
         self.radius_pixels = radius_pixels
 
-
         # Add any other kwargs to the JSON output
         if kwargs:
             self.__dict__.update(kwargs)
-
 
         if is_aggregate_layer(type):
             self.radius = radius

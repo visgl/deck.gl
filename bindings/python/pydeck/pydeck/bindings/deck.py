@@ -83,3 +83,6 @@ class Deck(JSONMixin):
         Intended for use in a Jupyter notebook
         """
         self.deck_widget.json_input = self.to_json()
+
+    def to_html(self, filename=None):
+        pass

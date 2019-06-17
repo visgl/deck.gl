@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import math
+import random
 
 
 def get_random_rgb():
@@ -9,14 +9,11 @@ def get_random_rgb():
     -------
         :obj:`list` of :obj:`float`: Random RGB array
     """
-    return [round(math.random()*255) for _ in range(0, 3)]
-
+    return [round(random.random()*255) for _ in range(0, 3)]
 
 
 def assign_random_colors(data_vector):
-    """Produces a vector of random colors for each class of data
-
-    Useful for exploratory data analysis
+    """Produces a vector of lookup table keyed by each class of data, with value as an RGB array
 
     Parameters
     ---------
