@@ -28,7 +28,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_name: DeckGLModel.view_name,
       _view_module: DeckGLModel.view_module,
       _view_module_version: DeckGLModel.view_module_version,
-      json_input: {},
+      json_input: null,
       mapbox_key: null,
       width: 500,
       height: 500
