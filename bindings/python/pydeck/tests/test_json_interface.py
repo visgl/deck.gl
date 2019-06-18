@@ -7,9 +7,7 @@ from pydeck import (
     View,
     Deck
 )
-
 from .const import FIXTURE_STRING
-
 
 
 lights = LightSettings(

@@ -24,8 +24,7 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "webpack-bundle": "webpack",
-    "notebook-bundle": "npm install --save-dev && npm run webpack-bundle"
+    "notebook-bundle": "webpack"
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "7.1.0-beta.1",

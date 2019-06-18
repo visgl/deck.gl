@@ -180,6 +180,7 @@ setup_args = {
     'extras_require': {
         'test': [
             'pytest>=3.6',
+            'pandas>=0.23.4',
             'pytest-cov'
         ],
         'examples': [
