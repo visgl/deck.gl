@@ -48,7 +48,7 @@ export function getClosestObject({
     let i = 0;
 
     for (let row = 0; row < height; row++) {
-      const dy = row + y + 1 - deviceY;
+      const dy = row + y - deviceY;
       const dy2 = dy * dy;
 
       if (dy2 > minSquareDistanceToCenter) {

@@ -142,7 +142,8 @@ export default class DeckPicker {
     // And compensate for pixelRatio
     const pixelRatio = this.pixelRatio;
     const deviceX = Math.round(x * pixelRatio);
-    const deviceY = Math.round(this.gl.canvas.height - y * pixelRatio);
+    // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
+    const deviceY = Math.round(this.gl.canvas.height - (y + 1) * pixelRatio);
     const deviceRadius = Math.round(radius * pixelRatio);
     const {width, height} = this.pickingFBO;
     const deviceRect = this.getPickingRect({
@@ -321,9 +322,9 @@ export default class DeckPicker {
   getPickingRect({deviceX, deviceY, deviceRadius, deviceWidth, deviceHeight}) {
     // Create a box of size `radius * 2 + 1` centered at [deviceX, deviceY]
     const x = Math.max(0, deviceX - deviceRadius);
-    const y = Math.max(0, deviceY - deviceRadius - 1);
+    const y = Math.max(0, deviceY - deviceRadius);
     const width = Math.min(deviceWidth, deviceX + deviceRadius + 1) - x;
-    const height = Math.min(deviceHeight, deviceY + deviceRadius) - y;
+    const height = Math.min(deviceHeight, deviceY + deviceRadius + 1) - y;
 
     // x, y out of bounds.
     if (width <= 0 || height <= 0) {

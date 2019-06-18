@@ -6,17 +6,17 @@ const DEVICE_RECT_TEST_CASES = [
   {
     title: 'at center with radius',
     input: {deviceX: 5, deviceY: 5, deviceRadius: 1, deviceWidth: 10, deviceHeight: 10},
-    output: {x: 4, y: 3, width: 3, height: 3}
+    output: {x: 4, y: 4, width: 3, height: 3}
   },
   {
     title: 'at center without radius',
     input: {deviceX: 5, deviceY: 5, deviceRadius: 0, deviceWidth: 10, deviceHeight: 10},
-    output: {x: 5, y: 4, width: 1, height: 1}
+    output: {x: 5, y: 5, width: 1, height: 1}
   },
   {
     title: 'clipped by bounds',
     input: {deviceX: 0, deviceY: 10, deviceRadius: 1, deviceWidth: 10, deviceHeight: 10},
-    output: {x: 0, y: 8, width: 2, height: 2}
+    output: {x: 0, y: 9, width: 2, height: 1}
   },
   {
     title: 'x out of bounds',
