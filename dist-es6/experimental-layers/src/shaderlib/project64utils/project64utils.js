@@ -1,0 +1,24 @@
+function _objectDestructuringEmpty(obj) { if (obj == null) throw new TypeError("Cannot destructure undefined"); }
+
+/* eslint-disable camelcase */
+var INITIAL_STATE = {};
+
+function getUniforms() {
+  var _ref = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : INITIAL_STATE;
+
+  _objectDestructuringEmpty(_ref);
+
+  var uniforms = {};
+  return uniforms;
+}
+
+var vs = 'vec4 project_position_and_offset_to_clipspace_fp64(\n  vec3 position64xyzHi, vec2 position64xyLow, vec3 offset, out vec4 worldPosition\n) {\n  // This is the local offset to the instance position\n  vec2 offset64[4];\n  vec4_fp64(vec4(offset, 0.0), offset64);\n\n  // The 64 bit xy vertex position\n  vec4 position64xy = vec4(\n    position64xyzHi.x, position64xyLow.x,\n    position64xyzHi.y, position64xyLow.y\n  );\n\n  float z = project_scale(position64xyzHi.z);\n\n  // Apply web mercator projection (depends on coordinate system imn use)\n  vec2 projectedPosition64xy[2];\n  project_position_fp64(position64xy, projectedPosition64xy);\n\n  vec2 worldPosition64[4];\n  worldPosition64[0] = sum_fp64(offset64[0], projectedPosition64xy[0]);\n  worldPosition64[1] = sum_fp64(offset64[1], projectedPosition64xy[1]);\n  worldPosition64[2] = sum_fp64(offset64[2], vec2(z, 0.0));\n  worldPosition64[3] = vec2(1.0, 0.0);\n\n  worldPosition = vec4(projectedPosition64xy[0].x, projectedPosition64xy[1].x, z, 1.0);\n\n  return project_to_clipspace_fp64(worldPosition64);\n}\n\nvec4 project_position_and_offset_to_clipspace_fp64(\n  vec3 position64xyzHi, vec2 position64xyLow, vec3 offset\n) {\n  vec4 worldPosition;\n  return project_position_and_offset_to_clipspace_fp64(\n    position64xyzHi, position64xyLow, offset, worldPosition\n  );\n}\n';
+
+export default {
+  name: 'project64utils',
+  dependencies: ['project64'],
+  vs: vs,
+  fs: null,
+  getUniforms: getUniforms
+};
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uLy4uLy4uL3NyYy9leHBlcmltZW50YWwtbGF5ZXJzL3NyYy9zaGFkZXJsaWIvcHJvamVjdDY0dXRpbHMvcHJvamVjdDY0dXRpbHMuanMiXSwibmFtZXMiOlsiSU5JVElBTF9TVEFURSIsImdldFVuaWZvcm1zIiwidW5pZm9ybXMiLCJ2cyIsIm5hbWUiLCJkZXBlbmRlbmNpZXMiLCJmcyJdLCJtYXBwaW5ncyI6Ijs7QUFBQTtBQUNBLElBQU1BLGdCQUFnQixFQUF0Qjs7QUFFQSxTQUFTQyxXQUFULEdBQXlDO0FBQUEsaUZBQWZELGFBQWU7O0FBQUE7O0FBQ3ZDLE1BQU1FLFdBQVcsRUFBakI7QUFDQSxTQUFPQSxRQUFQO0FBQ0Q7O0FBRUQsSUFBTUMsaTBDQUFOOztBQXlDQSxlQUFlO0FBQ2JDLFFBQU0sZ0JBRE87QUFFYkMsZ0JBQWMsQ0FBQyxXQUFELENBRkQ7QUFHYkYsUUFIYTtBQUliRyxNQUFJLElBSlM7QUFLYkw7QUFMYSxDQUFmIiwiZmlsZSI6InByb2plY3Q2NHV0aWxzLmpzIiwic291cmNlc0NvbnRlbnQiOlsiLyogZXNsaW50LWRpc2FibGUgY2FtZWxjYXNlICovXG5jb25zdCBJTklUSUFMX1NUQVRFID0ge307XG5cbmZ1bmN0aW9uIGdldFVuaWZvcm1zKHt9ID0gSU5JVElBTF9TVEFURSkge1xuICBjb25zdCB1bmlmb3JtcyA9IHt9O1xuICByZXR1cm4gdW5pZm9ybXM7XG59XG5cbmNvbnN0IHZzID0gYFxcXG52ZWM0IHByb2plY3RfcG9zaXRpb25fYW5kX29mZnNldF90b19jbGlwc3BhY2VfZnA2NChcbiAgdmVjMyBwb3NpdGlvbjY0eHl6SGksIHZlYzIgcG9zaXRpb242NHh5TG93LCB2ZWMzIG9mZnNldCwgb3V0IHZlYzQgd29ybGRQb3NpdGlvblxuKSB7XG4gIC8vIFRoaXMgaXMgdGhlIGxvY2FsIG9mZnNldCB0byB0aGUgaW5zdGFuY2UgcG9zaXRpb25cbiAgdmVjMiBvZmZzZXQ2NFs0XTtcbiAgdmVjNF9mcDY0KHZlYzQob2Zmc2V0LCAwLjApLCBvZmZzZXQ2NCk7XG5cbiAgLy8gVGhlIDY0IGJpdCB4eSB2ZXJ0ZXggcG9zaXRpb25cbiAgdmVjNCBwb3NpdGlvbjY0eHkgPSB2ZWM0KFxuICAgIHBvc2l0aW9uNjR4eXpIaS54LCBwb3NpdGlvbjY0eHlMb3cueCxcbiAgICBwb3NpdGlvbjY0eHl6SGkueSwgcG9zaXRpb242NHh5TG93LnlcbiAgKTtcblxuICBmbG9hdCB6ID0gcHJvamVjdF9zY2FsZShwb3NpdGlvbjY0eHl6SGkueik7XG5cbiAgLy8gQXBwbHkgd2ViIG1lcmNhdG9yIHByb2plY3Rpb24gKGRlcGVuZHMgb24gY29vcmRpbmF0ZSBzeXN0ZW0gaW1uIHVzZSlcbiAgdmVjMiBwcm9qZWN0ZWRQb3NpdGlvbjY0eHlbMl07XG4gIHByb2plY3RfcG9zaXRpb25fZnA2NChwb3NpdGlvbjY0eHksIHByb2plY3RlZFBvc2l0aW9uNjR4eSk7XG5cbiAgdmVjMiB3b3JsZFBvc2l0aW9uNjRbNF07XG4gIHdvcmxkUG9zaXRpb242NFswXSA9IHN1bV9mcDY0KG9mZnNldDY0WzBdLCBwcm9qZWN0ZWRQb3NpdGlvbjY0eHlbMF0pO1xuICB3b3JsZFBvc2l0aW9uNjRbMV0gPSBzdW1fZnA2NChvZmZzZXQ2NFsxXSwgcHJvamVjdGVkUG9zaXRpb242NHh5WzFdKTtcbiAgd29ybGRQb3NpdGlvbjY0WzJdID0gc3VtX2ZwNjQob2Zmc2V0NjRbMl0sIHZlYzIoeiwgMC4wKSk7XG4gIHdvcmxkUG9zaXRpb242NFszXSA9IHZlYzIoMS4wLCAwLjApO1xuXG4gIHdvcmxkUG9zaXRpb24gPSB2ZWM0KHByb2plY3RlZFBvc2l0aW9uNjR4eVswXS54LCBwcm9qZWN0ZWRQb3NpdGlvbjY0eHlbMV0ueCwgeiwgMS4wKTtcblxuICByZXR1cm4gcHJvamVjdF90b19jbGlwc3BhY2VfZnA2NCh3b3JsZFBvc2l0aW9uNjQpO1xufVxuXG52ZWM0IHByb2plY3RfcG9zaXRpb25fYW5kX29mZnNldF90b19jbGlwc3BhY2VfZnA2NChcbiAgdmVjMyBwb3NpdGlvbjY0eHl6SGksIHZlYzIgcG9zaXRpb242NHh5TG93LCB2ZWMzIG9mZnNldFxuKSB7XG4gIHZlYzQgd29ybGRQb3NpdGlvbjtcbiAgcmV0dXJuIHByb2plY3RfcG9zaXRpb25fYW5kX29mZnNldF90b19jbGlwc3BhY2VfZnA2NChcbiAgICBwb3NpdGlvbjY0eHl6SGksIHBvc2l0aW9uNjR4eUxvdywgb2Zmc2V0LCB3b3JsZFBvc2l0aW9uXG4gICk7XG59XG5gO1xuXG5leHBvcnQgZGVmYXVsdCB7XG4gIG5hbWU6ICdwcm9qZWN0NjR1dGlscycsXG4gIGRlcGVuZGVuY2llczogWydwcm9qZWN0NjQnXSxcbiAgdnMsXG4gIGZzOiBudWxsLFxuICBnZXRVbmlmb3Jtc1xufTtcbiJdfQ==

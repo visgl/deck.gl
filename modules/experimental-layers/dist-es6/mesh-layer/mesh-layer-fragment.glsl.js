@@ -1,0 +1,25 @@
+export default `
+#define SHADER_NAME mesh-layer-fs
+
+precision highp float;
+
+uniform bool hasTexture;
+uniform sampler2D sampler;
+uniform vec4 color;
+
+varying vec2 vTexCoord;
+varying vec4 vColor;
+varying float vLightWeight;
+
+void main(void) {
+  vec4 color = hasTexture ? texture2D(sampler, vTexCoord) : vColor / 255.;
+  gl_FragColor = vec4(color.rgb * vLightWeight, color.a);
+
+  // use highlight color if this fragment belongs to the selected object.
+  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
+
+  // use picking color if rendering to picking FBO.
+  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+}
+`;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9tZXNoLWxheWVyL21lc2gtbGF5ZXItZnJhZ21lbnQuZ2xzbC5qcyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiQUFBQSxlQUFnQjs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Q0FBaEIiLCJzb3VyY2VzQ29udGVudCI6WyJleHBvcnQgZGVmYXVsdCBgXG4jZGVmaW5lIFNIQURFUl9OQU1FIG1lc2gtbGF5ZXItZnNcblxucHJlY2lzaW9uIGhpZ2hwIGZsb2F0O1xuXG51bmlmb3JtIGJvb2wgaGFzVGV4dHVyZTtcbnVuaWZvcm0gc2FtcGxlcjJEIHNhbXBsZXI7XG51bmlmb3JtIHZlYzQgY29sb3I7XG5cbnZhcnlpbmcgdmVjMiB2VGV4Q29vcmQ7XG52YXJ5aW5nIHZlYzQgdkNvbG9yO1xudmFyeWluZyBmbG9hdCB2TGlnaHRXZWlnaHQ7XG5cbnZvaWQgbWFpbih2b2lkKSB7XG4gIHZlYzQgY29sb3IgPSBoYXNUZXh0dXJlID8gdGV4dHVyZTJEKHNhbXBsZXIsIHZUZXhDb29yZCkgOiB2Q29sb3IgLyAyNTUuO1xuICBnbF9GcmFnQ29sb3IgPSB2ZWM0KGNvbG9yLnJnYiAqIHZMaWdodFdlaWdodCwgY29sb3IuYSk7XG5cbiAgLy8gdXNlIGhpZ2hsaWdodCBjb2xvciBpZiB0aGlzIGZyYWdtZW50IGJlbG9uZ3MgdG8gdGhlIHNlbGVjdGVkIG9iamVjdC5cbiAgZ2xfRnJhZ0NvbG9yID0gcGlja2luZ19maWx0ZXJIaWdobGlnaHRDb2xvcihnbF9GcmFnQ29sb3IpO1xuXG4gIC8vIHVzZSBwaWNraW5nIGNvbG9yIGlmIHJlbmRlcmluZyB0byBwaWNraW5nIEZCTy5cbiAgZ2xfRnJhZ0NvbG9yID0gcGlja2luZ19maWx0ZXJQaWNraW5nQ29sb3IoZ2xfRnJhZ0NvbG9yKTtcbn1cbmA7XG4iXX0=

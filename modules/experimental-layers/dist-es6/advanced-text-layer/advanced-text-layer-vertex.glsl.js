@@ -1,0 +1,77 @@
+// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+export default `\
+#define SHADER_NAME advanced-text-layer-vertex-shader
+
+attribute vec2 positions;
+
+attribute vec3 instancePositions;
+attribute vec2 instancePositions64xyLow;
+attribute float instanceSizes;
+attribute float instanceAngles;
+attribute vec4 instanceColors;
+attribute vec3 instancePickingColors;
+attribute vec4 instanceIconFrames;
+attribute float instanceColorModes;
+attribute vec2 instanceOffsets;
+
+uniform float sizeScale;
+uniform vec2 iconsTextureDim;
+
+varying float vColorMode;
+varying vec4 vColor;
+varying vec2 vTextureCoords;
+
+vec2 rotate_by_angle(vec2 vertex, float angle) {
+  float angle_radian = angle * PI / 180.0;
+  float cos_angle = cos(angle_radian);
+  float sin_angle = sin(angle_radian);
+  mat2 rotationMatrix = mat2(cos_angle, -sin_angle, sin_angle, cos_angle);
+  return rotationMatrix * vertex;
+}
+
+void main(void) {
+  vec2 iconSize = instanceIconFrames.zw;
+
+  // scale and rotate vertex in "pixel" value and convert back to fraction in clipspace
+  vec2 pixelOffset = positions / 2.0 * iconSize + instanceOffsets;
+  pixelOffset = rotate_by_angle(pixelOffset, instanceAngles) * sizeScale * instanceSizes;
+  pixelOffset.y *= -1.0;
+
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0));
+  gl_Position += project_pixel_to_clipspace(pixelOffset);
+
+  vTextureCoords = mix(
+    instanceIconFrames.xy,
+    instanceIconFrames.xy + iconSize,
+    (positions.xy + 1.0) / 2.0
+  ) / iconsTextureDim;
+
+  vTextureCoords.y = 1.0 - vTextureCoords.y;
+
+  vColor = instanceColors / 255.;
+
+  vColorMode = instanceColorModes;
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(instancePickingColors);
+}
+`;
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uL3NyYy9hZHZhbmNlZC10ZXh0LWxheWVyL2FkdmFuY2VkLXRleHQtbGF5ZXItdmVydGV4Lmdsc2wuanMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IkFBQUE7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFFQSxlQUFnQjs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Q0FBaEIiLCJzb3VyY2VzQ29udGVudCI6WyIvLyBDb3B5cmlnaHQgKGMpIDIwMTUgLSAyMDE3IFViZXIgVGVjaG5vbG9naWVzLCBJbmMuXG4vL1xuLy8gUGVybWlzc2lvbiBpcyBoZXJlYnkgZ3JhbnRlZCwgZnJlZSBvZiBjaGFyZ2UsIHRvIGFueSBwZXJzb24gb2J0YWluaW5nIGEgY29weVxuLy8gb2YgdGhpcyBzb2Z0d2FyZSBhbmQgYXNzb2NpYXRlZCBkb2N1bWVudGF0aW9uIGZpbGVzICh0aGUgXCJTb2Z0d2FyZVwiKSwgdG8gZGVhbFxuLy8gaW4gdGhlIFNvZnR3YXJlIHdpdGhvdXQgcmVzdHJpY3Rpb24sIGluY2x1ZGluZyB3aXRob3V0IGxpbWl0YXRpb24gdGhlIHJpZ2h0c1xuLy8gdG8gdXNlLCBjb3B5LCBtb2RpZnksIG1lcmdlLCBwdWJsaXNoLCBkaXN0cmlidXRlLCBzdWJsaWNlbnNlLCBhbmQvb3Igc2VsbFxuLy8gY29waWVzIG9mIHRoZSBTb2Z0d2FyZSwgYW5kIHRvIHBlcm1pdCBwZXJzb25zIHRvIHdob20gdGhlIFNvZnR3YXJlIGlzXG4vLyBmdXJuaXNoZWQgdG8gZG8gc28sIHN1YmplY3QgdG8gdGhlIGZvbGxvd2luZyBjb25kaXRpb25zOlxuLy9cbi8vIFRoZSBhYm92ZSBjb3B5cmlnaHQgbm90aWNlIGFuZCB0aGlzIHBlcm1pc3Npb24gbm90aWNlIHNoYWxsIGJlIGluY2x1ZGVkIGluXG4vLyBhbGwgY29waWVzIG9yIHN1YnN0YW50aWFsIHBvcnRpb25zIG9mIHRoZSBTb2Z0d2FyZS5cbi8vXG4vLyBUSEUgU09GVFdBUkUgSVMgUFJPVklERUQgXCJBUyBJU1wiLCBXSVRIT1VUIFdBUlJBTlRZIE9GIEFOWSBLSU5ELCBFWFBSRVNTIE9SXG4vLyBJTVBMSUVELCBJTkNMVURJTkcgQlVUIE5PVCBMSU1JVEVEIFRPIFRIRSBXQVJSQU5USUVTIE9GIE1FUkNIQU5UQUJJTElUWSxcbi8vIEZJVE5FU1MgRk9SIEEgUEFSVElDVUxBUiBQVVJQT1NFIEFORCBOT05JTkZSSU5HRU1FTlQuIElOIE5PIEVWRU5UIFNIQUxMIFRIRVxuLy8gQVVUSE9SUyBPUiBDT1BZUklHSFQgSE9MREVSUyBCRSBMSUFCTEUgRk9SIEFOWSBDTEFJTSwgREFNQUdFUyBPUiBPVEhFUlxuLy8gTElBQklMSVRZLCBXSEVUSEVSIElOIEFOIEFDVElPTiBPRiBDT05UUkFDVCwgVE9SVCBPUiBPVEhFUldJU0UsIEFSSVNJTkcgRlJPTSxcbi8vIE9VVCBPRiBPUiBJTiBDT05ORUNUSU9OIFdJVEggVEhFIFNPRlRXQVJFIE9SIFRIRSBVU0UgT1IgT1RIRVIgREVBTElOR1MgSU5cbi8vIFRIRSBTT0ZUV0FSRS5cblxuZXhwb3J0IGRlZmF1bHQgYFxcXG4jZGVmaW5lIFNIQURFUl9OQU1FIGFkdmFuY2VkLXRleHQtbGF5ZXItdmVydGV4LXNoYWRlclxuXG5hdHRyaWJ1dGUgdmVjMiBwb3NpdGlvbnM7XG5cbmF0dHJpYnV0ZSB2ZWMzIGluc3RhbmNlUG9zaXRpb25zO1xuYXR0cmlidXRlIHZlYzIgaW5zdGFuY2VQb3NpdGlvbnM2NHh5TG93O1xuYXR0cmlidXRlIGZsb2F0IGluc3RhbmNlU2l6ZXM7XG5hdHRyaWJ1dGUgZmxvYXQgaW5zdGFuY2VBbmdsZXM7XG5hdHRyaWJ1dGUgdmVjNCBpbnN0YW5jZUNvbG9ycztcbmF0dHJpYnV0ZSB2ZWMzIGluc3RhbmNlUGlja2luZ0NvbG9ycztcbmF0dHJpYnV0ZSB2ZWM0IGluc3RhbmNlSWNvbkZyYW1lcztcbmF0dHJpYnV0ZSBmbG9hdCBpbnN0YW5jZUNvbG9yTW9kZXM7XG5hdHRyaWJ1dGUgdmVjMiBpbnN0YW5jZU9mZnNldHM7XG5cbnVuaWZvcm0gZmxvYXQgc2l6ZVNjYWxlO1xudW5pZm9ybSB2ZWMyIGljb25zVGV4dHVyZURpbTtcblxudmFyeWluZyBmbG9hdCB2Q29sb3JNb2RlO1xudmFyeWluZyB2ZWM0IHZDb2xvcjtcbnZhcnlpbmcgdmVjMiB2VGV4dHVyZUNvb3JkcztcblxudmVjMiByb3RhdGVfYnlfYW5nbGUodmVjMiB2ZXJ0ZXgsIGZsb2F0IGFuZ2xlKSB7XG4gIGZsb2F0IGFuZ2xlX3JhZGlhbiA9IGFuZ2xlICogUEkgLyAxODAuMDtcbiAgZmxvYXQgY29zX2FuZ2xlID0gY29zKGFuZ2xlX3JhZGlhbik7XG4gIGZsb2F0IHNpbl9hbmdsZSA9IHNpbihhbmdsZV9yYWRpYW4pO1xuICBtYXQyIHJvdGF0aW9uTWF0cml4ID0gbWF0Mihjb3NfYW5nbGUsIC1zaW5fYW5nbGUsIHNpbl9hbmdsZSwgY29zX2FuZ2xlKTtcbiAgcmV0dXJuIHJvdGF0aW9uTWF0cml4ICogdmVydGV4O1xufVxuXG52b2lkIG1haW4odm9pZCkge1xuICB2ZWMyIGljb25TaXplID0gaW5zdGFuY2VJY29uRnJhbWVzLnp3O1xuXG4gIC8vIHNjYWxlIGFuZCByb3RhdGUgdmVydGV4IGluIFwicGl4ZWxcIiB2YWx1ZSBhbmQgY29udmVydCBiYWNrIHRvIGZyYWN0aW9uIGluIGNsaXBzcGFjZVxuICB2ZWMyIHBpeGVsT2Zmc2V0ID0gcG9zaXRpb25zIC8gMi4wICogaWNvblNpemUgKyBpbnN0YW5jZU9mZnNldHM7XG4gIHBpeGVsT2Zmc2V0ID0gcm90YXRlX2J5X2FuZ2xlKHBpeGVsT2Zmc2V0LCBpbnN0YW5jZUFuZ2xlcykgKiBzaXplU2NhbGUgKiBpbnN0YW5jZVNpemVzO1xuICBwaXhlbE9mZnNldC55ICo9IC0xLjA7XG5cbiAgZ2xfUG9zaXRpb24gPSBwcm9qZWN0X3Bvc2l0aW9uX3RvX2NsaXBzcGFjZShpbnN0YW5jZVBvc2l0aW9ucywgaW5zdGFuY2VQb3NpdGlvbnM2NHh5TG93LCB2ZWMzKDAuMCkpO1xuICBnbF9Qb3NpdGlvbiArPSBwcm9qZWN0X3BpeGVsX3RvX2NsaXBzcGFjZShwaXhlbE9mZnNldCk7XG5cbiAgdlRleHR1cmVDb29yZHMgPSBtaXgoXG4gICAgaW5zdGFuY2VJY29uRnJhbWVzLnh5LFxuICAgIGluc3RhbmNlSWNvbkZyYW1lcy54eSArIGljb25TaXplLFxuICAgIChwb3NpdGlvbnMueHkgKyAxLjApIC8gMi4wXG4gICkgLyBpY29uc1RleHR1cmVEaW07XG5cbiAgdlRleHR1cmVDb29yZHMueSA9IDEuMCAtIHZUZXh0dXJlQ29vcmRzLnk7XG5cbiAgdkNvbG9yID0gaW5zdGFuY2VDb2xvcnMgLyAyNTUuO1xuXG4gIHZDb2xvck1vZGUgPSBpbnN0YW5jZUNvbG9yTW9kZXM7XG5cbiAgLy8gU2V0IGNvbG9yIHRvIGJlIHJlbmRlcmVkIHRvIHBpY2tpbmcgZmJvIChhbHNvIHVzZWQgdG8gY2hlY2sgZm9yIHNlbGVjdGlvbiBoaWdobGlnaHQpLlxuICBwaWNraW5nX3NldFBpY2tpbmdDb2xvcihpbnN0YW5jZVBpY2tpbmdDb2xvcnMpO1xufVxuYDtcbiJdfQ==
