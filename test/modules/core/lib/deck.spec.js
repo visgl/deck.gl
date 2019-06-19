@@ -1,5 +1,6 @@
 import test from 'tape-catch';
 import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
 import {gl} from '@deck.gl/test-utils';
 
 test('Deck#constructor', t => {
@@ -52,4 +53,42 @@ test('Deck#constructor', t => {
   });
 
   t.pass('Deck constructor did not throw');
+});
+
+test('Deck#picking', t => {
+  const deck = new Deck({
+    gl,
+    width: 1,
+    height: 1,
+    // This is required because the jsdom canvas does not have client width/height
+    autoResizeDrawingBuffer: gl.canvas.clientWidth > 0,
+
+    viewState: {
+      longitude: 0,
+      latitude: 0,
+      zoom: 12
+    },
+
+    layers: [
+      new ScatterplotLayer({
+        data: [{position: [0, 0]}, {position: [0, 0]}],
+        radiusMinPixels: 100,
+        pickable: true
+      })
+    ],
+
+    onLoad: () => {
+      const info = deck.pickObject({x: 0, y: 0});
+      t.is(info && info.index, 1, 'Picked object');
+
+      let infos = deck.pickMultipleObjects({x: 0, y: 0});
+      t.is(infos.length, 2, 'Picked multiple objects');
+
+      infos = deck.pickObjects({x: 0, y: 0, width: 1, height: 1});
+      t.is(infos.length, 1, 'Picked objects');
+
+      deck.finalize();
+      t.end();
+    }
+  });
 });
