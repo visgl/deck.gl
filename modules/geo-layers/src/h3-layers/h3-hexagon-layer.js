@@ -126,8 +126,7 @@ export default class H3HexagonLayer extends CompositeLayer {
       this.setState({
         resolution,
         edgeLengthKM: resolution >= 0 ? edgeLength(resolution, UNITS.km) : 0,
-        hasPentagon,
-        vertices: null
+        hasPentagon
       });
     }
 
