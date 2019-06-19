@@ -22,7 +22,7 @@ const overrides = new Map();
  * Do nothing in case Seer as not been initialized to prevent any preformance drawback.
  */
 export const setPropOverrides = (id, valuePath, value) => {
-  if (!seer.isReady()) {
+  if (VISGL_PROD || !seer.isReady()) {
     return;
   }
 
@@ -39,7 +39,7 @@ export const setPropOverrides = (id, valuePath, value) => {
  * Invalidates the data to be sure new ones are always picked up.
  */
 export const applyPropOverrides = props => {
-  if (!seer.isReady() || !props.id) {
+  if (VISGL_PROD || !seer.isReady() || !props.id) {
     return;
   }
 
@@ -57,30 +57,26 @@ export const applyPropOverrides = props => {
   });
 };
 
-/**
- * Listen for deck.gl edit events
- */
-export const layerEditListener = cb => {
-  if (!seer.isReady()) {
+export const addSeerListeners = ({onInit, onEdit}) => {
+  if (VISGL_PROD || !seer.isReady()) {
     return;
   }
-
-  seer.listenFor('deck.gl', cb);
+  // Listen for seer events to resend data
+  seer.listenFor('init', onInit);
+  // Listen for deck.gl edit events
+  seer.listenFor('deck.gl', onEdit);
 };
 
-/**
- * Listen for seer init events to resend data
- */
-export const seerInitListener = cb => {
-  if (!seer.isReady()) {
+export const removeSeerListeners = ({onInit, onEdit}) => {
+  if (VISGL_PROD || !seer.isReady()) {
     return;
   }
-
-  seer.listenFor('init', cb);
+  seer.removeListener(onInit);
+  seer.removeListener(onEdit);
 };
 
 export const initLayerInSeer = layer => {
-  if (!seer.isReady() || !layer) {
+  if (VISGL_PROD || !seer.isReady() || !layer) {
     return;
   }
 
@@ -98,7 +94,7 @@ export const initLayerInSeer = layer => {
  * Log layer's properties to Seer
  */
 export const updateLayerInSeer = layer => {
-  if (!seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1e3)) {
+  if (VISGL_PROD || !seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1e3)) {
     return;
   }
 
@@ -110,7 +106,7 @@ export const updateLayerInSeer = layer => {
  * On finalize of a specify layer, remove it from seer
  */
 export const removeLayerInSeer = id => {
-  if (!seer.isReady() || !id) {
+  if (VISGL_PROD || !seer.isReady() || !id) {
     return;
   }
 

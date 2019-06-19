@@ -87,7 +87,8 @@ const config = {
     // Therefore we need to manually import the correct version from the core
     // This is called in prepublishOnly, after lerna bumps the package versions
     new webpack.DefinePlugin({
-      __VERSION__: JSON.stringify(PACKAGE_INFO.version)
+      __VERSION__: JSON.stringify(PACKAGE_INFO.version),
+      VISGL_PROD: true
     })
     // Uncomment for bundle size debug
     // ,new (require('webpack-bundle-analyzer').BundleAnalyzerPlugin)()

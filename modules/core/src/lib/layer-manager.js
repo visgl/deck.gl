@@ -20,7 +20,6 @@
 
 import assert from '../utils/assert';
 import {_ShaderCache as ShaderCache} from '@luma.gl/core';
-import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
 import log from '../utils/log';
@@ -31,8 +30,8 @@ import Viewport from '../viewports/viewport';
 
 import {
   setPropOverrides,
-  layerEditListener,
-  seerInitListener,
+  addSeerListeners,
+  removeSeerListeners,
   initLayerInSeer,
   updateLayerInSeer
 } from './seer-integration';
@@ -102,8 +101,7 @@ export default class LayerManager {
 
     Object.seal(this);
 
-    seerInitListener(this._initSeer);
-    layerEditListener(this._editSeer);
+    addSeerListeners({onInit: this._initSeer, onEdit: this._editSeer});
   }
 
   // Method to call when the layer manager is not needed anymore.
@@ -114,8 +112,7 @@ export default class LayerManager {
       this._finalizeLayer(layer);
     }
 
-    seer.removeListener(this._initSeer);
-    seer.removeListener(this._editSeer);
+    removeSeerListeners({onInit: this._initSeer, onEdit: this._editSeer});
   }
 
   // Check if a redraw is needed
