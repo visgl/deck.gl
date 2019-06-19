@@ -25,21 +25,14 @@ let completedTourColor = [255, 0, 0]
 let incompleteTourColor = [255, 255, 0]
 
 let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
-let actsCntUpdsData = require(`./inputs/activities_count_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
 let trIds = Object.keys(toursData);
-let initActsCnt = actsCntUpdsData[0];
-let maxResidents = Math.max(...Object.values(initActsCnt['Home']))
 
-var colorstours = d3.scaleSequential()
+var colorTours = d3.scaleSequential()
                   .domain(shuffle([...trIds]))
                   .interpolator(d3.interpolateRainbow);
 
-var colorsActs = d3.scaleSequential()
-                   .domain(([0, maxResidents]))
-                   .interpolator(d3.interpolatePuRd);
-
-let data = {zonesData: zonesData, tours: toursData, actsCnt: initActsCnt, actsCntUpds: actsCntUpdsData};
+let data = {zonesData: zonesData, tours: toursData};
 
 function shuffle(a) {
   let j, x, i;
@@ -57,10 +50,6 @@ function getRgbFromStr(strRgb) {
   return [color.r, color.g, color.b]  
 }
   
-function getActsCnt(actsCnt, actType, zoneId) {
-      return _.get(actsCnt, `${actType}.${zoneId}`, 0);   
-}
-
 function filterToursBySource(tours, zone, prop='Sources') {
   let filtered = Array();
   const filterZone = zone["properties"]["lsoa11cd"];
@@ -68,18 +57,15 @@ function filterToursBySource(tours, zone, prop='Sources') {
   return filtered
 }
 
-function filterIncompleteTours(tours, currentTime, delay=10.1) {
-  
+function filterIncompleteTours(tours, currentTime, delay=10.1) {  
   for (const tour of tours) {
     tour['Completed'] = false;
     if (tour.Timestamps[tour.Timestamps.length-1] < currentTime) {
       tour['Completed'] = true;
     }
   }
-  //return filtered
   return tours
 }
-
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -119,8 +105,6 @@ export class App extends Component {
     };
 
     this._filterTours = this._filterTours.bind(this);
-    this._renderTooltip = this._renderTooltip.bind(this);
-    
     this._onHover = this._onHover.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
     this._onTimerChange = this._onTimerChange.bind(this);
@@ -128,20 +112,6 @@ export class App extends Component {
 
   _onHover({x, y, object}) {
     this.setState({x, y, hoveredObject: object});
-  }
-
-  _renderTooltip() {
-    const {x, y, hoveredObject} = this.state;
-    return (
-      hoveredObject && (
-        <div className="tooltip" style={{top: y, left: x}}>
-          <div>
-            <b>ActCnt</b>
-          </div>
-          <div>{data.actsCnt[actType][hoveredObject.properties.lsoa11cd]}</div>
-        </div>
-      )
-    );
   }
 
   componentDidMount() {
@@ -165,10 +135,6 @@ export class App extends Component {
     this._filterTours();
   }
   
-  _onAnimationSpeedChange(evnt) {
-    this.props.animationSpeed = evnt.target.value
-  }
-
   _onTimerChange(evnt, newSimTime) {
     anchorTime = Date.now() / 1000
     simTime = newSimTime
@@ -184,26 +150,9 @@ export class App extends Component {
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
     
-  _updateActsCnt(actsCnt, actTypes, currentTime) {
-    const {actsCntUpds = this.props.data.actsCntUpds} = this.props;
-
-    for (const updTime of Object.keys(actsCntUpds)) {
-      if (updTime > currentTime) {
-        for (const actType of actTypes) {
-          actsCnt[actType] = Object.assign(actsCnt[actType], actsCntUpds[updTime][actType])
-        }
-        break
-      }
-    }
-    this.props.data.actsCnt = actsCnt
-  }
-  
   _filterTours() {
     const {allTours: allTours = this.props.data.tours} = this.props;
     
-    // I should probably split tours and activities
-    this._updateActsCnt(this.props.data.actsCnt, [actType], this.state.time)
-
     let filteredTours = allTours;
     let incompleteTours;
     let sourceTours;
@@ -226,21 +175,16 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {zones = this.props.data.zonesData,
-           actsCnt = this.props.data.actsCnt,
-           trailLength = this.props.trailLength,
-           actType = this.props.actType
-          } = this.props;
+    const {trailLength = this.props.trailLength} = this.props;
     
     return [
-      
       new TripsLayer({
         id: 'trips',
         data: this.state.tours,
         getPath: d => d.Segments,
         getTimestamps: d => d.Timestamps,
         //getColor: d => d.Completed ? completedTourColor : incompleteTourColor, //getRgbFromStr(colorstours(d.Tourid)),
-        getColor: d => getRgbFromStr(colorstours(d.Tourid)),
+        getColor: d => getRgbFromStr(colorTours(d.Tourid)),
         billboard: true,
         opacity: 0.5,
         widthMinPixels: 2,
@@ -251,24 +195,6 @@ export class App extends Component {
         autoHighlight: false,
         highlightColor: [0, 255, 255]
       }),
-      new GeoJsonLayer({
-        id: 'boundaries',
-        //data:this.state.zones,
-        data: zones,
-        stroked: true,
-        filled: true,
-        pickable: true,
-        extruded: false,
-        getFillColor: d => getRgbFromStr(colorsActs(getActsCnt(actsCnt, actType, d.properties.lsoa11cd))),
-        opacity: 0.10,
-        onClick: this._onSelectZone,
-        onHover: this._onHover,
-        updateTriggers: {
-          getFillColor: this.state.time
-        },
-        autoHighlight: true,
-        highlightColor: [0, 255, 255]
-      })
     ];
   }
   
