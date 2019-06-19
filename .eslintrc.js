@@ -26,7 +26,7 @@ module.exports = {
     'import/no-extraneous-dependencies': ['error', {devDependencies: false, peerDependencies: true}]
   },
   globals: {
-    VISGL_PROD: 'readonly'
+    DEBUG: 'readonly'
   },
   parserOptions: {
     ecmaVersion: 2018

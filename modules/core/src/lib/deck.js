@@ -165,9 +165,8 @@ export default class Deck {
     this.animationLoop = this._createAnimationLoop(props);
 
     this.stats = new Stats({id: 'deck.gl'});
-    this.metrics = VISGL_PROD
-      ? {}
-      : {
+    this.metrics = DEBUG
+      ? {
           fps: 0,
           setPropsTime: 0,
           updateAttributesTime: 0,
@@ -182,7 +181,8 @@ export default class Deck {
           textureMemory: 0,
           renderbufferMemory: 0,
           gpuMemory: 0
-        };
+        }
+      : {};
     this._metricsCounter = 0;
 
     this.setProps(props);
@@ -800,7 +800,7 @@ export default class Deck {
   }
 
   _getMetrics() {
-    if (VISGL_PROD) {
+    if (!DEBUG) {
       return;
     }
     this.metrics.fps = this.stats.get('frameRate').getHz();

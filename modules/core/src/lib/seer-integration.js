@@ -22,7 +22,7 @@ const overrides = new Map();
  * Do nothing in case Seer as not been initialized to prevent any preformance drawback.
  */
 export const setPropOverrides = (id, valuePath, value) => {
-  if (VISGL_PROD || !seer.isReady()) {
+  if (!DEBUG || !seer.isReady()) {
     return;
   }
 
@@ -39,7 +39,7 @@ export const setPropOverrides = (id, valuePath, value) => {
  * Invalidates the data to be sure new ones are always picked up.
  */
 export const applyPropOverrides = props => {
-  if (VISGL_PROD || !seer.isReady() || !props.id) {
+  if (!DEBUG || !seer.isReady() || !props.id) {
     return;
   }
 
@@ -58,7 +58,7 @@ export const applyPropOverrides = props => {
 };
 
 export const addSeerListeners = ({onInit, onEdit}) => {
-  if (VISGL_PROD || !seer.isReady()) {
+  if (!DEBUG || !seer.isReady()) {
     return;
   }
   // Listen for seer events to resend data
@@ -68,7 +68,7 @@ export const addSeerListeners = ({onInit, onEdit}) => {
 };
 
 export const removeSeerListeners = ({onInit, onEdit}) => {
-  if (VISGL_PROD || !seer.isReady()) {
+  if (!DEBUG || !seer.isReady()) {
     return;
   }
   seer.removeListener(onInit);
@@ -76,7 +76,7 @@ export const removeSeerListeners = ({onInit, onEdit}) => {
 };
 
 export const initLayerInSeer = layer => {
-  if (VISGL_PROD || !seer.isReady() || !layer) {
+  if (!DEBUG || !seer.isReady() || !layer) {
     return;
   }
 
@@ -94,7 +94,7 @@ export const initLayerInSeer = layer => {
  * Log layer's properties to Seer
  */
 export const updateLayerInSeer = layer => {
-  if (VISGL_PROD || !seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1e3)) {
+  if (!DEBUG || !seer.isReady() || seer.throttle(`deck.gl:${layer.id}`, 1e3)) {
     return;
   }
 
@@ -106,7 +106,7 @@ export const updateLayerInSeer = layer => {
  * On finalize of a specify layer, remove it from seer
  */
 export const removeLayerInSeer = id => {
-  if (VISGL_PROD || !seer.isReady() || !id) {
+  if (!DEBUG || !seer.isReady() || !id) {
     return;
   }
 

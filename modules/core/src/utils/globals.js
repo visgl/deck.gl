@@ -29,7 +29,7 @@ const window_ = typeof window !== 'undefined' ? window : global;
 const global_ = typeof global !== 'undefined' ? global : window;
 const document_ = typeof document !== 'undefined' ? document : {};
 
-// Avoid breaking `VISGL_PROD` if conditional compilation is not setup
-global_.VISGL_PROD = false;
+// Avoid breaking `VISGL_DEBUG` if conditional compilation is not setup
+global_.DEBUG = true;
 
 export {window_ as window, global_ as global, document_ as document};
