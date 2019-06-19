@@ -3,9 +3,24 @@ import {shallowEqualObjects} from '@deck.gl/json/utils/shallow-equal-objects';
 
 const TEST_CASES = [
   {
+    a: 10,
+    b: 10,
+    output: true
+  },
+  {
     a: {longitude: -70, latitude: 40.7, zoom: 12},
     b: {longitude: -70, latitude: 40.7, zoom: 12},
     output: true
+  },
+  {
+    a: {longitude: -70, latitude: 40.7, zoom: 12},
+    b: null,
+    output: false
+  },
+  {
+    a: {longitude: -70, latitude: 40.7, zoom: 12, position: [0, 0, 0]},
+    b: {longitude: -70, latitude: 40.7, zoom: 12},
+    output: false
   },
   {
     a: {longitude: -70, latitude: 40.7, zoom: 12, position: [0, 0, 0]},
