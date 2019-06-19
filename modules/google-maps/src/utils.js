@@ -82,7 +82,9 @@ export function destroyDeckInstance(deck) {
  * @param overlay (google.maps.OverlayView) - A maps Overlay instance
  */
 export function getViewState(map, overlay) {
-  const container = map.getDiv();
+  // The map fills the container div unless it's in fullscreen mode
+  // at which point the first child of the container is promoted
+  const container = map.getDiv().firstChild;
   const width = container.offsetWidth;
   const height = container.offsetHeight;
 
