@@ -29,9 +29,10 @@ import './json';
 import './react';
 import './jupyter-widget';
 
+import './react/deckgl.spec';
+
 if (typeof document !== 'undefined') {
   // Tests currently only work in browser
-  require('./react/deckgl.spec');
   require('./json/json-render.spec');
 
   require('./main/bundle');
@@ -48,6 +49,7 @@ if (typeof document !== 'undefined') {
   global.navigator = dom.window.navigator;
   global.document = dom.window.document;
   global.Element = dom.window.Element;
+  global.__JSDOM__ = true;
 
   const {gl} = require('@deck.gl/test-utils');
   // Create a dummy canvas for the headless gl context
