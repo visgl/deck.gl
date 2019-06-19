@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {Deck} from '@deck.gl/core';
+import {Deck, log} from '@deck.gl/core';
 import {ScatterplotLayer} from '@deck.gl/layers';
 import {gl} from '@deck.gl/test-utils';
 
@@ -55,7 +55,10 @@ test('Deck#constructor', t => {
   t.pass('Deck constructor did not throw');
 });
 
-test('Deck#picking', t => {
+test('Deck#rendering, picking, logging', t => {
+  // Test logging functionalities
+  log.priority = 4;
+
   const deck = new Deck({
     gl,
     width: 1,
@@ -77,7 +80,7 @@ test('Deck#picking', t => {
       })
     ],
 
-    onLoad: () => {
+    onAfterRender: () => {
       const info = deck.pickObject({x: 0, y: 0});
       t.is(info && info.index, 1, 'Picked object');
 
@@ -88,6 +91,8 @@ test('Deck#picking', t => {
       t.is(infos.length, 1, 'Picked objects');
 
       deck.finalize();
+      log.priority = 0;
+
       t.end();
     }
   });
