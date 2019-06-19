@@ -25,11 +25,10 @@ import './layers';
 import './aggregation-layers';
 import './geo-layers';
 
+import './mapbox';
 import './json';
 import './react';
 import './jupyter-widget';
-
-import './react/deckgl.spec';
 
 if (typeof document !== 'undefined') {
   // Tests currently only work in browser
