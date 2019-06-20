@@ -71,10 +71,20 @@ RFCs loosely targeted for 7.x releases. Also see [luma.gl RFCs](https://github.c
 | [**Project / Unproject Improvements**](v7.x/project-unproject-rfc.md) | @ibgreen | **Draft** | Consolidating, generalizing and simplifying JS `project`/`unproject` API, covering uses from new features such as MultiView. |
 | [**Layer Operations**](v7.x/layer-and-group-operation-rfc.md) | @ibgreen| **Preliminary Approval** | Allow partial updates of vertex attributes to support high-performance editing. |
 | [**Property Animation**](v7.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
+| [**Heatmap Layer**](v7.x/heatmap-layer-rfc.md) | @1chandu | Draft | A new layer to render heat maps with GPU Acceleration |
+
+## V7.1 RFCs
+
+These RFCS were implemented in v7.1.
+
+| RFC | Author | Status | Description |
+| --- | ---    | ---    | ---         |
+| [**GPU Acceleration in GridLayer**](v7.1/gpu-grid-layer.md) | @1chandu | **Implemented** | GPU Accelerated aggregation support in GridLayer. |
+
 
 ## v7.0 RFCs
 
-These RFCS are currently targeted for v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v70-rfcs).
+These RFCS were implemented in v7.0. Also see [luma.gl RFCs](https://github.com/uber/luma.gl/tree/master/dev-docs/RFCs#v70-rfcs).
 
 | RFC | Author | Status | Description |
 | --- | ---    | ---    | ---         |
@@ -91,6 +101,7 @@ These RFCS were implemented in v6.3. Also see [luma.gl RFCs](https://github.com/
 | --- | ---    | ---    | ---         |
 | [**Prop Types**](v6.3/prop-types-rfc.md) | @ibgreen | **Implemented** | Validate e.g ranges for numeric attributes, support animation/auto-interpolation. |
 | [**Advanced Event Handling**](v6.3/event-handling.md) | @pessimistress | Draft | Allow Layer props to accept *on<Event>* style callbacks for events other than hover and click |
+| [**GPU Aggregation enhancements**](v6.3/gpu-aggregator-enhancements.md) | @1chandu | **Implemented** | Enhance GPUGridAggregator to support multiple aggregation operations and aggregation of up to 3 weights  |
 
 
 ## v6.2 RFCs
@@ -111,7 +122,7 @@ These RFCS were implmented in v6.1. Also see [luma.gl RFCs](https://github.com/u
 | [**JSON Layers**](v6.1/json-layers-rfc.md) | @ibgreen| **Preliminary Approval** | Enable deck.gl layers to be specified as JSON payloads. |
 | [**View Class Extensions**](v6.1/view-class-extension-rfc.md) | @ibgreen| **Review** | Additional View Class properties that enable e.g. "nested" maps (minimap on top of main map). |
 | [**Property Animation (Phase 1)**](v6.x/property-animation-rfc.md) | @ibgreen | Draft | Allow Layer props and GL parameters to accept functions in addition to values and call these on every render to update values |
-| [**Contour Layer**](v6.1/contour-layer-rfc.md) | @1chandy | **Preliminary Approval** | Contour detecting aggregating layer. |
+| [**Contour Layer**](v6.1/contour-layer-rfc.md) | @1chandu | **Preliminary Approval** | Contour detecting aggregating layer. |
 | [**Improved 32 bit Projection Mode**](v6.1/improved-lnglat-projection-rfc.md.md) | @ibgreen @georgios-uber | **Implemented** | New projection mode for mixed 32/64 bit precision. |
 
 
