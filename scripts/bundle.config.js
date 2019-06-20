@@ -73,7 +73,11 @@ const config = {
           presets: [['@babel/preset-env', {forceAllTransforms: true}]],
           // all of the helpers will reference the module @babel/runtime to avoid duplication
           // across the compiled output.
-          plugins: ['@babel/transform-runtime']
+          plugins: [
+            '@babel/transform-runtime',
+            'inline-webgl-constants',
+            ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
+          ]
         }
       }
     ]
