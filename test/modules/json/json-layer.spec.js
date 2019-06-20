@@ -1,18 +1,7 @@
 import test from 'tape-catch';
 import {_JSONLayer as JSONLayer} from '@deck.gl/json';
 
-const JSON_DATA = [
-  {
-    type: 'ScatterplotLayer',
-    data: [{position: [-122.45, 37.8]}],
-    getColor: [255, 0, 0, 255],
-    getRadius: 1000
-  },
-  {
-    type: 'TextLayer',
-    data: [{position: [-122.45, 37.8], text: 'Hello World'}]
-  }
-];
+import {JSON_DATA} from './json-converter.spec';
 
 test('JSONLayer#import', t => {
   t.ok(JSONLayer, 'JSONLayer imported');
@@ -20,7 +9,7 @@ test('JSONLayer#import', t => {
 });
 
 test('JSONLayer#create', t => {
-  const jsonLayer = new JSONLayer({data: JSON_DATA});
+  const jsonLayer = new JSONLayer({data: JSON_DATA.layers});
   t.ok(jsonLayer, 'JSONLayer created');
   t.end();
 });
