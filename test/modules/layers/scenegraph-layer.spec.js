@@ -135,7 +135,7 @@ test('ScenegraphLayer#defaultProps.fetch', async t => {
   const propName = 'scenegraph';
   const layer = {
     props: {
-      scenegraphLoader: {
+      _scenegraphLoader: {
         parse: () => 9,
         loadAndParse: () => 9,
         extensions: '.glb'
