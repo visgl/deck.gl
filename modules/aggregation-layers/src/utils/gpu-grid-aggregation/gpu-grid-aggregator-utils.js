@@ -3,9 +3,9 @@ import GL from '@luma.gl/constants';
 import {Framebuffer, Texture2D} from '@luma.gl/core';
 
 export function getFloatTexture(gl, opts) {
-  const {width = 1, height = 1} = opts;
+  const {width = 1, height = 1, data = null, unpackFlipY = true} = opts;
   const texture = new Texture2D(gl, {
-    data: null,
+    data,
     format: GL.RGBA32F,
     type: GL.FLOAT,
     border: 0,
@@ -16,7 +16,8 @@ export function getFloatTexture(gl, opts) {
     },
     dataFormat: GL.RGBA,
     width,
-    height
+    height,
+    unpackFlipY
   });
   return texture;
 }

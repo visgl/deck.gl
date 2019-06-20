@@ -20,3 +20,14 @@ export function extractCameraVectors({viewMatrix, viewMatrixInverse}) {
 //   const modulus = value % divisor;
 //   return modulus < 0 ? divisor + modulus : modulus;
 // }
+
+// Normalizes longitude (lng) with respect to reference longitude (refLng)
+export function normalizeLongitude(lng, refLng) {
+  const deltaLng = lng - refLng;
+  if (deltaLng > 180) {
+    return lng - 360;
+  } else if (deltaLng < -180) {
+    return lng + 360;
+  }
+  return lng;
+}

@@ -94,6 +94,9 @@ import memoize from './utils/memoize';
 // lighting
 export {AmbientLight} from '@luma.gl/core';
 
+// Math utils
+export {normalizeLongitude} from './utils/math-utils';
+
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {

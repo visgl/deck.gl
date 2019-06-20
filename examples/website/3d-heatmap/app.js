@@ -4,7 +4,7 @@ import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import {PhongMaterial} from '@luma.gl/core';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
-import {HexagonLayer} from '@deck.gl/aggregation-layers';
+import {HexagonLayer, _HeatMapLayer as HeatMapLayer} from '@deck.gl/aggregation-layers';
 import DeckGL from '@deck.gl/react';
 
 // Set your mapbox token here
@@ -81,7 +81,7 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    this._animate();
+    // this._animate();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -122,7 +122,7 @@ export class App extends Component {
     const {data, radius = 1000, upperPercentile = 100, coverage = 1} = this.props;
 
     return [
-      new HexagonLayer({
+      new HeatMapLayer({
         id: 'heatmap',
         colorRange,
         coverage,
@@ -136,7 +136,11 @@ export class App extends Component {
         pickable: Boolean(this.props.onHover),
         radius,
         upperPercentile,
-        material
+        material,
+        radiusPixels: 20,
+        linearFilter: false,
+        renderGirdTexture: false,
+        cellSize: 200
       })
     ];
   }

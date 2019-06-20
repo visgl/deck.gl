@@ -1,9 +1,10 @@
 import React, {PureComponent} from 'react';
 import {StaticMap, _MapContext as MapContext, NavigationControl} from 'react-map-gl';
 import autobind from 'react-autobind';
+import '@luma.gl/debug';
 
 import DeckGL from '@deck.gl/react';
-import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, View, WebMercatorViewport} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';
 
@@ -42,7 +43,7 @@ export default class Map extends PureComponent {
       mapViewState: {
         latitude: 37.752,
         longitude: -122.427,
-        zoom: 11.5,
+        zoom: 1.5,
         pitch: 0,
         bearing: 0
       },
@@ -77,6 +78,21 @@ export default class Map extends PureComponent {
       console.log(infos); // eslint-disable-line
       this.setState({queriedItems: infos});
     }
+  }
+
+  fitbounds(opts) {
+    // const {x, y, width, height} = opts;
+    const {mapViewState} = this.state;
+    const bounds = [[-122.38, 37.73], [-122.0, 37.78]];
+    const bounds2 = [[-122.11, 37.71], [-122.07, 37.8]];
+    const width = (mapViewState.height * (-122.0 - -122.38)) / (37.78 - 37.73);
+    const viewport = new WebMercatorViewport(Object.assign({}, mapViewState)); //, {width}));
+    const newViewport = viewport.fitBounds(bounds);
+    const newViewState = {
+      ...newViewport,
+      transitionDuration: 500
+    };
+    this.setState({mapViewState: newViewState});
   }
 
   _onViewStateChange({viewState, viewId}) {

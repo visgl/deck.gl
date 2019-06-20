@@ -22,6 +22,7 @@ import {
 } from '@deck.gl/aggregation-layers';
 
 const {flattenVertices} = experimental;
+const USE_EARTHQUACKE_DATA = true;
 
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
@@ -265,9 +266,26 @@ const LineLayerExample = {
 
 const ScatterplotLayerExample = {
   layer: ScatterplotLayer,
-  getData: () => dataSamples.points,
+  getData: () => USE_EARTHQUACKE_DATA ? dataSamples.earthquakes : dataSamples.points,
   props: {
     id: 'scatterplotLayer',
+    getPosition: d => USE_EARTHQUACKE_DATA ? d.geometry.coordinates : d.COORDINATES,
+    getFillColor: d => [255, 128, 0],
+    getLineColor: d => [0, 128, 255],
+    getRadius: d => d.SPACES,
+    opacity: 1,
+    pickable: true,
+    radiusScale: 30,
+    radiusMinPixels: 1,
+    radiusMaxPixels: 30
+  }
+};
+
+const ScatterplotLayerExample2 = {
+  layer: ScatterplotLayer,
+  getData: () => dataSamples.points,
+  props: {
+    id: 'scatterplotLayer2',
     getPosition: d => d.COORDINATES,
     getFillColor: d => [255, 128, 0],
     getLineColor: d => [0, 128, 255],
@@ -303,7 +321,7 @@ const ContourLayerExample = {
     getPosition: d => d.COORDINATES,
     gpuAggregation: true,
     contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
+      // {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
       {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
       {threshold: 15, color: [0, 0, 255]}
     ]
@@ -319,7 +337,7 @@ const ContourLayerBandsExample = {
     getPosition: d => d.COORDINATES,
     gpuAggregation: true,
     contours: [
-      {threshold: [1, 5], color: [255, 0, 0]},
+      //{threshold: [1, 5], color: [255, 0, 0]},
       {threshold: [5, 15], color: [0, 255, 0]},
       {threshold: [15, 1000], color: [0, 0, 255]}
     ]
@@ -358,12 +376,12 @@ const CPUGridLayerExample = {
   layer: CPUGridLayer,
   props: {
     id: 'gridLayer',
-    data: dataSamples.points,
-    cellSize: 200,
+    data: USE_EARTHQUACKE_DATA ? dataSamples.earthquakes : dataSamples.points,
+    cellSize: 10000, // 200,
     opacity: 1,
     extruded: true,
     pickable: true,
-    getPosition: d => d.COORDINATES,
+    getPosition: d =>USE_EARTHQUACKE_DATA ? d.geometry.coordinates : d.COORDINATES,
     getColorValue,
     getElevationValue
   }
@@ -510,6 +528,7 @@ export default {
     PathLayer: PathLayerExample,
     'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
+    ScatterplotLayer2: ScatterplotLayerExample2,
     ArcLayer: ArcLayerExample,
     LineLayer: LineLayerExample,
     IconLayer: IconLayerExample,

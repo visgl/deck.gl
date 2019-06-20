@@ -1,6 +1,6 @@
 import {Matrix4} from 'math.gl';
 import {fp64 as fp64Utils} from '@luma.gl/core';
-import {COORDINATE_SYSTEM, log, createIterable, experimental} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, log, createIterable, experimental, normalizeLongitude} from '@deck.gl/core';
 const {count} = experimental;
 const {fp64LowPart} = fp64Utils;
 
@@ -22,6 +22,7 @@ export function pointToDensityGridData({
   fp64 = false,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   viewport = null,
+  projectPoints = false,
   boundingBox = null
 }) {
   let gridData = {};
@@ -29,47 +30,34 @@ export function pointToDensityGridData({
     gridData = parseGridData(data, getPosition, weightParams);
     boundingBox = gridData.boundingBox;
   }
-  let cellSize = [cellSizeMeters, cellSizeMeters];
-  let worldOrigin = [0, 0];
-  log.assert(
-    coordinateSystem === COORDINATE_SYSTEM.LNGLAT || coordinateSystem === COORDINATE_SYSTEM.IDENTITY
-  );
 
-  switch (coordinateSystem) {
-    case COORDINATE_SYSTEM.LNGLAT:
-    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
-      const gridOffset = getGridOffset(boundingBox, cellSizeMeters);
-      cellSize = [gridOffset.xOffset, gridOffset.yOffset];
-      worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
-      break;
-    case COORDINATE_SYSTEM.IDENTITY:
-      const {width, height} = viewport;
-      worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
-      break;
-    default:
-      // Currently other coodinate systems not supported/verified.
-      log.assert(false);
-  }
 
-  const opts = getGPUAggregationParams({boundingBox, cellSize, worldOrigin});
+  const cellSize = getCellSize({cellSizeMeters, boundingBox, coordinateSystem});
 
+  const gridParams = getGridParams({boundingBox, cellSize, viewport, coordinateSystem});
+
+  const {positions, positions64xyLow, weights} = gridData;
+  const {width, height, gridTransformMatrix, gridSize, gridOrigin} = gridParams;
+  // console.log(`cellSizeMeters: ${cellSizeMeters} cellSize: ${cellSize} width: ${width} height: ${height} gridTransformMatrix: ${gridTransformMatrix} gridSize: ${gridSize} gridOrigin: ${gridOrigin}`);
   const aggregatedData = gpuGridAggregator.run({
-    positions: gridData.positions,
-    positions64xyLow: gridData.positions64xyLow,
-    weights: gridData.weights,
+    positions,
+    positions64xyLow,
+    weights,
     cellSize,
-    width: opts.width,
-    height: opts.height,
-    gridTransformMatrix: opts.gridTransformMatrix,
+    width,
+    height,
+    gridTransformMatrix,
     useGPU: gpuAggregation,
     changeFlags: aggregationFlags,
+    viewport,
+    projectPoints,
     fp64
   });
 
   return {
     weights: aggregatedData,
-    gridSize: opts.gridSize,
-    gridOrigin: opts.gridOrigin,
+    gridSize,
+    gridOrigin,
     cellSize,
     boundingBox
   };
@@ -77,7 +65,7 @@ export function pointToDensityGridData({
 
 // Parse input data to build positions, wights and bounding box.
 /* eslint-disable max-statements */
-function parseGridData(data, getPosition, weightParams) {
+export function parseGridData(data, getPosition, weightParams) {
   const pointCount = count(data);
 
   // For CPU Aggregation this needs to have full 64 bit precession, hence don't use FLoat32Array
@@ -85,6 +73,8 @@ function parseGridData(data, getPosition, weightParams) {
   const positions = new Float64Array(pointCount * 2);
   const positions64xyLow = new Float32Array(pointCount * 2);
 
+  // (Lattitudes: 55.3248, 50.1963)
+  // (Longitudes: -6.4506, 3.2624)
   let yMin = Infinity;
   let yMax = -Infinity;
   let xMin = Infinity;
@@ -100,12 +90,19 @@ function parseGridData(data, getPosition, weightParams) {
   }
 
   const {iterable, objectInfo} = createIterable(data);
+  const refLng = getPosition(iterable[0], objectInfo)[0];
   for (const object of iterable) {
     objectInfo.index++;
     const position = getPosition(object, objectInfo);
     const {index} = objectInfo;
-    x = position[0];
+    x = normalizeLongitude(position[0], refLng);
     y = position[1];
+
+    // // HAck to make 3d heatmap example work
+    // if (x > 3.2624 || x < -6.5506 || y > 55.3248 || y < 49.0063) {
+    //   continue;
+    // }
+
     positions[index * 2] = x;
     positions[index * 2 + 1] = y;
 
@@ -141,6 +138,7 @@ function parseGridData(data, getPosition, weightParams) {
     yMin: toFinite(yMin),
     yMax: toFinite(yMax)
   };
+  // console.log(`parseGridData: boundingBox: X: ${xMin} -> ${xMax} Y: ${yMin} -> ${yMax}`);
   return {
     positions,
     positions64xyLow,
@@ -212,8 +210,37 @@ export function alignToCell(inValue, cellSize) {
   return value * sign;
 }
 
+export function getCellSize(opts) {
+  const {cellSizeMeters, boundingBox, coordinateSystem = COORDINATE_SYSTEM.LNGLAT} = opts;
+  let cellSize = [cellSizeMeters, cellSizeMeters];
+  if (coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+    const gridOffset = getGridOffset(boundingBox, cellSizeMeters);
+    cellSize = [gridOffset.xOffset, gridOffset.yOffset];
+  }
+  return cellSize;
+}
+
 // Calculate grid parameters
-function getGPUAggregationParams({boundingBox, cellSize, worldOrigin}) {
+export function getGridParams(opts) {
+  const {boundingBox, viewport, coordinateSystem = COORDINATE_SYSTEM.LNGLAT, cellSize} = opts;
+
+  let worldOrigin = [0, 0];
+
+  switch (coordinateSystem) {
+    case COORDINATE_SYSTEM.LNGLAT:
+    case COORDINATE_SYSTEM.LNGLAT_DEPRECATED:
+      worldOrigin = [-180, -90]; // Origin used to define grid cell boundaries
+      break;
+    case COORDINATE_SYSTEM.IDENTITY:
+      const {width, height} = viewport;
+      worldOrigin = [-width / 2, -height / 2]; // Origin used to define grid cell boundaries
+      break;
+    default:
+      // Currently other coodinate systems not supported/verified.
+      log.assert(false);
+  }
+
+
   const {yMin, yMax, xMin, xMax} = boundingBox;
 
   // NOTE: this alignment will match grid cell boundaries with existing CPU implementation

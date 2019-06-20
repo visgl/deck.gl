@@ -9,7 +9,7 @@ import {
   UNITS
 } from 'h3-js';
 import {lerp} from 'math.gl';
-import {CompositeLayer, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable, normalizeLongitude} from '@deck.gl/core';
 import {ColumnLayer, PolygonLayer} from '@deck.gl/layers';
 
 // There is a cost to updating the instanced geometries when using highPrecision: false
@@ -21,12 +21,7 @@ const UPDATE_THRESHOLD_KM = 10;
 export function normalizeLongitudes(vertices, refLng) {
   refLng = refLng === undefined ? vertices[0][0] : refLng;
   for (const pt of vertices) {
-    const deltaLng = pt[0] - refLng;
-    if (deltaLng > 180) {
-      pt[0] -= 360;
-    } else if (deltaLng < -180) {
-      pt[0] += 360;
-    }
+    pt[0] = normalizeLongitude(pt[0], refLng);
   }
 }
 

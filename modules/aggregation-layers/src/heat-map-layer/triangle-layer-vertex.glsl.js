@@ -18,15 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './contour-layer/contour-layer.spec';
-import './contour-layer/marching-squares.spec';
-import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
-import './gpu-grid-layer/gpu-grid-layer.spec';
-import './cpu-grid-layer/cpu-grid-layer.spec';
-import './grid-aggregator.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
-import './grid-layer.spec';
-import './screen-grid-layer.spec';
-import './utils/scale-utils.spec';
-import './utils/rectangle-tesselation.spec';
+// Inspired by screen-grid-layer vertex shader in deck.gl
+
+export default `\
+#define SHADER_NAME heatp-map-layer-vertex-shader
+
+attribute vec3 positions;
+attribute vec2 texCoords;
+
+varying vec2 vTexCoords;
+
+
+// Custom uniforms
+void main(void) {
+
+  gl_Position = project_position_to_clipspace(positions, vec2(0, 0), vec3(0, 0, 0));
+  vTexCoords = texCoords;
+}
+`;

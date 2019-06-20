@@ -2,6 +2,7 @@ import {Vector3} from 'math.gl';
 
 /* load data samples for display */
 import allPoints from '../data/sf.bike.parking.json';
+export {default as earthquakes} from '../data/earthquakes.json';
 import {pointGrid} from './utils';
 import {pointsToWorldGrid} from './utils/grid-aggregator';
 import {default as meterTrajectorySmall} from '../data/meter-trajectory-small.json';

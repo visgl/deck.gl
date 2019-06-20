@@ -585,6 +585,19 @@ export default class GPUGridAggregator {
     }
   }
 
+  updateCPUResultTexture({gl, textureName, id, data, result}) {
+    const {resources, numCol, numRow} = this.state;
+    const resourceName = `cpu-result-${id}-${textureName}`;
+    result[textureName] = result[textureName] || resources[resourceName];
+    if (result[textureName]) {
+      result[textureName].setImageData({data});
+    } else {
+      // save resource for garbage collection
+      resources[resourceName] = getFloatTexture(this.gl, {id: resourceName, width: numCol, height: numRow, unpackFlipY: false});
+      result[textureName] = resources[resourceName];
+    }
+  }
+
   updateAggregationBuffers(opts, results) {
     if (!opts.createBufferObjects) {
       return;
@@ -601,6 +614,14 @@ export default class GPUGridAggregator {
         data: aggregationData,
         result: results[id]
       });
+      this.updateCPUResultTexture({
+        gl: this.gl,
+        textureName: 'aggregationTexture',
+        id,
+        data: aggregationData,
+        result: results[id]
+      });
+
       if (combineMaxMin) {
         this.updateCPUResultBuffer({
           gl: this.gl,

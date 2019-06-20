@@ -28,7 +28,9 @@ export {default as GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
 export {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';
 
 // experimental export
+export {default as _HeatMapLayer} from './heat-map-layer/heat-map-layer';
 export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
+export {default as _TriangleLayer} from './heat-map-layer/triangle-layer';
 
 import {default as BinSorter} from './utils/bin-sorter';
 import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';

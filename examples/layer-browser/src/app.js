@@ -46,7 +46,8 @@ export default class App extends PureComponent {
 
     this.state = props.state || {
       activeExamples: {
-        ScatterplotLayer: true
+        // TriangleLayer: true
+        HeatMapLayer: true
       },
       settings: {
         orthographic: false,
@@ -104,6 +105,11 @@ export default class App extends PureComponent {
   _onPickObjects() {
     const {width, height} = this._getSize();
     this.mapRef.current.pickObjects({x: 0, y: 0, width, height});
+  }
+
+  _onFitbounds() {
+    const {width, height} = this._getSize();
+    this.mapRef.current.fitbounds({x: 0, y: 0, width, height});
   }
 
   _multiDepthPick(x, y) {
@@ -240,6 +246,9 @@ export default class App extends PureComponent {
               }
             >
               <b>Multi Depth Pick ({this.state.enableDepthPickOnClick ? 'ON' : 'OFF'})</b>
+            </button>
+            <button onClick={this._onFitbounds}>
+              <b>Fit Bounds</b>
             </button>
           </div>
           <LayerControls

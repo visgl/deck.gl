@@ -52,7 +52,7 @@ uniform float widthMaxPixels;
 varying vec4 vColor;
 
 void main(void) {
-  
+
   vec4 color = isStroke ? instanceLineColors : instanceFillColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
@@ -72,7 +72,7 @@ void main(void) {
   }
 
   // if alpha == 0.0 or z < 0.0, do not render element
-  float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
+  float shouldRender = 1.; // float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = radius * coverage * shouldRender;
 
   // project center of column
