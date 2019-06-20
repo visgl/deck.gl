@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.5] - June 20 2019
+
+- update bundle configs (#3264)
+- json module bug fixes (#3253)
+- Fix fullscreen bug in GoogleMapsOverlay (#3255)
+- Fix missing brace on link in viewport doc
+- [Bug] Fix H3HexagonLayer state update (#3246)
+
 #### deck.gl [v7.1.4] - June 13 2019
 
 - CompositeLayer: add ability to override sublayer updateTriggers (#3234)
