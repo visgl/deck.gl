@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,27 +18,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export const defaultColorRange = [
-  [255, 255, 178],
-  [254, 217, 118],
-  [254, 178, 76],
-  [253, 141, 60],
-  [240, 59, 32],
-  [189, 0, 38]
+import test from 'tape-catch';
+
+import {getValueFunc} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
+
+const data = [10, 'a', null, 14, -3, 16, 0.2];
+const accessor = x => x;
+const TEST_CASES = [
+  {
+    name: 'Min Function',
+    op: 'min',
+    data,
+    expected: -3
+  },
+  {
+    name: 'Max Function',
+    op: 'Max',
+    data,
+    expected: 16
+  },
+  {
+    name: 'Sum Function',
+    op: 'sUM',
+    data,
+    expected: 37.2
+  },
+  {
+    name: 'Mean Function',
+    op: 'MEAN',
+    data,
+    expected: 37.2 / 5
+  },
+  {
+    name: 'Invalid(should default to SUM)',
+    op: 'Invalid',
+    data,
+    expected: 37.2
+  }
 ];
 
-// Converts a colorRange array to a flat array with 4 components per color
-export function colorRangeToFlatArray(colorRange, ArrayType, defaultValue) {
-  if (colorRange.constructor === ArrayType) {
-    return colorRange;
-  }
-  const flatArray = new ArrayType(colorRange.length * 4);
-  colorRange.forEach((color, index) => {
-    const flatArrayIdnex = index * 4;
-    flatArray[flatArrayIdnex] = color[0];
-    flatArray[flatArrayIdnex + 1] = color[1];
-    flatArray[flatArrayIdnex + 2] = color[2];
-    flatArray[flatArrayIdnex + 3] = Number.isFinite(color[3]) ? color[3] : defaultValue;
+test('GridAggregationOperationUtils#getValueFunc', t => {
+  TEST_CASES.forEach(tc => {
+    const func = getValueFunc(tc.op, accessor);
+    t.ok(func(data) === tc.expected, `${tc.name} should return expected result`);
   });
-  return flatArray;
-}
+  t.end();
+});

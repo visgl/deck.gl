@@ -42,7 +42,7 @@ test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
   const opts = {
     data: FIXTURES.points,
     getPosition,
-    weightParams: {weight: {needMax: 1, getWeight: x => 1}},
+    weightParams: {weight: {needMax: 1, needMin: 1, getWeight: x => 1}},
     gpuGridAggregator,
     aggregationFlags: {dataChanged: true},
     fp64: true // NOTE this test fails wihtout FP64 gpu aggregation.
@@ -71,6 +71,15 @@ test('GridAggregationUtils#pointToDensityGridData (CPU vs GPU)', t => {
       gpuMaxCountData[0],
       `Max data should match for cellSizeMeters:${cellSizeMeters}`
     );
+
+    const cpuMinCountsData = cpuResults.weights.weight.maxBuffer.getData();
+    const gpuMinCountData = gpuResults.weights.weight.maxBuffer.getData();
+    t.deepEqual(
+      cpuMinCountsData[0],
+      gpuMinCountData[0],
+      `Max data should match for cellSizeMeters:${cellSizeMeters}`
+    );
+
     // TODO - This is failing in headless browser test. Might be related to
     // https://github.com/uber/deck.gl/issues/3156
     // t.deepEqual(

@@ -27,6 +27,7 @@
     "start": "open http://uber.github.io/deck.gl/#/documentation/getting-started/installation?section=running-the-examples",
     "test": "ocular-test",
     "test-fast": "ocular-test fast",
+    "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
     "bench": "ocular-test bench",
     "bench-browser": "ocular-test bench-browser",

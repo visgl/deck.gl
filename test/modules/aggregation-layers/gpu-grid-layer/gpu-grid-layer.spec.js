@@ -22,8 +22,9 @@ import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl-test/data';
 import {testLayer, generateLayerTests, testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
-import {GPUGridLayer, _GPUGridAggregator as GPUGridAggregator} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer} from '@deck.gl/aggregation-layers';
 import GPUGridCellLayer from '@deck.gl/aggregation-layers/gpu-grid-layer/gpu-grid-cell-layer';
+import {setupSpysForWebGL1, restoreSpies} from './webgl1-spies-utils';
 import {gl} from '@deck.gl/test-utils';
 
 const SAMPLE_PROPS = {
@@ -32,11 +33,7 @@ const SAMPLE_PROPS = {
 };
 
 test('GPUGridLayer', t => {
-  if (!GPUGridAggregator.isSupported(gl)) {
-    t.comment('GPUGridLayer not supported, skipping');
-    t.end();
-    return;
-  }
+  const webgl1Spies = setupSpysForWebGL1(gl);
   const testCases = generateLayerTests({
     Layer: GPUGridLayer,
     sampleProps: SAMPLE_PROPS,
@@ -49,15 +46,13 @@ test('GPUGridLayer', t => {
 
   testLayer({Layer: GPUGridLayer, testCases, onError: t.notOk});
 
+  restoreSpies(webgl1Spies);
   t.end();
 });
 
 test('GPUGridLayer#renderLayers', t => {
-  if (!GPUGridAggregator.isSupported(gl)) {
-    t.comment('GPUGridLayer not supported, skipping');
-    t.end();
-    return;
-  }
+  const webgl1Spies = setupSpysForWebGL1(gl);
+
   makeSpy(GPUGridLayer.prototype, 'getAggregationFlags');
   makeSpy(GPUGridLayer.prototype, 'getLayerData');
 
@@ -76,15 +71,12 @@ test('GPUGridLayer#renderLayers', t => {
   GPUGridLayer.prototype.getAggregationFlags.restore();
   GPUGridLayer.prototype.getLayerData.restore();
 
+  restoreSpies(webgl1Spies);
   t.end();
 });
 
 test('GPUGridLayer#updates', t => {
-  if (!GPUGridAggregator.isSupported(gl)) {
-    t.comment('GPUGridLayer not supported, skipping');
-    t.end();
-    return;
-  }
+  const webgl1Spies = setupSpysForWebGL1(gl);
   testLayer({
     Layer: GPUGridLayer,
     onError: t.notOk,
@@ -155,5 +147,6 @@ test('GPUGridLayer#updates', t => {
     ]
   });
 
+  restoreSpies(webgl1Spies);
   t.end();
 });
