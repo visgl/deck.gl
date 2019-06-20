@@ -10,6 +10,9 @@ global.navigator = dom.window.navigator;
 global.document = dom.window.document;
 global.Element = dom.window.Element;
 global.__JSDOM__ = true;
+global.Image = dom.window.Image;
+global.HTMLCanvasElement = dom.window.HTMLCanvasElement;
+global.HTMLVideoElement = dom.window.HTMLVideoElement;
 
 const {gl} = require('@deck.gl/test-utils');
 // Create a dummy canvas for the headless gl context
