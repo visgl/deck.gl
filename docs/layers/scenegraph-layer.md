@@ -71,6 +71,11 @@ Can be a URL of an object. You need to provide the `fetch` function to load the 
 Can also be a luma.gl [ScenegraphNode](http://uber.github.io/luma.gl/#/documentation/api-reference/), or a `Promise` that resolves to one.
 The layer calls _delete()_ on _scenegraph_ when a new one is provided or the layer is finalized.
 
+##### `_scenegraphLoader` (Object, optional)
+
+If you provide a URL for `scenegraph` you can optionally provide a `_scenegraphLoader` to load the URL.
+Read more about loaders [here](https://loaders.gl/docs/developer-guide/get-started).
+If not provided `loaders.gl` will select one automatically from [registered loaders](https://loaders.gl/docs/api-reference/core/register-loaders).
 
 ### Render Options
 
