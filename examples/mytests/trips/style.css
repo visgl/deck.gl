@@ -4,16 +4,17 @@
     background-color: red;
 }
 
+
 .time-slider {
-    position: absolute;
-    align-items: center;
+  position: absolute;
+  align-items: center;
   -webkit-appearance: none;
-  left: 20%;
-    bottom: 2rem;
-  width: 50%;
-  height: 25px;
-  padding: 1rem 1.5rem .5rem 1.5rem;
+  left: 18%;
+  bottom: 2rem;
+  width: 60%;
+  padding:  0.6rem 1rem 0.5rem 1rem;
   background: #d3d3d3;
+  border-radius: 20px;
   outline: none;
   opacity: 0.4;
   -webkit-transition: .2s;
@@ -39,3 +40,4 @@
   background: #4CAF50;
   cursor: pointer;
 }
+
