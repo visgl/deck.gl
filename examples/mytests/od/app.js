@@ -19,8 +19,6 @@ let animationSpeed = 500 // unit time per second
 
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
-let completedTourColor = [255, 0, 0]
-let incompleteTourColor = [255, 255, 0]
 
 let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
