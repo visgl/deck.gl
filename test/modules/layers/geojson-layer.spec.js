@@ -44,6 +44,30 @@ test('GeoJsonLayer#tests', t => {
     }
   });
 
+  // Add partial update test case
+  testCases.push({
+    title: 'GeoJsonLayer#',
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    onAfterUpdate: ({layer, subLayers}) => {
+      const {featuresDiff} = layer.state;
+      t.deepEquals(
+        featuresDiff,
+        {
+          polygonFeatures: [{startRow: 0, endRow: 3}],
+          polygonOutlineFeatures: [{startRow: 0, endRow: 3}],
+          lineFeatures: [{startRow: 0, endRow: 0}],
+          pointFeatures: [{startRow: 0, endRow: 0}]
+        },
+        'created diff for subLayers'
+      );
+      t.ok(subLayers.every(l => l.props._dataDiff), "sublayers' dataDiff prop is populated");
+    },
+    updateProps: {
+      data: Object.assign({}, FIXTURES.choropleths),
+      _dataDiff: () => [{startRow: 0, endRow: 3}]
+    }
+  });
+
   testLayer({Layer: GeoJsonLayer, testCases, onError: t.notOk});
 
   t.end();

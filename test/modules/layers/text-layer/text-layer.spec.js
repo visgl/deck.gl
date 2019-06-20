@@ -19,6 +19,9 @@ test('TextLayer', t => {
         t.ok(layer.state.data.length, 'Creates sublayer data');
         t.ok(subLayer, 'Renders sublayer');
       }
+      if (layer.props._dataDiff) {
+        t.ok(Array.isArray(layer.state.dataDiff), 'created diff for sublayer');
+      }
     }
   });
   testLayer({Layer: TextLayer, testCases, onError: t.notOk});

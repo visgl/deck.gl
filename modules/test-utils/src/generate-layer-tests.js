@@ -160,9 +160,15 @@ function makeAltDataTestCases(props, propTypes) {
   if (!Array.isArray(originalData)) {
     return [];
   }
+  // partial update
+  const partialUpdateProps = {
+    data: originalData.slice(),
+    _dataDiff: () => [{startRow: 0, endRow: 2}]
+  };
   // data should support any iterable
   const genIterableProps = {
-    data: new Set(originalData)
+    data: new Set(originalData),
+    _dataDiff: null
   };
   // data in non-iterable form
   const nonIterableProps = {
@@ -177,6 +183,10 @@ function makeAltDataTestCases(props, propTypes) {
   }
 
   return [
+    {
+      title: 'Partial update',
+      props: partialUpdateProps
+    },
     {
       title: 'Generic iterable data',
       props: genIterableProps

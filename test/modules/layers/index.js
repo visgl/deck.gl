@@ -33,3 +33,4 @@ import './text-layer/font-atlas-utils.spec';
 import './text-layer/lru-cache.spec';
 import './text-layer/text-layer.spec';
 import './column-geometry.spec';
+import './utils.spec';

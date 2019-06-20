@@ -23,6 +23,7 @@ import {CompositeLayer, createIterable} from '@deck.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import PathLayer from '../path-layer/path-layer';
 import * as Polygon from '../solid-polygon-layer/polygon';
+import {replaceInRange} from '../utils';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
@@ -73,8 +74,22 @@ export default class PolygonLayer extends CompositeLayer {
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 
-    if (geometryChanged) {
-      this.state.paths = this._getPaths(props);
+    if (geometryChanged && Array.isArray(changeFlags.dataChanged)) {
+      const paths = this.state.paths.slice();
+      const pathsDiff = changeFlags.dataChanged.map(dataRange =>
+        replaceInRange({
+          data: paths,
+          getIndex: p => p._i,
+          dataRange,
+          replace: this._getPaths(dataRange)
+        })
+      );
+      this.setState({paths, pathsDiff});
+    } else if (geometryChanged) {
+      this.setState({
+        paths: this._getPaths(),
+        pathsDiff: null
+      });
     }
   }
 
@@ -85,11 +100,13 @@ export default class PolygonLayer extends CompositeLayer {
     });
   }
 
-  _getPaths({data, getPolygon, positionFormat}) {
+  _getPaths(dataRange = {}) {
+    const {data, getPolygon, positionFormat} = this.props;
     const paths = [];
     const positionSize = positionFormat === 'XY' ? 2 : 3;
+    const {startRow, endRow} = dataRange;
 
-    const {iterable, objectInfo} = createIterable(data);
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const {positions, holeIndices} = Polygon.normalize(
@@ -106,10 +123,10 @@ export default class PolygonLayer extends CompositeLayer {
             holeIndices[i - 1] || 0,
             holeIndices[i] || positions.length
           );
-          paths.push({path, object});
+          paths.push({path, object, _i: objectInfo.index});
         }
       } else {
-        paths.push({path: positions, object});
+        paths.push({path: positions, object, _i: objectInfo.index});
       }
     }
     return paths;
@@ -125,7 +142,16 @@ export default class PolygonLayer extends CompositeLayer {
   /* eslint-disable complexity */
   renderLayers() {
     // Layer composition props
-    const {data, stroked, filled, extruded, wireframe, elevationScale, transitions} = this.props;
+    const {
+      data,
+      _dataDiff,
+      stroked,
+      filled,
+      extruded,
+      wireframe,
+      elevationScale,
+      transitions
+    } = this.props;
 
     // Rendering props underlying layer
     const {
@@ -151,7 +177,7 @@ export default class PolygonLayer extends CompositeLayer {
       material
     } = this.props;
 
-    const {paths} = this.state;
+    const {paths, pathsDiff} = this.state;
 
     const FillLayer = this.getSubLayerClass('fill', SolidPolygonLayer);
     const StrokeLayer = this.getSubLayerClass('stroke', PathLayer);
@@ -161,6 +187,7 @@ export default class PolygonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('fill', paths) &&
       new FillLayer(
         {
+          _dataDiff,
           extruded,
           elevationScale,
 
@@ -197,6 +224,7 @@ export default class PolygonLayer extends CompositeLayer {
       this.shouldRenderSubLayer('stroke', paths) &&
       new StrokeLayer(
         {
+          _dataDiff: pathsDiff && (() => pathsDiff),
           fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
