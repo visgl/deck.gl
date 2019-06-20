@@ -408,6 +408,11 @@ export const docPages = generatePath([
             content: getDocUrl('layers/geojson-layer.md')
           },
           {
+            name: 'HeatmapLayer',
+            tag: 'WebGL2',
+            content: getDocUrl('layers/heatmap-layer.md')
+          },
+          {
             name: 'IconLayer',
             content: getDocUrl('layers/icon-layer.md')
           },
