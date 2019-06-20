@@ -16,7 +16,7 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTB
 
 let sampleSize = 1;
 let actType = 'Other';
-let trailLength = 1000;
+let trailLength = 84600;
 let animationSpeed = 500 // unit time per second
 
 let simTime = 0;

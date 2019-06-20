@@ -4,17 +4,38 @@
     background-color: red;
 }
 
-.time-slider{
+.time-slider {
     position: absolute;
     align-items: center;
-    justify-content: flex-end;
-    min-width: 800px;
-    max-width: 815px;
-    left: 2rem;
+  -webkit-appearance: none;
+  left: 20%;
     bottom: 2rem;
-    padding: 1rem 1.5rem .5rem 1.5rem;
-    background-color: red;
-    border: 1.5px blue;
-    border-radius: .25rem;
-    z-index: 2;
+  width: 50%;
+  height: 25px;
+  padding: 1rem 1.5rem .5rem 1.5rem;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.4;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.time-slider:hover {
+  opacity: 1;
+}
+
+.time-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.time-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
 }
