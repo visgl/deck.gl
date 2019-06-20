@@ -27,9 +27,9 @@ const config = {
   },
 
   entry: {
-    test: 'test/modules/index.js',
+    test: 'test/node.js',
     'test-browser': 'test/browser.js',
-    bench: 'test/bench/index.js',
+    bench: 'test/bench/node.js',
     'bench-browser': 'test/bench/browser.js',
     size: 'test/size/import-nothing.js'
   }
