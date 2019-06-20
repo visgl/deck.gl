@@ -71,12 +71,16 @@ export default function coreLayersBench(suite) {
       testInitializeLayer({layer});
     })
     .add('SolidPolygonLayer#initialize (flat)', () => {
-      const layer = new SolidPolygonLayer({data: data.choropleths.features});
+      const layer = new SolidPolygonLayer({
+        data: data.choropleths.features,
+        getPolygon: f => f.geometry.coordinates
+      });
       testInitializeLayer({layer});
     })
     .add('SolidPolygonLayer#initialize (extruded)', () => {
       const layer = new SolidPolygonLayer({
         data: data.choropleths.features,
+        getPolygon: f => f.geometry.coordinates,
         extruded: true
       });
       testInitializeLayer({layer});
@@ -84,33 +88,17 @@ export default function coreLayersBench(suite) {
     .add('SolidPolygonLayer#initialize (wireframe)', () => {
       const layer = new SolidPolygonLayer({
         data: data.choropleths.features,
+        getPolygon: f => f.geometry.coordinates,
         extruded: true,
         wireframe: true
       });
       testInitializeLayer({layer});
     })
-    .add('SolidPolygonLayer#initialize (flat,fp64)', () => {
-      const layer = new SolidPolygonLayer({data: data.choropleths.features, fp64: true});
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer#initialize (extruded,fp64)', () => {
-      const layer = new SolidPolygonLayer({
-        data: data.choropleths.features,
-        extruded: true,
-        fp64: true
-      });
-      testInitializeLayer({layer});
-    })
-    .add('SolidPolygonLayer#initialize (wireframe,fp64)', () => {
-      const layer = new SolidPolygonLayer({
-        data: data.choropleths.features,
-        extruded: true,
-        wireframe: true,
-        fp64: true
-      });
-      testInitializeLayer({layer});
-    })
     .add('TextLayer#initialize', () => {
+      if (typeof document === 'undefined') {
+        // FontAtlasManager does not work in Node
+        return;
+      }
       const layer = new TextLayer({
         data: data.points,
         getPosition: d => d.COORDINATES,
@@ -185,10 +173,16 @@ function layerConstructionBench(suite) {
       return new GeoJsonLayer({data: data.choropleths});
     })
     .add('PolygonLayer#construct', () => {
-      return new PolygonLayer({data: data.choropleths.features});
+      return new PolygonLayer({
+        data: data.choropleths.features,
+        getPolygon: f => f.geometry.coordinates
+      });
     })
     .add('SolidPolygonLayer#construct', () => {
-      return new PolygonLayer({data: data.choropleths.features});
+      return new PolygonLayer({
+        data: data.choropleths.features,
+        getPolygon: f => f.geometry.coordinates
+      });
     })
     .add('ScatterplotLayer#construct(separate prop objects)', () => {
       return new ScatterplotLayer(PROPS1, PROPS2, PROPS3);
