@@ -34,10 +34,16 @@ const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
+  scenegraphLoader: null,
 
   fetch: (url, {propName, layer}) => {
     if (propName === 'scenegraph') {
-      return load(url, layer.getLoadOptions());
+      const options = layer.getLoadOptions();
+
+      if (layer.props.scenegraphLoader) {
+        return load(url, layer.props.scenegraphLoader, options);
+      }
+      return load(url, options);
     }
 
     return fetch(url).then(response => response.json());

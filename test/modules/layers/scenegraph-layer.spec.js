@@ -126,3 +126,25 @@ test('ScenegraphLayer#tests', t => {
 
   t.end();
 });
+
+test('ScenegraphLayer#defaultProps.fetch', async t => {
+  const loadOptions = {
+    load: true
+  };
+  const url = new ArrayBuffer();
+  const propName = 'scenegraph';
+  const layer = {
+    props: {
+      scenegraphLoader: {
+        parse: () => 9,
+        loadAndParse: () => 9,
+        extensions: '.glb'
+      }
+    },
+    getLoadOptions: () => loadOptions
+  };
+
+  const loaded = await ScenegraphLayer.defaultProps.fetch(url, {propName, layer});
+  t.ok(loaded === 9, 'Using loader success');
+  t.end();
+});
