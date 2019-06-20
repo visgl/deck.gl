@@ -1,4 +1,4 @@
-// Copyright (c) 2015 - 2017 Uber Technologies, Inc.
+// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -18,16 +18,49 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './contour-layer/contour-layer.spec';
-import './contour-layer/marching-squares.spec';
-import './gpu-grid-layer/gpu-grid-cell-layer-vertex.spec';
-import './gpu-grid-layer/gpu-grid-layer.spec';
-import './gpu-grid-layer/gpu-grid-cell-layer.spec';
-import './cpu-grid-layer/cpu-grid-layer.spec';
-import './grid-aggregator.spec';
-import './hexagon-layer.spec';
-import './hexagon-aggregator.spec';
-import './grid-layer.spec';
-import './screen-grid-layer.spec';
-import './utils/scale-utils.spec';
-import './utils/aggregation-operation-utils.spec';
+import test from 'tape-catch';
+
+import {getValueFunc} from '@deck.gl/aggregation-layers/utils/aggregation-operation-utils';
+
+const data = [10, 'a', null, 14, -3, 16, 0.2];
+const accessor = x => x;
+const TEST_CASES = [
+  {
+    name: 'Min Function',
+    op: 'min',
+    data,
+    expected: -3
+  },
+  {
+    name: 'Max Function',
+    op: 'Max',
+    data,
+    expected: 16
+  },
+  {
+    name: 'Sum Function',
+    op: 'sUM',
+    data,
+    expected: 37.2
+  },
+  {
+    name: 'Mean Function',
+    op: 'MEAN',
+    data,
+    expected: 37.2 / 5
+  },
+  {
+    name: 'Invalid(should default to SUM)',
+    op: 'Invalid',
+    data,
+    expected: 37.2
+  }
+];
+
+test('GridAggregationOperationUtils#getValueFunc', t => {
+  TEST_CASES.forEach(tc => {
+    const func = getValueFunc(tc.op, accessor);
+    t.ok(func(data) === tc.expected, `${tc.name} should return expected result`);
+  });
+  t.end();
+});
