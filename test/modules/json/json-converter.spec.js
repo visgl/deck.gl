@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+import {_JSONConverter as JSONConverter, _JSONLayer as JSONLayer} from '@deck.gl/json';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
@@ -23,16 +23,32 @@ export const JSON_DATA = {
     latitude: 37.8,
     zoom: 12
   },
+  mapStyle: {},
+  views: [
+    {
+      type: 'MapView',
+      height: '50%',
+      controller: true
+    },
+    {
+      type: 'FirstPersonView',
+      y: '50%',
+      height: '50%'
+    }
+  ],
   layers: [
     {
       type: 'ScatterplotLayer',
       data: [{position: [-122.45, 37.8]}],
+      getPosition: 'position',
       getColor: [255, 0, 0, 255],
       getRadius: 1000
     },
     {
       type: 'TextLayer',
-      data: [{position: [-122.45, 37.8], text: 'Hello World'}]
+      data: [[-122.45, 37.8]],
+      getPosition: '-',
+      getText: d => 'Hello World'
     }
   ]
 };
@@ -54,5 +70,12 @@ test('JSONConverter#convert', t => {
 
   const deckProps = jsonConverter.convertJsonToDeckProps(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
+
+  t.is(deckProps.views.length, 2, 'JSONConverter converted views');
+
+  const layer = deckProps.layers[0];
+  t.is(layer && layer.constructor, JSONLayer, 'JSONConverter created JSONLayer');
+  t.is(layer.props.data.length, 2, 'JSONLayer has data');
+
   t.end();
 });
