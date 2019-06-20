@@ -17,6 +17,7 @@ const deckJson = require('@deck.gl/json');
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
 
+// Note: Variables shared explictly between Python and JavaScript use camel-case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
     return {
@@ -28,9 +29,9 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module: DeckGLModel.view_module,
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
+      mapbox_key: null,
       width: 500,
-      height: 500,
-      mapbox_key: null
+      height: 500
     };
   }
 
@@ -65,10 +66,12 @@ export class DeckGLView extends DOMWidgetView {
   render() {
     this.modelId = this.model.model_id;
     super.render();
-    this.listenTo(this.model, 'change:json_input', this.value_changed);
+    this.model.on('change:json_input', this.value_changed, this);
     loadCss(MAPBOX_CSS_URL);
     const [width, height] = [this.model.get('width'), this.model.get('height')];
+
     createDeckScaffold(this.el, this.modelId, width, height);
+
     waitForElementToDisplay(
       `#deck-map-wrapper-${this.modelId}`,
       TICK_RATE_MILLISECONDS,

@@ -22,6 +22,10 @@ const {Tesselator} = experimental;
 import {fp64 as fp64Module} from '@luma.gl/core';
 const {fp64LowPart} = fp64Module;
 
+const START_CAP = 1;
+const END_CAP = 2;
+const INVALID = 4;
+
 // This class is set up to allow querying one attribute at a time
 // the way the AttributeManager expects it
 export default class PathTesselator extends Tesselator {
@@ -32,12 +36,11 @@ export default class PathTesselator extends Tesselator {
       fp64,
       positionFormat,
       attributes: {
-        startPositions: {size: 3},
-        endPositions: {size: 3},
-        leftPositions: {size: 3},
-        rightPositions: {size: 3},
-        startEndPositions64XyLow: {size: 4, fp64Only: true},
-        neighborPositions64XyLow: {size: 4, fp64Only: true}
+        startPositions: {size: 3, padding: 3},
+        endPositions: {size: 3, padding: 3},
+        segmentTypes: {size: 1, type: Uint8ClampedArray},
+        startPositions64XyLow: {size: 2, padding: 2, fp64Only: true},
+        endPositions64XyLow: {size: 2, padding: 2, fp64Only: true}
       }
     });
   }
@@ -49,7 +52,12 @@ export default class PathTesselator extends Tesselator {
 
   /* Implement base Tesselator interface */
   getGeometrySize(path) {
-    return Math.max(0, this.getPathLength(path) - 1);
+    const numPoints = this.getPathLength(path);
+    if (numPoints < 2) {
+      // invalid path
+      return 0;
+    }
+    return this.isClosed(path) ? numPoints + 1 : Math.max(0, numPoints - 1);
   }
 
   /* eslint-disable max-statements, complexity */
@@ -58,64 +66,59 @@ export default class PathTesselator extends Tesselator {
       attributes: {
         startPositions,
         endPositions,
-        leftPositions,
-        rightPositions,
-        startEndPositions64XyLow,
-        neighborPositions64XyLow
+        startPositions64XyLow,
+        endPositions64XyLow,
+        segmentTypes
       },
       fp64
     } = this;
 
-    const numPoints = context.geometrySize + 1;
-    if (numPoints < 2) {
-      // ignore invalid path
+    const {geometrySize} = context;
+    if (geometrySize === 0) {
       return;
     }
     const isPathClosed = this.isClosed(path);
 
-    let startPoint = this.getPointOnPath(path, 0);
-    let endPoint = this.getPointOnPath(path, 1);
-    let prevPoint = isPathClosed ? this.getPointOnPath(path, numPoints - 2) : startPoint;
-    let nextPoint;
+    let startPoint;
+    let endPoint;
 
-    for (let i = context.vertexStart, ptIndex = 1; ptIndex < numPoints; i++, ptIndex++) {
-      if (ptIndex + 1 < numPoints) {
-        nextPoint = this.getPointOnPath(path, ptIndex + 1);
-      } else {
-        nextPoint = isPathClosed ? this.getPointOnPath(path, 1) : endPoint;
+    // startPositions   --  A0  B0 B1 B2 B3 B0 B1
+    // endPositions         A1  B1 B2 B3 B0 B1 B2  --
+    // segmentTypes         3   4  0  0  0  0  4
+    for (let i = context.vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
+      startPoint = endPoint || this.getPointOnPath(path, 0);
+      endPoint = this.getPointOnPath(path, ptIndex + 1);
+
+      segmentTypes[i] = 0;
+      if (ptIndex === 0) {
+        if (isPathClosed) {
+          segmentTypes[i] += INVALID;
+        } else {
+          segmentTypes[i] += START_CAP;
+        }
+      }
+      if (ptIndex === geometrySize - 1) {
+        if (isPathClosed) {
+          segmentTypes[i] += INVALID;
+        } else {
+          segmentTypes[i] += END_CAP;
+        }
       }
 
-      startPositions[i * 3] = startPoint[0];
-      startPositions[i * 3 + 1] = startPoint[1];
-      startPositions[i * 3 + 2] = startPoint[2] || 0;
+      startPositions[i * 3 + 3] = startPoint[0];
+      startPositions[i * 3 + 4] = startPoint[1];
+      startPositions[i * 3 + 5] = startPoint[2] || 0;
 
       endPositions[i * 3] = endPoint[0];
       endPositions[i * 3 + 1] = endPoint[1];
       endPositions[i * 3 + 2] = endPoint[2] || 0;
 
-      leftPositions[i * 3] = prevPoint[0];
-      leftPositions[i * 3 + 1] = prevPoint[1];
-      leftPositions[i * 3 + 2] = prevPoint[2] || 0;
-
-      rightPositions[i * 3] = nextPoint[0];
-      rightPositions[i * 3 + 1] = nextPoint[1];
-      rightPositions[i * 3 + 2] = nextPoint[2] || 0;
-
       if (fp64) {
-        startEndPositions64XyLow[i * 4] = fp64LowPart(startPoint[0]);
-        startEndPositions64XyLow[i * 4 + 1] = fp64LowPart(startPoint[1]);
-        startEndPositions64XyLow[i * 4 + 2] = fp64LowPart(endPoint[0]);
-        startEndPositions64XyLow[i * 4 + 3] = fp64LowPart(endPoint[1]);
-
-        neighborPositions64XyLow[i * 4] = fp64LowPart(prevPoint[0]);
-        neighborPositions64XyLow[i * 4 + 1] = fp64LowPart(prevPoint[1]);
-        neighborPositions64XyLow[i * 4 + 2] = fp64LowPart(nextPoint[0]);
-        neighborPositions64XyLow[i * 4 + 3] = fp64LowPart(nextPoint[1]);
+        startPositions64XyLow[i * 2 + 2] = fp64LowPart(startPoint[0]);
+        startPositions64XyLow[i * 2 + 3] = fp64LowPart(startPoint[1]);
+        endPositions64XyLow[i * 2] = fp64LowPart(endPoint[0]);
+        endPositions64XyLow[i * 2 + 1] = fp64LowPart(endPoint[1]);
       }
-
-      prevPoint = startPoint;
-      startPoint = endPoint;
-      endPoint = nextPoint;
     }
   }
   /* eslint-enable max-statements, complexity */
@@ -133,12 +136,20 @@ export default class PathTesselator extends Tesselator {
     if (Number.isFinite(path[0])) {
       // flat format
       const {positionSize} = this;
+      if (index * positionSize >= path.length) {
+        // loop
+        index += 1 - path.length / positionSize;
+      }
       // TODO - avoid creating new arrays when using binary
       return [
         path[index * positionSize],
         path[index * positionSize + 1],
         positionSize === 3 ? path[index * positionSize + 2] : 0
       ];
+    }
+    if (index >= path.length) {
+      // loop
+      index += 1 - path.length;
     }
     return path[index];
   }

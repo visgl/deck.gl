@@ -11,7 +11,7 @@ function getDeckModel(state) {
 
 test('jupyter-widget should be createable', t => {
   const model = getDeckModel({});
-  t.equal(model.get('json_input'), null, 'json_input should be null');
+  t.deepEquals(model.get('json_input'), null, 'json_input should be null');
   t.equal(model.get('mapbox_key'), null, 'mapbox_key should be null');
   t.equal(model.get('width'), 500, 'default width should be specified');
   t.equal(model.get('height'), 500, 'default height should be specified');

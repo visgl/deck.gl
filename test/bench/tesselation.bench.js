@@ -7,20 +7,21 @@ const polygons = data.choropleths.features.map(f => f.geometry.coordinates);
 export default function tesselationBench(suite) {
   return suite
     .group('TESSELATOR')
-    .add('polygonTesselator.updatePositions#flat', () => {
-      const tesselator = new PolygonTesselator({polygons});
-      tesselator._updatePositions({});
+    .add('polygonTesselator.buildGeometry', () => {
+      // eslint-disable-next-line
+      new PolygonTesselator({
+        data: polygons,
+        getGeometry: d => d,
+        positionFormat: 'XYZ'
+      });
     })
-    .add('polygonTesselator.updatePositions#extruded', () => {
-      const tesselator = new PolygonTesselator({polygons});
-      tesselator._updatePositions({extruded: true});
-    })
-    .add('polygonTesselator.updatePositions#flat - fp64', () => {
-      const tesselator = new PolygonTesselator({polygons});
-      tesselator._updatePositions({fp64: true});
-    })
-    .add('polygonTesselator.updatePositions#extruded - fp64', () => {
-      const tesselator = new PolygonTesselator({polygons});
-      tesselator._updatePositions({extruded: true, fp64: true});
+    .add('polygonTesselator.buildGeometry - fp64', () => {
+      // eslint-disable-next-line
+      new PolygonTesselator({
+        data: polygons,
+        getGeometry: d => d,
+        fp64: true,
+        positionFormat: 'XYZ'
+      });
     });
 }

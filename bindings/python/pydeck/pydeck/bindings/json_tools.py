@@ -20,16 +20,26 @@ def to_camel_case(snake_case):
     return output_str
 
 
-def camel_case_keys(attrs):
-    """Makes all the keys in a dictionary camel-cased"""
+def lower_first_letter(s):
+    return s[:1].lower() + s[1:] if s else ''
+
+
+def lower_camel_case_keys(attrs):
+    """Makes all the keys in a dictionary camel-cased and lower-case
+
+    Parameters
+    ----------
+    attrs : dict
+        Dictionary for which all the keys should be converted to camel-case
+    """
     for snake_key in list(attrs.keys()):
         if '_' not in snake_key:
             continue
-        camel_key = to_camel_case(snake_key)
+        camel_key = lower_first_letter(to_camel_case(snake_key))
         attrs[camel_key] = attrs.pop(snake_key)
 
 
-def default_serialize(o, remap_function=camel_case_keys):
+def default_serialize(o, remap_function=lower_camel_case_keys):
     """Default method for rendering JSON from a dictionary"""
     attrs = vars(o)
     attrs = {k: v for k, v in attrs.items() if v is not None}

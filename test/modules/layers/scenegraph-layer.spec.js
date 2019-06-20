@@ -22,8 +22,54 @@ import test from 'tape-catch';
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
+import {GroupNode, ModelNode, CubeGeometry} from '@luma.gl/core';
 
 import * as FIXTURES from 'deck.gl-test/data';
+
+const fs = `\
+varying vec4 vColor;
+
+void main(void) {
+  gl_FragColor = vColor;
+}
+`;
+
+const vs = `\
+uniform float sizeScale;
+
+attribute vec3 positions;
+
+attribute vec3 instancePositions;
+attribute vec2 instancePositions64xy;
+attribute vec4 instanceColors;
+attribute vec3 instanceTranslation;
+
+varying vec4 vColor;
+
+void main(void) {
+  vColor = instanceColors / 255.0;
+
+  vec3 pos = (positions + instanceTranslation) * sizeScale;
+  pos = project_size(pos);
+
+  vec4 position_commonspace;
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
+}
+`;
+
+class MockGLTFAnimator {
+  constructor() {
+    this.animation0 = {};
+    this.animation1 = {};
+    this.animation2 = {name: 'name'};
+  }
+
+  getAnimations() {
+    return [this.animation0, this.animation1, this.animation2];
+  }
+
+  animate() {}
+}
 
 test('ScenegraphLayer#tests', t => {
   const testCases = generateLayerTests({
@@ -31,14 +77,47 @@ test('ScenegraphLayer#tests', t => {
     sampleProps: {
       data: FIXTURES.points,
       getPosition: d => d.COORDINATES,
-      scenegraph: ''
+      getTranslation: d => [0, 0, 2],
+      pickable: false,
+      sizeScale: 50,
+      scenegraph: true,
+      _animations: {
+        '*': {
+          playing: true,
+          speed: 10
+        },
+        1: {
+          playing: true,
+          speed: 20
+        },
+        name: {
+          playing: true,
+          speed: 30
+        }
+      },
+      getScene: (_scenegraph, {gl}) => {
+        return new GroupNode([
+          new ModelNode(gl, {
+            geometry: new CubeGeometry(),
+            vs,
+            fs,
+            modules: ['project32'],
+            isInstanced: true
+          })
+        ]);
+      },
+      getAnimator: () => new MockGLTFAnimator()
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer, subLayers}) => {
-      // if (layer.props.mesh) {
-      //   t.ok(layer.getModels().length > 0, 'Layer should have models');
-      // }
+    onAfterUpdate: ({layer}) => {
+      if (layer.props.scenegraph) {
+        t.ok(layer.state.scenegraph, 'State scenegraph');
+        t.ok(layer.state.animator, 'State animator');
+        t.ok(layer.state.animator.animation0.speed === 10, 'Animator speed wildcard');
+        t.ok(layer.state.animator.animation1.speed === 20, 'Animator speed by index');
+        t.ok(layer.state.animator.animation2.speed === 30, 'Animator speed by name');
+      }
     },
     runDefaultAsserts: false
   });

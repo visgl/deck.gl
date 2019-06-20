@@ -65,9 +65,9 @@ export function getBuffers(transitions) {
   for (const attributeName in transitions) {
     const {fromState, toState, buffer} = transitions[attributeName];
     sourceBuffers[`${attributeName}From`] =
-      fromState instanceof Buffer ? [fromState, {divisor: 0}] : fromState;
+      fromState instanceof Buffer ? [fromState, {divisor: 0, offset: toState.offset}] : fromState;
     sourceBuffers[`${attributeName}To`] = toState;
-    feedbackBuffers[`${attributeName}`] = buffer;
+    feedbackBuffers[`${attributeName}`] = {buffer, byteOffset: toState.offset};
   }
   return {sourceBuffers, feedbackBuffers};
 }
@@ -79,6 +79,7 @@ export function padBuffer({
   toLength,
   fromBufferLayout,
   toBufferLayout,
+  offset,
   getData = x => x
 }) {
   const hasBufferLayout = fromBufferLayout && toBufferLayout;
@@ -103,6 +104,7 @@ export function padBuffer({
     target: data,
     sourceLayout: fromBufferLayout,
     targetLayout: toBufferLayout,
+    offset,
     size: toState.size,
     getData: getMissingData
   });

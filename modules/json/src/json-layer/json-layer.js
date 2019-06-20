@@ -2,6 +2,8 @@ import {CompositeLayer} from '@deck.gl/core';
 import {getJSONLayers} from '../parsers/convert-json';
 
 const defaultProps = {
+  // Optionally accept JSON strings by parsing them
+  fetch: dataString => JSON.parse(dataString),
   configuration: []
 };
 
@@ -12,14 +14,11 @@ export default class JSONLayer extends CompositeLayer {
     };
   }
 
-  updateState({props, oldProps}) {
-    const layersChanged =
-      props.data !== oldProps.data || props.configuration !== oldProps.configuration;
+  updateState({props, oldProps, changeFlags}) {
+    const layersChanged = changeFlags.dataChanged || props.configuration !== oldProps.configuration;
 
     if (layersChanged) {
-      // Optionally accept JSON strings by parsing them
-      const data = typeof props.data === 'string' ? JSON.parse(props.data) : props.data;
-      this.state.layers = getJSONLayers(data, props.configuration);
+      this.state.layers = getJSONLayers(props.data, props.configuration);
     }
   }
 

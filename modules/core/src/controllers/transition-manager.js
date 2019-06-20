@@ -162,7 +162,8 @@ export default class TransitionManager {
     if (this.onViewStateChange) {
       this.onViewStateChange({
         viewState: this.propsInTransition,
-        interactionState: {inTransition: true}
+        interactionState: {inTransition: true},
+        oldViewState: this.props
       });
     }
   }
