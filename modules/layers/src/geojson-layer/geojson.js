@@ -63,15 +63,16 @@ export function getGeojsonFeatures(geojson) {
 }
 
 // Linearize
-export function separateGeojsonFeatures(features) {
+export function separateGeojsonFeatures(features, dataRange = {}) {
   const separated = {
     pointFeatures: [],
     lineFeatures: [],
     polygonFeatures: [],
     polygonOutlineFeatures: []
   };
+  const {startRow = 0, endRow = features.length} = dataRange;
 
-  for (let featureIndex = 0; featureIndex < features.length; featureIndex++) {
+  for (let featureIndex = startRow; featureIndex < endRow; featureIndex++) {
     const feature = features[featureIndex];
 
     assert(feature && feature.geometry, 'GeoJSON does not have geometry');

@@ -29,6 +29,7 @@ import FontAtlasManager, {
   DEFAULT_RADIUS,
   DEFAULT_CUTOFF
 } from './font-atlas-manager';
+import {replaceInRange} from '../utils';
 
 const DEFAULT_FONT_SETTINGS = {
   fontSize: DEFAULT_FONT_SIZE,
@@ -91,13 +92,28 @@ export default class TextLayer extends CompositeLayer {
       this.updateFontAtlas({oldProps, props});
     }
 
-    if (
+    const textChanged =
       changeFlags.dataChanged ||
       fontChanged ||
       (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText))
-    ) {
-      this.transformStringToLetters();
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
+
+    if (textChanged && Array.isArray(changeFlags.dataChanged)) {
+      const data = this.state.data.slice();
+      const dataDiff = changeFlags.dataChanged.map(dataRange =>
+        replaceInRange({
+          data,
+          getIndex: p => p.objectIndex,
+          dataRange,
+          replace: this.transformStringToLetters(dataRange)
+        })
+      );
+      this.setState({data, dataDiff});
+    } else if (textChanged) {
+      this.setState({
+        data: this.transformStringToLetters(),
+        dataDiff: null
+      });
     }
   }
 
@@ -160,13 +176,14 @@ export default class TextLayer extends CompositeLayer {
   }
 
   /* eslint-disable no-loop-func */
-  transformStringToLetters() {
+  transformStringToLetters(dataRange = {}) {
     const {data, getText} = this.props;
     const {iconMapping} = this.state;
+    const {startRow, endRow} = dataRange;
 
     const transformedData = [];
 
-    const {iterable, objectInfo} = createIterable(data);
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
       const text = getText(object, objectInfo);
@@ -199,7 +216,7 @@ export default class TextLayer extends CompositeLayer {
       }
     }
 
-    this.setState({data: transformedData});
+    return transformedData;
   }
   /* eslint-enable no-loop-func */
 
@@ -256,7 +273,7 @@ export default class TextLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {data, scale, iconAtlas, iconMapping} = this.state;
+    const {data, dataDiff, scale, iconAtlas, iconMapping} = this.state;
 
     const {
       getPosition,
@@ -284,6 +301,8 @@ export default class TextLayer extends CompositeLayer {
         sdf,
         iconAtlas,
         iconMapping,
+
+        _dataDiff: dataDiff && (() => dataDiff),
 
         getPosition: this._getAccessor(getPosition),
         getColor: this._getAccessor(getColor),
