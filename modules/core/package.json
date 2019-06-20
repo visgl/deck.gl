@@ -37,7 +37,7 @@
     "gl-matrix": "^3.0.0",
     "math.gl": "^2.3.0",
     "mjolnir.js": "^2.1.2",
-    "probe.gl": "^3.0.1",
+    "probe.gl": "^3.0.2",
     "seer": "^0.2.4",
     "viewport-mercator-project": "^6.1.0"
   }
