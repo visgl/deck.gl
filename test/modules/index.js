@@ -25,6 +25,7 @@ import './layers';
 import './aggregation-layers';
 import './geo-layers';
 
+import './google-maps';
 import './mapbox';
 import './json';
 import './react';
