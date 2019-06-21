@@ -1,3 +1,4 @@
+/* eslint-disable max-statements */
 import test from 'tape-catch';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
@@ -80,10 +81,12 @@ test('GoogleMapsOverlay#draw, pick', t => {
   const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
   map.emit({type: 'mousemove', pixel: [0, 0]});
   t.ok(pointerMoveSpy.called, 'pointer move event is handled');
+  pointerMoveSpy.reset();
 
   const pointerLeaveSpy = makeSpy(overlay._deck, '_onPointerLeave');
   map.emit({type: 'mouseout', pixel: [0, 0]});
   t.ok(pointerLeaveSpy.called, 'pointer leave event is handled');
+  pointerLeaveSpy.reset();
 
   overlay.finalize();
 
