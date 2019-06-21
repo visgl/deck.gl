@@ -17,7 +17,7 @@
     "modules/*"
   ],
   "scripts": {
-    "bootstrap": "yarn && ocular-bootstrap",
+    "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "ocular-clean && ocular-build",
     "version": "ocular-build core,main",
@@ -35,9 +35,6 @@
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
     "update-release-branch": "scripts/update-release-branch.sh"
-  },
-  "resolutions": {
-    "puppeteer": "1.12.0"
   },
   "browser": {
     "jsdom": false
