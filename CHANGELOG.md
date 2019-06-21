@@ -17,6 +17,77 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v7.2
+
+### deck.gl v7.2 Prereleases
+
+#### deck.gl [v7.2.0-alphs.1] - June 21, 2019
+
+- S2Layer bug fix (#3270)
+- upgrade to puppeteer 1.18 (#3267)
+- Revert "Add _scenegraphLoader property to ScenegraphLayer (#3258)" (#3265)
+- Improve test coverage for Grid layers and utils (#3262)
+- Data Partial Update (#3224)
+- Add _scenegraphLoader property to ScenegraphLayer (#3258)
+- update bundle configs (#3264)
+- Enable bitmap layer test (#3260)
+- Fix benchmark tests (#3257)
+- upgrade ocular-dev-tools (#3256)
+- json module bug fixes (#3253)
+- Fix fullscreen bug in GoogleMapsOverlay (#3255)
+- Fix missing brace on link in viewport doc
+- Add layer shader hooks rfc (#3218)
+- Improve unit test coverage (#3251)
+- [Bug] Fix H3HexagonLayer state update (#3246)
+- Fix picking rect calculation (#3244)
+- Add viewport helper functions, add documentation, support saving state across kernel restarts (#3205)
+- Cache frustum planes (#3242)
+- add deck tests with headless gl (#3243)
+- Frustum planes (#3241)
+- PathLayer attribute buffer reuse (#3211)
+- ScenegraphLayer: Add more unit tests, sort animations order (#3212)
+- Align controller behavior with react-map-gl (#3235)
+- add elementOffset to BaseAttribute (#3238)
+- Clean up outdated test apps (#3232)
+- CompositeLayer: add ability to override sublayer updateTriggers (#3234)
+- Add touchAction prop to Deck (#3231)
+- Add unit tests for controllers (#3230)
+- Clean up core utilities (#3229)
+- Update geo-layers unit tests (#3228)
+- Enable unit tests for canvas-based layers (#3226)
+- Layer browser perf and bug fixes (#3220)
+- H3Hexagon: add support for coverage. (#3210)
+- fix react method binding (#3219)
+- improve the depth encoding (#3217)
+- improve PostProcessEffect unit tests (#3208)
+- Fix unpkg links in layer documentations (#3216)
+- Fix tree shaking in pre-bundled version (#3214)
+- Give jupyter-widget JS module test coverage (#3146)
+- Unit tests for scenegraph-layer (#3204)
+- Add instanceColors support to ScenegraphLayer in PBR mode (#3200)
+- Add link to upgrade guide to CHANGELOG
+- Add sideEffects field to core package.json (#3202)
+- Attribute buffer handling bug fixes (#3207)
+- fix path layer vertex shader (#3206)
+- Support 3D paths with TripsLayer (#3192)
+- Note about metrics in what's new (#3201)
+- more unit tests for lighting effect and effect manager (#3190)
+- Bump dependency version
+- GPUGridLayer: make it exclusive for WebGL2 (#3195)
+- Address different publishing requirements (#3174)
+- Fix website control panel (#3193)
+- Fix layer-browser color picker (#3194)
+- Fix website bugs (#3191)
+- 7.1 website: fix crashes (#3187)
+- use supercluster for IconLayer demo clustering (#3188)
+- Reduce flashing in map-tile demo (#3182)
+- Fix BitmapLayer (#3181)
+- Fix GridLayer docs (#3177)
+- Website improvements (#3180)
+- upgrade website to react-map-gl v5 (#3179)
+- webside optimization (#3176)
+- Fix ArcLayer bug when using non-iterable data with pre-allocated target array (#3170)
+
 ## deck.gl v7.1
 
 ### deck.gl v7.1 Prereleases
