@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.6] - June 21 2019
+
+- S2Layer bug fix (#3270)
+
 #### deck.gl [v7.1.5] - June 20 2019
 
 - update bundle configs (#3264)
