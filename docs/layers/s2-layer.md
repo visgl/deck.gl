@@ -96,6 +96,12 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md), [CompositeLayer](/
 
 ##### `getS2Token` ([Function](/docs/developer-guide/using-layers.md#accessors), optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
+Called for each data object to retrieve the identifier of the S2 cell. May return one of the following:
+
+- A string that is the cell's hex token
+- A string that is the Hilbert quad key (containing `/`)
+- A [Long](https://www.npmjs.com/package/long) object that is the cell's id
+
 Check [S2 Cell](http://s2geometry.io/devguide/s2cell_hierarchy) for more details.
 
 * default: `object => object.token`
