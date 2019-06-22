@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-/* global fetch */
 /* global window */
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
@@ -37,6 +36,8 @@ import LayerState from './layer-state';
 
 import {worldToPixels} from 'viewport-mercator-project';
 
+import {load} from '@loaders.gl/core';
+
 const LOG_PRIORITY_UPDATE = 1;
 
 const EMPTY_ARRAY = Object.freeze([]);
@@ -51,7 +52,7 @@ const defaultProps = {
   dataTransform: {type: 'function', value: data => data, compare: false},
   fetch: {
     type: 'function',
-    value: url => fetch(url).then(response => response.json()),
+    value: (url, {layer}) => load(url, layer.getLoadOptions()),
     compare: false
   },
   updateTriggers: {}, // Update triggers: a core change detection mechanism in deck.gl
@@ -157,6 +158,11 @@ export default class Layer extends Component {
   // (When reacting to an async event, this layer may no longer be the latest)
   getCurrentLayer() {
     return this.internalState && this.internalState.layer;
+  }
+
+  // Returns the default parse options for async props
+  getLoadOptions() {
+    return this.props.loadOptions || {};
   }
 
   // Use iteration (the only required capability on data) to get first element

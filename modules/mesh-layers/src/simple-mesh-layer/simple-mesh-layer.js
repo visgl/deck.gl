@@ -25,8 +25,6 @@
 import {Layer, createIterable} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, fp64, PhongMaterial, isWebGL2} from '@luma.gl/core';
-import {load} from '@loaders.gl/core';
-import {loadImage} from '@loaders.gl/images';
 const {fp64LowPart} = fp64;
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -42,25 +40,6 @@ function assert(condition, message) {
   if (!condition) {
     throw new Error(`deck.gl: ${message}`);
   }
-}
-
-/*
- * Load image data into luma.gl Texture2D objects
- * @param {WebGLContext} gl
- * @param {String|Texture2D|HTMLImageElement|Uint8ClampedArray} src - source of image data
- *   can be url string, Texture2D object, HTMLImageElement or pixel array
- * @returns {Promise} resolves to an object with name -> texture mapping
- */
-function getTexture(gl, src, opts) {
-  if (typeof src === 'string') {
-    // Url, load the image
-    return loadImage(src)
-      .then(data => getTextureFromData(gl, data, opts))
-      .catch(error => {
-        throw new Error(`Could not load texture from ${src}: ${error}`);
-      });
-  }
-  return new Promise(resolve => resolve(getTextureFromData(gl, src, opts)));
 }
 
 /*
@@ -106,13 +85,6 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultMaterial = new PhongMaterial();
 
 const defaultProps = {
-  fetch: (url, {propName}) => {
-    if (propName === 'mesh') {
-      return load(url);
-    }
-
-    return fetch(url).then(response => response.json());
-  },
   mesh: {value: null, type: 'object', async: true},
   texture: null,
   sizeScale: {type: 'number', value: 1, min: 0},
@@ -265,12 +237,11 @@ export default class SimpleMeshLayer extends Layer {
     }
 
     if (src) {
-      getTexture(gl, src).then(texture => {
-        this.setState({texture});
-        if (this.state.model) {
-          this.state.model.setUniforms({sampler: this.state.texture, hasTexture: 1});
-        }
-      });
+      const texture = getTextureFromData(gl, src);
+      this.setState({texture});
+      if (this.state.model) {
+        this.state.model.setUniforms({sampler: this.state.texture, hasTexture: 1});
+      }
     } else {
       // reset
       this.setState({texture: null});
