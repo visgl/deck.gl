@@ -1,41 +1,76 @@
 requirejs.config({
-  enforceDefine: true,
   paths: {
-    deck: 'https://unpkg.com/@deck.gl/core@7.1.0/dist/dist.dev',
-    deckjson: 'https://unpkg.com/@deck.gl/json@7.1.0/dist/dist.dev',
-    decklayers: 'https://unpkg.com/@deck.gl/layers@7.1.0/dist/dist.dev',
-    deckaggregate: 'https://unpkg.com/@deck.gl/aggregation-layers@7.1.0/dist/dist.dev',
-    mapboxjs: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl',
+    deck: 'https://unpkg.com/@deck.gl/core@7.1.0/dist.min',
+    deckjson: 'https://unpkg.com/@deck.gl/json@7.1.0/dist.min',
+    decklayers: 'https://unpkg.com/@deck.gl/layers@7.1.0/dist.min',
+    deckaggregate: 'https://unpkg.com/@deck.gl/aggregation-layers@7.1.0/dist.min',
+    mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl',
     luma: 'https://unpkg.com/@luma.gl/core@7.1.0/dist/dist.min'
+  },
+  shim : {
+    'deckaggregate': ['deck', 'decklayers', 'luma']
   }
 });
 
-function onViewportChange({viewport}) {
-  config.setProps({viewState: viewport});
+let config, mapLayer, jsonInput, jsonConverter;
+
+jsonInput = JSON.parse(JSON.stringify({{json_input}}));
+
+function setMapProps(map, props) {
+  if ('viewState' in props && props.viewState.longitude && props.viewState.latitude) {
+    const {viewState} = props;
+    map.jumpTo({
+      center: [viewState.longitude, viewState.latitude],
+      zoom: Number.isFinite(viewState.zoom) ? viewState.zoom : 10,
+      bearing: viewState.bearing || 0,
+      pitch: viewState.pitch || 0
+    });
+  }
+
+  if (props.map && 'style' in props.map) {
+    if (props.map.style !== map.deckStyle) {
+      map.setStyle(props.map.style);
+      map.deckStyle = props.map.style;
+    }
+  }
 }
 
 
-requirejs(['luma', 'deckjson', 'deck', 'decklayers', 'mapboxjs'], function(
-  luma, deckJson, deckgl, deckglLayers, mbjs) {
+function onViewportChange({viewState}) {
+  config.setProps({viewState});
+  setMapProps(mapLayer, {viewState});
+}
 
-  const deckAggregationLayers = require(['deckaggregate']);
 
-  const jsonConverter = new deckJson._JSONConverter({
+function valueChanged() {
+  const jsonProps = jsonConverter.convertJsonToDeckProps(jsonInput);
+  config.setProps(jsonProps);
+  setMapProps(mapLayer, config.props);
+}
+
+
+function init(luma, deckJson, deckgl, deckglLayers, mapboxgl, deckAggregationLayers) {
+   mapboxgl.accessToken = '{{mapbox_api_key}}',
+   mapLayer = new mapboxgl.Map({
+    container: 'map',
+    interactive: false,
+    style: null
+  });
+
+  jsonConverter = new deckJson._JSONConverter({
     configuration: {
       layers: {...deckglLayers, ...deckAggregationLayers}
     }
   });
 
-  const config = new deckgl.Deck({
+  config = new deckgl.Deck({
     canvas: 'deck-map-container',
     height: '100%',
     width: '100%',
-    mapboxApiAccessToken: '{{mapbox_api_key}}',
+    onLoad: valueChanged.bind(this),
     views: [new deckgl.MapView()],
     onViewStateChange: onViewportChange.bind(this)
   });
+}
 
-  const jsonProps = jsonConverter.convertJsonToDeckProps({{json_input}});
-  config.setProps(jsonProps);
-
-});
+requirejs(['luma', 'deckjson', 'deck', 'decklayers', 'mapboxgl', 'deckaggregate'], init);

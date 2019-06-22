@@ -13,8 +13,8 @@ from pydeck.io.html import (
 from .const import FIXTURE_STRING
 
 
-def test_example_creation_blank():
+def test_rendering_is_not_broken():
     rendered = render_json_to_html(FIXTURE_STRING, 'fake_key')
-    # f = open('tmp.html', 'w').write(rendered)
-    # f.close()
     assert render_json_to_html
+    assert FIXTURE_STRING in render_json_to_html
+    assert 'fake_key' in render_json_to_html
