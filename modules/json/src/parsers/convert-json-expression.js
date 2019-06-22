@@ -27,19 +27,25 @@ export default function convertJSONExpression(propValue, configuration, isAccess
     SINGLE_IDENTIFIER_REGEX.test(propValue) &&
     propValue !== 'true' &&
     propValue !== 'false';
+
   if (isSingleIdentifier) {
     func = row => get(row, propValue);
   } else {
     // Compile with expression-eval
     try {
-      const compiledFunc = expressionEval.compile(propValue);
+      const ast = expressionEval.parse(propValue);
       // NOTE: To avoid security risks, the arguments passed to the
       // compiled expresion must only give access to pure data (no globals etc)
-      // TODO - disable function call syntax?
+      // We disable function call syntax?
+      traverse(ast, node => {
+        if (node.type === 'CallExpression') {
+          throw new Error('Function calls not allowed in JSON expressions');
+        }
+      });
       func = isAccessor
-        ? row => compiledFunc({row})
+        ? row => expressionEval.eval(ast, {row})
         : // TBD - how do we pass args to general (non-accessor) functions?
-          args => compiledFunc({args});
+          args => expressionEval.eval(ast, {args});
     } catch (error) {
       // Report error and store marker to avoid recompiling invalid func?
       log.warn(`Failed to compile expression ${propValue}`);
@@ -50,4 +56,18 @@ export default function convertJSONExpression(propValue, configuration, isAccess
   // Cache the compiled function
   cachedExpressionMap[propValue] = func;
   return func;
+}
+
+// eslint-disable-next-line complexity
+function traverse(node, visitor) {
+  if (Array.isArray(node)) {
+    node.forEach(element => traverse(element, visitor));
+  } else if (node && typeof node === 'object') {
+    if (node.type) {
+      visitor(node);
+    }
+    for (const key in node) {
+      traverse(node[key], visitor);
+    }
+  }
 }
