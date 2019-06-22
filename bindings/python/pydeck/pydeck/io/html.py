@@ -1,7 +1,11 @@
+import time
 import jinja2
 import os
 import os.path
 import tempfile
+
+import webbrowser
+from IPython.display import IFrame
 
 
 TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
@@ -16,26 +20,26 @@ def render_json_to_html(json_input, mapbox_api_key=None):
     return html
 
 
-def display_html(html_str, filename=None):
-    """Converts HTML into a temporary file and open it in the system browser or IPython/Jupyter Notebook IFrame.
+def display_html(filename=None):
+    """Converts HTML into a temporary file and open it in the system browser or IPython/Jupyter Notebook IFrame."""
+    try:
+        return IFrame(filename, height=500, width=500)
+    except Exception:
+        try:
+            url = 'file://{}'.format(filename)
+            # Hack to prevent blank page
+            time.sleep(0.5)
+            webbrowser.open(url)
+        except Exception:
+            raise
 
-    Parameters
-    ==========
-    html_str : str:
-        String of HTML to render filename
-    filename : str, default None"""
-    pass
 
-
-def open_named_or_temporary_file(filename='', dir=''):
+def open_named_or_temporary_file(filename=''):
     if filename:
         filename = add_html_extension(filename)
         return open(filename, 'w+')
-    if dir:
-        return tempfile.NamedTemporaryFile(
-            suffix='.html', dir=dir, delete=False)
     return tempfile.NamedTemporaryFile(
-        suffix='.html', delete=False)
+        suffix='.html', dir=os.cwd(), delete=False)
 
 
 def add_html_extension(fname):
@@ -44,3 +48,11 @@ def add_html_extension(fname):
     if fname is None:
         raise Exception("File has no name")
     return fname + '.html'
+
+
+def to_html(deck_json, mapbox_key, filename=None):
+    html = render_json_to_html(deck_json, mapbox_key)
+    f = open_named_or_temporary_file(filename)
+    f.write(html)
+    f.close()
+    display_html(f.name)

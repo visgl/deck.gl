@@ -1,8 +1,11 @@
-from .json_tools import JSONMixin
+import os
+import warnings
 
+from .json_tools import JSONMixin
 from .layer import Layer
 from .view import View
 from .view_state import ViewState
+from ..io.html import to_html
 from ..widget import DeckGLWidget
 
 
@@ -13,9 +16,12 @@ class Deck(JSONMixin):
         layers=[],
         views=[View()],
         map_style='mapbox://styles/mapbox/dark-v9',
+        mapbox_key=os.getenv('MAPBOX_API_KEY'),
         initial_view_state=ViewState(),
     ):
         """Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
+
+        Requires a Mapbox API token to display a basemap, see notes below.
 
         Parameters
         ----------
@@ -28,7 +34,9 @@ class Deck(JSONMixin):
         initial_view_state : pydeck.ViewState, default pydeck.ViewState()
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see `pydeck.data_utils.autocompute_viewport`
-
+        mapbox_key : str, default None
+            Read on inititialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
+            See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
 
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
@@ -43,6 +51,11 @@ class Deck(JSONMixin):
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
+        self.deck_widget.mapbox_key = mapbox_key
+        self.mapbox_key = mapbox_key
+        if not mapbox_key:
+            warnings.warn(
+                'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
 
     def __add__(self, obj):
         """
@@ -85,4 +98,4 @@ class Deck(JSONMixin):
         self.deck_widget.json_input = self.to_json()
 
     def to_html(self, filename=None):
-        pass
+        to_html(self.to_json(), self.mapbox_key)
