@@ -1,4 +1,7 @@
+import pytest
+
 import json
+import os
 
 from pydeck import (
     Layer,
@@ -7,9 +10,9 @@ from pydeck import (
     View,
     Deck
 )
-from .const import FIXTURE_STRING
+from ..const import FIXTURE_STRING
 
-
+"""Create a series of test objects"""
 lights = LightSettings(
     lights_position=[
         -0.144528,
@@ -41,10 +44,25 @@ view = View(type='MapView', controller=True)
 deck = Deck(layers=[layer], initial_view_state=view_state, views=[view])
 
 
+def test_warning():
+    """Verify that a warning is emitted when no Mapbox API key is set"""
+    _environ = dict(os.environ)
+    try:
+        if os.environ.get('MAPBOX_API_KEY'):
+            del os.environ['MAPBOX_API_KEY']
+        with pytest.warns(UserWarning) as record:
+            d = Deck()
+            os.environ['MAPBOX_API_KEY'] = 'pk.xx'
+            d = Deck()
+        # Assert that only one warning has been raised
+        assert len(record) == 1
+    finally:
+        os.environ.clear()
+        os.environ.update(_environ)
+
 def test_json_output():
     """Verify that the JSON rendering produces an @deck.gl/json library-compliant JSON object"""
     assert str(deck) == json.dumps(json.loads(FIXTURE_STRING), sort_keys=True)
-
 
 def test_update():
     """Verify that calling `update` changes the Deck object"""

@@ -5,7 +5,7 @@ from .json_tools import JSONMixin
 from .layer import Layer
 from .view import View
 from .view_state import ViewState
-from ..io.html import to_html
+from ..io.html import deck_to_html
 from ..widget import DeckGLWidget
 
 
@@ -16,7 +16,7 @@ class Deck(JSONMixin):
         layers=[],
         views=[View()],
         map_style='mapbox://styles/mapbox/dark-v9',
-        mapbox_key=os.getenv('MAPBOX_API_KEY'),
+        mapbox_key=None,
         initial_view_state=ViewState(),
     ):
         """Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
@@ -51,9 +51,9 @@ class Deck(JSONMixin):
         # Use passed view state
         self.initial_view_state = initial_view_state
         self.deck_widget = DeckGLWidget()
-        self.deck_widget.mapbox_key = mapbox_key
-        self.mapbox_key = mapbox_key
-        if not mapbox_key:
+        self.mapbox_key = mapbox_key or os.getenv('MAPBOX_API_KEY')
+        self.deck_widget.mapbox_key = self.mapbox_key
+        if not self.mapbox_key:
             warnings.warn(
                 'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
 
@@ -97,5 +97,15 @@ class Deck(JSONMixin):
         """
         self.deck_widget.json_input = self.to_json()
 
-    def to_html(self, filename=None):
-        to_html(self.to_json(), self.mapbox_key)
+    def to_html(self, filename=None, open_browser=False):
+        """Writes a file and loads it to an iframe, if in a Jupyter notebook
+        Otherwise writes a file and optionally opens it in a web browser
+
+        Parameters
+        ----------
+        filename : str, default None
+            Name of the file. If no name is provided, a randomly named file will be written locally.
+        open_browser : bool, default False
+            Whether a browser window will open or not after write
+        """
+        deck_to_html(self.to_json(), self.mapbox_key)

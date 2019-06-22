@@ -50,7 +50,7 @@ def add_html_extension(fname):
     return fname + '.html'
 
 
-def to_html(deck_json, mapbox_key, filename=None):
+def deck_to_html(deck_json, mapbox_key, filename=None):
     html = render_json_to_html(deck_json, mapbox_key)
     f = open_named_or_temporary_file(filename)
     f.write(html)
