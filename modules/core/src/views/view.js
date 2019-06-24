@@ -36,6 +36,7 @@ export default class View {
     this.type = type;
 
     this.props = Object.assign({}, props, {
+      id: this.id,
       projectionMatrix,
       fovy,
       near,
