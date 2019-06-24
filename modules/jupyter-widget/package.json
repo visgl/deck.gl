@@ -22,8 +22,8 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "webpack-bundle": "webpack",
-    "notebook-bundle": "npm install --save-dev && npm run webpack-bundle"
+    "build": "echo No operation. This package is not currently built for distribution on NPM",
+    "notebook-bundle": "webpack"
   },
   "dependencies": {
     "@deck.gl/aggregation-layers": "7.1.6",
@@ -31,7 +31,7 @@
     "@deck.gl/json": "7.1.6",
     "@deck.gl/layers": "7.1.6",
     "@jupyter-widgets/base": "^1.1.10",
-    "@types/mapbox-gl": "^0.51.4",
     "mapbox-gl": "^0.53.1"
-  }
+  },
+  "private": true
 }

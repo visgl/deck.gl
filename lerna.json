@@ -7,7 +7,9 @@
     "modules/*"
   ],
   "command": {
-    "publish": {},
+    "publish": {
+      "ignoreChanges": "modules/jupyter-widget/*",
+    },
     "bootstrap": {}
   }
 }

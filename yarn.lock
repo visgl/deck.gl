@@ -1745,11 +1745,6 @@
     "@types/jquery" "*"
     "@types/underscore" "*"
 
-"@types/geojson@*":
-  version "7946.0.7"
-  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
-  integrity sha512-wE2v81i4C4Ol09RtsWFAqg3BUitWbHSpSlIo+bNdsCJijO9sjme+zm+73ZMCa/qMC8UEERxzGbvmr1cffo2SiQ==
-
 "@types/jquery@*":
   version "3.3.29"
   resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.3.29.tgz#680a2219ce3c9250483722fccf5570d1e2d08abd"
@@ -1761,13 +1756,6 @@
   version "4.14.123"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.123.tgz#39be5d211478c8dd3bdae98ee75bb7efe4abfe4d"
   integrity sha512-pQvPkc4Nltyx7G1Ww45OjVqUsJP4UsZm+GWJpigXgkikZqJgRm4c48g027o6tdgubWHwFRF15iFd+Y4Pmqv6+Q==
-
-"@types/mapbox-gl@^0.51.4":
-  version "0.51.5"
-  resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-0.51.5.tgz#5f9661298f54de54269a8e7701806083c82afe42"
-  integrity sha512-qkfYgg0N6pib6Ed4qy7GDsvMGMSFxef9CkjVaKgGz0ESx+blwnbG/qtZVFXpb7BCMirKruqSUzxBVflmH3/oWA==
-  dependencies:
-    "@types/geojson" "*"
 
 "@types/sizzle@*":
   version "2.3.2"
