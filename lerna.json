@@ -1,6 +1,6 @@
 {
   "lerna": "2.0.0",
-  "version": "7.1.6",
+  "version": "7.1.7",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "packages": [
@@ -8,7 +8,7 @@
   ],
   "command": {
     "publish": {
-      "ignoreChanges": "modules/jupyter-widget/*",
+      "ignoreChanges": "modules/jupyter-widget/*"
     },
     "bootstrap": {}
   }

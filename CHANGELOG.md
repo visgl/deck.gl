@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.7] - June 24 2019
+
+- fix missing viewport id (#3275)
+- Prevent publishing jupyter-widget module for now (#3273)
+
 #### deck.gl [v7.1.6] - June 21 2019
 
 - S2Layer bug fix (#3270)
