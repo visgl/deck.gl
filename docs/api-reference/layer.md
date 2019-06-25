@@ -65,7 +65,7 @@ Remarks:
 
 * Some layers may accept alternative data formats. For example, the [GeoJsonLayer](/docs/layers/geojson-layer.md) supports any valid GeoJSON object as `data`. These exceptions, if any, are documented in each layer's documentation.
 * When an iterable value is passed to `data`, every accessor function receives the current element as the first argument. When a non-iterable value (any object with a `length` field) is passed to `data`, the accessor functions are responsible of interpreting the data format. The latter is often used with binary inputs. Read about this in [accessors](/docs/developer-guide/using-layers.md#accessors).
-* The automatic URL loading support is intended as a convenience for simple use cases. There are many limitations, including control over request parameters and headers, ability to parse non-JSON data, control of post-processing, CORS support etc. In such cases, it is always possible to load data using traditional JavaScript techniqwues and rerender the layer with the resulting data array.
+* The automatic URL loading support is intended as a convenience for simple use cases. There are many limitations, including control over request parameters and headers, ability to parse non-JSON data, control of post-processing, CORS support etc. In such cases, it is always possible to load data using traditional JavaScript techniques and rerender the layer with the resulting data array.
 * For `Layer` writers: Even though applications can pass in url string as `data` props, deck.gl makes sure that the layers never see `data` props containing `String` values. Layers will only see the default empty array value for the `data` prop until the data is loaded, at which point it will be updated with the loaded array.
 
 
@@ -564,7 +564,7 @@ Parameters:
 
 * `pixels` (Number) - The number in screen pixels.
 
-Retures:
+Returns:
 
 * A number in device pixels
 

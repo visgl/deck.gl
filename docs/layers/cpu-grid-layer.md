@@ -225,7 +225,7 @@ You should pass in the function defined outside the render function so it doesn'
 
 * Default: `point => 1`
 
-`getColorWeight` is the accessor function to get the weight of a point used to calcuate the color value for a cell.
+`getColorWeight` is the accessor function to get the weight of a point used to calculate the color value for a cell.
 
 
 ##### `colorAggregation` (String, optional)
