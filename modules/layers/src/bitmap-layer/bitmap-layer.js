@@ -30,13 +30,6 @@ import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
 
 const DEFAULT_TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-};
-
-const DEFAULT_MIPMAP_TEXTURE_PARAMETERS = {
   [GL.TEXTURE_MIN_FILTER]: GL.LINEAR_MIPMAP_LINEAR,
   [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
   [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
@@ -201,18 +194,18 @@ export default class BitmapLayer extends Layer {
         bitmapTexture.width !== image.videoWidth || bitmapTexture.height !== image.videoHeight;
       if (sizeChanged) {
         // note clears image and mipmaps when resizing
-        bitmapTexture.resize({width: image.videoWidth, height: image.videoHeight});
+        bitmapTexture.resize({width: image.videoWidth, height: image.videoHeight, mipmaps: true});
         bitmapTexture.setImageData({
           data: image,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
+          paramters: DEFAULT_TEXTURE_PARAMETERS
         });
-        bitmapTexture.generateMipmap();
       } else {
         bitmapTexture.setImageData({
-          data: image,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
+          data: image
         });
       }
+
+      bitmapTexture.generateMipmap();
     }
 
     // // TODO fix zFighting
@@ -256,7 +249,7 @@ export default class BitmapLayer extends Layer {
       this.setState({
         bitmapTexture: new Texture2D(gl, {
           data: image,
-          parameters: DEFAULT_MIPMAP_TEXTURE_PARAMETERS
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         })
       });
     } else if (image instanceof HTMLVideoElement) {
