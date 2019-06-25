@@ -113,11 +113,11 @@ export default class ScenegraphLayer extends Layer {
     let scenegraphData;
     if (props.scenegraph instanceof ScenegraphNode) {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
-      scenegraphData = {scenes: [scenegraphNode]};
+      scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && !props.scenegraph.gltf) {
       scenegraphData = convertGLTFtoScenegraphSync(gl, props.scenegraph, this.getLoadOptions());
     } else {
-      // Assume this data was loaded through GLTFScenegraphLoader
+      // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
       log.deprecated(
         'ScenegraphLayer.props.scenegraph',
         'Use GLTFLoader instead of GLTFScenegraphLoader'

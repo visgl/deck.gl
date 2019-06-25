@@ -53,7 +53,7 @@
     "eslint-config-uber-jsx": "^3.3.3",
     "eslint-plugin-import": "^2.16.0",
     "eslint-plugin-react": "^7.10",
-    "gl": "^4.2.2",
+    "gl": "^4.3.3",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
     "ocular-dev-tools": "0.0.27",
@@ -68,5 +68,9 @@
   },
   "pre-commit": [
     "test-fast"
-  ]
+  ],
+  "resolutions": {
+    "fsevents": "^1.2.9"
+  }
 }
+

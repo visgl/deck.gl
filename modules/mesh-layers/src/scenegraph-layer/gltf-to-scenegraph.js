@@ -1,6 +1,5 @@
 /* global window */
 import {assert} from '@luma.gl/core';
-import {GLTFLoader} from '@loaders.gl/gltf';
 import {createGLTFObjects} from '@luma.gl/addons';
 
 export async function convertGLTFtoScenegraph(gl, gltf, options) {
