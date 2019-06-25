@@ -23,7 +23,9 @@ matrix:
       install:
         - yarn bootstrap
       node_js:
-        - 10.16.0
+        - 8.16.1
+        - 10.16.3
+        - 12.10.0
       before_script:
         - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
         - ulimit -c unlimited -S       # enable core dumps
