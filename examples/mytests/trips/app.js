@@ -6,6 +6,7 @@ import {PhongMaterial} from '@luma.gl/core';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {TripsLayer} from '@deck.gl/geo-layers';
+import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider';
 import './style.css';
 
@@ -232,15 +233,19 @@ export class App extends Component {
         </div>
         
         <div className='timer'>
-            ({this.state.time})
+            ({Math.floor(this.state.time)})
         </div>
 
         <div className='trailLength'>
+        <Typography id="range-slider" gutterBottom>
+        TrailLength
+         </Typography>
           <Slider
             value={this.state.trailLength}
             min={0}
             max={86400}
             onChange={this._ontrailLength}
+            aria-labelledby="range-slider"
           />
         </div>
 
@@ -249,11 +254,15 @@ export class App extends Component {
         </div>
 
         <div className='time-slider'>
+        <Typography id="range-slider" gutterBottom>
+        Time-Slider
+         </Typography>
           <Slider
             value={this.state.time}
             min={0}
             max={86400}
             onChange={this._onTimerChange}
+            aria-labelledby="range-slider"
           />
         </div>
       </div>

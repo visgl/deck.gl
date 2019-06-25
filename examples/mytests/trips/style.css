@@ -2,36 +2,29 @@
 .timer{
     position: absolute;
     background-color: red;
+    right: 2%;
+    bottom: 4rem;
 }
 .timer2{
     position: absolute;
     background-color: red;
-    bottom: 2rem;
+    bottom: 7.5rem;
+    right: 2%;
 }
 
-.button {
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
 
 .time-slider {
   position: absolute;
   align-items: center;
   -webkit-appearance: none;
-  left: 18%;
+  left: 13%;
   bottom: 2rem;
-  width: 60%;
-  padding:  0.6rem 1rem 0.5rem 1rem;
+  width: 70%;
+  padding:  0.2rem 0.7rem 0.2rem 0.7rem;
   background: #d3d3d3;
   border-radius: 20px;
   outline: none;
-  opacity: 0.4;
+  opacity: 0.3;
   -webkit-transition: .2s;
   transition: opacity .2s;
 }
@@ -63,14 +56,14 @@
   position: absolute;
   align-items: center;
   -webkit-appearance: none;
-  left: 18%;
-  top: 2rem;
-  width: 60%;
-  padding:  0.6rem 1rem 0.5rem 1rem;
+  left: 13%;
+  bottom: 6.5rem;
+  width: 70%;
+  padding:  0.2rem 0.7rem 0.2rem 0.7rem;
   background: #d3d3d3;
   border-radius: 20px;
   outline: none;
-  opacity: 0.4;
+  opacity: 0.3;
   -webkit-transition: .2s;
   transition: opacity .2s;
 }
