@@ -195,12 +195,12 @@ export default class BitmapLayer extends Layer {
       if (sizeChanged) {
         // note clears image and mipmaps when resizing
         bitmapTexture.resize({width: image.videoWidth, height: image.videoHeight, mipmaps: true});
-        bitmapTexture.setImageData({
+        bitmapTexture.setSubImageData({
           data: image,
           paramters: DEFAULT_TEXTURE_PARAMETERS
         });
       } else {
-        bitmapTexture.setImageData({
+        bitmapTexture.setSubImageData({
           data: image
         });
       }
