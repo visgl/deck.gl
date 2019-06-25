@@ -21,11 +21,11 @@
 /* global fetch */
 import {Layer, createIterable} from '@deck.gl/core';
 import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
+import {createGLTFObjects} from '@luma.gl/addons';
 import {load} from '@loaders.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
-import {convertGLTFtoScenegraphSync} from './gltf-to-scenegraph';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
@@ -115,7 +115,10 @@ export default class ScenegraphLayer extends Layer {
       // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
       scenegraphData = {scenes: [props.scenegraph]};
     } else if (props.scenegraph && !props.scenegraph.gltf) {
-      scenegraphData = convertGLTFtoScenegraphSync(gl, props.scenegraph, this.getLoadOptions());
+      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/addons function
+      const gltf = props.scenegraph;
+      const gltfObjects = createGLTFObjects(gl, gltf, this.getLoadOptions());
+      scenegraphData = Object.assign({gltf}, gltfObjects);
     } else {
       // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
       log.deprecated(
