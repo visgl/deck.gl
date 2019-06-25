@@ -1,11 +1,12 @@
 import {SimpleMeshLayer, ScenegraphLayer} from '@deck.gl/mesh-layers';
 import {registerLoaders} from '@loaders.gl/core';
-import {GLTFScenegraphLoader, GLTFEnvironment} from '@luma.gl/addons';
+import {GLTFLoader} from '@loaders.gl/gltf';
+import {GLTFEnvironment} from '@luma.gl/addons';
 import GL from '@luma.gl/constants';
 
 import * as dataSamples from '../data-samples';
 
-registerLoaders([GLTFScenegraphLoader]);
+registerLoaders([GLTFLoader]);
 
 const GLTF_BASE_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/luma.gl/examples/gltf/';
