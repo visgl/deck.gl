@@ -1,5 +1,5 @@
 {
-  "name": "scenegraph-layer-demo",
+  "name": "video",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -7,20 +7,17 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/core": "1.0.1",
-    "@luma.gl/core": "^7.2.0-alpha.1",
-    "@luma.gl/addons": "^7.2.0-alpha.1",
     "deck.gl": "^7.1.0",
     "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "react-map-gl": "^5.0.0"
+    "react-dom": "^16.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/preset-react": "^7.0.0",
     "babel-loader": "^8.0.5",
+    "html-webpack-plugin": "^4.0.0-beta.5",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
-    "webpack-dev-server": "^3.1.11"
+    "webpack-dev-server": "^3.1.1"
   }
 }
