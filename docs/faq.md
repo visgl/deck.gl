@@ -19,7 +19,7 @@ Not to worry, there are easier ways to use deck.gl:
 You are likely experiencing a well-known issue in 3D graphics known as Z-fighting. The good news is that there are many ways to mitigate Z-fighting and deck.gl provides several mechanisms to help you. To get started, see the [tips and tricks](http://deck.gl/#/documentation/developer-guide/tips-and-tricks) article.
 
 
-## Should I really regenerate all layers everything something changes?
+## Should I really regenerate all layers every time something changes?
 
 Q: If I wanted to, say, change the opacity of a layer, Is my only option to create a new layer with the same Id and different properties?
 
