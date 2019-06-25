@@ -68,9 +68,6 @@
   },
   "pre-commit": [
     "test-fast"
-  ],
-  "resolutions": {
-    "fsevents": "^1.2.9"
-  }
+  ]
 }
 
