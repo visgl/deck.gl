@@ -1404,12 +1404,33 @@
     npmlog "^4.1.2"
     write-file-atomic "^2.3.0"
 
+"@loaders.gl/core@1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.1.5.tgz#2d9c497628c573fa68480754a0e6b385336979ea"
+  integrity sha512-gn9GlkxryuREKxgv/d0pQOlO72wz703cCGK4Np4KlEJBbCsd3ul1bud0IyL4cWnB1dqUYsWjBxmewYpLp8A8Zg==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+
 "@loaders.gl/core@^1.0.3":
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.0.3.tgz#60a1467e583f28d974a72f947cf2c7c2bc266393"
   integrity sha512-ENyW3UqPgtOx81iY23Y8jD7FJ6miNduOzV6Z1xY7pXwoOGrF2BXTJ3P7KPLXTIBN98mh67jUax0fouBhrQL2Kw==
   dependencies:
     "@babel/runtime" "^7.3.1"
+
+"@loaders.gl/gltf@^1.0.3":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-1.1.5.tgz#c343508717e0173ed475a2541f1836bd69326ff9"
+  integrity sha512-+6esRYcPDZvqzM/wTCMoCva2/P+eI0GVueSQdAyyUo5bx7NOjgG077gHIRb6VhDfEX5U32nDTvX8TrK0CwnLsA==
+  dependencies:
+    "@loaders.gl/core" "1.1.5"
+    "@loaders.gl/images" "1.1.5"
+    "@loaders.gl/loader-utils" "1.1.5"
+
+"@loaders.gl/images@1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-1.1.5.tgz#50636376db4235d993e98144809020714429bf5a"
+  integrity sha512-bpDBqowkdUrPGJrPYYBD5BnqqAJ5WbD1VteS8u9kqhFX7TC7y3Jvvsv3+8cuFOeKhBGDCFFW8HlnUKcv1Fvfiw==
 
 "@loaders.gl/images@^1.0.3":
   version "1.0.3"
@@ -1421,6 +1442,22 @@
     ndarray "^1.0.18"
     save-pixels "^2.3.2"
     through "^2.3.8"
+
+"@loaders.gl/loader-utils@1.1.5":
+  version "1.1.5"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/loader-utils/-/loader-utils-1.1.5.tgz#9c5ff266fcfb8f86841c89692c0c3191d4997ab3"
+  integrity sha512-kEP60rhC3CngLm70qUlmrx7sGBk+hLvBYNMKg3mn4EB0bKDMCVXndz2HGi2Y1jSh7fVM+zFak+XtNhQyyCI3MA==
+  dependencies:
+    "@babel/runtime" "^7.3.1"
+
+"@luma.gl/addons@^7.2.0-alpha.1":
+  version "7.2.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@luma.gl/addons/-/addons-7.2.0-alpha.1.tgz#c990c3d4089f9e93374b935f8859a05da733ae00"
+  integrity sha512-rC1YGlVHO5x15V7V2MTCQAOxmZQ3rWLeLrKpCXPZQvIiGbKin33X1oy5T5FpixQCF7TUThLFw/bML5xpUnCSTg==
+  dependencies:
+    "@loaders.gl/gltf" "^1.0.3"
+    "@luma.gl/constants" "7.2.0-alpha.1"
+    math.gl "^2.3.0"
 
 "@luma.gl/constants@7.2.0-alpha.1":
   version "7.2.0-alpha.1"
