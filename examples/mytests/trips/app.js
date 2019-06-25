@@ -16,8 +16,12 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTB
 
 let sampleSize = 1;
 let actType = 'Other';
-let trailLength = 84600;
+let trailLength = 300;
 let animationSpeed = 500 // unit time per second
+
+
+let simTime2 = 0;
+let anchorTime2 = 0;
 
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
@@ -100,6 +104,7 @@ export class App extends Component {
     super(props);
     this.state = {
       time: 0,
+      trailLength: this.props.trailLength,
       tours: this.props.data.tours,
       selectedZone: null
     };
@@ -108,6 +113,7 @@ export class App extends Component {
     this._onHover = this._onHover.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
     this._onTimerChange = this._onTimerChange.bind(this);
+    this._ontrailLength = this._ontrailLength.bind(this);
   }
 
   _onHover({x, y, object}) {
@@ -138,6 +144,10 @@ export class App extends Component {
   _onTimerChange(evnt, newSimTime) {
     anchorTime = Date.now() / 1000
     simTime = newSimTime
+  };
+
+  _ontrailLength(evnt, newTrailLength) {    
+    this.setState({trailLength: newTrailLength})
   };
 
   _animate() {
@@ -175,7 +185,6 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {trailLength = this.props.trailLength} = this.props;
     
     return [
       new TripsLayer({
@@ -189,10 +198,10 @@ export class App extends Component {
         opacity: 0.5,
         widthMinPixels: 2,
         rounded: false,
-        trailLength: trailLength,
+        trailLength: this.state.trailLength,
         currentTime: this.state.time,
-        pickable: false,
-        autoHighlight: false,
+        pickable: true,
+        autoHighlight: true,
         highlightColor: [0, 255, 255]
       }),
     ];
@@ -226,6 +235,19 @@ export class App extends Component {
         
         <div className='timer'>
             ({this.state.time})
+        </div>
+
+        <div className='trailLength'>
+          <Slider
+            value={this.state.trailLength}
+            min={0}
+            max={86400}
+            onChange={this._ontrailLength}
+          />
+        </div>
+
+        <div className='timer2'>
+            ({this.state.trailLength})
         </div>
 
         <div className='time-slider'>
