@@ -47,10 +47,15 @@ function shuffle(a) {
 
 function secondsToHms(d) {
     d = Number(d);
-    let h = String(Math.floor(d / 3600));
-    let m = String(Math.floor(d % 3600 / 60));
+    let h = Math.floor(d / 3600);
+    let m = Math.floor(d % 3600 / 60);
     //let s = Math.floor(d % 3600 % 60);
-    return h.padStart(2, '0') + ":" + m.padStart(2, '0') 
+    if (h < 24) {
+      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') 
+    } else {
+      return 'Simulation finished'
+    }
+     
 }
 
 function getRgbFromStr(strRgb) {
