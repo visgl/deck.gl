@@ -167,7 +167,7 @@ Only applies if `extruded: true`.
 * Polygons are always closed, i.e. there is an implicit line segment between
   the first and last vertices, when those vertices are not equal.
 * The specification of complex polygons intentionally follows the GeoJson
-  conventions for representing polugons with holes.
+  conventions for representing polygons with holes.
 
 ## Source
 

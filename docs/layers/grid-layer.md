@@ -330,7 +330,7 @@ You should pass in the function defined outside the render function so it doesn'
 
 * Default: `point => 1`
 
-`getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
+`getElevationWeight` is the accessor function to get the weight of a point used to calculate the elevation value for a cell.
 It takes the data prop array element and returns the weight, for example, to use `SPACE` field, `getElevationWeight` should be set to `point => point.SPACES`.
 By default `getElevationWeight` returns `1`.
 
@@ -346,7 +346,7 @@ Note: similar to `getElevationValue`, grid layer compares whether `getElevationW
 Note: `getElevationWeight` and `elevationAggregation` together define how elevation value of cell is determined, same can be done by setting `getColorValue` prop. But to enable gpu aggregation, former props must be provided instead of later.
 
 
-###### Example1 : Using count of data elements that fall into a cell to encode the its elevation
+###### Example1 : Using count of data elements that fall into a cell to encode its elevation
 
 * Using `getElevationValue`
 ```js
@@ -430,7 +430,7 @@ Note that this is only fired when using CPU Aggregation (`gpuAggregation: false`
 
 The following table compares the performance between CPU and GPU aggregations using random data points:
 
-| #points | CPU #iternations/sec | GPU #iterations/sec | Notes |
+| #points | CPU #iterations/sec | GPU #iterations/sec | Notes |
 | ---- | --- | --- | --- |
 | 25K | 535 | 359 | GPU is <b style="color:red">33%</b> slower |
 | 100K | 119 | 437 | GPU is <b style="color:green">267%</b> faster |
