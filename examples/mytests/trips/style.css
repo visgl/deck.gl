@@ -1,26 +1,51 @@
 
 .timer{
     position: absolute;
-    background-color: red;
-    right: 2%;
-    bottom: 4rem;
+    left: 1%;
+    top: 1%;
+    font-size: 30px;
+    background: #c2a9a9;
+    border-radius: 10px;
+    outline: none;
+    opacity: 0.4;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    padding:  0.2% 0.7% 0.2% 0.9%;   
+    text-shadow: 0 0 3px #932626, 0 0 5px #932626;
 }
+.timer:hover {
+  opacity: 1;
+}
+
+
 .timer2{
     position: absolute;
-    background-color: red;
-    bottom: 7.5rem;
-    right: 2%;
+    top: 1%;
+    right: 1%;
+    font-size: 30px;
+    background: #c2a9a9;
+    border-radius: 10px;
+    outline: none;
+    opacity: 0.4;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    padding:  0.2% 0.7% 0.2% 0.9%;
+    text-shadow: 0 0 3px #932626, 0 0 5px #932626;
 }
+.timer2:hover {
+  opacity: 1;
+}
+
 
 
 .time-slider {
   position: absolute;
   align-items: center;
   -webkit-appearance: none;
-  left: 13%;
-  bottom: 2rem;
-  width: 70%;
-  padding:  0.2rem 0.7rem 0.2rem 0.7rem;
+  left: 1%;
+  bottom: 2.5%;
+  width: 47%;
+  padding:  0.2% 0.7% 0.2% 0.9%;
   background: #d3d3d3;
   border-radius: 20px;
   outline: none;
@@ -50,16 +75,14 @@
 }
 
 
-
-
 .trailLength {
   position: absolute;
   align-items: center;
   -webkit-appearance: none;
-  left: 13%;
-  bottom: 6.5rem;
-  width: 70%;
-  padding:  0.2rem 0.7rem 0.2rem 0.7rem;
+  right: 1%;
+  bottom: 2.5%;
+  width: 47%;
+   padding:  0.2% 0.7% 0.2% 0.9%;
   background: #d3d3d3;
   border-radius: 20px;
   outline: none;

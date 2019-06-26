@@ -48,6 +48,34 @@ function shuffle(a) {
   return a;
 }
 
+function secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+    var text = " ";
+    var hDisplay = h;
+    var mDisplay = m 
+    var sDisplay = s 
+    if(hDisplay < 10){
+      hDisplay = "0" + hDisplay  
+    }
+    if(mDisplay < 10){
+      mDisplay = "0" + mDisplay 
+    }
+    if (hDisplay < 12){
+      text = " am"
+    }else{
+      text = " pm"
+    }
+    if (hDisplay > 23){     
+      hDisplay = "00"
+      mDisplay = "00" 
+      text = ""    
+    }
+    return hDisplay + ":" + mDisplay + text; 
+}
+
 function getRgbFromStr(strRgb) {
   var color = d3.color(strRgb);
   return [color.r, color.g, color.b]  
@@ -232,9 +260,7 @@ export class App extends Component {
           </DeckGL>
         </div>
         
-        <div className='timer'>
-            ({Math.floor(this.state.time)})
-        </div>
+        <div className='timer'> Time: {secondsToHms(Math.floor(this.state.time))}</div>
 
         <div className='trailLength'>
         <Typography id="range-slider" gutterBottom>
@@ -249,9 +275,7 @@ export class App extends Component {
           />
         </div>
 
-        <div className='timer2'>
-            ({this.state.trailLength})
-        </div>
+        <div className='timer2'>Trail-Length: {this.state.trailLength}</div>
 
         <div className='time-slider'>
         <Typography id="range-slider" gutterBottom>
