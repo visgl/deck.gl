@@ -112,7 +112,7 @@ to scale all cell elevations without updating the data.
 
 * Default: `true`
 
-Whether to enable grid elevation. If se to false, all grid will be flat.
+Whether to enable grid elevation. If set to false, all grid will be flat.
 
 ##### `fp64` (Boolean, optional)
 
