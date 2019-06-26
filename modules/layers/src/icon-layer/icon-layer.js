@@ -132,9 +132,10 @@ export default class IconLayer extends Layer {
     const {iconAtlas, iconMapping, data, getIcon} = props;
 
     let iconMappingChanged = false;
+    const prePacked = iconAtlas || this.props._asyncPropOriginalValues.iconAtlas;
 
     // prepacked iconAtlas from user
-    if (iconAtlas) {
+    if (prePacked) {
       if (oldProps.iconAtlas !== props.iconAtlas) {
         iconManager.setProps({iconAtlas, autoPacking: false});
       }
