@@ -58,6 +58,9 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 }
 
 void main(void) {
+  geometry.worldPosition = instancePositions;
+  geometry.uv = positions;
+
   vec2 iconSize = instanceIconFrames.zw;
  
   // project meters to pixels and clamp to limits 
@@ -77,13 +80,17 @@ void main(void) {
   
   if (billboard)  {
     pixelOffset.y *= -1.0;
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0)); 
-    gl_Position.xy += project_pixel_size_to_clipspace(pixelOffset);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, vec3(0.0), geometry.position); 
+    vec3 offset = vec3(pixelOffset, 0.0);
+    DECKGL_FILTER_SIZE(offset, geometry);
+    gl_Position.xy += project_pixel_size_to_clipspace(offset.xy);
 
   } else {
     vec3 offset_common = vec3(project_pixel_size(pixelOffset), 0.0);
-    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset_common); 
+    DECKGL_FILTER_SIZE(offset_common, geometry);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset_common, geometry.position); 
   }
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vTextureCoords = mix(
     instanceIconFrames.xy,
@@ -94,6 +101,7 @@ void main(void) {
   vTextureCoords.y = 1.0 - vTextureCoords.y;
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  DECKGL_FILTER_COLOR(vColor, geometry);
   picking_setPickingColor(instancePickingColors);
 
   vGamma = gamma / (sizeScale * iconSize.y);

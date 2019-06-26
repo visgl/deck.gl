@@ -58,6 +58,9 @@ void calculatePosition(PolygonProps props) {
   vec3 normal;
   vec4 colors = isWireframe ? props.lineColors : props.fillColors;
 
+  geometry.worldPosition = props.positions;
+  geometry.worldPositionAlt = props.nextPositions;
+
 #ifdef IS_SIDE_VERTEX
   pos = mix(props.positions, props.nextPositions, vertexPositions.x);
   pos64xyLow = mix(props.positions64xyLow, props.nextPositions64xyLow, vertexPositions.x);
@@ -74,6 +77,8 @@ void calculatePosition(PolygonProps props) {
 
   vec4 position_commonspace;
   gl_Position = project_position_to_clipspace(pos, pos64xyLow, vec3(0.), position_commonspace);
+  geometry.position = position_commonspace;
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   if (extruded) {
 #ifdef IS_SIDE_VERTEX
@@ -82,12 +87,14 @@ void calculatePosition(PolygonProps props) {
 #else
     normal = vec3(0.0, 0.0, 1.0);
 #endif
+    geometry.normal = normal;
 
     vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, position_commonspace.xyz, normal);
     vColor = vec4(lightColor, colors.a * opacity) / 255.0;
   } else {
     vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;
   }
+  DECKGL_FILTER_COLOR(vColor, geometry);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(props.pickingColors);

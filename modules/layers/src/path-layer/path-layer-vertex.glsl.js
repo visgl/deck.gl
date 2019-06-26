@@ -62,7 +62,7 @@ float flipIfTrue(bool flag) {
 vec3 lineJoin(
   vec3 prevPoint, vec3 currPoint, vec3 nextPoint,
   float relativePosition, bool isEnd, bool isJoint,
-  vec2 width
+  vec2 width, vec2 widthPixels
 ) {
   vec2 deltaA = (currPoint.xy - prevPoint.xy) / width;
   vec2 deltaB = (nextPoint.xy - currPoint.xy) / width;
@@ -169,9 +169,12 @@ vec3 lineJoin(
     positions.y + positions.z * offsetDirection,
     dot(offsetFromStartOfPath, dir)
   );
+  geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
-  return currPoint + vec3(vCornerOffset * width * isValid, 0.0);
+  vec3 offset = vec3(vCornerOffset * widthPixels * isValid, 0.0);
+  DECKGL_FILTER_SIZE(offset, geometry);
+  return currPoint + vec3(offset.xy / widthPixels * width, 0.0);
 }
 
 // calculate line join positions
@@ -190,10 +193,12 @@ vec3 lineJoin(vec3 prevPoint, vec3 currPoint, vec3 nextPoint) {
   vec2 widthPixels = vec2(clamp(project_size_to_pixel(instanceStrokeWidths * widthScale),
     widthMinPixels, widthMaxPixels) / 2.0);
 
+  vec2 width = billboard ? project_pixel_size_to_clipspace(widthPixels) : project_pixel_size(widthPixels);
+
   return lineJoin(
     prevPoint, currPoint, nextPoint,
     relativePosition, isEnd, isJoint,
-    billboard ? project_pixel_size_to_clipspace(widthPixels) : project_pixel_size(widthPixels)
+    width, widthPixels
   );
 }
 
@@ -206,6 +211,9 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 }
 
 void main() {
+  geometry.worldPosition = instanceStartPositions;
+  geometry.worldPositionAlt = instanceEndPositions;
+
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
@@ -225,7 +233,7 @@ void main() {
   if (billboard) {
     // Extrude in clipspace
     vec4 prevPositionScreen = project_position_to_clipspace(prevPosition, prevPosition64xyLow, ZERO_OFFSET);
-    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64xyLow, ZERO_OFFSET);
+    vec4 currPositionScreen = project_position_to_clipspace(currPosition, currPosition64xyLow, ZERO_OFFSET, geometry.position);
     vec4 nextPositionScreen = project_position_to_clipspace(nextPosition, nextPosition64xyLow, ZERO_OFFSET);
 
     clipLine(prevPositionScreen, currPositionScreen);
@@ -245,8 +253,13 @@ void main() {
     currPosition = project_position(currPosition, currPosition64xyLow);
     nextPosition = project_position(nextPosition, nextPosition64xyLow);
 
-    vec3 pos = lineJoin(prevPosition, currPosition, nextPosition);
-    gl_Position = project_common_position_to_clipspace(vec4(pos, 1.0));
+    vec4 pos = vec4(
+      lineJoin(prevPosition, currPosition, nextPosition),
+      1.0);
+    geometry.position = pos;
+    gl_Position = project_common_position_to_clipspace(pos);
   }
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;
