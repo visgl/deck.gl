@@ -97,7 +97,7 @@ void main(void) {
   vec4 curr = project_common_position_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_common_position_to_clipspace(vec4(nextPos, 1.0));
   geometry.position = vec4(currPos, 1.0);
-  uv = positions.xy;
+  uv = vec2(segmentRatio, positions.y);
   geometry.uv = uv;
 
   // Multiply out width and clamp to limits

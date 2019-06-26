@@ -44,10 +44,10 @@ uniform float gamma;
 uniform float opacity;
 uniform bool billboard;
 
-varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 varying float vGamma;
+varying vec2 uv;
 
 vec2 rotate_by_angle(vec2 vertex, float angle) {
   float angle_radian = angle * PI / 180.0;
@@ -60,6 +60,7 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
+  uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;
  

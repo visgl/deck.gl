@@ -22,6 +22,8 @@ varying vec4 position_commonspace;
 varying vec4 vColor;
 
 void main(void) {
+  geometry.uv = vTexCoord;
+
   vec3 normal;
   if (flatShading) {
     normal = FLAT_SHADE_NORMAL;
@@ -33,10 +35,6 @@ void main(void) {
   vec3 lightColor = lighting_getLightColor(color.rgb * 255., cameraPosition, position_commonspace.xyz, normal);
   gl_FragColor = vec4(lightColor / 255., color.a);
 
-  // use highlight color if this fragment belongs to the selected object.
-  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
-
-  // use picking color if rendering to picking FBO.
-  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;

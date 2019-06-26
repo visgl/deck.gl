@@ -76,25 +76,20 @@ void main(void) {
   float shouldRender = float(color.a > 0.0 && instanceElevations >= 0.0);
   float dotRadius = radius * coverage * shouldRender;
 
+  geometry.normal = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
+
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
   vec3 pos = vec3(project_size(rotationMatrix * positions.xy * strokeOffsetRatio + offset) * dotRadius, 0.);
   DECKGL_FILTER_SIZE(pos, geometry);
 
-  vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, position_commonspace);
-  geometry.position = position_commonspace;
+  gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Light calculations
-  // Worldspace is the linear space after Mercator projection
-
-  vec3 normals_commonspace = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
-  geometry.normal = normals_commonspace;
-
   if (extruded && !isStroke) {
-    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, position_commonspace.xyz, normals_commonspace);
+    vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
     vColor = vec4(lightColor, color.a * opacity) / 255.0;
   } else {
     vColor = vec4(color.rgb, color.a * opacity) / 255.0;

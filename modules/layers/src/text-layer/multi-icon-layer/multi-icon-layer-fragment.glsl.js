@@ -30,10 +30,13 @@ uniform bool sdf;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 varying float vGamma;
+varying vec2 uv;
 
 const float MIN_ALPHA = 0.05;
 
 void main(void) {
+  geometry.uv = uv;
+
   vec4 texColor = texture2D(iconsTexture, vTextureCoords);
   
   float alpha = texColor.a;

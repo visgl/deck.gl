@@ -29,10 +29,13 @@ uniform sampler2D iconsTexture;
 varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
+varying vec2 uv;
 
 const float MIN_ALPHA = 0.05;
 
 void main(void) {
+  geometry.uv = uv;
+
   vec4 texColor = texture2D(iconsTexture, vTextureCoords);
 
   // if colorMode == 0, use pixel color from the texture
