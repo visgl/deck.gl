@@ -219,35 +219,33 @@ export default class SimpleMeshLayer extends Layer {
       })
     );
 
-    if (this.state.texture) {
-      model.setUniforms({sampler: this.state.texture, hasTexture: 1});
-    } else {
-      model.setUniforms({sampler: this.state.emptyTexture, hasTexture: 0});
-    }
+    const {texture, emptyTexture} = this.state;
+    model.setUniforms({
+      sampler: texture || emptyTexture,
+      hasTexture: Boolean(texture)
+    });
 
     return model;
   }
 
-  setTexture(src) {
+  setTexture(image) {
     const {gl} = this.context;
-    const {emptyTexture} = this.state;
+    const {emptyTexture, model} = this.state;
 
     if (this.state.texture) {
       this.state.texture.delete();
     }
 
-    if (src) {
-      const texture = getTextureFromData(gl, src);
-      this.setState({texture});
-      if (this.state.model) {
-        this.state.model.setUniforms({sampler: this.state.texture, hasTexture: 1});
-      }
-    } else {
-      // reset
-      this.setState({texture: null});
-      if (this.state.model) {
-        this.state.model.setUniforms({sampler: emptyTexture, hasTexture: 0});
-      }
+    const texture = image ? getTextureFromData(gl, image) : null;
+    this.setState({texture});
+
+    if (model) {
+      // props.mesh may not be ready at this time.
+      // The sampler will be set when `getModel` is called
+      model.setUniforms({
+        sampler: texture || emptyTexture,
+        hasTexture: Boolean(texture)
+      });
     }
   }
 

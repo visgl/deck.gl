@@ -162,7 +162,7 @@ export default class Layer extends Component {
 
   // Returns the default parse options for async props
   getLoadOptions() {
-    return this.props.loadOptions || {};
+    return this.props.loadOptions;
   }
 
   // Use iteration (the only required capability on data) to get first element
