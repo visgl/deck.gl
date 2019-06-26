@@ -5,6 +5,7 @@ import {StaticMap} from 'react-map-gl';
 import {PhongMaterial} from '@luma.gl/core';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer} from 'deck.gl';
 import {TripsLayer} from '@deck.gl/geo-layers';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider';
@@ -18,14 +19,10 @@ let actType = 'Other';
 let trailLength = 300;
 let animationSpeed = 500 // unit time per second
 
-
-let simTime2 = 0;
-let anchorTime2 = 0;
-
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
-let completedTourColor = [255, 0, 0]
-let incompleteTourColor = [255, 255, 0]
+//let completedTourColor = [255, 0, 0]
+//let incompleteTourColor = [255, 255, 0]
 
 let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
@@ -35,7 +32,7 @@ var colorTours = d3.scaleSequential()
                   .domain(shuffle([...trIds]))
                   .interpolator(d3.interpolateRainbow);
 
-let data = {zonesData: zonesData, tours: toursData};
+let data = {zones: zonesData, tours: toursData};
 
 function shuffle(a) {
   let j, x, i;
@@ -50,30 +47,10 @@ function shuffle(a) {
 
 function secondsToHms(d) {
     d = Number(d);
-    var h = Math.floor(d / 3600);
-    var m = Math.floor(d % 3600 / 60);
-    var s = Math.floor(d % 3600 % 60);
-    var text = " ";
-    var hDisplay = h;
-    var mDisplay = m 
-    var sDisplay = s 
-    if(hDisplay < 10){
-      hDisplay = "0" + hDisplay  
-    }
-    if(mDisplay < 10){
-      mDisplay = "0" + mDisplay 
-    }
-    if (hDisplay < 12){
-      text = " am"
-    }else{
-      text = " pm"
-    }
-    if (hDisplay > 23){     
-      hDisplay = "00"
-      mDisplay = "00" 
-      text = ""    
-    }
-    return hDisplay + ":" + mDisplay + text; 
+    let h = String(Math.floor(d / 3600));
+    let m = String(Math.floor(d % 3600 / 60));
+    //let s = Math.floor(d % 3600 % 60);
+    return h.padStart(2, '0') + ":" + m.padStart(2, '0') 
 }
 
 function getRgbFromStr(strRgb) {
@@ -213,6 +190,8 @@ export class App extends Component {
 
   _renderLayers() {
     
+    const {zones = this.props.data.zones} = this.props;
+
     return [
       new TripsLayer({
         id: 'trips',
@@ -231,6 +210,22 @@ export class App extends Component {
         autoHighlight: true,
         highlightColor: [0, 255, 255]
       }),
+      new GeoJsonLayer({
+        id: 'boundaries',
+        data: zones,
+        stroked: true,
+        filled: true,
+        pickable: true,
+        extruded: false,
+        opacity: 0.10,
+        onClick: this._onSelectZone,
+        onHover: this._onHover,
+        updateTriggers: {
+          getFillColor: this.state.time
+        },
+        autoHighlight: true,
+        highlightColor: [0, 255, 255]
+      })
     ];
   }
   
