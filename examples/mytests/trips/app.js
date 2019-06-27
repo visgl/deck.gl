@@ -141,6 +141,7 @@ export class App extends Component {
     this._onSelectZone = this._onSelectZone.bind(this);
     this._onTimerChange = this._onTimerChange.bind(this);
     this._ontrailLength = this._ontrailLength.bind(this);
+    this._onRestart = this._onRestart.bind(this);
   }
 
   _onHover({x, y, object}) {
@@ -173,6 +174,9 @@ export class App extends Component {
     simTime = newSimTime
   };
 
+  _onRestart(evnt, newSimTime){
+window.location.reload(false);
+}
   _ontrailLength(evnt, newTrailLength) {    
     this.setState({trailLength: newTrailLength})
   };
@@ -260,6 +264,15 @@ export class App extends Component {
           </DeckGL>
         </div>
         
+
+        <div>
+        <button className="button" onClick={this._onRestart}>
+        {'restart'}
+        //{this.props.label}
+        </button>
+        </div>
+
+
         <div className='timer'> Time: {secondsToHms(Math.floor(this.state.time))}</div>
 
         <div className='trailLength'>

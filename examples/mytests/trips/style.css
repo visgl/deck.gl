@@ -1,4 +1,22 @@
 
+.button{
+    position: absolute;
+    left: 45%;
+    top: 1%;
+    font-size: 20px;
+    background: #c2a9a9;
+    border-radius: 10px;
+    outline: none;
+    opacity: 0.4;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    padding:  0.2% 0.7% 0.2% 0.9%;   
+    text-shadow: 0 0 3px #932626, 0 0 5px #932626;
+}
+
+
+
+
 .timer{
     position: absolute;
     left: 1%;
