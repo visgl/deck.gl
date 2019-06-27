@@ -12,7 +12,6 @@ const TEST_CASES = [
   },
   {
     title: 'function child',
-    // eslint-disable-next-line react/display-name
     input: props => createElement('div', Object.assign({id: 'test-func'}, props)),
     count: 1,
     expected: {
