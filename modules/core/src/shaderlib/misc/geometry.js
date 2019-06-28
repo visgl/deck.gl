@@ -20,9 +20,9 @@
 
 const vs = `
 struct VertexGeometry {
+  vec4 position;
   vec3 worldPosition;
   vec3 worldPositionAlt;
-  vec4 position;
   vec3 normal;
   vec2 uv;
 } geometry;
