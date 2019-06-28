@@ -47,7 +47,6 @@ if (!global.deck) {
     log
   };
 
-  HTMLImageLoader.extensions = ['png', 'jpg', 'gif', 'webp', 'bmp', 'svg'];
   registerLoaders([jsonLoader, HTMLImageLoader]);
 
   initializeShaderModules();
