@@ -226,7 +226,7 @@ Some good places to check for performance improvements are:
   The [`visible`](/docs/api-reference/layer.md#visible-boolean-optional) prop is a cheap way to temporarily disable a layer:
 
   ```js
-  // Bad
+  // Good
   const DATA = [...];
   const layerVisibility = {circles: true, labels: true}
 
