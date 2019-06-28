@@ -34,8 +34,13 @@ const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
-  getScene: scenegraph =>
-    scenegraph && scenegraph.scenes ? scenegraph.scenes[scenegraph.scene || 0] : scenegraph,
+  getScene: gltf => {
+    if (gltf && gltf.scenes) {
+      // gltf post processer replaces `gltf.scene` number with the scene `object`
+      return typeof gltf.scene === 'object' ? gltf.scene : gltf.scenes[gltf.scene || 0];
+    }
+    return gltf;
+  },
   getAnimator: scenegraph => scenegraph && scenegraph.animator,
   _animations: null,
 
