@@ -30,10 +30,13 @@ uniform bool sdf;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 varying float vGamma;
+varying vec2 uv;
 
 const float MIN_ALPHA = 0.05;
 
 void main(void) {
+  geometry.uv = uv;
+
   vec4 texColor = texture2D(iconsTexture, vTextureCoords);
   
   float alpha = texColor.a;
@@ -52,10 +55,6 @@ void main(void) {
 
   gl_FragColor = vec4(vColor.rgb, a);
 
-  // use highlight color if this fragment belongs to the selected object.
-  gl_FragColor = picking_filterHighlightColor(gl_FragColor);
-
-  // use picking color if rendering to picking FBO.
-  gl_FragColor = picking_filterPickingColor(gl_FragColor);
+  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
 `;

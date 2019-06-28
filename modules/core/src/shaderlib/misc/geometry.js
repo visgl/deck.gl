@@ -18,13 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-export default `\
-highp float random(vec2 co) {
-  highp float a = 12.9898;
-  highp float b = 78.233;
-  highp float c = 43758.5453;
-  highp float dt= dot(co.xy ,vec2(a,b));
-  highp float sn= mod(dt,3.14);
-  return fract(sin(sn) / c) - .5;
-}
+const vs = `
+struct VertexGeometry {
+  vec4 position;
+  vec3 worldPosition;
+  vec3 worldPositionAlt;
+  vec3 normal;
+  vec2 uv;
+} geometry;
 `;
+
+const fs = `
+struct FragmentGeometry {
+  vec2 uv;
+} geometry;
+`;
+
+export default {name: 'geometry', vs, fs};

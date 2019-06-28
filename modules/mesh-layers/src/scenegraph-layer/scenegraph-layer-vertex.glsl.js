@@ -46,20 +46,16 @@ _varying vec4 vColor;
 void main(void) {
   #if defined(HAS_UV) && !defined(MODULE_PBR)
     vTEXCOORD_0 = TEXCOORD_0;
+    geometry.uv = vTEXCOORD_0;
   #endif
 
-  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
-  pos = project_size(pos);
-
-  vec4 position_commonspace;
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, position_commonspace);
+  geometry.worldPosition = instancePositions;
 
   #ifdef MODULE_PBR
     // set PBR data
-    pbr_vPosition = position_commonspace.xyz;
-
     #ifdef HAS_NORMALS
       pbr_vNormal = project_normal(instanceModelMatrix * (sceneModelMatrix * vec4(NORMAL.xyz, 0.0)).xyz);
+      geometry.normal = pbr_vNormal;
     #endif
 
     #ifdef HAS_UV
@@ -67,9 +63,23 @@ void main(void) {
     #else
       pbr_vUV = vec2(0., 0.);
     #endif    
+    geometry.uv = pbr_vUV;
+  #endif
+
+  vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
+  pos = project_size(pos);
+  DECKGL_FILTER_SIZE(pos, geometry);
+
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, geometry.position);
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+
+  #ifdef MODULE_PBR
+    // set PBR data
+    pbr_vPosition = geometry.position.xyz;
   #endif
 
   vColor = instanceColors / 255.0;
+  DECKGL_FILTER_COLOR(vColor, geometry);
 
   picking_setPickingColor(instancePickingColors);
 }
