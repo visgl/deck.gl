@@ -21,8 +21,9 @@
 /* global fetch */
 import {Layer, createIterable} from '@deck.gl/core';
 import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
-import {createGLTFObjects} from '@luma.gl/addons';
 import {load} from '@loaders.gl/core';
+import {createGLTFObjects} from '@luma.gl/addons';
+import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
@@ -119,6 +120,8 @@ export default class ScenegraphLayer extends Layer {
       const gltf = props.scenegraph;
       const gltfObjects = createGLTFObjects(gl, gltf, this.getLoadOptions());
       scenegraphData = Object.assign({gltf}, gltfObjects);
+
+      waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw());
     } else {
       // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
       log.deprecated(
