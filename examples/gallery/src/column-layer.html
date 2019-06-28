@@ -1,0 +1,44 @@
+<html>
+  <head>
+    <title>deck.gl ColumnLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+    </style>
+  </head>
+
+  <body></body>
+
+  <script type="text/javascript">
+    const {DeckGL, ColumnLayer} = deck;
+    new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/dark-v9',
+      longitude: -122.4,
+      latitude: 37.74,
+      zoom: 10,
+      maxZoom: 15,
+      pitch: 30,
+      layers: [
+        new ColumnLayer({
+          id: 'column',
+          data:
+            'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/hexagons.json',
+          diskResolution: 12,
+          radius: 250,
+          elevationScale: 5000,
+          getPosition: d => d.centroid,
+          getFillColor: d => [48, 128, d.value * 255, 255],
+          getElevation: d => d.value
+        })
+      ]
+    });
+  </script>
+</html>
