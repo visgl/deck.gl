@@ -59,17 +59,18 @@ const GET_TEST_CASES = [
     result: 2
   },
   {
+    title: 'nested object, same key, invalid path',
+    container: {a: {}},
+    key: 'a.b.c',
+    result: undefined
+  },
+  {
     title: 'nested object, array key',
     container: {a: {b: {c: 2}}},
     key: ['a', 'b', 'c'],
     result: 2
   }
 ];
-
-test('get#import', t => {
-  t.ok(typeof get === 'function', 'get imported OK');
-  t.end();
-});
 
 test('container#get', t => {
   for (const tc of GET_TEST_CASES) {

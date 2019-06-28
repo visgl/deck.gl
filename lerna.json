@@ -1,13 +1,15 @@
 {
   "lerna": "2.0.0",
-  "version": "7.1.0-beta.1",
+  "version": "7.2.0-alpha.1",
   "npmClient": "yarn",
   "useWorkspaces": true,
   "packages": [
     "modules/*"
   ],
   "command": {
-    "publish": {},
+    "publish": {
+      "ignoreChanges": "modules/jupyter-widget/*"
+    },
     "bootstrap": {}
   }
 }

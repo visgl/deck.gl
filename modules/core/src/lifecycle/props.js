@@ -124,18 +124,22 @@ function diffDataProps(props, oldProps) {
     return 'oldProps is null, initial diff';
   }
 
+  let dataChanged = null;
   // Support optional app defined comparison of data
-  const {dataComparator} = props;
+  const {dataComparator, _dataDiff} = props;
   if (dataComparator) {
     if (!dataComparator(props.data, oldProps.data)) {
-      return 'Data comparator detected a change';
+      dataChanged = 'Data comparator detected a change';
     }
     // Otherwise, do a shallow equal on props
   } else if (props.data !== oldProps.data) {
-    return 'A new data container was supplied';
+    dataChanged = 'A new data container was supplied';
+  }
+  if (dataChanged && _dataDiff) {
+    dataChanged = _dataDiff(oldProps.data, props.data) || dataChanged;
   }
 
-  return null;
+  return dataChanged;
 }
 
 // Checks if any update triggers have changed

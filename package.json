@@ -17,7 +17,7 @@
     "modules/*"
   ],
   "scripts": {
-    "bootstrap": "yarn && ocular-bootstrap",
+    "bootstrap": "PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true yarn && ocular-bootstrap",
     "clean": "ocular-clean",
     "build": "ocular-clean && ocular-build",
     "version": "ocular-build core,main",
@@ -27,6 +27,7 @@
     "start": "open http://uber.github.io/deck.gl/#/documentation/getting-started/installation?section=running-the-examples",
     "test": "ocular-test",
     "test-fast": "ocular-test fast",
+    "test-node": "ocular-test node",
     "test-browser": "ocular-test browser",
     "bench": "ocular-test bench",
     "bench-browser": "ocular-test bench-browser",
@@ -35,16 +36,13 @@
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
     "update-release-branch": "scripts/update-release-branch.sh"
   },
-  "resolutions": {
-    "lerna": "3.14.1"
-  },
   "browser": {
     "jsdom": false
   },
   "devDependencies": {
-    "@luma.gl/effects": "^7.1.0-beta.1",
-    "@probe.gl/bench": "^3.0.1",
-    "@probe.gl/test-utils": "^3.0.1",
+    "@luma.gl/effects": "^7.2.0-alpha.1",
+    "@probe.gl/bench": "^3.0.2",
+    "@probe.gl/test-utils": "^3.0.2",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.0",
     "babel-plugin-remove-glsl-comments": "^0.1.0",
@@ -58,7 +56,7 @@
     "gl": "^4.2.2",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "0.0.18",
+    "ocular-dev-tools": "0.0.27",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",

@@ -98,7 +98,7 @@ This value should be in the same units as the timestamps from `getPath`.
 
 - Default: `d => d.path`
 
-Called for each data object to retreive paths.
+Called for each data object to retrieve paths.
 Returns an array of navigation points on a single path.
 
 See [PathLayer](/docs/layers/path-layer.md) documentation for supported path formats.

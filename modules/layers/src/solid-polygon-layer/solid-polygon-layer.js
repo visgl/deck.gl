@@ -264,7 +264,8 @@ export default class SolidPolygonLayer extends Layer {
         data: props.data,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
-        fp64: this.use64bitPositions()
+        fp64: this.use64bitPositions(),
+        dataChanged: changeFlags.dataChanged
       });
 
       this.setState({
@@ -272,7 +273,11 @@ export default class SolidPolygonLayer extends Layer {
         bufferLayout: polygonTesselator.bufferLayout
       });
 
-      this.getAttributeManager().invalidateAll();
+      if (!changeFlags.dataChanged) {
+        // Base `layer.updateState` only invalidates all attributes on data change
+        // Cover the rest of the scenarios here
+        this.getAttributeManager().invalidateAll();
+      }
     }
   }
 

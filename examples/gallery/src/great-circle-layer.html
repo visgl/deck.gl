@@ -1,0 +1,74 @@
+<html>
+  <head>
+    <title>deck.gl GreatCircleLayer Example</title>
+
+    <script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
+
+    <script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"></script>
+
+    <style type="text/css">
+      body {
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+      }
+      #tooltip:empty {
+        display: none;
+      }
+      #tooltip {
+        font-family: Helvetica, Arial, sans-serif;
+        position: absolute;
+        padding: 4px;
+        margin: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        color: #fff;
+        max-width: 300px;
+        font-size: 10px;
+        z-index: 9;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="tooltip"></div>
+  </body>
+
+  <script type="text/javascript">
+    const {DeckGL, GreatCircleLayer} = deck;
+
+    function updateTooltip({x, y, object}) {
+      const tooltip = document.getElementById('tooltip');
+      if (object) {
+        tooltip.style.top = `${y}px`;
+        tooltip.style.left = `${x}px`;
+        tooltip.innerText = `${object.from.name} to ${object.to.name}`;
+      } else tooltip.innerText = '';
+    }
+
+    const greatCircleLayer = new GreatCircleLayer({
+      id: 'great-circle',
+      data:
+        'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/flights.json',
+      getSourcePosition: d => d.from.coordinates,
+      getTargetPosition: d => d.to.coordinates,
+      getSourceColor: [64, 255, 0],
+      getTargetColor: [0, 128, 200],
+      widthMinPixels: 5,
+      pickable: true,
+      onHover: updateTooltip
+    });
+
+    new DeckGL({
+      mapboxApiAccessToken: '<mapbox-access-token>',
+      mapStyle: 'mapbox://styles/mapbox/dark-v9',
+      longitude: -122.38,
+      latitude: 37.6,
+      zoom: 1,
+      maxZoom: 20,
+      pitch: 30,
+      bearing: 0,
+      layers: [greatCircleLayer]
+    });
+  </script>
+</html>

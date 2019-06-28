@@ -1,31 +1,16 @@
 // s2-geometry is a pure JavaScript port of Google/Niantic's S2 Geometry library
 // which is perfect since it works in the browser.
 import {S2} from 's2-geometry';
-
-/**
- * Given a S2 hex token this function returns cell level
- * cells level is a number between 1 and 30
- *
- * S2 cell id is a 64 bit number
- * S2 token removed all trailing zeros from the 16 bit converted number
- * */
-function getLevelFromToken(token) {
-  // leaf level token size is 16. Each 2 bit add a level
-  const lastHex = token.substr(token.length - 1);
-  // a) token = trailing-zero trimmed hex id
-  // b) 64 bit hex id - 3 face bit + 60 bits for 30 levels + 1 bit lsb marker
-  const level = 2 * (token.length - 1) - ((lastHex & 1) === 0);
-  // c) If lsb bit of last hex digit is zero, we have one more level less of
-  return level;
-}
+import Long from 'long';
 
 /**
  * Given an S2 token this function convert the token to 64 bit id
+   https://github.com/google/s2-geometry-library-java/blob/c04b68bf3197a9c34082327eeb3aec7ab7c85da1/src/com/google/common/geometry/S2CellId.java#L439
  * */
 function getIdFromToken(token) {
   // pad token with zeros to make the length 16
   const paddedToken = token.padEnd(16, '0');
-  return String(parseInt(paddedToken, 16));
+  return Long.fromString(paddedToken, 16);
 }
 
 const RADIAN_TO_DEGREE = 180 / Math.PI;
@@ -72,6 +57,19 @@ function getGeoBounds({face, ij, level}) {
   return result;
 }
 
+export function getS2QuadKey(token) {
+  if (typeof token === 'string') {
+    if (token.indexOf('/') > 0) {
+      // is Hilbert quad key
+      return token;
+    }
+    // is S2 token
+    token = getIdFromToken(token);
+  }
+  // is Long id
+  return S2.S2Cell.toHilbertQuadkey(token.toString());
+}
+
 /**
  * Get a polygon with corner coordinates for an s2 cell
  * @param {*} cell - This can be an S2 key or token
@@ -80,10 +78,8 @@ function getGeoBounds({face, ij, level}) {
  *   - the polygon is closed, i.e. last coordinate is a copy of the first coordinate
  */
 export function getS2Polygon(token) {
-  const id = getIdFromToken(token);
-  const level = getLevelFromToken(token);
-
-  const s2cell = S2.S2Cell.FromLatLng(S2.idToLatLng(id), level);
+  const key = getS2QuadKey(token);
+  const s2cell = S2.S2Cell.FromHilbertQuadKey(key);
 
   return getGeoBounds(s2cell);
 }
