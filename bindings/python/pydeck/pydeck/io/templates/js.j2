@@ -1,11 +1,11 @@
 requirejs.config({
   paths: {
-    deck: 'https://unpkg.com/@deck.gl/core@7.1.0/dist.min',
-    deckjson: 'https://unpkg.com/@deck.gl/json@7.1.0/dist.min',
-    decklayers: 'https://unpkg.com/@deck.gl/layers@7.1.0/dist.min',
-    deckaggregate: 'https://unpkg.com/@deck.gl/aggregation-layers@7.1.0/dist.min',
-    mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.44.1/mapbox-gl',
-    luma: 'https://unpkg.com/@luma.gl/core@7.1.0/dist/dist.min'
+    deck: 'https://unpkg.com/@deck.gl/core@{{release_version}}/dist.min',
+    deckjson: 'https://unpkg.com/@deck.gl/json@{{release_version}}/dist.min',
+    decklayers: 'https://unpkg.com/@deck.gl/layers@{{release_version}}/dist.min',
+    deckaggregate: 'https://unpkg.com/@deck.gl/aggregation-layers@{{release_version}}/dist.min',
+    mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_version}}/mapbox-gl',
+    luma: 'https://unpkg.com/@luma.gl/core@{{release_version}}/dist/dist.min'
   },
   shim : {
     'deckaggregate': ['deck', 'decklayers', 'luma']

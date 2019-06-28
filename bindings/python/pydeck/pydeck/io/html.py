@@ -16,7 +16,9 @@ def render_json_to_html(json_input, mapbox_api_key=None):
     js = j2_env.get_template('index.j2')
     html = js.render(
         mapbox_api_key=mapbox_api_key,
-        json_input=json_input)
+        json_input=json_input,
+        release_version='0.7.2-alpha.1',
+        mapbox_gl_version='0.53.1')
     return html
 
 

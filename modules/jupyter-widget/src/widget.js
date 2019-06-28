@@ -10,10 +10,10 @@ import {
   waitForElementToDisplay
 } from './utils';
 
-const deckgl = require('@deck.gl/core');
-const deckglLayers = require('@deck.gl/layers');
-const deckAggregationLayers = require('@deck.gl/aggregation-layers');
-const deckJson = require('@deck.gl/json');
+import {Deck, MapView} from '@deck.gl/core';
+import * as deckglLayers from '@deck.gl/layers';
+import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
+import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
 
@@ -87,18 +87,19 @@ export class DeckGLView extends DOMWidgetView {
   initJSElements() {
     try {
       if (!this.deck) {
-        this.deck = new deckgl.Deck({
+        this.deck = new Deck({
           canvas: `deck-map-container-${this.modelId}`,
           height: '100%',
           width: '100%',
           onLoad: this.value_changed.bind(this),
-          views: [new deckgl.MapView()],
+          views: [new MapView()],
           onViewStateChange: this._onViewStateChange.bind(this)
         });
       }
 
       if (!this.mapLayer) {
         const mapboxgl = require('mapbox-gl');
+
         mapboxgl.accessToken = this.model.get('mapbox_key');
         this.mapLayer = new mapboxgl.Map({
           container: `map-${this.modelId}`,
@@ -117,7 +118,7 @@ export class DeckGLView extends DOMWidgetView {
     this.json_input = this.model.get('json_input');
     const parsedJSONInput = JSON.parse(this.json_input);
     this.initJSElements();
-    const jsonConverter = new deckJson._JSONConverter({
+    const jsonConverter = new JSONConverter({
       configuration: {
         layers: {...deckglLayers, ...deckAggregationLayers}
       }

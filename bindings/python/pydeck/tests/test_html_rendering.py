@@ -15,5 +15,8 @@ from .const import FIXTURE_STRING
 
 def test_rendering_is_not_broken():
     rendered = render_json_to_html(FIXTURE_STRING, 'fake_key')
+    f = open('tmp.html', 'w')
+    f.write(rendered)
+    f.close()
     assert FIXTURE_STRING in rendered
     assert 'fake_key' in rendered

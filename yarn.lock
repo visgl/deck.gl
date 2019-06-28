@@ -682,6 +682,43 @@
     lodash "^4.17.11"
     to-fast-properties "^2.0.0"
 
+"@deck.gl/aggregation-layers@7.2.0-alpha.1":
+  version "7.2.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@deck.gl/aggregation-layers/-/aggregation-layers-7.2.0-alpha.1.tgz#6738841965a36fa01b39e63d9e388e26c24f5867"
+  integrity sha512-o2fjkYTZNxY0mY4LRee959ZKVCgvtGghAGqb9OgX11ZcabJ/YJYA8BPBQH/spsOmJFuanBMAqhD38Mql5uKQMA==
+  dependencies:
+    d3-hexbin "^0.2.1"
+
+"@deck.gl/core@7.2.0-alpha.1":
+  version "7.2.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@deck.gl/core/-/core-7.2.0-alpha.1.tgz#11b47cf68e11b68f0ccadc766feace1253f6a253"
+  integrity sha512-5s02tQDKqISpaV1DduZpUHasVOgIRBOJ50zQlrD2fo74XaThTvdu14IjFroTLhcsTAxN87DFW/EyQHGebzuI5A==
+  dependencies:
+    "@luma.gl/core" "^7.1.0"
+    gl-matrix "^3.0.0"
+    math.gl "^2.3.0"
+    mjolnir.js "^2.1.2"
+    probe.gl "^3.0.2"
+    seer "^0.2.4"
+    viewport-mercator-project "^6.1.0"
+
+"@deck.gl/json@7.2.0-alpha.1":
+  version "7.2.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@deck.gl/json/-/json-7.2.0-alpha.1.tgz#112448d7e4db9df9838dc348fb464278ba8796df"
+  integrity sha512-v/7z/79Gg6RZJkJeKw5sIFaIR7eG61X+578uToCODz578afAli9RLCdTOTKyW7BsV61/1dh8DD8/Njt4VDO3gA==
+  dependencies:
+    d3-dsv "^1.0.8"
+
+"@deck.gl/layers@7.2.0-alpha.1":
+  version "7.2.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@deck.gl/layers/-/layers-7.2.0-alpha.1.tgz#c0a38652789691bb68a818933bb2e621ad2cf63f"
+  integrity sha512-LEXSI4ibPmYyAk83v4rAn8O3ZT5hsPV+lkY+l8rEAIqDFVwrCg1w4ihOLvTZDTjeQ+t0LcqXHx1cBNwOgjlEcg==
+  dependencies:
+    "@loaders.gl/core" "^1.0.3"
+    "@loaders.gl/images" "^1.0.3"
+    "@mapbox/tiny-sdf" "^1.1.0"
+    earcut "^2.0.6"
+
 "@jupyter-widgets/base@^1.1.10":
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/@jupyter-widgets/base/-/base-1.2.4.tgz#78fe7bc5b8a2b1aaa6f3b48a48e8c304819ea669"
@@ -1740,11 +1777,6 @@
     "@types/jquery" "*"
     "@types/underscore" "*"
 
-"@types/geojson@*":
-  version "7946.0.7"
-  resolved "https://registry.yarnpkg.com/@types/geojson/-/geojson-7946.0.7.tgz#c8fa532b60a0042219cdf173ca21a975ef0666ad"
-  integrity sha512-wE2v81i4C4Ol09RtsWFAqg3BUitWbHSpSlIo+bNdsCJijO9sjme+zm+73ZMCa/qMC8UEERxzGbvmr1cffo2SiQ==
-
 "@types/jquery@*":
   version "3.3.29"
   resolved "https://registry.yarnpkg.com/@types/jquery/-/jquery-3.3.29.tgz#680a2219ce3c9250483722fccf5570d1e2d08abd"
@@ -1756,13 +1788,6 @@
   version "4.14.123"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.123.tgz#39be5d211478c8dd3bdae98ee75bb7efe4abfe4d"
   integrity sha512-pQvPkc4Nltyx7G1Ww45OjVqUsJP4UsZm+GWJpigXgkikZqJgRm4c48g027o6tdgubWHwFRF15iFd+Y4Pmqv6+Q==
-
-"@types/mapbox-gl@^0.51.4":
-  version "0.51.5"
-  resolved "https://registry.yarnpkg.com/@types/mapbox-gl/-/mapbox-gl-0.51.5.tgz#5f9661298f54de54269a8e7701806083c82afe42"
-  integrity sha512-qkfYgg0N6pib6Ed4qy7GDsvMGMSFxef9CkjVaKgGz0ESx+blwnbG/qtZVFXpb7BCMirKruqSUzxBVflmH3/oWA==
-  dependencies:
-    "@types/geojson" "*"
 
 "@types/sizzle@*":
   version "2.3.2"
