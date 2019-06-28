@@ -22,6 +22,8 @@
 import {Layer, createIterable} from '@deck.gl/core';
 import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {load} from '@loaders.gl/core';
+import {createGLTFObjects} from '@luma.gl/addons';
+import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
@@ -43,7 +45,8 @@ const defaultProps = {
     return fetch(url).then(response => response.json());
   },
 
-  getScene: scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph),
+  getScene: scenegraph =>
+    scenegraph && scenegraph.scenes ? scenegraph.scenes[scenegraph.scene || 0] : scenegraph,
   getAnimator: scenegraph => scenegraph && scenegraph.animator,
   _animations: null,
 
@@ -90,44 +93,12 @@ export default class ScenegraphLayer extends Layer {
     });
   }
 
-  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    const {data, getPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const point of iterable) {
-      objectInfo.index++;
-      const position = getPosition(point, objectInfo);
-      value[i++] = fp64LowPart(position[0]);
-      value[i++] = fp64LowPart(position[1]);
-    }
-  }
-
   updateState(params) {
     super.updateState(params);
     const {props, oldProps} = params;
 
     if (props.scenegraph !== oldProps.scenegraph) {
-      const getParams = {layer: this, gl: this.context.gl};
-      const scenegraph = props.getScene(props.scenegraph, getParams);
-      const animator = props.getAnimator(props.scenegraph, getParams);
-
-      if (scenegraph instanceof ScenegraphNode) {
-        this._deleteScenegraph();
-        this._applyAllAttributes(scenegraph);
-        this._applyAnimationsProp(scenegraph, animator, props._animations);
-        this.setState({scenegraph, animator});
-      } else if (scenegraph !== null) {
-        log.warn('invalid scenegraph:', scenegraph)();
-      }
+      this._updateScenegraph(props);
     } else if (props._animations !== oldProps._animations) {
       this._applyAnimationsProp(this.state.scenegraph, this.state.animator, props._animations);
     }
@@ -136,6 +107,42 @@ export default class ScenegraphLayer extends Layer {
   finalizeState() {
     super.finalizeState();
     this._deleteScenegraph();
+  }
+
+  _updateScenegraph(props) {
+    const {gl} = this.context;
+    let scenegraphData;
+    if (props.scenegraph instanceof ScenegraphNode) {
+      // Signature 1: props.scenegraph is a proper luma.gl Scenegraph
+      scenegraphData = {scenes: [props.scenegraph]};
+    } else if (props.scenegraph && !props.scenegraph.gltf) {
+      // Converts loaders.gl gltf to luma.gl scenegraph using the undocumented @luma.gl/addons function
+      const gltf = props.scenegraph;
+      const gltfObjects = createGLTFObjects(gl, gltf, this.getLoadOptions());
+      scenegraphData = Object.assign({gltf}, gltfObjects);
+
+      waitForGLTFAssets(gltfObjects).then(() => this.setNeedsRedraw());
+    } else {
+      // DEPRECATED PATH: Assumes this data was loaded through GLTFScenegraphLoader
+      log.deprecated(
+        'ScenegraphLayer.props.scenegraph',
+        'Use GLTFLoader instead of GLTFScenegraphLoader'
+      );
+      scenegraphData = props.scenegraph;
+    }
+
+    const options = {layer: this, gl};
+    const scenegraph = props.getScene(scenegraphData, options);
+    const animator = props.getAnimator(scenegraphData, options);
+
+    if (scenegraph instanceof ScenegraphNode) {
+      this._deleteScenegraph();
+      this._applyAllAttributes(scenegraph);
+      this._applyAnimationsProp(scenegraph, animator, props._animations);
+      this.setState({scenegraph, animator});
+    } else if (scenegraph !== null) {
+      log.warn('invalid scenegraph:', scenegraph)();
+    }
   }
 
   _applyAllAttributes(scenegraph) {
@@ -267,6 +274,27 @@ export default class ScenegraphLayer extends Layer {
         }
       });
     });
+  }
+
+  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
+    const isFP64 = this.use64bitPositions();
+    attribute.constant = !isFP64;
+
+    if (!isFP64) {
+      attribute.value = new Float32Array(2);
+      return;
+    }
+
+    const {data, getPosition} = this.props;
+    const {value, size} = attribute;
+    let i = startRow * size;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
+    for (const point of iterable) {
+      objectInfo.index++;
+      const position = getPosition(point, objectInfo);
+      value[i++] = fp64LowPart(position[0]);
+      value[i++] = fp64LowPart(position[1]);
+    }
   }
 }
 
