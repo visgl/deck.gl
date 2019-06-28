@@ -36,7 +36,7 @@ const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
   getScene: gltf => {
     if (gltf && gltf.scenes) {
-      // gltf post processer replaces `gltf.scene` number with the scene `object`
+      // gltf post processor replaces `gltf.scene` number with the scene `object`
       return typeof gltf.scene === 'object' ? gltf.scene : gltf.scenes[gltf.scene || 0];
     }
     return gltf;
