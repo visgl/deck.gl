@@ -1411,10 +1411,10 @@
   dependencies:
     "@babel/runtime" "^7.3.1"
 
-"@loaders.gl/core@^1.0.3":
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.0.3.tgz#60a1467e583f28d974a72f947cf2c7c2bc266393"
-  integrity sha512-ENyW3UqPgtOx81iY23Y8jD7FJ6miNduOzV6Z1xY7pXwoOGrF2BXTJ3P7KPLXTIBN98mh67jUax0fouBhrQL2Kw==
+"@loaders.gl/core@^1.1.6":
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/core/-/core-1.1.6.tgz#6963e14e93663d9582238f39e70607b01a172c36"
+  integrity sha512-/byPhredVzkxAMVR8CAaD8uzB72p6/pWAmgkvZmDeI7dHrCiQGt59EolmTJoQ5c50FMAFKQ75tidXor7D+fObA==
   dependencies:
     "@babel/runtime" "^7.3.1"
 
@@ -1442,6 +1442,11 @@
     ndarray "^1.0.18"
     save-pixels "^2.3.2"
     through "^2.3.8"
+
+"@loaders.gl/images@^1.1.6":
+  version "1.1.6"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/images/-/images-1.1.6.tgz#21dd3238c97ad1164f7c0ed43d18edaec49d97e1"
+  integrity sha512-Ad63Uj0VGzmA71ucThnyc+VYsJJKZqYKkmANsQDDFe8p9UiR8JaI8DNLTJCfEtusyl5KVBWzWIdqXGPoT2uLWA==
 
 "@loaders.gl/loader-utils@1.1.5":
   version "1.1.5"
