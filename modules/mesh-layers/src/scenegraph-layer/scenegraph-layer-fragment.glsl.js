@@ -26,14 +26,16 @@ _varying vec4 vColor;
 void main(void) {
   #ifdef MODULE_PBR
     fragmentColor = vColor * pbr_filterColor(vec4(0));
+    geometry.uv = pbr_vUV;
   #else
     #if defined(HAS_UV) && defined(HAS_BASECOLORMAP)
       fragmentColor = vColor * _texture2D(u_BaseColorSampler, vTEXCOORD_0);
+      geometry.uv = vTEXCOORD_0;
     #else
       fragmentColor = vColor;
     #endif
   #endif
 
-  fragmentColor = picking_filterPickingColor(fragmentColor);
+  DECKGL_FILTER_COLOR(fragmentColor, geometry);
 }
 `;

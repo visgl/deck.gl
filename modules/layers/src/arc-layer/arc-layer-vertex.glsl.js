@@ -38,6 +38,7 @@ uniform float widthMinPixels;
 uniform float widthMaxPixels;
 
 varying vec4 vColor;
+varying vec2 uv;
 
 float paraboloid(vec2 source, vec2 target, float ratio) {
 
@@ -57,10 +58,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
-  vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
-  vec2 offset_clipspace = project_pixel_size_to_clipspace(offset_screenspace);
-
-  return offset_clipspace;
+  return dir_screenspace * offset_direction * width / 2.0;
 }
 
 float getSegmentRatio(float index) {
@@ -81,8 +79,11 @@ vec3 getPos(vec2 source, vec2 target, float segmentRatio) {
 }
 
 void main(void) {
-  vec2 source = project_position(vec3(instancePositions.xy, 0.0), instancePositions64Low.xy).xy;
-  vec2 target = project_position(vec3(instancePositions.zw, 0.0), instancePositions64Low.zw).xy;
+  geometry.worldPosition = vec3(instancePositions.xy, 0.0);
+  geometry.worldPositionAlt = vec3(instancePositions.zw, 0.0);
+
+  vec2 source = project_position(geometry.worldPosition, instancePositions64Low.xy).xy;
+  vec2 target = project_position(geometry.worldPositionAlt, instancePositions64Low.zw).xy;
 
   float segmentIndex = positions.x;
   float segmentRatio = getSegmentRatio(segmentIndex);
@@ -95,6 +96,9 @@ void main(void) {
   vec3 nextPos = getPos(source, target, nextSegmentRatio);
   vec4 curr = project_common_position_to_clipspace(vec4(currPos, 1.0));
   vec4 next = project_common_position_to_clipspace(vec4(nextPos, 1.0));
+  geometry.position = vec4(currPos, 1.0);
+  uv = vec2(segmentRatio, positions.y);
+  geometry.uv = uv;
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
@@ -104,11 +108,16 @@ void main(void) {
   );
 
   // extrude
-  vec2 offset = getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, widthPixels);
-  gl_Position = curr + vec4(offset, 0.0, 0.0);
+  vec3 offset = vec3(
+    getExtrusionOffset((next.xy - curr.xy) * indexDir, positions.y, widthPixels),
+    0.0);
+  DECKGL_FILTER_SIZE(offset, geometry);
+  gl_Position = curr + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
   vColor = vec4(color.rgb, color.a * opacity);
+  DECKGL_FILTER_COLOR(vColor, geometry);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);
