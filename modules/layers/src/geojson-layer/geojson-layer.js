@@ -143,6 +143,10 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  unwrapObject(object) {
+    return unwrapSourceFeature(object);
+  }
+
   /* eslint-disable complexity */
   renderLayers() {
     const {features, featuresDiff} = this.state;
