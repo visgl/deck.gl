@@ -18,14 +18,16 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './color.spec';
-import './deep-equal.spec';
-import './flatten.spec';
-import './positions.spec';
-import './memoize.spec';
-import './array-utils.spec';
-import './iterable-utils.spec';
-import './range.spec';
-import './math-utils.spec';
-import './shader.spec';
-// import './compare-objects.spec';
+export class LayerExtension {
+  constructor(opts) {
+    this.opts = opts;
+  }
+
+  getShaders(layer) {
+    return null;
+  }
+
+  initializeState(layer, context) {}
+
+  updateState(layer, params) {}
+}

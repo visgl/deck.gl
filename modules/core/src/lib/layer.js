@@ -29,6 +29,7 @@ import log from '../utils/log';
 import GL from '@luma.gl/constants';
 import {withParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
+import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 
 import Component from '../lifecycle/component';
@@ -75,6 +76,7 @@ const defaultProps = {
 
   parameters: {},
   uniforms: {},
+  extensions: [],
   framebuffer: null,
 
   animation: null, // Passed prop animation functions to evaluate props
@@ -306,6 +308,13 @@ export default class Layer extends Component {
   // App can create WebGL resources
   initializeState() {
     throw new Error(`Layer ${this} has not defined initializeState`);
+  }
+
+  getShaders(shaders) {
+    for (const extension of this.props.extensions) {
+      shaders = mergeShaders(shaders, extension.getShaders(this));
+    }
+    return shaders;
   }
 
   // Let's layer control if updateState should be called
@@ -587,6 +596,10 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle methods
     this.initializeState(this.context);
+    // Initialize extensions
+    for (const extension of this.props.extensions) {
+      extension.initializeState(this, this.context);
+    }
     // End subclass lifecycle methods
 
     // TODO deprecated, for backwards compatibility with older layers
@@ -631,6 +644,10 @@ export default class Layer extends Component {
       } catch (error) {
         // ignore error if gl context is missing
       }
+    }
+    // Execute extension updates
+    for (const extension of this.props.extensions) {
+      extension.updateState(this, updateParams);
     }
     // End subclass lifecycle methods
 
