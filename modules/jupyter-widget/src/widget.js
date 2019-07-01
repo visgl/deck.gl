@@ -11,7 +11,7 @@ import {
 } from './utils';
 
 import {Deck, MapView} from '@deck.gl/core';
-import * as deckglLayers from '@deck.gl/layers';
+import * as deckLayers from '@deck.gl/layers';
 import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
 import {_JSONConverter as JSONConverter} from '@deck.gl/json';
 
@@ -120,7 +120,7 @@ export class DeckGLView extends DOMWidgetView {
     this.initJSElements();
     const jsonConverter = new JSONConverter({
       configuration: {
-        layers: {...deckglLayers, ...deckAggregationLayers}
+        layers: {...deckLayers, ...deckAggregationLayers}
       }
     });
     const results = jsonConverter.convertJsonToDeckProps(parsedJSONInput);

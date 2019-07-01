@@ -35,7 +35,7 @@ class Deck(JSONMixin):
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see `pydeck.data_utils.autocompute_viewport`
         mapbox_key : str, default None
-            Read on inititialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
+            Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
 
         .. _Deck:
@@ -97,9 +97,20 @@ class Deck(JSONMixin):
         """
         self.deck_widget.json_input = self.to_json()
 
-    def to_html(self, filename=None, open_browser=False):
+    def to_html(
+            self,
+            filename=None,
+            open_browser=False,
+            notebook_display=True,
+            iframe_width=500,
+            iframe_height=500):
         """Writes a file and loads it to an iframe, if in a Jupyter notebook
         Otherwise writes a file and optionally opens it in a web browser
+
+        The single HTML page uses RequireJS to work, a technology that requires
+        Internet access to download the deck.gl libraries that render a visualization.
+        In other words, you will need an Internet connection or the visualization will
+        not render.
 
         Parameters
         ----------
@@ -107,5 +118,24 @@ class Deck(JSONMixin):
             Name of the file. If no name is provided, a randomly named file will be written locally.
         open_browser : bool, default False
             Whether a browser window will open or not after write
+        notebook_display : bool, default True
+            Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
+        iframe_width : int, default 500
+            Height of Jupyter notebook iframe in pixels, if rendered
+        iframe_height : int, default 500
+            Width of Jupyter notebook iframe in pixels, if rendered
+
+        Returns
+        -------
+            file : Returns a closed file object for the HTML file
         """
-        deck_to_html(self.to_json(), self.mapbox_key)
+        json_blob = self.to_json()
+        f = deck_to_html(
+            json_blob,
+            self.mapbox_key,
+            filename,
+            open_browser=open_browser,
+            notebook_display=notebook_display,
+            iframe_height=iframe_height,
+            iframe_width=iframe_width)
+        return f

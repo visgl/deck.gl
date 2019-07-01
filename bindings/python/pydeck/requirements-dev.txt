@@ -1,4 +1,7 @@
-pytest>=3.6
-pytest-cov>=2.6.1
+image>=1.5.27
 jupyter>=1.0.0
 pandas>=0.23.4
+pyppeteer>=0.0.25
+pytest>=3.6
+pytest-cov>=2.6.1
+pytest-asyncio>=0.10.0
