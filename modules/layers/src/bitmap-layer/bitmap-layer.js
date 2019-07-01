@@ -57,7 +57,7 @@ const defaultProps = {
 export default class BitmapLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'picking']};
+    return super.getShaders({vs, fs, modules: [projectModule, 'picking']});
   }
 
   initializeState() {

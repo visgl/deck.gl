@@ -55,9 +55,11 @@ const ATTRIBUTE_TRANSITION = {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return this.use64bitProjection()
-      ? {vs: vs64, fs, modules: ['project64', 'picking']}
-      : {vs, fs, modules: ['project32', 'picking']}; // 'project' module added by default.
+    return super.getShaders(
+      this.use64bitProjection()
+        ? {vs: vs64, fs, modules: ['project64', 'picking']}
+        : {vs, fs, modules: ['project32', 'picking']}
+    ); // 'project' module added by default.
   }
 
   initializeState() {

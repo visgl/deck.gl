@@ -62,7 +62,7 @@ const defaultProps = {
 export default class ColumnLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'gouraud-lighting', 'picking']};
+    return super.getShaders({vs, fs, modules: [projectModule, 'gouraud-lighting', 'picking']});
   }
 
   /**

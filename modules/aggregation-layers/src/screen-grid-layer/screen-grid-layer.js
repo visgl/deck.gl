@@ -55,7 +55,7 @@ export default class ScreenGridLayer extends Layer {
   getShaders() {
     const shaders = isWebGL2(this.context.gl) ? {vs, fs} : {vs: vs_WebGL1, fs: fs_WebGL1};
     shaders.modules = ['picking'];
-    return shaders;
+    return super.getShaders(shaders);
   }
 
   initializeState() {
