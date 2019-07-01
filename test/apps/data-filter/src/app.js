@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
 import POINTS from './data-sample';
@@ -48,16 +48,16 @@ class Root extends Component {
     ];
 
     return [
-      new ScatterplotLayer({
+      new GeoJsonLayer({
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
         data: POINTS,
 
         // Data accessors
-        getPosition: d => d,
+        stroked: false,
         getFillColor: [0, 180, 255],
         getRadius: d => 8,
-        getFilterValue: d => d,
+        getFilterValue: d => d.geometry.coordinates,
 
         // Filter
         filterRange,

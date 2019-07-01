@@ -47,20 +47,24 @@ export default class DataFilterExtension extends LayerExtension {
     super({filterSize, softMargin});
   }
 
-  getShaders(opts) {
+  getShaders(extension) {
+    const {softMargin, filterSize} = extension.opts;
     return {
       modules: [shaderModule],
       defines: {
-        DATAFILTER_SOFT_MARGIN: String(opts.softMargin),
-        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[opts.filterSize]
+        DATAFILTER_SOFT_MARGIN: String(softMargin),
+        DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize]
       }
     };
   }
 
-  initializeState(context, opts) {
-    this.getAttributeManager().addInstanced({
-      instanceFilterValue: {size: opts.filterSize, accessor: 'getFilterValue'}
-    });
+  initializeState(context, extension) {
+    const attributeManager = this.getAttributeManager();
+    if (attributeManager) {
+      attributeManager.addInstanced({
+        instanceFilterValue: {size: extension.opts.filterSize, accessor: 'getFilterValue'}
+      });
+    }
   }
 }
 

@@ -14,7 +14,13 @@ export function pointGrid(N, bbox) {
 
   for (let x = 0; x < sizeX; x++) {
     for (let y = 0; y < sizeY; y++) {
-      points[index] = [bbox[0] + stepX * x, bbox[1] + stepY * y];
+      points[index] = {
+        type: 'Feature',
+        geometry: {
+          type: 'Point',
+          coordinates: [bbox[0] + stepX * x, bbox[1] + stepY * y]
+        }
+      };
       index++;
     }
   }
