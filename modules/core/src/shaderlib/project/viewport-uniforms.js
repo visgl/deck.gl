@@ -44,7 +44,6 @@ const getMemoizedViewportUniforms = memoize(calculateViewportUniforms);
 function getShaderCoordinateSystem(coordinateSystem) {
   switch (coordinateSystem) {
     case COORDINATE_SYSTEM.LNGLAT:
-    case COORDINATE_SYSTEM.LNGLAT_EXPERIMENTAL:
     default:
       return PROJECT_COORDINATE_SYSTEM.LNGLAT_AUTO_OFFSET;
 

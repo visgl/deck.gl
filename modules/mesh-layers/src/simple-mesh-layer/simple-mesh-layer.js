@@ -22,10 +22,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Texture2D, fp64, PhongMaterial, isWebGL2} from '@luma.gl/core';
-const {fp64LowPart} = fp64;
+import {Model, Geometry, Texture2D, PhongMaterial, isWebGL2} from '@luma.gl/core';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
@@ -93,7 +92,7 @@ const defaultProps = {
     depthTest: true,
     depthFunc: GL.LEQUAL
   },
-  fp64: false,
+
   // NOTE(Tarek): Quick and dirty wireframe. Just draws
   // the same mesh with LINE_STRIPS. Won't follow edges
   // of the original mesh.
@@ -115,12 +114,11 @@ const defaultProps = {
 
 export default class SimpleMeshLayer extends Layer {
   getShaders() {
-    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     const gl2 = isWebGL2(this.context.gl);
     const vs = gl2 ? vs3 : vs1;
     const fs = gl2 ? fs3 : fs1;
 
-    return super.getShaders({vs, fs, modules: [projectModule, 'phong-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: ['project32', 'phong-lighting', 'picking']});
   }
 
   initializeState() {
@@ -160,7 +158,7 @@ export default class SimpleMeshLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    if (props.mesh !== oldProps.mesh || props.fp64 !== oldProps.fp64) {
+    if (props.mesh !== oldProps.mesh || changeFlags.extensionsChanged) {
       if (this.state.model) {
         this.state.model.delete();
       }

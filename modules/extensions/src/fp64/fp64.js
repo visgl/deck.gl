@@ -18,31 +18,18 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-// Merge two luma.gl shader descriptors
-export function mergeShaders(target, source) {
-  if (!source) {
-    return target;
-  }
-  const result = Object.assign({}, target, source);
+import {LayerExtension, COORDINATE_SYSTEM, project64} from '@deck.gl/core';
 
-  if ('defines' in source) {
-    result.defines = Object.assign({}, target.defines, source.defines);
-  }
-  if ('modules' in source) {
-    result.modules = (target.modules || []).concat(source.modules);
-
-    // Hack: prject32 and project64 cannot co-exist
-    if (source.modules.some(module => module === 'project64' || module.name === 'project64')) {
-      const index = result.modules.findIndex(
-        module => module === 'project32' || module.name === 'project32'
-      );
-      if (index >= 0) {
-        result.modules.splice(index, 1);
-      }
+export default class Fp64Extension extends LayerExtension {
+  getShaders(opts) {
+    if (this.props.coordinateSystem !== COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
+      throw new Error('fp64: coordinateSystem must be LNGLAT_DEPRECATED');
     }
+
+    return {
+      modules: [project64]
+    };
   }
-  if ('inject' in source) {
-    result.inject = Object.assign({}, target.inject, source.inject);
-  }
-  return result;
 }
+
+Fp64Extension.extensionName = 'Fp64Extension';

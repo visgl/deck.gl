@@ -43,7 +43,6 @@ const defaultProps = {
   lineJointRounded: false,
   lineMiterLimit: 4,
   lineDashJustified: false,
-  fp64: false,
 
   getPolygon: {type: 'accessor', value: f => f.polygon},
   // Polygon fill color
@@ -165,8 +164,7 @@ export default class PolygonLayer extends CompositeLayer {
       lineWidthMaxPixels,
       lineJointRounded,
       lineMiterLimit,
-      lineDashJustified,
-      fp64
+      lineDashJustified
     } = this.props;
 
     // Accessor props for underlying layers
@@ -195,7 +193,6 @@ export default class PolygonLayer extends CompositeLayer {
           extruded,
           elevationScale,
 
-          fp64,
           filled,
           wireframe,
 
@@ -229,7 +226,6 @@ export default class PolygonLayer extends CompositeLayer {
       new StrokeLayer(
         {
           _dataDiff: pathsDiff && (() => pathsDiff),
-          fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,

@@ -49,7 +49,6 @@ export default class S2Layer extends CompositeLayer {
       lineJointRounded,
       lineMiterLimit,
       lineDashJustified,
-      fp64,
       getElevation,
       getFillColor,
       getLineColor,
@@ -64,7 +63,6 @@ export default class S2Layer extends CompositeLayer {
     const CellLayer = this.getSubLayerClass('cell', PolygonLayer);
     return new CellLayer(
       {
-        fp64,
         filled,
         wireframe,
 

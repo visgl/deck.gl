@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, fp64LowPart} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, CubeGeometry, fp64, PhongMaterial} from '@luma.gl/core';
-const {fp64LowPart} = fp64;
+import {Model, CubeGeometry, PhongMaterial} from '@luma.gl/core';
 const defaultMaterial = new PhongMaterial();
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 
@@ -50,7 +49,7 @@ const defaultProps = {
   offset: {type: 'array', min: 0, value: [1, 1]},
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   extruded: true,
-  fp64: false,
+
   material: defaultMaterial
 };
 
