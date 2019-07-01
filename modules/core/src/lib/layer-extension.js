@@ -17,15 +17,28 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import {deepEqual} from '../utils/deep-equal';
 
-import './color.spec';
-import './deep-equal.spec';
-import './flatten.spec';
-import './positions.spec';
-import './memoize.spec';
-import './array-utils.spec';
-import './iterable-utils.spec';
-import './range.spec';
-import './math-utils.spec';
-import './shader.spec';
-// import './compare-objects.spec';
+export class LayerExtension {
+  constructor(opts = {}) {
+    this.opts = opts;
+  }
+
+  equals(extension) {
+    if (this === extension) {
+      return true;
+    }
+
+    return this.constructor === extension.constructor && deepEqual(this.opts, extension.opts);
+  }
+
+  getShaders(opts) {
+    return null;
+  }
+
+  initializeState(context, opts) {}
+
+  updateState(params, opts) {}
+
+  finalizeState(opts) {}
+}

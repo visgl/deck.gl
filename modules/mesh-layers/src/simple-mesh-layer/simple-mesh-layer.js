@@ -120,7 +120,7 @@ export default class SimpleMeshLayer extends Layer {
     const vs = gl2 ? vs3 : vs1;
     const fs = gl2 ? fs3 : fs1;
 
-    return {vs, fs, modules: [projectModule, 'phong-lighting', 'picking']};
+    return super.getShaders({vs, fs, modules: [projectModule, 'phong-lighting', 'picking']});
   }
 
   initializeState() {

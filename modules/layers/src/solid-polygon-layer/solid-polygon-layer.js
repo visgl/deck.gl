@@ -64,11 +64,11 @@ const ATTRIBUTE_TRANSITION = {
 export default class SolidPolygonLayer extends Layer {
   getShaders(vs) {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {
+    return super.getShaders({
       vs,
       fs,
       modules: [projectModule, 'gouraud-lighting', 'picking']
-    };
+    });
   }
 
   initializeState() {

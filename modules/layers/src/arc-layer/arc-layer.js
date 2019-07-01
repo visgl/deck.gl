@@ -52,9 +52,11 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    return this.use64bitProjection()
-      ? {vs: vs64, fs, modules: ['project64', 'picking']}
-      : {vs, fs, modules: ['picking']}; // 'project' module added by default.
+    return super.getShaders(
+      this.use64bitProjection()
+        ? {vs: vs64, fs, modules: ['project64', 'picking']}
+        : {vs, fs, modules: ['picking']}
+    ); // 'project' module added by default.
   }
 
   initializeState() {

@@ -27,6 +27,7 @@ import './deck.spec';
 import './deck-picker.spec';
 import './layer.spec';
 import './composite-layer.spec';
+import './layer-extension.spec';
 import './layer-manager.spec';
 import './transition-manager.spec';
 import './seer-integration.spec';

@@ -18,14 +18,21 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './color.spec';
-import './deep-equal.spec';
-import './flatten.spec';
-import './positions.spec';
-import './memoize.spec';
-import './array-utils.spec';
-import './iterable-utils.spec';
-import './range.spec';
-import './math-utils.spec';
-import './shader.spec';
-// import './compare-objects.spec';
+// Merge two luma.gl shader descriptors
+export function mergeShaders(target, source) {
+  if (!source) {
+    return target;
+  }
+  const result = Object.assign({}, target, source);
+
+  if ('defines' in source) {
+    result.defines = Object.assign({}, target.defines, source.defines);
+  }
+  if ('modules' in source) {
+    result.modules = (target.modules || []).concat(source.modules);
+  }
+  if ('inject' in source) {
+    result.inject = Object.assign({}, target.inject, source.inject);
+  }
+  return result;
+}

@@ -29,6 +29,7 @@ import log from '../utils/log';
 import GL from '@luma.gl/constants';
 import {withParameters} from '@luma.gl/core';
 import assert from '../utils/assert';
+import {mergeShaders} from '../utils/shader';
 import {projectPosition, getWorldPosition} from '../shaderlib/project/project-functions';
 
 import Component from '../lifecycle/component';
@@ -75,6 +76,7 @@ const defaultProps = {
 
   parameters: {},
   uniforms: {},
+  extensions: [],
   framebuffer: null,
 
   animation: null, // Passed prop animation functions to evaluate props
@@ -306,6 +308,13 @@ export default class Layer extends Component {
   // App can create WebGL resources
   initializeState() {
     throw new Error(`Layer ${this} has not defined initializeState`);
+  }
+
+  getShaders(shaders) {
+    for (const extension of this.props.extensions) {
+      shaders = mergeShaders(shaders, extension.getShaders.call(this, extension.opts));
+    }
+    return shaders;
   }
 
   // Let's layer control if updateState should be called
@@ -587,6 +596,10 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle methods
     this.initializeState(this.context);
+    // Initialize extensions
+    for (const extension of this.props.extensions) {
+      extension.initializeState.call(this, this.context, extension.opts);
+    }
     // End subclass lifecycle methods
 
     // TODO deprecated, for backwards compatibility with older layers
@@ -632,6 +645,10 @@ export default class Layer extends Component {
         // ignore error if gl context is missing
       }
     }
+    // Execute extension updates
+    for (const extension of this.props.extensions) {
+      extension.updateState.call(this, updateParams, extension.opts);
+    }
     // End subclass lifecycle methods
 
     if (this.isComposite) {
@@ -660,6 +677,10 @@ export default class Layer extends Component {
 
     // Call subclass lifecycle method
     this.finalizeState(this.context);
+    // Finalize extensions
+    for (const extension of this.props.extensions) {
+      extension.finalizeState.call(this, extension.opts);
+    }
     // End lifecycle method
     removeLayerInSeer(this.id);
   }
@@ -735,6 +756,13 @@ export default class Layer extends Component {
       changeFlags.propsChanged = flags.propsChanged;
       log.log(LOG_PRIORITY_UPDATE + 1, () => `propsChanged: ${flags.propsChanged} in ${this.id}`)();
     }
+    if (flags.extensionsChanged && !changeFlags.extensionsChanged) {
+      changeFlags.extensionsChanged = flags.extensionsChanged;
+      log.log(
+        LOG_PRIORITY_UPDATE + 1,
+        () => `extensionsChanged: ${flags.extensionsChanged} in ${this.id}`
+      )();
+    }
     if (flags.viewportChanged && !changeFlags.viewportChanged) {
       changeFlags.viewportChanged = flags.viewportChanged;
       log.log(
@@ -749,7 +777,10 @@ export default class Layer extends Component {
 
     // Update composite flags
     const propsOrDataChanged =
-      flags.dataChanged || flags.updateTriggersChanged || flags.propsChanged;
+      flags.dataChanged ||
+      flags.updateTriggersChanged ||
+      flags.propsChanged ||
+      flags.extensionsChanged;
     changeFlags.propsOrDataChanged = changeFlags.propsOrDataChanged || propsOrDataChanged;
     changeFlags.somethingChanged =
       changeFlags.somethingChanged ||
@@ -768,6 +799,7 @@ export default class Layer extends Component {
       updateTriggersChanged: false,
       viewportChanged: false,
       stateChanged: false,
+      extensionsChanged: false,
 
       // Derived changeFlags
       propsOrDataChanged: false,
