@@ -56,7 +56,11 @@ const defaultProps = {
 
 export default class GPUGridCellLayer extends Layer {
   getShaders() {
-    return {vs, fs, modules: ['project32', 'gouraud-lighting', 'picking', 'fp64']};
+    return super.getShaders({
+      vs,
+      fs,
+      modules: ['project32', 'gouraud-lighting', 'picking', 'fp64']
+    });
   }
 
   initializeState() {

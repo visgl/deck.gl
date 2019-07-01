@@ -47,6 +47,8 @@ varying vec2 unitPosition;
 varying float innerUnitRadius;
 
 void main(void) {
+  geometry.worldPosition = instancePositions;
+
   // Multiply out radius and clamp to limits
   float outerRadiusPixels = clamp(
     project_size_to_pixel(radiusScale * instanceRadius),
@@ -64,15 +66,20 @@ void main(void) {
 
   // position on the containing square in [-1, 1] space
   unitPosition = positions.xy;
+  geometry.uv = unitPosition;
 
   innerUnitRadius = 1.0 - stroked * lineWidthPixels / outerRadiusPixels;
   
   vec3 offset = positions * project_pixel_size(outerRadiusPixels);
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset);
+  DECKGL_FILTER_SIZE(offset, geometry);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, offset, geometry.position);
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Apply opacity to instance color, or return instance picking color
   vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity) / 255.;
+  DECKGL_FILTER_COLOR(vFillColor, geometry);
   vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity) / 255.;
+  DECKGL_FILTER_COLOR(vLineColor, geometry);
   
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);

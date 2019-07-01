@@ -22,7 +22,6 @@
 import GL from '@luma.gl/constants';
 import {Layer} from '@deck.gl/core';
 import {Model, Geometry, Texture2D, fp64} from '@luma.gl/core';
-import {loadImage} from '@loaders.gl/images';
 
 const {fp64LowPart} = fp64;
 
@@ -37,7 +36,7 @@ const DEFAULT_TEXTURE_PARAMETERS = {
 };
 
 const defaultProps = {
-  image: null,
+  image: {type: 'object', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
   fp64: false,
 
@@ -58,7 +57,7 @@ const defaultProps = {
 export default class BitmapLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'picking']};
+    return super.getShaders({vs, fs, modules: [projectModule, 'picking']});
   }
 
   initializeState() {
@@ -225,14 +224,6 @@ export default class BitmapLayer extends Layer {
   }
 
   loadTexture(image) {
-    if (typeof image === 'string') {
-      image = loadImage(image);
-    }
-    if (image instanceof Promise) {
-      image.then(data => this.loadTexture(data));
-      return;
-    }
-
     const {gl} = this.context;
 
     if (this.state.bitmapTexture) {

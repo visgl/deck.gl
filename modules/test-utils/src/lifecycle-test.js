@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import {LayerManager, MapView, DeckRenderer} from '@deck.gl/core';
+import {VertexArrayObject} from '@luma.gl/core';
 
 import {makeSpy} from '@probe.gl/test-utils';
 import gl from './utils/setup-gl';
@@ -124,6 +125,13 @@ export function testLayer({
   runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onError);
 
   safelyCall(`finalizing ${layer.id}`, () => layerManager.setLayers([]), onError);
+
+  // Edge case handling: when VertexArrayObject is not supported, we create a
+  // constant buffer for attribute zero which is not deleted with the program
+  // TODO - fix in luma?
+  if (!VertexArrayObject.isSupported(gl) && VertexArrayObject.getDefaultArray(gl).buffer) {
+    VertexArrayObject.getDefaultArray(gl).delete();
+  }
 
   const resourceCounts = getResourceCounts();
 

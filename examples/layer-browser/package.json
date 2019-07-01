@@ -9,8 +9,8 @@
     "start-local-production": "webpack-dev-server --env.local --env.production --progress --hot --open"
   },
   "dependencies": {
-    "@loaders.gl/core": "^1.0.1",
-    "@loaders.gl/ply": "^1.0.1",
+    "@loaders.gl/ply": "^1.1.5",
+    "@loaders.gl/gltf": "^1.1.5",
     "@luma.gl/addons": "^7.2.0-alpha.1",
     "@luma.gl/debug": "^7.2.0-alpha.1",
     "colorbrewer": "^1.0.0",

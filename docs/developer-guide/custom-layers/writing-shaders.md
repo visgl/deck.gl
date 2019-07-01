@@ -47,6 +47,103 @@ Note that for geospatial projection, deck.gl v6.1 introduced a "hybrid" 32-bit p
 Picking is supported using luma.gl [picking shader module](https://github.com/uber/luma.gl/blob/master/docs/api-reference/shadertools/shader-module-picking.md).
 
 
+### Standard Shader Hooks
+
+When [subclassing](/docs/developer-guide/custom-layers/subclassed-layers.md) an official deck.gl layer with minor feature additions, it is possible to inject custom code into predefined locations into the original shaders. These hooks are considered the public API of layers that will work consistently cross minor releases.
+
+```js
+const shaders = this.getShaders();
+
+const model = new Model(gl, {
+  ...this.getShaders(),
+  inject: {
+    'fs:decl': `
+      uniform float coverage;
+    `
+    'fs:DECKGL_FILTER_COLOR': `
+      if (abs(geometry.uv.x) > coverage) discard;
+    `
+  }
+});
+```
+
+##### vs:#decl
+
+Inject into the top of the vertex shader (declarations).
+
+##### vs:#main-start
+
+Inject into the the very beginning of the main function in the vertex shader.
+
+##### vs:#main-end
+
+Inject into the the very end of the main function in the vertex shader.
+
+##### vs:DeckGL_FILTER_SIZE
+
+Inject into a function in the vertex shader to manipulate the size of a geometry. Called before projection.
+
+Arguments:
+
+- `inout vec3 size` - offset of the current vertex from `geometry.worldPosition` in common space.
+- `VertexGeometry geometry` - descriptor of the current geometry
+
+
+##### vs:DeckGL_FILTER_GL_POSITION
+
+Inject into a function in the vertex shader to manipulate the projected position of the current vertex. Called after projection.
+
+Arguments:
+
+- `inout vec4 position` - position of the current vertex in clipspace
+- `VertexGeometry geometry` - descriptor of the current geometry
+
+
+##### vs:DeckGL_FILTER_COLOR
+
+Inject into a function in the vertex shader to manipulate the color of the current geometry. Called after projection.
+
+Arguments:
+
+- `inout vec4 color` - color of the current geometry, RGBA in the `[0, 1]` range
+- `VertexGeometry geometry` - descriptor of the current geometry
+
+
+##### fs:#decl
+
+Inject into the top of the fragment shader (declarations).
+
+##### fs:#main-start
+
+Inject into the the very beginning of the main function in the fragment shader.
+
+##### fs:#main-end
+
+Inject into the the very end of the main function in the fragment shader.
+
+##### fs:DeckGL_FILTER_COLOR
+
+Inject into a function in the vertex shader to manipulate the color of the current geometry. Called after projection.
+
+Arguments:
+
+- `inout vec4 color` - color of the current geometry, RGBA in the `[0, 1]` range
+- `FragmentGeometry geometry` - descriptor of the current geometry
+
+
+### VertexGeometry struct
+
+- `vec3 worldPosition` - The world position of the current geometry, usually populated from a `getPosition` accessor.
+- `vec3 worldPositionAlt` - The secondary world position of the current geometry. This property is populated if the geometry is instanced between a source position and a target position, for example `ArcLayer`.
+- `vec3 normal` - The normal at the current vertex in common space. Only populated for 3D layers.
+- `vec2 uv` - The uv position at the current vertex.
+- `vec4 position` - The position of the current vertex in common space. Populated during projection.
+
+### FragmentGeometry struct
+
+- `vec2 uv` - The uv position at the current vertex.
+
+
 ## Shader Techniques and Ideas
 
 ### Filtering and Brushing (Vertex and Fragment Shaders)

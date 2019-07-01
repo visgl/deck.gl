@@ -68,7 +68,7 @@ if(vTime > currentTime || vTime < currentTime - trailLength) {
 }
 `,
       // Fade the color (currentTime - 100%, end of trail - 0%)
-      'gl_FragColor = vColor;': 'gl_FragColor.a *= 1.0 - (currentTime - vTime) / trailLength;'
+      'fs:DECKGL_FILTER_COLOR': 'color.a *= 1.0 - (currentTime - vTime) / trailLength;'
     };
     return shaders;
   }

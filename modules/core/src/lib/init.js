@@ -18,8 +18,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+import {registerLoaders} from '@loaders.gl/core';
+import {HTMLImageLoader} from '@loaders.gl/images';
+
 import {global} from '../utils/globals';
 import log from '../utils/log';
+import jsonLoader from '../utils/json-loader';
 import {initializeShaderModules} from '../shaderlib';
 
 // Version detection using babel plugin
@@ -42,6 +46,8 @@ if (!global.deck) {
     version,
     log
   };
+
+  registerLoaders([jsonLoader, HTMLImageLoader]);
 
   initializeShaderModules();
 }

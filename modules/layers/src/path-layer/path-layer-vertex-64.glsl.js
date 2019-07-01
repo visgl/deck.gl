@@ -184,12 +184,16 @@ vec3 lineJoin(vec2 prevPoint64[2], vec2 currPoint64[2], vec2 nextPoint64[2]) {
     positions.y + positions.z * offsetDirection,
     dot(offsetFromStartOfPath, dir)
   );
+  geometry.uv = vPathPosition;
 
   float isValid = step(instanceTypes, 3.5);
   return vec3(vCornerOffset * width * isValid, 0.0);
 }
 
 void main() {
+  geometry.worldPosition = instanceStartPositions;
+  geometry.worldPositionAlt = instanceEndPositions;
+
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
@@ -225,6 +229,7 @@ void main() {
   project_position_fp64(nextPosition.xy, nextPosition64xyLow, projected_next_position);
 
   vec3 pos = lineJoin(projected_prev_position, projected_curr_position, projected_next_position);
+  DECKGL_FILTER_SIZE(pos, geometry);
   vec2 vertex_pos_modelspace[4];
 
   vertex_pos_modelspace[0] = sum_fp64(vec2(pos.x, 0.0), projected_curr_position[0]);
@@ -232,6 +237,10 @@ void main() {
   vertex_pos_modelspace[2] = vec2(pos.z + projected_curr_position_z, 0.0);
   vertex_pos_modelspace[3] = vec2(1.0, 0.0);
 
+  geometry.position = vec4(vertex_pos_modelspace[0].x, vertex_pos_modelspace[1].x, vertex_pos_modelspace[2].x, 1.0);
+
   gl_Position = project_common_position_to_clipspace_fp64(vertex_pos_modelspace);
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
+  DECKGL_FILTER_COLOR(vColor, geometry);
 }
 `;

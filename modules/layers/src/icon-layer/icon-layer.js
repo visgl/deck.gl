@@ -52,7 +52,7 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
  * @param {func} props.getAngle - returns rotating angle (in degree) of the icon.
  */
 const defaultProps = {
-  iconAtlas: null,
+  iconAtlas: {type: 'object', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
   fp64: false,
@@ -71,7 +71,7 @@ const defaultProps = {
 export default class IconLayer extends Layer {
   getShaders() {
     const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return {vs, fs, modules: [projectModule, 'picking']};
+    return super.getShaders({vs, fs, modules: [projectModule, 'picking']});
   }
 
   initializeState() {
@@ -132,9 +132,10 @@ export default class IconLayer extends Layer {
     const {iconAtlas, iconMapping, data, getIcon} = props;
 
     let iconMappingChanged = false;
+    const prePacked = iconAtlas || this.props._asyncPropOriginalValues.iconAtlas;
 
     // prepacked iconAtlas from user
-    if (iconAtlas) {
+    if (prePacked) {
       if (oldProps.iconAtlas !== props.iconAtlas) {
         iconManager.setProps({iconAtlas, autoPacking: false});
       }

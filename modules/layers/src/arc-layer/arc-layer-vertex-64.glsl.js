@@ -38,6 +38,7 @@ uniform float widthMinPixels;
 uniform float widthMaxPixels;
 
 varying vec4 vColor;
+varying vec2 uv;
 
 vec2 paraboloid_fp64(vec2 source[2], vec2 target[2], float ratio) {
 
@@ -59,10 +60,7 @@ vec2 getExtrusionOffset(vec2 line_clipspace, float offset_direction, float width
   // rotate by 90 degrees
   dir_screenspace = vec2(-dir_screenspace.y, dir_screenspace.x);
 
-  vec2 offset_screenspace = dir_screenspace * offset_direction * width / 2.0;
-  vec2 offset_clipspace = project_pixel_size_to_clipspace(offset_screenspace);
-
-  return offset_clipspace;
+  return dir_screenspace * offset_direction * width / 2.0;
 }
 
 float getSegmentRatio(float index) {
@@ -89,6 +87,9 @@ void get_pos_fp64(vec2 source[2], vec2 target[2], float segmentRatio, out vec2 p
 }
 
 void main(void) {
+  geometry.worldPosition = vec3(instancePositions.xy, 0.0);
+  geometry.worldPositionAlt = vec3(instancePositions.zw, 0.0);
+
   vec2 projected_source_coord[2];
   vec2 projected_target_coord[2];
 
@@ -115,6 +116,9 @@ void main(void) {
 
   vec4 curr_pos_clipspace = project_common_position_to_clipspace_fp64(curr_pos_modelspace);
   vec4 next_pos_clipspace = project_common_position_to_clipspace_fp64(next_pos_modelspace);
+  geometry.position = vec4(curr_pos_modelspace[0].x, curr_pos_modelspace[1].x, curr_pos_modelspace[2].x, 1.0);
+  uv = positions.xy;
+  geometry.uv = uv;
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
@@ -123,12 +127,17 @@ void main(void) {
     widthMinPixels, widthMaxPixels
   );
 
-  vec2 offset = getExtrusionOffset(next_pos_clipspace.xy - curr_pos_clipspace.xy, positions.y, widthPixels);
+  vec3 offset = vec3(
+    getExtrusionOffset(next_pos_clipspace.xy - curr_pos_clipspace.xy, positions.y, widthPixels),
+    0.0);
+  DECKGL_FILTER_SIZE(offset, geometry);
 
-  gl_Position = curr_pos_clipspace + vec4(offset, 0.0, 0.0);
+  gl_Position = curr_pos_clipspace + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
+  DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
   vColor = vec4(color.rgb, color.a * opacity);
+  DECKGL_FILTER_COLOR(vColor, geometry);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);

@@ -18,14 +18,20 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import './color.spec';
-import './deep-equal.spec';
-import './flatten.spec';
-import './positions.spec';
-import './memoize.spec';
-import './array-utils.spec';
-import './iterable-utils.spec';
-import './range.spec';
-import './math-utils.spec';
-import './shader.spec';
-// import './compare-objects.spec';
+const vs = `
+struct VertexGeometry {
+  vec4 position;
+  vec3 worldPosition;
+  vec3 worldPositionAlt;
+  vec3 normal;
+  vec2 uv;
+} geometry;
+`;
+
+const fs = `
+struct FragmentGeometry {
+  vec2 uv;
+} geometry;
+`;
+
+export default {name: 'geometry', vs, fs};
