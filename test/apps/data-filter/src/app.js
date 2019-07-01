@@ -2,10 +2,12 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM} from 'deck.gl';
+import DeckGL, {ScatterplotLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {DataFilterExtension} from '@deck.gl/extensions';
 
-import ScatterplotLayer from './scatterplot-layer';
 import POINTS from './data-sample';
+
+const dataFilterExtension = new DataFilterExtension({filterSize: 2, softMargin: true});
 
 const INITIAL_VIEW_STATE = {
   longitude: -122.45,
@@ -32,8 +34,18 @@ class Root extends Component {
   }
 
   _renderLayers() {
-    const t = (this.state.time / 2000) % 0.5;
-    const filterRange = [t, t + 0.5];
+    const t = (this.state.time / 4000) % 1;
+    const cos = Math.abs(Math.cos(t * Math.PI));
+    const sin = Math.abs(Math.sin(t * Math.PI));
+
+    const filterRange = [
+      [-cos * 5000, cos * 5000], // x
+      [-sin * 5000, sin * 5000] // y
+    ];
+    const filterSoftRange = [
+      [-cos * 5000 + 1000, cos * 5000 - 1000], // x
+      [-sin * 5000 + 1000, sin * 5000 - 1000] // y
+    ];
 
     return [
       new ScatterplotLayer({
@@ -43,12 +55,15 @@ class Root extends Component {
 
         // Data accessors
         getPosition: d => d,
-        getColor: d => [0, 180, 255],
+        getFillColor: [0, 180, 255],
         getRadius: d => 8,
-        getFilterValue: d => Math.sqrt(d[0] * d[0] + d[1] * d[1]) / 1e4,
+        getFilterValue: d => d,
 
         // Filter
-        filterRange
+        filterRange,
+        filterSoftRange,
+
+        extensions: [dataFilterExtension]
       })
     ];
   }
