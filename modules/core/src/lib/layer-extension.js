@@ -39,4 +39,6 @@ export class LayerExtension {
   initializeState(context, opts) {}
 
   updateState(params, opts) {}
+
+  finalizeState(opts) {}
 }
