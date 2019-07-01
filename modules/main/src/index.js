@@ -71,7 +71,9 @@ export {
   // Lights
   AmbientLight,
   PointLight,
-  DirectionalLight
+  DirectionalLight,
+  // Extension
+  LayerExtension
 } from '@deck.gl/core';
 
 // EXPERIMENTAL CORE LIB CLASSES (May change in minor version bumps, use at your own risk)

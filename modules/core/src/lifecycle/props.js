@@ -19,7 +19,7 @@ export function diffProps(props, oldProps) {
     newProps: props,
     oldProps,
     propTypes: getPropTypes(props),
-    ignoreProps: {data: null, updateTriggers: null}
+    ignoreProps: {data: null, updateTriggers: null, extensions: null}
   });
 
   // Now check if any data related props have changed
@@ -35,7 +35,8 @@ export function diffProps(props, oldProps) {
   return {
     dataChanged: dataChangedReason,
     propsChanged: propsChangedReason,
-    updateTriggersChanged: updateTriggersChangedReason
+    updateTriggersChanged: updateTriggersChangedReason,
+    extensionsChanged: diffExtensions(props, oldProps)
   };
 }
 
@@ -171,6 +172,29 @@ function diffUpdateTriggers(props, oldProps) {
   }
 
   return reason;
+}
+
+// Returns true if any extensions have changed
+function diffExtensions(props, oldProps) {
+  if (oldProps === null) {
+    return 'oldProps is null, initial diff';
+  }
+
+  const oldExtensions = oldProps.extensions;
+  const {extensions} = props;
+
+  if (extensions === oldExtensions) {
+    return false;
+  }
+  if (extensions.length !== oldExtensions.length) {
+    return true;
+  }
+  for (let i = 0; i < extensions.length; i++) {
+    if (!extensions[i].equals(oldExtensions[i])) {
+      return true;
+    }
+  }
+  return false;
 }
 
 function diffUpdateTrigger(props, oldProps, triggerName) {
