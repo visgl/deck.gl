@@ -17,15 +17,23 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
+import {createModuleInjection} from '@luma.gl/core';
 
 const vs = `
   const float R_EARTH = 6371000.; // earth radius in km
 
   uniform bool brushing_enabled;
+  uniform int brushing_target;
   uniform vec2 brushing_mousePos;
   uniform float brushing_radius;
 
-  varying float brushing_hidden;
+  #ifdef NON_INSTANCED_MODEL
+  attribute vec2 brushingTargets;
+  #else
+  attribute vec2 instanceBrushingTargets;
+  #endif
+
+  varying float brushing_isVisible;
 
   // approximate distance between lng lat in meters
   float distanceBetweenLatLng(vec2 source, vec2 target) {
@@ -49,35 +57,63 @@ const vs = `
   }
 
   void brushing_setVisible(bool visible) {
-    brushing_hidden = float(!visible);
+    brushing_isVisible = float(visible);
   }
 `;
 
 const fs = `
   uniform bool brushing_enabled;
-
-  varying float brushing_hidden;
-  
-  vec4 brushing_filterBrushingColor(vec4 color) {
-    if (brushing_enabled && brushing_hidden > 0.5) {
-      discard;
-    }
-    return color;
-  }
+  varying float brushing_isVisible;
 `;
 
-const INITIAL_MODULE_OPTIONS = {};
+// filter_setValue(instanceFilterValue);
+const moduleName = 'brushing';
+
+const TARGET = {
+  source: 0,
+  target: 1,
+  custom: 2
+};
+
+createModuleInjection(moduleName, {
+  hook: 'vs:DECKGL_FILTER_GL_POSITION',
+  injection: `
+vec2 brushingTarget;
+if (brushing_target == 0) {
+  brushingTarget = geometry.worldPosition.xy;
+} else if (brushing_target == 1) {
+  brushingTarget = geometry.worldPositionAlt.xy;
+} else {
+  #ifdef NON_INSTANCED_MODEL
+  brushingTarget = brushingTargets;
+  #else
+  brushingTarget = instanceBrushingTargets;
+  #endif
+}
+brushing_setVisible(brushing_isPointInRange(brushingTarget));
+  `
+});
+
+createModuleInjection(moduleName, {
+  hook: 'fs:DECKGL_FILTER_COLOR',
+  injection: `
+if (brushing_enabled && brushing_isVisible < 0.5) {
+  discard;
+}
+  `
+});
 
 export default {
-  name: 'brushing',
+  name: moduleName,
   dependencies: ['project'],
   vs,
   fs,
-  getUniforms: (opts = INITIAL_MODULE_OPTIONS) => {
-    if (opts.viewport) {
+  getUniforms: opts => {
+    if (opts && opts.viewport) {
       return {
-        brushing_enabled: opts.enableBrushing,
-        brushing_radius: opts.brushRadius,
+        brushing_enabled: opts.brushingEnabled,
+        brushing_radius: opts.brushingRadius,
+        brushing_target: TARGET[opts.brushingTarget] || 0,
         brushing_mousePos: opts.mousePosition ? opts.viewport.unproject(opts.mousePosition) : [0, 0]
       };
     }
