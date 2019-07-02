@@ -109,14 +109,20 @@ export default {
   vs,
   fs,
   getUniforms: opts => {
-    if (opts && opts.viewport) {
-      return {
-        brushing_enabled: opts.brushingEnabled,
-        brushing_radius: opts.brushingRadius,
-        brushing_target: TARGET[opts.brushingTarget] || 0,
-        brushing_mousePos: opts.mousePosition ? opts.viewport.unproject(opts.mousePosition) : [0, 0]
-      };
+    if (!opts || !opts.viewport) {
+      return {};
     }
-    return {};
+    const {
+      brushingEnabled = true,
+      brushingRadius = 10000,
+      brushingTarget = 'source',
+      mousePosition = null
+    } = opts;
+    return {
+      brushing_enabled: Boolean(brushingEnabled && mousePosition),
+      brushing_radius: brushingRadius,
+      brushing_target: TARGET[brushingTarget] || 0,
+      brushing_mousePos: mousePosition ? opts.viewport.unproject(mousePosition) : [0, 0]
+    };
   }
 };

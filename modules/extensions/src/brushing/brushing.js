@@ -45,6 +45,8 @@ export default class BrushingExtension extends LayerExtension {
         brushingTargets: {
           size: 2,
           accessor: 'getBrushingTarget',
+          // Hack: extension's defaultProps is not merged with the layer's defaultProps,
+          // So we can't use the standard accessor when the prop is undefined
           update: !this.props.getBrushingTarget && extension.useConstantTargetPositions,
           shaderAttributes: {
             brushingTargets: {
