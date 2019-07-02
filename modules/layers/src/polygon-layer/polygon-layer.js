@@ -100,6 +100,10 @@ export default class PolygonLayer extends CompositeLayer {
     });
   }
 
+  unwrapObject(object) {
+    return object.object || object;
+  }
+
   _getPaths(dataRange = {}) {
     const {data, getPolygon, positionFormat} = this.props;
     const paths = [];

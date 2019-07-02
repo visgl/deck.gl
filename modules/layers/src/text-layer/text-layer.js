@@ -175,6 +175,10 @@ export default class TextLayer extends CompositeLayer {
     });
   }
 
+  unwrapObject(object) {
+    return object.object;
+  }
+
   /* eslint-disable no-loop-func */
   transformStringToLetters(dataRange = {}) {
     const {data, getText} = this.props;
