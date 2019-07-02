@@ -8,21 +8,45 @@ uniform DATAFILTER_TYPE filter_min;
 uniform DATAFILTER_TYPE filter_softMin;
 uniform DATAFILTER_TYPE filter_softMax;
 uniform DATAFILTER_TYPE filter_max;
+uniform bool filter_useSoftMargin;
 uniform bool filter_enabled;
 uniform bool filter_transformSize;
-attribute DATAFILTER_TYPE instanceFilterValue;
+
+#ifdef NON_INSTANCED_MODEL
+attribute DATAFILTER_TYPE filterValues;
+#else
+attribute DATAFILTER_TYPE instanceFilterValues;
+#endif
+
 varying float dataFilter_value;
-void dataFilter_setValue(float value) {
-  dataFilter_value = value;
+
+float dataFilter_reduceValue(float value) {
+  return value;
 }
-void dataFilter_setValue(vec2 value) {
-  dataFilter_value = min(value.x, value.y);
+float dataFilter_reduceValue(vec2 value) {
+  return min(value.x, value.y);
 }
-void dataFilter_setValue(vec3 value) {
-  dataFilter_value = min(min(value.x, value.y), value.z);
+float dataFilter_reduceValue(vec3 value) {
+  return min(min(value.x, value.y), value.z);
 }
-void dataFilter_setValue(vec4 value) {
-  dataFilter_value = min(min(value.x, value.y), min(value.z, value.w));
+float dataFilter_reduceValue(vec4 value) {
+  return min(min(value.x, value.y), min(value.z, value.w));
+}
+void dataFilter_setValue(DATAFILTER_TYPE value) {
+  if (filter_enabled) {
+    if (filter_useSoftMargin) {
+      dataFilter_value = dataFilter_reduceValue(
+        smoothstep(filter_min, filter_softMin, value) *
+        (1.0 - smoothstep(filter_softMax, filter_max, value))
+      );
+    } else {
+      dataFilter_value = dataFilter_reduceValue(
+        step(filter_min, value) * step(value, filter_max)
+      );
+    }
+  } else {
+    dataFilter_value = 1.0;
+  }
 }
 `;
 
@@ -57,6 +81,7 @@ const getUniforms = opts => {
         filter_max: filterRange.map(r => r[1])
       };
   uniforms.filter_enabled = filterEnabled;
+  uniforms.filter_useSoftMargin = Boolean(opts.filterSoftRange);
   uniforms.filter_transformSize = filterEnabled && filterTransformSize;
   uniforms.filter_transformColor = filterEnabled && filterTransformColor;
 
@@ -69,20 +94,11 @@ const moduleName = 'data-filter';
 createModuleInjection(moduleName, {
   hook: 'vs:#main-start',
   injection: `
-if (filter_enabled) {
-#ifdef DATAFILTER_SOFT_MARGIN
-  dataFilter_setValue(
-    smoothstep(filter_min, filter_softMin, instanceFilterValue) *
-    (1.0 - smoothstep(filter_softMax, filter_max, instanceFilterValue))
-  );
+#ifdef NON_INSTANCED_MODEL
+dataFilter_setValue(filterValues);
 #else
-  dataFilter_setValue(
-    step(filter_min, instanceFilterValue) * step(instanceFilterValue, filter_max)
-  );
+dataFilter_setValue(instanceFilterValues);
 #endif
-} else {
-  dataFilter_setValue(1.0);
-}
   `
 });
 

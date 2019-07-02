@@ -22,7 +22,7 @@ import {LayerExtension} from '@deck.gl/core';
 import shaderModule from './shader-module';
 
 const defaultProps = {
-  getFilterValue: 0,
+  getFilterValue: {type: 'accessor', value: 0},
 
   filterEnabled: true,
   filterRange: [-1, 1],
@@ -39,20 +39,19 @@ const DATA_TYPE_FROM_SIZE = {
 };
 
 export default class DataFilterExtension extends LayerExtension {
-  constructor({filterSize = 1, softMargin = false} = {}) {
+  constructor({filterSize = 1} = {}) {
     if (!DATA_TYPE_FROM_SIZE[filterSize]) {
       throw new Error('filterSize out of range');
     }
 
-    super({filterSize, softMargin});
+    super({filterSize});
   }
 
   getShaders(extension) {
-    const {softMargin, filterSize} = extension.opts;
+    const {filterSize} = extension.opts;
     return {
       modules: [shaderModule],
       defines: {
-        DATAFILTER_SOFT_MARGIN: String(softMargin),
         DATAFILTER_TYPE: DATA_TYPE_FROM_SIZE[filterSize]
       }
     };
@@ -61,8 +60,19 @@ export default class DataFilterExtension extends LayerExtension {
   initializeState(context, extension) {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.addInstanced({
-        instanceFilterValue: {size: extension.opts.filterSize, accessor: 'getFilterValue'}
+      attributeManager.add({
+        filterValues: {
+          size: extension.opts.filterSize,
+          accessor: 'getFilterValue',
+          shaderAttributes: {
+            filterValues: {
+              divisor: 0
+            },
+            instanceFilterValues: {
+              divisor: 1
+            }
+          }
+        }
       });
     }
   }

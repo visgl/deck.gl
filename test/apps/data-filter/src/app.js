@@ -5,7 +5,7 @@ import {render} from 'react-dom';
 import DeckGL, {GeoJsonLayer, COORDINATE_SYSTEM} from 'deck.gl';
 import {DataFilterExtension} from '@deck.gl/extensions';
 
-import POINTS from './data-sample';
+import DATA from './data-sample';
 
 const dataFilterExtension = new DataFilterExtension({filterSize: 2, softMargin: true});
 
@@ -51,13 +51,13 @@ class Root extends Component {
       new GeoJsonLayer({
         coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
         coordinateOrigin: [-122.45, 37.78],
-        data: POINTS,
+        data: DATA,
 
         // Data accessors
-        stroked: false,
-        getFillColor: [0, 180, 255],
-        getRadius: d => 8,
-        getFilterValue: d => d.geometry.coordinates,
+        getFillColor: f => f.properties.color,
+        getLineWidth: 10,
+        getRadius: f => f.properties.radius,
+        getFilterValue: f => f.properties.centroid,
 
         // Filter
         filterRange,
