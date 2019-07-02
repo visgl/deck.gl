@@ -7,4 +7,5 @@ pytest-cov>=2.6.1
 pytest-asyncio>=0.10.0;python_version>"3.4"
 pathlib>=1.0.1;python_version<"3.4"
 mock>=3.0.5;python_version<"3.4"
-typing>=3.7.4;python_version<"3.6"
+typing>=3.7.4
+typing-extensions>=3.7.4
