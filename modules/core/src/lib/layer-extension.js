@@ -50,7 +50,10 @@ export class LayerExtension {
         newProps[key] = propValue;
         if (propDef && propDef.type === 'accessor') {
           newProps.updateTriggers[key] = this.props.updateTriggers[key];
-          // Unwrap sublayer objects before passing to accessor
+          // Some composite layers "wrap" user data into another format before passing to sublayers
+          // We need to unwrap them before calling the accessor so that they see the original data
+          // objects
+          // TODO - make this a formal API and document
           if (this.unwrapObject && typeof propValue === 'function') {
             newProps[key] = (object, objectInfo) =>
               propValue(this.unwrapObject(object), objectInfo);
