@@ -23,7 +23,6 @@
       "filled": true,
       "extruded": true,
       "wireframe": true,
-      "fp64": true,
       "elevationScale": 0.10,
       "getElevation": "properties.valuePerSqm",
       "getFillColor": [199, 233, 180],

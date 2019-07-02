@@ -66,7 +66,6 @@ export class App extends Component {
         filled: true,
         extruded: true,
         wireframe: true,
-        fp64: true,
         getElevation: f => Math.sqrt(f.properties.valuePerSqm) * 10,
         getFillColor: f => COLOR_SCALE(f.properties.growth),
         getLineColor: [255, 255, 255],
