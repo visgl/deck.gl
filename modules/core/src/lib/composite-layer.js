@@ -85,6 +85,7 @@ export default class CompositeLayer extends Layer {
       wrapLongitude,
       positionFormat,
       modelMatrix,
+      extensions,
       _subLayerProps: overridingProps
     } = this.props;
     const newProps = {
@@ -100,7 +101,8 @@ export default class CompositeLayer extends Layer {
       coordinateOrigin,
       wrapLongitude,
       positionFormat,
-      modelMatrix
+      modelMatrix,
+      extensions
     };
 
     if (sublayerProps) {
@@ -123,6 +125,14 @@ export default class CompositeLayer extends Layer {
           )
         }
       );
+    }
+
+    // Pass through extension props
+    for (const extension of extensions) {
+      const passThroughProps = extension.getSubLayerProps.call(this, extension);
+      Object.assign(newProps, passThroughProps, {
+        updateTriggers: Object.assign(newProps.updateTriggers, passThroughProps.updateTriggers)
+      });
     }
 
     return newProps;
