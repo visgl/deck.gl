@@ -57,6 +57,7 @@ async def go_to_page_and_screenshot(url, file_name, output_dir='.', sleep_second
         await page.setViewport({'width': 768, 'height': page_height})
     # Save out the screenshot
     screenshot_path = os.path.join(output_dir, rename_png(file_name))
+    logging.info("Writing screenshot to %s" % screenshot_path)
     await page._screenshotTask('png', {
         'path': screenshot_path,
         'fullPage': True

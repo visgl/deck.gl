@@ -44,6 +44,8 @@ def open_named_or_temporary_file(pathname=None):
 
 
 def make_directory_if_not_exists(path):
+    print(path)
+    print('heyyyyyyyyyyy')
     if path and not os.path.exists(path):
         os.makedirs(path)
     return path
@@ -71,9 +73,9 @@ def deck_to_html(
         if f is None:
             raise Exception("deckgl did not write a file")
         f.close()
-    if open_browser is True:
+    if open_browser:
         display_html(f.name)
-    if is_jupyter_notebook is True and notebook_display is True:
+    if is_jupyter_notebook() is True and notebook_display is True:
         display(IFrame('file://' + f.name, width=iframe_width, height=iframe_width))  # noqa
     return f.name
 
