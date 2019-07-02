@@ -24,8 +24,6 @@ import shaderModule from './shader-module';
 const defaultProps = {
   getBrushingTarget: {type: 'accessor', value: [0, 0]},
 
-  mousePosition: null,
-
   brushingTarget: 'source',
   brushingEnabled: true,
   brushingRadius: 10000
@@ -57,6 +55,28 @@ export default class BrushingExtension extends LayerExtension {
             }
           }
         }
+      });
+    }
+
+    // Trigger redraw when mouse moves
+    // TODO - expose this in a better way
+    extension.onMouseMove = () => {
+      this.getCurrentLayer().setNeedsRedraw();
+    };
+    if (this.context.deck) {
+      this.context.deck.eventManager.on({
+        pointermove: extension.onMouseMove,
+        pointerleave: extension.onMouseMove
+      });
+    }
+  }
+
+  finalizeState(extension) {
+    // Remove event listeners
+    if (this.context.deck) {
+      this.context.deck.eventManager.off({
+        pointermove: extension.onMouseMove,
+        pointerleave: extension.onMouseMove
       });
     }
   }

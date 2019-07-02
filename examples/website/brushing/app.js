@@ -52,11 +52,8 @@ export class App extends Component {
       arcs: [],
       targets: [],
       sources: [],
-      mousePosition: null,
       ...this._getLayerData(props)
     };
-    this._onMouseMove = this._onMouseMove.bind(this);
-    this._onMouseLeave = this._onMouseLeave.bind(this);
     this._onHover = this._onHover.bind(this);
   }
 
@@ -66,16 +63,6 @@ export class App extends Component {
         ...this._getLayerData(nextProps)
       });
     }
-  }
-
-  _onMouseMove(evt) {
-    if (evt.nativeEvent) {
-      this.setState({mousePosition: [evt.nativeEvent.offsetX, evt.nativeEvent.offsetY]});
-    }
-  }
-
-  _onMouseLeave() {
-    this.setState({mousePosition: null});
   }
 
   _onHover({x, y, object}) {
@@ -174,10 +161,7 @@ export class App extends Component {
       opacity = 0.7
     } = this.props;
 
-    const {arcs, targets, sources, mousePosition} = this.state;
-
-    const isMouseover = mousePosition !== null;
-    const startBrushing = Boolean(isMouseover && enableBrushing);
+    const {arcs, targets, sources} = this.state;
 
     if (!arcs || !targets) {
       return null;
@@ -188,12 +172,11 @@ export class App extends Component {
         id: 'sources',
         data: sources,
         brushingRadius: brushRadius,
-        mousePosition,
         opacity: 1,
-        brushingEnabled: startBrushing,
+        brushingEnabled: enableBrushing,
         pickable: false,
         // only show source points when brushing
-        radiusScale: startBrushing ? 3000 : 0,
+        radiusScale: enableBrushing ? 3000 : 0,
         getFillColor: d => (d.gain > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [brushingExtension]
       }),
@@ -201,14 +184,13 @@ export class App extends Component {
         id: 'targets-ring',
         data: targets,
         brushingRadius: brushRadius,
-        mousePosition,
         lineWidthMinPixels: 2,
         stroked: true,
         filled: false,
         opacity: 1,
-        brushingEnabled: startBrushing,
+        brushingEnabled: enableBrushing,
         // only show rings when brushing
-        radiusScale: startBrushing ? 4000 : 0,
+        radiusScale: enableBrushing ? 4000 : 0,
         getLineColor: d => (d.net > 0 ? TARGET_COLOR : SOURCE_COLOR),
         extensions: [brushingExtension]
       }),
@@ -216,9 +198,8 @@ export class App extends Component {
         id: 'targets',
         data: targets,
         brushingRadius: brushRadius,
-        mousePosition,
         opacity: 1,
-        brushingEnabled: startBrushing,
+        brushingEnabled: enableBrushing,
         pickable: true,
         radiusScale: 3000,
         onHover: this._onHover,
@@ -231,8 +212,7 @@ export class App extends Component {
         getWidth: strokeWidth,
         opacity,
         brushingRadius: brushRadius,
-        brushingEnabled: startBrushing,
-        mousePosition,
+        brushingEnabled: enableBrushing,
         getSourcePosition: d => d.source,
         getTargetPosition: d => d.target,
         getSourceColor: SOURCE_COLOR,
@@ -246,22 +226,21 @@ export class App extends Component {
     const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
 
     return (
-      <div onMouseMove={this._onMouseMove} onMouseLeave={this._onMouseLeave}>
-        {this._renderTooltip()}
+      <DeckGL
+        ref={this._deckRef}
+        layers={this._renderLayers()}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+      >
+        <StaticMap
+          reuseMaps
+          mapStyle={mapStyle}
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
 
-        <DeckGL
-          layers={this._renderLayers()}
-          initialViewState={INITIAL_VIEW_STATE}
-          controller={true}
-        >
-          <StaticMap
-            reuseMaps
-            mapStyle={mapStyle}
-            preventStyleDiffing={true}
-            mapboxApiAccessToken={MAPBOX_TOKEN}
-          />
-        </DeckGL>
-      </div>
+        {this._renderTooltip()}
+      </DeckGL>
     );
   }
 }

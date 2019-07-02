@@ -525,6 +525,10 @@ export default class Deck {
       _pickRequest.radius = this.props.pickingRadius;
     }
 
+    if (this.layerManager) {
+      this.layerManager.context.mousePosition = {x: _pickRequest.x, y: _pickRequest.y};
+    }
+
     _pickRequest.callback = callback;
     _pickRequest.event = event;
     _pickRequest.mode = mode;

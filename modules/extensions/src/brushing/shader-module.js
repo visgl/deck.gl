@@ -20,8 +20,6 @@
 import {createModuleInjection} from '@luma.gl/core';
 
 const vs = `
-  const float R_EARTH = 6371000.; // earth radius in km
-
   uniform bool brushing_enabled;
   uniform int brushing_target;
   uniform vec2 brushing_mousePos;
@@ -35,25 +33,15 @@ const vs = `
 
   varying float brushing_isVisible;
 
-  // approximate distance between lng lat in meters
-  float distanceBetweenLatLng(vec2 source, vec2 target) {
-    vec2 delta = (source - target) * PI / 180.;
-
-    float a =
-      sin(delta.y / 2.) * sin(delta.y / 2.) +
-      cos(source.y * PI / 180.) * cos(target.y * PI / 180.) *
-      sin(delta.x / 2.) * sin(delta.x / 2.);
-
-    float c = 2. * atan(sqrt(a), sqrt(1. - a));
-
-    return R_EARTH * c;
-  }
-
   bool brushing_isPointInRange(vec2 position) {
     if (!brushing_enabled) {
       return true;
     }
-    return distanceBetweenLatLng(position, brushing_mousePos) <= brushing_radius;
+    vec2 source_commonspace = project_position(position);
+    vec2 target_commonspace = project_position(brushing_mousePos);
+    float distance = length((target_commonspace - source_commonspace) / project_uCommonUnitsPerMeter.xy);
+
+    return distance <= brushing_radius;
   }
 
   void brushing_setVisible(bool visible) {
@@ -116,13 +104,18 @@ export default {
       brushingEnabled = true,
       brushingRadius = 10000,
       brushingTarget = 'source',
-      mousePosition = null
+      mousePosition,
+      viewport
     } = opts;
     return {
-      brushing_enabled: Boolean(brushingEnabled && mousePosition),
+      brushing_enabled: Boolean(
+        brushingEnabled && mousePosition && viewport.containsPixel(mousePosition)
+      ),
       brushing_radius: brushingRadius,
       brushing_target: TARGET[brushingTarget] || 0,
-      brushing_mousePos: mousePosition ? opts.viewport.unproject(mousePosition) : [0, 0]
+      brushing_mousePos: mousePosition
+        ? viewport.unproject([mousePosition.x - viewport.x, mousePosition.y - viewport.y])
+        : [0, 0]
     };
   }
 };

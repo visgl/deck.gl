@@ -27,9 +27,12 @@ test('BrushingExtension', t => {
     {
       updateProps: {
         brushingEnabled: true,
-        mousePosition: [1, 1],
         brushingTarget: 'custom',
         brushingRadius: 5e6
+      },
+      onBeforeUpdate: ({layer}) => {
+        // Simulate user interaction
+        layer.context.mousePosition = {x: 1, y: 1};
       },
       onAfterUpdate: ({layer}) => {
         const {uniforms} = layer.state.model.program;
