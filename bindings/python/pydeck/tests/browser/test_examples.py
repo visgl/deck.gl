@@ -15,20 +15,22 @@ from .screenshot_utils import go_to_page_and_screenshot
 
 here = os.path.dirname(os.path.abspath(__file__))
 notebook_directory = os.path.join(here, '../../examples/')
+jupyter_execution_directory = os.path.join(notebook_directory, './..')
 token = str(uuid.uuid4())
 
 
 def make_nb_url(ipynb, token):
-    return 'http://localhost:9876/notebooks/' + urllib.parse.quote(ipynb) + '?token=' + token
+    return 'http://localhost:9876/notebooks/examples/' + urllib.parse.quote(ipynb) + '?token=' + token
 
 
 async def start_notebook():
     my_env = os.environ.copy()
+    my_env['PYTHONPATH'] = "{}".format(jupyter_execution_directory)
     my_env['JUPYTER_TOKEN'] = token
     return subprocess.Popen(
-        'jupyter notebook --no-browser --port 9876',
+        './env3/bin/jupyter notebook --no-browser --port 9876',
         shell=True,
-        cwd=notebook_directory,
+        cwd=jupyter_execution_directory,
         env=my_env)
 
 async def stop_notebook(nb_process):
@@ -37,7 +39,7 @@ async def stop_notebook(nb_process):
 def list_notebooks():
     """Get list of all example notebooks for execution"""
     notebook_path = os.path.join(notebook_directory, '*.ipynb')
-    return [os.path.basename(fn) for fn in glob.glob(notebook_path)]
+    return sorted([os.path.basename(fn) for fn in glob.glob(notebook_path)])
 
 
 async def run_notebooks(output_dir='.'):
@@ -49,6 +51,8 @@ async def run_notebooks(output_dir='.'):
             logging.info('Running for %s' % file_name)
             url = make_nb_url(file_name, token)
             await go_to_page_and_screenshot(url, file_name, output_dir=output_dir)
+    except Exception as e:
+        logging.error('Caught exception %s' % str(e))
     finally:
         await stop_notebook(nb_process)
 
