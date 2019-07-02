@@ -7,12 +7,12 @@ import {
   hasFeatures,
   isWebGL2,
   readPixelsToBuffer,
-  fp64 as fp64Utils,
+  fp64 as fp64ShaderModule,
   withParameters
 } from '@luma.gl/core';
 import {log, project64} from '@deck.gl/core';
 import {worldToPixels} from 'viewport-mercator-project';
-const {fp64ifyMatrix4} = fp64Utils;
+const {fp64ifyMatrix4} = fp64ShaderModule;
 
 import {
   DEFAULT_CHANGE_FLAGS,
@@ -683,7 +683,7 @@ export default class GPUGridAggregator {
       id: 'Gird-Aggregation-Model',
       vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
-      modules: fp64 ? ['fp64', project64] : ['project32'],
+      modules: fp64 ? [project64] : ['project32'],
       shaderCache,
       vertexCount: 0,
       drawMode: GL.POINTS
@@ -697,7 +697,7 @@ export default class GPUGridAggregator {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
       fs: AGGREGATE_ALL_FS,
-      modules: ['fp64'],
+      modules: [fp64ShaderModule],
       shaderCache,
       vertexCount: 1,
       drawMode: GL.POINTS,
