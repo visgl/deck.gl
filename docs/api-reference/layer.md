@@ -258,8 +258,8 @@ function updateData(index, item) {
 
 The function receives two arguments:
 
-- `oldData` - the data prop before the update
 - `newData` - the new data prop
+- `oldData` - the data prop before the update
 
 And is expected to return an array of "ranges", in the form of `{startRow, endRow}`:
 - `startRow` (Number) - the beginning index of a changed chunk in the new data.

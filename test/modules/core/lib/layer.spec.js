@@ -24,6 +24,8 @@ import {testInitializeLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from 'math.gl';
 
+import {sleep, testAsyncData} from './async-iterator-test-utils';
+
 const dataVariants = [{data: ['a', 'b', 'c'], size: 3}];
 
 const LAYER_PROPS = {
@@ -338,6 +340,30 @@ test('Layer#project', t => {
     ]),
     'returns correct value'
   );
+
+  t.end();
+});
+
+test('Layer#Async Iterable Data', async t => {
+  async function getData() {
+    await sleep(50);
+    return [0, 1, 2, 3, 4, 5, 6, 7];
+  }
+
+  async function* getDataIterator() {
+    await sleep(50);
+    yield [0, 1, 2];
+    await sleep(50);
+    yield [3, 4];
+    await sleep(50);
+    yield [5, 6, 7];
+  }
+
+  let data = await testAsyncData(t, getData());
+  t.deepEquals(data, [0, 1, 2, 3, 4, 5, 6, 7], 'data is fully loaded');
+
+  data = await testAsyncData(t, getDataIterator());
+  t.deepEquals(data, [0, 1, 2, 3, 4, 5, 6, 7], 'data is fully loaded');
 
   t.end();
 });
