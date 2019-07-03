@@ -80,13 +80,11 @@ test('GoogleMapsOverlay#draw, pick', t => {
 
   const pointerMoveSpy = makeSpy(overlay._deck, '_onPointerMove');
   map.emit({type: 'mousemove', pixel: [0, 0]});
-  t.ok(pointerMoveSpy.called, 'pointer move event is handled');
-  pointerMoveSpy.reset();
+  t.is(pointerMoveSpy.callCount, 1, 'pointer move event is handled');
 
-  const pointerLeaveSpy = makeSpy(overlay._deck, '_onPointerLeave');
   map.emit({type: 'mouseout', pixel: [0, 0]});
-  t.ok(pointerLeaveSpy.called, 'pointer leave event is handled');
-  pointerLeaveSpy.reset();
+  t.is(pointerMoveSpy.callCount, 2, 'pointer leave event is handled');
+  pointerMoveSpy.reset();
 
   overlay.finalize();
 
