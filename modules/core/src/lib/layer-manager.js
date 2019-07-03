@@ -58,6 +58,7 @@ const INITIAL_CONTEXT = Object.seal({
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
   animationProps: null,
+  mousePosition: null,
 
   userData: {} // Place for any custom app `context`
 });
