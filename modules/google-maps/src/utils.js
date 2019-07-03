@@ -142,11 +142,13 @@ function handleMouseEvent(deck, type, event) {
       break;
 
     case 'mousemove':
+      type = 'pointermove';
       callback = deck._onPointerMove;
       break;
 
     case 'mouseout':
-      callback = deck._onPointerLeave;
+      type = 'pointerleave';
+      callback = deck._onPointerMove;
       break;
 
     default:
