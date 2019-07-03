@@ -3,7 +3,14 @@ import logging
 from pathlib import Path
 
 import asyncio
-from pyppeteer import launch
+
+try:
+    from pyppeteer import launch
+except ImportError:
+    from typing_extensions import Coroutine
+    typing.Coroutine = Coroutine
+    from pyppeteer import launch
+
 from PIL import Image
 
 
