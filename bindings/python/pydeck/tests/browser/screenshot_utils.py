@@ -8,6 +8,7 @@ try:
     from pyppeteer import launch
 except ImportError:
     from typing_extensions import Coroutine
+    import typing
     typing.Coroutine = Coroutine
     from pyppeteer import launch
 
