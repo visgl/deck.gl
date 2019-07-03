@@ -20,10 +20,8 @@
 
 /* global Image, HTMLCanvasElement, HTMLVideoElement */
 import GL from '@luma.gl/constants';
-import {Layer} from '@deck.gl/core';
-import {Model, Geometry, Texture2D, fp64} from '@luma.gl/core';
-
-const {fp64LowPart} = fp64;
+import {Layer, fp64LowPart} from '@deck.gl/core';
+import {Model, Geometry, Texture2D} from '@luma.gl/core';
 
 import vs from './bitmap-layer-vertex';
 import fs from './bitmap-layer-fragment';
@@ -38,7 +36,6 @@ const DEFAULT_TEXTURE_PARAMETERS = {
 const defaultProps = {
   image: {type: 'object', value: null, async: true},
   bounds: {type: 'array', value: [1, 0, 0, 1], compare: true},
-  fp64: false,
 
   desaturate: {type: 'number', min: 0, max: 1, value: 0},
   // More context: because of the blending mode we're using for ground imagery,
@@ -56,8 +53,7 @@ const defaultProps = {
  */
 export default class BitmapLayer extends Layer {
   getShaders() {
-    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return super.getShaders({vs, fs, modules: [projectModule, 'picking']});
+    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
   }
 
   initializeState() {
@@ -81,7 +77,7 @@ export default class BitmapLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     // setup model first
-    if (props.fp64 !== oldProps.fp64) {
+    if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();

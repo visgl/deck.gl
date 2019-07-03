@@ -11,6 +11,8 @@ import {
 
 import {ScreenGridLayer} from '@deck.gl/aggregation-layers';
 
+import {Fp64Extension} from '@deck.gl/extensions';
+
 // Demonstrate immutable support
 import * as dataSamples from '../data-samples';
 
@@ -153,7 +155,7 @@ const ScatterplotLayer64PerfExample = (id, getData) => ({
     // pickable: true,
     radiusMinPixels: 1,
     radiusMaxPixels: 5,
-    fp64: true
+    extensions: [new Fp64Extension()]
   }
 });
 

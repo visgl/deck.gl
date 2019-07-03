@@ -38,7 +38,6 @@ const defaultProps = {
   extruded: false,
   // Whether to draw a GL.LINES wireframe of the polygon
   wireframe: false,
-  fp64: false,
 
   // elevation multiplier
   elevationScale: {type: 'number', min: 0, value: 1},
@@ -63,12 +62,11 @@ const ATTRIBUTE_TRANSITION = {
 
 export default class SolidPolygonLayer extends Layer {
   getShaders(vs) {
-    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
     return super.getShaders({
       vs,
       fs,
       defines: {},
-      modules: [projectModule, 'gouraud-lighting', 'picking']
+      modules: ['project32', 'gouraud-lighting', 'picking']
     });
   }
 
@@ -232,11 +230,11 @@ export default class SolidPolygonLayer extends Layer {
 
     this.updateGeometry(updateParams);
 
-    const {props, oldProps} = updateParams;
+    const {props, oldProps, changeFlags} = updateParams;
     const attributeManager = this.getAttributeManager();
 
     const regenerateModels =
-      props.fp64 !== oldProps.fp64 ||
+      changeFlags.extensionsChanged ||
       props.filled !== oldProps.filled ||
       props.extruded !== oldProps.extruded;
 
@@ -253,7 +251,6 @@ export default class SolidPolygonLayer extends Layer {
   updateGeometry({props, oldProps, changeFlags}) {
     const geometryConfigChanged =
       changeFlags.dataChanged ||
-      props.fp64 !== oldProps.fp64 ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
 

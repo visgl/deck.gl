@@ -99,6 +99,15 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
   return planes;
 }
 
+/**
+ * Calculate the low part of a WebGL 64 bit float
+ * @param a {number} - the input float number
+ * @returns {number} - the lower 32 bit of the number
+ */
+export function fp64LowPart(x) {
+  return x - Math.fround(x);
+}
+
 // export function mod(value, divisor) {
 //   assert(Number.isFinite(value) && Number.isFinite(divisor));
 //   const modulus = value % divisor;

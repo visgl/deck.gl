@@ -228,24 +228,8 @@ export default class Layer extends Component {
     return viewport.unprojectFlat(xy);
   }
 
-  use64bitProjection() {
-    if (this.props.fp64) {
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
-        return true;
-      }
-      log.once(
-        0,
-        `Legacy 64-bit mode only works with coordinateSystem set to
-        COORDINATE_SYSTEM.LNGLAT_DEPRECATED. Rendering in 32-bit mode instead`
-      )();
-    }
-
-    return false;
-  }
-
   use64bitPositions() {
     return (
-      this.props.fp64 ||
       this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
       this.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY
     );
@@ -607,7 +591,12 @@ export default class Layer extends Component {
     this.state.attributeManager = this.getAttributeManager();
 
     // initializeState callback tends to clear state
-    this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
+    this.setChangeFlags({
+      dataChanged: true,
+      propsChanged: true,
+      viewportChanged: true,
+      extensionsChanged: true
+    });
 
     this._updateState();
 

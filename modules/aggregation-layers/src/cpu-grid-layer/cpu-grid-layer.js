@@ -58,7 +58,6 @@ const defaultProps = {
   coverage: {type: 'number', min: 0, max: 1, value: 1},
   getPosition: {type: 'accessor', value: x => x.position},
   extruded: false,
-  fp64: false,
 
   // Optional material for 'lighting' shader module
   material: defaultMaterial
@@ -360,13 +359,12 @@ export default class CPUGridLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {elevationScale, fp64, extruded, cellSize, coverage, material, transitions} = this.props;
+    const {elevationScale, extruded, cellSize, coverage, material, transitions} = this.props;
 
     const SubLayerClass = this.getSubLayerClass('grid-cell', GridCellLayer);
 
     return new SubLayerClass(
       {
-        fp64,
         cellSize,
         coverage,
         material,

@@ -18,11 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, fp64, PhongMaterial} from '@luma.gl/core';
+import {Model, PhongMaterial} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
-const {fp64LowPart} = fp64;
 const defaultMaterial = new PhongMaterial();
 
 import vs from './column-layer-vertex.glsl';
@@ -45,7 +44,6 @@ const defaultProps = {
   lineWidthMaxPixels: Number.MAX_SAFE_INTEGER,
 
   extruded: true,
-  fp64: false,
   wireframe: false,
   filled: true,
   stroked: false,
@@ -61,8 +59,7 @@ const defaultProps = {
 
 export default class ColumnLayer extends Layer {
   getShaders() {
-    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return super.getShaders({vs, fs, modules: [projectModule, 'gouraud-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
   }
 
   /**
@@ -114,7 +111,7 @@ export default class ColumnLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    const regenerateModels = props.fp64 !== oldProps.fp64;
+    const regenerateModels = changeFlags.extensionsChanged;
 
     if (regenerateModels) {
       const {gl} = this.context;

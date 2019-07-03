@@ -66,7 +66,6 @@ export default class H3ClusterLayer extends CompositeLayer {
       lineJointRounded,
       lineMiterLimit,
       lineDashJustified,
-      fp64,
       material,
 
       getFillColor,
@@ -81,7 +80,6 @@ export default class H3ClusterLayer extends CompositeLayer {
 
     return new SubLayerClass(
       {
-        fp64,
         filled,
         wireframe,
 
