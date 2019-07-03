@@ -38,7 +38,7 @@ matrix:
       before_install:
         - cd bindings/python/pydeck
       python:
-        - '3.5'
+        - '3.7'
         - '2.7'
       cache:
         pip: true
