@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
+import {Layer, fp64LowPart} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from '@luma.gl/core';
-const {fp64LowPart} = fp64;
+import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './bezier-curve-layer-vertex.glsl';
 import fs from './bezier-curve-layer-fragment.glsl';
@@ -31,7 +30,6 @@ const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
   strokeWidth: {type: 'number', min: 0, value: 1},
-  fp64: false,
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getControlPoint: {type: 'accessor', value: x => x.controlPoint},
@@ -74,21 +72,16 @@ export default class BezierCurveLayer extends Layer {
     /* eslint-enable max-len */
   }
 
-  updateAttribute({props, oldProps, changeFlags}) {
-    if (props.fp64 !== oldProps.fp64) {
-      const {attributeManager} = this.state;
-      attributeManager.invalidateAll();
-    }
-  }
-
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
 
-    if (props.fp64 !== oldProps.fp64) {
+    if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
+      if (this.state.model) {
+        this.state.model.delete();
+      }
       this.setState({model: this._getModel(gl)});
     }
-    this.updateAttribute({props, oldProps, changeFlags});
   }
 
   draw({uniforms}) {

@@ -60,7 +60,6 @@ const defaultProps = {
   extruded: false,
   hexagonAggregator: pointToHexbin,
   getPosition: {type: 'accessor', value: x => x.position},
-  fp64: false,
   // Optional material for 'lighting' shader module
   material: defaultMaterial
 };
@@ -394,14 +393,13 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   renderLayers() {
-    const {elevationScale, extruded, coverage, material, fp64, transitions} = this.props;
+    const {elevationScale, extruded, coverage, material, transitions} = this.props;
     const {angle, radius} = this.state;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
 
     return new SubLayerClass(
       {
-        fp64,
         radius,
         diskResolution: 6,
         elevationScale,

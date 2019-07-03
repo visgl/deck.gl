@@ -1,6 +1,5 @@
 <p class="badges">
   <img src="https://img.shields.io/badge/@deck.gl/mesh--layers-lightgrey.svg?style=flat-square" alt="@deck.gl/mesh-layers" />
-  <img src="https://img.shields.io/badge/fp64-yes-blue.svg?style=flat-square" alt="64-bit" />
   <img src="https://img.shields.io/badge/lighting-yes-blue.svg?style=flat-square" alt="lighting" />
 </p>
 
@@ -108,12 +107,6 @@ If `texture` is supplied, texture is used to render the geometries. Otherwise, o
 - Default `1`.
 
 Multiplier to scale each geometry by.
-
-##### `fp64` (Boolean, optional)
-
-- Default: `false`
-
-Whether the layer should be rendered in high-precision 64-bit mode.
 
 ##### `wireframe` (Boolean, optional)
 

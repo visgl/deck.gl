@@ -31,7 +31,6 @@
       "id": "flight-paths",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/line/heathrow-flights.json",
       "strokeWidth": 3,
-      "fp64": false,
       "getSourcePosition": "start",
       "getTargetPosition": "end",
       "getColor": [200, 32, 64, 192]

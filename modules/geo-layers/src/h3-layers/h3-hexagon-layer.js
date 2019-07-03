@@ -177,7 +177,6 @@ export default class H3HexagonLayer extends CompositeLayer {
   _getForwardProps() {
     const {
       elevationScale,
-      fp64,
       material,
       coverage,
       extruded,
@@ -199,7 +198,6 @@ export default class H3HexagonLayer extends CompositeLayer {
 
     return {
       elevationScale,
-      fp64,
       extruded,
       coverage,
       wireframe,

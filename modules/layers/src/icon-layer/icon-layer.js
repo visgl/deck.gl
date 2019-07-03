@@ -17,11 +17,9 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from '@luma.gl/core';
-
-const {fp64LowPart} = fp64;
+import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './icon-layer-vertex.glsl';
 import fs from './icon-layer-fragment.glsl';
@@ -55,7 +53,6 @@ const defaultProps = {
   iconAtlas: {type: 'object', value: null, async: true},
   iconMapping: {type: 'object', value: {}, async: true},
   sizeScale: {type: 'number', value: 1, min: 0},
-  fp64: false,
   billboard: true,
   sizeUnits: 'pixels',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
@@ -70,8 +67,7 @@ const defaultProps = {
 
 export default class IconLayer extends Layer {
   getShaders() {
-    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return super.getShaders({vs, fs, modules: [projectModule, 'picking']});
+    return super.getShaders({vs, fs, modules: ['project32', 'picking']});
   }
 
   initializeState() {
@@ -164,7 +160,7 @@ export default class IconLayer extends Layer {
       attributeManager.invalidate('instanceColorModes');
     }
 
-    if (props.fp64 !== oldProps.fp64) {
+    if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();
