@@ -21,6 +21,24 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
+#### deck.gl [v7.2.0-alphs.2] - July 3, 2019
+
+- Add Brushing extension (#3309)
+- Move fp64 support to an extension (#3308)
+- Add Brushing extension (#3309)
+- Move fp64 support to an extension (#3308)
+- Add extensions module (#3306)
+- composite layer: pass extension props through (#3307)
+- Implement layer extensions RFC (#3305)
+- ScenegraphLayer: scene detection fixup (#3300)
+- Implement layer shader hooks (#3295)
+- loaders.gl integration (#3276)
+- Update ScenegraphLayer to use GLTFLoader (#3288)
+- Add video support in BitmapLayer (#3203)
+- Update lerna.json (#3273)
+- fix missing viewport id (#3275)
+- Data Loading RFC (#3077)
+
 #### deck.gl [v7.2.0-alphs.1] - June 21, 2019
 
 - S2Layer bug fix (#3270)
