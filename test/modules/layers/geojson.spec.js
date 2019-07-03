@@ -19,12 +19,7 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {
-  getGeojsonFeatures,
-  separateGeojsonFeatures,
-  unwrapSourceFeature,
-  unwrapSourceFeatureIndex
-} from '@deck.gl/layers/geojson-layer/geojson';
+import {getGeojsonFeatures, separateGeojsonFeatures} from '@deck.gl/layers/geojson-layer/geojson';
 
 const TEST_DATA = {
   POINT: {
@@ -310,6 +305,20 @@ const TEST_CASES = [
   }
 ];
 
+function wrapSourceFeature(feature, object, index) {
+  feature._object = object;
+  feature._index = index;
+  return feature;
+}
+
+function unwrapSourceFeature(feature) {
+  return feature._object;
+}
+
+function unwrapSourceFeatureIndex(feature) {
+  return feature._index;
+}
+
 test('geojson#import', t => {
   t.ok(typeof getGeojsonFeatures === 'function', 'getGeojsonFeatures imported OK');
   t.ok(typeof separateGeojsonFeatures === 'function', 'separateGeojsonFeatures imported OK');
@@ -322,7 +331,7 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
       t.throws(
         () => {
           const featureArray = getGeojsonFeatures(tc.argument);
-          separateGeojsonFeatures(featureArray);
+          separateGeojsonFeatures(featureArray, wrapSourceFeature);
         },
         tc.error,
         `separateGeojsonFeatures ${tc.title} throws error`
@@ -331,7 +340,7 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
       const featureArray = getGeojsonFeatures(tc.argument);
       t.ok(Array.isArray(featureArray), `getGeojsonFeatures ${tc.title} returned array`);
 
-      const result = separateGeojsonFeatures(featureArray);
+      const result = separateGeojsonFeatures(featureArray, wrapSourceFeature);
       const actual = {
         pointFeaturesLength: result.pointFeatures.length,
         lineFeaturesLength: result.lineFeatures.length,
