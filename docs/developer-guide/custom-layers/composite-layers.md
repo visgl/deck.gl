@@ -250,3 +250,70 @@ class AwesomeCompositeLayer extends CompositeLayer {
 ```
 
 For more details, read about [how picking works](/docs/developer-guide/custom-layers/picking.md).
+
+
+### Transforming Data
+
+Because deck.gl's primitive layers expect input to be a flat iteratorable data structure, some composite layers need to transform user data into a different format before passing to sublayers. This transformation may consist converting a tree to an array, filtering, sorting, etc. For example, the [GeoJsonLayer](/docs/layers/geojson-layer.md) splits features by type and passes each to `ScatterplotLayer`, `PathLayer` or `SolidPolygonLayer` respectively. The [TextLayer](/docs/layers/text-layer.md) breaks each text string down to multiple characters and render them with a variation of `IconLayer`.
+
+From the user's perspective, when they specify accessors such as `getColor`, or callbacks such as `onHover`, the functions should always interface with the original data that they give the top-level layer, instead of its internal implementations. For the sublayer to reference back to the original data, we can add a reference onto every transformed datum by calling `getSubLayerDatum`:
+
+```js
+class MyCompositeLayer extends CompositeLayer {
+  updateState({props, changeFlags}) {
+    if (changeFlags.dataChanged) {
+      // data to pass to the sublayer
+      const subLayerData = [];
+      /*
+       * input data format:
+         [
+           {position: [-122.45, 37.78], timestamps: [0, 1, 4, 7, 8]},
+           {position: [-122.43, 38.01], timestamps: [2, 4]},
+           ...
+         ]
+       * data format to pass to sublayer:
+         [
+           {timestamp: 0},
+           {timestamp: 1},
+           {timestamp: 4},
+           {timestamp: 7},
+           ...
+         ]
+       */
+      props.data.forEach((object, index) => {
+        for (const timestamp of object.timestamps) {
+          // `getSubLayerDatum` decorates each datum with a reference to the original object and index
+          subLayerData.push(this.getSubLayerDatum({
+            timestamp
+          }, object, index));
+        }
+      });
+
+      this.setState({subLayerData});
+    }
+  }
+}
+```
+
+When the sublayer receives data decorated by `getSubLayerDatum`, its accessors need to know how to read the data to access the original objects. In the above example, `getPosition: d => d.position` would fail if called with `{timestamp: 0}`, while the user expects it to be called with `{position: [-122.45, 37.78], timestamps: [0, 1, 4, 7, 8]}`. This can be solved by wrapping the user-provided accessor with `getSubLayerAccessor`:
+
+```js
+  renderLayers() {
+    const {subLayerData} = this.state;
+    const {getPosition, getRadius, getFillColor, getLineColor, getLineWidth, updateTriggers} = this.props;
+
+    return new ScatterplotLayer(props, this.getSubLayerProps({
+      id: 'scatterplot',
+      updateTriggers,
+
+      data: this.state.subLayerData,
+      getPosition: this.getSubLayerAccessor(getPosition),
+      getRadius: this.getSubLayerAccessor(getRadius),
+      getFillColor: this.getSubLayerAccessor(getFillColor),
+      getLineColor: this.getSubLayerAccessor(getLineColor),
+      getLineWidth: this.getSubLayerAccessor(getLineWidth)
+    }));
+  }
+```
+
+The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the orignal objects from the sublayer data if they are created using `getSubLayerDatum`.
