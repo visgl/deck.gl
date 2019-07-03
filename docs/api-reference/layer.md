@@ -246,12 +246,12 @@ And should return `true` if the two values are considered equal (no update neede
 
 ##### `dataTransform` (Function, optional)
 
-Executed to manipulate remote data when it's fetched. This callback applies to `data` values that are strings (URL), promises or async iterables.
+Executed to manipulate remote data when it's fetched. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
 
 The function receives two arguments:
 
 - `data` - the newly fetched data
-- `previousData` - (only available when `data` is an async iterable) the previously loaded data.
+- `previousData` - (only available when `data` is an async iterable) the previously loaded data. If `dataTransform` is not supplied, the new data chunk is appended to the previous data array.
 
 And must return a valid `data` object: an array, an iterable or a non-iterable object that contains a `length` field. See documentation of the `data` prop for details.
 
@@ -329,6 +329,17 @@ The variables may be numbers, strings, objects or functions. During each renderi
 Note:
 
 * change of the `data` prop has higher priority than the `updateTriggers`. If the app supplies a new `data` object, then all attributes will be automatically updated, even if the updateTriggers have not changed. To block excessive attribute updates, set the [`dataComparator`](/docs/api-reference/layer.md#-datacomparator-function-optional-) prop.
+
+
+##### `onDataLoad` (Function, optional)
+
+Called when remote data is fully loaded. This callback applies when `data` is assigned a value that is either string (URL), Promise or an async iterable.
+
+The function receives two arguments:
+
+- `value` - the loaded data
+- `context` (Object)
+  + `layer` - the current layer
 
 
 ### Render Properties
