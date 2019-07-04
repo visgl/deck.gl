@@ -31,8 +31,8 @@ export class App extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      thresholdValue1: 20,
-      thresholdValue2: 40,
+      thresholdValue1: 100,
+      thresholdValue2: 300,
       cellSize: 1000
     };
     this.onCellSizeChange = this.onCellSizeChange.bind(this);
