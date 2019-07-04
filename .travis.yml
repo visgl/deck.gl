@@ -36,6 +36,23 @@ matrix:
     - language: python
       dist: precise
       os: linux
+      group: stable
+      sudo: required
+      dist: trusty
+      env:
+        - CXX=g++-6
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-6
+          - mesa-utils
+          - xvfb
+          - libgl1-mesa-dri
+          - libglapi-mesa
+          - libosmesa6
+          - libxi-dev
       before_install:
         # Enable user namespace cloning
         - cd bindings/python/pydeck
@@ -49,7 +66,6 @@ matrix:
           - ~/.npm  # NPM cache
       install:
         - sudo apt-get update
-        - sudo apt-get install -y libatk-bridge2.0-0 libgtk-3.0 libnss3-dev libxss1 xvfb libasound2
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
         - pip install -e .
