@@ -8,10 +8,18 @@
   },
   "dependencies": {
     "@material-ui/core": "^4.0.1",
+    "canvasjs": "^1.8.1",
+    "chart.js": "^2.8.0",
     "deck.gl": "^7.0.0-beta",
     "react": "^16.3.0",
+    "react-canvas-js": "^1.0.1",
+    "react-chartkick": "^0.3.1",
     "react-dom": "^16.3.0",
-    "react-map-gl": "^4.1.2"
+    "react-hover-observer": "^2.1.1",
+    "react-linechart": "^1.1.12",
+    "react-map-gl": "^4.1.2",
+    "react-vis": "^1.11.7",
+    "reactjs-popup": "^1.4.1"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",

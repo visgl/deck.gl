@@ -1,5 +1,6 @@
 /* global window */
 import React, {Component} from 'react';
+import Popup from "reactjs-popup";
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import {PhongMaterial} from '@luma.gl/core';
@@ -10,14 +11,17 @@ import {TripsLayer} from '@deck.gl/geo-layers';
 import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider';
 import './style.css';
-
+import {XYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
+import { RadialChart, GradientDefs, Hint, AreaSeries  } from 'react-vis';
+import {Sunburst} from 'react-vis';
 // Set your mapbox token here
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 let sampleSize = 1;
 let actType = 'Other';
 let trailLength = 300;
-let animationSpeed = 500 // unit time per second
+let animationSpeed = 500; // unit time per second
+let variable = 0;
 
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
@@ -51,7 +55,7 @@ function secondsToHms(d) {
     let m = Math.floor(d % 3600 / 60);
     //let s = Math.floor(d % 3600 % 60);
     if (h < 24) {
-      return String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') 
+      return  "Time: " + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') 
     } else {
       return 'Simulation finished'
     }
@@ -115,6 +119,7 @@ export class App extends Component {
       time: 0,
       trailLength: this.props.trailLength,
       tours: this.props.data.tours,
+      isHovering: false,
       selectedZone: null
     };
 
@@ -124,6 +129,22 @@ export class App extends Component {
     this._onTimerChange = this._onTimerChange.bind(this);
     this._ontrailLength = this._ontrailLength.bind(this);
     this._onRestart = this._onRestart.bind(this);
+    this.handleMouseHover = this.handleMouseHover.bind(this);
+  }
+
+
+  handleMouseHover(object) {
+    this.setState(this.toggleHoverState);
+    console.log(object);
+     variable = object.index;
+    //console.log("handleMouseHover");
+  }
+
+  toggleHoverState(state) {
+    //console.log("hanver2");
+    return {
+      isHovering: !state.isHovering,
+    };
   }
 
   _onHover({x, y, object}) {
@@ -141,14 +162,26 @@ export class App extends Component {
   }
 
   _onSelectZone(object) {
+     //let url = './graph.html';
+    // let windowName =  "test";  
     if (object.layer) {
       if (object.layer.id == 'boundaries') {
         this.setState({selectedZone: object.object})  
+        //newwindow=window.open(url,windowName,'height=400, width=400');
+        //if (window.focus) {
+        //  newwindow.focus()
+        //}
+    return false;  
       }
     } else {
         this.setState({selectedZone: null})
     }
     this._filterTours();
+    
+       
+     
+    
+
   }
   
   _onTimerChange(evnt, newSimTime) {
@@ -217,7 +250,7 @@ window.location.reload(false);
         currentTime: this.state.time,
         pickable: true,
         autoHighlight: true,
-        highlightColor: [0, 255, 255]
+        highlightColor: [0, 255, 255],
       }),
       new GeoJsonLayer({
         id: 'boundaries',
@@ -228,7 +261,7 @@ window.location.reload(false);
         extruded: false,
         opacity: 0.10,
         onClick: this._onSelectZone,
-        onHover: this._onHover,
+        onHover: this.handleMouseHover,
         updateTriggers: {
           getFillColor: this.state.time
         },
@@ -256,6 +289,7 @@ window.location.reload(false);
               <StaticMap
                 reuseMaps
                 mapStyle="mapbox://styles/mapbox/dark-v9"
+                //streets-v9 dark-v9  light-v10
                 preventStyleDiffing={true}
                 mapboxApiAccessToken={MAPBOX_TOKEN}
               />
@@ -263,21 +297,63 @@ window.location.reload(false);
             {this._renderTooltip}        
           </DeckGL>
         </div>
+        //MapboxAccess.ClearCache() 
+
         
 
-        <div>
-        <button className="button" onClick={this._onRestart}>
-        {'restart'}
-        //{this.props.label}
-        </button>
+
+
+      <div className="graph">
+        <div
+          onMouseEnter={this.handleMouseHover}
+          onMouseLeave={this.handleMouseHover}
+        >         
         </div>
+        {this.state.isHovering &&
+     <div> 
+      <XYPlot width={300} height={300}>
+        <GradientDefs>
+          <linearGradient id="CoolGradient" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="white" stopOpacity={0.8}/>
+            <stop offset="100%" stopColor="red" stopOpacity={0.7} />
+          </linearGradient>
+        </GradientDefs>
+        <AreaSeries
+          color={'url(#CoolGradient)'}
+          data={[
+            {x: variable, y: variable, y0: 1},
+            {x: 2, y: 25, y0: 5},
+            {x: 2, y: variable, y0: 5},
+            {x: variable, y: 10, y0: 6},
+            {x: 3, y: variable, y0: 3}
+          ]}/>
+      </XYPlot>
+      
+      </div>}
+    </div>
 
 
-        <div className='timer'> Time: {secondsToHms(Math.floor(this.state.time))}</div>
+    <div className='timer2'>
+        <div className='text2'>Bristol City:</div>
+        <div>{secondsToHms(Math.floor(this.state.time))}</div>
+         <div>
+          <Typography id="range-slider" gutterBottom>        
+           </Typography>
+            <Slider
+              value={this.state.time}
+              min={0}
+              max={86400}
+              onChange={this._onTimerChange}
+              aria-labelledby="range-slider"
+           />
+          </div>
 
-        <div className='trailLength'>
-        <Typography id="range-slider" gutterBottom>
-        TrailLength
+
+        <div>Trail-Length: {this.state.trailLength}</div>
+        <div className='text3'></div>
+
+        <div>
+        <Typography id="range-slider" gutterBottom>      
          </Typography>
           <Slider
             value={this.state.trailLength}
@@ -288,22 +364,23 @@ window.location.reload(false);
           />
         </div>
 
-        <div className='timer2'>Trail-Length: {this.state.trailLength}</div>
+       
+       <button
+        className="button"
+        
+        onClick={this._onRestart}>restart script</button>   
+      <button
+        className="button2"
+        
+        onClick={this._onRestart}>Change City</button>
 
-        <div className='time-slider'>
-        <Typography id="range-slider" gutterBottom>
-        Time-Slider
-         </Typography>
-          <Slider
-            value={this.state.time}
-            min={0}
-            max={86400}
-            onChange={this._onTimerChange}
-            aria-labelledby="range-slider"
-          />
-        </div>
+    </div>
+
+          
       </div>
     );
+
+
   }
 }
 
@@ -311,5 +388,5 @@ export function renderToDOM(container) {
   render(<App actType={actType} 
               data={data} 
               animationSpeed={animationSpeed}
-              trailLength={trailLength}/>, container);
+              trailLength={trailLength}/>, container)
 }

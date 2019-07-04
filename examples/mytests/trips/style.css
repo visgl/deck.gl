@@ -1,31 +1,63 @@
 
-.button{
+.graph{
+    color : white;
     position: absolute;
-    left: 45%;
-    top: 1%;
-    font-size: 20px;
-    background: #c2a9a9;
-    border-radius: 10px;
+    top: 2%;
+    right: 2%;
+    line-height: 1.8;
+    font-variant: small-caps;
+    font-size: 150%;
+    background: black;
+    border-radius: 5px;
     outline: none;
-    opacity: 0.4;
+    opacity: 0.8;
     -webkit-transition: .2s;
     transition: opacity .2s;
-    padding:  0.2% 0.7% 0.2% 0.9%;   
     text-shadow: 0 0 3px #932626, 0 0 5px #932626;
+    }
+
+
+
+.button{
+    width: 49%;
+    font-variant: small-caps;
+    position: block;
+    font-size: 70%;
+    outline: none;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    padding:  0.5% 0.5% 0.5% 0.5%;
+    text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);  
+    box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);   
+
+}
+.button2{
+  margin-left: 2%;
+    width: 49%;
+    font-variant: small-caps;
+    position: block;
+    font-size: 70%;
+    outline: none;
+    -webkit-transition: .2s;
+    transition: opacity .2s;
+    padding:  0.5% 0.5% 0.5% 0.5%;
+    text-shadow: 0 0.04em 0.04em rgba(0,0,0,0.35);  
+    box-shadow:inset 0 -0.6em 0 -0.35em rgba(0,0,0,0.17);   
+
 }
 
 
-
-
 .timer{
+    color : white;
     position: absolute;
     left: 1%;
-    top: 1%;
-    font-size: 30px;
-    background: #c2a9a9;
+    top: 7%;
+    font-size: 190%;
+    background: black;
     border-radius: 10px;
     outline: none;
-    opacity: 0.4;
+    opacity: 0.8;
+    font-variant: small-caps;
     -webkit-transition: .2s;
     transition: opacity .2s;
     padding:  0.2% 0.7% 0.2% 0.9%;   
@@ -36,27 +68,46 @@
 }
 
 
+
+.text2{
+  text-decoration: underline;
+  font-size: 140%;
+  line-height: 2.2;
+  padding:  1.5% 0% 1.5% 0%;
+}
+
+
 .timer2{
+
+    width: 25%;
+    color : white;
     position: absolute;
-    top: 1%;
-    right: 1%;
-    font-size: 30px;
-    background: #c2a9a9;
-    border-radius: 10px;
+    top: 2%;
+    left: 2%;
+    line-height: 2.0;
+    font-variant: small-caps;
+    font-size: 120%;
+    background: black;
+    border-radius: 5px;
     outline: none;
-    opacity: 0.4;
+    opacity: 0.5;
     -webkit-transition: .2s;
     transition: opacity .2s;
-    padding:  0.2% 0.7% 0.2% 0.9%;
+    padding:  0.2% 2% 0.5% 2%;
     text-shadow: 0 0 3px #932626, 0 0 5px #932626;
+
 }
 .timer2:hover {
-  opacity: 1;
+  opacity: 0.7;
 }
+
+
 
 
 
 .time-slider {
+  font-variant: small-caps;
+  color: white;
   position: absolute;
   align-items: center;
   -webkit-appearance: none;
@@ -64,10 +115,10 @@
   bottom: 2.5%;
   width: 47%;
   padding:  0.2% 0.7% 0.2% 0.9%;
-  background: #d3d3d3;
+  background: black;
   border-radius: 20px;
   outline: none;
-  opacity: 0.3;
+  opacity: 0.6;
   -webkit-transition: .2s;
   transition: opacity .2s;
 }
@@ -94,6 +145,8 @@
 
 
 .trailLength {
+  font-variant: small-caps;
+  color: white;
   position: absolute;
   align-items: center;
   -webkit-appearance: none;
@@ -101,10 +154,10 @@
   bottom: 2.5%;
   width: 47%;
    padding:  0.2% 0.7% 0.2% 0.9%;
-  background: #d3d3d3;
+  background: black;
   border-radius: 20px;
   outline: none;
-  opacity: 0.3;
+  opacity: 0.6;
   -webkit-transition: .2s;
   transition: opacity .2s;
 }
