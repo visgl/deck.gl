@@ -168,7 +168,7 @@ test('LayerExtension#CompositeLayer passthrough', t => {
           );
 
           const {instanceValues} = subLayer.getAttributeManager().getAttributes();
-          t.deepEqual(instanceValues.value, [1, 2], 'attribute is populated');
+          t.deepEqual(instanceValues.value.slice(0, 2), [1, 2], 'attribute is populated');
         }
       }
     ],
