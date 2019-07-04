@@ -24,47 +24,45 @@ const INITIAL_VIEW_STATE = {
 
 const THRESHOLD = {
   MIN: 1,
-  MAX: 20
+  MAX: 500
 };
 
 export class App extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      thresholdValue1: 5,
-      thresholdValue2: 10,
+      thresholdValue1: 20,
+      thresholdValue2: 40,
       cellSize: 1000
     };
-    this.handleCellSizeChange = this.handleCellSizeChange.bind(this);
-    this.onThresholdValueChange = this.onThresholdValueChange.bind(this);
+    this.onCellSizeChange = this.onCellSizeChange.bind(this);
+    this.onThresholdChange = this.onThresholdChange.bind(this);
   }
 
-  onThresholdValueChange(thresholdValue1, thresholdValue2) {
+  onThresholdChange(thresholdValue1, thresholdValue2) {
     this.setState({
       thresholdValue1,
       thresholdValue2
     });
   }
 
-  handleCellSizeChange(event) {
+  onCellSizeChange(event) {
     const cellSize = event.target.value;
     this.setState({cellSize});
   }
 
   _renderLayers() {
-    const {data, coverage = 1} = this.props;
+    const {data} = this.props;
     const {thresholdValue1, thresholdValue2, cellSize} = this.state;
     return [
       new ContourLayer({
         id: 'contourlayer',
-        coverage,
         data,
         getPosition: d => d,
-        opacity: 1,
         contours: [
-          {threshold: [THRESHOLD.MIN, thresholdValue1], color: [1, 152, 189]},
-          {threshold: [thresholdValue1, thresholdValue2], color: [0, 255, 0]},
-          {threshold: [thresholdValue2, THRESHOLD.MAX], color: [0, 0, 255, 128]}
+          {threshold: [THRESHOLD.MIN, thresholdValue1], color: [255, 255, 178]},
+          {threshold: [thresholdValue1, thresholdValue2], color: [253, 141, 60]},
+          {threshold: [thresholdValue2, THRESHOLD.MAX], color: [189, 0, 38]}
         ],
         cellSize
       })
@@ -91,7 +89,7 @@ export class App extends PureComponent {
           <div className="input-group">
             <label className="input-label">Threshold</label>
             <RangeSlider
-              handleChange={this.onThresholdValueChange}
+              handleChange={this.onThresholdChange}
               range={[THRESHOLD.MIN, THRESHOLD.MAX]}
               defaultMin={this.state.thresholdValue1}
               defaultMax={this.state.thresholdValue2}
@@ -109,7 +107,7 @@ export class App extends PureComponent {
               max="2000"
               step="100"
               value={this.state.cellSize}
-              onChange={this.handleCellSizeChange}
+              onChange={this.onCellSizeChange}
             />
           </div>
         </div>
