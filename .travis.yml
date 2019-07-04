@@ -38,9 +38,8 @@ matrix:
       os: linux
       before_install:
         # Enable user namespace cloning
-        - "sysctl kernel.unprivileged_userns_clone=1"
-        - "export DISPLAY=:99.0"
-        - "sh -e /etc/init.d/xvfb start"
+        - cd bindings/python/pydeck
+        - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
       python:
         - '3.5'
         - '2.7'
@@ -50,7 +49,7 @@ matrix:
           - ~/.npm  # NPM cache
       install:
         - sudo apt-get update
-        - sudo apt-get install -y libatk-bridge2.0-0 libgtk-3.0
+        - sudo apt-get install -y libatk-bridge2.0-0 libgtk-3.0 libnss3-dev libxss1 xvfb
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
         - pip install -e .

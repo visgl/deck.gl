@@ -52,7 +52,7 @@ def is_ipynb(file_name):
 async def go_to_page_and_screenshot(url, file_name, output_dir='.', sleep_seconds=SECONDS_BEFORE_SCREENSHOT):
     browser = None
     try:
-        browser = await launch({"headless": False, "args": ['--no-sandbox', '--disable-setuid-sandbox']})
+        browser = await launch({"headless": True, "args": ['--no-sandbox', '--disable-setuid-sandbox']})
         page = await browser.newPage()
         await go_to_url(page, url)
         if is_ipynb(file_name):
