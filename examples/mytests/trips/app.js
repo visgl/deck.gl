@@ -20,9 +20,10 @@ const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTB
 let sampleSize = 1;
 let actType = 'Other';
 let trailLength = 300;
-let animationSpeed = 500; // unit time per second
+let animationSpeed = 1000; // unit time per second
 let variable = 0;
-
+let pause = true;
+let animationSpeed2 = 0;
 let simTime = 0;
 let anchorTime = Date.now() / 1000;
 //let completedTourColor = [255, 0, 0]
@@ -117,6 +118,7 @@ export class App extends Component {
     super(props);
     this.state = {
       time: 0,
+      animationSpeed: this.props.animationSpeed,
       trailLength: this.props.trailLength,
       tours: this.props.data.tours,
       isHovering: false,
@@ -127,15 +129,17 @@ export class App extends Component {
     this._onHover = this._onHover.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
     this._onTimerChange = this._onTimerChange.bind(this);
+    this._onanimationSpeed = this._onanimationSpeed.bind(this);
     this._ontrailLength = this._ontrailLength.bind(this);
     this._onRestart = this._onRestart.bind(this);
+    this._onPause = this._onPause.bind(this);
     this.handleMouseHover = this.handleMouseHover.bind(this);
   }
 
 
   handleMouseHover(object) {
     this.setState(this.toggleHoverState);
-    console.log(object);
+    //console.log(object);
      variable = object.index;
     //console.log("handleMouseHover");
   }
@@ -177,10 +181,6 @@ export class App extends Component {
         this.setState({selectedZone: null})
     }
     this._filterTours();
-    
-       
-     
-    
 
   }
   
@@ -189,9 +189,32 @@ export class App extends Component {
     simTime = newSimTime
   };
 
+  _onanimationSpeed(evnt, newanimationSpeed){
+    this.setState({animationSpeed: newanimationSpeed})
+    animationSpeed = newanimationSpeed;
+
+  };
+
+  _onPause(evnt, newSimTime){
+    
+    if (pause){
+      animationSpeed2 = animationSpeed;
+      animationSpeed = 0;
+      pause = false;
+
+    }else{
+      pause = true;
+      animationSpeed = animationSpeed2;
+    }
+
+};
+
+
   _onRestart(evnt, newSimTime){
-window.location.reload(false);
-}
+    window.location.reload(false);
+  };
+
+
   _ontrailLength(evnt, newTrailLength) {    
     this.setState({trailLength: newTrailLength})
   };
@@ -199,8 +222,10 @@ window.location.reload(false);
   _animate() {
     const timestamp = Date.now() / 1000;
 
+    
+  
     this.setState({ 
-      time: simTime + (timestamp - anchorTime) * this.props.animationSpeed
+      time: simTime + (timestamp - anchorTime) * animationSpeed
     }, () => this._filterTours());
     
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
@@ -248,6 +273,7 @@ window.location.reload(false);
         rounded: false,
         trailLength: this.state.trailLength,
         currentTime: this.state.time,
+        animationSpeed: this.state.animationSpeed,
         pickable: true,
         autoHighlight: true,
         highlightColor: [0, 255, 255],
@@ -299,10 +325,6 @@ window.location.reload(false);
         </div>
         //MapboxAccess.ClearCache() 
 
-        
-
-
-
       <div className="graph">
         <div
           onMouseEnter={this.handleMouseHover}
@@ -335,6 +357,22 @@ window.location.reload(false);
 
     <div className='timer2'>
         <div className='text2'>Bristol City:</div>
+
+        <div>AnimationSpeed: {this.state.animationSpeed}</div>
+        <div>
+          <Typography id="range-slider" gutterBottom>        
+           </Typography>
+            <Slider
+              value={this.state.animationSpeed}
+              min={0}
+              max={1000}
+              onChange={this._onanimationSpeed}
+              aria-labelledby="range-slider"
+           />
+          </div>
+
+
+
         <div>{secondsToHms(Math.floor(this.state.time))}</div>
          <div>
           <Typography id="range-slider" gutterBottom>        
@@ -366,13 +404,13 @@ window.location.reload(false);
 
        
        <button
-        className="button"
-        
+        className="button"        
         onClick={this._onRestart}>restart script</button>   
+     
       <button
-        className="button2"
-        
-        onClick={this._onRestart}>Change City</button>
+        className="button2"       
+        onClick={this._onPause}>Pause / Play</button>
+
 
     </div>
 
