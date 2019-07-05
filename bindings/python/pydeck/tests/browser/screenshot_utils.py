@@ -35,7 +35,7 @@ async def go_to_url(page, url):
             logging.info("Attempting to read page %s" % url)
             await page.goto(url)
             break
-        except:
+        except Exception as e:
             await asyncio.sleep(SECONDS_BEFORE_REEXECUTION)
             if num_attempts > 5:
                 raise TimeoutError('Jupyter notebook failed to open')
