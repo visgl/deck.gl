@@ -1,6 +1,5 @@
 /* global window */
 import React, {Component} from 'react';
-import Popup from "reactjs-popup";
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import {PhongMaterial} from '@luma.gl/core';
@@ -12,22 +11,19 @@ import Typography from '@material-ui/core/Typography';
 import Slider from '@material-ui/lab/Slider';
 import './style.css';
 import {XYPlot, XAxis, YAxis, HorizontalGridLines, LineSeries} from 'react-vis';
-import { RadialChart, GradientDefs, Hint, AreaSeries  } from 'react-vis';
-import {Sunburst} from 'react-vis';
+import {GradientDefs, AreaSeries  } from 'react-vis';
 // Set your mapbox token here
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 let sampleSize = 1;
 let actType = 'Other';
-let trailLength = 300;
-let animationSpeed = 1000; // unit time per second
 let variable = 0;
 let pause = true;
-let animationSpeed2 = 0;
-let simTime = 0;
+
+let prevSimTime = Date.now() / 1000;
+
+let simAnchorTime = 0;
 let anchorTime = Date.now() / 1000;
-//let completedTourColor = [255, 0, 0]
-//let incompleteTourColor = [255, 255, 0]
 
 let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
@@ -59,8 +55,7 @@ function secondsToHms(d) {
       return  "Time: " + String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0') 
     } else {
       return 'Simulation finished'
-    }
-     
+    }    
 }
 
 function getRgbFromStr(strRgb) {
@@ -98,13 +93,6 @@ const pointLight = new PointLight({
 
 const lightingEffect = new LightingEffect({ambientLight, pointLight});
 
-const material = new PhongMaterial({
-  ambient: 0.1,
-  diffuse: 0.6,
-  shininess: 32,
-  specularColor: [60, 64, 70]
-});
-
 export const INITIAL_VIEW_STATE = {
   longitude: -2.50, //-2.5893897,
   latitude: 51.45,// 51.4516883,
@@ -117,42 +105,24 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      time: 0,
-      animationSpeed: this.props.animationSpeed,
-      trailLength: this.props.trailLength,
+      simTime: 0,
+      animationSpeed: 100,
+      trailLength: 100,
       tours: this.props.data.tours,
       isHovering: false,
       selectedZone: null
     };
 
-    this._filterTours = this._filterTours.bind(this);
     this._onHover = this._onHover.bind(this);
     this._onSelectZone = this._onSelectZone.bind(this);
     this._onTimerChange = this._onTimerChange.bind(this);
-    this._onanimationSpeed = this._onanimationSpeed.bind(this);
-    this._ontrailLength = this._ontrailLength.bind(this);
+    this._onAnimationSpeedChange = this._onAnimationSpeedChange.bind(this);
+    this._onTrailLengthChange = this._onTrailLengthChange.bind(this);
     this._onRestart = this._onRestart.bind(this);
     this._onPause = this._onPause.bind(this);
     this.handleMouseHover = this.handleMouseHover.bind(this);
-  }
 
-
-  handleMouseHover(object) {
-    this.setState(this.toggleHoverState);
-    //console.log(object);
-     variable = object.index;
-    //console.log("handleMouseHover");
-  }
-
-  toggleHoverState(state) {
-    //console.log("hanver2");
-    return {
-      isHovering: !state.isHovering,
-    };
-  }
-
-  _onHover({x, y, object}) {
-    this.setState({x, y, hoveredObject: object});
+    this._filterTours = this._filterTours.bind(this);
   }
 
   componentDidMount() {
@@ -165,16 +135,25 @@ export class App extends Component {
     }
   }
 
+  handleMouseHover(object) {
+    this.setState(this.toggleHoverState);
+     variable = object.index;
+  }
+
+  toggleHoverState(state) {
+    return {
+      isHovering: !state.isHovering,
+    };
+  }
+
+  _onHover({x, y, object}) {
+    this.setState({x, y, hoveredObject: object});
+  }
+
   _onSelectZone(object) {
-     //let url = './graph.html';
-    // let windowName =  "test";  
     if (object.layer) {
       if (object.layer.id == 'boundaries') {
         this.setState({selectedZone: object.object})  
-        //newwindow=window.open(url,windowName,'height=400, width=400');
-        //if (window.focus) {
-        //  newwindow.focus()
-        //}
     return false;  
       }
     } else {
@@ -185,52 +164,26 @@ export class App extends Component {
   }
   
   _onTimerChange(evnt, newSimTime) {
-    anchorTime = Date.now() / 1000
-    simTime = newSimTime
+    this.setState({simTime: newSimTime})
   };
 
-  _onanimationSpeed(evnt, newanimationSpeed){
-    this.setState({animationSpeed: newanimationSpeed})
-    animationSpeed = newanimationSpeed;
-
+  _onAnimationSpeedChange(evnt, newAnimationSpeed){
+    this.setState({animationSpeed: newAnimationSpeed})
   };
 
-  _onPause(evnt, newSimTime){
-    
-    if (pause){
-      animationSpeed2 = animationSpeed;
-      animationSpeed = 0;
-      pause = false;
-
-    }else{
-      pause = true;
-      animationSpeed = animationSpeed2;
-    }
-
-};
-
-
-  _onRestart(evnt, newSimTime){
-    window.location.reload(false);
-  };
-
-
-  _ontrailLength(evnt, newTrailLength) {    
+  _onTrailLengthChange(evnt, newTrailLength) {    
     this.setState({trailLength: newTrailLength})
   };
 
   _animate() {
-    const timestamp = Date.now() / 1000;
-
-    
-  
+    const timestamp = Date.now() / 1000;    
     this.setState({ 
-      time: simTime + (timestamp - anchorTime) * animationSpeed
-    }, () => this._filterTours());
-    
+      simTime: this.state.simTime + (timestamp - prevSimTime) * this.state.animationSpeed
+    });
+    prevSimTime = Date.now() / 1000;
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
-    
+
   _filterTours() {
     const {allTours: allTours = this.props.data.tours} = this.props;
     
@@ -242,8 +195,7 @@ export class App extends Component {
       return;
     }
     
-    incompleteTours = filterIncompleteTours(allTours, this.state.time);
-    //incompleteTours = allTours;
+    incompleteTours = filterIncompleteTours(allTours, this.state.simTime);
     
     if (!this.state.selectedZone) {
       sourceTours = incompleteTours
@@ -254,6 +206,21 @@ export class App extends Component {
     filteredTours = incompleteTours.filter(x => sourceTours.includes(x));
     this.setState({ tours: filteredTours });
   }
+
+  _onPause() {
+    if (pause) {
+      pause = false;
+      this.setState({animationSpeed: 0});
+    } else {
+      pause = true;
+      // reads the value 
+      this._onTimerChange
+    }
+  };
+
+_onRestart(evnt){
+  window.location.reload(false);
+};
 
   _renderLayers() {
     
@@ -272,8 +239,7 @@ export class App extends Component {
         widthMinPixels: 2,
         rounded: false,
         trailLength: this.state.trailLength,
-        currentTime: this.state.time,
-        animationSpeed: this.state.animationSpeed,
+        currentTime: this.state.simTime,
         pickable: true,
         autoHighlight: true,
         highlightColor: [0, 255, 255],
@@ -289,7 +255,7 @@ export class App extends Component {
         onClick: this._onSelectZone,
         onHover: this.handleMouseHover,
         updateTriggers: {
-          getFillColor: this.state.time
+          getFillColor: this.state.simTime
         },
         autoHighlight: true,
         highlightColor: [0, 255, 255]
@@ -363,68 +329,58 @@ export class App extends Component {
           <Typography id="range-slider" gutterBottom>        
            </Typography>
             <Slider
-              value={this.state.animationSpeed}
+              value={Math.round(this.state.animationSpeed, 0)}
               min={0}
-              max={1000}
-              onChange={this._onanimationSpeed}
+              max={3600}
+              onChange={this._onAnimationSpeedChange}
               aria-labelledby="range-slider"
            />
           </div>
 
-
-
-        <div>{secondsToHms(Math.floor(this.state.time))}</div>
+        <div>{secondsToHms(Math.floor(this.state.simTime))}</div>
          <div>
           <Typography id="range-slider" gutterBottom>        
            </Typography>
             <Slider
-              value={this.state.time}
+              value={this.state.simTime}
               min={0}
               max={86400}
               onChange={this._onTimerChange}
               aria-labelledby="range-slider"
-           />
+             />
           </div>
 
-
-        <div>Trail-Length: {this.state.trailLength}</div>
+        <div>Trail-Length: {parseInt(this.state.trailLength)}</div>
         <div className='text3'></div>
 
         <div>
         <Typography id="range-slider" gutterBottom>      
          </Typography>
           <Slider
-            value={this.state.trailLength}
+            value={this.state.trailLengt}
             min={0}
             max={86400}
-            onChange={this._ontrailLength}
+            onChange={this._onTrailLengthChange}
             aria-labelledby="range-slider"
           />
         </div>
 
-       
        <button
-        className="button"        
+        className="btn_restart"        
         onClick={this._onRestart}>restart script</button>   
      
       <button
-        className="button2"       
+        className="btn_pause"       
         onClick={this._onPause}>Pause / Play</button>
-
-
     </div>
-
           
       </div>
     );
-
-
   }
 }
 
 export function renderToDOM(container) {
   render(<App actType={actType} 
               data={data} 
-              animationSpeed={animationSpeed}
-              trailLength={trailLength}/>, container)
+          />, container)
 }
