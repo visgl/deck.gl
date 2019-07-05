@@ -154,13 +154,11 @@ export class App extends Component {
     if (object.layer) {
       if (object.layer.id == 'boundaries') {
         this.setState({selectedZone: object.object})  
-    return false;  
       }
     } else {
         this.setState({selectedZone: null})
     }
     this._filterTours();
-
   }
   
   _onTimerChange(evnt, newSimTime) {
