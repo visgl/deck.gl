@@ -20,7 +20,7 @@ token = str(uuid.uuid4())
 
 
 def make_nb_url(ipynb, token):
-    return 'http://localhost:9876/notebooks/examples/' + urllib.parse.quote(ipynb) + '?token=' + token
+    return 'http://127.0.0.1:9876/notebooks/examples/' + urllib.parse.quote(ipynb) + '?token=' + token
 
 
 async def start_notebook():
@@ -28,7 +28,7 @@ async def start_notebook():
     my_env['PYTHONPATH'] = "{}".format(jupyter_execution_directory)
     my_env['JUPYTER_TOKEN'] = token
     return subprocess.Popen(
-        './env3/bin/jupyter notebook --no-browser --port 9876',
+        'jupyter notebook --no-browser --port 9876 --ip 0.0.0.0 --allow-root',
         shell=True,
         cwd=jupyter_execution_directory,
         env=my_env)
