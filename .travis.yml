@@ -56,7 +56,7 @@ matrix:
       before_install:
         # Enable user namespace cloning
         - cd bindings/python/pydeck
-        - export DISPLAY=:99.0; sh -e ./usr/bin/xvfb-run start
+        - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
       python:
         - '3.5'
         - '2.7'
