@@ -57,6 +57,7 @@ async def go_to_page_and_screenshot(url, file_name, output_dir='.', sleep_second
         await go_to_url(page, url)
         if is_ipynb(file_name):
             # Execute the notebook
+            await page.waitForSelector(CELL_DROPDOWN_SELECTOR, {'timeout': 10000})
             await page.click(CELL_DROPDOWN_SELECTOR)
             await page.click(RUN_ALL_SELECTOR)
             # Wait for the kernel to execute

@@ -53,6 +53,7 @@ async def run_notebooks(output_dir='.'):
             await go_to_page_and_screenshot(url, file_name, output_dir=output_dir)
     except Exception as e:
         logging.error('Caught exception %s' % str(e))
+        raise e
     finally:
         await stop_notebook(nb_process)
 
