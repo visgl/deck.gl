@@ -18,21 +18,17 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64} from '@luma.gl/core';
-const {fp64LowPart} = fp64;
+import {Model, Geometry} from '@luma.gl/core';
 
 import vs from './arc-layer-vertex.glsl';
-import vs64 from './arc-layer-vertex-64.glsl';
 import fs from './arc-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
 const defaultProps = {
-  fp64: false,
-
   getSourcePosition: {type: 'accessor', value: x => x.sourcePosition},
   getTargetPosition: {type: 'accessor', value: x => x.targetPosition},
   getSourceColor: {type: 'accessor', value: DEFAULT_COLOR},
@@ -52,11 +48,7 @@ const defaultProps = {
 
 export default class ArcLayer extends Layer {
   getShaders() {
-    return super.getShaders(
-      this.use64bitProjection()
-        ? {vs: vs64, fs, modules: ['project64', 'picking']}
-        : {vs, fs, modules: ['picking']}
-    ); // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: ['picking']}); // 'project' module added by default.
   }
 
   initializeState() {
@@ -114,7 +106,7 @@ export default class ArcLayer extends Layer {
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
     // Re-generate model if geometry changed
-    if (props.fp64 !== oldProps.fp64) {
+    if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();

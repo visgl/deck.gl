@@ -57,7 +57,6 @@ const defaultProps = {
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
 
   lineDashJustified: false,
-  fp64: false,
 
   // Line and polygon outline color
   getLineColor: {type: 'accessor', value: defaultLineColor},
@@ -143,6 +142,10 @@ export default class GeoJsonLayer extends CompositeLayer {
     });
   }
 
+  unwrapObject(object) {
+    return unwrapSourceFeature(object);
+  }
+
   /* eslint-disable complexity */
   renderLayers() {
     const {features, featuresDiff} = this.state;
@@ -163,8 +166,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
       elevationScale,
-      lineDashJustified,
-      fp64
+      lineDashJustified
     } = this.props;
 
     // Accessor props for underlying layers
@@ -190,7 +192,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         {
           _dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
 
-          fp64,
           extruded,
           elevationScale,
           filled,
@@ -230,7 +231,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           _dataDiff:
             featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
 
-          fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -269,7 +269,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         {
           _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
 
-          fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -308,7 +307,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         {
           _dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
 
-          fp64,
           stroked,
           filled,
           radiusScale: pointRadiusScale,

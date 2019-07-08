@@ -228,24 +228,8 @@ export default class Layer extends Component {
     return viewport.unprojectFlat(xy);
   }
 
-  use64bitProjection() {
-    if (this.props.fp64) {
-      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT_DEPRECATED) {
-        return true;
-      }
-      log.once(
-        0,
-        `Legacy 64-bit mode only works with coordinateSystem set to
-        COORDINATE_SYSTEM.LNGLAT_DEPRECATED. Rendering in 32-bit mode instead`
-      )();
-    }
-
-    return false;
-  }
-
   use64bitPositions() {
     return (
-      this.props.fp64 ||
       this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
       this.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY
     );
@@ -312,7 +296,7 @@ export default class Layer extends Component {
 
   getShaders(shaders) {
     for (const extension of this.props.extensions) {
-      shaders = mergeShaders(shaders, extension.getShaders.call(this, extension.opts));
+      shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
     return shaders;
   }
@@ -598,7 +582,7 @@ export default class Layer extends Component {
     this.initializeState(this.context);
     // Initialize extensions
     for (const extension of this.props.extensions) {
-      extension.initializeState.call(this, this.context, extension.opts);
+      extension.initializeState.call(this, this.context, extension);
     }
     // End subclass lifecycle methods
 
@@ -607,7 +591,12 @@ export default class Layer extends Component {
     this.state.attributeManager = this.getAttributeManager();
 
     // initializeState callback tends to clear state
-    this.setChangeFlags({dataChanged: true, propsChanged: true, viewportChanged: true});
+    this.setChangeFlags({
+      dataChanged: true,
+      propsChanged: true,
+      viewportChanged: true,
+      extensionsChanged: true
+    });
 
     this._updateState();
 
@@ -647,7 +636,7 @@ export default class Layer extends Component {
     }
     // Execute extension updates
     for (const extension of this.props.extensions) {
-      extension.updateState.call(this, updateParams, extension.opts);
+      extension.updateState.call(this, updateParams, extension);
     }
     // End subclass lifecycle methods
 
@@ -679,7 +668,7 @@ export default class Layer extends Component {
     this.finalizeState(this.context);
     // Finalize extensions
     for (const extension of this.props.extensions) {
-      extension.finalizeState.call(this, extension.opts);
+      extension.finalizeState.call(this, extension);
     }
     // End lifecycle method
     removeLayerInSeer(this.id);

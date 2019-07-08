@@ -2,14 +2,13 @@
 // delete the local development overrides at the bottom of this file
 
 // avoid destructuring for older Node version support
-const resolve = require('path').resolve;
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./src/app.js')
+    app: './src/app.js'
   },
 
   devtool: 'source-map',
@@ -17,12 +16,13 @@ const CONFIG = {
   module: {
     rules: [
       {
-        // Compile ES2015 using buble
+        // Transpile ES6 to ES5 with babel
+        // Remove if your app does not use JSX or you don't need to support old browsers
         test: /\.js$/,
-        loader: 'buble-loader',
-        include: [resolve('src')],
+        loader: 'babel-loader',
+        exclude: [/node_modules/],
         options: {
-          objectAssign: 'Object.assign'
+          presets: ['@babel/preset-react']
         }
       }
     ]

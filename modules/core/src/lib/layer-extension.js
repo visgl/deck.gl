@@ -32,13 +32,42 @@ export class LayerExtension {
     return this.constructor === extension.constructor && deepEqual(this.opts, extension.opts);
   }
 
-  getShaders(opts) {
+  getShaders(extension) {
     return null;
   }
 
-  initializeState(context, opts) {}
+  getSubLayerProps(extension) {
+    const {defaultProps = {}} = extension.constructor;
+    const newProps = {
+      updateTriggers: {}
+    };
 
-  updateState(params, opts) {}
+    /* eslint-disable max-depth */
+    for (const key in defaultProps) {
+      if (key in this.props) {
+        const propDef = defaultProps[key];
+        const propValue = this.props[key];
+        newProps[key] = propValue;
+        if (propDef && propDef.type === 'accessor') {
+          newProps.updateTriggers[key] = this.props.updateTriggers[key];
+          // Some composite layers "wrap" user data into another format before passing to sublayers
+          // We need to unwrap them before calling the accessor so that they see the original data
+          // objects
+          // TODO - make this a formal API and document
+          if (this.unwrapObject && typeof propValue === 'function') {
+            newProps[key] = (object, objectInfo) =>
+              propValue(this.unwrapObject(object), objectInfo);
+          }
+        }
+      }
+    }
+    /* eslint-enable max-depth */
+    return newProps;
+  }
 
-  finalizeState(opts) {}
+  initializeState(context, extension) {}
+
+  updateState(params, extension) {}
+
+  finalizeState(extension) {}
 }

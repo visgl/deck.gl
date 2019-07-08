@@ -41,6 +41,10 @@ export default class H3ClusterLayer extends CompositeLayer {
     });
   }
 
+  unwrapObject(object) {
+    return object._obj;
+  }
+
   getSubLayerAccessor(accessor) {
     if (typeof accessor !== 'function') return accessor;
 
@@ -62,7 +66,6 @@ export default class H3ClusterLayer extends CompositeLayer {
       lineJointRounded,
       lineMiterLimit,
       lineDashJustified,
-      fp64,
       material,
 
       getFillColor,
@@ -77,7 +80,6 @@ export default class H3ClusterLayer extends CompositeLayer {
 
     return new SubLayerClass(
       {
-        fp64,
         filled,
         wireframe,
 

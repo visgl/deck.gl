@@ -256,22 +256,6 @@ test('Layer#diffProps', t => {
   t.end();
 });
 
-test('Layer#use64bitProjection', t => {
-  let layer = new SubLayer({});
-  t.false(layer.use64bitProjection(), 'returns false for fp64: false');
-
-  layer = new SubLayer({fp64: true});
-  t.false(layer.use64bitProjection(), 'returns false for default mode');
-
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS, fp64: true});
-  t.false(layer.use64bitProjection(), 'returns false for default mode');
-
-  layer = new SubLayer({coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED, fp64: true});
-  t.true(layer.use64bitProjection(), 'returns true for legacy lnglat mode');
-
-  t.end();
-});
-
 test('Layer#use64bitPositions', t => {
   let layer = new SubLayer({});
   t.true(layer.use64bitPositions(), 'returns true for default settings');

@@ -1,30 +1,45 @@
 import test from 'tape-catch';
-import {LayerExtension} from '@deck.gl/core';
-import {ScatterplotLayer} from '@deck.gl/layers';
+import {Layer, LayerExtension} from '@deck.gl/core';
+import {ScatterplotLayer, GeoJsonLayer} from '@deck.gl/layers';
 import {testLayer} from '@deck.gl/test-utils';
 
 class MockExtension extends LayerExtension {
   getShaders() {
     return {modules: [{name: 'empty-module', vs: ''}]};
   }
-  initializeState(context, opts) {
-    opts.assert(this.id === 'test-layer', 'initializeState: Self is layer instance');
-    opts.assert(context.gl, 'initializeState: context received');
+  initializeState(context, extension) {
+    extension.opts.assert(this instanceof Layer, 'initializeState: Self is layer instance');
+    extension.opts.assert(context.gl, 'initializeState: context received');
+
+    const attributeManager = this.getAttributeManager();
+    if (attributeManager) {
+      attributeManager.addInstanced({
+        instanceValues: {
+          size: 1,
+          accessor: 'ext_getValue'
+        }
+      });
+    }
 
     MockExtension.initializeCalled++;
   }
-  updateState(updateParams, opts) {
-    opts.assert(this.id === 'test-layer', 'updateState: Self is layer instance');
-    opts.assert(updateParams.changeFlags, 'updateState: changeFlags received');
+  updateState(updateParams, extension) {
+    extension.opts.assert(this instanceof Layer, 'updateState: Self is layer instance');
+    extension.opts.assert(updateParams.changeFlags, 'updateState: changeFlags received');
 
     MockExtension.updateCalled++;
   }
-  finalizeState(opts) {
-    opts.assert(this.id === 'test-layer', 'finalizeState: Self is layer instance');
+  finalizeState(extension) {
+    extension.opts.assert(this instanceof Layer, 'finalizeState: Self is layer instance');
 
     MockExtension.finalizeCalled++;
   }
 }
+
+MockExtension.defaultProps = {
+  ext_getValue: {type: 'accessor', value: 0},
+  ext_enabled: false
+};
 
 MockExtension.resetStats = () => {
   MockExtension.initializeCalled = 0;
@@ -46,6 +61,7 @@ test('LayerExtension', t => {
         props: {
           id: 'test-layer',
           data: [],
+          ext_getValue: 0,
           extensions: [extension0]
         },
         onAfterUpdate: () => {
@@ -79,6 +95,87 @@ test('LayerExtension', t => {
   });
 
   t.is(MockExtension.finalizeCalled, 1, 'finalizeState called');
+
+  t.end();
+});
+
+test('LayerExtension#CompositeLayer passthrough', t => {
+  const extension = new MockExtension({assert: t.ok});
+
+  MockExtension.resetStats();
+
+  testLayer({
+    Layer: GeoJsonLayer,
+    testCases: [
+      {
+        props: {
+          id: 'test-layer',
+          data: [
+            {
+              type: 'Feature',
+              geometry: {type: 'Point', coordinates: [-122, 38]},
+              properties: {value: 1}
+            },
+            {
+              type: 'Feature',
+              geometry: {type: 'Point', coordinates: [-122, 38]},
+              properties: {value: 2}
+            }
+          ],
+          ext_enabled: true,
+          ext_getValue: 0,
+          updateTriggers: {
+            ext_getValue: 'v0'
+          },
+          extensions: [extension]
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.is(
+            MockExtension.initializeCalled,
+            2,
+            'initializeState called by parent and sub layers'
+          );
+          t.is(MockExtension.updateCalled, 2, 'updateState called by parent and sub layers');
+          t.is(MockExtension.finalizeCalled, 0, 'finalizeState called');
+
+          t.is(subLayer.props.ext_enabled, true, 'ext_enabled prop is passed through');
+          t.is(
+            subLayer.props.updateTriggers.ext_getValue,
+            'v0',
+            'ext_getValue updateTrigger is passed through'
+          );
+
+          const {instanceValues} = subLayer.getAttributeManager().getAttributes();
+          t.deepEqual(instanceValues.value, [0], 'attribute is populated');
+        }
+      },
+      {
+        updateProps: {
+          ext_getValue: f => f.properties.value,
+          updateTriggers: {
+            ext_getValue: 'v1'
+          }
+        },
+        onAfterUpdate: ({subLayer}) => {
+          t.is(MockExtension.initializeCalled, 2, 'initializeState not called');
+          t.is(MockExtension.updateCalled, 4, 'updateState called by parent and sub layers');
+          t.is(MockExtension.finalizeCalled, 0, 'finalizeState not called');
+
+          t.is(
+            subLayer.props.updateTriggers.ext_getValue,
+            'v1',
+            'ext_getValue updateTrigger is passed through'
+          );
+
+          const {instanceValues} = subLayer.getAttributeManager().getAttributes();
+          t.deepEqual(instanceValues.value, [1, 2], 'attribute is populated');
+        }
+      }
+    ],
+    onError: t.notOk
+  });
+
+  t.is(MockExtension.finalizeCalled, 2, 'finalizeState called');
 
   t.end();
 });

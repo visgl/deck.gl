@@ -57,7 +57,6 @@ const MISSING_CHAR_WIDTH = 32;
 const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
-  fp64: false,
   billboard: true,
   sizeScale: 1,
   sizeUnits: 'pixels',
@@ -175,6 +174,10 @@ export default class TextLayer extends CompositeLayer {
     });
   }
 
+  unwrapObject(object) {
+    return object.object;
+  }
+
   /* eslint-disable no-loop-func */
   transformStringToLetters(dataRange = {}) {
     const {data, getText} = this.props;
@@ -283,7 +286,6 @@ export default class TextLayer extends CompositeLayer {
       getTextAnchor,
       getAlignmentBaseline,
       getPixelOffset,
-      fp64,
       billboard,
       sdf,
       sizeScale,
@@ -311,7 +313,6 @@ export default class TextLayer extends CompositeLayer {
         getAnchorX: this.getAnchorXFromTextAnchor(getTextAnchor),
         getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
         getPixelOffset: this._getAccessor(getPixelOffset),
-        fp64,
         billboard,
         sizeScale: sizeScale * scale,
         sizeUnits,

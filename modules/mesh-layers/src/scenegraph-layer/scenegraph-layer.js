@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
-import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
+import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
 import {waitForGLTFAssets} from './gltf-utils';
 
@@ -27,8 +27,6 @@ import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
-
-const {fp64LowPart} = fp64;
 
 const DEFAULT_COLOR = [255, 255, 255, 255];
 

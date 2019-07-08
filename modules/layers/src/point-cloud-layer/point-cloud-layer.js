@@ -18,10 +18,9 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
-import {Model, Geometry, fp64, PhongMaterial} from '@luma.gl/core';
-const {fp64LowPart} = fp64;
+import {Model, Geometry, PhongMaterial} from '@luma.gl/core';
 
 import vs from './point-cloud-layer-vertex.glsl';
 import fs from './point-cloud-layer-fragment.glsl';
@@ -33,7 +32,6 @@ const defaultMaterial = new PhongMaterial();
 const defaultProps = {
   sizeUnits: 'pixels',
   pointSize: {type: 'number', min: 0, value: 10}, //  point radius in pixels
-  fp64: false,
 
   getPosition: {type: 'accessor', value: x => x.position},
   getNormal: {type: 'accessor', value: DEFAULT_NORMAL},
@@ -47,8 +45,7 @@ const defaultProps = {
 
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
-    const projectModule = this.use64bitProjection() ? 'project64' : 'project32';
-    return super.getShaders({vs, fs, modules: [projectModule, 'gouraud-lighting', 'picking']});
+    return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
   }
 
   initializeState() {
@@ -83,7 +80,7 @@ export default class PointCloudLayer extends Layer {
 
   updateState({props, oldProps, changeFlags}) {
     super.updateState({props, oldProps, changeFlags});
-    if (props.fp64 !== oldProps.fp64) {
+    if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();
