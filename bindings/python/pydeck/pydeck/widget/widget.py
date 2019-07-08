@@ -17,7 +17,10 @@ class DeckGLWidget(widgets.DOMWidget):
 
     Attributes
     ----------
-    json_input (str) - JSON as a string meant for reading into deck.gl JSON API
+    json_input : str
+        JSON as a string meant for reading into deck.gl JSON API
+    mapbox_key : str
+        API key for Mapbox map tiles
     """
     _model_name = Unicode('DeckGLModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)

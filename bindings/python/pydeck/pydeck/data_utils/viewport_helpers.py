@@ -119,11 +119,15 @@ def get_n_pct(points, proportion=1):
 
 def bbox_to_zoom_level(bbox):
     """Computes the zoom level of a lat/lng bounding box
-    Args:
-        bbox (:obj:`list` of :obj:`list` of `:obj:`float`): Northwest and southeast corners of a bounding box,
-            given as two points in a list
-    Returns:
-        int: Zoom level of map in a WGS84 Mercator projection (e.g., like that of Google Maps)
+
+    Parameters
+    ----------
+    bbox : :obj:`list` of :obj:`list` of `:obj:`float`
+        Northwest and southeast corners of a bounding box, given as two points in a list
+
+    Returns
+    -------
+        int : Zoom level of map in a WGS84 Mercator projection (e.g., like that of Google Maps)
     """
     lat_diff = max(bbox[0][0], bbox[1][0]) - min(bbox[0][0], bbox[1][0])
     lng_diff = max(bbox[0][1], bbox[1][1]) - min(bbox[0][1], bbox[1][1])
