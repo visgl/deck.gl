@@ -1,5 +1,3 @@
-import {Matrix4, Vector3} from 'math.gl';
-
 const vs = `
 uniform mat4 shadow_viewProjectionMatrix;
 uniform bool shadow_drawShadowMap;
@@ -66,15 +64,6 @@ vec4 shadow_filterShadowColor(vec4 color) {
 }
 `;
 
-const projectionMatrix = new Matrix4().ortho({
-  left: -1,
-  right: 1,
-  bottom: 1,
-  top: -1,
-  near: 0,
-  far: 2
-});
-
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 255];
 
 export default {
@@ -93,19 +82,12 @@ export default {
         };
       }
 
-      const viewMatrix = new Matrix4()
-        .lookAt({
-          eye: new Vector3(light.direction).negate()
-        })
-        // arbitrary number that covers enough grounds
-        .scale(1e-3);
-
       return {
         shadow_drawShadowMap: Boolean(opts.drawToShadowMap),
         shadow_useShadowMap: !context.picking_uActive && Boolean(opts.shadowMap),
         shadow_shadowMap: opts.shadowMap || true,
         shadow_color: opts.shadowColor || DEFAULT_SHADOW_COLOR,
-        shadow_viewProjectionMatrix: projectionMatrix.clone().multiplyRight(viewMatrix)
+        shadow_viewProjectionMatrix: opts.shadow_viewProjectionMatrix
       };
     }
     return {};

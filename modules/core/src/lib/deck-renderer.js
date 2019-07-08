@@ -70,7 +70,8 @@ export default class DeckRenderer {
       viewports,
       onViewportActive: activateViewport,
       views,
-      effects
+      effects,
+      pixelRatio: this.pixelRatio
     });
     const outputBuffer = this.lastPostProcessEffect
       ? this.screenBuffer

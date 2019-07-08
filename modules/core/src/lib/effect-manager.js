@@ -1,5 +1,6 @@
 import {deepEqual} from '../utils/deep-equal';
 import {default as LightingEffect} from '../effects/lighting/lighting-effect';
+import {default as ShadowEffect} from '../effects/shadow-effect';
 
 export default class EffectManager {
   constructor() {
@@ -7,6 +8,7 @@ export default class EffectManager {
     this._needsRedraw = 'Initial render';
     this.defaultLightingEffect = new LightingEffect();
     this.needApplyDefaultLighting = false;
+    this.needApplyDefaultShadow = false;
   }
 
   setProps(props) {
@@ -17,6 +19,7 @@ export default class EffectManager {
       }
     }
     this.checkLightingEffect();
+    this.checkShadowEffect();
   }
 
   needsRedraw(opts = {clearRedrawFlags: false}) {
@@ -28,10 +31,13 @@ export default class EffectManager {
   }
 
   getEffects() {
-    let effects = this.effects;
+    const effects = this.effects.slice();
     if (this.needApplyDefaultLighting) {
-      effects = this.effects.slice();
       effects.push(this.defaultLightingEffect);
+    }
+
+    if (this.needApplyDefaultShadow) {
+      this.applyShadowEffect(effects);
     }
     return effects;
   }
@@ -62,5 +68,29 @@ export default class EffectManager {
       }
     }
     this.needApplyDefaultLighting = !hasEffect;
+  }
+
+  checkShadowEffect() {
+    let shouldApplyShadow = false;
+    for (const effect of this.effects) {
+      if (effect instanceof LightingEffect && effect.directionalLights.length > 0) {
+        shouldApplyShadow = true;
+        break;
+      }
+    }
+    this.needApplyDefaultShadow = shouldApplyShadow;
+  }
+
+  applyShadowEffect(effects) {
+    for (const effect of this.effects) {
+      if (effect instanceof LightingEffect) {
+        for (const light of effect.directionalLights) {
+          // eslint-disable-next-line max-depth
+          if (light.castShadow) {
+            effects.push(new ShadowEffect({light}));
+          }
+        }
+      }
+    }
   }
 }

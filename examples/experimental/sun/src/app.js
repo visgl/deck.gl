@@ -6,7 +6,6 @@ import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {PhongMaterial} from '@luma.gl/core';
 
 import ShadowPolygonLayer from './shadow-polygon-layer';
-import ShadowEffect from './shadow-effect/shadow-effect';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -23,7 +22,8 @@ const ambientLight = new AmbientLight({
 const dirLight = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 2.0,
-  direction: [10, -20, -30]
+  direction: [10, -20, -30],
+  castShadow: true
 });
 
 const lightingEffect = new LightingEffect({ambientLight, dirLight});
@@ -34,8 +34,6 @@ const material = new PhongMaterial({
   shininess: 32,
   specularColor: [60, 64, 70]
 });
-
-const shadowEffect = new ShadowEffect({shadowColor: [2, 0, 5, 200]});
 
 const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 
@@ -91,7 +89,7 @@ export class App extends Component {
           this._deck = ref && ref.deck;
         }}
         layers={this._renderLayers()}
-        effects={[lightingEffect, shadowEffect]}
+        effects={[lightingEffect]}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}

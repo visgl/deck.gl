@@ -1,8 +1,8 @@
-import {_LayersPass as LayersPass} from '@deck.gl/core';
+import {default as LayersPass} from './layers-pass';
 import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
-  constructor(gl) {
+  constructor(gl, {pixelRatio}) {
     super(gl);
 
     // The shadowMap texture
@@ -76,6 +76,7 @@ export default class ShadowPass extends LayersPass {
     for (const effect of effects) {
       Object.assign(moduleParameters, effect.getParameters(layer));
     }
+    Object.assign(moduleParameters, effectProps);
     return moduleParameters;
   }
 
