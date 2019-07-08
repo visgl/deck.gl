@@ -78,7 +78,7 @@ export default class PolygonLayer extends CompositeLayer {
       const pathsDiff = changeFlags.dataChanged.map(dataRange =>
         replaceInRange({
           data: paths,
-          getIndex: p => p._i,
+          getIndex: p => p.__source.index,
           dataRange,
           replace: this._getPaths(dataRange)
         })
@@ -90,17 +90,6 @@ export default class PolygonLayer extends CompositeLayer {
         pathsDiff: null
       });
     }
-  }
-
-  getPickingInfo({info}) {
-    return Object.assign(info, {
-      // override object with picked data
-      object: (info.object && info.object.object) || info.object
-    });
-  }
-
-  unwrapObject(object) {
-    return object.object || object;
   }
 
   _getPaths(dataRange = {}) {
@@ -126,20 +115,13 @@ export default class PolygonLayer extends CompositeLayer {
             holeIndices[i - 1] || 0,
             holeIndices[i] || positions.length
           );
-          paths.push({path, object, _i: objectInfo.index});
+          paths.push(this.getSubLayerRow({path}, object, objectInfo.index));
         }
       } else {
-        paths.push({path: positions, object, _i: objectInfo.index});
+        paths.push(this.getSubLayerRow({path: positions}, object, objectInfo.index));
       }
     }
     return paths;
-  }
-
-  _getAccessor(accessor) {
-    if (typeof accessor === 'function') {
-      return x => accessor(x.object);
-    }
-    return accessor;
   }
 
   /* eslint-disable complexity */
@@ -240,9 +222,9 @@ export default class PolygonLayer extends CompositeLayer {
             getPath: transitions.getPolygon
           },
 
-          getColor: this._getAccessor(getLineColor),
-          getWidth: this._getAccessor(getLineWidth),
-          getDashArray: this._getAccessor(getLineDashArray)
+          getColor: this.getSubLayerAccessor(getLineColor),
+          getWidth: this.getSubLayerAccessor(getLineWidth),
+          getDashArray: this.getSubLayerAccessor(getLineDashArray)
         },
         this.getSubLayerProps({
           id: 'stroke',

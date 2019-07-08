@@ -45,7 +45,19 @@ export default class CompositeLayer extends Layer {
   // not apply to a composite layer.
   // @return null to cancel event
   getPickingInfo({info}) {
-    return info;
+    const {object} = info;
+    const isDataWrapped =
+      object && object.__source && object.__source.parent && object.__source.parent.id === this.id;
+
+    if (!isDataWrapped) {
+      return info;
+    }
+
+    return Object.assign(info, {
+      // override object with picked data
+      object: object.__source.object,
+      index: object.__source.index
+    });
   }
 
   // Implement to generate subLayers
@@ -67,6 +79,37 @@ export default class CompositeLayer extends Layer {
     return (
       (overridingProps && overridingProps[id] && overridingProps[id].type) || DefaultLayerClass
     );
+  }
+
+  // When casting user data into another format to pass to sublayers,
+  // add reference to the original object and object index
+  getSubLayerRow(row, sourceObject, sourceObjectIndex) {
+    row.__source = {
+      parent: this,
+      object: sourceObject,
+      index: sourceObjectIndex
+    };
+    return row;
+  }
+
+  // Some composite layers cast user data into another format before passing to sublayers
+  // We need to unwrap them before calling the accessor so that they see the original data
+  // objects
+  getSubLayerAccessor(accessor) {
+    if (typeof accessor === 'function') {
+      const objectInfo = {
+        data: this.props.data,
+        target: []
+      };
+      return (x, i) => {
+        if (x.__source) {
+          objectInfo.index = x.__source.index;
+          return accessor(x.__source.object, objectInfo);
+        }
+        return accessor(x, i);
+      };
+    }
+    return accessor;
   }
 
   // Returns sub layer props for a specific sublayer

@@ -63,7 +63,7 @@ export function getGeojsonFeatures(geojson) {
 }
 
 // Linearize
-export function separateGeojsonFeatures(features, dataRange = {}) {
+export function separateGeojsonFeatures(features, wrapFeature, dataRange = {}) {
   const separated = {
     pointFeatures: [],
     lineFeatures: [],
@@ -79,27 +79,22 @@ export function separateGeojsonFeatures(features, dataRange = {}) {
 
     const {geometry} = feature;
 
-    const sourceFeature = {
-      feature,
-      index: featureIndex
-    };
-
     if (geometry.type === 'GeometryCollection') {
       assert(Array.isArray(geometry.geometries), 'GeoJSON does not have geometries array');
       const {geometries} = geometry;
       for (let i = 0; i < geometries.length; i++) {
         const subGeometry = geometries[i];
-        separateGeometry(subGeometry, separated, sourceFeature);
+        separateGeometry(subGeometry, separated, wrapFeature, feature, featureIndex);
       }
     } else {
-      separateGeometry(geometry, separated, sourceFeature);
+      separateGeometry(geometry, separated, wrapFeature, feature, featureIndex);
     }
   }
 
   return separated;
 }
 
-function separateGeometry(geometry, separated, sourceFeature) {
+function separateGeometry(geometry, separated, wrapFeature, sourceFeature, sourceFeatureIndex) {
   const {type, coordinates} = geometry;
   const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = separated;
 
@@ -108,81 +103,105 @@ function separateGeometry(geometry, separated, sourceFeature) {
   // Split each feature, but keep track of the source feature and index (for Multi* geometries)
   switch (type) {
     case 'Point':
-      pointFeatures.push({
-        geometry,
-        sourceFeature
-      });
+      pointFeatures.push(
+        wrapFeature(
+          {
+            geometry
+          },
+          sourceFeature,
+          sourceFeatureIndex
+        )
+      );
       break;
     case 'MultiPoint':
       coordinates.forEach(point => {
-        pointFeatures.push({
-          geometry: {type: 'Point', coordinates: point},
-          sourceFeature
-        });
+        pointFeatures.push(
+          wrapFeature(
+            {
+              geometry: {type: 'Point', coordinates: point}
+            },
+            sourceFeature,
+            sourceFeatureIndex
+          )
+        );
       });
       break;
     case 'LineString':
-      lineFeatures.push({
-        geometry,
-        sourceFeature
-      });
+      lineFeatures.push(
+        wrapFeature(
+          {
+            geometry
+          },
+          sourceFeature,
+          sourceFeatureIndex
+        )
+      );
       break;
     case 'MultiLineString':
       // Break multilinestrings into multiple lines
       coordinates.forEach(path => {
-        lineFeatures.push({
-          geometry: {type: 'LineString', coordinates: path},
-          sourceFeature
-        });
+        lineFeatures.push(
+          wrapFeature(
+            {
+              geometry: {type: 'LineString', coordinates: path}
+            },
+            sourceFeature,
+            sourceFeatureIndex
+          )
+        );
       });
       break;
     case 'Polygon':
-      polygonFeatures.push({
-        geometry,
-        sourceFeature
-      });
+      polygonFeatures.push(
+        wrapFeature(
+          {
+            geometry
+          },
+          sourceFeature,
+          sourceFeatureIndex
+        )
+      );
       // Break polygon into multiple lines
       coordinates.forEach(path => {
-        polygonOutlineFeatures.push({
-          geometry: {type: 'LineString', coordinates: path},
-          sourceFeature
-        });
+        polygonOutlineFeatures.push(
+          wrapFeature(
+            {
+              geometry: {type: 'LineString', coordinates: path}
+            },
+            sourceFeature,
+            sourceFeatureIndex
+          )
+        );
       });
       break;
     case 'MultiPolygon':
       // Break multipolygons into multiple polygons
       coordinates.forEach(polygon => {
-        polygonFeatures.push({
-          geometry: {type: 'Polygon', coordinates: polygon},
-          sourceFeature
-        });
+        polygonFeatures.push(
+          wrapFeature(
+            {
+              geometry: {type: 'Polygon', coordinates: polygon}
+            },
+            sourceFeature,
+            sourceFeatureIndex
+          )
+        );
         // Break polygon into multiple lines
         polygon.forEach(path => {
-          polygonOutlineFeatures.push({
-            geometry: {type: 'LineString', coordinates: path},
-            sourceFeature
-          });
+          polygonOutlineFeatures.push(
+            wrapFeature(
+              {
+                geometry: {type: 'LineString', coordinates: path}
+              },
+              sourceFeature,
+              sourceFeatureIndex
+            )
+          );
         });
       });
       break;
     default:
   }
-}
-
-/**
- * Returns the source feature that was passed to `separateGeojsonFeatures`
- */
-export function unwrapSourceFeature(wrappedFeature) {
-  // The feature provided by the user is under `sourceFeature.feature`
-  return wrappedFeature.sourceFeature.feature;
-}
-
-/**
- * Returns the index of the source feature that was passed to `separateGeojsonFeatures`
- */
-export function unwrapSourceFeatureIndex(wrappedFeature) {
-  // The index of the feature provided by the user is under `sourceFeature.index`
-  return wrappedFeature.sourceFeature.index;
 }
 
 /**
