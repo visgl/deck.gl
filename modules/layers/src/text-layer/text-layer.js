@@ -192,7 +192,7 @@ export default class TextLayer extends CompositeLayer {
         let offsetLeft = 0;
 
         letters.forEach((letter, i) => {
-          const datum = this.getSubLayerDatum(
+          const datum = this.getSubLayerRow(
             {
               text: letter,
               index: i,

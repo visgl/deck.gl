@@ -198,19 +198,19 @@ Returns:
 
 Constructor for this sublayer. The base class implementation checks if `type` is specified for the sublayer in `_subLayerProps`, otherwise returns the default.
 
-##### `getSubLayerDatum`
+##### `getSubLayerRow`
 
 Used by [adapter layers](/docs/developer-guide/custom-layers/composite-layers.md#transforming-data)) to decorate transformed data with a reference to the original object.
 
 Parameters:
 
-* `datum` (Object) - a custom data object to pass to a sublayer.
+* `row` (Object) - a custom data object to pass to a sublayer.
 * `sourceObject` (Object) - the original data object provided by the user
 * `sourceObjectIndex` (Object) - the index of the original data object provided by the user
 
 Returns:
 
-The `datum` object, decorated with a reference.
+The `row` object, decorated with a reference.
 
 
 ##### `getSubLayerAccessor`

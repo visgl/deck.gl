@@ -115,10 +115,10 @@ export default class PolygonLayer extends CompositeLayer {
             holeIndices[i - 1] || 0,
             holeIndices[i] || positions.length
           );
-          paths.push(this.getSubLayerDatum({path}, object, objectInfo.index));
+          paths.push(this.getSubLayerRow({path}, object, objectInfo.index));
         }
       } else {
-        paths.push(this.getSubLayerDatum({path: positions}, object, objectInfo.index));
+        paths.push(this.getSubLayerRow({path: positions}, object, objectInfo.index));
       }
     }
     return paths;

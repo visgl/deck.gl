@@ -83,13 +83,13 @@ export default class CompositeLayer extends Layer {
 
   // When casting user data into another format to pass to sublayers,
   // add reference to the original object and object index
-  getSubLayerDatum(datum, sourceObject, sourceObjectIndex) {
-    datum.__source = {
+  getSubLayerRow(row, sourceObject, sourceObjectIndex) {
+    row.__source = {
       parent: this,
       object: sourceObject,
       index: sourceObjectIndex
     };
-    return datum;
+    return row;
   }
 
   // Some composite layers cast user data into another format before passing to sublayers

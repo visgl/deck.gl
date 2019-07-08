@@ -256,7 +256,7 @@ For more details, read about [how picking works](/docs/developer-guide/custom-la
 
 Because deck.gl's primitive layers expect input to be a flat iteratorable data structure, some composite layers need to transform user data into a different format before passing to sublayers. This transformation may consist converting a tree to an array, filtering, sorting, etc. For example, the [GeoJsonLayer](/docs/layers/geojson-layer.md) splits features by type and passes each to `ScatterplotLayer`, `PathLayer` or `SolidPolygonLayer` respectively. The [TextLayer](/docs/layers/text-layer.md) breaks each text string down to multiple characters and render them with a variation of `IconLayer`.
 
-From the user's perspective, when they specify accessors such as `getColor`, or callbacks such as `onHover`, the functions should always interface with the original data that they give the top-level layer, instead of its internal implementations. For the sublayer to reference back to the original data, we can add a reference onto every transformed datum by calling `getSubLayerDatum`:
+From the user's perspective, when they specify accessors such as `getColor`, or callbacks such as `onHover`, the functions should always interface with the original data that they give the top-level layer, instead of its internal implementations. For the sublayer to reference back to the original data, we can add a reference onto every transformed datum by calling `getSubLayerRow`:
 
 ```js
 class MyCompositeLayer extends CompositeLayer {
@@ -282,8 +282,8 @@ class MyCompositeLayer extends CompositeLayer {
        */
       props.data.forEach((object, index) => {
         for (const timestamp of object.timestamps) {
-          // `getSubLayerDatum` decorates each datum with a reference to the original object and index
-          subLayerData.push(this.getSubLayerDatum({
+          // `getSubLayerRow` decorates each data row for the sub layer with a reference to the original object and index
+          subLayerData.push(this.getSubLayerRow({
             timestamp
           }, object, index));
         }
@@ -295,7 +295,7 @@ class MyCompositeLayer extends CompositeLayer {
 }
 ```
 
-When the sublayer receives data decorated by `getSubLayerDatum`, its accessors need to know how to read the data to access the original objects. In the above example, `getPosition: d => d.position` would fail if called with `{timestamp: 0}`, while the user expects it to be called with `{position: [-122.45, 37.78], timestamps: [0, 1, 4, 7, 8]}`. This can be solved by wrapping the user-provided accessor with `getSubLayerAccessor`:
+When the sublayer receives data decorated by `getSubLayerRow`, its accessors need to know how to read the data to access the original objects. In the above example, `getPosition: d => d.position` would fail if called with `{timestamp: 0}`, while the user expects it to be called with `{position: [-122.45, 37.78], timestamps: [0, 1, 4, 7, 8]}`. This can be solved by wrapping the user-provided accessor with `getSubLayerAccessor`:
 
 ```js
   renderLayers() {
@@ -316,4 +316,4 @@ When the sublayer receives data decorated by `getSubLayerDatum`, its accessors n
   }
 ```
 
-The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the orignal objects from the sublayer data if they are created using `getSubLayerDatum`.
+The default implementations of lifecycle methods such as `getPickingInfo` also understand how to retrieve the orignal objects from the sublayer data if they are created using `getSubLayerRow`.

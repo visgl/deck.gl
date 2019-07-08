@@ -26,7 +26,7 @@ export default class H3ClusterLayer extends CompositeLayer {
         const multiPolygon = h3SetToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
-          polygons.push(this.getSubLayerDatum({polygon}, object, objectInfo.index));
+          polygons.push(this.getSubLayerRow({polygon}, object, objectInfo.index));
         }
       }
 
