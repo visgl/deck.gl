@@ -28,4 +28,5 @@ import './iterable-utils.spec';
 import './range.spec';
 import './math-utils.spec';
 import './shader.spec';
+import './typed-array-manager.spec';
 // import './compare-objects.spec';
