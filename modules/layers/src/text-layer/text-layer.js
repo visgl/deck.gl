@@ -188,14 +188,27 @@ export default class TextLayer extends CompositeLayer {
       const text = getText(object, objectInfo);
       if (text) {
         const letters = Array.from(text);
-        const offsets = [0];
-        let offsetLeft = 0;
 
+        let offsetLeft = 0;
+        let offsetTop = 0;
+        let lineHeight = 0;
+
+        // offsetX, offsetY
+        const offsets = [[0, 0]];
+        // width and height of the text
+        const size = [0, 0];
+        // width of each line
+        const lineLengths = [];
+
+        let lineIndex = 0;
         letters.forEach((letter, i) => {
           const datum = this.getSubLayerRow(
             {
               text: letter,
               index: i,
+              size,
+              lineIndex,
+              lineLengths,
               offsets,
               len: text.length
             },
@@ -204,15 +217,30 @@ export default class TextLayer extends CompositeLayer {
           );
 
           const frame = iconMapping[letter];
-          if (frame) {
+          if (letter === '\n') {
+            size[0] = Math.max(offsetLeft, size[0]);
+            lineLengths.push(offsetLeft);
+            lineIndex++;
+
+            offsetLeft = 0;
+            offsetTop += lineHeight;
+          } else if (frame) {
             offsetLeft += frame.width;
+            lineHeight = Math.max(lineHeight, frame.height);
           } else {
             log.warn(`Missing character: ${letter}`)();
             offsetLeft += MISSING_CHAR_WIDTH;
           }
-          offsets.push(offsetLeft);
+          offsets.push([offsetLeft, offsetTop]);
           transformedData.push(datum);
         });
+
+        // last line
+        size[0] = Math.max(size[0], offsetLeft);
+        if (letters[letters.length - 1] !== '\n') {
+          size[1] = offsetTop + lineHeight;
+          lineLengths.push(offsetLeft);
+        }
       }
     }
 
@@ -221,11 +249,20 @@ export default class TextLayer extends CompositeLayer {
   /* eslint-enable no-loop-func */
 
   getLetterOffset(datum) {
+    // offsetX, offsetY
     return datum.offsets[datum.index];
   }
 
+  getLineLength(datum) {
+    return datum.lineLengths[datum.lineIndex];
+  }
+
   getTextLength(datum) {
-    return datum.offsets[datum.offsets.length - 1];
+    return datum.size[0];
+  }
+
+  getTextHeight(datum) {
+    return datum.size[1];
   }
 
   getAnchorXFromTextAnchor(getTextAnchor) {
@@ -311,10 +348,11 @@ export default class TextLayer extends CompositeLayer {
       }),
       {
         data,
-
         getIcon: d => d.text,
+        getLineLength: d => this.getLineLength(d),
         getShiftInQueue: d => this.getLetterOffset(d),
-        getLengthOfQueue: d => this.getTextLength(d)
+        getLengthOfQueue: d => this.getTextLength(d),
+        getHeightOfQueue: d => this.getTextHeight(d)
       }
     );
   }

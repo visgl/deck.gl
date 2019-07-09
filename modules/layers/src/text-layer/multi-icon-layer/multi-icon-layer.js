@@ -29,8 +29,10 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
+  getLineLength: {type: 'accessor', value: x => x.lineLength || 0},
   getShiftInQueue: {type: 'accessor', value: x => x.shift || 0},
   getLengthOfQueue: {type: 'accessor', value: x => x.len || 1},
+  getHeightOfQueue: {type: 'accessor', value: x => x.height || 1},
   // 1: left, 0: middle, -1: right
   getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
   // 1: top, 0: center, -1: bottom
@@ -95,6 +97,8 @@ export default class MultiIconLayer extends IconLayer {
       getAnchorX,
       getAnchorY,
       getLengthOfQueue,
+      getHeightOfQueue,
+      getLineLength,
       getShiftInQueue
     } = this.props;
     const {value, size} = attribute;
@@ -105,10 +109,14 @@ export default class MultiIconLayer extends IconLayer {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
       const len = getLengthOfQueue(object);
-      const shiftX = getShiftInQueue(object);
+      const height = getHeightOfQueue(object);
+      // [shiftX, shiftY]
+      const [shiftX, shiftY] = getShiftInQueue(object);
+      const anchorX = getAnchorX(object);
+      const lineShift = ((1 - anchorX) * (getLengthOfQueue(object) - getLineLength(object))) / 2;
 
-      value[i++] = ((getAnchorX(object) - 1) * len) / 2 + rect.width / 2 + shiftX || 0;
-      value[i++] = (rect.height / 2) * getAnchorY(object) || 0;
+      value[i++] = ((anchorX - 1) * len) / 2 + lineShift + rect.width / 2 + shiftX || 0;
+      value[i++] = ((getAnchorY(object) - 1) * height) / 2 + rect.height / 2 + shiftY || 0;
     }
   }
 

@@ -1061,6 +1061,33 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/text-layer.png'
   },
   {
+    name: 'text-layer-multi-lines',
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 0,
+      bearing: 0
+    },
+    layers: [
+      new TextLayer({
+        id: 'text-layer',
+        data: dataSamples.points.slice(0, 10),
+        fontFamily: 'Arial',
+        getText: x => `${x.PLACEMENT}\n${x.YR_INSTALLED}`,
+        getPosition: x => x.COORDINATES,
+        getColor: x => [153, 0, 0],
+        getSize: x => 16,
+        getAngle: x => 0,
+        sizeScale: 1,
+        getTextAnchor: x => 'middle',
+        getAlignmentBaseline: x => 'center',
+        getPixelOffset: x => [10, 0]
+      })
+    ],
+    goldenImage: './test/render/golden-images/text-layer-multi-lines.png'
+  },
+  {
     name: 'gpu-grid-lnglat',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
