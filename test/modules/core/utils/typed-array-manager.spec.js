@@ -7,7 +7,7 @@ test('TypedArrayManager#allocate', t => {
   // Allocate an "empty" array
   let array = typedArrayManager.allocate(null, 0, {size: 2, type: Float32Array});
   t.ok(array instanceof Float32Array, 'Allocated array has correct type');
-  t.ok(array.length, 'Allocated array has length');
+  t.is(array.length, 1, 'Allocated array has correct length');
 
   // Create a new array with over allocation
   array = typedArrayManager.allocate(null, 1, {size: 2, type: Float32Array});
@@ -25,8 +25,9 @@ test('TypedArrayManager#allocate', t => {
   t.deepEqual(array2, [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 'Copied existing array');
 
   // Reuse a released array from pool
-  array2 = typedArrayManager.allocate(null, 1, {size: 2, type: Float32Array});
-  t.is(array, array2, 'Reused released array');
+  array2 = typedArrayManager.allocate(null, 1, {size: 2, type: Uint16Array});
+  t.is(array.length, 4, 'Allocated array has correct length');
+  t.is(array.buffer, array2.buffer, 'Reused released arraybuffer');
 
   t.end();
 });
@@ -36,25 +37,18 @@ test('TypedArrayManager#release', t => {
 
   t.doesNotThrow(() => typedArrayManager.release(null), 'Releasing null does not throw');
 
-  for (let i = 1; i <= 3; i++) {
-    const floatArr = typedArrayManager.allocate(null, i, {size: 3, type: Float32Array});
-    const byteArr = typedArrayManager.allocate(null, i, {size: 1, type: Uint8ClampedArray});
+  [1, 3, 2, 1]
+    .map(count => typedArrayManager.allocate(null, count, {size: 3, type: Float32Array}))
+    .forEach(array => typedArrayManager.release(array));
 
-    typedArrayManager.release(floatArr);
-    typedArrayManager.release(byteArr);
-  }
+  const pool = typedArrayManager._pool;
 
-  const floatArraysPool = typedArrayManager._pool.Float32Array;
-  const byteArraysPool = typedArrayManager._pool.Uint8ClampedArray;
+  t.is(pool.length, 2, 'Has correct pool size');
+  t.deepEqual(pool.map(buffer => buffer.byteLength), [24, 36], 'Has correct buffers in pool');
 
-  t.is(floatArraysPool.length, 2, 'Has correct pool size');
-  t.deepEqual(floatArraysPool.map(arr => arr.length), [9, 6], 'Has correct arrays in pool');
-  t.is(byteArraysPool.length, 2, 'Has correct pool size');
-  t.deepEqual(byteArraysPool.map(arr => arr.length), [3, 2], 'Has correct arrays in pool');
-
-  typedArrayManager.allocate(null, 2, {size: 4, type: Float32Array});
-  t.is(floatArraysPool.length, 1, 'Reused released array');
-  t.deepEqual(floatArraysPool.map(arr => arr.length), [6], 'Has correct arrays in pool');
+  typedArrayManager.allocate(null, 8, {size: 4, type: Uint8ClampedArray});
+  t.is(pool.length, 1, 'Reused released arraybuffer');
+  t.deepEqual(pool.map(buffer => buffer.byteLength), [24], 'Has correct buffers in pool');
 
   t.end();
 });
