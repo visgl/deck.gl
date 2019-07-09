@@ -174,7 +174,7 @@ export class App extends Component {
   };
 
   _animate() {
-    const timestamp = Date.now() / 1000;    
+    const timestamp = Date.now() / 1000;
     this.setState({ 
       simTime: this.state.simTime + (timestamp - prevSimTime) * this.state.animationSpeed
     });
