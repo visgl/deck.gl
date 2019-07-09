@@ -5,7 +5,8 @@ import DeckGL, {ScreenGridLayer} from 'deck.gl';
 import {isWebGL2} from '@luma.gl/core';
 
 // Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+// const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 // Source data CSV
 const DATA_URL =
@@ -31,7 +32,7 @@ const colorRange = [
 
 export class App extends Component {
   _renderLayers() {
-    const {data = DATA_URL, cellSize = 20, gpuAggregation = true, aggregation = 'Sum'} = this.props;
+    const {data = DATA_URL, cellSize = 20, gpuAggregation = false, aggregation = 'Sum'} = this.props;
 
     return [
       new ScreenGridLayer({

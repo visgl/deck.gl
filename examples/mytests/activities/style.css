@@ -1,0 +1,41 @@
+
+.timer{
+    position: absolute;
+    background-color: red;
+}
+
+.time-slider {
+  position: absolute;
+  align-items: center;
+  -webkit-appearance: none;
+  left: 18%;
+  bottom: 2rem;
+  width: 60%;
+  padding:  0.6rem 1rem 0.5rem 1rem;
+  background: #d3d3d3;
+  border-radius: 20px;
+  outline: none;
+  opacity: 0.4;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+
+.time-slider:hover {
+  opacity: 1;
+}
+
+.time-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.time-slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}

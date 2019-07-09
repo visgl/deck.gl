@@ -1,0 +1,35 @@
+{
+  "name": "trips",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start-local": "webpack-dev-server --env.local --progress --hot --open",
+    "start": "webpack-dev-server --progress --hot --open"
+  },
+  "dependencies": {
+    "@material-ui/core": "^4.0.1",
+    "canvasjs": "^1.8.1",
+    "chart.js": "^2.8.0",
+    "deck.gl": "^7.0.0-beta",
+    "react": "^16.3.0",
+    "react-canvas-js": "^1.0.1",
+    "react-chartkick": "^0.3.1",
+    "react-dom": "^16.3.0",
+    "react-hover-observer": "^2.1.1",
+    "react-linechart": "^1.1.12",
+    "react-map-gl": "^4.1.2",
+    "react-vis": "^1.11.7",
+    "reactjs-popup": "^1.4.1"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-react": "^7.0.0",
+    "@material-ui/lab": "^4.0.0-alpha.14",
+    "babel-loader": "^8.0.5",
+    "css-loader": "^2.1.1",
+    "style-loader": "^0.23.1",
+    "webpack": "^4.20.2",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.1"
+  }
+}

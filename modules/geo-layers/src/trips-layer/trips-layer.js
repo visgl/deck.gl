@@ -52,7 +52,7 @@ if (!isPath3D) {
 `,
       // Apply a small shift to battle z-fighting
       'vs:#main-end': `\
-float shiftZ = sin(timestamps.x) * 1e-4;
+float shiftZ = sin(timestamps.x) * 1e-7;
 gl_Position.z += shiftZ;
 vTime = timestamps.x + (timestamps.y - timestamps.x) * vPathPosition.y / vPathLength;
 `,
