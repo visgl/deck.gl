@@ -247,6 +247,7 @@ export default class Viewport {
     );
   }
 
+  // Extract frustum planes in common space
   getFrustumPlanes() {
     if (this._frustumPlanes.near) {
       return this._frustumPlanes;
@@ -263,7 +264,8 @@ export default class Viewport {
         fovyRadians,
         position: this.cameraPosition,
         direction: this.cameraDirection,
-        up: this.cameraUp
+        up: this.cameraUp,
+        right: this.cameraRight
       })
     );
 
@@ -444,13 +446,14 @@ export default class Viewport {
     this.viewMatrixInverse = mat4.invert([], this.viewMatrix) || this.viewMatrix;
 
     // Decompose camera directions
-    const {eye, direction, up} = extractCameraVectors({
+    const {eye, direction, up, right} = extractCameraVectors({
       viewMatrix: this.viewMatrix,
       viewMatrixInverse: this.viewMatrixInverse
     });
     this.cameraPosition = eye;
     this.cameraDirection = direction;
     this.cameraUp = up;
+    this.cameraRight = right;
 
     // console.log(this.cameraPosition, this.cameraDirection, this.cameraUp);
 
