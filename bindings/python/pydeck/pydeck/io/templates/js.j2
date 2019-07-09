@@ -1,15 +1,14 @@
 requirejs.config({
   paths: {
-    deck: 'https://unpkg.com/@deck.gl/core@{{release_version}}/dist.min',
-    deckjson: 'https://unpkg.com/@deck.gl/json@{{release_version}}/dist.min',
-    decklayers: 'https://unpkg.com/@deck.gl/layers@{{release_version}}/dist.min',
-    deckaggregate: 'https://unpkg.com/@deck.gl/aggregation-layers@{{release_version}}/dist.min',
+    deck: 'https://unpkg.com/deck.gl@{{release_version}}/dist.min',
     mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_version}}/mapbox-gl',
-    luma: 'https://unpkg.com/@luma.gl/core@{{release_version}}/dist/dist.min'
+    h3: 'https://unpkg.com/h3-js@3.4.3/dist/h3-js.umd',
+    S2: 'https://unpkg.com/s2-geometry@1.2.10/src/s2geometry'
   },
   shim : {
-    'deckaggregate': ['deck', 'decklayers', 'luma']
+    'deck': ['h3', 'S2']
   }
+
 });
 
 let config, mapLayer, jsonInput, jsonConverter;
@@ -49,28 +48,37 @@ function valueChanged() {
 }
 
 
-function init(luma, deckJson, deckgl, deckglLayers, mapboxgl, deckAggregationLayers) {
-   mapboxgl.accessToken = '{{mapbox_api_key}}',
+function init(deck, mapboxgl) {
+  deck.log.priority=1
+  let layersDict = {};
+
+  const layers = Object.keys(deck).filter(x => x.indexOf('Layer') > 0 && x.indexOf('_') != 0);
+
+  layers.map(k => layersDict[k] = deck[k]);
+
+   mapboxgl.accessToken = '{{mapbox_api_key}}';
    mapLayer = new mapboxgl.Map({
     container: 'map',
     interactive: false,
     style: null
   });
 
-  jsonConverter = new deckJson._JSONConverter({
+  jsonConverter = new deck._JSONConverter({
     configuration: {
-      layers: {...deckglLayers, ...deckAggregationLayers}
+      layers: layersDict
+      
     }
   });
 
-  config = new deckgl.Deck({
+  config = new deck.Deck({
     canvas: 'deck-map-container',
     height: '100%',
     width: '100%',
     onLoad: valueChanged.bind(this),
-    views: [new deckgl.MapView()],
+    views: [new deck.MapView()],
     onViewStateChange: onViewportChange.bind(this)
   });
 }
 
-requirejs(['luma', 'deckjson', 'deck', 'decklayers', 'mapboxgl', 'deckaggregate'], init);
+
+requirejs(['deck', 'mapboxgl'], init);

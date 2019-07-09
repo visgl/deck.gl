@@ -17,7 +17,7 @@ def render_json_to_html(json_input, mapbox_api_key=None):
     html_str = js.render(
         mapbox_api_key=mapbox_api_key,
         json_input=json_input,
-        release_version='7.1.0',
+        release_version='7.1.7',
         mapbox_gl_version='0.53.1')
     return html_str
 
@@ -44,8 +44,6 @@ def open_named_or_temporary_file(pathname=None):
 
 
 def make_directory_if_not_exists(path):
-    print(path)
-    print('heyyyyyyyyyyy')
     if path and not os.path.exists(path):
         os.makedirs(path)
     return path
