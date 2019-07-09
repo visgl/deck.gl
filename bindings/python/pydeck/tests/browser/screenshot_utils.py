@@ -19,7 +19,7 @@ from PIL import Image
 CELL_DROPDOWN_SELECTOR = '#menus > div > div > ul > li:nth-child(5) > a'
 RUN_ALL_SELECTOR = '#run_all_cells > a'
 SECONDS_BEFORE_REEXECUTION = 0.5
-SECONDS_BEFORE_SCREENSHOT = 10
+SECONDS_BEFORE_SCREENSHOT = 5
 
 
 
@@ -61,16 +61,16 @@ async def go_to_page_and_screenshot(url, file_name, output_dir='.', sleep_second
             await page.click(CELL_DROPDOWN_SELECTOR)
             await page.click(RUN_ALL_SELECTOR)
             # Wait for the kernel to execute
-            # TODO this might be flaky, is there a good way to check that
-            # WebGL calls happened from Pyppeteer?
+            # TODO this might be flaky, is there a good way to check that WebGL calls actually happened from Puppeteer?
             await asyncio.sleep(sleep_seconds)
             page_height = await get_notebook_page_height(page)
             # Set viewport height to larger page height in order to capture entire page in a screenshot
             await page.setViewport({'width': 768, 'height': page_height})
-        # Pytest passes POSIX paths, so we need to convert them to a string
+        # Pytest passes a POSIX path, so we need to convert it to a string
         str_path = str(output_dir)
         screenshot_path = os.path.join(str_path, rename_png(file_name))
         logging.info("Writing screenshot to %s" % screenshot_path)
+        await asyncio.sleep(sleep_seconds)
         await page._screenshotTask('png', {
             'path': screenshot_path,
             'fullPage': True
