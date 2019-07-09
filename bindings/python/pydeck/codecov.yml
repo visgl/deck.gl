@@ -9,4 +9,6 @@ coverage:
       default:
         target: 0%
 ignore:
-  - "pydeck/tests"
+  - "tests/"
+  - "env/"
+  - "env3/"

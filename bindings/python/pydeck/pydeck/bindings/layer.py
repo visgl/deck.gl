@@ -1,6 +1,5 @@
 import uuid
 
-from .colors import BLACK_RGBA, COLOR_BREWER
 from ..data_utils import is_pandas_df
 from .json_tools import JSONMixin
 
@@ -25,8 +24,8 @@ class Layer(JSONMixin):
         id=None,
         get_position='-',
         color_range=None,
-        opacity=1,
-        radius=1000,
+        opacity=None,
+        radius=None,
         get_radius=None,
         light_settings=None,
         coverage=None,
@@ -36,7 +35,7 @@ class Layer(JSONMixin):
         upper_percentile=None,
         get_fill_color=None,
         get_color=None,
-        stroked=False,
+        stroked=None,
         filled=None,
         radius_scale=None,
         radius_min_pixels=None,
@@ -93,13 +92,13 @@ class Layer(JSONMixin):
             Boolean to determine if layer rises from map. Defaults to `True` for aggregate layers.
         get_fill_color : :obj:`list` of `float` or str
             *Not valid on all deck.gl layers.* Specifies fill color as an RGBA value or field name in the data.
-        stroked : bool, default False
+        stroked : bool, default None
             *Valid on ScatterplotLayer.* Draw online the outline of a point
         filled : bool, default True
             *Valid on ScatterplotLayer.* Draw the filled area of a point
         radius_scale : int, default 1
             Global radius multiplier for all points
-        radius_min_pixels : int, default 1
+        radius_min_pixels : int, default None
             Minimum radius in pixels, prevents stroke from getting too small when zoomed out
         radius_max_pixels : int, default 100
             Maximum radius in pixels, prevents stroke from getting too big when zoomed out
@@ -115,9 +114,9 @@ class Layer(JSONMixin):
         self.get_position = get_position
         self.opacity = opacity
         self.get_radius = get_radius or radius
-        self.get_color = get_color or BLACK_RGBA
-        self.get_fill_color = get_fill_color or BLACK_RGBA
-        self.get_line_color = get_line_color or BLACK_RGBA
+        self.get_color = get_color
+        self.get_fill_color = get_fill_color
+        self.get_line_color = get_line_color
         self.get_line_width = get_line_width
         # ScatterplotLayer
         self.radius_scale = radius_scale
@@ -151,7 +150,7 @@ class Layer(JSONMixin):
         if is_aggregate_layer(type):
             self.radius = radius
             self.upper_percentile = upper_percentile
-            self.color_range = color_range or COLOR_BREWER['BuRd']
+            self.color_range = color_range
             self.light_settings = light_settings
             self.extruded = extruded if extruded is not None else True
 

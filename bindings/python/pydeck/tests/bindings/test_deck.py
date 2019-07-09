@@ -1,4 +1,7 @@
+import pytest
+
 import json
+import os
 
 from pydeck import (
     Layer,
@@ -7,10 +10,9 @@ from pydeck import (
     View,
     Deck
 )
+from ..const import FIXTURE_STRING
 
-
-FIXTURE_STRING = """{"initialViewState": {"bearing": -27.396674584323023, "latitude": 52.232395363869415, "longitude": -1.4157267858730052, "maxZoom": 15, "minZoom": 5, "pitch": 40.5, "zoom": 6.6}, "layers": [{"colorRange": [[1, 152, 189], [73, 227, 206], [216, 254, 181], [254, 237, 177], [254, 173, 84], [209, 55, 78]], "coverage": 1, "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv", "elevationRange": [0, 3000], "elevationScale": 50, "extruded": true, "getColor": [0, 0, 0, 255], "getFillColor": [0, 0, 0, 255], "getLineColor": [0, 0, 0, 255], "getPosition": "-", "getRadius": 1000, "id": "heatmap", "lightSettings": {"ambientRatio": 0.4, "diffuseRatio": 0.6, "lightsPosition": [-0.144528, 49.739968, 8000, -3.807751, 54.104682, 8000], "numberOfLights": 2}, "opacity": 1, "radius": 1000, "stroked": false, "type": "HexagonLayer"}], "mapStyle": "mapbox://styles/mapbox/dark-v9", "views": [{"controller": true, "type": "MapView"}]}"""
-
+"""Create a series of test objects"""
 lights = LightSettings(
     lights_position=[
         -0.144528,
@@ -42,10 +44,25 @@ view = View(type='MapView', controller=True)
 deck = Deck(layers=[layer], initial_view_state=view_state, views=[view])
 
 
+def test_warning():
+    """Verify that a warning is emitted when no Mapbox API key is set"""
+    _environ = dict(os.environ)
+    try:
+        if os.environ.get('MAPBOX_API_KEY'):
+            del os.environ['MAPBOX_API_KEY']
+        with pytest.warns(UserWarning) as record:
+            d = Deck()
+            os.environ['MAPBOX_API_KEY'] = 'pk.xx'
+            d = Deck()
+        # Assert that only one warning has been raised
+        assert len(record) == 1
+    finally:
+        os.environ.clear()
+        os.environ.update(_environ)
+
 def test_json_output():
     """Verify that the JSON rendering produces an @deck.gl/json library-compliant JSON object"""
     assert str(deck) == json.dumps(json.loads(FIXTURE_STRING), sort_keys=True)
-
 
 def test_update():
     """Verify that calling `update` changes the Deck object"""

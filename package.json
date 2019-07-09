@@ -34,7 +34,8 @@
     "metrics": "ocular-metrics",
     "link-luma": "yarn && (cd node_modules && mv luma.gl luma.orig && ln -s ../../luma.gl/modules/core)",
     "unlink-luma": "(cd node_modules && mv luma.gl luma.ln && mv luma.orig luma.gl)",
-    "update-release-branch": "scripts/update-release-branch.sh"
+    "update-release-branch": "scripts/update-release-branch.sh",
+    "bindings-precommit-tests": "scripts/bindings-precommit-hook.sh"
   },
   "browser": {
     "jsdom": false
@@ -67,7 +68,8 @@
     "reify": "^0.18.1"
   },
   "pre-commit": [
-    "test-fast"
+    "test-fast",
+    "bindings-precommit-tests"
   ]
 }
 
