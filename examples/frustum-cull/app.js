@@ -41,6 +41,14 @@ class Root extends Component {
     this.loop = this.loop.bind(this);
   }
 
+  componentDidMount() {
+    this.animationLoop = requestAnimationFrame(this.loop);
+  }
+
+  componentWillUnmount() {
+    cancelAnimationFrame(this.animationLoop);
+  }
+
   loop() {
     if (this.deckRef.current.viewports) {
       const viewport = this.deckRef.current.viewports[0];
@@ -69,14 +77,6 @@ class Root extends Component {
     }
 
     this.animationLoop = requestAnimationFrame(this.loop);
-  }
-
-  componentDidMount() {
-    this.animationLoop = requestAnimationFrame(this.loop);
-  }
-
-  componentWillUnmount() {
-    cancelAnimationFrame(this.animationLoop);
   }
 
   render() {
