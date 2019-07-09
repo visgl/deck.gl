@@ -19,7 +19,7 @@ from PIL import Image
 CELL_DROPDOWN_SELECTOR = '#menus > div > div > ul > li:nth-child(5) > a'
 RUN_ALL_SELECTOR = '#run_all_cells > a'
 SECONDS_BEFORE_REEXECUTION = 0.5
-SECONDS_BEFORE_SCREENSHOT = 5
+SECONDS_BEFORE_SCREENSHOT = 10
 
 
 
