@@ -1,5 +1,5 @@
 {
-  "name": "react-basic",
+  "name": "frustum-cull",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -8,10 +8,10 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "deck.gl": "^7.0.0-beta",
-    "luma.gl": "^7.0.0-beta",
+    "deck.gl": "^7.1.0",
     "react": "^16.3.0",
-    "react-dom": "^16.3.0"
+    "react-dom": "^16.3.0",
+    "react-map-gl": "^4.1.2"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

@@ -31,19 +31,15 @@ const a = new Vector3();
 // Extract frustum planes in common space.
 // Note that common space is left-handed
 // (with y pointing down)
-export function getFrustumPlanes({
-  aspect,
-  near,
-  far,
-  fovyRadians,
-  position,
-  direction,
-  up,
-  right,
-  height
-}) {
+export function getFrustumPlanes({aspect, near, far, fovyRadians, position, direction, up, right}) {
+  cameraDirection.copy(direction);
+
+  // Account for any scaling of the z axis (e.g. in
+  // mercator view matrix)
+  const nearFarScale = 1 / cameraDirection.len();
+  cameraDirection.normalize();
+
   cameraPosition.copy(position);
-  cameraDirection.copy(direction).normalize();
   cameraUp.copy(up).normalize();
   cameraRight.copy(right).normalize();
 
@@ -52,11 +48,11 @@ export function getFrustumPlanes({
 
   nearCenter
     .copy(cameraDirection)
-    .scale(near * height)
+    .scale(near * nearFarScale)
     .add(cameraPosition);
   farCenter
     .copy(cameraDirection)
-    .scale(far * height) // Account for scaling in view matrix
+    .scale(far * nearFarScale)
     .add(cameraPosition);
 
   let n = cameraDirection.clone().negate();
@@ -111,9 +107,3 @@ export function getFrustumPlanes({
 
   return planes;
 }
-
-// export function mod(value, divisor) {
-//   assert(Number.isFinite(value) && Number.isFinite(divisor));
-//   const modulus = value % divisor;
-//   return modulus < 0 ? divisor + modulus : modulus;
-// }

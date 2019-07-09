@@ -247,10 +247,11 @@ export default class Viewport {
     );
   }
 
+  // Extract frustum planes in common space
   getFrustumPlanes() {
-    // if (this._frustumPlanes.near) {
-    //   return this._frustumPlanes;
-    // }
+    if (this._frustumPlanes.near) {
+      return this._frustumPlanes;
+    }
 
     const {near, far, fovyRadians, aspect} = this.projectionProps;
 
@@ -264,8 +265,7 @@ export default class Viewport {
         position: this.cameraPosition,
         direction: this.cameraDirection,
         up: this.cameraUp,
-        right: this.cameraRight,
-        height: this.height
+        right: this.cameraRight
       })
     );
 

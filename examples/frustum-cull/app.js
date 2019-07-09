@@ -5,7 +5,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import DeckGL, {SimpleMeshLayer} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
-import {SphereGeometry} from 'luma.gl';
+import {SphereGeometry} from '@luma.gl/core';
 import {Vector3} from 'math.gl';
 
 const INITIAL_VIEW_STATE = {
@@ -37,36 +37,42 @@ class Root extends Component {
       background: 'white',
       border: '1px solid black'
     };
+
+    this.loop = this.loop.bind(this);
   }
 
   componentDidMount() {
-    const loop = () => {
-      if (this.deckRef.current.viewports) {
-        const viewport = this.deckRef.current.viewports[0];
-        const commonPosition = viewport.projectPosition(position);
-        const frustumPlanes = viewport.getFrustumPlanes();
-        let out = false;
-        let outDir = null;
-        for (const dir in frustumPlanes) {
-          const plane = frustumPlanes[dir];
-          if (plane.d === undefined) {
-            continue;
-          }
-          const test = testPosition.copy(commonPosition).dot(plane.n);
-          if (test > plane.d) {
-            out = true;
-            outDir = dir;
-            break;
-          }
+    this.animationLoop = requestAnimationFrame(this.loop);
+  }
+
+  loop() {
+    if (this.deckRef.current.viewports) {
+      const viewport = this.deckRef.current.viewports[0];
+
+      // Culling tests must be done in common space
+      const commonPosition = viewport.projectPosition(position);
+
+      // Extract frustum planes based on current view.
+      const frustumPlanes = viewport.getFrustumPlanes();
+      let out = false;
+      let outDir = null;
+      for (const dir in frustumPlanes) {
+        const plane = frustumPlanes[dir];
+        if (plane.d === undefined) {
+          continue;
         }
 
-        this.setState({cullStatus: out ? `OUT (${outDir})` : 'IN'});
+        if (testPosition.copy(commonPosition).dot(plane.n) > plane.d) {
+          out = true;
+          outDir = dir;
+          break;
+        }
       }
 
-      this.animationLoop = requestAnimationFrame(loop);
-    };
+      this.setState({cullStatus: out ? `OUT (${outDir})` : 'IN'});
+    }
 
-    this.animationLoop = requestAnimationFrame(loop);
+    this.animationLoop = requestAnimationFrame(this.loop);
   }
 
   componentWillUnmount() {

@@ -56,8 +56,8 @@ If `projectionMatrix` is not supplied, an attempt is made to build from the rema
 
 * `fovy` (`Number`, optional) - Field of view covered by camera, in the perspective case. In degrees. Default `75`.
 * `aspect` (`Number`, optional) - Aspect ratio. Defaults to the Viewport's `width/height` ratio.
-* `near` (`Number`, optional) - Distance of near clipping plane. Default `0.1`.
-* `far` (`Number`, optional) - Distance of far clipping plane. Default `1000`.
+* `near` (`Number`, optional) - Distance of near clipping plane. Default `0.1`. (Note that in geospatial viewports, this actual distanct used is scaled by the height of the screen).
+* `far` (`Number`, optional) - Distance of far clipping plane. Default `1000`. (Note that in geospatial viewports, this actual distanct used is scaled by the height of the screen).
 * `orthographic` (`Boolean`, optional) - whether to create an orthographic or perspective projection matrix. Default `false` (perspective projection).
 * `orthographicFocalDistance` (`Number`, optional) - Used by orthographic projections only. The distance at which the field-of-view frustum is sampled to extract the extents of the view box. Default `1`.
 
@@ -144,6 +144,16 @@ Parameters:
 Returns:
 
 * `[longitude, latitude, altitude]`
+
+
+##### `getFrustumPlanes`
+
+Extract view frustum planes in common space. Each plane is defined by its normal `n` and distance from
+the origin `d` (such that point `x` is on the plane if `dot(n, x) === d`).
+
+Returns:
+
+* `{near: {n, d}, far: {n, d}, left: {n, d}, right: {n, d}, top: {n, d}, bottom: {n, d}}`
 
 
 ## Remarks
