@@ -41,10 +41,6 @@ class Root extends Component {
     this.loop = this.loop.bind(this);
   }
 
-  componentDidMount() {
-    this.animationLoop = requestAnimationFrame(this.loop);
-  }
-
   loop() {
     if (this.deckRef.current.viewports) {
       const viewport = this.deckRef.current.viewports[0];
@@ -72,6 +68,10 @@ class Root extends Component {
       this.setState({cullStatus: out ? `OUT (${outDir})` : 'IN'});
     }
 
+    this.animationLoop = requestAnimationFrame(this.loop);
+  }
+
+  componentDidMount() {
     this.animationLoop = requestAnimationFrame(this.loop);
   }
 
