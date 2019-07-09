@@ -19,7 +19,7 @@ from PIL import Image
 CELL_DROPDOWN_SELECTOR = '#menus > div > div > ul > li:nth-child(5) > a'
 RUN_ALL_SELECTOR = '#run_all_cells > a'
 SECONDS_BEFORE_REEXECUTION = 0.5
-SECONDS_BEFORE_SCREENSHOT = 10
+SECONDS_BEFORE_SCREENSHOT = 10.0
 
 
 
@@ -66,11 +66,12 @@ async def go_to_page_and_screenshot(url, file_name, output_dir='.', sleep_second
             page_height = await get_notebook_page_height(page)
             # Set viewport height to larger page height in order to capture entire page in a screenshot
             await page.setViewport({'width': 768, 'height': page_height})
+        else:
+            await asyncio.sleep(sleep_seconds)
         # Pytest passes a POSIX path, so we need to convert it to a string
         str_path = str(output_dir)
         screenshot_path = os.path.join(str_path, rename_png(file_name))
         logging.info("Writing screenshot to %s" % screenshot_path)
-        await asyncio.sleep(sleep_seconds)
         await page._screenshotTask('png', {
             'path': screenshot_path,
             'fullPage': True
