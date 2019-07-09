@@ -18,8 +18,8 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable} from '@deck.gl/core';
-import {fp64, ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
+import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
+import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
 import {waitForGLTFAssets} from './gltf-utils';
 
@@ -28,14 +28,17 @@ import {MATRIX_ATTRIBUTES} from '../utils/matrix';
 import vs from './scenegraph-layer-vertex.glsl';
 import fs from './scenegraph-layer-fragment.glsl';
 
-const {fp64LowPart} = fp64;
-
 const DEFAULT_COLOR = [255, 255, 255, 255];
 
 const defaultProps = {
   scenegraph: {type: 'object', value: null, async: true},
-  getScene: scenegraph =>
-    scenegraph && scenegraph.scenes ? scenegraph.scenes[scenegraph.scene || 0] : scenegraph,
+  getScene: gltf => {
+    if (gltf && gltf.scenes) {
+      // gltf post processor replaces `gltf.scene` number with the scene `object`
+      return typeof gltf.scene === 'object' ? gltf.scene : gltf.scenes[gltf.scene || 0];
+    }
+    return gltf;
+  },
   getAnimator: scenegraph => scenegraph && scenegraph.animator,
   _animations: null,
 

@@ -57,7 +57,6 @@ const MISSING_CHAR_WIDTH = 32;
 const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
-  fp64: false,
   billboard: true,
   sizeScale: 1,
   sizeUnits: 'pixels',
@@ -103,7 +102,7 @@ export default class TextLayer extends CompositeLayer {
       const dataDiff = changeFlags.dataChanged.map(dataRange =>
         replaceInRange({
           data,
-          getIndex: p => p.objectIndex,
+          getIndex: p => p.__source.index,
           dataRange,
           replace: this.transformStringToLetters(dataRange)
         })
@@ -193,15 +192,16 @@ export default class TextLayer extends CompositeLayer {
         let offsetLeft = 0;
 
         letters.forEach((letter, i) => {
-          const datum = {
-            text: letter,
-            index: i,
-            offsets,
-            len: text.length,
-            // reference of original object and object index
+          const datum = this.getSubLayerRow(
+            {
+              text: letter,
+              index: i,
+              offsets,
+              len: text.length
+            },
             object,
-            objectIndex: objectInfo.index
-          };
+            objectInfo.index
+          );
 
           const frame = iconMapping[letter];
           if (frame) {
@@ -228,46 +228,18 @@ export default class TextLayer extends CompositeLayer {
     return datum.offsets[datum.offsets.length - 1];
   }
 
-  _getAccessor(accessor) {
-    if (typeof accessor === 'function') {
-      const objectInfo = {
-        data: this.props.data,
-        target: []
-      };
-      return x => {
-        objectInfo.index = x.objectIndex;
-        return accessor(x.object, objectInfo);
-      };
-    }
-    return accessor;
-  }
-
   getAnchorXFromTextAnchor(getTextAnchor) {
     if (typeof getTextAnchor === 'function') {
-      const objectInfo = {
-        data: this.props.data,
-        target: []
-      };
-      return x => {
-        objectInfo.index = x.objectIndex;
-        const textAnchor = getTextAnchor(x.object, objectInfo);
-        return TEXT_ANCHOR[textAnchor] || 0;
-      };
+      getTextAnchor = this.getSubLayerAccessor(getTextAnchor);
+      return x => TEXT_ANCHOR[getTextAnchor(x)] || 0;
     }
     return () => TEXT_ANCHOR[getTextAnchor] || 0;
   }
 
   getAnchorYFromAlignmentBaseline(getAlignmentBaseline) {
     if (typeof getAlignmentBaseline === 'function') {
-      const objectInfo = {
-        data: this.props.data,
-        target: []
-      };
-      return x => {
-        objectInfo.index = x.objectIndex;
-        const alignmentBaseline = getAlignmentBaseline(x.object, objectInfo);
-        return ALIGNMENT_BASELINE[alignmentBaseline] || 0;
-      };
+      getAlignmentBaseline = this.getSubLayerAccessor(getAlignmentBaseline);
+      return x => TEXT_ANCHOR[getAlignmentBaseline(x)] || 0;
     }
     return () => ALIGNMENT_BASELINE[getAlignmentBaseline] || 0;
   }
@@ -283,7 +255,6 @@ export default class TextLayer extends CompositeLayer {
       getTextAnchor,
       getAlignmentBaseline,
       getPixelOffset,
-      fp64,
       billboard,
       sdf,
       sizeScale,
@@ -304,14 +275,14 @@ export default class TextLayer extends CompositeLayer {
 
         _dataDiff: dataDiff && (() => dataDiff),
 
-        getPosition: this._getAccessor(getPosition),
-        getColor: this._getAccessor(getColor),
-        getSize: this._getAccessor(getSize),
-        getAngle: this._getAccessor(getAngle),
+        getPosition: this.getSubLayerAccessor(getPosition),
+        getColor: this.getSubLayerAccessor(getColor),
+        getSize: this.getSubLayerAccessor(getSize),
+        getAngle: this.getSubLayerAccessor(getAngle),
         getAnchorX: this.getAnchorXFromTextAnchor(getTextAnchor),
         getAnchorY: this.getAnchorYFromAlignmentBaseline(getAlignmentBaseline),
-        getPixelOffset: this._getAccessor(getPixelOffset),
-        fp64,
+        getPixelOffset: this.getSubLayerAccessor(getPixelOffset),
+        getPickingIndex: obj => obj.__source.index,
         billboard,
         sizeScale: sizeScale * scale,
         sizeUnits,

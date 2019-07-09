@@ -149,7 +149,6 @@ export default class Deck {
     this._onEvent = this._onEvent.bind(this);
     this._onPointerDown = this._onPointerDown.bind(this);
     this._onPointerMove = this._onPointerMove.bind(this);
-    this._onPointerLeave = this._onPointerLeave.bind(this);
     this._pickAndCallback = this._pickAndCallback.bind(this);
     this._onRendererInitialized = this._onRendererInitialized.bind(this);
     this._onRenderFrame = this._onRenderFrame.bind(this);
@@ -507,12 +506,15 @@ export default class Deck {
   // The `pointermove` event may fire multiple times in between two animation frames,
   // it's a waste of time to run picking without rerender. Instead we save the last pick
   // request and only do it once on the next animation frame.
-  _requestPick({event, callback, mode}) {
+  _onPointerMove(event) {
     const {_pickRequest} = this;
     if (event.type === 'pointerleave') {
       _pickRequest.x = -1;
       _pickRequest.y = -1;
       _pickRequest.radius = 0;
+    } else if (event.leftButton || event.rightButton) {
+      // Do not trigger onHover callbacks if mouse button is down.
+      return;
     } else {
       const pos = event.offsetCenter;
       // Do not trigger callbacks when click/hover position is invalid. Doing so will cause a
@@ -525,9 +527,13 @@ export default class Deck {
       _pickRequest.radius = this.props.pickingRadius;
     }
 
-    _pickRequest.callback = callback;
+    if (this.layerManager) {
+      this.layerManager.context.mousePosition = {x: _pickRequest.x, y: _pickRequest.y};
+    }
+
+    _pickRequest.callback = this.props.onHover;
     _pickRequest.event = event;
-    _pickRequest.mode = mode;
+    _pickRequest.mode = 'hover';
   }
 
   // Actually run picking
@@ -592,7 +598,7 @@ export default class Deck {
       events: {
         pointerdown: this._onPointerDown,
         pointermove: this._onPointerMove,
-        pointerleave: this._onPointerLeave
+        pointerleave: this._onPointerMove
       }
     });
     for (const eventType in EVENTS) {
@@ -764,26 +770,6 @@ export default class Deck {
     this._lastPointerDownInfo = this.pickObject({
       x: pos.x,
       y: pos.y
-    });
-  }
-
-  _onPointerMove(event) {
-    if (event.leftButton || event.rightButton) {
-      // Do not trigger onHover callbacks if mouse button is down.
-      return;
-    }
-    this._requestPick({
-      callback: this.props.onHover,
-      event,
-      mode: 'hover'
-    });
-  }
-
-  _onPointerLeave(event) {
-    this._requestPick({
-      callback: this.props.onHover,
-      event,
-      mode: 'hover'
     });
   }
 

@@ -26,27 +26,12 @@ export default class H3ClusterLayer extends CompositeLayer {
         const multiPolygon = h3SetToMultiPolygon(hexagons, true);
 
         for (const polygon of multiPolygon) {
-          polygons.push({polygon, _obj: object, _idx: objectInfo.index});
+          polygons.push(this.getSubLayerRow({polygon}, object, objectInfo.index));
         }
       }
 
       this.setState({polygons});
     }
-  }
-
-  getPickingInfo({info}) {
-    return Object.assign(info, {
-      object: info.object && info.object._obj,
-      index: info.object && info.object._idx
-    });
-  }
-
-  getSubLayerAccessor(accessor) {
-    if (typeof accessor !== 'function') return accessor;
-
-    return (object, objectInfo) => {
-      return accessor(object._obj, objectInfo);
-    };
   }
 
   renderLayers() {
@@ -62,7 +47,6 @@ export default class H3ClusterLayer extends CompositeLayer {
       lineJointRounded,
       lineMiterLimit,
       lineDashJustified,
-      fp64,
       material,
 
       getFillColor,
@@ -77,7 +61,6 @@ export default class H3ClusterLayer extends CompositeLayer {
 
     return new SubLayerClass(
       {
-        fp64,
         filled,
         wireframe,
 

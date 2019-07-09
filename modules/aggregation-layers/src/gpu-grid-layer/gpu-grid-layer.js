@@ -247,7 +247,6 @@ export default class GPUGridLayer extends CompositeLayer {
     }
     const {
       elevationScale,
-      fp64,
       extruded,
       cellSize: cellSizeMeters,
       coverage,
@@ -273,7 +272,6 @@ export default class GPUGridLayer extends CompositeLayer {
         colorDomain,
         elevationDomain,
 
-        fp64,
         cellSize: cellSizeMeters,
         coverage,
         material,

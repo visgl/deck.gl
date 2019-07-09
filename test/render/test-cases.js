@@ -16,6 +16,8 @@ import {
 } from '@deck.gl/core';
 import {noise, vignette} from '@luma.gl/effects';
 
+import {Fp64Extension} from '@deck.gl/extensions';
+
 const effect1 = new PostProcessEffect(noise);
 const effect2 = new PostProcessEffect(vignette);
 
@@ -380,31 +382,6 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/path-lnglat.png'
   },
   {
-    name: 'path-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PathLayer({
-        id: 'path-lnglat-64',
-        data: dataSamples.zigzag,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        opacity: 0.6,
-        getPath: f => f.path,
-        getColor: f => [128, 0, 0],
-        getWidth: f => 100,
-        widthMinPixels: 1,
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/path-lnglat.png'
-  },
-  {
     name: 'path-billboard',
     viewState: {
       latitude: 37.7518488,
@@ -462,10 +439,9 @@ export const TEST_CASES = [
     },
     layers: [
       new ScatterplotLayer({
-        id: 'scatterplot-lnglat-64',
+        id: 'scatterplot-lnglat',
         data: dataSamples.points,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         getPosition: d => d.COORDINATES,
         getFillColor: d => [255, 128, 0],
         getRadius: d => d.SPACES,
@@ -473,7 +449,8 @@ export const TEST_CASES = [
         pickable: true,
         radiusScale: 30,
         radiusMinPixels: 1,
-        radiusMaxPixels: 30
+        radiusMaxPixels: 30,
+        extensions: [new Fp64Extension()]
       })
     ],
     goldenImage: './test/render/golden-images/scatterplot-lnglat.png'
@@ -505,34 +482,6 @@ export const TEST_CASES = [
     }
   },
   {
-    name: 'arc-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 20,
-      bearing: 0
-    },
-    layers: [
-      new ArcLayer({
-        id: 'arc-lnglat-64',
-        data: dataSamples.routes,
-        strokeWidth: 2,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        getSourcePosition: d => d.START,
-        getTargetPosition: d => d.END,
-        getSourceColor: d => [64, 255, 0],
-        getTargetColor: d => [0, 128, 200],
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/arc-lnglat-64.png',
-    imageDiffOptions: !IS_HEADLESS && {
-      threshold: 0.985
-    }
-  },
-  {
     name: 'line-lnglat',
     viewState: {
       latitude: 37.751537058389985,
@@ -554,31 +503,6 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/line-lnglat.png'
-  },
-  {
-    name: 'line-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new LineLayer({
-        id: 'line-lnglat-64',
-        data: dataSamples.routes,
-        getWidth: 0,
-        widthMinPixels: 2,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        getSourcePosition: d => d.START,
-        getTargetPosition: d => d.END,
-        getColor: d => (d.SERVICE === 'WEEKDAY' ? [255, 64, 0] : [255, 200, 0]),
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/line-lnglat-64.png'
   },
   {
     name: 'icon-lnglat',
@@ -648,36 +572,6 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/icon-lnglat-facing-up.png'
   },
   {
-    name: 'icon-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    // rendering times
-    renderingTimes: 2,
-    layers: [
-      new IconLayer({
-        id: 'icon-lnglat-64',
-        data: dataSamples.points,
-        iconAtlas: ICON_ATLAS,
-        iconMapping: dataSamples.iconAtlas,
-        sizeScale: 12,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
-        getPosition: d => d.COORDINATES,
-        getColor: d => [64, 64, 72],
-        getIcon: d => (d.PLACEMENT === 'SW' ? 'marker' : 'marker-warning'),
-        getSize: d => (d.RACKS > 2 ? 2 : 1),
-        opacity: 0.8,
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/icon-lnglat.png'
-  },
-  {
     name: 'icon-lnglat-auto',
     viewState: {
       latitude: 37.751537058389985,
@@ -694,7 +588,6 @@ export const TEST_CASES = [
         data: dataSamples.points,
         sizeScale: 12,
         coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         getPosition: d => d.COORDINATES,
         getColor: d => [64, 64, 72],
         getIcon: d => {
@@ -831,31 +724,6 @@ export const TEST_CASES = [
         data: dataSamples.worldGrid.data,
         cellSize: dataSamples.worldGrid.cellSize,
         extruded: true,
-        pickable: true,
-        opacity: 1,
-        getFillColor: g => [245, 166, g.value * 255, 255],
-        getElevation: h => h.value * 5000
-      })
-    ],
-    goldenImage: './test/render/golden-images/gridcell-lnglat.png'
-  },
-  {
-    name: 'gridcell-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new GridCellLayer({
-        id: 'gridcell-lnglat-64',
-        data: dataSamples.worldGrid.data,
-        cellSize: dataSamples.worldGrid.cellSize,
-        extruded: true,
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         pickable: true,
         opacity: 1,
         getFillColor: g => [245, 166, g.value * 255, 255],
@@ -1082,36 +950,6 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/pointcloud-lnglat.png'
   },
   {
-    name: 'pointcloud-lnglat-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 13,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new PointCloudLayer({
-        id: 'pointcloud-lnglat-64',
-        data: dataSamples.getPointCloud(),
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        coordinateOrigin: dataSamples.positionOrigin,
-        fp64: true,
-        getPosition: d => [
-          d.position[0] * 1e-5 - 122.42694203247012,
-          d.position[1] * 1e-5 + 37.751537058389985,
-          d.position[2]
-        ],
-        getNormal: d => d.normal,
-        getColor: d => d.color,
-        opacity: 1,
-        pointSize: 2,
-        pickable: true
-      })
-    ],
-    goldenImage: './test/render/golden-images/pointcloud-lnglat-64.png'
-  },
-  {
     name: 'pointcloud-meter',
     viewState: {
       latitude: 37.751537058389985,
@@ -1181,35 +1019,6 @@ export const TEST_CASES = [
         id: 'text-layer',
         data: dataSamples.points.slice(0, 50),
         fontFamily: 'Arial',
-        getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
-        getPosition: x => x.COORDINATES,
-        getColor: x => [153, 0, 0],
-        getSize: x => 16,
-        getAngle: x => 0,
-        sizeScale: 1,
-        getTextAnchor: x => 'start',
-        getAlignmentBaseline: x => 'center',
-        getPixelOffset: x => [10, 0]
-      })
-    ],
-    goldenImage: './test/render/golden-images/text-layer.png'
-  },
-  {
-    name: 'text-layer-64',
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 11.5,
-      pitch: 0,
-      bearing: 0
-    },
-    layers: [
-      new TextLayer({
-        id: 'text-layer-64',
-        data: dataSamples.points.slice(0, 50),
-        fontFamily: 'Arial',
-        coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
-        fp64: true,
         getText: x => `${x.PLACEMENT}-${x.YR_INSTALLED}`,
         getPosition: x => x.COORDINATES,
         getColor: x => [153, 0, 0],

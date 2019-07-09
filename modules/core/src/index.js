@@ -87,12 +87,15 @@ export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
 export {createIterable} from './utils/iterable-utils';
+export {fp64LowPart} from './utils/math-utils';
 import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 import {count} from './utils/count';
 import memoize from './utils/memoize';
 
 // lighting
 export {AmbientLight} from '@luma.gl/core';
+
+export {LayerExtension} from './lib/layer-extension';
 
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)

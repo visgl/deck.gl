@@ -26,12 +26,7 @@ import {PhongMaterial} from '@luma.gl/core';
 import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 import {replaceInRange} from '../utils';
 
-import {
-  getGeojsonFeatures,
-  separateGeojsonFeatures,
-  unwrapSourceFeature,
-  unwrapSourceFeatureIndex
-} from './geojson';
+import {getGeojsonFeatures, separateGeojsonFeatures} from './geojson';
 
 const defaultLineColor = [0, 0, 0, 255];
 const defaultFillColor = [0, 0, 0, 255];
@@ -57,7 +52,6 @@ const defaultProps = {
   pointRadiusMaxPixels: Number.MAX_SAFE_INTEGER, // max point radius in pixels
 
   lineDashJustified: false,
-  fp64: false,
 
   // Line and polygon outline color
   getLineColor: {type: 'accessor', value: defaultLineColor},
@@ -79,15 +73,6 @@ function getCoordinates(f) {
   return f.geometry.coordinates;
 }
 
-/**
- * Unwraps the real source feature passed into props and passes as the argument to `accessor`.
- */
-function unwrappingAccessor(accessor) {
-  if (typeof accessor !== 'function') return accessor;
-
-  return feature => accessor(unwrapSourceFeature(feature));
-}
-
 export default class GeoJsonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -100,6 +85,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       return;
     }
     const features = getGeojsonFeatures(props.data);
+    const wrapFeature = this.getSubLayerRow.bind(this);
 
     if (Array.isArray(changeFlags.dataChanged)) {
       const oldFeatures = this.state.features;
@@ -111,12 +97,12 @@ export default class GeoJsonLayer extends CompositeLayer {
       }
 
       for (const dataRange of changeFlags.dataChanged) {
-        const partialFeatures = separateGeojsonFeatures(features, dataRange);
+        const partialFeatures = separateGeojsonFeatures(features, wrapFeature, dataRange);
         for (const key in oldFeatures) {
           featuresDiff[key].push(
             replaceInRange({
               data: newFeatures[key],
-              getIndex: unwrapSourceFeatureIndex,
+              getIndex: f => f.__source.index,
               dataRange,
               replace: partialFeatures[key]
             })
@@ -126,21 +112,10 @@ export default class GeoJsonLayer extends CompositeLayer {
       this.setState({features: newFeatures, featuresDiff});
     } else {
       this.setState({
-        features: separateGeojsonFeatures(features),
+        features: separateGeojsonFeatures(features, wrapFeature),
         featuresDiff: {}
       });
     }
-  }
-
-  getPickingInfo({info, sourceLayer}) {
-    // `info.index` is the index within the particular sub-layer
-    // We want to expose the index of the feature the user provided
-
-    return Object.assign(info, {
-      // override object with picked feature
-      object: info.object ? unwrapSourceFeature(info.object) : info.object,
-      index: info.object ? unwrapSourceFeatureIndex(info.object) : info.index
-    });
   }
 
   /* eslint-disable complexity */
@@ -163,8 +138,7 @@ export default class GeoJsonLayer extends CompositeLayer {
       pointRadiusMinPixels,
       pointRadiusMaxPixels,
       elevationScale,
-      lineDashJustified,
-      fp64
+      lineDashJustified
     } = this.props;
 
     // Accessor props for underlying layers
@@ -190,15 +164,14 @@ export default class GeoJsonLayer extends CompositeLayer {
         {
           _dataDiff: featuresDiff.polygonFeatures && (() => featuresDiff.polygonFeatures),
 
-          fp64,
           extruded,
           elevationScale,
           filled,
           wireframe,
           material,
-          getElevation: unwrappingAccessor(getElevation),
-          getFillColor: unwrappingAccessor(getFillColor),
-          getLineColor: unwrappingAccessor(getLineColor),
+          getElevation: this.getSubLayerAccessor(getElevation),
+          getFillColor: this.getSubLayerAccessor(getFillColor),
+          getLineColor: this.getSubLayerAccessor(getLineColor),
 
           transitions: transitions && {
             getPolygon: transitions.geometry,
@@ -230,7 +203,6 @@ export default class GeoJsonLayer extends CompositeLayer {
           _dataDiff:
             featuresDiff.polygonOutlineFeatures && (() => featuresDiff.polygonOutlineFeatures),
 
-          fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -239,9 +211,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
 
-          getColor: unwrappingAccessor(getLineColor),
-          getWidth: unwrappingAccessor(getLineWidth),
-          getDashArray: unwrappingAccessor(getLineDashArray),
+          getColor: this.getSubLayerAccessor(getLineColor),
+          getWidth: this.getSubLayerAccessor(getLineWidth),
+          getDashArray: this.getSubLayerAccessor(getLineDashArray),
 
           transitions: transitions && {
             getPath: transitions.geometry,
@@ -269,7 +241,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         {
           _dataDiff: featuresDiff.lineFeatures && (() => featuresDiff.lineFeatures),
 
-          fp64,
           widthUnits: lineWidthUnits,
           widthScale: lineWidthScale,
           widthMinPixels: lineWidthMinPixels,
@@ -278,9 +249,9 @@ export default class GeoJsonLayer extends CompositeLayer {
           miterLimit: lineMiterLimit,
           dashJustified: lineDashJustified,
 
-          getColor: unwrappingAccessor(getLineColor),
-          getWidth: unwrappingAccessor(getLineWidth),
-          getDashArray: unwrappingAccessor(getLineDashArray),
+          getColor: this.getSubLayerAccessor(getLineColor),
+          getWidth: this.getSubLayerAccessor(getLineWidth),
+          getDashArray: this.getSubLayerAccessor(getLineDashArray),
 
           transitions: transitions && {
             getPath: transitions.geometry,
@@ -308,7 +279,6 @@ export default class GeoJsonLayer extends CompositeLayer {
         {
           _dataDiff: featuresDiff.pointFeatures && (() => featuresDiff.pointFeatures),
 
-          fp64,
           stroked,
           filled,
           radiusScale: pointRadiusScale,
@@ -319,10 +289,10 @@ export default class GeoJsonLayer extends CompositeLayer {
           lineWidthMinPixels,
           lineWidthMaxPixels,
 
-          getFillColor: unwrappingAccessor(getFillColor),
-          getLineColor: unwrappingAccessor(getLineColor),
-          getRadius: unwrappingAccessor(getRadius),
-          getLineWidth: unwrappingAccessor(getLineWidth),
+          getFillColor: this.getSubLayerAccessor(getFillColor),
+          getLineColor: this.getSubLayerAccessor(getLineColor),
+          getRadius: this.getSubLayerAccessor(getRadius),
+          getLineWidth: this.getSubLayerAccessor(getLineWidth),
 
           transitions: transitions && {
             getPosition: transitions.geometry,

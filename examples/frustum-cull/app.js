@@ -16,6 +16,15 @@ const INITIAL_VIEW_STATE = {
   pitch: 0
 };
 
+const STYLE = {
+  position: 'absolute',
+  right: '10px',
+  top: '10px',
+  padding: '10px',
+  background: 'white',
+  border: '1px solid black'
+};
+
 const position = [-0.4531566, 51.4709959, 100000];
 const radius = 10000;
 const testPosition = new Vector3();
@@ -29,14 +38,7 @@ class Root extends Component {
       cullStatus: 'IN'
     };
 
-    this.statusStyle = {
-      position: 'absolute',
-      right: '10px',
-      top: '10px',
-      padding: '10px',
-      background: 'white',
-      border: '1px solid black'
-    };
+    this.statusStyle =
 
     this.loop = this.loop.bind(this);
   }

@@ -174,13 +174,11 @@ export default class ContourLayer extends CompositeLayer {
   }
 
   _getLineLayerProps() {
-    const {fp64} = this.props;
     const {colorTrigger, strokeWidthTrigger} = this.state;
 
     return this.getSubLayerProps({
       id: 'contour-line-layer',
       data: this.state.contourData.contourSegments,
-      fp64,
       getSourcePosition: d => d.start,
       getTargetPosition: d => d.end,
       getColor: this._onGetSublayerColor.bind(this),
@@ -194,13 +192,11 @@ export default class ContourLayer extends CompositeLayer {
   }
 
   _getSolidPolygonLayerProps() {
-    const {fp64} = this.props;
     const {colorTrigger} = this.state;
 
     return this.getSubLayerProps({
       id: 'contour-solid-polygon-layer',
       data: this.state.contourData.contourPolygons,
-      fp64,
       getPolygon: d => d.vertices,
       getFillColor: this._onGetSublayerColor.bind(this),
       updateTriggers: {

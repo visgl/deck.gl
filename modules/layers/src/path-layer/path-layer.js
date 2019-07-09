@@ -25,7 +25,6 @@ import {Model, Geometry} from '@luma.gl/core';
 import PathTesselator from './path-tesselator';
 
 import vs from './path-layer-vertex.glsl';
-import vs64 from './path-layer-vertex-64.glsl';
 import fs from './path-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
@@ -37,7 +36,6 @@ const defaultProps = {
   widthMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max stroke width in pixels
   rounded: false,
   miterLimit: {type: 'number', min: 0, value: 4},
-  fp64: false,
   dashJustified: false,
   billboard: false,
 
@@ -55,9 +53,7 @@ const ATTRIBUTE_TRANSITION = {
 
 export default class PathLayer extends Layer {
   getShaders() {
-    return this.use64bitProjection()
-      ? {vs: vs64, fs, modules: ['project64', 'picking']}
-      : {vs, fs, modules: ['project32', 'picking']}; // 'project' module added by default.
+    return super.getShaders({vs, fs, modules: ['project32', 'picking']}); // 'project' module added by default.
   }
 
   initializeState() {
@@ -150,7 +146,6 @@ export default class PathLayer extends Layer {
 
     const geometryChanged =
       changeFlags.dataChanged ||
-      props.fp64 !== oldProps.fp64 ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPath));
 
@@ -174,7 +169,7 @@ export default class PathLayer extends Layer {
       }
     }
 
-    if (props.fp64 !== oldProps.fp64) {
+    if (changeFlags.extensionsChanged) {
       const {gl} = this.context;
       if (this.state.model) {
         this.state.model.delete();

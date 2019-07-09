@@ -93,12 +93,6 @@ Each value is an object with:
 - `speed`: number, `1` for default speed.
 Animations are parsed automatically from `glTF` files. Requires `_animate` on deck object.
 
-##### `fp64` (Boolean, optional)
-
-- Default: `false`
-
-Not supported. Please do not use this option.
-
 ##### `getScene` (Function, optional)
 
 - Default: `scenegraph => (scenegraph && scenegraph.scenes ? scenegraph.scenes[0] : scenegraph)`

@@ -158,6 +158,7 @@ export default class LayersPass extends Pass {
   getModuleParameters(layer) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
+      mousePosition: layer.context.mousePosition,
       pickingActive: 0,
       devicePixelRatio: this.props.pixelRatio
     });
