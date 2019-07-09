@@ -23,11 +23,11 @@ const EXPECTED_PLANES = {
   },
   top: {
     d: ROOT2,
-    n: [0, ROOT2, ROOT2]
+    n: [0, -ROOT2, ROOT2]
   },
   bottom: {
     d: ROOT2,
-    n: [0, -ROOT2, ROOT2]
+    n: [0, ROOT2, ROOT2]
   }
 };
 
@@ -37,10 +37,12 @@ test('getFrustumPlanes#tests', t => {
   const planes = getFrustumPlanes({
     position: [0, 0, 1],
     direction: [0, 0, -1],
-    up: [0, 1, 0],
+    up: [0, -1, 0],
+    right: [1, 0, 0],
     near: 1,
     far: 10,
     fovyRadians: Math.PI / 2,
+    height: 1,
     aspect: 1
   });
 
