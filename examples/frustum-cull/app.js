@@ -1,5 +1,4 @@
 /* eslint-disable no-continue */
-/* global requestAnimationFrame, cancelAnimationFrame */
 
 import React, {Component} from 'react';
 import {render} from 'react-dom';
@@ -33,52 +32,34 @@ class Root extends Component {
   constructor(props) {
     super(props);
     this.deckRef = React.createRef();
-    this.animationLoop = null;
     this.state = {
       cullStatus: 'IN'
     };
 
-    this.statusStyle =
-
-    this.loop = this.loop.bind(this);
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
-  componentDidMount() {
-    this.animationLoop = requestAnimationFrame(this.loop);
-  }
+  _onViewStateChange() {
+    const viewport = this.deckRef.current.viewports[0];
 
-  componentWillUnmount() {
-    cancelAnimationFrame(this.animationLoop);
-  }
+    // Culling tests must be done in common space
+    const commonPosition = viewport.projectPosition(position);
 
-  loop() {
-    if (this.deckRef.current.viewports) {
-      const viewport = this.deckRef.current.viewports[0];
+    // Extract frustum planes based on current view.
+    const frustumPlanes = viewport.getFrustumPlanes();
+    let out = false;
+    let outDir = null;
+    for (const dir in frustumPlanes) {
+      const plane = frustumPlanes[dir];
 
-      // Culling tests must be done in common space
-      const commonPosition = viewport.projectPosition(position);
-
-      // Extract frustum planes based on current view.
-      const frustumPlanes = viewport.getFrustumPlanes();
-      let out = false;
-      let outDir = null;
-      for (const dir in frustumPlanes) {
-        const plane = frustumPlanes[dir];
-        if (plane.d === undefined) {
-          continue;
-        }
-
-        if (testPosition.copy(commonPosition).dot(plane.n) > plane.d) {
-          out = true;
-          outDir = dir;
-          break;
-        }
+      if (testPosition.copy(commonPosition).dot(plane.n) > plane.d) {
+        out = true;
+        outDir = dir;
+        break;
       }
-
-      this.setState({cullStatus: out ? `OUT (${outDir})` : 'IN'});
     }
 
-    this.animationLoop = requestAnimationFrame(this.loop);
+    this.setState({cullStatus: out ? `OUT (${outDir})` : 'IN'});
   }
 
   render() {
@@ -87,7 +68,7 @@ class Root extends Component {
         controller={true}
         initialViewState={INITIAL_VIEW_STATE}
         ref={this.deckRef}
-        _animate={true}
+        onViewStateChange={this._onViewStateChange}
       >
         <StaticMap key="map" mapStyle="mapbox://styles/mapbox/light-v9" />
         <SimpleMeshLayer
@@ -98,7 +79,7 @@ class Root extends Component {
           getTranslation={[0, 0, position[2]]}
           getColor={[255, 0, 0]}
         />
-        <div style={this.statusStyle}>Culling Status: {this.state.cullStatus}</div>
+        <div style={STYLE}>Culling Status: {this.state.cullStatus}</div>
       </DeckGL>
     );
   }
