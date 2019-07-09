@@ -1,0 +1,23 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+    <title>pydeck</title>
+    {% include 'imports.j2' %}
+    <style>
+    {% include 'style.j2' %}
+    </style>
+  </head>
+  <body>
+    <div id="deck-container">
+      <div id="deck-map-wrapper">
+        <canvas id="deck-map-container">
+	</canvas>
+	<div id="map">
+	</div>
+      </div>
+    </div>
+  </body>
+  <script>
+  {% include 'js.j2' %}
+  </script>
+</html>

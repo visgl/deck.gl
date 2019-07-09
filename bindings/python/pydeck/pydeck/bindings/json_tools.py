@@ -1,4 +1,10 @@
+"""
+Support serializing objects into JSON
+"""
 import json
+
+# Ignore deck_widget and mapbox_key attributes
+IGNORE_KEYS = ['mapbox_key', 'deck_widget']
 
 
 def to_camel_case(snake_case):
@@ -43,8 +49,9 @@ def default_serialize(o, remap_function=lower_camel_case_keys):
     """Default method for rendering JSON from a dictionary"""
     attrs = vars(o)
     attrs = {k: v for k, v in attrs.items() if v is not None}
-    if attrs.get('deck_widget'):
-        del attrs['deck_widget']
+    for ignore_attr in IGNORE_KEYS:
+        if attrs.get(ignore_attr):
+            del attrs[ignore_attr]
     if remap_function:
         remap_function(attrs)
     return attrs

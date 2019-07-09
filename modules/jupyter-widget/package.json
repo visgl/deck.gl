@@ -33,6 +33,7 @@
     "@deck.gl/json": "7.2.0-alpha.2",
     "@deck.gl/layers": "7.2.0-alpha.2",
     "@jupyter-widgets/base": "^1.1.10",
+    "@luma.gl/constants": "^7.2.0-alpha.1",
     "mapbox-gl": "^0.53.1"
   },
   "private": true

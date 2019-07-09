@@ -35,8 +35,28 @@ matrix:
 
     - language: python
       dist: precise
+      os: linux
+      group: stable
+      sudo: required
+      dist: trusty
+      env:
+        - CXX=g++-6
+      addons:
+        apt:
+          sources:
+          - ubuntu-toolchain-r-test
+          packages:
+          - g++-6
+          - mesa-utils
+          - xvfb
+          - libgl1-mesa-dri
+          - libglapi-mesa
+          - libosmesa6
+          - libxi-dev
       before_install:
+        # Enable user namespace cloning
         - cd bindings/python/pydeck
+        - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
       python:
         - '3.5'
         - '2.7'
