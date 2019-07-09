@@ -2,7 +2,7 @@
 
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {SimpleMeshLayer} from 'deck.gl';
+import DeckGL, {SimpleMeshLayer, WebMercatorViewport} from 'deck.gl';
 import {StaticMap} from 'react-map-gl';
 import {SphereGeometry} from '@luma.gl/core';
 import {Vector3} from 'math.gl';
@@ -39,8 +39,8 @@ class Root extends Component {
     this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
-  _onViewStateChange() {
-    const viewport = this.deckRef.current.viewports[0];
+  _onViewStateChange(params) {
+    const viewport = new WebMercatorViewport(params.viewState);
 
     // Culling tests must be done in common space
     const commonPosition = viewport.projectPosition(position);
