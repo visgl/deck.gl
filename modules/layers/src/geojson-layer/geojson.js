@@ -92,7 +92,7 @@ function separateGeometry(geometry, separated, wrapFeature, sourceFeature, sourc
 
   if (!validateGeometry(type, coordinates)) {
     // Avoid hard failure if some features are malformed
-    log.warn(`${type} coordinates are malformed`);
+    log.warn(`${type} coordinates are malformed`)();
     return;
   }
 
