@@ -770,7 +770,7 @@ export default class Deck {
     this._lastPointerDownInfo = this.pickObject({
       x: pos.x,
       y: pos.y,
-      pickingRadius: this.props.pickingRadius
+      radius: this.props.pickingRadius
     });
   }
 
