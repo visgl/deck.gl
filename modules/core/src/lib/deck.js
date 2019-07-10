@@ -763,7 +763,8 @@ export default class Deck {
     const pos = event.offsetCenter;
     this._lastPointerDownInfo = this.pickObject({
       x: pos.x,
-      y: pos.y
+      y: pos.y,
+      radius: this.props.pickingRadius
     });
   }
 
