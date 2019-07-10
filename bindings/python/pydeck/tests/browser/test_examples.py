@@ -58,6 +58,7 @@ async def run_notebooks(output_dir='.'):
         await stop_notebook(nb_process)
 
 
+@pytest.mark.skip(reason='No golden images yet generated')
 @pytest.mark.asyncio
 async def test_notebooks(tmp_path):
     await run_notebooks(tmp_path)
