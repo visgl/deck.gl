@@ -216,11 +216,9 @@ _onRestart(evnt){
         data: this.state.tours,
         getPath: d => d.Segments,
         getTimestamps: d => d.Timestamps,
-        //getColor: d => d.Completed ? completedTourColor : incompleteTourColor, //getRgbFromStr(colorstours(d.Tourid)),
         getColor: d => getRgbFromStr(colorTours(d.Tourid)),
         billboard: true,
-        opacity: 0.5,
-        widthMinPixels: 2,
+        widthMinPixels: 1.2,
         rounded: false,
         trailLength: this.state.trailLength,
         currentTime: this.state.simTime,
@@ -231,16 +229,14 @@ _onRestart(evnt){
       new GeoJsonLayer({
         id: 'boundaries',
         data: zones,
+        //getFillColor: [255, 153, 51],
         stroked: true,
         filled: true,
         pickable: true,
         extruded: false,
-        opacity: 0.10,
+        opacity: 0.05,
         onClick: this._onSelectZone,
         onHover: this.handleMouseHover,
-        updateTriggers: {
-          getFillColor: this.state.simTime
-        },
         autoHighlight: true,
         highlightColor: [0, 255, 255]
       })
@@ -264,7 +260,7 @@ _onRestart(evnt){
             {baseMap && (
               <StaticMap
                 reuseMaps
-                mapStyle="mapbox://styles/mapbox/dark-v9"
+                mapStyle="mapbox://styles/mapbox/light-v10"
                 //streets-v9 dark-v9  light-v10
                 preventStyleDiffing={true}
                 mapboxApiAccessToken={MAPBOX_TOKEN}

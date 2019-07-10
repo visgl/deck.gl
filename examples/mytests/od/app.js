@@ -6,7 +6,6 @@ import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {PathLayer} from '@deck.gl/layers';
 import {GeoJsonLayer} from 'deck.gl';
-import Slider from '@material-ui/lab/Slider';
 import './style.css';
 
 let _ = require('underscore');
@@ -14,7 +13,7 @@ let _ = require('underscore');
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 let sampleSize = 1;
-const allTrips = require(`./inputs/tours_${sampleSize}pct.json`);
+const allPaths = require(`./inputs/paths_${sampleSize}pct.json`);
 const orderedTps = ['OP1', 'AM', 'IP1', 'IP2', 'PM', 'IP3', 'OP2']; 
 const elevenationStep = 1000;
 
@@ -80,7 +79,7 @@ export class App extends Component {
       filteredpaths = paths.filter(x => x[prop] === filt);
       this.setState({paths: filteredpaths})
     } else {
-      this.setState({paths: this.props.data.allpaths})
+      this.setState({paths: this.props.data.allPaths})
     }
     
   }
@@ -93,7 +92,7 @@ export class App extends Component {
     } else {
         this.setState({selectedZone: null})
     }
-    this._filterPathsByObjProp(this.props.data.allpaths, this.state.selectedZone, 'Source');
+    this._filterPathsByObjProp(this.props.data.allPaths, this.state.selectedZone, 'Source');
   }
 
   _renderLayers() {
@@ -105,7 +104,7 @@ export class App extends Component {
         id: 'paths',
         data: this.state.paths,
         widthScale: 1,
-        widthMinPixels: 0.7,
+        widthMinPixels: 1.2,
         getPath: d => d.Segment,
         getColor: d => getRgbFromStr(colorTps(orderedTps.indexOf(d.Timeperiod))),
         getWidth: d => d.Dailytrips,
@@ -114,12 +113,12 @@ export class App extends Component {
       new GeoJsonLayer({
         id: 'boundaries',
         data: zones,
-        getFillColor: [255, 153, 51, 120],
+        //getFillColor: [255, 153, 51],
         stroked: true,
         filled: true,
         pickable: true,
         extruded: false,
-        opacity: 0.10,
+        opacity: 0.05,
         autoHighlight: true,
         highlightColor: [0, 255, 255],
         onClick: this._onSelectZone
@@ -144,7 +143,7 @@ export class App extends Component {
             {baseMap && (
               <StaticMap
                 reuseMaps
-                mapStyle="mapbox://styles/mapbox/dark-v9"
+                mapStyle="mapbox://styles/mapbox/light-v10"
                 preventStyleDiffing={true}
                 mapboxApiAccessToken={MAPBOX_TOKEN}
               />
