@@ -1,20 +1,25 @@
 export class TypedArrayManager {
-  constructor({overAlloc = 1, poolSize = 100} = {}) {
+  constructor({overAlloc = 2, poolSize = 100} = {}) {
     this.overAlloc = overAlloc;
     this.poolSize = poolSize;
 
     this._pool = [];
   }
 
-  allocate(typedArray, count, {size, type, padding = 0, copy = false}) {
+  allocate(typedArray, count, {size = 1, type, padding = 0, copy = false}) {
+    const Type = type || (typedArray && typedArray.constructor) || Float32Array;
+
     const newSize = count * size + padding;
-    if (typedArray && newSize <= typedArray.length) {
-      return typedArray;
+    if (ArrayBuffer.isView(typedArray)) {
+      if (newSize <= typedArray.length) {
+        return typedArray;
+      }
+      if (newSize * typedArray.BYTES_PER_ELEMENT <= typedArray.buffer.byteLength) {
+        return new Type(typedArray.buffer, 0, newSize);
+      }
     }
 
-    // Allocate at least one element to ensure a valid buffer
-    const allocSize = Math.max(Math.ceil(newSize * this.overAlloc), 1);
-    const newArray = this._allocate(type, allocSize);
+    const newArray = this._allocate(Type, newSize);
 
     if (typedArray && copy) {
       newArray.set(typedArray);
@@ -32,7 +37,10 @@ export class TypedArrayManager {
     this._release(typedArray);
   }
 
-  _allocate(Type = Float32Array, size) {
+  _allocate(Type, size) {
+    // Allocate at least one element to ensure a valid buffer
+    size = Math.max(Math.ceil(size * this.overAlloc), 1);
+
     // Check if available in pool
     const pool = this._pool;
     const byteLength = Type.BYTES_PER_ELEMENT * size;
@@ -67,4 +75,4 @@ export class TypedArrayManager {
   }
 }
 
-export default new TypedArrayManager({overAlloc: 1.5});
+export default new TypedArrayManager();

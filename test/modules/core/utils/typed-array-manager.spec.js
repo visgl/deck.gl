@@ -25,9 +25,14 @@ test('TypedArrayManager#allocate', t => {
   t.deepEqual(array2, [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0], 'Copied existing array');
 
   // Reuse a released array from pool
-  array2 = typedArrayManager.allocate(null, 1, {size: 2, type: Uint16Array});
-  t.is(array.length, 4, 'Allocated array has correct length');
+  array2 = typedArrayManager.allocate(null, 1, {size: 1, type: Uint16Array});
+  t.is(array2.length, 2, 'Allocated array has correct length');
   t.is(array.buffer, array2.buffer, 'Reused released arraybuffer');
+
+  // Existing array's underlying buffer is large enough
+  array2 = typedArrayManager.allocate(array2, 4, {size: 1, type: Uint16Array});
+  t.is(array2.length, 4, 'Allocated array has correct length');
+  t.is(array.buffer, array2.buffer, 'Reused existing arraybuffer');
 
   t.end();
 });
