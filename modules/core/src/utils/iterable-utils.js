@@ -53,3 +53,10 @@ export function createIterable(data, startRow = 0, endRow = Infinity) {
 
   return {iterable, objectInfo};
 }
+
+/*
+ * Returns true if data is an async iterable object
+ */
+export function isAsyncIterable(data) {
+  return data && data[Symbol.asyncIterator];
+}

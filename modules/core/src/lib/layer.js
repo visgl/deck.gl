@@ -49,8 +49,9 @@ const defaultProps = {
   // data: Special handling for null, see below
   data: {type: 'data', value: EMPTY_ARRAY, async: true},
   dataComparator: null,
-  _dataDiff: null,
-  dataTransform: {type: 'function', value: data => data, compare: false},
+  _dataDiff: {type: 'function', value: data => data && data.__diff, compare: false, optional: true},
+  dataTransform: {type: 'function', value: null, compare: false, optional: true},
+  onDataLoad: {type: 'function', value: null, compare: false, optional: true},
   fetch: {
     type: 'function',
     value: (url, {layer}) => load(url, layer.getLoadOptions()),
