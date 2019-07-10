@@ -205,18 +205,6 @@ export default class TextLayer extends CompositeLayer {
     return [datum.offsetLeft, datum.offsetTop];
   }
 
-  getLineLength(datum) {
-    return datum.lineLength;
-  }
-
-  getTextLength(datum) {
-    return datum.size[0];
-  }
-
-  getTextHeight(datum) {
-    return datum.size[1];
-  }
-
   getAnchorXFromTextAnchor(getTextAnchor) {
     if (typeof getTextAnchor === 'function') {
       getTextAnchor = this.getSubLayerAccessor(getTextAnchor);
@@ -301,10 +289,10 @@ export default class TextLayer extends CompositeLayer {
       {
         data,
         getIcon: d => d.text,
-        getLineLength: d => this.getLineLength(d),
+        getLineLength: d => d.lineLength,
         getOffsets: d => this.getLetterOffsets(d),
-        getLengthOfQueue: d => this.getTextLength(d),
-        getHeightOfQueue: d => this.getTextHeight(d)
+        getLengthOfQueue: d => d.size[0],
+        getHeightOfQueue: d => d.size[1]
       }
     );
   }
