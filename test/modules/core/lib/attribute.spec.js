@@ -241,9 +241,11 @@ test('Attribute#updateBuffer', t => {
         props: TEST_PROPS
       });
 
+      const result = testCase[param.title];
+
       t.deepEqual(
-        attribute.value,
-        testCase[param.title],
+        attribute.value.slice(0, result.length),
+        result,
         `${testCase.title} updates attribute buffer`
       );
     }
@@ -409,7 +411,11 @@ test('Attribute#updateBuffer - partial', t => {
       props: TEST_PROPS
     });
 
-    t.deepEqual(attribute.value, testCase.value, `${testCase.title} yields correct result`);
+    t.deepEqual(
+      attribute.value.slice(0, testCase.value.length),
+      testCase.value,
+      `${testCase.title} yields correct result`
+    );
   }
 
   t.end();

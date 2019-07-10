@@ -98,7 +98,7 @@ test('PathTesselator#constructor', t => {
         'endPositions are filled'
       );
       t.deepEquals(
-        tesselator.get('endPositions').slice(-9),
+        tesselator.get('endPositions').slice(21, 30),
         [2, 2, 0, 3, 3, 0, 0, 0, 0],
         'endPositions is handling loop correctly'
       );

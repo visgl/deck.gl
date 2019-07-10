@@ -185,12 +185,12 @@ test('PolygonTesselator#tesselation', t => {
   });
 
   t.deepEquals(
-    tesselator.get('indices'),
+    tesselator.get('indices').slice(0, 24),
     [1, 3, 2, 4, 12, 11, 10, 12, 4, 5, 6, 7, 7, 4, 11, 10, 4, 5, 5, 7, 11, 11, 10, 5],
     'returned correct indices'
   );
   t.deepEquals(
-    tesselator.get('vertexValid'),
+    tesselator.get('vertexValid').slice(0, 13),
     [1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0],
     'returned correct vertexValid'
   );
@@ -215,7 +215,7 @@ test('PolygonTesselator#partial update', t => {
   });
 
   let positions = tesselator.get('positions').slice(0, 27);
-  let indices = tesselator.get('indices');
+  let indices = tesselator.get('indices').slice(0, tesselator.vertexCount);
   t.is(tesselator.instanceCount, 9, 'Initial instance count');
   t.is(tesselator.vertexCount, 9, 'Initial vertex count');
   // prettier-ignore
@@ -230,7 +230,7 @@ test('PolygonTesselator#partial update', t => {
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 2});
   positions = tesselator.get('positions').slice(0, 39);
-  indices = tesselator.get('indices');
+  indices = tesselator.get('indices').slice(0, tesselator.vertexCount);
   t.is(tesselator.instanceCount, 13, 'Updated instance count');
   t.is(tesselator.vertexCount, 12, 'Updated vertex count');
   // prettier-ignore
@@ -246,7 +246,7 @@ test('PolygonTesselator#partial update', t => {
   accessorCalled.clear();
   tesselator.updatePartialGeometry({startRow: 0, endRow: 1});
   positions = tesselator.get('positions').slice(0, 39);
-  indices = tesselator.get('indices').slice(0, 12);
+  indices = tesselator.get('indices').slice(0, tesselator.vertexCount);
   t.is(tesselator.instanceCount, 13, 'Updated instance count');
   t.is(tesselator.vertexCount, 12, 'Updated vertex count');
   // prettier-ignore

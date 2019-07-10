@@ -71,21 +71,15 @@ export default class PolygonTesselator extends Tesselator {
     const {attributes, indexLayout, typedArrayManager} = this;
 
     let target = attributes.indices;
-    let currentLength = target.length;
     let i = indexStart;
 
     // 1. get triangulated indices for the internal areas
     const indices = Polygon.getSurfaceIndices(polygon, this.positionSize);
 
     // make sure the buffer is large enough
-    if (currentLength < i + indices.length) {
-      currentLength = (i + indices.length) * 2;
-      target = typedArrayManager.allocate(target, currentLength, {
-        type: target.constructor,
-        size: 1,
-        copy: true
-      });
-    }
+    target = typedArrayManager.allocate(target, indexStart + indices.length, {
+      copy: true
+    });
 
     // 2. offset each index by the number of indices in previous polygons
     for (let j = 0; j < indices.length; j++) {

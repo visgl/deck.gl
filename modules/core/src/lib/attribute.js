@@ -7,13 +7,13 @@ import {fillArray} from '../utils/flatten';
 import * as range from '../utils/range';
 import log from '../utils/log';
 import BaseAttribute from './base-attribute';
+import typedArrayManager from '../utils/typed-array-manager';
 
 const DEFAULT_STATE = {
   isExternalBuffer: false,
   needsUpdate: true,
   needsRedraw: false,
-  updateRanges: range.FULL,
-  allocedInstances: -1
+  updateRanges: range.FULL
 };
 
 export default class Attribute extends BaseAttribute {
@@ -81,6 +81,13 @@ export default class Attribute extends BaseAttribute {
 
   set bufferLayout(layout) {
     this.userData.bufferLayout = layout;
+  }
+
+  delete() {
+    super.delete();
+    if (!this.userData.isExternalBuffer) {
+      typedArrayManager.release(this.value);
+    }
   }
 
   needsUpdate() {
@@ -179,24 +186,28 @@ export default class Attribute extends BaseAttribute {
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
       const oldValue = this.value;
+      const shouldCopy = state.updateRanges !== range.FULL;
 
       this.constant = false;
-      this.value = new ArrayType(this.size * allocCount);
+      this.value = typedArrayManager.allocate(oldValue, allocCount, {
+        size: this.size,
+        type: ArrayType,
+        padding: this.elementOffset,
+        copy: shouldCopy
+      });
 
       if (this.buffer && this.buffer.byteLength < this.value.byteLength) {
         this.buffer.reallocate(this.value.byteLength);
-      }
 
-      if (this.buffer && state.updateRanges !== range.FULL) {
-        this.value.set(oldValue);
-        // Upload the full existing attribute value to the GPU, so that updateBuffer
-        // can choose to only update a partial range.
-        // TODO - copy old buffer to new buffer on the GPU
-        this.buffer.subData(oldValue);
+        if (shouldCopy) {
+          // Upload the full existing attribute value to the GPU, so that updateBuffer
+          // can choose to only update a partial range.
+          // TODO - copy old buffer to new buffer on the GPU
+          this.buffer.subData(oldValue);
+        }
       }
 
       this.setNeedsUpdate(true, {startRow: instanceCount});
-      state.allocedInstances = allocCount;
       return true;
     }
 
@@ -214,9 +225,14 @@ export default class Attribute extends BaseAttribute {
 
     let updated = true;
     if (update) {
+      const allocatedValue = !noAlloc && this.value;
       // Custom updater - typically for non-instanced layers
       for (const [startRow, endRow] of updateRanges) {
         update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
+      }
+      if (allocatedValue && allocatedValue !== this.value) {
+        // The update function did not use the allocated value
+        typedArrayManager.release(allocatedValue);
       }
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
         // call base clas `update` method to upload value to GPU
