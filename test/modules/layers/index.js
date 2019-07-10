@@ -25,6 +25,7 @@ import './core-layers.spec';
 import './polygon-layer.spec';
 import './geojson.spec';
 import './geojson-layer.spec';
+import './point-cloud-layer.spec';
 import './simple-mesh-layer.spec';
 import './scenegraph-layer.spec';
 import './path-layer/path-layer-vertex.spec';

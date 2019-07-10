@@ -50,14 +50,11 @@ function normalizeData(data) {
     return;
   }
 
-  data.length = data.header.vertexCount;
+  data.length = header.vertexCount;
 
-  if (attributes.POSITION instanceof Float32Array) {
+  if (attributes.POSITION) {
     attributes.instancePositions = attributes.POSITION;
     attributes.instancePositions64xyLow = {constant: true, value: new Float32Array(2)};
-  } else if (attributes.POSITION) {
-    attributes.instancePositions = new Float32Array(attributes.POSITION);
-    attributes.instancePositions64xyLow = new Float32Array(attributes.POSITION.map(fp64LowPart));
   }
   if (attributes.NORMAL) {
     attributes.instanceNormals = attributes.NORMAL;
