@@ -21,7 +21,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
-#### deck.gl [v7.2.0-alphs.2] - July 3, 2019
+#### deck.gl [v7.2.0-alpha.3] - July 10, 2019
+
+Add an HTML page writer for pydeck (#3250)
+fce0b28e Fix frustum cull (#3323)
+42fd04ec Formal API for CompositeLayer data/accessor wrapping (#3311)
+
+#### deck.gl [v7.2.0-alpha.2] - July 3, 2019
 
 - Add Brushing extension (#3309)
 - Move fp64 support to an extension (#3308)
@@ -39,7 +45,7 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - fix missing viewport id (#3275)
 - Data Loading RFC (#3077)
 
-#### deck.gl [v7.2.0-alphs.1] - June 21, 2019
+#### deck.gl [v7.2.0-alpha.1] - June 21, 2019
 
 - S2Layer bug fix (#3270)
 - upgrade to puppeteer 1.18 (#3267)
