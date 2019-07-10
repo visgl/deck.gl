@@ -29,9 +29,15 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
+  // each queue can have one or multiple line(s)
+  // each line can have one or multiple object(s)
+  // length of the line where the given object is
   getLineLength: {type: 'accessor', value: x => x.lineLength || 0},
-  getShiftInQueue: {type: 'accessor', value: x => x.shift || 0},
+  // offset from the left, top position of the queue
+  getOffsets: {type: 'accessor', value: x => x.shift || 0},
+  // length of the queue
   getLengthOfQueue: {type: 'accessor', value: x => x.len || 1},
+  // height of the queue
   getHeightOfQueue: {type: 'accessor', value: x => x.height || 1},
   // 1: left, 0: middle, -1: right
   getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
@@ -99,7 +105,7 @@ export default class MultiIconLayer extends IconLayer {
       getLengthOfQueue,
       getHeightOfQueue,
       getLineLength,
-      getShiftInQueue
+      getOffsets
     } = this.props;
     const {value, size} = attribute;
     let i = startRow * size;
@@ -110,13 +116,14 @@ export default class MultiIconLayer extends IconLayer {
       const rect = iconMapping[icon] || {};
       const len = getLengthOfQueue(object);
       const height = getHeightOfQueue(object);
-      // [shiftX, shiftY]
-      const [shiftX, shiftY] = getShiftInQueue(object);
+      const [offsetX, offsetY] = getOffsets(object);
       const anchorX = getAnchorX(object);
-      const lineShift = ((1 - anchorX) * (getLengthOfQueue(object) - getLineLength(object))) / 2;
 
-      value[i++] = ((anchorX - 1) * len) / 2 + lineShift + rect.width / 2 + shiftX || 0;
-      value[i++] = ((getAnchorY(object) - 1) * height) / 2 + rect.height / 2 + shiftY || 0;
+      // For a multi-line object, shift in direction needs consider the line shift and the object shift in its line
+      const lineOffset = ((1 - anchorX) * (getLengthOfQueue(object) - getLineLength(object))) / 2;
+
+      value[i++] = ((anchorX - 1) * len) / 2 + lineOffset + rect.width / 2 + offsetX || 0;
+      value[i++] = ((getAnchorY(object) - 1) * height) / 2 + rect.height / 2 + offsetY || 0;
     }
   }
 

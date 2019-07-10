@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_CHAR_SET,
@@ -30,6 +30,7 @@ import FontAtlasManager, {
   DEFAULT_CUTOFF
 } from './font-atlas-manager';
 import {replaceInRange} from '../utils';
+import {transformText} from './utils';
 
 const DEFAULT_FONT_SETTINGS = {
   fontSize: DEFAULT_FONT_SIZE,
@@ -53,7 +54,6 @@ const ALIGNMENT_BASELINE = {
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
-const MISSING_CHAR_WIDTH = 32;
 const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
@@ -179,82 +179,34 @@ export default class TextLayer extends CompositeLayer {
     const {data, getText} = this.props;
     const {iconMapping} = this.state;
     const {startRow, endRow} = dataRange;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
 
     const transformedData = [];
 
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
+      const transformLetter = transformed => {
+        return this.getSubLayerRow(transformed, object, objectInfo.index);
+      };
+
       objectInfo.index++;
       const text = getText(object, objectInfo);
       if (text) {
-        const letters = Array.from(text);
-
-        let offsetLeft = 0;
-        let offsetTop = 0;
-        let lineHeight = 0;
-
-        // offsetX, offsetY
-        const offsets = [[0, 0]];
-        // width and height of the text
-        const size = [0, 0];
-        // width of each line
-        const lineLengths = [];
-
-        let lineIndex = 0;
-        letters.forEach((letter, i) => {
-          const datum = this.getSubLayerRow(
-            {
-              text: letter,
-              index: i,
-              size,
-              lineIndex,
-              lineLengths,
-              offsets,
-              len: text.length
-            },
-            object,
-            objectInfo.index
-          );
-
-          const frame = iconMapping[letter];
-          if (letter === '\n') {
-            size[0] = Math.max(offsetLeft, size[0]);
-            lineLengths.push(offsetLeft);
-            lineIndex++;
-
-            offsetLeft = 0;
-            offsetTop += lineHeight;
-          } else if (frame) {
-            offsetLeft += frame.width;
-            lineHeight = Math.max(lineHeight, frame.height);
-          } else {
-            log.warn(`Missing character: ${letter}`)();
-            offsetLeft += MISSING_CHAR_WIDTH;
-          }
-          offsets.push([offsetLeft, offsetTop]);
-          transformedData.push(datum);
-        });
-
-        // last line
-        size[0] = Math.max(size[0], offsetLeft);
-        if (letters[letters.length - 1] !== '\n') {
-          size[1] = offsetTop + lineHeight;
-          lineLengths.push(offsetLeft);
-        }
+        transformText(text, iconMapping, transformLetter, transformedData);
       }
     }
 
     return transformedData;
   }
+
   /* eslint-enable no-loop-func */
 
-  getLetterOffset(datum) {
+  getLetterOffsets(datum) {
     // offsetX, offsetY
-    return datum.offsets[datum.index];
+    return [datum.offsetLeft, datum.offsetTop];
   }
 
   getLineLength(datum) {
-    return datum.lineLengths[datum.lineIndex];
+    return datum.lineLength;
   }
 
   getTextLength(datum) {
@@ -350,7 +302,7 @@ export default class TextLayer extends CompositeLayer {
         data,
         getIcon: d => d.text,
         getLineLength: d => this.getLineLength(d),
-        getShiftInQueue: d => this.getLetterOffset(d),
+        getOffsets: d => this.getLetterOffsets(d),
         getLengthOfQueue: d => this.getTextLength(d),
         getHeightOfQueue: d => this.getTextHeight(d)
       }

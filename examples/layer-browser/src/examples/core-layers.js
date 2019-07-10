@@ -407,7 +407,7 @@ const HexagonLayerExample = {
 
 const TextLayerExample = {
   layer: TextLayer,
-  getData: () => dataSamples.texts,
+  getData: () => dataSamples.texts.slice(1, 3),
   propTypes: {
     fontFamily: {
       name: 'fontFamily',
@@ -485,7 +485,7 @@ const TextLayerExample = {
     autoHighlight: true,
     pickable: true,
     highlightColor: [0, 0, 128, 128],
-    getText: x => x.LOCATION_NAME,
+    getText: x => `${x.PLACEMENT}\n${x.YR_INSTALLED}`,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
     getAngle: x => 30,

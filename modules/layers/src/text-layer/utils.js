@@ -1,4 +1,8 @@
 // TODO merge with icon-layer/icon-manager
+import {log} from '@deck.gl/core';
+
+const MISSING_CHAR_WIDTH = 32;
+
 export function nextPowOfTwo(number) {
   return Math.pow(2, Math.ceil(Math.log2(number)));
 }
@@ -63,4 +67,76 @@ export function buildMapping({
     yOffset: yOffset + row * rowHeight,
     canvasHeight: nextPowOfTwo(yOffset + (row + 1) * rowHeight)
   };
+}
+
+export function updateRange({array, startIndex, endIndex, data}) {
+  for (let i = startIndex; i < Math.min(endIndex, array.length); i++) {
+    const object = array[i];
+    Object.assign(object, data);
+  }
+}
+
+export function transformText(text, iconMapping, transformLetter, transformedData) {
+  let startIndex = transformedData.length;
+
+  const letters = Array.from(text);
+
+  let offsetLeft = 0;
+  let offsetTop = 0;
+  let lineHeight = 0;
+
+  // width and height of the text
+  const size = [0, 0];
+
+  letters.forEach((letter, i) => {
+    if (letter === '\n') {
+      size[0] = Math.max(offsetLeft, size[0]);
+
+      updateRange({
+        array: transformedData,
+        startIndex,
+        endIndex: transformedData.length,
+        data: {lineLength: offsetLeft}
+      });
+
+      startIndex = transformedData.length;
+      offsetLeft = 0;
+      offsetTop += lineHeight;
+    } else {
+      const datum = transformLetter({
+        text: letter,
+        index: i,
+        size,
+        offsetLeft,
+        offsetTop,
+        len: text.length
+      });
+
+      const frame = iconMapping[letter];
+
+      if (frame) {
+        offsetLeft += frame.width;
+        lineHeight = Math.max(lineHeight, frame.height);
+      } else {
+        log.warn(`Missing character: ${letter}`)();
+        offsetLeft += MISSING_CHAR_WIDTH;
+      }
+
+      transformedData.push(datum);
+    }
+  });
+
+  // last line
+  size[0] = Math.max(size[0], offsetLeft);
+  if (startIndex < transformedData.length) {
+    size[1] = offsetTop + lineHeight;
+
+    updateRange({
+      array: transformedData,
+      startIndex,
+      endIndex: transformedData.length,
+      data: {lineLength: offsetLeft}
+    });
+    startIndex = transformedData.length;
+  }
 }
