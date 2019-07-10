@@ -33,7 +33,7 @@ const defaultProps = {
   // each row can have one or multiple character(s)
   getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
   // offset from the left, top position of the paragraph
-  getOffsets: {type: 'accessor', value: x => x.offset || [0, 0]},
+  getOffsets: {type: 'accessor', value: x => x.offsets || [0, 0]},
   // [width, height] of the paragraph
   getParagraphSize: {type: 'accessor', value: x => x.size || [1, 1]},
   // 1: left, 0: middle, -1: right
