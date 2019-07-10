@@ -18,6 +18,10 @@ export class TypedArrayManager {
 
     if (typedArray && copy) {
       newArray.set(typedArray);
+    } else {
+      // Hack - viewing a buffer with a different type may create NaNs
+      // which crashes the Attribute validation
+      newArray.fill(0, 0, 4);
     }
 
     this._release(typedArray);
