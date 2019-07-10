@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.9] - July 10 2019
+
+- add NON_INSTANCED_MODEL define (#3333)
+
 #### deck.gl [v7.1.8] - July 10 2019
 
 - Fix missing pickingRadius for onClick handlers (#3321) (#3327)
