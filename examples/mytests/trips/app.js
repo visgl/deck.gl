@@ -2,7 +2,6 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import {PhongMaterial} from '@luma.gl/core';
 import {AmbientLight, PointLight, LightingEffect} from '@deck.gl/core';
 import DeckGL from '@deck.gl/react';
 import {GeoJsonLayer} from 'deck.gl';
@@ -21,9 +20,6 @@ let variable = 0;
 let pause = true;
 
 let prevSimTime = Date.now() / 1000;
-
-let simAnchorTime = 0;
-let anchorTime = Date.now() / 1000;
 
 let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
