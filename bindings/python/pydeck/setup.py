@@ -15,11 +15,15 @@ import sys
 
 here = os.path.dirname(os.path.abspath(__file__))
 
+
+def read(*parts):
+    return open(os.path.join(here, *parts), 'r').read()
+
+
 log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'Python wrapper for deck.gl'
 PATH_TO_WIDGET = '../../../modules/jupyter-widget'
 
 node_root = os.path.join(here, PATH_TO_WIDGET)
@@ -50,7 +54,7 @@ def js_prerelease(command, strict=False):
 
 
 class NPM(Command):
-    description = 'install package.json dependencies using npm'
+    description = 'Install package.json dependencies using npm'
 
     user_options = []
 
@@ -124,21 +128,27 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 
+with open('requirements.txt') as f:
+    tests_require = f.readlines()
+install_requires = [t.strip() for t in tests_require]
+
+
 version_ns = {}
 with open(os.path.join(here, 'pydeck', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
+
 setup_args = {
     'name': 'pydeck',
-    'version': version_ns['__version__'],
+    'version': version_ns,
     'description': 'Widget for deck.gl maps',
-    'long_description': LONG_DESCRIPTION,
+    'long_description': '{}'.format(read('README.md')),
     'license': 'MIT License',
     'include_package_data': True,
     'packages': find_packages(),
-    'zip_safe': False,
     'cmdclass': {
         'install': js_prerelease(install),
+        'develop': js_prerelease(install),
         'build_py': js_prerelease(build_py),
         'egg_info': egg_info,
         'sdist': js_prerelease(sdist, strict=True),
@@ -147,14 +157,13 @@ setup_args = {
     'author': 'Andrew Duberstein',
     'author_email': 'ajduberstein@gmail.com',
     'url': 'https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck',
-    'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', 'GIS'],
+    'keywords': ['data', 'visualization', 'graphics', 'GIS', 'maps'],
     'classifiers': [
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Topic :: Multimedia :: Graphics',
         'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.3',
@@ -164,15 +173,8 @@ setup_args = {
         'Programming Language :: Python :: 3.7',
         'Framework :: Jupyter',
     ],
-    'include_package_data': True,
-    'tests_require': ['pytest'],
-    'setup_requires': ['pytest-runner'],
-    'install_requires': [
-        'ipywidgets>=7.0.0,<8',
-        'traittypes>=0.2.1,<3',
-        'xarray>=0.10',
-        'branca>=0.3.1,<0.4'
-    ],
+    'extras_require': {'testing': ['pytest']},
+    'install_requires': install_requires,
     'data_files': [
         ('share/jupyter/nbextensions/pydeck', [
             'pydeck/nbextension/static/extension.js',
@@ -181,16 +183,7 @@ setup_args = {
         ]),
         ('etc/jupyter/nbconfig/notebook.d', ['pydeck.json'])
     ],
-    'extras_require': {
-        'test': [
-            'pytest>=3.6',
-            'pandas>=0.23.4',
-            'pytest-cov'
-        ],
-        'examples': [
-            # Any requirements for the examples to run
-        ],
-    },
+    'zip_safe': False,
     'entry_points': {}
 }
 
