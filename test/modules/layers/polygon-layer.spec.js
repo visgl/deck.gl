@@ -40,7 +40,7 @@ test('PolygonLayer', t => {
       if (layer.props.data && layer.props.data.length) {
         t.ok(layer.state.paths.length, 'should update state.paths');
       }
-      if (layer.props._dataDiff) {
+      if (Object.prototype.hasOwnProperty.call(layer.props, '_dataDiff') && layer.props._dataDiff) {
         t.ok(Array.isArray(layer.state.pathsDiff), 'created diff for sub path layer');
       }
     }

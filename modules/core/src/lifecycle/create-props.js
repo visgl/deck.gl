@@ -1,5 +1,6 @@
 import {applyPropOverrides} from '../lib/seer-integration';
 import log from '../utils/log';
+import {isAsyncIterable} from '../utils/iterable-utils';
 import {parsePropTypes} from './prop-types';
 
 // Create a property object
@@ -200,7 +201,11 @@ function getDescriptorForAsyncProp(name) {
     enumerable: true,
     // Save the provided value for async props in a special map
     set(newValue) {
-      if (typeof newValue === 'string' || newValue instanceof Promise) {
+      if (
+        typeof newValue === 'string' ||
+        newValue instanceof Promise ||
+        isAsyncIterable(newValue)
+      ) {
         this._asyncPropOriginalValues[name] = newValue;
       } else {
         this._asyncPropResolvedValues[name] = newValue;

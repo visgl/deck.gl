@@ -137,7 +137,7 @@ function diffDataProps(props, oldProps) {
     dataChanged = 'A new data container was supplied';
   }
   if (dataChanged && _dataDiff) {
-    dataChanged = _dataDiff(oldProps.data, props.data) || dataChanged;
+    dataChanged = _dataDiff(props.data, oldProps.data) || dataChanged;
   }
 
   return dataChanged;
