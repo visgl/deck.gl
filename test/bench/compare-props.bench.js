@@ -74,6 +74,29 @@ const TEST_CASES = {
       instancePositions: new Float32Array(1e6).fill(Math.PI)
     }),
     propTypes
+  },
+  realWorld: {
+    oldProps: Object.assign(Object.create(defaultProps), {
+      getPosition: d => d.position,
+      getRadius: d => d.size,
+      getLineWidth: d => d.size / 10,
+      getFillColor: [0, 0, 0, 255],
+      getLineColor: [200, 0, 0, 255],
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 1
+    }),
+    newProps: Object.assign(Object.create(defaultProps), {
+      getPosition: d => d.position,
+      getRadius: d => d.size,
+      getLineWidth: d => d.size / 10,
+      getFillColor: [0, 0, 0, 255],
+      getLineColor: [200, 0, 0, 255],
+      stroked: true,
+      filled: true,
+      lineWidthMinPixels: 1
+    }),
+    propTypes
   }
 };
 
@@ -84,7 +107,7 @@ export default function comparePropsBench(suite) {
     .add('compareProps#simple', () => {
       compareProps(TEST_CASES.simple);
     })
-    .add('compareProps#default', () => {
+    .add('compareProps#empty', () => {
       compareProps(TEST_CASES.default);
     })
     .add('compareProps#override function', () => {
@@ -95,5 +118,8 @@ export default function comparePropsBench(suite) {
     })
     .add('compareProps#override large array', () => {
       compareProps(TEST_CASES.overrideLargeArray);
+    })
+    .add('compareProps#real world sample', () => {
+      compareProps(TEST_CASES.realWorld);
     });
 }
