@@ -17,15 +17,7 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
-// Replacement for the external assert method to reduce bundle size
-// Since GeoJSON format issues are common to users we do show messages in
-// this case
-export default function assert(condition, message) {
-  if (!condition) {
-    throw new Error(`deck.gl: ${message}`);
-  }
-}
+import {log} from '@deck.gl/core';
 
 /**
  * "Normalizes" complete or partial GeoJSON data into iterable list of features
@@ -45,7 +37,7 @@ export function getGeojsonFeatures(geojson) {
     return geojson;
   }
 
-  assert(geojson.type, 'GeoJSON does not have type');
+  log.assert(geojson.type, 'GeoJSON does not have type');
 
   switch (geojson.type) {
     case 'Feature':
@@ -53,7 +45,7 @@ export function getGeojsonFeatures(geojson) {
       return [geojson];
     case 'FeatureCollection':
       // Just return the 'Features' array from the collection
-      assert(Array.isArray(geojson.features), 'GeoJSON does not have features array');
+      log.assert(Array.isArray(geojson.features), 'GeoJSON does not have features array');
       return geojson.features;
     default:
       // Assume it's a geometry, we'll check type in separateGeojsonFeatures
@@ -75,12 +67,12 @@ export function separateGeojsonFeatures(features, wrapFeature, dataRange = {}) {
   for (let featureIndex = startRow; featureIndex < endRow; featureIndex++) {
     const feature = features[featureIndex];
 
-    assert(feature && feature.geometry, 'GeoJSON does not have geometry');
+    log.assert(feature && feature.geometry, 'GeoJSON does not have geometry');
 
     const {geometry} = feature;
 
     if (geometry.type === 'GeometryCollection') {
-      assert(Array.isArray(geometry.geometries), 'GeoJSON does not have geometries array');
+      log.assert(Array.isArray(geometry.geometries), 'GeoJSON does not have geometries array');
       const {geometries} = geometry;
       for (let i = 0; i < geometries.length; i++) {
         const subGeometry = geometries[i];
@@ -98,7 +90,11 @@ function separateGeometry(geometry, separated, wrapFeature, sourceFeature, sourc
   const {type, coordinates} = geometry;
   const {pointFeatures, lineFeatures, polygonFeatures, polygonOutlineFeatures} = separated;
 
-  checkCoordinates(type, coordinates);
+  if (!validateGeometry(type, coordinates)) {
+    // Avoid hard failure if some features are malformed
+    log.warn(`${type} coordinates are malformed`)();
+    return;
+  }
 
   // Split each feature, but keep track of the source feature and index (for Multi* geometries)
   switch (type) {
@@ -219,13 +215,14 @@ const COORDINATE_NEST_LEVEL = {
   MultiPolygon: 4
 };
 
-function checkCoordinates(type, coordinates) {
+export function validateGeometry(type, coordinates) {
   let nestLevel = COORDINATE_NEST_LEVEL[type];
 
-  assert(nestLevel, `Unknown GeoJSON type ${type}`);
+  log.assert(nestLevel, `Unknown GeoJSON type ${type}`);
 
   while (coordinates && --nestLevel > 0) {
     coordinates = coordinates[0];
   }
-  assert(coordinates && Number.isFinite(coordinates[0]), `${type} coordinates are malformed`);
+
+  return coordinates && Number.isFinite(coordinates[0]);
 }
