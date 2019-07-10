@@ -222,8 +222,10 @@ export class App extends Component {
   _animate() {
     const timestamp = Date.now() / 1000;
 
-    
-  
+    console.log(simTime);
+    console.log(timestamp);
+    console.log(anchorTime);
+
     this.setState({ 
       time: simTime + (timestamp - anchorTime) * animationSpeed
     }, () => this._filterTours());
