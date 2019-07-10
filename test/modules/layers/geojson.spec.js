@@ -23,7 +23,8 @@ import {
   getGeojsonFeatures,
   separateGeojsonFeatures,
   unwrapSourceFeature,
-  unwrapSourceFeatureIndex
+  unwrapSourceFeatureIndex,
+  validateGeometry
 } from '@deck.gl/layers/geojson-layer/geojson';
 
 const TEST_DATA = {
@@ -67,6 +68,16 @@ const TEST_DATA = {
       {
         type: 'LineString',
         coordinates: [[101.0, 0.0], [102.0, 1.0]]
+      },
+      {
+        // empty coordinates, should warn but not throw
+        type: 'LineString',
+        coordinates: []
+      },
+      {
+        // empty coordinates, should warn but not throw
+        type: 'MultiPolygon',
+        coordinates: []
       }
     ]
   }
@@ -282,31 +293,6 @@ const TEST_CASES = [
     title: 'unknown geojson type',
     argument: {type: 'Feature', geometry: {type: 'Something', coordinates: [0, 0]}},
     error: /unknown geojson type/i
-  },
-  {
-    title: 'malformed geojson: Point',
-    argument: {type: 'Point'},
-    error: /coordinates are malformed/i
-  },
-  {
-    title: 'malformed geojson: Point',
-    argument: {type: 'Point', coordinates: 1},
-    error: /coordinates are malformed/i
-  },
-  {
-    title: 'malformed geojson: Point',
-    argument: {type: 'Point', coordinates: [[0, 0]]},
-    error: /coordinates are malformed/i
-  },
-  {
-    title: 'malformed geojson: Polygon',
-    argument: {type: 'Polygon', coordinates: [[0, 0]]},
-    error: /coordinates are malformed/i
-  },
-  {
-    title: 'malformed geojson: MultiPolygon',
-    argument: {type: 'MultiPolygon', coordinates: [[[0, 0]]]},
-    error: /coordinates are malformed/i
   }
 ];
 
@@ -357,5 +343,64 @@ test('geojson#getGeojsonFeatures, separateGeojsonFeatures', t => {
       );
     }
   }
+  t.end();
+});
+
+const TEST_GEOMETRIES = [
+  {
+    argument: TEST_DATA.POINT,
+    isValid: true
+  },
+  {
+    argument: TEST_DATA.LINESTRING,
+    isValid: true
+  },
+  {
+    argument: TEST_DATA.POLYGON,
+    isValid: true
+  },
+  {
+    argument: TEST_DATA.MULTI_POINT,
+    isValid: true
+  },
+  {
+    argument: TEST_DATA.MULTI_LINESTRING,
+    isValid: true
+  },
+  {
+    argument: TEST_DATA.MULTI_POLYGON,
+    isValid: true
+  },
+  {
+    argument: {type: 'Point'},
+    isValid: false
+  },
+  {
+    argument: {type: 'Point', coordinates: 1},
+    isValid: false
+  },
+  {
+    argument: {type: 'Point', coordinates: [[0, 0]]},
+    isValid: false
+  },
+  {
+    argument: {type: 'Polygon', coordinates: [[0, 0]]},
+    isValid: false
+  },
+  {
+    argument: {type: 'MultiPolygon', coordinates: [[[0, 0]]]},
+    isValid: false
+  }
+];
+
+test('validateGeometry', t => {
+  for (const testCase of TEST_GEOMETRIES) {
+    t.is(
+      Boolean(validateGeometry(testCase.argument.type, testCase.argument.coordinates)),
+      testCase.isValid,
+      'validateGeometry returns correct result'
+    );
+  }
+
   t.end();
 });
