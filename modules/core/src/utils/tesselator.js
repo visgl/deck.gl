@@ -18,50 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {createIterable} from './iterable-utils';
-
-class TypedArrayManager {
-  constructor({overAlloc = 1} = {}) {
-    this.overAlloc = overAlloc;
-  }
-
-  allocate(typedArray, count, {size, type, padding = 0, copy = false}) {
-    const newSize = count * size + padding;
-    if (typedArray && newSize <= typedArray.length) {
-      return typedArray;
-    }
-
-    // Allocate at least one element to ensure a valid buffer
-    const allocSize = Math.max(Math.ceil(newSize * this.overAlloc), 1);
-    const newArray = this._allocate(type, allocSize);
-
-    if (typedArray && copy) {
-      newArray.set(typedArray);
-    }
-
-    this._release(typedArray);
-    return newArray;
-  }
-
-  _allocate(Type = Float32Array, size) {
-    // TODO - check if available in pool
-    return new Type(size);
-  }
-
-  _release(typedArray) {
-    // TODO - add to pool
-    // logFunctions.onUpdate({
-    //   level: LOG_DETAIL_PRIORITY,
-    //   message: `${attributeName} allocated ${allocCount}`,
-    //   id: this.id
-    // });
-  }
-}
+import defaultTypedArrayManager from './typed-array-manager';
 
 export default class Tesselator {
   constructor(opts = {}) {
     const {attributes = {}} = opts;
 
-    this.typedArrayManager = new TypedArrayManager();
+    this.typedArrayManager = defaultTypedArrayManager;
     this.indexLayout = null;
     this.bufferLayout = null;
     this.vertexCount = 0;

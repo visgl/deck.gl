@@ -132,9 +132,8 @@ test('ArcLayer#non-iterable', t => {
         },
         onAfterUpdate: ({layer}) => {
           const instancePositions = layer.getAttributeManager().attributes.instancePositions.value;
-          t.is(
-            instancePositions.length,
-            FIXTURES.routes.length * 4,
+          t.ok(
+            instancePositions.length > FIXTURES.routes.length * 4,
             'instancePositions has correct length'
           );
           t.deepEquals(
