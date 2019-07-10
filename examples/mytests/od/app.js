@@ -11,7 +11,7 @@ import './style.css';
 
 let _ = require('underscore');
 // Set your mapbox token here
-const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
 const allTrips = require('./inputs/trips.json')
 const orderedTps = ['OP1', 'AM', 'IP1', 'IP2', 'PM', 'IP3', 'OP2'] 
@@ -103,7 +103,7 @@ export class App extends Component {
       new PathLayer({
         id: 'trips',
         data: this.state.trips,
-        widthScale: 0.7,
+        widthScale: 1,
         widthMinPixels: 0.7,
         getPath: d => d.Segment,
         getColor: d => getRgbFromStr(colorTps(orderedTps.indexOf(d.Timeperiod))),
@@ -113,6 +113,7 @@ export class App extends Component {
       new GeoJsonLayer({
         id: 'boundaries',
         data: zones,
+        getFillColor: [255, 153, 51, 120],
         stroked: true,
         filled: true,
         pickable: true,
