@@ -29,16 +29,13 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
-  // each queue can have one or multiple line(s)
-  // each line can have one or multiple object(s)
-  // length of the line where the given object is
-  getLineLength: {type: 'accessor', value: x => x.lineLength || 0},
-  // offset from the left, top position of the queue
-  getOffsets: {type: 'accessor', value: x => x.shift || 0},
-  // length of the queue
-  getLengthOfQueue: {type: 'accessor', value: x => x.len || 1},
-  // height of the queue
-  getHeightOfQueue: {type: 'accessor', value: x => x.height || 1},
+  // each paragraph can have one or multiple row(s)
+  // each row can have one or multiple character(s)
+  getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
+  // offset from the left, top position of the paragraph
+  getOffsets: {type: 'accessor', value: x => x.offset || [0, 0]},
+  // [width, height] of the paragraph
+  getParagraphSize: {type: 'accessor', value: x => x.size || [1, 1]},
   // 1: left, 0: middle, -1: right
   getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
   // 1: top, 0: center, -1: bottom
@@ -102,9 +99,8 @@ export default class MultiIconLayer extends IconLayer {
       getIcon,
       getAnchorX,
       getAnchorY,
-      getLengthOfQueue,
-      getHeightOfQueue,
-      getLineLength,
+      getParagraphSize,
+      getRowSize,
       getOffsets
     } = this.props;
     const {value, size} = attribute;
@@ -114,15 +110,15 @@ export default class MultiIconLayer extends IconLayer {
     for (const object of iterable) {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
-      const len = getLengthOfQueue(object);
-      const height = getHeightOfQueue(object);
+      const [width, height] = getParagraphSize(object);
+      const [rowWidth] = getRowSize(object);
       const [offsetX, offsetY] = getOffsets(object);
       const anchorX = getAnchorX(object);
 
-      // For a multi-line object, shift in direction needs consider the line shift and the object shift in its line
-      const lineOffset = ((1 - anchorX) * (getLengthOfQueue(object) - getLineLength(object))) / 2;
-
-      value[i++] = ((anchorX - 1) * len) / 2 + lineOffset + rect.width / 2 + offsetX || 0;
+      // For a multi-line object, offset in x-direction needs consider
+      // the row offset in the paragraph and the object offset in the row
+      const rowOffset = ((1 - anchorX) * (width - rowWidth)) / 2;
+      value[i++] = ((anchorX - 1) * width) / 2 + rowOffset + rect.width / 2 + offsetX || 0;
       value[i++] = ((getAnchorY(object) - 1) * height) / 2 + rect.height / 2 + offsetY || 0;
     }
   }

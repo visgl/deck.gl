@@ -69,74 +69,73 @@ export function buildMapping({
   };
 }
 
-export function updateRange({array, startIndex, endIndex, data}) {
-  for (let i = startIndex; i < Math.min(endIndex, array.length); i++) {
-    const object = array[i];
-    Object.assign(object, data);
-  }
-}
-
-export function transformText(text, iconMapping, transformLetter, transformedData) {
-  let startIndex = transformedData.length;
-
-  const letters = Array.from(text);
-
+export function transformRow(row, indexInParagraph, iconMapping) {
   let offsetLeft = 0;
-  let offsetTop = 0;
-  let lineHeight = 0;
+  let rowHeight = 0;
 
-  // width and height of the text
-  const size = [0, 0];
+  let characters = Array.from(row);
+  characters = characters.map((character, i) => {
+    const datum = {
+      text: character,
+      index: indexInParagraph + i,
+      offsetLeft
+    };
 
-  letters.forEach((letter, i) => {
-    if (letter === '\n') {
-      size[0] = Math.max(offsetLeft, size[0]);
+    const frame = iconMapping[character];
 
-      updateRange({
-        array: transformedData,
-        startIndex,
-        endIndex: transformedData.length,
-        data: {lineLength: offsetLeft}
-      });
-
-      startIndex = transformedData.length;
-      offsetLeft = 0;
-      offsetTop += lineHeight;
+    if (frame) {
+      offsetLeft += frame.width;
+      rowHeight = Math.max(rowHeight, frame.height);
     } else {
-      const datum = transformLetter({
-        text: letter,
-        index: i,
-        size,
-        offsetLeft,
-        offsetTop,
-        len: text.length
-      });
-
-      const frame = iconMapping[letter];
-
-      if (frame) {
-        offsetLeft += frame.width;
-        lineHeight = Math.max(lineHeight, frame.height);
-      } else {
-        log.warn(`Missing character: ${letter}`)();
-        offsetLeft += MISSING_CHAR_WIDTH;
-      }
-
-      transformedData.push(datum);
+      log.warn(`Missing character: ${character}`)();
+      offsetLeft += MISSING_CHAR_WIDTH;
     }
+
+    return datum;
   });
 
-  // last line
-  size[0] = Math.max(size[0], offsetLeft);
-  if (startIndex < transformedData.length) {
-    size[1] = offsetTop + lineHeight;
+  return {characters, rowWidth: offsetLeft, rowHeight};
+}
 
-    updateRange({
-      array: transformedData,
-      startIndex,
-      endIndex: transformedData.length,
-      data: {lineLength: offsetLeft}
+/**
+ * Transform a text paragraph to an array of characters, each character contains
+ * @param paragraph {String}
+ * @param iconMapping {Object} character mapping table for retrieving a character from font atlas
+ * @param transformCharacter {Function} callback to transform a single character
+ * @param transformedData {Array} output transformed data array, each datum contains
+ *   - text: character
+ *   - index: character index in the paragraph
+ *   - offsetLeft: x offset in the row,
+ *   - offsetTop: y offset in the paragraph
+ *   - size: [width, height] size of the paragraph
+ *   - rowSize: [rowWidth, rowHeight] size of the row
+ *   - len: length of the paragraph
+ */
+export function transformParagraph(paragraph, iconMapping, transformCharacter, transformedData) {
+  const rows = paragraph.split('\n');
+
+  // width and height of the paragraph
+  const size = [0, 0];
+  let offsetTop = 0;
+  let index = 0;
+
+  rows.forEach(row => {
+    const {characters, rowWidth, rowHeight} = transformRow(row, index, iconMapping);
+
+    characters.forEach(datum => {
+      datum.offsetTop = offsetTop;
+      datum.size = size;
+      datum.rowSize = [rowWidth, rowHeight];
+      datum.len = paragraph.length;
+
+      transformedData.push(transformCharacter(datum));
     });
-    startIndex = transformedData.length;
-  }
+
+    index += characters.length + 1; // 1 is for line break character
+    offsetTop = offsetTop + rowHeight;
+    size[0] = Math.max(size[0], rowWidth);
+  });
+
+  // last row
+  size[1] = offsetTop;
 }

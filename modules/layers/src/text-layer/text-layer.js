@@ -30,7 +30,7 @@ import FontAtlasManager, {
   DEFAULT_CUTOFF
 } from './font-atlas-manager';
 import {replaceInRange} from '../utils';
-import {transformText} from './utils';
+import {transformParagraph} from './utils';
 
 const DEFAULT_FONT_SETTINGS = {
   fontSize: DEFAULT_FONT_SIZE,
@@ -184,21 +184,31 @@ export default class TextLayer extends CompositeLayer {
     const transformedData = [];
 
     for (const object of iterable) {
-      const transformLetter = transformed => {
-        return this.getSubLayerRow(transformed, object, objectInfo.index);
+      const transformCharacter = ({text, index, offsetLeft, offsetTop, size, rowSize, len}) => {
+        return this.getSubLayerRow(
+          {
+            text,
+            index,
+            offsetLeft,
+            offsetTop,
+            size,
+            rowSize,
+            len
+          },
+          object,
+          objectInfo.index
+        );
       };
 
       objectInfo.index++;
       const text = getText(object, objectInfo);
       if (text) {
-        transformText(text, iconMapping, transformLetter, transformedData);
+        transformParagraph(text, iconMapping, transformCharacter, transformedData);
       }
     }
 
     return transformedData;
   }
-
-  /* eslint-enable no-loop-func */
 
   getLetterOffsets(datum) {
     // offsetX, offsetY
@@ -289,10 +299,9 @@ export default class TextLayer extends CompositeLayer {
       {
         data,
         getIcon: d => d.text,
-        getLineLength: d => d.lineLength,
+        getRowSize: d => d.rowSize,
         getOffsets: d => this.getLetterOffsets(d),
-        getLengthOfQueue: d => d.size[0],
-        getHeightOfQueue: d => d.size[1]
+        getParagraphSize: d => d.size
       }
     );
   }

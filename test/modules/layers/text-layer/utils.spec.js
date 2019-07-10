@@ -1,7 +1,7 @@
 /* eslint-disable */
 import test from 'tape-catch';
 
-import {nextPowOfTwo, buildMapping, transformText} from '@deck.gl/layers/text-layer/utils';
+import {nextPowOfTwo, buildMapping, transformParagraph} from '@deck.gl/layers/text-layer/utils';
 
 test('TextLayer - utils#nextPowOfTwo', t => {
   const testCases = [0, 1, 2, 5];
@@ -89,7 +89,7 @@ test('TextLayer - utils#buildMapping with cache', t => {
   t.end();
 });
 
-test('TextLayer - utils#transformText - single line', t => {
+test('TextLayer - utils#transformParagraph - single line', t => {
   const transformedData = [];
   const text = 'ab';
 
@@ -98,36 +98,36 @@ test('TextLayer - utils#transformText - single line', t => {
     b: {width: 2, height: 4}
   };
 
-  const transformLetter = data => data;
+  const transformCharacter = data => data;
 
   const expected = [
     {
       text: 'a',
       index: 0,
-      size: [3, 4],
       offsetLeft: 0,
       offsetTop: 0,
-      len: 2,
-      lineLength: 3
+      size: [3, 4],
+      rowSize: [3, 4],
+      len: 2
     },
     {
       text: 'b',
       index: 1,
-      size: [3, 4],
       offsetLeft: 1,
       offsetTop: 0,
-      len: 2,
-      lineLength: 3
+      size: [3, 4],
+      rowSize: [3, 4],
+      len: 2
     }
   ];
 
-  transformText(text, iconMapping, transformLetter, transformedData);
+  transformParagraph(text, iconMapping, transformCharacter, transformedData);
   t.deepEqual(transformedData, expected);
 
   t.end();
 });
 
-test('TextLayer - utils#transformText - multiple lines', t => {
+test('TextLayer - utils#transformParagraph - multiple lines', t => {
   const transformedData = [];
   const text = 'ab\nc';
 
@@ -137,63 +137,63 @@ test('TextLayer - utils#transformText - multiple lines', t => {
     c: {width: 2, height: 4}
   };
 
-  const transformLetter = data => data;
+  const transformCharacter = data => data;
 
   const expected = [
     {
       text: 'a',
       index: 0,
-      size: [4, 10],
       offsetLeft: 0,
       offsetTop: 0,
-      len: 4,
-      lineLength: 4
+      size: [4, 9],
+      rowSize: [4, 5],
+      len: 4
     },
     {
       text: 'b',
       index: 1,
-      size: [4, 10],
       offsetLeft: 1,
       offsetTop: 0,
-      len: 4,
-      lineLength: 4
+      size: [4, 9],
+      rowSize: [4, 5],
+      len: 4
     },
     {
       text: 'c',
       index: 3,
-      size: [4, 10],
       offsetLeft: 0,
       offsetTop: 5,
-      len: 4,
-      lineLength: 2
+      size: [4, 9],
+      rowSize: [2, 4],
+      len: 4
     }
   ];
 
-  transformText(text, iconMapping, transformLetter, transformedData);
+  transformParagraph(text, iconMapping, transformCharacter, transformedData);
   t.deepEqual(transformedData, expected);
 
   t.end();
 });
 
-test('TextLayer - utils#transformText - non empty', t => {
+test('TextLayer - utils#transformParagraph - non empty', t => {
   const transformedData = [
     {
       text: 'a',
       index: 0,
-      size: [3, 4],
       offsetLeft: 0,
       offsetTop: 0,
-      len: 2,
-      lineLength: 3
+      size: [3, 4],
+      rowSize: [3, 4],
+      len: 2
     },
     {
       text: 'b',
       index: 1,
-      size: [3, 4],
       offsetLeft: 1,
       offsetTop: 0,
-      len: 2,
-      lineLength: 3
+      size: [3, 4],
+      rowSize: [3, 4],
+      len: 2
     }
   ];
 
@@ -205,57 +205,57 @@ test('TextLayer - utils#transformText - non empty', t => {
     c: {width: 2, height: 4}
   };
 
-  const transformLetter = data => data;
+  const transformCharacter = data => data;
 
   const expected = [
     {
       text: 'a',
       index: 0,
-      size: [3, 4],
       offsetLeft: 0,
       offsetTop: 0,
-      len: 2,
-      lineLength: 3
+      size: [3, 4],
+      rowSize: [3, 4],
+      len: 2
     },
     {
       text: 'b',
       index: 1,
-      size: [3, 4],
       offsetLeft: 1,
       offsetTop: 0,
-      len: 2,
-      lineLength: 3
+      size: [3, 4],
+      rowSize: [3, 4],
+      len: 2
     },
     {
       text: 'a',
       index: 0,
-      size: [4, 10],
       offsetLeft: 0,
       offsetTop: 0,
-      len: 4,
-      lineLength: 4
+      size: [4, 9],
+      rowSize: [4, 5],
+      len: 4
     },
     {
       text: 'b',
       index: 1,
-      size: [4, 10],
       offsetLeft: 1,
       offsetTop: 0,
-      len: 4,
-      lineLength: 4
+      size: [4, 9],
+      rowSize: [4, 5],
+      len: 4
     },
     {
       text: 'c',
       index: 3,
-      size: [4, 10],
       offsetLeft: 0,
       offsetTop: 5,
-      len: 4,
-      lineLength: 2
+      size: [4, 9],
+      rowSize: [2, 4],
+      len: 4
     }
   ];
 
-  transformText(text, iconMapping, transformLetter, transformedData);
+  transformParagraph(text, iconMapping, transformCharacter, transformedData);
   t.deepEqual(transformedData, expected);
 
   t.end();

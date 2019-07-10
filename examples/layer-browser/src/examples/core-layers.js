@@ -485,7 +485,7 @@ const TextLayerExample = {
     autoHighlight: true,
     pickable: true,
     highlightColor: [0, 0, 128, 128],
-    getText: x => `${x.PLACEMENT}\n${x.YR_INSTALLED}`,
+    getText: x => x.LOCATION_NAME,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
     getAngle: x => 30,
