@@ -1,0 +1,43 @@
+.rangeslider input[type='range'] {
+  width: 180px;
+  height: 30px;
+  overflow: hidden;
+  cursor: pointer;
+  outline: none;
+}
+.rangeslider input[type='range'],
+.rangeslider input[type='range']::-webkit-slider-runnable-track,
+.rangeslider input[type='range']::-webkit-slider-thumb {
+  background: none;
+}
+
+.rangeslider input[type='range']::-webkit-slider-thumb {
+  position: relative;
+  z-index: 1;
+}
+
+.rangeslider input[type='range']:nth-child(1)::-webkit-slider-thumb {
+  z-index: 2;
+}
+
+.rangeslider {
+  position: relative;
+  height: 30px;
+  width: 180px;
+  display: inline-block;
+}
+.rangeslider input {
+  position: absolute;
+}
+
+.rangeslider span {
+  position: absolute;
+  margin-top: 30px;
+  left: 0;
+}
+
+.rangeslider .right {
+  position: relative;
+  float: right;
+  margin-right: -5px;
+}
