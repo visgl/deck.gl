@@ -85,5 +85,5 @@ There can be some confusion when mapping between deck.gl's coordinate systems an
 
 - deck.gl's world space maps to the standard "model space", i.e. the data that comes in before any transforms have been applied.
 - deck.gl's common space plays the role of standard "world space", but there are a few important differences. The y axis is inverted, which  means it's a left-handed coordinate system. The mercator "zoom" factor is applied as a common space transform (rather than in the view or projection transforms).
-- The view transform in deck.gl includes a scaling of the z axis by 1 / height of the screen in pixel. This is done used to line up mercator pixels with screen pixels, but also means the "near" and "far" distances used in the perspective transform are not the true distances, but numbers scaled down by the same factor.
+- The view transform in deck.gl includes a scaling of the z axis by 1 / height of the screen in pixel. This is done to line up mercator pixels with screen pixels, but also means the "near" and "far" distances used in the perspective transform are not the true distances, but numbers scaled down by the same factor.
 
