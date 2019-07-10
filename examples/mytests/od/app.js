@@ -13,13 +13,14 @@ let _ = require('underscore');
 // Set your mapbox token here
 const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
-const allTrips = require('./inputs/trips.json')
-const orderedTps = ['OP1', 'AM', 'IP1', 'IP2', 'PM', 'IP3', 'OP2'] 
-const elevenationStep = 2000;
+let sampleSize = 1;
+const allTrips = require(`./inputs/tours_${sampleSize}pct.json`);
+const orderedTps = ['OP1', 'AM', 'IP1', 'IP2', 'PM', 'IP3', 'OP2']; 
+const elevenationStep = 1000;
 
 let zones = require('./inputs/zones.json');
 
-let data = {zones: zones, allTrips: allTrips};
+let data = {zones: zones, allPaths: allPaths};
 
 let colorTps = d3.scaleSequential()
                   .domain([0, orderedTps.length-1])
@@ -55,31 +56,31 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      trips: this.props.data.allTrips,
+      paths: this.props.data.allPaths,
       selectedZone: null
     };
   
     this._onSelectZone = this._onSelectZone.bind(this);
-    this._filterTripsByProp = this._filterTripsByObjProp.bind(this);
+    this._filterPathsByProp = this._filterPathsByObjProp.bind(this);
   }
 
   componentDidMount() {    
-    const {allTrips = this.props.data.allTrips} = this.props;
-    allTrips.forEach(trip => { trip.Segment = [[trip.SourceX, trip.SourceY,
-                                                orderedTps.indexOf(trip.Timeperiod) * elevenationStep + 10],
-                                               [trip.TargetX, trip.TargetY,
-                                                orderedTps.indexOf(trip.Timeperiod) * elevenationStep + 10]] });
-    this.setState({trips: allTrips});
+    const {allPaths: allPaths = this.props.data.allPaths} = this.props;
+    allPaths.forEach(path => { path.Segment = [[path.SourceX, path.SourceY,
+                                                orderedTps.indexOf(path.Timeperiod) * elevenationStep + 10],
+                                               [path.TargetX, path.TargetY,
+                                                orderedTps.indexOf(path.Timeperiod) * elevenationStep + 10]] });
+    this.setState({paths: allPaths});
   }
 
-  _filterTripsByObjProp(trips, obj, prop) {
+  _filterPathsByObjProp(paths, obj, prop) {
     if (obj) {
-      let filteredTrips = Array();
+      let filteredpaths = Array();
       const filt = obj["properties"]["lsoa11cd"];
-      filteredTrips = trips.filter(x => x[prop] === filt);
-      this.setState({trips: filteredTrips})
+      filteredpaths = paths.filter(x => x[prop] === filt);
+      this.setState({paths: filteredpaths})
     } else {
-      this.setState({trips: this.props.data.allTrips})
+      this.setState({paths: this.props.data.allpaths})
     }
     
   }
@@ -92,7 +93,7 @@ export class App extends Component {
     } else {
         this.setState({selectedZone: null})
     }
-    this._filterTripsByObjProp(this.props.data.allTrips, this.state.selectedZone, 'Source');
+    this._filterPathsByObjProp(this.props.data.allpaths, this.state.selectedZone, 'Source');
   }
 
   _renderLayers() {
@@ -101,8 +102,8 @@ export class App extends Component {
 
     return [
       new PathLayer({
-        id: 'trips',
-        data: this.state.trips,
+        id: 'paths',
+        data: this.state.paths,
         widthScale: 1,
         widthMinPixels: 0.7,
         getPath: d => d.Segment,
