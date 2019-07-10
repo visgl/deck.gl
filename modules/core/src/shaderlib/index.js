@@ -40,6 +40,16 @@ export function initializeShaderModules() {
   createShaderHook('vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)');
   createShaderHook('fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)');
 
+  createModuleInjection('geometry', {
+    hook: 'vs:DECKGL_FILTER_COLOR',
+    order: 99,
+    injection: `
+  #ifdef COLOR_FORMAT_RGB
+  color.a = opacity;
+  #endif
+`
+  });
+
   createModuleInjection('picking', {
     hook: 'fs:DECKGL_FILTER_COLOR',
     order: 99,

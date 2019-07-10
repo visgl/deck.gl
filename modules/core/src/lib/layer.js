@@ -74,6 +74,8 @@ const defaultProps = {
   coordinateOrigin: {type: 'array', value: [0, 0, 0], compare: true},
   modelMatrix: {type: 'array', value: null, compare: true, optional: true},
   wrapLongitude: false,
+  positionFormat: 'XYZ',
+  colorFormat: 'RGBA',
 
   parameters: {},
   uniforms: {},
@@ -298,6 +300,11 @@ export default class Layer extends Component {
   getShaders(shaders) {
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
+    }
+    if (this.props.colorFormat === 'RGB') {
+      shaders = mergeShaders(shaders, {
+        defines: {COLOR_FORMAT_RGB: 1}
+      });
     }
     return shaders;
   }

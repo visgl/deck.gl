@@ -135,7 +135,8 @@ export default class PolygonLayer extends CompositeLayer {
       extruded,
       wireframe,
       elevationScale,
-      transitions
+      transitions,
+      positionFormat
     } = this.props;
 
     // Rendering props underlying layer
@@ -196,6 +197,7 @@ export default class PolygonLayer extends CompositeLayer {
         }),
         {
           data,
+          positionFormat,
           getPolygon
         }
       );
@@ -236,6 +238,7 @@ export default class PolygonLayer extends CompositeLayer {
         }),
         {
           data: paths,
+          positionFormat,
           getPath: x => x.path
         }
       );
