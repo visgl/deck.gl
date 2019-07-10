@@ -25,22 +25,12 @@ let toursData = require(`./inputs/tours_${sampleSize}pct.json`);
 let zonesData = require('./inputs/zones.json');
 let trIds = Object.keys(toursData);
 
-var colorTours = d3.scaleSequential()
-                  .domain(shuffle([...trIds]))
-                  .interpolator(d3.interpolateRainbow);
+let shuffledIds = d3.shuffle([...trIds]);
+let colorTours = d3.scaleOrdinal()
+                   .domain(shuffledIds)
+                   .range(d3.schemePaired);
 
 let data = {zones: zonesData, tours: toursData};
-
-function shuffle(a) {
-  let j, x, i;
-  for (i = a.length - 1; i > 0; i--) {
-      j = Math.floor(Math.random() * (i + 1));
-      x = a[i];
-      a[i] = a[j];
-      a[j] = x;
-  }
-  return a;
-}
 
 function secondsToHms(d) {
     d = Number(d);
@@ -66,7 +56,7 @@ function filterToursBySource(tours, zone, prop='Sources') {
   return filtered
 }
 
-function filterIncompleteTours(tours, currentTime, delay=10.1) {  
+function filterIncompleteTours(tours, currentTime) {  
   for (const tour of tours) {
     tour['Completed'] = false;
     if (tour.Timestamps[tour.Timestamps.length-1] < currentTime) {
@@ -179,7 +169,7 @@ export class App extends Component {
   }
 
   _filterTours() {
-    const {allTours: allTours = this.props.data.tours} = this.props;
+    const {allTours = this.props.data.tours} = this.props;
     
     let filteredTours = allTours;
     let incompleteTours;
@@ -269,7 +259,7 @@ _onRestart(evnt){
             initialViewState={INITIAL_VIEW_STATE}
             viewState={viewState}
             controller={controller}
-            onClick={(object) => { this._onSelectZone(object)}}
+            onClick={(object) => {this._onSelectZone(object)}}
           >
             {baseMap && (
               <StaticMap

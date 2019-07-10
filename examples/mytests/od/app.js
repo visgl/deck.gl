@@ -11,16 +11,24 @@ import './style.css';
 
 let _ = require('underscore');
 // Set your mapbox token here
-const MAPBOX_TOKEN = "pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
+const MAPBOX_TOKEN = "break-pk.eyJ1IjoiaGFyaXNiYWwiLCJhIjoiY2pzbmR0cTU1MGI4NjQzbGl5eTBhZmZrZCJ9.XN4kLWt5YzqmGQYVpFFqKw";
 
+const allTrips = require('./inputs/trips.json')
 const orderedTps = ['OP1', 'AM', 'IP1', 'IP2', 'PM', 'IP3', 'OP2'] 
-const elevenationStep = 1000;
+const elevenationStep = 2000;
 
 let zones = require('./inputs/zones.json');
-let od = require('./inputs/od.json');
-let coords = require('./inputs/coords.json');
 
-let data = {zones: zones, od: od, coords: coords};
+let data = {zones: zones, allTrips: allTrips};
+
+let colorTps = d3.scaleSequential()
+                  .domain([0, orderedTps.length-1])
+                  .interpolator(d3.interpolateGreens);
+
+function getRgbFromStr(strRgb) {
+  var color = d3.color(strRgb);
+  return [color.r, color.g, color.b]  
+}
 
 const ambientLight = new AmbientLight({
   color: [255, 255, 255],
@@ -47,42 +55,44 @@ export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      trips: null
+      trips: this.props.data.allTrips,
+      selectedZone: null
     };
+  
+    this._onSelectZone = this._onSelectZone.bind(this);
+    this._filterTripsByProp = this._filterTripsByObjProp.bind(this);
   }
 
   componentDidMount() {    
-    
-    const {coords = this.props.data.coords,
-           od = this.props.data.od} = this.props;
-
-    let zoneCoords;
-    let trips;
-    trips = _.map(od, function(trip){ 
-      zoneCoords = _.find(coords, function(zone){ return zone.BoundaryId == trip.Source });
-      trip.SourceX = zoneCoords.X
-      trip.SourceY = zoneCoords.Y
-      return trip; 
-    })
-
-    trips = _.map(od, function(trip){ 
-      zoneCoords = _.find(coords, function(zone){ return zone.BoundaryId == trip.Target });
-      trip.TargetX = zoneCoords.X
-      trip.TargetY = zoneCoords.Y
-      return trip; 
-    })
-    
-    trips.forEach(trip => { trip.Segment = [[trip.SourceX, trip.SourceY,
-                                             orderedTps.indexOf(trip.Timeperiod) * elevenationStep + 10],
-                                            [trip.TargetX, trip.TargetY,
-                                             orderedTps.indexOf(trip.Timeperiod) * elevenationStep + 10]] });
-    
-    this.setState({trips: trips});
-
+    const {allTrips = this.props.data.allTrips} = this.props;
+    allTrips.forEach(trip => { trip.Segment = [[trip.SourceX, trip.SourceY,
+                                                orderedTps.indexOf(trip.Timeperiod) * elevenationStep + 10],
+                                               [trip.TargetX, trip.TargetY,
+                                                orderedTps.indexOf(trip.Timeperiod) * elevenationStep + 10]] });
+    this.setState({trips: allTrips});
   }
 
-  componentWillUnmount() {
+  _filterTripsByObjProp(trips, obj, prop) {
+    if (obj) {
+      let filteredTrips = Array();
+      const filt = obj["properties"]["lsoa11cd"];
+      filteredTrips = trips.filter(x => x[prop] === filt);
+      this.setState({trips: filteredTrips})
+    } else {
+      this.setState({trips: this.props.data.allTrips})
+    }
+    
+  }
 
+  _onSelectZone(object) {
+    if (object.layer) {
+      if (object.layer.id == 'boundaries') {
+        this.setState({selectedZone: object.object})  
+      }
+    } else {
+        this.setState({selectedZone: null})
+    }
+    this._filterTripsByObjProp(this.props.data.allTrips, this.state.selectedZone, 'Source');
   }
 
   _renderLayers() {
@@ -91,13 +101,13 @@ export class App extends Component {
 
     return [
       new PathLayer({
-        id: 'od',
+        id: 'trips',
         data: this.state.trips,
+        widthScale: 0.7,
+        widthMinPixels: 0.7,
         getPath: d => d.Segment,
-        pickable: true,
-        widthMinPixels: 2,
-        getColor: [255, 255, 0],
-        getWidth: 1,
+        getColor: d => getRgbFromStr(colorTps(orderedTps.indexOf(d.Timeperiod))),
+        getWidth: d => d.Dailytrips,
       }),
 
       new GeoJsonLayer({
@@ -109,7 +119,8 @@ export class App extends Component {
         extruded: false,
         opacity: 0.10,
         autoHighlight: true,
-        highlightColor: [0, 255, 255]
+        highlightColor: [0, 255, 255],
+        onClick: this._onSelectZone
       })
     ];
   }
@@ -126,7 +137,7 @@ export class App extends Component {
             initialViewState={INITIAL_VIEW_STATE}
             viewState={viewState}
             controller={controller}
-            onClick={(object) => { this._onSelectZone(object)}}
+            onClick={(object) => {this._onSelectZone(object)}}
           >
             {baseMap && (
               <StaticMap
