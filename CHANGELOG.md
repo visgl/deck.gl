@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.8] - July 10 2019
+
+- Fix missing pickingRadius for onClick handlers (#3321) (#3327)
+- Relax geometry validation in GeoJsonLayer (#3325)
+
 #### deck.gl [v7.1.7] - June 24 2019
 
 - fix missing viewport id (#3275)
