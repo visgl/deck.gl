@@ -78,3 +78,12 @@ The view is independent of the layers' coordinate systems, and is shared by all 
 
 The default view used in deck.gl is the [MapView](/docs/api-reference/map-view.md), which implements the [Web Meractor projection](https://en.wikipedia.org/wiki/Web_Mercator_projection). When working with non-geospatial datasets, the `IDENTITY` coordinate system needs to be used in combination with an alternative view. Read about deck.gl's view system in [Views and Projections](/docs/developer-guide/views.md).
 
+
+## Comparison to Standard 3D Graphics Coordinate Systems
+
+There can be some confusion when mapping between deck.gl's coordinate systems and those typically seen in 3D graphics applications, i.e. model space, world space, view space, clip space.
+
+- deck.gl's world space maps to the standard "model space", i.e. the data that comes in before any transforms have been applied.
+- deck.gl's common space plays the role of standard "world space", but there are a few important differences. The y axis is inverted, which  means it's a left-handed coordinate system. The mercator "zoom" factor is applied as a common space transform (rather than in the view or projection transforms).
+- The view transform in deck.gl includes a scaling of the z axis by 1 / height of the screen in pixel. This is done to line up mercator pixels with screen pixels, but also means the "near" and "far" distances used in the perspective transform are not the true distances, but numbers scaled down by the same factor.
+
