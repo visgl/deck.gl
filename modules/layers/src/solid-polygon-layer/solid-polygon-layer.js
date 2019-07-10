@@ -67,6 +67,7 @@ export default class SolidPolygonLayer extends Layer {
     return {
       vs,
       fs,
+      defines: {},
       modules: [projectModule, 'gouraud-lighting', 'picking']
     };
   }
@@ -283,9 +284,12 @@ export default class SolidPolygonLayer extends Layer {
     let sideModel;
 
     if (filled) {
+      const shaders = this.getShaders(vsTop);
+      shaders.defines.NON_INSTANCED_MODEL = 1;
+
       topModel = new Model(
         gl,
-        Object.assign({}, this.getShaders(vsTop), {
+        Object.assign({}, shaders, {
           id: `${id}-top`,
           drawMode: GL.TRIANGLES,
           attributes: {
