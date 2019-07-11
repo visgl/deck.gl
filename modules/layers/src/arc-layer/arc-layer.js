@@ -68,14 +68,14 @@ export default class ArcLayer extends Layer {
         update: this.calculateInstancePositions64Low
       },
       instanceSourceColors: {
-        size: 4,
+        size: this.props.colorFormat === 'RGB' ? 3 : 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getSourceColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceTargetColors: {
-        size: 4,
+        size: this.props.colorFormat === 'RGB' ? 3 : 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getTargetColor',

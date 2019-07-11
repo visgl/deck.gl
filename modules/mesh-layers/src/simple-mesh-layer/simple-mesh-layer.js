@@ -137,7 +137,7 @@ export default class SimpleMeshLayer extends Layer {
       },
       instanceColors: {
         transition: true,
-        size: 4,
+        size: this.props.colorFormat === 'RGB' ? 3 : 4,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },

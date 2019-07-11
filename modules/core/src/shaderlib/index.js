@@ -45,7 +45,7 @@ export function initializeShaderModules() {
     order: 99,
     injection: `
   #ifdef COLOR_FORMAT_RGB
-  color.a = opacity;
+  color.a *= 255.;
   #endif
 `
   });

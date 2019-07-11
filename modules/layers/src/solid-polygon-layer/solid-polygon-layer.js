@@ -149,7 +149,7 @@ export default class SolidPolygonLayer extends Layer {
       },
       fillColors: {
         alias: 'colors',
-        size: 4,
+        size: this.props.colorFormat === 'RGB' ? 3 : 4,
         type: GL.UNSIGNED_BYTE,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getFillColor',
@@ -165,7 +165,7 @@ export default class SolidPolygonLayer extends Layer {
       },
       lineColors: {
         alias: 'colors',
-        size: 4,
+        size: this.props.colorFormat === 'RGB' ? 3 : 4,
         type: GL.UNSIGNED_BYTE,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getLineColor',

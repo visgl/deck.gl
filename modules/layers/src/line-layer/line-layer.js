@@ -68,7 +68,7 @@ export default class LineLayer extends Layer {
         update: this.calculateInstanceSourceTargetPositions64xyLow
       },
       instanceColors: {
-        size: 4,
+        size: this.props.colorFormat === 'RGB' ? 3 : 4,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',
