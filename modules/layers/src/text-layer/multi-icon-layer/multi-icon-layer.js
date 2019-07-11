@@ -29,8 +29,13 @@ const DEFAULT_GAMMA = 0.2;
 const DEFAULT_BUFFER = 192.0 / 256;
 
 const defaultProps = {
-  getShiftInQueue: {type: 'accessor', value: x => x.shift || 0},
-  getLengthOfQueue: {type: 'accessor', value: x => x.len || 1},
+  // each paragraph can have one or multiple row(s)
+  // each row can have one or multiple character(s)
+  getRowSize: {type: 'accessor', value: x => x.rowSize || [0, 0]},
+  // offset from the left, top position of the paragraph
+  getOffsets: {type: 'accessor', value: x => x.offsets || [0, 0]},
+  // [width, height] of the paragraph
+  getParagraphSize: {type: 'accessor', value: x => x.size || [1, 1]},
   // 1: left, 0: middle, -1: right
   getAnchorX: {type: 'accessor', value: x => x.anchorX || 0},
   // 1: top, 0: center, -1: bottom
@@ -94,8 +99,9 @@ export default class MultiIconLayer extends IconLayer {
       getIcon,
       getAnchorX,
       getAnchorY,
-      getLengthOfQueue,
-      getShiftInQueue
+      getParagraphSize,
+      getRowSize,
+      getOffsets
     } = this.props;
     const {value, size} = attribute;
     let i = startRow * size;
@@ -104,11 +110,17 @@ export default class MultiIconLayer extends IconLayer {
     for (const object of iterable) {
       const icon = getIcon(object);
       const rect = iconMapping[icon] || {};
-      const len = getLengthOfQueue(object);
-      const shiftX = getShiftInQueue(object);
+      const [width, height] = getParagraphSize(object);
+      const [rowWidth] = getRowSize(object);
+      const [offsetX, offsetY] = getOffsets(object);
+      const anchorX = getAnchorX(object);
+      const anchorY = getAnchorY(object);
 
-      value[i++] = ((getAnchorX(object) - 1) * len) / 2 + rect.width / 2 + shiftX || 0;
-      value[i++] = (rect.height / 2) * getAnchorY(object) || 0;
+      // For a multi-line object, offset in x-direction needs consider
+      // the row offset in the paragraph and the object offset in the row
+      const rowOffset = ((1 - anchorX) * (width - rowWidth)) / 2;
+      value[i++] = ((anchorX - 1) * width) / 2 + rowOffset + rect.width / 2 + offsetX || 0;
+      value[i++] = ((anchorY - 1) * height) / 2 + rect.height / 2 + offsetY || 0;
     }
   }
 

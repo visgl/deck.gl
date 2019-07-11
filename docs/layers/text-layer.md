@@ -129,6 +129,12 @@ Specifies a list of characters to include in the font. By default, only characte
 
 css `font-weight`.
 
+##### `lineHeight` (Number, optional)
+
+* Default: 1.0.
+
+A unitless number that will be multiplied with the current font-size to set the line height.
+
 ##### `fontSettings` (Object, optional)
 
 Advance options for fine tuning the appearance and performance of the generated shared `fontAtlas`.

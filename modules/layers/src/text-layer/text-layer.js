@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {CompositeLayer, log, createIterable} from '@deck.gl/core';
+import {CompositeLayer, createIterable} from '@deck.gl/core';
 import MultiIconLayer from './multi-icon-layer/multi-icon-layer';
 import FontAtlasManager, {
   DEFAULT_CHAR_SET,
@@ -30,6 +30,7 @@ import FontAtlasManager, {
   DEFAULT_CUTOFF
 } from './font-atlas-manager';
 import {replaceInRange} from '../utils';
+import {transformParagraph} from './utils';
 
 const DEFAULT_FONT_SETTINGS = {
   fontSize: DEFAULT_FONT_SIZE,
@@ -53,7 +54,8 @@ const ALIGNMENT_BASELINE = {
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
-const MISSING_CHAR_WIDTH = 32;
+const DEFAULT_LINE_HEIGHT = 1.0;
+
 const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
@@ -66,6 +68,7 @@ const defaultProps = {
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
   fontWeight: DEFAULT_FONT_WEIGHT,
+  lineHeight: DEFAULT_LINE_HEIGHT,
   fontSettings: {},
 
   getText: {type: 'accessor', value: x => x.text},
@@ -94,6 +97,7 @@ export default class TextLayer extends CompositeLayer {
     const textChanged =
       changeFlags.dataChanged ||
       fontChanged ||
+      props.lineHeight !== oldProps.lineHeight ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
 
@@ -176,56 +180,26 @@ export default class TextLayer extends CompositeLayer {
 
   /* eslint-disable no-loop-func */
   transformStringToLetters(dataRange = {}) {
-    const {data, getText} = this.props;
+    const {data, lineHeight, getText} = this.props;
     const {iconMapping} = this.state;
     const {startRow, endRow} = dataRange;
+    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
 
     const transformedData = [];
 
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
+      const transformCharacter = transformed => {
+        return this.getSubLayerRow(transformed, object, objectInfo.index);
+      };
+
       objectInfo.index++;
       const text = getText(object, objectInfo);
       if (text) {
-        const letters = Array.from(text);
-        const offsets = [0];
-        let offsetLeft = 0;
-
-        letters.forEach((letter, i) => {
-          const datum = this.getSubLayerRow(
-            {
-              text: letter,
-              index: i,
-              offsets,
-              len: text.length
-            },
-            object,
-            objectInfo.index
-          );
-
-          const frame = iconMapping[letter];
-          if (frame) {
-            offsetLeft += frame.width;
-          } else {
-            log.warn(`Missing character: ${letter}`)();
-            offsetLeft += MISSING_CHAR_WIDTH;
-          }
-          offsets.push(offsetLeft);
-          transformedData.push(datum);
-        });
+        transformParagraph(text, lineHeight, iconMapping, transformCharacter, transformedData);
       }
     }
 
     return transformedData;
-  }
-  /* eslint-enable no-loop-func */
-
-  getLetterOffset(datum) {
-    return datum.offsets[datum.index];
-  }
-
-  getTextLength(datum) {
-    return datum.offsets[datum.offsets.length - 1];
   }
 
   getAnchorXFromTextAnchor(getTextAnchor) {
@@ -311,10 +285,10 @@ export default class TextLayer extends CompositeLayer {
       }),
       {
         data,
-
         getIcon: d => d.text,
-        getShiftInQueue: d => this.getLetterOffset(d),
-        getLengthOfQueue: d => this.getTextLength(d)
+        getRowSize: d => d.rowSize,
+        getOffsets: d => [d.offsetLeft, d.offsetTop],
+        getParagraphSize: d => d.size
       }
     );
   }
