@@ -127,6 +127,42 @@ const TEST_CASES = [
     object1: {prop: x => x},
     object2: {prop: [1, 2, 3]},
     result: NOT_SAME
+  },
+  {
+    title: 'add key#1',
+    object1: Object.assign(Object.create(SHALLOW_OBJECT)),
+    object2: Object.assign(Object.create(SHALLOW_OBJECT), {c: 0}),
+    result: NOT_SAME
+  },
+  {
+    title: 'add key#2',
+    object1: Object.assign(Object.create(SHALLOW_OBJECT)),
+    object2: Object.assign(Object.create(SHALLOW_OBJECT), {b: 3}),
+    result: NOT_SAME
+  },
+  {
+    title: 'add key#3',
+    object1: Object.assign(Object.create(SHALLOW_OBJECT)),
+    object2: Object.assign(Object.create(SHALLOW_OBJECT), {b: 2}),
+    result: SAME
+  },
+  {
+    title: 'drop key#1',
+    object1: Object.assign(Object.create(SHALLOW_OBJECT), {c: 0}),
+    object2: Object.assign(Object.create(SHALLOW_OBJECT)),
+    result: NOT_SAME
+  },
+  {
+    title: 'drop key#2',
+    object1: Object.assign(Object.create(SHALLOW_OBJECT), {b: 3}),
+    object2: Object.assign(Object.create(SHALLOW_OBJECT)),
+    result: NOT_SAME
+  },
+  {
+    title: 'drop key#3',
+    object1: Object.assign(Object.create(SHALLOW_OBJECT), {b: 2}),
+    object2: Object.assign(Object.create(SHALLOW_OBJECT)),
+    result: SAME
   }
 ];
 
