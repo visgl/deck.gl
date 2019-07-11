@@ -407,7 +407,7 @@ const HexagonLayerExample = {
 
 const TextLayerExample = {
   layer: TextLayer,
-  getData: () => dataSamples.texts.slice(0, 2),
+  getData: () => dataSamples.texts,
   propTypes: {
     fontFamily: {
       name: 'fontFamily',
