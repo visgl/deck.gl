@@ -4,6 +4,7 @@ import {
   getVertices,
   CONTOUR_TYPE
 } from '@deck.gl/aggregation-layers/contour-layer/marching-squares';
+import {getLinearInterpolation} from '../../../../modules/aggregation-layers/src/contour-layer/linear-interpolation';
 
 const GETCODE_TESTS = [
   // ISO LINES
@@ -253,22 +254,50 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 4,
-    vertices: [[110, 230], [115, 220]]
+    vertices: [[110, 230], [115, 210]],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
   {
     gridOrigin: [100, 200],
     code: 0,
-    vertices: []
+    vertices: [],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
   {
     gridOrigin: [100, 200],
     code: 6,
-    vertices: [[110, 230], [110, 210]]
+    vertices: [[110, 230], [115, 210]],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
   {
     gridOrigin: [100, 200],
     code: 15,
-    vertices: []
+    vertices: [],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
 
   // non zero cellIndex
@@ -277,16 +306,30 @@ const GETVERTEX_TESTS = [
     code: 12,
     x: 1,
     y: 1,
-    vertices: [[115, 240], [125, 240]],
-    gridSize: [3, 3]
+    vertices: [[115, 270], [125, 230]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
   {
     gridOrigin: [100, 200],
     code: 9,
     x: 0,
     y: 1,
-    vertices: [[110, 250], [110, 230]],
-    gridSize: [3, 3]
+    vertices: [[110, 250], [115, 230]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
 
   // saddle cases
@@ -296,8 +339,15 @@ const GETVERTEX_TESTS = [
     meanCode: 1,
     x: 0,
     y: 0,
-    vertices: [[105, 220], [110, 230], [110, 210], [115, 220]],
-    gridSize: [3, 3]
+    vertices: [[105, 250], [110, 230], [115, 210], [115, 210]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
   {
     gridOrigin: [100, 200],
@@ -305,8 +355,15 @@ const GETVERTEX_TESTS = [
     meanCode: 0,
     x: 0,
     y: 0,
-    vertices: [[105, 220], [110, 210], [110, 230], [115, 220]],
-    gridSize: [3, 3]
+    vertices: [[105, 250], [115, 210], [110, 230], [115, 210]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15}
   },
 
   // ISO-BANDS
@@ -393,6 +450,15 @@ const GETVERTEX_TESTS = [
   }
 ];
 
+const GETLINEARINTERPOLATION_TESTS = [
+  {
+    min: 10,
+    max: 80,
+    threshold: 50,
+    li: 0.571
+  }
+];
+
 test('MarchingSquares#getCode', t => {
   const threshold = 6;
   const x = 0;
@@ -433,7 +499,9 @@ test('MarchingSquares#getVertices', t => {
       cellSize: testCase.cellSize || cellSize,
       code: testCase.code,
       meanCode: testCase.meanCode,
-      type: testCase.type || CONTOUR_TYPE.ISO_LINES
+      type: testCase.type || CONTOUR_TYPE.ISO_LINES,
+      weights: testCase.weights,
+      thresholdData: testCase.thresholdData
     });
     // Set z coordinate to 0 if not present.
     let expectedVertices = [];
@@ -461,3 +529,20 @@ test('MarchingSquares#getVertices', t => {
   t.end();
 });
 /* eslint-enable max-nested-callbacks */
+
+test('MarchingSquares#getLinearInterpolation', t => {
+  GETLINEARINTERPOLATION_TESTS.forEach(testCase => {
+    let linearInterpolation = getLinearInterpolation(
+      testCase.min,
+      testCase.max,
+      testCase.threshold
+    );
+    linearInterpolation = parseFloat(linearInterpolation.toFixed(3));
+    t.deepEquals(
+      linearInterpolation,
+      testCase.li,
+      `Linear Interpolation: expected: ${testCase.li}, actual: ${linearInterpolation}`
+    );
+  });
+  t.end();
+});

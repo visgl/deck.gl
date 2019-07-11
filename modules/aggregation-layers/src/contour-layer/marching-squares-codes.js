@@ -18,6 +18,14 @@ const OFFSET = {
   SW: [-HALF, -HALF]
 };
 
+// CORNERS of Cell
+const CORNERS = {
+  W: ['current', 'top'],
+  E: ['right', 'topRight'],
+  S: ['current', 'right'],
+  N: ['top', 'topRight']
+};
+
 // NOTE: vertices are ordered in CCW direction, starting from NW corner
 
 // Triangles
@@ -149,6 +157,37 @@ export const ISOLINES_CODE_OFFSET_MAP = {
   15: []
 };
 
+export const LINEAR_INTERPOLATION_CODE_OFFSET_MAP = {
+  // key is equal to the code of 4 vertices (invert the code specified in wiki)
+  // value can be an array or an Object
+  // Array defines the cell corners (top, current, topRight, right)
+  // Object : to handle saddle cases, whose output depends on mean value of all 4 corners
+  //  key: code of mean value (0 or 1)
+  //  value: Array , as above defines
+
+  0: [],
+  1: [[CORNERS.W, CORNERS.S]],
+  2: [[CORNERS.S, CORNERS.E]],
+  3: [[CORNERS.W, CORNERS.E]],
+  4: [[CORNERS.N, CORNERS.E]],
+  5: {
+    0: [[CORNERS.W, CORNERS.S], [CORNERS.N, CORNERS.E]],
+    1: [[CORNERS.W, CORNERS.N], [CORNERS.S, CORNERS.E]]
+  },
+  6: [[CORNERS.N, CORNERS.S]],
+  7: [[CORNERS.W, CORNERS.N]],
+  8: [[CORNERS.W, CORNERS.N]],
+  9: [[CORNERS.N, CORNERS.S]],
+  10: {
+    0: [[CORNERS.W, CORNERS.N], [CORNERS.S, CORNERS.E]],
+    1: [[CORNERS.W, CORNERS.S], [CORNERS.N, CORNERS.E]]
+  },
+  11: [[CORNERS.N, CORNERS.E]],
+  12: [[CORNERS.W, CORNERS.E]],
+  13: [[CORNERS.S, CORNERS.E]],
+  14: [[CORNERS.W, CORNERS.S]],
+  15: []
+};
 function ternaryToIndex(ternary) {
   return parseInt(ternary, 4);
 }

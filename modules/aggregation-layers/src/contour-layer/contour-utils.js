@@ -20,7 +20,7 @@ export function generateContours({
     for (let x = -1; x < width; x++) {
       for (let y = -1; y < height; y++) {
         // Get the MarchingSquares code based on neighbor cell weights.
-        const {code, meanCode} = getCode({
+        const {code, meanCode, weights} = getCode({
           cellWeights,
           threshold,
           x,
@@ -37,7 +37,8 @@ export function generateContours({
           height,
           code,
           meanCode,
-          thresholdData: data
+          thresholdData: data,
+          weights
         };
         if (Array.isArray(threshold)) {
           opts.type = CONTOUR_TYPE.ISO_BANDS;

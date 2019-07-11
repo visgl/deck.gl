@@ -2,7 +2,12 @@
 // Ref: https://en.wikipedia.org/wiki/Marching_squares
 
 import {log} from '@deck.gl/core';
-import {ISOLINES_CODE_OFFSET_MAP, ISOBANDS_CODE_OFFSET_MAP} from './marching-squares-codes';
+import {
+  ISOLINES_CODE_OFFSET_MAP,
+  ISOBANDS_CODE_OFFSET_MAP,
+  LINEAR_INTERPOLATION_CODE_OFFSET_MAP
+} from './marching-squares-codes';
+import {getLinearInterpolation} from './linear-interpolation';
 
 export const CONTOUR_TYPE = {
   ISO_LINES: 1,
@@ -56,6 +61,7 @@ export function getCode(opts) {
   // TOP
   if (isLeftBoundary || isTopBoundary) {
     codes.top = 0;
+    weights.top = 0;
   } else {
     weights.top = cellWeights[(y + 1) * width + x];
     codes.top = getVertexCode(weights.top, threshold);
@@ -64,6 +70,7 @@ export function getCode(opts) {
   // TOP-RIGHT
   if (isRightBoundary || isTopBoundary) {
     codes.topRight = 0;
+    weights.topRight = 0;
   } else {
     weights.topRight = cellWeights[(y + 1) * width + x + 1];
     codes.topRight = getVertexCode(weights.topRight, threshold);
@@ -72,6 +79,7 @@ export function getCode(opts) {
   // RIGHT
   if (isRightBoundary || isBottomBoundary) {
     codes.right = 0;
+    weights.right = 0;
   } else {
     weights.right = cellWeights[y * width + x + 1];
     codes.right = getVertexCode(weights.right, threshold);
@@ -80,6 +88,7 @@ export function getCode(opts) {
   // CURRENT
   if (isLeftBoundary || isBottomBoundary) {
     codes.current = 0;
+    weights.current = 0;
   } else {
     weights.current = cellWeights[y * width + x];
     codes.current = getVertexCode(weights.current, threshold);
@@ -104,19 +113,27 @@ export function getCode(opts) {
       threshold
     );
   }
-  return {code, meanCode};
+  return {code, meanCode, weights};
 }
 /* eslint-enable complexity, max-statements*/
 
 // Returns intersection vertices for given cellindex
 // [x, y] refers current marchng cell, reference vertex is always top-right corner
 export function getVertices(opts) {
-  const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES} = opts;
+  const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES, weights} = opts;
   const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);
   let offsets =
     type === CONTOUR_TYPE.ISO_BANDS
       ? ISOBANDS_CODE_OFFSET_MAP[code]
       : ISOLINES_CODE_OFFSET_MAP[code];
+
+  let linearOffsets = [];
+  if (type === CONTOUR_TYPE.ISO_LINES) {
+    linearOffsets = LINEAR_INTERPOLATION_CODE_OFFSET_MAP[code];
+    if (!Array.isArray(linearOffsets)) {
+      linearOffsets = linearOffsets[meanCode];
+    }
+  }
 
   // handle saddle cases
   if (!Array.isArray(offsets)) {
@@ -162,12 +179,27 @@ export function getVertices(opts) {
 
   // default case is ISO_LINES
   const lines = [];
-  offsets.forEach(xyOffsets => {
-    xyOffsets.forEach(offset => {
-      const vX = refVertexX + offset[0] * cellSize[0];
-      const vY = refVertexY + offset[1] * cellSize[1];
+  offsets.forEach((xyOffsets, i) => {
+    xyOffsets.forEach((offset, j) => {
+      const li = getLinearOffsetValue(linearOffsets[i][j], weights, thresholdData.threshold);
+
+      const xOffset = !offset[0] ? offset[0] + li : offset[0];
+      const yOffset = !offset[1] ? offset[1] + li : offset[1];
+
+      const vX = refVertexX + xOffset * cellSize[0];
+      const vY = refVertexY + yOffset * cellSize[1];
       lines.push([vX, vY, vZ]);
     });
   });
   return lines;
+}
+
+function getLinearOffsetValue(offset, weights, threshold) {
+  const linearInterpolation = getLinearInterpolation(
+    weights[offset[0]],
+    weights[offset[1]],
+    threshold
+  );
+  // linearInterpolation is between 0 and 1, to match with (-0.5, 0.5) subtracting with 0.5
+  return linearInterpolation - 0.5;
 }
