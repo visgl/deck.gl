@@ -170,6 +170,9 @@ export default class ContourLayer extends CompositeLayer {
     if (oldProps.cellSize !== props.cellSize) {
       aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
     }
+    if (oldProps.isLI !== props.isLI) {
+      aggregationFlags = Object.assign({}, aggregationFlags, {isLIChanged: true});
+    }
     return aggregationFlags;
   }
 

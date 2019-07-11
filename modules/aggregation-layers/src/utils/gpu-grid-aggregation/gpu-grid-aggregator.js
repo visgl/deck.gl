@@ -341,7 +341,10 @@ export default class GPUGridAggregator {
   validateProps(aggregationParams, opts) {
     const {changeFlags, projectPoints, gridTransformMatrix} = aggregationParams;
     log.assert(
-      changeFlags.dataChanged || changeFlags.viewportChanged || changeFlags.cellSizeChanged
+      changeFlags.dataChanged ||
+        changeFlags.viewportChanged ||
+        changeFlags.cellSizeChanged ||
+        changeFlags.isLIChanged
     );
 
     // log.assert for required options
@@ -521,7 +524,9 @@ export default class GPUGridAggregator {
     let gridPositions;
     const pos = [0, 0, 0];
 
-    log.assert(gridTransformRequired || opts.changeFlags.cellSizeChanged);
+    log.assert(
+      gridTransformRequired || opts.changeFlags.cellSizeChanged || opts.changeFlags.isLIChanged
+    );
 
     let posCount;
     if (gridTransformRequired) {
