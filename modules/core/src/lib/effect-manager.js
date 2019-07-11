@@ -5,10 +5,12 @@ import {default as ShadowEffect} from '../effects/shadow-effect';
 export default class EffectManager {
   constructor() {
     this.effects = [];
+    this.internalEffects = [];
     this._needsRedraw = 'Initial render';
     this.defaultLightingEffect = new LightingEffect();
     this.needApplyDefaultLighting = false;
     this.needApplyDefaultShadow = false;
+    this.applyLightingEffet();
   }
 
   setProps(props) {
@@ -18,8 +20,18 @@ export default class EffectManager {
         this._needsRedraw = 'effects changed';
       }
     }
+  }
+
+  createInternalEffects() {
     this.checkLightingEffect();
     this.checkShadowEffect();
+    this.internalEffects = this.effects.slice();
+    if (this.needApplyDefaultLighting) {
+      this.applyLightingEffet();
+    }
+    if (this.needApplyDefaultShadow) {
+      this.applyShadowEffect(this.internalEffects);
+    }
   }
 
   needsRedraw(opts = {clearRedrawFlags: false}) {
@@ -31,15 +43,7 @@ export default class EffectManager {
   }
 
   getEffects() {
-    const effects = this.effects.slice();
-    if (this.needApplyDefaultLighting) {
-      effects.push(this.defaultLightingEffect);
-    }
-
-    if (this.needApplyDefaultShadow) {
-      this.applyShadowEffect(effects);
-    }
-    return effects;
+    return this.internalEffects;
   }
 
   finalize() {
@@ -50,13 +54,19 @@ export default class EffectManager {
   setEffects(effects = []) {
     this.cleanup();
     this.effects = effects;
+    this.createInternalEffects();
   }
 
   cleanup() {
     for (const effect of this.effects) {
       effect.cleanup();
     }
+
+    for (const effect of this.internalEffects) {
+      effect.cleanup();
+    }
     this.effects.length = 0;
+    this.internalEffects.length = 0;
   }
 
   checkLightingEffect() {
@@ -82,15 +92,21 @@ export default class EffectManager {
   }
 
   applyShadowEffect(effects) {
+    const lights = [];
     for (const effect of this.effects) {
       if (effect instanceof LightingEffect) {
         for (const light of effect.directionalLights) {
           // eslint-disable-next-line max-depth
           if (light.castShadow) {
-            effects.push(new ShadowEffect({light}));
+            lights.push(light);
           }
         }
       }
     }
+    effects.push(new ShadowEffect({lights}));
+  }
+
+  applyLightingEffet() {
+    this.internalEffects.push(this.defaultLightingEffect);
   }
 }

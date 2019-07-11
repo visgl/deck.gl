@@ -19,14 +19,21 @@ const ambientLight = new AmbientLight({
   intensity: 1.0
 });
 
-const dirLight = new DirectionalLight({
+const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
-  intensity: 2.0,
+  intensity: 1.0,
   direction: [10, -20, -30],
   castShadow: true
 });
 
-const lightingEffect = new LightingEffect({ambientLight, dirLight});
+const dirLight1 = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 1.0,
+  direction: [-10, -20, -30],
+  castShadow: true
+});
+
+const lightingEffect = new LightingEffect({ambientLight, dirLight0, dirLight1});
 
 const material = new PhongMaterial({
   ambient: 0.1,

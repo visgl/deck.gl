@@ -65,7 +65,7 @@ test('EffectManager#set and get Effects', t => {
   const effect2 = new Effect();
   effectManager.setEffects([effect1, effect2]);
   let effects = effectManager.getEffects();
-  t.equal(effects.length, 2, 'Effect set and get successfully');
+  t.equal(effects.length, 3, 'Effect set and get successfully');
 
   effectManager.setProps({effects: [effect1]});
   effects = effectManager.getEffects();

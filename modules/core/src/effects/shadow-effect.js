@@ -1,15 +1,23 @@
 import Effect from '../lib/effect';
 import ShadowPass from '../passes/shadow-pass';
 import {Matrix4, Vector3} from 'math.gl';
+import {Texture2D} from '@luma.gl/core';
 
 export default class ShadowEffect extends Effect {
   constructor(props) {
     super(props);
-    const {shadowColor = [2, 0, 5, 200], light = null} = props;
-    this.shadowPass = null;
+    const {shadowColor = [2, 0, 5, 200], lights = []} = props;
+    this.shadowPasses = [];
     this.shadowColor = shadowColor;
-    this.light = light;
-    this.projectionMatrix = new Matrix4().ortho({
+    this.lights = lights;
+    this.lightMatrices = [];
+    this.dummyShadowMaps = [];
+
+    this.createLightMatrix();
+  }
+
+  createLightMatrix() {
+    const projectionMatrix = new Matrix4().ortho({
       left: -1,
       right: 1,
       bottom: 1,
@@ -17,38 +25,73 @@ export default class ShadowEffect extends Effect {
       near: 0,
       far: 2
     });
-    this.viewMatrix = new Matrix4()
-      .lookAt({
-        eye: new Vector3(this.light.direction).negate()
+
+    for (const light of this.lights) {
+      const viewMatrix = new Matrix4()
+        .lookAt({
+          eye: new Vector3(light.direction).negate()
+        })
+        // arbitrary number that covers enough grounds
+        .scale(1e-3);
+      const viewProjectionMatrix = projectionMatrix.clone().multiplyRight(viewMatrix);
+      this.lightMatrices.push(viewProjectionMatrix);
+    }
+  }
+
+  createShadowPasses(gl, pixelRatio) {
+    for (let i = 0; i < this.lights.length; i++) {
+      this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
+    }
+  }
+  createDummyShadowMaps(gl) {
+    this.dummyShadowMaps.push(
+      new Texture2D(gl, {
+        width: 1,
+        height: 1
       })
-      // arbitrary number that covers enough grounds
-      .scale(1e-3);
+    );
+    this.dummyShadowMaps.push(
+      new Texture2D(gl, {
+        width: 1,
+        height: 1
+      })
+    );
   }
 
   prepare(gl, {layers, viewports, onViewportActive, views, effects, pixelRatio}) {
-    if (!this.shadowPass) {
-      this.shadowPass = new ShadowPass(gl, {pixelRatio});
+    if (this.shadowPasses.length === 0) {
+      this.createShadowPasses(gl, pixelRatio);
     }
 
-    const shadow_viewProjectionMatrix = this.projectionMatrix
-      .clone()
-      .multiplyRight(this.viewMatrix);
+    if (this.dummyShadowMaps.length === 0) {
+      this.createDummyShadowMaps(gl);
+    }
 
-    this.shadowPass.render({
-      layers,
-      viewports,
-      onViewportActive,
-      views,
-      effects,
-      effectProps: {
-        shadow_viewProjectionMatrix
-      }
-    });
+    const shadowMaps = [];
+
+    for (let i = 0; i < this.shadowPasses.length; i++) {
+      const shadowPass = this.shadowPasses[i];
+      shadowPass.render({
+        layers,
+        viewports,
+        onViewportActive,
+        views,
+        effects,
+        effectProps: {
+          shadow_lightId: i,
+          dummyShadowMaps: this.dummyShadowMaps,
+          shadow_viewProjectionMatrices: this.lightMatrices
+        }
+      });
+      shadowMaps.push(shadowPass.shadowMap);
+    }
 
     return {
-      shadowMap: this.shadowPass.shadowMap,
+      shadowMaps,
+      dummyShadowMaps: this.dummyShadowMaps,
+      shadow_lightId: 0,
       shadowColor: this.shadowColor,
-      shadow_viewProjectionMatrix
+      shadow_viewProjectionMatrices: this.lightMatrices
     };
   }
 
