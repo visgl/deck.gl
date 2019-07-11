@@ -10,7 +10,7 @@ export default class EffectManager {
     this.defaultLightingEffect = new LightingEffect();
     this.needApplyDefaultLighting = false;
     this.needApplyDefaultShadow = false;
-    this.applyLightingEffet();
+    this._applyLightingEffect();
   }
 
   setProps(props) {
@@ -19,18 +19,6 @@ export default class EffectManager {
         this.setEffects(props.effects);
         this._needsRedraw = 'effects changed';
       }
-    }
-  }
-
-  createInternalEffects() {
-    this.checkLightingEffect();
-    this.checkShadowEffect();
-    this.internalEffects = this.effects.slice();
-    if (this.needApplyDefaultLighting) {
-      this.applyLightingEffet();
-    }
-    if (this.needApplyDefaultShadow) {
-      this.applyShadowEffect(this.internalEffects);
     }
   }
 
@@ -54,7 +42,7 @@ export default class EffectManager {
   setEffects(effects = []) {
     this.cleanup();
     this.effects = effects;
-    this.createInternalEffects();
+    this._createInternalEffects();
   }
 
   cleanup() {
@@ -69,7 +57,7 @@ export default class EffectManager {
     this.internalEffects.length = 0;
   }
 
-  checkLightingEffect() {
+  _checkLightingEffect() {
     let hasEffect = false;
     for (const effect of this.effects) {
       if (effect instanceof LightingEffect) {
@@ -80,7 +68,7 @@ export default class EffectManager {
     this.needApplyDefaultLighting = !hasEffect;
   }
 
-  checkShadowEffect() {
+  _checkShadowEffect() {
     let shouldApplyShadow = false;
     for (const effect of this.effects) {
       if (effect instanceof LightingEffect && effect.directionalLights.length > 0) {
@@ -91,7 +79,7 @@ export default class EffectManager {
     this.needApplyDefaultShadow = shouldApplyShadow;
   }
 
-  applyShadowEffect(effects) {
+  _applyShadowEffect(effects) {
     const lights = [];
     for (const effect of this.effects) {
       if (effect instanceof LightingEffect) {
@@ -106,7 +94,19 @@ export default class EffectManager {
     effects.push(new ShadowEffect({lights}));
   }
 
-  applyLightingEffet() {
+  _applyLightingEffect() {
     this.internalEffects.push(this.defaultLightingEffect);
+  }
+
+  _createInternalEffects() {
+    this._checkLightingEffect();
+    this._checkShadowEffect();
+    this.internalEffects = this.effects.slice();
+    if (this.needApplyDefaultLighting) {
+      this._applyLightingEffect();
+    }
+    if (this.needApplyDefaultShadow) {
+      this._applyShadowEffect(this.internalEffects);
+    }
   }
 }

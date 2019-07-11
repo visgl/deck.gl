@@ -13,58 +13,16 @@ export default class ShadowEffect extends Effect {
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
 
-    this.createLightMatrix();
-  }
-
-  createLightMatrix() {
-    const projectionMatrix = new Matrix4().ortho({
-      left: -1,
-      right: 1,
-      bottom: 1,
-      top: -1,
-      near: 0,
-      far: 2
-    });
-
-    for (const light of this.lights) {
-      const viewMatrix = new Matrix4()
-        .lookAt({
-          eye: new Vector3(light.direction).negate()
-        })
-        // arbitrary number that covers enough grounds
-        .scale(1e-3);
-      const viewProjectionMatrix = projectionMatrix.clone().multiplyRight(viewMatrix);
-      this.lightMatrices.push(viewProjectionMatrix);
-    }
-  }
-
-  createShadowPasses(gl, pixelRatio) {
-    for (let i = 0; i < this.lights.length; i++) {
-      this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
-    }
-  }
-  createDummyShadowMaps(gl) {
-    this.dummyShadowMaps.push(
-      new Texture2D(gl, {
-        width: 1,
-        height: 1
-      })
-    );
-    this.dummyShadowMaps.push(
-      new Texture2D(gl, {
-        width: 1,
-        height: 1
-      })
-    );
+    this._createLightMatrix();
   }
 
   prepare(gl, {layers, viewports, onViewportActive, views, effects, pixelRatio}) {
     if (this.shadowPasses.length === 0) {
-      this.createShadowPasses(gl, pixelRatio);
+      this._createShadowPasses(gl, pixelRatio);
     }
 
     if (this.dummyShadowMaps.length === 0) {
-      this.createDummyShadowMaps(gl);
+      this._createDummyShadowMaps(gl);
     }
 
     const shadowMaps = [];
@@ -96,9 +54,52 @@ export default class ShadowEffect extends Effect {
   }
 
   cleanup() {
-    if (this.shadowPass) {
-      this.shadowPass.delete();
-      this.shadowPass = null;
+    for (const shadowPass of this.shadowPasses) {
+      shadowPass.delete();
+    }
+    this.shadowPasses.length = 0;
+
+    for (const dummyShadowMap of this.dummyShadowMaps) {
+      dummyShadowMap.delete();
+    }
+    this.dummyShadowMaps.length = 0;
+  }
+
+  _createLightMatrix() {
+    const projectionMatrix = new Matrix4().ortho({
+      left: -1,
+      right: 1,
+      bottom: 1,
+      top: -1,
+      near: 0,
+      far: 2
+    });
+
+    for (const light of this.lights) {
+      const viewMatrix = new Matrix4()
+        .lookAt({
+          eye: new Vector3(light.direction).negate()
+        })
+        // arbitrary number that covers enough grounds
+        .scale(1e-3);
+      const viewProjectionMatrix = projectionMatrix.clone().multiplyRight(viewMatrix);
+      this.lightMatrices.push(viewProjectionMatrix);
+    }
+  }
+
+  _createShadowPasses(gl, pixelRatio) {
+    for (let i = 0; i < this.lights.length; i++) {
+      this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
+    }
+  }
+  _createDummyShadowMaps(gl) {
+    for (let i = 0; i < this.lights.length; i++) {
+      this.dummyShadowMaps.push(
+        new Texture2D(gl, {
+          width: 1,
+          height: 1
+        })
+      );
     }
   }
 }
