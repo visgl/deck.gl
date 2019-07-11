@@ -300,7 +300,8 @@ Default `'XYZ'`.
 
 One of `'RGBA'`, `'RGB'`.
 
-Setting it to `'RGB'` will make the layer ignore the alpha channel and assume `a: 255`.
+Setting it to `'RGB'` will make the layer ignore the alpha channel of the colors returned by accessors, and instead assume all objects to be opaque.
+The layer's overall transparency controlled by `opacity` is still applied.
 
 Default `'RGBA'`.
 
