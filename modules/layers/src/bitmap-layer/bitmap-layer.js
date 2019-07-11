@@ -63,12 +63,14 @@ export default class BitmapLayer extends Layer {
       positions: {
         size: 3,
         update: this.calculatePositions,
-        value: new Float32Array(12)
+        value: new Float32Array(12),
+        noAlloc: true
       },
       positions64xyLow: {
         size: 3,
         update: this.calculatePositions64xyLow,
-        value: new Float32Array(12)
+        value: new Float32Array(12),
+        noAlloc: true
       }
     });
 

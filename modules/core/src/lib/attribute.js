@@ -12,6 +12,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 const DEFAULT_STATE = {
   isExternalBuffer: false,
   lastExternalBuffer: null,
+  allocatedValue: null,
   needsUpdate: true,
   needsRedraw: false,
   updateRanges: range.FULL
@@ -86,9 +87,7 @@ export default class Attribute extends BaseAttribute {
 
   delete() {
     super.delete();
-    if (!this.userData.isExternalBuffer) {
-      typedArrayManager.release(this.value);
-    }
+    typedArrayManager.release(this.userData.allocatedValue);
   }
 
   needsUpdate() {
@@ -99,10 +98,6 @@ export default class Attribute extends BaseAttribute {
     const needsRedraw = this.userData.needsRedraw;
     this.userData.needsRedraw = this.userData.needsRedraw && !clearChangedFlags;
     return needsRedraw;
-  }
-
-  getInstanceCount() {
-    return this.value !== null ? this.value.length / this.size : 0;
   }
 
   getUpdateTriggers() {
@@ -178,15 +173,12 @@ export default class Attribute extends BaseAttribute {
       return false;
     }
 
-    // Do we need to reallocate the attribute's typed array?
-    const instanceCount = this.getInstanceCount();
-    const needsAlloc = instanceCount === 0 || instanceCount < numInstances;
-    if (needsAlloc && (state.update || state.accessor)) {
+    if (state.update) {
       assert(Number.isFinite(numInstances));
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
       const ArrayType = glArrayFromType(this.type || GL.FLOAT);
-      const oldValue = this.value;
+      const oldValue = state.allocatedValue;
       const shouldCopy = state.updateRanges !== range.FULL;
 
       this.constant = false;
@@ -200,7 +192,7 @@ export default class Attribute extends BaseAttribute {
       if (this.buffer && this.buffer.byteLength < this.value.byteLength) {
         this.buffer.reallocate(this.value.byteLength);
 
-        if (shouldCopy) {
+        if (shouldCopy && oldValue) {
           // Upload the full existing attribute value to the GPU, so that updateBuffer
           // can choose to only update a partial range.
           // TODO - copy old buffer to new buffer on the GPU
@@ -208,7 +200,7 @@ export default class Attribute extends BaseAttribute {
         }
       }
 
-      this.setNeedsUpdate(true, {startRow: instanceCount});
+      state.allocatedValue = this.value;
       return true;
     }
 
@@ -226,14 +218,9 @@ export default class Attribute extends BaseAttribute {
 
     let updated = true;
     if (update) {
-      const allocatedValue = !noAlloc && this.value;
       // Custom updater - typically for non-instanced layers
       for (const [startRow, endRow] of updateRanges) {
         update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
-      }
-      if (allocatedValue && allocatedValue !== this.value) {
-        // The update function did not use the allocated value
-        typedArrayManager.release(allocatedValue);
       }
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
         // call base clas `update` method to upload value to GPU
@@ -436,8 +423,7 @@ export default class Attribute extends BaseAttribute {
     const state = this.userData;
 
     // Check that either 'accessor' or 'update' is a valid function
-    const hasUpdater =
-      state.noAlloc || typeof state.update === 'function' || typeof state.accessor === 'string';
+    const hasUpdater = state.noAlloc || typeof state.update === 'function';
     if (!hasUpdater) {
       throw new Error(`Attribute ${this.id} missing update or accessor`);
     }
