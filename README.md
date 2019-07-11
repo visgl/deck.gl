@@ -79,7 +79,7 @@ const deck = new Deck({
 });
 ```
 
-Minimum setups of end-to-end deck.gl usage is also showcased in the [hello-world examples](./examples/get-started), using both [webpack2](./examples/get-started/react-webpack-2) and [browserify](./examples/get-started/react-browserify), so you can choose which bundler you prefer or are more familiar with.
+Minimum setups of end-to-end deck.gl usage is also showcased in the [hello-world examples](./examples/get-started), using both [webpack](https://webpack.js.org/) and [browserify](http://browserify.org/), so you can choose which bundler you prefer or are more familiar with.
 
 To learn how to use deck.gl through the many examples that come with the deck.gl repo, please clone the latest **release** branch:
 
