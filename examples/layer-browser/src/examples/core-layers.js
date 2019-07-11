@@ -470,6 +470,11 @@ const TextLayerExample = {
       onUpdate: (newValue, newSettings, change) => {
         change('fontSettings', {...newSettings.fontSettings, cutoff: newValue});
       }
+    },
+    getTextAnchor: {
+      name: 'textAnchor',
+      type: 'category',
+      value: ['start', 'middle', 'end']
     }
   },
   props: {
@@ -480,7 +485,7 @@ const TextLayerExample = {
     autoHighlight: true,
     pickable: true,
     highlightColor: [0, 0, 128, 128],
-    getText: x => x.LOCATION_NAME,
+    getText: x => `${x.LOCATION_NAME}\n${x.ADDRESS}`,
     getPosition: x => x.COORDINATES,
     getColor: x => [153, 0, 0],
     getAngle: x => 30,
