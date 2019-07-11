@@ -11,6 +11,7 @@ import typedArrayManager from '../utils/typed-array-manager';
 
 const DEFAULT_STATE = {
   isExternalBuffer: false,
+  lastExternalBuffer: null,
   needsUpdate: true,
   needsRedraw: false,
   updateRanges: range.FULL
@@ -303,44 +304,46 @@ export default class Attribute extends BaseAttribute {
 
   // Use external buffer
   // Returns true if successful
-  setExternalBuffer(buffer, numInstances) {
+  setExternalBuffer(buffer) {
     const state = this.userData;
 
-    if (buffer) {
-      state.isExternalBuffer = true;
-      this.clearNeedsUpdate();
-
-      if (buffer instanceof Buffer) {
-        if (this.externalBuffer !== buffer) {
-          this.update({constant: false, buffer});
-          state.needsRedraw = true;
-        }
-      } else if (this.value !== buffer) {
-        if (!ArrayBuffer.isView(buffer)) {
-          throw new Error('Attribute prop must be typed array');
-        }
-        if (state.auto && buffer.length <= numInstances * this.size) {
-          throw new Error('Attribute prop array must match length and size');
-        }
-
-        const ArrayType = glArrayFromType(this.type || GL.FLOAT);
-        if (buffer instanceof ArrayType) {
-          this.update({constant: false, value: buffer});
-        } else {
-          log.warn(`Attribute prop ${this.id} is casted to ${ArrayType.name}`)();
-          // Cast to proper type
-          this.update({constant: false, value: new ArrayType(buffer)});
-        }
-        // Save original typed array
-        this.value = buffer;
-        state.needsRedraw = true;
-      }
-      this._updateShaderAttributes();
-      return true;
+    if (!buffer) {
+      state.isExternalBuffer = false;
+      state.lastExternalBuffer = null;
+      return false;
     }
 
-    state.isExternalBuffer = false;
-    return false;
+    this.clearNeedsUpdate();
+
+    if (state.lastExternalBuffer === buffer) {
+      return false;
+    }
+    state.isExternalBuffer = true;
+    state.lastExternalBuffer = buffer;
+
+    let opts;
+    if (ArrayBuffer.isView(buffer)) {
+      opts = {constant: false, value: buffer};
+    } else if (buffer instanceof Buffer) {
+      opts = {constant: false, buffer};
+    } else {
+      opts = Object.assign({constant: false}, buffer);
+    }
+
+    if (opts.value) {
+      const ArrayType = glArrayFromType(this.type || GL.FLOAT);
+      if (!(opts.value instanceof ArrayType)) {
+        log.warn(`Attribute prop ${this.id} is casted to ${ArrayType.name}`)();
+        // Cast to proper type
+        opts.value = new ArrayType(opts.value);
+      }
+    }
+
+    this.update(opts);
+    state.needsRedraw = true;
+
+    this._updateShaderAttributes();
+    return true;
   }
 
   // PRIVATE HELPER METHODS

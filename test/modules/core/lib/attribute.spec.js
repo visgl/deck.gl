@@ -36,8 +36,18 @@ test('Attribute#constructor', t => {
   t.ok(attribute, 'Attribute construction successful');
   t.is(typeof attribute.getBuffer, 'function', 'Attribute.getBuffer function available');
   t.ok(attribute.allocate, 'Attribute.allocate function available');
-  t.ok(attribute.update, 'Attribute._updateBuffer function available');
-  t.ok(attribute.setExternalBuffer, 'Attribute._setExternalBuffer function available');
+  t.ok(attribute.update, 'Attribute.update function available');
+
+  t.end();
+});
+
+test('Attribute#delete', t => {
+  const attribute = new Attribute(gl, {size: 1, accessor: 'a', value: new Float32Array(4)});
+  t.ok(attribute.buffer, 'Attribute created Buffer object');
+
+  attribute.delete();
+  t.notOk(attribute.buffer, 'Attribute deleted Buffer object');
+
   t.end();
 });
 
@@ -128,6 +138,10 @@ test('Attribute#shaderAttributes', t => {
     attribute.shaderAttributes.instancePositions.getBuffer(),
     'Shader attribute buffer was updated'
   );
+
+  buffer1.delete();
+  buffer2.delete();
+  attribute.delete();
 
   t.end();
 });
@@ -418,13 +432,63 @@ test('Attribute#updateBuffer - partial', t => {
     );
   }
 
+  ATTRIBUTE_1.delete();
+  ATTRIBUTE_2.delete();
   t.end();
 });
 
-// t.ok(attribute.allocate(attributeName, allocCount), 'Attribute.allocate function available');
-// t.ok(attribute._setExternalBuffer(attributeName, buffer, numInstances), 'Attribute._setExternalBuffer function available');
-// t.ok(attribute._analyzeBuffer(attributeName, numInstances), 'Attribute._analyzeBuffer function available');
-// t.ok(attribute._updateBuffer({attributeName, numInstances, data, props, context}), 'Attribute._updateBuffer function available');
-// t.ok(attribute._updateBufferViaStandardAccessor(data, props), 'Attribute._updateBufferViaStandardAccessor function available');
-// t.ok(attribute._validateAttributeDefinition(attributeName), 'Attribute._validateAttributeDefinition function available');
-// t.ok(attribute._checkAttributeArray(attributeName, 'Attribute._checkAttributeArray function available');
+test('Attribute#setExternalBuffer', t => {
+  const attribute = new Attribute(gl, {
+    id: 'test-attribute',
+    type: GL.FLOAT,
+    size: 3,
+    update: () => {}
+  });
+  const buffer = new Buffer(gl, 12);
+  const value1 = new Float32Array(4);
+  const value2 = new Uint8Array(4);
+
+  attribute.setNeedsUpdate();
+  t.notOk(
+    attribute.setExternalBuffer(null),
+    'should do nothing if setting external buffer to null'
+  );
+  t.ok(attribute.needsUpdate(), 'attribute still needs update');
+
+  t.ok(attribute.setExternalBuffer(buffer), 'should set external buffer to Buffer object');
+  t.is(attribute.getBuffer(), buffer, 'external buffer is set');
+  t.notOk(attribute.needsUpdate(), 'attribute is updated');
+
+  t.notOk(
+    attribute.setExternalBuffer(buffer),
+    'should do nothing if setting external buffer to the same object'
+  );
+
+  t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
+  t.is(attribute.value, value1, 'external value is set');
+
+  t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
+  t.is(attribute.value.constructor.name, 'Float32Array', 'external value is cast to correct type');
+
+  t.notOk(
+    attribute.setExternalBuffer(value2),
+    'should do nothing if setting external buffer to the same object'
+  );
+
+  t.ok(
+    attribute.setExternalBuffer({
+      offset: 4,
+      stride: 8,
+      value: value1
+    }),
+    'should set external buffer to attribute descriptor'
+  );
+  t.is(attribute.offset, 4, 'attribute accessor is updated');
+  t.is(attribute.stride, 8, 'attribute accessor is updated');
+  t.is(attribute.value, value1, 'external value is set');
+
+  buffer.delete();
+  attribute.delete();
+
+  t.end();
+});
