@@ -74,7 +74,7 @@ export default class BitmapLayer extends Layer {
       }
     });
 
-    this.setState({numInstances: 4}); // 4 corners
+    this.setState({numInstances: 1});
   }
 
   updateState({props, oldProps, changeFlags}) {
