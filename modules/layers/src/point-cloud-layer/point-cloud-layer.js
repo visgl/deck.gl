@@ -43,6 +43,27 @@ const defaultProps = {
   radiusPixels: {deprecatedFor: 'pointSize'}
 };
 
+// support loaders.gl point cloud format
+function normalizeData(data) {
+  const {header, attributes} = data;
+  if (!header || !attributes) {
+    return;
+  }
+
+  data.length = header.vertexCount;
+
+  if (attributes.POSITION) {
+    attributes.instancePositions = attributes.POSITION;
+    attributes.instancePositions64xyLow = {constant: true, value: new Float32Array(2)};
+  }
+  if (attributes.NORMAL) {
+    attributes.instanceNormals = attributes.NORMAL;
+  }
+  if (attributes.COLOR_0) {
+    attributes.instanceColors = attributes.COLOR_0;
+  }
+}
+
 export default class PointCloudLayer extends Layer {
   getShaders(id) {
     return super.getShaders({vs, fs, modules: ['project32', 'gouraud-lighting', 'picking']});
@@ -87,6 +108,9 @@ export default class PointCloudLayer extends Layer {
       }
       this.setState({model: this._getModel(gl)});
       this.getAttributeManager().invalidateAll();
+    }
+    if (changeFlags.dataChanged) {
+      normalizeData(props.data);
     }
   }
 
