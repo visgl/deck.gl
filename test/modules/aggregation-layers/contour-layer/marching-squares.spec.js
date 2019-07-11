@@ -455,7 +455,25 @@ const GETLINEARINTERPOLATION_TESTS = [
     min: 10,
     max: 80,
     threshold: 50,
-    li: 0.571
+    offset: 0.571
+  },
+  {
+    min: 10,
+    max: 80,
+    threshold: 80,
+    offset: 1
+  },
+  {
+    min: 10,
+    max: 80,
+    threshold: 35,
+    offset: 0.357
+  },
+  {
+    min: 10,
+    max: 80,
+    threshold: 10,
+    offset: 0
   }
 ];
 
@@ -530,7 +548,7 @@ test('MarchingSquares#getVertices', t => {
 });
 /* eslint-enable max-nested-callbacks */
 
-test('MarchingSquares#getLinearInterpolation', t => {
+test.only('MarchingSquares#getLinearInterpolation', t => {
   GETLINEARINTERPOLATION_TESTS.forEach(testCase => {
     let linearInterpolation = getLinearInterpolation(
       testCase.min,
@@ -540,8 +558,8 @@ test('MarchingSquares#getLinearInterpolation', t => {
     linearInterpolation = parseFloat(linearInterpolation.toFixed(3));
     t.deepEquals(
       linearInterpolation,
-      testCase.li,
-      `Linear Interpolation: expected: ${testCase.li}, actual: ${linearInterpolation}`
+      testCase.offset,
+      `Linear Interpolation: expected: ${testCase.offset}, actual: ${linearInterpolation}`
     );
   });
   t.end();
