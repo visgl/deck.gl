@@ -548,7 +548,7 @@ test('MarchingSquares#getVertices', t => {
 });
 /* eslint-enable max-nested-callbacks */
 
-test.only('MarchingSquares#getLinearInterpolation', t => {
+test('MarchingSquares#getLinearInterpolation', t => {
   GETLINEARINTERPOLATION_TESTS.forEach(testCase => {
     let linearInterpolation = getLinearInterpolation(
       testCase.min,
