@@ -69,7 +69,7 @@ export function buildMapping({
   };
 }
 
-export function transformRow(row, indexInParagraph, iconMapping) {
+export function transformRow(row, iconMapping, lineHeight) {
   let offsetLeft = 0;
   let rowHeight = 0;
 
@@ -77,7 +77,6 @@ export function transformRow(row, indexInParagraph, iconMapping) {
   characters = characters.map((character, i) => {
     const datum = {
       text: character,
-      index: indexInParagraph + i,
       offsetLeft
     };
 
@@ -85,7 +84,10 @@ export function transformRow(row, indexInParagraph, iconMapping) {
 
     if (frame) {
       offsetLeft += frame.width;
-      rowHeight = Math.max(rowHeight, frame.height);
+      if (!rowHeight) {
+        // frame.height should be a constant
+        rowHeight = frame.height * lineHeight;
+      }
     } else {
       log.warn(`Missing character: ${character}`)();
       offsetLeft += MISSING_CHAR_WIDTH;
@@ -100,6 +102,7 @@ export function transformRow(row, indexInParagraph, iconMapping) {
 /**
  * Transform a text paragraph to an array of characters, each character contains
  * @param paragraph {String}
+ * @param lineHeight {Number} css line-height
  * @param iconMapping {Object} character mapping table for retrieving a character from font atlas
  * @param transformCharacter {Function} callback to transform a single character
  * @param transformedData {Array} output transformed data array, each datum contains
@@ -111,27 +114,31 @@ export function transformRow(row, indexInParagraph, iconMapping) {
  *   - rowSize: [rowWidth, rowHeight] size of the row
  *   - len: length of the paragraph
  */
-export function transformParagraph(paragraph, iconMapping, transformCharacter, transformedData) {
+export function transformParagraph(
+  paragraph,
+  lineHeight,
+  iconMapping,
+  transformCharacter,
+  transformedData
+) {
   const rows = paragraph.split('\n');
 
   // width and height of the paragraph
   const size = [0, 0];
   let offsetTop = 0;
-  let index = 0;
 
   rows.forEach(row => {
-    const {characters, rowWidth, rowHeight} = transformRow(row, index, iconMapping);
+    const {characters, rowWidth, rowHeight} = transformRow(row, iconMapping, lineHeight);
+    const rowSize = [rowWidth, rowHeight];
 
     characters.forEach(datum => {
       datum.offsetTop = offsetTop;
       datum.size = size;
-      datum.rowSize = [rowWidth, rowHeight];
-      datum.len = paragraph.length;
+      datum.rowSize = rowSize;
 
       transformedData.push(transformCharacter(datum));
     });
 
-    index += characters.length + 1; // 1 is for line break character
     offsetTop = offsetTop + rowHeight;
     size[0] = Math.max(size[0], rowWidth);
   });

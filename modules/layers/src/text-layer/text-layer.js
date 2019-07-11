@@ -54,6 +54,8 @@ const ALIGNMENT_BASELINE = {
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 
+const DEFAULT_LINE_HEIGHT = 1.0;
+
 const FONT_SETTINGS_PROPS = ['fontSize', 'buffer', 'sdf', 'radius', 'cutoff'];
 
 const defaultProps = {
@@ -66,6 +68,7 @@ const defaultProps = {
   characterSet: DEFAULT_CHAR_SET,
   fontFamily: DEFAULT_FONT_FAMILY,
   fontWeight: DEFAULT_FONT_WEIGHT,
+  lineHeight: DEFAULT_LINE_HEIGHT,
   fontSettings: {},
 
   getText: {type: 'accessor', value: x => x.text},
@@ -94,6 +97,7 @@ export default class TextLayer extends CompositeLayer {
     const textChanged =
       changeFlags.dataChanged ||
       fontChanged ||
+      props.lineHeight !== oldProps.lineHeight ||
       (changeFlags.updateTriggersChanged &&
         (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getText));
 
@@ -176,7 +180,7 @@ export default class TextLayer extends CompositeLayer {
 
   /* eslint-disable no-loop-func */
   transformStringToLetters(dataRange = {}) {
-    const {data, getText} = this.props;
+    const {data, lineHeight, getText} = this.props;
     const {iconMapping} = this.state;
     const {startRow, endRow} = dataRange;
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
@@ -184,35 +188,18 @@ export default class TextLayer extends CompositeLayer {
     const transformedData = [];
 
     for (const object of iterable) {
-      const transformCharacter = ({text, index, offsetLeft, offsetTop, size, rowSize, len}) => {
-        return this.getSubLayerRow(
-          {
-            text,
-            index,
-            offsetLeft,
-            offsetTop,
-            size,
-            rowSize,
-            len
-          },
-          object,
-          objectInfo.index
-        );
+      const transformCharacter = transformed => {
+        return this.getSubLayerRow(transformed, object, objectInfo.index);
       };
 
       objectInfo.index++;
       const text = getText(object, objectInfo);
       if (text) {
-        transformParagraph(text, iconMapping, transformCharacter, transformedData);
+        transformParagraph(text, lineHeight, iconMapping, transformCharacter, transformedData);
       }
     }
 
     return transformedData;
-  }
-
-  getLetterOffsets(datum) {
-    // offsetX, offsetY
-    return [datum.offsetLeft, datum.offsetTop];
   }
 
   getAnchorXFromTextAnchor(getTextAnchor) {
@@ -300,7 +287,7 @@ export default class TextLayer extends CompositeLayer {
         data,
         getIcon: d => d.text,
         getRowSize: d => d.rowSize,
-        getOffsets: d => this.getLetterOffsets(d),
+        getOffsets: d => [d.offsetLeft, d.offsetTop],
         getParagraphSize: d => d.size
       }
     );

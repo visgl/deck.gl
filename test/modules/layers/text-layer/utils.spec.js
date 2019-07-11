@@ -92,6 +92,7 @@ test('TextLayer - utils#buildMapping with cache', t => {
 test('TextLayer - utils#transformParagraph - single line', t => {
   const transformedData = [];
   const text = 'ab';
+  const lineHeight = 1.0;
 
   const iconMapping = {
     a: {width: 1, height: 4},
@@ -103,25 +104,21 @@ test('TextLayer - utils#transformParagraph - single line', t => {
   const expected = [
     {
       text: 'a',
-      index: 0,
       offsetLeft: 0,
       offsetTop: 0,
       size: [3, 4],
-      rowSize: [3, 4],
-      len: 2
+      rowSize: [3, 4]
     },
     {
       text: 'b',
-      index: 1,
       offsetLeft: 1,
       offsetTop: 0,
       size: [3, 4],
-      rowSize: [3, 4],
-      len: 2
+      rowSize: [3, 4]
     }
   ];
 
-  transformParagraph(text, iconMapping, transformCharacter, transformedData);
+  transformParagraph(text, lineHeight, iconMapping, transformCharacter, transformedData);
   t.deepEqual(transformedData, expected);
 
   t.end();
@@ -130,10 +127,11 @@ test('TextLayer - utils#transformParagraph - single line', t => {
 test('TextLayer - utils#transformParagraph - multiple lines', t => {
   const transformedData = [];
   const text = 'ab\nc';
+  const lineHeight = 1.0;
 
   const iconMapping = {
     a: {width: 1, height: 4},
-    b: {width: 3, height: 5},
+    b: {width: 3, height: 4},
     c: {width: 2, height: 4}
   };
 
@@ -142,58 +140,92 @@ test('TextLayer - utils#transformParagraph - multiple lines', t => {
   const expected = [
     {
       text: 'a',
-      index: 0,
       offsetLeft: 0,
       offsetTop: 0,
-      size: [4, 9],
-      rowSize: [4, 5],
-      len: 4
+      size: [4, 8],
+      rowSize: [4, 4]
     },
     {
       text: 'b',
-      index: 1,
       offsetLeft: 1,
       offsetTop: 0,
-      size: [4, 9],
-      rowSize: [4, 5],
-      len: 4
+      size: [4, 8],
+      rowSize: [4, 4]
     },
     {
       text: 'c',
-      index: 3,
       offsetLeft: 0,
-      offsetTop: 5,
-      size: [4, 9],
-      rowSize: [2, 4],
-      len: 4
+      offsetTop: 4,
+      size: [4, 8],
+      rowSize: [2, 4]
     }
   ];
 
-  transformParagraph(text, iconMapping, transformCharacter, transformedData);
+  transformParagraph(text, lineHeight, iconMapping, transformCharacter, transformedData);
   t.deepEqual(transformedData, expected);
 
   t.end();
 });
 
-test('TextLayer - utils#transformParagraph - non empty', t => {
-  const transformedData = [
+test('TextLayer - utils#transformParagraph - multiple lines with line height', t => {
+  const transformedData = [];
+  const text = 'ab\nc';
+  const lineHeight = 1.5;
+
+  const iconMapping = {
+    a: {width: 1, height: 4},
+    b: {width: 3, height: 4},
+    c: {width: 2, height: 4}
+  };
+
+  const transformCharacter = data => data;
+
+  const expected = [
     {
       text: 'a',
-      index: 0,
       offsetLeft: 0,
       offsetTop: 0,
-      size: [3, 4],
-      rowSize: [3, 4],
-      len: 2
+      size: [4, 12],
+      rowSize: [4, 6]
     },
     {
       text: 'b',
-      index: 1,
+      offsetLeft: 1,
+      offsetTop: 0,
+      size: [4, 12],
+      rowSize: [4, 6]
+    },
+    {
+      text: 'c',
+      offsetLeft: 0,
+      offsetTop: 6,
+      size: [4, 12],
+      rowSize: [2, 6]
+    }
+  ];
+
+  transformParagraph(text, lineHeight, iconMapping, transformCharacter, transformedData);
+  t.deepEqual(transformedData, expected);
+
+  t.end();
+});
+
+test('TextLayer - utils#transformParagraph - not empty', t => {
+  const lineHeight = 1.0;
+  const transformedData = [
+    {
+      text: 'a',
+      offsetLeft: 0,
+      offsetTop: 0,
+      size: [3, 4],
+      rowSize: [3, 4]
+    },
+    {
+      text: 'b',
       offsetLeft: 1,
       offsetTop: 0,
       size: [3, 4],
-      rowSize: [3, 4],
-      len: 2
+      rowSize: [3, 4]
     }
   ];
 
@@ -201,7 +233,7 @@ test('TextLayer - utils#transformParagraph - non empty', t => {
 
   const iconMapping = {
     a: {width: 1, height: 4},
-    b: {width: 3, height: 5},
+    b: {width: 3, height: 4},
     c: {width: 2, height: 4}
   };
 
@@ -210,52 +242,42 @@ test('TextLayer - utils#transformParagraph - non empty', t => {
   const expected = [
     {
       text: 'a',
-      index: 0,
       offsetLeft: 0,
       offsetTop: 0,
       size: [3, 4],
-      rowSize: [3, 4],
-      len: 2
+      rowSize: [3, 4]
     },
     {
       text: 'b',
-      index: 1,
       offsetLeft: 1,
       offsetTop: 0,
       size: [3, 4],
-      rowSize: [3, 4],
-      len: 2
+      rowSize: [3, 4]
     },
     {
       text: 'a',
-      index: 0,
       offsetLeft: 0,
       offsetTop: 0,
-      size: [4, 9],
-      rowSize: [4, 5],
-      len: 4
+      size: [4, 8],
+      rowSize: [4, 4]
     },
     {
       text: 'b',
-      index: 1,
       offsetLeft: 1,
       offsetTop: 0,
-      size: [4, 9],
-      rowSize: [4, 5],
-      len: 4
+      size: [4, 8],
+      rowSize: [4, 4]
     },
     {
       text: 'c',
-      index: 3,
       offsetLeft: 0,
-      offsetTop: 5,
-      size: [4, 9],
-      rowSize: [2, 4],
-      len: 4
+      offsetTop: 4,
+      size: [4, 8],
+      rowSize: [2, 4]
     }
   ];
 
-  transformParagraph(text, iconMapping, transformCharacter, transformedData);
+  transformParagraph(text, lineHeight, iconMapping, transformCharacter, transformedData);
   t.deepEqual(transformedData, expected);
 
   t.end();

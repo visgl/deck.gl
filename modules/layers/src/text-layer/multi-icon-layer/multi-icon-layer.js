@@ -114,12 +114,13 @@ export default class MultiIconLayer extends IconLayer {
       const [rowWidth] = getRowSize(object);
       const [offsetX, offsetY] = getOffsets(object);
       const anchorX = getAnchorX(object);
+      const anchorY = getAnchorY(object);
 
       // For a multi-line object, offset in x-direction needs consider
       // the row offset in the paragraph and the object offset in the row
       const rowOffset = ((1 - anchorX) * (width - rowWidth)) / 2;
       value[i++] = ((anchorX - 1) * width) / 2 + rowOffset + rect.width / 2 + offsetX || 0;
-      value[i++] = ((getAnchorY(object) - 1) * height) / 2 + rect.height / 2 + offsetY || 0;
+      value[i++] = ((anchorY - 1) * height) / 2 + rect.height / 2 + offsetY || 0;
     }
   }
 
