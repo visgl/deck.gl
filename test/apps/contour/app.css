@@ -17,18 +17,18 @@ body {
   padding: 20px;
 }
 .input-label {
+  top: -5px;
+  position: relative;
   padding-right: 25px;
 }
 .input-group {
   line-height: 40px;
 }
+.radio-group {
+  display: inline;
+}
 .radio {
   height: 20px;
   width: 20px;
   text-align: center;
-}
-.radio-label {
-  top: -5px;
-  position: relative;
-  padding-right: 25px;
 }

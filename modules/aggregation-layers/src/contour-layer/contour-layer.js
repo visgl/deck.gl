@@ -142,7 +142,6 @@ export default class ContourLayer extends CompositeLayer {
       countsData = countsBuffer.getData();
       this.setState({countsData});
     }
-
     const {cellWeights} = GPUGridAggregator.getCellData({countsData});
     // const thresholds = this.props.contours.map(x => x.threshold);
     const contourData = generateContours({
@@ -150,7 +149,8 @@ export default class ContourLayer extends CompositeLayer {
       cellWeights,
       gridSize,
       gridOrigin,
-      cellSize
+      cellSize,
+      isLI: this.props.isLI
     });
 
     // contourData contains both iso-lines and iso-bands if requested.

@@ -120,7 +120,17 @@ export function getCode(opts) {
 // Returns intersection vertices for given cellindex
 // [x, y] refers current marchng cell, reference vertex is always top-right corner
 export function getVertices(opts) {
-  const {gridOrigin, cellSize, x, y, code, meanCode, type = CONTOUR_TYPE.ISO_LINES, weights} = opts;
+  const {
+    gridOrigin,
+    cellSize,
+    x,
+    y,
+    code,
+    meanCode,
+    type = CONTOUR_TYPE.ISO_LINES,
+    weights,
+    isLI = true
+  } = opts;
   const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);
   let offsets =
     type === CONTOUR_TYPE.ISO_BANDS
@@ -182,10 +192,15 @@ export function getVertices(opts) {
   offsets.forEach((xyOffsets, i) => {
     xyOffsets.forEach((offset, j) => {
       const li = getLinearOffsetValue(linearOffsets[i][j], weights, thresholdData.threshold);
-
-      const xOffset = !offset[0] ? offset[0] + li : offset[0];
-      const yOffset = !offset[1] ? offset[1] + li : offset[1];
-
+      let xOffset;
+      let yOffset;
+      if (isLI) {
+        xOffset = !offset[0] ? offset[0] + li : offset[0];
+        yOffset = !offset[1] ? offset[1] + li : offset[1];
+      } else {
+        xOffset = offset[0];
+        yOffset = offset[1];
+      }
       const vX = refVertexX + xOffset * cellSize[0];
       const vY = refVertexY + yOffset * cellSize[1];
       lines.push([vX, vY, vZ]);
