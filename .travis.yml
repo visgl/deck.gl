@@ -53,9 +53,10 @@ matrix:
           - libosmesa6
           - libxi-dev
       before_install:
-        # Enable user namespace cloning
         - cd bindings/python/pydeck
         - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+        - yes | npm install -g webpack
+        - yes | npm install -g webpack-cli
       python:
         - '3.5'
         - '2.7'
