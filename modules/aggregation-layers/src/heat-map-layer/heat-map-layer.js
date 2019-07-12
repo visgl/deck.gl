@@ -51,7 +51,8 @@ const defaultProps = {
   renderGirdTexture: false,
   renderBoundingBox: false,
   disableTessilation: false,
-  screenSpaceAggregation: true
+  screenSpaceAggregation: true,
+  useGausMatrix: false
 };
 
 export default class HeatMapLayer extends CompositeLayer {
@@ -396,7 +397,7 @@ gl_Position = vec4(0, 0, 0, 1.);
     return transform.getData();
   }
 
-  updateHeatMap(updateSource = false) {
+  runGauKDE(updateSource = false) {
     const {linearFilter} = this.props;
     const {transform, radiusPixels} = this.state;
 
@@ -422,11 +423,6 @@ gl_Position = vec4(0, 0, 0, 1.);
     });
 
     const heatTexture = transform._getTargetTexture();
-
-    // const heatTexture = this.state.aggregationTexture;
-    // TODO: cleanup after verifying minMax before after running gaussing kernel
-    const maxValues = this.calculateMaxValue(heatTexture);
-    console.log(`Heatmap maxValues: ${maxValues}`);
     let filter = GL.LINEAR;
     if (!linearFilter || this.context.viewport.zoom > 18) {
       filter = GL.NEAREST;
@@ -435,7 +431,20 @@ gl_Position = vec4(0, 0, 0, 1.);
       [GL.TEXTURE_MAG_FILTER]: filter, // GL.LINEAR, // NEAREST, // LINEAR,
       [GL.TEXTURE_MIN_FILTER]: filter // GL.LINEAR // NEAREST // LINEAR
     });
-    this.setState({heatTexture, maxValues});
+
+    return heatTexture;
+  }
+
+
+  updateHeatMap(updateSource = false) {
+
+    const heatTexture = this.runGauKDE(updateSource);
+    // const heatTexture = this.state.aggregationTexture;
+    // TODO: cleanup after verifying minMax before after running gaussing kernel
+    const maxValues = this.calculateMaxValue(heatTexture);
+
+    console.log(`Heatmap maxValues: ${maxValues}`);
+    this.setState({maxValues, heatTexture});
   }
 
   renderLayers() {
