@@ -140,10 +140,6 @@ with open(os.path.join(here, 'pydeck', '_version.py')) as f:
 
 
 if __name__ == '__main__':
-    cmds = sys.argv[1:]
-    print('=-=================')
-    print(cmds)
-    print('=-=================')
     setup(
         name='pydeck',
         version=version_ns['__version__'],
