@@ -40,6 +40,20 @@ export function initializeShaderModules() {
   createShaderHook('vs:DECKGL_FILTER_COLOR(inout vec4 color, VertexGeometry geometry)');
   createShaderHook('fs:DECKGL_FILTER_COLOR(inout vec4 color, FragmentGeometry geometry)');
 
+  // https://www.khronos.org/opengl/wiki/Vertex_Specification
+  // If the vertex shader has more components than the array provides, the extras are given values
+  // from the vector (0, 0, 0, 1) for the missing XYZW components.
+  // In RGB mode (color attributes missing the 4th component), a is default to 1.0. We want 255.0
+  createModuleInjection('geometry', {
+    hook: 'vs:DECKGL_FILTER_COLOR',
+    order: 99,
+    injection: `
+  #ifdef COLOR_FORMAT_RGB
+  color.a *= 255.;
+  #endif
+`
+  });
+
   createModuleInjection('picking', {
     hook: 'fs:DECKGL_FILTER_COLOR',
     order: 99,
