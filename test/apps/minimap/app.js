@@ -71,7 +71,7 @@ export class App extends Component {
   }
 
   componentDidMount() {
-    // this._animate();
+    this._animate();
   }
 
   componentWillUnmount() {
