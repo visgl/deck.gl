@@ -5,6 +5,7 @@ from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
+from setuptools.command.develop import develop
 from distutils.command.install import install
 
 from distutils import log
@@ -15,11 +16,15 @@ import sys
 
 here = os.path.dirname(os.path.abspath(__file__))
 
+
+def read(*parts):
+    return open(os.path.join(here, *parts), 'r').read()
+
+
 log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
-LONG_DESCRIPTION = 'Python wrapper for deck.gl'
 PATH_TO_WIDGET = '../../../modules/jupyter-widget'
 
 node_root = os.path.join(here, PATH_TO_WIDGET)
@@ -50,7 +55,7 @@ def js_prerelease(command, strict=False):
 
 
 class NPM(Command):
-    description = 'install package.json dependencies using npm'
+    description = 'Install package.json dependencies using npm'
 
     user_options = []
 
@@ -108,8 +113,8 @@ class NPM(Command):
         env['PATH'] = npm_path
 
         log.info("Installing build dependencies with npm. This may take a while...")
-        check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
-        check_call(['npm', 'run', 'notebook-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr)
+        check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr, env=env)
+        check_call(['npm', 'run', 'notebook-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr, env=env)
 
         self.copy_js()
 
@@ -124,75 +129,58 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 
+with open('requirements.txt') as f:
+    tests_require = f.readlines()
+install_requires = [t.strip() for t in tests_require]
+
+
 version_ns = {}
 with open(os.path.join(here, 'pydeck', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
-setup_args = {
-    'name': 'pydeck',
-    'version': version_ns['__version__'],
-    'description': 'Widget for deck.gl maps',
-    'long_description': LONG_DESCRIPTION,
-    'license': 'MIT License',
-    'include_package_data': True,
-    'packages': find_packages(),
-    'zip_safe': False,
-    'cmdclass': {
-        'install': js_prerelease(install),
-        'build_py': js_prerelease(build_py),
-        'egg_info': egg_info,
-        'sdist': js_prerelease(sdist, strict=True),
-        'jsdeps': NPM,
-    },
-    'author': 'Andrew Duberstein',
-    'author_email': 'ajduberstein@gmail.com',
-    'url': 'https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck',
-    'keywords': ['ipython', 'jupyter', 'widgets', 'graphics', 'GIS'],
-    'classifiers': [
-        'Development Status :: 4 - Beta',
-        'Intended Audience :: Developers',
-        'Intended Audience :: Science/Research',
-        'Topic :: Multimedia :: Graphics',
-        'License :: OSI Approved :: MIT License',
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-        'Programming Language :: Python :: 3.7',
-        'Framework :: Jupyter',
-    ],
-    'include_package_data': True,
-    'tests_require': ['pytest'],
-    'setup_requires': ['pytest-runner'],
-    'install_requires': [
-        'ipywidgets>=7.0.0,<8',
-        'traittypes>=0.2.1,<3',
-        'xarray>=0.10',
-        'branca>=0.3.1,<0.4'
-    ],
-    'data_files': [
-        ('share/jupyter/nbextensions/pydeck', [
-            'pydeck/nbextension/static/extension.js',
-            'pydeck/nbextension/static/index.js',
-            'pydeck/nbextension/static/index.js.map'
-        ]),
-        ('etc/jupyter/nbconfig/notebook.d', ['pydeck.json'])
-    ],
-    'extras_require': {
-        'test': [
-            'pytest>=3.6',
-            'pandas>=0.23.4',
-            'pytest-cov'
-        ],
-        'examples': [
-            # Any requirements for the examples to run
-        ],
-    },
-    'entry_points': {}
-}
 
 if __name__ == '__main__':
-    setup(**setup_args)
+    setup(
+        name='pydeck',
+        version=version_ns['__version__'],
+        description='Widget for deck.gl maps',
+        long_description='{}'.format(read('README.md')),
+        license='MIT License',
+        include_package_data=True,
+        packages=find_packages(),
+        cmdclass={
+            'install': js_prerelease(install),
+            'develop': js_prerelease(develop),
+            'build_py': js_prerelease(build_py),
+            'egg_info': egg_info,
+            'sdist': js_prerelease(sdist, strict=True),
+            'jsdeps': NPM,
+        },
+        author='Andrew Duberstein',
+        author_email='ajduberstein@gmail.com',
+        url='https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck',
+        keywords=['data', 'visualization', 'graphics', 'GIS', 'maps'],
+        classifiers=[
+            'Intended Audience :: Developers',
+            'Intended Audience :: Science/Research',
+            'Topic :: Multimedia :: Graphics',
+            'License :: OSI Approved :: MIT License',
+            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3',
+            'Programming Language :: Python :: 3.3',
+            'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
+            'Programming Language :: Python :: 3.6',
+            'Programming Language :: Python :: 3.7',
+            'Framework :: Jupyter'],
+        extras_require={'testing': ['pytest']},
+        install_requires=install_requires,
+        data_files=[
+            ('share/jupyter/nbextensions/pydeck', [
+                'pydeck/nbextension/static/extension.js',
+                'pydeck/nbextension/static/index.js',
+                'pydeck/nbextension/static/index.js.map'
+            ]),
+            ('etc/jupyter/nbconfig/notebook.d', ['pydeck.json'])
+        ],
+        zip_safe=False)
