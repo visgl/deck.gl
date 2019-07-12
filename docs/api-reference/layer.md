@@ -288,6 +288,22 @@ And is expected to return an array of "ranges", in the form of `{startRow, endRo
 
 **This feature is experimental and intended for advanced use cases.** Note that it only rewrites part of a buffer, not remove or insert, therefore the user of this prop is responsible of making sure that all the unchanged objects remain at the same indices between `oldData` and `newData`. This becomes trickier when dealing with data of dynamic lengths, for example `PathLayer`, `PolygonLayer` and `GeoJsonLayer`. Generally speaking, it is not recommended to use this feature when the count of vertices in the paths/polygons may change.
 
+##### `positionFormat` (String, optional)
+
+One of `'XYZ'`, `'XY'`.
+
+This prop is currently only effective in `PathLayer`, `SolidPolygonLayer` and `PolygonLayer`.
+
+Default `'XYZ'`.
+
+##### `colorFormat` (String, optional)
+
+One of `'RGBA'`, `'RGB'`.
+
+Setting it to `'RGB'` will make the layer ignore the alpha channel of the colors returned by accessors, and instead assume all objects to be opaque.
+The layer's overall transparency controlled by `opacity` is still applied.
+
+Default `'RGBA'`.
 
 ##### `numInstances` (Number, optional)
 

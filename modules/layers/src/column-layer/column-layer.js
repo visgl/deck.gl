@@ -86,14 +86,14 @@ export default class ColumnLayer extends Layer {
         update: this.calculateInstancePositions64xyLow
       },
       instanceFillColors: {
-        size: 4,
+        size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
       },
       instanceLineColors: {
-        size: 4,
+        size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getLineColor',

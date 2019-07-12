@@ -89,7 +89,7 @@ export default class PointCloudLayer extends Layer {
         defaultValue: DEFAULT_NORMAL
       },
       instanceColors: {
-        size: 4,
+        size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
         transition: true,
         accessor: 'getColor',

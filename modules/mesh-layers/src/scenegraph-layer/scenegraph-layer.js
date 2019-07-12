@@ -76,7 +76,7 @@ export default class ScenegraphLayer extends Layer {
         update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
-        size: 4,
+        size: this.props.colorFormat.length,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR,
         transition: true
