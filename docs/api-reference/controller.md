@@ -93,9 +93,11 @@ Utility used by the event handlers, returns pointer position `[x, y]` from any e
 
 Utility used by the event handlers, returns `true` if ctrl/alt/meta key is pressed during any event.
 
-##### `isPointInBounds(pos)`
+##### `isPointInBounds(pos, [event])`
 
 Utility used by the event handlers, returns `true` if a pointer position `[x, y]` is inside the current view.
+
+If `event` is provided, returns `false` if the event is already handled, and mark the event as handled if the point is in bounds. This can be used to make sure that certain events are only handled by one controller, when there are overlapping viewports.
 
 ##### `isDragging()`
 
