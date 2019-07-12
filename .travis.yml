@@ -57,6 +57,7 @@ matrix:
         # Enable user namespace cloning
         - cd bindings/python/pydeck
         - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
+        - npm install -g webpack
       python:
         - '3.5'
         - '2.7'
