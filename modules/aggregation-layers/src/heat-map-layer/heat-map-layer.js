@@ -50,9 +50,8 @@ const defaultProps = {
   linearFilter: true,
   renderGirdTexture: false,
   renderBoundingBox: false,
-  projectPixels: false,
   disableTessilation: false,
-  screenSpaceAggregation: false
+  screenSpaceAggregation: true
 };
 
 export default class HeatMapLayer extends CompositeLayer {
@@ -189,7 +188,6 @@ export default class HeatMapLayer extends CompositeLayer {
       oldProps.linearFilter !== props.linearFilter ||
       oldProps.renderGirdTexture !== props.renderGirdTexture ||
       oldProps.renderBoundingBox !== props.renderBoundingBox ||
-      oldProps.projectPixels !== props.projectPixels ||
       oldProps.disableTessilation !== props.disableTessilation ||
       oldProps.screenSpaceAggregation !== props.screenSpaceAggregation
     ) {
@@ -265,67 +263,79 @@ export default class HeatMapLayer extends CompositeLayer {
   }
 
   updateAggregation(changeFlags) {
-    /*
-    const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
-    const viewport = this.context.viewport;
-    const {width, height, gridTransformMatrix} = getGridParams({boundingBox, cellSize, viewport});
-    const aggregationResults = gpuGridAggregator.run({
-      positions,
-      positions64xyLow,
-      weights,
-      cellSize,
-      width,
-      height,
-      gridTransformMatrix,
-      useGPU: true,
-      changeFlags,
-      fp64:true
-    });
-    */
-
-    let viewport = this.context.viewport;
-
-    const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
-    // const bounds = [[boundingBox.xMin, boundingBox.yMin], [boundingBox.xMax, boundingBox.yMax]];
-    // const width = viewport.height * (boundingBox.xMax - boundingBox.xMin) / (boundingBox.yMax - boundingBox.yMin);
-    // viewport = new WebMercatorViewport(Object.assign({}, viewport, {width}));
-    // viewport = viewport.fitBounds(bounds);
-
     const {
       data,
       getPosition,
       getWeight,
       screenSpaceAggregation
     } = this.props;
-    const weightParams = {
-      color: {
-        getWeight,
-        operation: AGGREGATION_OPERATION.SUM,
-        needMin: true,
-        needMax: true,
-        combineMaxMin: true
-      }
-    };
 
-    const aggregationResults = pointToDensityGridData({
-      data,
-      getPosition,
-      cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20,
-      gpuGridAggregator,
-      gpuAggregation: true,
-      aggregationFlags: {dataChanged: true},
-      weightParams,
-      // fp64 false,
-      // coordinateSystem COORDINATE_SYSTEM.LNGLAT,
-      // viewport = null,
-      // boundingBox = null,
+    if (screenSpaceAggregation) {
+      const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
+      let viewport = this.context.viewport;
 
-      viewport: screenSpaceAggregation ? viewport : null,
-      projectPoints: screenSpaceAggregation
-    });
+      const bounds = [[boundingBox.xMin, boundingBox.yMin], [boundingBox.xMax, boundingBox.yMax]];
+      const width = viewport.height * (boundingBox.xMax - boundingBox.xMin) / (boundingBox.yMax - boundingBox.yMin);
+      viewport = new WebMercatorViewport(Object.assign({}, viewport, {width}));
+      viewport = viewport.fitBounds(bounds);
 
-    this.setState({aggregationTexture: aggregationResults.weights.color.aggregationTexture});
-    // console.log(`aggregationTexture maxMin data: ${aggregationResults.weights.color.maxMinBuffer.getData()}`);
+
+      // const {width, height, gridTransformMatrix} = getGridParams({boundingBox, cellSize, viewport});
+      const aggregationResults = gpuGridAggregator.run({
+        positions,
+        positions64xyLow,
+        weights,
+        cellSize: [1, 1],
+        viewport,
+        // width,
+        // height,
+        // gridTransformMatrix,
+        useGPU: true,
+        changeFlags,
+        fp64:false, // TODO failing when enabled
+        projectPoints: true
+      });
+      this.setState({aggregationTexture: aggregationResults.color.aggregationTexture});
+    } else {
+
+      let viewport = this.context.viewport;
+
+      const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
+      // const bounds = [[boundingBox.xMin, boundingBox.yMin], [boundingBox.xMax, boundingBox.yMax]];
+      // const width = viewport.height * (boundingBox.xMax - boundingBox.xMin) / (boundingBox.yMax - boundingBox.yMin);
+      // viewport = new WebMercatorViewport(Object.assign({}, viewport, {width}));
+      // viewport = viewport.fitBounds(bounds);
+
+      const weightParams = {
+        color: {
+          getWeight,
+          operation: AGGREGATION_OPERATION.SUM,
+          needMin: true,
+          needMax: true,
+          combineMaxMin: true
+        }
+      };
+
+      const aggregationResults = pointToDensityGridData({
+        data,
+        getPosition,
+        cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20,
+        gpuGridAggregator,
+        gpuAggregation: true,
+        aggregationFlags: {dataChanged: true},
+        weightParams,
+        // fp64 false,
+        // coordinateSystem COORDINATE_SYSTEM.LNGLAT,
+        // viewport = null,
+        // boundingBox = null,
+
+        viewport: screenSpaceAggregation ? viewport : null,
+        projectPoints: screenSpaceAggregation
+      });
+
+      this.setState({aggregationTexture: aggregationResults.weights.color.aggregationTexture});
+      // console.log(`aggregationTexture maxMin data: ${aggregationResults.weights.color.maxMinBuffer.getData()}`);
+    }
   }
 
 
