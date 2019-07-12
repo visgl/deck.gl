@@ -95,14 +95,14 @@ const moduleName = 'shadow';
 createModuleInjection(moduleName, {
   hook: 'vs:DECKGL_FILTER_GL_POSITION',
   injection: `
-gl_Position = shadow_setVertexPosition(geometry.position);
+position = shadow_setVertexPosition(geometry.position);
   `
 });
 
 createModuleInjection(moduleName, {
   hook: 'fs:DECKGL_FILTER_COLOR',
   injection: `
-gl_FragColor = shadow_filterShadowColor(gl_FragColor);
+color = shadow_filterShadowColor(color);
   `
 });
 

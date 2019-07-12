@@ -66,7 +66,7 @@ export default class ShadowPass extends LayersPass {
   getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
-      pickingActive: 1,
+      pickingActive: 0,
       drawToShadowMap: true,
       devicePixelRatio: this.props.pixelRatio
     });
