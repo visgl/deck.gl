@@ -422,7 +422,7 @@ export default class Attribute extends BaseAttribute {
   _validateAttributeUpdaters() {
     const state = this.userData;
 
-    // Check that either 'accessor' or 'update' is a valid function
+    // Check that 'update' is a valid function
     const hasUpdater = state.noAlloc || typeof state.update === 'function';
     if (!hasUpdater) {
       throw new Error(`Attribute ${this.id} missing update or accessor`);
