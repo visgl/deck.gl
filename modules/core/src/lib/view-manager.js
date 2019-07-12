@@ -311,9 +311,12 @@ export default class ViewManager {
     const {width, height, views} = this;
 
     const oldControllers = this.controllers;
+    this._viewports = [];
     this.controllers = {};
 
-    this._viewports = views.map(view => {
+    // Create controllers in reverse order, so that views on top receive events first
+    for (let i = views.length; i--; ) {
+      const view = views[i];
       const viewState = this.getViewState(view);
       const viewport = view.makeViewport({width, height, viewState});
 
@@ -325,8 +328,8 @@ export default class ViewManager {
         oldControllers[view.id]
       );
 
-      return viewport;
-    });
+      this._viewports.unshift(viewport);
+    }
 
     // Remove unused controllers
     for (const id in oldControllers) {

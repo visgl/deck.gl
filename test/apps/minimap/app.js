@@ -5,7 +5,7 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {View, MapView} from '@deck.gl/core';
 import {PolygonLayer} from '@deck.gl/layers';
-import {TripsLayer} from '@deck.gl/experimental-layers';
+import {TripsLayer} from '@deck.gl/geo-layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -18,30 +18,56 @@ const DATA_URL = {
     'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
 };
 
-const LIGHT_SETTINGS = {
-  lightsPosition: [-74.05, 40.7, 8000, -73.5, 41, 5000],
-  ambientRatio: 0.05,
-  diffuseRatio: 0.6,
-  specularRatio: 0.8,
-  lightsStrength: [2.0, 0.0, 0.0, 0.0],
-  numberOfLights: 2
-};
+const VIEWS = [
+  new MapView({
+    id: 'main',
+    controller: true
+  }),
+  new MapView({
+    id: 'minimap',
 
-export const INITIAL_VIEW_STATE = {
-  longitude: -74,
-  latitude: 40.72,
-  zoom: 13,
-  maxZoom: 16,
-  pitch: 45,
-  bearing: 0
-};
+    // Position on top of main map
+    x: '65%',
+    y: '5%',
+    width: '30%',
+    height: '30%',
+
+    // Minimap is overlaid on top of an existing view, so need to clear the background
+    clear: true,
+
+    controller: {
+      maxZoom: 11,
+      minZoom: 11,
+      dragRotate: false,
+      keyboard: false
+    }
+  })
+];
 
 export class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      time: 0
+      time: 0,
+      viewState: {
+        main: {
+          longitude: -74.01,
+          latitude: 40.705,
+          zoom: 15,
+          pitch: 45,
+          bearing: 0
+        },
+        minimap: {
+          longitude: -74.01,
+          latitude: 40.705,
+          zoom: 11,
+          pitch: 0,
+          bearing: 0
+        }
+      }
     };
+
+    this._onViewStateChange = this._onViewStateChange.bind(this);
   }
 
   componentDidMount() {
@@ -68,6 +94,33 @@ export class App extends Component {
     this._animationFrame = window.requestAnimationFrame(this._animate.bind(this));
   }
 
+  _onViewStateChange({viewState, viewId}) {
+    const oldViewState = this.state.viewState;
+    if (viewId === 'minimap') {
+      this.setState({
+        viewState: {
+          main: {
+            ...oldViewState.main,
+            longitude: viewState.longitude,
+            latitude: viewState.latitude
+          },
+          minimap: viewState
+        }
+      });
+    } else {
+      this.setState({
+        viewState: {
+          main: viewState,
+          minimap: {
+            ...oldViewState.minimap,
+            longitude: viewState.longitude,
+            latitude: viewState.latitude
+          }
+        }
+      });
+    }
+  }
+
   _renderLayers() {
     const {buildings = DATA_URL.BUILDINGS, trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
 
@@ -76,9 +129,9 @@ export class App extends Component {
         id: 'trips',
         data: trips,
         getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
-        opacity: 0.3,
-        strokeWidth: 2,
+        getColor: [253, 128, 93],
+        getWidth: 5,
+        lineWidthMinPixels: 2,
         trailLength,
         currentTime: this.state.time
       }),
@@ -87,71 +140,36 @@ export class App extends Component {
         data: buildings,
         extruded: true,
         wireframe: false,
-        fp64: true,
-        opacity: 0.5,
+        opacity: 1,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
-        getFillColor: [74, 80, 87],
-        lightSettings: LIGHT_SETTINGS
+        getFillColor: [74, 80, 87]
       })
     ];
   }
 
   render() {
-    const {controller = true, baseMap = true} = this.props;
-
     return (
       <DeckGL
         layers={this._renderLayers()}
-        initialViewState={INITIAL_VIEW_STATE}
-        views={[
-          new MapView({id: 'main'}),
-          new MapView({
-            id: 'minimap',
-
-            // Position on top of main map
-            x: '65%',
-            y: '5%',
-            width: '30%',
-            height: '30%',
-
-            // Minimap is overlaid on top of an existing view, so need to clear the background
-            clear: true,
-
-            viewState: {
-              // Share the view state id of the main map
-              id: 'main',
-
-              // view state overrides: stay zoomed out and looking straight down, north up
-              zoom: 11,
-              pitch: 0,
-              bearing: 0
-            },
-
-            // No controller in the minimap in this first version
-            controller: false
-          })
-        ]}
-        controller={controller}
+        viewState={this.state.viewState}
+        views={VIEWS}
+        onViewStateChange={this._onViewStateChange}
       >
-        {baseMap && (
+        <StaticMap
+          reuseMaps
+          mapStyle="mapbox://styles/mapbox/dark-v9"
+          preventStyleDiffing={true}
+          mapboxApiAccessToken={MAPBOX_TOKEN}
+        />
+        <View id="minimap">
           <StaticMap
             reuseMaps
-            mapStyle="mapbox://styles/mapbox/dark-v9"
+            mapStyle="mapbox://styles/mapbox/light-v9"
             preventStyleDiffing={true}
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
-        )}
-        {baseMap && (
-          <View id="minimap">
-            <StaticMap
-              reuseMaps
-              mapStyle="mapbox://styles/mapbox/light-v9"
-              preventStyleDiffing={true}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          </View>
-        )}
+        </View>
       </DeckGL>
     );
   }
