@@ -52,14 +52,12 @@ export default class RangeInput extends PureComponent {
   }
 
   _toggle() {
+    cancelAnimationFrame(this._animationFrame);
     const {isPlaying} = this.state;
-    this.setState({isPlaying: !isPlaying});
-
-    if (isPlaying) {
-      cancelAnimationFrame(this._animationFrame);
-    } else {
+    if (!isPlaying) {
       this._animate();
     }
+    this.setState({isPlaying: !isPlaying});
   }
 
   _animate() {

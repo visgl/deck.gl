@@ -1,4 +1,4 @@
-This is a minimal standalone version of the GeoJsonLayer example
+This is a minimal standalone version of the DataFilterExtension example
 on [deck.gl](http://deck.gl) website.
 
 ### Usage
@@ -25,5 +25,5 @@ npm start
 ```
 
 ### Data format
-Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/geojson). To use your own data, checkout
-the [documentation of GeoJsonLayer](../../../docs/layers/geojson-layer.md).
+Sample data is stored in [kepler.gl Example Data](https://raw.githubusercontent.com/uber-web/kepler.gl-data/master/earthquakes/). To use your own data, checkout
+the [documentation of DataFilterExtension](../../../docs/extensions/data-filter-extension.md).
