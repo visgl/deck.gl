@@ -192,6 +192,30 @@ Some good places to check for performance improvements are:
   }
   ```
 
+  Starting v7.2.0, support for async iterables is added to efficiently update layers with incrementally loaded data:
+
+  ```js
+  // Create an async iterable
+  async function* getData() {
+    for (let i = 0; i < 10; i++) {
+      await const chunk = fetchChunk(...);
+      yield chunk;
+    }
+  }
+
+  function render() {
+    const layer = new ScatterplotLayer({
+      // When a new chunk arrives, deck.gl only updates the sub buffers for the new rows
+      data: getData(),
+      ...
+    });
+
+    deck.setProps({layers: [layer]});
+  }
+  ```
+
+  See [Layer properties](/docs/api-reference/layer.md#basic-properties) for details.
+
 * **When to remove a layer**
 
   Removing a layer will lose all of its internal states, including generated buffers. If the layer is added back later, all the WebGL resources need to be regenerated again. In the use cases where layers need to be toggled frequently (e.g. via a control panel), there might be a significant perf penalty:
@@ -504,22 +528,55 @@ When creating data-intensive applications, it is often desirable to offload clie
   const colors = new Uint8ClampedArray(...);
 
   // send back to main thread
-  postMessage({positions, colors}, [positions.buffer, colors.buffer]);
+  postMessage({pointCount, positions, colors}, [positions.buffer, colors.buffer]);
   ```
 
   ```js
   // Main thread
   // `data` is received from the worker
   new PointCloudLayer({
-    // since there's no raw data, the layer needs to know how many instances to draw
-    numInstances: data.positions.length / 3,
-    // external buffer
-    instancePositions: data.positions,
-    instanceColors: data.colors,
+    data: {
+      // this is required so that the layer knows how many points to draw
+      length: data.pointCount,
+      attributes: {
+        instancePositions: data.positions,
+        instanceColors: data.colors,
+      }
+    },
     // constant accessor works without raw data
     getNormal: [0, 0, 1]
   });
   ```
+
+  It is also possible to use interleaved or custom layout external buffers by supplying a descriptor instead of typed array to each attribute:
+
+  ```js
+  new PointCloudLayer({
+    data: {
+      length : data.pointCount,
+      attributes: {
+        instancePositions: data.positions,
+        // point[0].r, point[0].g, point[0].b, point[1].r, point[1].g, point[1].b, ...
+        instanceColors: {value: data.colors, size: 3, stride: 3},
+      }
+    },
+    // tell the layer that `instanceColors` does not contain alpha channel
+    colorFormat: 'RGB',
+    // constant accessor works without raw data
+    getNormal: [0, 0, 1]
+  });
+  ```
+
+  Each value in `data.attributes` may be one of the following formats:
+
+  - luma.gl `Buffer` instance
+  - A typed array
+  - An object containing the following optional fields. For more information, see [WebGL vertex attribute API](https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer).
+    + `buffer` (Buffer)
+    + `value` (TypedArray)
+    + `size` (Number) - the number of elements per vertex attribute.
+    + `offset` (Number) - offset of the first vertex attribute into the buffer, in bytes
+    + `stride` (Number) - the offset between the beginning of consecutive vertex attributes, in bytes
 
 
 ## Layer Rendering Performance
