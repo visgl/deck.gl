@@ -120,7 +120,7 @@ export default class PathLayer extends Layer {
       },
       instanceDashArrays: {size: 2, accessor: 'getDashArray'},
       instanceColors: {
-        size: this.props.colorFormat === 'RGB' ? 3 : 4,
+        size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getColor',
         transition: ATTRIBUTE_TRANSITION,
