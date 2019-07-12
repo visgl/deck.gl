@@ -2,7 +2,7 @@
   "name": "@deck.gl/jupyter-widget",
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
-  "version": "7.2.0-alpha.3",
+  "version": "7.2.0-alpha.4",
   "keywords": [
     "jupyter",
     "jupyterlab",
@@ -28,10 +28,10 @@
     "notebook-bundle": "webpack"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "7.2.0-alpha.3",
-    "@deck.gl/core": "7.2.0-alpha.3",
-    "@deck.gl/json": "7.2.0-alpha.3",
-    "@deck.gl/layers": "7.2.0-alpha.3",
+    "@deck.gl/aggregation-layers": "7.2.0-alpha.4",
+    "@deck.gl/core": "7.2.0-alpha.4",
+    "@deck.gl/json": "7.2.0-alpha.4",
+    "@deck.gl/layers": "7.2.0-alpha.4",
     "@jupyter-widgets/base": "^1.1.10",
     "@luma.gl/constants": "^7.2.0-alpha.1",
     "mapbox-gl": "^0.53.1"
