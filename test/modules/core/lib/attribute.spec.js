@@ -38,6 +38,8 @@ test('Attribute#constructor', t => {
   t.ok(attribute.allocate, 'Attribute.allocate function available');
   t.ok(attribute.update, 'Attribute.update function available');
 
+  t.throws(() => new Attribute(gl, {size: 1}), 'Attribute missing update option');
+
   t.end();
 });
 
@@ -76,6 +78,55 @@ test('Attribute#getUpdateTriggers', t => {
     'returns correct update triggers'
   );
 
+  t.end();
+});
+
+test('Attribute#allocate', t => {
+  const attributeNoAlloc = new Attribute(gl, {
+    id: 'positions',
+    size: 3,
+    accessor: 'a',
+    noAlloc: true
+  });
+
+  const attribute = new Attribute(gl, {
+    id: 'sizes',
+    update: attr => {
+      attr.constant = true;
+      attr.value = new Float32Array(2);
+    },
+    size: 2
+  });
+
+  const externalValue = new Float32Array(20).fill(1);
+
+  t.notOk(attributeNoAlloc.allocate(2), 'Should not allocate if noAlloc is set');
+
+  t.ok(attribute.allocate(2), 'allocate successful');
+  const allocatedValue = attribute.value;
+  t.ok(allocatedValue.length >= 4, 'allocated value is large enough');
+
+  t.ok(attribute.allocate(4), 'allocate successful');
+  t.is(attribute.value, allocatedValue, 'reused the same typed array');
+
+  attribute.setExternalBuffer(externalValue);
+  t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if external buffer is used');
+
+  attribute.setExternalBuffer(null);
+  t.ok(attribute.allocate(4), 'allocate successful');
+  t.is(attribute.value, allocatedValue, 'reused the same typed array');
+
+  attribute.setGenericValue([1, 1]);
+  t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if constant value is used');
+
+  attribute.setGenericValue(undefined);
+  t.ok(attribute.allocate(4), 'allocate successful');
+  t.is(attribute.value, allocatedValue, 'reused the same typed array');
+
+  t.ok(attribute.allocate(8), 'allocate successful');
+  t.not(attribute.value, allocatedValue, 'created new typed array');
+
+  attribute.delete();
   t.end();
 });
 
