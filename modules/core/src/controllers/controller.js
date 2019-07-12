@@ -110,10 +110,17 @@ export default class Controller {
     return [offsetCenter.x - x, offsetCenter.y - y];
   }
 
-  isPointInBounds(pos) {
+  isPointInBounds(pos, event) {
     const {width, height} = this.controllerStateProps;
+    if (event && event.handled) {
+      return false;
+    }
 
-    return pos[0] >= 0 && pos[0] <= width && pos[1] >= 0 && pos[1] <= height;
+    const inside = pos[0] >= 0 && pos[0] <= width && pos[1] >= 0 && pos[1] <= height;
+    if (inside && event) {
+      event.stopPropagation();
+    }
+    return inside;
   }
 
   isFunctionKeyPressed(event) {
@@ -235,7 +242,7 @@ export default class Controller {
   // Default handler for the `panstart` event.
   _onPanStart(event) {
     const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos)) {
+    if (!this.isPointInBounds(pos, event)) {
       return false;
     }
     const newControllerState = this.controllerState.panStart({pos}).rotateStart({pos});
@@ -308,7 +315,7 @@ export default class Controller {
     event.preventDefault();
 
     const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos)) {
+    if (!this.isPointInBounds(pos, event)) {
       return false;
     }
 
@@ -331,7 +338,7 @@ export default class Controller {
   // Default handler for the `pinchstart` event.
   _onPinchStart(event) {
     const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos)) {
+    if (!this.isPointInBounds(pos, event)) {
       return false;
     }
 
@@ -393,7 +400,7 @@ export default class Controller {
       return false;
     }
     const pos = this.getCenter(event);
-    if (!this.isPointInBounds(pos)) {
+    if (!this.isPointInBounds(pos, event)) {
       return false;
     }
 
