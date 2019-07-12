@@ -21,11 +21,23 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
+#### deck.gl [v7.2.0-alpha.4] - July 12, 2019
+
+- Fix missing pickingRadius for onClick handlers (#3321) (#3327)
+- Relax geometry validation in GeoJsonLayer (#3325)
+- Typed array manager (#3318)
+- Add support for streaming (#3312)
+- Support line breaks in text strings (#3322)
+- Support loaders.gl data attributes (#3302)
+- Add support for RGB color format (#3338)
+- Attribute allocation bug fixes (#3342)
+- Fix controller event propagation (#3345)
+
 #### deck.gl [v7.2.0-alpha.3] - July 10, 2019
 
-Add an HTML page writer for pydeck (#3250)
-fce0b28e Fix frustum cull (#3323)
-42fd04ec Formal API for CompositeLayer data/accessor wrapping (#3311)
+- Add an HTML page writer for pydeck (#3250)
+- Fix frustum cull (#3323)
+- Formal API for CompositeLayer data/accessor wrapping (#3311)
 
 #### deck.gl [v7.2.0-alpha.2] - July 3, 2019
 
