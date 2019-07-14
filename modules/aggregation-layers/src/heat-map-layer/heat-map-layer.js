@@ -19,6 +19,7 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
+import {_histoPyramidGenerateIndices as histoPyramidGenerateIndices} from '@luma.gl/gpgpu';
 import {Model, Geometry, Buffer, Transform, Texture2D} from '@luma.gl/core';
 import {CompositeLayer, WebMercatorViewport} from '@deck.gl/core';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
@@ -32,6 +33,16 @@ import kde_fs from './kde-fs.glsl';
 const USE_EARTHQUACKE_DATA = true;
 const LNG_LENGTH = 40;
 const LAT_LENGTH = 15;
+
+// TODO: enable to assert on texture dimension
+function isPowerOfTwo(x) {
+    return ((x !== 0) && !(x & (x - 1)));
+}
+
+function nextPowerOfTwo(x) {
+  const p = Math.ceil(Math.log2(x));
+  return Math.pow(2, p);
+}
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -51,8 +62,9 @@ const defaultProps = {
   renderGirdTexture: false,
   renderBoundingBox: false,
   disableTessilation: false,
-  screenSpaceAggregation: true,
-  useGausMatrix: false
+  screenSpaceAggregation: false,
+  useGausMatrix: false,
+  useHistoPyramid: false
 };
 
 export default class HeatMapLayer extends CompositeLayer {
@@ -165,7 +177,7 @@ export default class HeatMapLayer extends CompositeLayer {
     if (this.isDataChanged(opts)) {
       changeFlags.dataChanged = true;
     }
-    if (oldProps.granulatiry !== props.granularity) {
+    if (oldProps.granularity !== props.granularity) {
       changeFlags.cellSizeChanged = true;
     }
     if (this.state.zoom === undefined || zoom !== this.state.zoom) {
@@ -190,7 +202,8 @@ export default class HeatMapLayer extends CompositeLayer {
       oldProps.renderGirdTexture !== props.renderGirdTexture ||
       oldProps.renderBoundingBox !== props.renderBoundingBox ||
       oldProps.disableTessilation !== props.disableTessilation ||
-      oldProps.screenSpaceAggregation !== props.screenSpaceAggregation
+      oldProps.screenSpaceAggregation !== props.screenSpaceAggregation ||
+      oldProps.useHistoPyramid !== props.useHistoPyramid
     ) {
       return true;
     }
@@ -257,9 +270,21 @@ export default class HeatMapLayer extends CompositeLayer {
   }
 
   updateCellSize() {
-    // FOR now use constact cellSize
+    // TODO get cellSize based on props.granularity
+    // FOR now use constant cellSize
     const {boundingBox} = this.state;
-    const cellSize =  getCellSize({cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20, boundingBox})
+    const {width, height} = this.context.viewport;
+    const cellSize =  getCellSize({cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20, boundingBox});
+    if (this.props.useHistoPyramid) {
+      let numCol = Math.ceil(width / cellSize[0]);
+      let numRow = Math.ceil(height / cellSize[1]);
+      console.log(`Updating cellSize to get POT texture: ORIG cellSize: ${cellSize[0]} ${cellSize[1]} numRow: ${numRow} numCol: ${numCol}`);
+      numCol = nextPowerOfTwo(numCol);
+      numRow = nextPowerOfTwo(numRow);
+      cellSize[0] = width / numCol;
+      cellSize[1] = height / numRow;
+      console.log(`POT Texgture => cellSize: ${cellSize[0]} ${cellSize[1]} numRow: ${numRow} numCol: ${numCol}`);
+    }
     this.setState({cellSize});
   }
 
@@ -270,6 +295,7 @@ export default class HeatMapLayer extends CompositeLayer {
       getWeight,
       screenSpaceAggregation
     } = this.props;
+    console.log(`HeatmpaLayer: updateAggregation changeFlags: ${changeFlags}`);
 
     if (screenSpaceAggregation) {
       const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
@@ -302,10 +328,6 @@ export default class HeatMapLayer extends CompositeLayer {
       let viewport = this.context.viewport;
 
       const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
-      // const bounds = [[boundingBox.xMin, boundingBox.yMin], [boundingBox.xMax, boundingBox.yMax]];
-      // const width = viewport.height * (boundingBox.xMax - boundingBox.xMin) / (boundingBox.yMax - boundingBox.yMin);
-      // viewport = new WebMercatorViewport(Object.assign({}, viewport, {width}));
-      // viewport = viewport.fitBounds(bounds);
 
       const weightParams = {
         color: {
@@ -333,8 +355,31 @@ export default class HeatMapLayer extends CompositeLayer {
         viewport: screenSpaceAggregation ? viewport : null,
         projectPoints: screenSpaceAggregation
       });
-
       this.setState({aggregationTexture: aggregationResults.weights.color.aggregationTexture});
+
+
+
+      // ----
+
+      // const gridParams = getGridParams({boundingBox, cellSize, viewport});
+      //
+      // const {width, height, gridTransformMatrix/*, gridSize, gridOrigin*/} = gridParams;
+      //
+      // const aggregationResults = gpuGridAggregator.run({
+      //   positions,
+      //   positions64xyLow,
+      //   weights,
+      //   cellSize,
+      //   width,
+      //   height,
+      //   gridTransformMatrix,
+      //   useGPU: true,
+      //   changeFlags,
+      //   viewport
+      //   // projectPoints,
+      //   // fp64
+      // });
+      // this.setState({aggregationTexture: aggregationResults.color.aggregationTexture});
       // console.log(`aggregationTexture maxMin data: ${aggregationResults.weights.color.maxMinBuffer.getData()}`);
     }
   }
@@ -398,7 +443,7 @@ gl_Position = vec4(0, 0, 0, 1.);
   }
 
   runGauKDE(updateSource = false) {
-    const {linearFilter} = this.props;
+    const {linearFilter, useHistoPyramid} = this.props;
     const {transform, radiusPixels} = this.state;
 
     if (updateSource) {
@@ -411,6 +456,7 @@ gl_Position = vec4(0, 0, 0, 1.);
         elementCount: width * height
       });
     }
+
     // console.log(`updateHeatMap: radiusPixels: ${radiusPixels}`);
     transform.run({
       uniforms: {radiusPixels},
@@ -423,6 +469,16 @@ gl_Position = vec4(0, 0, 0, 1.);
     });
 
     const heatTexture = transform._getTargetTexture();
+
+    if (useHistoPyramid) {
+      const {locationAndIndexBuffer, baseLevelIndexBuffer} = histoPyramidGenerateIndices(gl, {
+        texture: heatTexture,
+        _readData: true
+      });
+      console.log(`locationAndIndex: ${locationAndIndexBuffer.getData()} baseLevelIndex: ${baseLevelIndexBuffer.getData()}`);
+    }
+
+
     let filter = GL.LINEAR;
     if (!linearFilter || this.context.viewport.zoom > 18) {
       filter = GL.NEAREST;

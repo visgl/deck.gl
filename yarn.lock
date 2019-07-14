@@ -1427,6 +1427,11 @@
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.1.0.tgz#4d95aab859719224b5f6fd56805e0041e30b2c11"
   integrity sha512-yPfUw4dxUndWXjscPJ4M9stfr3zhkhDacXrGEV9hHhZg5nc4OQgYUGctQmP5GjtBObkWEJZ4d9aZrGpKB1jAAw==
 
+"@luma.gl/constants@7.1.1":
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.1.1.tgz#f966fad9069722974e1b7bcae2fcd7a2444090dc"
+  integrity sha512-F+lkZzMJNPvGeTCkOezyHafAb48ottMx10PYx3j1rsKFBM2v1LgBHnV1I37xjkrx8PMhdb/2zMg80nRrniudGw==
+
 "@luma.gl/constants@^7.0.0-alpha.6":
   version "7.0.0-alpha.19"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.0.0-alpha.19.tgz#f9dcb21ebb53d1736be27aad68073c1562bc3d81"
@@ -1453,6 +1458,13 @@
   integrity sha512-DVm+ZSknft+DxxbfRiQq7zgOH5pjeBJlrS2rfnoK34I6z+RZ2x6XTM447S9zg/sYdpQEAvPZUqTpPqGvfaQLZA==
   dependencies:
     "@luma.gl/constants" "7.1.0"
+
+"@luma.gl/gpgpu@^7.1.0":
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/@luma.gl/gpgpu/-/gpgpu-7.1.1.tgz#77a6a1382496038b92fcf4eeac2dc670f5ddc43d"
+  integrity sha512-MOdh34S/gIu26bt4Bk/3eAAuBnceVZ0HQFqEin9z5AM0UEtXj6LUks7kvginh7K6rtO8dvMz/gdBMY1z2zoiIQ==
+  dependencies:
+    "@luma.gl/constants" "7.1.1"
 
 "@luma.gl/shadertools@7.1.0":
   version "7.1.0"
