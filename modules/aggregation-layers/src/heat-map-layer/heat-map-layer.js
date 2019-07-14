@@ -437,6 +437,9 @@ gl_Position = vec4(0, 0, 0, 1.);
 
 
   updateHeatMap(updateSource = false) {
+    if (this.props.renderGirdTexture) {
+      return;
+    }
 
     const heatTexture = this.runGauKDE(updateSource);
     // const heatTexture = this.state.aggregationTexture;

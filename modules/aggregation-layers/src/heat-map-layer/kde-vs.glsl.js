@@ -7,6 +7,6 @@ void main()
 {
   outTexture = inTexture;
   // gl_PointSize = radiusPixels * 2.;
-  // gl_PointSize = (outTexture.r + outTexture.g + outTexture.b == 0.) ? 1. : radiusPixels * 2.;
+  gl_PointSize = (outTexture.r + outTexture.g + outTexture.b == 0.) ? 1. : radiusPixels * 2.;
 }
 `;
