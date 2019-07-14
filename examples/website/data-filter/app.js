@@ -81,7 +81,7 @@ export class App extends Component {
           radiusMinPixels: 1,
           wrapLongitude: true,
 
-          getPosition: d => [d.longitude, d.latitude],
+          getPosition: d => [d.longitude, d.latitude, -d.depth * 1000],
           getRadius: d => Math.pow(2, d.magnitude),
           getFillColor: d => {
             const r = Math.sqrt(Math.max(d.depth, 0));

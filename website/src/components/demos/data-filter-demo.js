@@ -3,10 +3,10 @@ import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {App} from 'website-examples/data-filter/app';
 
-export default class HighwayDemo extends Component {
+export default class DataFilterDemo extends Component {
   static get data() {
     return {
-      url: `${DATA_URI}/earthquakes.csv`,
+      url: `${DATA_URI}/earthquakes.txt`,
       worker: 'workers/earthquakes-decoder.js'
     };
   }
