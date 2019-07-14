@@ -329,57 +329,58 @@ export default class HeatMapLayer extends CompositeLayer {
 
       const {boundingBox, cellSize, gpuGridAggregator, positions, positions64xyLow, weights} = this.state;
 
-      const weightParams = {
-        color: {
-          getWeight,
-          operation: AGGREGATION_OPERATION.SUM,
-          needMin: true,
-          needMax: true,
-          combineMaxMin: true
-        }
-      };
-
-      const aggregationResults = pointToDensityGridData({
-        data,
-        getPosition,
-        cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20,
-        gpuGridAggregator,
-        gpuAggregation: true,
-        aggregationFlags: {dataChanged: true},
-        weightParams,
-        // fp64 false,
-        // coordinateSystem COORDINATE_SYSTEM.LNGLAT,
-        // viewport = null,
-        // boundingBox = null,
-
-        viewport: screenSpaceAggregation ? viewport : null,
-        projectPoints: screenSpaceAggregation
-      });
-      this.setState({aggregationTexture: aggregationResults.weights.color.aggregationTexture});
+      // ---
+      // const weightParams = {
+      //   color: {
+      //     getWeight,
+      //     operation: AGGREGATION_OPERATION.SUM,
+      //     needMin: true,
+      //     needMax: true,
+      //     combineMaxMin: true
+      //   }
+      // };
+      //
+      // const aggregationResults = pointToDensityGridData({
+      //   data,
+      //   getPosition,
+      //   cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20,
+      //   gpuGridAggregator,
+      //   gpuAggregation: true,
+      //   aggregationFlags: {dataChanged: true},
+      //   weightParams,
+      //   // fp64 false,
+      //   // coordinateSystem COORDINATE_SYSTEM.LNGLAT,
+      //   // viewport = null,
+      //   // boundingBox = null,
+      //
+      //   viewport: screenSpaceAggregation ? viewport : null,
+      //   projectPoints: screenSpaceAggregation
+      // });
+      // this.setState({aggregationTexture: aggregationResults.weights.color.aggregationTexture});
 
 
 
       // ----
 
-      // const gridParams = getGridParams({boundingBox, cellSize, viewport});
-      //
-      // const {width, height, gridTransformMatrix/*, gridSize, gridOrigin*/} = gridParams;
-      //
-      // const aggregationResults = gpuGridAggregator.run({
-      //   positions,
-      //   positions64xyLow,
-      //   weights,
-      //   cellSize,
-      //   width,
-      //   height,
-      //   gridTransformMatrix,
-      //   useGPU: true,
-      //   changeFlags,
-      //   viewport
-      //   // projectPoints,
-      //   // fp64
-      // });
-      // this.setState({aggregationTexture: aggregationResults.color.aggregationTexture});
+      const gridParams = getGridParams({boundingBox, cellSize, viewport});
+
+      const {width, height, gridTransformMatrix/*, gridSize, gridOrigin*/} = gridParams;
+
+      const aggregationResults = gpuGridAggregator.run({
+        positions,
+        positions64xyLow,
+        weights,
+        cellSize,
+        width,
+        height,
+        gridTransformMatrix,
+        useGPU: true,
+        changeFlags,
+        viewport
+        // projectPoints,
+        // fp64
+      });
+      this.setState({aggregationTexture: aggregationResults.color.aggregationTexture});
       // console.log(`aggregationTexture maxMin data: ${aggregationResults.weights.color.maxMinBuffer.getData()}`);
     }
   }
@@ -471,6 +472,7 @@ gl_Position = vec4(0, 0, 0, 1.);
     const heatTexture = transform._getTargetTexture();
 
     if (useHistoPyramid) {
+      const {gl} = this.context;
       const {locationAndIndexBuffer, baseLevelIndexBuffer} = histoPyramidGenerateIndices(gl, {
         texture: heatTexture,
         _readData: true
