@@ -145,6 +145,13 @@ export const examplePages = generatePath([
         }
       },
       {
+        name: 'Data Filter',
+        content: {
+          demo: 'DataFilterDemo',
+          code: getCodeUrl('examples/website/data-filter')
+        }
+      },
+      {
         name: '3D Surface Explorer',
         content: {
           demo: 'PlotDemo',
