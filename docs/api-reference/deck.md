@@ -278,7 +278,7 @@ Callback arguments:
 
 ##### `onLoad` (Function, optional)
 
-Called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. Can be used to trigger viewport transitions.
+Called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. It is safe to trigger viewport transitions after this event.
 
 
 ##### `onResize` (Function, optional)
@@ -289,7 +289,7 @@ Callback arguments:
 
 * `size`
   - `width` (Number) - the new width of the deck canvas, in client pixels
-  - `height` (Number) - the new width of the deck canvas, in client pixels
+  - `height` (Number) - the new height of the deck canvas, in client pixels
 
 
 ##### `onBeforeRender` (Function, optional)
