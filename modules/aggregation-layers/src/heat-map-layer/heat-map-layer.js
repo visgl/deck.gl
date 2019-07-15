@@ -64,7 +64,7 @@ const defaultProps = {
   disableTessilation: false,
   screenSpaceAggregation: false,
   useGausMatrix: false,
-  useHistoPyramid: false
+  useHistoPyramid: true
 };
 
 export default class HeatMapLayer extends CompositeLayer {
@@ -273,18 +273,18 @@ export default class HeatMapLayer extends CompositeLayer {
     // TODO get cellSize based on props.granularity
     // FOR now use constant cellSize
     const {boundingBox} = this.state;
-    const {width, height} = this.context.viewport;
+    // const {width, height} = this.context.viewport;
     const cellSize =  getCellSize({cellSizeMeters: USE_EARTHQUACKE_DATA ? 10000 : 20, boundingBox});
-    if (this.props.useHistoPyramid) {
-      let numCol = Math.ceil(width / cellSize[0]);
-      let numRow = Math.ceil(height / cellSize[1]);
-      console.log(`Updating cellSize to get POT texture: ORIG cellSize: ${cellSize[0]} ${cellSize[1]} numRow: ${numRow} numCol: ${numCol}`);
-      numCol = nextPowerOfTwo(numCol);
-      numRow = nextPowerOfTwo(numRow);
-      cellSize[0] = width / numCol;
-      cellSize[1] = height / numRow;
-      console.log(`POT Texgture => cellSize: ${cellSize[0]} ${cellSize[1]} numRow: ${numRow} numCol: ${numCol}`);
-    }
+    // if (this.props.useHistoPyramid) {
+    //   let numCol = Math.ceil(width / cellSize[0]);
+    //   let numRow = Math.ceil(height / cellSize[1]);
+    //   console.log(`Updating cellSize to get POT texture: ORIG cellSize: ${cellSize[0]} ${cellSize[1]} numRow: ${numRow} numCol: ${numCol}`);
+    //   numCol = nextPowerOfTwo(numCol);
+    //   numRow = nextPowerOfTwo(numRow);
+    //   cellSize[0] = width / numCol;
+    //   cellSize[1] = height / numRow;
+    //   console.log(`POT Texgture => cellSize: ${cellSize[0]} ${cellSize[1]} numRow: ${numRow} numCol: ${numCol}`);
+    // }
     this.setState({cellSize});
   }
 
