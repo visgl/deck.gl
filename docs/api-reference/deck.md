@@ -205,7 +205,7 @@ Forces deck.gl to redraw layers every animation frame. Normally deck.gl layers a
 
 ##### `onWebGLInitialized` (Function, optional)
 
-Callback, called once the WebGL context has been initiated
+Called once the WebGL context has been initiated.
 
 Callback arguments:
 
@@ -232,45 +232,45 @@ Returns:
 
 ##### `onHover` (Function, optional)
 
-Callback - called when the pointer moves over the canvas.
+Called when the pointer moves over the canvas.
 
-Callback Arguments:
+Callback arguments:
 
-* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
 * `event` - the original gesture event
 
 ##### `onClick` (Function, optional)
 
-Callback - called when clicking on the canvas.
+Called when clicking on the canvas.
 
-Callback Arguments:
+Callback arguments:
 
-* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being clicked.
 * `event` - the original gesture event
 
 ##### `onDragStart` (Function, optional)
 
-Callback - called when the user starts dragging on the canvas.
+Called when the user starts dragging on the canvas.
 
-Callback Arguments:
+Callback arguments:
 
 * `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 ##### `onDrag` (Function, optional)
 
-Callback - called when dragging the canvas.
+Called when dragging the canvas.
 
-Callback Arguments:
+Callback arguments:
 
 * `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
 
 ##### `onDragEnd` (Function, optional)
 
-Callback - called when the user releases from dragging the canvas.
+Called when the user releases from dragging the canvas.
 
-Callback Arguments:
+Callback arguments:
 
 * `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being dragged.
 * `event` - the original gesture event
@@ -278,7 +278,36 @@ Callback Arguments:
 
 ##### `onLoad` (Function, optional)
 
-Callback, called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. Can be used to trigger viewport transitions.
+Called once after gl context and Deck components (`ViewManager`, `LayerManager`, etc) are created. It is safe to trigger viewport transitions after this event.
+
+
+##### `onResize` (Function, optional)
+
+Called when the canvas resizes.
+
+Callback arguments:
+
+* `size`
+  - `width` (Number) - the new width of the deck canvas, in client pixels
+  - `height` (Number) - the new height of the deck canvas, in client pixels
+
+
+##### `onBeforeRender` (Function, optional)
+
+Called just before the canvas rerenders.
+
+Callback arguments:
+
+* `gl` - the WebGL context.
+
+
+##### `onAfterRender` (Function, optional)
+
+Called right after the canvas rerenders.
+
+Callback arguments:
+
+* `gl` - the WebGL context.
 
 
 ##### `_onMetrics` (Function, optional) **Experimental**
