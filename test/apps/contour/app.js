@@ -145,7 +145,7 @@ export class App extends PureComponent {
             </div>
           </div>
           <div className="input-group">
-            <label className="input-label">LI</label>
+            <label className="input-label">Linear Interpolation</label>
             <div className="radio-group">
               <input
                 className="radio"
@@ -154,7 +154,6 @@ export class App extends PureComponent {
                 checked={this.state.linearInterpolation}
                 onChange={this.onIsLinearInterpolationChange}
               />
-              <label className="input-label">Linear Interpolation</label>
             </div>
           </div>
           <div className="input-group">

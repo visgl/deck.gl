@@ -2,9 +2,9 @@ import test from 'tape-catch';
 import {
   getCode,
   getVertices,
+  getSmoothOffset,
   CONTOUR_TYPE
 } from '@deck.gl/aggregation-layers/contour-layer/marching-squares';
-import {getLinearInterpolation} from '../../../../modules/aggregation-layers/src/contour-layer/linear-interpolation';
 
 const GETCODE_TESTS = [
   // ISO LINES
@@ -254,50 +254,22 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 4,
-    vertices: [[110, 230], [115, 210]],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: [[110, 230], [115, 220]]
   },
   {
     gridOrigin: [100, 200],
     code: 0,
-    vertices: [],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: []
   },
   {
     gridOrigin: [100, 200],
     code: 6,
-    vertices: [[110, 230], [115, 210]],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: [[110, 230], [110, 210]]
   },
   {
     gridOrigin: [100, 200],
     code: 15,
-    vertices: [],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: []
   },
 
   // non zero cellIndex
@@ -306,30 +278,16 @@ const GETVERTEX_TESTS = [
     code: 12,
     x: 1,
     y: 1,
-    vertices: [[115, 270], [125, 230]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: [[115, 240], [125, 240]],
+    gridSize: [3, 3]
   },
   {
     gridOrigin: [100, 200],
     code: 9,
     x: 0,
     y: 1,
-    vertices: [[110, 250], [115, 230]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: [[110, 250], [110, 230]],
+    gridSize: [3, 3]
   },
 
   // saddle cases
@@ -339,15 +297,8 @@ const GETVERTEX_TESTS = [
     meanCode: 1,
     x: 0,
     y: 0,
-    vertices: [[105, 250], [110, 230], [115, 210], [115, 210]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: [[105, 220], [110, 230], [110, 210], [115, 220]],
+    gridSize: [3, 3]
   },
   {
     gridOrigin: [100, 200],
@@ -355,15 +306,8 @@ const GETVERTEX_TESTS = [
     meanCode: 0,
     x: 0,
     y: 0,
-    vertices: [[105, 250], [115, 210], [110, 230], [115, 210]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15}
+    vertices: [[105, 220], [110, 210], [110, 230], [115, 220]],
+    gridSize: [3, 3]
   },
 
   // ISO-BANDS
@@ -447,33 +391,186 @@ const GETVERTEX_TESTS = [
     cellSize: [12, 24],
     vertices: [[[106, 236], [106, 224], [112, 212], [118, 212], [118, 224], [112, 236]]],
     type: CONTOUR_TYPE.ISO_BANDS
+  },
+  // linear interpolation flag set true
+  {
+    gridOrigin: [100, 200],
+    code: 4,
+    vertices: [[110, 230], [115, 210]],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+  {
+    gridOrigin: [100, 200],
+    code: 0,
+    vertices: [],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+  {
+    gridOrigin: [100, 200],
+    code: 6,
+    vertices: [[110, 230], [115, 210]],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+  {
+    gridOrigin: [100, 200],
+    code: 15,
+    vertices: [],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+
+  // non zero cellIndex
+  {
+    gridOrigin: [100, 200],
+    code: 12,
+    x: 1,
+    y: 1,
+    vertices: [[115, 270], [125, 230]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+  {
+    gridOrigin: [100, 200],
+    code: 9,
+    x: 0,
+    y: 1,
+    vertices: [[110, 250], [115, 230]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+
+  // saddle cases
+  {
+    gridOrigin: [100, 200],
+    code: 5,
+    meanCode: 1,
+    x: 0,
+    y: 0,
+    vertices: [[105, 250], [110, 230], [115, 210], [115, 210]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
+  },
+  {
+    gridOrigin: [100, 200],
+    code: 5,
+    meanCode: 0,
+    x: 0,
+    y: 0,
+    vertices: [[105, 250], [115, 210], [110, 230], [115, 210]],
+    gridSize: [3, 3],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 15,
+      topRight: 20
+    },
+    thresholdData: {threshold: 15},
+    isLI: true
   }
 ];
-
-const GETLINEARINTERPOLATION_TESTS = [
+const GETSMOOTHOFFSET_TESTS = [
   {
-    min: 10,
-    max: 80,
-    threshold: 50,
-    offset: 0.571
-  },
-  {
-    min: 10,
-    max: 80,
-    threshold: 80,
-    offset: 1
-  },
-  {
-    min: 10,
-    max: 80,
+    offsetKeys: ['current', 'top'],
+    weights: {
+      current: 10,
+      right: 30,
+      top: 40,
+      topRight: 60
+    },
     threshold: 35,
-    offset: 0.357
+    offset: 0.333
   },
   {
-    min: 10,
-    max: 80,
-    threshold: 10,
+    offsetKeys: ['right', 'topRight'],
+    weights: {
+      current: 10,
+      right: 30,
+      top: 40,
+      topRight: 60
+    },
+    threshold: 35,
+    offset: -0.333
+  },
+  {
+    offsetKeys: ['current', 'right'],
+    weights: {
+      current: 10,
+      right: 90,
+      top: 40,
+      topRight: 30
+    },
+    threshold: 50,
     offset: 0
+  },
+  {
+    offsetKeys: ['right', 'topRight'],
+    weights: {
+      current: 10,
+      right: 90,
+      top: 40,
+      topRight: 30
+    },
+    threshold: 50,
+    offset: 0.167
+  },
+  {
+    offsetKeys: ['top', 'topRight'],
+    weights: {
+      current: 80,
+      right: 90,
+      top: 50,
+      topRight: 60
+    },
+    threshold: 50,
+    offset: -0.5
   }
 ];
 
@@ -519,7 +616,8 @@ test('MarchingSquares#getVertices', t => {
       meanCode: testCase.meanCode,
       type: testCase.type || CONTOUR_TYPE.ISO_LINES,
       weights: testCase.weights,
-      thresholdData: testCase.thresholdData
+      thresholdData: testCase.thresholdData,
+      isLI: testCase.isLI
     });
     // Set z coordinate to 0 if not present.
     let expectedVertices = [];
@@ -528,14 +626,14 @@ test('MarchingSquares#getVertices', t => {
         if (!polygon) {
           return;
         }
-        const expectedPolygon = polygon.map(
-          vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+        const expectedPolygon = polygon.map(vertex =>
+          vertex.length === 2 ? vertex.concat(0) : vertex
         );
         expectedVertices.push(expectedPolygon);
       });
     } else {
-      expectedVertices = testCase.vertices.map(
-        vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+      expectedVertices = testCase.vertices.map(vertex =>
+        vertex.length === 2 ? vertex.concat(0) : vertex
       );
     }
     t.deepEquals(
@@ -548,11 +646,11 @@ test('MarchingSquares#getVertices', t => {
 });
 /* eslint-enable max-nested-callbacks */
 
-test('MarchingSquares#getLinearInterpolation', t => {
-  GETLINEARINTERPOLATION_TESTS.forEach(testCase => {
-    let linearInterpolation = getLinearInterpolation(
-      testCase.min,
-      testCase.max,
+test('MarchingSquares#getSmoothOffset', t => {
+  GETSMOOTHOFFSET_TESTS.forEach(testCase => {
+    let linearInterpolation = getSmoothOffset(
+      testCase.offsetKeys,
+      testCase.weights,
       testCase.threshold
     );
     linearInterpolation = parseFloat(linearInterpolation.toFixed(3));

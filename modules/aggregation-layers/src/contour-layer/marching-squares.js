@@ -7,7 +7,6 @@ import {
   ISOBANDS_CODE_OFFSET_MAP,
   LINEAR_INTERPOLATION_CODE_OFFSET_MAP
 } from './marching-squares-codes';
-import {getLinearInterpolation} from './linear-interpolation';
 
 export const CONTOUR_TYPE = {
   ISO_LINES: 1,
@@ -129,7 +128,7 @@ export function getVertices(opts) {
     meanCode,
     type = CONTOUR_TYPE.ISO_LINES,
     weights,
-    isLI = true
+    isLI = false
   } = opts;
   const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);
   let offsets =
@@ -191,10 +190,10 @@ export function getVertices(opts) {
   const lines = [];
   offsets.forEach((xyOffsets, i) => {
     xyOffsets.forEach((offset, j) => {
-      const li = getLinearOffsetValue(linearOffsets[i][j], weights, thresholdData.threshold);
       let xOffset;
       let yOffset;
       if (isLI) {
+        const li = getSmoothOffset(linearOffsets[i][j], weights, thresholdData.threshold);
         xOffset = !offset[0] ? offset[0] + li : offset[0];
         yOffset = !offset[1] ? offset[1] + li : offset[1];
       } else {
@@ -209,12 +208,15 @@ export function getVertices(opts) {
   return lines;
 }
 
-function getLinearOffsetValue(offset, weights, threshold) {
-  const linearInterpolation = getLinearInterpolation(
-    weights[offset[0]],
-    weights[offset[1]],
-    threshold
-  );
+export function getSmoothOffset(offset, weights, threshold) {
+  console.log(offset, weights, threshold);
+  const minThreshold = weights[offset[0]];
+  const maxThreshold = weights[offset[1]];
+
+  if (maxThreshold === minThreshold) {
+    return maxThreshold;
+  }
+  const linearInterpolation = (threshold - minThreshold) / (maxThreshold - minThreshold);
   // linearInterpolation is between 0 and 1, to match with (-0.5, 0.5) subtracting with 0.5
   return linearInterpolation - 0.5;
 }
