@@ -626,14 +626,14 @@ test('MarchingSquares#getVertices', t => {
         if (!polygon) {
           return;
         }
-        const expectedPolygon = polygon.map(vertex =>
-          vertex.length === 2 ? vertex.concat(0) : vertex
+        const expectedPolygon = polygon.map(
+          vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
         );
         expectedVertices.push(expectedPolygon);
       });
     } else {
-      expectedVertices = testCase.vertices.map(vertex =>
-        vertex.length === 2 ? vertex.concat(0) : vertex
+      expectedVertices = testCase.vertices.map(
+        vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
       );
     }
     t.deepEquals(
