@@ -64,7 +64,7 @@ const defaultProps = {
   disableTessilation: false,
   screenSpaceAggregation: false,
   useGausMatrix: false,
-  useHistoPyramid: true
+  useHistoPyramid: false
 };
 
 export default class HeatMapLayer extends CompositeLayer {
@@ -293,7 +293,8 @@ export default class HeatMapLayer extends CompositeLayer {
       data,
       getPosition,
       getWeight,
-      screenSpaceAggregation
+      screenSpaceAggregation,
+      useHistoPyramid
     } = this.props;
     console.log(`HeatmpaLayer: updateAggregation changeFlags: ${changeFlags}`);
 
@@ -380,7 +381,24 @@ export default class HeatMapLayer extends CompositeLayer {
         // projectPoints,
         // fp64
       });
-      this.setState({aggregationTexture: aggregationResults.color.aggregationTexture});
+
+      const state = {aggregationTexture: aggregationResults.color.aggregationTexture};
+      if (useHistoPyramid) {
+        const {gl} = this.context;
+        console.log(`Run histo pyramids`);
+        const {baseLevelIndexBuffer, indexCount} = histoPyramidGenerateIndices(gl, {
+          texture: aggregationResults.color.aggregationTexture,
+          // _readData: true
+        });
+        // console.log(`locationAndIndex: count: ${indexCount} ${locationAndIndexBuffer.getData()} baseLevelIndex: ${baseLevelIndexBuffer.getData()}`);
+        console.log(`locationAndIndex: count: ${indexCount} baseLevelIndex: ${baseLevelIndexBuffer.getData()}`);
+        if (this.state.kdeIndexBuffer) {
+          this.state.kdeIndexBuffer.delete();
+        }
+        state.kdeIndexBuffer = baseLevelIndexBuffer;
+        state.indexCount = indexCount;
+      }
+      this.setState(state);
       // console.log(`aggregationTexture maxMin data: ${aggregationResults.weights.color.maxMinBuffer.getData()}`);
     }
   }
@@ -444,8 +462,8 @@ gl_Position = vec4(0, 0, 0, 1.);
   }
 
   runGauKDE(updateSource = false) {
-    const {linearFilter, useHistoPyramid} = this.props;
-    const {transform, radiusPixels} = this.state;
+    const {linearFilter} = this.props;
+    const {transform, radiusPixels, kdeIndexBuffer, indexCount} = this.state;
 
     if (updateSource) {
       const {width, height} = this.state.aggregationTexture;
@@ -456,6 +474,13 @@ gl_Position = vec4(0, 0, 0, 1.);
         _targetTexture: this.state.heatTexture || 'inTexture',
         elementCount: width * height
       });
+      if (kdeIndexBuffer) {
+        transform.model.setVertexCount(indexCount);
+        if (transform.elementIDBuffer !== kdeIndexBuffer) {
+          transform.elementIDBuffer.delete();
+          transform.elementIDBuffer = kdeIndexBuffer;
+        }
+      }
     }
 
     // console.log(`updateHeatMap: radiusPixels: ${radiusPixels}`);
@@ -470,15 +495,6 @@ gl_Position = vec4(0, 0, 0, 1.);
     });
 
     const heatTexture = transform._getTargetTexture();
-
-    if (useHistoPyramid) {
-      const {gl} = this.context;
-      const {locationAndIndexBuffer, baseLevelIndexBuffer} = histoPyramidGenerateIndices(gl, {
-        texture: heatTexture,
-        _readData: true
-      });
-      console.log(`locationAndIndex: ${locationAndIndexBuffer.getData()} baseLevelIndex: ${baseLevelIndexBuffer.getData()}`);
-    }
 
 
     let filter = GL.LINEAR;
