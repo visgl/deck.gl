@@ -209,7 +209,6 @@ export function getVertices(opts) {
 }
 
 export function getSmoothOffset(offset, weights, threshold) {
-  console.log(offset, weights, threshold);
   const minThreshold = weights[offset[0]];
   const maxThreshold = weights[offset[1]];
 
