@@ -130,7 +130,7 @@ Method called to retrieve the target position of each object.
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color at the source, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color at the source, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the source color for all objects.
 * If a function is provided, it is called on each object to retrieve its source color.
@@ -139,7 +139,7 @@ The rgba color at the source, in `r, g, b, [a]`. Each component is in the 0-255 
 
 * Default `[0, 0, 0, 255]`
 
-The rgba color at the target, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color at the target, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the target color for all objects.
 * If a function is provided, it is called on each object to retrieve its target color.

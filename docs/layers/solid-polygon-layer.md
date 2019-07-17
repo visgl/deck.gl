@@ -126,7 +126,7 @@ A polygon can be one of the following formats:
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba fill color of each object's polygon, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
@@ -135,7 +135,7 @@ The rgba fill color of each object's polygon, in `r, g, b, [a]`. Each component 
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba wireframe color of each object's polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba wireframe color of each object's polygon, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 Only applies if `extruded: true`.
 
 * If an array is provided, it is used as the stroke color for all polygons.

@@ -239,7 +239,7 @@ If the optional third component `z` is supplied for a position, it specifies the
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba fill color of each polygon, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the fill color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its fill color.
@@ -248,7 +248,7 @@ The rgba fill color of each polygon, in `r, g, b, [a]`. Each component is in the
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba outline color of each polygon, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba outline color of each polygon, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the outline color for all polygons.
 * If a function is provided, it is called on each polygon to retrieve its outline color.

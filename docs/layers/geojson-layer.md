@@ -220,7 +220,7 @@ Check [PhongMaterial](https://github.com/uber/luma.gl/tree/7.0-release/docs/api-
 * Default: `[0, 0, 0, 255]`
 
 The rgba color of line string and/or the outline of polygon for a GeoJson feature, depending on its type.
-Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+Format is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the line color for all features.
 * If a function is provided, it is called on each feature to retrieve its line color.
@@ -230,7 +230,7 @@ Format is `r, g, b, [a]`. Each component is in the 0-255 range.
 * Default: `[0, 0, 0, 255]`
 
 The solid color of the polygon and point features of a GeoJson.
-Format is `r, g, b, [a]`. Each component is in the 0-255 range.
+Format is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the fill color for all features.
 * If a function is provided, it is called on each feature to retrieve its fill color.

@@ -135,7 +135,7 @@ Method called to retrieve the center position for each object in the `data` stre
 
 - Default: `[0, 0, 0, 255]`
 
-The color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range. Only used if `texture` is empty.
+The color of each object, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default. Only used if `texture` is empty.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.

@@ -197,7 +197,7 @@ Method called to retrieve the position of each column, in `[x, y]`. An optional 
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba color of each object, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the color for all objects.
 * If a function is provided, it is called on each object to retrieve its color.
@@ -207,7 +207,7 @@ The rgba color of each object, in `r, g, b, [a]`. Each component is in the 0-255
 
 * Default: `[0, 0, 0, 255]`
 
-The rgba outline color of each object, in `r, g, b, [a]`. Each component is in the 0-255 range.
+The rgba outline color of each object, is `[r, g, b, [a]]`. `r, g, b, a` is in 0-255 range and `a` is 255 by default.
 
 * If an array is provided, it is used as the outline color for all columns.
 * If a function is provided, it is called on each object to retrieve its outline color.
