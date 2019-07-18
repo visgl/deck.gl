@@ -396,12 +396,12 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 4,
-    vertices: [[110, 230], [115, 210]],
+    vertices: [[112.5, 230], [115, 220]],
     weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
+      top: 30,
+      current: 25,
+      right: 20,
+      topRight: 10
     },
     thresholdData: {threshold: 15},
     isLI: true
@@ -411,10 +411,10 @@ const GETVERTEX_TESTS = [
     code: 0,
     vertices: [],
     weights: {
-      top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
+      top: 30,
+      current: 25,
+      right: 20,
+      topRight: 18
     },
     thresholdData: {threshold: 15},
     isLI: true
@@ -422,12 +422,12 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 6,
-    vertices: [[110, 230], [115, 210]],
+    vertices: [[112.5, 230], [115, 210]],
     weights: {
-      top: 10,
-      current: 5,
+      top: 30,
+      current: 20,
       right: 15,
-      topRight: 20
+      topRight: 10
     },
     thresholdData: {threshold: 15},
     isLI: true
@@ -438,27 +438,26 @@ const GETVERTEX_TESTS = [
     vertices: [],
     weights: {
       top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
+      current: 8,
+      right: 9,
+      topRight: 5
     },
     thresholdData: {threshold: 15},
     isLI: true
   },
-
   // non zero cellIndex
   {
     gridOrigin: [100, 200],
     code: 12,
     x: 1,
     y: 1,
-    vertices: [[115, 270], [125, 230]],
+    vertices: [[115, 237.5], [125, 250]],
     gridSize: [3, 3],
     weights: {
       top: 10,
-      current: 5,
-      right: 15,
-      topRight: 20
+      current: 18,
+      right: 25,
+      topRight: 15
     },
     thresholdData: {threshold: 15},
     isLI: true
@@ -468,12 +467,12 @@ const GETVERTEX_TESTS = [
     code: 9,
     x: 0,
     y: 1,
-    vertices: [[110, 250], [115, 230]],
+    vertices: [[110, 250], [105, 230]],
     gridSize: [3, 3],
     weights: {
       top: 10,
-      current: 5,
-      right: 15,
+      current: 15,
+      right: 25,
       topRight: 20
     },
     thresholdData: {threshold: 15},
@@ -487,11 +486,11 @@ const GETVERTEX_TESTS = [
     meanCode: 1,
     x: 0,
     y: 0,
-    vertices: [[105, 250], [110, 230], [115, 210], [115, 210]],
+    vertices: [[105, 223.33333333333334], [110, 230], [115, 210], [115, 210]],
     gridSize: [3, 3],
     weights: {
       top: 10,
-      current: 5,
+      current: 25,
       right: 15,
       topRight: 20
     },
@@ -504,13 +503,13 @@ const GETVERTEX_TESTS = [
     meanCode: 0,
     x: 0,
     y: 0,
-    vertices: [[105, 250], [115, 210], [110, 230], [115, 210]],
+    vertices: [[105, 223.33333333333334], [110, 210], [110, 230], [115, 223.33333333333334]],
     gridSize: [3, 3],
     weights: {
-      top: 10,
+      top: 20,
       current: 5,
-      right: 15,
-      topRight: 20
+      right: 25,
+      topRight: 10
     },
     thresholdData: {threshold: 15},
     isLI: true
@@ -626,14 +625,14 @@ test('MarchingSquares#getVertices', t => {
         if (!polygon) {
           return;
         }
-        const expectedPolygon = polygon.map(
-          vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+        const expectedPolygon = polygon.map(vertex =>
+          vertex.length === 2 ? vertex.concat(0) : vertex
         );
         expectedVertices.push(expectedPolygon);
       });
     } else {
-      expectedVertices = testCase.vertices.map(
-        vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+      expectedVertices = testCase.vertices.map(vertex =>
+        vertex.length === 2 ? vertex.concat(0) : vertex
       );
     }
     t.deepEquals(

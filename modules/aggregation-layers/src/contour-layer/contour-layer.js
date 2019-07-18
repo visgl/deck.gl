@@ -170,9 +170,6 @@ export default class ContourLayer extends CompositeLayer {
     if (oldProps.cellSize !== props.cellSize) {
       aggregationFlags = Object.assign({}, aggregationFlags, {cellSizeChanged: true});
     }
-    if (oldProps.isLI !== props.isLI) {
-      aggregationFlags = Object.assign({}, aggregationFlags, {isLIChanged: true});
-    }
     return aggregationFlags;
   }
 
@@ -239,7 +236,8 @@ export default class ContourLayer extends CompositeLayer {
       !oldProps.contours ||
       !oldProps.zOffset ||
       oldProps.contours.length !== props.contours.length ||
-      oldProps.zOffset !== props.zOffset
+      oldProps.zOffset !== props.zOffset ||
+      oldProps.isLI !== props.isLI
     ) {
       return true;
     }
