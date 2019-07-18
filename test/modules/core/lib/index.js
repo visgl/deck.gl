@@ -33,3 +33,5 @@ import './transition-manager.spec';
 import './seer-integration.spec';
 import './effect.spec';
 import './effect-manager.spec';
+import './picking.spec';
+import './view-manager.spec';
