@@ -2,10 +2,9 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from 'deck.gl';
-import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
+import {AmbientLight, DirectionalLight, _LightWithShadowEffect} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {PhongMaterial} from '@luma.gl/core';
-import {ShadowExtension} from '@deck.gl/extensions';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -33,7 +32,7 @@ const dirLight1 = new DirectionalLight({
   castShadow: true
 });
 
-const lightingEffect = new LightingEffect({ambientLight, dirLight0, dirLight1});
+const lightingEffect = new _LightWithShadowEffect({ambientLight, dirLight0, dirLight1});
 
 const material = new PhongMaterial({
   ambient: 0.1,
@@ -52,8 +51,6 @@ export const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const LAYER_EXTENSIONS = [new ShadowExtension()];
-
 export class App extends Component {
   constructor(props) {
     super(props);
@@ -68,7 +65,6 @@ export class App extends Component {
 
     return [
       new SolidPolygonLayer({
-        extensions: LAYER_EXTENSIONS,
         id: 'buildings',
         data,
         opacity: 1,
@@ -80,7 +76,6 @@ export class App extends Component {
         castShadow: true
       }),
       new SolidPolygonLayer({
-        extensions: LAYER_EXTENSIONS,
         id: 'land',
         data: landCover,
         opacity: 1,

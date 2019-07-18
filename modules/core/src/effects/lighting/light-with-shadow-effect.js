@@ -1,17 +1,21 @@
-import Effect from '../lib/effect';
-import ShadowPass from '../passes/shadow-pass';
+import LightingEffect from './lighting-effect';
+import ShadowPass from '../../passes/shadow-pass';
 import {Matrix4, Vector3} from 'math.gl';
 import {Texture2D} from '@luma.gl/core';
+import {default as shadow} from '../../shaderlib/shadow/shadow';
+import {setDefaultShaderModules, getDefaultShaderModules} from '@luma.gl/core';
 
-export default class ShadowEffect extends Effect {
+export default class LightWithShadowEffect extends LightingEffect {
   constructor(props) {
     super(props);
-    const {shadowColor = [2, 0, 5, 200], lights = []} = props;
+    this.shadowColor = [2, 0, 5, 200];
     this.shadowPasses = [];
-    this.shadowColor = shadowColor;
-    this.lights = lights;
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
+
+    const defaultShaderModules = getDefaultShaderModules();
+    defaultShaderModules.push(shadow);
+    setDefaultShaderModules(defaultShaderModules);
 
     this._createLightMatrix();
   }
@@ -75,7 +79,7 @@ export default class ShadowEffect extends Effect {
       far: 2
     });
 
-    for (const light of this.lights) {
+    for (const light of this.directionalLights) {
       const viewMatrix = new Matrix4()
         .lookAt({
           eye: new Vector3(light.direction).negate()
@@ -88,12 +92,12 @@ export default class ShadowEffect extends Effect {
   }
 
   _createShadowPasses(gl, pixelRatio) {
-    for (let i = 0; i < this.lights.length; i++) {
+    for (let i = 0; i < this.directionalLights.length; i++) {
       this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
     }
   }
   _createDummyShadowMaps(gl) {
-    for (let i = 0; i < this.lights.length; i++) {
+    for (let i = 0; i < this.directionalLights.length; i++) {
       this.dummyShadowMaps.push(
         new Texture2D(gl, {
           width: 1,
