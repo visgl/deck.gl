@@ -11,11 +11,11 @@ Deck.gl has new basic lighting effect since 7.0, shadow effects for directional 
 
 ## Proposal
 ### API
-`ShadowEffect` class is the public interface to create shadow effects, it has two params.
-* `lights`(Object): collection of directional light sources
-* `shadowColor`(Array): RGBA color for shadow rendering
+`LightWithShadowEffect` class is the public interface to create shadow effects, it extends from LightingEffect and has one param.
+* `lights`(Object): collection of light sources
 
-`ShadowExtension` class is the public interface to interact with layers, inject GLSL code to layer shaders.
+New layer prop
+`enableShadow`(Boolean): when this prop is true, layer casts and renders shadows
 
 ### Example
 ```js
@@ -36,28 +36,24 @@ const dirLight1 = new DirectionalLight({
   direction: [-10, -20, -30]
 });
 
-const lightingEffect = new LightingEffect({ambientLight, dirLight0, dirLight1});
-const shadowEffect = new ShadowEffect({dirLight0, dirLight1});
-const LAYER_EXTENSIONS = [new ShadowExtension()];
+const lightWithShadowEffect = new LightWithShadowEffect({ambientLight, dirLight0, dirLight1});
 const deckgl = new Deck({
   canvas: 'my-deck-canvas',
-  effects: [lightingEffect, shadowEffect],
+  effects: [lightWithShadowEffect],
   layers: [
 	  // building layer
 	  new SolidPolygonLayer({
-	  extensions: LAYER_EXTENSIONS,
       ...}),
       // ground layer
       new SolidPolygonLayer({
-	  extensions: LAYER_EXTENSIONS,
       ...})]
 });
 ```
 ### Workflow
-* Shadow effect passed into deck and create shadow passes based on light directions, there is one shadow pass for each directional light, for now totally two lights are supported
-* Shadow module code injected to layer shader by layer extension
-* For each shadow pass, layers with shadow extension are rendered to a shadow map
+* User creates LightWithShadowEffect which adds shadow modules into default shader modules
+* LightWithShadowEffect is passed into deck and create shadow passes based on light directions, there is one shadow pass for each directional light, for now totally two lights are supported
+* For each shadow pass, layers are rendered to a shadow map
 * After all the effects are processed, there is a regular layer rendering pass, shadow maps are used to render the final shadows.
 
 ## Future Ideas
- With current design user need specify both shadow effect and extension to enable shadow effects, we could design a mechanism to add shadow extension to qualified layers automatically
+ With current design user need create LightWithShadowEffect from the beginning, can't create after app is initialized, so the default modules can be modified before layer shaders are assembled
