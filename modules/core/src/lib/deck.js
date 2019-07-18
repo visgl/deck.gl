@@ -40,7 +40,7 @@ import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 import {EVENTS} from './constants';
-/* global document */
+/* global window, document */
 
 function noop() {}
 
@@ -122,6 +122,8 @@ const defaultProps = {
 /* eslint-disable max-statements */
 export default class Deck {
   constructor(props) {
+    assert(!isIE11(), 'IE 11 not supported');
+
     props = Object.assign({}, defaultProps, props);
 
     this.width = 0; // "read-only", auto-updated from canvas
@@ -807,6 +809,15 @@ export default class Deck {
     this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
     this.metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
+}
+
+function isIE11() {
+  if (typeof window === undefined) {
+    return false;
+  }
+  const navigator = window.navigator || {};
+  const userAgent = navigator.userAgent || '';
+  return userAgent.indexOf('Trident/') !== -1;
 }
 
 Deck.getPropTypes = getPropTypes;
