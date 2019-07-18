@@ -122,8 +122,6 @@ const defaultProps = {
 /* eslint-disable max-statements */
 export default class Deck {
   constructor(props) {
-    assert(!isIE11(), 'IE 11 not supported');
-
     props = Object.assign({}, defaultProps, props);
 
     this.width = 0; // "read-only", auto-updated from canvas
@@ -156,6 +154,10 @@ export default class Deck {
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+
+    if (isIE11()) {
+      log.warn('IE 11 support will be deprecated in v8.0')();
+    }
 
     if (!props.gl) {
       // Note: LayerManager creation deferred until gl context available
