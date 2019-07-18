@@ -176,3 +176,38 @@ test('CompositeLayer#getSubLayerProps(override)', t => {
 
   t.end();
 });
+
+test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', t => {
+  const layer = new TestCompositeLayer(Object.assign({id: BASE_LAYER_ID}, BASE_LAYER_PROPS));
+
+  const originalRow = {id: 'original datum', value: 100};
+  const sublayerRow = layer.getSubLayerRow({id: 'sublayer datum'}, originalRow, 0);
+
+  let accessor = layer.getSubLayerAccessor(1);
+  t.is(accessor, 1, 'returns valid accessor');
+
+  accessor = layer.getSubLayerAccessor(d => d.value);
+  t.is(accessor(originalRow), 100, 'returns valid accessor');
+  t.is(accessor(sublayerRow), 100, 'returns valid accessor');
+
+  accessor = layer.getSubLayerAccessor((d, {index}) => index);
+  t.is(accessor(originalRow, {index: 1}), 1, 'returns valid accessor');
+  t.is(accessor(sublayerRow, {index: 1}), 0, 'returns valid accessor');
+
+  t.deepEqual(
+    layer.getPickingInfo({
+      info: {object: originalRow, index: 1}
+    }),
+    {object: originalRow, index: 1},
+    'returns correct picking info'
+  );
+  t.deepEqual(
+    layer.getPickingInfo({
+      info: {object: sublayerRow, index: 1}
+    }),
+    {object: originalRow, index: 0},
+    'returns correct picking info'
+  );
+
+  t.end();
+});
