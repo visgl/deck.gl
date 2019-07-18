@@ -15,7 +15,7 @@ Deck.gl has new basic lighting effect since 7.0, shadow effects for directional 
 * `lights`(Object): collection of light sources
 
 New layer prop
-`enableShadow`(Boolean): when this prop is true, layer casts and renders shadows
+* `enableShadow`(Boolean): when this prop is true, layer casts and renders shadows
 
 ### Example
 ```js
