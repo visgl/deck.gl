@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 
-import {window, isBrowser} from '@deck.gl/core/utils/globals';
+import {window} from '@deck.gl/core/utils/globals';
 import {setPropOverrides, applyPropOverrides} from '@deck.gl/core/lib/seer-integration';
 
 test('Seer overrides', t => {
@@ -10,19 +10,17 @@ test('Seer overrides', t => {
     one: 1
   };
 
-  if (isBrowser) {
-    window.__SEER_INITIALIZED__ = false;
+  window.__SEER_INITIALIZED__ = false;
 
-    setPropOverrides('arc-layer', ['opacity', 'data', 'value'], 0.5);
-    applyPropOverrides(props);
-    t.equal(props.opacity.data.value, 0.4, 'The value should not have been overriden');
+  setPropOverrides('arc-layer', ['opacity', 'data', 'value'], 0.5);
+  applyPropOverrides(props);
+  t.equal(props.opacity.data.value, 0.4, 'The value should not have been overriden');
 
-    window.__SEER_INITIALIZED__ = true;
+  window.__SEER_INITIALIZED__ = true;
 
-    setPropOverrides('arc-layer', ['opacity', 'data', 'value'], 0.5);
-    applyPropOverrides(props);
-    t.equal(props.opacity.data.value, 0.5, 'The value should now have been changed');
-  }
+  setPropOverrides('arc-layer', ['opacity', 'data', 'value'], 0.5);
+  applyPropOverrides(props);
+  t.equal(props.opacity.data.value, 0.5, 'The value should now have been changed');
 
   t.end();
 });
