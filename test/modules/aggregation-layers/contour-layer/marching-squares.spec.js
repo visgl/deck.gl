@@ -254,22 +254,54 @@ const GETVERTEX_TESTS = [
   {
     gridOrigin: [100, 200],
     code: 4,
-    vertices: [[110, 230], [115, 220]]
+    vertices: [[110, 230], [115, 220]],
+    smoothVertices: [[112.5, 230, 0], [115, 223.334, 0]],
+    weights: {
+      top: 12,
+      current: 8,
+      right: 10,
+      topRight: 4
+    },
+    smoothEnabled: [true, false]
   },
   {
     gridOrigin: [100, 200],
     code: 0,
-    vertices: []
+    vertices: [],
+    smoothVertices: [],
+    weights: {
+      top: 12,
+      current: 8,
+      right: 15,
+      topRight: 10
+    },
+    smoothEnabled: [true, false]
   },
   {
     gridOrigin: [100, 200],
     code: 6,
-    vertices: [[110, 230], [110, 210]]
+    vertices: [[110, 230], [110, 210]],
+    smoothVertices: [[111.667, 230, 0], [111.667, 210, 0]],
+    weights: {
+      top: 10,
+      current: 8,
+      right: 5,
+      topRight: 4
+    },
+    smoothEnabled: [true, false]
   },
   {
     gridOrigin: [100, 200],
     code: 15,
-    vertices: []
+    vertices: [],
+    smoothVertices: [],
+    weights: {
+      top: 2,
+      current: 3,
+      right: 4,
+      topRight: 5
+    },
+    smoothEnabled: [true, false]
   },
 
   // non zero cellIndex
@@ -279,7 +311,15 @@ const GETVERTEX_TESTS = [
     x: 1,
     y: 1,
     vertices: [[115, 240], [125, 240]],
-    gridSize: [3, 3]
+    gridSize: [3, 3],
+    smoothVertices: [[115, 241.428, 0], [125, 243.334, 0]],
+    weights: {
+      top: 3,
+      current: 10,
+      right: 8,
+      topRight: 5
+    },
+    smoothEnabled: [true, false]
   },
   {
     gridOrigin: [100, 200],
@@ -287,7 +327,15 @@ const GETVERTEX_TESTS = [
     x: 0,
     y: 1,
     vertices: [[110, 250], [110, 230]],
-    gridSize: [3, 3]
+    gridSize: [3, 3],
+    smoothVertices: [[108.333, 250, 0], [107, 230, 0]],
+    weights: {
+      top: 3,
+      current: 5,
+      right: 10,
+      topRight: 12
+    },
+    smoothEnabled: [true, false]
   },
 
   // saddle cases
@@ -298,7 +346,15 @@ const GETVERTEX_TESTS = [
     x: 0,
     y: 0,
     vertices: [[105, 220], [110, 230], [110, 210], [115, 220]],
-    gridSize: [3, 3]
+    gridSize: [3, 3],
+    smoothVertices: [[105, 220, 0], [111, 230, 0], [111, 210, 0], [115, 220, 0]],
+    weights: {
+      top: 3,
+      current: 9,
+      right: 4,
+      topRight: 8
+    },
+    smoothEnabled: [true, false]
   },
   {
     gridOrigin: [100, 200],
@@ -307,9 +363,16 @@ const GETVERTEX_TESTS = [
     x: 0,
     y: 0,
     vertices: [[105, 220], [110, 210], [110, 230], [115, 220]],
-    gridSize: [3, 3]
+    gridSize: [3, 3],
+    smoothVertices: [[105, 214, 0], [106.429, 210, 0], [110, 230, 0], [115, 222, 0]],
+    weights: {
+      top: 10,
+      current: 5,
+      right: 12,
+      topRight: 2
+    },
+    smoothEnabled: [true, false]
   },
-
   // ISO-BANDS
   {
     // 2222
@@ -391,128 +454,6 @@ const GETVERTEX_TESTS = [
     cellSize: [12, 24],
     vertices: [[[106, 236], [106, 224], [112, 212], [118, 212], [118, 224], [112, 236]]],
     type: CONTOUR_TYPE.ISO_BANDS
-  },
-  // linear interpolation flag set true
-  {
-    gridOrigin: [100, 200],
-    code: 4,
-    vertices: [[112.5, 230], [115, 220]],
-    weights: {
-      top: 30,
-      current: 25,
-      right: 20,
-      topRight: 10
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-  {
-    gridOrigin: [100, 200],
-    code: 0,
-    vertices: [],
-    weights: {
-      top: 30,
-      current: 25,
-      right: 20,
-      topRight: 18
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-  {
-    gridOrigin: [100, 200],
-    code: 6,
-    vertices: [[112.5, 230], [115, 210]],
-    weights: {
-      top: 30,
-      current: 20,
-      right: 15,
-      topRight: 10
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-  {
-    gridOrigin: [100, 200],
-    code: 15,
-    vertices: [],
-    weights: {
-      top: 10,
-      current: 8,
-      right: 9,
-      topRight: 5
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-  // non zero cellIndex
-  {
-    gridOrigin: [100, 200],
-    code: 12,
-    x: 1,
-    y: 1,
-    vertices: [[115, 237.5], [125, 250]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 18,
-      right: 25,
-      topRight: 15
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-  {
-    gridOrigin: [100, 200],
-    code: 9,
-    x: 0,
-    y: 1,
-    vertices: [[110, 250], [105, 230]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 15,
-      right: 25,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-
-  // saddle cases
-  {
-    gridOrigin: [100, 200],
-    code: 5,
-    meanCode: 1,
-    x: 0,
-    y: 0,
-    vertices: [[105, 223.33333333333334], [110, 230], [115, 210], [115, 210]],
-    gridSize: [3, 3],
-    weights: {
-      top: 10,
-      current: 25,
-      right: 15,
-      topRight: 20
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
-  },
-  {
-    gridOrigin: [100, 200],
-    code: 5,
-    meanCode: 0,
-    x: 0,
-    y: 0,
-    vertices: [[105, 223.33333333333334], [110, 210], [110, 230], [115, 223.33333333333334]],
-    gridSize: [3, 3],
-    weights: {
-      top: 20,
-      current: 5,
-      right: 25,
-      topRight: 10
-    },
-    thresholdData: {threshold: 15},
-    isLI: true
   }
 ];
 const GETSMOOTHOFFSET_TESTS = [
@@ -601,45 +542,52 @@ test('MarchingSquares#getCode', t => {
 });
 
 /* eslint-disable max-nested-callbacks */
-test('MarchingSquares#getVertices', t => {
+test.only('MarchingSquares#getVertices', t => {
   const x = 0;
   const y = 0;
   const cellSize = [10, 20];
+  const thresholdData = {threshold: 6};
   GETVERTEX_TESTS.forEach(testCase => {
-    const vertices = getVertices({
-      gridOrigin: testCase.gridOrigin,
-      x: testCase.x || x,
-      y: testCase.y || y,
-      cellSize: testCase.cellSize || cellSize,
-      code: testCase.code,
-      meanCode: testCase.meanCode,
-      type: testCase.type || CONTOUR_TYPE.ISO_LINES,
-      weights: testCase.weights,
-      thresholdData: testCase.thresholdData,
-      isLI: testCase.isLI
-    });
-    // Set z coordinate to 0 if not present.
-    let expectedVertices = [];
-    if (testCase.type === CONTOUR_TYPE.ISO_BANDS) {
-      testCase.vertices.forEach(polygon => {
-        if (!polygon) {
-          return;
-        }
-        const expectedPolygon = polygon.map(
+    if (!testCase.smoothEnabled) {
+      testCase.smoothEnabled = [false];
+    }
+    testCase.smoothEnabled.forEach(isLI => {
+      const vertices = getVertices({
+        gridOrigin: testCase.gridOrigin,
+        x: testCase.x || x,
+        y: testCase.y || y,
+        cellSize: testCase.cellSize || cellSize,
+        code: testCase.code,
+        meanCode: testCase.meanCode,
+        type: testCase.type || CONTOUR_TYPE.ISO_LINES,
+        weights: testCase.weights,
+        thresholdData: testCase.thresholdData || thresholdData,
+        isLI
+      });
+      // Set z coordinate to 0 if not present.
+      let expectedVertices = [];
+      if (testCase.type === CONTOUR_TYPE.ISO_BANDS) {
+        testCase.vertices.forEach(polygon => {
+          if (!polygon) {
+            return;
+          }
+          const expectedPolygon = polygon.map(
+            vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+          );
+          expectedVertices.push(expectedPolygon);
+        });
+      } else {
+        const testCaseVertices = isLI ? testCase.smoothVertices : testCase.vertices;
+        expectedVertices = testCaseVertices.map(
           vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
         );
-        expectedVertices.push(expectedPolygon);
-      });
-    } else {
-      expectedVertices = testCase.vertices.map(
-        vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
+      }
+      t.deepEquals(
+        vertices,
+        expectedVertices,
+        `Vertices: expected: ${expectedVertices}, actual: ${vertices}`
       );
-    }
-    t.deepEquals(
-      vertices,
-      expectedVertices,
-      `Vertices: expected: ${expectedVertices}, actual: ${vertices}`
-    );
+    });
   });
   t.end();
 });

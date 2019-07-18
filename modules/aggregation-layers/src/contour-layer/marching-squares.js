@@ -217,5 +217,6 @@ export function getSmoothOffset(offset, weights, threshold) {
   }
   const linearInterpolation = (threshold - minThreshold) / (maxThreshold - minThreshold);
   // linearInterpolation is between 0 and 1, to match with (-0.5, 0.5) subtracting with 0.5
-  return linearInterpolation - 0.5;
+  const newLI = linearInterpolation - 0.5;
+  return parseFloat(newLI.toFixed(4));
 }
