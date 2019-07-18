@@ -135,29 +135,6 @@ export default class ViewManager {
   }
 
   /**
-   * Projects xyz (possibly latitude and longitude) to pixel coordinates in window
-   * using viewport projection parameters
-   * - [longitude, latitude] to [x, y]
-   * - [longitude, latitude, Z] => [x, y, z]
-   * Note: By default, returns top-left coordinates for canvas/SVG type render
-   *
-   * @param {Array} lngLatZ - [lng, lat] or [lng, lat, Z]
-   * @param {Object} opts - options
-   * @param {Object} opts.topLeft=true - Whether projected coords are top left
-   * @return {Array} - [x, y] or [x, y, z] in top left coords
-   */
-  project(xyz, opts = {topLeft: true}) {
-    const viewports = this.getViewports();
-    for (let i = viewports.length - 1; i >= 0; --i) {
-      const viewport = viewports[i];
-      if (viewport.contains(xyz, opts)) {
-        return viewport.project(xyz, opts);
-      }
-    }
-    return null;
-  }
-
-  /**
    * Unproject pixel coordinates on screen onto world coordinates,
    * (possibly [lon, lat]) on map.
    * - [x, y] => [lng, lat]
@@ -169,10 +146,14 @@ export default class ViewManager {
    */
   unproject(xyz, opts) {
     const viewports = this.getViewports();
+    const pixel = {x: xyz[0], y: xyz[1]};
     for (let i = viewports.length - 1; i >= 0; --i) {
       const viewport = viewports[i];
-      if (viewport.containsPixel(xyz, opts)) {
-        return viewport.unproject(xyz);
+      if (viewport.containsPixel(pixel)) {
+        const p = xyz.slice();
+        p[0] -= viewport.x;
+        p[1] -= viewport.y;
+        return viewport.unproject(p, opts);
       }
     }
     return null;
