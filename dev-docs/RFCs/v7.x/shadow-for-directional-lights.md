@@ -41,8 +41,8 @@ const deckgl = new Deck({
   canvas: 'my-deck-canvas',
   effects: [lightWithShadowEffect],
   layers: [
-	  // building layer
-	  new SolidPolygonLayer({
+      // building layer
+      new SolidPolygonLayer({
       ...}),
       // ground layer
       new SolidPolygonLayer({
