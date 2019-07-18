@@ -40,7 +40,7 @@ import {EventManager} from 'mjolnir.js';
 
 import assert from '../utils/assert';
 import {EVENTS} from './constants';
-/* global document */
+/* global window, document */
 
 function noop() {}
 
@@ -154,6 +154,10 @@ export default class Deck {
     this._onRenderFrame = this._onRenderFrame.bind(this);
     this._onViewStateChange = this._onViewStateChange.bind(this);
     this._onInteractiveStateChange = this._onInteractiveStateChange.bind(this);
+
+    if (isIE11()) {
+      log.warn('IE 11 support will be deprecated in v8.0')();
+    }
 
     if (!props.gl) {
       // Note: LayerManager creation deferred until gl context available
@@ -807,6 +811,15 @@ export default class Deck {
     this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
     this.metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
+}
+
+function isIE11() {
+  if (typeof window === undefined) {
+    return false;
+  }
+  const navigator = window.navigator || {};
+  const userAgent = navigator.userAgent || '';
+  return userAgent.indexOf('Trident/') !== -1;
 }
 
 Deck.getPropTypes = getPropTypes;
