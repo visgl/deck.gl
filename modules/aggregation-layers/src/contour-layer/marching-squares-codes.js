@@ -171,13 +171,13 @@ function _getOffsetFromCode(code, map) {
   };
   return CODE_OFFSET_MAP[code];
 }
-export const getIsolineOffsets = function(code) {
+export function getIsolineOffsets(code) {
   return _getOffsetFromCode(code, OFFSET);
-};
+}
 
-export const getCellCorners = function(code) {
+export function getCellCorners(code) {
   return _getOffsetFromCode(code, CORNERS);
-};
+}
 
 function ternaryToIndex(ternary) {
   return parseInt(ternary, 4);
