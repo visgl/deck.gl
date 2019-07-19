@@ -98,7 +98,7 @@ export class App extends PureComponent {
           {threshold: thresholdLayer3, color: [189, 0, 38]}
         ],
         cellSize,
-        isLI: this.state.linearInterpolation
+        _smooth: this.state.linearInterpolation
       })
     ];
   }

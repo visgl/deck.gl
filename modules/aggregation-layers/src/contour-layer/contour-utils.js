@@ -9,7 +9,7 @@ export function generateContours({
   gridSize,
   gridOrigin,
   cellSize,
-  isLI
+  _smooth
 }) {
   const contourSegments = [];
   const contourPolygons = [];
@@ -40,7 +40,7 @@ export function generateContours({
           meanCode,
           thresholdData: data,
           weights,
-          isLI
+          _smooth
         };
         if (Array.isArray(threshold)) {
           opts.type = CONTOUR_TYPE.ISO_BANDS;

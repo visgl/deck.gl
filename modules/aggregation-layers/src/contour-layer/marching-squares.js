@@ -3,9 +3,9 @@
 
 import {log} from '@deck.gl/core';
 import {
-  ISOLINES_CODE_OFFSET_MAP,
+  getIsolineOffsets,
   ISOBANDS_CODE_OFFSET_MAP,
-  LINEAR_INTERPOLATION_CODE_OFFSET_MAP
+  getCellCorners
 } from './marching-squares-codes';
 
 export const CONTOUR_TYPE = {
@@ -128,17 +128,15 @@ export function getVertices(opts) {
     meanCode,
     type = CONTOUR_TYPE.ISO_LINES,
     weights,
-    isLI = false
+    _smooth = false
   } = opts;
   const thresholdData = Object.assign({}, DEFAULT_THRESHOLD_DATA, opts.thresholdData);
   let offsets =
-    type === CONTOUR_TYPE.ISO_BANDS
-      ? ISOBANDS_CODE_OFFSET_MAP[code]
-      : ISOLINES_CODE_OFFSET_MAP[code];
+    type === CONTOUR_TYPE.ISO_BANDS ? ISOBANDS_CODE_OFFSET_MAP[code] : getIsolineOffsets(code);
 
   let linearOffsets = [];
   if (type === CONTOUR_TYPE.ISO_LINES) {
-    linearOffsets = LINEAR_INTERPOLATION_CODE_OFFSET_MAP[code];
+    linearOffsets = getCellCorners(code);
     if (!Array.isArray(linearOffsets)) {
       linearOffsets = linearOffsets[meanCode];
     }
@@ -192,7 +190,7 @@ export function getVertices(opts) {
     xyOffsets.forEach((offset, j) => {
       let xOffset;
       let yOffset;
-      if (isLI) {
+      if (_smooth) {
         const li = getSmoothOffset(linearOffsets[i][j], weights, thresholdData.threshold);
         xOffset = !offset[0] ? offset[0] + li : offset[0];
         yOffset = !offset[1] ? offset[1] + li : offset[1];

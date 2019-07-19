@@ -150,7 +150,7 @@ export default class ContourLayer extends CompositeLayer {
       gridSize,
       gridOrigin,
       cellSize,
-      isLI: this.props.isLI
+      _smooth: this.props._smooth
     });
 
     // contourData contains both iso-lines and iso-bands if requested.
@@ -237,7 +237,7 @@ export default class ContourLayer extends CompositeLayer {
       !oldProps.zOffset ||
       oldProps.contours.length !== props.contours.length ||
       oldProps.zOffset !== props.zOffset ||
-      oldProps.isLI !== props.isLI
+      oldProps._smooth !== props._smooth
     ) {
       return true;
     }

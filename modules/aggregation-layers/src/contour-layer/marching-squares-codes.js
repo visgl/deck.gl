@@ -19,6 +19,17 @@ const OFFSET = {
 };
 
 // CORNERS of Cell
+// Table to map edge of intersection, pair of cell's who's weight is used as a domain for interpolation
+//          N
+//   top________topRight
+//     |    |    |
+//     |    |    |
+// W   |---------|   E  // cell
+//     |    |    |
+//     |____|____|
+//   current     right
+//          S
+//
 const CORNERS = {
   W: ['current', 'top'],
   E: ['right', 'topRight'],
@@ -126,68 +137,48 @@ const OCTAGON = [
 ];
 
 // Note: above wiki page invertes white/black dots for generating the code, we don't
-export const ISOLINES_CODE_OFFSET_MAP = {
-  // key is equal to the code of 4 vertices (invert the code specified in wiki)
-  // value can be an array or an Object
-  // Array : [line] or [line, line], where each line is [start-point, end-point], and each point is [x, y]
-  // Object : to handle saddle cases, whos output depends on mean value of all 4 corners
-  //  key: code of mean value (0 or 1)
-  //  value: Array , as above defines one or two line segments
-  0: [],
-  1: [[OFFSET.W, OFFSET.S]],
-  2: [[OFFSET.S, OFFSET.E]],
-  3: [[OFFSET.W, OFFSET.E]],
-  4: [[OFFSET.N, OFFSET.E]],
-  5: {
-    0: [[OFFSET.W, OFFSET.S], [OFFSET.N, OFFSET.E]],
-    1: [[OFFSET.W, OFFSET.N], [OFFSET.S, OFFSET.E]]
-  },
-  6: [[OFFSET.N, OFFSET.S]],
-  7: [[OFFSET.W, OFFSET.N]],
-  8: [[OFFSET.W, OFFSET.N]],
-  9: [[OFFSET.N, OFFSET.S]],
-  10: {
-    0: [[OFFSET.W, OFFSET.N], [OFFSET.S, OFFSET.E]],
-    1: [[OFFSET.W, OFFSET.S], [OFFSET.N, OFFSET.E]]
-  },
-  11: [[OFFSET.N, OFFSET.E]],
-  12: [[OFFSET.W, OFFSET.E]],
-  13: [[OFFSET.S, OFFSET.E]],
-  14: [[OFFSET.W, OFFSET.S]],
-  15: []
+
+function _getOffsetFromCode(code, map) {
+  const CODE_OFFSET_MAP = {
+    // key is equal to the code of 4 vertices (invert the code specified in wiki)
+    // value can be an array or an Object
+    // Array : [line] or [line, line], where each line is [start-point, end-point], and each point is [x, y]
+    // Object : to handle saddle cases, whos output depends on mean value of all 4 corners
+    //  key: code of mean value (0 or 1)
+    //  value: Array , as above defines one or two line segments
+    0: [],
+    1: [[map.W, map.S]],
+    2: [[map.S, map.E]],
+    3: [[map.W, map.E]],
+    4: [[map.N, map.E]],
+    5: {
+      0: [[map.W, map.S], [map.N, map.E]],
+      1: [[map.W, map.N], [map.S, map.E]]
+    },
+    6: [[map.N, map.S]],
+    7: [[map.W, map.N]],
+    8: [[map.W, map.N]],
+    9: [[map.N, map.S]],
+    10: {
+      0: [[map.W, map.N], [map.S, map.E]],
+      1: [[map.W, map.S], [map.N, map.E]]
+    },
+    11: [[map.N, map.E]],
+    12: [[map.W, map.E]],
+    13: [[map.S, map.E]],
+    14: [[map.W, map.S]],
+    15: []
+  };
+  return CODE_OFFSET_MAP[code];
+}
+export const getIsolineOffsets = function(code) {
+  return _getOffsetFromCode(code, OFFSET);
 };
 
-export const LINEAR_INTERPOLATION_CODE_OFFSET_MAP = {
-  // key is equal to the code of 4 vertices (invert the code specified in wiki)
-  // value can be an array or an Object
-  // Array defines the cell corners (top, current, topRight, right)
-  // Object : to handle saddle cases, whose output depends on mean value of all 4 corners
-  //  key: code of mean value (0 or 1)
-  //  value: Array , as above defines
-
-  0: [],
-  1: [[CORNERS.W, CORNERS.S]],
-  2: [[CORNERS.S, CORNERS.E]],
-  3: [[CORNERS.W, CORNERS.E]],
-  4: [[CORNERS.N, CORNERS.E]],
-  5: {
-    0: [[CORNERS.W, CORNERS.S], [CORNERS.N, CORNERS.E]],
-    1: [[CORNERS.W, CORNERS.N], [CORNERS.S, CORNERS.E]]
-  },
-  6: [[CORNERS.N, CORNERS.S]],
-  7: [[CORNERS.W, CORNERS.N]],
-  8: [[CORNERS.W, CORNERS.N]],
-  9: [[CORNERS.N, CORNERS.S]],
-  10: {
-    0: [[CORNERS.W, CORNERS.N], [CORNERS.S, CORNERS.E]],
-    1: [[CORNERS.W, CORNERS.S], [CORNERS.N, CORNERS.E]]
-  },
-  11: [[CORNERS.N, CORNERS.E]],
-  12: [[CORNERS.W, CORNERS.E]],
-  13: [[CORNERS.S, CORNERS.E]],
-  14: [[CORNERS.W, CORNERS.S]],
-  15: []
+export const getCellCorners = function(code) {
+  return _getOffsetFromCode(code, CORNERS);
 };
+
 function ternaryToIndex(ternary) {
   return parseInt(ternary, 4);
 }

@@ -542,7 +542,7 @@ test('MarchingSquares#getCode', t => {
 });
 
 /* eslint-disable max-nested-callbacks */
-test.only('MarchingSquares#getVertices', t => {
+test('MarchingSquares#getVertices', t => {
   const x = 0;
   const y = 0;
   const cellSize = [10, 20];
@@ -551,7 +551,7 @@ test.only('MarchingSquares#getVertices', t => {
     if (!testCase.smoothEnabled) {
       testCase.smoothEnabled = [false];
     }
-    testCase.smoothEnabled.forEach(isLI => {
+    testCase.smoothEnabled.forEach(smooth => {
       const vertices = getVertices({
         gridOrigin: testCase.gridOrigin,
         x: testCase.x || x,
@@ -562,7 +562,7 @@ test.only('MarchingSquares#getVertices', t => {
         type: testCase.type || CONTOUR_TYPE.ISO_LINES,
         weights: testCase.weights,
         thresholdData: testCase.thresholdData || thresholdData,
-        isLI
+        _smooth: smooth
       });
       // Set z coordinate to 0 if not present.
       let expectedVertices = [];
@@ -577,7 +577,7 @@ test.only('MarchingSquares#getVertices', t => {
           expectedVertices.push(expectedPolygon);
         });
       } else {
-        const testCaseVertices = isLI ? testCase.smoothVertices : testCase.vertices;
+        const testCaseVertices = smooth ? testCase.smoothVertices : testCase.vertices;
         expectedVertices = testCaseVertices.map(
           vertex => (vertex.length === 2 ? vertex.concat(0) : vertex)
         );
