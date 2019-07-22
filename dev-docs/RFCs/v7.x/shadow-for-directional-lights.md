@@ -58,4 +58,4 @@ const deckgl = new Deck({
 * After all the effects are processed, there is a regular layer rendering pass, shadow maps are used to render the final shadows.
 
 ## Limitations
- With current design user need create LightWithShadowEffect from the beginning, can't create after app is initialized, so the default modules can be modified before layer shaders are assembled
+With the current design, the user needs to create LightWithShadowEffect before Deck's initialization, so that the default modules can be modified before layer shaders are assembled.
