@@ -43,9 +43,11 @@ const deckgl = new Deck({
   layers: [
       // building layer
       new SolidPolygonLayer({
+      enableShadow: true,
       ...}),
       // ground layer
       new SolidPolygonLayer({
+      enableShadow: true,
       ...})]
 });
 ```
