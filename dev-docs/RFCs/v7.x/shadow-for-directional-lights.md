@@ -7,7 +7,7 @@
 * **Status**: For Review
 
 ## Abstract
-Deck.gl has new basic lighting effect since 7.0, shadow effects for directional lights can improve rendering quality.
+Deck.gl has new basic lighting effect since 7.0, having shadow effects for directional lights can improve rendering quality.
 
 ## Proposal
 ### API
@@ -55,5 +55,5 @@ const deckgl = new Deck({
 * For each shadow pass, layers are rendered to a shadow map
 * After all the effects are processed, there is a regular layer rendering pass, shadow maps are used to render the final shadows.
 
-## Future Ideas
+## Limitations
  With current design user need create LightWithShadowEffect from the beginning, can't create after app is initialized, so the default modules can be modified before layer shaders are assembled
