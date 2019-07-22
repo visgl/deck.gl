@@ -72,10 +72,6 @@ export default class BaseAttribute {
         this.value = value;
       }
 
-      if (constant && this.normalized) {
-        this.value = this._normalizeConstant(this.value);
-      }
-
       // Create buffer if needed
       if (!constant && this.gl) {
         this.buffer = this.buffer || this._createBuffer(opts);
@@ -85,6 +81,10 @@ export default class BaseAttribute {
     }
 
     this._setAccessor(opts);
+
+    if (constant && this.normalized) {
+      this.value = this._normalizeConstant(this.value);
+    }
   }
 
   getBuffer() {
