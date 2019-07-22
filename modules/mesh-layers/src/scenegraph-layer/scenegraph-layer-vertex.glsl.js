@@ -78,7 +78,7 @@ void main(void) {
     pbr_vPosition = geometry.position.xyz;
   #endif
 
-  vColor = instanceColors / 255.0;
+  vColor = instanceColors;
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   picking_setPickingColor(instancePickingColors);

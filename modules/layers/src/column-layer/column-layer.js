@@ -88,6 +88,7 @@ export default class ColumnLayer extends Layer {
       instanceFillColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         transition: true,
         accessor: 'getFillColor',
         defaultValue: DEFAULT_COLOR
@@ -95,6 +96,7 @@ export default class ColumnLayer extends Layer {
       instanceLineColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         transition: true,
         accessor: 'getLineColor',
         defaultValue: DEFAULT_COLOR

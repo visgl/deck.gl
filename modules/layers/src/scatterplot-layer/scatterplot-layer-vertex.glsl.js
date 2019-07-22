@@ -76,9 +76,9 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Apply opacity to instance color, or return instance picking color
-  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity) / 255.;
+  vFillColor = vec4(instanceFillColors.rgb, instanceFillColors.a * opacity);
   DECKGL_FILTER_COLOR(vFillColor, geometry);
-  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity) / 255.;
+  vLineColor = vec4(instanceLineColors.rgb, instanceLineColors.a * opacity);
   DECKGL_FILTER_COLOR(vLineColor, geometry);
   
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

@@ -80,7 +80,7 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   // Color
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

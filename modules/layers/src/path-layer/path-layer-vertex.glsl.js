@@ -214,7 +214,7 @@ void main() {
   geometry.worldPosition = instanceStartPositions;
   geometry.worldPositionAlt = instanceEndPositions;
 
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).
   picking_setPickingColor(instancePickingColors);

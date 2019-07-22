@@ -122,6 +122,7 @@ export default class PathLayer extends Layer {
       instanceColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         accessor: 'getColor',
         transition: ATTRIBUTE_TRANSITION,
         defaultValue: DEFAULT_COLOR

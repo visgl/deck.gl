@@ -70,6 +70,7 @@ export default class ArcLayer extends Layer {
       instanceSourceColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         transition: true,
         accessor: 'getSourceColor',
         defaultValue: DEFAULT_COLOR
@@ -77,6 +78,7 @@ export default class ArcLayer extends Layer {
       instanceTargetColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         transition: true,
         accessor: 'getTargetColor',
         defaultValue: DEFAULT_COLOR

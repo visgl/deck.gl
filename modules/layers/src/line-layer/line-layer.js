@@ -70,6 +70,7 @@ export default class LineLayer extends Layer {
       instanceColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         transition: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]

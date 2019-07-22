@@ -54,7 +54,7 @@ void main(void) {
   vec3 lightColor = lighting_getLightColor(instanceColors.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
 
   // Apply opacity to instance color, or return instance picking color
-  vColor = vec4(lightColor, instanceColors.a * opacity) / 255.0;
+  vColor = vec4(lightColor, instanceColors.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   // Set color to be rendered to picking fbo (also used to check for selection highlight).

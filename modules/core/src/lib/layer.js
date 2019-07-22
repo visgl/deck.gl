@@ -301,11 +301,6 @@ export default class Layer extends Component {
     for (const extension of this.props.extensions) {
       shaders = mergeShaders(shaders, extension.getShaders.call(this, extension));
     }
-    if (this.props.colorFormat === 'RGB') {
-      shaders = mergeShaders(shaders, {
-        defines: {COLOR_FORMAT_RGB: 1}
-      });
-    }
     return shaders;
   }
 
