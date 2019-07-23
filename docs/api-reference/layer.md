@@ -93,7 +93,9 @@ if (showMyLayer) {
 
 In the second example (conditional rendering) the layer state will be destroyed and regenerated every time the `showMyLayer` flag changes.
 
-##### `opacity` (Number, required)
+##### `opacity` (Number, optional)
+
+* Default: `0.8`
 
 The opacity of the layer.
 
@@ -101,6 +103,11 @@ Remarks:
 
 * deck.gl automatically applies gamma to the opacity in an attempt to make opacity changes appear linear (i.e. the perceived opacity is visually proportional to the value of the prop).
 * While it is a recommended convention that all deck.gl layers should support the `opacity` prop, it is up to each layer's fragment shader to properly implement support for opacity.
+
+
+##### `extensions` (Array, optional)
+
+Add additional functionalities to this layer. See the [list of available extensions](/docs/api-reference/extensions/overview.md).
 
 
 ### Interaction Properties
