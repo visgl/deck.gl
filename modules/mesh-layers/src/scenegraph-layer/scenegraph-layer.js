@@ -21,6 +21,7 @@
 import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
 import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
+import GL from '@luma.gl/constants';
 import {waitForGLTFAssets} from './gltf-utils';
 
 import {MATRIX_ATTRIBUTES} from '../utils/matrix';
@@ -76,8 +77,10 @@ export default class ScenegraphLayer extends Layer {
         update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
+        type: GL.UNSIGNED_BYTE,
         size: this.props.colorFormat.length,
         accessor: 'getColor',
+        normalized: true,
         defaultValue: DEFAULT_COLOR,
         transition: true
       },

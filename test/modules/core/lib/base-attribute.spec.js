@@ -4,6 +4,7 @@ import test from 'tape-catch'; // Avoid warnings on `gl` parameters
 import GL from '@luma.gl/constants';
 import {isWebGL2, Buffer, Framebuffer, Model, readPixelsToArray} from '@luma.gl/core';
 import BaseAttribute from '@deck.gl/core/lib/base-attribute';
+import {vecEquals} from 'deck.gl-test/utils/utils';
 
 const value1 = new Float32Array([0, 0, 0, 0, 1, 2, 3, 4]);
 const value2 = new Float32Array([0, 0, 0, 0, 1, 2, 3, 4]);
@@ -78,6 +79,54 @@ test('WebGL#BaseAttribute update', t => {
   t.is(attribute.divisor, 1, 'divisor prop is updated using buffer prop');
 
   attribute.delete();
+
+  t.end();
+});
+
+test('WebGL#BaseAttribute normalize constant', t => {
+  let attribute = new BaseAttribute(gl, {
+    size: 3,
+    constant: true,
+    normalized: true,
+    value: [1, 2, 3]
+  });
+  t.ok(vecEquals(attribute.value, [1, 2, 3]), 'float attribute is not normalized');
+
+  attribute = new BaseAttribute(gl, {
+    size: 3,
+    type: gl.UNSIGNED_BYTE,
+    constant: true,
+    normalized: true,
+    value: new Uint8ClampedArray([255, 128, 0])
+  });
+  t.ok(vecEquals(attribute.value, [1, 0.50196, 0]), 'unsigned byte attribute is normalized');
+
+  attribute = new BaseAttribute(gl, {
+    size: 3,
+    type: gl.UNSIGNED_SHORT,
+    constant: true,
+    normalized: true,
+    value: new Uint16Array([65535, 255, 0])
+  });
+  t.ok(vecEquals(attribute.value, [1, 0.0039, 0]), 'unsigned short attribute is normalized');
+
+  attribute = new BaseAttribute(gl, {
+    size: 3,
+    type: gl.BYTE,
+    constant: true,
+    normalized: true,
+    value: new Int8Array([-128, 127, 0])
+  });
+  t.ok(vecEquals(attribute.value, [-1, 1, 0.0039]), 'byte attribute is normalized');
+
+  attribute = new BaseAttribute(gl, {
+    size: 3,
+    type: gl.SHORT,
+    constant: true,
+    normalized: true,
+    value: new Int16Array([-32768, 0, 16384])
+  });
+  t.ok(vecEquals(attribute.value, [-1, 0, 0.5]), 'short attribute is normalized');
 
   t.end();
 });

@@ -95,7 +95,7 @@ void main(void) {
 
   vTextureCoords.y = 1.0 - vTextureCoords.y;
 
-  vColor = instanceColors / 255.;
+  vColor = instanceColors;
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   vColorMode = instanceColorModes;

@@ -115,7 +115,7 @@ void main(void) {
   gl_Position = curr + vec4(project_pixel_size_to_clipspace(offset.xy), 0.0, 0.0);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
-  vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio) / 255.;
+  vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
   vColor = vec4(color.rgb, color.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
 

@@ -81,6 +81,10 @@ export default class BaseAttribute {
     }
 
     this._setAccessor(opts);
+
+    if (constant && this.normalized) {
+      this.value = this._normalizeConstant(this.value);
+    }
   }
 
   getBuffer() {
@@ -153,6 +157,31 @@ export default class BaseAttribute {
     if (instanced !== undefined) {
       log.deprecated('Attribute.instanced')();
       this.divisor = instanced ? 1 : 0;
+    }
+  }
+
+  // https://developer.mozilla.org/en-US/docs/Web/API/WebGLRenderingContext/vertexAttribPointer
+  _normalizeConstant(value) {
+    switch (this.type) {
+      case GL.BYTE:
+        // normalize [-128, 127] to [-1, 1]
+        return new Float32Array(value).map(x => ((x + 128) / 255) * 2 - 1);
+
+      case GL.SHORT:
+        // normalize [-32768, 32767] to [-1, 1]
+        return new Float32Array(value).map(x => ((x + 32768) / 65535) * 2 - 1);
+
+      case GL.UNSIGNED_BYTE:
+        // normalize [0, 255] to [0, 1]
+        return new Float32Array(value).map(x => x / 255);
+
+      case GL.UNSIGNED_SHORT:
+        // normalize [0, 65535] to [0, 1]
+        return new Float32Array(value).map(x => x / 65535);
+
+      default:
+        // No normalization for gl.FLOAT and gl.HALF_FLOAT
+        return value;
     }
   }
 

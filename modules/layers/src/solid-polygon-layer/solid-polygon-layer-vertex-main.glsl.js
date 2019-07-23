@@ -88,9 +88,9 @@ void calculatePosition(PolygonProps props) {
 
   if (extruded) {
     vec3 lightColor = lighting_getLightColor(colors.rgb, project_uCameraPosition, geometry.position.xyz, normal);
-    vColor = vec4(lightColor, colors.a * opacity) / 255.0;
+    vColor = vec4(lightColor, colors.a * opacity);
   } else {
-    vColor = vec4(colors.rgb, colors.a * opacity) / 255.0;
+    vColor = vec4(colors.rgb, colors.a * opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
 

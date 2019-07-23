@@ -31,9 +31,9 @@ void main(void) {
     normal = normals_commonspace;
   }
 
-  vec4 color = hasTexture ? texture2D(sampler, vTexCoord) : vColor / 255.;
-  vec3 lightColor = lighting_getLightColor(color.rgb * 255., cameraPosition, position_commonspace.xyz, normal);
-  gl_FragColor = vec4(lightColor / 255., color.a);
+  vec4 color = hasTexture ? texture2D(sampler, vTexCoord) : vColor;
+  vec3 lightColor = lighting_getLightColor(color.rgb, cameraPosition, position_commonspace.xyz, normal);
+  gl_FragColor = vec4(lightColor, color.a);
 
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }

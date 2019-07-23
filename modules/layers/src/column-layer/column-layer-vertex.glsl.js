@@ -90,9 +90,9 @@ void main(void) {
   // Light calculations
   if (extruded && !isStroke) {
     vec3 lightColor = lighting_getLightColor(color.rgb, project_uCameraPosition, geometry.position.xyz, geometry.normal);
-    vColor = vec4(lightColor, color.a * opacity) / 255.0;
+    vColor = vec4(lightColor, color.a * opacity);
   } else {
-    vColor = vec4(color.rgb, color.a * opacity) / 255.0;
+    vColor = vec4(color.rgb, color.a * opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
 
