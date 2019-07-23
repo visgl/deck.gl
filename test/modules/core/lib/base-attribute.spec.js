@@ -97,36 +97,36 @@ test('WebGL#BaseAttribute normalize constant', t => {
     type: gl.UNSIGNED_BYTE,
     constant: true,
     normalized: true,
-    value: [255, 255, 0]
+    value: new Uint8ClampedArray([255, 128, 0])
   });
-  t.ok(vecEquals(attribute.value, [1, 1, 0]), 'unsigned byte attribute is normalized');
+  t.ok(vecEquals(attribute.value, [1, 0.50196, 0]), 'unsigned byte attribute is normalized');
 
   attribute = new BaseAttribute(gl, {
     size: 3,
     type: gl.UNSIGNED_SHORT,
     constant: true,
     normalized: true,
-    value: [65535, 255, 0]
+    value: new Uint16Array([65535, 255, 0])
   });
-  t.ok(vecEquals(attribute.value, [1, 0.00389105, 0]), 'unsigned short attribute is normalized');
+  t.ok(vecEquals(attribute.value, [1, 0.0039, 0]), 'unsigned short attribute is normalized');
 
   attribute = new BaseAttribute(gl, {
     size: 3,
     type: gl.BYTE,
     constant: true,
     normalized: true,
-    value: [-128, 127, 0]
+    value: new Int8Array([-128, 127, 0])
   });
-  t.ok(vecEquals(attribute.value, [-1, 1, 0.0039215686]), 'byte attribute is normalized');
+  t.ok(vecEquals(attribute.value, [-1, 1, 0.0039]), 'byte attribute is normalized');
 
   attribute = new BaseAttribute(gl, {
     size: 3,
     type: gl.SHORT,
     constant: true,
     normalized: true,
-    value: [-32768, 32767, 0]
+    value: new Int16Array([-32768, 0, 16384])
   });
-  t.ok(vecEquals(attribute.value, [-1, 1, 0.000015259]), 'short attribute is normalized');
+  t.ok(vecEquals(attribute.value, [-1, 0, 0.5]), 'short attribute is normalized');
 
   t.end();
 });
