@@ -5,7 +5,6 @@ precision highp float;
 
 uniform bool hasTexture;
 uniform sampler2D sampler;
-uniform vec4 color;
 uniform bool flatShading;
 
 in vec2 vTexCoord;
