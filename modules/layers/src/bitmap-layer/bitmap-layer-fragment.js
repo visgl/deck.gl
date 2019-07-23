@@ -22,12 +22,12 @@ vec3 color_desaturate(vec3 color) {
 
 // apply tint
 vec3 color_tint(vec3 color) {
-  return color * tintColor / 255.0;
+  return color * tintColor;
 }
 
 // blend with background color
 vec4 apply_opacity(vec3 color, float alpha) {
-  return mix(transparentColor / 255.0, vec4(color, 1.0), alpha);
+  return mix(transparentColor, vec4(color, 1.0), alpha);
 }
 
 void main(void) {

@@ -213,8 +213,8 @@ export default class BitmapLayer extends Layer {
           Object.assign({}, uniforms, {
             bitmapTexture,
             desaturate,
-            transparentColor,
-            tintColor
+            transparentColor: transparentColor.map(x => x / 255),
+            tintColor: tintColor.slice(0, 3).map(x => x / 255)
           })
         )
         .draw();
