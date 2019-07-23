@@ -105,6 +105,7 @@ export default class IconLayer extends Layer {
       instanceColors: {
         size: this.props.colorFormat.length,
         type: GL.UNSIGNED_BYTE,
+        normalized: true,
         transition: true,
         accessor: 'getColor',
         defaultValue: DEFAULT_COLOR

@@ -45,17 +45,25 @@ export default class Attribute extends BaseAttribute {
         // Initialize the attribute descriptor, with WebGL and metadata fields
         this.shaderAttributes[shaderAttributeName] = new Attribute(
           this.gl,
-          Object.assign({}, shaderAttribute, {
-            id: shaderAttributeName,
-            // Luma fields
-            constant: shaderAttribute.constant || false,
-            isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
-            size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
-            value: shaderAttribute.value || null,
-            divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
-            buffer: this.getBuffer(),
-            noAlloc: true
-          })
+          Object.assign(
+            {
+              offset: this.offset,
+              stride: this.stride,
+              normalized: this.normalized
+            },
+            shaderAttribute,
+            {
+              id: shaderAttributeName,
+              // Luma fields
+              constant: shaderAttribute.constant || false,
+              isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
+              size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
+              value: shaderAttribute.value || null,
+              divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
+              buffer: this.getBuffer(),
+              noAlloc: true
+            }
+          )
         );
 
         this.hasShaderAttributes = true;

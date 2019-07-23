@@ -101,7 +101,7 @@ void main(void) {
 
   vTextureCoords.y = 1.0 - vTextureCoords.y;
 
-  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity) / 255.;
+  vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
   picking_setPickingColor(instancePickingColors);
 

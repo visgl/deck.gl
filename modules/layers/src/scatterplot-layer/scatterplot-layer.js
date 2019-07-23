@@ -78,6 +78,7 @@ export default class ScatterplotLayer extends Layer {
       instanceFillColors: {
         size: this.props.colorFormat.length,
         transition: true,
+        normalized: true,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getFillColor',
         defaultValue: [0, 0, 0, 255]
@@ -85,6 +86,7 @@ export default class ScatterplotLayer extends Layer {
       instanceLineColors: {
         size: this.props.colorFormat.length,
         transition: true,
+        normalized: true,
         type: GL.UNSIGNED_BYTE,
         accessor: 'getLineColor',
         defaultValue: [0, 0, 0, 255]

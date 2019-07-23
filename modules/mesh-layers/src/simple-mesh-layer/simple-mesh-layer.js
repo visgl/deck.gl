@@ -136,8 +136,10 @@ export default class SimpleMeshLayer extends Layer {
         update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
+        type: GL.UNSIGNED_BYTE,
         transition: true,
         size: this.props.colorFormat.length,
+        normalized: true,
         accessor: 'getColor',
         defaultValue: [0, 0, 0, 255]
       },
