@@ -337,6 +337,10 @@ export const docPages = generatePath([
             content: getDocUrl('developer-guide/custom-layers/subclassed-layers.md')
           },
           {
+            name: 'Layer Extensions',
+            content: getDocUrl('developer-guide/custom-layers/layer-extensions.md')
+          },
+          {
             name: 'Primitive Layers',
             content: getDocUrl('developer-guide/custom-layers/primitive-layers.md')
           },
@@ -627,6 +631,27 @@ export const docPages = generatePath([
   {
     name: 'Submodule API Reference',
     children: [
+      {
+        name: '@deck.gl/extensions',
+        children: [
+          {
+            name: 'Overview',
+            content: getDocUrl('api-reference/extensions/overview.md')
+          },
+          {
+            name: 'DataFilterExtension',
+            content: getDocUrl('api-reference/extensions/data-filter-extension.md')
+          },
+          {
+            name: 'Fp64Extension',
+            content: getDocUrl('api-reference/extensions/fp64-extension.md')
+          },
+          {
+            name: 'BrushingExtension',
+            content: getDocUrl('api-reference/extensions/brushing-extension.md')
+          }
+        ]
+      },
       {
         name: '@deck.gl/google-maps',
         children: [

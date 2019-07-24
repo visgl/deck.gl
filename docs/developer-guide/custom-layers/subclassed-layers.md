@@ -13,9 +13,14 @@ good technique to add it.
 // Example to add per-segment color to PathLayer
 import {PathLayer} from '@deck.gl/layers';
 
-// Accessor: `getColor` (Function, optional)
+// Allow accessor: `getColor` (Function, optional)
 // Returns an color (array of numbers, RGBA) or array of colors (array of arrays).
 export default class MultiColorPathLayer extends PathLayer {
+  initializeState() {
+    super.initializeState();
+    this.getAttributeManager().getAttributes().instanceColors.update = this.calculateColors;
+  }
+
   calculateColors(attribute) {
     const {data, getPath, getColor} = this.props;
     const {value} = attribute;
@@ -220,3 +225,8 @@ void main(void) {
 }
 `;
 ```
+
+## Layer Extensions
+
+Sometimes we need to subclass multiple layers to add similar functionalities.
+[Layer extension](/docs/api-reference/extensions/overview.md) is a way to generalize, reuse, and share subclassed layer code. [Read on](/docs/developer-guide/custom-layers/layer-extensions.md) about how to package up a subclassed layer code into a layer extension.
