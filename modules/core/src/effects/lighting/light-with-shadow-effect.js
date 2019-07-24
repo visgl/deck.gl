@@ -12,11 +12,7 @@ export default class LightWithShadowEffect extends LightingEffect {
     this.shadowPasses = [];
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
-
-    const defaultShaderModules = getDefaultShaderModules();
-    defaultShaderModules.push(shadow);
-    setDefaultShaderModules(defaultShaderModules);
-
+    this._addShadowModule();
     this._createLightMatrix();
   }
 
@@ -67,14 +63,16 @@ export default class LightWithShadowEffect extends LightingEffect {
       dummyShadowMap.delete();
     }
     this.dummyShadowMaps.length = 0;
+
+    this._removeShadowModule();
   }
 
   _createLightMatrix() {
     const projectionMatrix = new Matrix4().ortho({
       left: -1,
       right: 1,
-      bottom: 1,
-      top: -1,
+      bottom: -1,
+      top: 1,
       near: 0,
       far: 2
     });
@@ -104,6 +102,32 @@ export default class LightWithShadowEffect extends LightingEffect {
           height: 1
         })
       );
+    }
+  }
+
+  _addShadowModule() {
+    const defaultShaderModules = getDefaultShaderModules();
+    let hasShadowModule = false;
+    for (const module of defaultShaderModules) {
+      if (module.name === `shadow`) {
+        hasShadowModule = true;
+        break;
+      }
+    }
+    if (!hasShadowModule) {
+      defaultShaderModules.push(shadow);
+      setDefaultShaderModules(defaultShaderModules);
+    }
+  }
+
+  _removeShadowModule() {
+    const defaultShaderModules = getDefaultShaderModules();
+    for (let i = 0; i < defaultShaderModules.length; i++) {
+      if (defaultShaderModules[i].name === `shadow`) {
+        defaultShaderModules.splice(i, 1);
+        setDefaultShaderModules(defaultShaderModules);
+        break;
+      }
     }
   }
 }

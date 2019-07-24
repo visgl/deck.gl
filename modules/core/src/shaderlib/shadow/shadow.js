@@ -18,10 +18,13 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import {createModuleInjection} from '@luma.gl/core';
+import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
+import {Vector3, Matrix4} from 'math.gl';
 
 const vs = `
 const int max_lights = 2;
 uniform mat4 shadow_uViewProjectionMatrices[max_lights];
+uniform vec4 shadow_uProjectCenters[max_lights];
 uniform bool shadow_uDrawShadowMap;
 uniform bool shadow_uUseShadowMap;
 uniform int shadow_uLightId;
@@ -31,12 +34,12 @@ varying vec3 shadow_vPosition[max_lights];
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
   if (shadow_uDrawShadowMap) {
-    return shadow_uViewProjectionMatrices[shadow_uLightId] * position_commonspace;
+    return project_common_position_to_clipspace(shadow_uViewProjectionMatrices[shadow_uLightId], position_commonspace, shadow_uProjectCenters[shadow_uLightId]);
   }
   if (shadow_uUseShadowMap) {
     for (int i = 0; i < max_lights; i++) {
       if(i < int(shadow_uLightCount)) {
-        vec4 shadowMap_position = shadow_uViewProjectionMatrices[i] * position_commonspace;
+        vec4 shadowMap_position = project_common_position_to_clipspace(shadow_uViewProjectionMatrices[i], position_commonspace, shadow_uProjectCenters[i]);
         shadow_vPosition[i] = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;
       }
     }
@@ -107,8 +110,9 @@ color = shadow_filterShadowColor(color);
 });
 
 const DEFAULT_shadow_Color = [0, 0, 0, 255];
+const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
-function createShadowUniforms(opts = {}) {
+function createShadowUniforms(opts = {}, context = {}) {
   const uniforms = {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
     shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
@@ -117,8 +121,32 @@ function createShadowUniforms(opts = {}) {
     shadow_uLightCount: opts.shadow_viewProjectionMatrices.length
   };
 
+  const center = new Matrix4(opts.viewport.viewProjectionMatrix)
+    .invert()
+    .transformVector4(context.project_uCenter);
+
+  const viewProjectionMatrices = [];
+  const projectCenters = [];
+
   for (let i = 0; i < opts.shadow_viewProjectionMatrices.length; i++) {
-    uniforms[`shadow_uViewProjectionMatrices[${i}]`] = opts.shadow_viewProjectionMatrices[i];
+    const viewProjectionMatrix = opts.shadow_viewProjectionMatrices[i]
+      .clone()
+      .translate(new Vector3(opts.viewport.center).negate());
+
+    if (context.project_uCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNG_LAT) {
+      viewProjectionMatrices.push(viewProjectionMatrix);
+      projectCenters.push([0, 0, 0, 0]);
+    } else {
+      viewProjectionMatrices.push(
+        opts.shadow_viewProjectionMatrices[i].clone().multiplyRight(VECTOR_TO_POINT_MATRIX)
+      );
+      projectCenters.push(viewProjectionMatrix.transformVector4(center));
+    }
+  }
+
+  for (let i = 0; i < viewProjectionMatrices.length; i++) {
+    uniforms[`shadow_uViewProjectionMatrices[${i}]`] = viewProjectionMatrices[i];
+    uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
 
     if (opts.shadowMaps && opts.shadowMaps.length > 0) {
       uniforms[`shadow_uShadowMap[${i}]`] = opts.shadowMaps[i];
@@ -134,11 +162,16 @@ export default {
   dependencies: ['project'],
   vs,
   fs,
-  getUniforms: (opts = {}) => {
+  getUniforms: (opts = {}, context = {}) => {
     if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
       const shadowUniforms = {};
-      if (opts.shadow_viewProjectionMatrices && opts.shadow_viewProjectionMatrices.length > 0) {
-        Object.assign(shadowUniforms, createShadowUniforms(opts));
+      const {enableShadow = true} = opts;
+      if (
+        enableShadow &&
+        opts.shadow_viewProjectionMatrices &&
+        opts.shadow_viewProjectionMatrices.length > 0
+      ) {
+        Object.assign(shadowUniforms, createShadowUniforms(opts, context));
       } else {
         Object.assign(shadowUniforms, {
           shadow_uDrawShadowMap: false,

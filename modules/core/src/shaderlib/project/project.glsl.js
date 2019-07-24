@@ -170,6 +170,15 @@ vec4 project_common_position_to_clipspace(vec4 position) {
   return project_uViewProjectionMatrix * position + project_uCenter;
 }
 
+vec4 project_common_position_to_clipspace(mat4 viewProject, vec4 position, vec4 center) {
+  if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
+    project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
+    // Needs to be divided with project_uCommonUnitsPerMeter
+    position.w *= project_uCommonUnitsPerMeter.z;
+  }
+  return viewProject * position + center;
+}
+
 // Returns a clip space offset that corresponds to a given number of screen pixels
 vec2 project_pixel_size_to_clipspace(vec2 pixels) {
   vec2 offset = pixels / project_uViewportSize * project_uDevicePixelRatio * 2.0;

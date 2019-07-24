@@ -72,8 +72,7 @@ export class App extends Component {
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
         getFillColor: [74, 80, 87],
-        material,
-        castShadow: true
+        material
       }),
       new SolidPolygonLayer({
         id: 'land',

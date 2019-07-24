@@ -59,10 +59,6 @@ export default class ShadowPass extends LayersPass {
     );
   }
 
-  shouldDrawLayer(layer) {
-    return layer.props.castShadow;
-  }
-
   getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
