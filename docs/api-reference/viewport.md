@@ -122,7 +122,7 @@ Note:
 
 ##### `projectPosition`
 
-Projects latitude, longitude (and altitude) to coordinates in the WebMercator world.
+Projects latitude, longitude (and altitude) to coordinates in the [common space](/docs/shader-modules/project.md).
 
 Parameters:
 
@@ -135,7 +135,7 @@ Returns:
 
 ##### `unprojectPosition`
 
-Projects a coordinate from the WebMercator world to latitude, longitude and altitude.
+Projects a coordinate from the [common space](/docs/shader-modules/project.md) to latitude, longitude and altitude.
 
 Parameters:
 
@@ -148,12 +148,12 @@ Returns:
 
 ##### `getFrustumPlanes`
 
-Extract view frustum planes in common space. Each plane is defined by its normal `n` and distance from
-the origin `d` (such that point `x` is on the plane if `dot(n, x) === d`).
+Extract view frustum planes of the current camera. Each plane is defined by its normal `normal` and distance from
+the origin `distance` (such that point `x` is on the plane if `dot(normal, x) === distance`) in the [common space](/docs/shader-modules/project.md).
 
 Returns:
 
-* `{near: {n, d}, far: {n, d}, left: {n, d}, right: {n, d}, top: {n, d}, bottom: {n, d}}`
+* `{near: {normal, distance}, far: {normal, distance}, left: {normal, distance}, right: {normal, distance}, top: {normal, distance}, bottom: {normal, distance}}`
 
 
 ## Remarks
