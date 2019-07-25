@@ -21,15 +21,13 @@ const ambientLight = new AmbientLight({
 const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
-  direction: [10, -20, -30],
-  castShadow: true
+  direction: [10, -20, -30]
 });
 
 const dirLight1 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
-  direction: [-10, -20, -30],
-  castShadow: true
+  direction: [-10, -20, -30]
 });
 
 const lightingEffect = new _LightWithShadowEffect({ambientLight, dirLight0, dirLight1});
