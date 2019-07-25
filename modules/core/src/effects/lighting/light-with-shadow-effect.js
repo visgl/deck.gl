@@ -15,7 +15,7 @@ export default class LightWithShadowEffect extends LightingEffect {
     this._addShadowModule();
   }
 
-  prepare(gl, {layers, viewports, onViewportActive, views, effects, pixelRatio}) {
+  prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
     this._createLightMatrix();
 
     if (this.shadowPasses.length === 0) {
