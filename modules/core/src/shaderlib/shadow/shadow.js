@@ -80,7 +80,7 @@ vec4 shadow_filterShadowColor(vec4 color) {
     float shadowAlpha = 0.0;
     for (int i = 0; i < max_lights; i++) {
       if(i < int(shadow_uLightCount)) {
-        shadowAlpha += shadow_getShadowWeight(shadow_vPosition[i], shadow_uShadowMap[i]) * shadow_uColor.a / 255.0 / shadow_uLightCount;
+        shadowAlpha += shadow_getShadowWeight(shadow_vPosition[i], shadow_uShadowMap[i]) * shadow_uColor.a / shadow_uLightCount;
       }
     }
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
@@ -111,7 +111,7 @@ color = shadow_filterShadowColor(color);
   `
 });
 
-const DEFAULT_shadow_Color = [0, 0, 0, 255];
+const DEFAULT_shadow_Color = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
 function _getViewportCenterPosition({viewport, center}) {

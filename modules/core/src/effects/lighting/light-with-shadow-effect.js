@@ -8,7 +8,7 @@ import {setDefaultShaderModules, getDefaultShaderModules} from '@luma.gl/core';
 export default class LightWithShadowEffect extends LightingEffect {
   constructor(props) {
     super(props);
-    this.shadowColor = [2, 0, 5, 200] / 255;
+    this.shadowColor = [2 / 255, 0, 5 / 255, 200 / 255];
     this.shadowPasses = [];
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
