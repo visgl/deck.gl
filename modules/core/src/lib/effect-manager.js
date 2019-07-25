@@ -4,10 +4,9 @@ import {default as LightingEffect} from '../effects/lighting/lighting-effect';
 export default class EffectManager {
   constructor() {
     this.effects = [];
-    this.internalEffects = [];
+    this._internalEffects = [];
     this._needsRedraw = 'Initial render';
     this.defaultLightingEffect = new LightingEffect();
-    this.needApplyDefaultLighting = false;
     this._applyLightingEffect();
   }
 
@@ -29,7 +28,7 @@ export default class EffectManager {
   }
 
   getEffects() {
-    return this.internalEffects;
+    return this._internalEffects;
   }
 
   finalize() {
@@ -48,14 +47,14 @@ export default class EffectManager {
       effect.cleanup();
     }
 
-    for (const effect of this.internalEffects) {
+    for (const effect of this._internalEffects) {
       effect.cleanup();
     }
     this.effects.length = 0;
-    this.internalEffects.length = 0;
+    this._internalEffects.length = 0;
   }
 
-  _checkLightingEffect() {
+  _needApplyLightingEffect() {
     let hasEffect = false;
     for (const effect of this.effects) {
       if (effect instanceof LightingEffect) {
@@ -63,17 +62,16 @@ export default class EffectManager {
         break;
       }
     }
-    this.needApplyDefaultLighting = !hasEffect;
+    return !hasEffect;
   }
 
   _applyLightingEffect() {
-    this.internalEffects.push(this.defaultLightingEffect);
+    this._internalEffects.push(this.defaultLightingEffect);
   }
 
   _createInternalEffects() {
-    this._checkLightingEffect();
-    this.internalEffects = this.effects.slice();
-    if (this.needApplyDefaultLighting) {
+    this._internalEffects = this.effects.slice();
+    if (this._needApplyLightingEffect()) {
       this._applyLightingEffect();
     }
   }

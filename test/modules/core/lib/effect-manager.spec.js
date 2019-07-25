@@ -106,7 +106,7 @@ test('EffectManager#setProps', t => {
 
   t.deepEqual(effectManager.effects, [effect], 'Effect manager set props correctly');
   t.equal(
-    effectManager.needApplyDefaultLighting,
+    effectManager._needApplyLightingEffect(),
     false,
     'Effect Manager should not need to apply default lighting'
   );
@@ -126,7 +126,7 @@ test('EffectManager#setProps', t => {
 
   effectManager.setProps({effects: []});
   t.equal(
-    effectManager.needApplyDefaultLighting,
+    effectManager._needApplyLightingEffect(),
     true,
     'Effect Manager should need to apply default lighting'
   );

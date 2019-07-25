@@ -20,6 +20,7 @@
 import {createModuleInjection} from '@luma.gl/core';
 import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
 import {Vector3, Matrix4} from 'math.gl';
+import memoize from '../../utils/memoize';
 
 const vs = `
 const int max_lights = 2;
@@ -34,12 +35,12 @@ varying vec3 shadow_vPosition[max_lights];
 
 vec4 shadow_setVertexPosition(vec4 position_commonspace) {
   if (shadow_uDrawShadowMap) {
-    return project_common_position_to_clipspace(shadow_uViewProjectionMatrices[shadow_uLightId], position_commonspace, shadow_uProjectCenters[shadow_uLightId]);
+    return project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[shadow_uLightId], shadow_uProjectCenters[shadow_uLightId]);
   }
   if (shadow_uUseShadowMap) {
     for (int i = 0; i < max_lights; i++) {
       if(i < int(shadow_uLightCount)) {
-        vec4 shadowMap_position = project_common_position_to_clipspace(shadow_uViewProjectionMatrices[i], position_commonspace, shadow_uProjectCenters[i]);
+        vec4 shadowMap_position = project_common_position_to_clipspace(position_commonspace, shadow_uViewProjectionMatrices[i], shadow_uProjectCenters[i]);
         shadow_vPosition[i] = (shadowMap_position.xyz / shadowMap_position.w + 1.0) / 2.0;
       }
     }
@@ -85,7 +86,7 @@ vec4 shadow_filterShadowColor(vec4 color) {
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
 
     return vec4(
-      mix(color.rgb, shadow_uColor.rgb / 255.0, shadowAlpha / blendedAlpha),
+      mix(color.rgb, shadow_uColor.rgb, shadowAlpha / blendedAlpha),
       blendedAlpha
     );
   }
@@ -94,6 +95,7 @@ vec4 shadow_filterShadowColor(vec4 color) {
 `;
 
 const moduleName = 'shadow';
+const _getMemoizedViewportCenterPosition = memoize(_getViewportCenterPosition);
 
 createModuleInjection(moduleName, {
   hook: 'vs:DECKGL_FILTER_GL_POSITION',
@@ -112,6 +114,10 @@ color = shadow_filterShadowColor(color);
 const DEFAULT_shadow_Color = [0, 0, 0, 255];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
+function _getViewportCenterPosition({viewport, center}) {
+  return new Matrix4(viewport.viewProjectionMatrix).invert().transformVector4(center);
+}
+
 function createShadowUniforms(opts = {}, context = {}) {
   const uniforms = {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
@@ -121,9 +127,10 @@ function createShadowUniforms(opts = {}, context = {}) {
     shadow_uLightCount: opts.shadow_viewProjectionMatrices.length
   };
 
-  const center = new Matrix4(opts.viewport.viewProjectionMatrix)
-    .invert()
-    .transformVector4(context.project_uCenter);
+  const center = _getMemoizedViewportCenterPosition({
+    viewport: opts.viewport,
+    center: context.project_uCenter
+  });
 
   const viewProjectionMatrices = [];
   const projectCenters = [];
@@ -134,13 +141,13 @@ function createShadowUniforms(opts = {}, context = {}) {
       .translate(new Vector3(opts.viewport.center).negate());
 
     if (context.project_uCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNG_LAT) {
-      viewProjectionMatrices.push(viewProjectionMatrix);
-      projectCenters.push([0, 0, 0, 0]);
+      viewProjectionMatrices[i] = viewProjectionMatrix;
+      projectCenters[i] = [0, 0, 0, 0];
     } else {
-      viewProjectionMatrices.push(
-        opts.shadow_viewProjectionMatrices[i].clone().multiplyRight(VECTOR_TO_POINT_MATRIX)
-      );
-      projectCenters.push(viewProjectionMatrix.transformVector4(center));
+      viewProjectionMatrices[i] = opts.shadow_viewProjectionMatrices[i]
+        .clone()
+        .multiplyRight(VECTOR_TO_POINT_MATRIX);
+      projectCenters[i] = viewProjectionMatrix.transformVector4(center);
     }
   }
 

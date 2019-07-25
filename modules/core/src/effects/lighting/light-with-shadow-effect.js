@@ -8,15 +8,16 @@ import {setDefaultShaderModules, getDefaultShaderModules} from '@luma.gl/core';
 export default class LightWithShadowEffect extends LightingEffect {
   constructor(props) {
     super(props);
-    this.shadowColor = [2, 0, 5, 200];
+    this.shadowColor = [2, 0, 5, 200] / 255;
     this.shadowPasses = [];
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
     this._addShadowModule();
-    this._createLightMatrix();
   }
 
   prepare(gl, {layers, viewports, onViewportActive, views, effects, pixelRatio}) {
+    this._createLightMatrix();
+
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl, pixelRatio);
     }
@@ -34,7 +35,6 @@ export default class LightWithShadowEffect extends LightingEffect {
         viewports,
         onViewportActive,
         views,
-        effects,
         effectProps: {
           shadow_lightId: i,
           dummyShadowMaps: this.dummyShadowMaps,
@@ -77,6 +77,7 @@ export default class LightWithShadowEffect extends LightingEffect {
       far: 2
     });
 
+    this.lightMatrices = [];
     for (const light of this.directionalLights) {
       const viewMatrix = new Matrix4()
         .lookAt({

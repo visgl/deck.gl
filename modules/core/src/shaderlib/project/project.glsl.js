@@ -170,7 +170,7 @@ vec4 project_common_position_to_clipspace(vec4 position) {
   return project_uViewProjectionMatrix * position + project_uCenter;
 }
 
-vec4 project_common_position_to_clipspace(mat4 viewProject, vec4 position, vec4 center) {
+vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProject, vec4 center) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     // Needs to be divided with project_uCommonUnitsPerMeter

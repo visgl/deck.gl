@@ -66,9 +66,7 @@ export default class ShadowPass extends LayersPass {
       drawToShadowMap: true,
       devicePixelRatio: this.props.pixelRatio
     });
-    for (const effect of effects) {
-      Object.assign(moduleParameters, effect.getParameters(layer));
-    }
+
     Object.assign(moduleParameters, effectProps);
     return moduleParameters;
   }
