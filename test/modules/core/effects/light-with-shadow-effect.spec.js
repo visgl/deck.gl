@@ -66,23 +66,11 @@ test('LightWithShadowEffect#prepare and cleanup', t => {
 test('LightWithShadowEffect#shadow module', t => {
   const lightingEffect = new LightWithShadowEffect();
   const defaultModules = getDefaultShaderModules();
-  let hasShadow = false;
-  for (const module of defaultModules) {
-    if (module.name === `shadow`) {
-      hasShadow = true;
-      break;
-    }
-  }
+  let hasShadow = defaultModules.find(m => m.name === 'shadow');
   t.equal(hasShadow, true, 'LightWithShadowEffect adds shadow module to default correctly');
 
   lightingEffect.cleanup();
-  hasShadow = false;
-  for (const module of defaultModules) {
-    if (module.name === `shadow`) {
-      hasShadow = true;
-      break;
-    }
-  }
+  hasShadow = defaultModules.find(m => m.name === 'shadow');
   t.equal(hasShadow, false, 'LightWithShadowEffect removes shadow module to default correctly');
   t.end();
 });

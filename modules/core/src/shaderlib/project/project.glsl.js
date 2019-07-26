@@ -157,17 +157,17 @@ vec2 project_position(vec2 position) {
   return projected_position.xy;
 }
 
-vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProject, vec4 center) {
+vec4 project_common_position_to_clipspace(vec4 position, mat4 viewProjectionMatrix, vec4 center) {
   if (project_uCoordinateSystem == COORDINATE_SYSTEM_METER_OFFSETS ||
     project_uCoordinateSystem == COORDINATE_SYSTEM_LNGLAT_OFFSETS) {
     // Needs to be divided with project_uCommonUnitsPerMeter
     position.w *= project_uCommonUnitsPerMeter.z;
   }
-  return viewProject * position + center;
+  return viewProjectionMatrix * position + center;
 }
 
 //
-// Projects from "world" coordinates to clip space.
+// Projects from common space coordinates to clip space.
 // Uses project_uViewProjectionMatrix
 //
 vec4 project_common_position_to_clipspace(vec4 position) {
