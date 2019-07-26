@@ -1,13 +1,24 @@
 import {deepEqual} from '../utils/deep-equal';
 import {default as LightingEffect} from '../effects/lighting/lighting-effect';
 
+function needApplyLightingEffect(effects) {
+  let hasEffect = false;
+  for (const effect of effects) {
+    if (effect instanceof LightingEffect) {
+      hasEffect = true;
+      break;
+    }
+  }
+  return !hasEffect;
+}
+
 export default class EffectManager {
   constructor() {
     this.effects = [];
     this._internalEffects = [];
     this._needsRedraw = 'Initial render';
     this.defaultLightingEffect = new LightingEffect();
-    this._applyLightingEffect();
+    this.setEffects();
   }
 
   setProps(props) {
@@ -54,24 +65,13 @@ export default class EffectManager {
     this._internalEffects.length = 0;
   }
 
-  _needApplyLightingEffect() {
-    let hasEffect = false;
-    for (const effect of this.effects) {
-      if (effect instanceof LightingEffect) {
-        hasEffect = true;
-        break;
-      }
-    }
-    return !hasEffect;
-  }
-
   _applyLightingEffect() {
     this._internalEffects.push(this.defaultLightingEffect);
   }
 
   _createInternalEffects() {
     this._internalEffects = this.effects.slice();
-    if (this._needApplyLightingEffect()) {
+    if (needApplyLightingEffect(this.effects)) {
       this._applyLightingEffect();
     }
   }

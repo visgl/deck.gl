@@ -15,9 +15,9 @@ test('ShadowPass#constructor and delete', t => {
 
   shadowPass.delete();
 
-  t.ok(!shadowPass.shadowMap, `ShadowPass deletes shadow map well`);
-  t.ok(!shadowPass.depthBuffer, `ShadowPass deletes depth buffer well`);
-  t.ok(!shadowPass.fbo, `ShadowPass deletes fbo well`);
+  t.notOk(shadowPass.shadowMap, `ShadowPass deletes shadow map well`);
+  t.notOk(shadowPass.depthBuffer, `ShadowPass deletes depth buffer well`);
+  t.notOk(shadowPass.fbo, `ShadowPass deletes fbo well`);
   t.end();
 });
 
