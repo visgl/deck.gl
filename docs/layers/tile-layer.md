@@ -124,7 +124,7 @@ The maximum cache size for a tile layer. If not defined, it is calculated using 
 
 ##### `getTileData` (Function,  optional)
 
-`getTileData` given x, y, z indices of the tile, returns a Promise that resolves to the decoded tile data.
+`getTileData` given x, y, z indices of the tile, returns the tile data or a Promise that resolves to the tile data.
 
 - Default: `getTileData: ({x, y, z}) => Promise.resolve(null)`
 
