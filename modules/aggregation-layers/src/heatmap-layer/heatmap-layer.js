@@ -52,11 +52,168 @@ export default class HeatmapLayer extends CompositeLayer {
     if (!isWebGL2(gl)) {
       log.error('HeatmapLayer is not supported on this browser, requires WebGL2')();
     }
+    this._setupAttributes();
+    this._setupResources();
+  }
+
+  shouldUpdateState({changeFlags}) {
+    // Need to be updated when viewports
+    return changeFlags.somethingChanged;
+  }
+
+  updateState(opts) {
+    super.updateState(opts);
+    const {props, oldProps} = opts;
+    const changeFlags = this._getChangeFlags(opts);
+
+    if (changeFlags.viewportChanged) {
+      changeFlags.boundsChanged = this._updateBounds(changeFlags.viewportZoomChanged);
+    }
+
+    if (changeFlags.dataChanged) {
+      this._updateWeightmapAttributes();
+    }
+
+    if (changeFlags.dataChanged || changeFlags.boundsChanged || changeFlags.uniformsChanged) {
+      this._updateWeightmap();
+    }
+
+    if (props.colorRange !== oldProps.colorRange) {
+      this._updateColorTexture(opts);
+    }
+
+    // TODO: need to be fixed, seem to be rendring wrong part of the texture
+    if (changeFlags.viewportChanged) {
+      this._updateTextureRenderingBounds();
+    }
+
+    this.setState({zoom: opts.context.viewport.zoom});
+  }
+
+  renderLayers() {
+    const {
+      weightsTexture,
+      triPositionBuffer,
+      triTexCoordBuffer,
+      maxWeightsTexture,
+      colorTexture
+    } = this.state;
+    const {updateTriggers, enhanceFactor} = this.props;
+
+    return new TriangleLayer(
+      this.getSubLayerProps({
+        id: `${this.id}-triangle-layer`,
+        updateTriggers
+      }),
+      {
+        id: 'heatmap-triangle-layer',
+        data: {
+          attributes: {
+            positions: triPositionBuffer,
+            texCoords: triTexCoordBuffer
+          }
+        },
+        count: 6,
+        maxTexture: maxWeightsTexture,
+        colorTexture,
+        texture: weightsTexture,
+        opacityFactor: enhanceFactor
+      }
+    );
+  }
+
+  finalizeState() {
+    super.finalizeState();
+    const {
+      weightsTransform,
+      weightsTexture,
+      maxWeightsTexture,
+      triPositionBuffer,
+      triTexCoordBuffer
+    } = this.state;
+    weightsTransform.delete();
+    weightsTexture.delete();
+    maxWeightsTexture.delete();
+    triPositionBuffer.delete();
+    triTexCoordBuffer.delete();
+  }
+
+  // PRIVATE
+
+  // override Composite layer private method to create AttributeManager instance
+  _getAttributeManager() {
+    return new AttributeManager(this.context.gl, {
+      id: this.props.id,
+      stats: this.context.stats
+    });
+  }
+
+  _getChangeFlags(opts) {
+    const {oldProps, props} = opts;
+    const changeFlags = {};
+    if (this._isDataChanged(opts)) {
+      changeFlags.dataChanged = true;
+    }
+    if (oldProps.radiusPixels !== props.radiusPixels || oldProps.intensity !== props.intensity) {
+      changeFlags.uniformsChanged = true;
+    }
+    changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
+
+    const {zoom} = this.state;
+    if (!opts.context.viewport || opts.context.viewport.zoom !== zoom) {
+      changeFlags.viewportZoomChanged = true;
+    }
+
+    return changeFlags;
+  }
+
+  // returns visible world bounds [[minLong, minLat], [maxLong, maxLat]
+  _getVisibleWorldBounds() {
+    const {textureSize} = this.state;
+    const width = textureSize;
+    const height = textureSize;
+
+    // Unproject all 4 corners of the current screen coordiantes into world coordiantes (lng/lat)
+    // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
+    const topLeft = this.unproject([0, 0]);
+    const topRight = this.unproject([width, 0]);
+    const bottomLeft = this.unproject([0, height]);
+    const bottomRight = this.unproject([width, height]);
+
+    // Now build bounding box in world space (aligned to world coordiante system)
+    const minLong = Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
+    const maxLong = Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
+    const minLat = Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
+    const maxLat = Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
+
+    return [[minLong, minLat], [maxLong, maxLat]];
+  }
+
+  _isDataChanged({changeFlags}) {
+    if (changeFlags.dataChanged) {
+      return true;
+    }
+    if (
+      changeFlags.updateTriggersChanged &&
+      (changeFlags.updateTriggersChanged.all ||
+        changeFlags.updateTriggersChanged.getPosition ||
+        changeFlags.updateTriggersChanged.getWeight)
+    ) {
+      return true;
+    }
+    return false;
+  }
+
+  _setupAttributes() {
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
       positions: {size: 3, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
+  }
+
+  _setupResources() {
+    const {gl} = this.context;
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
     const weightsTexture = getFloatTexture(gl, {
       width: textureSize,
@@ -105,88 +262,41 @@ export default class HeatmapLayer extends CompositeLayer {
     };
   }
 
-  // override Composite layer private method to create AttributeManager instance
-  _getAttributeManager() {
-    return new AttributeManager(this.context.gl, {
-      id: this.props.id,
-      stats: this.context.stats
+  _shouldUpdateBounds(opts) {
+    return opts.changeFlags.viewportChanged;
+  }
+
+  _updateWeightmapAttributes() {
+    // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
+    this.updateAttributes(this.props);
+    // Attribute manager sets data array count as instaceCount on model
+    // we need to set that as elementCount on 'weightsTransform'
+    this.state.weightsTransform.update({
+      elementCount: this.getNumInstances()
     });
   }
 
-  shouldUpdateState({changeFlags}) {
-    // Need to be updated when viewports
-    return changeFlags.somethingChanged;
-  }
-
-  // returns visible world bounds [[minLong, minLat], [maxLong, maxLat]
-  getVisibleWorldBounds() {
-    const {textureSize} = this.state;
-    const width = textureSize;
-    const height = textureSize;
-
-    // Unproject all 4 corners of the current screen coordiantes into world coordiantes (lng/lat)
-    // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
-    const topLeft = this.unproject([0, 0]);
-    const topRight = this.unproject([width, 0]);
-    const bottomLeft = this.unproject([0, height]);
-    const bottomRight = this.unproject([width, height]);
-
-    // Now build bounding box in world space (aligned to world coordiante system)
-    const minLong = Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
-    const maxLong = Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
-    const minLat = Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
-    const maxLat = Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
-
-    return [[minLong, minLat], [maxLong, maxLat]];
-  }
-
-  // input: worldBounds: [[minLong, minLat], [maxLong, maxLat]]
-  // input: opts.useLayerCoordinateSystem : layers coordiante system is used
-  // optput: commonBounds: [[minX, minY], [maxX, maxY]]
-  worldToCommonBounds(worldBounds, opts = {}) {
-    const {useLayerCoordinateSystem = false, scaleToAspect = false, width, height} = opts;
-    const [[minLong, minLat], [maxLong, maxLat]] = worldBounds;
-    const {viewport} = this.context;
-
-    let topLeftCommon;
-    let bottomRightCommon;
-
-    // Y-axis is flipped between World and Common bounds
-    if (useLayerCoordinateSystem) {
-      topLeftCommon = this.projectPosition([minLong, maxLat, 0]);
-      bottomRightCommon = this.projectPosition([maxLong, minLat, 0]);
-    } else {
-      topLeftCommon = viewport.projectPosition([minLong, maxLat, 0]);
-      bottomRightCommon = viewport.projectPosition([maxLong, minLat, 0]);
-    }
-    // Ignore z component
-    let commonBounds = [topLeftCommon.slice(0, 2), bottomRightCommon.slice(0, 2)];
-    if (scaleToAspect) {
-      commonBounds = scaleToAspectRatio(commonBounds, width, height);
-    }
-    return commonBounds;
-  }
-
-  // input commonBounds: [[xMin, yMin], [xMax, yMax]]
-  // output worldBounds: [[minLong, minLat], [maxLong, maxLat]]
-  commonToWorldBounds(commonBounds) {
-    const [[xMin, yMin], [xMax, yMax]] = commonBounds;
-    const {viewport} = this.context;
-    const topLeftWorld = viewport.unprojectPosition([xMin, yMax]);
-    const bottomRightWorld = viewport.unprojectPosition([xMax, yMin]);
-
-    return [topLeftWorld.slice(0, 2), bottomRightWorld.slice(0, 2)];
+  _updateMaxWeightValue() {
+    const {maxWeightTransform} = this.state;
+    maxWeightTransform.run({
+      parameters: {
+        blend: true,
+        depthTest: false,
+        blendFunc: [GL.ONE, GL.ONE],
+        blendEquation: GL.MAX
+      }
+    });
   }
 
   // Computes world bounds area that needs to be processed for generate heatmap
-  updateBounds(forceUpdate = false) {
+  _updateBounds(forceUpdate = false) {
     const {triPositionBuffer, textureSize} = this.state;
     const width = textureSize;
     const height = textureSize;
     // #1: get world bounds for current viewport extends
-    const visibleWorldBounds = this.getVisibleWorldBounds(); // TODO: Change to visible bounds
+    const visibleWorldBounds = this._getVisibleWorldBounds(); // TODO: Change to visible bounds
     // #2 : convert world bounds to common (Flat) bounds
-    const visibleCommonBounds = this.worldToCommonBounds(visibleWorldBounds);
+    const visibleCommonBounds = this._worldToCommonBounds(visibleWorldBounds);
 
     const newState = {visibleWorldBounds, visibleCommonBounds};
     let boundsChanged = false;
@@ -204,7 +314,7 @@ export default class HeatmapLayer extends CompositeLayer {
       );
 
       // #4 :convert aligned common bounds to world bounds
-      const worldBounds = this.commonToWorldBounds(scaledCommonBounds);
+      const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
       worldBounds[0][1] = Math.max(worldBounds[0][1], -85.051129);
@@ -213,7 +323,7 @@ export default class HeatmapLayer extends CompositeLayer {
       worldBounds[1][0] = Math.min(worldBounds[1][0], 360);
 
       // #5: now convert world bounds to common using Layer's coordiante system and origin
-      const commonBounds = this.worldToCommonBounds(worldBounds, {
+      const commonBounds = this._worldToCommonBounds(worldBounds, {
         useLayerCoordinateSystem: true,
         scaleToAspect: true,
         width: width * RESOLUTION,
@@ -240,7 +350,7 @@ export default class HeatmapLayer extends CompositeLayer {
     return boundsChanged;
   }
 
-  updateTextureRenderingBounds() {
+  _updateTextureRenderingBounds() {
     // Just render visible portion of the texture
     const {
       triPositionBuffer,
@@ -253,7 +363,7 @@ export default class HeatmapLayer extends CompositeLayer {
       textureSize
     } = this.state;
 
-    const commonBounds = this.worldToCommonBounds(worldBounds, {
+    const commonBounds = this._worldToCommonBounds(worldBounds, {
       scaleToAspect: true,
       width: textureSize * RESOLUTION,
       height: textureSize * RESOLUTION
@@ -284,36 +394,7 @@ export default class HeatmapLayer extends CompositeLayer {
     });
   }
 
-  updateState(opts) {
-    super.updateState(opts);
-    const {props, oldProps} = opts;
-    const changeFlags = this.getChangeFlags(opts);
-
-    if (changeFlags.viewportChanged) {
-      changeFlags.boundsChanged = this.updateBounds(changeFlags.viewportZoomChanged);
-    }
-
-    if (changeFlags.dataChanged) {
-      this.updateWeightmapAttributes();
-    }
-
-    if (changeFlags.dataChanged || changeFlags.boundsChanged || changeFlags.uniformsChanged) {
-      this.updateWeightmap();
-    }
-
-    if (props.colorRange !== oldProps.colorRange) {
-      this.updateColorTexture(opts);
-    }
-
-    // TODO: need to be fixed, seem to be rendring wrong part of the texture
-    if (changeFlags.viewportChanged) {
-      this.updateTextureRenderingBounds();
-    }
-
-    this.setState({zoom: opts.context.viewport.zoom});
-  }
-
-  updateColorTexture(opts) {
+  _updateColorTexture(opts) {
     const {colorRange} = opts.props;
     const colors = colorRangeToFlatArray(colorRange, Float32Array, 255, true);
     const colorTexture = getFloatTexture(this.context.gl, {data: colors, width: 6});
@@ -329,7 +410,7 @@ export default class HeatmapLayer extends CompositeLayer {
     this.setState({colorTexture});
   }
 
-  updateWeightmap() {
+  _updateWeightmap() {
     const {radiusPixels, intensity} = this.props;
     const {weightsTransform, commonBounds, textureSize} = this.state;
     const moduleParameters = Object.assign(Object.create(this.props), {
@@ -358,115 +439,44 @@ export default class HeatmapLayer extends CompositeLayer {
       },
       clearRenderTarget: true
     });
-    this.updateMaxWeightValue();
+    this._updateMaxWeightValue();
   }
+  // input: worldBounds: [[minLong, minLat], [maxLong, maxLat]]
+  // input: opts.useLayerCoordinateSystem : layers coordiante system is used
+  // optput: commonBounds: [[minX, minY], [maxX, maxY]]
+  _worldToCommonBounds(worldBounds, opts = {}) {
+    const {useLayerCoordinateSystem = false, scaleToAspect = false, width, height} = opts;
+    const [[minLong, minLat], [maxLong, maxLat]] = worldBounds;
+    const {viewport} = this.context;
 
-  finalizeState() {
-    super.finalizeState();
-    const {
-      weightsTransform,
-      weightsTexture,
-      maxWeightsTexture,
-      triPositionBuffer,
-      triTexCoordBuffer
-    } = this.state;
-    weightsTransform.delete();
-    weightsTexture.delete();
-    maxWeightsTexture.delete();
-    triPositionBuffer.delete();
-    triTexCoordBuffer.delete();
-  }
+    let topLeftCommon;
+    let bottomRightCommon;
 
-  getChangeFlags(opts) {
-    const {oldProps, props} = opts;
-    const changeFlags = {};
-    if (this.isDataChanged(opts)) {
-      changeFlags.dataChanged = true;
+    // Y-axis is flipped between World and Common bounds
+    if (useLayerCoordinateSystem) {
+      topLeftCommon = this.projectPosition([minLong, maxLat, 0]);
+      bottomRightCommon = this.projectPosition([maxLong, minLat, 0]);
+    } else {
+      topLeftCommon = viewport.projectPosition([minLong, maxLat, 0]);
+      bottomRightCommon = viewport.projectPosition([maxLong, minLat, 0]);
     }
-    if (oldProps.radiusPixels !== props.radiusPixels || oldProps.intensity !== props.intensity) {
-      changeFlags.uniformsChanged = true;
+    // Ignore z component
+    let commonBounds = [topLeftCommon.slice(0, 2), bottomRightCommon.slice(0, 2)];
+    if (scaleToAspect) {
+      commonBounds = scaleToAspectRatio(commonBounds, width, height);
     }
-    changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
-
-    const {zoom} = this.state;
-    if (!opts.context.viewport || opts.context.viewport.zoom !== zoom) {
-      changeFlags.viewportZoomChanged = true;
-    }
-
-    return changeFlags;
+    return commonBounds;
   }
 
-  shouldUpdateBounds(opts) {
-    return opts.changeFlags.viewportChanged;
-  }
+  // input commonBounds: [[xMin, yMin], [xMax, yMax]]
+  // output worldBounds: [[minLong, minLat], [maxLong, maxLat]]
+  _commonToWorldBounds(commonBounds) {
+    const [[xMin, yMin], [xMax, yMax]] = commonBounds;
+    const {viewport} = this.context;
+    const topLeftWorld = viewport.unprojectPosition([xMin, yMax]);
+    const bottomRightWorld = viewport.unprojectPosition([xMax, yMin]);
 
-  isDataChanged({changeFlags}) {
-    if (changeFlags.dataChanged) {
-      return true;
-    }
-    if (
-      changeFlags.updateTriggersChanged &&
-      (changeFlags.updateTriggersChanged.all ||
-        changeFlags.updateTriggersChanged.getPosition ||
-        changeFlags.updateTriggersChanged.getWeight)
-    ) {
-      return true;
-    }
-    return false;
-  }
-
-  updateWeightmapAttributes() {
-    // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
-    this.updateAttributes(this.props);
-    // Attribute manager sets data array count as instaceCount on model
-    // we need to set that as elementCount on 'weightsTransform'
-    this.state.weightsTransform.update({
-      elementCount: this.getNumInstances()
-    });
-  }
-
-  updateMaxWeightValue() {
-    const {maxWeightTransform} = this.state;
-    maxWeightTransform.run({
-      parameters: {
-        blend: true,
-        depthTest: false,
-        blendFunc: [GL.ONE, GL.ONE],
-        blendEquation: GL.MAX
-      }
-    });
-  }
-
-  renderLayers() {
-    const {
-      weightsTexture,
-      triPositionBuffer,
-      triTexCoordBuffer,
-      maxWeightsTexture,
-      colorTexture
-    } = this.state;
-    const {updateTriggers, enhanceFactor} = this.props;
-
-    return new TriangleLayer(
-      this.getSubLayerProps({
-        id: `${this.id}-triangle-layer`,
-        updateTriggers
-      }),
-      {
-        id: 'heatmap-triangle-layer',
-        data: {
-          attributes: {
-            positions: triPositionBuffer,
-            texCoords: triTexCoordBuffer
-          }
-        },
-        count: 6,
-        maxTexture: maxWeightsTexture,
-        colorTexture,
-        texture: weightsTexture,
-        opacityFactor: enhanceFactor
-      }
-    );
+    return [topLeftWorld.slice(0, 2), bottomRightWorld.slice(0, 2)];
   }
 }
 

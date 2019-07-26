@@ -25,7 +25,6 @@ import vs from './triangle-layer-vertex.glsl';
 import fs from './triangle-layer-fragment.glsl';
 
 const defaultProps = {
-  // data {positions(Buffer), texCoords(Buffer)}
   count: 0, // number of triangles to be rendered
   texture: null
 };
@@ -34,12 +33,11 @@ export default class TriangleLayer extends Layer {
   getShaders() {
     return {vs, fs, modules: ['project32']};
   }
+
   initializeState() {
     const {gl} = this.context;
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      // positions: {size: 3, update: this.calculatePositions, noAlloc: true},
-      // texCoords: {size: 2, update: this.calculateTexCoords, noAlloc: true}
       positions: {size: 3, noAlloc: true},
       texCoords: {size: 2, noAlloc: true}
     });
@@ -71,20 +69,6 @@ export default class TriangleLayer extends Layer {
         shaderCache: this.context.shaderCache
       })
     );
-  }
-
-  calculatePositions(attribute) {
-    const {positions} = this.props.data;
-    attribute.update({
-      buffer: positions
-    });
-  }
-
-  calculateTexCoords(attribute) {
-    const {texCoords} = this.props.data;
-    attribute.update({
-      buffer: texCoords
-    });
   }
 
   draw({uniforms}) {
