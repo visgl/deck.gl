@@ -22,12 +22,11 @@ import GL from '@luma.gl/constants';
 import {
   boundsContain,
   getTriangleVertices,
-  parseData,
   scaleToAspectRatio,
   scaleTextureCoordiantes
 } from './heatmap-layer-utils';
 import {Buffer, Transform, getParameter, isWebGL2} from '@luma.gl/core';
-import {CompositeLayer, log} from '@deck.gl/core';
+import {CompositeLayer, AttributeManager, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import {getFloatTexture} from '../utils/resource-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
@@ -53,6 +52,11 @@ export default class HeatmapLayer extends CompositeLayer {
     if (!isWebGL2(gl)) {
       log.error('HeatmapLayer is not supported on this browser, requires WebGL2')();
     }
+    const attributeManager = this.getAttributeManager();
+    attributeManager.add({
+      positions: {size: 3, accessor: 'getPosition'},
+      weights: {size: 1, accessor: 'getWeight'}
+    });
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
     const weightsTexture = getFloatTexture(gl, {
       width: textureSize,
@@ -63,19 +67,22 @@ export default class HeatmapLayer extends CompositeLayer {
       }
     });
     const maxWeightsTexture = getFloatTexture(gl); // 1 X 1 texture
+    const weightsTransform = new Transform(gl, {
+      id: `${this.id}-weights-transform`,
+      vs: weights_vs,
+      _fs: weights_fs,
+      modules: ['project32'],
+      elementCount: 1,
+      _targetTexture: weightsTexture,
+      _targetTextureVarying: 'weightsTexture'
+    });
+
     this.state = {
       textureSize,
       weightsTexture,
       maxWeightsTexture,
-      weightsTransform: new Transform(gl, {
-        id: `${this.id}-weights-transform`,
-        vs: weights_vs,
-        _fs: weights_fs,
-        modules: ['project32'],
-        elementCount: 1,
-        _targetTexture: weightsTexture,
-        _targetTextureVarying: 'weightsTexture'
-      }),
+      weightsTransform,
+      model: weightsTransform.model,
       maxWeightTransform: new Transform(gl, {
         id: `${this.id}-max-weights-transform`,
         _sourceTextures: {
@@ -96,6 +103,14 @@ export default class HeatmapLayer extends CompositeLayer {
         accessor: {size: 2}
       })
     };
+  }
+
+  // override Composite layer private method to create AttributeManager instance
+  _getAttributeManager() {
+    return new AttributeManager(this.context.gl, {
+      id: this.props.id,
+      stats: this.context.stats
+    });
   }
 
   shouldUpdateState({changeFlags}) {
@@ -349,16 +364,12 @@ export default class HeatmapLayer extends CompositeLayer {
   finalizeState() {
     super.finalizeState();
     const {
-      positionsBuffer,
-      weightsBuffer,
       weightsTransform,
       weightsTexture,
       maxWeightsTexture,
       triPositionBuffer,
       triTexCoordBuffer
     } = this.state;
-    positionsBuffer.delete();
-    weightsBuffer.delete();
     weightsTransform.delete();
     weightsTexture.delete();
     maxWeightsTexture.delete();
@@ -405,34 +416,13 @@ export default class HeatmapLayer extends CompositeLayer {
   }
 
   updateWeightmapAttributes() {
-    const {gl} = this.context;
-    const {data, getPosition, getWeight} = this.props;
-    const {positions, weights} = parseData(data, getPosition, getWeight);
-    const {weightsTransform} = this.state;
-    let {positionsBuffer, weightsBuffer} = this.state;
-    if (positionsBuffer) {
-      positionsBuffer.delete();
-    }
-    if (weightsBuffer) {
-      weightsBuffer.delete();
-    }
-    positionsBuffer = new Buffer(gl, {
-      data: positions,
-      accessor: {size: 3}
+    // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
+    this.updateAttributes(this.props);
+    // Attribute manager sets data array count as instaceCount on model
+    // we need to set that as elementCount on 'weightsTransform'
+    this.state.weightsTransform.update({
+      elementCount: this.getNumInstances()
     });
-    weightsBuffer = new Buffer(gl, {
-      data: weights,
-      accessor: {size: 1}
-    });
-    const elementCount = weights.length;
-    weightsTransform.update({
-      sourceBuffers: {
-        positions: positionsBuffer,
-        weights: weightsBuffer
-      },
-      elementCount
-    });
-    this.setState({positionsBuffer, weightsBuffer, elementCount});
   }
 
   updateMaxWeightValue() {
@@ -465,8 +455,10 @@ export default class HeatmapLayer extends CompositeLayer {
       {
         id: 'heatmap-triangle-layer',
         data: {
-          positions: triPositionBuffer,
-          texCoords: triTexCoordBuffer
+          attributes: {
+            positions: triPositionBuffer,
+            texCoords: triTexCoordBuffer
+          }
         },
         count: 6,
         maxTexture: maxWeightsTexture,

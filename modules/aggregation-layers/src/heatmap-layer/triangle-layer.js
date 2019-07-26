@@ -38,8 +38,10 @@ export default class TriangleLayer extends Layer {
     const {gl} = this.context;
     const attributeManager = this.getAttributeManager();
     attributeManager.add({
-      positions: {size: 3, update: this.calculatePositions, noAlloc: true},
-      texCoords: {size: 2, update: this.calculateTexCoords, noAlloc: true}
+      // positions: {size: 3, update: this.calculatePositions, noAlloc: true},
+      // texCoords: {size: 2, update: this.calculateTexCoords, noAlloc: true}
+      positions: {size: 3, noAlloc: true},
+      texCoords: {size: 2, noAlloc: true}
     });
     this.setState({
       model: this._getModel(gl)
