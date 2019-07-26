@@ -23,7 +23,7 @@ import {
   boundsContain,
   getTriangleVertices,
   scaleToAspectRatio,
-  scaleTextureCoordiantes
+  getTextureCoordinates
 } from './heatmap-layer-utils';
 import {Buffer, Transform, getParameter, isWebGL2} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, log} from '@deck.gl/core';
@@ -57,7 +57,7 @@ export default class HeatmapLayer extends CompositeLayer {
   }
 
   shouldUpdateState({changeFlags}) {
-    // Need to be updated when viewports
+    // Need to be updated when viewport changes
     return changeFlags.somethingChanged;
   }
 
@@ -173,7 +173,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const width = textureSize;
     const height = textureSize;
 
-    // Unproject all 4 corners of the current screen coordiantes into world coordiantes (lng/lat)
+    // Unproject all 4 corners of the current screen coordinates into world coordinates (lng/lat)
     // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
     const topLeft = this.unproject([0, 0]);
     const topRight = this.unproject([width, 0]);
@@ -381,7 +381,7 @@ export default class HeatmapLayer extends CompositeLayer {
       accessor: {size: 3}
     });
 
-    const textureBounds = scaleTextureCoordiantes(commonBounds, visibleCommonBounds);
+    const textureBounds = getTextureCoordinates(commonBounds, visibleCommonBounds);
     triTexCoordBuffer.setData({
       // Y-flip for world bounds
       data: getTriangleVertices({

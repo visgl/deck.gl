@@ -1,25 +1,24 @@
-/* global document window */
+/* global document */
 /* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from 'deck.gl';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
-import {default as earthquakes} from './data/earthquakes.json';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
+// const DATA_URL_EQ = 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson';
+const DATA_URL =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
 
 const INITIAL_VIEW_STATE = {
-  bearing: 0,
+  longitude: -73.75,
+  latitude: 40.73,
+  zoom: 9.6,
+  maxZoom: 16,
   pitch: 0,
-  longitude: -122.45,
-  latitude: 37.78,
-  zoom: 1.5,
-  minZoom: 1.5,
-  maxZoom: 15,
-  height: window.innerHeight,
-  width: window.innerWidth
+  bearing: 0
 };
 
 const MAP_STYLE = 'mapbox://styles/mapbox/dark-v9';
@@ -44,11 +43,12 @@ class Root extends PureComponent {
           controller={true}
           layers={[
             new HeatmapLayer({
-              data: earthquakes,
+              data: DATA_URL,
               id: 'heatmp-layer-eq',
               opacity: 1,
               pickable: false,
-              getPosition: d => d.geometry.coordinates,
+              getPosition: d => [d[0], d[1]],
+              getWeight: d => d[2],
               colorRange,
               enhanceFactor: 100
             })

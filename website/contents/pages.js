@@ -409,7 +409,6 @@ export const docPages = generatePath([
           },
           {
             name: 'HeatmapLayer',
-            tag: 'WebGL2',
             content: getDocUrl('layers/heatmap-layer.md')
           },
           {

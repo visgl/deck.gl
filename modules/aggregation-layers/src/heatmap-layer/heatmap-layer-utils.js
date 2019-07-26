@@ -1,30 +1,3 @@
-import {experimental, createIterable} from '@deck.gl/core';
-const {count} = experimental;
-
-// Parse input data to build positions, wights arrays.
-export function parseData(data, getPosition, getWeight) {
-  const pointCount = count(data);
-
-  const positions = new Float32Array(pointCount * 3);
-  const weights = new Float32Array(pointCount);
-
-  const {iterable, objectInfo} = createIterable(data);
-  for (const object of iterable) {
-    objectInfo.index++;
-    const position = getPosition(object, objectInfo);
-    const {index} = objectInfo;
-    positions[index * 3] = position[0];
-    positions[index * 3 + 1] = position[1];
-    positions[index * 3 + 2] = position[2] || 0;
-    weights[index] = getWeight(object, objectInfo);
-  }
-
-  return {
-    positions,
-    weights
-  };
-}
-
 // true if currentBounds contains targetBounds, false otherwise
 export function boundsContain(currentBounds, targetBounds) {
   const [currentMin, currentMax] = currentBounds;
@@ -100,7 +73,7 @@ export function scaleToAspectRatio(boundingBox, width, height) {
 }
 
 // Scales texture coordiante range to a sub rectangel
-export function scaleTextureCoordiantes(originalRect, subRect) {
+export function getTextureCoordinates(originalRect, subRect) {
   const [[xMin, yMin], [xMax, yMax]] = originalRect;
   const [[subXMin, subYMin], [subXMax, subYMax]] = subRect;
   const width = xMax - xMin;

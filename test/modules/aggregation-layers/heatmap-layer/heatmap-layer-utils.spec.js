@@ -20,38 +20,10 @@
 
 import test from 'tape-catch';
 import {
-  scaleTextureCoordiantes,
+  getTextureCoordinates,
   boundsContain,
-  getTriangleVertices,
-  parseData
+  getTriangleVertices
 } from '@deck.gl/aggregation-layers/heatmap-layer/heatmap-layer-utils';
-test('HeatmapLayerUtils#parseData', t => {
-  const TESTS_CASE = {
-    data: [
-      {
-        p: [0, 0],
-        w: [0]
-      },
-      {
-        p: [1, 1, 1],
-        w: [1]
-      },
-      {
-        p: [2, 2],
-        w: [20]
-      }
-    ],
-    getPosition: x => x.p,
-    getWeight: x => x.w,
-    positions: [0, 0, 0, 1, 1, 1, 2, 2, 0],
-    weights: [0, 1, 20]
-  };
-
-  const actual = parseData(TESTS_CASE.data, TESTS_CASE.getPosition, TESTS_CASE.getWeight);
-  t.deepEqual(actual.positions, TESTS_CASE.positions, 'should return correct positions array');
-  t.deepEqual(actual.weights, TESTS_CASE.weights, 'should return correct weights array');
-  t.end();
-});
 
 test('HeatmapLayerUtils#boundsContain', t => {
   const TESTS = [
@@ -120,7 +92,7 @@ test('HeatmapLayerUtils#getTriangleVertices', t => {
   t.end();
 });
 
-test('HeatmapLayerUtils#scaleTextureCoordiantes', t => {
+test('HeatmapLayerUtils#getTextureCoordinates', t => {
   const TESTS = [
     {
       originalRect: [[0, 0], [100, 100]],
@@ -140,8 +112,8 @@ test('HeatmapLayerUtils#scaleTextureCoordiantes', t => {
   ];
 
   TESTS.forEach(tc => {
-    const actual = scaleTextureCoordiantes(tc.originalRect, tc.subRect);
-    t.deepEqual(actual, tc.expected, 'should return correct coordiantes');
+    const actual = getTextureCoordinates(tc.originalRect, tc.subRect);
+    t.deepEqual(actual, tc.expected, 'should return correct coordinates');
   });
   t.end();
 });
