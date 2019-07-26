@@ -55,17 +55,17 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
     .scale(far * nearFarScale)
     .add(cameraPosition);
 
-  let n = cameraDirection.clone().negate();
-  let d = n.dot(nearCenter);
+  let normal = cameraDirection.clone().negate();
+  let distance = normal.dot(nearCenter);
 
   const planes = {
     near: {
-      d,
-      n
+      distance,
+      normal
     },
     far: {
-      d: cameraDirection.dot(farCenter),
-      n: cameraDirection.clone()
+      distance: cameraDirection.dot(farCenter),
+      normal: cameraDirection.clone()
     }
   };
 
@@ -74,36 +74,36 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  n = new Vector3(cameraUp).cross(a);
-  d = cameraPosition.dot(n);
-  planes.right = {n, d};
+  normal = new Vector3(cameraUp).cross(a);
+  distance = cameraPosition.dot(normal);
+  planes.right = {normal, distance};
 
   a.copy(cameraRight)
     .scale(-nearWidth * 0.5)
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  n = new Vector3(a).cross(cameraUp);
-  d = cameraPosition.dot(n);
-  planes.left = {n, d};
+  normal = new Vector3(a).cross(cameraUp);
+  distance = cameraPosition.dot(normal);
+  planes.left = {normal, distance};
 
   a.copy(cameraUp)
     .scale(nearHeight * 0.5)
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  n = new Vector3(a).cross(cameraRight);
-  d = cameraPosition.dot(n);
-  planes.top = {n, d};
+  normal = new Vector3(a).cross(cameraRight);
+  distance = cameraPosition.dot(normal);
+  planes.top = {normal, distance};
 
   a.copy(cameraUp)
     .scale(-nearHeight * 0.5)
     .add(nearCenter)
     .subtract(cameraPosition)
     .normalize();
-  n = new Vector3(cameraRight).cross(a);
-  d = cameraPosition.dot(n);
-  planes.bottom = {n, d};
+  normal = new Vector3(cameraRight).cross(a);
+  distance = cameraPosition.dot(normal);
+  planes.bottom = {normal, distance};
 
   return planes;
 }

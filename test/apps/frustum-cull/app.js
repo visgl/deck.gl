@@ -52,7 +52,7 @@ class Root extends Component {
     for (const dir in frustumPlanes) {
       const plane = frustumPlanes[dir];
 
-      if (testPosition.copy(commonPosition).dot(plane.n) > plane.d) {
+      if (testPosition.copy(commonPosition).dot(plane.normal) > plane.distance) {
         out = true;
         outDir = dir;
         break;

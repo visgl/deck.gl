@@ -6,28 +6,28 @@ const ROOT2 = 0.7071;
 
 const EXPECTED_PLANES = {
   near: {
-    d: 0,
-    n: [0, 0, 1]
+    distance: 0,
+    normal: [0, 0, 1]
   },
   far: {
-    d: 9,
-    n: [0, 0, -1]
+    distance: 9,
+    normal: [0, 0, -1]
   },
   left: {
-    d: ROOT2,
-    n: [-ROOT2, 0, ROOT2]
+    distance: ROOT2,
+    normal: [-ROOT2, 0, ROOT2]
   },
   right: {
-    d: ROOT2,
-    n: [ROOT2, 0, ROOT2]
+    distance: ROOT2,
+    normal: [ROOT2, 0, ROOT2]
   },
   top: {
-    d: ROOT2,
-    n: [0, -ROOT2, ROOT2]
+    distance: ROOT2,
+    normal: [0, -ROOT2, ROOT2]
   },
   bottom: {
-    d: ROOT2,
-    n: [0, ROOT2, ROOT2]
+    distance: ROOT2,
+    normal: [0, ROOT2, ROOT2]
   }
 };
 
@@ -49,8 +49,8 @@ test('getFrustumPlanes#tests', t => {
   for (const plane in planes) {
     const calculated = planes[plane];
     const expected = EXPECTED_PLANES[plane];
-    t.ok(floatEquals(calculated.d, expected.d), 'd is equal');
-    t.ok(vecEquals(calculated.n, expected.n), 'n is equal');
+    t.ok(floatEquals(calculated.distance, expected.distance), 'distance is equal');
+    t.ok(vecEquals(calculated.normal, expected.normal), 'normal is equal');
   }
 
   t.end();
