@@ -73,7 +73,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 * Default: `30`
 
-Radius of the circle to which weight of an object is distributed, in pixels.
+Radius of the circle in pixels, to which weight of an object is distributed.
 
 ##### `colorRange` (Array, optional)
 
@@ -92,7 +92,7 @@ Value that is multiplied with weight of every object to obtain the final weight.
 
 * Default: `20`
 
-In final rendering weight of pixel determines its opacity, this will help smoothen the boundaries at the same time, pixels with low relative weight are hard to spot. `enhanceFactor` can be increased to increase the opacity while keeping the hot spots unchanged.
+In final rendering weight of pixel determines its opacity, this will help smoothen the boundaries, but at the same time, pixels with low relative weight are hard to spot (due to low alpha value). `enhanceFactor` can be increased to increase the opacity while keeping the hot spots unchanged.
 
 ### Data Accessors
 
