@@ -173,7 +173,7 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
   // Run successive update tests
   for (let i = 0; i < testCases.length; i++) {
     const testCase = testCases[i];
-    const {props, updateProps, onBeforeUpdate, onAfterUpdate} = testCase;
+    const {props, updateProps, onBeforeUpdate, onAfterUpdate, viewport = testViewport} = testCase;
 
     spies = testCase.spies || spies;
 
@@ -204,7 +204,7 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
       `drawing ${layer.id}`,
       () =>
         deckRenderer.renderLayers({
-          viewports: [testViewport],
+          viewports: [viewport],
           layers: layerManager.getLayers(),
           activateViewport: layerManager.activateViewport
         }),

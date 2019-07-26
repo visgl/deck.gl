@@ -75,7 +75,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 * Default: `30`
 
-Radius of the circle in pixels, to which weight of an object is distributed.
+Radius of the circle in pixels, to which the weight of an object is distributed.
 
 ##### `colorRange` (Array, optional)
 
@@ -88,7 +88,7 @@ Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an
 
 * Default: `1`
 
-Value that is multiplied with weight of every object to obtain the final weight.
+Value that is multiplied with the weight of every object to obtain the final weight.
 
 ##### `enhanceFactor` (Number, optional)
 

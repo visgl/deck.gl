@@ -41,7 +41,8 @@ import {
   ContourLayer,
   ScreenGridLayer,
   CPUGridLayer,
-  HexagonLayer
+  HexagonLayer,
+  HeatmapLayer
 } from '@deck.gl/aggregation-layers';
 import {H3HexagonLayer, H3ClusterLayer, S2Layer, TripsLayer} from '@deck.gl/geo-layers';
 
@@ -94,6 +95,18 @@ const HEXAGON_LAYER_INFO = {
     getPosition: d => d.COORDINATES
   }
 };
+
+const HEATMAP_LAYER_INFO = {
+  props: {
+    data: dataSamples.points,
+    pickable: false,
+    getPosition: d => d.COORDINATES,
+    radiusPixels: 35,
+    enhanceFactor: 25
+  },
+  goldenImage: './test/render/golden-images/heatmap-lnglat.png'
+};
+HEATMAP_LAYER_INFO.viewState = GRID_LAYER_INFO.viewsState;
 
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
@@ -923,6 +936,18 @@ export const TEST_CASES = [
       )
     ],
     goldenImage: './test/render/golden-images/hexagon-lnglat.png'
+  },
+  {
+    name: 'heatmap-lnglat',
+    viewState: HEATMAP_LAYER_INFO.viewState,
+    layers: [
+      new HeatmapLayer(
+        Object.assign({}, HEATMAP_LAYER_INFO.props, {
+          id: 'heatmap-lnglat'
+        })
+      )
+    ],
+    goldenImage: HEATMAP_LAYER_INFO.goldenImage
   },
   {
     name: 'pointcloud-lnglat',
