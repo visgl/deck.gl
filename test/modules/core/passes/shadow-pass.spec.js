@@ -8,16 +8,16 @@ import gl from '@deck.gl/test-utils/utils/setup-gl';
 test('ShadowPass#constructor and delete', t => {
   const shadowPass = new ShadowPass(gl, {pixelRatio: 1.0});
 
-  t.ok(shadowPass, `ShadowPass is constructed well`);
-  t.ok(shadowPass.shadowMap, `ShadowPass creates shadow map well`);
-  t.ok(shadowPass.depthBuffer, `ShadowPass creates depth buffer well`);
-  t.ok(shadowPass.fbo, `ShadowPass creates fbo well`);
+  t.ok(shadowPass, `ShadowPass is constructed`);
+  t.ok(shadowPass.shadowMap, `ShadowPass creates shadow map`);
+  t.ok(shadowPass.depthBuffer, `ShadowPass creates depth buffer`);
+  t.ok(shadowPass.fbo, `ShadowPass creates fbo`);
 
   shadowPass.delete();
 
-  t.notOk(shadowPass.shadowMap, `ShadowPass deletes shadow map well`);
-  t.notOk(shadowPass.depthBuffer, `ShadowPass deletes depth buffer well`);
-  t.notOk(shadowPass.fbo, `ShadowPass deletes fbo well`);
+  t.notOk(shadowPass.shadowMap, `ShadowPass deletes shadow map`);
+  t.notOk(shadowPass.depthBuffer, `ShadowPass deletes depth buffer`);
+  t.notOk(shadowPass.fbo, `ShadowPass deletes fbo`);
   t.end();
 });
 
@@ -48,8 +48,8 @@ test('ShadowPass#render', t => {
     effectProps: {shadow_lightId: 0}
   });
 
-  t.equal(shadowPass.shadowMap.width, 100, `ShadowPass resize shadow map width well`);
-  t.equal(shadowPass.shadowMap.height, 100, `ShadowPass resize shadow map height well`);
+  t.equal(shadowPass.shadowMap.width, 100, `ShadowPass resize shadow map width`);
+  t.equal(shadowPass.shadowMap.height, 100, `ShadowPass resize shadow map height`);
   shadowPass.delete();
   t.end();
 });

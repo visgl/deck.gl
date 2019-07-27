@@ -1,12 +1,14 @@
 import {deepEqual} from '../utils/deep-equal';
 import {default as LightingEffect} from '../effects/lighting/lighting-effect';
 
+const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
+
 export default class EffectManager {
   constructor() {
     this.effects = [];
     this._internalEffects = [];
     this._needsRedraw = 'Initial render';
-    this.defaultLightingEffect = new LightingEffect();
+    this.defaultLightingEffect = DEFAULT_LIGHTING_EFFECT;
     this.setEffects();
   }
 

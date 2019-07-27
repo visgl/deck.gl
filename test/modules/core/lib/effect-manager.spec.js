@@ -95,7 +95,7 @@ test('EffectManager#finalize', t => {
   effectManager.finalize();
   const resEnd = getResourceCounts();
 
-  t.deepEqual(resBegin, resEnd, 'Effect manager is finalized well');
+  t.deepEqual(resBegin, resEnd, 'Effect manager is finalized');
   t.end();
 });
 

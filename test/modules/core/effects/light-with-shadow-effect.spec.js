@@ -9,9 +9,9 @@ test('LightWithShadowEffect#constructor', t => {
   const lightingEffect = new LightWithShadowEffect();
   lightingEffect.cleanup();
 
-  t.ok(lightingEffect, 'LightWithShadowEffect created well');
-  t.ok(lightingEffect.ambientLight, 'Default ambient light created well');
-  t.equal(lightingEffect.directionalLights.length, 2, 'Default directional lights created well');
+  t.ok(lightingEffect, 'LightWithShadowEffect created');
+  t.ok(lightingEffect.ambientLight, 'Default ambient light created');
+  t.equal(lightingEffect.directionalLights.length, 2, 'Default directional lights created');
   t.end();
 });
 
@@ -33,32 +33,20 @@ test('LightWithShadowEffect#prepare and cleanup', t => {
   layer.context = {viewport};
   lightingEffect.prepare(gl, {layers: [layer], viewports: [viewport], pixelRatio: 1});
 
-  t.equal(
-    lightingEffect.lightMatrices.length,
-    2,
-    'LightWithShadowEffect prepares light matrices well'
-  );
-  t.equal(
-    lightingEffect.shadowPasses.length,
-    2,
-    'LightWithShadowEffect prepares shadow passes well'
-  );
+  t.equal(lightingEffect.lightMatrices.length, 2, 'LightWithShadowEffect prepares light matrices');
+  t.equal(lightingEffect.shadowPasses.length, 2, 'LightWithShadowEffect prepares shadow passes');
   t.equal(
     lightingEffect.dummyShadowMaps.length,
     2,
-    'LightWithShadowEffect prepares dummy shadow maps well'
+    'LightWithShadowEffect prepares dummy shadow maps'
   );
 
   lightingEffect.cleanup();
-  t.equal(
-    lightingEffect.shadowPasses.length,
-    0,
-    'LightWithShadowEffect prepares shadow passes well'
-  );
+  t.equal(lightingEffect.shadowPasses.length, 0, 'LightWithShadowEffect prepares shadow passes');
   t.equal(
     lightingEffect.dummyShadowMaps.length,
     0,
-    'LightWithShadowEffect prepares dummy shadow maps well'
+    'LightWithShadowEffect prepares dummy shadow maps'
   );
   t.end();
 });
