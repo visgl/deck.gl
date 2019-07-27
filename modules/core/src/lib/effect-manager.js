@@ -8,7 +8,6 @@ export default class EffectManager {
     this.effects = [];
     this._internalEffects = [];
     this._needsRedraw = 'Initial render';
-    this.defaultLightingEffect = DEFAULT_LIGHTING_EFFECT;
     this.setEffects();
   }
 
@@ -59,7 +58,7 @@ export default class EffectManager {
   _createInternalEffects() {
     this._internalEffects = this.effects.slice();
     if (!this.effects.some(effect => effect instanceof LightingEffect)) {
-      this._internalEffects.push(this.defaultLightingEffect);
+      this._internalEffects.push(DEFAULT_LIGHTING_EFFECT);
     }
   }
 }
