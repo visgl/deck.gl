@@ -111,7 +111,7 @@ color = shadow_filterShadowColor(color);
   `
 });
 
-const DEFAULT_shadow_Color = [0, 0, 0, 1.0];
+const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
 function _getViewportCenterPosition({viewport, center}) {
@@ -122,7 +122,7 @@ function createShadowUniforms(opts = {}, context = {}) {
   const uniforms = {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
     shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
-    shadow_uColor: opts.shadowColor || DEFAULT_shadow_Color,
+    shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
     shadow_uLightId: opts.shadow_lightId,
     shadow_uLightCount: opts.shadow_viewProjectionMatrices.length
   };

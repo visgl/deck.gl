@@ -5,10 +5,12 @@ import {Texture2D} from '@luma.gl/core';
 import {default as shadow} from '../../shaderlib/shadow/shadow';
 import {setDefaultShaderModules, getDefaultShaderModules} from '@luma.gl/core';
 
+const DEFAULT_SHADOW_COLOR = [2 / 255, 0, 5 / 255, 200 / 255];
+
 export default class LightWithShadowEffect extends LightingEffect {
   constructor(props) {
     super(props);
-    this.shadowColor = [2 / 255, 0, 5 / 255, 200 / 255];
+    this.shadowColor = DEFAULT_SHADOW_COLOR;
     this.shadowPasses = [];
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
