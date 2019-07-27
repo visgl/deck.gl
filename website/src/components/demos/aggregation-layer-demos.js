@@ -8,7 +8,8 @@ import {
   HexagonLayer,
   ScreenGridLayer,
   GPUGridLayer,
-  GridLayer
+  GridLayer,
+  HeatmapLayer
 } from '@deck.gl/aggregation-layers';
 
 export const ContourLayerDemo = createLayerDemoClass({
@@ -85,5 +86,17 @@ export const ScreenGridLayerDemo = createLayerDemoClass({
     ],
     getPosition: d => d.COORDINATES,
     getWeight: d => d.SPACES
+  }
+});
+
+export const HeatmapLayerDemo = createLayerDemoClass({
+  Layer: HeatmapLayer,
+  dataUrl: `${DATA_URI}/sf-bike-parking.json`,
+  formatTooltip: d => 'heatmap',
+  props: {
+    pickable: false,
+    getPosition: d => d.COORDINATES,
+    radiusPixels: 25,
+    enhanceFactor: 20
   }
 });

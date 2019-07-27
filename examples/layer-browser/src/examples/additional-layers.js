@@ -7,8 +7,7 @@ import {
   // KMLLayer
 } from '@deck.gl/geo-layers';
 
-import {GPUGridLayer} from '@deck.gl/aggregation-layers';
-import {GridLayer} from '@deck.gl/aggregation-layers';
+import {GPUGridLayer, GridLayer, HeatmapLayer} from '@deck.gl/aggregation-layers';
 import * as h3 from 'h3-js';
 
 import {registerLoaders} from '@loaders.gl/core';
@@ -30,8 +29,19 @@ const GRID_LAYER_PROPS = {
   }
 };
 
+const HEAT_LAYER_PROPS = {
+  getData: () => dataSamples.points,
+  props: {
+    id: 'heatmp-layer',
+    opacity: 1,
+    pickable: false,
+    getPosition: d => d.COORDINATES
+  }
+};
+
 const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GRID_LAYER_PROPS);
 const GridLayerExample = Object.assign({}, {layer: GridLayer}, GRID_LAYER_PROPS);
+const HeatmapLayerExample = Object.assign({}, {layer: HeatmapLayer}, HEAT_LAYER_PROPS);
 
 const GPUGridLayerPerfExample = (id, getData) => ({
   layer: GPUGridLayer,
@@ -137,6 +147,7 @@ export default {
   'Experimental Core Layers': {
     GPUGridLayer: GPUGridLayerExample,
     GridLayer: GridLayerExample,
+    HeatmapLayer: HeatmapLayerExample,
     'GPUGridLayer (1M)': GPUGridLayerPerfExample('1M', dataSamples.getPoints1M),
     'GPUGridLayer (5M)': GPUGridLayerPerfExample('5M', dataSamples.getPoints5M)
   }

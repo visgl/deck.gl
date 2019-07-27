@@ -17,31 +17,35 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-/* eslint-disable max-len */
 
-export {default as ScreenGridLayer} from './screen-grid-layer/screen-grid-layer';
-export {default as CPUGridLayer} from './cpu-grid-layer/cpu-grid-layer';
-export {default as HexagonLayer} from './hexagon-layer/hexagon-layer';
-export {default as ContourLayer} from './contour-layer/contour-layer';
-export {default as GridLayer} from './grid-layer/grid-layer';
-export {default as GPUGridLayer} from './gpu-grid-layer/gpu-grid-layer';
-export {AGGREGATION_OPERATION} from './utils/aggregation-operation-utils';
+export default `\
+#define SHADER_NAME triangle-layer-fragment-shader
 
-// experimental export
-export {default as HeatmapLayer} from './heatmap-layer/heatmap-layer';
-export {default as _GPUGridAggregator} from './utils/gpu-grid-aggregation/gpu-grid-aggregator';
+precision highp float;
 
-import {default as BinSorter} from './utils/bin-sorter';
-import {linearScale, getLinearScale, quantizeScale, getQuantizeScale} from './utils/scale-utils';
-import {defaultColorRange} from './utils/color-utils';
+uniform float opacity;
+uniform sampler2D texture;
+varying vec2 vTexCoords;
+uniform sampler2D maxTexture;
+uniform sampler2D colorTexture;
+uniform float opacityFactor;
 
-export const experimental = {
-  BinSorter,
 
-  linearScale,
-  getLinearScale,
-  quantizeScale,
-  getQuantizeScale,
+vec4 getLinearColor(float value, float maxValue) {
+  float factor = clamp(value/(maxValue), 0., 1.);
+  vec4 color = texture2D(colorTexture, vec2(factor, 0.5));
+  color.a = clamp(opacityFactor * factor, 0., 1.);
+  return color;
+}
 
-  defaultColorRange
-};
+void main(void) {
+  vec4 weight = texture2D(texture, vTexCoords);
+  if (weight.r == 0.) {
+     discard;
+  }
+  float maxValue = texture2D(maxTexture, vec2(0.5)).r;
+  vec4 linearColor = getLinearColor(weight.r, maxValue);
+  linearColor.a *= opacity;
+  gl_FragColor =linearColor;
+}
+`;
