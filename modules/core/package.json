@@ -35,7 +35,7 @@
   "dependencies": {
     "@loaders.gl/core": "^1.1.6",
     "@loaders.gl/images": "^1.1.6",
-    "@luma.gl/core": "^7.2.0-alpha.5",
+    "@luma.gl/core": "^7.2.0-alpha.6",
     "gl-matrix": "^3.0.0",
     "math.gl": "^2.3.0",
     "mjolnir.js": "^2.1.2",
