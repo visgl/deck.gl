@@ -46,15 +46,6 @@ export default class TriangleLayer extends Layer {
     });
   }
 
-  updateState(opts) {
-    super.updateState(opts);
-
-    if (opts.changeFlags.dataChanged) {
-      const attributeManager = this.getAttributeManager();
-      attributeManager.invalidateAll();
-    }
-  }
-
   _getModel(gl) {
     const {count} = this.props;
 

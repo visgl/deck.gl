@@ -82,7 +82,6 @@ export default class HeatmapLayer extends CompositeLayer {
       this._updateColorTexture(opts);
     }
 
-    // TODO: need to be fixed, seem to be rendring wrong part of the texture
     if (changeFlags.viewportChanged) {
       this._updateTextureRenderingBounds();
     }
@@ -127,15 +126,19 @@ export default class HeatmapLayer extends CompositeLayer {
     const {
       weightsTransform,
       weightsTexture,
+      maxWeightTransform,
       maxWeightsTexture,
       triPositionBuffer,
-      triTexCoordBuffer
+      triTexCoordBuffer,
+      colorTexture
     } = this.state;
     weightsTransform.delete();
     weightsTexture.delete();
+    maxWeightTransform.delete();
     maxWeightsTexture.delete();
     triPositionBuffer.delete();
     triTexCoordBuffer.delete();
+    colorTexture.delete();
   }
 
   // PRIVATE
