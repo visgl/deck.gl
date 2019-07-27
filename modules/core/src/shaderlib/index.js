@@ -29,6 +29,7 @@ import geometry from './misc/geometry';
 import project from './project/project';
 import project32 from './project32/project32';
 import project64 from './project64/project64';
+import shadow from './shadow/shadow';
 
 export function initializeShaderModules() {
   registerShaderModules([fp32, project, project32, gouraudlighting, phonglighting, picking]);
@@ -53,4 +54,4 @@ export function initializeShaderModules() {
   });
 }
 
-export {picking, project, project64, gouraudlighting, phonglighting};
+export {picking, project, project64, gouraudlighting, phonglighting, shadow};
