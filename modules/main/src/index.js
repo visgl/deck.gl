@@ -141,7 +141,8 @@ export {
   ContourLayer,
   GridLayer,
   GPUGridLayer,
-  AGGREGATION_OPERATION
+  AGGREGATION_OPERATION,
+  HeatmapLayer
 } from '@deck.gl/aggregation-layers';
 
 export {
