@@ -44,6 +44,10 @@ const defaultProps = {
   _animations: null,
 
   sizeScale: {type: 'number', value: 1, min: 0},
+  sizeMinPixels: {type: 'number', min: 0, value: 0},
+  sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER},
+  sizePixelsDimension: {type: 'number', value: 100, min: 0},
+
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
   opacity: {type: 'number', min: 0, max: 1, value: 1.0},
@@ -250,7 +254,14 @@ export default class ScenegraphLayer extends Layer {
       this.state.animator.animate(context.animationProps.time);
     }
 
-    const {sizeScale, opacity, _composeModelMatrix} = this.props;
+    const {
+      sizeScale,
+      sizeMinPixels,
+      sizeMaxPixels,
+      sizePixelsDimension,
+      opacity,
+      _composeModelMatrix
+    } = this.props;
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((model, {worldMatrix}) => {
       model.model.setInstanceCount(numInstances);
@@ -261,6 +272,7 @@ export default class ScenegraphLayer extends Layer {
           sizeScale,
           opacity,
           enableOffsetModelMatrix: _composeModelMatrix,
+          sizePixels: [sizeMinPixels, sizeMaxPixels, sizePixelsDimension],
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           u_Camera: model.model.program.uniforms.project_uCameraPosition
