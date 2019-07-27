@@ -1,12 +1,14 @@
 import {deepEqual} from '../utils/deep-equal';
 import {default as LightingEffect} from '../effects/lighting/lighting-effect';
 
+const DEFAULT_LIGHTING_EFFECT = new LightingEffect();
+
 export default class EffectManager {
   constructor() {
     this.effects = [];
+    this._internalEffects = [];
     this._needsRedraw = 'Initial render';
-    this.defaultLightingEffect = new LightingEffect();
-    this.needApplyDefaultLighting = false;
+    this.setEffects();
   }
 
   setProps(props) {
@@ -16,7 +18,6 @@ export default class EffectManager {
         this._needsRedraw = 'effects changed';
       }
     }
-    this.checkLightingEffect();
   }
 
   needsRedraw(opts = {clearRedrawFlags: false}) {
@@ -28,12 +29,7 @@ export default class EffectManager {
   }
 
   getEffects() {
-    let effects = this.effects;
-    if (this.needApplyDefaultLighting) {
-      effects = this.effects.slice();
-      effects.push(this.defaultLightingEffect);
-    }
-    return effects;
+    return this._internalEffects;
   }
 
   finalize() {
@@ -44,23 +40,25 @@ export default class EffectManager {
   setEffects(effects = []) {
     this.cleanup();
     this.effects = effects;
+    this._createInternalEffects();
   }
 
   cleanup() {
     for (const effect of this.effects) {
       effect.cleanup();
     }
+
+    for (const effect of this._internalEffects) {
+      effect.cleanup();
+    }
     this.effects.length = 0;
+    this._internalEffects.length = 0;
   }
 
-  checkLightingEffect() {
-    let hasEffect = false;
-    for (const effect of this.effects) {
-      if (effect instanceof LightingEffect) {
-        hasEffect = true;
-        break;
-      }
+  _createInternalEffects() {
+    this._internalEffects = this.effects.slice();
+    if (!this.effects.some(effect => effect instanceof LightingEffect)) {
+      this._internalEffects.push(DEFAULT_LIGHTING_EFFECT);
     }
-    this.needApplyDefaultLighting = !hasEffect;
   }
 }

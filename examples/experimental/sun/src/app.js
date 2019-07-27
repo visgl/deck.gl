@@ -2,11 +2,9 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from 'deck.gl';
-import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
+import {AmbientLight, DirectionalLight, _LightWithShadowEffect} from '@deck.gl/core';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 import {PhongMaterial} from '@luma.gl/core';
-
-import ShadowPolygonLayer from './shadow-polygon-layer';
-import ShadowEffect from './shadow-effect/shadow-effect';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -20,13 +18,19 @@ const ambientLight = new AmbientLight({
   intensity: 1.0
 });
 
-const dirLight = new DirectionalLight({
+const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
-  intensity: 2.0,
+  intensity: 1.0,
   direction: [10, -20, -30]
 });
 
-const lightingEffect = new LightingEffect({ambientLight, dirLight});
+const dirLight1 = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 1.0,
+  direction: [-10, -20, -30]
+});
+
+const lightingEffect = new _LightWithShadowEffect({ambientLight, dirLight0, dirLight1});
 
 const material = new PhongMaterial({
   ambient: 0.1,
@@ -34,8 +38,6 @@ const material = new PhongMaterial({
   shininess: 32,
   specularColor: [60, 64, 70]
 });
-
-const shadowEffect = new ShadowEffect({shadowColor: [2, 0, 5, 200]});
 
 const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 
@@ -60,7 +62,7 @@ export class App extends Component {
     const {data = DATA_URL} = this.props;
 
     return [
-      new ShadowPolygonLayer({
+      new SolidPolygonLayer({
         id: 'buildings',
         data,
         opacity: 1,
@@ -68,10 +70,9 @@ export class App extends Component {
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
         getFillColor: [74, 80, 87],
-        material,
-        castShadow: true
+        material
       }),
-      new ShadowPolygonLayer({
+      new SolidPolygonLayer({
         id: 'land',
         data: landCover,
         opacity: 1,
@@ -91,7 +92,7 @@ export class App extends Component {
           this._deck = ref && ref.deck;
         }}
         layers={this._renderLayers()}
-        effects={[lightingEffect, shadowEffect]}
+        effects={[lightingEffect]}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={controller}

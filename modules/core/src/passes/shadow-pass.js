@@ -1,9 +1,9 @@
-import {_LayersPass as LayersPass} from '@deck.gl/core';
+import {default as LayersPass} from './layers-pass';
 import {Framebuffer, Texture2D, Renderbuffer, withParameters} from '@luma.gl/core';
 
 export default class ShadowPass extends LayersPass {
-  constructor(gl) {
-    super(gl);
+  constructor(gl, props) {
+    super(gl, props);
 
     // The shadowMap texture
     this.shadowMap = new Texture2D(gl, {
@@ -33,7 +33,6 @@ export default class ShadowPass extends LayersPass {
         [gl.DEPTH_ATTACHMENT]: this.depthBuffer
       }
     });
-    this.props.pixelRatio = 2;
   }
 
   render(params) {
@@ -52,30 +51,23 @@ export default class ShadowPass extends LayersPass {
         const width = viewport.width * this.props.pixelRatio;
         const height = viewport.height * this.props.pixelRatio;
         if (width !== target.width || height !== target.height) {
-          // this.shadowMap.resize({width, height});
           target.resize({width, height});
         }
 
         super.render(Object.assign(params, {outputBuffer: target}));
-        // this.target.generateMipmap();
       }
     );
-  }
-
-  shouldDrawLayer(layer) {
-    return layer.props.castShadow;
   }
 
   getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
-      pickingActive: 1,
+      pickingActive: 0,
       drawToShadowMap: true,
       devicePixelRatio: this.props.pixelRatio
     });
-    for (const effect of effects) {
-      Object.assign(moduleParameters, effect.getParameters(layer));
-    }
+
+    Object.assign(moduleParameters, effectProps);
     return moduleParameters;
   }
 

@@ -41,7 +41,7 @@ test('PickLayersPass#drawPickingBuffer', t => {
   const subLayers = layer.getSubLayers();
   const models = subLayers[0].getModels();
 
-  t.ok(`PickLayersPass rendered well`);
+  t.ok(`PickLayersPass rendered`);
   t.equal(
     models[0].program.uniforms.lighting_uEnabled,
     false,
