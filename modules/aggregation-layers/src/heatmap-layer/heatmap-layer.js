@@ -271,7 +271,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateWeightmapAttributes() {
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
-    this.updateAttributes(this.props);
+    this._updateAttributes(this.props);
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     this.state.weightsTransform.update({

@@ -235,13 +235,10 @@ export default class ScenegraphLayer extends Layer {
     };
   }
 
-  updateAttributes(props) {
-    super.updateAttributes(props);
+  updateAttributes(changedAttributes) {
     this.setState({attributesAvailable: true});
     if (!this.state.scenegraph) return;
 
-    const attributeManager = this.getAttributeManager();
-    const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
     this.state.scenegraph.traverse(model => {
       this._setModelAttributes(model.model, changedAttributes);
     });

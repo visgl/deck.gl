@@ -384,8 +384,14 @@ export default class Layer extends Component {
     }
   }
 
+  updateAttributes(changedAttributes) {
+    for (const model of this.getModels()) {
+      this._setModelAttributes(model, changedAttributes);
+    }
+  }
+
   // Calls attribute manager to update any WebGL attributes
-  updateAttributes(props) {
+  _updateAttributes(props) {
     const attributeManager = this.getAttributeManager();
     if (!attributeManager) {
       return;
@@ -407,14 +413,8 @@ export default class Layer extends Component {
       ignoreUnknownAttributes: true
     });
 
-    const models = this.getModels();
-
-    if (models.length > 0) {
-      const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-      for (let i = 0, len = models.length; i < len; ++i) {
-        this._setModelAttributes(models[i], changedAttributes);
-      }
-    }
+    const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
+    this.updateAttributes(changedAttributes);
   }
 
   // Update attribute transition
@@ -649,7 +649,7 @@ export default class Layer extends Component {
     } else {
       this.setNeedsRedraw();
       // Add any subclass attributes
-      this.updateAttributes(this.props);
+      this._updateAttributes(this.props);
       this._updateBaseUniforms();
 
       // Note: Automatic instance count update only works for single layers

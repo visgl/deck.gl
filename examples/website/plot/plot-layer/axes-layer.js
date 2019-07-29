@@ -156,20 +156,8 @@ export default class AxesLayer extends Layer {
     }
   }
 
-  updateAttributes(props) {
-    super.updateAttributes(props);
-    const {attributeManager, modelsByName, numInstances} = this.state;
-    const changedAttributes = attributeManager.getChangedAttributes({clearChangedFlags: true});
-
-    modelsByName.grids.setInstanceCount(numInstances);
-    modelsByName.grids.setAttributes(changedAttributes);
-
-    modelsByName.labels.setInstanceCount(numInstances);
-    modelsByName.labels.setAttributes(changedAttributes);
-  }
-
-  draw({uniforms, moduleParameters}) {
-    const {gridDims, gridCenter, modelsByName, labelTexture} = this.state;
+  draw({uniforms}) {
+    const {gridDims, gridCenter, modelsByName, labelTexture, numInstances} = this.state;
     const {fontSize, color, padding} = this.props;
 
     if (labelTexture) {
@@ -181,10 +169,8 @@ export default class AxesLayer extends Layer {
         strokeColor: color
       };
 
-      if (moduleParameters) {
-        modelsByName.grids.updateModuleSettings(moduleParameters);
-        modelsByName.labels.updateModuleSettings(moduleParameters);
-      }
+      modelsByName.grids.setInstanceCount(numInstances);
+      modelsByName.labels.setInstanceCount(numInstances);
 
       modelsByName.grids.setUniforms(Object.assign({}, uniforms, baseUniforms)).draw();
       modelsByName.labels
