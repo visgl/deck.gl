@@ -10,8 +10,8 @@ import {Matrix4, Vector3} from 'math.gl';
 import ShadowPass from '../../passes/shadow-pass';
 import {default as shadow} from '../../shaderlib/shadow/shadow';
 
-const DefaultAmbientLightProps = {color: [255, 255, 255], intensity: 1.0};
-const DefaultDirectionalLightProps = [
+const DEFAULT_AMBIENT_LIGHT_PROPS = {color: [255, 255, 255], intensity: 1.0};
+const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
   {
     color: [255, 255, 255],
     intensity: 1.0,
@@ -23,7 +23,7 @@ const DefaultDirectionalLightProps = [
     direction: [1, 8, -2.5]
   }
 ];
-const DefaultShadowColor = [0, 0, 0, 200 / 255];
+const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
 
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
@@ -33,7 +33,7 @@ export default class LightingEffect extends Effect {
     this.directionalLights = [];
     this.pointLights = [];
 
-    this.shadowColor = DefaultShadowColor;
+    this.shadowColor = DEFAULT_SHADOW_COLOR;
     this.shadowPasses = [];
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
@@ -196,9 +196,9 @@ export default class LightingEffect extends Effect {
   _applyDefaultLights() {
     const {ambientLight, pointLights, directionalLights} = this;
     if (!ambientLight && pointLights.length === 0 && directionalLights.length === 0) {
-      this.ambientLight = new AmbientLight(DefaultAmbientLightProps);
-      this.directionalLights.push(new DirectionalLight(DefaultDirectionalLightProps[0]));
-      this.directionalLights.push(new DirectionalLight(DefaultDirectionalLightProps[1]));
+      this.ambientLight = new AmbientLight(DEFAULT_AMBIENT_LIGHT_PROPS);
+      this.directionalLights.push(new DirectionalLight(DEFAULT_DIRECTIONAL_LIGHT_PROPS[0]));
+      this.directionalLights.push(new DirectionalLight(DEFAULT_DIRECTIONAL_LIGHT_PROPS[1]));
     }
   }
 
