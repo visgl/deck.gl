@@ -88,12 +88,12 @@ test('HeatmapLayer#updates', t => {
           pickable: false
         },
         onAfterUpdate({layer, subLayer}) {
-          const {worldBounds, normalizedCommonBounds} = layer.state;
+          const {worldBounds, viewportCorners} = layer.state;
 
           t.ok(subLayer instanceof TriangleLayer, 'Sublayer Triangle layer rendered');
 
           t.ok(worldBounds, 'should compute worldBounds');
-          t.ok(normalizedCommonBounds, 'should compute commonBounds');
+          t.ok(viewportCorners, 'should compute viewportCorners');
         }
       },
       {
@@ -118,7 +118,6 @@ test('HeatmapLayer#updates', t => {
         spies: [
           '_updateColorTexture',
           '_updateBounds',
-          '_updateWeightmapAttributes',
           '_updateWeightmap',
           '_updateTextureRenderingBounds'
         ],
@@ -126,10 +125,6 @@ test('HeatmapLayer#updates', t => {
           const {zoom} = layer.state;
           t.notOk(spies._updateColorTexture.called, 'should not update color texture');
           t.ok(spies._updateBounds.called, 'viewport changed, should call _updateBounds');
-          t.notOk(
-            spies._updateWeightmapAttributes.called,
-            'data not changed, should not call _updateWeightmapAttributes'
-          );
           t.ok(spies._updateWeightmap.called, 'boundsChanged changed, should _updateWeightmap');
           t.ok(
             spies._updateTextureRenderingBounds.called,
@@ -138,7 +133,6 @@ test('HeatmapLayer#updates', t => {
           t.equal(zoom, viewport1.zoom, 'should update state.zoom');
           spies._updateColorTexture.restore();
           spies._updateBounds.restore();
-          spies._updateWeightmapAttributes.restore();
           spies._updateWeightmap.restore();
           spies._updateTextureRenderingBounds.restore();
         }

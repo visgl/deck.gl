@@ -21,8 +21,9 @@
 /* global setTimeout */
 import GL from '@luma.gl/constants';
 import {
+  getBounds,
   boundsContain,
-  getTriangleVertices,
+  packVertices,
   scaleToAspectRatio,
   getTextureCoordinates
 } from './heatmap-layer-utils';
@@ -41,7 +42,7 @@ const ZOOM_DEBOUNCE = 500; // milliseconds
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
-  getWeight: {type: 'accessor', value: x => 1},
+  getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, max: 1, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
@@ -70,10 +71,6 @@ export default class HeatmapLayer extends CompositeLayer {
 
     if (changeFlags.viewportChanged) {
       changeFlags.boundsChanged = this._updateBounds();
-    }
-
-    if (changeFlags.dataChanged) {
-      this._updateWeightmapAttributes();
     }
 
     if (changeFlags.dataChanged || changeFlags.boundsChanged || changeFlags.uniformsChanged) {
@@ -116,7 +113,7 @@ export default class HeatmapLayer extends CompositeLayer {
             texCoords: triTexCoordBuffer
           }
         },
-        count: 6,
+        vertexCount: 4,
         maxTexture: maxWeightsTexture,
         colorTexture,
         texture: weightsTexture,
@@ -172,28 +169,6 @@ export default class HeatmapLayer extends CompositeLayer {
     }
 
     return changeFlags;
-  }
-
-  // returns visible world bounds [[minLong, minLat], [maxLong, maxLat]
-  _getVisibleWorldBounds() {
-    const {textureSize} = this.state;
-    const width = textureSize;
-    const height = textureSize;
-
-    // Unproject all 4 corners of the current screen coordinates into world coordinates (lng/lat)
-    // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
-    const topLeft = this.unproject([0, 0]);
-    const topRight = this.unproject([width, 0]);
-    const bottomLeft = this.unproject([0, height]);
-    const bottomRight = this.unproject([width, height]);
-
-    // Now build bounding box in world space (aligned to world coordiante system)
-    const minLong = Math.min(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
-    const maxLong = Math.max(topLeft[0], topRight[0], bottomLeft[0], bottomRight[0]);
-    const minLat = Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
-    const maxLat = Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
-
-    return [minLong, minLat, maxLong, maxLat];
   }
 
   _isDataChanged({changeFlags}) {
@@ -259,24 +234,14 @@ export default class HeatmapLayer extends CompositeLayer {
       }),
       zoom: null,
       triPositionBuffer: new Buffer(gl, {
-        data: getTriangleVertices({xMin: -1, yMin: -1, xMax: 1, yMax: 1, addZ: true}),
+        byteLength: 48,
         accessor: {size: 3}
       }),
       triTexCoordBuffer: new Buffer(gl, {
-        data: getTriangleVertices(),
+        byteLength: 48,
         accessor: {size: 2}
       })
     };
-  }
-
-  _updateWeightmapAttributes() {
-    // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
-    this._updateAttributes(this.props);
-    // Attribute manager sets data array count as instaceCount on model
-    // we need to set that as elementCount on 'weightsTransform'
-    this.state.weightsTransform.update({
-      elementCount: this.getNumInstances()
-    });
   }
 
   _updateMaxWeightValue() {
@@ -294,14 +259,23 @@ export default class HeatmapLayer extends CompositeLayer {
   // Computes world bounds area that needs to be processed for generate heatmap
   _updateBounds(forceUpdate = false) {
     const {textureSize} = this.state;
-    const width = textureSize;
-    const height = textureSize;
+    const {viewport} = this.context;
+
+    // Unproject all 4 corners of the current screen coordinates into world coordinates (lng/lat)
+    // Takes care of viewport has non zero bearing/pitch (i.e axis not aligned with world coordiante system)
+    const viewportCorners = [
+      viewport.unproject([0, 0]),
+      viewport.unproject([viewport.width, 0]),
+      viewport.unproject([viewport.width, viewport.height]),
+      viewport.unproject([0, viewport.height])
+    ];
+
     // #1: get world bounds for current viewport extends
-    const visibleWorldBounds = this._getVisibleWorldBounds(); // TODO: Change to visible bounds
+    const visibleWorldBounds = getBounds(viewportCorners); // TODO: Change to visible bounds
     // #2 : convert world bounds to common (Flat) bounds
     const visibleCommonBounds = this._worldToCommonBounds(visibleWorldBounds);
 
-    const newState = {visibleWorldBounds, visibleCommonBounds};
+    const newState = {visibleWorldBounds, viewportCorners};
     let boundsChanged = false;
 
     if (
@@ -312,8 +286,8 @@ export default class HeatmapLayer extends CompositeLayer {
       // #3: extend common bounds to match aspect ratio with viewport
       const scaledCommonBounds = scaleToAspectRatio(
         visibleCommonBounds,
-        width * RESOLUTION,
-        height * RESOLUTION
+        textureSize * RESOLUTION,
+        textureSize * RESOLUTION
       );
 
       // #4 :convert aligned common bounds to world bounds
@@ -331,11 +305,12 @@ export default class HeatmapLayer extends CompositeLayer {
       const normalizedCommonBounds = this._worldToCommonBounds(worldBounds, {
         scaleToAspect: true,
         normalize: true,
-        width: width * RESOLUTION,
-        height: height * RESOLUTION
+        width: textureSize * RESOLUTION,
+        height: textureSize * RESOLUTION
       });
 
-      Object.assign(newState, {worldBounds, normalizedCommonBounds});
+      newState.worldBounds = worldBounds;
+      newState.normalizedCommonBounds = normalizedCommonBounds;
 
       boundsChanged = true;
     }
@@ -349,36 +324,18 @@ export default class HeatmapLayer extends CompositeLayer {
       triPositionBuffer,
       triTexCoordBuffer,
       normalizedCommonBounds,
-      visibleCommonBounds,
-      visibleWorldBounds
+      viewportCorners
     } = this.state;
 
-    const {scale} = this.context.viewport;
-    const commonBounds = normalizedCommonBounds.map(x => x * scale);
+    const {viewport} = this.context;
+    const commonBounds = normalizedCommonBounds.map(x => x * viewport.scale);
 
-    triPositionBuffer.setData({
-      // Y-flip for world bounds
-      data: getTriangleVertices({
-        xMin: visibleWorldBounds[0],
-        yMin: visibleWorldBounds[3],
-        xMax: visibleWorldBounds[2],
-        yMax: visibleWorldBounds[1],
-        addZ: true
-      }),
-      accessor: {size: 3}
-    });
+    triPositionBuffer.subData(packVertices(viewportCorners, 3));
 
-    const textureBounds = getTextureCoordinates(commonBounds, visibleCommonBounds);
-    triTexCoordBuffer.setData({
-      // Y-flip for world bounds
-      data: getTriangleVertices({
-        xMin: textureBounds[0],
-        yMin: textureBounds[1],
-        xMax: textureBounds[2],
-        yMax: textureBounds[3]
-      }),
-      accessor: {size: 2}
-    });
+    const textureBounds = viewportCorners.map(p =>
+      getTextureCoordinates(viewport.projectPosition(p), commonBounds)
+    );
+    triTexCoordBuffer.subData(packVertices(textureBounds, 2));
   }
 
   _updateColorTexture(opts) {
@@ -400,6 +357,10 @@ export default class HeatmapLayer extends CompositeLayer {
   _updateWeightmap() {
     const {radiusPixels, intensity} = this.props;
     const {weightsTransform, worldBounds, textureSize} = this.state;
+
+    // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
+    this._updateAttributes(this.props);
+
     const moduleParameters = Object.assign(Object.create(this.props), {
       viewport: this.context.viewport,
       pickingActive: 0
@@ -418,6 +379,11 @@ export default class HeatmapLayer extends CompositeLayer {
       intensity,
       commonBounds,
       textureWidth: textureSize
+    });
+    // Attribute manager sets data array count as instaceCount on model
+    // we need to set that as elementCount on 'weightsTransform'
+    weightsTransform.update({
+      elementCount: this.getNumInstances()
     });
     weightsTransform.run({
       uniforms,
