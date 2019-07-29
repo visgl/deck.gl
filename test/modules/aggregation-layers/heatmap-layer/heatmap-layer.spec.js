@@ -26,6 +26,12 @@ import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-laye
 
 const getPosition = d => d.COORDINATES;
 
+const viewport0 = new MapView().makeViewport({
+  width: 100,
+  height: 100,
+  viewState: {longitude: -122, latitude: 38, zoom: 10}
+});
+
 const viewport1 = new MapView().makeViewport({
   width: 100,
   height: 100,
@@ -47,7 +53,7 @@ const viewport3_bigChange = new MapView().makeViewport({
 const viewport4_zoomChange = new MapView().makeViewport({
   width: 100,
   height: 100,
-  viewState: {longitude: 10, latitude: 0, zoom: 9}
+  viewState: {longitude: 10, latitude: 0, zoom: 9.9}
 });
 
 test('HeatmapLayer', t => {
@@ -73,6 +79,7 @@ test('HeatmapLayer#updates', t => {
   testLayer({
     Layer: HeatmapLayer,
     onError: t.notOk,
+    viewport: viewport0,
     testCases: [
       {
         props: {
@@ -81,12 +88,12 @@ test('HeatmapLayer#updates', t => {
           pickable: false
         },
         onAfterUpdate({layer, subLayer}) {
-          const {worldBounds, commonBounds} = layer.state;
+          const {worldBounds, normalizedCommonBounds} = layer.state;
 
           t.ok(subLayer instanceof TriangleLayer, 'Sublayer Triangle layer rendered');
 
           t.ok(worldBounds, 'should compute worldBounds');
-          t.ok(commonBounds, 'should compute commonBounds');
+          t.ok(normalizedCommonBounds, 'should compute commonBounds');
         }
       },
       {
@@ -169,16 +176,16 @@ test('HeatmapLayer#updates', t => {
       },
       {
         viewport: viewport4_zoomChange, // only zoom change
-        spies: ['_updateBounds', '_updateWeightmap'],
+        spies: ['_updateBounds', '_debouncedUpdateWeightmap'],
         onAfterUpdate({layer, subLayers, spies}) {
           const {zoom} = layer.state;
           t.ok(spies._updateBounds.called, 'viewport zoom changed, should call _updateBounds');
           t.ok(
-            spies._updateWeightmap.called,
-            'viewport zoom changed, should call _updateWeightmap'
+            spies._debouncedUpdateWeightmap.called,
+            'viewport zoom changed, should call _debouncedUpdateWeightmap'
           );
           spies._updateBounds.restore();
-          spies._updateWeightmap.restore();
+          spies._debouncedUpdateWeightmap.restore();
           t.equal(
             zoom,
             viewport4_zoomChange.zoom,

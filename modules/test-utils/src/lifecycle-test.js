@@ -88,7 +88,7 @@ export function testDrawLayer({
     () => {
       layerManager.setLayers([layer]);
       deckRenderer.renderLayers({
-        viewports: [testViewport],
+        viewports: [viewport],
         layers: layerManager.getLayers(),
         activateViewport: layerManager.activateViewport
       });
@@ -173,7 +173,13 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
   // Run successive update tests
   for (let i = 0; i < testCases.length; i++) {
     const testCase = testCases[i];
-    const {props, updateProps, onBeforeUpdate, onAfterUpdate, viewport = testViewport} = testCase;
+    const {
+      props,
+      updateProps,
+      onBeforeUpdate,
+      onAfterUpdate,
+      viewport = layerManager.context.viewport
+    } = testCase;
 
     spies = testCase.spies || spies;
 
