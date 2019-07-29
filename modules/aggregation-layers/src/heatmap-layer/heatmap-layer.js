@@ -18,6 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
+/* global setTimeout */
 import GL from '@luma.gl/constants';
 import {
   boundsContain,
@@ -26,7 +27,7 @@ import {
   getTextureCoordinates
 } from './heatmap-layer-utils';
 import {Buffer, Transform, getParameter, isWebGL2} from '@luma.gl/core';
-import {CompositeLayer, AttributeManager, log} from '@deck.gl/core';
+import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import {getFloatTexture} from '../utils/resource-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
@@ -36,6 +37,7 @@ import vs_max from './max-vs.glsl';
 
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
+const ZOOM_DEBOUNCE = 500; // milliseconds
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -67,7 +69,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const changeFlags = this._getChangeFlags(opts);
 
     if (changeFlags.viewportChanged) {
-      changeFlags.boundsChanged = this._updateBounds(changeFlags.viewportZoomChanged);
+      changeFlags.boundsChanged = this._updateBounds();
     }
 
     if (changeFlags.dataChanged) {
@@ -76,6 +78,8 @@ export default class HeatmapLayer extends CompositeLayer {
 
     if (changeFlags.dataChanged || changeFlags.boundsChanged || changeFlags.uniformsChanged) {
       this._updateWeightmap();
+    } else if (changeFlags.viewportZoomChanged) {
+      this._debouncedUpdateWeightmap();
     }
 
     if (props.colorRange !== oldProps.colorRange) {
@@ -265,10 +269,6 @@ export default class HeatmapLayer extends CompositeLayer {
     };
   }
 
-  _shouldUpdateBounds(opts) {
-    return opts.changeFlags.viewportChanged;
-  }
-
   _updateWeightmapAttributes() {
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
     this._updateAttributes(this.props);
@@ -293,7 +293,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   // Computes world bounds area that needs to be processed for generate heatmap
   _updateBounds(forceUpdate = false) {
-    const {triPositionBuffer, textureSize} = this.state;
+    const {textureSize} = this.state;
     const width = textureSize;
     const height = textureSize;
     // #1: get world bounds for current viewport extends
@@ -320,32 +320,22 @@ export default class HeatmapLayer extends CompositeLayer {
       const worldBounds = this._commonToWorldBounds(scaledCommonBounds);
 
       // Clip webmercator projection limits
-      worldBounds[0][1] = Math.max(worldBounds[0][1], -85.051129);
-      worldBounds[1][1] = Math.min(worldBounds[1][1], 85.051129);
-      worldBounds[0][0] = Math.max(worldBounds[0][0], -360);
-      worldBounds[1][0] = Math.min(worldBounds[1][0], 360);
+      if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
+        worldBounds[0][1] = Math.max(worldBounds[0][1], -85.051129);
+        worldBounds[1][1] = Math.min(worldBounds[1][1], 85.051129);
+        worldBounds[0][0] = Math.max(worldBounds[0][0], -360);
+        worldBounds[1][0] = Math.min(worldBounds[1][0], 360);
+      }
 
       // #5: now convert world bounds to common using Layer's coordiante system and origin
-      const commonBounds = this._worldToCommonBounds(worldBounds, {
-        useLayerCoordinateSystem: true,
+      const normalizedCommonBounds = this._worldToCommonBounds(worldBounds, {
         scaleToAspect: true,
+        normalize: true,
         width: width * RESOLUTION,
         height: height * RESOLUTION
       });
 
-      // Update for triangle layer
-      triPositionBuffer.setData({
-        // Y-flip for world bounds
-        data: getTriangleVertices({
-          xMin: worldBounds[0][0],
-          yMin: worldBounds[1][1],
-          xMax: worldBounds[1][0],
-          yMax: worldBounds[0][1],
-          addZ: true
-        }),
-        accessor: {size: 3}
-      });
-      Object.assign(newState, {worldBounds, commonBounds, scaledCommonBounds});
+      Object.assign(newState, {worldBounds, normalizedCommonBounds});
 
       boundsChanged = true;
     }
@@ -358,19 +348,16 @@ export default class HeatmapLayer extends CompositeLayer {
     const {
       triPositionBuffer,
       triTexCoordBuffer,
+      normalizedCommonBounds,
       visibleCommonBounds,
-      // scaledCommonBounds,
-      // commonBounds,
-      visibleWorldBounds,
-      worldBounds,
-      textureSize
+      visibleWorldBounds
     } = this.state;
 
-    const commonBounds = this._worldToCommonBounds(worldBounds, {
-      scaleToAspect: true,
-      width: textureSize * RESOLUTION,
-      height: textureSize * RESOLUTION
-    });
+    const {scale} = this.context.viewport;
+    const commonBounds = [
+      normalizedCommonBounds[0].map(x => x * scale),
+      normalizedCommonBounds[1].map(x => x * scale)
+    ];
 
     triPositionBuffer.setData({
       // Y-flip for world bounds
@@ -415,10 +402,18 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateWeightmap() {
     const {radiusPixels, intensity} = this.props;
-    const {weightsTransform, commonBounds, textureSize} = this.state;
+    const {weightsTransform, worldBounds, textureSize} = this.state;
     const moduleParameters = Object.assign(Object.create(this.props), {
       viewport: this.context.viewport,
       pickingActive: 0
+    });
+
+    // #5: convert world bounds to common using Layer's coordiante system and origin
+    const commonBounds = this._worldToCommonBounds(worldBounds, {
+      useLayerCoordinateSystem: true,
+      scaleToAspect: true,
+      width: textureSize * RESOLUTION,
+      height: textureSize * RESOLUTION
     });
 
     const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
@@ -443,7 +438,33 @@ export default class HeatmapLayer extends CompositeLayer {
       clearRenderTarget: true
     });
     this._updateMaxWeightValue();
+
+    this.setState({lastUpdate: Date.now()});
   }
+
+  _debouncedUpdateWeightmap(fromTimer = false) {
+    let {updateTimer} = this.state;
+    const timeSinceLastUpdate = Date.now() - this.state.lastUpdate;
+
+    if (fromTimer) {
+      updateTimer = null;
+    }
+
+    if (timeSinceLastUpdate >= ZOOM_DEBOUNCE) {
+      // update
+      this._updateBounds(true);
+      this._updateWeightmap();
+      this._updateTextureRenderingBounds();
+    } else if (!updateTimer) {
+      updateTimer = setTimeout(
+        this._debouncedUpdateWeightmap.bind(this, true),
+        ZOOM_DEBOUNCE - timeSinceLastUpdate
+      );
+    }
+
+    this.setState({updateTimer});
+  }
+
   // input: worldBounds: [[minLong, minLat], [maxLong, maxLat]]
   // input: opts.useLayerCoordinateSystem : layers coordiante system is used
   // optput: commonBounds: [[minX, minY], [maxX, maxY]]
@@ -467,6 +488,10 @@ export default class HeatmapLayer extends CompositeLayer {
     let commonBounds = [topLeftCommon.slice(0, 2), bottomRightCommon.slice(0, 2)];
     if (scaleToAspect) {
       commonBounds = scaleToAspectRatio(commonBounds, width, height);
+    }
+    if (opts.normalize) {
+      commonBounds[0] = commonBounds[0].map(x => x / viewport.scale);
+      commonBounds[1] = commonBounds[1].map(x => x / viewport.scale);
     }
     return commonBounds;
   }
