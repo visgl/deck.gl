@@ -424,6 +424,12 @@ Notes:
   - `toValue` (TypedArray) - the new value to transition to, for the current vertex
   - `fromChunk` (Array | TypedArray) - the existing value to transition from, for the chunk that the current vertex belongs to. A "chunk" is a group of vertices that help the callback determine the context of this transition. For most layers, all objects are in one chunk. For PathLayer and PolygonLayer, each path/polygon is a chunk.
 
+##### `enableShadow` (Boolean, optional) **Experimental**
+
+* Default: `true`
+
+Experimental shadow effect can be toggled on and off for a layer by setting `enableShadow` prop. In order to render shadow, a [DirectionalLight](/docs/api-reference/lights/directional-light.md) with `castShadow` set to `true` must be created and passed to [LightingEffect](/docs/effects/lighting-effect.md).
+
 
 ## Members
 

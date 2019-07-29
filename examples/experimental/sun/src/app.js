@@ -2,7 +2,7 @@ import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
 import DeckGL from 'deck.gl';
-import {AmbientLight, DirectionalLight, _LightWithShadowEffect} from '@deck.gl/core';
+import {AmbientLight, DirectionalLight, LightingEffect} from '@deck.gl/core';
 import {SolidPolygonLayer} from '@deck.gl/layers';
 import {PhongMaterial} from '@luma.gl/core';
 
@@ -21,16 +21,18 @@ const ambientLight = new AmbientLight({
 const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
-  direction: [10, -20, -30]
+  direction: [10, -20, -30],
+  castShadow: true
 });
 
 const dirLight1 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
-  direction: [-10, -20, -30]
+  direction: [-10, -20, -30],
+  castShadow: true
 });
 
-const lightingEffect = new _LightWithShadowEffect({ambientLight, dirLight0, dirLight1});
+const lightingEffect = new LightingEffect({ambientLight, dirLight0, dirLight1});
 
 const material = new PhongMaterial({
   ambient: 0.1,
