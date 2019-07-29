@@ -20,47 +20,67 @@
 
 import test from 'tape-catch';
 import {
-  getTextureCoordinates,
+  getBounds,
   boundsContain,
-  getTriangleVertices
+  getTextureCoordinates,
+  scaleToAspectRatio,
+  packVertices
 } from '@deck.gl/aggregation-layers/heatmap-layer/heatmap-layer-utils';
+
+test('HeatmapLayerUtils#getBounds', t => {
+  const TESTS = [
+    {
+      input: [[0, 1], [-1, -1], [2, 0]],
+      output: [-1, -1, 2, 1]
+    },
+    {
+      input: [],
+      output: [Infinity, Infinity, -Infinity, -Infinity]
+    }
+  ];
+  for (const testCase of TESTS) {
+    t.deepEqual(getBounds(testCase.input), testCase.output, 'returns expected result');
+  }
+
+  t.end();
+});
 
 test('HeatmapLayerUtils#boundsContain', t => {
   const TESTS = [
     {
       name: 'all corners inside',
-      currentBounds: [[0, 0], [100, 100]],
-      targetBounds: [[20, 0], [100, 80]],
+      currentBounds: [0, 0, 100, 100],
+      targetBounds: [20, 0, 100, 80],
       expected: true
     },
     {
       name: 'xMin out of bounds',
-      currentBounds: [[0, 0], [100, 100]],
-      targetBounds: [[-1, 20], [80, 80]],
+      currentBounds: [0, 0, 100, 100],
+      targetBounds: [-1, 20, 80, 80],
       expected: false
     },
     {
       name: 'xMax out of bounds',
-      currentBounds: [[0, 0], [100, 100]],
-      targetBounds: [[20, 20], [110, 80]],
+      currentBounds: [0, 0, 100, 100],
+      targetBounds: [20, 20, 110, 80],
       expected: false
     },
     {
       name: 'yMin out of bounds',
-      currentBounds: [[0, 0], [100, 100]],
-      targetBounds: [[20, -0.1], [80, 80]],
+      currentBounds: [0, 0, 100, 100],
+      targetBounds: [20, -0.1, 80, 80],
       expected: false
     },
     {
       name: 'yMax out of bounds',
-      currentBounds: [[0, 0], [100, 100]],
-      targetBounds: [[20, 20], [80, 100.1]],
+      currentBounds: [0, 0, 100, 100],
+      targetBounds: [20, 20, 80, 100.1],
       expected: false
     },
     {
       name: 'bounds are same',
-      currentBounds: [[20, 20], [80, 80]],
-      targetBounds: [[20, 20], [80, 80]],
+      currentBounds: [20, 20, 80, 80],
+      targetBounds: [20, 20, 80, 80],
       expected: true
     }
   ];
@@ -72,48 +92,82 @@ test('HeatmapLayerUtils#boundsContain', t => {
   t.end();
 });
 
-test('HeatmapLayerUtils#getTriangleVertices', t => {
+test('HeatmapLayerUtils#packVertices', t => {
   const TESTS = [
     {
-      name: 'default',
-      expected: [0, 0, 1, 0, 1, 1, 0, 0, 1, 1, 0, 1]
+      name: '2D',
+      points: [[0, 0], [1, 1], [2, 2]],
+      dimensions: 2,
+      expected: [0, 0, 1, 1, 2, 2]
     },
     {
-      name: 'custom',
-      opts: {xMin: 10, xMax: 100, yMin: 11, yMax: 111, addZ: true},
-      expected: [10, 11, 0, 100, 11, 0, 100, 111, 0, 10, 11, 0, 100, 111, 0, 10, 111, 0]
+      name: '3D',
+      points: [[0, 0], [1, 1], [2, 2]],
+      dimensions: 3,
+      expected: [0, 0, 0, 1, 1, 0, 2, 2, 0]
     }
   ];
 
-  TESTS.forEach(tc => {
-    const actual = getTriangleVertices(tc.opts);
-    t.deepEqual(tc.expected, actual, `should return correct vertices for ${tc.name}`);
-  });
+  for (const tc of TESTS) {
+    const actual = packVertices(tc.points, tc.dimensions);
+    t.deepEqual(
+      actual.slice(0, tc.expected.length),
+      tc.expected,
+      `should return correct vertices for ${tc.name}`
+    );
+  }
   t.end();
 });
 
 test('HeatmapLayerUtils#getTextureCoordinates', t => {
   const TESTS = [
     {
-      originalRect: [[0, 0], [100, 100]],
-      subRect: [[20, 20], [80, 80]],
-      expected: [[0.2, 0.2], [0.8, 0.8]]
+      bounds: [0, 0, 100, 100],
+      point: [20, 20],
+      expected: [0.2, 0.2]
     },
     {
-      originalRect: [[10, 10], [60, 60]],
-      subRect: [[15, 20], [45, 35]],
-      expected: [[0.1, 0.2], [0.7, 0.5]]
-    },
-    {
-      originalRect: [[10, 10], [60, 60]],
-      subRect: [[10, 10], [60, 60]],
-      expected: [[0, 0], [1, 1]]
+      bounds: [10, 10, 60, 60],
+      point: [45, 35],
+      expected: [0.7, 0.5]
     }
   ];
 
-  TESTS.forEach(tc => {
-    const actual = getTextureCoordinates(tc.originalRect, tc.subRect);
+  for (const tc of TESTS) {
+    const actual = getTextureCoordinates(tc.point, tc.bounds);
     t.deepEqual(actual, tc.expected, 'should return correct coordinates');
-  });
+  }
+  t.end();
+});
+
+test('HeatmapLayerUtils#scaleToAspectRatio', t => {
+  const TESTS = [
+    {
+      title: 'fit width',
+      boundingBox: [0, 0, 8, 8],
+      width: 8,
+      height: 4,
+      expected: [-4, 0, 12, 8]
+    },
+    {
+      title: 'fit height',
+      boundingBox: [0, 0, 8, 8],
+      width: 4,
+      height: 8,
+      expected: [0, -4, 8, 12]
+    },
+    {
+      title: 'fit both',
+      boundingBox: [0, 0, 8, 8],
+      width: 16,
+      height: 10,
+      expected: [-4, -1, 12, 9]
+    }
+  ];
+
+  for (const tc of TESTS) {
+    const actual = scaleToAspectRatio(tc.boundingBox, tc.width, tc.height);
+    t.deepEqual(actual, tc.expected, `${tc.title}: returns correct bounds`);
+  }
   t.end();
 });

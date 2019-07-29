@@ -106,7 +106,7 @@ Method called to retrieve the position of each point.
 
 ##### `getWeight` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)
 
-* Default: `object => 1`
+* Default: `1`
 
 Method called to retrieve weight of each point. By default each point will use a weight of `1`.
 
