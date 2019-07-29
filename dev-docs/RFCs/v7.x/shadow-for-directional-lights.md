@@ -4,18 +4,18 @@
 
 * **Date**: July. 2019
 
-* **Status**: For Review
+* **Status**: Approved
 
 ## Abstract
 Deck.gl has new basic lighting effect since 7.0, having shadow effects for directional lights can improve rendering quality.
 
 ## Proposal
 ### API
-`LightingEffect` class is the public interface to create shadow effects
-* `castShadow`(Boolean): create shadow effect when set to `true`, default is `false`
+`DirectionalLight` class is the public interface to create shadow effects
+* `shadow`(Boolean): create shadow effect when set to `true`, default is `false`
 
 New layer prop
-* `enableShadow`(Boolean): when this prop is true, layer casts and renders shadows
+* `shadowEnabled`(Boolean): when this prop is true, layer casts and renders shadows
 
 ### Example
 ```js
@@ -28,14 +28,14 @@ const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
   direction: [10, -20, -30],
-  castShadow: true
+  shadow: true
 });
 
 const dirLight1 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
   direction: [-10, -20, -30],
-  castShadow: true
+  shadow: true
 });
 
 const lightingEffect = new LightingEffect({
@@ -49,12 +49,12 @@ const deckgl = new Deck({
   layers: [
     // building layer
     new SolidPolygonLayer({
-      enableShadow: true,
+      shadowEnabled: true,
       ...
     }),
     // ground layer
     new SolidPolygonLayer({
-      enableShadow: true,
+      shadowEnabled: true,
       ...
     })
   ]

@@ -172,9 +172,9 @@ export default {
   getUniforms: (opts = {}, context = {}) => {
     if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
       const shadowUniforms = {};
-      const {enableShadow = true} = opts;
+      const {shadowEnabled = true} = opts;
       if (
-        enableShadow &&
+        shadowEnabled &&
         opts.shadow_viewProjectionMatrices &&
         opts.shadow_viewProjectionMatrices.length > 0
       ) {

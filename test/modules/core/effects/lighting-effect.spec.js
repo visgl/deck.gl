@@ -80,14 +80,14 @@ test('LightingEffect#prepare and cleanup', t => {
     color: [255, 255, 255],
     intensity: 1.0,
     direction: [10, -20, -30],
-    castShadow: true
+    shadow: true
   });
 
   const dirLight1 = new DirectionalLight({
     color: [255, 255, 255],
     intensity: 1.0,
     direction: [-10, -20, -30],
-    castShadow: true
+    shadow: true
   });
 
   const lightingEffect = new LightingEffect({dirLight0, dirLight1});
@@ -131,7 +131,7 @@ test('LightingEffect#shadow module', t => {
     color: [255, 255, 255],
     intensity: 1.0,
     direction: [10, -20, -30],
-    castShadow: true
+    shadow: true
   });
 
   const lightingEffect = new LightingEffect({dirLight});

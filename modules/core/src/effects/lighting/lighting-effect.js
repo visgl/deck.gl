@@ -37,7 +37,7 @@ export default class LightingEffect extends Effect {
     this.shadowPasses = [];
     this.lightMatrices = [];
     this.dummyShadowMaps = [];
-    this.castShadow = false;
+    this.shadow = false;
 
     for (const key in props) {
       const lightSource = props[key];
@@ -59,14 +59,14 @@ export default class LightingEffect extends Effect {
     }
     this._applyDefaultLights();
 
-    if (this.directionalLights.some(light => light.castShadow)) {
-      this.castShadow = true;
+    if (this.directionalLights.some(light => light.shadow)) {
+      this.shadow = true;
       this._addShadowModule();
     }
   }
 
   prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
-    if (!this.castShadow) return {};
+    if (!this.shadow) return {};
 
     this._createLightMatrix();
 
