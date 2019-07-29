@@ -1,12 +1,10 @@
 // true if currentBounds contains targetBounds, false otherwise
 export function boundsContain(currentBounds, targetBounds) {
-  const [currentMin, currentMax] = currentBounds;
-  const [targetMin, targetMax] = targetBounds;
-
   if (
-    targetMin[0] >= currentMin[0] &&
-    targetMax[0] <= currentMax[0] &&
-    (targetMin[1] >= currentMin[1] && targetMax[1] <= currentMax[1])
+    targetBounds[0] >= currentBounds[0] &&
+    targetBounds[2] <= currentBounds[2] &&
+    targetBounds[1] >= currentBounds[1] &&
+    targetBounds[3] <= currentBounds[3]
   ) {
     return true;
   }
@@ -42,9 +40,9 @@ export function getTriangleVertices(opts = {}) {
   return new Float32Array([xMin, yMin, xMax, yMin, xMax, yMax, xMin, yMin, xMax, yMax, xMin, yMax]);
 }
 
-// Expands boundingBox:[[xMin, yMin], [xMax, yMax]] to match aspect ratio of given width and height
+// Expands boundingBox:[xMin, yMin, xMax, yMax] to match aspect ratio of given width and height
 export function scaleToAspectRatio(boundingBox, width, height) {
-  const [[xMin, yMin], [xMax, yMax]] = boundingBox;
+  const [xMin, yMin, xMax, yMax] = boundingBox;
 
   const currentWidth = xMax - xMin;
   const currentHeight = yMax - yMin;
@@ -67,20 +65,22 @@ export function scaleToAspectRatio(boundingBox, width, height) {
   const yCenter = (yMax + yMin) / 2;
 
   return [
-    [xCenter - newWidth / 2, yCenter - newHeight / 2],
-    [xCenter + newWidth / 2, yCenter + newHeight / 2]
+    xCenter - newWidth / 2,
+    yCenter - newHeight / 2,
+    xCenter + newWidth / 2,
+    yCenter + newHeight / 2
   ];
 }
 
 // Scales texture coordiante range to a sub rectangel
 export function getTextureCoordinates(originalRect, subRect) {
-  const [[xMin, yMin], [xMax, yMax]] = originalRect;
-  const [[subXMin, subYMin], [subXMax, subYMax]] = subRect;
+  const [xMin, yMin, xMax, yMax] = originalRect;
+  const [subXMin, subYMin, subXMax, subYMax] = subRect;
   const width = xMax - xMin;
   const height = yMax - yMin;
   const tXMin = (subXMin - xMin) / width;
   const tXMax = (subXMax - xMin) / width;
   const tYMin = (subYMin - yMin) / height;
   const tYMax = (subYMax - yMin) / height;
-  return [[tXMin, tYMin], [tXMax, tYMax]];
+  return [tXMin, tYMin, tXMax, tYMax];
 }

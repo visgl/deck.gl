@@ -193,7 +193,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const minLat = Math.min(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
     const maxLat = Math.max(topLeft[1], topRight[1], bottomLeft[1], bottomRight[1]);
 
-    return [[minLong, minLat], [maxLong, maxLat]];
+    return [minLong, minLat, maxLong, maxLat];
   }
 
   _isDataChanged({changeFlags}) {
@@ -321,10 +321,10 @@ export default class HeatmapLayer extends CompositeLayer {
 
       // Clip webmercator projection limits
       if (this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT) {
-        worldBounds[0][1] = Math.max(worldBounds[0][1], -85.051129);
-        worldBounds[1][1] = Math.min(worldBounds[1][1], 85.051129);
-        worldBounds[0][0] = Math.max(worldBounds[0][0], -360);
-        worldBounds[1][0] = Math.min(worldBounds[1][0], 360);
+        worldBounds[1] = Math.max(worldBounds[1], -85.051129);
+        worldBounds[3] = Math.min(worldBounds[3], 85.051129);
+        worldBounds[0] = Math.max(worldBounds[0], -360);
+        worldBounds[2] = Math.min(worldBounds[2], 360);
       }
 
       // #5: now convert world bounds to common using Layer's coordiante system and origin
@@ -354,18 +354,15 @@ export default class HeatmapLayer extends CompositeLayer {
     } = this.state;
 
     const {scale} = this.context.viewport;
-    const commonBounds = [
-      normalizedCommonBounds[0].map(x => x * scale),
-      normalizedCommonBounds[1].map(x => x * scale)
-    ];
+    const commonBounds = normalizedCommonBounds.map(x => x * scale);
 
     triPositionBuffer.setData({
       // Y-flip for world bounds
       data: getTriangleVertices({
-        xMin: visibleWorldBounds[0][0],
-        yMin: visibleWorldBounds[1][1],
-        xMax: visibleWorldBounds[1][0],
-        yMax: visibleWorldBounds[0][1],
+        xMin: visibleWorldBounds[0],
+        yMin: visibleWorldBounds[3],
+        xMax: visibleWorldBounds[2],
+        yMax: visibleWorldBounds[1],
         addZ: true
       }),
       accessor: {size: 3}
@@ -375,10 +372,10 @@ export default class HeatmapLayer extends CompositeLayer {
     triTexCoordBuffer.setData({
       // Y-flip for world bounds
       data: getTriangleVertices({
-        xMin: textureBounds[0][0],
-        yMin: textureBounds[0][1],
-        xMax: textureBounds[1][0],
-        yMax: textureBounds[1][1]
+        xMin: textureBounds[0],
+        yMin: textureBounds[1],
+        xMax: textureBounds[2],
+        yMax: textureBounds[3]
       }),
       accessor: {size: 2}
     });
@@ -419,12 +416,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
       radiusPixels,
       intensity,
-      commonBounds: [
-        commonBounds[0][0],
-        commonBounds[0][1],
-        commonBounds[1][0],
-        commonBounds[1][1]
-      ],
+      commonBounds,
       textureWidth: textureSize
     });
     weightsTransform.run({
@@ -465,12 +457,12 @@ export default class HeatmapLayer extends CompositeLayer {
     this.setState({updateTimer});
   }
 
-  // input: worldBounds: [[minLong, minLat], [maxLong, maxLat]]
+  // input: worldBounds: [minLong, minLat, maxLong, maxLat]
   // input: opts.useLayerCoordinateSystem : layers coordiante system is used
-  // optput: commonBounds: [[minX, minY], [maxX, maxY]]
+  // optput: commonBounds: [minX, minY, maxX, maxY]
   _worldToCommonBounds(worldBounds, opts = {}) {
     const {useLayerCoordinateSystem = false, scaleToAspect = false, width, height} = opts;
-    const [[minLong, minLat], [maxLong, maxLat]] = worldBounds;
+    const [minLong, minLat, maxLong, maxLat] = worldBounds;
     const {viewport} = this.context;
 
     let topLeftCommon;
@@ -485,26 +477,25 @@ export default class HeatmapLayer extends CompositeLayer {
       bottomRightCommon = viewport.projectPosition([maxLong, minLat, 0]);
     }
     // Ignore z component
-    let commonBounds = [topLeftCommon.slice(0, 2), bottomRightCommon.slice(0, 2)];
+    let commonBounds = topLeftCommon.slice(0, 2).concat(bottomRightCommon.slice(0, 2));
     if (scaleToAspect) {
       commonBounds = scaleToAspectRatio(commonBounds, width, height);
     }
     if (opts.normalize) {
-      commonBounds[0] = commonBounds[0].map(x => x / viewport.scale);
-      commonBounds[1] = commonBounds[1].map(x => x / viewport.scale);
+      commonBounds = commonBounds.map(x => x / viewport.scale);
     }
     return commonBounds;
   }
 
-  // input commonBounds: [[xMin, yMin], [xMax, yMax]]
-  // output worldBounds: [[minLong, minLat], [maxLong, maxLat]]
+  // input commonBounds: [xMin, yMin, xMax, yMax]
+  // output worldBounds: [minLong, minLat, maxLong, maxLat]
   _commonToWorldBounds(commonBounds) {
-    const [[xMin, yMin], [xMax, yMax]] = commonBounds;
+    const [xMin, yMin, xMax, yMax] = commonBounds;
     const {viewport} = this.context;
     const topLeftWorld = viewport.unprojectPosition([xMin, yMax]);
     const bottomRightWorld = viewport.unprojectPosition([xMax, yMin]);
 
-    return [topLeftWorld.slice(0, 2), bottomRightWorld.slice(0, 2)];
+    return topLeftWorld.slice(0, 2).concat(bottomRightWorld.slice(0, 2));
   }
 }
 
