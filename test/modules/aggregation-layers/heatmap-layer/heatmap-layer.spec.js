@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 import test from 'tape-catch';
 import * as FIXTURES from 'deck.gl-test/data';
-import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {MapView} from '@deck.gl/core';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 import {default as TriangleLayer} from '@deck.gl/aggregation-layers/heatmap-layer/triangle-layer';
@@ -69,24 +69,6 @@ test('HeatmapLayer', t => {
   t.end();
 });
 
-test('HeatmapLayer#renderSubLayer', t => {
-  const layer = new HeatmapLayer({
-    id: 'contourLayer',
-    data: FIXTURES.points,
-    getPosition
-  });
-
-  testInitializeLayer({layer, onError: t.notOk});
-
-  // render sublayer
-  const subLayer = layer.renderLayers();
-  testInitializeLayer({layer: subLayer, onError: t.notOk});
-
-  t.ok(subLayer instanceof TriangleLayer, 'Sublayer Triangle layer rendered');
-
-  t.end();
-});
-
 test('HeatmapLayer#updates', t => {
   testLayer({
     Layer: HeatmapLayer,
@@ -98,8 +80,10 @@ test('HeatmapLayer#updates', t => {
           getPosition,
           pickable: false
         },
-        onAfterUpdate({layer}) {
+        onAfterUpdate({layer, subLayer}) {
           const {worldBounds, commonBounds} = layer.state;
+
+          t.ok(subLayer instanceof TriangleLayer, 'Sublayer Triangle layer rendered');
 
           t.ok(worldBounds, 'should compute worldBounds');
           t.ok(commonBounds, 'should compute commonBounds');
