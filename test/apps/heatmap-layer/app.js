@@ -15,21 +15,14 @@ const DATA_URL =
 const INITIAL_VIEW_STATE = {
   longitude: -73.75,
   latitude: 40.73,
-  zoom: 9.6,
+  zoom: 9,
   maxZoom: 16,
   pitch: 0,
   bearing: 0
 };
 
 const MAP_STYLE = 'mapbox://styles/mapbox/dark-v9';
-const colorRange = [
-  [33, 102, 172, 0],
-  [103, 169, 207],
-  [209, 229, 240],
-  [253, 219, 199],
-  [239, 138, 98],
-  [178, 24, 43]
-];
+
 class Root extends PureComponent {
   constructor(props) {
     super(props);
@@ -49,7 +42,6 @@ class Root extends PureComponent {
               pickable: false,
               getPosition: d => [d[0], d[1]],
               getWeight: d => d[2],
-              colorRange,
               enhanceFactor: 100
             })
           ]}

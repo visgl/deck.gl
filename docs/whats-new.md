@@ -2,6 +2,26 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v7.2
+
+Release Date: Aug XX, 2019
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/heatmap-layer.gif" />
+        <p><i>HeatmapLayer</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+### HeatmapLayer
+
+deck.gl's `aggregation-layers` module now offers `HeatmapLayer` as experimental layer. It performs density distribution on the GPU to provide fast dynamic heatmaps.
+
+
 ## deck.gl v7.1
 
 Release Date: 2019
