@@ -12,7 +12,7 @@ Deck.gl has new basic lighting effect since 7.0, having shadow effects for direc
 ## Proposal
 ### API
 `DirectionalLight` class is the public interface to create shadow effects
-* `shadow`(Boolean): create shadow effect when set to `true`, default is `false`
+* `_shadow`(Boolean): create shadow effect when set to `true`, default is `false`
 
 New layer prop
 * `shadowEnabled`(Boolean): when this prop is true, layer casts and renders shadows
@@ -28,14 +28,14 @@ const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
   direction: [10, -20, -30],
-  shadow: true
+  _shadow: true
 });
 
 const dirLight1 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
   direction: [-10, -20, -30],
-  shadow: true
+  _shadow: true
 });
 
 const lightingEffect = new LightingEffect({

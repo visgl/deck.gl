@@ -22,14 +22,14 @@ const dirLight0 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
   direction: [10, -20, -30],
-  shadow: true
+  _shadow: true
 });
 
 const dirLight1 = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 1.0,
   direction: [-10, -20, -30],
-  shadow: true
+  _shadow: true
 });
 
 const lightingEffect = new LightingEffect({ambientLight, dirLight0, dirLight1});
