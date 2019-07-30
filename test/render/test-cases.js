@@ -96,18 +96,6 @@ const HEXAGON_LAYER_INFO = {
   }
 };
 
-const HEATMAP_LAYER_INFO = {
-  props: {
-    data: dataSamples.points,
-    pickable: false,
-    getPosition: d => d.COORDINATES,
-    radiusPixels: 35,
-    enhanceFactor: 25
-  },
-  goldenImage: './test/render/golden-images/heatmap-lnglat.png'
-};
-HEATMAP_LAYER_INFO.viewState = GRID_LAYER_INFO.viewsState;
-
 function getMean(pts, key) {
   const filtered = pts.filter(pt => Number.isFinite(pt[key]));
 
@@ -939,15 +927,24 @@ export const TEST_CASES = [
   },
   {
     name: 'heatmap-lnglat',
-    viewState: HEATMAP_LAYER_INFO.viewState,
+    viewState: {
+      latitude: 37.75,
+      longitude: -122.44,
+      zoom: 11.5,
+      pitch: 30,
+      bearing: 0
+    },
     layers: [
-      new HeatmapLayer(
-        Object.assign({}, HEATMAP_LAYER_INFO.props, {
-          id: 'heatmap-lnglat'
-        })
-      )
+      new HeatmapLayer({
+        id: 'heatmap-lnglat',
+        data: dataSamples.points,
+        pickable: false,
+        getPosition: d => d.COORDINATES,
+        radiusPixels: 35,
+        softMargin: 0.1
+      })
     ],
-    goldenImage: HEATMAP_LAYER_INFO.goldenImage
+    goldenImage: './test/render/golden-images/heatmap-lnglat.png'
   },
   {
     name: 'pointcloud-lnglat',
