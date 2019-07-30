@@ -81,20 +81,20 @@ Radius of the circle in pixels, to which the weight of an object is distributed.
 
 * Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
+Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing Red, Green, Blue and Alpha channels.  Each channel is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
 ##### `intensity` (Number, optional)
 
 * Default: `1`
 
-Value that is multiplied with the weight of every object to obtain the final weight.
+Value that is multiplied with the total weight at a pixel to obtain the final weight.
 
-##### `enhanceFactor` (Number, optional)
+##### `softness` (Number, optional)
 
-* Default: `20`
+* Default: `10`
 
-In final rendering weight of pixel determines its opacity, this will help smoothen the boundaries, but at the same time, pixels with low relative weight are hard to spot (due to low alpha value). `enhanceFactor` can be increased to increase the opacity while keeping the hot spots unchanged.
+`softness` can be used to smoothen the boundaries of color blobs while keeping the hot spots unchanged. However, at the same time, pixels with low relative weight get harder to spot (due to low alpha value).
 
 ### Data Accessors
 

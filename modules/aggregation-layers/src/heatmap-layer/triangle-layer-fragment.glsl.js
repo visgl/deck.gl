@@ -28,13 +28,13 @@ uniform sampler2D texture;
 varying vec2 vTexCoords;
 uniform sampler2D maxTexture;
 uniform sampler2D colorTexture;
-uniform float opacityFactor;
-
+uniform float softness;
+uniform float intensity;
 
 vec4 getLinearColor(float value, float maxValue) {
-  float factor = clamp(value/(maxValue), 0., 1.);
+  float factor = clamp(value * intensity / maxValue, 0., 1.);
   vec4 color = texture2D(colorTexture, vec2(factor, 0.5));
-  color.a = clamp(opacityFactor * factor, 0., 1.);
+  color.a = value / softness;
   return color;
 }
 

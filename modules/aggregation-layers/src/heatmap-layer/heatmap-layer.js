@@ -43,10 +43,10 @@ const ZOOM_DEBOUNCE = 500; // milliseconds
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: 1},
-  intensity: {type: 'number', min: 0, max: 1, value: 1},
+  intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
-  enhanceFactor: {type: 'number', min: 1, max: 100, value: 20}
+  softness: {type: 'number', min: 1, value: 10}
 };
 
 export default class HeatmapLayer extends CompositeLayer {
@@ -98,7 +98,7 @@ export default class HeatmapLayer extends CompositeLayer {
       maxWeightsTexture,
       colorTexture
     } = this.state;
-    const {updateTriggers, enhanceFactor} = this.props;
+    const {updateTriggers, intensity, softness} = this.props;
 
     return new TriangleLayer(
       this.getSubLayerProps({
@@ -117,7 +117,8 @@ export default class HeatmapLayer extends CompositeLayer {
         maxTexture: maxWeightsTexture,
         colorTexture,
         texture: weightsTexture,
-        opacityFactor: enhanceFactor
+        intensity,
+        softness
       }
     );
   }
@@ -158,7 +159,7 @@ export default class HeatmapLayer extends CompositeLayer {
     if (this._isDataChanged(opts)) {
       changeFlags.dataChanged = true;
     }
-    if (oldProps.radiusPixels !== props.radiusPixels || oldProps.intensity !== props.intensity) {
+    if (oldProps.radiusPixels !== props.radiusPixels) {
       changeFlags.uniformsChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
@@ -355,7 +356,7 @@ export default class HeatmapLayer extends CompositeLayer {
   }
 
   _updateWeightmap() {
-    const {radiusPixels, intensity} = this.props;
+    const {radiusPixels} = this.props;
     const {weightsTransform, worldBounds, textureSize} = this.state;
 
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
@@ -376,7 +377,6 @@ export default class HeatmapLayer extends CompositeLayer {
 
     const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
       radiusPixels,
-      intensity,
       commonBounds,
       textureWidth: textureSize
     });
