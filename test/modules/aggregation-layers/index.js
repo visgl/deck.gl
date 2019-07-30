@@ -30,5 +30,6 @@ import './hexagon-aggregator.spec';
 import './grid-layer.spec';
 import './screen-grid-layer.spec';
 import './utils/scale-utils.spec';
+import './utils/color-utils.spec';
 import './utils/aggregation-operation-utils.spec';
 import './heatmap-layer/heatmap-layer-utils.spec';

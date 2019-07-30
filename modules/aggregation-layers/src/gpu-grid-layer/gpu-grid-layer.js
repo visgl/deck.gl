@@ -258,7 +258,7 @@ export default class GPUGridLayer extends CompositeLayer {
 
     const {weights, gridSize, gridOrigin, cellSize} = this.state;
 
-    const colorRange = colorRangeToFlatArray(this.props.colorRange, Float32Array, 255);
+    const colorRange = colorRangeToFlatArray(this.props.colorRange);
 
     const SubLayerClass = this.getSubLayerClass('gpu-grid-cell', GPUGridCellLayer);
 

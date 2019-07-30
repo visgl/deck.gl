@@ -369,7 +369,7 @@ export default class ScreenGridLayer extends Layer {
     }
 
     if (oldProps.colorRange !== props.colorRange) {
-      newState.colorRange = colorRangeToFlatArray(props.colorRange, Float32Array, 255);
+      newState.colorRange = colorRangeToFlatArray(props.colorRange);
     }
 
     if (

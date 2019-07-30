@@ -39,6 +39,12 @@ import vs_max from './max-vs.glsl';
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
 const ZOOM_DEBOUNCE = 500; // milliseconds
+const TEXTURE_PARAMETERS = {
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+};
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -46,7 +52,7 @@ const defaultProps = {
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
-  softness: {type: 'number', min: 1, value: 10}
+  softMargin: {type: 'number', min: 0, max: 1, value: 0.05}
 };
 
 export default class HeatmapLayer extends CompositeLayer {
@@ -98,7 +104,7 @@ export default class HeatmapLayer extends CompositeLayer {
       maxWeightsTexture,
       colorTexture
     } = this.state;
-    const {updateTriggers, intensity, softness} = this.props;
+    const {updateTriggers, intensity, softMargin} = this.props;
 
     return new TriangleLayer(
       this.getSubLayerProps({
@@ -118,7 +124,7 @@ export default class HeatmapLayer extends CompositeLayer {
         colorTexture,
         texture: weightsTexture,
         intensity,
-        softness
+        softMargin
       }
     );
   }
@@ -201,10 +207,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const weightsTexture = getFloatTexture(gl, {
       width: textureSize,
       height: textureSize,
-      parameters: {
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
-      }
+      parameters: TEXTURE_PARAMETERS
     });
     const maxWeightsTexture = getFloatTexture(gl); // 1 X 1 texture
     const weightsTransform = new Transform(gl, {
@@ -341,17 +344,21 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateColorTexture(opts) {
     const {colorRange} = opts.props;
-    const colors = colorRangeToFlatArray(colorRange, Float32Array, 255, true);
-    const colorTexture = getFloatTexture(this.context.gl, {data: colors, width: 6});
-    if (this.state.colorTexture) {
-      this.state.colorTexture.delete();
+    let {colorTexture} = this.state;
+    const colors = colorRangeToFlatArray(colorRange, true);
+
+    if (colorTexture) {
+      colorTexture.setImageData({
+        data: colors,
+        width: colorRange.length
+      });
+    } else {
+      colorTexture = getFloatTexture(this.context.gl, {
+        data: colors,
+        width: colorRange.length,
+        parameters: TEXTURE_PARAMETERS
+      });
     }
-    colorTexture.setParameters({
-      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-      [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-    });
     this.setState({colorTexture});
   }
 

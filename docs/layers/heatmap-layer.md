@@ -81,20 +81,22 @@ Radius of the circle in pixels, to which the weight of an object is distributed.
 
 * Default: <img src="/website/src/static/images/colorbrewer_YlOrRd_6.png"/></a>
 
-Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing Red, Green, Blue and Alpha channels.  Each channel is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
+Specified as an array of colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing Red, Green, Blue and Alpha channels.  Each channel is a value between 0 and 255. When Alpha is not provided, a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
 ##### `intensity` (Number, optional)
 
 * Default: `1`
 
-Value that is multiplied with the total weight at a pixel to obtain the final weight.
+Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than `1` biases the output color towards the higher end of the spectrum, and a value less than `1` biases the output color towards the lower end of the spectrum.
 
-##### `softness` (Number, optional)
+##### `softMargin` (Number, optional)
 
-* Default: `10`
+* Default: `0.05`
 
-`softness` can be used to smoothen the boundaries of color blobs while keeping the hot spots unchanged. However, at the same time, pixels with low relative weight get harder to spot (due to low alpha value).
+The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight to create a fading effect at the edge. A larger `softMargin` smoothens the boundaries of color blobs, while making pixels with low relative weight harder to spot (due to low alpha value).
+
+`softMargin` is defined as the ratio of the fading threshold to the max weight, between `0` and `1`. For example, `0.1` affects all pixels with weight under 10% of the max.
 
 ### Data Accessors
 
