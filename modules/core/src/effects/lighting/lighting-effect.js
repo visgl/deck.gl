@@ -124,8 +124,6 @@ export default class LightingEffect extends Effect {
       dummyShadowMap.delete();
     }
     this.dummyShadowMaps.length = 0;
-
-    this._removeShadowModule();
   }
 
   _createLightMatrix() {
