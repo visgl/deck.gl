@@ -26,25 +26,24 @@ precision highp float;
 uniform float opacity;
 uniform sampler2D texture;
 varying vec2 vTexCoords;
-uniform sampler2D maxTexture;
 uniform sampler2D colorTexture;
-uniform float opacityFactor;
+uniform float softMargin;
 
+varying float vIntensity;
 
-vec4 getLinearColor(float value, float maxValue) {
-  float factor = clamp(value/(maxValue), 0., 1.);
+vec4 getLinearColor(float value) {
+  float factor = clamp(value, 0., 1.);
   vec4 color = texture2D(colorTexture, vec2(factor, 0.5));
-  color.a = clamp(opacityFactor * factor, 0., 1.);
+  color.a *= min(value / softMargin, 1.0);
   return color;
 }
 
 void main(void) {
-  vec4 weight = texture2D(texture, vTexCoords);
-  if (weight.r == 0.) {
+  float weight = texture2D(texture, vTexCoords).r;
+  if (weight == 0.) {
      discard;
   }
-  float maxValue = texture2D(maxTexture, vec2(0.5)).r;
-  vec4 linearColor = getLinearColor(weight.r, maxValue);
+  vec4 linearColor = getLinearColor(weight * vIntensity);
   linearColor.a *= opacity;
   gl_FragColor =linearColor;
 }

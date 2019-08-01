@@ -39,14 +39,20 @@ import vs_max from './max-vs.glsl';
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
 const ZOOM_DEBOUNCE = 500; // milliseconds
+const TEXTURE_PARAMETERS = {
+  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+};
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: 1},
-  intensity: {type: 'number', min: 0, max: 1, value: 1},
+  intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
-  enhanceFactor: {type: 'number', min: 1, max: 100, value: 20}
+  softMargin: {type: 'number', min: 0, max: 1, value: 0.05}
 };
 
 export default class HeatmapLayer extends CompositeLayer {
@@ -98,7 +104,7 @@ export default class HeatmapLayer extends CompositeLayer {
       maxWeightsTexture,
       colorTexture
     } = this.state;
-    const {updateTriggers, enhanceFactor} = this.props;
+    const {updateTriggers, intensity, softMargin} = this.props;
 
     return new TriangleLayer(
       this.getSubLayerProps({
@@ -117,7 +123,8 @@ export default class HeatmapLayer extends CompositeLayer {
         maxTexture: maxWeightsTexture,
         colorTexture,
         texture: weightsTexture,
-        opacityFactor: enhanceFactor
+        intensity,
+        softMargin
       }
     );
   }
@@ -158,7 +165,7 @@ export default class HeatmapLayer extends CompositeLayer {
     if (this._isDataChanged(opts)) {
       changeFlags.dataChanged = true;
     }
-    if (oldProps.radiusPixels !== props.radiusPixels || oldProps.intensity !== props.intensity) {
+    if (oldProps.radiusPixels !== props.radiusPixels) {
       changeFlags.uniformsChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
@@ -200,10 +207,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const weightsTexture = getFloatTexture(gl, {
       width: textureSize,
       height: textureSize,
-      parameters: {
-        [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-        [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
-      }
+      parameters: TEXTURE_PARAMETERS
     });
     const maxWeightsTexture = getFloatTexture(gl); // 1 X 1 texture
     const weightsTransform = new Transform(gl, {
@@ -340,22 +344,26 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateColorTexture(opts) {
     const {colorRange} = opts.props;
-    const colors = colorRangeToFlatArray(colorRange, Float32Array, 255, true);
-    const colorTexture = getFloatTexture(this.context.gl, {data: colors, width: 6});
-    if (this.state.colorTexture) {
-      this.state.colorTexture.delete();
+    let {colorTexture} = this.state;
+    const colors = colorRangeToFlatArray(colorRange, true);
+
+    if (colorTexture) {
+      colorTexture.setImageData({
+        data: colors,
+        width: colorRange.length
+      });
+    } else {
+      colorTexture = getFloatTexture(this.context.gl, {
+        data: colors,
+        width: colorRange.length,
+        parameters: TEXTURE_PARAMETERS
+      });
     }
-    colorTexture.setParameters({
-      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-      [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
-    });
     this.setState({colorTexture});
   }
 
   _updateWeightmap() {
-    const {radiusPixels, intensity} = this.props;
+    const {radiusPixels} = this.props;
     const {weightsTransform, worldBounds, textureSize} = this.state;
 
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
@@ -376,7 +384,6 @@ export default class HeatmapLayer extends CompositeLayer {
 
     const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
       radiusPixels,
-      intensity,
       commonBounds,
       textureWidth: textureSize
     });

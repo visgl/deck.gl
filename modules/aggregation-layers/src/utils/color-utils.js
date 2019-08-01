@@ -28,19 +28,30 @@ export const defaultColorRange = [
 ];
 
 // Converts a colorRange array to a flat array with 4 components per color
-export function colorRangeToFlatArray(colorRange, ArrayType, defaultValue, normalize = false) {
+export function colorRangeToFlatArray(colorRange, normalize = false, ArrayType = Float32Array) {
+  let flatArray;
+
   if (Number.isFinite(colorRange[0])) {
     // its already a flat array.
-    return colorRange;
+    flatArray = new ArrayType(colorRange);
+  } else {
+    // flatten it
+    flatArray = new ArrayType(colorRange.length * 4);
+    let index = 0;
+
+    for (let i = 0; i < colorRange.length; i++) {
+      const color = colorRange[i];
+      flatArray[index++] = color[0];
+      flatArray[index++] = color[1];
+      flatArray[index++] = color[2];
+      flatArray[index++] = Number.isFinite(color[3]) ? color[3] : 255;
+    }
   }
-  const flatArray = new ArrayType(colorRange.length * 4);
-  colorRange.forEach((color, index) => {
-    const flatArrayIdnex = index * 4;
-    flatArray[flatArrayIdnex] = normalize ? color[0] / 255 : color[0];
-    flatArray[flatArrayIdnex + 1] = normalize ? color[1] / 255 : color[1];
-    flatArray[flatArrayIdnex + 2] = normalize ? color[2] / 255 : color[2];
-    const alpha = Number.isFinite(color[3]) ? color[3] : defaultValue;
-    flatArray[flatArrayIdnex + 3] = normalize ? alpha / 255 : alpha;
-  });
+
+  if (normalize) {
+    for (let i = 0; i < flatArray.length; i++) {
+      flatArray[i] /= 255;
+    }
+  }
   return flatArray;
 }

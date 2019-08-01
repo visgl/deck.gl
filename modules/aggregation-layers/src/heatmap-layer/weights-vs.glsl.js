@@ -5,10 +5,9 @@ varying vec4 weightsTexture;
 uniform float radiusPixels;
 uniform float textureWidth;
 uniform vec4 commonBounds;
-uniform float intensity;
 void main()
 {
-  weightsTexture = vec4(weights * intensity, 0., 0., 1.);
+  weightsTexture = vec4(weights, 0., 0., 1.);
 
   float radiusTexels  = radiusPixels * textureWidth / (commonBounds.z - commonBounds.x);
   gl_PointSize = radiusTexels * 2.;

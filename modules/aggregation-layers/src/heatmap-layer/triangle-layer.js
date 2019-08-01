@@ -64,8 +64,8 @@ export default class TriangleLayer extends Layer {
 
   draw({uniforms}) {
     const {model} = this.state;
-    const {texture, maxTexture, colorTexture, opacityFactor} = this.props;
-    model.setUniforms({texture, maxTexture, colorTexture, opacityFactor}).draw();
+    const {texture, maxTexture, colorTexture, intensity, softMargin} = this.props;
+    model.setUniforms({texture, maxTexture, colorTexture, intensity, softMargin}).draw();
   }
 }
 
