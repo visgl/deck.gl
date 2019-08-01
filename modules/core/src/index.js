@@ -35,7 +35,6 @@ export {default as DirectionalLight} from './effects/lighting/directional-light'
 export {default as _CameraLight} from './effects/lighting/camera-light';
 export {default as _SunLight} from './effects/lighting/sun-light';
 export {default as PostProcessEffect} from './effects/post-process-effect';
-export {default as _LightWithShadowEffect} from './effects/lighting/light-with-shadow-effect';
 
 // Passes
 export {default as _LayersPass} from './passes/layers-pass';
