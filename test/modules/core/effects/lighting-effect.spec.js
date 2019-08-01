@@ -139,7 +139,7 @@ test('LightingEffect#shadow module', t => {
   let hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, true, 'LightingEffect adds shadow module to default correctly');
 
-  lightingEffect._removeShadowModule();
+  lightingEffect.cleanup();
   hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, false, 'LightingEffect removes shadow module to default correctly');
   t.end();

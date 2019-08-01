@@ -62,13 +62,12 @@ export default class LightingEffect extends Effect {
     if (this.directionalLights.some(light => light.shadow)) {
       this.shadow = true;
       this._addShadowModule();
+      this._createLightMatrix();
     }
   }
 
   prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
     if (!this.shadow) return {};
-
-    this._createLightMatrix();
 
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl, pixelRatio);
@@ -90,7 +89,7 @@ export default class LightingEffect extends Effect {
         effectProps: {
           shadow_lightId: i,
           dummyShadowMaps: this.dummyShadowMaps,
-          shadow_viewProjectionMatrices: this.lightMatrices
+          shadow_matrices: this.lightMatrices
         }
       });
       shadowMaps.push(shadowPass.shadowMap);
@@ -101,7 +100,7 @@ export default class LightingEffect extends Effect {
       dummyShadowMaps: this.dummyShadowMaps,
       shadow_lightId: 0,
       shadowColor: this.shadowColor,
-      shadow_viewProjectionMatrices: this.lightMatrices
+      shadow_matrices: this.lightMatrices
     };
   }
 
@@ -124,28 +123,20 @@ export default class LightingEffect extends Effect {
       dummyShadowMap.delete();
     }
     this.dummyShadowMaps.length = 0;
+
+    if (this.shadow) {
+      this._removeShadowModule();
+      this.shadow = false;
+    }
   }
 
   _createLightMatrix() {
-    const projectionMatrix = new Matrix4().ortho({
-      left: -1,
-      right: 1,
-      bottom: -1,
-      top: 1,
-      near: 0,
-      far: 2
-    });
-
-    this.lightMatrices = [];
     for (const light of this.directionalLights) {
-      const viewMatrix = new Matrix4()
-        .lookAt({
-          eye: new Vector3(light.direction).negate()
-        })
-        // arbitrary number that covers enough grounds
-        .scale(1e-3);
-      const viewProjectionMatrix = projectionMatrix.clone().multiplyRight(viewMatrix);
-      this.lightMatrices.push(viewProjectionMatrix);
+      const viewMatrix = new Matrix4().lookAt({
+        eye: new Vector3(light.direction).negate()
+      });
+
+      this.lightMatrices.push(viewMatrix);
     }
   }
 

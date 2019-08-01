@@ -96,6 +96,7 @@ vec4 shadow_filterShadowColor(vec4 color) {
 
 const moduleName = 'shadow';
 const _getMemoizedViewportCenterPosition = memoize(_getViewportCenterPosition);
+const _getMemoizedViewProjectionMatrix = memoize(_getViewProjectionMatrix);
 
 createModuleInjection(moduleName, {
   hook: 'vs:DECKGL_FILTER_GL_POSITION',
@@ -118,13 +119,40 @@ function _getViewportCenterPosition({viewport, center}) {
   return new Matrix4(viewport.viewProjectionMatrix).invert().transformVector4(center);
 }
 
+function _getViewProjectionMatrix({viewport, shadowMatrix}) {
+  const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
+
+  const topLeft = viewport.projectPosition(viewport.unproject([0, 0]));
+  const topRight = viewport.projectPosition(viewport.unproject([viewport.width, 0]));
+  const bottomLeft = viewport.projectPosition(viewport.unproject([0, viewport.height]));
+  const bottomRight = viewport.projectPosition(
+    viewport.unproject([viewport.width, viewport.height])
+  );
+
+  const pos0 = viewMatrix.transformVector3([topLeft[0], topLeft[1], 0]);
+  const pos1 = viewMatrix.transformVector3([topRight[0], topRight[1], 0]);
+  const pos2 = viewMatrix.transformVector3([bottomLeft[0], bottomLeft[1], 0]);
+  const pos3 = viewMatrix.transformVector3([bottomRight[0], bottomRight[1], 0]);
+
+  const projectionMatrix = new Matrix4().ortho({
+    left: Math.min(pos0[0], pos1[0], pos2[0], pos3[0]),
+    right: Math.max(pos0[0], pos1[0], pos2[0], pos3[0]),
+    bottom: Math.min(pos0[1], pos1[1], pos2[1], pos3[1]),
+    top: Math.max(pos0[1], pos1[1], pos2[1], pos3[1]),
+    // Near plane could be too close to cover tall objects, scale up by 2.0
+    near: Math.min(-pos0[2], -pos1[2], -pos2[2], -pos3[2]) * 2.0,
+    far: Math.max(-pos0[2], -pos1[2], -pos2[2], -pos3[2])
+  });
+  return projectionMatrix.multiplyRight(shadowMatrix);
+}
+
 function createShadowUniforms(opts = {}, context = {}) {
   const uniforms = {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
     shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
     shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
     shadow_uLightId: opts.shadow_lightId,
-    shadow_uLightCount: opts.shadow_viewProjectionMatrices.length
+    shadow_uLightCount: opts.shadow_matrices.length
   };
 
   const center = _getMemoizedViewportCenterPosition({
@@ -135,19 +163,24 @@ function createShadowUniforms(opts = {}, context = {}) {
   const viewProjectionMatrices = [];
   const projectCenters = [];
 
-  for (let i = 0; i < opts.shadow_viewProjectionMatrices.length; i++) {
-    const viewProjectionMatrix = opts.shadow_viewProjectionMatrices[i]
+  for (let i = 0; i < opts.shadow_matrices.length; i++) {
+    const viewProjectionMatrix = _getMemoizedViewProjectionMatrix({
+      shadowMatrix: opts.shadow_matrices[i],
+      viewport: opts.viewport
+    });
+
+    const viewProjectionMatrixCentered = viewProjectionMatrix
       .clone()
       .translate(new Vector3(opts.viewport.center).negate());
 
     if (context.project_uCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNG_LAT) {
-      viewProjectionMatrices[i] = viewProjectionMatrix;
+      viewProjectionMatrices[i] = viewProjectionMatrixCentered;
       projectCenters[i] = [0, 0, 0, 0];
     } else {
-      viewProjectionMatrices[i] = opts.shadow_viewProjectionMatrices[i]
+      viewProjectionMatrices[i] = viewProjectionMatrix
         .clone()
         .multiplyRight(VECTOR_TO_POINT_MATRIX);
-      projectCenters[i] = viewProjectionMatrix.transformVector4(center);
+      projectCenters[i] = viewProjectionMatrixCentered.transformVector4(center);
     }
   }
 
@@ -173,11 +206,7 @@ export default {
     if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
       const shadowUniforms = {};
       const {shadowEnabled = true} = opts;
-      if (
-        shadowEnabled &&
-        opts.shadow_viewProjectionMatrices &&
-        opts.shadow_viewProjectionMatrices.length > 0
-      ) {
+      if (shadowEnabled && opts.shadow_matrices && opts.shadow_matrices.length > 0) {
         Object.assign(shadowUniforms, createShadowUniforms(opts, context));
       } else {
         Object.assign(shadowUniforms, {
