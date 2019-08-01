@@ -24,7 +24,7 @@ function parseCSV(text) {
 
   for (const row of csv) {
     for (const key in row) {
-      const number = parseFloat(row[key]) || 0;
+      const number = parseFloat(row[key]);
       if (!Number.isNaN(number)) {
         row[key] = number;
       }

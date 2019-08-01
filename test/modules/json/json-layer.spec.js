@@ -64,7 +64,9 @@ test('JSONLayer#fetch', t => {
   };
   _global.fetch = url =>
     Promise.resolve({
-      text: () => data[url]
+      text: () => {
+        return data[url];
+      }
     });
 
   const jsonLayer = new JSONLayer({

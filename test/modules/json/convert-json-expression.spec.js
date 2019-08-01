@@ -2,6 +2,8 @@
 import test from 'tape-catch';
 import convertJSONExpression from '@deck.gl/json/parsers/convert-json-expression';
 
+const row = Object.freeze({bar: 'baz', baz: 'wow', list: [1, 2, 3, 4]});
+
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
 
@@ -10,7 +12,6 @@ const TEST_CASES = [
   {expr: '(["one","two","three"])[1]', expected: 'two'},
   {expr: '([true,false,true])[2]', expected: true},
   {expr: '([1,true,"three"]).length', expected: 3},
-  {expr: 'isArray([1,2,3])', expected: true},
   {expr: 'row.list[3]', expected: 4},
   {expr: 'numMap[1 + two]', expected: 'three'},
 
@@ -29,10 +30,6 @@ const TEST_CASES = [
   {expr: '"a"+"b"', expected: 'ab'},
   {expr: 'one + three', expected: 4},
 
-  // call expression
-  {expr: 'func(5)', expected: 6},
-  {expr: 'func(1+2)', expected: 4},
-
   // conditional expression
   {expr: '(true ? "true" : "false")', expected: 'true'},
   {expr: '( ( bool || false ) ? "true" : "false")', expected: 'true'},
@@ -48,7 +45,6 @@ const TEST_CASES = [
   {expr: '"foo"', expected: 'foo'}, // string literal
   {expr: "'foo'", expected: 'foo'}, // string literal
   {expr: '123', expected: 123}, // numeric literal
-  // {expr: 'true', expected: true}, // boolean literal
 
   // logical expression
   {expr: 'true || false', expected: true},
@@ -73,8 +69,12 @@ const TEST_CASES = [
   {expr: 'foo["bar"]', expected: 'baz'},
   {expr: 'foo[foo.bar]', expected: 'wow'},
 
-  // call expression with member
-  // {expr: 'foo.func("bar")', expected: 'baz'},
+  // call expressions -- should all fail
+  {expr: 'foo.func("bar")', expected: null, shouldError: true},
+  {expr: 'Math.sin(x)', expected: null, shouldError: true},
+  {expr: 'Array.isArray([1,2,3])', expected: null, shouldError: true},
+  {expr: 'func(5)', expected: 6, shouldError: true},
+  {expr: 'func(1+2)', expected: 4, shouldError: true},
 
   // unary expression
   {expr: '-one', expected: -1},
@@ -87,13 +87,18 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-const row = Object.freeze({bar: 'baz', baz: 'wow', list: [1, 2, 3, 4]});
-
 test('convertJSONExpression', t => {
   for (const testCase of TEST_CASES) {
     // Test a function string
     const isAccessor = true;
-    const func = convertJSONExpression(testCase.expr, null, isAccessor);
+    let func;
+    if (testCase.shouldError) {
+      func = convertJSONExpression(testCase.expr, null, isAccessor);
+      t.ok(func, `JSONConverter errored ${testCase.expr}`);
+      t.throws(() => func);
+    } else {
+      func = convertJSONExpression(testCase.expr, null, isAccessor);
+    }
     t.ok(func, `JSONConverter converted ${testCase.expr}`);
     t.deepEquals(
       func(row),
