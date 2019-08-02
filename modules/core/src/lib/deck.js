@@ -26,7 +26,7 @@ import Effect from './effect';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import log from '../utils/log';
-import init from './init';
+import deckGlobal from './init';
 
 import GL from '@luma.gl/constants';
 import {
@@ -123,9 +123,6 @@ const defaultProps = {
 /* eslint-disable max-statements */
 export default class Deck {
   constructor(props) {
-    // Make sure we register default loaders and shaders
-    init();
-
     props = Object.assign({}, defaultProps, props);
 
     this.width = 0; // "read-only", auto-updated from canvas
@@ -828,3 +825,7 @@ function isIE11() {
 
 Deck.getPropTypes = getPropTypes;
 Deck.defaultProps = defaultProps;
+
+// This is used to defeat tree shaking of init.js
+// https://github.com/uber/deck.gl/issues/3213
+Deck.VERSION = deckGlobal.VERSION;
