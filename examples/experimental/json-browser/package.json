@@ -8,11 +8,11 @@
     "build": "NODE_ENV=production webpack --env.prod=true"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.1.0",
-    "@deck.gl/json": "^7.1.0",
-    "@deck.gl/layers": "^7.1.0",
-    "@deck.gl/react": "^7.1.0",
-    "@luma.gl/constants": "^7.2.0-alpha.1",
+    "@deck.gl/core": "^7.2.0-beta",
+    "@deck.gl/json": "^7.2.0-beta",
+    "@deck.gl/layers": "^7.2.0-beta",
+    "@deck.gl/react": "^7.2.0-beta",
+    "@luma.gl/constants": "^7.2.0-beta",
     "brace": "^0.11.1",
     "react": "~16.7.0",
     "react-ace": "^6.1.4",
