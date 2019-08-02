@@ -1,41 +1,83 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v7.1 to v7.2
+
+#### Breaking Changes
+
+- The deprecated `fp64` prop is removed. The current 32-bit projection is generally precise enough for almost all use cases. If you previously use this feature:
+
+  ```js
+  /// old
+  import {COORDINATE_SYSTEM} from '@deck.gl/core';
+
+  new ScatterplotLayer({
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+    fp64: true,
+    ...
+  })
+  ```
+
+  It can be changed to:
+
+  ```js
+  /// old
+  import {COORDINATE_SYSTEM} from '@deck.gl/core';
+  import {Fp64Extension} from '@deck.gl/extensions';
+
+  new ScatterplotLayer({
+    coordinateSystem: COORDINATE_SYSTEM.LNGLAT_DEPRECATED,
+    extensions: [new Fp64Extension()],
+    ...
+  })
+  ```
+
+- All core layer shaders now receive **normalized** color attributes and uniforms. If you were previously subclassing a core layer with custom vertex shaders, you should expect the color attributes to be in `[0, 1]` range instead of `[0, 255]`.
+- The `project64` shader module is no longer registered by default. If you were previously using a custom layer that depends on this module:
+
+  ```js
+  getShaders() {
+    return {vs, fs, modules: ['project64']};
+  }
+  ```
+
+  It can be changed to:
+
+  ```js
+  import {project64} from '@deck.gl/core';
+
+  getShaders() {
+    return {vs, fs, modules: [project64]};
+  }
+  ```
+
 ## Upgrading from deck.gl v7.0 to v7.1
 
-### Layer Props
-
-Breaking Changes:
+#### Breaking Changes
 
 - Fixed a bug where `coordinateOrigin`'s `z` is not applied in `METER_OFFSETS` and `LNGLAT_OFFSETS` coordinate systems.
+- If your application was subclassing `GridLayer`, you should now subclass `CPUGridLayer` instead, and either use it directly, or provide it as the sublayer class for `GridLayer` using `_subLayerProps`:
 
-Deprecations:
+  ```js
+  class EnhancedCPUGridLayer extends CPUGridLayer {
+  // enhancments
+  }
+
+  // Code initilizing GridLayer
+  const myGridLayer = new GridLayer({
+    // props
+    ...
+    // Override sublayer type for 'CPU'
+    _subLayerProps: {
+      CPU: {
+        type: EnhancedCPUGridLayer
+      }
+    }
+  });
+  ```
+
+#### Deprecations
 
 - `getColor` props in `ColumnLayer` and `H3HexagonLayer` are deprecated. Use `getLineColor` and `getFillColor` instead.
-
-### GridLayer
-
-Breaking Changes:
-
-- If your application is not subclassing `GridLayer`, no additional changes are needed. If you are subclassing `GridLayer`, you should now subclass `CPUGridLayer` instead, and either use it directly, or provide it as the sublayer class for `GridLayer` using `_subLayerProps`:
-
-```js
-class EnhancedCPUGridLayer extends CPUGridLayer {
-// enhancments
-}
-
-// Code initilizing GridLayer
-const myGridLayer = new GridLayer({
-  // props
-  ...
-  // Override sublayer type for 'CPU'
-  _subLayerProps: {
-    CPU: {
-      type: EnhancedCPUGridLayer
-    }
-  }
-});
-```
-
 
 ## Upgrading from deck.gl v6.4 to v7.0
 
