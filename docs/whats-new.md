@@ -6,6 +6,17 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release Date: Aug XX, 2019
 
+### Layer Extensions
+
+A new module [`@deck.gl/extensions`](/docs/api-reference/extensions/overview.md) has joined the deck.gl family.
+Layer extensions are bonus features that you can optionally add to the core deck.gl layers. As a start, this module offers the following extensions:
+
+- [BrushingExtension](/docs/api-reference/extensions/brushing-extension.md): GPU-based data brushing, see "examples" section of this website
+- [DataFilterExtension](/docs/api-reference/extensions/data-filter-extension.md): GPU-based data filtering, see "examples" section of this website
+- [Fp64Extension](/docs/api-reference/extensions/fp64-extension.md): See [upgrade guide](/docs/upgrade-guide.md) if you are using the deprecated `fp64` mode.
+
+For instructions on authoring your own layer extensions, visit [developer guide](/docs/developer-guide/custom-layers/layer-extensions.md).
+
 <table style="border: 0;" align="center">
   <tbody>
     <tr>
@@ -13,13 +24,47 @@ Release Date: Aug XX, 2019
         <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/heatmap-layer.gif" />
         <p><i>HeatmapLayer</i></p>
       </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/shadow-nyc.jpg" />
+        <p><i>GeoJsonLayer with shadow</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/shadow-uk.jpg" />
+        <p><i>HexagonLayer with shadow</i></p>
+      </td>
     </tr>
   </tbody>
 </table>
 
 ### HeatmapLayer
 
-deck.gl's `aggregation-layers` module now offers `HeatmapLayer` as experimental layer. It performs density distribution on the GPU to provide fast dynamic heatmaps.
+The `@deck.gl/aggregation-layers` module now offers `HeatmapLayer` as an experimental layer. It performs density distribution on the GPU to provide fast dynamic heatmaps. The layer currently only supports WebGL2-enabled browsers. A fallback solution for WebGL1 will be added later.
+
+### Shadows in LightingEffect
+
+As an experimental feature, the [LightingEffect](/docs/effects/lighting-effect.md) can now render shadows from up to two directional light sources. To enable shadows, set `_shadow: true` when constructing a
+[DirectionalLight](/docs/api-reference/lights/directional-light.md) or [SunLight](/docs/api-reference/lights/sun-light.md).
+
+### New Ways to Supply and Update Layer Data
+
+#### Streaming Data Support
+
+Layers now have built-in streaming support. The `data` prop now accepts an [async iterable](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Symbol/asyncIterator) object. As new baches of data are resolved, the layer is updated incrementally. This eliminates the need to manually merge chunks of data or manage multiple layer instances.
+See details in the [data prop](/docs/api-reference/layer.md#basic-properties) documentation and the updated [performance optimization](/docs/developer-guide/performance.md) examples.
+
+#### Partial Data Update
+
+By default, when the `data` prop value of a layer changes shallowly, all of its attributes are recalculated and re-uploaded to the GPU. You may now compare the old and new data arrays and only update the range of elements that have actually changed. This can lead to significant performance improvement if a few rows in a large data table need to change frequently. See the [_dataDiff prop](/docs/api-reference/layer.md#data-properties) documentation.
+
+#### Using External Buffers
+
+It is now easier to build attributes as typed arrays outside of a layer, e.g. in a web worker or on the server. See the "Supplying attributes directly" section in [performance optimization](/docs/developer-guide/performance.md).
+
+### Other Layer Features and Optimizations
+
+- [BitmapLayer](/docs/layers/bitmap-layer.md)'s `image` prop now accepts a `HTMLVideoElement`.
+- [TextLayer](/docs/layers/text-layer.md) now supports line breaks in the text string. A new prop `lineHeight` is added.
+- Layer matching performance is improved. This affects applications with a large number of layers.
 
 
 ## deck.gl v7.1

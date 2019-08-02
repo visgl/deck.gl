@@ -977,9 +977,9 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     log.deprecated('layer.setUniforms', 'model.setUniforms')();
   }
 
-  is64bitEnabled() {
-    log.deprecated('is64bitEnabled', 'use64bitProjection')();
-    return this.use64bitProjection();
+  use64bitProjection() {
+    log.removed('use64bitProjection', 'Fp64Extension')();
+    return false;
   }
 }
 
