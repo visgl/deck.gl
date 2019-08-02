@@ -46,8 +46,18 @@ if (!global.deck) {
     version,
     log
   };
+}
 
-  registerLoaders([jsonLoader, HTMLImageLoader]);
+let initialized = false;
 
-  initializeShaderModules();
+// This is wrapped in a function and imported by deck.js to defeat tree shaking
+// https://github.com/uber/deck.gl/issues/3213
+export default function init() {
+  if (!initialized) {
+    registerLoaders([jsonLoader, HTMLImageLoader]);
+    initializeShaderModules();
+
+    // Loaders and shaders are registered globally -- only call once
+    initialized = true;
+  }
 }
