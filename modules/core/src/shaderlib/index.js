@@ -32,7 +32,9 @@ import project64 from './project64/project64';
 import shadow from './shadow/shadow';
 
 export function initializeShaderModules() {
-  registerShaderModules([fp32, project, project32, gouraudlighting, phonglighting, picking]);
+  registerShaderModules([fp32, project, project32, gouraudlighting, phonglighting, picking], {
+    ignoreMultipleRegistrations: true
+  });
 
   setDefaultShaderModules([geometry, project]);
 
