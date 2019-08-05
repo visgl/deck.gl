@@ -27,23 +27,30 @@ class Root extends PureComponent {
     super(props);
   }
 
+  _renderLayers() {
+    const {data = DATA_URL, intensity = 1, threshold = 0.03} = this.props;
+
+    return [
+      new HeatmapLayer({
+        data,
+        id: 'heatmp-layer',
+        opacity: 1,
+        pickable: false,
+        getPosition: d => [d[0], d[1]],
+        getWeight: d => d[2],
+        intensity,
+        threshold
+      })
+    ];
+  }
+
   render() {
     return (
       <div>
         <DeckGL
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
-          layers={[
-            new HeatmapLayer({
-              data: DATA_URL,
-              id: 'heatmp-layer',
-              opacity: 1,
-              pickable: false,
-              getPosition: d => [d[0], d[1]],
-              getWeight: d => d[2],
-              threshold: 0.03
-            })
-          ]}
+          layers={this._renderLayers()}
         >
           <StaticMap
             reuseMaps
