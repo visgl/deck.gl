@@ -26,6 +26,7 @@ import Effect from './effect';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import log from '../utils/log';
+import deckGlobal from './init';
 
 import GL from '@luma.gl/constants';
 import {
@@ -824,3 +825,7 @@ function isIE11() {
 
 Deck.getPropTypes = getPropTypes;
 Deck.defaultProps = defaultProps;
+
+// This is used to defeat tree shaking of init.js
+// https://github.com/uber/deck.gl/issues/3213
+Deck.VERSION = deckGlobal.VERSION;

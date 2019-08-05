@@ -19,8 +19,6 @@
 // THE SOFTWARE.
 
 // Set up deck.gl global state
-import './init';
-
 export {COORDINATE_SYSTEM} from './constants';
 
 // Export core objects
