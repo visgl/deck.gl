@@ -132,11 +132,11 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
     [viewport.width, viewport.height],
     pixelUnprojectionMatrix
   );
-  const topLeftNear = pixelsToWorld([0, 0, 0.0], pixelUnprojectionMatrix);
-  const topRightNear = pixelsToWorld([viewport.width, 0, 0.0], pixelUnprojectionMatrix);
-  const bottomLeftNear = pixelsToWorld([0, viewport.height, 0.0], pixelUnprojectionMatrix);
+  const topLeftNear = pixelsToWorld([0, 0, -1.0], pixelUnprojectionMatrix);
+  const topRightNear = pixelsToWorld([viewport.width, 0, -1.0], pixelUnprojectionMatrix);
+  const bottomLeftNear = pixelsToWorld([0, viewport.height, -1.0], pixelUnprojectionMatrix);
   const bottomRightNear = pixelsToWorld(
-    [viewport.width, viewport.height, 0.0],
+    [viewport.width, viewport.height, -1.0],
     pixelUnprojectionMatrix
   );
 
