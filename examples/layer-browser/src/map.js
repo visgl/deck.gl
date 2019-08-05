@@ -1,3 +1,5 @@
+/* global window */
+
 import React, {PureComponent} from 'react';
 import {StaticMap, _MapContext as MapContext, NavigationControl} from 'react-map-gl';
 import autobind from 'react-autobind';
@@ -6,6 +8,7 @@ import DeckGL from '@deck.gl/react';
 import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';
+import {RenderStats} from './render-stats';
 
 /* eslint-disable no-process-env */
 const MapboxAccessToken =
@@ -57,10 +60,20 @@ export default class Map extends PureComponent {
       clickedItem: null,
       queriedItems: null,
 
-      enableDepthPickOnClick: false
+      enableDepthPickOnClick: false,
+      metrics: null
     };
 
     this.deckRef = React.createRef();
+    this.rafLoop = null;
+  }
+
+  componentDidMount() {
+    this.rafLoop = window.requestAnimationFrame(this._rafLoop);
+  }
+
+  componentWillUnmount() {
+    window.cancelAnimationFrame(this.rafLoop);
   }
 
   pickObjects(opts) {
@@ -76,6 +89,23 @@ export default class Map extends PureComponent {
       const infos = this.deckRef.current.pickMultipleObjects(opts);
       console.log(infos); // eslint-disable-line
       this.setState({queriedItems: infos});
+    }
+  }
+
+  _rafLoop() {
+    this.rafLoop = window.requestAnimationFrame(this._rafLoop);
+    if (this.deckRef.current) {
+      const deck = this.deckRef.current.deck;
+      this.setState({metrics: Object.assign({}, deck.metrics)});
+      if (this.props.randomCamera) {
+        const viewState = deck.viewManager.getViewState();
+        deck.setProps({
+          viewState: Object.assign({}, viewState, {
+            latitude: viewState.latitude + (Math.random() * 0.0002 - 0.0001),
+            longitude: viewState.longitude + (Math.random() * 0.0002 - 0.0001)
+          })
+        });
+      }
     }
   }
 
@@ -121,6 +151,9 @@ export default class Map extends PureComponent {
 
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
+        <div style={{position: 'absolute', top: '10px', left: '100px', zIndex: 999}}>
+          <RenderStats stats={this.state.metrics} />
+        </div>
         <DeckGL
           ref={this.deckRef}
           id="default-deckgl-overlay"

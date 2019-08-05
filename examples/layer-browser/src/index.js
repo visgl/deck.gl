@@ -1,7 +1,6 @@
 /* global document */
 import React, {Component} from 'react';
 import ReactDOM from 'react-dom';
-import FPSStats from 'react-stats-zavatta';
 
 class Root extends Component {
   constructor(props) {
@@ -18,7 +17,6 @@ class Root extends Component {
 
     return (
       <div>
-        <FPSStats isActive left={100} />
         <AppComponent state={this._appState} onStateChange={this._onAppStateChange.bind(this)} />
       </div>
     );
