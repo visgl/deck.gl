@@ -5,52 +5,50 @@ import {shadow} from '@deck.gl/core/shaderlib';
 import {Matrix4, Vector3} from 'math.gl';
 import {PROJECT_COORDINATE_SYSTEM} from '@deck.gl/core/shaderlib/project/constants';
 
+// unproject viewport corners to ground and use them as reference points to test tight fitting bounding box
+
 const TEST_CASE1 = [
   {
-    xyz: [83095, 202499, 0],
+    xyz: [83095, 202499, 0], // top left corner inside
     result: true
   },
   {
-    xyz: [83094, 202499, 0],
+    xyz: [83094, 202499, 0], // top left corner outside
     result: false
   },
   {
-    xyz: [84056, 201943, 0],
+    xyz: [84056, 201943, 0], // top right corner inside
     result: true
   },
   {
-    xyz: [83730, 203113, 0],
+    xyz: [84056, 202043, 100], // point with altitude inside
     result: true
   },
   {
-    xyz: [84056, 202043, 100],
+    xyz: [83730, 203113, 0], // bottom left corner inside
     result: true
   },
   {
-    xyz: [83730, 203113, 0],
-    result: true
-  },
-  {
-    xyz: [84271, 202801, 0],
+    xyz: [84271, 202801, 0], // bottom right corner outside
     result: false
   }
 ];
 
 const TEST_CASE2 = [
   {
-    xyz: [-753, -194, 0],
+    xyz: [-753, -194, 0], // top left corner outside
     result: false
   },
   {
-    xyz: [210, -749, 0],
+    xyz: [210, -749, 0], // top right corner outside
     result: false
   },
   {
-    xyz: [-117, 421, 0],
+    xyz: [-117, 421, 0], // bottom left corner inside
     result: true
   },
   {
-    xyz: [423, 108, 0],
+    xyz: [423, 108, 0], // bottom right corner inside
     result: true
   }
 ];
@@ -141,12 +139,6 @@ test('shadow#getUniforms', t => {
         1.4999866483231017
       ]
     }
-  );
-
-  t.deepEqual(
-    uniforms[`shadow_uProjectCenters[0]`].toArray(),
-    [0.27978817346138385, 0.2796375220259506, 0.057706067456820165, 1.0000000000047367],
-    `Shadow projection center in LNGLAT_AUTO_OFFSET mode is correct!`
   );
 
   for (const value of TEST_CASE2) {
