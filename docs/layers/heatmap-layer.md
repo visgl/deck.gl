@@ -90,13 +90,13 @@ Specified as an array of colors [color1, color2, ... color6]. Each color is an a
 
 Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than `1` biases the output color towards the higher end of the spectrum, and a value less than `1` biases the output color towards the lower end of the spectrum.
 
-##### `softMargin` (Number, optional)
+##### `threshold` (Number, optional)
 
 * Default: `0.05`
 
-The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight to create a fading effect at the edge. A larger `softMargin` smoothens the boundaries of color blobs, while making pixels with low relative weight harder to spot (due to low alpha value).
+The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight to create a fading effect at the edge. A larger `threshold` smoothens the boundaries of color blobs, while making pixels with low relative weight harder to spot (due to low alpha value).
 
-`softMargin` is defined as the ratio of the fading threshold to the max weight, between `0` and `1`. For example, `0.1` affects all pixels with weight under 10% of the max.
+`threshold` is defined as the ratio of the fading weight to the max weight, between `0` and `1`. For example, `0.1` affects all pixels with weight under 10% of the max.
 
 ### Data Accessors
 

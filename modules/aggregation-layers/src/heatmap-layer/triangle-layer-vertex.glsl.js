@@ -25,7 +25,6 @@ export default `\
 
 uniform sampler2D maxTexture;
 uniform float intensity;
-uniform float softMargin;
 
 attribute vec3 positions;
 attribute vec2 texCoords;

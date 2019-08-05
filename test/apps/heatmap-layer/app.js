@@ -8,7 +8,6 @@ import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-// const DATA_URL_EQ = 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson';
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
 
@@ -37,12 +36,12 @@ class Root extends PureComponent {
           layers={[
             new HeatmapLayer({
               data: DATA_URL,
-              id: 'heatmp-layer-eq',
+              id: 'heatmp-layer',
               opacity: 1,
               pickable: false,
               getPosition: d => [d[0], d[1]],
               getWeight: d => d[2],
-              enhanceFactor: 100
+              threshold: 0.03
             })
           ]}
         >
