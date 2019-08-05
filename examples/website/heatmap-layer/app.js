@@ -8,7 +8,6 @@ import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-// const DATA_URL_EQ = 'https://docs.mapbox.com/mapbox-gl-js/assets/earthquakes.geojson';
 const DATA_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/uber-pickup-locations.json'; // eslint-disable-line
 
@@ -28,23 +27,30 @@ class Root extends PureComponent {
     super(props);
   }
 
+  _renderLayers() {
+    const {data = DATA_URL, intensity = 1, threshold = 0.03} = this.props;
+
+    return [
+      new HeatmapLayer({
+        data,
+        id: 'heatmp-layer',
+        opacity: 1,
+        pickable: false,
+        getPosition: d => [d[0], d[1]],
+        getWeight: d => d[2],
+        intensity,
+        threshold
+      })
+    ];
+  }
+
   render() {
     return (
       <div>
         <DeckGL
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
-          layers={[
-            new HeatmapLayer({
-              data: DATA_URL,
-              id: 'heatmp-layer-eq',
-              opacity: 1,
-              pickable: false,
-              getPosition: d => [d[0], d[1]],
-              getWeight: d => d[2],
-              enhanceFactor: 100
-            })
-          ]}
+          layers={this._renderLayers()}
         >
           <StaticMap
             reuseMaps

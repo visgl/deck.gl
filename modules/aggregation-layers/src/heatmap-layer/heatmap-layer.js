@@ -52,7 +52,7 @@ const defaultProps = {
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
-  softMargin: {type: 'number', min: 0, max: 1, value: 0.05}
+  threshold: {type: 'number', min: 0, max: 1, value: 0.05}
 };
 
 export default class HeatmapLayer extends CompositeLayer {
@@ -104,7 +104,7 @@ export default class HeatmapLayer extends CompositeLayer {
       maxWeightsTexture,
       colorTexture
     } = this.state;
-    const {updateTriggers, intensity, softMargin} = this.props;
+    const {updateTriggers, intensity, threshold} = this.props;
 
     return new TriangleLayer(
       this.getSubLayerProps({
@@ -124,7 +124,7 @@ export default class HeatmapLayer extends CompositeLayer {
         colorTexture,
         texture: weightsTexture,
         intensity,
-        softMargin
+        threshold
       }
     );
   }

@@ -941,7 +941,7 @@ export const TEST_CASES = [
         pickable: false,
         getPosition: d => d.COORDINATES,
         radiusPixels: 35,
-        softMargin: 0.1
+        threshold: 0.1
       })
     ],
     goldenImage: './test/render/golden-images/heatmap-lnglat.png'
