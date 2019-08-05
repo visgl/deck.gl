@@ -123,15 +123,15 @@ function getViewportCenterPosition({viewport, center}) {
 function getViewProjectionMatrices({viewport, shadowMatrices}) {
   const projectionMatrices = [];
 
+  const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
+
+  const topLeft = pixelsToWorld([0, 0], pixelUnprojectionMatrix);
+  const topRight = pixelsToWorld([viewport.width, 0], pixelUnprojectionMatrix);
+  const bottomLeft = pixelsToWorld([0, viewport.height], pixelUnprojectionMatrix);
+  const bottomRight = pixelsToWorld([viewport.width, viewport.height], pixelUnprojectionMatrix);
+
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
-    const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
-
-    const topLeft = pixelsToWorld([0, 0], pixelUnprojectionMatrix);
-    const topRight = pixelsToWorld([viewport.width, 0], pixelUnprojectionMatrix);
-    const bottomLeft = pixelsToWorld([0, viewport.height], pixelUnprojectionMatrix);
-    const bottomRight = pixelsToWorld([viewport.width, viewport.height], pixelUnprojectionMatrix);
-
     const pos0 = viewMatrix.transformVector3([topLeft[0], topLeft[1], 0]);
     const pos1 = viewMatrix.transformVector3([topRight[0], topRight[1], 0]);
     const pos2 = viewMatrix.transformVector3([bottomLeft[0], bottomLeft[1], 0]);

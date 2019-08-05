@@ -116,7 +116,6 @@ test('LightingEffect#prepare and cleanup', t => {
     pixelRatio: 1
   });
 
-  t.equal(lightingEffect.lightMatrices.length, 2, 'LightingEffect prepares light matrices');
   t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect prepares shadow passes');
   t.equal(lightingEffect.dummyShadowMaps.length, 2, 'LightingEffect prepares dummy shadow maps');
 

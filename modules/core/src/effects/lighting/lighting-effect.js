@@ -35,7 +35,6 @@ export default class LightingEffect extends Effect {
 
     this.shadowColor = DEFAULT_SHADOW_COLOR;
     this.shadowPasses = [];
-    this.lightMatrices = [];
     this.dummyShadowMaps = [];
     this.shadow = false;
 
@@ -69,7 +68,7 @@ export default class LightingEffect extends Effect {
     if (!this.shadow) return {};
 
     // create light matrix every frame to make sure always updated from light source
-    this._createLightMatrix();
+    const shadowMatrices = this._createLightMatrix();
 
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl, pixelRatio);
@@ -91,7 +90,7 @@ export default class LightingEffect extends Effect {
         effectProps: {
           shadowLightId: i,
           dummyShadowMaps: this.dummyShadowMaps,
-          shadowMatrices: this.lightMatrices
+          shadowMatrices
         }
       });
       shadowMaps.push(shadowPass.shadowMap);
@@ -102,7 +101,7 @@ export default class LightingEffect extends Effect {
       dummyShadowMaps: this.dummyShadowMaps,
       shadowLightId: 0,
       shadowColor: this.shadowColor,
-      shadowMatrices: this.lightMatrices
+      shadowMatrices
     };
   }
 
@@ -128,19 +127,19 @@ export default class LightingEffect extends Effect {
 
     if (this.shadow) {
       this._removeShadowModule();
-      this.shadow = false;
     }
   }
 
   _createLightMatrix() {
-    this.lightMatrices = [];
+    const lightMatrices = [];
     for (const light of this.directionalLights) {
       const viewMatrix = new Matrix4().lookAt({
         eye: new Vector3(light.direction).negate()
       });
 
-      this.lightMatrices.push(viewMatrix);
+      lightMatrices.push(viewMatrix);
     }
+    return lightMatrices;
   }
 
   _createShadowPasses(gl, pixelRatio) {
