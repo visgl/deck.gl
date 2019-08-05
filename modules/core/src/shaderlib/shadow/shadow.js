@@ -125,26 +125,49 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
 
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
 
-  const topLeft = pixelsToWorld([0, 0], pixelUnprojectionMatrix);
-  const topRight = pixelsToWorld([viewport.width, 0], pixelUnprojectionMatrix);
-  const bottomLeft = pixelsToWorld([0, viewport.height], pixelUnprojectionMatrix);
-  const bottomRight = pixelsToWorld([viewport.width, viewport.height], pixelUnprojectionMatrix);
+  const topLeftNear = pixelsToWorld([0, 0, 0], pixelUnprojectionMatrix);
+  const topRightNear = pixelsToWorld([viewport.width, 0, 0], pixelUnprojectionMatrix);
+  const bottomLeftNear = pixelsToWorld([0, viewport.height, 0], pixelUnprojectionMatrix);
+  const bottomRightNear = pixelsToWorld(
+    [viewport.width, viewport.height, 0],
+    pixelUnprojectionMatrix
+  );
+  const topLeftFar = pixelsToWorld([0, 0, 1], pixelUnprojectionMatrix);
+  const topRightFar = pixelsToWorld([viewport.width, 0, 1], pixelUnprojectionMatrix);
+  const bottomLeftFar = pixelsToWorld([0, viewport.height, 1], pixelUnprojectionMatrix);
+  const bottomRightFar = pixelsToWorld(
+    [viewport.width, viewport.height, 1],
+    pixelUnprojectionMatrix
+  );
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
-    const pos0 = viewMatrix.transformVector3([topLeft[0], topLeft[1], 0]);
-    const pos1 = viewMatrix.transformVector3([topRight[0], topRight[1], 0]);
-    const pos2 = viewMatrix.transformVector3([bottomLeft[0], bottomLeft[1], 0]);
-    const pos3 = viewMatrix.transformVector3([bottomRight[0], bottomRight[1], 0]);
+    const pos0 = viewMatrix.transformVector3(topLeftNear);
+    const pos1 = viewMatrix.transformVector3(topRightNear);
+    const pos2 = viewMatrix.transformVector3(bottomLeftNear);
+    const pos3 = viewMatrix.transformVector3(bottomRightNear);
+    const pos4 = viewMatrix.transformVector3(topLeftFar);
+    const pos5 = viewMatrix.transformVector3(topRightFar);
+    const pos6 = viewMatrix.transformVector3(bottomLeftFar);
+    const pos7 = viewMatrix.transformVector3(bottomRightFar);
 
     const projectionMatrix = new Matrix4().ortho({
-      left: Math.min(pos0[0], pos1[0], pos2[0], pos3[0]),
-      right: Math.max(pos0[0], pos1[0], pos2[0], pos3[0]),
-      bottom: Math.min(pos0[1], pos1[1], pos2[1], pos3[1]),
-      top: Math.max(pos0[1], pos1[1], pos2[1], pos3[1]),
+      left: Math.min(pos0[0], pos1[0], pos2[0], pos3[0], pos4[0], pos5[0], pos6[0], pos7[0]),
+      right: Math.max(pos0[0], pos1[0], pos2[0], pos3[0], pos4[0], pos5[0], pos6[0], pos7[0]),
+      bottom: Math.min(pos0[1], pos1[1], pos2[1], pos3[1], pos4[1], pos5[1], pos6[1], pos7[1]),
+      top: Math.max(pos0[1], pos1[1], pos2[1], pos3[1], pos4[1], pos5[1], pos6[1], pos7[1]),
       // Near plane could be too close to cover tall objects, scale up by 2.0
-      near: Math.min(-pos0[2], -pos1[2], -pos2[2], -pos3[2]) * 2.0,
-      far: Math.max(-pos0[2], -pos1[2], -pos2[2], -pos3[2])
+      near: Math.min(
+        -pos0[2],
+        -pos1[2],
+        -pos2[2],
+        -pos3[2],
+        -pos4[2],
+        -pos5[2],
+        -pos6[2],
+        -pos7[2]
+      ),
+      far: Math.max(-pos0[2], -pos1[2], -pos2[2], -pos3[2], -pos4[2], -pos5[2], -pos6[2], -pos7[2])
     });
     projectionMatrices.push(projectionMatrix.multiplyRight(shadowMatrix));
   }
