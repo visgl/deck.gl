@@ -5,6 +5,67 @@ import {shadow} from '@deck.gl/core/shaderlib';
 import {Matrix4, Vector3} from 'math.gl';
 import {PROJECT_COORDINATE_SYSTEM} from '@deck.gl/core/shaderlib/project/constants';
 
+const TEST_CASE1 = [
+  {
+    xyz: [83095, 202499, 0],
+    result: true
+  },
+  {
+    xyz: [83094, 202499, 0],
+    result: false
+  },
+  {
+    xyz: [84056, 201943, 0],
+    result: true
+  },
+  {
+    xyz: [83730, 203113, 0],
+    result: true
+  },
+  {
+    xyz: [84056, 202043, 100],
+    result: true
+  },
+  {
+    xyz: [83730, 203113, 0],
+    result: true
+  },
+  {
+    xyz: [84271, 202801, 0],
+    result: false
+  }
+];
+
+const TEST_CASE2 = [
+  {
+    xyz: [-753, -194, 0],
+    result: false
+  },
+  {
+    xyz: [210, -749, 0],
+    result: false
+  },
+  {
+    xyz: [-117, 421, 0],
+    result: true
+  },
+  {
+    xyz: [423, 108, 0],
+    result: true
+  }
+];
+
+function insideClipSpace(xyz) {
+  return (
+    xyz[0] >= -1.0 &&
+    xyz[0] <= 1.0 &&
+    xyz[1] >= -1.0 &&
+    xyz[1] <= 1.0 &&
+    xyz[2] >= -1.0 &&
+    xyz[2] <= 1.0
+  );
+}
+
 test('shadow#getUniforms', t => {
   // LNG_LAT mode
   let viewport = new MapView().makeViewport({
@@ -26,7 +87,7 @@ test('shadow#getUniforms', t => {
   let uniforms = shadow.getUniforms(
     {
       viewport,
-      shadow_matrices: [viewMatrix],
+      shadowMatrices: [viewMatrix],
       drawToShadowMap: true,
       dummyShadowMaps: [true]
     },
@@ -42,28 +103,15 @@ test('shadow#getUniforms', t => {
     [0, 0, 0, 0],
     `Shadow projection center in LNG_LAT mode is correct!`
   );
-  t.deepEqual(
-    uniforms[`shadow_uViewProjectionMatrices[0]`].toArray(),
-    [
-      0.0016999849607879905,
-      -0.0007500704153316311,
-      -0.0009960848968223089,
-      0,
-      0,
-      0.0015001408306632622,
-      -0.0009960848968223089,
-      0,
-      -0.0016999849607879905,
-      -0.0007500704153316311,
-      -0.0009960848968223089,
-      0,
-      -142.25867192876336,
-      -240.8948015140241,
-      285.47408688945353,
-      1
-    ],
-    `Shadow viewProjection matrix in LNG_LAT mode is correct!`
-  );
+
+  for (const value of TEST_CASE1) {
+    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transformVector3(value.xyz);
+    t.equal(
+      insideClipSpace(result),
+      value.result,
+      `Shadow viewProjection matrix in LNG_LAT mode is correct!`
+    );
+  }
 
   // LNGLAT_AUTO_OFFSET mode
   viewport = new MapView().makeViewport({
@@ -81,7 +129,7 @@ test('shadow#getUniforms', t => {
   uniforms = shadow.getUniforms(
     {
       viewport,
-      shadow_matrices: [viewMatrix],
+      shadowMatrices: [viewMatrix],
       drawToShadowMap: true,
       dummyShadowMaps: [true]
     },
@@ -97,31 +145,23 @@ test('shadow#getUniforms', t => {
 
   t.deepEqual(
     uniforms[`shadow_uProjectCenters[0]`].toArray(),
-    [0.27978817346047435, 0.2796375220259506, 0.057706067456820165, 1.0000000000047367],
+    [0.27978817346138385, 0.2796375220259506, 0.057706067456820165, 1.0000000000047367],
     `Shadow projection center in LNGLAT_AUTO_OFFSET mode is correct!`
   );
-  t.deepEqual(
-    uniforms[`shadow_uViewProjectionMatrices[0]`].toArray(),
-    [
-      0.0016999849607999596,
-      -0.0007500704153308891,
-      -0.0009960848968280857,
-      0,
-      0,
-      0.0015001408306617781,
-      -0.0009960848968280857,
-      0,
-      -0.0016999849607999596,
-      -0.0007500704153308891,
-      -0.0009960848968280857,
-      0,
-      0,
-      0,
-      0,
-      0
-    ],
-    `Shadow viewProjection matrix in LNGLAT_AUTO_OFFSET mode is correct!`
-  );
+
+  for (const value of TEST_CASE2) {
+    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transformVector3(value.xyz);
+    const center = uniforms[`shadow_uProjectCenters[0]`];
+    t.equal(
+      insideClipSpace([
+        (result[0] + center[0]) / center[3],
+        (result[1] + center[1]) / center[3],
+        (result[2] + center[2]) / center[3]
+      ]),
+      value.result,
+      `Shadow viewProjection matrix in LNGLAT_AUTO_OFFSET mode is correct!`
+    );
+  }
 
   t.end();
 });
