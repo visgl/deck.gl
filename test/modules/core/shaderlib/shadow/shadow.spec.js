@@ -5,7 +5,31 @@ import {shadow} from '@deck.gl/core/shaderlib';
 import {Matrix4, Vector3} from 'math.gl';
 import {PROJECT_COORDINATE_SYSTEM} from '@deck.gl/core/shaderlib/project/constants';
 
-// unproject viewport corners to ground and use them as reference points to test tight fitting bounding box
+const TEST_VIEWPORT1 = new MapView().makeViewport({
+  width: 800,
+  height: 600,
+  viewState: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 10,
+    bearing: -30,
+    pitch: 40
+  }
+});
+
+const TEST_VIEWPORT2 = new MapView().makeViewport({
+  width: 800,
+  height: 600,
+  viewState: {
+    latitude: 37.751537058389985,
+    longitude: -122.42694203247012,
+    zoom: 15,
+    bearing: -30,
+    pitch: 40
+  }
+});
+
+// unproject above test viewports corners to ground and use them as reference points to test tight fitting bounding box
 
 const TEST_CASE1 = [
   {
@@ -66,17 +90,7 @@ function insideClipSpace(xyz) {
 
 test('shadow#getUniforms', t => {
   // LNG_LAT mode
-  let viewport = new MapView().makeViewport({
-    width: 800,
-    height: 600,
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 10,
-      bearing: -30,
-      pitch: 40
-    }
-  });
+  let viewport = TEST_VIEWPORT1;
 
   const viewMatrix = new Matrix4().lookAt({
     eye: new Vector3([-1, -1, -1]).negate()
@@ -112,17 +126,7 @@ test('shadow#getUniforms', t => {
   }
 
   // LNGLAT_AUTO_OFFSET mode
-  viewport = new MapView().makeViewport({
-    width: 800,
-    height: 600,
-    viewState: {
-      latitude: 37.751537058389985,
-      longitude: -122.42694203247012,
-      zoom: 15,
-      bearing: -30,
-      pitch: 40
-    }
-  });
+  viewport = TEST_VIEWPORT2;
 
   uniforms = shadow.getUniforms(
     {

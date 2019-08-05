@@ -125,49 +125,40 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
 
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
 
-  const topLeftNear = pixelsToWorld([0, 0, 0], pixelUnprojectionMatrix);
-  const topRightNear = pixelsToWorld([viewport.width, 0, 0], pixelUnprojectionMatrix);
-  const bottomLeftNear = pixelsToWorld([0, viewport.height, 0], pixelUnprojectionMatrix);
-  const bottomRightNear = pixelsToWorld(
-    [viewport.width, viewport.height, 0],
+  const topLeftGround = pixelsToWorld([0, 0], pixelUnprojectionMatrix);
+  const topRightGround = pixelsToWorld([viewport.width, 0], pixelUnprojectionMatrix);
+  const bottomLeftGround = pixelsToWorld([0, viewport.height], pixelUnprojectionMatrix);
+  const bottomRightGround = pixelsToWorld(
+    [viewport.width, viewport.height],
     pixelUnprojectionMatrix
   );
-  const topLeftFar = pixelsToWorld([0, 0, 1], pixelUnprojectionMatrix);
-  const topRightFar = pixelsToWorld([viewport.width, 0, 1], pixelUnprojectionMatrix);
-  const bottomLeftFar = pixelsToWorld([0, viewport.height, 1], pixelUnprojectionMatrix);
-  const bottomRightFar = pixelsToWorld(
-    [viewport.width, viewport.height, 1],
+  const topLeftNear = pixelsToWorld([0, 0, 0.0], pixelUnprojectionMatrix);
+  const topRightNear = pixelsToWorld([viewport.width, 0, 0.0], pixelUnprojectionMatrix);
+  const bottomLeftNear = pixelsToWorld([0, viewport.height, 0.0], pixelUnprojectionMatrix);
+  const bottomRightNear = pixelsToWorld(
+    [viewport.width, viewport.height, 0.0],
     pixelUnprojectionMatrix
   );
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
-    const pos0 = viewMatrix.transformVector3(topLeftNear);
-    const pos1 = viewMatrix.transformVector3(topRightNear);
-    const pos2 = viewMatrix.transformVector3(bottomLeftNear);
-    const pos3 = viewMatrix.transformVector3(bottomRightNear);
-    const pos4 = viewMatrix.transformVector3(topLeftFar);
-    const pos5 = viewMatrix.transformVector3(topRightFar);
-    const pos6 = viewMatrix.transformVector3(bottomLeftFar);
-    const pos7 = viewMatrix.transformVector3(bottomRightFar);
+    const positions = [];
+    positions[0] = viewMatrix.transformVector3([topLeftGround[0], topLeftGround[1], 0]);
+    positions[1] = viewMatrix.transformVector3([topRightGround[0], topRightGround[1], 0]);
+    positions[2] = viewMatrix.transformVector3([bottomLeftGround[0], bottomLeftGround[1], 0]);
+    positions[3] = viewMatrix.transformVector3([bottomRightGround[0], bottomRightGround[1], 0]);
+    positions[4] = viewMatrix.transformVector3(topLeftNear);
+    positions[5] = viewMatrix.transformVector3(topRightNear);
+    positions[6] = viewMatrix.transformVector3(bottomLeftNear);
+    positions[7] = viewMatrix.transformVector3(bottomRightNear);
 
     const projectionMatrix = new Matrix4().ortho({
-      left: Math.min(pos0[0], pos1[0], pos2[0], pos3[0], pos4[0], pos5[0], pos6[0], pos7[0]),
-      right: Math.max(pos0[0], pos1[0], pos2[0], pos3[0], pos4[0], pos5[0], pos6[0], pos7[0]),
-      bottom: Math.min(pos0[1], pos1[1], pos2[1], pos3[1], pos4[1], pos5[1], pos6[1], pos7[1]),
-      top: Math.max(pos0[1], pos1[1], pos2[1], pos3[1], pos4[1], pos5[1], pos6[1], pos7[1]),
-      // Near plane could be too close to cover tall objects, scale up by 2.0
-      near: Math.min(
-        -pos0[2],
-        -pos1[2],
-        -pos2[2],
-        -pos3[2],
-        -pos4[2],
-        -pos5[2],
-        -pos6[2],
-        -pos7[2]
-      ),
-      far: Math.max(-pos0[2], -pos1[2], -pos2[2], -pos3[2], -pos4[2], -pos5[2], -pos6[2], -pos7[2])
+      left: Math.min(...positions.map(position => position[0])),
+      right: Math.max(...positions.map(position => position[0])),
+      bottom: Math.min(...positions.map(position => position[1])),
+      top: Math.max(...positions.map(position => position[1])),
+      near: Math.min(...positions.map(position => -position[2])),
+      far: Math.max(...positions.map(position => -position[2]))
     });
     projectionMatrices.push(projectionMatrix.multiplyRight(shadowMatrix));
   }
