@@ -45,3 +45,5 @@ if (!global.deck) {
 
   initializeShaderModules();
 }
+
+export default global.deck;
