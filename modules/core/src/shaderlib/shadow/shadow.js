@@ -116,42 +116,40 @@ color = shadow_filterShadowColor(color);
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
+function screenToCommonSpace(xyz, pixelUnprojectionMatrix) {
+  const [x, y, z] = xyz;
+  const coord = pixelsToWorld([x, y, z], pixelUnprojectionMatrix);
+
+  if (Number.isFinite(z)) {
+    return coord;
+  }
+  return [coord[0], coord[1], 0];
+}
+
 function getViewportCenterPosition({viewport, center}) {
   return new Matrix4(viewport.viewProjectionMatrix).invert().transformVector4(center);
 }
 
 function getViewProjectionMatrices({viewport, shadowMatrices}) {
   const projectionMatrices = [];
-
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
+  const corners = [];
 
-  const topLeftGround = pixelsToWorld([0, 0], pixelUnprojectionMatrix);
-  const topRightGround = pixelsToWorld([viewport.width, 0], pixelUnprojectionMatrix);
-  const bottomLeftGround = pixelsToWorld([0, viewport.height], pixelUnprojectionMatrix);
-  const bottomRightGround = pixelsToWorld(
-    [viewport.width, viewport.height],
-    pixelUnprojectionMatrix
-  );
-  const topLeftNear = pixelsToWorld([0, 0, -1.0], pixelUnprojectionMatrix);
-  const topRightNear = pixelsToWorld([viewport.width, 0, -1.0], pixelUnprojectionMatrix);
-  const bottomLeftNear = pixelsToWorld([0, viewport.height, -1.0], pixelUnprojectionMatrix);
-  const bottomRightNear = pixelsToWorld(
+  corners[0] = screenToCommonSpace([0, 0], pixelUnprojectionMatrix);
+  corners[1] = screenToCommonSpace([viewport.width, 0], pixelUnprojectionMatrix);
+  corners[2] = screenToCommonSpace([0, viewport.height], pixelUnprojectionMatrix);
+  corners[3] = screenToCommonSpace([viewport.width, viewport.height], pixelUnprojectionMatrix);
+  corners[4] = screenToCommonSpace([0, 0, -1.0], pixelUnprojectionMatrix);
+  corners[5] = screenToCommonSpace([viewport.width, 0, -1.0], pixelUnprojectionMatrix);
+  corners[6] = screenToCommonSpace([0, viewport.height, -1.0], pixelUnprojectionMatrix);
+  corners[7] = screenToCommonSpace(
     [viewport.width, viewport.height, -1.0],
     pixelUnprojectionMatrix
   );
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
-    const positions = [];
-    positions[0] = viewMatrix.transformVector3([topLeftGround[0], topLeftGround[1], 0]);
-    positions[1] = viewMatrix.transformVector3([topRightGround[0], topRightGround[1], 0]);
-    positions[2] = viewMatrix.transformVector3([bottomLeftGround[0], bottomLeftGround[1], 0]);
-    positions[3] = viewMatrix.transformVector3([bottomRightGround[0], bottomRightGround[1], 0]);
-    positions[4] = viewMatrix.transformVector3(topLeftNear);
-    positions[5] = viewMatrix.transformVector3(topRightNear);
-    positions[6] = viewMatrix.transformVector3(bottomLeftNear);
-    positions[7] = viewMatrix.transformVector3(bottomRightNear);
-
+    const positions = corners.map(corner => viewMatrix.transformVector3(corner));
     const projectionMatrix = new Matrix4().ortho({
       left: Math.min(...positions.map(position => position[0])),
       right: Math.max(...positions.map(position => position[0])),
@@ -170,7 +168,7 @@ function createShadowUniforms(opts = {}, context = {}) {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
     shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
     shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
-    shadow_uLightId: opts.shadowLightId,
+    shadow_uLightId: opts.shadowLightId || 0,
     shadow_uLightCount: opts.shadowMatrices.length
   };
 

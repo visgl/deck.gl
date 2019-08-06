@@ -99,7 +99,6 @@ export default class LightingEffect extends Effect {
     return {
       shadowMaps,
       dummyShadowMaps: this.dummyShadowMaps,
-      shadowLightId: 0,
       shadowColor: this.shadowColor,
       shadowMatrices
     };
