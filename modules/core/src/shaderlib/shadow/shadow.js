@@ -134,14 +134,14 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
   const projectionMatrices = [];
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
   const corners = [
-    [0, 0],
-    [viewport.width, 0],
-    [0, viewport.height],
-    [viewport.width, viewport.height],
-    [0, 0, -1.0],
-    [viewport.width, 0, -1.0],
-    [0, viewport.height, -1.0],
-    [viewport.width, viewport.height, -1.0]
+    [0, 0], // top left ground
+    [viewport.width, 0], // top right ground
+    [0, viewport.height], // bottom left ground
+    [viewport.width, viewport.height], // bottom right ground
+    [0, 0, -1.0], // top left near
+    [viewport.width, 0, -1.0], // top right near
+    [0, viewport.height, -1.0], // bottom left near
+    [viewport.width, viewport.height, -1.0] // bottom right near
   ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
 
   for (const shadowMatrix of shadowMatrices) {
