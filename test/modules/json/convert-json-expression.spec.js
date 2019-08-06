@@ -102,7 +102,6 @@ const TEST_CASES = [
 
 test('convertJSONExpression', t => {
   for (const testCase of TEST_CASES) {
-    // Test a function string
     const isAccessor = true;
     const isErrorCase = Boolean(testCase.errorRegex);
     if (isErrorCase) {
@@ -111,7 +110,8 @@ test('convertJSONExpression', t => {
         testCase.errorRegex,
         `throws on ${testCase.expr}`
       );
-      continue; // eslint-disable-line
+      /* eslint-disable-next-line no-continue */
+      continue;
     }
     const func = convertJSONExpression(testCase.expr, null, isAccessor);
 
