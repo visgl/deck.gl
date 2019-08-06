@@ -2,7 +2,7 @@
   "name": "@deck.gl/core",
   "description": "deck.gl core library",
   "license": "MIT",
-  "version": "7.2.0-alpha.4",
+  "version": "7.2.0-beta.1",
   "publishConfig": {
     "access": "public"
   },
@@ -32,7 +32,7 @@
   "dependencies": {
     "@loaders.gl/core": "^1.1.6",
     "@loaders.gl/images": "^1.1.6",
-    "@luma.gl/core": "^7.2.0-alpha.6",
+    "@luma.gl/core": "^7.2.0-beta.1",
     "gl-matrix": "^3.0.0",
     "math.gl": "^2.3.0",
     "mjolnir.js": "^2.1.2",

@@ -50,6 +50,11 @@
   }
   ```
 
+#### Deprecations
+
+IE support is deprecated and will be removed in the next major release.
+
+
 ## Upgrading from deck.gl v7.0 to v7.1
 
 #### Breaking Changes

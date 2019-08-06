@@ -21,6 +21,27 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
+#### deck.gl [v7.2.0-beta.1] - Aug 6, 2019
+
+- Heatmap layer api audit (#3398)
+- Remove side effects from core module (#3395)
+- HeatmapLayer API audit (#3391)
+- Add shadow effect to LightingEffect class (#3387)
+- HeatmapLayer minor optimizations (#3388)
+- HeatmapLayer: Add tests and whats-new (#3384)
+- [HeatmapLayer] add debounce to zoom updates (#3386)
+- Simplify `layer.updateAttributes` override (#3381)
+- Bump luma.gl to 7.2-alpha.6 (#3383)
+- shadow feature for directional light (#3343)
+- Add : Heatmap Layer (#3379)
+- Rename frustum plane properties (#3378)
+- Fix TileLayer flashing (#3380)
+- make sure deck.gl reexports everything from core and layers (#3374)
+- Normalize bitmap layer color uniforms (#3369)
+- Normalize color attributes (#3365)
+- Deprecation warning for IE (#3360)
+- Improve core module test coverage (#3359)
+
 #### deck.gl [v7.2.0-alpha.4] - July 12, 2019
 
 - Fix missing pickingRadius for onClick handlers (#3321) (#3327)
