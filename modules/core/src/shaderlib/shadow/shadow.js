@@ -133,19 +133,16 @@ function getViewportCenterPosition({viewport, center}) {
 function getViewProjectionMatrices({viewport, shadowMatrices}) {
   const projectionMatrices = [];
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
-  const corners = [];
-
-  corners[0] = screenToCommonSpace([0, 0], pixelUnprojectionMatrix);
-  corners[1] = screenToCommonSpace([viewport.width, 0], pixelUnprojectionMatrix);
-  corners[2] = screenToCommonSpace([0, viewport.height], pixelUnprojectionMatrix);
-  corners[3] = screenToCommonSpace([viewport.width, viewport.height], pixelUnprojectionMatrix);
-  corners[4] = screenToCommonSpace([0, 0, -1.0], pixelUnprojectionMatrix);
-  corners[5] = screenToCommonSpace([viewport.width, 0, -1.0], pixelUnprojectionMatrix);
-  corners[6] = screenToCommonSpace([0, viewport.height, -1.0], pixelUnprojectionMatrix);
-  corners[7] = screenToCommonSpace(
-    [viewport.width, viewport.height, -1.0],
-    pixelUnprojectionMatrix
-  );
+  const corners = [
+    [0, 0],
+    [viewport.width, 0],
+    [0, viewport.height],
+    [viewport.width, viewport.height],
+    [0, 0, -1.0],
+    [viewport.width, 0, -1.0],
+    [0, viewport.height, -1.0],
+    [viewport.width, viewport.height, -1.0]
+  ].map(corner => screenToCommonSpace(corner, pixelUnprojectionMatrix));
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
