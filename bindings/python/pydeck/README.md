@@ -20,7 +20,7 @@ pip install pydeck
 ## Installation
 
 ```bash
-pip install pydeck
+pip install -i https://test.pypi.org/simple/ pydeck
 ```
 
 ### Installation from source
