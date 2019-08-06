@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.1
 
+#### deck.gl [v7.1.11] - Aug 6 2019
+
+- Remove side effects from core module (#3395)
+
 #### deck.gl [v7.1.10] - July 12 2019
 
 - Fix controller event propagation (#3345)
