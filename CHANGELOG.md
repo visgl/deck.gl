@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
+#### deck.gl [v7.2.0-beta.2] - Aug 6, 2019
+
+- Calc right scale for shadow map (#3393)
+- Display rendering stats in layer browser (#3400)
+
 #### deck.gl [v7.2.0-beta.1] - Aug 6, 2019
 
 - Heatmap layer api audit (#3398)

@@ -2,7 +2,7 @@
   "name": "deck.gl",
   "description": "A suite of 3D-enabled data visualization overlays, suitable for react-map-gl",
   "license": "MIT",
-  "version": "7.2.0-beta.1",
+  "version": "7.2.0-beta.2",
   "keywords": [
     "webgl",
     "visualization",
@@ -27,15 +27,15 @@
     "prepublishOnly": "npm run build-bundle && npm run build-bundle -- --env.dev"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "7.2.0-beta.1",
-    "@deck.gl/core": "7.2.0-beta.1",
-    "@deck.gl/extensions": "7.2.0-beta.1",
-    "@deck.gl/geo-layers": "7.2.0-beta.1",
-    "@deck.gl/google-maps": "7.2.0-beta.1",
-    "@deck.gl/json": "7.2.0-beta.1",
-    "@deck.gl/layers": "7.2.0-beta.1",
-    "@deck.gl/mapbox": "7.2.0-beta.1",
-    "@deck.gl/mesh-layers": "7.2.0-beta.1",
-    "@deck.gl/react": "7.2.0-beta.1"
+    "@deck.gl/aggregation-layers": "7.2.0-beta.2",
+    "@deck.gl/core": "7.2.0-beta.2",
+    "@deck.gl/extensions": "7.2.0-beta.2",
+    "@deck.gl/geo-layers": "7.2.0-beta.2",
+    "@deck.gl/google-maps": "7.2.0-beta.2",
+    "@deck.gl/json": "7.2.0-beta.2",
+    "@deck.gl/layers": "7.2.0-beta.2",
+    "@deck.gl/mapbox": "7.2.0-beta.2",
+    "@deck.gl/mesh-layers": "7.2.0-beta.2",
+    "@deck.gl/react": "7.2.0-beta.2"
   }
 }
