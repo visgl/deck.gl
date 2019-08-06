@@ -65,15 +65,15 @@ export default class Map extends PureComponent {
     };
 
     this.deckRef = React.createRef();
-    this.metricsLoopHandle = null;
+    this.cameraShakeHandle = null;
   }
 
   componentDidMount() {
-    this.metricsLoopHandle = window.requestAnimationFrame(this._metricsLoop);
+    this.cameraShakeHandle = window.requestAnimationFrame(this._cameraShake);
   }
 
   componentWillUnmount() {
-    window.cancelAnimationFrame(this.metricsLoopHandle);
+    window.cancelAnimationFrame(this.cameraShakeHandle);
   }
 
   pickObjects(opts) {
@@ -92,21 +92,22 @@ export default class Map extends PureComponent {
     }
   }
 
-  _metricsLoop() {
-    this.metricsLoopHandle = window.requestAnimationFrame(this._metricsLoop);
-    if (this.deckRef.current) {
+  _cameraShake() {
+    this.cameraShakeHandle = window.requestAnimationFrame(this._cameraShake);
+    if (this.deckRef.current && this.props.shakeCamera) {
       const deck = this.deckRef.current.deck;
-      this.setState({metrics: Object.assign({}, deck.metrics)});
-      if (this.props.shakeCamera) {
-        const viewState = deck.viewManager.getViewState();
-        deck.setProps({
-          viewState: Object.assign({}, viewState, {
-            latitude: viewState.latitude + (Math.random() * 0.0002 - 0.0001),
-            longitude: viewState.longitude + (Math.random() * 0.0002 - 0.0001)
-          })
-        });
-      }
+      const viewState = deck.viewManager.getViewState();
+      deck.setProps({
+        viewState: Object.assign({}, viewState, {
+          latitude: viewState.latitude + (Math.random() * 0.0002 - 0.0001),
+          longitude: viewState.longitude + (Math.random() * 0.0002 - 0.0001)
+        })
+      });
     }
+  }
+
+  _onMetrics(metrics) {
+    this.setState({metrics: Object.assign({}, metrics)});
   }
 
   _onViewStateChange({viewState, viewId}) {
@@ -170,6 +171,7 @@ export default class Map extends PureComponent {
           debug={true}
           drawPickingColors={drawPickingColors}
           ContextProvider={MapContext.Provider}
+          _onMetrics={this._onMetrics}
         >
           <View id="basemap">
             <StaticMap
