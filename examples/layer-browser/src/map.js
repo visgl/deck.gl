@@ -97,7 +97,7 @@ export default class Map extends PureComponent {
     if (this.deckRef.current) {
       const deck = this.deckRef.current.deck;
       this.setState({metrics: Object.assign({}, deck.metrics)});
-      if (this.props.randomCamera) {
+      if (this.props.shakeCamera) {
         const viewState = deck.viewManager.getViewState();
         deck.setProps({
           viewState: Object.assign({}, viewState, {

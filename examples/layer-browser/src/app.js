@@ -67,7 +67,7 @@ export default class App extends PureComponent {
       },
 
       enableDepthPickOnClick: false,
-      randomCamera: false // Shake camera to force rendering every frame
+      shakeCamera: false // Shake camera to force rendering every frame
     };
 
     this.mapRef = React.createRef();
@@ -229,7 +229,7 @@ export default class App extends PureComponent {
           views={this._getViews()}
           effects={this._getEffects()}
           settings={settings}
-          randomCamera={this.state.randomCamera}
+          shakeCamera={this.state.shakeCamera}
         />
         <div id="control-panel">
           <div style={{textAlign: 'center', padding: '5px 0 5px'}}>
@@ -243,8 +243,8 @@ export default class App extends PureComponent {
             >
               <b>Multi Depth Pick ({this.state.enableDepthPickOnClick ? 'ON' : 'OFF'})</b>
             </button>
-            <button onClick={() => this.setState({randomCamera: !this.state.randomCamera})}>
-              <b>Random Camera ({this.state.randomCamera ? 'ON' : 'OFF'})</b>
+            <button onClick={() => this.setState({shakeCamera: !this.state.shakeCamera})}>
+              <b>Shake Camera ({this.state.shakeCamera ? 'ON' : 'OFF'})</b>
             </button>
           </div>
           <LayerControls
