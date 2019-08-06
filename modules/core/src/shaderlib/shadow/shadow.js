@@ -142,7 +142,7 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
     [viewport.width, 0, -1.0],
     [0, viewport.height, -1.0],
     [viewport.width, viewport.height, -1.0]
-  ].map(corner => screenToCommonSpace(corner, pixelUnprojectionMatrix));
+  ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
