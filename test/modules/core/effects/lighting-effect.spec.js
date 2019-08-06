@@ -116,7 +116,6 @@ test('LightingEffect#prepare and cleanup', t => {
     pixelRatio: 1
   });
 
-  t.equal(lightingEffect.lightMatrices.length, 2, 'LightingEffect prepares light matrices');
   t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect prepares shadow passes');
   t.equal(lightingEffect.dummyShadowMaps.length, 2, 'LightingEffect prepares dummy shadow maps');
 
@@ -139,7 +138,7 @@ test('LightingEffect#shadow module', t => {
   let hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, true, 'LightingEffect adds shadow module to default correctly');
 
-  lightingEffect._removeShadowModule();
+  lightingEffect.cleanup();
   hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, false, 'LightingEffect removes shadow module to default correctly');
   t.end();

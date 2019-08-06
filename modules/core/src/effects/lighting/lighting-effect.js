@@ -35,7 +35,6 @@ export default class LightingEffect extends Effect {
 
     this.shadowColor = DEFAULT_SHADOW_COLOR;
     this.shadowPasses = [];
-    this.lightMatrices = [];
     this.dummyShadowMaps = [];
     this.shadow = false;
 
@@ -68,7 +67,8 @@ export default class LightingEffect extends Effect {
   prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
     if (!this.shadow) return {};
 
-    this._createLightMatrix();
+    // create light matrix every frame to make sure always updated from light source
+    const shadowMatrices = this._createLightMatrix();
 
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl, pixelRatio);
@@ -88,9 +88,9 @@ export default class LightingEffect extends Effect {
         onViewportActive,
         views,
         effectProps: {
-          shadow_lightId: i,
+          shadowLightId: i,
           dummyShadowMaps: this.dummyShadowMaps,
-          shadow_viewProjectionMatrices: this.lightMatrices
+          shadowMatrices
         }
       });
       shadowMaps.push(shadowPass.shadowMap);
@@ -99,9 +99,8 @@ export default class LightingEffect extends Effect {
     return {
       shadowMaps,
       dummyShadowMaps: this.dummyShadowMaps,
-      shadow_lightId: 0,
       shadowColor: this.shadowColor,
-      shadow_viewProjectionMatrices: this.lightMatrices
+      shadowMatrices
     };
   }
 
@@ -124,29 +123,22 @@ export default class LightingEffect extends Effect {
       dummyShadowMap.delete();
     }
     this.dummyShadowMaps.length = 0;
+
+    if (this.shadow) {
+      this._removeShadowModule();
+    }
   }
 
   _createLightMatrix() {
-    const projectionMatrix = new Matrix4().ortho({
-      left: -1,
-      right: 1,
-      bottom: -1,
-      top: 1,
-      near: 0,
-      far: 2
-    });
-
-    this.lightMatrices = [];
+    const lightMatrices = [];
     for (const light of this.directionalLights) {
-      const viewMatrix = new Matrix4()
-        .lookAt({
-          eye: new Vector3(light.direction).negate()
-        })
-        // arbitrary number that covers enough grounds
-        .scale(1e-3);
-      const viewProjectionMatrix = projectionMatrix.clone().multiplyRight(viewMatrix);
-      this.lightMatrices.push(viewProjectionMatrix);
+      const viewMatrix = new Matrix4().lookAt({
+        eye: new Vector3(light.direction).negate()
+      });
+
+      lightMatrices.push(viewMatrix);
     }
+    return lightMatrices;
   }
 
   _createShadowPasses(gl, pixelRatio) {

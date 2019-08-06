@@ -21,6 +21,7 @@ import {createModuleInjection} from '@luma.gl/core';
 import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
 import {Vector3, Matrix4} from 'math.gl';
 import memoize from '../../utils/memoize';
+import {pixelsToWorld} from 'viewport-mercator-project';
 
 const vs = `
 const int max_lights = 2;
@@ -95,7 +96,8 @@ vec4 shadow_filterShadowColor(vec4 color) {
 `;
 
 const moduleName = 'shadow';
-const _getMemoizedViewportCenterPosition = memoize(_getViewportCenterPosition);
+const getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
+const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
 
 createModuleInjection(moduleName, {
   hook: 'vs:DECKGL_FILTER_GL_POSITION',
@@ -114,8 +116,48 @@ color = shadow_filterShadowColor(color);
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
 
-function _getViewportCenterPosition({viewport, center}) {
+function screenToCommonSpace(xyz, pixelUnprojectionMatrix) {
+  const [x, y, z] = xyz;
+  const coord = pixelsToWorld([x, y, z], pixelUnprojectionMatrix);
+
+  if (Number.isFinite(z)) {
+    return coord;
+  }
+  return [coord[0], coord[1], 0];
+}
+
+function getViewportCenterPosition({viewport, center}) {
   return new Matrix4(viewport.viewProjectionMatrix).invert().transformVector4(center);
+}
+
+function getViewProjectionMatrices({viewport, shadowMatrices}) {
+  const projectionMatrices = [];
+  const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
+  const corners = [
+    [0, 0], // top left ground
+    [viewport.width, 0], // top right ground
+    [0, viewport.height], // bottom left ground
+    [viewport.width, viewport.height], // bottom right ground
+    [0, 0, -1.0], // top left near
+    [viewport.width, 0, -1.0], // top right near
+    [0, viewport.height, -1.0], // bottom left near
+    [viewport.width, viewport.height, -1.0] // bottom right near
+  ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
+
+  for (const shadowMatrix of shadowMatrices) {
+    const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
+    const positions = corners.map(corner => viewMatrix.transformVector3(corner));
+    const projectionMatrix = new Matrix4().ortho({
+      left: Math.min(...positions.map(position => position[0])),
+      right: Math.max(...positions.map(position => position[0])),
+      bottom: Math.min(...positions.map(position => position[1])),
+      top: Math.max(...positions.map(position => position[1])),
+      near: Math.min(...positions.map(position => -position[2])),
+      far: Math.max(...positions.map(position => -position[2]))
+    });
+    projectionMatrices.push(projectionMatrix.multiplyRight(shadowMatrix));
+  }
+  return projectionMatrices;
 }
 
 function createShadowUniforms(opts = {}, context = {}) {
@@ -123,31 +165,35 @@ function createShadowUniforms(opts = {}, context = {}) {
     shadow_uDrawShadowMap: Boolean(opts.drawToShadowMap),
     shadow_uUseShadowMap: opts.shadowMaps ? opts.shadowMaps.length > 0 : false,
     shadow_uColor: opts.shadowColor || DEFAULT_SHADOW_COLOR,
-    shadow_uLightId: opts.shadow_lightId,
-    shadow_uLightCount: opts.shadow_viewProjectionMatrices.length
+    shadow_uLightId: opts.shadowLightId || 0,
+    shadow_uLightCount: opts.shadowMatrices.length
   };
 
-  const center = _getMemoizedViewportCenterPosition({
+  const center = getMemoizedViewportCenterPosition({
     viewport: opts.viewport,
     center: context.project_uCenter
   });
 
-  const viewProjectionMatrices = [];
   const projectCenters = [];
+  const viewProjectionMatrices = getMemoizedViewProjectionMatrices({
+    shadowMatrices: opts.shadowMatrices,
+    viewport: opts.viewport
+  }).slice();
 
-  for (let i = 0; i < opts.shadow_viewProjectionMatrices.length; i++) {
-    const viewProjectionMatrix = opts.shadow_viewProjectionMatrices[i]
+  for (let i = 0; i < opts.shadowMatrices.length; i++) {
+    const viewProjectionMatrix = viewProjectionMatrices[i];
+    const viewProjectionMatrixCentered = viewProjectionMatrix
       .clone()
       .translate(new Vector3(opts.viewport.center).negate());
 
     if (context.project_uCoordinateSystem === PROJECT_COORDINATE_SYSTEM.LNG_LAT) {
-      viewProjectionMatrices[i] = viewProjectionMatrix;
+      viewProjectionMatrices[i] = viewProjectionMatrixCentered;
       projectCenters[i] = [0, 0, 0, 0];
     } else {
-      viewProjectionMatrices[i] = opts.shadow_viewProjectionMatrices[i]
+      viewProjectionMatrices[i] = viewProjectionMatrix
         .clone()
         .multiplyRight(VECTOR_TO_POINT_MATRIX);
-      projectCenters[i] = viewProjectionMatrix.transformVector4(center);
+      projectCenters[i] = viewProjectionMatrixCentered.transformVector4(center);
     }
   }
 
@@ -173,11 +219,7 @@ export default {
     if (opts.drawToShadowMap || (opts.shadowMaps && opts.shadowMaps.length > 0)) {
       const shadowUniforms = {};
       const {shadowEnabled = true} = opts;
-      if (
-        shadowEnabled &&
-        opts.shadow_viewProjectionMatrices &&
-        opts.shadow_viewProjectionMatrices.length > 0
-      ) {
+      if (shadowEnabled && opts.shadowMatrices && opts.shadowMatrices.length > 0) {
         Object.assign(shadowUniforms, createShadowUniforms(opts, context));
       } else {
         Object.assign(shadowUniforms, {
