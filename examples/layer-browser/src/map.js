@@ -8,7 +8,7 @@ import DeckGL from '@deck.gl/react';
 import {COORDINATE_SYSTEM, View} from '@deck.gl/core';
 
 import LayerInfo from './components/layer-info';
-import {RenderStats} from './render-stats';
+import {RenderMetrics} from './render-metrics';
 
 /* eslint-disable no-process-env */
 const MapboxAccessToken =
@@ -65,15 +65,15 @@ export default class Map extends PureComponent {
     };
 
     this.deckRef = React.createRef();
-    this.rafLoop = null;
+    this.metricsLoopHandle = null;
   }
 
   componentDidMount() {
-    this.rafLoop = window.requestAnimationFrame(this._rafLoop);
+    this.metricsLoopHandle = window.requestAnimationFrame(this._metricsLoop);
   }
 
   componentWillUnmount() {
-    window.cancelAnimationFrame(this.rafLoop);
+    window.cancelAnimationFrame(this.metricsLoopHandle);
   }
 
   pickObjects(opts) {
@@ -92,8 +92,8 @@ export default class Map extends PureComponent {
     }
   }
 
-  _rafLoop() {
-    this.rafLoop = window.requestAnimationFrame(this._rafLoop);
+  _metricsLoop() {
+    this.metricsLoopHandle = window.requestAnimationFrame(this._metricsLoop);
     if (this.deckRef.current) {
       const deck = this.deckRef.current.deck;
       this.setState({metrics: Object.assign({}, deck.metrics)});
@@ -152,7 +152,7 @@ export default class Map extends PureComponent {
     return (
       <div style={{backgroundColor: '#eeeeee'}}>
         <div style={{position: 'absolute', top: '10px', left: '100px', zIndex: 999}}>
-          <RenderStats stats={this.state.metrics} />
+          <RenderMetrics metrics={this.state.metrics} />
         </div>
         <DeckGL
           ref={this.deckRef}

@@ -4,25 +4,25 @@ const kB = 1024;
 const MB = 1024 * 1024;
 const GB = 1024 * 1024 * 1024;
 
-export function RenderStats(props) {
-  const stats = props.stats;
+export function RenderMetrics(props) {
+  const metrics = props.metrics;
 
-  if (!stats) {
+  if (!metrics) {
     return null;
   }
 
   return (
     <div>
-      <div>FPS: {Math.round(stats.fps)}</div>
+      <div>FPS: {Math.round(metrics.fps)}</div>
       <div>
-        GPU Frame Time: {stats.gpuTimePerFrame.toFixed(2)}
+        GPU Frame Time: {metrics.gpuTimePerFrame.toFixed(2)}
         ms
       </div>
       <div>
-        CPU Frame Time: {stats.cpuTimePerFrame.toFixed(2)}
+        CPU Frame Time: {metrics.cpuTimePerFrame.toFixed(2)}
         ms
       </div>
-      <div>GPU Memory: {formatMemory(stats.gpuMemory)}</div>
+      <div>GPU Memory: {formatMemory(metrics.gpuMemory)}</div>
     </div>
   );
 }

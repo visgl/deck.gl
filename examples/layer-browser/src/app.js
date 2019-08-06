@@ -67,7 +67,7 @@ export default class App extends PureComponent {
       },
 
       enableDepthPickOnClick: false,
-      randomCamera: false
+      randomCamera: false // Shake camera to force rendering every frame
     };
 
     this.mapRef = React.createRef();
