@@ -96,7 +96,6 @@ export const HeatmapLayerDemo = createLayerDemoClass({
   props: {
     pickable: false,
     getPosition: d => d.COORDINATES,
-    radiusPixels: 25,
-    enhanceFactor: 20
+    radiusPixels: 25
   }
 });
