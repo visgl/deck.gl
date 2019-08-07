@@ -16,7 +16,7 @@ const DATA_URL = {
   BUILDINGS:
     'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/buildings.json', // eslint-disable-line
   TRIPS:
-    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips.json' // eslint-disable-line
+    'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/trips/trips-v7.json' // eslint-disable-line
 };
 
 const ambientLight = new AmbientLight({
@@ -39,6 +39,14 @@ const material = new PhongMaterial({
   specularColor: [60, 64, 70]
 });
 
+const DEFAULT_THEME = {
+  buildingColor: [74, 80, 87],
+  trailColor0: [253, 128, 93],
+  trailColor1: [23, 184, 190],
+  material,
+  effects: [lightingEffect]
+};
+
 const INITIAL_VIEW_STATE = {
   longitude: -74,
   latitude: 40.72,
@@ -46,6 +54,8 @@ const INITIAL_VIEW_STATE = {
   pitch: 45,
   bearing: 0
 };
+
+const landCover = [[[-74.0, 40.7], [-74.02, 40.7], [-74.02, 40.72], [-74.0, 40.72]]];
 
 export class App extends Component {
   constructor(props) {
@@ -80,19 +90,35 @@ export class App extends Component {
   }
 
   _renderLayers() {
-    const {buildings = DATA_URL.BUILDINGS, trips = DATA_URL.TRIPS, trailLength = 180} = this.props;
+    const {
+      buildings = DATA_URL.BUILDINGS,
+      trips = DATA_URL.TRIPS,
+      trailLength = 180,
+      theme = DEFAULT_THEME
+    } = this.props;
 
     return [
+      // This is only needed when using shadow effects
+      new PolygonLayer({
+        id: 'ground',
+        data: landCover,
+        getPolygon: f => f,
+        stroked: false,
+        getFillColor: [0, 0, 0, 0]
+      }),
       new TripsLayer({
         id: 'trips',
         data: trips,
-        getPath: d => d.segments,
-        getColor: d => (d.vendor === 0 ? [253, 128, 93] : [23, 184, 190]),
+        getPath: d => d.path,
+        getTimestamps: d => d.timestamps,
+        getColor: d => (d.vendor === 0 ? theme.trailColor0 : theme.trailColor1),
         opacity: 0.3,
         widthMinPixels: 2,
         rounded: true,
         trailLength,
-        currentTime: this.state.time
+        currentTime: this.state.time,
+
+        shadowEnabled: false
       }),
       new PolygonLayer({
         id: 'buildings',
@@ -102,19 +128,23 @@ export class App extends Component {
         opacity: 0.5,
         getPolygon: f => f.polygon,
         getElevation: f => f.height,
-        getFillColor: [74, 80, 87],
-        material
+        getFillColor: theme.buildingColor,
+        material: theme.material
       })
     ];
   }
 
   render() {
-    const {viewState, mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
+    const {
+      viewState,
+      mapStyle = 'mapbox://styles/mapbox/dark-v9',
+      theme = DEFAULT_THEME
+    } = this.props;
 
     return (
       <DeckGL
         layers={this._renderLayers()}
-        effects={[lightingEffect]}
+        effects={theme.effects}
         initialViewState={INITIAL_VIEW_STATE}
         viewState={viewState}
         controller={true}

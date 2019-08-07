@@ -83,7 +83,7 @@ export default class LightingEffect extends Effect {
     for (let i = 0; i < this.shadowPasses.length; i++) {
       const shadowPass = this.shadowPasses[i];
       shadowPass.render({
-        layers,
+        layers: layers.filter(layer => layer.props.shadowEnabled !== false),
         viewports,
         onViewportActive,
         views,

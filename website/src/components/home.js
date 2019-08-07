@@ -3,9 +3,9 @@ import React, {Component} from 'react';
 import {connect} from 'react-redux';
 import Stats from 'stats.js';
 
-import {updateMapState, updateMapSize, setHeaderOpacity} from '../actions/app-actions';
+import {updateMapState, updateMapSize} from '../actions/app-actions';
 import DemoLauncher from './demo-launcher';
-import TWEEN from '@tweenjs/tween.js';
+// import TWEEN from '@tweenjs/tween.js';
 import HomeDemo from './demos/home-demo';
 
 class Home extends Component {
@@ -15,22 +15,20 @@ class Home extends Component {
 
     const viewport = {...HomeDemo.viewport};
 
-    TWEEN.removeAll();
-    this.cameraAnimation = new TWEEN.Tween(viewport).to(
-      {...viewport, bearing: -15},
-      29000
-    ).easing(TWEEN.Easing.Sinusoidal.InOut)
-    .onUpdate(function tweenUpdate() {
-      props.updateMapState({...viewport}); // eslint-disable-line
-    })
-    .repeat(Infinity)
-    .yoyo(true);
+    // TWEEN.removeAll();
+    // this.cameraAnimation = new TWEEN.Tween(viewport).to(
+    //   {...viewport, bearing: -15},
+    //   29000
+    // ).easing(TWEEN.Easing.Sinusoidal.InOut)
+    // .onUpdate(function tweenUpdate() {
+    //   props.updateMapState({...viewport}); // eslint-disable-line
+    // })
+    // .repeat(Infinity)
+    // .yoyo(true);
   }
 
   componentDidMount() {
-    window.onscroll = this._onScroll.bind(this);
     window.onresize = this._resizeMap.bind(this);
-    this._onScroll();
     this._resizeMap();
 
     this._stats = new Stats();
@@ -38,7 +36,7 @@ class Home extends Component {
     this.refs.fps.appendChild(this._stats.dom);
 
     const calcFPS = () => {
-      TWEEN.update();
+      // TWEEN.update();
       this._stats.begin();
       this._stats.end();
       this._animateRef = window.requestAnimationFrame(calcFPS);
@@ -46,13 +44,12 @@ class Home extends Component {
 
     this._animateRef = window.requestAnimationFrame(calcFPS);
 
-    this.cameraAnimation.start();
+    // this.cameraAnimation.start();
   }
 
   componentWillUnmount() {
-    window.onscroll = null;
     window.onresize = null;
-    this.cameraAnimation.stop();
+    // this.cameraAnimation.stop();
     window.cancelAnimationFrame(this._animateRef);
   }
 
@@ -61,12 +58,6 @@ class Home extends Component {
     const width = container.clientWidth;
     const height = container.clientHeight;
     this.props.updateMapSize({width, height});
-  }
-
-  _onScroll() {
-    const y = window.pageYOffset;
-    const opacity = Math.max(0, Math.min(1, (y - 168) / 20));
-    this.props.setHeaderOpacity(opacity);
   }
 
   render() {
@@ -150,5 +141,5 @@ class Home extends Component {
 
 export default connect(
   state => ({}),
-  {updateMapState, updateMapSize, setHeaderOpacity}
+  {updateMapState, updateMapSize}
 )(Home);
