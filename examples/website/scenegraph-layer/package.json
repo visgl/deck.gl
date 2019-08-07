@@ -7,10 +7,10 @@
     "start": "webpack-dev-server --progress --hot --open"
   },
   "dependencies": {
-    "@deck.gl/mesh-layers": "^7.1.10",
-    "@deck.gl/react": "^7.1.10",
+    "@deck.gl/mesh-layers": "^7.2.0-beta",
+    "@deck.gl/react": "^7.2.0-beta",
     "@loaders.gl/core": "^1.1.6",
-    "@luma.gl/addons": "^7.1.1",
+    "@luma.gl/addons": "^7.2.0-beta",
     "react": "^16.3.0",
     "react-dom": "^16.3.0",
     "react-map-gl": "^5.0.0"
