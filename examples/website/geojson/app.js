@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {GeoJsonLayer} from 'deck.gl';
+import DeckGL, {GeoJsonLayer, PolygonLayer} from 'deck.gl';
+import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';
 import {scaleThreshold} from 'd3-scale';
 
 // Set your mapbox token here
@@ -39,6 +40,20 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
+const ambientLight = new AmbientLight({
+  color: [255, 255, 255],
+  intensity: 1.0
+});
+
+const dirLight = new SunLight({
+  timestamp: new Date('2019-08-01 15:00:00 Z-7').getTime(),
+  color: [255, 255, 255],
+  intensity: 1.0,
+  _shadow: true
+});
+
+const landCover = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]];
+
 export class App extends Component {
   constructor(props) {
     super(props);
@@ -48,6 +63,10 @@ export class App extends Component {
     };
     this._onHover = this._onHover.bind(this);
     this._renderTooltip = this._renderTooltip.bind(this);
+
+    const lightingEffect = new LightingEffect({ambientLight, dirLight});
+    lightingEffect.shadowColor = [0, 0, 0, 0.5];
+    this._effects = [lightingEffect];
   }
 
   _onHover({x, y, object}) {
@@ -58,6 +77,14 @@ export class App extends Component {
     const {data = DATA_URL} = this.props;
 
     return [
+      // only needed when using shadows - a plane for shadows to drop on
+      new PolygonLayer({
+        id: 'ground',
+        data: landCover,
+        stroked: false,
+        getPolygon: f => f,
+        getFillColor: [0, 0, 0, 0]
+      }),
       new GeoJsonLayer({
         id: 'geojson',
         data,
@@ -102,7 +129,12 @@ export class App extends Component {
     const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
 
     return (
-      <DeckGL layers={this._renderLayers()} initialViewState={INITIAL_VIEW_STATE} controller={true}>
+      <DeckGL
+        layers={this._renderLayers()}
+        effects={this._effects}
+        initialViewState={INITIAL_VIEW_STATE}
+        controller={true}
+      >
         <StaticMap
           reuseMaps
           mapStyle={mapStyle}
