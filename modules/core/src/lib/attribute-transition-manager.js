@@ -223,7 +223,7 @@ export default class AttributeTransitionManager {
   // get current values of an attribute, clipped/padded to the size of the new buffer
   _getNextTransitionStates(transition, settings) {
     const {attribute} = transition;
-    const {size, offset} = attribute;
+    const {size, offset, normalized} = attribute;
 
     let toState;
     if (attribute.constant) {
@@ -235,6 +235,7 @@ export default class AttributeTransitionManager {
         divisor: 0,
         size,
         offset,
+        normalized,
         // attribute's `value` does not match the content of external buffer,
         // will need to call buffer.getData if needed
         value: attribute.externalBuffer ? null : attribute.value

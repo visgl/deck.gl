@@ -55,7 +55,11 @@ export default class PathTesselator extends Tesselator {
       // invalid path
       return 0;
     }
-    return this.isClosed(path) ? numPoints + 1 : Math.max(0, numPoints - 1);
+    if (this.isClosed(path)) {
+      // minimum 3 vertices
+      return numPoints < 3 ? 0 : numPoints + 1;
+    }
+    return numPoints - 1;
   }
 
   /* eslint-disable max-statements, complexity */
