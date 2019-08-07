@@ -780,37 +780,39 @@ export default class Deck {
   }
 
   _getFrameStats() {
-    this.stats.get('frameRate').timeEnd();
-    this.stats.get('frameRate').timeStart();
+    const {stats} = this;
+    stats.get('frameRate').timeEnd();
+    stats.get('frameRate').timeStart();
 
     // Get individual stats from luma.gl so reset works
     const animationLoopStats = this.animationLoop.stats;
-    this.stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
-    this.stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
+    stats.get('GPU Time').addTime(animationLoopStats.get('GPU Time').lastTiming);
+    stats.get('CPU Time').addTime(animationLoopStats.get('CPU Time').lastTiming);
   }
 
   _getMetrics() {
-    this.metrics.fps = this.stats.get('frameRate').getHz();
-    this.metrics.setPropsTime = this.stats.get('setProps Time').time;
-    this.metrics.updateAttributesTime = this.stats.get('Update Attributes').time;
-    this.metrics.framesRedrawn = this.stats.get('Redraw Count').count;
-    this.metrics.pickTime =
-      this.stats.get('pickObject Time').time +
-      this.stats.get('pickMultipleObjects Time').time +
-      this.stats.get('pickObjects Time').time;
-    this.metrics.pickCount = this.stats.get('Pick Count').count;
+    const {metrics, stats} = this;
+    metrics.fps = stats.get('frameRate').getHz();
+    metrics.setPropsTime = stats.get('setProps Time').time;
+    metrics.updateAttributesTime = stats.get('Update Attributes').time;
+    metrics.framesRedrawn = stats.get('Redraw Count').count;
+    metrics.pickTime =
+      stats.get('pickObject Time').time +
+      stats.get('pickMultipleObjects Time').time +
+      stats.get('pickObjects Time').time;
+    metrics.pickCount = stats.get('Pick Count').count;
 
     // Luma stats
-    this.metrics.gpuTime = this.stats.get('GPU Time').time;
-    this.metrics.cpuTime = this.stats.get('CPU Time').time;
-    this.metrics.gpuTimePerFrame = this.stats.get('GPU Time').getAverageTime();
-    this.metrics.cpuTimePerFrame = this.stats.get('CPU Time').getAverageTime();
+    metrics.gpuTime = stats.get('GPU Time').time;
+    metrics.cpuTime = stats.get('CPU Time').time;
+    metrics.gpuTimePerFrame = stats.get('GPU Time').getAverageTime();
+    metrics.cpuTimePerFrame = stats.get('CPU Time').getAverageTime();
 
     const memoryStats = lumaStats.get('Memory Usage');
-    this.metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
-    this.metrics.textureMemory = memoryStats.get('Texture Memory').count;
-    this.metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
-    this.metrics.gpuMemory = memoryStats.get('GPU Memory').count;
+    metrics.bufferMemory = memoryStats.get('Buffer Memory').count;
+    metrics.textureMemory = memoryStats.get('Texture Memory').count;
+    metrics.renderbufferMemory = memoryStats.get('Renderbuffer Memory').count;
+    metrics.gpuMemory = memoryStats.get('GPU Memory').count;
   }
 }
 
