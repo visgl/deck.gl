@@ -315,7 +315,7 @@ const TEST_CASES = [
             height: 400
           },
           results: {
-            count: 4
+            count: 3
           }
         },
         {
@@ -409,7 +409,7 @@ const TEST_CASES = [
             height: 400
           },
           results: {
-            count: 33
+            count: 32
           }
         },
         {

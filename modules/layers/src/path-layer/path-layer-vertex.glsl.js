@@ -130,8 +130,8 @@ vec3 lineJoin(
   offsetScale = mix(offsetScale, 1.0 / max(cosHalfA, 0.001), step(0.5, cornerPosition));
 
   // special treatment for start cap and end cap
-  bool isStartCap = !isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0);
-  bool isEndCap = isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0);
+  bool isStartCap = lenA == 0.0 || (!isEnd && (instanceTypes == 1.0 || instanceTypes == 3.0));
+  bool isEndCap = lenB == 0.0 || (isEnd && (instanceTypes == 2.0 || instanceTypes == 3.0));
   bool isCap = isStartCap || isEndCap;
 
   // 0: center, 1: side
