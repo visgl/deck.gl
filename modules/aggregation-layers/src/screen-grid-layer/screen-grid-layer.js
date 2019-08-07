@@ -114,7 +114,13 @@ export default class ScreenGridLayer extends Layer {
     const changeFlags = this._getAggregationChangeFlags(opts);
 
     if (changeFlags) {
-      this._updateAggregation(changeFlags);
+      if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
+        this._updateGridParams();
+      }
+      const {pointCount} = this.state;
+      if (pointCount > 0) {
+        this._updateAggregation(changeFlags);
+      }
     }
   }
 
@@ -282,7 +288,7 @@ export default class ScreenGridLayer extends Layer {
       }
     }
     weights.color.values = colorWeights;
-    this.setState({positions});
+    this.setState({positions, pointCount});
   }
 
   // Set a binding point for the aggregation uniform block index
@@ -316,10 +322,6 @@ export default class ScreenGridLayer extends Layer {
 
   _updateAggregation(changeFlags) {
     const attributeManager = this.getAttributeManager();
-    if (changeFlags.cellSizeChanged || changeFlags.viewportChanged) {
-      this._updateGridParams();
-      attributeManager.invalidateAll();
-    }
     const {cellSizePixels, gpuAggregation} = this.props;
 
     const {positions, weights} = this.state;
@@ -391,6 +393,8 @@ export default class ScreenGridLayer extends Layer {
   }
 
   _updateGridParams() {
+    const attributeManager = this.getAttributeManager();
+    attributeManager.invalidateAll();
     const {width, height} = this.context.viewport;
     const {cellSizePixels} = this.props;
     const {gl} = this.context;
