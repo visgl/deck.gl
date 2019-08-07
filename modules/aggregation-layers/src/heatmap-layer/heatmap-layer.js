@@ -58,8 +58,12 @@ const defaultProps = {
 export default class HeatmapLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
+    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
+    this.state = {textureSize, supported: true};
     if (!isWebGL2(gl)) {
-      log.error('HeatmapLayer is not supported on this browser, requires WebGL2')();
+      log.error(`HeatmapLayer ${this.id} is not supported on this browser, requires WebGL2`)();
+      this.setState({supported: false});
+      return;
     }
     this._setupAttributes();
     this._setupResources();
@@ -71,6 +75,9 @@ export default class HeatmapLayer extends CompositeLayer {
   }
 
   updateState(opts) {
+    if (!this.state.supported) {
+      return;
+    }
     super.updateState(opts);
     const {props, oldProps} = opts;
     const changeFlags = this._getChangeFlags(opts);
@@ -97,6 +104,9 @@ export default class HeatmapLayer extends CompositeLayer {
   }
 
   renderLayers() {
+    if (!this.state.supported) {
+      return [];
+    }
     const {
       weightsTexture,
       triPositionBuffer,
@@ -140,13 +150,15 @@ export default class HeatmapLayer extends CompositeLayer {
       triTexCoordBuffer,
       colorTexture
     } = this.state;
-    weightsTransform.delete();
-    weightsTexture.delete();
-    maxWeightTransform.delete();
-    maxWeightsTexture.delete();
-    triPositionBuffer.delete();
-    triTexCoordBuffer.delete();
-    colorTexture.delete();
+    /* eslint-disable no-unused-expressions */
+    weightsTransform && weightsTransform.delete();
+    weightsTexture && weightsTexture.delete();
+    maxWeightTransform && maxWeightTransform.delete();
+    maxWeightsTexture && maxWeightsTexture.delete();
+    triPositionBuffer && triPositionBuffer.delete();
+    triTexCoordBuffer && triTexCoordBuffer.delete();
+    colorTexture && colorTexture.delete();
+    /* eslint-enable no-unused-expressions */
   }
 
   // PRIVATE
@@ -203,7 +215,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _setupResources() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
+    const {textureSize} = this.state;
     const weightsTexture = getFloatTexture(gl, {
       width: textureSize,
       height: textureSize,
@@ -220,8 +232,7 @@ export default class HeatmapLayer extends CompositeLayer {
       _targetTextureVarying: 'weightsTexture'
     });
 
-    this.state = {
-      textureSize,
+    this.setState({
       weightsTexture,
       maxWeightsTexture,
       weightsTransform,
@@ -245,7 +256,7 @@ export default class HeatmapLayer extends CompositeLayer {
         byteLength: 48,
         accessor: {size: 2}
       })
-    };
+    });
   }
 
   _updateMaxWeightValue() {
