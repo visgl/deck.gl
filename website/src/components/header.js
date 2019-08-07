@@ -25,11 +25,11 @@ export default class Header extends Component {
   }
 
   render() {
-    const {isMenuOpen, opacity, toggleMenu} = this.props;
+    const {isMenuOpen, toggleMenu} = this.props;
 
     return (
       <header className={isMenuOpen ? 'open' : ''}>
-        <div className="bg" style={{opacity}} />
+        <div className="bg" />
         <div className="container stretch">
           <a className="logo" href="#">
             {FRAMEWORK_NAME}

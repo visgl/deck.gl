@@ -22,14 +22,12 @@ export const loadContent = filename => {
     text(filename, (error, response) => {
       dispatch(loadContentSuccess(filename, error ? error.target.response : response));
     });
-
   };
 };
 
 const loadDataStart = owner => ({type: 'LOAD_DATA_START', owner});
 
 const loadDataSuccess = (context, index, data, meta) => {
-
   if (context.isArray) {
     context.resultData = context.resultData.slice(0);
     context.resultData[index] = data;
@@ -60,7 +58,6 @@ const loadDataSuccess = (context, index, data, meta) => {
  *      based on its extension
  */
 export const loadData = (owner, source) => {
-
   return (dispatch, getState) => {
     if (getState().vis.owner === owner) {
       // already loading / loaded
@@ -89,7 +86,8 @@ export const loadData = (owner, source) => {
           dispatch(loadDataSuccess(context, index, data, meta));
         });
 
-        req.on('progress', dataParser.onProgress)
+        req
+          .on('progress', dataParser.onProgress)
           .on('load', dataParser.onLoad)
           .get();
       } else if (/\.(json|geojson)$/.test(url)) {
@@ -108,7 +106,6 @@ export const loadData = (owner, source) => {
         });
       }
     });
-
   };
 };
 
@@ -122,5 +119,3 @@ export const updateParam = (name, value) => ({type: 'UPDATE_PARAM', payload: {na
 export const resetParams = params => ({type: 'RESET_PARAMS'});
 
 export const toggleMenu = isOpen => ({type: 'TOGGLE_MENU', isOpen});
-
-export const setHeaderOpacity = opacity => ({type: 'SET_HEADER_OPACITY', opacity});
