@@ -73,13 +73,12 @@
     color: $black-40;
   }
   .btn {
-    color: $black-20;
-    border: solid 2px $primary;
-    @include linearGradientH(border-image, $primary, $secondary);
-    border-image-slice: 2;
+    font-size: 16px;
+    color: $white;
+    background: $black;
   }
   .btn:hover {
-    background: rgba(0, 173, 230, 0.3);
+    background: $black-40;
   }
 }
 
