@@ -25,6 +25,7 @@ import PathTesselator from '@deck.gl/layers/path-layer/path-tesselator';
 const SAMPLE_DATA = [
   {path: [], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1]], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
+  {path: [[1, 1], [1, 1]], width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1], [2, 2], [3, 3]], width: 2, dashArray: [0, 0], color: [255, 0, 0]},
   {path: new Float64Array([1, 1, 2, 2, 3, 3]), width: 1, dashArray: [0, 0], color: [0, 0, 0]},
   {path: [[1, 1], [2, 2], [3, 3], [1, 1]], width: 3, dashArray: [2, 1], color: [0, 0, 255]}
