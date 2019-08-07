@@ -8,7 +8,6 @@ import {PhongMaterial} from '@luma.gl/core';
 const EMPTY_ARRAY = [];
 
 export default class HomeDemo extends Component {
-
   static get data() {
     return [
       {
@@ -84,10 +83,11 @@ export default class HomeDemo extends Component {
     return (
       <App
         {...otherProps}
-        trips={data && data[0] || EMPTY_ARRAY}
-        buildings={data && data[1] || EMPTY_ARRAY}
+        trips={(data && data[0]) || EMPTY_ARRAY}
+        buildings={(data && data[1]) || EMPTY_ARRAY}
         trailLength={180}
-        theme={this.theme} />
+        theme={this.theme}
+      />
     );
   }
 }

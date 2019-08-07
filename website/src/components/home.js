@@ -5,7 +5,6 @@ import Stats from 'stats.js';
 
 import {updateMapState, updateMapSize} from '../actions/app-actions';
 import DemoLauncher from './demo-launcher';
-// import TWEEN from '@tweenjs/tween.js';
 import HomeDemo from './demos/home-demo';
 
 class Home extends Component {
@@ -14,17 +13,6 @@ class Home extends Component {
     this.state = {};
 
     const viewport = {...HomeDemo.viewport};
-
-    // TWEEN.removeAll();
-    // this.cameraAnimation = new TWEEN.Tween(viewport).to(
-    //   {...viewport, bearing: -15},
-    //   29000
-    // ).easing(TWEEN.Easing.Sinusoidal.InOut)
-    // .onUpdate(function tweenUpdate() {
-    //   props.updateMapState({...viewport}); // eslint-disable-line
-    // })
-    // .repeat(Infinity)
-    // .yoyo(true);
   }
 
   componentDidMount() {
@@ -36,20 +24,16 @@ class Home extends Component {
     this.refs.fps.appendChild(this._stats.dom);
 
     const calcFPS = () => {
-      // TWEEN.update();
       this._stats.begin();
       this._stats.end();
       this._animateRef = window.requestAnimationFrame(calcFPS);
     };
 
     this._animateRef = window.requestAnimationFrame(calcFPS);
-
-    // this.cameraAnimation.start();
   }
 
   componentWillUnmount() {
     window.onresize = null;
-    // this.cameraAnimation.stop();
     window.cancelAnimationFrame(this._animateRef);
   }
 
