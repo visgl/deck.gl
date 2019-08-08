@@ -73,6 +73,7 @@
     color: $black-40;
   }
   .btn {
+    text-transform: none;
     font-size: 16px;
     color: $white;
     background: $black;
@@ -179,5 +180,8 @@
       padding: 0 24px;
       width: auto;
     }
+  }
+  .floater {
+    display: none;
   }
 }
