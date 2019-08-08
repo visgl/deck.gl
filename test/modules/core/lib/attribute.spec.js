@@ -510,9 +510,9 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.getBuffer(), buffer, 'external buffer is set');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
-  t.notOk(
+  t.ok(
     attribute.setExternalBuffer(buffer),
-    'should do nothing if setting external buffer to the same object'
+    'should successfully set external buffer if setting external buffer to the same object'
   );
 
   t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
@@ -521,9 +521,9 @@ test('Attribute#setExternalBuffer', t => {
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.value.constructor.name, 'Float32Array', 'external value is cast to correct type');
 
-  t.notOk(
+  t.ok(
     attribute.setExternalBuffer(value2),
-    'should do nothing if setting external buffer to the same object'
+    'should successfully set external buffer if setting external buffer to the same object'
   );
 
   t.ok(
