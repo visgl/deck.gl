@@ -13,7 +13,7 @@ def get_random_rgb():
 
 
 def assign_random_colors(data_vector):
-    """Produces a vector of lookup table keyed by each class of data, with value as an RGB array
+    """Produces lookup table keyed by each class of data, with value as an RGB array
 
     Parameters
     ---------
