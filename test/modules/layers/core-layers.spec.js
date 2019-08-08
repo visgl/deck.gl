@@ -226,11 +226,16 @@ test('GridCellLayer', t => {
 });
 
 test('IconLayer', t => {
+  /* global document */
+  const canvas = document.createElement('canvas');
+  canvas.width = 24;
+  canvas.height = 24;
+
   const testCases = generateLayerTests({
     Layer: IconLayer,
     sampleProps: {
       data: FIXTURES.points,
-      iconAtlas: {},
+      iconAtlas: canvas,
       iconMapping: {
         marker: {x: 0, y: 0, width: 24, height: 24}
       },
