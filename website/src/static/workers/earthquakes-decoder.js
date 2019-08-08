@@ -16,18 +16,18 @@ onmessage = function(e) {
     if (!line) {
       return;
     }
-    const parts = line.match(pattern);
+    let parts = line.match(pattern);
     parts.shift();
-    const [mag, dt, lat, lon, d] = parts.map(x => decodeNumber(x, 90, 32));
+    parts = parts.map(x => decodeNumber(x, 90, 32));
 
-    timestamp += dt;
+    timestamp += parts[1];
 
     result.push({
       timestamp,
-      latitude: (lat - 9e5) / 1e4,
-      longitude: (lon - 1.8e6) / 1e4,
-      depth: (d - 300) / 100,
-      magnitude: (mag + 30) / 10
+      latitude: (parts[2] - 9e5) / 1e4,
+      longitude: (parts[3] - 1.8e6) / 1e4,
+      depth: (parts[4] - 300) / 100,
+      magnitude: (parts[0] + 30) / 10
     });
     count++;
   });
