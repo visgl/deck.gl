@@ -4,7 +4,20 @@
 
 #### Breaking Changes
 
-- The deprecated `fp64` prop is removed. The current 32-bit projection is generally precise enough for almost all use cases. If you previously use this feature:
+##### Layer methods
+
+Following `Layer` class methods have been removed :
+
+| Removed            | Alternate       | Comment |
+| ---              | --- | --- |
+| `use64bitProjection`  | use `Fp64Extension` | details in `fp64 prop` section below  |
+| `is64bitEnabled`      | use `Fp64Extension` | details in `fp64 prop` section below  |
+| `updateAttributes` | `_updateAttributes` | method is renamed |
+
+
+##### fp64 prop
+
+The deprecated `fp64` prop is removed. The current 32-bit projection is generally precise enough for almost all use cases. If you previously use this feature:
 
   ```js
   /// old
@@ -20,7 +33,7 @@
   It can be changed to:
 
   ```js
-  /// old
+  /// new
   import {COORDINATE_SYSTEM} from '@deck.gl/core';
   import {Fp64Extension} from '@deck.gl/extensions';
 
@@ -31,8 +44,13 @@
   })
   ```
 
-- All core layer shaders now receive **normalized** color attributes and uniforms. If you were previously subclassing a core layer with custom vertex shaders, you should expect the color attributes to be in `[0, 1]` range instead of `[0, 255]`.
-- The `project64` shader module is no longer registered by default. If you were previously using a custom layer that depends on this module:
+##### Color Attributes and Uniforms
+
+All core layer shaders now receive **normalized** color attributes and uniforms. If you were previously subclassing a core layer with custom vertex shaders, you should expect the color attributes to be in `[0, 1]` range instead of `[0, 255]`.
+
+##### project64 Shader Module
+
+The `project64` shader module is no longer registered by default. If you were previously using a custom layer that depends on this module:
 
   ```js
   getShaders() {
