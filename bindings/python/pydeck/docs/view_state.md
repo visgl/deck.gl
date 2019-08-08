@@ -18,7 +18,7 @@ class ViewState(
 
 An object that represents where the state of a viewport, essentially where the screen is focused.
 
-If you have two dimensional data and you don't want to set this manually, see `pydeck.data_utils.viewport_helpers.`autocompute_viewport`.
+If you have two dimensional data and you don't want to set this manually, see `pydeck.data_utils.viewport_helpers.autocompute_viewport`.
 
 #### Parameters
 
@@ -28,9 +28,9 @@ If you have two dimensional data and you don't want to set this manually, see `p
     y-coordinate of focus
 `zoom` : `float`
     Magnification level of the map, usually between 0 (representing the whole world) and 21 (close to individual buildings)
-`min`\_zoom `: float`
-    Least mangified zoom level the user can navigate to
-`max`\_zoom `: float`
+`min_zoom` : `float`
+    Least magnified zoom level the user can navigate to
+`max_zoom` : float`
     Most magnified zoom level the user can navigate to
 `pitch` : `float`
     Up/down angle relative to the map's plane, with 0 being looking directly at the map
