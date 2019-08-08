@@ -241,6 +241,7 @@ export default class BitmapLayer extends Layer {
         })
       });
     } else if (image) {
+      // Browser object: Image, ImageData, HTMLCanvasElement, ImageBitmap
       this.setState({
         bitmapTexture: new Texture2D(gl, {
           data: image,
