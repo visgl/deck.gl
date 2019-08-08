@@ -42,7 +42,7 @@ export function getSunlightDirection(timestamp, latitude, longitude) {
   const azimuthN = azimuth + Math.PI;
 
   // solar position to light direction
-  return [-Math.sin(azimuthN), -Math.cos(azimuthN), -Math.sin(altitude)];
+  return [-Math.sin(azimuthN), Math.cos(azimuthN), -Math.sin(altitude)];
 }
 
 function toJulianDay(timestamp) {
