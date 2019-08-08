@@ -2,6 +2,36 @@
 
 <div>
   <div class="thumb">
+    <div data-title="Isochronic Map" >
+      <a href="http://pessimistress.github.io/isochronic-map/">
+        <img src="images/showcase-isochrone.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="http://pessimistress.github.io/isochronic-map/" target="_blank" rel="noopener noreferrer"><h2>Isochronic Map</h2></a>
+      <p class="credit"><a href="https://github.com/Pessimistress/isochronic-map-gpu">Source code</a> | <a href="https://medium.com/vis-gl/vis-hackathon-2019-56096209dce2">Blog post</a> | <a href="http://www.xiaoji-chen.com/2019/isochronic-map-webgl">Other blog post</a></p>
+      <p>Remapping road network in major cities by travel times.</p>
+    </div>
+  </div>
+
+  <div class="thumb">
+    <div data-title="Simulating the 2016 Primary" >
+      <a href="http://mcvs.thesunstirade.com/">
+        <img src="images/showcase-election-maricopa.jpg" />
+      </a>
+    </div>
+  </div>
+  <div class="thumb-desc">
+    <div>
+      <a href="http://mcvs.thesunstirade.com/" target="_blank" rel="noopener noreferrer"><h2>Simulating the 2016 Primary</h2></a>
+      <p class="credit">By <a href="https://twitter.com/andrewpulcipher">Andrew Pulcipher</a></p>
+      <p>An interactive visualization of the 2016 Presidential primary election in Maricopa County that uses polling place operations research to simulate election day lines and voter walkoffs in real time.</p>
+    </div>
+  </div>
+
+  <div class="thumb">
     <div data-title="The Bad Bet" >
       <a href="https://features.propublica.org/the-bad-bet/how-illinois-bet-on-video-gambling-and-lost/" target="_blank" rel="noopener noreferrer">
         <img src="images/showcase-propublica.jpg" />

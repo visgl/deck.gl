@@ -168,6 +168,14 @@ export const showcasePages = generatePath([
     content: 'markdown/showcase.md'
   },
   {
+    name: 'Isochronic Map',
+    external: 'http://pessimistress.github.io/isochronic-map/'
+  },
+  {
+    name: 'Simulating the 2016 Primary',
+    external: 'http://mcvs.thesunstirade.com/'
+  },
+  {
     name: 'The Bad Bet',
     external:
       'https://features.propublica.org/the-bad-bet/how-illinois-bet-on-video-gambling-and-lost/'
