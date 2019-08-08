@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-/* global Image, HTMLCanvasElement, HTMLVideoElement */
+/* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
 import {Layer, fp64LowPart} from '@deck.gl/core';
 import {Model, Geometry, Texture2D} from '@luma.gl/core';
@@ -230,17 +230,6 @@ export default class BitmapLayer extends Layer {
 
     if (image instanceof Texture2D) {
       this.setState({bitmapTexture: image});
-    } else if (
-      // browser object
-      image instanceof Image ||
-      image instanceof HTMLCanvasElement
-    ) {
-      this.setState({
-        bitmapTexture: new Texture2D(gl, {
-          data: image,
-          parameters: DEFAULT_TEXTURE_PARAMETERS
-        })
-      });
     } else if (image instanceof HTMLVideoElement) {
       // Initialize an empty texture while we wait for the video to load
       this.setState({
@@ -249,6 +238,13 @@ export default class BitmapLayer extends Layer {
           height: 1,
           parameters: DEFAULT_TEXTURE_PARAMETERS,
           mipmaps: false
+        })
+      });
+    } else if (image) {
+      this.setState({
+        bitmapTexture: new Texture2D(gl, {
+          data: image,
+          parameters: DEFAULT_TEXTURE_PARAMETERS
         })
       });
     }

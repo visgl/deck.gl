@@ -1,4 +1,4 @@
-/* global document, Image, HTMLCanvasElement */
+/* global document */
 import GL from '@luma.gl/constants';
 import {Texture2D, readPixelsToBuffer} from '@luma.gl/core';
 import {loadImage} from '@loaders.gl/images';
@@ -248,11 +248,7 @@ export default class IconManager {
 
       this._externalTexture = iconAtlas;
       this.onUpdate();
-    } else if (
-      // browser object
-      iconAtlas instanceof Image ||
-      iconAtlas instanceof HTMLCanvasElement
-    ) {
+    } else if (iconAtlas) {
       this._texture = new Texture2D(this.gl, {
         data: iconAtlas,
         parameters: DEFAULT_TEXTURE_PARAMETERS
