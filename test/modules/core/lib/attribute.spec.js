@@ -24,6 +24,7 @@ import GL from '@luma.gl/constants';
 import {Buffer} from '@luma.gl/core';
 import test from 'tape-catch';
 import {gl} from '@deck.gl/test-utils';
+import {makeSpy} from '@probe.gl/test-utils';
 
 test('Attribute#imports', t => {
   t.equals(typeof Attribute, 'function', 'Attribute import successful');
@@ -510,10 +511,12 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.getBuffer(), buffer, 'external buffer is set');
   t.notOk(attribute.needsUpdate(), 'attribute is updated');
 
+  const spy = makeSpy(attribute, 'update');
   t.ok(
     attribute.setExternalBuffer(buffer),
     'should successfully set external buffer if setting external buffer to the same object'
   );
+  t.notOk(spy.called, 'Should not call update if setting external buffer to the same object');
 
   t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
   t.is(attribute.value, value1, 'external value is set');
@@ -521,10 +524,12 @@ test('Attribute#setExternalBuffer', t => {
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.value.constructor.name, 'Float32Array', 'external value is cast to correct type');
 
+  spy.reset();
   t.ok(
     attribute.setExternalBuffer(value2),
     'should successfully set external buffer if setting external buffer to the same object'
   );
+  t.notOk(spy.called, 'Should not call update if setting external buffer to the same object');
 
   t.ok(
     attribute.setExternalBuffer({
