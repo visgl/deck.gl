@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {registerLoaders} from '@loaders.gl/core';
-import {HTMLImageLoader} from '@loaders.gl/images';
+import {ImageLoader} from '@loaders.gl/images';
 
 import {global} from '../utils/globals';
 import log from '../utils/log';
@@ -47,7 +47,7 @@ if (!global.deck) {
     log
   };
 
-  registerLoaders([jsonLoader, HTMLImageLoader]);
+  registerLoaders([jsonLoader, [ImageLoader, {imageOrientation: 'flipY'}]]);
 
   initializeShaderModules();
 }
