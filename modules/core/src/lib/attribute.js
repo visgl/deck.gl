@@ -311,7 +311,7 @@ export default class Attribute extends BaseAttribute {
     this.clearNeedsUpdate();
 
     if (state.lastExternalBuffer === buffer) {
-      return false;
+      return true;
     }
     state.isExternalBuffer = true;
     state.lastExternalBuffer = buffer;
