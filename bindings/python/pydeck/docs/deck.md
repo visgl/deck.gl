@@ -7,7 +7,7 @@ pydeck.Deck API Documentation
 class pydeck.*Deck*(
     layers=[],
     views=[pydeck.View()],
-    map\_style="mapbox://styles/mapbox/dark-v9",
+    map_style="mapbox://styles/mapbox/dark-v9",
     mapbox_key=None, 
     initial_view_state=pydeck.ViewState()
 )
@@ -25,14 +25,14 @@ Requires a Mapbox API token to display a basemap, see notes below.
 `views` : `list` of `pydeck.View`, default `[pydeck.View()]`
     List of `pydeck.View` objects to render. If rendering a standard map, there is rarely a reason to modify this.
 
-`map\_style` : `str`, default `"mapbox://styles/mapbox/dark-v9"`
+`map_style` : `str`, default `"mapbox://styles/mapbox/dark-v9"`
     URI for Mapbox basemap style
 
-`mapbox\_key` : `str`, default None
+`mapbox_key` : `str`, default None
     Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
     See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
 
-`initial\_view\_state` : `pydeck.ViewState`, default `pydeck.ViewState()`
+`initial_view_state` : `pydeck.ViewState`, default `pydeck.ViewState()`
     Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
     To compute a viewport from data, see `pydeck.data\_utils.autocompute\_viewport`
 
@@ -81,16 +81,16 @@ not render.
 `filename` : `str`, default `None`
     Name of the file. If no name is provided, a randomly named file will be written locally.
 
-`open\_browser` : `bool`, default `False`
+`open_browser` : `bool`, default `False`
     Whether to open the visualization in a browser after execution.
 
-`notebook\_display` : `bool`, default `True`
+`notebook_display` : `bool`, default `True`
     Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
 
-`iframe\_width` : `int`, default `500`
+`iframe_width` : `int`, default `500`
     Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
 
-`iframe\_height` : `int`, default `500`
+`iframe_height` : `int`, default `500`
     Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
 
 #### Returns
