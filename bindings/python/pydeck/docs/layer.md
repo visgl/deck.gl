@@ -22,7 +22,7 @@ Note that this is Javascript documentation and parameters in pydeck usually will
 
 `type` : `str`
     Type of layer to render, e.g., `HexagonLayer`. See the layer catalog above.
-data : `str` or `list` of `dict` or `pandas.DataFrame`
+`data` : `str` or `list` of `dict` or `pandas.DataFrame`
     A URL of data to load in, a list of dictionaries, 
 `id` : `str`, default `None`
     Unique name for the layer. Will autopopulate with a UUID if no ID is provided.
