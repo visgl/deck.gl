@@ -21,6 +21,20 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
+#### deck.gl [v7.2.0-beta.3] - Aug 8, 2019
+
+- improve Deck minification (#3402)
+- Fix PathLayer/trips demo perf regression (#3410)
+- HeatmapLayer: website testing fixes (#3409)
+- Fix highway safety demo bugs (#3411)
+- ScreenGridLayer: skip aggregation when data is empty (#3412)
+- Add shadow to website home demo (#3413)
+- Fix sunlight with shadows (#3414)
+- Fix website data filter example (#3417)
+- Fix set external buffer (#3419)
+- Upgrade to loaders.gl@1.2.0 (#3420)
+
+
 #### deck.gl [v7.2.0-beta.2] - Aug 6, 2019
 
 - Calc right scale for shadow map (#3393)
