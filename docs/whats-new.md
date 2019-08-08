@@ -38,7 +38,7 @@ For instructions on authoring your own layer extensions, visit [developer guide]
 
 ### HeatmapLayer
 
-The `@deck.gl/aggregation-layers` module now offers `HeatmapLayer` as an experimental layer. It performs density distribution on the GPU to provide fast dynamic heatmaps. The layer currently only supports WebGL2-enabled browsers. A fallback solution for WebGL1 will be added later.
+The ` @deck.gl/aggregation-layers` module now offers `HeatmapLayer` as an experimental layer. It performs density distribution on the GPU to provide fast dynamic heatmaps. The layer currently only supports WebGL2-enabled browsers. A fallback solution for WebGL1 will be added later.
 
 ### Shadows in LightingEffect
 
