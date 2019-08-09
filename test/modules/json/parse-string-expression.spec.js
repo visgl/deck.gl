@@ -97,15 +97,13 @@ const TEST_CASES = [
   {expr: '~15', expected: -16},
 
   // 'this' context
-  {expr: 'this.three', expected: 3},
-
-  // cachedExpressionMap trigger
-  {expr: '-', expected: object => object}
+  {expr: 'this.three', expected: 3}
 ];
+
+const isAccessor = true;
 
 test('parseStringExpression', t => {
   for (const testCase of TEST_CASES) {
-    const isAccessor = true;
     const isErrorCase = Boolean(testCase.errorRegex);
     if (isErrorCase) {
       t.throws(
@@ -118,13 +116,20 @@ test('parseStringExpression', t => {
     }
     const func = parseStringExpression(testCase.expr, null, isAccessor);
 
-    t.ok(func, `JSONConverter converted ${testCase.expr}`);
+    t.ok(func, `parseStringExpression converted ${testCase.expr}`);
     t.deepEquals(
       func(row),
       testCase.expected,
-      `JSONConverter correctly evaluated ${testCase.expr} to ${testCase.expected}`
+      `parseStringExpression correctly evaluated ${testCase.expr} to ${testCase.expected}`
     );
   }
+
+  const func = parseStringExpression('-', null, isAccessor);
+  t.deepEquals(
+    func('identity'),
+    'identity',
+    'parseStringExpression of - returns a cached identity function'
+  );
 
   t.end();
 });
