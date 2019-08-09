@@ -186,4 +186,4 @@ Explicitly define a 4x4 column-major model matrix for the mesh. If provided, wil
 
 ## Source
 
-[modules/mesh-layers/src/scenegraph-layer](https://github.com/uber/deck.gl/tree/master/modules/mesh-layers/src/scenegraph-layer)
+[modules/mesh-layers/src/scenegraph-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/mesh-layers/src/scenegraph-layer)

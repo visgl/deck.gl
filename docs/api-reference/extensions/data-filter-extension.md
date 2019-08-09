@@ -172,4 +172,4 @@ The `DataFilterExtension` does not work with any layer from the `@deck.gl/aggreg
 
 ## Source
 
-[modules/extensions/src/data-filter](https://github.com/uber/deck.gl/tree/master/modules/extensions/src/data-filter)
+[modules/extensions/src/data-filter](https://github.com/uber/deck.gl/tree/7.2-release/modules/extensions/src/data-filter)

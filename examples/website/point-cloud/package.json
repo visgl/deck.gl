@@ -9,7 +9,7 @@
   "dependencies": {
     "@loaders.gl/las": "^1.1.6",
     "@loaders.gl/ply": "^1.1.6",
-    "deck.gl": "^7.2.0-beta",
+    "deck.gl": "^7.2.0",
     "react": "^16.3.0",
     "react-dom": "^16.3.0"
   },

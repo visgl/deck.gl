@@ -234,5 +234,5 @@ The width of the outline of the column, in units specified by `lineWidthUnits` (
 
 ## Source
 
-[modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/column-layer)
+[modules/layers/src/column-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/layers/src/column-layer)
 

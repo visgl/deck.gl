@@ -465,4 +465,4 @@ The GridLayer renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/grid-layer)
+[modules/aggregation-layers/src/grid-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/aggregation-layers/src/grid-layer)

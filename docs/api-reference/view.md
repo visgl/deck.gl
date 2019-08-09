@@ -195,4 +195,4 @@ A projection matrix depends on the aspect ratio and needs to be recalculated whe
 
 ## Source
 
-[modules/core/src/views/view.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/views/view.js)
+[modules/core/src/views/view.js](https://github.com/uber/deck.gl/tree/7.2-release/modules/core/src/views/view.js)
