@@ -97,7 +97,10 @@ const TEST_CASES = [
   {expr: '~15', expected: -16},
 
   // 'this' context
-  {expr: 'this.three', expected: 3}
+  {expr: 'this.three', expected: 3},
+
+  // cachedExpressionMap trigger
+  {expr: '-', expected: object => object}
 ];
 
 test('parseStringExpression', t => {
