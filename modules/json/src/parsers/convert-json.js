@@ -10,7 +10,7 @@
 
 import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import JSONLayer from '../json-layer/json-layer';
-import convertJSONExpression from './convert-json-expression';
+import parseStringExpression from './parse-string-expression';
 // TODO - replace with loaders.gl
 import enhancedFetch from './enhanced-fetch';
 
@@ -131,10 +131,10 @@ function getJSONLayerProps(Layer, jsonProps, configuration) {
       switch (type) {
         case 'accessor':
           const isAccessor = true;
-          propValue = convertJSONExpression(propValue, configuration, isAccessor);
+          propValue = parseStringExpression(propValue, configuration, isAccessor);
           break;
         case 'function':
-          propValue = convertJSONExpression(propValue, configuration);
+          propValue = parseStringExpression(propValue, configuration);
           break;
         default:
       }

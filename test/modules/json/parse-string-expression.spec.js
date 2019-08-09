@@ -1,6 +1,6 @@
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-catch';
-import convertJSONExpression from '@deck.gl/json/parsers/convert-json-expression';
+import parseStringExpression from '@deck.gl/json/parsers/parse-string-expression';
 
 const row = Object.freeze({
   foo: {
@@ -81,13 +81,13 @@ const TEST_CASES = [
   {expr: 'foo[foo.bar]', expected: 'wow'},
 
   // call expressions -- should all fail
-  {expr: 'foo.addOne("bar")', expected: null, errorRegex: /EvaluationError/},
-  {expr: 'Math.sin(x)', expected: null, errorRegex: /EvaluationError/},
-  {expr: 'Array.isArray([1,2,3])', expected: null, errorRegex: /EvaluationError/},
-  {expr: 'addOne(5)', expected: null, errorRegex: /EvaluationError/},
-  {expr: 'addOne(1+2)', expected: null, errorRegex: /EvaluationError/},
-  {expr: 'true || new Error()', expected: null, errorRegex: /EvaluationError/},
-  {expr: 'false && Error()', expected: null, errorRegex: /EvaluationError/},
+  {expr: 'foo.addOne("bar")', expected: null, errorRegex: /not allowed/},
+  {expr: 'Math.sin(x)', expected: null, errorRegex: /not allowed/},
+  {expr: 'Array.isArray([1,2,3])', expected: null, errorRegex: /not allowed/},
+  {expr: 'addOne(5)', expected: null, errorRegex: /not allowed/},
+  {expr: 'addOne(1+2)', expected: null, errorRegex: /not allowed/},
+  {expr: 'true || new Error()', expected: null, errorRegex: /not allowed/},
+  {expr: 'false && Error()', expected: null, errorRegex: /not allowed/},
 
   // unary expression
   {expr: '-one', expected: -1},
@@ -100,20 +100,20 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-test('convertJSONExpression', t => {
+test('parseStringExpression', t => {
   for (const testCase of TEST_CASES) {
     const isAccessor = true;
     const isErrorCase = Boolean(testCase.errorRegex);
     if (isErrorCase) {
       t.throws(
-        () => convertJSONExpression(testCase.expr, null, isAccessor),
+        () => parseStringExpression(testCase.expr, null, isAccessor),
         testCase.errorRegex,
         `throws on ${testCase.expr}`
       );
       /* eslint-disable-next-line no-continue */
       continue;
     }
-    const func = convertJSONExpression(testCase.expr, null, isAccessor);
+    const func = parseStringExpression(testCase.expr, null, isAccessor);
 
     t.ok(func, `JSONConverter converted ${testCase.expr}`);
     t.deepEquals(
