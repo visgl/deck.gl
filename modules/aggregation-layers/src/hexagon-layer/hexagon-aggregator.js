@@ -50,9 +50,9 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
       );
     } catch (err) {
       log.warn(
-        `Failed processing datum, skipping entry.
+        `Failed processing row, skipping entry.
          Row number: ${objectInfo.index}
-         Datum: ${object}
+         Datum: ${String(object)}
          Error message: ${err}`.replace(/  +/g, '')
       );
     }
