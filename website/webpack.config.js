@@ -76,7 +76,8 @@ const COMMON_CONFIG = {
     modules: [resolve('./node_modules'), resolve('../node_modules')],
     alias: Object.assign({}, ALIASES, {
       'website-examples': resolve('../examples/website'),
-      'viewport-mercator-project': resolve('../node_modules/viewport-mercator-project')
+      'viewport-mercator-project': resolve('../node_modules/viewport-mercator-project'),
+      supercluster: resolve('../node_modules/supercluster/dist/supercluster.js')
     })
   },
 
