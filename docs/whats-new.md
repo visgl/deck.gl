@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v7.2
 
-Release Date: Aug XX, 2019
+Release Date: Aug 9, 2019
 
 ### Layer Extensions
 

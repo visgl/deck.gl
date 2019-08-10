@@ -19,6 +19,13 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.2
 
+#### deck.gl [v7.2.0] - Aug 9, 2019
+
+- Bump luma.gl to 7.2.0 (#3429)
+- Website: Lock loaders.gl/las to 1.0.3 (#3428)
+- Website reference ES5 transpiled version of supercluster depend… (#3427)
+- Update links to point to 7.2 branch (#3426)
+
 ### deck.gl v7.2 Prereleases
 
 #### deck.gl [v7.2.0-beta.3] - Aug 8, 2019
