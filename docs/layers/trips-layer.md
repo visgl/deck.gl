@@ -115,4 +115,4 @@ Because timestamps are stored as 32-bit floating numbers, raw unix epoch time ca
 
 # Source
 
-[modules/geo-layers/src/trips-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/trips-layer)
+[modules/geo-layers/src/trips-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/geo-layers/src/trips-layer)

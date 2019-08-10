@@ -449,4 +449,4 @@ A map of various performance statistics for the last 60 frames of rendering. Met
 
 ## Source
 
-[modules/core/src/lib/deck.js](https://github.com/uber/deck.gl/blob/master/modules/core/src/lib/deck.js)
+[modules/core/src/lib/deck.js](https://github.com/uber/deck.gl/tree/7.2-release/modules/core/src/lib/deck.js)

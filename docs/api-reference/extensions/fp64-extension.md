@@ -59,4 +59,4 @@ When added to a layer via the `extensions` prop, the `Fp64Extension` requires th
 
 ## Source
 
-[modules/extensions/src/fp64](https://github.com/uber/deck.gl/tree/master/modules/extensions/src/fp64)
+[modules/extensions/src/fp64](https://github.com/uber/deck.gl/tree/7.2-release/modules/extensions/src/fp64)

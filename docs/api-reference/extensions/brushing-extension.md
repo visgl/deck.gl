@@ -99,4 +99,4 @@ Called to retrieve an arbitrary position for each object that it will be filtere
 
 ## Source
 
-[modules/extensions/src/brushing](https://github.com/uber/deck.gl/tree/master/modules/extensions/src/brushing)
+[modules/extensions/src/brushing](https://github.com/uber/deck.gl/tree/7.2-release/modules/extensions/src/brushing)

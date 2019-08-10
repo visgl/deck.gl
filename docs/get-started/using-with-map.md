@@ -10,7 +10,7 @@ deck.gl has been designed to work in tandem with popular JavaScript base map pro
 
 When using deck.gl and Mapbox, there are two options you can choose from:
 
-- Using the Deck canvas as a overlay on top of the Mapbox map, in [pure JS](https://github.com/uber/deck.gl/tree/master/examples/get-started/pure-js/mapbox) or [React](https://github.com/uber/deck.gl/tree/master/examples/get-started/react/mapbox). This is the most tested and robust use case.
+- Using the Deck canvas as a overlay on top of the Mapbox map, in [pure JS](https://github.com/uber/deck.gl/tree/7.2-release/examples/get-started/pure-js/mapbox) or [React](https://github.com/uber/deck.gl/tree/7.2-release/examples/get-started/react/mapbox). This is the most tested and robust use case.
 - Using deck.gl layers as custom Mapbox layers, using the [@deck.gl/mapbox](/docs/api-reference/mapbox/overview.md) module. This allows you to interleave deck.gl layers with base map layers, e.g. below text labels or occlude each other correctly in 3D. Be cautious that this feature is experimental: we are working closely with Mapbox to evolve the API.
 
 <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/mapbox-layers.jpg" />
@@ -20,7 +20,7 @@ When using deck.gl and Mapbox, there are two options you can choose from:
 
 [react-map-gl](https://github.com/uber/react-map-gl) is a React wrapper around mapbox-gl. If you'd like to use deck.gl with React, this component is the recommended companion.
 
-All the [examples on this website](https://github.com/uber/deck.gl/tree/master/examples/website) are implemented using the React integration. The `DeckGL` React component works especially well as the parent of a react-map-gl [StaticMap](https://uber.github.io/react-map-gl/#/Documentation/api-reference/static-map), which automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
+All the [examples on this website](https://github.com/uber/deck.gl/tree/7.2-release/examples/website) are implemented using the React integration. The `DeckGL` React component works especially well as the parent of a react-map-gl [StaticMap](https://uber.github.io/react-map-gl/#/Documentation/api-reference/static-map), which automatically interprets the deck.gl view state (i.e. latitude, longitude, zoom etc). In this configuration your deck.gl layers will render as a perfectly synchronized geospatial overlay over the underlying map.
 
 ### About Mapbox Tokens
 
@@ -56,7 +56,7 @@ Starting v7.0, deck.gl has experimental support for Google Maps with the [@deck.
 
 <img src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/google-maps.jpg" />
 
-The Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/uber/deck.gl/tree/master/examples/get-started/pure-js/google-maps). Tilting is not supported due to Google Maps API restrictions. See module documentation page for a full list of features.
+The Deck canvas can only be used as a overlay on top of Google Maps, see [pure JS example](https://github.com/uber/deck.gl/tree/7.2-release/examples/get-started/pure-js/google-maps). Tilting is not supported due to Google Maps API restrictions. See module documentation page for a full list of features.
 
 Note that to run the examples, you need a [Google Maps API key](https://developers.google.com/maps/documentation/javascript/get-api-key).
 

@@ -94,4 +94,4 @@ The color to tint the bitmap by, in `[r, g, b]`. Each component is in the `[0, 2
 
 ## Source
 
-[modules/layers/src/bitmap-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/bitmap-layer)
+[modules/layers/src/bitmap-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/layers/src/bitmap-layer)

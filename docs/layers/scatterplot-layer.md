@@ -198,5 +198,5 @@ The width of the outline of each object, in units specified by `lineWidthUnits` 
 
 ## Source
 
-[modules/layers/src/scatterplot-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/scatterplot-layer)
+[modules/layers/src/scatterplot-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/layers/src/scatterplot-layer)
 

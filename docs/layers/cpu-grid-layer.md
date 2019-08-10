@@ -408,4 +408,4 @@ The CPUGridLayer renders the following sublayers:
 
 ## Source
 
-[modules/aggregation-layers/src/cpu-grid-layer](https://github.com/uber/deck.gl/tree/master/modules/aggregation-layers/src/cpu-grid-layer)
+[modules/aggregation-layers/src/cpu-grid-layer](https://github.com/uber/deck.gl/tree/7.2-release/modules/aggregation-layers/src/cpu-grid-layer)
