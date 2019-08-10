@@ -54,7 +54,7 @@ onmessage = function onmessage(e) {
 
 function addTrip(trip) {
   result.push(trip);
-  vertexCount += trip.segments.length;
+  vertexCount += trip.path.length;
 
   if (result.length >= FLUSH_LIMIT) {
     flush();
@@ -79,8 +79,8 @@ function sliceTrip(trip, start, end) {
       startIndex = -1,
       endIndex = -1;
 
-  for (i = 0; i < trip.segments.length; i++) {
-    var t = trip.segments[i][2];
+  for (i = 0; i < trip.timestamps.length; i++) {
+    var t = trip.timestamps[i];
 
     if (t > start && startIndex === -1) {
       startIndex = Math.max(0, i - 1);
@@ -97,20 +97,20 @@ function sliceTrip(trip, start, end) {
     vendor: trip.vendor,
     startTime: trip.startTime,
     endTime: trip.endTime,
-    segments: trip.segments.slice(startIndex, endIndex)
+    path: trip.path.slice(startIndex, endIndex),
+    timestamps: trip.timestamps.slice(startIndex, endIndex)
   };
 }
 
 function shiftTrip(trip, offset) {
-  var cutoffIndex = 0;
-  var segments = trip.segments.map(function (p, i) {
-    return [p[0], p[1], p[2] + offset];
-  });
   return {
     vendor: trip.vendor,
     startTime: trip.startTime + offset,
     endTime: trip.endTime + offset,
-    segments: segments
+    path: trip.path,
+    timestamps: trip.timestamps.map(function (t) {
+      return t + offset;
+    })
   };
 }
 
@@ -124,16 +124,24 @@ function decodeTrip(str, segments) {
     return acc.concat(t);
   }, [0]);
   var rT = (endTime - startTime) / projectedTimes[projectedTimes.length - 1];
+  var z = Math.random() * 20;
+  var path = [];
+  var timestamps = [];
+  segs.forEach(function (seg, i) {
+    var t0 = projectedTimes[i];
+    seg.forEach(function (s, j) {
+      if (i === 0 || j > 0) {
+        path.push([s[0], s[1], z]);
+        timestamps.push((s[2] + t0) * rT + startTime);
+      }
+    });
+  });
   return {
     vendor: vendor,
     startTime: startTime,
     endTime: endTime,
-    segments: segs.reduce(function (acc, seg, i) {
-      var t0 = projectedTimes[i];
-      return acc.concat(seg.map(function (s) {
-        return [s[0], s[1], (s[2] + t0) * rT + startTime];
-      }));
-    }, [])
+    path: path,
+    timestamps: timestamps
   };
 }
 
