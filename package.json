@@ -41,7 +41,7 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@luma.gl/effects": "^7.2.0-alpha.1",
+    "@luma.gl/effects": "^7.2.0",
     "@probe.gl/bench": "^3.0.2",
     "@probe.gl/test-utils": "^3.0.2",
     "babel-loader": "^8.0.0",
@@ -72,4 +72,3 @@
     "bindings-precommit-tests"
   ]
 }
-
