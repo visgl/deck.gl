@@ -32,7 +32,7 @@
   "dependencies": {
     "@loaders.gl/core": "^1.2.0-beta.4",
     "@loaders.gl/images": "^1.2.0-beta.4",
-    "@luma.gl/core": "^7.2.0-beta.1",
+    "@luma.gl/core": "^7.2.0",
     "gl-matrix": "^3.0.0",
     "math.gl": "^2.3.0",
     "mjolnir.js": "^2.1.2",
