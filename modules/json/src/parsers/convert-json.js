@@ -122,7 +122,7 @@ function getJSONLayerProps(Layer, jsonProps, configuration) {
 
     // Parse string valued expressions
     if (typeof propValue === 'string') {
-      const propType = Layer && Layer.defaultProps && Layer.defaultProps[propName];
+      const propType = Layer && Layer._mergedDefaultProps && Layer._mergedDefaultProps[propName];
       let type = typeof propType === 'object' && propType.type;
       // TODO - should not be needed if prop types are good
       if (propName.startsWith('get')) {
