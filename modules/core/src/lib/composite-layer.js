@@ -34,6 +34,10 @@ export default class CompositeLayer extends Layer {
   // Provide empty definition to disable check for missing definition
   initializeState() {}
 
+  shouldUpdateState({oldProps, props, context, changeFlags}) {
+    return changeFlags.propsOrDataChanged || changeFlags.stateChanged;
+  }
+
   // Updates selected state members and marks the composite layer to need rerender
   setState(updateObject) {
     super.setState(updateObject);

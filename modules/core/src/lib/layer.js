@@ -122,11 +122,8 @@ export default class Layer extends Component {
   }
 
   // This layer needs a deep update
-  setNeedsUpdate(update = true) {
-    if (update) {
-      this.context.layerManager.setNeedsUpdate(String(this));
-    }
-    this.internalState.needsUpdate = update;
+  setNeedsUpdate() {
+    this.context.layerManager.setNeedsUpdate(String(this));
   }
 
   // Checks state of attributes and model
@@ -137,7 +134,7 @@ export default class Layer extends Component {
   // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
-    return this.internalState.needsUpdate || this.shouldUpdateState(this._getUpdateParams());
+    return this.shouldUpdateState(this._getUpdateParams());
     // End lifecycle method
   }
 
@@ -660,7 +657,6 @@ export default class Layer extends Component {
     }
 
     this.clearChangeFlags();
-    this.setNeedsUpdate(false);
     this.internalState.resetOldProps();
   }
 
