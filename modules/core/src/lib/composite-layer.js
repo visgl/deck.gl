@@ -37,7 +37,7 @@ export default class CompositeLayer extends Layer {
   // Updates selected state members and marks the composite layer to need rerender
   setState(updateObject) {
     super.setState(updateObject);
-    this.setLayerNeedsUpdate();
+    this.setNeedsUpdate();
   }
 
   // called to augment the info object that is bubbled up from a sublayer
