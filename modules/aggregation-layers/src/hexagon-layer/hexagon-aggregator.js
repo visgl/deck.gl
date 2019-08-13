@@ -42,9 +42,14 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
     const position = getPosition(object, objectInfo);
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {
-      screenPoints.push({
-        screenCoord: viewport.projectFlat(position)
-      });
+      screenPoints.push(
+        Object.assign(
+          {
+            screenCoord: viewport.projectFlat(position)
+          },
+          object
+        )
+      );
     } else {
       log.warn('HexagonLayer: invalid position')();
     }
