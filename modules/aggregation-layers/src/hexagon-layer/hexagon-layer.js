@@ -411,6 +411,8 @@ export default class HexagonLayer extends CompositeLayer {
         getFillColor: this._onGetSublayerColor.bind(this),
         getElevation: this._onGetSublayerElevation.bind(this),
         transitions: transitions && {
+          elevationScale: transitions.elevationScale,
+          coverage: transitions.coverage,
           getFillColor: transitions.getColorValue || transitions.getColorWeight,
           getElevation: transitions.getElevationValue || transitions.getElevationWeight
         }

@@ -1,4 +1,3 @@
-/* global window */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
@@ -95,7 +94,7 @@ export class App extends Component {
         material,
 
         transitions: {
-          elevationScale: 1000
+          elevationScale: 3000
         }
       })
     ];

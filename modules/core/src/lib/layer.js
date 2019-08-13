@@ -23,6 +23,7 @@
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
+import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
@@ -323,6 +324,13 @@ export default class Layer extends Component {
         attributeManager.invalidateAll();
       }
     }
+
+    if (!this.isComposite && changeFlags.transitionsChanged) {
+      for (const key in changeFlags.transitionsChanged) {
+        // prop changed and transition is enabled
+        this.internalState.transitions.add(key, oldProps[key], props[key], props.transitions[key]);
+      }
+    }
   }
 
   // Called once when layer is no longer matched and state will be discarded
@@ -335,6 +343,7 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
+    this.internalState.transitions.clear();
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -416,12 +425,24 @@ export default class Layer extends Component {
     this.updateAttributes(changedAttributes);
   }
 
-  // Update attribute transition
+  // Update attribute and uniform transitions, returns props in transition
   updateTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.updateTransition(this.context.time);
+      attributeManager.updateTransition(this.context.timeline.getTime());
     }
+
+    const {transitions} = this.internalState;
+    if (transitions.size > 0) {
+      // clone props
+      const propsInTransition = transitions.update();
+      const props = Object.create(this.props);
+      for (const key in propsInTransition) {
+        Object.defineProperty(props, key, {value: propsInTransition[key]});
+      }
+      return props;
+    }
+    return this.props;
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
@@ -649,7 +670,6 @@ export default class Layer extends Component {
       this.setNeedsRedraw();
       // Add any subclass attributes
       this._updateAttributes(this.props);
-      this._updateBaseUniforms();
 
       // Note: Automatic instance count update only works for single layers
       if (this.state.model) {
@@ -679,21 +699,19 @@ export default class Layer extends Component {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
+    const currentProps = this.props;
     if (!uniforms.picking_uActive) {
-      this.updateTransition();
+      // Overwrite this.props during redraw to use in-transition prop values
+      this.props = this.updateTransition();
     }
+
+    const {opacity} = this.props;
+    // apply gamma to opacity to make it visually "linear"
+    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
 
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
       this.setModuleParameters(moduleParameters);
-    }
-
-    // Hack/ib - define a public luma function
-    const {animationProps} = this.context;
-    if (animationProps) {
-      for (const model of this.getModels()) {
-        model._setAnimationProps(animationProps);
-      }
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -707,6 +725,12 @@ export default class Layer extends Component {
       this.draw({moduleParameters, uniforms, parameters, context: this.context});
     });
     // End lifecycle method
+
+    this.props = currentProps;
+    if (this.internalState.transitions.size) {
+      // contains animation
+      this.setNeedsRedraw();
+    }
   }
 
   // {uniforms = {}, ...opts}
@@ -766,6 +790,7 @@ export default class Layer extends Component {
       changeFlags.stateChanged = flags.stateChanged;
       log.log(LOG_PRIORITY_UPDATE + 1, () => `stateChanged: ${flags.stateChanged} in ${this.id}`)();
     }
+    changeFlags.transitionsChanged = changeFlags.transitionsChanged || flags.transitionsChanged;
 
     // Update composite flags
     const propsOrDataChanged =
@@ -903,7 +928,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.state = {};
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = attributeManager;
-
+    this.internalState.transitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
     // Ensure any async props are updated
@@ -949,19 +974,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // Operate on each changed triggers, will be called when an updateTrigger changes
   _activeUpdateTrigger(propName) {
     this.invalidateAttribute(propName);
-  }
-
-  _updateBaseUniforms() {
-    const uniforms = {
-      // apply gamma to opacity to make it visually "linear"
-      opacity:
-        typeof this.props.opacity === 'function'
-          ? animationProps => Math.pow(this.props.opacity(animationProps), 1 / 2.2)
-          : Math.pow(this.props.opacity, 1 / 2.2)
-    };
-    for (const model of this.getModels()) {
-      model.setUniforms(uniforms);
-    }
   }
 
   // DEPRECATED METHODS

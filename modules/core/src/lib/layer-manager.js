@@ -20,6 +20,7 @@
 
 import assert from '../utils/assert';
 import {_ShaderCache as ShaderCache} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/addons';
 import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
@@ -45,7 +46,6 @@ const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
   deck: null,
   gl: null,
-  time: -1,
 
   // Settings
   useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
@@ -88,7 +88,8 @@ export default class LayerManager {
       shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
-      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
+      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
+      timeline: new Timeline()
     });
 
     this._needsRedraw = 'Initial render';
@@ -208,7 +209,7 @@ export default class LayerManager {
   // Update layers from last cycle if `setNeedsUpdate()` has been called
   updateLayers(animationProps = {}) {
     if ('time' in animationProps) {
-      this.context.time = animationProps.time;
+      this.context.timeline.setTime(animationProps.time);
     }
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
