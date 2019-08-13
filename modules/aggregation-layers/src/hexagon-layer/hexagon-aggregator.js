@@ -37,7 +37,6 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   // add world space coordinates to points
   const screenPoints = [];
   let position;
-  let shouldWarn = false;
   const {iterable, objectInfo} = createIterable(data);
   for (const object of iterable) {
     objectInfo.index++;
@@ -53,14 +52,10 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
         )
       );
     } else {
-      shouldWarn = true;
+      log.warn(
+        'At least one row was ignored for hexbinning because it had a non-finite position value'
+      )();
     }
-  }
-
-  if (shouldWarn) {
-    log.warn(
-      'At least one row was ignored for hexbinning because it had a non-finite position value'
-    )();
   }
 
   const newHexbin = hexbin()
