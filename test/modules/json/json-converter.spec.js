@@ -48,7 +48,9 @@ export const JSON_DATA = {
       type: 'TextLayer',
       data: [[-122.45, 37.8]],
       getPosition: '-',
-      getText: d => 'Hello World'
+      elevationRange: [0, 3000],
+      getText: d => 'Hello World',
+      billboard: false
     }
   ]
 };

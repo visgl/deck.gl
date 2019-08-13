@@ -34,6 +34,7 @@ test('JSONLayer#lifecycle', t => {
           t.is(subLayers.length, 2, 'Sublayers rendered');
           t.is(typeof subLayers[0].props.getPosition, 'function', 'Accessor populated');
           t.is(typeof subLayers[1].props.getPosition, 'function', 'Accessor populated');
+          t.is(typeof subLayers[1].props.billboard, 'boolean', 'Accessor populated');
         }
       },
       {

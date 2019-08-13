@@ -10,8 +10,9 @@
 
 import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import JSONLayer from '../json-layer/json-layer';
-import {get} from '../utils/get';
-import {csvParseRows} from 'd3-dsv';
+import parseStringExpression from './parse-string-expression';
+// TODO - replace with loaders.gl
+import enhancedFetch from './enhanced-fetch';
 
 // Support all `@deck.gl/core` Views by default
 const DEFAULT_VIEW_CATALOG = {MapView, FirstPersonView, OrbitView, OrthographicView};
@@ -108,73 +109,41 @@ export function getJSONLayers(jsonLayers = [], configuration) {
   const layerCatalog = configuration.layers || {};
   return jsonLayers.map(jsonLayer => {
     const Layer = layerCatalog[jsonLayer.type];
-    const props = getJSONLayerProps(jsonLayer, configuration);
+    const props = getJSONLayerProps(Layer, jsonLayer, configuration);
     props.fetch = enhancedFetch;
     return Layer && new Layer(props);
   });
 }
 
-function getJSONLayerProps(jsonProps, configuration) {
+function getJSONLayerProps(Layer, jsonProps, configuration) {
   const replacedProps = {};
   for (const propName in jsonProps) {
-    // eslint-disable-line guard-for-in
-    const propValue = jsonProps[propName];
-    // Handle accessors
-    if (propName.startsWith('get')) {
-      replacedProps[propName] = getJSONAccessor(propValue, configuration);
-    } else {
+    let propValue = jsonProps[propName];
+
+    // Parse string valued expressions
+    if (typeof propValue === 'string') {
+      const propType = Layer && Layer._propTypes && Layer._propTypes[propName];
+      let type = typeof propType === 'object' && propType.type;
+      // TODO - should not be needed if prop types are good
+      if (propName.startsWith('get')) {
+        type = 'accessor';
+      }
+      switch (type) {
+        case 'accessor':
+          const isAccessor = true;
+          propValue = parseStringExpression(propValue, configuration, isAccessor);
+          break;
+        case 'function':
+          propValue = parseStringExpression(propValue, configuration);
+          break;
+        default:
+      }
+    }
+
+    // Invalid functions return null, show default value instead.
+    if (propValue) {
       replacedProps[propName] = propValue;
     }
   }
   return replacedProps;
-}
-
-// Calculates an accessor function from a JSON string
-// '-' : x => x
-// 'a.b.c': x => x.a.b.c
-function getJSONAccessor(propValue, configuration) {
-  if (propValue === '-') {
-    return object => object;
-  }
-  if (typeof propValue === 'string') {
-    return object => {
-      return get(object, propValue);
-    };
-  }
-  return propValue;
-}
-
-// HELPERS
-
-function enhancedFetch(url) {
-  /* global fetch */
-  return fetch(url)
-    .then(response => response.text())
-    .then(text => {
-      try {
-        return JSON.parse(text);
-      } catch (error) {
-        return parseCSV(text);
-      }
-    });
-}
-
-function parseCSV(text) {
-  const csv = csvParseRows(text);
-
-  // Remove header
-  if (csv.length > 0) {
-    csv.shift();
-  }
-
-  for (const row of csv) {
-    for (const key in row) {
-      const number = parseFloat(row[key]);
-      if (!Number.isNaN(number)) {
-        row[key] = number;
-      }
-    }
-  }
-
-  return csv;
 }
