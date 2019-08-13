@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.2
 
+#### deck.gl [v7.2.1] - Aug 13, 2019
+
+- Use HTMLImageLoader for browser compatibility (#3440)
+
 #### deck.gl [v7.2.0] - Aug 9, 2019
 
 - Bump luma.gl to 7.2.0 (#3429)
