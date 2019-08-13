@@ -39,7 +39,7 @@ test('pointToHexbin', t => {
   t.end();
 });
 
-test.only('pointToHexbin#invalidData', t => {
+test('pointToHexbin#invalidData', t => {
   makeSpy(log, 'warn');
   const onePoint = FIXTURES.points[0];
   onePoint.COORDINATES = ['', ''];
