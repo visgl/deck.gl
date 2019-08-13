@@ -34,13 +34,14 @@ export default class CompositeLayer extends Layer {
   // Provide empty definition to disable check for missing definition
   initializeState() {}
 
-  shouldUpdateState({oldProps, props, context, changeFlags}) {
-    return changeFlags.propsOrDataChanged || changeFlags.stateChanged;
-  }
-
   // Updates selected state members and marks the composite layer to need rerender
   setState(updateObject) {
     super.setState(updateObject);
+    // Trigger a layer update
+    // Although conceptually layer.draw and compositeLayer.renderLayers are equivalent,
+    // they are executed during different lifecycles.
+    // draw can be called without calling updateState (e.g. most viewport changes),
+    // while renderLayers can only be called during a recursive layer update.
     this.setNeedsUpdate();
   }
 
