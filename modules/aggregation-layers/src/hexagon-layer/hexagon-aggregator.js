@@ -60,7 +60,7 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   if (shouldWarn) {
     log.warn(
       'At least one row was ignored for hexbinning because it had a non-finite position value'
-    );
+    )();
   }
 
   const newHexbin = hexbin()
