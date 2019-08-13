@@ -2,6 +2,9 @@
 import test from 'tape-catch';
 import {getSolarPosition} from '@deck.gl/core/effects/lighting/suncalc';
 import {equals, config} from 'math.gl';
+import {MapView, PolygonLayer} from 'deck.gl';
+import {_SunLight as SunLight} from '@deck.gl/core';
+import * as FIXTURES from 'deck.gl-test/data';
 
 const MS_A_HOUR = 3.6e6;
 
@@ -58,5 +61,45 @@ test('Sunlight#azimuth and altitude', t => {
   });
 
   config.EPSILON = oldEpsilon;
+  t.end();
+});
+
+test('Sunlight#Constructor', t => {
+  const sunLight = new SunLight({
+    timestamp: new Date('2019-08-01 15:00:00 Z-7').getTime(),
+    color: [255, 255, 255],
+    intensity: 1.0
+  });
+  t.ok(sunLight, 'Sun light is ok');
+  t.end();
+});
+
+test('Sunlight#getProjectedLight', t => {
+  const sunLight = new SunLight({
+    timestamp: new Date('2019-08-01 15:00:00 Z-7').getTime(),
+    color: [255, 255, 255],
+    intensity: 1.0
+  });
+
+  const viewport = new MapView().makeViewport({
+    width: 100,
+    height: 100,
+    viewState: {longitude: -122, latitude: 37, zoom: 13}
+  });
+
+  const layer = new PolygonLayer({
+    data: FIXTURES.polygons.slice(0, 3),
+    getPolygon: f => f,
+    getFillColor: (f, {index}) => [index, 0, 0]
+  });
+
+  layer.context = {viewport};
+
+  const projectedLight = sunLight.getProjectedLight({layer});
+  t.deepEqual(
+    projectedLight.direction,
+    [0.8448592259153318, -0.5349886806145961, -0.8670767876117542],
+    'Sun light is ok'
+  );
   t.end();
 });
