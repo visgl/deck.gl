@@ -1,5 +1,9 @@
 import test from 'tape-catch';
+
+import {makeSpy} from '@probe.gl/test-utils';
 import {_JSONConverter as JSONConverter, _JSONLayer as JSONLayer} from '@deck.gl/json';
+
+import {log} from '@deck.gl/core';
 
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
@@ -79,5 +83,17 @@ test('JSONConverter#convert', t => {
   t.is(layer && layer.constructor, JSONLayer, 'JSONConverter created JSONLayer');
   t.is(layer.props.data.length, 2, 'JSONLayer has data');
 
+  t.end();
+});
+
+test('JSONConverter#badConvert', t => {
+  makeSpy(log, 'warn');
+  const jsonConverter = new JSONConverter({configuration});
+  t.ok(jsonConverter, 'JSONConverter created');
+  const badData = JSON.parse(JSON.stringify(JSON_DATA));
+  badData.layers[0].type = 'InvalidLayer';
+  jsonConverter.convertJsonToDeckProps(badData);
+  t.ok(log.warn.called, 'should produce a warning message if the layer type is invalid');
+  log.warn.restore();
   t.end();
 });

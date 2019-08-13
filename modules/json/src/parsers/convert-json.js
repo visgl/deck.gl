@@ -8,8 +8,11 @@
 // * Optionally, error checking could be applied, but ideally should leverage
 //   non-JSON specific mechanisms like prop types.
 
+import {log} from '@deck.gl/core';
+
 import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import JSONLayer from '../json-layer/json-layer';
+
 import parseStringExpression from './parse-string-expression';
 // TODO - replace with loaders.gl
 import enhancedFetch from './enhanced-fetch';
@@ -69,6 +72,11 @@ function convertJSONMapProps(jsonProps, configuration) {
 
 // Use the composite JSONLayer to render any JSON layers
 function convertJSONLayers(jsonLayers, configuration) {
+  for (const layer of jsonLayers) {
+    if (!configuration.layers[layer.type]) {
+      log.warn(`Unknown layer ${layer.type}`);
+    }
+  }
   return [
     new JSONLayer({
       data: jsonLayers,
@@ -109,6 +117,9 @@ export function getJSONLayers(jsonLayers = [], configuration) {
   const layerCatalog = configuration.layers || {};
   return jsonLayers.map(jsonLayer => {
     const Layer = layerCatalog[jsonLayer.type];
+    if (!Layer) {
+      log.warn(`No layer named ${jsonLayer.type}`)();
+    }
     const props = getJSONLayerProps(Layer, jsonLayer, configuration);
     props.fetch = enhancedFetch;
     return Layer && new Layer(props);
