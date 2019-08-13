@@ -36,25 +36,17 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
 
   // add world space coordinates to points
   const screenPoints = [];
-  let position;
   const {iterable, objectInfo} = createIterable(data);
   for (const object of iterable) {
     objectInfo.index++;
-    position = getPosition(object, objectInfo);
+    const position = getPosition(object, objectInfo);
     const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
     if (arrayIsFinite) {
-      screenPoints.push(
-        Object.assign(
-          {
-            screenCoord: viewport.projectFlat(position)
-          },
-          object
-        )
-      );
+      screenPoints.push({
+        screenCoord: viewport.projectFlat(position)
+      });
     } else {
-      log.warn(
-        'At least one row was ignored for hexbinning because it had a non-finite position value'
-      )();
+      log.warn('HexagonLayer: invalid position')();
     }
   }
 
