@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 import {hexbin} from 'd3-hexbin';
-import {createIterable} from '@deck.gl/core';
+import {createIterable, log} from '@deck.gl/core';
 
 /**
  * Use d3-hexbin to performs hexagonal binning from geo points to hexagons
@@ -39,14 +39,20 @@ export function pointToHexbin({data, radius, getPosition}, viewport) {
   const {iterable, objectInfo} = createIterable(data);
   for (const object of iterable) {
     objectInfo.index++;
-    screenPoints.push(
-      Object.assign(
-        {
-          screenCoord: viewport.projectFlat(getPosition(object, objectInfo))
-        },
-        object
-      )
-    );
+    const position = getPosition(object, objectInfo);
+    const arrayIsFinite = Number.isFinite(position[0]) && Number.isFinite(position[1]);
+    if (arrayIsFinite) {
+      screenPoints.push(
+        Object.assign(
+          {
+            screenCoord: viewport.projectFlat(position)
+          },
+          object
+        )
+      );
+    } else {
+      log.warn('HexagonLayer: invalid position')();
+    }
   }
 
   const newHexbin = hexbin()
