@@ -54,7 +54,8 @@ const fs = `
 const int max_lights = 2;
 uniform bool shadow_uDrawShadowMap;
 uniform bool shadow_uUseShadowMap;
-uniform sampler2D shadow_uShadowMap[max_lights];
+uniform sampler2D shadow_uShadowMap0;
+uniform sampler2D shadow_uShadowMap1;
 uniform vec4 shadow_uColor;
 uniform float shadow_uLightCount;
 
@@ -64,8 +65,14 @@ const vec4 bitPackShift = vec4(1.0, 255.0, 65025.0, 16581375.0);
 const vec4 bitUnpackShift = 1.0 / bitPackShift;
 const vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);
 
-float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
-  vec4 rgbaDepth = texture2D(shadowMap, position.xy);
+float shadow_getShadowWeight(vec3 position, int index) {
+  vec4 rgbaDepth;
+  if(index == 0) {
+    rgbaDepth = texture2D(shadow_uShadowMap0, position.xy);
+  }
+  else {
+    rgbaDepth = texture2D(shadow_uShadowMap1, position.xy);
+  }
 
   float z = dot(rgbaDepth, bitUnpackShift);
   return smoothstep(0.001, 0.01, position.z - z);
@@ -81,7 +88,7 @@ vec4 shadow_filterShadowColor(vec4 color) {
     float shadowAlpha = 0.0;
     for (int i = 0; i < max_lights; i++) {
       if(i < int(shadow_uLightCount)) {
-        shadowAlpha += shadow_getShadowWeight(shadow_vPosition[i], shadow_uShadowMap[i]) * shadow_uColor.a / shadow_uLightCount;
+        shadowAlpha += shadow_getShadowWeight(shadow_vPosition[i], i) * shadow_uColor.a / shadow_uLightCount;
       }
     }
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
@@ -133,16 +140,30 @@ function getViewportCenterPosition({viewport, center}) {
 function getViewProjectionMatrices({viewport, shadowMatrices}) {
   const projectionMatrices = [];
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
-  const corners = [
-    [0, 0], // top left ground
-    [viewport.width, 0], // top right ground
-    [0, viewport.height], // bottom left ground
-    [viewport.width, viewport.height], // bottom right ground
-    [0, 0, -1.0], // top left near
-    [viewport.width, 0, -1.0], // top right near
-    [0, viewport.height, -1.0], // bottom left near
-    [viewport.width, viewport.height, -1.0] // bottom right near
-  ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
+  let corners = [];
+  if (viewport.isGeospatial) {
+    corners = [
+      [0, 0], // top left ground
+      [viewport.width, 0], // top right ground
+      [0, viewport.height], // bottom left ground
+      [viewport.width, viewport.height], // bottom right ground
+      [0, 0, -1.0], // top left near
+      [viewport.width, 0, -1.0], // top right near
+      [0, viewport.height, -1.0], // bottom left near
+      [viewport.width, viewport.height, -1.0] // bottom right near
+    ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
+  } else {
+    corners = [
+      [0, 0, 1.0], // top left far
+      [viewport.width, 0, 1.0], // top right far
+      [0, viewport.height, 1.0], // bottom left far
+      [viewport.width, viewport.height, 1.0], // bottom right far
+      [0, 0, -1.0], // top left near
+      [viewport.width, 0, -1.0], // top right near
+      [0, viewport.height, -1.0], // bottom left near
+      [viewport.width, viewport.height, -1.0] // bottom right near
+    ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
+  }
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
@@ -202,9 +223,9 @@ function createShadowUniforms(opts = {}, context = {}) {
     uniforms[`shadow_uProjectCenters[${i}]`] = projectCenters[i];
 
     if (opts.shadowMaps && opts.shadowMaps.length > 0) {
-      uniforms[`shadow_uShadowMap[${i}]`] = opts.shadowMaps[i];
+      uniforms[`shadow_uShadowMap${i}`] = opts.shadowMaps[i];
     } else {
-      uniforms[`shadow_uShadowMap[${i}]`] = opts.dummyShadowMaps[0];
+      uniforms[`shadow_uShadowMap${i}`] = opts.dummyShadowMaps[0];
     }
   }
   return uniforms;
