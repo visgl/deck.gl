@@ -74,7 +74,7 @@ function convertJSONMapProps(jsonProps, configuration) {
 function convertJSONLayers(jsonLayers, configuration) {
   for (const layer of jsonLayers) {
     if (!configuration.layers[layer.type]) {
-      log.warn(`Unknown layer ${layer.type}`);
+      log.warn(`Unknown layer ${layer.type}`)();
     }
   }
   return [
