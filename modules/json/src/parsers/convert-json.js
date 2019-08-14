@@ -117,9 +117,6 @@ export function getJSONLayers(jsonLayers = [], configuration) {
   const layerCatalog = configuration.layers || {};
   return jsonLayers.map(jsonLayer => {
     const Layer = layerCatalog[jsonLayer.type];
-    if (!Layer) {
-      log.warn(`No layer named ${jsonLayer.type}`)();
-    }
     const props = getJSONLayerProps(Layer, jsonLayer, configuration);
     props.fetch = enhancedFetch;
     return Layer && new Layer(props);
