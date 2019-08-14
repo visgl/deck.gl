@@ -76,6 +76,7 @@ export {
   LayerExtension,
   // Utilities
   fp64LowPart,
+  positionFp64LowPart,
   createIterable
 } from '@deck.gl/core';
 

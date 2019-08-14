@@ -35,6 +35,10 @@ function update(attribute, {data}) {
   }
 }
 
+function enable() {
+  return this.enabled; // eslint-disable-line
+}
+
 const fixture = {
   positions: new Float32Array([0, 1, 0, -1, -1, 0, 1, -1, 0])
 };
@@ -173,6 +177,35 @@ test('AttributeManager.update - external buffers', t => {
   });
 
   t.is(attribute.buffer.accessor.type, gl.UNSIGNED_BYTE, 'colors casted to correct type');
+
+  t.end();
+});
+
+test('AttributeManager.update - disabled attributes', t => {
+  const attributeManager = new AttributeManager(gl);
+  attributeManager.add({
+    positions: {size: 2, update, enable}
+  });
+
+  // First update, should autoalloc and update the value array
+  attributeManager.update({
+    numInstances: 0,
+    data: [{}, {}],
+    context: {enabled: true}
+  });
+
+  let attribute = attributeManager.getAttributes()['positions'];
+  t.deepEqual(attribute.value.slice(0, 4), [0, 1, 2, 3], 'attribute value is populated');
+
+  attributeManager.update({
+    numInstances: 0,
+    data: [{}, {}],
+    context: {enabled: false}
+  });
+
+  attribute = attributeManager.getAttributes()['positions'];
+  t.ok(attribute.constant, 'attribute is set to contant');
+  t.deepEqual(attribute.value, [0, 0], 'attribute is set to default value');
 
   t.end();
 });

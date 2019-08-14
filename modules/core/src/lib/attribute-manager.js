@@ -232,7 +232,9 @@ export default class AttributeManager {
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
 
-      if (
+      if (!attribute.isEnabled(context)) {
+        attribute.disable();
+      } else if (
         attribute.setExternalBuffer(
           buffers[attributeName] || (data.attributes && data.attributes[attributeName])
         )

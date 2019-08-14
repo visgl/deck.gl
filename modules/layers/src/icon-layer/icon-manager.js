@@ -208,8 +208,7 @@ export default class IconManager {
     return this._texture || this._externalTexture;
   }
 
-  getIconMapping(object, objectInfo) {
-    const icon = this._getIcon(object, objectInfo);
+  getIconMapping(icon) {
     const id = this._autoPacking ? getIconId(icon) : icon;
     return this._mapping[id] || {};
   }

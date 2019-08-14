@@ -259,6 +259,18 @@ test('Attribute#updateBuffer', t => {
       ]
     },
     {
+      title: 'standard accessor with transform',
+      attribute: new Attribute(gl, {
+        id: 'values',
+        type: GL.FLOAT,
+        size: 1,
+        accessor: 'getValue',
+        transform: x => x * 2
+      }),
+      standard: [20, 40, 14, 0],
+      'variable size': [20, 20, 40, 14, 14, 14, 14, 0, 0, 0]
+    },
+    {
       title: 'custom accessor',
       attribute: new Attribute(gl, {
         id: 'values',
