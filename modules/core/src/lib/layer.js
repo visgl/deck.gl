@@ -122,11 +122,9 @@ export default class Layer extends Component {
   }
 
   // This layer needs a deep update
-  setNeedsUpdate(update = true) {
-    if (update) {
-      this.context.layerManager.setNeedsUpdate(String(this));
-    }
-    this.internalState.needsUpdate = update;
+  setNeedsUpdate() {
+    this.context.layerManager.setNeedsUpdate(String(this));
+    this.internalState.needsUpdate = true;
   }
 
   // Checks state of attributes and model
@@ -660,7 +658,7 @@ export default class Layer extends Component {
     }
 
     this.clearChangeFlags();
-    this.setNeedsUpdate(false);
+    this.internalState.needsUpdate = false;
     this.internalState.resetOldProps();
   }
 
