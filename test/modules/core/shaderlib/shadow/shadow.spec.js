@@ -1,6 +1,6 @@
 import test from 'tape-catch';
 
-import {MapView} from 'deck.gl';
+import {MapView, OrbitView} from 'deck.gl';
 import {shadow} from '@deck.gl/core/shaderlib';
 import {Matrix4, Vector3} from 'math.gl';
 import {PROJECT_COORDINATE_SYSTEM} from '@deck.gl/core/shaderlib/project/constants';
@@ -26,6 +26,19 @@ const TEST_VIEWPORT2 = new MapView().makeViewport({
     zoom: 15,
     bearing: -30,
     pitch: 40
+  }
+});
+
+const TEST_VIEWPORT3 = new OrbitView({near: 0.1, far: 2}).makeViewport({
+  width: 800,
+  height: 600,
+  viewState: {
+    target: [0, 0, 0],
+    rotationX: 0,
+    rotationOrbit: 0,
+    orbitAxis: 'Y',
+    fov: 30,
+    zoom: 0
   }
 });
 
@@ -73,6 +86,25 @@ const TEST_CASE2 = [
   },
   {
     xyz: [423, 108, 0], // bottom right corner inside
+    result: true
+  }
+];
+
+const TEST_CASE3 = [
+  {
+    xyz: [-746, 559, -556], // top left far corner outside
+    result: false
+  },
+  {
+    xyz: [746, -559, -556], // bottom right far corner outside
+    result: false
+  },
+  {
+    xyz: [-37, 27, 583], // top left near corner inside
+    result: true
+  },
+  {
+    xyz: [37, -27, 583], // bottom right near corner inside
     result: true
   }
 ];
@@ -159,5 +191,29 @@ test('shadow#getUniforms', t => {
     );
   }
 
+  // Non-Geospatial Identity Mode
+  viewport = TEST_VIEWPORT3;
+
+  uniforms = shadow.getUniforms(
+    {
+      viewport,
+      shadowMatrices: [viewMatrix],
+      drawToShadowMap: true,
+      dummyShadowMaps: [true]
+    },
+    {
+      project_uCenter: [0, 0, 0, 0],
+      project_uCoordinateSystem: PROJECT_COORDINATE_SYSTEM.IDENTITY
+    }
+  );
+
+  for (const value of TEST_CASE3) {
+    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transformVector3(value.xyz);
+    t.equal(
+      insideClipSpace(result),
+      value.result,
+      `Shadow viewProjection matrix in Identity mode is correct!`
+    );
+  }
   t.end();
 });
