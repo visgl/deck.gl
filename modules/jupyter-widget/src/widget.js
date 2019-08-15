@@ -2,22 +2,15 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {
-  createDeckScaffold,
-  loadCss,
-  hideMapboxCSSWarning,
-  setMapProps,
-  waitForElementToDisplay
-} from './utils';
+import {loadCss, createWidgetDiv, hideMapboxCSSWarning} from './utils';
 
-import {Deck, MapView} from '@deck.gl/core';
-import * as deckLayers from '@deck.gl/layers';
-import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+/* global window */
+const deckgl = window.deck;
+const mapboxgl = window.mapboxgl;
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
 
-// Note: Variables shared explictly between Python and JavaScript use camel-case
+// Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
     return {
@@ -60,53 +53,43 @@ export class DeckGLModel extends DOMWidgetModel {
   }
 }
 
-const TICK_RATE_MILLISECONDS = 100;
-
 export class DeckGLView extends DOMWidgetView {
   render() {
     this.modelId = this.model.model_id;
     super.render();
     this.model.on('change:json_input', this.value_changed, this);
     loadCss(MAPBOX_CSS_URL);
-    const [width, height] = [this.model.get('width'), this.model.get('height')];
 
-    createDeckScaffold(this.el, this.modelId, width, height);
+    this.el.id = this.model.id;
 
-    waitForElementToDisplay(
-      `#deck-map-wrapper-${this.modelId}`,
-      TICK_RATE_MILLISECONDS,
-      this.initJSElements.bind(this)
-    );
+    createWidgetDiv(this.el, this.modelId, this.model.get('width'), this.model.get('height'));
   }
 
   _onViewStateChange({viewState}) {
     this.deck.setProps({viewState});
-    setMapProps(this.mapLayer, {viewState});
   }
 
   initJSElements() {
     try {
       if (!this.deck) {
-        this.deck = new Deck({
+        this.deck = new deckgl.Deck({
+          mapboxAccessToken: '',
+          map: mapboxgl,
+          mapboxApiAccessToken: this.model.get('mapbox_key'),
           canvas: `deck-map-container-${this.modelId}`,
           height: '100%',
           width: '100%',
           onLoad: this.value_changed.bind(this),
-          views: [new MapView()],
-          onViewStateChange: this._onViewStateChange.bind(this)
+          views: [new deckgl.MapView()],
+          onViewStateChange: this._onViewStateChange.bind(this),
+          mapStyle: null
         });
       }
-
-      if (!this.mapLayer) {
-        const mapboxgl = require('mapbox-gl');
-
-        mapboxgl.accessToken = this.model.get('mapbox_key');
-        this.mapLayer = new mapboxgl.Map({
-          container: `map-${this.modelId}`,
-          interactive: false,
-          style: null
-        });
-      }
+      this.jsonConverter = new deckgl.JSONConverter({
+        configuration: {
+          layers: {...deckgl.deckLayers, ...deckgl.deckAggregationLayers}
+        }
+      });
     } catch (err) {
       // This will fail in node tests
       // eslint-disable-next-line
@@ -118,14 +101,8 @@ export class DeckGLView extends DOMWidgetView {
     this.json_input = this.model.get('json_input');
     const parsedJSONInput = JSON.parse(this.json_input);
     this.initJSElements();
-    const jsonConverter = new JSONConverter({
-      configuration: {
-        layers: {...deckLayers, ...deckAggregationLayers}
-      }
-    });
-    const results = jsonConverter.convertJsonToDeckProps(parsedJSONInput);
+    const results = this.jsonConverter.convertJsonToDeckProps(parsedJSONInput);
     this.deck.setProps(results);
     hideMapboxCSSWarning();
-    setMapProps(this.mapLayer, this.deck.props);
   }
 }

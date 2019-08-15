@@ -1,16 +1,3 @@
-requirejs.config({
-  paths: {
-    deck: 'https://unpkg.com/deck.gl@{{release_version}}/dist.min',
-    mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v{{mapbox_gl_version}}/mapbox-gl',
-    h3: 'https://unpkg.com/h3-js@3.4.3/dist/h3-js.umd',
-    S2: 'https://unpkg.com/s2-geometry@1.2.10/src/s2geometry'
-  },
-  shim : {
-    'deck': ['h3', 'S2']
-  }
-
-});
-
 let config, mapLayer, jsonInput, jsonConverter;
 
 jsonInput = JSON.parse(JSON.stringify({{json_input}}));

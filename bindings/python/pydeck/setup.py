@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import print_function
 from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
@@ -26,11 +25,13 @@ log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
 PATH_TO_WIDGET = '../../../modules/jupyter-widget'
+PATH_TO_REPO_ROOT = '../../../..'
 
-node_root = os.path.join(here, PATH_TO_WIDGET)
+yarn_root = os.path.join(here, PATH_TO_REPO_ROOT)
+widget_dir = os.path.join(here, PATH_TO_WIDGET)
 
 npm_path = os.pathsep.join([
-    os.path.join(node_root, 'node_modules', '.bin'),
+    os.path.join(PATH_TO_REPO_ROOT, 'node_modules', '.bin'),
     os.environ.get('PATH', os.defpath),
 ])
 
@@ -54,8 +55,8 @@ def js_prerelease(command, strict=False):
     return DecoratedCommand
 
 
-class NPM(Command):
-    description = 'Install package.json dependencies using npm'
+class Yarn(Command):
+    description = 'Install package.json dependencies using yarn'
 
     user_options = []
 
@@ -78,9 +79,9 @@ class NPM(Command):
     def finalize_options(self):
         pass
 
-    def has_npm(self):
+    def has_yarn(self):
         try:
-            check_call(['npm', '--version'])
+            check_call(['yarn', '--version'])
             return True
         except Exception:
             return False
@@ -89,10 +90,10 @@ class NPM(Command):
         """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder.
            Overwrites destination files."""
         # Compiled JS files for copying
-        js_dist_dir = os.path.join(node_root, 'dist', 'pydeck_embeddable')
+        js_dist_dir = os.path.join(widget_dir, 'dist', 'pydeck_embeddable')
         # Uncompiled JS files for copying
         # See https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/%7B%7Bcookiecutter.python_package_name%7D%7D/nbextension/static/extension.js
-        js_src_dir = os.path.join(node_root, 'src')
+        js_src_dir = os.path.join(widget_dir, 'src')
         js_files = [
             os.path.join(js_src_dir, 'extension.js'),
             os.path.join(js_dist_dir, 'index.js'),
@@ -104,25 +105,23 @@ class NPM(Command):
             copy(js_file, static_folder)
 
     def run(self):
-        has_npm = self.has_npm()
-        if not has_npm:
+        has_yarn = self.has_yarn()
+        if not has_yarn:
             log.error(
-                "`npm` unavailable.  If you're running this command using sudo, make sure `npm` is available to sudo")
+                "`yarn` unavailable.  If you're running this command using sudo, make sure `yarn` is available to sudo")
 
         env = os.environ.copy()
         env['PATH'] = npm_path
 
-        log.info("Installing build dependencies with npm. This may take a while...")
-        check_call(['npm', 'install'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr, env=env)
-        check_call(['npm', 'run', 'notebook-bundle'], cwd=node_root, stdout=sys.stdout, stderr=sys.stderr, env=env)
-
+        log.info("Installing build dependencies with yarn. This may take a while...")
+        check_call(['yarn', 'bootstrap'], cwd=yarn_root, stdout=sys.stdout, stderr=sys.stderr, env=env)
         self.copy_js()
 
         for t in self.targets:
             if not os.path.exists(t):
                 msg = 'Missing file: %s' % t
-                if not has_npm:
-                    msg += '\nnpm is required to build a development version of widgetsnbextension'
+                if not has_yarn:
+                    msg += '\nyarn is required to build a development version of widgetsnbextension'
                 raise ValueError(msg)
 
         # update package data in case this created new files
@@ -154,7 +153,7 @@ if __name__ == '__main__':
             'build_py': js_prerelease(build_py),
             'egg_info': egg_info,
             'sdist': js_prerelease(sdist, strict=True),
-            'jsdeps': NPM,
+            'jsdeps': Yarn,
         },
         author='Andrew Duberstein',
         author_email='ajduberstein@gmail.com',

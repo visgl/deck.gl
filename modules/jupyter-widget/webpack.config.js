@@ -1,7 +1,7 @@
 // File leans heavily on configuration in
 // https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/webpack.config.js
 const path = require('path');
-const version = require('./package.json').version;
+const packageInfo = require('./package.json');
 
 const rules = [
   {
@@ -15,11 +15,25 @@ const rules = [
 ];
 
 // Packages that shouldn't be bundled but loaded at runtime
-const externals = ['@jupyter-widgets/base'];
+
+function getExternals() {
+  const {peerDependencies = {}} = packageInfo;
+  const externals = {};
+  for (const depName in peerDependencies) {
+    if (depName.startsWith('@deck.gl')) {
+      // Instead of bundling the dependency, import from the global `deck` object
+      externals[depName] = 'deck';
+    }
+  }
+
+  return [externals, '@jupyter-widgets/base'];
+}
 
 const resolve = {
   extensions: ['.webpack.js', '.web.js', '.js']
 };
+
+const externals = getExternals();
 
 module.exports = [
   {
@@ -59,14 +73,17 @@ module.exports = [
       filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
       libraryTarget: 'amd',
-      library: '@deck.gl/jupyter-widget',
-      publicPath: `https://unpkg.com/deck.gl@jupyter-widget@${version}/dist/`
+      library: '@deck.gl/jupyter-widget'
     },
     devtool: 'source-map',
     module: {
       rules
     },
     externals,
+    plugins: [
+      // Uncomment for bundle size debug
+      // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
+    ],
     resolve
   }
 ];
