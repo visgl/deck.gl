@@ -56,7 +56,7 @@ const dirLight = new DirectionalLight({
 
 const lightingEffect = new LightingEffect({ambientLight, dirLight});
 
-const landCover = [
+const background = [
   [[-1000.0, -1000.0, -40], [1000.0, -1000.0, -40], [1000.0, 1000.0, -40], [-1000.0, 1000.0, -40]]
 ];
 
@@ -73,8 +73,8 @@ class Example extends PureComponent {
         getOrientation: d => d.orientation
       }),
       new SolidPolygonLayer({
-        id: 'land',
-        data: landCover,
+        id: 'background',
+        data: background,
         opacity: 1,
         extruded: false,
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
