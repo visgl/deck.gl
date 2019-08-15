@@ -80,8 +80,9 @@ vec4 shadow_filterShadowColor(vec4 color) {
   }
   if (shadow_uUseShadowMap) {
     float shadowAlpha = 0.0;
-    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0) * shadow_uColor.a / shadow_uLightCount;
-    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1) * shadow_uColor.a / shadow_uLightCount;
+    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0);
+    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1);
+    shadowAlpha *= shadow_uColor.a / shadow_uLightCount;
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
 
     return vec4(
@@ -131,30 +132,17 @@ function getViewportCenterPosition({viewport, center}) {
 function getViewProjectionMatrices({viewport, shadowMatrices}) {
   const projectionMatrices = [];
   const pixelUnprojectionMatrix = viewport.pixelUnprojectionMatrix;
-  let corners = [];
-  if (viewport.isGeospatial) {
-    corners = [
-      [0, 0], // top left ground
-      [viewport.width, 0], // top right ground
-      [0, viewport.height], // bottom left ground
-      [viewport.width, viewport.height], // bottom right ground
-      [0, 0, -1], // top left near
-      [viewport.width, 0, -1], // top right near
-      [0, viewport.height, -1], // bottom left near
-      [viewport.width, viewport.height, -1] // bottom right near
-    ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
-  } else {
-    corners = [
-      [0, 0, 1], // top left far
-      [viewport.width, 0, 1], // top right far
-      [0, viewport.height, 1], // bottom left far
-      [viewport.width, viewport.height, 1], // bottom right far
-      [0, 0, -1], // top left near
-      [viewport.width, 0, -1], // top right near
-      [0, viewport.height, -1], // bottom left near
-      [viewport.width, viewport.height, -1] // bottom right near
-    ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
-  }
+  const farZ = viewport.isGeospatial ? undefined : 1;
+  const corners = [
+    [0, 0, farZ], // top left ground
+    [viewport.width, 0, farZ], // top right ground
+    [0, viewport.height, farZ], // bottom left ground
+    [viewport.width, viewport.height, farZ], // bottom right ground
+    [0, 0, -1], // top left near
+    [viewport.width, 0, -1], // top right near
+    [0, viewport.height, -1], // bottom left near
+    [viewport.width, viewport.height, -1] // bottom right near
+  ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
