@@ -37,7 +37,12 @@ export default class CompositeLayer extends Layer {
   // Updates selected state members and marks the composite layer to need rerender
   setState(updateObject) {
     super.setState(updateObject);
-    this.setLayerNeedsUpdate();
+    // Trigger a layer update
+    // Although conceptually layer.draw and compositeLayer.renderLayers are equivalent,
+    // they are executed during different lifecycles.
+    // draw can be called without calling updateState (e.g. most viewport changes),
+    // while renderLayers can only be called during a recursive layer update.
+    this.setNeedsUpdate();
   }
 
   // called to augment the info object that is bubbled up from a sublayer

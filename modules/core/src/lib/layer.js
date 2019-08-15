@@ -122,10 +122,9 @@ export default class Layer extends Component {
   }
 
   // This layer needs a deep update
-  // TODO - Need to align with existing needsUpdate before uncommenting
-  // For now async props will call layerManager directly
-  setLayerNeedsUpdate() {
+  setNeedsUpdate() {
     this.context.layerManager.setNeedsUpdate(String(this));
+    this.internalState.needsUpdate = true;
   }
 
   // Checks state of attributes and model
@@ -136,7 +135,7 @@ export default class Layer extends Component {
   // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
-    return this.shouldUpdateState(this._getUpdateParams());
+    return this.internalState.needsUpdate || this.shouldUpdateState(this._getUpdateParams());
     // End lifecycle method
   }
 
@@ -659,6 +658,7 @@ export default class Layer extends Component {
     }
 
     this.clearChangeFlags();
+    this.internalState.needsUpdate = false;
     this.internalState.resetOldProps();
   }
 
@@ -943,7 +943,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   _onAsyncPropUpdated() {
     this.diffProps(this.props, this.internalState.getOldProps());
-    this.setLayerNeedsUpdate();
+    this.setNeedsUpdate();
   }
 
   // Operate on each changed triggers, will be called when an updateTrigger changes
@@ -965,6 +965,12 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   }
 
   // DEPRECATED METHODS
+
+  // TODO - remove in v8
+  setLayerNeedsUpdate() {
+    log.deprecated('layer.setLayerNeedsUpdate', 'layer.setNeedsUpdate')();
+    this.setNeedsUpdate();
+  }
 
   // Updates selected state members and marks the object for redraw
   setUniforms(uniformMap) {

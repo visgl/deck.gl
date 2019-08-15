@@ -19,7 +19,8 @@
 // THE SOFTWARE.
 
 import test from 'tape-catch';
-import {CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {LayerManager, CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
+import {gl} from '@deck.gl/test-utils';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -58,13 +59,23 @@ const OVERRIDE_PROPS = {
   }
 };
 
-class TestLayer extends Layer {}
+class TestLayer extends Layer {
+  initializeState() {}
+}
 
 TestLayer.layerName = 'TestLayer';
 
 class TestCompositeLayer extends CompositeLayer {
+  initializeState() {
+    this.state = {scale: 1};
+  }
+
   renderLayers() {
-    return [new TestLayer(this.getSubLayerProps())];
+    return [
+      new TestLayer(this.getSubLayerProps(), {
+        scale: this.state.scale
+      })
+    ];
   }
 }
 
@@ -92,7 +103,9 @@ test('CompositeLayer#getSubLayerProps', t => {
     );
   }
 
-  const sublayers = layer.renderLayers();
+  const layerManager = new LayerManager(gl);
+  layerManager.setLayers([layer]);
+  const sublayers = layer.getSubLayers();
   const subProps = sublayers[0].props;
   for (const propName in BASE_LAYER_PROPS) {
     t.equal(
@@ -101,6 +114,7 @@ test('CompositeLayer#getSubLayerProps', t => {
       `CompositeLayer subLayerProp ${propName} ok`
     );
   }
+  layerManager.finalize();
 
   t.end();
 });
@@ -208,6 +222,29 @@ test('CompositeLayer#getSubLayerRow, getSubLayerAccessor', t => {
     {object: originalRow, index: 0},
     'returns correct picking info'
   );
+
+  t.end();
+});
+
+test('CompositeLayer#setState', t => {
+  const layerManager = new LayerManager(gl);
+  const compositeLayer = new TestCompositeLayer(BASE_LAYER_PROPS);
+  let subLayer = null;
+
+  layerManager.setLayers([compositeLayer]);
+  subLayer = compositeLayer.getSubLayers()[0];
+  t.is(subLayer.props.scale, 1, 'sublayer has default props');
+
+  layerManager.updateLayers();
+  t.is(subLayer, compositeLayer.getSubLayers()[0], 'composite layer should not rerender');
+
+  compositeLayer.setState({scale: 2});
+  layerManager.updateLayers();
+  t.not(subLayer, compositeLayer.getSubLayers()[0], 'composite layer should rerender');
+  subLayer = compositeLayer.getSubLayers()[0];
+  t.is(subLayer.props.scale, 2, 'sublayer has updated props from state');
+
+  layerManager.finalize();
 
   t.end();
 });
