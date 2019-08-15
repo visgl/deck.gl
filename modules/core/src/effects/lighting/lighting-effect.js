@@ -35,7 +35,7 @@ export default class LightingEffect extends Effect {
 
     this.shadowColor = DEFAULT_SHADOW_COLOR;
     this.shadowPasses = [];
-    this.dummyShadowMaps = [];
+    this.dummyShadowMap = null;
     this.shadow = false;
 
     for (const key in props) {
@@ -74,8 +74,11 @@ export default class LightingEffect extends Effect {
       this._createShadowPasses(gl, pixelRatio);
     }
 
-    if (this.dummyShadowMaps.length === 0) {
-      this._createDummyShadowMaps(gl);
+    if (!this.dummyShadowMap) {
+      this.dummyShadowMap = new Texture2D(gl, {
+        width: 1,
+        height: 1
+      });
     }
 
     const shadowMaps = [];
@@ -89,7 +92,7 @@ export default class LightingEffect extends Effect {
         views,
         effectProps: {
           shadowLightId: i,
-          dummyShadowMaps: this.dummyShadowMaps,
+          dummyShadowMap: this.dummyShadowMap,
           shadowMatrices
         }
       });
@@ -98,7 +101,7 @@ export default class LightingEffect extends Effect {
 
     return {
       shadowMaps,
-      dummyShadowMaps: this.dummyShadowMaps,
+      dummyShadowMap: this.dummyShadowMap,
       shadowColor: this.shadowColor,
       shadowMatrices
     };
@@ -119,10 +122,10 @@ export default class LightingEffect extends Effect {
     }
     this.shadowPasses.length = 0;
 
-    for (const dummyShadowMap of this.dummyShadowMaps) {
-      dummyShadowMap.delete();
+    if (this.dummyShadowMap) {
+      this.dummyShadowMap.delete();
+      this.dummyShadowMap = null;
     }
-    this.dummyShadowMaps.length = 0;
 
     if (this.shadow) {
       this._removeShadowModule();
@@ -144,16 +147,6 @@ export default class LightingEffect extends Effect {
   _createShadowPasses(gl, pixelRatio) {
     for (let i = 0; i < this.directionalLights.length; i++) {
       this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
-    }
-  }
-  _createDummyShadowMaps(gl) {
-    for (let i = 0; i < this.directionalLights.length; i++) {
-      this.dummyShadowMaps.push(
-        new Texture2D(gl, {
-          width: 1,
-          height: 1
-        })
-      );
     }
   }
 

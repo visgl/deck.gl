@@ -65,14 +65,8 @@ const vec4 bitPackShift = vec4(1.0, 255.0, 65025.0, 16581375.0);
 const vec4 bitUnpackShift = 1.0 / bitPackShift;
 const vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);
 
-float shadow_getShadowWeight(vec3 position, int index) {
-  vec4 rgbaDepth;
-  if(index == 0) {
-    rgbaDepth = texture2D(shadow_uShadowMap0, position.xy);
-  }
-  else {
-    rgbaDepth = texture2D(shadow_uShadowMap1, position.xy);
-  }
+float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
+  vec4 rgbaDepth = texture2D(shadowMap, position.xy);
 
   float z = dot(rgbaDepth, bitUnpackShift);
   return smoothstep(0.001, 0.01, position.z - z);
@@ -86,11 +80,8 @@ vec4 shadow_filterShadowColor(vec4 color) {
   }
   if (shadow_uUseShadowMap) {
     float shadowAlpha = 0.0;
-    for (int i = 0; i < max_lights; i++) {
-      if(i < int(shadow_uLightCount)) {
-        shadowAlpha += shadow_getShadowWeight(shadow_vPosition[i], i) * shadow_uColor.a / shadow_uLightCount;
-      }
-    }
+    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0) * shadow_uColor.a / shadow_uLightCount;
+    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1) * shadow_uColor.a / shadow_uLightCount;
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
 
     return vec4(
@@ -147,21 +138,21 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
       [viewport.width, 0], // top right ground
       [0, viewport.height], // bottom left ground
       [viewport.width, viewport.height], // bottom right ground
-      [0, 0, -1.0], // top left near
-      [viewport.width, 0, -1.0], // top right near
-      [0, viewport.height, -1.0], // bottom left near
-      [viewport.width, viewport.height, -1.0] // bottom right near
+      [0, 0, -1], // top left near
+      [viewport.width, 0, -1], // top right near
+      [0, viewport.height, -1], // bottom left near
+      [viewport.width, viewport.height, -1] // bottom right near
     ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
   } else {
     corners = [
-      [0, 0, 1.0], // top left far
-      [viewport.width, 0, 1.0], // top right far
-      [0, viewport.height, 1.0], // bottom left far
-      [viewport.width, viewport.height, 1.0], // bottom right far
-      [0, 0, -1.0], // top left near
-      [viewport.width, 0, -1.0], // top right near
-      [0, viewport.height, -1.0], // bottom left near
-      [viewport.width, viewport.height, -1.0] // bottom right near
+      [0, 0, 1], // top left far
+      [viewport.width, 0, 1], // top right far
+      [0, viewport.height, 1], // bottom left far
+      [viewport.width, viewport.height, 1], // bottom right far
+      [0, 0, -1], // top left near
+      [viewport.width, 0, -1], // top right near
+      [0, viewport.height, -1], // bottom left near
+      [viewport.width, viewport.height, -1] // bottom right near
     ].map(pixel => screenToCommonSpace(pixel, pixelUnprojectionMatrix));
   }
 
@@ -225,7 +216,7 @@ function createShadowUniforms(opts = {}, context = {}) {
     if (opts.shadowMaps && opts.shadowMaps.length > 0) {
       uniforms[`shadow_uShadowMap${i}`] = opts.shadowMaps[i];
     } else {
-      uniforms[`shadow_uShadowMap${i}`] = opts.dummyShadowMaps[0];
+      uniforms[`shadow_uShadowMap${i}`] = opts.dummyShadowMap;
     }
   }
   return uniforms;
