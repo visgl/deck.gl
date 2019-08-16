@@ -28,6 +28,8 @@ export default class Attribute extends BaseAttribute {
       noAlloc = false,
       update = null,
       accessor = null,
+      enable = () => true,
+      transform = null,
       bufferLayout = null
     } = opts;
 
@@ -75,6 +77,8 @@ export default class Attribute extends BaseAttribute {
       noAlloc,
       update: update || (accessor && this._standardAccessor),
       accessor,
+      enable,
+      transform,
       defaultValue,
       bufferLayout
     });
@@ -117,6 +121,10 @@ export default class Attribute extends BaseAttribute {
 
   getAccessor() {
     return this.userData.accessor;
+  }
+
+  isEnabled(context) {
+    return this.userData.enable.call(context);
   }
 
   getShaderAttributes() {
@@ -272,9 +280,13 @@ export default class Attribute extends BaseAttribute {
     this._updateShaderAttributes();
   }
 
+  disable() {
+    this.setConstantValue(this.userData.defaultValue);
+  }
+
   // Use generic value
   // Returns true if successful
-  setGenericValue(value) {
+  setConstantValue(value) {
     const state = this.userData;
 
     if (value === undefined || typeof value === 'function') {
@@ -394,7 +406,7 @@ export default class Attribute extends BaseAttribute {
   _standardAccessor(attribute, {data, startRow, endRow, props, numInstances, bufferLayout}) {
     const state = attribute.userData;
 
-    const {accessor} = state;
+    const {accessor, transform} = state;
     const {value, size} = attribute;
     const accessorFunc = typeof accessor === 'function' ? accessor : props[accessor];
 
@@ -405,7 +417,12 @@ export default class Attribute extends BaseAttribute {
     for (const object of iterable) {
       objectInfo.index++;
 
-      const objectValue = accessorFunc(object, objectInfo);
+      let objectValue = accessorFunc(object, objectInfo);
+      if (transform) {
+        // transform callbacks could be bound to a particular layer instance.
+        // always point `this` to the current layer.
+        objectValue = transform.call(this, objectValue);
+      }
 
       if (bufferLayout) {
         attribute._normalizeValue(objectValue, objectInfo.target);

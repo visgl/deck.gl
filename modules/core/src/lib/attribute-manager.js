@@ -232,13 +232,15 @@ export default class AttributeManager {
     for (const attributeName in this.attributes) {
       const attribute = this.attributes[attributeName];
 
-      if (
+      if (!attribute.isEnabled(context)) {
+        attribute.disable();
+      } else if (
         attribute.setExternalBuffer(
           buffers[attributeName] || (data.attributes && data.attributes[attributeName])
         )
       ) {
         // Attribute is using external buffer from the props
-      } else if (attribute.setGenericValue(props[attribute.getAccessor()])) {
+      } else if (attribute.setConstantValue(props[attribute.getAccessor()])) {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;

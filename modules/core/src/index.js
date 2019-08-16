@@ -87,7 +87,7 @@ export {default as log} from './utils/log';
 import {flattenVertices, fillArray} from './utils/flatten'; // Export? move to luma.gl or math.gl?
 
 export {createIterable} from './utils/iterable-utils';
-export {fp64LowPart} from './utils/math-utils';
+export {fp64LowPart, positionFp64LowPart} from './utils/math-utils';
 import Tesselator from './utils/tesselator'; // Export? move to luma.gl or math.gl?
 import {count} from './utils/count';
 import memoize from './utils/memoize';

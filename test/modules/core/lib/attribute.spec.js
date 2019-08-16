@@ -117,10 +117,10 @@ test('Attribute#allocate', t => {
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
-  attribute.setGenericValue([1, 1]);
+  attribute.setConstantValue([1, 1]);
   t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if constant value is used');
 
-  attribute.setGenericValue(undefined);
+  attribute.setConstantValue(undefined);
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
@@ -257,6 +257,18 @@ test('Attribute#updateBuffer', t => {
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
         0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128
       ]
+    },
+    {
+      title: 'standard accessor with transform',
+      attribute: new Attribute(gl, {
+        id: 'values',
+        type: GL.FLOAT,
+        size: 1,
+        accessor: 'getValue',
+        transform: x => x * 2
+      }),
+      standard: [20, 40, 14, 0],
+      'variable size': [20, 20, 40, 14, 14, 14, 14, 0, 0, 0]
     },
     {
       title: 'custom accessor',

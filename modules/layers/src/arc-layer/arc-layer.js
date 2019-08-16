@@ -187,6 +187,7 @@ export default class ArcLayer extends Layer {
     }
   }
 
+  // TODO - split into two attributes and use attribute transform
   calculateInstancePositions64Low(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;

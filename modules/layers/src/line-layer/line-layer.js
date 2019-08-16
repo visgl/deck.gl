@@ -141,6 +141,7 @@ export default class LineLayer extends Layer {
     );
   }
 
+  // TODO - split into two attributes and use attribute transform
   calculateInstanceSourceTargetPositions64xyLow(attribute, {startRow, endRow}) {
     const isFP64 = this.use64bitPositions();
     attribute.constant = !isFP64;
