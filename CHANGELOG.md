@@ -19,6 +19,12 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.2
 
+#### deck.gl [v7.2.2] - Aug 16, 2019
+
+- fix OrbitView bug when orbitAxis: Z (#3453)
+- Fail gracefully in the event of a hexbin projection error (#3424)
+- Improve shadow for mesh layer (#3452)
+
 #### deck.gl [v7.2.1] - Aug 13, 2019
 
 - Use HTMLImageLoader for browser compatibility (#3440)
