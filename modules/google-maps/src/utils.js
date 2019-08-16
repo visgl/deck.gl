@@ -1,4 +1,4 @@
-/* global document, google */
+/* global document, google, window */
 import {Deck} from '@deck.gl/core';
 
 /**
@@ -39,7 +39,7 @@ export function createDeckInstance(map, overlay, deck) {
   // Register event listeners
   for (const eventType in eventListeners) {
     eventListeners[eventType] = map.addListener(eventType, evt =>
-      handleMouseEvent(deck, eventType, evt)
+      handleMouseEvent(deck, eventType, evt, map)
     );
   }
 
@@ -128,16 +128,87 @@ export function getViewState(map, overlay) {
   };
 }
 
+function getNativeMouseEvent(event) {
+  for (const i in event) {
+    if (event[i] instanceof window.MouseEvent) {
+      return event[i];
+    }
+  }
+  return undefined;
+}
+
+function getXYFromLatLng(latLng, map) {
+  const numTiles = 1 << map.getZoom();
+  const projection = map.getProjection();
+  const worldCoordinate = projection.fromLatLngToPoint(latLng);
+  const pixelCoordinate = new google.maps.Point(
+    worldCoordinate.x * numTiles,
+    worldCoordinate.y * numTiles
+  );
+  return pixelCoordinate;
+}
+
+// Calculate google event pixel coordinate
+// Pixel and and original MouseEvent presence in event are undocumented feature
+// and not present in all google events
+// https://developers.google.com/maps/documentation/javascript/reference/map#MouseEvent
+//
+// latLng is is documented but does not always return position of mouse.
+// It returns position of google POI if clicked on it. Thus using it as fallback.
+function getEventPixel(event, map) {
+  let pixel;
+
+  if (event.pixel) {
+    pixel = {
+      x: event.pixel.x,
+      y: event.pixel.y
+    };
+  } else {
+    // Clicking on google POI icon does not return pixel coordinates.
+    // Trying to calculate these using google map element and provided
+    // mouse event details.
+
+    const mapDiv = map.getDiv();
+    if (!mapDiv) {
+      // Map not rendered or something wrong,
+      // thus not wise to continue.
+      return undefined;
+    }
+
+    const mapRect = mapDiv.getBoundingClientRect();
+    const mouseEvent = getNativeMouseEvent(event);
+
+    if (mouseEvent) {
+      // Calculating by sutracting map top corner coordinate in window
+      // from mouse coordinate in window
+      pixel = {
+        x: mouseEvent.clientX - mapRect.left,
+        y: mouseEvent.clientY - mapRect.top
+      };
+    } else {
+      const point = getXYFromLatLng(event.latLng, map);
+      pixel = {
+        x: point.x,
+        y: point.y
+      };
+    }
+  }
+  return pixel;
+}
+
 // Triggers picking on a mouse event
-function handleMouseEvent(deck, type, event) {
+function handleMouseEvent(deck, type, event, map) {
   let callback;
+  const pixel = getEventPixel(event, map);
+
   switch (type) {
     case 'click':
+      // If pixel calulations all fail, do not push through the event
+      if (!pixel) {
+        return;
+      }
       // Hack: because we do not listen to pointer down, perform picking now
-      deck._lastPointerDownInfo = deck.pickObject({
-        x: event.pixel.x,
-        y: event.pixel.y
-      });
+      deck._lastPointerDownInfo = deck.pickObject(pixel);
       callback = deck._onEvent;
       break;
 
@@ -157,7 +228,7 @@ function handleMouseEvent(deck, type, event) {
 
   callback({
     type,
-    offsetCenter: event.pixel,
+    offsetCenter: pixel,
     srcEvent: event
   });
 }
