@@ -117,10 +117,10 @@ test('Attribute#allocate', t => {
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 
-  attribute.setGenericValue([1, 1]);
+  attribute.setConstantValue([1, 1]);
   t.notOk(attributeNoAlloc.allocate(4), 'Should not allocate if constant value is used');
 
-  attribute.setGenericValue(undefined);
+  attribute.setConstantValue(undefined);
   t.ok(attribute.allocate(4), 'allocate successful');
   t.is(attribute.value, allocatedValue, 'reused the same typed array');
 

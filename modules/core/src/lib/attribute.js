@@ -281,12 +281,12 @@ export default class Attribute extends BaseAttribute {
   }
 
   disable() {
-    this.setGenericValue(this.userData.defaultValue);
+    this.setConstantValue(this.userData.defaultValue);
   }
 
   // Use generic value
   // Returns true if successful
-  setGenericValue(value) {
+  setConstantValue(value) {
     const state = this.userData;
 
     if (value === undefined || typeof value === 'function') {
@@ -419,6 +419,8 @@ export default class Attribute extends BaseAttribute {
 
       let objectValue = accessorFunc(object, objectInfo);
       if (transform) {
+        // transform callbacks could be bound to a particular layer instance.
+        // always point `this` to the current layer.
         objectValue = transform.call(this, objectValue);
       }
 

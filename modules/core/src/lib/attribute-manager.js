@@ -240,7 +240,7 @@ export default class AttributeManager {
         )
       ) {
         // Attribute is using external buffer from the props
-      } else if (attribute.setGenericValue(props[attribute.getAccessor()])) {
+      } else if (attribute.setConstantValue(props[attribute.getAccessor()])) {
         // Attribute is using generic value from the props
       } else if (attribute.needsUpdate()) {
         updated = true;
