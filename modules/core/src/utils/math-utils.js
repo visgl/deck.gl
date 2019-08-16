@@ -110,9 +110,23 @@ export function getFrustumPlanes({aspect, near, far, fovyRadians, position, dire
 
 /**
  * Calculate the low part of a WebGL 64 bit float
- * @param a {number} - the input float number
+ * @param x {number} - the input float number
  * @returns {number} - the lower 32 bit of the number
  */
 export function fp64LowPart(x) {
   return x - Math.fround(x);
+}
+
+/**
+ * Calculate the low part of a position
+ * @param array {number} - the input position
+ * @returns {array} - the lower 32 bit of the position
+ */
+const target = new Array(2);
+export function positionFp64LowPart(array) {
+  target[0] = fp64LowPart(array[0]);
+  target[1] = fp64LowPart(array[1]);
+  // TODO - support 64-bit in z
+  // target[2] = fp64LowPart(array[2] || 0);
+  return target;
 }
