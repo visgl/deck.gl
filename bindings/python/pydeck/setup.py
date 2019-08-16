@@ -25,7 +25,7 @@ log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
 PATH_TO_WIDGET = '../../../modules/jupyter-widget'
-PATH_TO_REPO_ROOT = '../../../..'
+PATH_TO_REPO_ROOT = '../../..'
 
 yarn_root = os.path.join(here, PATH_TO_REPO_ROOT)
 widget_dir = os.path.join(here, PATH_TO_WIDGET)

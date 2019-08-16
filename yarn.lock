@@ -1453,7 +1453,7 @@
     "@luma.gl/constants" "7.2.0"
     math.gl "^2.3.0"
 
-"@luma.gl/constants@7.2.0", "@luma.gl/constants@^7.2.0":
+"@luma.gl/constants@7.2.0":
   version "7.2.0"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.2.0.tgz#0fbc4aa07839e6e0454f80658a4e361b855deb67"
   integrity sha512-VQFdTM3N8pxFLfjpLq5vO3CBVcbvyRKseTZ8zmkMFL3uCYrorE9v32vDHW+3hABaYaQc/Xw4J1mOrtyfzKtv3w==
@@ -6851,7 +6851,7 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mapbox-gl@^0.53.1, mapbox-gl@~0.53.0:
+mapbox-gl@~0.53.0:
   version "0.53.1"
   resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-0.53.1.tgz#08a956d8da54b04bc7f29ab1319bddb9c97ddedf"
   integrity sha512-dTtW/qlkUowKGlqOhE8fqII2Tj4lcokvlZwUDLnkjy4uQ9zMFnVBULGeSzzTVkj9HtQZ3Zbey10/jmoVPV9t5w==

@@ -2,11 +2,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, createWidgetDiv, hideMapboxCSSWarning} from './utils';
-
-/* global window */
-const deckgl = window.deck;
-const mapboxgl = window.mapboxgl;
+import {loadCss, createWidgetDiv, setDependencies, hideMapboxCSSWarning} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
 
@@ -55,28 +51,37 @@ export class DeckGLModel extends DOMWidgetModel {
 
 export class DeckGLView extends DOMWidgetView {
   render() {
-    this.modelId = this.model.model_id;
     super.render();
     this.model.on('change:json_input', this.value_changed, this);
     loadCss(MAPBOX_CSS_URL);
 
-    this.el.id = this.model.id;
+    this.el.id = this.model.model_id;
 
-    createWidgetDiv(this.el, this.modelId, this.model.get('width'), this.model.get('height'));
+    createWidgetDiv({
+      parentDiv: this.el,
+      idName: this.model.model_id,
+      done: this.initDeckElements.bind(this),
+      width: this.model.get('width'),
+      height: this.model.get('height')
+    });
   }
 
   _onViewStateChange({viewState}) {
     this.deck.setProps({viewState});
   }
 
-  initJSElements() {
+  initDeckElements() {
+    setDependencies(this._initDeck.bind(this));
+  }
+
+  _initDeck(deckgl, mapboxgl) {
     try {
       if (!this.deck) {
         this.deck = new deckgl.Deck({
           mapboxAccessToken: '',
           map: mapboxgl,
           mapboxApiAccessToken: this.model.get('mapbox_key'),
-          canvas: `deck-map-container-${this.modelId}`,
+          canvas: `deck-map-container-${this.model.model_id}`,
           height: '100%',
           width: '100%',
           onLoad: this.value_changed.bind(this),
