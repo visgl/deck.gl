@@ -88,7 +88,7 @@ export default class CPUGridLayer extends CompositeLayer {
       // project data into hexagons, and get sortedBins
       this.getLayerData();
     } else {
-      const dimensionChanges = this.getDimensionChanges(oldProps, props) || [];
+      const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
       dimensionChanges.forEach(f => typeof f === 'function' && f.apply(this));
     }
   }
@@ -148,7 +148,8 @@ export default class CPUGridLayer extends CompositeLayer {
         {
           id: 'value',
           triggers: ['getColorValue', 'getColorWeight', 'colorAggregation'],
-          updater: this.getSortedColorBins
+          updater: this.getSortedColorBins,
+          updateTriggers: {getColorValue: true, getColorWeight: true}
         },
         {
           id: 'domain',
@@ -165,7 +166,8 @@ export default class CPUGridLayer extends CompositeLayer {
         {
           id: 'value',
           triggers: ['getElevationValue', 'getElevationWeight', 'elevationAggregation'],
-          updater: this.getSortedElevationBins
+          updater: this.getSortedElevationBins,
+          updateTriggers: {getElevationValue: true, getElevationWeight: true}
         },
         {
           id: 'domain',
@@ -181,7 +183,7 @@ export default class CPUGridLayer extends CompositeLayer {
     };
   }
 
-  getDimensionChanges(oldProps, props) {
+  getDimensionChanges(oldProps, props, changeFlags) {
     const {dimensionUpdaters} = this.state;
     const updaters = [];
 
@@ -189,7 +191,14 @@ export default class CPUGridLayer extends CompositeLayer {
     for (const dimensionKey in dimensionUpdaters) {
       // return the first triggered updater for each dimension
       const needUpdate = dimensionUpdaters[dimensionKey].find(item =>
-        item.triggers.some(t => oldProps[t] !== props[t])
+        item.triggers.some(t => {
+          if (item.updateTriggers && item.updateTriggers[t]) {
+            // check based on updateTriggers change first
+            return changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged[t];
+          }
+          // fallback to direct comparison
+          return oldProps[t] !== props[t];
+        })
       );
 
       if (needUpdate) {

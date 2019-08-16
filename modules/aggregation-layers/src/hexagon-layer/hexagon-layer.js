@@ -83,7 +83,7 @@ export default class HexagonLayer extends CompositeLayer {
 
   updateState({oldProps, props, changeFlags}) {
     this.updateGetValueFuncs(oldProps, props);
-    const dimensionChanges = this.getDimensionChanges(oldProps, props);
+    const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags);
 
     if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
       // project data into hexagons, and get sortedColorBins
@@ -146,7 +146,8 @@ export default class HexagonLayer extends CompositeLayer {
         {
           id: 'value',
           triggers: ['getColorValue', 'getColorWeight', 'colorAggregation'],
-          updater: this.getSortedColorBins
+          updater: this.getSortedColorBins,
+          updateTriggers: {getColorValue: true, getColorWeight: true}
         },
         {
           id: 'domain',
@@ -163,7 +164,8 @@ export default class HexagonLayer extends CompositeLayer {
         {
           id: 'value',
           triggers: ['getElevationValue', 'getElevationWeight', 'elevationAggregation'],
-          updater: this.getSortedElevationBins
+          updater: this.getSortedElevationBins,
+          updateTriggers: {getColorValue: true, getColorWeight: true}
         },
         {
           id: 'domain',
@@ -179,7 +181,7 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
-  getDimensionChanges(oldProps, props) {
+  getDimensionChanges(oldProps, props, changeFlags) {
     const {dimensionUpdaters} = this.state;
     const updaters = [];
 
@@ -187,7 +189,14 @@ export default class HexagonLayer extends CompositeLayer {
     for (const dimensionKey in dimensionUpdaters) {
       // return the first triggered updater for each dimension
       const needUpdate = dimensionUpdaters[dimensionKey].find(item =>
-        item.triggers.some(t => oldProps[t] !== props[t])
+        item.triggers.some(t => {
+          if (item.updateTriggers && item.updateTriggers[t]) {
+            // check based on updateTriggers change first
+            return changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged[t];
+          }
+          // fallback to direct comparison
+          return oldProps[t] !== props[t];
+        })
       );
 
       if (needUpdate) {
