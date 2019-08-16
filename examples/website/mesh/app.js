@@ -1,6 +1,14 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, SimpleMeshLayer, OrbitView} from 'deck.gl';
+import DeckGL, {
+  COORDINATE_SYSTEM,
+  SimpleMeshLayer,
+  OrbitView,
+  SolidPolygonLayer,
+  DirectionalLight,
+  LightingEffect,
+  AmbientLight
+} from 'deck.gl';
 
 import {OBJLoader} from '@loaders.gl/obj';
 import {registerLoaders} from '@loaders.gl/core';
@@ -34,6 +42,24 @@ const SAMPLE_DATA = (([xCount, yCount], spacing) => {
   return data;
 })([10, 10], 120);
 
+const ambientLight = new AmbientLight({
+  color: [255, 255, 255],
+  intensity: 1.0
+});
+
+const dirLight = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 1.0,
+  direction: [-10, -2, -15],
+  _shadow: true
+});
+
+const lightingEffect = new LightingEffect({ambientLight, dirLight});
+
+const background = [
+  [[-1000.0, -1000.0, -40], [1000.0, -1000.0, -40], [1000.0, 1000.0, -40], [-1000.0, 1000.0, -40]]
+];
+
 class Example extends PureComponent {
   render() {
     const layers = [
@@ -45,15 +71,31 @@ class Example extends PureComponent {
         getPosition: d => d.position,
         getColor: d => d.color,
         getOrientation: d => d.orientation
+      }),
+      // only needed when using shadows - a plane for shadows to drop on
+      new SolidPolygonLayer({
+        id: 'background',
+        data: background,
+        opacity: 1,
+        extruded: false,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
+        getPolygon: f => f,
+        getFillColor: [0, 0, 0, 0]
       })
     ];
 
     return (
       <DeckGL
-        views={new OrbitView()}
+        views={
+          new OrbitView({
+            near: 0.1,
+            far: 2
+          })
+        }
         initialViewState={INITIAL_VIEW_STATE}
         controller={true}
         layers={layers}
+        effects={[lightingEffect]}
       />
     );
   }
