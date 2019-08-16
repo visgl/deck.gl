@@ -117,11 +117,11 @@ test('LightingEffect#prepare and cleanup', t => {
   });
 
   t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect prepares shadow passes');
-  t.equal(lightingEffect.dummyShadowMaps.length, 2, 'LightingEffect prepares dummy shadow maps');
+  t.ok(lightingEffect.dummyShadowMap, 'LightingEffect prepares dummy shadow map');
 
   lightingEffect.cleanup();
   t.equal(lightingEffect.shadowPasses.length, 0, 'LightingEffect prepares shadow passes');
-  t.equal(lightingEffect.dummyShadowMaps.length, 0, 'LightingEffect prepares dummy shadow maps');
+  t.notOk(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map');
   t.end();
 });
 
