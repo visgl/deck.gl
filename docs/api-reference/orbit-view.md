@@ -4,7 +4,7 @@
 
 # OrbitView Class
 
-The [OrbitView`] class is a subclass of [View](/docs/api-reference/view.md) that creates an orbital view using classic "3D camera" view state parameters.
+The [OrbitView] class is a subclass of [View](/docs/api-reference/view.md) that creates an orbital view using classic "3D camera" view state parameters.
 
 To render, `OrbitView` needs to be used together with a `viewState` with the following parameters:
 
