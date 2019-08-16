@@ -72,6 +72,7 @@ class Example extends PureComponent {
         getColor: d => d.color,
         getOrientation: d => d.orientation
       }),
+      // only needed when using shadows - a plane for shadows to drop on
       new SolidPolygonLayer({
         id: 'background',
         data: background,

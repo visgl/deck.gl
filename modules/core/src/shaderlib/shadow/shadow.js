@@ -81,7 +81,9 @@ vec4 shadow_filterShadowColor(vec4 color) {
   if (shadow_uUseShadowMap) {
     float shadowAlpha = 0.0;
     shadowAlpha += shadow_getShadowWeight(shadow_vPosition[0], shadow_uShadowMap0);
-    shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1);
+    if(shadow_uLightCount > 1.0) {
+      shadowAlpha += shadow_getShadowWeight(shadow_vPosition[1], shadow_uShadowMap1);
+    }
     shadowAlpha *= shadow_uColor.a / shadow_uLightCount;
     float blendedAlpha = shadowAlpha + color.a * (1.0 - shadowAlpha);
 
