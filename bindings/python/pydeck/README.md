@@ -2,19 +2,12 @@
 
 ![demo](https://user-images.githubusercontent.com/2204757/58838976-1538f400-8615-11e9-84f6-a2fe42bb300b.gif)
 
+Note that pydeck is under active development and not yet officially released. At the moment use of this library is experimental.
+
 pydeck is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
 optimized for a Jupyter Notebook environment.
 
 For more, open the `examples/` directory in a Jupyter notebook.
-
-## Getting started
-
-First, install pydeck:
-
-```bash
-pip install pydeck
-```
-
 
 
 ## Installation
