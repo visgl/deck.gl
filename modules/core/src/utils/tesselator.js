@@ -38,10 +38,9 @@ export default class Tesselator {
   }
 
   /* Public methods */
-  updateGeometry({data, getGeometry, positionFormat, fp64, dataChanged}) {
+  updateGeometry({data, getGeometry, positionFormat, dataChanged}) {
     this.data = data;
     this.getGeometry = getGeometry;
-    this.fp64 = fp64;
     this.positionSize = positionFormat === 'XY' ? 2 : 3;
     if (Array.isArray(dataChanged)) {
       // is partial update

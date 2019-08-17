@@ -103,17 +103,6 @@ test('PathTesselator#constructor', t => {
         [2, 2, 0, 3, 3, 0, 0, 0, 0],
         'endPositions is handling loop correctly'
       );
-
-      if (testCase.params.fp64) {
-        t.ok(
-          ArrayBuffer.isView(tesselator.get('startPositions64XyLow')),
-          'PathTesselator.get startPositions64XyLow'
-        );
-        t.ok(
-          ArrayBuffer.isView(tesselator.get('endPositions64XyLow')),
-          'PathTesselator.get endPositions64XyLow'
-        );
-      }
     });
   });
 

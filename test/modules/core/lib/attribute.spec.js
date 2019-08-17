@@ -534,7 +534,11 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.value, value1, 'external value is set');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
-  t.is(attribute.value.constructor.name, 'Float32Array', 'external value is cast to correct type');
+  t.is(
+    attribute.buffer.debugData.constructor.name,
+    'Float32Array',
+    'external value is cast to correct type'
+  );
 
   spy.reset();
   t.ok(
