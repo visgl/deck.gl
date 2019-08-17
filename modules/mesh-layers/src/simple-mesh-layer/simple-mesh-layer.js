@@ -22,7 +22,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, positionFp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, Texture2D, PhongMaterial, isWebGL2} from '@luma.gl/core';
 
@@ -127,14 +127,9 @@ export default class SimpleMeshLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         transition: true,
+        doublePrecision: this.use64bitPositions(),
         size: 3,
         accessor: 'getPosition'
-      },
-      instancePositions64xy: {
-        size: 2,
-        accessor: 'getPosition',
-        enable: this.use64bitPositions,
-        transform: positionFp64LowPart
       },
       instanceColors: {
         type: GL.UNSIGNED_BYTE,

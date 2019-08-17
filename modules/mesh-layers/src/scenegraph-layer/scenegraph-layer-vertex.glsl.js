@@ -9,7 +9,7 @@ export default `\
 
 // Instance attributes
 _attribute vec3 instancePositions;
-_attribute vec2 instancePositions64xy;
+_attribute vec2 instancePositions64xyLow;
 _attribute vec4 instanceColors;
 _attribute vec3 instancePickingColors;
 _attribute mat3 instanceModelMatrix;
@@ -70,7 +70,7 @@ void main(void) {
   pos = project_size(pos);
   DECKGL_FILTER_SIZE(pos, geometry);
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xy, pos, geometry.position);
+  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   #ifdef MODULE_PBR

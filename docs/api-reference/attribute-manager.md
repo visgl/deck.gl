@@ -66,7 +66,6 @@ Takes a single parameter as a map of attribute descriptor objects:
     [`updateTriggers`](/docs/api-reference/layer.md#-updatetriggers-object-optional-).
   + `transform` (Function, optional) - callback to process the result returned by `accessor`.
   + `update` (Function, optional) - the function to be called when data changes. If not supplied, the attribute will be auto-filled with `accessor`.
-  + `enable` (Function, optional) - callback to determine if the attribute is enabled. If an attribute is disabled, it will receive a constant value that is the `defaultValue`. Default always returns `true`.
   + `instanced` (Boolean, optional) - if this is an instanced attribute
     (a.k.a. divisor). Default to `false`.
   + `isIndexed` (Boolean, optional) - if this is an index attribute
@@ -74,6 +73,7 @@ Takes a single parameter as a map of attribute descriptor objects:
   + `constant` (Boolean, optional) - if this is a generic attribute
     (same value applied to every vertex). Default to `false`.
   + `defaultValue` (Number | Array of numbers, optional) - Default `[0, 0, 0, 0]`.
+  + `doublePrecision` (Bool) - whether to use 64-bit precision. Default `false`.
   + `noAlloc` (Boolean, optional) - if this attribute should not be
     automatically allocated. Default to `false`.
   + `shaderAttributes` (Object, optional) - If this attribute maps to multiple

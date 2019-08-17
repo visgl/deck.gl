@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, positionFp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -61,14 +61,9 @@ export default class ScatterplotLayer extends Layer {
     this.getAttributeManager().addInstanced({
       instancePositions: {
         size: 3,
+        doublePrecision: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
-      },
-      instancePositions64xyLow: {
-        size: 2,
-        accessor: 'getPosition',
-        enable: this.use64bitPositions,
-        transform: positionFp64LowPart
       },
       instanceRadius: {
         size: 1,

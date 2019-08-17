@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry} from '@luma.gl/core';
 
@@ -54,18 +54,15 @@ export default class LineLayer extends Layer {
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
+        doublePrecision: this.use64bitPositions(),
         transition: true,
         accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
+        doublePrecision: this.use64bitPositions(),
         transition: true,
         accessor: 'getTargetPosition'
-      },
-      instanceSourceTargetPositions64xyLow: {
-        size: 4,
-        accessor: ['getSourcePosition', 'getTargetPosition'],
-        update: this.calculateInstanceSourceTargetPositions64xyLow
       },
       instanceColors: {
         size: this.props.colorFormat.length,
@@ -139,31 +136,6 @@ export default class LineLayer extends Layer {
         shaderCache: this.context.shaderCache
       })
     );
-  }
-
-  // TODO - split into two attributes and use attribute transform
-  calculateInstanceSourceTargetPositions64xyLow(attribute, {startRow, endRow}) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(4);
-      return;
-    }
-
-    const {data, getSourcePosition, getTargetPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const object of iterable) {
-      objectInfo.index++;
-      const sourcePosition = getSourcePosition(object, objectInfo);
-      const targetPosition = getTargetPosition(object, objectInfo);
-      value[i++] = fp64LowPart(sourcePosition[0]);
-      value[i++] = fp64LowPart(sourcePosition[1]);
-      value[i++] = fp64LowPart(targetPosition[0]);
-      value[i++] = fp64LowPart(targetPosition[1]);
-    }
   }
 }
 

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, positionFp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
 import GL from '@luma.gl/constants';
@@ -68,14 +68,9 @@ export default class ScenegraphLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        doublePrecision: this.use64bitPositions(),
         accessor: 'getPosition',
         transition: true
-      },
-      instancePositions64xy: {
-        size: 2,
-        accessor: 'getPosition',
-        enable: this.use64bitPositions,
-        transform: positionFp64LowPart
       },
       instanceColors: {
         type: GL.UNSIGNED_BYTE,

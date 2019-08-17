@@ -238,7 +238,7 @@ export default class AttributeTransitionManager {
         normalized,
         // attribute's `value` does not match the content of external buffer,
         // will need to call buffer.getData if needed
-        value: attribute.externalBuffer ? null : attribute.value
+        value: attribute.externalBuffer || attribute.doublePrecision ? null : attribute.value
       });
     }
     const fromState = transition.buffer || toState;
