@@ -22,28 +22,15 @@
 import TestRunner from './test-runner';
 import {getBoundingBoxInPage} from './utils/dom';
 
-const DEFAULT_TEST_OPTIONS = {
-  imageDiffOptions: {}
-};
-
-const DEFAULT_TEST_CASE = {
-  name: 'Unnamed snapshot test',
-  props: {},
-  onAfterRender: ({deck, layers, done}) => done(),
-  goldenImage: ''
-};
-
 export default class SnapshotTestRunner extends TestRunner {
   constructor(props) {
     super(props);
 
     this.isDiffing = false;
 
-    Object.assign(this.testOptions, DEFAULT_TEST_OPTIONS);
-  }
-
-  get defaultTestCase() {
-    return DEFAULT_TEST_CASE;
+    Object.assign(this.testOptions, {
+      imageDiffOptions: {}
+    });
   }
 
   initTestCase(testCase) {
@@ -51,22 +38,6 @@ export default class SnapshotTestRunner extends TestRunner {
     if (!testCase.goldenImage) {
       throw new Error(`Test case ${testCase.name} does not have golden image`);
     }
-  }
-
-  runTestCase(testCase, onDone) {
-    const {deck} = this;
-
-    deck.setProps(
-      Object.assign({}, this.props, testCase, {
-        onAfterRender: () => {
-          testCase.onAfterRender({
-            deck,
-            layers: deck.layerManager.getLayers(),
-            done: onDone
-          });
-        }
-      })
-    );
   }
 
   shouldRender() {
