@@ -10,3 +10,5 @@ export {default as TestRunner} from './test-runner';
 
 // A utility that renders a list of scenes and compares against golden images
 export {default as SnapshotTestRunner} from './snapshot-test-runner';
+// A utility that emulates input events
+export {default as InteractionTestRunner} from './interaction-test-runner';

@@ -43,7 +43,7 @@
   "devDependencies": {
     "@luma.gl/effects": "^7.2.0",
     "@probe.gl/bench": "^3.0.2",
-    "@probe.gl/test-utils": "^3.0.2",
+    "@probe.gl/test-utils": "^3.1.0-alpha.8",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.0",
     "babel-plugin-remove-glsl-comments": "^0.1.0",
