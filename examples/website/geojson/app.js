@@ -46,7 +46,7 @@ const ambientLight = new AmbientLight({
 });
 
 const dirLight = new SunLight({
-  timestamp: new Date('2019-08-01 15:00:00 Z-7').getTime(),
+  timestamp: Date.UTC(2019, 7, 1, 22),
   color: [255, 255, 255],
   intensity: 1.0,
   _shadow: true
