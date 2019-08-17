@@ -71,7 +71,7 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   initDeckElements() {
-    setDependencies(this._initDeck.bind(this));
+    setDependencies(this._initDeck);
   }
 
   _initDeck(deckgl, mapboxgl) {
