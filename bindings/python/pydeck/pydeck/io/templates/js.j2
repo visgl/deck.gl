@@ -1,71 +1,34 @@
-let config, mapLayer, jsonInput, jsonConverter;
+let config, jsonInput, jsonConverter;
 
 jsonInput = JSON.parse(JSON.stringify({{json_input}}));
-
-function setMapProps(map, props) {
-  if ('viewState' in props && props.viewState.longitude && props.viewState.latitude) {
-    const {viewState} = props;
-    map.jumpTo({
-      center: [viewState.longitude, viewState.latitude],
-      zoom: Number.isFinite(viewState.zoom) ? viewState.zoom : 10,
-      bearing: viewState.bearing || 0,
-      pitch: viewState.pitch || 0
-    });
-  }
-
-  if (props.map && 'style' in props.map) {
-    if (props.map.style !== map.deckStyle) {
-      map.setStyle(props.map.style);
-      map.deckStyle = props.map.style;
-    }
-  }
-}
-
-
-function onViewportChange({viewState}) {
-  config.setProps({viewState});
-  setMapProps(mapLayer, {viewState});
-}
-
 
 function valueChanged() {
   const jsonProps = jsonConverter.convertJsonToDeckProps(jsonInput);
   config.setProps(jsonProps);
-  setMapProps(mapLayer, config.props);
 }
 
 
 function init(deck, mapboxgl) {
-  deck.log.priority=1
-  let layersDict = {};
+  deck.log.priority=1;
 
-  const layers = Object.keys(deck).filter(x => x.indexOf('Layer') > 0 && x.indexOf('_') != 0);
-
+  const layersDict = {};
+  const layers = Object.keys(deck).filter(x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0);
   layers.map(k => layersDict[k] = deck[k]);
-
-   mapboxgl.accessToken = '{{mapbox_api_key}}';
-   mapLayer = new mapboxgl.Map({
-    container: 'map',
-    interactive: false,
-    style: null
-  });
 
   jsonConverter = new deck._JSONConverter({
     configuration: {
       layers: layersDict
-      
     }
   });
 
-  config = new deck.Deck({
+  config = new deckgl.DeckGL({
+    map: mapboxgl,
+    mapboxApiAccessToken: '{{mapbox_api_key}}',
     canvas: 'deck-map-container',
     height: '100%',
     width: '100%',
     onLoad: valueChanged.bind(this),
-    views: [new deck.MapView()],
-    onViewStateChange: onViewportChange.bind(this)
   });
 }
-
 
 requirejs(['deck', 'mapboxgl'], init);

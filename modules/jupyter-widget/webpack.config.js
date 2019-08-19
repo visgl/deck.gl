@@ -1,7 +1,6 @@
 // File leans heavily on configuration in
 // https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/webpack.config.js
 const path = require('path');
-const packageInfo = require('./package.json');
 
 const rules = [
   {
@@ -17,14 +16,7 @@ const rules = [
 // Packages that shouldn't be bundled but loaded at runtime
 
 function getExternals() {
-  const {peerDependencies = {}} = packageInfo;
   const externals = {};
-  for (const depName in peerDependencies) {
-    if (depName.startsWith('@deck.gl')) {
-      // Instead of bundling the dependency, import from the global `deck` object
-      externals[depName] = 'deck';
-    }
-  }
 
   return [externals, '@jupyter-widgets/base'];
 }

@@ -66,10 +66,6 @@ export class DeckGLView extends DOMWidgetView {
     });
   }
 
-  _onViewStateChange({viewState}) {
-    this.deck.setProps({viewState});
-  }
-
   initDeckElements() {
     setDependencies(this._initDeck);
   }
@@ -77,22 +73,25 @@ export class DeckGLView extends DOMWidgetView {
   _initDeck(deckgl, mapboxgl) {
     try {
       if (!this.deck) {
-        this.deck = new deckgl.Deck({
-          mapboxAccessToken: '',
+        this.deck = new deckgl.DeckGL({
           map: mapboxgl,
           mapboxApiAccessToken: this.model.get('mapbox_key'),
           canvas: `deck-map-container-${this.model.model_id}`,
           height: '100%',
           width: '100%',
           onLoad: this.value_changed.bind(this),
-          views: [new deckgl.MapView()],
-          onViewStateChange: this._onViewStateChange.bind(this),
           mapStyle: null
         });
       }
+      const layersDict = {};
+      const layers = Object.keys(deckgl).filter(
+        x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
+      );
+      layers.map(k => (layersDict[k] = deckgl[k]));
+
       this.jsonConverter = new deckgl.JSONConverter({
         configuration: {
-          layers: {...deckgl.deckLayers, ...deckgl.deckAggregationLayers}
+          layers: layersDict
         }
       });
     } catch (err) {
