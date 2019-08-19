@@ -83,7 +83,25 @@ test('CPUGridLayer#renderSubLayer', t => {
 });
 
 test.only('CPUGridLayer#updates', t => {
-  function getCheckForNoTriggerChange(accessor) {
+  const testItems = {
+    color: {
+      bin: 'sortedColorBins',
+      domain: 'colorValueDomain',
+      scale: 'colorScaleFunc',
+      getValue: 'getColorValue'
+    },
+    elevation: {
+      bin: 'sortedElevationBins',
+      domain: 'elevationValueDomain',
+      scale: 'elevationScaleFunc',
+      getValue: 'getElevationValue'
+    }
+  };
+
+  function getCheckForNoTriggerChange(accessor, dimension) {
+    const update = testItems[dimension];
+    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+
     return function onAfterUpdate({layer, oldState}) {
       t.ok(
         oldState.layerData === layer.state.layerData,
@@ -91,56 +109,57 @@ test.only('CPUGridLayer#updates', t => {
       );
 
       t.ok(
-        oldState.sortedColorBins === layer.state.sortedColorBins,
-        `update props.${accessor} w/o trigger change should not update sortedColorBins`
+        oldState[update.bin] === layer.state[update.bin],
+        `update props.${accessor} w/o trigger change should not update ${update.bin}`
       );
 
       t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        `update props.${accessor} w/o trigger change should not update sortedElevationBins`
+        oldState[noUpdate.bin] === layer.state[noUpdate.bin],
+        `update props.${accessor} w/o trigger change should not update ${[noUpdate.bin]}`
       );
 
       t.ok(
-        oldState.colorValueDomain === layer.state.colorValueDomain,
-        `update props.${accessor} w/o trigger change should not re calculate colorValueDomain`
+        oldState[update.domain] === layer.state[update.domain],
+        `update props.${accessor} w/o trigger change should not re calculate ${update.domain}`
       );
 
       t.ok(
-        oldState.elevationValueDomain === layer.state.elevationValueDomain,
-        `update props.${accessor} w/o trigger change should not update elevationValueDomain`
+        oldState[noUpdate.domain] === layer.state[noUpdate.domain],
+        `update props.${accessor} w/o trigger change should not update ${noUpdate.domain}`
       );
 
       t.ok(
-        oldState.colorScaleFunc === layer.state.colorScaleFunc,
-        `update props.${accessor} w/o trigger change should not update colorScaleFunc`
+        oldState[update.scale] === layer.state[update.scale],
+        `update props.${accessor} w/o trigger change should not update ${update.scale}`
       );
 
       t.ok(
-        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-        `update props.${accessor} w/o trigger change should not update elevationScaleFunc`
+        oldState[noUpdate.scale] === layer.state[noUpdate.scale],
+        `update props.${accessor} w/o trigger change should not update ${noUpdate.scale}`
       );
 
-      // color props changed
-      if (accessor === 'getColorValue') {
+      if (accessor === 'getColorValue' || accessor === 'getElevationValue') {
         t.ok(
-          layer.state.getColorValue !== oldState.getColorValue,
-          `update props.${accessor} w/o trigger change should reset state.getColorValue`
+          layer.state[update.getValue] !== oldState[update.getValue],
+          `update props.${accessor} w/o trigger change should reset state.${update.getValue}`
         );
       } else {
         t.ok(
-          layer.state.getColorValue === oldState.getColorValue,
-          `update props.${accessor} w/o trigger change should not reset state.getColorValue`
+          layer.state[update.getValue] === oldState[update.getValue],
+          `update props.${accessor} w/o trigger change should not reset state.${update.getValue}`
         );
       }
 
-      // elevation props didn't change
       t.ok(
-        layer.state.getElevationValue === oldState.getElevationValue,
-        `update props.${accessor} w/o trigger change should not reset state.getElevationValue`
+        layer.state[noUpdate.getValue] === oldState[noUpdate.getValue],
+        `update props.${accessor} w/o trigger change should not reset state.${noUpdate.getValue}`
       );
     };
   }
-  function getCheckForChangedTriggers(accessor) {
+  function getCheckForChangedTriggers(accessor, dimension) {
+    const update = testItems[dimension];
+    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+
     return function onAfterUpdate({layer, oldState}) {
       t.ok(
         oldState.layerData === layer.state.layerData,
@@ -148,45 +167,45 @@ test.only('CPUGridLayer#updates', t => {
       );
 
       t.ok(
-        oldState.sortedColorBins !== layer.state.sortedColorBins,
-        `update props.${accessor} w/ trigger change should update sortedColorBins`
+        oldState[update.bin] !== layer.state[update.bin],
+        `update props.${accessor} w/ trigger change should update ${update.bin}`
       );
 
       t.ok(
-        oldState.sortedElevationBins === layer.state.sortedElevationBins,
-        `update props.${accessor} w/ trigger change should not update sortedElevationBins`
+        oldState[noUpdate.bin] === layer.state[noUpdate.bin],
+        `update props.${accessor} w/ trigger change should not update ${noUpdate.bin}`
       );
 
       t.ok(
-        oldState.colorValueDomain !== layer.state.colorValueDomain,
-        `update props.${accessor} w/ trigger change should re calculate colorValueDomain`
+        oldState[update.domain] !== layer.state[update.domain],
+        `update props.${accessor} w/ trigger change should re calculate ${update.domain}`
       );
 
       t.ok(
-        oldState.elevationValueDomain === layer.state.elevationValueDomain,
-        `update props.${accessor} w/ trigger change should not update elevationValueDomain`
+        oldState[noUpdate.domain] === layer.state[noUpdate.domain],
+        `update props.${accessor} w/ trigger change should not update ${noUpdate.domain}`
       );
 
       t.ok(
-        oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-        `update props.${accessor} w/ trigger change should update colorScaleFunc`
+        oldState[update.scale] !== layer.state[update.scale],
+        `update props.${accessor} w/ trigger change should update ${update.scale}`
       );
 
       t.ok(
-        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-        `update props.${accessor} w/ trigger change should not update elevationScaleFunc`
+        oldState[noUpdate.scale] === layer.state[noUpdate.scale],
+        `update props.${accessor} w/ trigger change should not update ${noUpdate.scale}`
       );
 
       // color props changed
       t.ok(
-        layer.state.getColorValue !== oldState.getColorValue,
-        `update props.${accessor} w/ trigger change should reset state.getColorValue`
+        layer.state[update.getValue] !== oldState[update.getValue],
+        `update props.${accessor} w/ trigger change should reset state ${update.getValue}`
       );
 
       // elevation props didn't change
       t.ok(
-        layer.state.getElevationValue === oldState.getElevationValue,
-        `update props.${accessor} w/ trigger change should not reset state.getElevationValue`
+        layer.state[noUpdate.getValue] === oldState[noUpdate.getValue],
+        `update props.${accessor} w/ trigger change should not reset state ${noUpdate.getValue}`
       );
     };
   }
@@ -320,6 +339,41 @@ test.only('CPUGridLayer#updates', t => {
       },
       {
         updateProps: {
+          getPosition: d => d.COORDINATES
+        },
+        onAfterUpdate({layer, oldState}) {
+          t.ok(
+            oldState.layerData === layer.state.layerData,
+            'getPosition w/o trigger change should update layer data'
+          );
+          t.ok(
+            oldState.sortedColorBins === layer.state.sortedColorBins,
+            'getPosition w/o trigger change should update sortedColorBins'
+          );
+          t.ok(
+            oldState.colorValueDomain === layer.state.colorValueDomain,
+            'getPosition w/o trigger change should update valueDomain'
+          );
+          t.ok(
+            oldState.colorScaleFunc === layer.state.colorScaleFunc,
+            'getPosition w/o trigger change should update colorScaleFunc'
+          );
+          t.ok(
+            oldState.sortedElevationBins === layer.state.sortedElevationBins,
+            'getPosition w/o trigger change should update sortedElevationBins'
+          );
+          t.ok(
+            oldState.elevationValueDomain === layer.state.elevationValueDomain,
+            'getPosition w/o trigger change should update elevationValueDomain'
+          );
+          t.ok(
+            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+            'getPosition w/o trigger change should update elevationScaleFunc'
+          );
+        }
+      },
+      {
+        updateProps: {
           getPosition: d => d.COORDINATES,
           updateTriggers: {
             getPosition: 1
@@ -328,37 +382,37 @@ test.only('CPUGridLayer#updates', t => {
         onAfterUpdate({layer, oldState}) {
           t.ok(
             oldState.layerData !== layer.state.layerData,
-            'getPosition prop change should update layer data'
+            'getPosition w/ trigger change should update layer data'
           );
 
           t.ok(
             oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'getPosition prop change should update sortedColorBins'
+            'getPosition w/ trigger change should update sortedColorBins'
           );
 
           t.ok(
             oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'getPosition prop change should update valueDomain'
+            'getPosition w/ trigger change should update valueDomain'
           );
 
           t.ok(
             oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'getPosition prop change should update colorScaleFunc'
+            'getPosition w/ trigger change should update colorScaleFunc'
           );
 
           t.ok(
             oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-            'getPosition prop change should update sortedElevationBins'
+            'getPosition w/ trigger change should update sortedElevationBins'
           );
 
           t.ok(
             oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-            'getPosition prop change should update elevationValueDomain'
+            'getPosition w/ trigger change should update elevationValueDomain'
           );
 
           t.ok(
             oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'getPosition prop change should update elevationScaleFunc'
+            'getPosition w/ trigger change should update elevationScaleFunc'
           );
         }
       },
@@ -366,7 +420,7 @@ test.only('CPUGridLayer#updates', t => {
         updateProps: {
           getColorWeight: x => 2
         },
-        onAfterUpdate: getCheckForNoTriggerChange('getColorWeight')
+        onAfterUpdate: getCheckForNoTriggerChange('getColorWeight', 'color')
       },
       {
         updateProps: {
@@ -375,13 +429,13 @@ test.only('CPUGridLayer#updates', t => {
             getColorWeight: 1
           }
         },
-        onAfterUpdate: getCheckForChangedTriggers('getColorWeight')
+        onAfterUpdate: getCheckForChangedTriggers('getColorWeight', 'color')
       },
       {
         updateProps: {
           getColorValue: x => 2
         },
-        onAfterUpdate: getCheckForNoTriggerChange('getColorValue')
+        onAfterUpdate: getCheckForNoTriggerChange('getColorValue', 'color')
       },
       {
         updateProps: {
@@ -390,28 +444,31 @@ test.only('CPUGridLayer#updates', t => {
             getColorValue: 1
           }
         },
-        onAfterUpdate: getCheckForChangedTriggers('getColorValue')
+        onAfterUpdate: getCheckForChangedTriggers('getColorValue', 'color')
       },
       {
         updateProps: {
           elevationAggregation: 'Mean'
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
+          t.ok(
+            oldState.layerData === layer.state.layerData,
+            'update elevationAggregation should not update layer data'
+          );
 
           t.ok(
             oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
+            'update elevationAggregation should not update sortedColorBins'
           );
 
           t.ok(
             oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
+            'update elevationAggregation should update sortedElevationBins'
           );
 
           t.ok(
             oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
+            'update elevationAggregation should not re calculate colorValueDomain'
           );
 
           t.ok(
@@ -421,24 +478,24 @@ test.only('CPUGridLayer#updates', t => {
 
           t.ok(
             oldState.colorScaleFunc === layer.state.colorScaleFunc,
-            'should not update colorScaleFunc'
+            'update elevationAggregation should not update colorScaleFunc'
           );
 
           t.ok(
             oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update colorScaleFunc'
+            'update elevationAggregation should update elevationScaleFunc'
           );
 
           // color porps didn't changed
           t.ok(
             layer.state.getColorValue === oldState.getColorValue,
-            'getColorValue should not get re-calculated'
+            'update elevationAggregation should not reset state.getColorValue'
           );
 
           // elevation porps changed
           t.ok(
             layer.state.getElevationValue !== oldState.getElevationValue,
-            'getElevationValue should get re-calculated'
+            'update elevationAggregation should re-calculated state.getElevationValue'
           );
         }
       },
@@ -447,36 +504,39 @@ test.only('CPUGridLayer#updates', t => {
           upperPercentile: 90
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
+          t.ok(
+            oldState.layerData === layer.state.layerData,
+            'update upperPercentile should not update layer data'
+          );
 
           t.ok(
             oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
+            'update upperPercentile should not update sortedColorBins'
           );
 
           t.ok(
             oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should re calculate colorValueDomain'
+            'update upperPercentile should re calculate colorValueDomain'
           );
 
           t.ok(
             oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
+            'update upperPercentile should update colorScaleFunc'
           );
 
           t.ok(
             oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
+            'update upperPercentile should not update sortedElevationBins'
           );
 
           t.ok(
             oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
+            'update upperPercentile should not update elevationValueDomain'
           );
 
           t.ok(
             oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update elevationScaleFunc'
+            'update upperPercentile should not update elevationScaleFunc'
           );
         }
       },
@@ -485,79 +545,71 @@ test.only('CPUGridLayer#updates', t => {
           colorDomain: [0, 10]
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
+          t.ok(
+            oldState.layerData === layer.state.layerData,
+            'update colorDomain should not update layer data'
+          );
 
           t.ok(
             oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
+            'update colorDomain should not update sortedColorBins'
           );
 
           t.ok(
             oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
+            'update colorDomain should not re calculate colorValueDomain'
           );
 
           t.ok(
             oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
+            'update colorDomain should update colorScaleFunc'
           );
 
           t.ok(
             oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
+            'update colorDomain should not update sortedElevationBins'
           );
 
           t.ok(
             oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
+            'update colorDomain should not update elevationValueDomain'
           );
 
           t.ok(
             oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update elevationScaleFunc'
+            'update colorDomain should not update elevationScaleFunc'
           );
         }
       },
       {
         updateProps: {
-          getElevationValue: GET_ELEVATION_VALUE,
+          getElevationWeight: x => 2
+        },
+        onAfterUpdate: getCheckForNoTriggerChange('getElevationWeight', 'elevation')
+      },
+      {
+        updateProps: {
+          getElevationWeight: x => 2,
+          updateTriggers: {
+            getElevationWeight: 1
+          }
+        },
+        onAfterUpdate: getCheckForChangedTriggers('getElevationWeight', 'elevation')
+      },
+      {
+        updateProps: {
+          getElevationValue: x => 2
+        },
+        onAfterUpdate: getCheckForNoTriggerChange('getElevationValue', 'elevation')
+      },
+      {
+        updateProps: {
+          getElevationValue: x => 2,
           updateTriggers: {
             getElevationValue: 1
           }
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-            'should re calculate elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update elevationScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc === layer.state.colorScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: getCheckForChangedTriggers('getElevationValue', 'elevation')
       },
       {
         updateProps: {
