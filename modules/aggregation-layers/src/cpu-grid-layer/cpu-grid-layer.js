@@ -63,9 +63,6 @@ const defaultProps = {
   material: defaultMaterial
 };
 
-const COLOR_PROPS = ['getColorValue', 'colorAggregation', 'getColorWeight'];
-const ELEVATION_PROPS = ['getElevationValue', 'elevationAggregation', 'getElevationWeight'];
-
 export default class CPUGridLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -81,7 +78,7 @@ export default class CPUGridLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    this.updateGetValueFuncs(oldProps, props);
+    this.updateGetValueFuncs(oldProps, props, changeFlags);
     const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
 
     if (changeFlags.dataChanged || reprojectNeeded) {
@@ -93,32 +90,30 @@ export default class CPUGridLayer extends CompositeLayer {
     }
   }
 
-  colorElevationPropsChanged(oldProps, props) {
-    let colorChanged = false;
-    let elevationChanged = false;
-    for (const p of COLOR_PROPS) {
-      if (oldProps[p] !== props[p]) {
-        colorChanged = true;
-      }
-    }
-    for (const p of ELEVATION_PROPS) {
-      if (oldProps[p] !== props[p]) {
-        elevationChanged = true;
-      }
-    }
-    return {colorChanged, elevationChanged};
-  }
-
-  updateGetValueFuncs(oldProps, props) {
+  updateGetValueFuncs(oldProps, props, changeFlags) {
+    const {getFillColor, getElevation} = this.getDimensionUpdaters();
     let {getColorValue, getElevationValue} = props;
     const {colorAggregation, getColorWeight, elevationAggregation, getElevationWeight} = this.props;
-    const {colorChanged, elevationChanged} = this.colorElevationPropsChanged(oldProps, props);
 
-    if (colorChanged && getColorValue === null) {
+    const getColorValueChanged = this.needUpdateDimensionStep(
+      getFillColor[0],
+      oldProps,
+      props,
+      changeFlags
+    );
+
+    const getElevationValueChanged = this.needUpdateDimensionStep(
+      getElevation[0],
+      oldProps,
+      props,
+      changeFlags
+    );
+
+    if (getColorValueChanged && getColorValue === null) {
       // If `getColorValue` is not provided, build it.
       getColorValue = getValueFunc(colorAggregation, getColorWeight);
     }
-    if (elevationChanged && getElevationValue === null) {
+    if (getElevationValueChanged && getElevationValue === null) {
       // If `getElevationValue` is not provided, build it.
       getElevationValue = getValueFunc(elevationAggregation, getElevationWeight);
     }
@@ -183,6 +178,22 @@ export default class CPUGridLayer extends CompositeLayer {
     };
   }
 
+  needUpdateDimensionStep(dimensionStep, oldProps, props, changeFlags) {
+    // whether need to update current dimension step
+    // dimension step is the value, domain, scaleFunction of each dimension
+    return dimensionStep.triggers.some(t => {
+      if (dimensionStep.updateTriggers && dimensionStep.updateTriggers[t]) {
+        // check based on updateTriggers change first
+        return (
+          changeFlags.updateTriggersChanged &&
+          (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged[t])
+        );
+      }
+      // fallback to direct comparison
+      return oldProps[t] !== props[t];
+    });
+  }
+
   getDimensionChanges(oldProps, props, changeFlags) {
     const {dimensionUpdaters} = this.state;
     const updaters = [];
@@ -190,15 +201,8 @@ export default class CPUGridLayer extends CompositeLayer {
     // get dimension to be updated
     for (const dimensionKey in dimensionUpdaters) {
       // return the first triggered updater for each dimension
-      const needUpdate = dimensionUpdaters[dimensionKey].find(item =>
-        item.triggers.some(t => {
-          if (item.updateTriggers && item.updateTriggers[t]) {
-            // check based on updateTriggers change first
-            return changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged[t];
-          }
-          // fallback to direct comparison
-          return oldProps[t] !== props[t];
-        })
+      const needUpdate = dimensionUpdaters[dimensionKey].find(step =>
+        this.needUpdateDimensionStep(step, oldProps, props, changeFlags)
       );
 
       if (needUpdate) {

@@ -82,45 +82,106 @@ test('CPUGridLayer#renderSubLayer', t => {
   t.end();
 });
 
-test('CPUGridLayer#updates', t => {
-  function onAfterUpdateColor({layer, oldState}) {
-    t.ok(oldState.layerData === layer.state.layerData, 'should not update layer data');
+test.only('CPUGridLayer#updates', t => {
+  function getCheckForNoTriggerChange(accessor) {
+    return function onAfterUpdate({layer, oldState}) {
+      t.ok(
+        oldState.layerData === layer.state.layerData,
+        `update props.${accessor} w/o trigger change should not update layer data`
+      );
 
-    t.ok(oldState.sortedColorBins !== layer.state.sortedColorBins, 'should update sortedColorBins');
+      t.ok(
+        oldState.sortedColorBins === layer.state.sortedColorBins,
+        `update props.${accessor} w/o trigger change should not update sortedColorBins`
+      );
 
-    t.ok(
-      oldState.sortedElevationBins === layer.state.sortedElevationBins,
-      'should not update sortedElevationBins'
-    );
+      t.ok(
+        oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        `update props.${accessor} w/o trigger change should not update sortedElevationBins`
+      );
 
-    t.ok(
-      oldState.colorValueDomain !== layer.state.colorValueDomain,
-      'should re calculate colorValueDomain'
-    );
+      t.ok(
+        oldState.colorValueDomain === layer.state.colorValueDomain,
+        `update props.${accessor} w/o trigger change should not re calculate colorValueDomain`
+      );
 
-    t.ok(
-      oldState.elevationValueDomain === layer.state.elevationValueDomain,
-      'should not update elevationValueDomain'
-    );
+      t.ok(
+        oldState.elevationValueDomain === layer.state.elevationValueDomain,
+        `update props.${accessor} w/o trigger change should not update elevationValueDomain`
+      );
 
-    t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
+      t.ok(
+        oldState.colorScaleFunc === layer.state.colorScaleFunc,
+        `update props.${accessor} w/o trigger change should not update colorScaleFunc`
+      );
 
-    t.ok(
-      oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-      'should not update colorScaleFunc'
-    );
+      t.ok(
+        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+        `update props.${accessor} w/o trigger change should not update elevationScaleFunc`
+      );
 
-    // color porps changed
-    t.ok(
-      layer.state.getColorValue !== oldState.getColorValue,
-      'getColorValue should get re-calculated'
-    );
+      // color props changed
+      t.ok(
+        layer.state.getColorValue !== oldState.getColorValue,
+        `update props.${accessor} w/o trigger change should reset state.getColorValue`
+      );
 
-    // elevation porps didn't change
-    t.ok(
-      layer.state.getElevationValue === oldState.getElevationValue,
-      'getElevationValue should not get re-calculated'
-    );
+      // elevation props didn't change
+      t.ok(
+        layer.state.getElevationValue === oldState.getElevationValue,
+        `update props.${accessor} w/o trigger change should not reset state.getElevationValue`
+      );
+    };
+  }
+  function getCheckForChangedTriggers(accessor) {
+    return function onAfterUpdate({layer, oldState}) {
+      t.ok(
+        oldState.layerData === layer.state.layerData,
+        `update props.${accessor} w/ trigger change should not update layer data`
+      );
+
+      t.ok(
+        oldState.sortedColorBins !== layer.state.sortedColorBins,
+        `update props.${accessor} w/ trigger change should update sortedColorBins`
+      );
+
+      t.ok(
+        oldState.sortedElevationBins === layer.state.sortedElevationBins,
+        `update props.${accessor} w/ trigger change should not update sortedElevationBins`
+      );
+
+      t.ok(
+        oldState.colorValueDomain !== layer.state.colorValueDomain,
+        `update props.${accessor} w/ trigger change should re calculate colorValueDomain`
+      );
+
+      t.ok(
+        oldState.elevationValueDomain === layer.state.elevationValueDomain,
+        `update props.${accessor} w/ trigger change should not update elevationValueDomain`
+      );
+
+      t.ok(
+        oldState.colorScaleFunc !== layer.state.colorScaleFunc,
+        `update props.${accessor} w/ trigger change should update colorScaleFunc`
+      );
+
+      t.ok(
+        oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
+        `update props.${accessor} w/ trigger change should not update elevationScaleFunc`
+      );
+
+      // color props changed
+      t.ok(
+        layer.state.getColorValue !== oldState.getColorValue,
+        `update props.${accessor} w/ trigger change should reset state.getColorValue`
+      );
+
+      // elevation props didn't change
+      t.ok(
+        layer.state.getElevationValue === oldState.getElevationValue,
+        `update props.${accessor} w/ trigger change should not reset state.getElevationValue`
+      );
+    };
   }
   testLayer({
     Layer: CPUGridLayer,
@@ -192,7 +253,7 @@ test('CPUGridLayer#updates', t => {
         onAfterUpdate({layer, subLayer, spies, oldState}) {
           t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
 
-          // color or elevation porps didn't change
+          // color or elevation prop didn't change
           t.ok(
             layer.state.getColorValue === oldState.getColorValue,
             'getColorValue should not get re-calculated'
@@ -214,36 +275,39 @@ test('CPUGridLayer#updates', t => {
           cellSize: 800
         },
         onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.layerData !== layer.state.layerData, 'should update layer data');
+          t.ok(
+            oldState.layerData !== layer.state.layerData,
+            'update cellSize should update layer data'
+          );
 
           t.ok(
             oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should update sortedColorBins'
+            'update cellSize should update sortedColorBins'
           );
 
           t.ok(
             oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should update valueDomain'
+            'update cellSize should update valueDomain'
           );
 
           t.ok(
             oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
+            'update cellSize should update colorScaleFunc'
           );
 
           t.ok(
             oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
+            'update cellSize should update sortedElevationBins'
           );
 
           t.ok(
             oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-            'should update elevationValueDomain'
+            'update cellSize should update elevationValueDomain'
           );
 
           t.ok(
             oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update elevationScaleFunc'
+            'update cellSize should update elevationScaleFunc'
           );
         }
       },
@@ -293,21 +357,33 @@ test('CPUGridLayer#updates', t => {
       },
       {
         updateProps: {
+          getColorWeight: x => 2
+        },
+        onAfterUpdate: getCheckForNoTriggerChange('getColorWeight')
+      },
+      {
+        updateProps: {
           getColorWeight: x => 2,
           updateTriggers: {
             getColorWeight: 1
           }
         },
-        onAfterUpdate: onAfterUpdateColor
+        onAfterUpdate: getCheckForChangedTriggers('getColorWeight')
       },
       {
         updateProps: {
-          getColorValue: GET_COLOR_VALUE,
+          getColorValue: x => 2
+        },
+        onAfterUpdate: getCheckForNoTriggerChange('getColorValue')
+      },
+      {
+        updateProps: {
+          getColorValue: x => 2,
           updateTriggers: {
             getColorValue: 1
           }
         },
-        onAfterUpdate: onAfterUpdateColor
+        onAfterUpdate: getCheckForChangedTriggers('getColorValue')
       },
       {
         updateProps: {

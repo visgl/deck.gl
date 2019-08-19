@@ -257,7 +257,16 @@ export default class HexagonLayer extends CompositeLayer {
 
       for (const step of dimensionUpdaters[dimensionKey]) {
         step.triggers.forEach(prop => {
-          updateTriggers[dimensionKey][prop] = this.props[prop];
+          if (step.updateTriggers && step.updateTriggers[prop] && this.props.updateTriggers[prop]) {
+            // check based on props.updateTriggers
+            const fromProp = this.props.updateTriggers[prop];
+            updateTriggers[dimensionKey] =
+              typeof fromProp === 'object' && !Array.isArray(fromProp)
+                ? Object.assign(updateTriggers[dimensionKey], fromProp)
+                : Object.assign(updateTriggers[dimensionKey], {[prop]: fromProp});
+          } else {
+            updateTriggers[dimensionKey][prop] = this.props[prop];
+          }
         });
       }
     }
