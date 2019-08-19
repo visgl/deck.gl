@@ -121,10 +121,17 @@ test.only('CPUGridLayer#updates', t => {
       );
 
       // color props changed
-      t.ok(
-        layer.state.getColorValue !== oldState.getColorValue,
-        `update props.${accessor} w/o trigger change should reset state.getColorValue`
-      );
+      if (accessor === 'getColorValue') {
+        t.ok(
+          layer.state.getColorValue !== oldState.getColorValue,
+          `update props.${accessor} w/o trigger change should reset state.getColorValue`
+        );
+      } else {
+        t.ok(
+          layer.state.getColorValue === oldState.getColorValue,
+          `update props.${accessor} w/o trigger change should not reset state.getColorValue`
+        );
+      }
 
       // elevation props didn't change
       t.ok(
