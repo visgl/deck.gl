@@ -255,9 +255,12 @@ export default class CPUGridLayer extends CompositeLayer {
 
       for (const step of dimensionUpdaters[dimensionKey]) {
         step.triggers.forEach(prop => {
-          if (step.updateTriggers && step.updateTriggers[prop] && this.props.updateTriggers[prop]) {
+          if (step.updateTriggers && step.updateTriggers[prop]) {
             // check based on props.updateTriggers
-            const fromProp = this.props.updateTriggers[prop];
+            const fromProp = this.props.updateTriggers
+              ? this.props.updateTriggers[prop]
+              : undefined;
+
             updateTriggers[dimensionKey] =
               typeof fromProp === 'object' && !Array.isArray(fromProp)
                 ? Object.assign(updateTriggers[dimensionKey], fromProp)

@@ -27,16 +27,12 @@ import {testLayer, testInitializeLayer, generateLayerTests} from '@deck.gl/test-
 import {ColumnLayer} from '@deck.gl/layers';
 import {HexagonLayer} from '@deck.gl/aggregation-layers';
 
-const getColorValue = points => points.length;
-const getElevationValue = points => points.length;
-const getPosition = d => d.COORDINATES;
-
 test('HexagonLayer', t => {
   const testCases = generateLayerTests({
     Layer: HexagonLayer,
     sampleProps: {
       data: data.points.slice(0, 3),
-      getPosition
+      getPosition: d => d.COORDINATES
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -56,94 +52,136 @@ test('HexagonLayer', t => {
 // update props
 // asserts on the resulting layer
 test('HexagonLayer#updateLayer', t => {
-  function onAfterUpdateElevation({layer, oldState}) {
-    t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
+  // state properties derived by layer.prop update
+  const testItems = {
+    color: {
+      bin: 'sortedColorBins',
+      domain: 'colorValueDomain',
+      scale: 'colorScaleFunc',
+      getValue: 'getColorValue'
+    },
+    elevation: {
+      bin: 'sortedElevationBins',
+      domain: 'elevationValueDomain',
+      scale: 'elevationScaleFunc',
+      getValue: 'getElevationValue'
+    }
+  };
 
-    t.ok(
-      oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-      'should update sortedElevationBins'
-    );
-
-    t.ok(
-      oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-      'should re calculate elevationValueDomain'
-    );
-
-    t.ok(
-      oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-      'should update elevationScaleFunc'
-    );
-
-    t.ok(
-      oldState.sortedColorBins === layer.state.sortedColorBins,
-      'should not update sortedColorBins'
-    );
-
-    t.ok(
-      oldState.colorValueDomain === layer.state.colorValueDomain,
-      'should not re calculate colorValueDomain'
-    );
-
-    t.ok(
-      oldState.colorScaleFunc === layer.state.colorScaleFunc,
-      'should not update colorScaleFunc'
-    );
-
-    // color porps didn't change
-    t.ok(
-      layer.state.getColorValue === oldState.getColorValue,
-      'getColorValue should not get re-calculated'
-    );
-
-    // elevation porps changed
-    t.ok(
-      layer.state.getElevationValue !== oldState.getElevationValue,
-      'getElevationValue should get re-calculated'
-    );
-  }
-  function onAfterUpdateColor({layer, oldState}) {
-    t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-    t.ok(
-      oldState.sortedColorBins !== layer.state.sortedColorBins,
-      'should not update sortedColorBins'
-    );
-
-    t.ok(
-      oldState.sortedElevationBins === layer.state.sortedElevationBins,
-      'should update sortedElevationBins'
-    );
-
-    t.ok(
-      oldState.colorValueDomain !== layer.state.colorValueDomain,
-      'should re calculate colorValueDomain'
-    );
-
-    t.ok(
-      oldState.elevationValueDomain === layer.state.elevationValueDomain,
-      'should not update elevationValueDomain'
-    );
-
-    t.ok(oldState.colorScaleFunc !== layer.state.colorScaleFunc, 'should update colorScaleFunc');
-
-    t.ok(
-      oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-      'should not update colorScaleFunc'
-    );
-
-    // color porps changed
-    t.ok(
-      layer.state.getColorValue !== oldState.getColorValue,
-      'getColorValue should get re-calculated'
-    );
-
-    // elevation porps didn't change
-    t.ok(
-      layer.state.getElevationValue === oldState.getElevationValue,
-      'getElevationValue should not get re-calculated'
-    );
+  // assert on state property updates after layer.prop change
+  function assertStateUpdate(shouldUpdate, prop) {
+    return function onAfterUpdate({layer, oldState}) {
+      for (const key in shouldUpdate) {
+        t.ok(
+          shouldUpdate[key]
+            ? oldState[key] !== layer.state[key]
+            : oldState[key] === layer.state[key],
+          `update props.${prop} should ${!shouldUpdate[key] ? 'not' : ''} update ${key}`
+        );
+      }
+    };
   }
 
+  function getChecksForRadiusChange() {
+    const shouldUpdate = {
+      hexagons: true,
+      [testItems.color.bin]: true,
+      [testItems.elevation.bin]: true,
+      [testItems.color.domain]: true,
+      [testItems.elevation.domain]: true,
+      [testItems.color.scale]: true,
+      [testItems.elevation.scale]: true,
+      [testItems.color.getValue]: false,
+      [testItems.elevation.getValue]: false
+    };
+    return assertStateUpdate(shouldUpdate, 'radius');
+  }
+  function getChecksForPositionChange(triggerChange) {
+    const shouldUpdate = {
+      hexagons: triggerChange,
+      [testItems.color.bin]: triggerChange,
+      [testItems.elevation.bin]: triggerChange,
+      [testItems.color.domain]: triggerChange,
+      [testItems.elevation.domain]: triggerChange,
+      [testItems.color.scale]: triggerChange,
+      [testItems.elevation.scale]: triggerChange,
+      [testItems.color.getValue]: false,
+      [testItems.elevation.getValue]: false
+    };
+    return assertStateUpdate(
+      shouldUpdate,
+      `getPosition ${triggerChange ? 'w/' : 'w/o'} trigger change`
+    );
+  }
+  function getCheckForNoBinChange(accessor, dimension) {
+    const update = testItems[dimension];
+    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+    const shouldUpdate = {
+      hexagons: false,
+      [update.bin]: false,
+      [noUpdate.bin]: false,
+      [update.domain]: false,
+      [noUpdate.domain]: false,
+      [update.scale]: false,
+      [noUpdate.scale]: false,
+      [update.getValue]:
+        accessor === 'getColorValue w/o trigger' || accessor === 'getElevationValue w/o trigger',
+      [noUpdate.getValue]: false
+    };
+    return assertStateUpdate(shouldUpdate, accessor);
+  }
+  function getCheckForTriggeredBinUpdate(accessor, dimension) {
+    const update = testItems[dimension];
+    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+    const shouldUpdate = {
+      hexagons: false,
+      [update.bin]: true,
+      [noUpdate.bin]: false,
+      [update.domain]: true,
+      [noUpdate.domain]: false,
+      [update.scale]: true,
+      [noUpdate.scale]: false,
+      [update.getValue]: true,
+      [noUpdate.getValue]: false
+    };
+    return assertStateUpdate(shouldUpdate, accessor);
+  }
+  function getChecksForPercentileUpdate(dimension, side) {
+    const update = testItems[dimension];
+    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+    const shouldUpdate = {
+      layerData: false,
+      [update.bin]: false,
+      [noUpdate.bin]: false,
+      [update.domain]: true,
+      [noUpdate.domain]: false,
+      [update.scale]: true,
+      [noUpdate.scale]: false,
+      [update.getValue]: false,
+      [noUpdate.getValue]: false
+    };
+    return assertStateUpdate(shouldUpdate, `${side}Percentile`);
+  }
+  function getChecksForDomainOrRangeUpdate(dimension, prop) {
+    const update = testItems[dimension];
+    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+    const shouldUpdate = {
+      layerData: false,
+      [update.bin]: false,
+      [noUpdate.bin]: false,
+      [update.domain]: false,
+      [noUpdate.domain]: false,
+      [update.scale]: true,
+      [noUpdate.scale]: false,
+      [update.getValue]: false,
+      [noUpdate.getValue]: false
+    };
+    return assertStateUpdate(shouldUpdate, `${dimension}${prop}`);
+  }
+
+  /*
+   * Test layer update with test cases
+   */
   testLayer({
     Layer: HexagonLayer,
     onError: t.notOk,
@@ -153,7 +191,7 @@ test('HexagonLayer#updateLayer', t => {
         props: {
           data: data.points,
           radius: 400,
-          getPosition
+          getPosition: d => d.COORDINATES
         },
         onAfterUpdate({layer}) {
           t.ok(
@@ -167,236 +205,147 @@ test('HexagonLayer#updateLayer', t => {
         }
       },
       {
-        title: 'Update radius',
         updateProps: {
           radius: 800
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons !== layer.state.hexagons, 'should update layer data');
-
-          t.ok(
-            oldState.sortedColorBins !== layer.state.sortedColorBins,
-            'should update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should update valueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedElevationBins !== layer.state.sortedElevationBins,
-            'should update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-            'should update elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update elevationScaleFunc'
-          );
-        }
+        onAfterUpdate: getChecksForRadiusChange()
       },
       {
-        title: 'Update colorAggregation',
         updateProps: {
-          colorAggregation: 'MAX'
+          getPosition: d => d.COORDINATES
         },
-        onAfterUpdate: onAfterUpdateColor
+        onAfterUpdate: getChecksForPositionChange(false)
       },
       {
-        title: 'Update getColorValue accessor',
         updateProps: {
-          getColorValue,
+          getPosition: d => d.COORDINATES,
+          updateTriggers: {
+            getPosition: 1
+          }
+        },
+        onAfterUpdate: getChecksForPositionChange(true)
+      },
+      {
+        updateProps: {
+          getColorWeight: x => 2
+        },
+        onAfterUpdate: getCheckForNoBinChange('getColorWeight w/o trigger', 'color')
+      },
+      {
+        updateProps: {
+          getColorWeight: x => 2,
+          updateTriggers: {
+            getColorWeight: 1
+          }
+        },
+        onAfterUpdate: getCheckForTriggeredBinUpdate('getColorWeight w/ trigger', 'color')
+      },
+      {
+        updateProps: {
+          getColorValue: x => 2
+        },
+        onAfterUpdate: getCheckForNoBinChange('getColorValue w/o trigger', 'color')
+      },
+      {
+        updateProps: {
+          getColorValue: x => 2,
           updateTriggers: {
             getColorValue: 1
           }
         },
-        onAfterUpdate: onAfterUpdateColor
+        onAfterUpdate: getCheckForTriggeredBinUpdate('getColorValue w/ trigger', 'color')
       },
       {
-        title: 'Update upperPercentile',
+        updateProps: {
+          colorAggregation: 'Mean',
+          getColorValue: null
+        },
+        onAfterUpdate: getCheckForTriggeredBinUpdate('colorAggregation w/o getColorValue', 'color')
+      },
+      {
         updateProps: {
           upperPercentile: 90
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain !== layer.state.colorValueDomain,
-            'should re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update elevationScaleFunc'
-          );
-        }
+        onAfterUpdate: getChecksForPercentileUpdate('color', 'upper')
       },
       {
-        title: 'Update colorDomain',
+        updateProps: {
+          lowerPercentile: 90
+        },
+        onAfterUpdate: getChecksForPercentileUpdate('color', 'lower')
+      },
+      {
         updateProps: {
           colorDomain: [0, 10]
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc !== layer.state.colorScaleFunc,
-            'should update colorScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not update elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc === layer.state.elevationScaleFunc,
-            'should not update elevationScaleFunc'
-          );
-        }
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('color', 'Domain')
       },
       {
-        title: 'Update getElevationWeight accessor',
+        updateProps: {
+          colorRange: [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
+        },
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('color', 'Range')
+      },
+      {
+        updateProps: {
+          getElevationWeight: x => 2
+        },
+        onAfterUpdate: getCheckForNoBinChange('getElevationWeight', 'elevation')
+      },
+      {
         updateProps: {
           getElevationWeight: x => 2,
           updateTriggers: {
             getElevationWeight: 1
           }
         },
-        onAfterUpdate: onAfterUpdateElevation
+        onAfterUpdate: getCheckForTriggeredBinUpdate('getElevationWeight', 'elevation')
       },
       {
-        title: 'Update getElevationWeight accessor',
         updateProps: {
-          getElevationValue,
+          getElevationValue: x => 2
+        },
+        onAfterUpdate: getCheckForNoBinChange('getElevationValue w/o trigger', 'elevation')
+      },
+      {
+        updateProps: {
+          getElevationValue: x => 2,
           updateTriggers: {
             getElevationValue: 1
           }
         },
-        onAfterUpdate: onAfterUpdateElevation
+        onAfterUpdate: getCheckForTriggeredBinUpdate('getElevationValue', 'elevation')
       },
       {
-        title: 'Update elevation lower percentile',
         updateProps: {
-          elevationLowerPercentile: 1
+          elevationAggregation: 'Mean',
+          getElevationValue: null
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain !== layer.state.elevationValueDomain,
-            'should re calculate elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update elevationScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc === layer.state.colorScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: getCheckForTriggeredBinUpdate('elevationAggregation', 'elevation')
       },
       {
-        title: 'Update elevationRange accessor',
+        updateProps: {
+          elevationUpperPercentile: 80
+        },
+        onAfterUpdate: getChecksForPercentileUpdate('elevation', 'elevationUpper')
+      },
+      {
+        updateProps: {
+          elevationLowerPercentile: 10
+        },
+        onAfterUpdate: getChecksForPercentileUpdate('elevation', 'elevationLower')
+      },
+      {
         updateProps: {
           elevationRange: [1, 10]
         },
-        onAfterUpdate({layer, oldState}) {
-          t.ok(oldState.hexagons === layer.state.hexagons, 'should not update layer data');
-
-          t.ok(
-            oldState.sortedElevationBins === layer.state.sortedElevationBins,
-            'should not update sortedElevationBins'
-          );
-
-          t.ok(
-            oldState.elevationValueDomain === layer.state.elevationValueDomain,
-            'should not re calculate elevationValueDomain'
-          );
-
-          t.ok(
-            oldState.elevationScaleFunc !== layer.state.elevationScaleFunc,
-            'should update elevationScaleFunc'
-          );
-
-          t.ok(
-            oldState.sortedColorBins === layer.state.sortedColorBins,
-            'should not update sortedColorBins'
-          );
-
-          t.ok(
-            oldState.colorValueDomain === layer.state.colorValueDomain,
-            'should not re calculate colorValueDomain'
-          );
-
-          t.ok(
-            oldState.colorScaleFunc === layer.state.colorScaleFunc,
-            'should not update colorScaleFunc'
-          );
-        }
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('elevation', 'Range')
+      },
+      {
+        updateProps: {
+          elevationDomain: [0, 10]
+        },
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('elevation', 'Domain')
       }
     ]
   });
@@ -406,7 +355,20 @@ test('HexagonLayer#updateLayer', t => {
 
 test('HexagonLayer#updateTriggers', t => {
   const SPIES = ['_onGetSublayerColor', '_onGetSublayerElevation'];
-
+  function getSublayerAttributeUpdateCheck(prop, result = {}) {
+    return function onAfterUpdate({subLayer, spies}) {
+      t.ok(
+        result.color ? spies._onGetSublayerColor.called : !spies._onGetSublayerColor.called,
+        `update ${prop} should ${result.color ? '' : 'not'} call _onGetSublayerColor`
+      );
+      t.ok(
+        result.elevation
+          ? spies._onGetSublayerElevation.called
+          : !spies._onGetSublayerElevation.called,
+        `update ${prop} should ${result.elevation ? '' : 'not'} call _onGetSublayerElevation`
+      );
+    };
+  }
   testLayer({
     Layer: HexagonLayer,
     onError: t.notOk,
@@ -417,123 +379,246 @@ test('HexagonLayer#updateTriggers', t => {
         props: {
           data: data.points,
           radius: 400,
-          getPosition
+          getPosition: d => d.COORDINATES
         }
       },
       {
-        title: 'Update radius prop',
         updateProps: {
           radius: 800
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(spies._onGetSublayerColor.called, 'update radius should call _onGetSublayerColor');
-          t.ok(
-            spies._onGetSublayerElevation.called,
-            'update radius should call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('radius', {color: true, elevation: true})
       },
       {
-        title: 'Update opacity prop',
         updateProps: {
           opacity: 0.1
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(
-            !spies._onGetSublayerColor.called,
-            'update opacity should not call _onGetSublayerColor'
-          );
-          t.ok(
-            !spies._onGetSublayerElevation.called,
-            'update opacity  should not call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('opacity', {color: false, elevation: false})
       },
       {
-        title: 'Update getColorValue prop',
         updateProps: {
-          getColorValue,
+          coverage: 0.1
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('coverage', {color: false, elevation: false})
+      },
+      {
+        updateProps: {
+          extruded: true
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('extruded', {color: false, elevation: false})
+      },
+      {
+        updateProps: {
+          colorAggregation: 'Mean'
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('colorAggregation', {
+          color: true,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorWeight: x => 2
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorWeight w/o triggers', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorWeight: x => 2,
+          updateTriggers: {
+            getColorWeight: 1
+          }
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorWeight w triggers', {
+          color: true,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorWeight: x => 3
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorWeight w/o triggers', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorValue: x => 2
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue null to assigned ', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorValue: x => 3
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue w/o triggers', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorValue: x => 4,
           updateTriggers: {
             getColorValue: 1
           }
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(
-            spies._onGetSublayerColor.called,
-            'update getColorValue should call _onGetSublayerColor'
-          );
-          t.ok(
-            !spies._onGetSublayerElevation.called,
-            'update getColorValue should not call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue w triggers', {
+          color: true,
+          elevation: false
+        })
       },
       {
-        title: 'Update upperPercentile prop',
         updateProps: {
           upperPercentile: 90
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(
-            spies._onGetSublayerColor.called,
-            'update upperPercentile should call _onGetSublayerColor'
-          );
-          t.ok(
-            !spies._onGetSublayerElevation.called,
-            'update upperPercentile should not call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('upperPercentile', {
+          color: true,
+          elevation: false
+        })
       },
       {
-        title: 'Update getElevationValue prop',
         updateProps: {
-          getElevationValue,
+          lowerPercentile: 10
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('lowerPercentile', {
+          color: true,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          colorDomain: [10, 20]
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('colorDomain', {
+          color: true,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          colorRange: [[1, 2, 3], [2, 3, 4], [3, 4, 5]]
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('colorRange', {
+          color: true,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          elevationAggregation: 'Mean'
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('elevationAggregation', {
+          color: false,
+          elevation: true
+        })
+      },
+      {
+        updateProps: {
+          getElevationWeight: x => 2
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationWeight w/o triggers', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getElevationWeight: x => 2,
           updateTriggers: {
-            getElevationValue: 1
+            getElevationWeight: 1,
+            // persist color updateTriggers to avoid triggering color update
+            getColorValue: 1
           }
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(
-            !spies._onGetSublayerColor.called,
-            'update getElevationValue should not call _onGetSublayerColor'
-          );
-          t.ok(
-            spies._onGetSublayerElevation.called,
-            'update getElevationValue should call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationWeight w triggers', {
+          color: false,
+          elevation: true
+        })
       },
       {
-        title: 'Update elevationUpperPercentile prop',
         updateProps: {
-          elevationUpperPercentile: 99
+          getElevationWeight: x => 3
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(
-            !spies._onGetSublayerColor.called,
-            'update elevationUpperPercentile should not call _onGetSublayerColor'
-          );
-          t.ok(
-            spies._onGetSublayerElevation.called,
-            'update elevationUpperPercentile should call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationWeight w/o triggers', {
+          color: false,
+          elevation: false
+        })
       },
       {
-        title: 'Update elevationRange prop',
         updateProps: {
-          elevationRange: [0, 100]
+          getElevationValue: x => 2
         },
-        onAfterUpdate({subLayer, spies}) {
-          t.ok(
-            !spies._onGetSublayerColor.called,
-            'update elevationRange should not call _onGetSublayerColor'
-          );
-          t.ok(
-            spies._onGetSublayerElevation.called,
-            'update elevationRange should call _onGetSublayerElevation'
-          );
-        }
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationValue null to assigned', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getElevationValue: x => 3
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationValue w/o triggers', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getElevationValue: x => 4,
+          updateTriggers: {
+            getElevationValue: 1,
+            // persist getColorValue update triggers
+            getColorValue: 1
+          }
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationValue w triggers', {
+          color: false,
+          elevation: true
+        })
+      },
+      {
+        updateProps: {
+          elevationUpperPercentile: 90
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('elevationUpperPercentile', {
+          color: false,
+          elevation: true
+        })
+      },
+      {
+        updateProps: {
+          elevationLowerPercentile: 10
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('elevationLowerPercentile', {
+          color: false,
+          elevation: true
+        })
+      },
+      {
+        updateProps: {
+          elevationDomain: [10, 20]
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('elevationDomain', {
+          color: false,
+          elevation: true
+        })
+      },
+      {
+        updateProps: {
+          elevationRange: [2, 20]
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('elevationRange', {
+          color: false,
+          elevation: true
+        })
       }
     ]
   });
@@ -559,7 +644,7 @@ test('HexagonLayer#constructor', t => {
   layer = new HexagonLayer({
     data: data.points,
     radius: 500,
-    getPosition,
+    getPosition: d => d.COORDINATES,
     pickable: true
   });
   t.ok(layer instanceof HexagonLayer, 'HexagonLayer created');
@@ -586,7 +671,7 @@ test('HexagonLayer#renderSubLayer', t => {
   const layer = new HexagonLayer({
     data: data.points,
     radius: 500,
-    getPosition,
+    getPosition: d => d.COORDINATES,
     pickable: true
   });
 

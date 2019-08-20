@@ -64,9 +64,6 @@ const defaultProps = {
   material: defaultMaterial
 };
 
-const COLOR_PROPS = ['getColorValue', 'colorAggregation', 'getColorWeight'];
-const ELEVATION_PROPS = ['getElevationValue', 'elevationAggregation', 'getElevationWeight'];
-
 export default class HexagonLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -82,43 +79,42 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   updateState({oldProps, props, changeFlags}) {
-    this.updateGetValueFuncs(oldProps, props);
-    const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags);
+    this.updateGetValueFuncs(oldProps, props, changeFlags);
+    const reprojectNeeded = this.needsReProjectPoints(oldProps, props, changeFlags);
 
-    if (changeFlags.dataChanged || this.needsReProjectPoints(oldProps, props)) {
+    if (changeFlags.dataChanged || reprojectNeeded) {
       // project data into hexagons, and get sortedColorBins
       this.getHexagons();
-    } else if (dimensionChanges) {
+    } else {
+      const dimensionChanges = this.getDimensionChanges(oldProps, props, changeFlags) || [];
       dimensionChanges.forEach(f => typeof f === 'function' && f.apply(this));
     }
   }
 
-  colorElevationPropsChanged(oldProps, props) {
-    let colorChanged = false;
-    let elevationChanged = false;
-    for (const p of COLOR_PROPS) {
-      if (oldProps[p] !== props[p]) {
-        colorChanged = true;
-      }
-    }
-    for (const p of ELEVATION_PROPS) {
-      if (oldProps[p] !== props[p]) {
-        elevationChanged = true;
-      }
-    }
-    return {colorChanged, elevationChanged};
-  }
-
-  updateGetValueFuncs(oldProps, props) {
+  updateGetValueFuncs(oldProps, props, changeFlags) {
+    const {getFillColor, getElevation} = this.getDimensionUpdaters();
     let {getColorValue, getElevationValue} = props;
     const {colorAggregation, getColorWeight, elevationAggregation, getElevationWeight} = this.props;
-    const {colorChanged, elevationChanged} = this.colorElevationPropsChanged(oldProps, props);
 
-    if (colorChanged && getColorValue === null) {
+    const getColorValueChanged = this.needUpdateDimensionStep(
+      getFillColor[0],
+      oldProps,
+      props,
+      changeFlags
+    );
+
+    const getElevationValueChanged = this.needUpdateDimensionStep(
+      getElevation[0],
+      oldProps,
+      props,
+      changeFlags
+    );
+
+    if (getColorValueChanged && getColorValue === null) {
       // If `getColorValue` is not provided, build it.
       getColorValue = getValueFunc(colorAggregation, getColorWeight);
     }
-    if (elevationChanged && getElevationValue === null) {
+    if (getElevationValueChanged && getElevationValue === null) {
       // If `getElevationValue` is not provided, build it.
       getElevationValue = getValueFunc(elevationAggregation, getElevationWeight);
     }
@@ -130,9 +126,12 @@ export default class HexagonLayer extends CompositeLayer {
     }
   }
 
-  needsReProjectPoints(oldProps, props) {
+  needsReProjectPoints(oldProps, props, changeFlags) {
     return (
-      oldProps.radius !== props.radius || oldProps.hexagonAggregator !== props.hexagonAggregator
+      oldProps.radius !== props.radius ||
+      oldProps.hexagonAggregator !== props.hexagonAggregator ||
+      (changeFlags.updateTriggersChanged &&
+        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPosition))
     );
   }
 
@@ -165,7 +164,7 @@ export default class HexagonLayer extends CompositeLayer {
           id: 'value',
           triggers: ['getElevationValue', 'getElevationWeight', 'elevationAggregation'],
           updater: this.getSortedElevationBins,
-          updateTriggers: {getColorValue: true, getColorWeight: true}
+          updateTriggers: {getElevationValue: true, getElevationWeight: true}
         },
         {
           id: 'domain',
@@ -181,6 +180,23 @@ export default class HexagonLayer extends CompositeLayer {
     };
   }
 
+  needUpdateDimensionStep(dimensionStep, oldProps, props, changeFlags) {
+    // whether need to update current dimension step
+    // dimension step is the value, domain, scaleFunction of each dimension
+    return dimensionStep.triggers.some(t => {
+      if (dimensionStep.updateTriggers && dimensionStep.updateTriggers[t]) {
+        // check based on updateTriggers change first
+
+        return (
+          changeFlags.updateTriggersChanged &&
+          (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged[t])
+        );
+      }
+      // fallback to direct comparison
+      return oldProps[t] !== props[t];
+    });
+  }
+
   getDimensionChanges(oldProps, props, changeFlags) {
     const {dimensionUpdaters} = this.state;
     const updaters = [];
@@ -188,15 +204,8 @@ export default class HexagonLayer extends CompositeLayer {
     // get dimension to be updated
     for (const dimensionKey in dimensionUpdaters) {
       // return the first triggered updater for each dimension
-      const needUpdate = dimensionUpdaters[dimensionKey].find(item =>
-        item.triggers.some(t => {
-          if (item.updateTriggers && item.updateTriggers[t]) {
-            // check based on updateTriggers change first
-            return changeFlags.updateTriggersChanged && changeFlags.updateTriggersChanged[t];
-          }
-          // fallback to direct comparison
-          return oldProps[t] !== props[t];
-        })
+      const needUpdate = dimensionUpdaters[dimensionKey].find(step =>
+        this.needUpdateDimensionStep(step, oldProps, props, changeFlags)
       );
 
       if (needUpdate) {
@@ -257,9 +266,13 @@ export default class HexagonLayer extends CompositeLayer {
 
       for (const step of dimensionUpdaters[dimensionKey]) {
         step.triggers.forEach(prop => {
-          if (step.updateTriggers && step.updateTriggers[prop] && this.props.updateTriggers[prop]) {
+          if (step.updateTriggers && step.updateTriggers[prop]) {
             // check based on props.updateTriggers
-            const fromProp = this.props.updateTriggers[prop];
+            const fromProp = this.props.updateTriggers
+              ? this.props.updateTriggers[prop]
+              : undefined;
+
+            // spread updateTriggers of dimension triggers into a single object
             updateTriggers[dimensionKey] =
               typeof fromProp === 'object' && !Array.isArray(fromProp)
                 ? Object.assign(updateTriggers[dimensionKey], fromProp)
@@ -270,7 +283,6 @@ export default class HexagonLayer extends CompositeLayer {
         });
       }
     }
-
     return updateTriggers;
   }
 
