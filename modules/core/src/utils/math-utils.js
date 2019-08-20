@@ -138,12 +138,15 @@ export function toDoublePrecisionArray(typedArray, {size = 1, startIndex = 0, en
     size: size * 2
   });
 
-  for (let sourceIndex = startIndex, targetIndex = 0; sourceIndex < endIndex; targetIndex += size) {
+  let sourceIndex = startIndex;
+  let targetIndex = 0;
+  while (sourceIndex < endIndex) {
     for (let j = 0; j < size; j++) {
       const value = typedArray[sourceIndex++];
-      scratchArray[targetIndex + size] = fp64LowPart(value);
-      scratchArray[targetIndex++] = value;
+      scratchArray[targetIndex + j] = value;
+      scratchArray[targetIndex + j + size] = fp64LowPart(value);
     }
+    targetIndex += size * 2;
   }
 
   return scratchArray.subarray(0, count * size * 2);
