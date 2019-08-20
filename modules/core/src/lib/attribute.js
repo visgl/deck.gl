@@ -21,7 +21,6 @@ const DEFAULT_STATE = {
 
 function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
   const doubleShaderAttributeDefs = {};
-  shaderAttributeDefs = shaderAttributeDefs || {[attribute.id]: {}};
   for (const shaderAttributeName in shaderAttributeDefs) {
     const def = shaderAttributeDefs[shaderAttributeName];
     const offset = 'offset' in def ? def.offset : attribute.offset;
@@ -69,10 +68,13 @@ export default class Attribute extends BaseAttribute {
     this.hasShaderAttributes = false;
     this.doublePrecision = doublePrecision;
 
-    if (opts.shaderAttributes || doublePrecision) {
-      const shaderAttributes = doublePrecision
-        ? addDoublePrecisionAttributes(this, opts.shaderAttributes)
-        : opts.shaderAttributes;
+    let shaderAttributes = opts.shaderAttributes || (doublePrecision && {[this.id]: {}});
+
+    if (shaderAttributes) {
+      const shaderAttributeNames = Object.keys(shaderAttributes);
+      shaderAttributes = doublePrecision
+        ? addDoublePrecisionAttributes(this, shaderAttributes)
+        : shaderAttributes;
       for (const shaderAttributeName in shaderAttributes) {
         const shaderAttribute = shaderAttributes[shaderAttributeName];
 
@@ -96,7 +98,7 @@ export default class Attribute extends BaseAttribute {
           )
         );
 
-        this.hasShaderAttributes = true;
+        this.hasShaderAttributes = shaderAttributeNames;
       }
     }
 
@@ -154,17 +156,14 @@ export default class Attribute extends BaseAttribute {
     const shaderAttributes = {};
     if (this.doublePrecision) {
       const isBuffer64Bit = this.value instanceof Float64Array;
-      for (const shaderAttributeName in this.shaderAttributes) {
-        if (shaderAttributeName.endsWith('64xyLow')) {
-          const highPartAttributeName = shaderAttributeName.replace('64xyLow', '');
-
-          shaderAttributes[highPartAttributeName] = this.shaderAttributes[
-            isBuffer64Bit ? `${highPartAttributeName}64` : `${highPartAttributeName}32`
-          ];
-          shaderAttributes[shaderAttributeName] = isBuffer64Bit
-            ? this.shaderAttributes[shaderAttributeName]
-            : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
-        }
+      for (const shaderAttributeName of this.hasShaderAttributes) {
+        shaderAttributes[shaderAttributeName] = this.shaderAttributes[
+          isBuffer64Bit ? `${shaderAttributeName}64` : `${shaderAttributeName}32`
+        ];
+        const shaderAttributeLowPartName = `${shaderAttributeName}64xyLow`;
+        shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
+          ? this.shaderAttributes[shaderAttributeLowPartName]
+          : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
       }
     } else if (this.hasShaderAttributes) {
       Object.assign(shaderAttributes, this.shaderAttributes);
