@@ -508,6 +508,16 @@ test('Attribute#setExternalBuffer', t => {
     size: 3,
     update: () => {}
   });
+  const attribute2 = new Attribute(gl, {
+    id: 'test-attribute-with-shader-attributes',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    normalized: true,
+    update: () => {},
+    shaderAttributes: {
+      shaderAttribute: {offset: 4}
+    }
+  });
   const buffer = new Buffer(gl, 12);
   const value1 = new Float32Array(4);
   const value2 = new Uint8Array(4);
@@ -534,7 +544,14 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.value, value1, 'external value is set');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
-  t.is(attribute.value.constructor.name, 'Float32Array', 'external value is cast to correct type');
+  t.is(attribute.buffer.debugData.constructor.name, 'Uint8Array', 'external value is set');
+
+  t.ok(attribute2.setExternalBuffer(value1), 'should set external buffer to typed array');
+  t.is(
+    attribute2.buffer.debugData.constructor.name,
+    'Uint8ClampedArray',
+    'external value is cast to correct type'
+  );
 
   spy.reset();
   t.ok(
@@ -557,6 +574,7 @@ test('Attribute#setExternalBuffer', t => {
 
   buffer.delete();
   attribute.delete();
+  attribute2.delete();
 
   t.end();
 });
