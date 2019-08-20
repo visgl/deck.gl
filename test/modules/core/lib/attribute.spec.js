@@ -508,6 +508,16 @@ test('Attribute#setExternalBuffer', t => {
     size: 3,
     update: () => {}
   });
+  const attribute2 = new Attribute(gl, {
+    id: 'test-attribute-with-shader-attributes',
+    type: GL.UNSIGNED_BYTE,
+    size: 4,
+    normalized: true,
+    update: () => {},
+    shaderAttributes: {
+      shaderAttribute: {offset: 4}
+    }
+  });
   const buffer = new Buffer(gl, 12);
   const value1 = new Float32Array(4);
   const value2 = new Uint8Array(4);
@@ -532,9 +542,14 @@ test('Attribute#setExternalBuffer', t => {
 
   t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
   t.is(attribute.value, value1, 'external value is set');
+  t.is(attribute.type, GL.FLOAT, 'attribute type is set correctly');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
-  t.is(attribute.value.constructor.name, 'Float32Array', 'external value is cast to correct type');
+  t.is(attribute.buffer.debugData.constructor.name, 'Uint8Array', 'external value is set');
+  t.is(attribute.type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
+
+  t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
+  t.throws(() => attribute2.setExternalBuffer(value1), 'should throw on invalid buffer type');
 
   spy.reset();
   t.ok(
@@ -554,9 +569,11 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.offset, 4, 'attribute accessor is updated');
   t.is(attribute.stride, 8, 'attribute accessor is updated');
   t.is(attribute.value, value1, 'external value is set');
+  t.is(attribute.type, GL.FLOAT, 'attribute type is set correctly');
 
   buffer.delete();
   attribute.delete();
+  attribute2.delete();
 
   t.end();
 });

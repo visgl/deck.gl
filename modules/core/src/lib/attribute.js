@@ -36,6 +36,10 @@ export default class Attribute extends BaseAttribute {
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
+    // This is the attribute type defined by the layer
+    // If an external buffer is provided, this.type may be overwritten
+    // But we always want to use defaultType for allocation
+    this.defaultType = this.type || GL.FLOAT;
     this.shaderAttributes = {};
     this.hasShaderAttributes = false;
 
@@ -193,7 +197,7 @@ export default class Attribute extends BaseAttribute {
       assert(Number.isFinite(numInstances));
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
-      const ArrayType = glArrayFromType(this.type || GL.FLOAT);
+      const ArrayType = glArrayFromType(this.defaultType);
       const oldValue = state.allocatedValue;
       const shouldCopy = state.updateRanges !== range.FULL;
 
@@ -305,7 +309,6 @@ export default class Attribute extends BaseAttribute {
     state.needsRedraw = state.needsUpdate || hasChanged;
     this.clearNeedsUpdate();
     state.isExternalBuffer = true;
-    this._updateShaderAttributes();
     return true;
   }
 
@@ -337,23 +340,35 @@ export default class Attribute extends BaseAttribute {
       opts = Object.assign({constant: false}, buffer);
     }
 
-    if (opts.value) {
-      const ArrayType = glArrayFromType(this.type || GL.FLOAT);
-      if (!(opts.value instanceof ArrayType)) {
-        log.warn(`Attribute prop ${this.id} is casted to ${ArrayType.name}`)();
-        // Cast to proper type
-        opts.value = new ArrayType(opts.value);
-      }
-    }
+    this._checkExternalBuffer(opts);
 
     this.update(opts);
+
     state.needsRedraw = true;
 
-    this._updateShaderAttributes();
     return true;
   }
 
   // PRIVATE HELPER METHODS
+  _checkExternalBuffer(opts) {
+    const {value} = opts;
+    if (!opts.constant && value) {
+      const ArrayType = glArrayFromType(this.defaultType);
+      if (
+        this.hasShaderAttributes &&
+        value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
+        Object.values(this.shaderAttributes).some(attribute => attribute.offset || attribute.stride)
+      ) {
+        // Shader attributes have hard-coded offsets and strides
+        // TODO - switch to element offsets and element strides?
+        throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
+      }
+      if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
+        log.warn(`Attribute ${this.id} is normalized`)();
+      }
+    }
+  }
+
   _getVertexOffset(row, bufferLayout) {
     let offset = this.elementOffset;
     if (bufferLayout) {
