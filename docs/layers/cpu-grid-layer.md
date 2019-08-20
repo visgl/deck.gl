@@ -193,19 +193,14 @@ It takes an array of points inside each cell as arguments, returns a number. For
 You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
 By default `getColorValue` returns the length of the points array.
 
-Note: grid layer compares whether `getColorValue` has changed to recalculate the value for each bin that its color based on.
-You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
+`getColorValue` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental)
 
 ```js
  class MyGridLayer {
-    getColorValue (points) {
-        return points.length;
-    }
-
     renderLayers() {
       return new CPUGridLayer({
         id: 'grid-layer',
-        getColorValue: this.getColorValue // instead of getColorValue: (points) => { return points.length; }
+        getColorValue: points => points.length
         data,
         cellSize: 500
       });
@@ -220,6 +215,7 @@ You should pass in the function defined outside the render function so it doesn'
 
 `getColorWeight` is the accessor function to get the weight of a point used to calculate the color value for a cell.
 
+`getColorWeight` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
 
 ##### `colorAggregation` (String, optional)
 
@@ -233,28 +229,24 @@ Note: `getColorWeight` and `colorAggregation` together define how color value of
 
 * Using `getColorValue`
 ```js
-function getCount(points) {
-  return points.length;
-}
+
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getColorValue: getCount,
+  getColorValue: points => points.length,
   ...
 });
 ```
 
 * Using `getColorWeight` and `colorAggregation`
 ```js
-function getWeight(point) {
-  return 1;
-}
+
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getColorWeight: getWeight,
+  getColorWeight: point => 1,
   colorAggregation: 'SUM'
   ...
 });
@@ -278,14 +270,11 @@ const layer = new CPUGridLayer({
 
 * Using `getColorWeight` and `colorAggregation`
 ```js
-function getWeight(point) {
-  return point.SPACES;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getColorWeight: getWeight,
+  getColorWeight: point => point.SPACES,
   colorAggregation: 'SUM'
   ...
 });
@@ -293,6 +282,7 @@ const layer = new CPUGridLayer({
 
 If your use case requires aggregating using an operation that is not one of 'SUM', 'MEAN', 'MAX' and 'MIN', `getColorValue` should be used to define such custom aggregation function. In those cases GPU aggregation is not supported.
 
+`getColorValue` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
 
 ##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -302,16 +292,13 @@ Similar to `getColorValue`, `getElevationValue` is the accessor function to get 
 It takes an array of points inside each cell as arguments, returns a number.
 By default `getElevationValue` returns the length of the points array.
 
-Note: grid layer compares whether `getElevationValue` has changed to recalculate the value for each cell for its elevation.
-You should pass in the function defined outside the render function so it doesn't create a new function on every rendering pass.
-
 
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `point => 1`
 
 `getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
-
+`getElevationWeight` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
 
 ##### `elevationAggregation` (String, optional)
 
@@ -327,28 +314,22 @@ Note: `getElevationWeight` and `elevationAggregation` together define how elevat
 * Using `getElevationValue`
 
 ```js
-function getCount(points) {
-  return points.length;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getElevationValue: getCount,
+  getElevationValue: points => points.length
   ...
 });
 ```
 
 * Using `getElevationWeight` and `elevationAggregation`
 ```js
-function getWeight(point) {
-  return 1;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getElevationWeight: getWeight,
+  getElevationWeight: point => 1,
   elevationAggregation: 'SUM'
   ...
 });
@@ -372,14 +353,11 @@ const layer = new CPUGridLayer({
 
 * Using `getElevationWeight` and `elevationAggregation`
 ```js
-function getWeight(point) {
-  return point.SPACES;
-}
 ...
 const layer = new CPUGridLayer({
   id: 'my-grid-layer',
   ...
-  getElevationWeight: getWeight,
+  getElevationWeight: point => point.SPACES,
   elevationAggregation: 'MAX'
   ...
 });
