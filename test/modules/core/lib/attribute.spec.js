@@ -542,16 +542,14 @@ test('Attribute#setExternalBuffer', t => {
 
   t.ok(attribute.setExternalBuffer(value1), 'should set external buffer to typed array');
   t.is(attribute.value, value1, 'external value is set');
+  t.is(attribute.type, GL.FLOAT, 'attribute type is set correctly');
 
   t.ok(attribute.setExternalBuffer(value2), 'should set external buffer to typed array');
   t.is(attribute.buffer.debugData.constructor.name, 'Uint8Array', 'external value is set');
+  t.is(attribute.type, GL.UNSIGNED_BYTE, 'attribute type is set correctly');
 
-  t.ok(attribute2.setExternalBuffer(value1), 'should set external buffer to typed array');
-  t.is(
-    attribute2.buffer.debugData.constructor.name,
-    'Uint8ClampedArray',
-    'external value is cast to correct type'
-  );
+  t.ok(attribute2.setExternalBuffer(value2), 'external value is set');
+  t.throws(() => attribute2.setExternalBuffer(value1), 'should throw on invalid buffer type');
 
   spy.reset();
   t.ok(
@@ -571,6 +569,7 @@ test('Attribute#setExternalBuffer', t => {
   t.is(attribute.offset, 4, 'attribute accessor is updated');
   t.is(attribute.stride, 8, 'attribute accessor is updated');
   t.is(attribute.value, value1, 'external value is set');
+  t.is(attribute.type, GL.FLOAT, 'attribute type is set correctly');
 
   buffer.delete();
   attribute.delete();

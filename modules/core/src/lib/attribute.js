@@ -36,6 +36,9 @@ export default class Attribute extends BaseAttribute {
     let {defaultValue = [0, 0, 0, 0]} = opts;
     defaultValue = Array.isArray(defaultValue) ? defaultValue : [defaultValue];
 
+    // This is the attribute type defined by the layer
+    // If an external buffer is provided, this.type may be overwritten
+    // But we always want to use defaultType for allocation
     this.defaultType = this.type || GL.FLOAT;
     this.shaderAttributes = {};
     this.hasShaderAttributes = false;
@@ -348,19 +351,19 @@ export default class Attribute extends BaseAttribute {
 
   // PRIVATE HELPER METHODS
   _checkExternalBuffer(opts) {
-    if (!opts.constant && opts.value) {
+    const {value} = opts;
+    if (!opts.constant && value) {
       const ArrayType = glArrayFromType(this.defaultType);
       if (
-        opts.value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
-        this.hasShaderAttributes
+        this.hasShaderAttributes &&
+        value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
+        Object.values(this.shaderAttributes).some(attribute => attribute.offset || attribute.stride)
       ) {
         // Shader attributes have hard-coded offsets and strides
         // TODO - switch to element offsets and element strides?
-        log.warn(`Attribute ${this.id} is casted to ${ArrayType.name}`)();
-        // Cast to proper type
-        opts.value = new ArrayType(opts.value);
+        throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
       }
-      if (!(opts.value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
+      if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
         log.warn(`Attribute ${this.id} is normalized`)();
       }
     }
