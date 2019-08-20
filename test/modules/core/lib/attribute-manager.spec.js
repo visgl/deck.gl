@@ -176,7 +176,16 @@ test('AttributeManager.update - external buffers', t => {
     }
   });
 
-  t.is(attribute.buffer.accessor.type, gl.UNSIGNED_BYTE, 'colors casted to correct type');
+  t.is(attribute.type, gl.FLOAT, 'colors accessor is set to correct type');
+
+  attributeManager.update({
+    numInstances: 1,
+    buffers: {
+      positions: new Float32Array([0, 0]),
+      colors: new Uint32Array([0, 0, 0])
+    }
+  });
+  t.is(attribute.type, gl.UNSIGNED_INT, 'colors accessor is set to correct type');
 
   t.end();
 });
