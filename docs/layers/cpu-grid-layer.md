@@ -282,7 +282,6 @@ const layer = new CPUGridLayer({
 
 If your use case requires aggregating using an operation that is not one of 'SUM', 'MEAN', 'MAX' and 'MIN', `getColorValue` should be used to define such custom aggregation function. In those cases GPU aggregation is not supported.
 
-`getColorValue` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
 
 ##### `getElevationValue` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
@@ -292,6 +291,7 @@ Similar to `getColorValue`, `getElevationValue` is the accessor function to get 
 It takes an array of points inside each cell as arguments, returns a number.
 By default `getElevationValue` returns the length of the points array.
 
+`getElevationValue` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
 
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
