@@ -51,7 +51,7 @@ test('HexagonLayer', t => {
 // props to initialize layer with
 // update props
 // asserts on the resulting layer
-test('HexagonLayer#updateLayer', t => {
+test.only('HexagonLayer#updateLayer', t => {
   // state properties derived by layer.prop update
   const testItems = {
     color: {
@@ -203,6 +203,12 @@ test('HexagonLayer#updateLayer', t => {
             'GridLayer.state.getElevationValue calculated'
           );
         }
+      },
+      {
+        updateProps: {
+          hexagonAggregator: points => ({hexagons: []})
+        },
+        onAfterUpdate: getChecksForRadiusChange()
       },
       {
         updateProps: {
