@@ -27,7 +27,11 @@ function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
     const offset = 'offset' in def ? def.offset : attribute.offset;
     const stride = 'stride' in def ? def.stride : attribute.size * 4;
 
-    doubleShaderAttributeDefs[shaderAttributeName] = Object.assign({}, def, {
+    doubleShaderAttributeDefs[`${shaderAttributeName}32`] = Object.assign({}, def, {
+      offset,
+      stride
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64`] = Object.assign({}, def, {
       offset: offset * 2,
       stride: stride * 2
     });
@@ -73,25 +77,21 @@ export default class Attribute extends BaseAttribute {
         const shaderAttribute = shaderAttributes[shaderAttributeName];
 
         // Initialize the attribute descriptor, with WebGL and metadata fields
-        this.shaderAttributes[shaderAttributeName] = new Attribute(
+        this.shaderAttributes[shaderAttributeName] = new BaseAttribute(
           this.gl,
           Object.assign(
             {
+              size: this.size,
+              normalized: this.normalized,
+              integer: this.integer,
               offset: this.offset,
               stride: this.stride,
-              normalized: this.normalized
+              divisor: this.divisor
             },
             shaderAttribute,
             {
               id: shaderAttributeName,
-              // Luma fields
-              constant: shaderAttribute.constant || false,
-              isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
-              size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
-              value: shaderAttribute.value || null,
-              divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
-              buffer: this.getBuffer(),
-              noAlloc: true
+              buffer: this.getBuffer()
             }
           )
         );
@@ -152,7 +152,21 @@ export default class Attribute extends BaseAttribute {
 
   getShaderAttributes() {
     const shaderAttributes = {};
-    if (this.hasShaderAttributes) {
+    if (this.doublePrecision) {
+      const isBuffer64Bit = this.value instanceof Float64Array;
+      for (const shaderAttributeName in this.shaderAttributes) {
+        if (shaderAttributeName.endsWith('64xyLow')) {
+          const highPartAttributeName = shaderAttributeName.replace('64xyLow', '');
+
+          shaderAttributes[highPartAttributeName] = this.shaderAttributes[
+            isBuffer64Bit ? `${highPartAttributeName}64` : `${highPartAttributeName}32`
+          ];
+          shaderAttributes[shaderAttributeName] = isBuffer64Bit
+            ? this.shaderAttributes[shaderAttributeName]
+            : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
+        }
+      }
+    } else if (this.hasShaderAttributes) {
       Object.assign(shaderAttributes, this.shaderAttributes);
     } else {
       shaderAttributes[this.id] = this;
@@ -371,7 +385,7 @@ export default class Attribute extends BaseAttribute {
 
     if (this.doublePrecision && opts.value instanceof Float64Array) {
       opts.originalValue = opts.value;
-      opts.value = toDoublePrecisionArray(userValue, this);
+      opts.value = toDoublePrecisionArray(opts.value, this);
     }
 
     this.update(opts);
@@ -389,14 +403,21 @@ export default class Attribute extends BaseAttribute {
     const {value} = opts;
     if (!opts.constant && value) {
       const ArrayType = glArrayFromType(this.defaultType, this);
-      if (
-        !this.doublePrecision &&
-        this.hasShaderAttributes &&
-        value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
-        Object.values(this.shaderAttributes).some(attribute => attribute.offset || attribute.stride)
-      ) {
-        // Shader attributes have hard-coded offsets and strides
-        // TODO - switch to element offsets and element strides?
+
+      let illegalArrayType = false;
+      if (this.doublePrecision) {
+        // not 32bit or 64bit
+        illegalArrayType = value.BYTES_PER_ELEMENT < 4;
+      } else if (this.hasShaderAttributes) {
+        illegalArrayType =
+          value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
+          // Shader attributes have hard-coded offsets and strides
+          // TODO - switch to element offsets and element strides?
+          Object.values(this.shaderAttributes).some(
+            attribute => attribute.offset || attribute.stride
+          );
+      }
+      if (illegalArrayType) {
         throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
       }
       if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
