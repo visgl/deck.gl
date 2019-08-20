@@ -51,7 +51,7 @@ test('HexagonLayer', t => {
 // props to initialize layer with
 // update props
 // asserts on the resulting layer
-test.only('HexagonLayer#updateLayer', t => {
+test('HexagonLayer#updateLayer', t => {
   // state properties derived by layer.prop update
   const testItems = {
     color: {
