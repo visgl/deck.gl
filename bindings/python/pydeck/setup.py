@@ -62,7 +62,7 @@ class Yarn(Command):
 
     # Files to copy into the Python side of the widget
     targets = [
-        os.path.join(here, 'pydeck', 'nbextension', 'static', 'extension.js'),
+        # os.path.join(here, 'pydeck', 'nbextension', 'static', 'extension.js'),
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js'),
         os.path.join(here, 'pydeck', 'nbextension', 'static', 'index.js.map'),
     ]
@@ -93,9 +93,9 @@ class Yarn(Command):
         js_dist_dir = os.path.join(widget_dir, 'dist', 'pydeck_embeddable')
         # Uncompiled JS files for copying
         # See https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/%7B%7Bcookiecutter.python_package_name%7D%7D/nbextension/static/extension.js
-        js_src_dir = os.path.join(widget_dir, 'src')
+        # js_src_dir = os.path.join(widget_dir, 'src')
         js_files = [
-            os.path.join(js_src_dir, 'extension.js'),
+            # os.path.join(js_src_dir, 'extension.js'),
             os.path.join(js_dist_dir, 'index.js'),
             os.path.join(js_dist_dir, 'index.js.map')
         ]
