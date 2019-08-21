@@ -72,7 +72,7 @@ export default class ColumnLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         transition: true,
         accessor: 'getPosition'
       },
