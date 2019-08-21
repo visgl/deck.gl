@@ -1,5 +1,5 @@
 // Extensions to math.gl library. Intended to be folded back.
-
+import typedArrayManager from './typed-array-manager';
 import {Vector3} from 'math.gl';
 
 // Helper, avoids low-precision 32 bit matrices from gl-matrix mat4.create()
@@ -117,16 +117,37 @@ export function fp64LowPart(x) {
   return x - Math.fround(x);
 }
 
+let scratchArray;
+
 /**
- * Calculate the low part of a position
- * @param array {number} - the input position
- * @returns {array} - the lower 32 bit of the position
+ * Split a Float64Array into a double-length Float32Array
+ * @param typedArray {Float64Array}
+ * @param size {Number} - per attribute size
+ * @param [startIndex] {Number} - start index in the source array
+ * @param [endIndex] {Number} - end index in the source array
+ * @returns {Float32Array} - high part, low part for each attribute:
+    [1xHi, 1yHi, 1zHi, 1xLow, 1yLow, 1zLow, 2xHi, ...]
  */
-const target = new Array(2);
-export function positionFp64LowPart(array) {
-  target[0] = fp64LowPart(array[0]);
-  target[1] = fp64LowPart(array[1]);
-  // TODO - support 64-bit in z
-  // target[2] = fp64LowPart(array[2] || 0);
-  return target;
+export function toDoublePrecisionArray(typedArray, {size = 1, startIndex = 0, endIndex}) {
+  if (!Number.isFinite(endIndex)) {
+    endIndex = typedArray.length;
+  }
+  const count = (endIndex - startIndex) / size;
+  scratchArray = typedArrayManager.allocate(scratchArray, count, {
+    type: Float32Array,
+    size: size * 2
+  });
+
+  let sourceIndex = startIndex;
+  let targetIndex = 0;
+  while (sourceIndex < endIndex) {
+    for (let j = 0; j < size; j++) {
+      const value = typedArray[sourceIndex++];
+      scratchArray[targetIndex + j] = value;
+      scratchArray[targetIndex + j + size] = fp64LowPart(value);
+    }
+    targetIndex += size * 2;
+  }
+
+  return scratchArray.subarray(0, count * size * 2);
 }

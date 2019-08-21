@@ -190,35 +190,6 @@ test('AttributeManager.update - external buffers', t => {
   t.end();
 });
 
-test('AttributeManager.update - disabled attributes', t => {
-  const attributeManager = new AttributeManager(gl);
-  attributeManager.add({
-    positions: {size: 2, update, enable}
-  });
-
-  // First update, should autoalloc and update the value array
-  attributeManager.update({
-    numInstances: 0,
-    data: [{}, {}],
-    context: {enabled: true}
-  });
-
-  let attribute = attributeManager.getAttributes()['positions'];
-  t.deepEqual(attribute.value.slice(0, 4), [0, 1, 2, 3], 'attribute value is populated');
-
-  attributeManager.update({
-    numInstances: 0,
-    data: [{}, {}],
-    context: {enabled: false}
-  });
-
-  attribute = attributeManager.getAttributes()['positions'];
-  t.ok(attribute.constant, 'attribute is set to contant');
-  t.deepEqual(attribute.value, [0, 0], 'attribute is set to default value');
-
-  t.end();
-});
-
 test('AttributeManager.invalidate', t => {
   const attributeManager = new AttributeManager(gl);
   attributeManager.add({positions: {size: 2, update}});

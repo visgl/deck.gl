@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, positionFp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, PhongMaterial} from '@luma.gl/core';
 import ColumnGeometry from './column-geometry';
@@ -72,6 +72,7 @@ export default class ColumnLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        doublePrecision: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
       },
@@ -79,12 +80,6 @@ export default class ColumnLayer extends Layer {
         size: 1,
         transition: true,
         accessor: 'getElevation'
-      },
-      instancePositions64xyLow: {
-        size: 2,
-        accessor: 'getPosition',
-        enable: this.use64bitPositions,
-        transform: positionFp64LowPart
       },
       instanceFillColors: {
         size: this.props.colorFormat.length,

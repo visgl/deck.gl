@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, positionFp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {Model, Geometry, PhongMaterial} from '@luma.gl/core';
 
@@ -54,7 +54,6 @@ function normalizeData(data) {
 
   if (attributes.POSITION) {
     attributes.instancePositions = attributes.POSITION;
-    attributes.instancePositions64xyLow = {constant: true, value: new Float32Array(2)};
   }
   if (attributes.NORMAL) {
     attributes.instanceNormals = attributes.NORMAL;
@@ -74,14 +73,9 @@ export default class PointCloudLayer extends Layer {
     this.getAttributeManager().addInstanced({
       instancePositions: {
         size: 3,
+        doublePrecision: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
-      },
-      instancePositions64xyLow: {
-        size: 2,
-        accessor: 'getPosition',
-        enable: this.use64bitPositions,
-        transform: positionFp64LowPart
       },
       instanceNormals: {
         size: 3,

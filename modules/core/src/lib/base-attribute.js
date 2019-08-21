@@ -48,6 +48,7 @@ export default class BaseAttribute {
     if (buffer) {
       this.externalBuffer = buffer;
       this.constant = false;
+      this.value = null;
 
       this.type = opts.type || buffer.accessor.type;
       if (buffer.accessor.divisor !== undefined) {
