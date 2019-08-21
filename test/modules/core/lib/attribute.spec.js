@@ -577,3 +577,95 @@ test('Attribute#setExternalBuffer', t => {
 
   t.end();
 });
+
+test('Attribute#doublePrecision', t => {
+  const attribute = new Attribute(gl, {
+    id: 'positions',
+    type: GL.FLOAT,
+    doublePrecision: true,
+    size: 3,
+    accessor: 'getPosition'
+  });
+
+  const validateShaderAttributes = is64Bit => {
+    const shaderAttributes = attribute.getShaderAttributes();
+    t.deepEqual(
+      Object.keys(shaderAttributes),
+      ['positions', 'positions64xyLow'],
+      'shaderAttributes generated'
+    );
+
+    if (is64Bit) {
+      t.is(
+        shaderAttributes.positions.externalBuffer,
+        attribute.getBuffer(),
+        'shaderAttributes.positions buffer'
+      );
+      t.is(shaderAttributes.positions.offset, 0, 'shaderAttributes.positions offset');
+      t.is(shaderAttributes.positions.stride, 24, 'shaderAttributes.positions stride');
+      t.is(
+        shaderAttributes.positions64xyLow.externalBuffer,
+        attribute.getBuffer(),
+        'shaderAttributes.positions64xyLow buffer'
+      );
+      t.is(
+        shaderAttributes.positions64xyLow.offset,
+        12,
+        'shaderAttributes.positions64xyLow offset'
+      );
+      t.is(
+        shaderAttributes.positions64xyLow.stride,
+        24,
+        'shaderAttributes.positions64xyLow stride'
+      );
+    } else {
+      t.is(
+        shaderAttributes.positions.externalBuffer,
+        attribute.getBuffer(),
+        'shaderAttributes.positions buffer'
+      );
+      t.is(shaderAttributes.positions.offset, 0, 'shaderAttributes.positions offset');
+      t.is(shaderAttributes.positions.stride, 12, 'shaderAttributes.positions stride');
+      t.deepEqual(
+        shaderAttributes.positions64xyLow,
+        [0, 0, 0],
+        'shaderAttributes.positions64xyLow is constant'
+      );
+    }
+  };
+
+  attribute.allocate(2);
+  attribute.updateBuffer({
+    numInstances: 2,
+    data: [0, 1],
+    props: {
+      getPosition: d => [d, 1, 2]
+    }
+  });
+  t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
+  t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
+  validateShaderAttributes(true);
+
+  attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
+  t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
+  t.deepEqual(attribute.buffer.debugData.slice(0, 6), [3, 4, 5, 4, 4, 5], 'Attribute value is set');
+  validateShaderAttributes(false);
+
+  t.throws(
+    () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
+    'should throw on invalid buffer'
+  );
+
+  attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
+  t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
+  t.deepEqual(attribute.buffer.debugData.slice(0, 6), [3, 4, 5, 0, 0, 0], 'Attribute value is set');
+  validateShaderAttributes(true);
+
+  const buffer = new Buffer(gl, 12);
+  attribute.setExternalBuffer(buffer);
+  validateShaderAttributes(false);
+
+  buffer.delete();
+  attribute.delete();
+  t.end();
+});

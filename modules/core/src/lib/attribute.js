@@ -8,6 +8,7 @@ import * as range from '../utils/range';
 import log from '../utils/log';
 import BaseAttribute from './base-attribute';
 import typedArrayManager from '../utils/typed-array-manager';
+import {toDoublePrecisionArray} from '../utils/math-utils';
 
 const DEFAULT_STATE = {
   isExternalBuffer: false,
@@ -18,6 +19,29 @@ const DEFAULT_STATE = {
   updateRanges: range.FULL
 };
 
+function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
+  const doubleShaderAttributeDefs = {};
+  for (const shaderAttributeName in shaderAttributeDefs) {
+    const def = shaderAttributeDefs[shaderAttributeName];
+    const offset = 'offset' in def ? def.offset : attribute.offset;
+    const stride = 'stride' in def ? def.stride : attribute.size * 4;
+
+    doubleShaderAttributeDefs[`${shaderAttributeName}32`] = Object.assign({}, def, {
+      offset,
+      stride
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64`] = Object.assign({}, def, {
+      offset: offset * 2,
+      stride: stride * 2
+    });
+    doubleShaderAttributeDefs[`${shaderAttributeName}64xyLow`] = Object.assign({}, def, {
+      offset: offset * 2 + stride,
+      stride: stride * 2
+    });
+  }
+  return doubleShaderAttributeDefs;
+}
+
 export default class Attribute extends BaseAttribute {
   constructor(gl, opts = {}) {
     super(gl, opts);
@@ -25,10 +49,10 @@ export default class Attribute extends BaseAttribute {
     const {
       // deck.gl fields
       transition = false,
+      doublePrecision = false,
       noAlloc = false,
       update = null,
       accessor = null,
-      enable = () => true,
       transform = null,
       bufferLayout = null
     } = opts;
@@ -42,37 +66,39 @@ export default class Attribute extends BaseAttribute {
     this.defaultType = this.type || GL.FLOAT;
     this.shaderAttributes = {};
     this.hasShaderAttributes = false;
+    this.doublePrecision = doublePrecision;
 
-    if (opts.shaderAttributes) {
-      const shaderAttributes = opts.shaderAttributes;
+    let shaderAttributes = opts.shaderAttributes || (doublePrecision && {[this.id]: {}});
+
+    if (shaderAttributes) {
+      const shaderAttributeNames = Object.keys(shaderAttributes);
+      shaderAttributes = doublePrecision
+        ? addDoublePrecisionAttributes(this, shaderAttributes)
+        : shaderAttributes;
       for (const shaderAttributeName in shaderAttributes) {
         const shaderAttribute = shaderAttributes[shaderAttributeName];
 
         // Initialize the attribute descriptor, with WebGL and metadata fields
-        this.shaderAttributes[shaderAttributeName] = new Attribute(
+        this.shaderAttributes[shaderAttributeName] = new BaseAttribute(
           this.gl,
           Object.assign(
             {
+              size: this.size,
+              normalized: this.normalized,
+              integer: this.integer,
               offset: this.offset,
               stride: this.stride,
-              normalized: this.normalized
+              divisor: this.divisor
             },
             shaderAttribute,
             {
               id: shaderAttributeName,
-              // Luma fields
-              constant: shaderAttribute.constant || false,
-              isIndexed: shaderAttribute.isIndexed || shaderAttribute.elements,
-              size: (shaderAttribute.elements && 1) || shaderAttribute.size || this.size,
-              value: shaderAttribute.value || null,
-              divisor: shaderAttribute.instanced || shaderAttribute.divisor || this.divisor,
-              buffer: this.getBuffer(),
-              noAlloc: true
+              buffer: this.getBuffer()
             }
           )
         );
 
-        this.hasShaderAttributes = true;
+        this.hasShaderAttributes = shaderAttributeNames;
       }
     }
 
@@ -81,7 +107,6 @@ export default class Attribute extends BaseAttribute {
       noAlloc,
       update: update || (accessor && this._standardAccessor),
       accessor,
-      enable,
       transform,
       defaultValue,
       bufferLayout
@@ -127,13 +152,20 @@ export default class Attribute extends BaseAttribute {
     return this.userData.accessor;
   }
 
-  isEnabled(context) {
-    return this.userData.enable.call(context);
-  }
-
   getShaderAttributes() {
     const shaderAttributes = {};
-    if (this.hasShaderAttributes) {
+    if (this.doublePrecision) {
+      const isBuffer64Bit = this.value instanceof Float64Array;
+      for (const shaderAttributeName of this.hasShaderAttributes) {
+        shaderAttributes[shaderAttributeName] = this.shaderAttributes[
+          isBuffer64Bit ? `${shaderAttributeName}64` : `${shaderAttributeName}32`
+        ];
+        const shaderAttributeLowPartName = `${shaderAttributeName}64xyLow`;
+        shaderAttributes[shaderAttributeLowPartName] = isBuffer64Bit
+          ? this.shaderAttributes[shaderAttributeLowPartName]
+          : new Float32Array(this.size); // use constant for low part if buffer is 32-bit
+      }
+    } else if (this.hasShaderAttributes) {
       Object.assign(shaderAttributes, this.shaderAttributes);
     } else {
       shaderAttributes[this.id] = this;
@@ -197,7 +229,7 @@ export default class Attribute extends BaseAttribute {
       assert(Number.isFinite(numInstances));
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
-      const ArrayType = glArrayFromType(this.defaultType);
+      const ArrayType = glArrayFromType(this.defaultType, this);
       const oldValue = state.allocatedValue;
       const shouldCopy = state.updateRanges !== range.FULL;
 
@@ -243,11 +275,16 @@ export default class Attribute extends BaseAttribute {
         update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
       }
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
+        const attributeValue = this.value;
         // call base clas `update` method to upload value to GPU
         this.update({
-          value: this.value,
+          value: this.doublePrecision
+            ? toDoublePrecisionArray(attributeValue, this)
+            : attributeValue,
           constant: this.constant
         });
+        // Save the 64-bit version
+        this.value = attributeValue;
       } else {
         for (const [startRow, endRow] of updateRanges) {
           const startOffset = Number.isFinite(startRow)
@@ -261,7 +298,13 @@ export default class Attribute extends BaseAttribute {
 
           // Only update the changed part of the attribute
           this.buffer.subData({
-            data: this.value.subarray(startOffset, endOffset),
+            data: this.doublePrecision
+              ? toDoublePrecisionArray(this.value, {
+                  size: this.size,
+                  startIndex: startOffset,
+                  endIndex: endOffset
+                })
+              : this.value.subarray(startOffset, endOffset),
             offset: startOffset * this.value.BYTES_PER_ELEMENT
           });
         }
@@ -282,10 +325,6 @@ export default class Attribute extends BaseAttribute {
   update(props) {
     super.update(props);
     this._updateShaderAttributes();
-  }
-
-  disable() {
-    this.setConstantValue(this.userData.defaultValue);
   }
 
   // Use generic value
@@ -314,6 +353,7 @@ export default class Attribute extends BaseAttribute {
 
   // Use external buffer
   // Returns true if successful
+  // eslint-disable-next-line max-statements
   setExternalBuffer(buffer) {
     const state = this.userData;
 
@@ -342,9 +382,17 @@ export default class Attribute extends BaseAttribute {
 
     this._checkExternalBuffer(opts);
 
+    if (this.doublePrecision && opts.value instanceof Float64Array) {
+      opts.originalValue = opts.value;
+      opts.value = toDoublePrecisionArray(opts.value, this);
+    }
+
     this.update(opts);
 
     state.needsRedraw = true;
+    if (opts.originalValue) {
+      this.value = opts.originalValue;
+    }
 
     return true;
   }
@@ -353,14 +401,22 @@ export default class Attribute extends BaseAttribute {
   _checkExternalBuffer(opts) {
     const {value} = opts;
     if (!opts.constant && value) {
-      const ArrayType = glArrayFromType(this.defaultType);
-      if (
-        this.hasShaderAttributes &&
-        value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
-        Object.values(this.shaderAttributes).some(attribute => attribute.offset || attribute.stride)
-      ) {
-        // Shader attributes have hard-coded offsets and strides
-        // TODO - switch to element offsets and element strides?
+      const ArrayType = glArrayFromType(this.defaultType, this);
+
+      let illegalArrayType = false;
+      if (this.doublePrecision) {
+        // not 32bit or 64bit
+        illegalArrayType = value.BYTES_PER_ELEMENT < 4;
+      } else if (this.hasShaderAttributes) {
+        illegalArrayType =
+          value.BYTES_PER_ELEMENT !== ArrayType.BYTES_PER_ELEMENT &&
+          // Shader attributes have hard-coded offsets and strides
+          // TODO - switch to element offsets and element strides?
+          Object.values(this.shaderAttributes).some(
+            attribute => attribute.offset || attribute.stride
+          );
+      }
+      if (illegalArrayType) {
         throw new Error(`Attribute ${this.id} does not support ${value.constructor.name}`);
       }
       if (!(value instanceof ArrayType) && this.normalized && !('normalized' in opts)) {
@@ -497,11 +553,11 @@ export default class Attribute extends BaseAttribute {
 }
 
 /* eslint-disable complexity */
-export function glArrayFromType(glType, {clamped = true} = {}) {
+function glArrayFromType(glType, {doublePrecision = false}) {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (glType) {
     case GL.FLOAT:
-      return Float32Array;
+      return doublePrecision ? Float64Array : Float32Array;
     case GL.UNSIGNED_SHORT:
     case GL.UNSIGNED_SHORT_5_6_5:
     case GL.UNSIGNED_SHORT_4_4_4_4:
@@ -510,7 +566,7 @@ export function glArrayFromType(glType, {clamped = true} = {}) {
     case GL.UNSIGNED_INT:
       return Uint32Array;
     case GL.UNSIGNED_BYTE:
-      return clamped ? Uint8ClampedArray : Uint8Array;
+      return Uint8ClampedArray;
     case GL.BYTE:
       return Int8Array;
     case GL.SHORT:
