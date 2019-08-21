@@ -60,6 +60,7 @@ Takes a single parameter as a map of attribute descriptor objects:
 
 * keys are attribute names
 * values are objects with attribute definitions:
+  + `type` (Enum, optional) - data type of the attribute, can be one of the following: `GL.FLOAT`, `GL.DOUBLE`, `GL.UNSIGNED_SHORT`, `GL.UNSIGNED_INT`, `GL.UNSIGNED_BYTE`, `GL.BYTE`, `GL.SHORT`, and `GL.INT`.
   + `size` (Number) - number of elements per object
   + `accessor` (String | Array of strings | Function) - accessor name(s) that will
     trigger an update of this attribute when changed. Used with
