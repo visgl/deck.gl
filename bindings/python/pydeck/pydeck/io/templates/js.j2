@@ -1,3 +1,15 @@
+requirejs.config({
+  paths: {
+    deckgl: 'https://cdn.jsdelivr.net/npm/deck.gl@~7.2.0/dist/dist.dev',
+    mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl',
+    h3: 'https://unpkg.com/h3-js@3.4.3/dist/h3-js.umd',
+    S2: 'https://unpkg.com/s2-geometry@1.2.10/src/s2geometry'
+  },
+  shim: {
+    deckgl: ['h3', 'S2']
+  }
+});
+
 let config, jsonInput, jsonConverter;
 
 jsonInput = JSON.parse(JSON.stringify({{json_input}}));
@@ -24,7 +36,10 @@ function init(deck, mapboxgl) {
   config = new deckgl.DeckGL({
     map: mapboxgl,
     mapboxApiAccessToken: '{{mapbox_api_key}}',
-    canvas: 'deck-map-container',
+    container: 'deck-container',
+    latitude: 0.0,
+    longitude: 0.0,
+    zoom: 10,
     height: '100%',
     width: '100%',
     onLoad: valueChanged.bind(this),
