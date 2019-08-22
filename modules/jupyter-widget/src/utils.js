@@ -1,4 +1,4 @@
-/* global requirejs, define, document */
+/* global requirejs, document */
 function loadCss(url) {
   const link = document.createElement('link');
   link.type = 'text/css';
@@ -7,23 +7,10 @@ function loadCss(url) {
   document.getElementsByTagName('head')[0].appendChild(link);
 }
 
-// Note: This code executes in a Jupyter notebook environment
-// Jupyter notebooks most often load JS modules via RequireJS and
-// include RequireJS globally
+// requirejs is globally available in a Jupyter notebook
+// Modules are defined in pydeck/static/nbextension/extension.js
 function setDependencies(callback) {
-  requirejs.config({
-    paths: {
-      deckgl: 'https://unpkg.com/deck.gl@~7.2.0/dist.min',
-      mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl',
-      h3: 'https://unpkg.com/h3-js@3.4.3/dist/h3-js.umd',
-      S2: 'https://unpkg.com/s2-geometry@1.2.10/src/s2geometry'
-    },
-    shim: {
-      deckgl: ['h3', 'S2']
-    }
-  });
-
-  define(['deckgl', 'mapboxgl'], (deckLib, mapboxLib) => {
+  requirejs(['deckgl', 'mapboxgl'], (deckLib, mapboxLib) => {
     callback(deckLib, mapboxLib);
   });
 }

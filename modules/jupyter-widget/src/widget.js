@@ -67,32 +67,32 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   initDeckElements() {
+    this._initDeck = this._initDeck.bind(this);
     setDependencies(this._initDeck);
   }
 
   _initDeck(deckgl, mapboxgl) {
     try {
-      if (!this.deck) {
-        this.deck = new deckgl.DeckGL({
-          map: mapboxgl,
-          mapboxApiAccessToken: this.model.get('mapbox_key'),
-          canvas: `deck-map-container-${this.model.model_id}`,
-          height: '100%',
-          width: '100%',
-          onLoad: this.value_changed.bind(this),
-          mapStyle: null
-        });
-      }
       const layersDict = {};
       const layers = Object.keys(deckgl).filter(
         x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
       );
       layers.map(k => (layersDict[k] = deckgl[k]));
 
-      this.jsonConverter = new deckgl.JSONConverter({
+      this.jsonConverter = new deckgl._JSONConverter({
         configuration: {
           layers: layersDict
         }
+      });
+
+      this.deckVis = new deckgl.DeckGL({
+        map: mapboxgl,
+        mapboxApiAccessToken: this.model.get('mapbox_key'),
+        latitude: 0,
+        longitude: 0,
+        zoom: 1,
+        container: `${this.model.model_id}`,
+        onLoad: this.value_changed.bind(this)
       });
     } catch (err) {
       // This will fail in node tests
@@ -104,9 +104,8 @@ export class DeckGLView extends DOMWidgetView {
   value_changed() {
     this.json_input = this.model.get('json_input');
     const parsedJSONInput = JSON.parse(this.json_input);
-    this.initJSElements();
     const results = this.jsonConverter.convertJsonToDeckProps(parsedJSONInput);
-    this.deck.setProps(results);
+    this.deckVis.setProps(results);
     hideMapboxCSSWarning();
   }
 }

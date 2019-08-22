@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
+
+from distutils.command.install import install
 from setuptools import setup, find_packages, Command
 from setuptools.command.sdist import sdist
 from setuptools.command.build_py import build_py
 from setuptools.command.egg_info import egg_info
 from setuptools.command.develop import develop
-from distutils.command.install import install
 
+import atexit
 from distutils import log
 import os
 from shutil import copy
@@ -20,7 +22,6 @@ def read(*parts):
     return open(os.path.join(here, *parts), 'r').read()
 
 
-log.set_verbosity(log.DEBUG)
 log.info('setup.py entered')
 log.info('$PATH=%s' % os.environ['PATH'])
 
@@ -44,19 +45,22 @@ def update_package_data(distribution):
     build_py.finalize_options()
 
 
-def js_prerelease(command, strict=False):
-    """decorator for building minified js/css prior to another command"""
-    class DecoratedCommand(command):
-        def run(self):
-            jsdeps = self.distribution.get_command_obj('jsdeps')  # noqa
-            self.distribution.run_command('jsdeps')
-            command.run(self)
-            update_package_data(self.distribution)
-    return DecoratedCommand
+class ExitHookDevelop(develop):
+    """Registers widget with notebook server after development installation"""
+    description = "Register widget with a local Jupyter notebook"
+
+    def run(self):
+
+        def _post_install():
+            log.info("Enabling widget locally")
+            check_call(['bash', 'postBuild'], cwd=here, stdout=sys.stdout, stderr=sys.stderr)
+
+        atexit.register(_post_install)
+        develop.run(self)
 
 
 class Yarn(Command):
-    description = 'Install package.json dependencies using yarn'
+    description = "Install package.json dependencies using yarn"
 
     user_options = []
 
@@ -89,15 +93,10 @@ class Yarn(Command):
     def copy_js(self):
         """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder.
            Overwrites destination files."""
-        # Compiled JS files for copying
-        js_dist_dir = os.path.join(widget_dir, 'dist', 'pydeck_embeddable')
-        # Uncompiled JS files for copying
-        # See https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/%7B%7Bcookiecutter.python_package_name%7D%7D/nbextension/static/extension.js
-        # js_src_dir = os.path.join(widget_dir, 'src')
+        js_dist_dir = os.path.join(widget_dir, 'dist')
         js_files = [
-            # os.path.join(js_src_dir, 'extension.js'),
-            os.path.join(js_dist_dir, 'index.js'),
-            os.path.join(js_dist_dir, 'index.js.map')
+            os.path.join(js_dist_dir, 'pydeck_embeddable', 'index.js'),
+            os.path.join(js_dist_dir, 'pydeck_embeddable', 'index.js.map')
         ]
         static_folder = os.path.join(here, 'pydeck', 'nbextension', 'static')
         for js_file in js_files:
@@ -128,6 +127,17 @@ class Yarn(Command):
         update_package_data(self.distribution)
 
 
+def js_prerelease(command, strict=False):
+    """decorator for symlinking notebook with extension in development"""
+    class DecoratedCommand(command):
+        def run(self):
+            jsdeps = self.distribution.get_command_obj('jsdeps')  # noqa
+            self.distribution.run_command('jsdeps')
+            command.run(self)
+            update_package_data(self.distribution)
+    return DecoratedCommand
+
+
 with open('requirements.txt') as f:
     tests_require = f.readlines()
 install_requires = [t.strip() for t in tests_require]
@@ -149,7 +159,7 @@ if __name__ == '__main__':
         packages=find_packages(),
         cmdclass={
             'install': js_prerelease(install),
-            'develop': js_prerelease(develop),
+            'develop': js_prerelease(ExitHookDevelop),
             'build_py': js_prerelease(build_py),
             'egg_info': egg_info,
             'sdist': js_prerelease(sdist, strict=True),
