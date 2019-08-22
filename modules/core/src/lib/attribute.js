@@ -44,12 +44,19 @@ function addDoublePrecisionAttributes(attribute, shaderAttributeDefs) {
 
 export default class Attribute extends BaseAttribute {
   constructor(gl, opts = {}) {
+    const logicalType = opts.type;
+    const doublePrecision = logicalType === GL.DOUBLE;
+    if (doublePrecision) {
+      // DOUBLE is not a valid WebGL buffer type
+      // tell BaseAttribute to set the accessor type to FLOAT
+      opts = Object.assign({}, opts, {type: GL.FLOAT});
+    }
+
     super(gl, opts);
 
     const {
       // deck.gl fields
       transition = false,
-      doublePrecision = false,
       noAlloc = false,
       update = null,
       accessor = null,
@@ -63,7 +70,7 @@ export default class Attribute extends BaseAttribute {
     // This is the attribute type defined by the layer
     // If an external buffer is provided, this.type may be overwritten
     // But we always want to use defaultType for allocation
-    this.defaultType = this.type || GL.FLOAT;
+    this.defaultType = logicalType || this.type || GL.FLOAT;
     this.shaderAttributes = {};
     this.hasShaderAttributes = false;
     this.doublePrecision = doublePrecision;
@@ -229,7 +236,7 @@ export default class Attribute extends BaseAttribute {
       assert(Number.isFinite(numInstances));
       // Allocate at least one element to ensure a valid buffer
       const allocCount = Math.max(numInstances, 1);
-      const ArrayType = glArrayFromType(this.defaultType, this);
+      const ArrayType = glArrayFromType(this.defaultType);
       const oldValue = state.allocatedValue;
       const shouldCopy = state.updateRanges !== range.FULL;
 
@@ -401,7 +408,7 @@ export default class Attribute extends BaseAttribute {
   _checkExternalBuffer(opts) {
     const {value} = opts;
     if (!opts.constant && value) {
-      const ArrayType = glArrayFromType(this.defaultType, this);
+      const ArrayType = glArrayFromType(this.defaultType);
 
       let illegalArrayType = false;
       if (this.doublePrecision) {
@@ -553,11 +560,13 @@ export default class Attribute extends BaseAttribute {
 }
 
 /* eslint-disable complexity */
-function glArrayFromType(glType, {doublePrecision = false}) {
+function glArrayFromType(glType) {
   // Sorted in some order of likelihood to reduce amount of comparisons
   switch (glType) {
     case GL.FLOAT:
-      return doublePrecision ? Float64Array : Float32Array;
+      return Float32Array;
+    case GL.DOUBLE:
+      return Float64Array;
     case GL.UNSIGNED_SHORT:
     case GL.UNSIGNED_SHORT_5_6_5:
     case GL.UNSIGNED_SHORT_4_4_4_4:

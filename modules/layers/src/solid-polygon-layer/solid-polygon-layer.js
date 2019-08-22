@@ -90,7 +90,7 @@ export default class SolidPolygonLayer extends Layer {
       indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
       positions: {
         size: 3,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPolygon',
         update: this.calculatePositions,

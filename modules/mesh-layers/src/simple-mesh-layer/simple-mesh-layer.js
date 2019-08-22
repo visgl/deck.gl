@@ -127,7 +127,7 @@ export default class SimpleMeshLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         transition: true,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         size: 3,
         accessor: 'getPosition'
       },
