@@ -37,11 +37,9 @@ function init(deck, mapboxgl) {
     map: mapboxgl,
     mapboxApiAccessToken: '{{mapbox_api_key}}',
     container: 'deck-container',
-    latitude: 0.0,
-    longitude: 0.0,
-    zoom: 10,
-    height: '100%',
-    width: '100%',
+    latitude: 0,
+    longitude: 0,
+    zoom: 1,
     onLoad: valueChanged.bind(this),
   });
 }
