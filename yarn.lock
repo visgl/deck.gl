@@ -1459,7 +1459,7 @@
     "@luma.gl/constants" "7.3.0-alpha.1"
     math.gl "^2.3.0"
 
-"@luma.gl/constants@7.3.0-alpha.1", "@luma.gl/constants@^7.0.0-alpha.6", "@luma.gl/constants@^7.3.0-alpha.1":
+"@luma.gl/constants@7.3.0-alpha.1", "@luma.gl/constants@^7.3.0-alpha.1":
   version "7.3.0-alpha.1"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.3.0-alpha.1.tgz#e7097d725e42130fc5afdc4df724b98e21f56857"
   integrity sha512-DKBJkPEYGLUYY//+UPEc5ABvoqFm7KoSlpA7Q8flgl5JpibKED4QoFtLwZpDO6AVO0VVI+75/MOcs7XYL0tUtw==
@@ -2417,12 +2417,12 @@ babel-loader@^8.0.0:
     mkdirp "^0.5.1"
     util.promisify "^1.0.0"
 
-babel-plugin-inline-webgl-constants@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/babel-plugin-inline-webgl-constants/-/babel-plugin-inline-webgl-constants-1.0.0.tgz#206548c03df77ea800c40bf59622000fbd976753"
-  integrity sha512-50aOuF9zgvZZn8RA+cxHtjSlbQEQDeus6LJlA5DLMobq8LzIhs/RaTkZmVDRfwT3+I5h9+sSVwiOppKOY19GXA==
+babel-plugin-inline-webgl-constants@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/babel-plugin-inline-webgl-constants/-/babel-plugin-inline-webgl-constants-1.0.1.tgz#ca81b3e3c3816356a23414a44bf367f51c5b7a89"
+  integrity sha512-PG2gJZF69mYywdvMFiix1rHBDJGvfzCm34niP4Lsedk6JXUuvQndY+jm53jNSPxe5wohBWsnM60LmWhxE5j6Bw==
   dependencies:
-    "@luma.gl/constants" "^7.0.0-alpha.6"
+    "@luma.gl/constants" "^7.3.0-alpha.1"
 
 babel-plugin-istanbul@^5.0.0:
   version "5.1.1"
