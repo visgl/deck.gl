@@ -28,6 +28,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
     '@luma.gl/addons': `${ROOT_DIR}/../luma.gl/modules/addons/src`
   };
   const LUMA_LOCAL_ALIASES = {
+    '@luma.gl/constants': `${ROOT_DIR}/node_modules/@luma.gl/constants`,
     '@luma.gl/core': `${ROOT_DIR}/node_modules/@luma.gl/core`,
     '@luma.gl/webgl': `${ROOT_DIR}/node_modules/@luma.gl/webgl`,
     '@luma.gl/webgl-state-tracker': `${ROOT_DIR}/node_modules/@luma.gl/webgl-state-tracker`,
