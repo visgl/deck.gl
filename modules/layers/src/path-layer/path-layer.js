@@ -66,7 +66,7 @@ export default class PathLayer extends Layer {
         // Hack - Attribute class needs this to properly apply partial update
         // The first 3 numbers of the value is just padding
         offset: 12,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateStartPositions,
@@ -82,7 +82,7 @@ export default class PathLayer extends Layer {
       },
       endPositions: {
         size: 3,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         transition: ATTRIBUTE_TRANSITION,
         accessor: 'getPath',
         update: this.calculateEndPositions,

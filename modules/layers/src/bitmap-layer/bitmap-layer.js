@@ -62,7 +62,7 @@ export default class BitmapLayer extends Layer {
     attributeManager.add({
       positions: {
         size: 3,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         update: this.calculatePositions,
         noAlloc: true
       }

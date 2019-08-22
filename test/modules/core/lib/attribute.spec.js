@@ -581,8 +581,7 @@ test('Attribute#setExternalBuffer', t => {
 test('Attribute#doublePrecision', t => {
   const attribute = new Attribute(gl, {
     id: 'positions',
-    type: GL.FLOAT,
-    doublePrecision: true,
+    type: GL.DOUBLE,
     size: 3,
     accessor: 'getPosition'
   });

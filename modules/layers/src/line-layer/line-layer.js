@@ -54,13 +54,13 @@ export default class LineLayer extends Layer {
     attributeManager.addInstanced({
       instanceSourcePositions: {
         size: 3,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         transition: true,
         accessor: 'getSourcePosition'
       },
       instanceTargetPositions: {
         size: 3,
-        doublePrecision: this.use64bitPositions(),
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         transition: true,
         accessor: 'getTargetPosition'
       },
