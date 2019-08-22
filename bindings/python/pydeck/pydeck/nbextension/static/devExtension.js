@@ -1,9 +1,9 @@
 /* eslint-disable */
-// Entry point for local development
+// Entry point for local Jupyter notebook development
 define(function() {
   'use strict';
 
-  window['requirejs'].config({
+  requirejs.config({
     paths: {
       '@deck.gl/jupyter-widget': 'http://localhost:8080/index',
       deckgl: 'https://cdn.jsdelivr.net/npm/deck.gl@~7.2.0/dist/dist.dev',

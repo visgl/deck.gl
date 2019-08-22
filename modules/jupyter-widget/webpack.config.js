@@ -14,11 +14,8 @@ const rules = [
 ];
 
 // Packages that shouldn't be bundled but loaded at runtime
-
 function getExternals() {
-  const externals = {};
-
-  return [externals, '@jupyter-widgets/base'];
+  return ['@jupyter-widgets/base'];
 }
 
 const resolve = {
