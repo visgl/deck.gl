@@ -33,7 +33,7 @@ function init(deck, mapboxgl) {
     }
   });
 
-  config = new deckgl.DeckGL({
+  config = new deck.DeckGL({
     map: mapboxgl,
     mapboxApiAccessToken: '{{mapbox_api_key}}',
     container: 'deck-container',
@@ -46,4 +46,4 @@ function init(deck, mapboxgl) {
   });
 }
 
-requirejs(['deck', 'mapboxgl'], init);
+requirejs(['deckgl', 'mapboxgl'], init);
