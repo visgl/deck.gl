@@ -168,16 +168,23 @@ export default class ArcLayer extends Layer {
   calculateInstancePositions(attribute, {startRow, endRow}) {
     const {data, getSourcePosition, getTargetPosition} = this.props;
     const {value, size} = attribute;
+    const transform = attribute.userData.transform;
     let i = startRow * size;
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;
-      const sourcePosition = getSourcePosition(object, objectInfo);
+      let sourcePosition = getSourcePosition(object, objectInfo);
+      if (transform) {
+        sourcePosition = transform(sourcePosition);
+      }
       value[i++] = sourcePosition[0];
       value[i++] = sourcePosition[1];
       // Call `getTargetPosition` after `sourcePosition` is used in case both accessors write into
       // the same temp array
-      const targetPosition = getTargetPosition(object, objectInfo);
+      let targetPosition = getTargetPosition(object, objectInfo);
+      if (transform) {
+        targetPosition = transform(targetPosition);
+      }
       value[i++] = targetPosition[0];
       value[i++] = targetPosition[1];
     }

@@ -60,6 +60,17 @@ export default class PolygonTesselator extends Tesselator {
   updateGeometryAttributes(polygon, context) {
     polygon = Polygon.normalize(polygon, this.positionSize, context.geometrySize);
 
+    const {positionSize, positionTransform} = this;
+    const {positions} = polygon;
+    if (positionTransform) {
+      for (let i = 0; i < positions.length; i += positionSize) {
+        const p = positionTransform(positions.slice(i, i + positionSize));
+        for (let j = 0; j < positionSize; j++) {
+          positions[i + j] = p[j] || 0;
+        }
+      }
+    }
+
     this._updateIndices(polygon, context);
     this._updatePositions(polygon, context);
   }

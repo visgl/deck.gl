@@ -148,6 +148,7 @@ export default class PathLayer extends Layer {
         data: props.data,
         getGeometry: props.getPath,
         positionFormat: props.positionFormat,
+        positionTransform: attributeManager.getAttributes().startPositions.userData.transform,
         dataChanged: changeFlags.dataChanged
       });
       this.setState({

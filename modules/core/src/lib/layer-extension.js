@@ -60,6 +60,10 @@ export class LayerExtension {
     return newProps;
   }
 
+  shouldUpdateState(context, extension) {
+    return false;
+  }
+
   initializeState(context, extension) {}
 
   updateState(params, extension) {}

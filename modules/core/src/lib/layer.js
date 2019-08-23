@@ -135,7 +135,20 @@ export default class Layer extends Component {
   // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
-    return this.internalState.needsUpdate || this.shouldUpdateState(this._getUpdateParams());
+    if (this.internalState.needsUpdate) {
+      return true;
+    }
+    const updateParams = this._getUpdateParams();
+    if (this.shouldUpdateState(updateParams)) {
+      return true;
+    }
+    // Call extension lifecycle methods
+    for (const extension of this.props.extensions) {
+      if (extension.shouldUpdateState.call(this, updateParams, extension)) {
+        return true;
+      }
+    }
+    return false;
     // End lifecycle method
   }
 

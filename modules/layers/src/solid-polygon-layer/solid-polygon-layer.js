@@ -247,6 +247,7 @@ export default class SolidPolygonLayer extends Layer {
         data: props.data,
         getGeometry: props.getPolygon,
         positionFormat: props.positionFormat,
+        positionTransform: this.getAttributeManager().getAttributes().positions.userData.transform,
         fp64: this.use64bitPositions(),
         dataChanged: changeFlags.dataChanged
       });

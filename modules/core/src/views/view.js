@@ -138,13 +138,10 @@ export default class View {
     if (!opts) {
       return null;
     }
-    if (opts === true) {
-      return defaultOpts;
-    }
     if (typeof opts === 'function') {
       opts = {type: opts};
     }
-    return Object.assign({}, defaultOpts, opts);
+    return Object.assign({ViewportType: this.type}, defaultOpts, opts);
   }
 
   // Overridable method

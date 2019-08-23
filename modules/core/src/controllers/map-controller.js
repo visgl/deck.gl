@@ -38,6 +38,7 @@ const DEFAULT_STATE = {
 
 class MapState extends ViewState {
   constructor({
+    ViewportType = WebMercatorViewport,
     /** Mapbox viewport properties */
     /** The width of the viewport */
     width,
@@ -104,6 +105,8 @@ class MapState extends ViewState {
       startPitch,
       startZoom
     };
+
+    this.ViewportType = ViewportType;
   }
 
   /* Public API */
@@ -251,7 +254,7 @@ class MapState extends ViewState {
 
     const zoom = this._calculateNewZoom({scale, startZoom});
 
-    const zoomedViewport = new WebMercatorViewport(Object.assign({}, this._viewportProps, {zoom}));
+    const zoomedViewport = new this.ViewportType(Object.assign({}, this._viewportProps, {zoom}));
     const [longitude, latitude] = zoomedViewport.getLocationAtPoint({lngLat: startZoomLngLat, pos});
 
     return this._getUpdatedState({
@@ -374,13 +377,13 @@ class MapState extends ViewState {
   }
 
   _unproject(pos) {
-    const viewport = new WebMercatorViewport(this._viewportProps);
+    const viewport = new this.ViewportType(this._viewportProps);
     return pos && viewport.unproject(pos);
   }
 
   // Calculate a new lnglat based on pixel dragging position
   _calculateNewLngLat({startPanLngLat, pos}) {
-    const viewport = new WebMercatorViewport(this._viewportProps);
+    const viewport = new this.ViewportType(this._viewportProps);
     return viewport.getMapCenterByLngLatPosition({lngLat: startPanLngLat, pos});
   }
 

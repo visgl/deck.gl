@@ -64,6 +64,7 @@ export default class PathTesselator extends Tesselator {
   /* eslint-disable max-statements, complexity */
   updateGeometryAttributes(path, context) {
     const {
+      positionTransform,
       attributes: {startPositions, endPositions, segmentTypes}
     } = this;
 
@@ -80,8 +81,8 @@ export default class PathTesselator extends Tesselator {
     // endPositions         A1  B1 B2 B3 B0 B1 B2  --
     // segmentTypes         3   4  0  0  0  0  4
     for (let i = context.vertexStart, ptIndex = 0; ptIndex < geometrySize; i++, ptIndex++) {
-      startPoint = endPoint || this.getPointOnPath(path, 0);
-      endPoint = this.getPointOnPath(path, ptIndex + 1);
+      startPoint = endPoint || this.getPointOnPath(path, 0, positionTransform);
+      endPoint = this.getPointOnPath(path, ptIndex + 1, positionTransform);
 
       segmentTypes[i] = 0;
       if (ptIndex === 0) {
@@ -119,7 +120,8 @@ export default class PathTesselator extends Tesselator {
     return path.length;
   }
 
-  getPointOnPath(path, index) {
+  getPointOnPath(path, index, transform) {
+    let p;
     if (Number.isFinite(path[0])) {
       // flat format
       const {positionSize} = this;
@@ -128,17 +130,19 @@ export default class PathTesselator extends Tesselator {
         index += 1 - path.length / positionSize;
       }
       // TODO - avoid creating new arrays when using binary
-      return [
+      p = [
         path[index * positionSize],
         path[index * positionSize + 1],
         positionSize === 3 ? path[index * positionSize + 2] : 0
       ];
+    } else {
+      if (index >= path.length) {
+        // loop
+        index += 1 - path.length;
+      }
+      p = path[index];
     }
-    if (index >= path.length) {
-      // loop
-      index += 1 - path.length;
-    }
-    return path[index];
+    return transform ? transform(p) : p;
   }
 
   isClosed(path) {
