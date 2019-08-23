@@ -180,7 +180,7 @@ export default class IconLayer extends Layer {
     const {viewport} = this.context;
 
     const iconsTexture = iconManager.getTexture();
-    if (iconsTexture && iconsTexture.width && iconsTexture.height) {
+    if (iconsTexture && iconsTexture.loaded) {
       this.state.model
         .setUniforms(
           Object.assign({}, uniforms, {
