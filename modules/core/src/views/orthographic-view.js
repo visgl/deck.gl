@@ -48,8 +48,7 @@ export default class OrthographicView extends View {
 
   get controller() {
     return this._getControllerProps({
-      type: OrthographicController,
-      ViewportType: OrthographicViewport
+      type: OrthographicController
     });
   }
 }
