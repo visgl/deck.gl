@@ -57,11 +57,11 @@ const App = ({data, viewport}) => {
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/geo-layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/geo-layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
