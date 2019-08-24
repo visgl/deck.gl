@@ -12,20 +12,10 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
 
-def render_dependencies(in_notebook=False):
-    bundle_path = os.getenv('PYDECK_DEVELOPMENT_URL', 'nbextensions/pydeck/nb_extension')
-    if in_notebook:
-        dependencies = j2_env.get_template('notebook_require.j2')
-    else:
-        dependencies = j2_env.get_template('dependencies.json')
-    return dependencies.render(bundle_path=bundle_path)
-
-
 def render_json_to_html(json_input, mapbox_key=None):
     js = j2_env.get_template('index.j2')
     html_str = js.render(
         mapbox_key=mapbox_key,
-        dependencies=render_dependencies(),
         json_input=json_input,
         mapbox_gl_version='1.2.1')
     return html_str

@@ -39,11 +39,13 @@ python setup.py install
 
 First, run `yarn bootstrap` at the root of this repository.
 
-Run `npx webpack-dev-server` in the `modules/jupyter-widget`, which will enable hot-reloading at `localhost:8080`.
+Run `npx webpack-dev-server` in the `modules/jupyter-widget` and in a separate terminal `export PYDECK_DEV_SERVER=http://localhost:8080`.
+
+To specifiy a non-default URL for the webpack dev server, you can set a URL in the `PYDECK_DEV_SERVER` environment variable,
+e.g., `export PYDECK_DEV_SERVER=http://localhost:8080`.
 
 Finally, run `pip install -e .` for a development installation.
 
-Additionally, `export PYDECK_DEVELOPMENT_SERVER=http://localhost:8080/index`
 
 ### Tests
 

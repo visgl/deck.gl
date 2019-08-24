@@ -10,10 +10,16 @@ from setuptools.command.develop import develop
 
 import atexit
 from distutils import log
+import json
 import os
 from shutil import copy
 from subprocess import check_call
 import sys
+
+from dependency_managers import (
+    create_notebook_requirejs,
+    create_standalone_render_requirejs,
+)
 
 here = os.path.dirname(os.path.abspath(__file__))
 
@@ -40,7 +46,7 @@ npm_path = os.pathsep.join(
 
 
 # build_all is read from the command line and  `yarn bootstrap`
-# for a frontend build instead of `webpack`
+# for a frontend build instead of using `webpack` within @deck.gl/jupyter-widget
 build_all = False
 
 
@@ -60,9 +66,8 @@ class ExitHookDevelop(develop):
     def run(self):
         def _post_install():
             log.info("Enabling widget locally...")
-            check_call(
-                ["bash", "postBuild"], cwd=here, stdout=sys.stdout, stderr=sys.stderr
-            )
+            # This bash script actually installs the widget into a notebook server
+            check_call(["bash", "postBuild"], cwd=here)
 
         atexit.register(_post_install)
         develop.run(self)
@@ -145,6 +150,9 @@ class FrontendBuild(Command):
 
         self.clean_frontend_build()
         self.copy_frontend_build()
+        log.info('Creating RequireJS configs.')
+        create_notebook_requirejs(load_requirejs_dependencies(), here, setup_environment='development')
+        create_standalone_render_requirejs(load_requirejs_dependencies(), here, setup_environment='development')
 
         for t in self.target_files:
             if not os.path.exists(t):
@@ -170,18 +178,13 @@ def js_prerelease(command, strict=False):
     return DecoratedCommand
 
 
-def build_nbextension_file():
-    from pydeck.io.html import render_dependencies
-
-    template_text = render_dependencies(in_notebook=True)
-    output_js = os.path.join(here, 'pydeck', 'nbextension', 'extensionRequires.js')
-    with open(output_js, 'w+') as f:
-        f.write(template_text)
+def load_requirejs_dependencies():
+    return json.loads(read('requirejs_dependencies.json'))
 
 
 with open("requirements.txt") as f:
-    tests_require = f.readlines()
-install_requires = [t.strip() for t in tests_require]
+    require = f.readlines()
+install_requires = [t.strip() for t in require]
 
 
 version_ns = {}
@@ -230,6 +233,8 @@ if __name__ == "__main__":
         ],
         extras_require={"testing": ["pytest"]},
         install_requires=install_requires,
+        setup_requires=['pytest-runner'],
+        tests_require=['pytest'],
         data_files=[
             (
                 "share/jupyter/nbextensions/pydeck",
