@@ -1,8 +1,9 @@
+/* global requirejs, document */
 import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, createWidgetDiv, setDependencies, hideMapboxCSSWarning} from './utils';
+import {loadCss, hideMapboxCSSWarning} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
 
@@ -52,26 +53,36 @@ export class DeckGLModel extends DOMWidgetModel {
 export class DeckGLView extends DOMWidgetView {
   render() {
     super.render();
-    this.model.on('change:json_input', this.value_changed, this);
+    this.model.on('change:json_input', this.valueChanged, this);
     loadCss(MAPBOX_CSS_URL);
 
-    this.el.id = this.model.model_id;
+    const containerDiv = document.createElement('div');
 
-    createWidgetDiv({
-      parentDiv: this.el,
-      idName: this.model.model_id,
-      done: this.initDeckElements.bind(this),
-      width: this.model.get('width'),
-      height: this.model.get('height')
+    containerDiv.style.height = `${this.model.get('height')}px`;
+    containerDiv.style.width = `${this.model.get('width')}px`;
+    this.el.appendChild(containerDiv);
+
+    this.deck = initDeck({
+      mapboxApiKey: this.model.get('mapbox_key'),
+      container: containerDiv,
+      jsonInput: JSON.parse(this.model.get('json_input'))
     });
   }
 
-  initDeckElements() {
-    this._initDeck = this._initDeck.bind(this);
-    setDependencies(this._initDeck);
+  valueChanged() {
+    updateDeck(this.model.get('json_input'), this.deck);
+    // Jupyter notebook displays an error that this suppresses
+    hideMapboxCSSWarning();
   }
+}
 
-  _initDeck(deckgl, mapboxgl) {
+function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
+  const results = jsonConverter.convertJsonToDeckProps(inputJSON);
+  deckConfig.setProps(results);
+}
+
+export function initDeck({mapboxApiKey, container, jsonInput}) {
+  requirejs(['deckgl', 'mapboxgl', 'h3', 'S2'], (deckgl, mapboxgl) => {
     try {
       const layersDict = {};
       const layers = Object.keys(deckgl).filter(
@@ -79,33 +90,27 @@ export class DeckGLView extends DOMWidgetView {
       );
       layers.map(k => (layersDict[k] = deckgl[k]));
 
-      this.jsonConverter = new deckgl._JSONConverter({
+      const jsonConverter = new deckgl._JSONConverter({
         configuration: {
           layers: layersDict
         }
       });
 
-      this.deckVis = new deckgl.DeckGL({
+      const deckConfig = new deckgl.DeckGL({
         map: mapboxgl,
-        mapboxApiAccessToken: this.model.get('mapbox_key'),
+        mapboxApiAccessToken: mapboxApiKey,
         latitude: 0,
         longitude: 0,
         zoom: 1,
-        container: `${this.model.model_id}`,
-        onLoad: this.value_changed.bind(this)
+        container,
+        onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
       });
+      return {jsonConverter, deckConfig};
     } catch (err) {
       // This will fail in node tests
       // eslint-disable-next-line
       console.error(err);
     }
-  }
-
-  value_changed() {
-    this.json_input = this.model.get('json_input');
-    const parsedJSONInput = JSON.parse(this.json_input);
-    const results = this.jsonConverter.convertJsonToDeckProps(parsedJSONInput);
-    this.deckVis.setProps(results);
-    hideMapboxCSSWarning();
-  }
+    return {};
+  });
 }

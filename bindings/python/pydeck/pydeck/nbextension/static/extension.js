@@ -7,7 +7,7 @@ define(function() {
   window['requirejs'].config({
     map: {
       '*': {
-        '@deck.gl/jupyter-widget': 'nbextensions/pydeck/index'
+        '@deck.gl/jupyter-widget': 'nbextensions/pydeck/nb_extension'
       }
     },
     paths: {
@@ -15,9 +15,6 @@ define(function() {
       mapboxgl: 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl',
       h3: 'https://unpkg.com/h3-js@3.4.3/dist/h3-js.umd',
       S2: 'https://unpkg.com/s2-geometry@1.2.10/src/s2geometry'
-    },
-    shim: {
-      deckgl: ['h3', 'S2']
     }
   });
   // Export the required load_ipython_extension function

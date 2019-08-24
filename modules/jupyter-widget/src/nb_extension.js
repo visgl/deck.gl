@@ -12,6 +12,6 @@
 // dynamically.
 //
 const dataBaseUrl = document.querySelector('body').getAttribute('data-base-url');
-window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck`;
+window.__webpack_public_path__ = `${dataBaseUrl}nbextensions/pydeck/nb_extension`;
 
 export {MODULE_VERSION, MODULE_NAME, DeckGLModel, DeckGLView} from './index';

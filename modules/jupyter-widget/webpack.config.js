@@ -10,6 +10,22 @@ const rules = [
   {
     test: /\.(jpg|png|gif|svg)$/,
     use: ['file-loader']
+  },
+  {
+    // Compile ES2015 using babel
+    test: /\.js$/,
+    loader: 'babel-loader',
+    include: /src/,
+    options: {
+      presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+      // all of the helpers will reference the module @babel/runtime to avoid duplication
+      // across the compiled output.
+      plugins: [
+        '@babel/transform-runtime',
+        'inline-webgl-constants',
+        ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
+      ]
+    }
   }
 ];
 
@@ -34,8 +50,8 @@ module.exports = [
      */
     entry: './src/nb_extension.js',
     output: {
-      filename: 'index.js',
-      path: path.resolve(__dirname, 'dist', 'pydeck_embeddable'),
+      filename: 'nb_extension.js',
+      path: path.resolve(__dirname, 'dist'),
       libraryTarget: 'amd'
     },
     devtool: 'source-map',
@@ -61,10 +77,12 @@ module.exports = [
     output: {
       filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
-      libraryTarget: 'amd',
-      library: '@deck.gl/jupyter-widget'
+      libraryTarget: 'amd'
     },
     devtool: 'source-map',
+    devServer: {
+      contentBase: path.join(__dirname, 'dist')
+    },
     module: {
       rules
     },
