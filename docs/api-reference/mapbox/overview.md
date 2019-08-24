@@ -22,7 +22,7 @@ Use deck.gl layers as custom mapbox layers, enabling seamless interleaving of ma
 ### Include the Standalone Bundle
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.0/mapbox-gl.js'></script>
 <script type="text/javascript">
   const {MapboxLayer} = deck;
