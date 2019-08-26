@@ -13,6 +13,7 @@ precision highp float;
 uniform bool hasTexture;
 uniform sampler2D sampler;
 uniform bool flatShading;
+uniform float opacity;
 
 varying vec2 vTexCoord;
 varying vec3 cameraPosition;
@@ -32,7 +33,7 @@ void main(void) {
 
   vec4 color = hasTexture ? texture2D(sampler, vTexCoord) : vColor;
   vec3 lightColor = lighting_getLightColor(color.rgb, cameraPosition, position_commonspace.xyz, normal);
-  gl_FragColor = vec4(lightColor, color.a);
+  gl_FragColor = vec4(lightColor, color.a * opacity);
 
   DECKGL_FILTER_COLOR(gl_FragColor, geometry);
 }
