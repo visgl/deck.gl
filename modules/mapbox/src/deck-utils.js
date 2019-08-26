@@ -111,12 +111,13 @@ function getViewport(deck, map, useMapboxProjection = true) {
         height: deck.height
       },
       getViewState(map),
-      // https://github.com/mapbox/mapbox-gl-js/issues/7573
       useMapboxProjection
         ? {
             // match mapbox's projection matrix
-            nearZMultiplier: deck.height ? 1 / deck.height : 1,
-            farZMultiplier: 1
+            // A change of near plane was made in 1.3.0
+            // https://github.com/mapbox/mapbox-gl-js/pull/8502
+            nearZMultiplier: map.version >= '1.3.0' ? 0.02 : 1 / (deck.height || 1),
+            farZMultiplier: 1.01
           }
         : {
             // use deck.gl's projection matrix
