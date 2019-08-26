@@ -1,4 +1,5 @@
-"""This file handles the creation of a config for RequireJS
+"""
+This file handles the creation of a config for RequireJS
 
 pydeck supports two strategies to render deck.gl maps:
 - A Juypter Notebook Widget
@@ -36,14 +37,11 @@ dev_server_url = os.getenv('PYDECK_DEV_SERVER')
 _is_open(dev_server_url)
 WIDGET_PATH = os.path.join(here, '../../../../modules/jupyter-widget/dist')
 
-
 def get_deckgl_version():
-    with open(os.path.join(WIDGET_PATH, '../..', 'lerna.json') as f:
+    with open(os.path.join(WIDGET_PATH, '../..', 'lerna.json')) as f:
         lerna_json = json.loads(f.read())
         version = lerna_json['version']
-        minor_version = version.split('.')
-        return '~{}.{}.0'.format(*minor_version.split('.')[0:2])
-
+        return version
 
 def create_notebook_requirejs(dependencies, base_path, setup_environment='development'):
     '''Embeds environment-appropriate RequireJS configuration into the Jupyter widget's module'''
