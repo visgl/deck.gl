@@ -37,6 +37,14 @@ _is_open(dev_server_url)
 WIDGET_PATH = os.path.join(here, '../../../../modules/jupyter-widget/dist')
 
 
+def get_deckgl_version():
+    with open(os.path.join(WIDGET_PATH, '../..', 'lerna.json') as f:
+        lerna_json = json.loads(f.read())
+        version = lerna_json['version']
+        minor_version = version.split('.')
+        return '~{}.{}.0'.format(*minor_version.split('.')[0:2])
+
+
 def create_notebook_requirejs(dependencies, base_path, setup_environment='development'):
     '''Embeds environment-appropriate RequireJS configuration into the Jupyter widget's module'''
     # Prepares JS dependencies for the notebook requirejs file
@@ -70,7 +78,8 @@ def create_standalone_render_requirejs(dependencies, base_path, setup_environmen
     # TODO verify this path
     elif setup_environment == 'production':
         # Standalone HTML renderer in production requires reading from CDN
-        CDN_URL = 'https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@latest/dist'
+        deckgl_version = get_deckgl_version()
+        CDN_URL = 'https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist'.format(deckgl_version)
         dependencies['paths']['nbextension/pydeck'] = CDN_URL
     elif setup_environment == 'development':
         # Standalone HTML renderer with static reloading requires a bundled JS file of the Jupyter widget module
