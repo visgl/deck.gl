@@ -5,7 +5,7 @@ import {MODULE_NAME, MODULE_VERSION} from './version';
 
 import {loadCss, hideMapboxCSSWarning} from './utils';
 
-const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
+const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {

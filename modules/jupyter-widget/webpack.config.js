@@ -29,16 +29,12 @@ const rules = [
   }
 ];
 
-// Packages that shouldn't be bundled but loaded at runtime
-function getExternals() {
-  return ['@jupyter-widgets/base'];
-}
-
 const resolve = {
   extensions: ['.webpack.js', '.web.js', '.js']
 };
 
-const externals = getExternals();
+// Packages that shouldn't be bundled but loaded at runtime
+const externals = ['@jupyter-widgets/base'];
 
 module.exports = [
   {
