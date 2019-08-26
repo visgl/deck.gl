@@ -8,6 +8,7 @@ import {gl} from '@deck.gl/test-utils';
 class MockMapboxMap {
   constructor(opts) {
     this.opts = opts;
+    this.version = opts.version;
     this._callbacks = {};
     this._layers = {};
   }
@@ -71,6 +72,7 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
   );
 
   const map = new MockMapboxMap({
+    version: '1.10.0-beta.1',
     center: {lng: -122.45, lat: 37.78},
     zoom: 12
   });
@@ -87,6 +89,7 @@ test('MapboxLayer#onAdd, onRemove, setProps', t => {
     ),
     'Layer is added to deck'
   );
+  t.deepEqual(deck.props.userData.mapboxVersion, {major: 1, minor: 10}, 'Mapbox version is parsed');
 
   t.deepEqual(
     deck.props.viewState,
@@ -157,6 +160,7 @@ test('MapboxLayer#external Deck', t => {
   deck.props.onLoad = () => {
     map.addLayer(layer);
     t.is(layer.deck, deck, 'Used external Deck instance');
+    t.ok(deck.props.userData.mapboxVersion, 'Mapbox version is parsed');
 
     map.emit('render');
     t.pass('Map render does not throw');
