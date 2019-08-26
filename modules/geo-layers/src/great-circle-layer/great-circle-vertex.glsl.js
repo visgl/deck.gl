@@ -25,7 +25,7 @@ attribute vec3 positions;
 attribute vec4 instanceSourceColors;
 attribute vec4 instanceTargetColors;
 attribute vec4 instancePositions;
-attribute vec4 instancePositions64Low;
+attribute vec4 instancePositions64xyLow;
 attribute vec3 instancePickingColors;
 attribute float instanceWidths;
 
@@ -105,8 +105,8 @@ void main(void) {
   vec3 currPos = vec3(degrees(interpolate(source, target, angularDist, segmentRatio)), 0.0);
   vec3 nextPos = vec3(degrees(interpolate(source, target, angularDist, nextSegmentRatio)), 0.0);
 
-  vec2 currPos64Low = mix(instancePositions64Low.xy, instancePositions64Low.zw, segmentRatio);
-  vec2 nextPos64Low = mix(instancePositions64Low.xy, instancePositions64Low.zw, nextSegmentRatio);
+  vec2 currPos64Low = mix(instancePositions64xyLow.xy, instancePositions64xyLow.zw, segmentRatio);
+  vec2 nextPos64Low = mix(instancePositions64xyLow.xy, instancePositions64xyLow.zw, nextSegmentRatio);
 
   vec4 curr = project_position_to_clipspace(currPos, currPos64Low, vec3(0.0), geometry.position);
   vec4 next = project_position_to_clipspace(nextPos, nextPos64Low, vec3(0.0));
