@@ -12,13 +12,12 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
 
-def render_json_to_html(json_input, mapbox_api_key=None):
+def render_json_to_html(json_input, mapbox_key=None):
     js = j2_env.get_template('index.j2')
     html_str = js.render(
-        mapbox_api_key=mapbox_api_key,
+        mapbox_key=mapbox_key,
         json_input=json_input,
-        release_version='7.1.7',
-        mapbox_gl_version='0.53.1')
+        mapbox_gl_version='1.2.1')
     return html_str
 
 
@@ -62,7 +61,7 @@ def deck_to_html(
         iframe_height=500,
         iframe_width=500):
     """Converts deck.gl format JSON to an HTML page"""
-    html = render_json_to_html(deck_json, mapbox_key)
+    html = render_json_to_html(deck_json, mapbox_key=mapbox_key)
     f = None
     try:
         f = open_named_or_temporary_file(filename)

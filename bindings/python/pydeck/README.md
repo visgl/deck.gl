@@ -7,8 +7,11 @@ Note that pydeck is under active development and not yet officially released. At
 pydeck is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
 optimized for a Jupyter Notebook environment.
 
-For more, open the `examples/` directory in a Jupyter notebook.
+To get started, run
 
+```bash
+pip install pydeck
+```
 
 ## Installation
 
@@ -26,30 +29,27 @@ git clone https://github.com/uber/deck.gl/
 cd deck.gl/bindings/python/pydeck
 
 # Create a virtual environment
-virtualenv env
-. env/bin/activate
+virtualenv -p python3 env3
+. env3/bin/activate
 
 python setup.py install
 ```
 
 ## Development
 
-Install pydeck from its source as above.
+First, run `yarn bootstrap` at the root of this repository.
 
-To install the Jupyter extension in [JupyterLab](https://jupyterlab.readthedocs.io/en/stable/), you can run:
+Run `npx webpack-dev-server` in the `modules/jupyter-widget` and in a separate terminal `export PYDECK_DEV_SERVER=http://localhost:8080`.
 
-```bash
-jupyter labextension install .
-```
+To specifiy a non-default URL for the webpack dev server, you can set a URL in the `PYDECK_DEV_SERVER` environment variable,
+e.g., `export PYDECK_DEV_SERVER=http://localhost:8080`.
 
-For classic notebook, you can run:
+Finally, run `pip install -e .` for a development installation.
 
-```bash
-jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
-jupyter nbextension enable --sys-prefix --py pydeck
-```
 
-To test the Python module, run:
+### Tests
+
+Tests are handled by pytest.
 
 ```bash
 pytest
