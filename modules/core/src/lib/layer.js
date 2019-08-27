@@ -325,10 +325,17 @@ export default class Layer extends Component {
       }
     }
 
+    // Composite layers do not have uniform transitions
+    // because they only affect `draw` calls
     if (!this.isComposite && changeFlags.transitionsChanged) {
       for (const key in changeFlags.transitionsChanged) {
         // prop changed and transition is enabled
-        this.internalState.transitions.add(key, oldProps[key], props[key], props.transitions[key]);
+        this.internalState.uniformTransitions.add(
+          key,
+          oldProps[key],
+          props[key],
+          props.transitions[key]
+        );
       }
     }
   }
@@ -343,7 +350,7 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
-    this.internalState.transitions.clear();
+    this.internalState.uniformTransitions.clear();
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -432,10 +439,10 @@ export default class Layer extends Component {
       attributeManager.updateTransition(this.context.timeline.getTime());
     }
 
-    const {transitions} = this.internalState;
-    if (transitions.size > 0) {
+    const {uniformTransitions} = this.internalState;
+    if (uniformTransitions.active) {
       // clone props
-      const propsInTransition = transitions.update();
+      const propsInTransition = uniformTransitions.update();
       const props = Object.create(this.props);
       for (const key in propsInTransition) {
         Object.defineProperty(props, key, {value: propsInTransition[key]});
@@ -727,7 +734,7 @@ export default class Layer extends Component {
     // End lifecycle method
 
     this.props = currentProps;
-    if (this.internalState.transitions.size) {
+    if (this.internalState.uniformTransitions.active) {
       // contains animation
       this.setNeedsRedraw();
     }
@@ -928,7 +935,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.state = {};
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = attributeManager;
-    this.internalState.transitions = new UniformTransitionManager(this.context.timeline);
+    this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
     // Ensure any async props are updated

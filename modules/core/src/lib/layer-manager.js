@@ -67,7 +67,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {deck, stats, viewport = null} = {}) {
+  constructor(gl, {deck, stats, viewport = null, timeline = null} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -89,7 +89,7 @@ export default class LayerManager {
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
-      timeline: new Timeline()
+      timeline: timeline || new Timeline()
     });
 
     this._needsRedraw = 'Initial render';
@@ -208,9 +208,6 @@ export default class LayerManager {
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
   updateLayers(animationProps = {}) {
-    if ('time' in animationProps) {
-      this.context.timeline.setTime(animationProps.time);
-    }
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
