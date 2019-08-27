@@ -177,9 +177,9 @@ export default class LayerManager {
   /* eslint-enable complexity, max-statements */
 
   // Supply a new layer list, initiating sublayer generation and layer matching
-  setLayers(newLayers) {
+  setLayers(newLayers, forceUpdate = false) {
     // TODO - something is generating state updates that cause rerender of the same
-    if (newLayers === this.lastRenderedLayers) {
+    if (!forceUpdate && newLayers === this.lastRenderedLayers) {
       log.log(3, 'Ignoring layer update due to layer array not changed')();
       return this;
     }
@@ -216,8 +216,9 @@ export default class LayerManager {
     const reason = this.needsUpdate();
     if (reason) {
       this.setNeedsRedraw(`updating layers: ${reason}`);
-      // HACK - Call with a copy of lastRenderedLayers to trigger a full update
-      this.setLayers([...this.lastRenderedLayers]);
+      // Force a full update
+      const forceUpdate = true;
+      this.setLayers(this.lastRenderedLayers, forceUpdate);
     }
   }
 

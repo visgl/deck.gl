@@ -20,7 +20,7 @@
 
 /* global HTMLVideoElement */
 import GL from '@luma.gl/constants';
-import {Layer, fp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import {Model, Geometry, Texture2D} from '@luma.gl/core';
 
 import vs from './bitmap-layer-vertex';
@@ -62,19 +62,16 @@ export default class BitmapLayer extends Layer {
     attributeManager.add({
       positions: {
         size: 3,
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         update: this.calculatePositions,
-        value: new Float32Array(12),
-        noAlloc: true
-      },
-      positions64xyLow: {
-        size: 3,
-        update: this.calculatePositions64xyLow,
-        value: new Float32Array(12),
         noAlloc: true
       }
     });
 
-    this.setState({numInstances: 1});
+    this.setState({
+      numInstances: 1,
+      positions: new Float64Array(12)
+    });
   }
 
   updateState({props, oldProps, changeFlags}) {
@@ -95,11 +92,7 @@ export default class BitmapLayer extends Layer {
     const attributeManager = this.getAttributeManager();
 
     if (props.bounds !== oldProps.bounds) {
-      this.setState({
-        positions: this._getPositionsFromBounds(props.bounds)
-      });
       attributeManager.invalidate('positions');
-      attributeManager.invalidate('positions64xyLow');
     }
   }
 
@@ -111,8 +104,9 @@ export default class BitmapLayer extends Layer {
     }
   }
 
-  _getPositionsFromBounds(bounds) {
-    const positions = new Array(12);
+  calculatePositions(attributes) {
+    const {positions} = this.state;
+    const {bounds} = this.props;
     // bounds as [minX, minY, maxX, maxY]
     if (Number.isFinite(bounds[0])) {
       /*
@@ -146,7 +140,7 @@ export default class BitmapLayer extends Layer {
       }
     }
 
-    return positions;
+    attributes.value = positions;
   }
 
   _getModel(gl) {
@@ -249,24 +243,6 @@ export default class BitmapLayer extends Layer {
         })
       });
     }
-  }
-
-  calculatePositions({value}) {
-    const {positions} = this.state;
-    value.set(positions);
-  }
-
-  calculatePositions64xyLow(attribute) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(4);
-      return;
-    }
-
-    const {value} = attribute;
-    value.set(this.state.positions.map(fp64LowPart));
   }
 }
 

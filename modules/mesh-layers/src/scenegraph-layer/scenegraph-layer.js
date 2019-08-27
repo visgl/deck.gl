@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer, createIterable, fp64LowPart} from '@deck.gl/core';
+import {Layer} from '@deck.gl/core';
 import {ScenegraphNode, isWebGL2, pbr, log} from '@luma.gl/core';
 import {createGLTFObjects} from '@luma.gl/addons';
 import GL from '@luma.gl/constants';
@@ -68,13 +68,9 @@ export default class ScenegraphLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
+        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
         accessor: 'getPosition',
         transition: true
-      },
-      instancePositions64xy: {
-        size: 2,
-        accessor: 'getPosition',
-        update: this.calculateInstancePositions64xyLow
       },
       instanceColors: {
         type: GL.UNSIGNED_BYTE,
@@ -266,27 +262,6 @@ export default class ScenegraphLayer extends Layer {
         }
       });
     });
-  }
-
-  calculateInstancePositions64xyLow(attribute, {startRow, endRow}) {
-    const isFP64 = this.use64bitPositions();
-    attribute.constant = !isFP64;
-
-    if (!isFP64) {
-      attribute.value = new Float32Array(2);
-      return;
-    }
-
-    const {data, getPosition} = this.props;
-    const {value, size} = attribute;
-    let i = startRow * size;
-    const {iterable, objectInfo} = createIterable(data, startRow, endRow);
-    for (const point of iterable) {
-      objectInfo.index++;
-      const position = getPosition(point, objectInfo);
-      value[i++] = fp64LowPart(position[0]);
-      value[i++] = fp64LowPart(position[1]);
-    }
   }
 }
 

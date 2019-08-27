@@ -17,7 +17,7 @@ Developer documentaion is available [here](https://github.com/uber/deck.gl/tree/
 
 ### Node Version Requirement
 
-Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `4.x` or higher. Building deck.gl from source has a dependency on Node `8.x` or higher. Either upgrade to a supported version, or install something like [nvm](https://github.com/creationix/nvm) to manage Node versions.
+Running deck.gl as a dependency in another project (e.g. via `npm i deck.gl`) requires Node `4.x` or higher. Building deck.gl from source has a dependency on Node `10.x` or higher. Either upgrade to a supported version, or install something like [nvm](https://github.com/creationix/nvm) to manage Node versions.
 
 ### Install yarn
 

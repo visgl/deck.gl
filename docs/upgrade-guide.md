@@ -1,5 +1,11 @@
 # Upgrade Guide
 
+## Upgrading from deck.gl v7.2 to v7.3
+
+#### Deprecations
+
+- `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and will be removed in the next major release.
+
 ## Upgrading from deck.gl v7.1 to v7.2
 
 #### Breaking Changes

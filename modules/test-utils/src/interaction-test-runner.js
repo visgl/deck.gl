@@ -19,41 +19,48 @@
 // THE SOFTWARE.
 
 /* global window */
-const test = require('tape');
-const {_enableDOMLogging: enableDOMLogging} = require('@probe.gl/test-utils');
+import TestRunner from './test-runner';
 
-// require('@luma.gl/debug');
+const DEFAULT_TEST_CASE = {
+  name: 'Unnamed interaction test',
+  events: [],
+  onBeforeEvents: ({deck}) => {},
+  onAfterEvents: ({deck, layers, context}) => {}
+};
 
-let failed = false;
-test.onFinish(window.browserTestDriver_finish);
-test.onFailure(() => {
-  failed = true;
-  window.browserTestDriver_fail();
-});
+function sleep(timeout) {
+  return new Promise(resolve => window.setTimeout(resolve, timeout));
+}
 
-// tap-browser-color alternative
-enableDOMLogging({
-  getStyle: message => ({
-    background: failed ? '#F28E82' : '#8ECA6C',
-    position: 'absolute',
-    top: '500px',
-    width: '100%'
-  })
-});
+export default class InteractionTestRunner extends TestRunner {
+  get defaultTestCase() {
+    return DEFAULT_TEST_CASE;
+  }
 
-test('deck.gl', t => {
-  require('./modules');
+  // chain events
+  // TODO - switch to async/await
+  runTestCase(testCase, onDone) {
+    testCase.context = testCase.onBeforeEvents({
+      deck: this.deck
+    });
 
-  // Tests currently only work in browser
-  require('./modules/json/json-render.spec');
-  require('./modules/main/bundle');
-  require('./modules/aggregation-layers/utils/gpu-grid-aggregator.spec');
-  require('./modules/aggregation-layers/utils/grid-aggregation-utils.spec');
-  require('./modules/aggregation-layers/heatmap-layer/heatmap-layer.spec');
-  require('./modules/core/lib/pick-layers.spec');
+    let promise = Promise.resolve();
+    for (const event of testCase.events) {
+      if (event.wait) {
+        promise = promise.then(() => sleep(event.wait));
+      } else {
+        promise = promise.then(() => window.browserTestDriver_emulateInput(event));
+      }
+    }
+    return promise.then(onDone);
+  }
 
-  require('./render');
-  require('./interaction');
-
-  t.end();
-});
+  assert(testCase) {
+    testCase.onAfterEvents({
+      deck: this.deck,
+      layers: this.deck.layerManager.getLayers(),
+      context: testCase.context
+    });
+    this._next();
+  }
+}

@@ -138,7 +138,7 @@ test('ArcLayer#non-iterable', t => {
           );
           t.deepEquals(
             instancePositions.slice(0, 4),
-            [data[0].START[0], data[0].START[1], data[0].END[0], data[0].END[1]].map(Math.fround),
+            [data[0].START[0], data[0].START[1], data[0].END[0], data[0].END[1]],
             'instancePositions has correct content'
           );
         }

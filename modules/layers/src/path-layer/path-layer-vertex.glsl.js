@@ -28,8 +28,10 @@ attribute vec3 instanceStartPositions;
 attribute vec3 instanceEndPositions;
 attribute vec3 instanceLeftPositions;
 attribute vec3 instanceRightPositions;
-attribute vec4 instanceLeftStartPositions64xyLow;
-attribute vec4 instanceEndRightPositions64xyLow;
+attribute vec2 instanceLeftPositions64xyLow;
+attribute vec2 instanceStartPositions64xyLow;
+attribute vec2 instanceEndPositions64xyLow;
+attribute vec2 instanceRightPositions64xyLow;
 attribute float instanceStrokeWidths;
 attribute vec4 instanceColors;
 attribute vec3 instancePickingColors;
@@ -222,13 +224,13 @@ void main() {
   float isEnd = positions.x;
 
   vec3 prevPosition = mix(instanceLeftPositions, instanceStartPositions, isEnd);
-  vec2 prevPosition64xyLow = mix(instanceLeftStartPositions64xyLow.xy, instanceLeftStartPositions64xyLow.zw, isEnd);
+  vec2 prevPosition64xyLow = mix(instanceLeftPositions64xyLow, instanceStartPositions64xyLow, isEnd);
 
   vec3 currPosition = mix(instanceStartPositions, instanceEndPositions, isEnd);
-  vec2 currPosition64xyLow = mix(instanceLeftStartPositions64xyLow.zw, instanceEndRightPositions64xyLow.xy, isEnd);
+  vec2 currPosition64xyLow = mix(instanceStartPositions64xyLow, instanceEndPositions64xyLow, isEnd);
 
   vec3 nextPosition = mix(instanceEndPositions, instanceRightPositions, isEnd);
-  vec2 nextPosition64xyLow = mix(instanceEndRightPositions64xyLow.xy, instanceEndRightPositions64xyLow.zw, isEnd);
+  vec2 nextPosition64xyLow = mix(instanceEndPositions64xyLow, instanceRightPositions64xyLow, isEnd);
 
   if (billboard) {
     // Extrude in clipspace

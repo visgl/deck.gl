@@ -68,10 +68,10 @@ new GeoJsonLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@^7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@^7.0.0/dist.min.js"></script>
 ```
 
 ```js
@@ -306,4 +306,3 @@ The GeoJsonLayer renders the following sublayers:
 ## Source
 
 [modules/layers/src/geojson-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/geojson-layer)
-

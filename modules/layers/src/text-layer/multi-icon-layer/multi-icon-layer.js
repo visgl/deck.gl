@@ -59,6 +59,11 @@ export default class MultiIconLayer extends IconLayer {
 
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
+      instanceOffsets: {
+        size: 2,
+        accessor: 'getIcon',
+        update: this.calculateInstanceOffsets
+      },
       instancePixelOffset: {
         size: 2,
         transition: true,
