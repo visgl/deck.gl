@@ -10,3 +10,4 @@ pyppeteer>=0.0.25;python_version>="3.5"
 tox>=3.13.2
 typing>=3.7.4;python_version<="3.5"
 typing_extensions>=3.7.4;python_version<="3.5"
+flake8
