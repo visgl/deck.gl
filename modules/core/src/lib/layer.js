@@ -136,8 +136,16 @@ export default class Layer extends Component {
   // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
-    return this.internalState.needsUpdate || this.shouldUpdateState(this._getUpdateParams());
+    return (
+      this.internalState.needsUpdate ||
+      this.hasUniformTransition() ||
+      this.shouldUpdateState(this._getUpdateParams())
+    );
     // End lifecycle method
+  }
+
+  hasUniformTransition() {
+    return this.internalState.uniformTransitions.active;
   }
 
   // Returns true if the layer is pickable and visible.
@@ -322,20 +330,6 @@ export default class Layer extends Component {
         }
       } else {
         attributeManager.invalidateAll();
-      }
-    }
-
-    // Composite layers do not have uniform transitions
-    // because they only affect `draw` calls
-    if (!this.isComposite && changeFlags.transitionsChanged) {
-      for (const key in changeFlags.transitionsChanged) {
-        // prop changed and transition is enabled
-        this.internalState.uniformTransitions.add(
-          key,
-          oldProps[key],
-          props[key],
-          props.transitions[key]
-        );
       }
     }
   }
@@ -652,6 +646,12 @@ export default class Layer extends Component {
 
   // Common code for _initialize and _update
   _updateState() {
+    const currentProps = this.props;
+    const propsInTransition = this.updateTransition();
+    this.internalState.propsInTransition = propsInTransition;
+    // Overwrite this.props during update to use in-transition prop values
+    this.props = propsInTransition;
+
     const updateParams = this._getUpdateParams();
 
     // Safely call subclass lifecycle methods
@@ -684,6 +684,7 @@ export default class Layer extends Component {
       }
     }
 
+    this.props = currentProps;
     this.clearChangeFlags();
     this.internalState.needsUpdate = false;
     this.internalState.resetOldProps();
@@ -707,10 +708,8 @@ export default class Layer extends Component {
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
     const currentProps = this.props;
-    if (!uniforms.picking_uActive) {
-      // Overwrite this.props during redraw to use in-transition prop values
-      this.props = this.updateTransition();
-    }
+    // Overwrite this.props during redraw to use in-transition prop values
+    this.props = this.internalState.propsInTransition;
 
     const {opacity} = this.props;
     // apply gamma to opacity to make it visually "linear"
@@ -734,10 +733,6 @@ export default class Layer extends Component {
     // End lifecycle method
 
     this.props = currentProps;
-    if (this.internalState.uniformTransitions.active) {
-      // contains animation
-      this.setNeedsRedraw();
-    }
   }
 
   // {uniforms = {}, ...opts}
@@ -797,7 +792,6 @@ export default class Layer extends Component {
       changeFlags.stateChanged = flags.stateChanged;
       log.log(LOG_PRIORITY_UPDATE + 1, () => `stateChanged: ${flags.stateChanged} in ${this.id}`)();
     }
-    changeFlags.transitionsChanged = changeFlags.transitionsChanged || flags.transitionsChanged;
 
     // Update composite flags
     const propsOrDataChanged =
@@ -853,6 +847,19 @@ ${flags.viewportChanged ? 'viewport' : ''}\
         if (changeFlags.updateTriggersChanged[key]) {
           this._activeUpdateTrigger(key);
         }
+      }
+    }
+
+    // trigger uniform transitions
+    if (changeFlags.transitionsChanged) {
+      for (const key in changeFlags.transitionsChanged) {
+        // prop changed and transition is enabled
+        this.internalState.uniformTransitions.add(
+          key,
+          oldProps[key],
+          newProps[key],
+          newProps.transitions[key]
+        );
       }
     }
 

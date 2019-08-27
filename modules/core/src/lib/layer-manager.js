@@ -290,7 +290,7 @@ export default class LayerManager {
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
-    this._needsUpdate = false;
+    this._needsUpdate = generatedLayers.some(layer => layer.hasUniformTransition());
 
     const firstError = error || error2;
     return {error: firstError, generatedLayers};
