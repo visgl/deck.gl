@@ -4,14 +4,6 @@ const path = require('path');
 
 const rules = [
   {
-    test: /\.css$/,
-    use: ['style-loader', 'css-loader']
-  },
-  {
-    test: /\.(jpg|png|gif|svg)$/,
-    use: ['file-loader']
-  },
-  {
     // Compile ES2015 using babel
     test: /\.js$/,
     loader: 'babel-loader',
@@ -36,28 +28,7 @@ const resolve = {
 // Packages that shouldn't be bundled but loaded at runtime
 const externals = ['@jupyter-widgets/base'];
 
-module.exports = [
-  {
-    /**
-     * Notebook extension
-     *
-     * This bundle only contains the part of the JavaScript that is run on load of
-     * the notebook.
-     */
-    entry: './src/nb_extension.js',
-    output: {
-      filename: 'nb_extension.js',
-      path: path.resolve(__dirname, 'dist'),
-      libraryTarget: 'amd'
-    },
-    devtool: 'source-map',
-    module: {
-      rules
-    },
-    externals,
-    resolve
-  },
-
+module.exports = {
   /**
    * Embeddable @deck.gl/jupyter-widget bundle
    *
@@ -68,25 +39,23 @@ module.exports = [
    * The target bundle is always `dist/index.js`, which is the path required by
    * the custom widget embedder.
    */
-  {
-    entry: './src/index.js',
-    output: {
-      filename: 'index.js',
-      path: path.resolve(__dirname, 'dist'),
-      libraryTarget: 'amd'
-    },
-    devtool: 'source-map',
-    devServer: {
-      contentBase: path.join(__dirname, 'dist')
-    },
-    module: {
-      rules
-    },
-    externals,
-    plugins: [
-      // Uncomment for bundle size debug
-      // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
-    ],
-    resolve
-  }
-];
+  entry: './src/index.js',
+  output: {
+    filename: 'index.js',
+    path: path.resolve(__dirname, 'dist'),
+    libraryTarget: 'amd'
+  },
+  devtool: 'source-map',
+  devServer: {
+    contentBase: path.join(__dirname, 'dist')
+  },
+  module: {
+    rules
+  },
+  externals,
+  plugins: [
+    // Uncomment for bundle size debug
+    // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
+  ],
+  resolve
+};
