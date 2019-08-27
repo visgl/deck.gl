@@ -102,13 +102,14 @@ export function testDrawLayer({
 export function testLayer({
   Layer,
   viewport = testViewport,
+  timeline = null,
   testCases = [],
   spies = [],
   onError = defaultOnError
 }) {
   // assert(Layer);
 
-  const layerManager = new LayerManager(gl, {viewport});
+  const layerManager = new LayerManager(gl, {viewport, timeline});
   const deckRenderer = new DeckRenderer(gl);
 
   layerManager.context.animationProps = {
