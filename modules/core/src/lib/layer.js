@@ -23,6 +23,7 @@
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
+import UniformTransitionManager from './uniform-transition-manager';
 import {diffProps, validateProps} from '../lifecycle/props';
 import {count} from '../utils/count';
 import log from '../utils/log';
@@ -135,8 +136,16 @@ export default class Layer extends Component {
   // Checks if layer attributes needs updating
   needsUpdate() {
     // Call subclass lifecycle method
-    return this.internalState.needsUpdate || this.shouldUpdateState(this._getUpdateParams());
+    return (
+      this.internalState.needsUpdate ||
+      this.hasUniformTransition() ||
+      this.shouldUpdateState(this._getUpdateParams())
+    );
     // End lifecycle method
+  }
+
+  hasUniformTransition() {
+    return this.internalState.uniformTransitions.active;
   }
 
   // Returns true if the layer is pickable and visible.
@@ -335,6 +344,7 @@ export default class Layer extends Component {
     if (attributeManager) {
       attributeManager.finalize();
     }
+    this.internalState.uniformTransitions.clear();
   }
 
   // If state has a model, draw it with supplied uniforms
@@ -416,12 +426,24 @@ export default class Layer extends Component {
     this.updateAttributes(changedAttributes);
   }
 
-  // Update attribute transition
+  // Update attribute and uniform transitions, returns props in transition
   updateTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.updateTransition(this.context.time);
+      attributeManager.updateTransition(this.context.timeline.getTime());
     }
+
+    const {uniformTransitions} = this.internalState;
+    if (uniformTransitions.active) {
+      // clone props
+      const propsInTransition = uniformTransitions.update();
+      const props = Object.create(this.props);
+      for (const key in propsInTransition) {
+        Object.defineProperty(props, key, {value: propsInTransition[key]});
+      }
+      return props;
+    }
+    return this.props;
   }
 
   calculateInstancePickingColors(attribute, {numInstances}) {
@@ -624,6 +646,12 @@ export default class Layer extends Component {
 
   // Common code for _initialize and _update
   _updateState() {
+    const currentProps = this.props;
+    const propsInTransition = this.updateTransition();
+    this.internalState.propsInTransition = propsInTransition;
+    // Overwrite this.props during update to use in-transition prop values
+    this.props = propsInTransition;
+
     const updateParams = this._getUpdateParams();
 
     // Safely call subclass lifecycle methods
@@ -649,7 +677,6 @@ export default class Layer extends Component {
       this.setNeedsRedraw();
       // Add any subclass attributes
       this._updateAttributes(this.props);
-      this._updateBaseUniforms();
 
       // Note: Automatic instance count update only works for single layers
       if (this.state.model) {
@@ -657,6 +684,7 @@ export default class Layer extends Component {
       }
     }
 
+    this.props = currentProps;
     this.clearChangeFlags();
     this.internalState.needsUpdate = false;
     this.internalState.resetOldProps();
@@ -679,21 +707,17 @@ export default class Layer extends Component {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
-    if (!uniforms.picking_uActive) {
-      this.updateTransition();
-    }
+    const currentProps = this.props;
+    // Overwrite this.props during redraw to use in-transition prop values
+    this.props = this.internalState.propsInTransition;
+
+    const {opacity} = this.props;
+    // apply gamma to opacity to make it visually "linear"
+    uniforms.opacity = Math.pow(opacity, 1 / 2.2);
 
     // TODO/ib - hack move to luma Model.draw
     if (moduleParameters) {
       this.setModuleParameters(moduleParameters);
-    }
-
-    // Hack/ib - define a public luma function
-    const {animationProps} = this.context;
-    if (animationProps) {
-      for (const model of this.getModels()) {
-        model._setAnimationProps(animationProps);
-      }
     }
 
     // Apply polygon offset to avoid z-fighting
@@ -707,6 +731,8 @@ export default class Layer extends Component {
       this.draw({moduleParameters, uniforms, parameters, context: this.context});
     });
     // End lifecycle method
+
+    this.props = currentProps;
   }
 
   // {uniforms = {}, ...opts}
@@ -824,6 +850,19 @@ ${flags.viewportChanged ? 'viewport' : ''}\
       }
     }
 
+    // trigger uniform transitions
+    if (changeFlags.transitionsChanged) {
+      for (const key in changeFlags.transitionsChanged) {
+        // prop changed and transition is enabled
+        this.internalState.uniformTransitions.add(
+          key,
+          oldProps[key],
+          newProps[key],
+          newProps.transitions[key]
+        );
+      }
+    }
+
     return this.setChangeFlags(changeFlags);
   }
 
@@ -903,7 +942,7 @@ ${flags.viewportChanged ? 'viewport' : ''}\
     this.state = {};
     // TODO deprecated, for backwards compatibility with older layers
     this.state.attributeManager = attributeManager;
-
+    this.internalState.uniformTransitions = new UniformTransitionManager(this.context.timeline);
     this.internalState.onAsyncPropUpdated = this._onAsyncPropUpdated.bind(this);
 
     // Ensure any async props are updated
@@ -949,19 +988,6 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   // Operate on each changed triggers, will be called when an updateTrigger changes
   _activeUpdateTrigger(propName) {
     this.invalidateAttribute(propName);
-  }
-
-  _updateBaseUniforms() {
-    const uniforms = {
-      // apply gamma to opacity to make it visually "linear"
-      opacity:
-        typeof this.props.opacity === 'function'
-          ? animationProps => Math.pow(this.props.opacity(animationProps), 1 / 2.2)
-          : Math.pow(this.props.opacity, 1 / 2.2)
-    };
-    for (const model of this.getModels()) {
-      model.setUniforms(uniforms);
-    }
   }
 
   // DEPRECATED METHODS
