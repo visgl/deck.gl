@@ -78,8 +78,8 @@ class FrontendBuild(Command):
 
     # Files to copy into the Python side of the widget
     target_files = [
-        os.path.join(here, "pydeck", "nbextension", "static", "nb_extension.js"),
-        os.path.join(here, "pydeck", "nbextension", "static", "nb_extension.js.map"),
+        os.path.join(here, "pydeck", "nbextension", "static", "index.js"),
+        os.path.join(here, "pydeck", "nbextension", "static", "index.js.map"),
     ]
 
     user_options = []
@@ -111,8 +111,8 @@ class FrontendBuild(Command):
            Overwrites destination files"""
         js_dist_dir = os.path.join(widget_dir, "dist")
         js_files = [
-            os.path.join(js_dist_dir, "nb_extension.js"),
-            os.path.join(js_dist_dir, "nb_extension.js.map"),
+            os.path.join(js_dist_dir, "index.js"),
+            os.path.join(js_dist_dir, "index.js.map"),
         ]
         static_folder = os.path.join(here, "pydeck", "nbextension", "static")
         for js_file in js_files:
@@ -240,8 +240,8 @@ if __name__ == "__main__":
                 "share/jupyter/nbextensions/pydeck",
                 [
                     "pydeck/nbextension/static/extensionRequires.js",
-                    "pydeck/nbextension/static/nb_extension.js",
-                    "pydeck/nbextension/static/nb_extension.js.map",
+                    "pydeck/nbextension/static/index.js",
+                    "pydeck/nbextension/static/index.js.map",
                 ],
             ),
             ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),

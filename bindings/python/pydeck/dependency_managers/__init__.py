@@ -53,7 +53,7 @@ def create_notebook_requirejs(dependencies, base_path, setup_environment='develo
         # Notebook using the JS bundle built from webpack command in @deck.gl/jupyter-widget
         # The notebook dependency manager will be written to ./pydeck/nbextension/static/extensionRequires.js
         # If this changes, ./pydeck/nbextension/__init__.py must also change
-        dependencies['map']['*']['@deck.gl/jupyter-widget'] = 'nbextensions/pydeck/nb_extension'
+        dependencies['map']['*']['@deck.gl/jupyter-widget'] = 'nbextensions/pydeck/index'
         del dependencies['paths']['nbextension/pydeck']
     else:
         raise Exception('Unrecognized setup environment')

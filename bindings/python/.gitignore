@@ -149,11 +149,7 @@ $RECYCLE.BIN/
 **/coverage/
 
 # Cut JS files created in build process
-**/pydeck/nbextension/static/nb_extension.js
-**/pydeck/nbextension/static/nb_extension.js.map
-
-# Cut JS files created in build process
-**/pydeck/nbextension/static/nb_extension.js
-**/pydeck/nbextension/static/nb_extension.js.map
+**/pydeck/nbextension/static/index.js
+**/pydeck/nbextension/static/index.js.map
 **/pydeck/nbextension/static/extensionRequires.js
 **/pydeck/io/templates/requirejs_dependencies.json
