@@ -1,4 +1,6 @@
 {
+  "description": "The deck.gl website LineLayer example in JSON format",
+  "websiteUrl": "https://deck.gl/#/examples/line-layers/line-layer",
   "initialViewState": {
     "latitude": 47.65,
     "longitude": 7,
@@ -8,12 +10,12 @@
     "bearing": 0
   },
   "map": true,
-  "mapStyle": "mapbox://styles/mapbox/dark-v9",
   "pickingRadius": 5,
   "views": [
     {
       "type": "MapView",
-      "controller": "true"
+      "controller": "true",
+      "mapStyle": "mapbox://styles/mapbox/dark-v9"
     }
   ],
   "layers": [

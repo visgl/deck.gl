@@ -87,7 +87,7 @@ function initializeApp() {
 const jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
 
 function setJSON(json, updateEditor = true) {
-  const deckProps = jsonConverter.convertJsonToDeckProps(json);
+  const deckProps = jsonConverter.convertJson(json);
   deck.setProps(deckProps);
   setMapProps(deckProps);
   map._container.style.visibility = deckProps.map ? 'visible' : 'hidden';

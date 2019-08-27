@@ -1,4 +1,5 @@
 {
+  "description": "A minimal deck.gl example rendering a circle with text",
   "initialViewState": {
     "longitude": -122.45,
     "latitude": 37.8,
