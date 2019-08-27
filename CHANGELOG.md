@@ -19,6 +19,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.2
 
+#### deck.gl [v7.2.3] - Aug 16, 2019
+
+- IconLayer: check texture width and height before drawing (#3481)
+- integrate mapbox-gl's near plane fix (#3490)
+
 #### deck.gl [v7.2.2] - Aug 16, 2019
 
 - fix OrbitView bug when orbitAxis: Z (#3453)
