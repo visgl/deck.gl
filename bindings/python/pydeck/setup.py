@@ -182,11 +182,6 @@ def load_requirejs_dependencies():
     return json.loads(read('requirejs_dependencies.json'))
 
 
-with open("requirements.txt") as f:
-    require = f.readlines()
-install_requires = [t.strip() for t in require]
-
-
 version_ns = {}
 with open(os.path.join(here, "pydeck", "_version.py")) as f:
     exec(f.read(), {}, version_ns)
@@ -232,7 +227,11 @@ if __name__ == "__main__":
             "Framework :: Jupyter",
         ],
         extras_require={"testing": ["pytest"]},
-        install_requires=install_requires,
+        install_requires=[
+            'ipywidgets>=7.0.0,<8',
+            'traitlets>=4.3.2',
+            'Jinja2>=2.10.1'
+        ],
         setup_requires=['pytest-runner'],
         tests_require=['pytest'],
         data_files=[

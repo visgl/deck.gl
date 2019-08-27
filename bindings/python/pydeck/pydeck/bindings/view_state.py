@@ -11,7 +11,8 @@ class ViewState(JSONMixin):
     latitude : float
         y-coordinate of focus
     zoom : float
-        Magnification level of the map, usually between 0 (representing the whole world) and 21 (close to individual buildings)
+        Magnification level of the map, usually between 0 (representing the whole world)
+        and 21 (close to individual buildings)
     min_zoom : float
         Least mangified zoom level the user can navigate to
     max_zoom : float
