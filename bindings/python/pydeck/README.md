@@ -29,8 +29,11 @@ git clone https://github.com/uber/deck.gl/
 cd deck.gl/bindings/python/pydeck
 
 # Create a virtual environment
-virtualenv -p python3 env3
+python3 -m venv env3
 . env3/bin/activate
+
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
 
 python setup.py install
 ```
