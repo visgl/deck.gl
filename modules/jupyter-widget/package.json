@@ -14,11 +14,10 @@
     "type": "git",
     "url": "https://github.com/uber/deck.gl.git"
   },
-  "main": "dist/es5/index.js",
-  "module": "dist/esm/index.js",
-  "esnext": "dist/es6/index.js",
+  "main": "dist/index.js",
   "files": [
-    "dist",
+    "dist/index.js",
+    "dist/index.js.map",
     "src",
     "README.md"
   ],
