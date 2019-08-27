@@ -55,8 +55,7 @@ matrix:
       before_install:
         - cd bindings/python/pydeck
         - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
-        - yes | npm install -g webpack
-        - yes | npm install -g webpack-cli
+        - yes | npm install -g webpack webpack-cli babel-cli
       python:
         - '3.5'
         - '2.7'
@@ -68,5 +67,5 @@ matrix:
         - sudo apt-get update
         - pip install -r requirements.txt
         - pip install -r requirements-dev.txt
-        - pip install -e .
+        - pip install -e . --install-option "--build_all"
       script: pytest --cov=pydeck

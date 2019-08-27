@@ -1,0 +1,14 @@
+{#- Requirements handler for Jupyter notebook extension -#}
+{#- Loads dependencies defined in the pydeck/requirejs_dependencies.json -#}
+/* eslint-disable */
+define(function() {
+  'use strict';
+  requirejs.config(
+    {{- dependencies -}}
+  );
+  // Export the required load_ipython_extension function
+  return {
+    load_ipython_extension: function() {}
+  };
+});
+

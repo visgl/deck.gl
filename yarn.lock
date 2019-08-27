@@ -6852,7 +6852,7 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-mapbox-gl@^0.53.1, mapbox-gl@~0.53.0:
+mapbox-gl@~0.53.0:
   version "0.53.1"
   resolved "https://registry.yarnpkg.com/mapbox-gl/-/mapbox-gl-0.53.1.tgz#08a956d8da54b04bc7f29ab1319bddb9c97ddedf"
   integrity sha512-dTtW/qlkUowKGlqOhE8fqII2Tj4lcokvlZwUDLnkjy4uQ9zMFnVBULGeSzzTVkj9HtQZ3Zbey10/jmoVPV9t5w==

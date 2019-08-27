@@ -1,23 +1,13 @@
+/* global requirejs, document */
 import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {
-  createDeckScaffold,
-  loadCss,
-  hideMapboxCSSWarning,
-  setMapProps,
-  waitForElementToDisplay
-} from './utils';
+import {loadCss, hideMapboxCSSWarning} from './utils';
 
-import {Deck, MapView} from '@deck.gl/core';
-import * as deckLayers from '@deck.gl/layers';
-import * as deckAggregationLayers from '@deck.gl/aggregation-layers';
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 
-const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v0.53.1/mapbox-gl.css';
-
-// Note: Variables shared explictly between Python and JavaScript use camel-case
+// Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
   defaults() {
     return {
@@ -60,72 +50,67 @@ export class DeckGLModel extends DOMWidgetModel {
   }
 }
 
-const TICK_RATE_MILLISECONDS = 100;
-
 export class DeckGLView extends DOMWidgetView {
   render() {
-    this.modelId = this.model.model_id;
     super.render();
-    this.model.on('change:json_input', this.value_changed, this);
+    this.model.on('change:json_input', this.valueChanged, this);
     loadCss(MAPBOX_CSS_URL);
-    const [width, height] = [this.model.get('width'), this.model.get('height')];
 
-    createDeckScaffold(this.el, this.modelId, width, height);
+    const containerDiv = document.createElement('div');
 
-    waitForElementToDisplay(
-      `#deck-map-wrapper-${this.modelId}`,
-      TICK_RATE_MILLISECONDS,
-      this.initJSElements.bind(this)
-    );
+    containerDiv.style.height = `${this.model.get('height')}px`;
+    containerDiv.style.width = `${this.model.get('width')}px`;
+    this.el.appendChild(containerDiv);
+
+    this.deck = initDeck({
+      mapboxApiKey: this.model.get('mapbox_key'),
+      container: containerDiv,
+      jsonInput: JSON.parse(this.model.get('json_input'))
+    });
   }
 
-  _onViewStateChange({viewState}) {
-    this.deck.setProps({viewState});
-    setMapProps(this.mapLayer, {viewState});
+  valueChanged() {
+    updateDeck(this.model.get('json_input'), this.deck);
+    // Jupyter notebook displays an error that this suppresses
+    hideMapboxCSSWarning();
   }
+}
 
-  initJSElements() {
+function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
+  const results = jsonConverter.convertJsonToDeckProps(inputJSON);
+  deckConfig.setProps(results);
+}
+
+export function initDeck({mapboxApiKey, container, jsonInput}) {
+  requirejs(['deckgl', 'mapboxgl', 'h3', 'S2'], (deckgl, mapboxgl) => {
     try {
-      if (!this.deck) {
-        this.deck = new Deck({
-          canvas: `deck-map-container-${this.modelId}`,
-          height: '100%',
-          width: '100%',
-          onLoad: this.value_changed.bind(this),
-          views: [new MapView()],
-          onViewStateChange: this._onViewStateChange.bind(this)
-        });
-      }
+      const layersDict = {};
+      const layers = Object.keys(deckgl).filter(
+        x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
+      );
+      layers.map(k => (layersDict[k] = deckgl[k]));
 
-      if (!this.mapLayer) {
-        const mapboxgl = require('mapbox-gl');
+      const jsonConverter = new deckgl._JSONConverter({
+        configuration: {
+          layers: layersDict
+        }
+      });
 
-        mapboxgl.accessToken = this.model.get('mapbox_key');
-        this.mapLayer = new mapboxgl.Map({
-          container: `map-${this.modelId}`,
-          interactive: false,
-          style: null
-        });
-      }
+      const deckConfig = new deckgl.DeckGL({
+        map: mapboxgl,
+        mapboxApiAccessToken: mapboxApiKey,
+        latitude: 0,
+        longitude: 0,
+        zoom: 1,
+        container,
+        onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
+      });
+      return {jsonConverter, deckConfig};
     } catch (err) {
       // This will fail in node tests
       // eslint-disable-next-line
       console.error(err);
     }
-  }
-
-  value_changed() {
-    this.json_input = this.model.get('json_input');
-    const parsedJSONInput = JSON.parse(this.json_input);
-    this.initJSElements();
-    const jsonConverter = new JSONConverter({
-      configuration: {
-        layers: {...deckLayers, ...deckAggregationLayers}
-      }
-    });
-    const results = jsonConverter.convertJsonToDeckProps(parsedJSONInput);
-    this.deck.setProps(results);
-    hideMapboxCSSWarning();
-    setMapProps(this.mapLayer, this.deck.props);
-  }
+    return {};
+  });
 }

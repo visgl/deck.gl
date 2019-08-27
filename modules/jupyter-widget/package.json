@@ -24,17 +24,9 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "build": "echo No operation. This package is not currently built for distribution on NPM",
-    "notebook-bundle": "webpack"
+    "build": "webpack"
   },
   "dependencies": {
-    "@deck.gl/aggregation-layers": "7.3.0-alpha.1",
-    "@deck.gl/core": "7.3.0-alpha.1",
-    "@deck.gl/json": "7.3.0-alpha.1",
-    "@deck.gl/layers": "7.3.0-alpha.1",
-    "@jupyter-widgets/base": "^1.1.10",
-    "@luma.gl/constants": "^7.3.0-alpha.1",
-    "mapbox-gl": "^0.53.1"
-  },
-  "private": true
+    "@jupyter-widgets/base": "^1.1.10"
+  }
 }
