@@ -2,32 +2,6 @@
 // https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/webpack.config.js
 const path = require('path');
 
-const rules = [
-  {
-    // Compile ES2015 using babel
-    test: /\.js$/,
-    loader: 'babel-loader',
-    include: /src/,
-    options: {
-      presets: [['@babel/preset-env', {forceAllTransforms: true}]],
-      // all of the helpers will reference the module @babel/runtime to avoid duplication
-      // across the compiled output.
-      plugins: [
-        '@babel/transform-runtime',
-        'inline-webgl-constants',
-        ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
-      ]
-    }
-  }
-];
-
-const resolve = {
-  extensions: ['.webpack.js', '.web.js', '.js']
-};
-
-// Packages that shouldn't be bundled but loaded at runtime
-const externals = ['@jupyter-widgets/base'];
-
 module.exports = {
   /**
    * Embeddable @deck.gl/jupyter-widget bundle
@@ -50,12 +24,29 @@ module.exports = {
     contentBase: path.join(__dirname, 'dist')
   },
   module: {
-    rules
+    rules: [
+      {
+        // Compile ES2015 using babel
+        test: /\.js$/,
+        loader: 'babel-loader',
+        include: /src/,
+        options: {
+          presets: [['@babel/preset-env', {forceAllTransforms: true}]],
+          // all of the helpers will reference the module @babel/runtime to avoid duplication
+          // across the compiled output.
+          plugins: [
+            '@babel/transform-runtime',
+            'inline-webgl-constants',
+            ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
+          ]
+        }
+      }
+    ]
   },
-  externals,
+  // Packages that shouldn't be bundled but loaded at runtime
+  externals: ['@jupyter-widgets/base'],
   plugins: [
     // Uncomment for bundle size debug
     // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
-  ],
-  resolve
+  ]
 };
