@@ -12,7 +12,7 @@ if [[ -n "$IS_PYTHON" ]]; then
 
   python3 -m pytest bindings/python/pydeck/tests/
   echo "Running flake8..."
-  (cd bindings/python/pydeck && python3 -m flake8 bindings/python/pydeck)
+  (cd bindings/python/pydeck && python3 -m flake8 pydeck)
 fi
 RESULT=$?
 [ $RESULT -ne 0 ] && exit 1
