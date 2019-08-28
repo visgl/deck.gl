@@ -49,6 +49,7 @@ const defaultProps = {
 
   // flat or pbr
   _lighting: 'flat',
+  _enableOffsetModelMatrix: true,
   // _lighting must be pbr for this to work
   _imageBasedLightingEnvironment: null,
 
@@ -247,7 +248,7 @@ export default class ScenegraphLayer extends Layer {
       this.state.animator.animate(context.animationProps.time);
     }
 
-    const {sizeScale} = this.props;
+    const {sizeScale, _enableOffsetModelMatrix} = this.props;
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((model, {worldMatrix}) => {
       model.model.setInstanceCount(numInstances);
@@ -256,6 +257,7 @@ export default class ScenegraphLayer extends Layer {
         parameters,
         uniforms: {
           sizeScale,
+          enableOffsetModelMatrix: _enableOffsetModelMatrix,
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
           u_Camera: model.model.program.uniforms.project_uCameraPosition
