@@ -18,6 +18,7 @@ _attribute vec3 instanceTranslation;
 // Uniforms
 uniform float sizeScale;
 uniform mat4 sceneModelMatrix;
+uniform bool enableOffsetModelMatrix;
 
 // Attributes
 _attribute vec4 POSITION;
@@ -67,10 +68,16 @@ void main(void) {
   #endif
 
   vec3 pos = (instanceModelMatrix * (sceneModelMatrix * POSITION).xyz) * sizeScale + instanceTranslation;
-  pos = project_size(pos);
-  DECKGL_FILTER_SIZE(pos, geometry);
 
-  gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, geometry.position);
+  if(enableOffsetModelMatrix) {
+    DECKGL_FILTER_SIZE(pos, geometry);
+    gl_Position = project_position_to_clipspace(pos + instancePositions, instancePositions64xyLow, vec3(0.0), geometry.position);
+  }
+  else {
+    pos = project_size(pos);
+    DECKGL_FILTER_SIZE(pos, geometry);
+    gl_Position = project_position_to_clipspace(instancePositions, instancePositions64xyLow, pos, geometry.position);
+  }
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   #ifdef MODULE_PBR
