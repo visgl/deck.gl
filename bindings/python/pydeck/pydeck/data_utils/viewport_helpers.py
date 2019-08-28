@@ -143,7 +143,7 @@ def bbox_to_zoom_level(bbox):
     return zoom_level
 
 
-def autocompute_viewport(points, view_proportion=1, viewport_type=ViewState):
+def compute_viewport(points, view_proportion=1, viewport_type=ViewState):
     """Automatically computes a zoom level for the points passed in.
 
     Parameters
