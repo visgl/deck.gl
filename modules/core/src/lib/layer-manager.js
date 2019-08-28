@@ -20,6 +20,7 @@
 
 import assert from '../utils/assert';
 import {_ShaderCache as ShaderCache} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/addons';
 import seer from 'seer';
 import Layer from './layer';
 import {LIFECYCLE} from '../lifecycle/constants';
@@ -45,7 +46,6 @@ const INITIAL_CONTEXT = Object.seal({
   layerManager: null,
   deck: null,
   gl: null,
-  time: -1,
 
   // Settings
   useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
@@ -67,7 +67,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {deck, stats, viewport = null} = {}) {
+  constructor(gl, {deck, stats, viewport = null, timeline = null} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -88,7 +88,8 @@ export default class LayerManager {
       shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
-      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}) // Current viewport, exposed to layers for project* function
+      viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
+      timeline: timeline || new Timeline()
     });
 
     this._needsRedraw = 'Initial render';
@@ -207,9 +208,6 @@ export default class LayerManager {
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
   updateLayers(animationProps = {}) {
-    if ('time' in animationProps) {
-      this.context.time = animationProps.time;
-    }
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered
@@ -292,7 +290,7 @@ export default class LayerManager {
     // Finalize unmatched layers
     const error2 = this._finalizeOldLayers(oldLayerMap);
 
-    this._needsUpdate = false;
+    this._needsUpdate = generatedLayers.some(layer => layer.hasUniformTransition());
 
     const firstError = error || error2;
     return {error: firstError, generatedLayers};

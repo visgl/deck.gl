@@ -7,15 +7,6 @@ import Transition from '../transitions/transition';
 import log from '../utils/log';
 import assert from '../utils/assert';
 
-const noop = () => {};
-const DEFAULT_TRANSITION_SETTINGS = {
-  duration: 0,
-  easing: t => t,
-  onStart: noop,
-  onEnd: noop,
-  onInterrupt: noop
-};
-
 export default class AttributeTransitionManager {
   constructor(gl, {id}) {
     this.id = id;
@@ -289,11 +280,9 @@ export default class AttributeTransitionManager {
 
     this.needsRedraw = true;
 
-    const transitionSettings = Object.assign({}, DEFAULT_TRANSITION_SETTINGS, settings);
-
     // Attribute descriptor to transition from
     transition.start(
-      Object.assign({}, this._getNextTransitionStates(transition, settings), transitionSettings)
+      Object.assign({}, this._getNextTransitionStates(transition, settings), settings)
     );
   }
 }

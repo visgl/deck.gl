@@ -36,6 +36,7 @@ import {
   setParameters,
   lumaStats
 } from '@luma.gl/core';
+import {Timeline} from '@luma.gl/addons';
 import {Stats} from 'probe.gl';
 import {EventManager} from 'mjolnir.js';
 
@@ -624,11 +625,18 @@ export default class Deck {
     // layerManager depends on viewport created by viewManager.
     assert(this.viewManager);
     const viewport = this.viewManager.getViewports()[0];
+
+    // timeline for transitions
+    const timeline = new Timeline();
+    timeline.play();
+    this.animationLoop.attachTimeline(timeline);
+
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
       deck: this,
       stats: this.stats,
-      viewport
+      viewport,
+      timeline
     });
 
     this.effectManager = new EffectManager();

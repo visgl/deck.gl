@@ -20,9 +20,10 @@
 
 import test from 'tape-catch';
 import {Layer, AttributeManager, COORDINATE_SYSTEM, MapView, OrbitView} from 'deck.gl';
-import {testInitializeLayer} from '@deck.gl/test-utils';
+import {testInitializeLayer, testLayer} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 import {equals, Matrix4} from 'math.gl';
+import {Timeline} from '@luma.gl/addons';
 
 import {sleep, testAsyncData} from './async-iterator-test-utils';
 
@@ -348,6 +349,71 @@ test('Layer#Async Iterable Data', async t => {
 
   data = await testAsyncData(t, getDataIterator());
   t.deepEquals(data, [0, 1, 2, 3, 4, 5, 6, 7], 'data is fully loaded');
+
+  t.end();
+});
+
+test('Layer#uniformTransitions', t => {
+  const drawCalls = [];
+  const timeline = new Timeline();
+
+  class TestLayer extends Layer {
+    initializeState() {}
+
+    draw() {
+      drawCalls.push({
+        opacity: this.props.opacity
+      });
+    }
+  }
+
+  const testCases = [
+    {
+      props: {
+        id: 'testLayer',
+        data: [],
+        opacity: 0
+      },
+      onBeforeUpdate: () => timeline.setTime(0),
+      onAfterUpdate: () => t.deepEquals(drawCalls.pop(), {opacity: 0}, 'layer drawn with opacity')
+    },
+    {
+      updateProps: {
+        opacity: 1
+      },
+      onBeforeUpdate: () => timeline.setTime(100),
+      onAfterUpdate: () => t.deepEquals(drawCalls.pop(), {opacity: 1}, 'layer drawn with opacity')
+    },
+    {
+      updateProps: {
+        opacity: 0,
+        transitions: {
+          opacity: 200
+        }
+      },
+      onBeforeUpdate: () => timeline.setTime(200),
+      onAfterUpdate: () =>
+        t.deepEquals(drawCalls.pop(), {opacity: 1}, 'layer drawn with opacity in transition')
+    },
+    {
+      updateProps: {
+        opacity: 0
+      },
+      onBeforeUpdate: () => timeline.setTime(300),
+      onAfterUpdate: () =>
+        t.deepEquals(drawCalls.pop(), {opacity: 0.5}, 'layer drawn with opacity in transition')
+    },
+    {
+      updateProps: {
+        opacity: 0
+      },
+      onBeforeUpdate: () => timeline.setTime(400),
+      onAfterUpdate: () =>
+        t.deepEquals(drawCalls.pop(), {opacity: 0}, 'layer drawn with opacity in transition')
+    }
+  ];
+
+  testLayer({Layer: TestLayer, timeline, testCases, onError: t.notOk});
 
   t.end();
 });
