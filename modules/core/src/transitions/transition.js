@@ -1,9 +1,3 @@
-// transition states
-const STATE_NONE = 0;
-const STATE_PENDING = 1;
-const STATE_IN_PROGRESS = 2;
-const STATE_ENDED = 3;
-
 function noop() {}
 
 export default class Transition {
@@ -21,7 +15,7 @@ export default class Transition {
    * Any additional properties are also saved on the instance but have no effect.
    */
   constructor(props) {
-    this._state = STATE_NONE;
+    this._inProgress = false;
     this._handle = null;
 
     // Defaults
@@ -36,12 +30,8 @@ export default class Transition {
   }
 
   /* Public API */
-  get state() {
-    return this._state;
-  }
-
   get inProgress() {
-    return this._state === STATE_PENDING || this._state === STATE_IN_PROGRESS;
+    return this._inProgress;
   }
 
   /**
@@ -49,21 +39,24 @@ export default class Transition {
    * @params props {object} - optional overriding props. see constructor
    */
   start(props) {
-    if (this.inProgress) {
+    if (this._inProgress) {
       this.onInterrupt(this);
+      this.timeline.removeChannel(this._handle);
+      this._handle = null;
     }
     Object.assign(this, props);
-    this._setState(STATE_PENDING);
+    this._inProgress = true;
   }
 
   /**
    * cancel this transition if it is in progress.
    */
   cancel() {
-    if (this.inProgress) {
+    if (this._inProgress) {
       this.onInterrupt(this);
-      this._setState(STATE_NONE);
       this.timeline.removeChannel(this._handle);
+      this._handle = null;
+      this._inProgress = false;
     }
   }
 
@@ -71,52 +64,31 @@ export default class Transition {
    * update this transition.
    */
   update() {
+    if (!this._inProgress) {
+      return false;
+    }
     const {timeline, duration, easing} = this;
     let handle = this._handle;
-    if (this.state === STATE_PENDING) {
-      if (handle !== null) {
-        timeline.removeChannel(handle);
-      }
+
+    if (handle === null) {
       handle = timeline.addChannel({
         delay: timeline.getTime(),
         duration
       });
       this._handle = handle;
-      this._setState(STATE_IN_PROGRESS);
+      this.onStart(this);
     }
 
-    if (this.state === STATE_IN_PROGRESS) {
-      const time = timeline.getTime(handle);
-      this.time = easing(time / duration);
-      this.onUpdate(this);
+    const time = timeline.getTime(handle);
+    this.time = easing(time / duration);
+    this.onUpdate(this);
 
-      if (timeline.isFinished(handle)) {
-        timeline.removeChannel(handle);
-        this._handle = null;
-        this._setState(STATE_ENDED);
-      }
-      return true;
+    if (timeline.isFinished(handle)) {
+      timeline.removeChannel(handle);
+      this._handle = null;
+      this._inProgress = false;
+      this.onEnd(this);
     }
-
-    return false;
-  }
-
-  /* Private API */
-  _setState(newState) {
-    if (this._state === newState) {
-      return;
-    }
-
-    this._state = newState;
-
-    switch (newState) {
-      case STATE_PENDING:
-        this.onStart(this);
-        break;
-      case STATE_ENDED:
-        this.onEnd(this);
-        break;
-      default:
-    }
+    return true;
   }
 }

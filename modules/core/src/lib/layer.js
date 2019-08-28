@@ -426,7 +426,7 @@ export default class Layer extends Component {
     this.updateAttributes(changedAttributes);
   }
 
-  // Update attribute and uniform transitions, returns props in transition
+  // Update attribute transitions. This is called in drawLayer, no model updates required.
   _updateAttributeTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
@@ -434,6 +434,7 @@ export default class Layer extends Component {
     }
   }
 
+  // Update uniform (prop) transitions. This is called in updateState, may result in model updates.
   _updateUniformTransition() {
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {

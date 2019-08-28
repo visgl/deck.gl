@@ -2,12 +2,6 @@ import test from 'tape-catch';
 import Transition from '@deck.gl/core/transitions/transition';
 import {Timeline} from '@luma.gl/addons';
 
-// transition states
-const STATE_NONE = 0;
-const STATE_PENDING = 1;
-const STATE_IN_PROGRESS = 2;
-const STATE_ENDED = 3;
-
 test('Transition#constructor', t => {
   let transition = new Transition();
   t.ok(transition, 'Transition is constructed without props');
@@ -23,17 +17,19 @@ test('Transition#start', t => {
   let onStartCallCount = 0;
 
   const transition = new Transition({
+    timeline: new Timeline(),
     onStart: () => {
       onStartCallCount++;
     }
   });
-  t.is(transition.state, STATE_NONE, 'Transition has initial state');
-  t.notOk(transition.inProgress, 'inProgress returns correct result');
+  t.notOk(transition.inProgress, 'Transition is not in progress');
 
   transition.start({customAttribute: 'custom value'});
-  t.is(transition.state, STATE_PENDING, 'Transition has started');
-  t.ok(transition.inProgress, 'inProgress returns correct result');
+  t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.customAttribute, 'custom value', 'Transition has customAttribute');
+  t.is(onStartCallCount, 0, 'onStart is not called');
+
+  transition.update();
   t.is(onStartCallCount, 1, 'onStart is called once');
 
   t.end();
@@ -56,7 +52,7 @@ test('Transition#update', t => {
   });
 
   transition.update();
-  t.is(transition.state, STATE_NONE, 'Transition is not in progress');
+  t.notOk(transition.inProgress, 'Transition is not in progress');
 
   transition.start({
     duration: 1,
@@ -64,24 +60,22 @@ test('Transition#update', t => {
   });
 
   transition.update();
-  t.is(transition.state, STATE_IN_PROGRESS, 'Transition is in progress');
-  t.ok(transition.inProgress, 'inProgress returns correct result');
+  t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.time, 0, 'time is correct');
 
   timeline.setTime(0.5);
   transition.update();
-  t.is(transition.state, STATE_IN_PROGRESS, 'Transition is in progress');
+  t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.time, 0.25, 'time is correct');
 
   timeline.setTime(1.5);
   transition.update();
-  t.is(transition.state, STATE_ENDED, 'Transition has ended');
-  t.notOk(transition.inProgress, 'inProgress returns correct result');
+  t.notOk(transition.inProgress, 'Transition has ended');
   t.is(transition.time, 1, 'time is correct');
 
   timeline.setTime(2);
   transition.update();
-  t.is(transition.state, STATE_ENDED, 'Transition has ended');
+  t.notOk(transition.inProgress, 'Transition has ended');
 
   t.is(onUpdateCallCount, 3, 'onUpdate is called 3 times');
   t.is(onEndCallCount, 1, 'onEnd is called 3 times');
