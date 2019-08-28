@@ -38,7 +38,7 @@ _is_open(dev_server_url)
 WIDGET_PATH = os.path.join(here, '../../../../modules/jupyter-widget/dist')
 
 def get_deckgl_version():
-    with open(os.path.join(WIDGET_PATH, '../..', 'lerna.json')) as f:
+    with open(os.path.join(WIDGET_PATH, '../../..', 'lerna.json')) as f:
         lerna_json = json.loads(f.read())
         version = lerna_json['version']
         return '~' + version
