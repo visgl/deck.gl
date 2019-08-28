@@ -46,7 +46,7 @@ npm_path = os.pathsep.join(
 
 
 # build_all is read from the command line and  `yarn bootstrap`
-# for a frontend build instead of using `webpack` within @deck.gl/jupyter-widget
+# for a frontend build instead of using `npm run build` within @deck.gl/jupyter-widget
 build_all = False
 
 
@@ -100,8 +100,8 @@ class FrontendBuild(Command):
 
     def has_build_utilities(self):
         try:
+            check_call(["npm", "--version"], stdout=open(os.devnull, 'wb'))
             check_call(["yarn", "--version"], stdout=open(os.devnull, 'wb'))
-            check_call(["webpack", "--version"], stdout=open(os.devnull, 'wb'))
             return True
         except Exception:
             return False
@@ -123,7 +123,7 @@ class FrontendBuild(Command):
         has_build_utilities = self.has_build_utilities()
         if not has_build_utilities:
             log.error(
-                "`yarn` and/or `webpack` are unavailable but are necessary for this build."
+                "`yarn` and/or `npm` are unavailable but are necessary for this build."
             )
 
         env = os.environ.copy()
@@ -139,9 +139,9 @@ class FrontendBuild(Command):
                 env=env,
             )
         else:
-            log.info("Installing build dependencies with webpack.")
+            log.info("Installing build dependencies with `npm run build`.")
             check_call(
-                ["webpack"],
+                ["npm", "run", "build"],
                 cwd=widget_dir,
                 stdout=sys.stdout,
                 stderr=sys.stderr,
@@ -228,6 +228,7 @@ if __name__ == "__main__":
         ],
         extras_require={"testing": ["pytest"]},
         install_requires=[
+            'ipykernel>=5.1.2',
             'ipywidgets>=7.0.0,<8',
             'traitlets>=4.3.2',
             'Jinja2>=2.10.1'

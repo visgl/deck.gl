@@ -6,7 +6,7 @@
   },
   "paths": {
     "deck.gl": "https://unpkg.com/deck.gl/dist.min",
-    "mapbox-gl": "https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.js",
+    "mapbox-gl": "https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl",
     "h3": "https://unpkg.com/h3-js@^3.4.3/dist/h3-js.umd",
     "S2": "https://unpkg.com/s2-geometry@^1.2.10/src/s2geometry"
   }
