@@ -49,7 +49,7 @@ const defaultProps = {
 
   // flat or pbr
   _lighting: 'flat',
-  _enableOffsetModelMatrix: true,
+  _enableOffsetModelMatrix: false,
   // _lighting must be pbr for this to work
   _imageBasedLightingEnvironment: null,
 
