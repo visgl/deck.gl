@@ -3,6 +3,7 @@ import AttributeTransitionManager from '@deck.gl/core/lib/attribute-transition-m
 import Attribute from '@deck.gl/core/lib/attribute';
 import test from 'tape-catch';
 import {isWebGL2} from '@luma.gl/core';
+import {Timeline} from '@luma.gl/addons';
 import {gl} from '@deck.gl/test-utils';
 
 const TEST_ATTRIBUTES = {
@@ -55,7 +56,8 @@ test('AttributeTransitionManager#constructor', t => {
 
 if (isWebGL2(gl)) {
   test('AttributeTransitionManager#update', t => {
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+    const timeline = new Timeline();
+    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     t.notOk(manager.transform, 'transform is not constructed');
@@ -114,8 +116,8 @@ if (isWebGL2(gl)) {
   });
 
   test('AttributeTransitionManager#transition', t => {
-    /* TODO - restore
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+    const timeline = new Timeline();
+    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     let startCounter = 0;
@@ -140,25 +142,31 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.setNeedsRedraw('initial');
 
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(0);
+    manager.run();
     t.is(startCounter, 1, 'transition starts');
 
     attributes.instanceSizes.needsRedraw({clearChangedFlags: true});
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(500);
+    timeline.setTime(500);
+    manager.run();
     t.is(startCounter, 1, 'no new transition is triggered');
 
     attributes.instanceSizes.update({value: new Float32Array(4).fill(3)});
     attributes.instanceSizes.setNeedsRedraw('update');
 
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(1000);
+    timeline.setTime(1000);
+    manager.run();
     t.is(interruptCounter, 1, 'transition is interrupted');
     t.is(startCounter, 2, 'new transition is triggered');
 
-    manager.setCurrentTime(1500);
+    timeline.setTime(1500);
+    manager.run();
     t.deepEquals(
-      manager.getAttributes().instanceSizes.getData(),
+      manager
+        .getAttributes()
+        .instanceSizes.getBuffer()
+        .getData(),
       [2, 2, 2, 2],
       'attribute in transition'
     );
@@ -167,28 +175,34 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.setNeedsRedraw('update');
 
     manager.update({attributes, transitions, numInstances: 4});
-    manager.setCurrentTime(1500);
+    timeline.setTime(1500);
+    manager.run();
     t.is(interruptCounter, 2, 'transition is interrupted');
     t.is(startCounter, 3, 'new transition is triggered');
 
-    manager.setCurrentTime(2000);
+    timeline.setTime(2000);
+    manager.run();
     t.deepEquals(
-      manager.getAttributes().instanceSizes.getData(),
+      manager
+        .getAttributes()
+        .instanceSizes.getBuffer()
+        .getData(),
       [3, 3, 3, 3],
       'attribute in transition'
     );
 
-    manager.setCurrentTime(2500);
+    timeline.setTime(2500);
+    manager.run();
     t.is(endCounter, 1, 'transition ends');
 
     manager.finalize();
-    */
     t.end();
   });
 } else {
   // AttributeTransitionManager should not fail in WebGL1
   test('AttributeTransitionManager#update, setCurrentTime', t => {
-    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition'});
+    const timeline = new Timeline();
+    const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
     attributes.instanceSizes.setNeedsRedraw('initial');
@@ -196,8 +210,9 @@ if (isWebGL2(gl)) {
     manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.pass('update does not throw error');
 
-    manager.setCurrentTime(0);
-    t.pass('setCurrentTime does not throw error');
+    timeline.setTime(0);
+    manager.run();
+    t.pass('run does not throw error');
 
     t.is(Object.keys(manager.getAttributes()).length, 0, 'no attributes added to transition');
     manager.finalize();

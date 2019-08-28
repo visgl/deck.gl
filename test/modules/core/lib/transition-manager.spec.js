@@ -2,6 +2,7 @@ import test from 'tape-catch';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import {testExports} from '@deck.gl/core/controllers/map-controller';
 const {MapState} = testExports;
+import {Timeline} from '@luma.gl/addons';
 
 /* global global, setTimeout, clearTimeout */
 // backfill requestAnimationFrame on Node
@@ -113,7 +114,8 @@ test('TransitionManager#constructor', t => {
 });
 
 test('TransitionManager#processViewStateChange', t => {
-  const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, props);
+  const timeline = new Timeline();
+  const mergeProps = props => Object.assign({timeline}, TransitionManager.defaultProps, props);
 
   TEST_CASES.forEach(testCase => {
     const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
@@ -131,6 +133,7 @@ test('TransitionManager#processViewStateChange', t => {
 });
 
 test('TransitionManager#callbacks', t => {
+  const timeline = new Timeline();
   const testCase = TEST_CASES[1];
 
   let startCount = 0;
@@ -165,7 +168,8 @@ test('TransitionManager#callbacks', t => {
     }
   };
 
-  const mergeProps = props => Object.assign({}, TransitionManager.defaultProps, callbacks, props);
+  const mergeProps = props =>
+    Object.assign({timeline}, TransitionManager.defaultProps, callbacks, props);
 
   const transitionManager = new TransitionManager(MapState, mergeProps(testCase.initialProps));
 
@@ -174,10 +178,14 @@ test('TransitionManager#callbacks', t => {
     transitionManager.processViewStateChange(transitionProps);
   });
 
-  transitionManager.updateTransition(200);
-  transitionManager.updateTransition(400);
-  transitionManager.updateTransition(600);
-  transitionManager.updateTransition(800);
+  timeline.setTime(200);
+  transitionManager.updateTransition();
+  timeline.setTime(400);
+  transitionManager.updateTransition();
+  timeline.setTime(600);
+  transitionManager.updateTransition();
+  timeline.setTime(800);
+  transitionManager.updateTransition();
 
   t.is(startCount, 2, 'onTransitionStart() called twice');
   t.is(interruptCount, 1, 'onTransitionInterrupt() called once');

@@ -26,15 +26,16 @@ export default class TransitionManager {
     this.ControllerState = ControllerState;
     this.props = Object.assign({}, DEFAULT_PROPS, props);
     this.propsInTransition = null;
-    this.time = 0;
-    this.transition = new Transition();
+    this.transition = new Transition({timeline: props.timeline});
 
     this.onViewStateChange = props.onViewStateChange;
 
     this._onTransitionUpdate = this._onTransitionUpdate.bind(this);
   }
 
-  finalize() {}
+  finalize() {
+    this.transition.cancel();
+  }
 
   // Returns current transitioned viewport.
   getViewportInTransition() {
@@ -74,9 +75,8 @@ export default class TransitionManager {
     return transitionTriggered;
   }
 
-  updateTransition(timestamp) {
-    this.time = timestamp;
-    this._updateTransition();
+  updateTransition() {
+    this.transition.update();
   }
 
   // Helper methods
@@ -133,11 +133,7 @@ export default class TransitionManager {
       onInterrupt: this._onTransitionEnd(endProps.onTransitionInterrupt),
       onEnd: this._onTransitionEnd(endProps.onTransitionEnd)
     });
-    this._updateTransition();
-  }
-
-  _updateTransition() {
-    this.transition.update(this.time);
+    this.updateTransition();
   }
 
   _onTransitionEnd(callback) {

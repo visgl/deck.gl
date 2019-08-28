@@ -57,7 +57,6 @@ const INITIAL_CONTEXT = Object.seal({
   shaderCache: null,
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
-  animationProps: null,
   mousePosition: null,
 
   userData: {} // Place for any custom app `context`
@@ -207,7 +206,7 @@ export default class LayerManager {
   }
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
-  updateLayers(animationProps = {}) {
+  updateLayers() {
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered

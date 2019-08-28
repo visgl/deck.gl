@@ -1,3 +1,5 @@
+import {Timeline} from '@luma.gl/addons';
+
 function makeEvents(events, opts = {}) {
   return events.map((type, i) => makeEvent(type, opts, i));
 }
@@ -175,8 +177,9 @@ export default function testController(t, ViewClass, defaultProps, blackList = [
   let onViewStateChangeCalled = 0;
   let affectedStates = null;
 
+  const timeline = new Timeline();
   const controllerProps = new ViewClass({controller: true}).controller;
-  Object.assign(defaultProps, BASE_PROPS, controllerProps);
+  Object.assign(defaultProps, BASE_PROPS, controllerProps, {timeline});
   const ControllerClass = controllerProps.type;
   const controller = new ControllerClass(defaultProps);
 
