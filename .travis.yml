@@ -33,7 +33,7 @@ matrix:
         - cat coverage/lcov.info | coveralls
 
     - language: python
-      dist: precise
+      dist: xenial
       os: linux
       group: stable
       sudo: required
@@ -56,9 +56,9 @@ matrix:
         - cd bindings/python/pydeck
         - export DISPLAY=:99.0; sh -e /etc/init.d/xvfb start
       python:
-        - '3.7'
-        - '3.5'
-        - '2.7'
+        - "3.7"
+        - "3.5"
+        - "2.7"
       cache:
         pip: true
         directories:
