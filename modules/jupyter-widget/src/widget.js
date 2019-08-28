@@ -1,4 +1,4 @@
-/* global requirejs, document */
+/* global document */
 import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
@@ -82,35 +82,37 @@ function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
 }
 
 export function initDeck({mapboxApiKey, container, jsonInput}) {
-  requirejs(['deckgl', 'mapboxgl', 'h3', 'S2'], (deckgl, mapboxgl) => {
-    try {
-      const layersDict = {};
-      const layers = Object.keys(deckgl).filter(
-        x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
-      );
-      layers.map(k => (layersDict[k] = deckgl[k]));
+  require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
+    require(['deck.gl'], deckgl => {
+      try {
+        const layersDict = {};
+        const layers = Object.keys(deckgl).filter(
+          x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
+        );
+        layers.map(k => (layersDict[k] = deckgl[k]));
 
-      const jsonConverter = new deckgl._JSONConverter({
-        configuration: {
-          layers: layersDict
-        }
-      });
+        const jsonConverter = new deckgl._JSONConverter({
+          configuration: {
+            layers: layersDict
+          }
+        });
 
-      const deckConfig = new deckgl.DeckGL({
-        map: mapboxgl,
-        mapboxApiAccessToken: mapboxApiKey,
-        latitude: 0,
-        longitude: 0,
-        zoom: 1,
-        container,
-        onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
-      });
-      return {jsonConverter, deckConfig};
-    } catch (err) {
-      // This will fail in node tests
-      // eslint-disable-next-line
-      console.error(err);
-    }
-    return {};
+        const deckConfig = new deckgl.DeckGL({
+          map: mapboxgl,
+          mapboxApiAccessToken: mapboxApiKey,
+          latitude: 0,
+          longitude: 0,
+          zoom: 1,
+          container,
+          onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
+        });
+        return {jsonConverter, deckConfig};
+      } catch (err) {
+        // This will fail in node tests
+        // eslint-disable-next-line
+        console.error(err);
+      }
+      return {};
+    });
   });
 }
