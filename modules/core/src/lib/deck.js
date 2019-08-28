@@ -27,6 +27,7 @@ import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
 import log from '../utils/log';
 import deckGlobal from './init';
+import {createProgramManager} from '../shaderlib';
 
 import GL from '@luma.gl/constants';
 import {
@@ -628,16 +629,18 @@ export default class Deck {
     const viewport = this.viewManager.getViewports()[0];
 
     // Note: avoid React setState due GL animation loop / setState timing issue
+    const programManager = createProgramManager(gl);
     this.layerManager = new LayerManager(gl, {
       deck: this,
       stats: this.stats,
       viewport,
-      timeline
+      timeline,
+      programManager
     });
 
     this.effectManager = new EffectManager();
 
-    this.deckRenderer = new DeckRenderer(gl);
+    this.deckRenderer = new DeckRenderer(gl, {programManager});
 
     this.deckPicker = new DeckPicker(gl);
 

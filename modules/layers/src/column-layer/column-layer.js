@@ -160,7 +160,7 @@ export default class ColumnLayer extends Layer {
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         isInstanced: true,
-        shaderCache: this.context.shaderCache
+        programManager: this.context.programManager
       })
     );
   }

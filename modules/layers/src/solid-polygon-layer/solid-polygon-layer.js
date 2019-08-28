@@ -288,7 +288,7 @@ export default class SolidPolygonLayer extends Layer {
           },
           vertexCount: 0,
           isIndexed: true,
-          shaderCache: this.context.shaderCache
+          programManager: this.context.programManager
         })
       );
     }
@@ -310,7 +310,7 @@ export default class SolidPolygonLayer extends Layer {
           }),
           instanceCount: 0,
           isInstanced: 1,
-          shaderCache: this.context.shaderCache
+          programManager: this.context.programManager
         })
       );
 

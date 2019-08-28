@@ -133,7 +133,7 @@ export default class LineLayer extends Layer {
           }
         }),
         isInstanced: true,
-        shaderCache: this.context.shaderCache
+        programManager: this.context.programManager
       })
     );
   }

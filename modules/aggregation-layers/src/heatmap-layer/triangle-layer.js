@@ -57,7 +57,7 @@ export default class TriangleLayer extends Layer {
           drawMode: GL.TRIANGLE_FAN,
           vertexCount
         }),
-        shaderCache: this.context.shaderCache
+        programManager: this.context.programManager
       })
     );
   }

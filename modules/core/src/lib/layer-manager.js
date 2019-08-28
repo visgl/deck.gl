@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {_ShaderCache as ShaderCache} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/addons';
 import seer from 'seer';
 import Layer from './layer';
@@ -29,6 +28,7 @@ import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
 
 import Viewport from '../viewports/viewport';
+import {createProgramManager} from '../shaderlib';
 
 import {
   setPropOverrides,
@@ -66,7 +66,7 @@ const layerName = layer => (layer instanceof Layer ? `${layer}` : !layer ? 'null
 
 export default class LayerManager {
   // eslint-disable-next-line
-  constructor(gl, {deck, stats, viewport = null, timeline = null} = {}) {
+  constructor(gl, {deck, stats, viewport, timeline, programManager} = {}) {
     // Currently deck.gl expects the DeckGL.layers array to be different
     // whenever React rerenders. If the same layers array is used, the
     // LayerManager's diffing algorithm will generate a fatal error and
@@ -84,7 +84,7 @@ export default class LayerManager {
       deck,
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
+      programManager: programManager || (gl && createProgramManager(gl)),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function

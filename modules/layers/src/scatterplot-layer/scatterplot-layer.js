@@ -157,7 +157,7 @@ export default class ScatterplotLayer extends Layer {
           }
         }),
         isInstanced: true,
-        shaderCache: this.context.shaderCache
+        programManager: this.context.programManager
       })
     );
   }

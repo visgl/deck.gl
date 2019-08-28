@@ -66,7 +66,7 @@ export default class GPUGridLayer extends CompositeLayer {
     }
     const options = {
       id: `${this.id}-gpu-aggregator`,
-      shaderCache: this.context.shaderCache
+      programManager: this.context.programManager
     };
     this.state = {
       gpuGridAggregator: new GPUGridAggregator(gl, options),

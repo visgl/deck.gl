@@ -77,7 +77,7 @@ export default class ScreenGridLayer extends Layer {
 
     const options = {
       id: `${this.id}-aggregator`,
-      shaderCache: this.context.shaderCache
+      programManager: this.context.programManager
     };
     const maxBuffer = this._getMaxCountBuffer(gl);
     const weights = {
@@ -244,7 +244,7 @@ export default class ScreenGridLayer extends Layer {
           }
         }),
         isInstanced: true,
-        shaderCache: this.context.shaderCache
+        programManager: this.context.programManager
       })
     );
   }

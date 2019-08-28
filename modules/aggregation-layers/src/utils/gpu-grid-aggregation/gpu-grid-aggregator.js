@@ -125,7 +125,7 @@ export default class GPUGridAggregator {
 
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
-    this.shaderCache = opts.shaderCache || null;
+    this.programManager = opts.programManager || null;
     this.gl = gl;
     this.state = {
       // cache weights and position data to process when data is not changed
@@ -678,27 +678,27 @@ export default class GPUGridAggregator {
   }
 
   getAggregationModel(fp64 = false) {
-    const {gl, shaderCache} = this;
+    const {gl, programManager} = this;
     return new Model(gl, {
       id: 'Gird-Aggregation-Model',
       vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
       modules: fp64 ? [project64] : ['project32'],
-      shaderCache,
+      programManager,
       vertexCount: 0,
       drawMode: GL.POINTS
     });
   }
 
   getAllAggregationModel() {
-    const {gl, shaderCache} = this;
+    const {gl, programManager} = this;
     const {numCol, numRow} = this.state;
     return new Model(gl, {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
       fs: AGGREGATE_ALL_FS,
       modules: [fp64ShaderModule],
-      shaderCache,
+      programManager,
       vertexCount: 1,
       drawMode: GL.POINTS,
       isInstanced: true,

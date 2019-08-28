@@ -156,7 +156,7 @@ export default class ArcLayer extends Layer {
           }
         }),
         isInstanced: true,
-        shaderCache: this.context.shaderCache
+        programManager: this.context.programManager
       })
     );
 

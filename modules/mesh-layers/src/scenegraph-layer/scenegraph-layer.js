@@ -225,6 +225,7 @@ export default class ScenegraphLayer extends Layer {
       modelOptions: {
         vs: this.addVersionToShader(vs),
         fs: this.addVersionToShader(fs),
+        programManager: this.context.programManager,
         modules,
         isInstanced: true
       },
