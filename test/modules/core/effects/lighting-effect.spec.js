@@ -1,10 +1,16 @@
 import test from 'tape-catch';
 import LightingEffect from '@deck.gl/core/effects/lighting/lighting-effect';
 import {_CameraLight as CameraLight, DirectionalLight, PointLight} from '@deck.gl/core';
-import {getDefaultShaderModules} from '@luma.gl/core';
+import {ProgramManager} from '@luma.gl/core';
 import {MapView, PolygonLayer, LayerManager} from 'deck.gl';
 import * as FIXTURES from 'deck.gl-test/data';
 import {gl} from '@deck.gl/test-utils';
+
+const testViewport = new MapView().makeViewport({
+  width: 100,
+  height: 100,
+  viewState: {longitude: -122, latitude: 37, zoom: 13}
+});
 
 test('LightingEffect#constructor', t => {
   const lightingEffect = new LightingEffect();
@@ -18,19 +24,13 @@ test('LightingEffect#CameraLight', t => {
   const cameraLight = new CameraLight();
   const lightEffect = new LightingEffect({cameraLight});
 
-  const viewport = new MapView().makeViewport({
-    width: 100,
-    height: 100,
-    viewState: {longitude: -122, latitude: 37, zoom: 13}
-  });
-
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
     getPolygon: f => f,
     getFillColor: (f, {index}) => [index, 0, 0]
   });
 
-  layer.context = {viewport};
+  layer.context = {viewport: testViewport};
 
   const projectedLights = lightEffect._getProjectedPointLights(layer);
   t.ok(projectedLights[0], 'Camera light is ok');
@@ -52,19 +52,13 @@ test('LightingEffect#PointLight', t => {
   const pointLight = new PointLight();
   const lightEffect = new LightingEffect({pointLight});
 
-  const viewport = new MapView().makeViewport({
-    width: 100,
-    height: 100,
-    viewState: {longitude: -122, latitude: 37, zoom: 13}
-  });
-
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
     getPolygon: f => f,
     getFillColor: (f, {index}) => [index, 0, 0]
   });
 
-  layer.context = {viewport};
+  layer.context = {viewport: testViewport};
   pointLight.intensity = 2.0;
   pointLight.color = [255, 0, 0];
 
@@ -91,12 +85,7 @@ test('LightingEffect#prepare and cleanup', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight0, dirLight1});
-
-  const viewport = new MapView().makeViewport({
-    width: 100,
-    height: 100,
-    viewState: {longitude: -122, latitude: 37, zoom: 13}
-  });
+  const programManager = new ProgramManager(gl);
 
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
@@ -104,16 +93,17 @@ test('LightingEffect#prepare and cleanup', t => {
     getFillColor: (f, {index}) => [index, 0, 0]
   });
 
-  layer.context = {viewport};
+  layer.context = {viewport: testViewport};
 
-  const layerManager = new LayerManager(gl, {viewport});
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
   lightingEffect.prepare(gl, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
-    viewports: [viewport],
-    pixelRatio: 1
+    viewports: [testViewport],
+    pixelRatio: 1,
+    programManager
   });
 
   t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect prepares shadow passes');
@@ -134,11 +124,21 @@ test('LightingEffect#shadow module', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight});
-  const defaultModules = getDefaultShaderModules();
+  const programManager = new ProgramManager(gl);
+  lightingEffect.prepare(gl, {
+    layers: [],
+    viewports: [testViewport],
+    onViewportActive: () => {},
+    views: [],
+    pixelRatio: 1,
+    programManager
+  });
+  let defaultModules = programManager._defaultModules;
   let hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, true, 'LightingEffect adds shadow module to default correctly');
 
   lightingEffect.cleanup();
+  defaultModules = programManager._defaultModules;
   hasShadow = defaultModules.some(m => m.name === 'shadow');
   t.equal(hasShadow, false, 'LightingEffect removes shadow module to default correctly');
   t.end();

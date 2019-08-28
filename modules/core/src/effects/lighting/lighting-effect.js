@@ -1,9 +1,4 @@
-import {
-  AmbientLight,
-  Texture2D,
-  setDefaultShaderModules,
-  getDefaultShaderModules
-} from '@luma.gl/core';
+import {AmbientLight, Texture2D} from '@luma.gl/core';
 import DirectionalLight from './directional-light';
 import Effect from '../../lib/effect';
 import {Matrix4, Vector3} from 'math.gl';
@@ -25,6 +20,21 @@ const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
 ];
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
 
+const SHADOW_MODULE_INJECTIONS = [
+  {
+    hook: 'vs:DECKGL_FILTER_GL_POSITION',
+    injection: `
+  position = shadow_setVertexPosition(geometry.position);
+    `
+  },
+  {
+    hook: 'fs:DECKGL_FILTER_COLOR',
+    injection: `
+  color = shadow_filterShadowColor(color);
+    `
+  }
+];
+
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
   constructor(props) {
@@ -37,6 +47,7 @@ export default class LightingEffect extends Effect {
     this.shadowPasses = [];
     this.dummyShadowMap = null;
     this.shadow = false;
+    this.programManager = null;
 
     for (const key in props) {
       const lightSource = props[key];
@@ -58,13 +69,10 @@ export default class LightingEffect extends Effect {
     }
     this._applyDefaultLights();
 
-    if (this.directionalLights.some(light => light.shadow)) {
-      this.shadow = true;
-      this._addShadowModule();
-    }
+    this.shadow = this.directionalLights.some(light => light.shadow);
   }
 
-  prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
+  prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio, programManager}) {
     if (!this.shadow) return {};
 
     // create light matrix every frame to make sure always updated from light source
@@ -72,6 +80,12 @@ export default class LightingEffect extends Effect {
 
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl, pixelRatio);
+    }
+    if (!this.programManager) {
+      this.programManager = programManager;
+      if (shadow) {
+        this._addShadowModule(programManager);
+      }
     }
 
     if (!this.dummyShadowMap) {
@@ -127,8 +141,17 @@ export default class LightingEffect extends Effect {
       this.dummyShadowMap = null;
     }
 
-    if (this.shadow) {
-      this._removeShadowModule();
+    if (this.shadow && this.programManager) {
+      this.programManager.removeDefaultModule(shadow);
+      this.programManager = null;
+    }
+  }
+
+  _addShadowModule(programManager) {
+    programManager.addDefaultModule(shadow);
+
+    for (const injection of SHADOW_MODULE_INJECTIONS) {
+      programManager.addModuleInjection(shadow.name, injection);
     }
   }
 
@@ -147,32 +170,6 @@ export default class LightingEffect extends Effect {
   _createShadowPasses(gl, pixelRatio) {
     for (let i = 0; i < this.directionalLights.length; i++) {
       this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
-    }
-  }
-
-  _addShadowModule() {
-    const defaultShaderModules = getDefaultShaderModules();
-    let hasShadowModule = false;
-    for (const module of defaultShaderModules) {
-      if (module.name === `shadow`) {
-        hasShadowModule = true;
-        break;
-      }
-    }
-    if (!hasShadowModule) {
-      defaultShaderModules.push(shadow);
-      setDefaultShaderModules(defaultShaderModules);
-    }
-  }
-
-  _removeShadowModule() {
-    const defaultShaderModules = getDefaultShaderModules();
-    for (let i = 0; i < defaultShaderModules.length; i++) {
-      if (defaultShaderModules[i].name === `shadow`) {
-        defaultShaderModules.splice(i, 1);
-        setDefaultShaderModules(defaultShaderModules);
-        break;
-      }
     }
   }
 

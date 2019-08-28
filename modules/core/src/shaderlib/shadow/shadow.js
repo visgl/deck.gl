@@ -17,7 +17,6 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-import {createModuleInjection} from '@luma.gl/core';
 import {PROJECT_COORDINATE_SYSTEM} from '../project/constants';
 import {Vector3, Matrix4} from 'math.gl';
 import memoize from '../../utils/memoize';
@@ -96,23 +95,8 @@ vec4 shadow_filterShadowColor(vec4 color) {
 }
 `;
 
-const moduleName = 'shadow';
 const getMemoizedViewportCenterPosition = memoize(getViewportCenterPosition);
 const getMemoizedViewProjectionMatrices = memoize(getViewProjectionMatrices);
-
-createModuleInjection(moduleName, {
-  hook: 'vs:DECKGL_FILTER_GL_POSITION',
-  injection: `
-position = shadow_setVertexPosition(geometry.position);
-  `
-});
-
-createModuleInjection(moduleName, {
-  hook: 'fs:DECKGL_FILTER_COLOR',
-  injection: `
-color = shadow_filterShadowColor(color);
-  `
-});
 
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 1.0];
 const VECTOR_TO_POINT_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0];
