@@ -37,7 +37,6 @@ matrix:
       os: linux
       group: stable
       sudo: required
-      dist: trusty
       env:
         - CXX=g++-6
       addons:
