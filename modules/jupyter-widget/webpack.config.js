@@ -1,8 +1,10 @@
 // File leans heavily on configuration in
 // https://github.com/jupyter-widgets/widget-ts-cookiecutter/blob/master/%7B%7Bcookiecutter.github_project_name%7D%7D/webpack.config.js
 const path = require('path');
+const packageVersion = require('./package.json').version;
+const webpack = require('webpack');
 
-module.exports = {
+const config = {
   /**
    * Embeddable @deck.gl/jupyter-widget bundle
    *
@@ -20,9 +22,6 @@ module.exports = {
     libraryTarget: 'amd'
   },
   devtool: 'source-map',
-  devServer: {
-    contentBase: path.join(__dirname, 'dist')
-  },
   module: {
     rules: [
       {
@@ -44,9 +43,28 @@ module.exports = {
     ]
   },
   // Packages that shouldn't be bundled but loaded at runtime
-  externals: ['@jupyter-widgets/base'],
+  externals: ['@jupyter-widgets/base', 'deck.gl', 'mapbox-gl', 'h3', 'S2'],
   plugins: [
     // Uncomment for bundle size debug
     // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
   ]
+};
+
+module.exports = env => {
+  if (env && env.dev) {
+    config.mode = 'development';
+    config.devServer = {
+      contentBase: path.join(__dirname, 'dist')
+    };
+  } else {
+    config.mode = 'production';
+  }
+
+  config.plugins.push(
+    new webpack.DefinePlugin({
+      __VERSION__: JSON.stringify(packageVersion)
+    })
+  );
+
+  return config;
 };

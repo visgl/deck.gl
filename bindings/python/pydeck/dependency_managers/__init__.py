@@ -38,7 +38,7 @@ _is_open(dev_server_url)
 WIDGET_PATH = os.path.join(here, '../../../../modules/jupyter-widget/dist')
 
 def get_deckgl_version():
-    with open(os.path.join(WIDGET_PATH, '../..', 'lerna.json')) as f:
+    with open(os.path.join(WIDGET_PATH, '../../..', 'lerna.json')) as f:
         lerna_json = json.loads(f.read())
         version = lerna_json['version']
         return '~' + version
@@ -49,12 +49,14 @@ def create_notebook_requirejs(dependencies, base_path, setup_environment='develo
     if setup_environment == 'development' and dev_server_url:
         # Notebook with hot reloading development on http://localhost:8080
         dependencies['paths']['nbextension/pydeck'] = dev_server_url
+        dependencies['paths']['deck.gl'] = dev_server_url + '/deckgl.dev'
     elif setup_environment in ('test', 'production', 'development'):
         # Notebook using the JS bundle built from webpack command in @deck.gl/jupyter-widget
         # The notebook dependency manager will be written to ./pydeck/nbextension/static/extensionRequires.js
         # If this changes, ./pydeck/nbextension/__init__.py must also change
-        dependencies['map']['*']['@deck.gl/jupyter-widget'] = 'nbextensions/pydeck/index'
-        del dependencies['paths']['nbextension/pydeck']
+        deckgl_version = get_deckgl_version()
+        DECK_CDN_URL = 'https://unpkg.com/deck.gl@{}/dist.min'.format(deckgl_version)
+        dependencies['paths']['deck.gl'] = DECK_CDN_URL
     else:
         raise Exception('Unrecognized setup environment')
 
@@ -73,12 +75,15 @@ def create_standalone_render_requirejs(dependencies, base_path, setup_environmen
     if setup_environment == 'development' and dev_server_url:
         # Supports standalone HTML renderer with hot reloading
         dependencies['paths']['nbextension/pydeck'] = dev_server_url
+        dependencies['paths']['deck.gl'] = dev_server_url + '/deckgl.dev'
     # TODO verify this path
     elif setup_environment == 'production':
         # Standalone HTML renderer in production requires reading from CDN
         deckgl_version = get_deckgl_version()
-        CDN_URL = 'https://cdn.jsdelivr.net/npm/@deck.gl/jupyter-widget@{}/dist'.format(deckgl_version)
+        CDN_URL = 'https://unpkg.com/@deck.gl/jupyter-widget@{}/dist'.format(deckgl_version)
         dependencies['paths']['nbextension/pydeck'] = CDN_URL
+        DECK_CDN_URL = 'https://unpkg.com/deck.gl@{}/dist.min'.format(deckgl_version)
+        dependencies['paths']['deck.gl'] = DECK_CDN_URL
     elif setup_environment == 'development':
         # Standalone HTML renderer with static reloading requires a bundled JS file of the Jupyter widget module
         dependencies['paths']['nbextension/pydeck'] = WIDGET_PATH

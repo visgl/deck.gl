@@ -39,7 +39,7 @@ yarn bootstrap
 
 # Optional but recommended: Run a hot reloading development server
 cd modules/jupyter-widget
-export PYDECK_DEV_SERVER=http://localhost:8080 && npx webpack-dev-server
+export PYDECK_DEV_SERVER=http://localhost:8080 && yarn watch
 ```
 
 To specifiy a non-default URL for the webpack dev server, you can set a URL in the `PYDECK_DEV_SERVER` environment variable,
