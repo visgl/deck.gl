@@ -30,10 +30,11 @@ Requires a Mapbox API token to display a basemap, see notes below.
 
 `mapbox_key` : `str`, default None
     Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
+    If not using a basemap, you can set this value to `None`.
     See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
 
 `initial_view_state` : `pydeck.ViewState`, default `pydeck.ViewState()`
-    Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
+    Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map with 0 pitch and bearing
     To compute a viewport from data, see `pydeck.data\_utils.compute\_viewport`
 
 ## pydeck.Deck.show
