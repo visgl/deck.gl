@@ -15,7 +15,6 @@ export default class AttributeTransitionManager {
 
     this.attributeTransitions = {};
     this.needsRedraw = false;
-    this.transform = null;
     this.numInstances = 0;
 
     if (Transform.isSupported(gl)) {
@@ -27,9 +26,6 @@ export default class AttributeTransitionManager {
   }
 
   finalize() {
-    if (this.transform) {
-      this.transform.delete();
-    }
     for (const attributeName in this.attributeTransitions) {
       this._removeTransition(attributeName);
     }
@@ -67,17 +63,6 @@ export default class AttributeTransitionManager {
         this._removeTransition(attributeName);
       }
     }
-
-    if (!this.transform) {
-      this._createModel();
-    } else if (this.transform) {
-      const {sourceBuffers, feedbackBuffers} = getBuffers(changedTransitions);
-      this.transform.update({
-        elementCount: this.numInstances,
-        sourceBuffers,
-        feedbackBuffers
-      });
-    }
   }
 
   // Returns `true` if attribute is transition-enabled
@@ -104,11 +89,9 @@ export default class AttributeTransitionManager {
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
   run() {
-    if (!this.transform || this.numInstances === 0) {
+    if (!this.isSupported || this.numInstances === 0) {
       return false;
     }
-
-    const uniforms = {};
 
     let needsRedraw = this.needsRedraw;
     this.needsRedraw = false;
@@ -117,13 +100,11 @@ export default class AttributeTransitionManager {
       const transition = this.attributeTransitions[attributeName];
       const updated = transition.update();
       if (updated) {
-        uniforms[`${attributeName}Time`] = transition.time;
+        transition.transform.run({
+          uniforms: {time: transition.time}
+        });
         needsRedraw = true;
       }
-    }
-
-    if (needsRedraw) {
-      this.transform.run({uniforms});
     }
 
     return needsRedraw;
@@ -142,7 +123,6 @@ export default class AttributeTransitionManager {
         bufferLayout: attribute.bufferLayout
       });
       this.attributeTransitions[attributeName] = transition;
-      this._invalidateModel();
       return transition;
     }
     return null;
@@ -152,6 +132,7 @@ export default class AttributeTransitionManager {
     const transition = this.attributeTransitions[attributeName];
     if (transition) {
       transition.cancel();
+      transition.transform.delete();
       if (transition.buffer) {
         transition.buffer.delete();
       }
@@ -159,7 +140,6 @@ export default class AttributeTransitionManager {
         transition._swapBuffer.delete();
       }
       delete this.attributeTransitions[attributeName];
-      this._invalidateModel();
     }
   }
 
@@ -186,32 +166,6 @@ export default class AttributeTransitionManager {
     }
 
     return false;
-  }
-
-  // Invalidates the current model
-  _invalidateModel() {
-    if (this.transform) {
-      this.transform.delete();
-      this.transform = null;
-    }
-  }
-
-  // Create a model for the transform feedback
-  _createModel() {
-    if (Object.keys(this.attributeTransitions).length === 0) {
-      // no transitions
-      return;
-    }
-    this.transform = new Transform(
-      this.gl,
-      Object.assign(
-        {
-          elementCount: this.numInstances
-        },
-        getBuffers(this.attributeTransitions),
-        getShaders(this.attributeTransitions)
-      )
-    );
   }
 
   // get current values of an attribute, clipped/padded to the size of the new buffer
@@ -287,5 +241,19 @@ export default class AttributeTransitionManager {
     transition.start(
       Object.assign({}, this._getNextTransitionStates(transition, settings), settings)
     );
+
+    if (transition.transform) {
+      transition.transform.update({
+        ...getBuffers(transition),
+        elementCount: this.numInstances
+      });
+    } else {
+      // Buffers must be supplied to the transform constructor
+      transition.transform = new Transform(this.gl, {
+        elementCount: this.numInstances,
+        ...getShaders(transition),
+        ...getBuffers(transition)
+      });
+    }
   }
 }

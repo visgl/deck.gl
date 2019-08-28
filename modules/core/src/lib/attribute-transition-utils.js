@@ -30,68 +30,58 @@ export function normalizeTransitionSettings(settings) {
   return Object.assign({}, DEFAULT_TRANSITION_SETTINGS, settings);
 }
 
-export function getShaders(transitions) {
-  // Build shaders
-  const varyings = [];
-  const attributeDeclarations = [];
-  const uniformsDeclarations = [];
-  const varyingDeclarations = [];
-  const calculations = [];
-
-  for (const attributeName in transitions) {
-    const transition = transitions[attributeName];
-    const attributeType = ATTRIBUTE_MAPPING[transition.attribute.size];
-
-    if (attributeType) {
-      transition.bufferIndex = varyings.length;
-      varyings.push(attributeName);
-
-      attributeDeclarations.push(`attribute ${attributeType} ${attributeName}From;`);
-      attributeDeclarations.push(`attribute ${attributeType} ${attributeName}To;`);
-      uniformsDeclarations.push(`uniform float ${attributeName}Time;`);
-      varyingDeclarations.push(`varying ${attributeType} ${attributeName};`);
-      calculations.push(`${attributeName} = mix(${attributeName}From, ${attributeName}To,
-        ${attributeName}Time);`);
-    }
-  }
-
-  const vs = `
+const vs = `
 #define SHADER_NAME feedback-vertex-shader
-${attributeDeclarations.join('\n')}
-${uniformsDeclarations.join('\n')}
-${varyingDeclarations.join('\n')}
+
+uniform float time;
+attribute ATTRIBUTE_TYPE aFrom;
+attribute ATTRIBUTE_TYPE aTo;
+varying ATTRIBUTE_TYPE vCurrent;
 
 void main(void) {
-  ${calculations.join('\n')}
+  vCurrent = mix(aFrom, aTo, time);
   gl_Position = vec4(0.0);
 }
 `;
 
-  const fs = `\
+const fs = `\
 #define SHADER_NAME feedback-fragment-shader
 
 precision highp float;
 
-${varyingDeclarations.join('\n')}
+varying ATTRIBUTE_TYPE vCurrent;
 
 void main(void) {
   gl_FragColor = vec4(0.0);
 }
 `;
-  return {vs, fs, varyings};
+
+export function getShaders(transition) {
+  const attributeType = ATTRIBUTE_MAPPING[transition.attribute.size];
+
+  return {
+    vs,
+    fs,
+    defines: {
+      ATTRIBUTE_TYPE: attributeType
+    },
+    varyings: ['vCurrent']
+  };
 }
 
-export function getBuffers(transitions) {
-  const sourceBuffers = {};
-  const feedbackBuffers = {};
-  for (const attributeName in transitions) {
-    const {fromState, toState, buffer} = transitions[attributeName];
-    sourceBuffers[`${attributeName}From`] =
-      fromState instanceof Buffer ? [fromState, {divisor: 0, offset: toState.offset}] : fromState;
-    sourceBuffers[`${attributeName}To`] = toState;
-    feedbackBuffers[`${attributeName}`] = {buffer, byteOffset: toState.offset};
-  }
-  return {sourceBuffers, feedbackBuffers};
+export function getBuffers(transition) {
+  const {fromState, toState, buffer} = transition;
+
+  return {
+    sourceBuffers: {
+      aFrom:
+        fromState instanceof Buffer ? [fromState, {divisor: 0, offset: toState.offset}] : fromState,
+      aTo: toState
+    },
+    feedbackBuffers: {
+      vCurrent: {buffer, byteOffset: toState.offset}
+    }
+  };
 }
 
 export function padBuffer({

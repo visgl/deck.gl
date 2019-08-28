@@ -60,8 +60,6 @@ if (isWebGL2(gl)) {
     const manager = new AttributeTransitionManager(gl, {id: 'attribute-transition', timeline});
     const attributes = Object.assign({}, TEST_ATTRIBUTES);
 
-    t.notOk(manager.transform, 'transform is not constructed');
-
     attributes.indices.setNeedsRedraw('initial');
     attributes.instanceSizes.setNeedsRedraw('initial');
     attributes.instancePositions.setNeedsRedraw('initial');
@@ -70,28 +68,23 @@ if (isWebGL2(gl)) {
     t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
     t.notOk(manager.hasAttribute('instanceSizes'), 'no transition for instanceSizes');
     t.notOk(manager.hasAttribute('instancePositions'), 'no transition for instancePositions');
-    t.notOk(manager.transform, 'transform is not constructed');
 
     manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 0});
     t.notOk(manager.hasAttribute('indices'), 'no transition for indices');
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
-    t.ok(manager.transform, 'a new transform is constructed');
 
     const sizeTransition = manager.attributeTransitions.instanceSizes;
     t.is(sizeTransition.buffer.getElementCount(), 1, 'buffer has correct size');
 
-    let lastTransform = manager.transform;
+    const positionTransition = manager.attributeTransitions.instancePositions;
+    t.ok(positionTransition.transform, 'transform is constructed for instancePositions');
     delete attributes.instancePositions;
 
     manager.update({attributes, transitions: {getSize: 1000, getElevation: 1000}, numInstances: 4});
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.notOk(manager.hasAttribute('instancePositions'), 'removed transition for instancePositions');
-    t.ok(
-      manager.transform && manager.transform !== lastTransform,
-      'a new transform is constructed'
-    );
-    t.notOk(lastTransform.model.program._handle, 'last transform is deleted');
+    t.notOk(positionTransition.transform._handle, 'instancePositions transform is deleted');
     t.is(sizeTransition.buffer.getElementCount(), 4, 'buffer has correct size');
 
     attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
@@ -108,9 +101,8 @@ if (isWebGL2(gl)) {
     );
     t.is(sizeTransition.buffer.getElementCount(), 6, 'buffer has correct size');
 
-    lastTransform = manager.transform;
     manager.finalize();
-    t.notOk(lastTransform.model.program._handle, 'transform is deleted');
+    t.notOk(sizeTransition.transform._handle, 'transform is deleted');
 
     t.end();
   });
