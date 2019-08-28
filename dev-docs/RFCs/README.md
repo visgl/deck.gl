@@ -34,6 +34,7 @@ These RFCs are not yet associated with any specific release.
 | [**Composite Layer Customization**](vNext/composite-layer-customization-rfc.md) | @ibgreen | **Draft** | Improvements to customizing composite layers |
 | **[Render Layer to Texture](vNext/render-layer-to-texture-rfc.md)** | TBD | Proposed | Allow layers to render to texture and then use texture in subsequent layers.  |
 | [**Layer Extension**](vNext/layer-extension-rfc.md) | @pessimistress | **Draft** | Adding optional functionalities to layers on-demand |
+| [**Component Wrapping System**](vNext/component-wrapping-rfc.md) | @ibgreen | **Draft** | A unified system for exposing JS components to Python/Jupyter Notebook/JSON etc. |
 
 Possible other animation related RFCs:
 - integration with event handling (enter leave triggers for animations)
