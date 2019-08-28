@@ -34,7 +34,7 @@ Requires a Mapbox API token to display a basemap, see notes below.
 
 `initial_view_state` : `pydeck.ViewState`, default `pydeck.ViewState()`
     Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
-    To compute a viewport from data, see `pydeck.data\_utils.autocompute\_viewport`
+    To compute a viewport from data, see `pydeck.data\_utils.compute\_viewport`
 
 ## pydeck.Deck.show
 

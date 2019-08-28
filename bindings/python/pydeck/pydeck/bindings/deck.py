@@ -33,7 +33,7 @@ class Deck(JSONMixin):
             URI for Mapbox basemap style
         initial_view_state : pydeck.ViewState, default pydeck.ViewState()
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
-            To compute a viewport from data, see `pydeck.data_utils.autocompute_viewport`
+            To compute a viewport from data, see `pydeck.data_utils.compute_viewport`
         mapbox_key : str, default None
             Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard

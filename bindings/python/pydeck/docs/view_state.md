@@ -18,7 +18,7 @@ class ViewState(
 
 An object that represents where the state of a viewport, essentially where the screen is focused.
 
-If you have two dimensional data and you don't want to set this manually, see `pydeck.data_utils.viewport_helpers.autocompute_viewport`.
+If you have two dimensional data and you don't want to set this manually, see `pydeck.data_utils.viewport_helpers.`compute_viewport`.
 
 #### Parameters
 
