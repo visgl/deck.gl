@@ -30,10 +30,10 @@ const LINEAR_TRANSITION_PROPS = {
 
 const zoom2Scale = zoom => Math.pow(2, zoom);
 
-const mod = (value, divisor) => {
-  const modulus = value % divisor;
-  return modulus < 0 ? divisor + modulus : modulus;
-};
+// const mod = (value, divisor) => {
+//   const modulus = value % divisor;
+//   return modulus < 0 ? divisor + modulus : modulus;
+// };
 
 export class OrbitState extends ViewState {
   constructor({
@@ -349,18 +349,9 @@ export class OrbitState extends ViewState {
   _applyConstraints(props) {
     // Ensure zoom is within specified range
     const {maxZoom, minZoom, zoom, maxRotationX, minRotationX} = props;
-    let {rotationX, rotationOrbit} = props;
-
-    if (rotationOrbit < -180 || rotationOrbit > 180) {
-      rotationOrbit = mod(rotationOrbit + 180, 360) - 180;
-    }
-    if (rotationX < -180 || rotationX > 180) {
-      rotationX = mod(rotationX + 180, 360) - 180;
-    }
 
     props.zoom = clamp(zoom, minZoom, maxZoom);
-    props.rotationX = clamp(rotationX, minRotationX, maxRotationX);
-    props.rotationOrbit = rotationOrbit;
+    props.rotationX = clamp(props.rotationX, minRotationX, maxRotationX);
 
     return props;
   }
