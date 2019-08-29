@@ -10,7 +10,7 @@ export default `\
 #endif
 
 // Uniforms
-// none
+uniform float opacity;
 
 // Varying
 _varying vec4 vColor;
@@ -36,6 +36,7 @@ void main(void) {
     #endif
   #endif
 
+  fragmentColor.a *= opacity;
   DECKGL_FILTER_COLOR(fragmentColor, geometry);
 }
 `;
