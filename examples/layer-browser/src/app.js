@@ -10,6 +10,7 @@ import {
   DirectionalLight,
   LightingEffect
 } from '@deck.gl/core';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import React, {PureComponent} from 'react';
 import autobind from 'react-autobind';
@@ -30,13 +31,27 @@ const AMBIENT_LIGHT = new AmbientLight({
 const DIRECTIONAL_LIGHT = new DirectionalLight({
   color: [255, 255, 255],
   intensity: 3.0,
-  direction: [-3, -9, -1]
+  direction: [-3, -1, -9]
+});
+
+const DIRECTIONAL_LIGHT_SHADOW = new DirectionalLight({
+  color: [255, 255, 255],
+  intensity: 3.0,
+  direction: [-3, -1, -9],
+  _shadow: true
 });
 
 const GLOBAL_LIGHTING = new LightingEffect({
   AMBIENT_LIGHT,
   DIRECTIONAL_LIGHT
 });
+
+const GLOBAL_LIGHTING_WITH_SHADOW = new LightingEffect({
+  AMBIENT_LIGHT,
+  DIRECTIONAL_LIGHT_SHADOW
+});
+
+const LAND_COVER = [[[-122.3, 37.7], [-122.3, 37.9], [-122.6, 37.9], [-122.6, 37.7]]];
 
 // ---- View ---- //
 export default class App extends PureComponent {
@@ -49,6 +64,7 @@ export default class App extends PureComponent {
         ScatterplotLayer: true
       },
       settings: {
+        shadow: false,
         orthographic: false,
         multiview: false,
         infovis: false,
@@ -134,7 +150,15 @@ export default class App extends PureComponent {
   /* eslint-disable max-depth */
   _renderExamples() {
     let index = 1;
-    const layers = [];
+    const layers = [
+      new SolidPolygonLayer({
+        data: LAND_COVER,
+        getPolygon: f => f,
+        extruded: false,
+        filled: true,
+        getFillColor: [0, 0, 0, 0]
+      })
+    ];
     const {activeExamples} = this.state;
 
     for (const categoryName of Object.keys(LAYER_CATEGORIES)) {
@@ -213,9 +237,9 @@ export default class App extends PureComponent {
 
   _getEffects() {
     // TODO
-    // const {effects} = this.state.settings;
+    const {shadow} = this.state.settings;
 
-    return [GLOBAL_LIGHTING];
+    return [shadow ? GLOBAL_LIGHTING_WITH_SHADOW : GLOBAL_LIGHTING];
   }
 
   render() {
