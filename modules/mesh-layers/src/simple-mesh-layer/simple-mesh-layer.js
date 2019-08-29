@@ -92,6 +92,7 @@ const defaultProps = {
     depthTest: true,
     depthFunc: GL.LEQUAL
   },
+  opacity: 1.0,
 
   // NOTE(Tarek): Quick and dirty wireframe. Just draws
   // the same mesh with LINE_STRIPS. Won't follow edges
