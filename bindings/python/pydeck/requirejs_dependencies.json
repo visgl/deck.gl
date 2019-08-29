@@ -1,7 +1,7 @@
 {
   "map": {
     "*": {
-      "@deck.gl/jupyter-widget": "nbextension/pydeck/index"
+      "@deck.gl/jupyter-widget": "nbextensions/pydeck/index"
     }
   },
   "paths": {
