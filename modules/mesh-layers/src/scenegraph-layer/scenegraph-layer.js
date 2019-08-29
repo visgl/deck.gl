@@ -46,6 +46,7 @@ const defaultProps = {
   sizeScale: {type: 'number', value: 1, min: 0},
   getPosition: {type: 'accessor', value: x => x.position},
   getColor: {type: 'accessor', value: DEFAULT_COLOR},
+  opacity: {type: 'number', min: 0, max: 1, value: 1.0},
 
   // flat or pbr
   _lighting: 'flat',
@@ -248,7 +249,7 @@ export default class ScenegraphLayer extends Layer {
       this.state.animator.animate(context.animationProps.time);
     }
 
-    const {sizeScale, _enableOffsetModelMatrix} = this.props;
+    const {sizeScale, opacity, _enableOffsetModelMatrix} = this.props;
     const numInstances = this.getNumInstances();
     this.state.scenegraph.traverse((model, {worldMatrix}) => {
       model.model.setInstanceCount(numInstances);
@@ -257,6 +258,7 @@ export default class ScenegraphLayer extends Layer {
         parameters,
         uniforms: {
           sizeScale,
+          opacity,
           enableOffsetModelMatrix: _enableOffsetModelMatrix,
           sceneModelMatrix: worldMatrix,
           // Needed for PBR (TODO: find better way to get it)
