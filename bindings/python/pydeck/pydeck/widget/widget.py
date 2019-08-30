@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import ipywidgets as widgets
-from traitlets import Int, Unicode
+from traitlets import Int, Any, Unicode
 
 from ._frontend import module_name, module_version
 
@@ -21,6 +21,12 @@ class DeckGLWidget(widgets.DOMWidget):
         JSON as a string meant for reading into deck.gl JSON API
     mapbox_key : str
         API key for Mapbox map tiles
+    height : int
+        Height of Jupyter notebook cell, in pixels
+    width : int
+        Width of Jupyter notebook cell, in pixels
+    selected_data : :obj:`list` of :obj:`int`
+        Data passed from Jupyter widget frontend back to Python backend
     """
     _model_name = Unicode('DeckGLModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
@@ -32,3 +38,4 @@ class DeckGLWidget(widgets.DOMWidget):
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Int(500).tag(sync=True)
+    selected_data = Any().tag(sync=True)

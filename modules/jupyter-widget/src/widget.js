@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning} from './utils';
+import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 
@@ -20,6 +20,8 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
+      selected_data: null,
+      initialized: false,
       width: 500,
       height: 500
     };
@@ -53,66 +55,47 @@ export class DeckGLModel extends DOMWidgetModel {
 export class DeckGLView extends DOMWidgetView {
   render() {
     super.render();
-    this.model.on('change:json_input', this.valueChanged, this);
-    loadCss(MAPBOX_CSS_URL);
+    this.model.on('change:json_input', this.valueChanged.bind(this), this);
+    const initialized = this.model.get('initialized');
 
     const containerDiv = document.createElement('div');
 
-    containerDiv.style.height = `${this.model.get('height')}px`;
-    containerDiv.style.width = `${this.model.get('width')}px`;
-    this.el.appendChild(containerDiv);
+    if (!initialized) {
+      containerDiv.style.height = `${this.model.get('height')}px`;
+      containerDiv.style.width = `${this.model.get('width')}px`;
+      this.el.appendChild(containerDiv);
 
-    this.deck = initDeck({
-      mapboxApiKey: this.model.get('mapbox_key'),
-      container: containerDiv,
-      jsonInput: JSON.parse(this.model.get('json_input'))
-    });
+      loadCss(MAPBOX_CSS_URL);
+      initDeck(
+        {
+          mapboxApiKey: this.model.get('mapbox_key'),
+          container: containerDiv,
+          jsonInput: JSON.parse(this.model.get('json_input'))
+        },
+        x => {
+          this.jsonDeck = x;
+        },
+        this.handleClick.bind(this)
+      );
+      this.model.set('initialized', true);
+    }
   }
 
   valueChanged() {
-    updateDeck(this.model.get('json_input'), this.deck);
+    updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }
-}
 
-function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
-  const results = jsonConverter.convertJsonToDeckProps(inputJSON);
-  deckConfig.setProps(results);
-}
-
-export function initDeck({mapboxApiKey, container, jsonInput}) {
-  require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
-    require(['deck.gl'], deckgl => {
-      try {
-        const layersDict = {};
-        const layers = Object.keys(deckgl).filter(
-          x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
-        );
-        layers.map(k => (layersDict[k] = deckgl[k]));
-
-        const jsonConverter = new deckgl._JSONConverter({
-          configuration: {
-            layers: layersDict
-          }
-        });
-
-        const deckConfig = new deckgl.DeckGL({
-          map: mapboxgl,
-          mapboxApiAccessToken: mapboxApiKey,
-          latitude: 0,
-          longitude: 0,
-          zoom: 1,
-          container,
-          onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
-        });
-        return {jsonConverter, deckConfig};
-      } catch (err) {
-        // This will fail in node tests
-        // eslint-disable-next-line
-        console.error(err);
-      }
-      return {};
-    });
-  });
+  handleClick(e) {
+    if (!e) {
+      return;
+    }
+    if (e.object && e.object.points) {
+      this.model.set('selected_data', e.object.points);
+    } else {
+      this.model.set('selected_data', e.object);
+    }
+    this.model.save_changes();
+  }
 }
