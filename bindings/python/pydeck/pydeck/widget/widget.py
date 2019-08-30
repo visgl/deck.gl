@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import ipywidgets as widgets
-from traitlets import Int, List, Unicode
+from traitlets import Int, Any, Unicode
 
 from ._frontend import module_name, module_version
 
@@ -38,4 +38,4 @@ class DeckGLWidget(widgets.DOMWidget):
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
     width = Int(500).tag(sync=True)
-    selected_data = List().tag(sync=True)
+    selected_data = Any().tag(sync=True)

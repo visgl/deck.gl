@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning} from './utils';
+import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 
@@ -72,7 +72,9 @@ export class DeckGLView extends DOMWidgetView {
           container: containerDiv,
           jsonInput: JSON.parse(this.model.get('json_input'))
         },
-        this,
+        x => {
+          this.jsonDeck = x;
+        },
         this.handleClick.bind(this)
       );
       this.model.set('initialized', true);
@@ -86,51 +88,14 @@ export class DeckGLView extends DOMWidgetView {
   }
 
   handleClick(e) {
-    console.table(e); // eslint-disable-line
-    this.model.set('selected_data', e.object.points);
+    if (!e) {
+      return;
+    }
+    if (e.object && e.object.points) {
+      this.model.set('selected_data', e.object.points);
+    } else {
+      this.model.set('selected_data', e.object);
+    }
     this.model.save_changes();
   }
-}
-
-function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
-  const results = jsonConverter.convertJsonToDeckProps(inputJSON);
-  deckConfig.setProps(results);
-}
-
-export function initDeck({mapboxApiKey, container, jsonInput}, context, handleClick) {
-  require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
-    require(['deck.gl'], deckgl => {
-      try {
-        const layersDict = {};
-        const layers = Object.keys(deckgl).filter(
-          x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
-        );
-        layers.map(k => (layersDict[k] = deckgl[k]));
-
-        const jsonConverter = new deckgl._JSONConverter({
-          configuration: {
-            layers: layersDict
-          }
-        });
-
-        const deckConfig = new deckgl.DeckGL({
-          map: mapboxgl,
-          mapboxApiAccessToken: mapboxApiKey,
-          latitude: 0,
-          longitude: 0,
-          zoom: 1,
-          onClick: handleClick,
-          container,
-          onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
-        });
-        context.jsonDeck = {jsonConverter, deckConfig};
-        return {jsonConverter, deckConfig};
-      } catch (err) {
-        // This will fail in node tests
-        // eslint-disable-next-line
-        console.error(err);
-      }
-      return {};
-    });
-  });
 }
