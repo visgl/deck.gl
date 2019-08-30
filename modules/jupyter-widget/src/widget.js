@@ -20,6 +20,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
+      initialized: false,
       width: 500,
       height: 500
     };
@@ -53,24 +54,31 @@ export class DeckGLModel extends DOMWidgetModel {
 export class DeckGLView extends DOMWidgetView {
   render() {
     super.render();
-    this.model.on('change:json_input', this.valueChanged, this);
-    loadCss(MAPBOX_CSS_URL);
+    this.model.on('change:json_input', this.valueChanged.bind(this), this);
+    const initialized = this.model.get('initialized');
 
     const containerDiv = document.createElement('div');
 
-    containerDiv.style.height = `${this.model.get('height')}px`;
-    containerDiv.style.width = `${this.model.get('width')}px`;
-    this.el.appendChild(containerDiv);
+    if (!initialized) {
+      containerDiv.style.height = `${this.model.get('height')}px`;
+      containerDiv.style.width = `${this.model.get('width')}px`;
+      this.el.appendChild(containerDiv);
 
-    this.deck = initDeck({
-      mapboxApiKey: this.model.get('mapbox_key'),
-      container: containerDiv,
-      jsonInput: JSON.parse(this.model.get('json_input'))
-    });
+      loadCss(MAPBOX_CSS_URL);
+      initDeck(
+        {
+          mapboxApiKey: this.model.get('mapbox_key'),
+          container: containerDiv,
+          jsonInput: JSON.parse(this.model.get('json_input'))
+        },
+        this
+      );
+      this.model.set('initialized', true);
+    }
   }
 
   valueChanged() {
-    updateDeck(this.model.get('json_input'), this.deck);
+    updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }
@@ -81,7 +89,7 @@ function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
   deckConfig.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput}) {
+export function initDeck({mapboxApiKey, container, jsonInput}, context) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl'], deckgl => {
       try {
@@ -106,6 +114,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}) {
           container,
           onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
         });
+        context.jsonDeck = {jsonConverter, deckConfig};
         return {jsonConverter, deckConfig};
       } catch (err) {
         // This will fail in node tests
