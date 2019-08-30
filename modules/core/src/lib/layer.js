@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 /* eslint-disable react/no-direct-mutation-state */
-/* global window */
 import {COORDINATE_SYSTEM} from './constants';
 import AttributeManager from './attribute-manager';
 import {removeLayerInSeer} from './seer-integration';
@@ -244,13 +243,6 @@ export default class Layer extends Component {
       this.props.coordinateSystem === COORDINATE_SYSTEM.LNGLAT ||
       this.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY
     );
-  }
-
-  // TODO - needs to refer to context for devicePixels setting
-  screenToDevicePixels(screenPixels) {
-    log.deprecated('screenToDevicePixels', 'DeckGL prop useDevicePixels for conversion')();
-    const devicePixelRatio = typeof window !== 'undefined' ? window.devicePixelRatio : 1;
-    return screenPixels * devicePixelRatio;
   }
 
   // Event handling

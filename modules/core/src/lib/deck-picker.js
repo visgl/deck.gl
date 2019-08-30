@@ -18,8 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Framebuffer, readPixelsToArray} from '@luma.gl/core';
-import getPixelRatio from '../utils/get-pixel-ratio';
+import {Framebuffer, readPixelsToArray, cssToDeviceRatio, cssToDevicePixels} from '@luma.gl/core';
 import assert from '../utils/assert';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
@@ -30,7 +29,7 @@ export default class DeckPicker {
     this.gl = gl;
     this.pickingFBO = null;
     this.pickLayersPass = new PickLayersPass(gl);
-    this.pixelRatio = null;
+    this.pixelRatio = cssToDeviceRatio(gl);
     this.layerFilter = null;
     this.pickingEvent = null;
     this.lastPickedInfo = {
@@ -42,10 +41,6 @@ export default class DeckPicker {
   }
 
   setProps(props) {
-    if ('useDevicePixels' in props) {
-      this.pixelRatio = getPixelRatio(props.useDevicePixels);
-    }
-
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
     }
@@ -139,16 +134,15 @@ export default class DeckPicker {
   pickClosestObject({layers, viewports, x, y, radius, depth = 1, mode, onViewportActive}) {
     this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
+    // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
     const pixelRatio = this.pixelRatio;
-    const deviceX = Math.round(x * pixelRatio);
-    // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
-    const deviceY = Math.round(this.gl.canvas.height - (y + 1) * pixelRatio);
+    const devicePixel = cssToDevicePixels(this.gl, [x, y], true);
     const deviceRadius = Math.round(radius * pixelRatio);
     const {width, height} = this.pickingFBO;
     const deviceRect = this.getPickingRect({
-      deviceX,
-      deviceY,
+      deviceX: devicePixel[0],
+      deviceY: devicePixel[1],
       deviceRadius,
       deviceWidth: width,
       deviceHeight: height
@@ -172,8 +166,8 @@ export default class DeckPicker {
       const pickInfo = getClosestObject({
         pickedColors,
         layers,
-        deviceX,
-        deviceY,
+        deviceX: devicePixel[0],
+        deviceY: devicePixel[1],
         deviceRadius,
         deviceRect
       });
@@ -199,8 +193,8 @@ export default class DeckPicker {
         viewports,
         x,
         y,
-        deviceX,
-        deviceY,
+        deviceX: devicePixel[0],
+        deviceY: devicePixel[1],
         pixelRatio
       });
 
@@ -230,16 +224,14 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
     const pixelRatio = this.pixelRatio;
-    const deviceLeft = Math.round(x * pixelRatio);
-    const deviceBottom = Math.round(this.gl.canvas.height - y * pixelRatio);
-    const deviceRight = Math.round((x + width) * pixelRatio);
-    const deviceTop = Math.round(this.gl.canvas.height - (y + height) * pixelRatio);
+    const [deviceLeft, deviceBottom] = cssToDevicePixels(this.gl, [x, y], true);
+    const [deviceRight, deviceTop] = cssToDevicePixels(this.gl, [x + width, y + height], true);
 
     const deviceRect = {
       x: deviceLeft,
       y: deviceTop,
-      width: deviceRight - deviceLeft,
-      height: deviceBottom - deviceTop
+      width: deviceRight - deviceLeft + 1,
+      height: deviceBottom - deviceTop + 1
     };
 
     const pickedColors = this.drawAndSamplePickingBuffer({

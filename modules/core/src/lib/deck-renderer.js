@@ -1,16 +1,15 @@
 import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
-import getPixelRatio from '../utils/get-pixel-ratio';
 import PostProcessEffect from '../effects/post-process-effect';
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer, cssToDeviceRatio} from '@luma.gl/core';
 
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
   constructor(gl) {
     this.gl = gl;
-    this.pixelRatio = null;
+    this.pixelRatio = cssToDeviceRatio(gl);
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(gl);
@@ -23,10 +22,6 @@ export default class DeckRenderer {
   }
 
   setProps(props) {
-    if ('useDevicePixels' in props) {
-      this.pixelRatio = getPixelRatio(props.useDevicePixels);
-    }
-
     if ('layerFilter' in props) {
       if (this.layerFilter !== props.layerFilter) {
         this.layerFilter = props.layerFilter;
