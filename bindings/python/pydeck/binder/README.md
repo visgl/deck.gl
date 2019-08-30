@@ -12,5 +12,6 @@ git checkout binder
 ln -s Dockerfile bindings/python/pydeck/binder/Dockerfile
 # Provide a root level link to the notebook examples
 ln -s notebook_examples bindings/python/pydeck/examples
+ln -s .dockerignore bindings/python/pydeck/binder/dockerignore
 git push
 ```
