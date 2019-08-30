@@ -20,6 +20,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
+      selected_data: null,
       initialized: false,
       width: 500,
       height: 500
@@ -71,7 +72,8 @@ export class DeckGLView extends DOMWidgetView {
           container: containerDiv,
           jsonInput: JSON.parse(this.model.get('json_input'))
         },
-        this
+        this,
+        this.handleClick.bind(this)
       );
       this.model.set('initialized', true);
     }
@@ -82,6 +84,12 @@ export class DeckGLView extends DOMWidgetView {
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
   }
+
+  handleClick(e) {
+    console.table(e); // eslint-disable-line
+    this.model.set('selected_data', e.object.points);
+    this.model.save_changes();
+  }
 }
 
 function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
@@ -89,7 +97,7 @@ function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
   deckConfig.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput}, context) {
+export function initDeck({mapboxApiKey, container, jsonInput}, context, handleClick) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl'], deckgl => {
       try {
@@ -111,6 +119,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, context) {
           latitude: 0,
           longitude: 0,
           zoom: 1,
+          onClick: handleClick,
           container,
           onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
         });
