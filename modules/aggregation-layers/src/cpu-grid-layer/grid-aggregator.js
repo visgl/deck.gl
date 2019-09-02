@@ -24,19 +24,19 @@ const R_EARTH = 6378000;
 
 /**
  * Calculate density grid from an array of points
- * @param {Iterable} points
+ * @param {Iterable} data
  * @param {number} cellSize - cell size in meters
  * @param {function} getPosition - position accessor
  * @returns {object} - grid data, cell dimension
  */
-export function pointToDensityGridDataCPU(points, cellSize, getPosition) {
-  const {gridHash, gridOffset} = _pointsToGridHashing(points, cellSize, getPosition);
-  const layerData = _getGridLayerDataFromGridHash(gridHash, gridOffset);
+export function pointToDensityGridDataCPU({data, cellSize, getPosition}) {
+  const {gridHash, gridOffset} = _pointsToGridHashing(data, cellSize, getPosition);
+  const result = _getGridLayerDataFromGridHash(gridHash, gridOffset);
 
   return {
     gridHash,
     gridOffset,
-    layerData
+    data: result
   };
 }
 

@@ -40,13 +40,22 @@ export function quantizeScale(domain, range, value) {
   return range[clampIdx];
 }
 
+export function getScale(domain, range, scaleFunction) {
+  function scale(value) {
+    return scaleFunction(domain, range, value);
+  }
+
+  scale.domain = () => domain;
+  scale.range = () => range;
+
+  return scale;
+}
 // return a quantize scale function
 export function getQuantizeScale(domain, range) {
-  return value => quantizeScale(domain, range, value);
+  return getScale(domain, range, quantizeScale);
 }
 
-// return a linear scale funciton
+// return a linear scale function
 export function getLinearScale(domain, range) {
-  return value =>
-    ((value - domain[0]) / (domain[1] - domain[0])) * (range[1] - range[0]) + range[0];
+  return getScale(domain, range, linearScale);
 }

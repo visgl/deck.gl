@@ -37,7 +37,12 @@ test('CPUGridLayer', t => {
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
-      t.ok(layer.state.layerData, 'should update state.layerData');
+      if (layer.props.data && layer.props.data.length) {
+        t.ok(
+          layer.state.aggregationState.layerData.data.length > 0,
+          'should update state.layerData'
+        );
+      }
     }
   });
 
@@ -79,61 +84,73 @@ test('CPUGridLayer#renderSubLayer', t => {
 });
 
 test('CPUGridLayer#updates', t => {
-  // state properties derived by layer.prop update
-  const testItems = {
-    color: {
-      bin: 'sortedColorBins',
-      domain: 'colorValueDomain',
-      scale: 'colorScaleFunc',
-      getValue: 'getColorValue'
-    },
-    elevation: {
-      bin: 'sortedElevationBins',
-      domain: 'elevationValueDomain',
-      scale: 'elevationScaleFunc',
-      getValue: 'getElevationValue'
-    }
-  };
-
   // assert on state property updates after layer.prop change
   function assertStateUpdate(shouldUpdate, prop) {
-    return function onAfterUpdate({layer, oldState}) {
-      for (const key in shouldUpdate) {
-        t.ok(
-          shouldUpdate[key]
-            ? oldState[key] !== layer.state[key]
-            : oldState[key] === layer.state[key],
-          `update props.${prop} should ${!shouldUpdate[key] ? 'not' : ''} update ${key}`
-        );
+    return function onAfterUpdate({layer, oldState: oldLayerState}) {
+      function checkIfUpdated(state, oldState, shouldUpdateItem, previousKeys) {
+        if (typeof shouldUpdateItem === 'object') {
+          for (const key in shouldUpdateItem) {
+            checkIfUpdated(
+              state[key],
+              oldState[key],
+              shouldUpdateItem[key],
+              `${previousKeys}.${key}`
+            );
+          }
+        } else {
+          t.ok(
+            shouldUpdateItem ? state !== oldState : state === oldState,
+            `update props.${prop} should ${!shouldUpdateItem ? 'not' : ''} update ${previousKeys}`
+          );
+        }
       }
+
+      checkIfUpdated(
+        layer.state.aggregationState,
+        oldLayerState.aggregationState,
+        shouldUpdate,
+        'aggregationState'
+      );
     };
   }
 
   function getChecksForCellSizeChange() {
     const shouldUpdate = {
       layerData: true,
-      [testItems.color.bin]: true,
-      [testItems.elevation.bin]: true,
-      [testItems.color.domain]: true,
-      [testItems.elevation.domain]: true,
-      [testItems.color.scale]: true,
-      [testItems.elevation.scale]: true,
-      [testItems.color.getValue]: false,
-      [testItems.elevation.getValue]: false
+      dimensions: {
+        fillColor: {
+          sortedBins: true,
+          valueDomain: true,
+          getValue: false,
+          scaleFunc: true
+        },
+        elevation: {
+          sortedBins: true,
+          valueDomain: true,
+          getValue: false,
+          scaleFunc: true
+        }
+      }
     };
     return assertStateUpdate(shouldUpdate, 'cellSize');
   }
   function getChecksForPositionChange(triggerChange) {
     const shouldUpdate = {
       layerData: triggerChange,
-      [testItems.color.bin]: triggerChange,
-      [testItems.elevation.bin]: triggerChange,
-      [testItems.color.domain]: triggerChange,
-      [testItems.elevation.domain]: triggerChange,
-      [testItems.color.scale]: triggerChange,
-      [testItems.elevation.scale]: triggerChange,
-      [testItems.color.getValue]: false,
-      [testItems.elevation.getValue]: false
+      dimensions: {
+        fillColor: {
+          sortedBins: triggerChange,
+          valueDomain: triggerChange,
+          getValue: false,
+          scaleFunc: triggerChange
+        },
+        elevation: {
+          sortedBins: triggerChange,
+          valueDomain: triggerChange,
+          getValue: false,
+          scaleFunc: triggerChange
+        }
+      }
     };
     return assertStateUpdate(
       shouldUpdate,
@@ -141,67 +158,92 @@ test('CPUGridLayer#updates', t => {
     );
   }
   function getCheckForNoBinChange(accessor, dimension) {
-    const update = testItems[dimension];
-    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+    const update = dimension;
+    const noUpdate = ['fillColor', 'elevation'].find(k => k !== dimension);
     const shouldUpdate = {
       layerData: false,
-      [update.bin]: false,
-      [noUpdate.bin]: false,
-      [update.domain]: false,
-      [noUpdate.domain]: false,
-      [update.scale]: false,
-      [noUpdate.scale]: false,
-      [update.getValue]:
-        accessor === 'getColorValue w/o trigger' || accessor === 'getElevationValue w/o trigger',
-      [noUpdate.getValue]: false
+      dimensions: {
+        [update]: {
+          sortedBins: false,
+          valueDomain: false,
+          getValue:
+            accessor === 'getColorValue w/o trigger' ||
+            accessor === 'getElevationValue w/o trigger',
+          scaleFunc: false
+        },
+        [noUpdate]: {
+          sortedBins: false,
+          valueDomain: false,
+          getValue: false,
+          scaleFunc: false
+        }
+      }
     };
     return assertStateUpdate(shouldUpdate, accessor);
   }
   function getCheckForTriggeredBinUpdate(accessor, dimension) {
-    const update = testItems[dimension];
-    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+    const update = dimension;
+    const noUpdate = ['fillColor', 'elevation'].find(k => k !== dimension);
     const shouldUpdate = {
       layerData: false,
-      [update.bin]: true,
-      [noUpdate.bin]: false,
-      [update.domain]: true,
-      [noUpdate.domain]: false,
-      [update.scale]: true,
-      [noUpdate.scale]: false,
-      [update.getValue]: true,
-      [noUpdate.getValue]: false
+      dimensions: {
+        [update]: {
+          sortedBins: true,
+          valueDomain: true,
+          getValue: true,
+          scaleFunc: true
+        },
+        [noUpdate]: {
+          sortedBins: false,
+          valueDomain: false,
+          getValue: false,
+          scaleFunc: false
+        }
+      }
     };
     return assertStateUpdate(shouldUpdate, accessor);
   }
-  function getChecksForPercentileUpdate(dimension, side) {
-    const update = testItems[dimension];
-    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+  function getChecksForPercentileUpdate(side, dimension) {
+    const update = dimension;
+    const noUpdate = ['fillColor', 'elevation'].find(k => k !== dimension);
     const shouldUpdate = {
       layerData: false,
-      [update.bin]: false,
-      [noUpdate.bin]: false,
-      [update.domain]: true,
-      [noUpdate.domain]: false,
-      [update.scale]: true,
-      [noUpdate.scale]: false,
-      [update.getValue]: false,
-      [noUpdate.getValue]: false
+      dimensions: {
+        [update]: {
+          sortedBins: false,
+          valueDomain: true,
+          getValue: false,
+          scaleFunc: true
+        },
+        [noUpdate]: {
+          sortedBins: false,
+          valueDomain: false,
+          getValue: false,
+          scaleFunc: false
+        }
+      }
     };
     return assertStateUpdate(shouldUpdate, `${side}Percentile`);
   }
-  function getChecksForDomainOrRangeUpdate(dimension, prop) {
-    const update = testItems[dimension];
-    const noUpdate = testItems[Object.keys(testItems).find(k => k !== dimension)];
+  function getChecksForDomainOrRangeUpdate(prop, dimension) {
+    const update = dimension;
+    const noUpdate = ['fillColor', 'elevation'].find(k => k !== dimension);
     const shouldUpdate = {
       layerData: false,
-      [update.bin]: false,
-      [noUpdate.bin]: false,
-      [update.domain]: false,
-      [noUpdate.domain]: false,
-      [update.scale]: true,
-      [noUpdate.scale]: false,
-      [update.getValue]: false,
-      [noUpdate.getValue]: false
+      dimensions: {
+        [update]: {
+          sortedBins: false,
+          valueDomain: false,
+          getValue: false,
+          scaleFunc: true
+        },
+        [noUpdate]: {
+          sortedBins: false,
+          valueDomain: false,
+          getValue: false,
+          scaleFunc: false
+        }
+      }
     };
     return assertStateUpdate(shouldUpdate, `${dimension}${prop}`);
   }
@@ -220,77 +262,59 @@ test('CPUGridLayer#updates', t => {
         onAfterUpdate({layer}) {
           const {
             layerData,
-            sortedColorBins,
-            sortedElevationBins,
-            colorValueDomain,
-            elevationValueDomain,
-            getColorValue,
-            getElevationValue
-          } = layer.state;
+            dimensions: {fillColor, elevation}
+          } = layer.state.aggregationState;
 
-          t.ok(layerData.length > 0, 'CPUGridLayer.state.layerDate calculated');
-          t.ok(sortedColorBins, 'CPUGridLayer.state.sortedColorBins calculated');
-          t.ok(sortedElevationBins, 'CPUGridLayer.state.sortedColorBins calculated');
-          t.ok(Array.isArray(colorValueDomain), 'CPUGridLayer.state.valueDomain calculated');
-          t.ok(Array.isArray(elevationValueDomain), 'CPUGridLayer.state.valueDomain calculated');
-          t.ok(typeof getColorValue === 'function', 'CPUGridLayer.state.getColorValue calculated');
+          t.ok(layerData.data.length > 0, 'aggregationState.dimensions.layerDate calculated');
           t.ok(
-            typeof getElevationValue === 'function',
-            'CPUGridLayer.state.getElevationValue calculated'
-          );
-
-          t.ok(
-            Array.isArray(sortedColorBins.sortedBins),
-            'CPUGridLayer.state.sortedColorBins.sortedBins calculated'
+            fillColor.sortedBins,
+            'aggregationState.dimensions.fillColor.sortedColorBins calculated'
           );
           t.ok(
-            Array.isArray(sortedElevationBins.sortedBins),
-            'CPUGridLayer.state.sortedColorBins.sortedBins calculated'
+            elevation.sortedBins,
+            'aggregationState.dimensions.elevation.sortedColorBins calculated'
           );
           t.ok(
-            Number.isFinite(sortedColorBins.maxCount),
-            'CPUGridLayer.state.sortedColorBins.maxCount calculated'
+            Array.isArray(fillColor.valueDomain),
+            'aggregationState.dimensions.fillColor.valueDomain calculated'
           );
           t.ok(
-            Number.isFinite(sortedElevationBins.maxCount),
-            'CPUGridLayer.state.sortedColorBins.maxCount calculated'
+            Array.isArray(elevation.valueDomain),
+            'aggregationState.dimensions.elevation.valueDomain calculated'
+          );
+          t.ok(
+            typeof fillColor.getValue === 'function',
+            'aggregationState.dimensions.fillColor.getValue calculated'
+          );
+          t.ok(
+            typeof elevation.getValue === 'function',
+            'aggregationState.dimension.elevation.getValue calculated'
           );
 
-          const firstSortedBin = sortedColorBins.sortedBins[0];
-          const binTocell = layerData.find(d => d.index === firstSortedBin.i);
+          t.ok(
+            Array.isArray(fillColor.sortedBins.sortedBins),
+            'aggregationState.dimension.fillColor.sortedBins.sortedBins calculated'
+          );
+          t.ok(
+            Array.isArray(elevation.sortedBins.sortedBins),
+            'aggregationState.dimension.elevation.sortedBins.sortedBins calculated'
+          );
+          t.ok(
+            Number.isFinite(fillColor.sortedBins.maxCount),
+            'aggregationState.dimension.fillColor.sortedBins.maxCount calculated'
+          );
+          t.ok(
+            Number.isFinite(elevation.sortedBins.maxCount),
+            'aggregationState.dimension.elevation.sortedBins.maxCount calculated'
+          );
+
+          const firstSortedBin = fillColor.sortedBins.sortedBins[0];
+          const binTocell = layerData.data.find(d => d.index === firstSortedBin.i);
 
           t.ok(
-            sortedColorBins.binMap[binTocell.index] === firstSortedBin,
-            'Correct CPUGridLayer.state.sortedColorBins.binMap created'
+            fillColor.sortedBins.binMap[binTocell.index] === firstSortedBin,
+            'Correct aggregationState.dimension.fillColor.sortedBins.binMap created'
           );
-        }
-      },
-      {
-        updateProps: {
-          data: FIXTURES.points,
-          cellSize: 500,
-          getPosition: d => d.COORDINATES,
-          pickable: true
-        },
-        spies: ['_onGetSublayerColor', '_onGetSublayerElevation'],
-        onAfterUpdate({layer, subLayer, spies, oldState}) {
-          t.ok(subLayer instanceof GridCellLayer, 'GridCellLayer rendered');
-
-          // color or elevation prop didn't change
-          t.ok(
-            layer.state.getColorValue === oldState.getColorValue,
-            'getColorValue should not get re-calculated'
-          );
-          t.ok(
-            layer.state.getElevationValue === oldState.getElevationValue,
-            'getElevationValue should not get re-calculated'
-          );
-          // should call attribute updater twice
-          // because test util calls both initialize and update layer
-          t.ok(spies._onGetSublayerColor.called, 'should call _onGetSublayerColor');
-          t.ok(spies._onGetSublayerElevation.called, 'should call _onGetSublayerElevation');
-          spies._onGetSublayerColor.restore();
-          spies._onGetSublayerElevation.restore();
         }
       },
       {
@@ -318,7 +342,7 @@ test('CPUGridLayer#updates', t => {
         updateProps: {
           getColorWeight: x => 2
         },
-        onAfterUpdate: getCheckForNoBinChange('getColorWeight w/o trigger', 'color')
+        onAfterUpdate: getCheckForNoBinChange('getColorWeight w/o trigger', 'fillColor')
       },
       {
         updateProps: {
@@ -327,13 +351,13 @@ test('CPUGridLayer#updates', t => {
             getColorWeight: 1
           }
         },
-        onAfterUpdate: getCheckForTriggeredBinUpdate('getColorWeight w/ trigger', 'color')
+        onAfterUpdate: getCheckForTriggeredBinUpdate('getColorWeight w/ trigger', 'fillColor')
       },
       {
         updateProps: {
           getColorValue: x => 2
         },
-        onAfterUpdate: getCheckForNoBinChange('getColorValue w/o trigger', 'color')
+        onAfterUpdate: getCheckForNoBinChange('getColorValue w/o trigger', 'fillColor')
       },
       {
         updateProps: {
@@ -342,38 +366,41 @@ test('CPUGridLayer#updates', t => {
             getColorValue: 1
           }
         },
-        onAfterUpdate: getCheckForTriggeredBinUpdate('getColorValue w/ trigger', 'color')
+        onAfterUpdate: getCheckForTriggeredBinUpdate('getColorValue w/ trigger', 'fillColor')
       },
       {
         updateProps: {
           colorAggregation: 'Mean',
           getColorValue: null
         },
-        onAfterUpdate: getCheckForTriggeredBinUpdate('colorAggregation w/o getColorValue', 'color')
+        onAfterUpdate: getCheckForTriggeredBinUpdate(
+          'colorAggregation w/o getColorValue',
+          'fillColor'
+        )
       },
       {
         updateProps: {
           upperPercentile: 90
         },
-        onAfterUpdate: getChecksForPercentileUpdate('color', 'upper')
+        onAfterUpdate: getChecksForPercentileUpdate('upper', 'fillColor')
       },
       {
         updateProps: {
           lowerPercentile: 90
         },
-        onAfterUpdate: getChecksForPercentileUpdate('color', 'lower')
+        onAfterUpdate: getChecksForPercentileUpdate('lower', 'fillColor')
       },
       {
         updateProps: {
           colorDomain: [0, 10]
         },
-        onAfterUpdate: getChecksForDomainOrRangeUpdate('color', 'Domain')
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('Domain', 'fillColor')
       },
       {
         updateProps: {
           colorRange: [[1, 1, 1], [2, 2, 2], [3, 3, 3]]
         },
-        onAfterUpdate: getChecksForDomainOrRangeUpdate('color', 'Range')
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('Range', 'fillColor')
       },
       {
         updateProps: {
@@ -416,25 +443,25 @@ test('CPUGridLayer#updates', t => {
         updateProps: {
           elevationUpperPercentile: 80
         },
-        onAfterUpdate: getChecksForPercentileUpdate('elevation', 'elevationUpper')
+        onAfterUpdate: getChecksForPercentileUpdate('elevationUpper', 'elevation')
       },
       {
         updateProps: {
           elevationLowerPercentile: 10
         },
-        onAfterUpdate: getChecksForPercentileUpdate('elevation', 'elevationLower')
+        onAfterUpdate: getChecksForPercentileUpdate('elevationLower', 'elevation')
       },
       {
         updateProps: {
           elevationRange: [1, 10]
         },
-        onAfterUpdate: getChecksForDomainOrRangeUpdate('elevation', 'Range')
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('Range', 'elevation')
       },
       {
         updateProps: {
           elevationDomain: [0, 10]
         },
-        onAfterUpdate: getChecksForDomainOrRangeUpdate('elevation', 'Domain')
+        onAfterUpdate: getChecksForDomainOrRangeUpdate('Domain', 'elevation')
       }
     ]
   });
@@ -537,15 +564,15 @@ test('CPUGridLayer#updateTriggers', t => {
           elevation: false
         })
       },
-      {
-        updateProps: {
-          getColorValue: x => 3
-        },
-        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue w/o triggers', {
-          color: false,
-          elevation: false
-        })
-      },
+      // {
+      //   updateProps: {
+      //     getColorValue: x => 3
+      //   },
+      //   onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue w/o triggers', {
+      //     color: false,
+      //     elevation: false
+      //   })
+      // },
       {
         updateProps: {
           getColorValue: x => 4,
@@ -557,6 +584,54 @@ test('CPUGridLayer#updateTriggers', t => {
           color: true,
           elevation: false
         })
+      },
+      {
+        updateProps: {
+          getColorValue: x => 4,
+          updateTriggers: {
+            getColorValue: {
+              a: 1,
+              b: 2
+            }
+          }
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue w triggers as object', {
+          color: true,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorValue: x => 4,
+          updateTriggers: {
+            getColorValue: {
+              a: 1,
+              b: 2
+            }
+          }
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck('getColorValue w triggers as object', {
+          color: false,
+          elevation: false
+        })
+      },
+      {
+        updateProps: {
+          getColorValue: x => 4,
+          updateTriggers: {
+            getColorValue: {
+              a: 2,
+              b: 2
+            }
+          }
+        },
+        onAfterUpdate: getSublayerAttributeUpdateCheck(
+          'getColorValue w triggers as changed object',
+          {
+            color: true,
+            elevation: false
+          }
+        )
       },
       {
         updateProps: {
@@ -622,7 +697,7 @@ test('CPUGridLayer#updateTriggers', t => {
           }
         },
         onAfterUpdate: getSublayerAttributeUpdateCheck('getElevationWeight w triggers', {
-          color: false,
+          color: true,
           elevation: true
         })
       },
