@@ -140,6 +140,7 @@ export default class AttributeTransitionManager {
       if (transition._swapBuffer) {
         transition._swapBuffer.delete();
       }
+      delete this.transforms[attributeName];
       delete this.transitions[attributeName];
     }
   }
