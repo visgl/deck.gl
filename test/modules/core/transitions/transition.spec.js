@@ -1,5 +1,6 @@
 import test from 'tape-catch';
-import Transition, {TRANSITION_STATE} from '@deck.gl/core/transitions/transition';
+import Transition from '@deck.gl/core/transitions/transition';
+import {Timeline} from '@luma.gl/addons';
 
 test('Transition#constructor', t => {
   let transition = new Transition();
@@ -16,27 +17,32 @@ test('Transition#start', t => {
   let onStartCallCount = 0;
 
   const transition = new Transition({
+    timeline: new Timeline(),
     onStart: () => {
       onStartCallCount++;
     }
   });
-  t.is(transition.state, TRANSITION_STATE.NONE, 'Transition has initial state');
-  t.notOk(transition.inProgress, 'inProgress returns correct result');
+  t.notOk(transition.inProgress, 'Transition is not in progress');
 
   transition.start({customAttribute: 'custom value'});
-  t.is(transition.state, TRANSITION_STATE.PENDING, 'Transition has started');
-  t.ok(transition.inProgress, 'inProgress returns correct result');
+  t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.customAttribute, 'custom value', 'Transition has customAttribute');
+  t.is(onStartCallCount, 0, 'onStart is not called');
+
+  transition.update();
   t.is(onStartCallCount, 1, 'onStart is called once');
 
   t.end();
 });
 
+/* eslint-disable max-statements */
 test('Transition#update', t => {
   let onUpdateCallCount = 0;
   let onEndCallCount = 0;
+  const timeline = new Timeline();
 
   const transition = new Transition({
+    timeline,
     onUpdate: () => {
       onUpdateCallCount++;
     },
@@ -45,30 +51,31 @@ test('Transition#update', t => {
     }
   });
 
-  transition.update(0);
-  t.is(transition.state, TRANSITION_STATE.NONE, 'Transition is not in progress');
+  transition.update();
+  t.notOk(transition.inProgress, 'Transition is not in progress');
 
   transition.start({
     duration: 1,
     easing: time => time * time
   });
 
-  transition.update(0);
-  t.is(transition.state, TRANSITION_STATE.IN_PROGRESS, 'Transition is in progress');
-  t.ok(transition.inProgress, 'inProgress returns correct result');
+  transition.update();
+  t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.time, 0, 'time is correct');
 
-  transition.update(0.5);
-  t.is(transition.state, TRANSITION_STATE.IN_PROGRESS, 'Transition is in progress');
+  timeline.setTime(0.5);
+  transition.update();
+  t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.time, 0.25, 'time is correct');
 
-  transition.update(1.5);
-  t.is(transition.state, TRANSITION_STATE.ENDED, 'Transition has ended');
-  t.notOk(transition.inProgress, 'inProgress returns correct result');
+  timeline.setTime(1.5);
+  transition.update();
+  t.notOk(transition.inProgress, 'Transition has ended');
   t.is(transition.time, 1, 'time is correct');
 
-  transition.update(2);
-  t.is(transition.state, TRANSITION_STATE.ENDED, 'Transition has ended');
+  timeline.setTime(2);
+  transition.update();
+  t.notOk(transition.inProgress, 'Transition has ended');
 
   t.is(onUpdateCallCount, 3, 'onUpdate is called 3 times');
   t.is(onEndCallCount, 1, 'onEnd is called 3 times');
@@ -78,8 +85,10 @@ test('Transition#update', t => {
 
 test('Transition#interrupt', t => {
   let onInterruptCallCount = 0;
+  const timeline = new Timeline();
 
   const transition = new Transition({
+    timeline,
     onInterrupt: () => {
       onInterruptCallCount++;
     }
@@ -89,14 +98,18 @@ test('Transition#interrupt', t => {
   transition.start({duration: 1});
   t.is(onInterruptCallCount, 1, 'starting another transition - onInterrupt is called');
 
-  transition.update(0.5);
-  transition.update(0.6);
+  timeline.setTime(0.5);
+  transition.update();
+  timeline.setTime(0.6);
+  transition.update();
   transition.cancel();
   t.is(onInterruptCallCount, 2, 'cancelling transition - onInterrupt is called');
 
   transition.start({duration: 1});
-  transition.update(1);
-  transition.update(2);
+  timeline.setTime(1);
+  transition.update();
+  timeline.setTime(2);
+  transition.update();
   transition.cancel();
   t.is(onInterruptCallCount, 2, 'cancelling after transition ends - onInterrupt is not called');
 

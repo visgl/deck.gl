@@ -573,11 +573,6 @@ export default class Deck {
     }
   }
 
-  // Updates animation props on the layer context
-  _updateAnimationProps(animationProps) {
-    this.layerManager.context.animationProps = animationProps;
-  }
-
   _setGLContext(gl) {
     if (this.layerManager) {
       return;
@@ -599,6 +594,11 @@ export default class Deck {
 
     this.props.onWebGLInitialized(gl);
 
+    // timeline for transitions
+    const timeline = new Timeline();
+    timeline.play();
+    this.animationLoop.attachTimeline(timeline);
+
     this.eventManager = new EventManager(gl.canvas, {
       touchAction: this.props.touchAction,
       events: {
@@ -612,6 +612,7 @@ export default class Deck {
     }
 
     this.viewManager = new ViewManager({
+      timeline,
       eventManager: this.eventManager,
       onViewStateChange: this._onViewStateChange,
       onInteractiveStateChange: this._onInteractiveStateChange,
@@ -625,11 +626,6 @@ export default class Deck {
     // layerManager depends on viewport created by viewManager.
     assert(this.viewManager);
     const viewport = this.viewManager.getViewports()[0];
-
-    // timeline for transitions
-    const timeline = new Timeline();
-    timeline.play();
-    this.animationLoop.attachTimeline(timeline);
 
     // Note: avoid React setState due GL animation loop / setState timing issue
     this.layerManager = new LayerManager(gl, {
@@ -706,10 +702,7 @@ export default class Deck {
 
     // Update layers if needed (e.g. some async prop has loaded)
     // Note: This can trigger a redraw
-    this.layerManager.updateLayers(animationProps);
-
-    // Needs to be done before drawing
-    this._updateAnimationProps(animationProps);
+    this.layerManager.updateLayers();
 
     // Perform picking request if any
     this._pickAndCallback();
@@ -721,7 +714,7 @@ export default class Deck {
     // Note: this can trigger `onViewStateChange`, and affect layers
     // We want to defer these changes to the next frame
     if (this.viewManager) {
-      this.viewManager.updateViewStates(animationProps);
+      this.viewManager.updateViewStates();
     }
   }
 

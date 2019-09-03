@@ -1,16 +1,10 @@
-export const TRANSITION_STATE = {
-  NONE: 'none',
-  PENDING: 'pending',
-  IN_PROGRESS: 'in_progress',
-  ENDED: 'ended'
-};
-
 function noop() {}
 
 export default class Transition {
   /**
    * @params props {object} - properties of the transition.
    *
+   * @params props.timeline {Timeline}
    * @params props.duration {number} - total time to complete the transition
    * @params props.easing {func} - easing function
    * @params props.onStart {func} - callback when transition starts
@@ -21,8 +15,8 @@ export default class Transition {
    * Any additional properties are also saved on the instance but have no effect.
    */
   constructor(props) {
-    this._startTime = null;
-    this._state = TRANSITION_STATE.NONE;
+    this._inProgress = false;
+    this._handle = null;
 
     // Defaults
     this.duration = 1;
@@ -36,12 +30,8 @@ export default class Transition {
   }
 
   /* Public API */
-  get state() {
-    return this._state;
-  }
-
   get inProgress() {
-    return this._state === TRANSITION_STATE.PENDING || this._state === TRANSITION_STATE.IN_PROGRESS;
+    return this._inProgress;
   }
 
   /**
@@ -49,68 +39,56 @@ export default class Transition {
    * @params props {object} - optional overriding props. see constructor
    */
   start(props) {
-    if (this.inProgress) {
+    if (this._inProgress) {
       this.onInterrupt(this);
+      this.timeline.removeChannel(this._handle);
+      this._handle = null;
     }
     Object.assign(this, props);
-    this._setState(TRANSITION_STATE.PENDING);
+    this._inProgress = true;
   }
 
   /**
    * cancel this transition if it is in progress.
    */
   cancel() {
-    if (this.inProgress) {
+    if (this._inProgress) {
       this.onInterrupt(this);
-      this._setState(TRANSITION_STATE.NONE);
+      this.timeline.removeChannel(this._handle);
+      this._handle = null;
+      this._inProgress = false;
     }
   }
 
   /**
    * update this transition.
-   * @params currentTime {number} - timestamp of the update. should be in the same unit as `duration`.
    */
-  update(currentTime) {
-    if (this.state === TRANSITION_STATE.PENDING) {
-      this._startTime = currentTime;
-      this._setState(TRANSITION_STATE.IN_PROGRESS);
+  update() {
+    if (!this._inProgress) {
+      return false;
+    }
+    const {timeline, duration, easing} = this;
+    let handle = this._handle;
+
+    if (handle === null) {
+      handle = timeline.addChannel({
+        delay: timeline.getTime(),
+        duration
+      });
+      this._handle = handle;
+      this.onStart(this);
     }
 
-    if (this.state === TRANSITION_STATE.IN_PROGRESS) {
-      let shouldEnd = false;
-      let time = (currentTime - this._startTime) / this.duration;
-      if (time >= 1) {
-        time = 1;
-        shouldEnd = true;
-      }
-      this.time = this.easing(time);
-      this.onUpdate(this);
+    const time = timeline.getTime(handle);
+    this.time = easing(time / duration);
+    this.onUpdate(this);
 
-      if (shouldEnd) {
-        this._setState(TRANSITION_STATE.ENDED);
-      }
-      return true;
+    if (timeline.isFinished(handle)) {
+      timeline.removeChannel(handle);
+      this._handle = null;
+      this._inProgress = false;
+      this.onEnd(this);
     }
-
-    return false;
-  }
-
-  /* Private API */
-  _setState(newState) {
-    if (this._state === newState) {
-      return;
-    }
-
-    this._state = newState;
-
-    switch (newState) {
-      case TRANSITION_STATE.PENDING:
-        this.onStart(this);
-        break;
-      case TRANSITION_STATE.ENDED:
-        this.onEnd(this);
-        break;
-      default:
-    }
+    return true;
   }
 }

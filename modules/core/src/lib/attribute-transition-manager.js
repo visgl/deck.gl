@@ -8,9 +8,10 @@ import log from '../utils/log';
 import assert from '../utils/assert';
 
 export default class AttributeTransitionManager {
-  constructor(gl, {id}) {
+  constructor(gl, {id, timeline}) {
     this.id = id;
     this.gl = gl;
+    this.timeline = timeline;
 
     this.attributeTransitions = {};
     this.needsRedraw = false;
@@ -102,7 +103,7 @@ export default class AttributeTransitionManager {
   /* eslint-disable max-statements */
   // Called every render cycle, run transform feedback
   // Returns `true` if anything changes
-  setCurrentTime(currentTime) {
+  run() {
     if (!this.transform || this.numInstances === 0) {
       return false;
     }
@@ -114,7 +115,7 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in this.attributeTransitions) {
       const transition = this.attributeTransitions[attributeName];
-      const updated = transition.update(currentTime);
+      const updated = transition.update();
       if (updated) {
         uniforms[`${attributeName}Time`] = transition.time;
         needsRedraw = true;
@@ -135,6 +136,7 @@ export default class AttributeTransitionManager {
     if (!transition) {
       transition = new Transition({
         name: attributeName,
+        timeline: this.timeline,
         attribute,
         attributeInTransition: new Attribute(this.gl, attribute),
         bufferLayout: attribute.bufferLayout
@@ -149,6 +151,7 @@ export default class AttributeTransitionManager {
   _removeTransition(attributeName) {
     const transition = this.attributeTransitions[attributeName];
     if (transition) {
+      transition.cancel();
       if (transition.buffer) {
         transition.buffer.delete();
       }

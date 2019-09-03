@@ -1,5 +1,11 @@
 import {lerp} from 'math.gl';
 import {normalizeTransitionSettings} from './attribute-transition-utils';
+import Transition from '../transitions/transition';
+
+function getCurrentValue(transition) {
+  const {fromValue, toValue, time} = transition;
+  return lerp(fromValue, toValue, time);
+}
 
 export default class UniformTransitionManager {
   constructor(timeline) {
@@ -16,8 +22,7 @@ export default class UniformTransitionManager {
     if (transitions.has(key)) {
       const transition = transitions.get(key);
       // start from interrupted position
-      fromValue = this._getValue(transition);
-      transition.onInterrupt();
+      fromValue = getCurrentValue(transition);
       this.remove(key);
     }
 
@@ -25,45 +30,38 @@ export default class UniformTransitionManager {
     if (!settings) {
       return;
     }
-    transitions.set(key, Object.assign({fromValue, toValue, handle: null}, settings));
+    const transition = new Transition({
+      timeline: this.timeline
+    });
+    transition.start({
+      ...settings,
+      fromValue,
+      toValue
+    });
+    transitions.set(key, transition);
   }
 
   remove(key) {
     const {transitions} = this;
     if (transitions.has(key)) {
-      this.timeline.removeChannel(transitions.get(key).handle);
+      transitions.get(key).cancel();
       transitions.delete(key);
     }
   }
 
   update() {
     const propsInTransition = {};
-    const {timeline} = this;
 
     for (const [key, transition] of this.transitions) {
-      if (transition.handle === null) {
-        transition.onStart();
-        transition.handle = timeline.addChannel({
-          delay: timeline.getTime(),
-          duration: transition.duration
-        });
-      }
-
-      propsInTransition[key] = this._getValue(transition);
-
-      if (timeline.isFinished(transition.handle)) {
-        transition.onEnd();
+      transition.update();
+      propsInTransition[key] = getCurrentValue(transition);
+      if (!transition.inProgress) {
+        // transition ended
         this.remove(key);
       }
     }
 
     return propsInTransition;
-  }
-
-  _getValue(transition) {
-    const time = this.timeline.getTime(transition.handle);
-    const {fromValue, toValue, duration, easing} = transition;
-    return lerp(fromValue, toValue, easing(time / duration));
   }
 
   clear() {
