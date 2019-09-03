@@ -56,8 +56,7 @@ export default class TriangleLayer extends Layer {
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           vertexCount
-        }),
-        programManager: this.context.programManager
+        })
       })
     );
   }

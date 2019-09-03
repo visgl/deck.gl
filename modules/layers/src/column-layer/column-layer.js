@@ -159,8 +159,7 @@ export default class ColumnLayer extends Layer {
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        isInstanced: true,
-        programManager: this.context.programManager
+        isInstanced: true
       })
     );
   }

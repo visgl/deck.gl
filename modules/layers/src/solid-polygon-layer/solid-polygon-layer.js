@@ -287,8 +287,7 @@ export default class SolidPolygonLayer extends Layer {
             isSideVertex: false
           },
           vertexCount: 0,
-          isIndexed: true,
-          programManager: this.context.programManager
+          isIndexed: true
         })
       );
     }
@@ -309,8 +308,7 @@ export default class SolidPolygonLayer extends Layer {
             }
           }),
           instanceCount: 0,
-          isInstanced: 1,
-          programManager: this.context.programManager
+          isInstanced: 1
         })
       );
 

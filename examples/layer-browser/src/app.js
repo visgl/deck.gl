@@ -151,7 +151,9 @@ export default class App extends PureComponent {
   _renderExamples() {
     let index = 1;
     const layers = [
+      // the ground - for shadows to drop on
       new SolidPolygonLayer({
+        id: 'ground',
         data: LAND_COVER,
         getPolygon: f => f,
         extruded: false,

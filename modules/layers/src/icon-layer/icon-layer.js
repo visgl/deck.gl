@@ -210,8 +210,7 @@ export default class IconLayer extends Layer {
             positions: new Float32Array(positions)
           }
         }),
-        isInstanced: true,
-        programManager: this.context.programManager
+        isInstanced: true
       })
     );
   }

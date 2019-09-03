@@ -18,13 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {
-  registerShaderModules,
-  setDefaultShaderModules,
-  createShaderHook,
-  createModuleInjection,
-  ProgramManager
-} from '@luma.gl/core';
+import {registerShaderModules, ProgramManager} from '@luma.gl/core';
 import {fp32, picking, gouraudlighting, phonglighting} from '@luma.gl/core';
 import geometry from './misc/geometry';
 import project from './project/project';
@@ -59,21 +53,10 @@ const MODULE_INJECTIONS = {
 
 export function initializeShaderModules() {
   registerShaderModules([fp32, project, project32, gouraudlighting, phonglighting, picking]);
-
-  setDefaultShaderModules(DEFAULT_MODULES);
-
-  for (const shaderHook of SHADER_HOOKS) {
-    createShaderHook(shaderHook);
-  }
-  for (const moduleName in MODULE_INJECTIONS) {
-    for (const injection of MODULE_INJECTIONS[moduleName]) {
-      createModuleInjection(moduleName, injection);
-    }
-  }
 }
 
 export function createProgramManager(gl) {
-  const programManager = new ProgramManager(gl);
+  const programManager = ProgramManager.getDefaultProgramManager(gl);
 
   for (const shaderModule of DEFAULT_MODULES) {
     programManager.addDefaultModule(shaderModule);

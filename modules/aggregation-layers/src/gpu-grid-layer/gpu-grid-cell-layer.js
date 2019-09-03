@@ -88,8 +88,7 @@ export default class GPUGridCellLayer extends Layer {
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         geometry: new CubeGeometry(),
-        isInstanced: true,
-        programManager: this.context.programManager
+        isInstanced: true
       })
     );
   }

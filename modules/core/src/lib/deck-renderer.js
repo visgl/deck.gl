@@ -8,9 +8,8 @@ import {Framebuffer} from '@luma.gl/core';
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
-  constructor(gl, opts = {}) {
+  constructor(gl) {
     this.gl = gl;
-    this.programManager = opts.programManager;
     this.pixelRatio = null;
     this.layerFilter = null;
     this.drawPickingColors = false;
@@ -72,8 +71,7 @@ export default class DeckRenderer {
       onViewportActive: activateViewport,
       views,
       effects,
-      pixelRatio: this.pixelRatio,
-      programManager: this.programManager
+      pixelRatio: this.pixelRatio
     });
     const outputBuffer = this.lastPostProcessEffect
       ? this.screenBuffer

@@ -211,8 +211,7 @@ export default class SimpleMeshLayer extends Layer {
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         geometry: getGeometry(mesh),
-        isInstanced: true,
-        programManager: this.context.programManager
+        isInstanced: true
       })
     );
 

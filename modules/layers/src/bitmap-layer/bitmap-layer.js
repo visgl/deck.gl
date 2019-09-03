@@ -157,7 +157,6 @@ export default class BitmapLayer extends Layer {
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
-        programManager: this.context.programManager,
         geometry: new Geometry({
           drawMode: GL.TRIANGLE_FAN,
           vertexCount: 4,

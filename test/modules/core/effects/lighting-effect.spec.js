@@ -85,7 +85,6 @@ test('LightingEffect#prepare and cleanup', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight0, dirLight1});
-  const programManager = new ProgramManager(gl);
 
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
@@ -102,8 +101,7 @@ test('LightingEffect#prepare and cleanup', t => {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
-    pixelRatio: 1,
-    programManager
+    pixelRatio: 1
   });
 
   t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect prepares shadow passes');
@@ -124,14 +122,13 @@ test('LightingEffect#shadow module', t => {
   });
 
   const lightingEffect = new LightingEffect({dirLight});
-  const programManager = new ProgramManager(gl);
+  const programManager = ProgramManager.getDefaultProgramManager(gl);
   lightingEffect.prepare(gl, {
     layers: [],
     viewports: [testViewport],
     onViewportActive: () => {},
     views: [],
-    pixelRatio: 1,
-    programManager
+    pixelRatio: 1
   });
   let defaultModules = programManager._defaultModules;
   let hasShadow = defaultModules.some(m => m.name === 'shadow');

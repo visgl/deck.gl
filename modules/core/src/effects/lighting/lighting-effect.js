@@ -1,4 +1,4 @@
-import {AmbientLight, Texture2D} from '@luma.gl/core';
+import {AmbientLight, Texture2D, ProgramManager} from '@luma.gl/core';
 import DirectionalLight from './directional-light';
 import Effect from '../../lib/effect';
 import {Matrix4, Vector3} from 'math.gl';
@@ -34,6 +34,14 @@ const SHADOW_MODULE_INJECTIONS = [
     `
   }
 ];
+
+function addShadowModule(programManager) {
+  programManager.addDefaultModule(shadow);
+
+  for (const injection of SHADOW_MODULE_INJECTIONS) {
+    programManager.addModuleInjection(shadow.name, injection);
+  }
+}
 
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
@@ -72,7 +80,7 @@ export default class LightingEffect extends Effect {
     this.shadow = this.directionalLights.some(light => light.shadow);
   }
 
-  prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio, programManager}) {
+  prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
     if (!this.shadow) return {};
 
     // create light matrix every frame to make sure always updated from light source
@@ -82,9 +90,10 @@ export default class LightingEffect extends Effect {
       this._createShadowPasses(gl, pixelRatio);
     }
     if (!this.programManager) {
-      this.programManager = programManager;
+      // TODO - support multiple contexts
+      this.programManager = ProgramManager.getDefaultProgramManager(gl);
       if (shadow) {
-        this._addShadowModule(programManager);
+        addShadowModule(this.programManager);
       }
     }
 
@@ -144,14 +153,6 @@ export default class LightingEffect extends Effect {
     if (this.shadow && this.programManager) {
       this.programManager.removeDefaultModule(shadow);
       this.programManager = null;
-    }
-  }
-
-  _addShadowModule(programManager) {
-    programManager.addDefaultModule(shadow);
-
-    for (const injection of SHADOW_MODULE_INJECTIONS) {
-      programManager.addModuleInjection(shadow.name, injection);
     }
   }
 

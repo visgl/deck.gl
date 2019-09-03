@@ -76,8 +76,7 @@ export default class ScreenGridLayer extends Layer {
     /* eslint-disable max-len */
 
     const options = {
-      id: `${this.id}-aggregator`,
-      programManager: this.context.programManager
+      id: `${this.id}-aggregator`
     };
     const maxBuffer = this._getMaxCountBuffer(gl);
     const weights = {
@@ -243,8 +242,7 @@ export default class ScreenGridLayer extends Layer {
             positions: new Float32Array([0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0])
           }
         }),
-        isInstanced: true,
-        programManager: this.context.programManager
+        isInstanced: true
       })
     );
   }
