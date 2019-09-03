@@ -93,29 +93,16 @@ export class DeckGLView extends DOMWidgetView {
     // Python function call?
     const jsonConfig = JSON.parse(this.model.get('json_input'));
     const viewport = this.jsonDeck.deckConfig.getViewports()[0];
-    const viewportConfig = this._extractViewport(viewport, jsonConfig);
-    jsonConfig.initialViewState = viewportConfig;
-    this.model.set('json_input', JSON.stringify(jsonConfig));
-    this.model.save_changes();
-  }
-
-  _extractViewport(viewport, currentJSONConfig) {
-    const viewportConfig = currentJSONConfig.initialViewState;
-    if (!viewportConfig) {
-      return {};
-    }
-    const newViewportConfig = {
+    const viewportConfig = {
       zoom: viewport.zoom,
       bearing: viewport.bearing,
       pitch: viewport.pitch,
       longitude: viewport.longitude,
       latitude: viewport.latitude
     };
-    if (viewportConfig) {
-      newViewportConfig.minZoom = viewportConfig.minZoom || 0;
-      newViewportConfig.maxZoom = viewportConfig.maxZoom || 22;
-    }
-    return newViewportConfig;
+    jsonConfig.initialViewState = viewportConfig;
+    this.model.set('json_input', JSON.stringify(jsonConfig));
+    this.model.save_changes();
   }
 
   handleClick(e) {
