@@ -44,24 +44,11 @@ void main(void) {
 }
 `;
 
-const fs = `\
-#define SHADER_NAME feedback-fragment-shader
-
-precision highp float;
-
-varying ATTRIBUTE_TYPE vCurrent;
-
-void main(void) {
-  gl_FragColor = vec4(0.0);
-}
-`;
-
 export function getShaders(transition) {
   const attributeType = ATTRIBUTE_MAPPING[transition.attribute.size];
 
   return {
     vs,
-    fs,
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },

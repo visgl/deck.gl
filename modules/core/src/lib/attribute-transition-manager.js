@@ -13,7 +13,8 @@ export default class AttributeTransitionManager {
     this.gl = gl;
     this.timeline = timeline;
 
-    this.attributeTransitions = {};
+    this.transitions = {};
+    this.transforms = {};
     this.needsRedraw = false;
     this.numInstances = 0;
 
@@ -26,7 +27,7 @@ export default class AttributeTransitionManager {
   }
 
   finalize() {
-    for (const attributeName in this.attributeTransitions) {
+    for (const attributeName in this.transitions) {
       this._removeTransition(attributeName);
     }
   }
@@ -44,18 +45,17 @@ export default class AttributeTransitionManager {
       return;
     }
 
-    const {attributeTransitions} = this;
     const changedTransitions = {};
 
     for (const attributeName in attributes) {
       const hasChanged = this._updateAttribute(attributeName, attributes[attributeName]);
 
       if (hasChanged) {
-        changedTransitions[attributeName] = attributeTransitions[attributeName];
+        changedTransitions[attributeName] = this.transitions[attributeName];
       }
     }
 
-    for (const attributeName in attributeTransitions) {
+    for (const attributeName in this.transitions) {
       const attribute = attributes[attributeName];
 
       if (!attribute || !attribute.supportsTransition()) {
@@ -67,15 +67,15 @@ export default class AttributeTransitionManager {
 
   // Returns `true` if attribute is transition-enabled
   hasAttribute(attributeName) {
-    return attributeName in this.attributeTransitions;
+    return attributeName in this.transitions;
   }
 
   // Get all the animated attributes
   getAttributes() {
     const animatedAttributes = {};
 
-    for (const attributeName in this.attributeTransitions) {
-      const transition = this.attributeTransitions[attributeName];
+    for (const attributeName in this.transitions) {
+      const transition = this.transitions[attributeName];
 
       if (transition.buffer) {
         animatedAttributes[attributeName] = transition.attributeInTransition;
@@ -93,14 +93,15 @@ export default class AttributeTransitionManager {
       return false;
     }
 
+    const {transitions, transforms} = this;
     let needsRedraw = this.needsRedraw;
     this.needsRedraw = false;
 
-    for (const attributeName in this.attributeTransitions) {
-      const transition = this.attributeTransitions[attributeName];
+    for (const attributeName in transitions) {
+      const transition = transitions[attributeName];
       const updated = transition.update();
       if (updated) {
-        transition.transform.run({
+        transforms[attributeName].run({
           uniforms: {time: transition.time}
         });
         needsRedraw = true;
@@ -113,7 +114,7 @@ export default class AttributeTransitionManager {
 
   /* Private methods */
   _createTransition(attributeName, attribute) {
-    let transition = this.attributeTransitions[attributeName];
+    let transition = this.transitions[attributeName];
     if (!transition) {
       transition = new Transition({
         name: attributeName,
@@ -122,24 +123,24 @@ export default class AttributeTransitionManager {
         attributeInTransition: new Attribute(this.gl, attribute),
         bufferLayout: attribute.bufferLayout
       });
-      this.attributeTransitions[attributeName] = transition;
+      this.transitions[attributeName] = transition;
       return transition;
     }
     return null;
   }
 
   _removeTransition(attributeName) {
-    const transition = this.attributeTransitions[attributeName];
+    const transition = this.transitions[attributeName];
     if (transition) {
       transition.cancel();
-      transition.transform.delete();
+      this.transforms[attributeName].delete();
       if (transition.buffer) {
         transition.buffer.delete();
       }
       if (transition._swapBuffer) {
         transition._swapBuffer.delete();
       }
-      delete this.attributeTransitions[attributeName];
+      delete this.transitions[attributeName];
     }
   }
 
@@ -150,7 +151,7 @@ export default class AttributeTransitionManager {
 
     if (settings) {
       let hasChanged;
-      let transition = this.attributeTransitions[attributeName];
+      let transition = this.transitions[attributeName];
       if (transition) {
         hasChanged = attribute.needsRedraw();
       } else {
@@ -241,19 +242,21 @@ export default class AttributeTransitionManager {
     transition.start(
       Object.assign({}, this._getNextTransitionStates(transition, settings), settings)
     );
+    let transform = this.transforms[transition.name];
 
-    if (transition.transform) {
-      transition.transform.update({
+    if (transform) {
+      transform.update({
         ...getBuffers(transition),
         elementCount: this.numInstances
       });
     } else {
       // Buffers must be supplied to the transform constructor
-      transition.transform = new Transform(this.gl, {
+      transform = new Transform(this.gl, {
         elementCount: this.numInstances,
         ...getShaders(transition),
         ...getBuffers(transition)
       });
+      this.transforms[transition.name] = transform;
     }
   }
 }
