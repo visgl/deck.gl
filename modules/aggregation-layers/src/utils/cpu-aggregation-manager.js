@@ -162,7 +162,7 @@ export default class CPUAggregationManager {
     this.state = Object.assign({}, this.state, updateObject);
   }
 
-  // Update priveate state.dimensions
+  // Update private state.dimensions
   setDimensionState(key, updateObject) {
     this.setState({
       dimensions: Object.assign({}, this.state.dimensions, {
@@ -247,10 +247,6 @@ export default class CPUAggregationManager {
   }
 
   getDimensionUpdaters({key, accessor, getBins, getDomain, getScaleFunc, nullValue}) {
-    // dimension updaters are sequential,
-    // if the first one needs to be called, the 2nd and 3rd one will automatically
-    // be called. e.g. if ColorValue needs to be updated, getColorValueDomain and getColorScale
-    // will automatically be called
     return {
       key,
       accessor,
@@ -259,43 +255,6 @@ export default class CPUAggregationManager {
       getScaleFunc: Object.assign({updater: this.getDimensionScale}, getScaleFunc),
       attributeAccessor: this.getSubLayerDimensionAttribute(key, nullValue)
     };
-    // getFillColor: [
-    //   {
-    //     id: 'value',
-    //     triggers: ['getColorValue', 'getColorWeight', 'colorAggregation'],
-    //     updater: this.getSortedColorBins,
-    //     updateTriggers: {getColorValue: true, getColorWeight: true}
-    //   },
-    //   {
-    //     id: 'domain',
-    //     triggers: ['lowerPercentile', 'upperPercentile'],
-    //     updater: this.getColorValueDomain
-    //   },
-    //   {
-    //     id: 'scaleFunc',
-    //     triggers: ['colorDomain', 'colorRange'],
-    //     updater: this.getColorScale
-    //   }
-    // ],
-    // getElevation: [
-    //   {
-    //     id: 'value',
-    //     triggers: ['getElevationValue', 'getElevationWeight', 'elevationAggregation'],
-    //     updater: this.getSortedElevationBins,
-    //     updateTriggers: {getElevationValue: true, getElevationWeight: true}
-    //   },
-    //   {
-    //     id: 'domain',
-    //     triggers: ['elevationLowerPercentile', 'elevationUpperPercentile'],
-    //     updater: this.getElevationValueDomain
-    //   },
-    //   {
-    //     id: 'scaleFunc',
-    //     triggers: ['elevationDomain', 'elevationRange'],
-    //     updater: this.getElevationScale
-    //   }
-    // ]
-    // };
   }
 
   needUpdateDimensionStep(dimensionStep, oldProps, props, changeFlags) {
@@ -401,6 +360,7 @@ export default class CPUAggregationManager {
         return getQuantizeScale;
       case 'linear':
         return getLinearScale;
+
       default:
         return getQuantizeScale;
     }

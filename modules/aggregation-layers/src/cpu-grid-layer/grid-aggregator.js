@@ -32,7 +32,7 @@ const R_EARTH = 6378000;
 export function pointToDensityGridDataCPU({data, cellSize, getPosition}) {
   const {gridHash, gridOffset} = _pointsToGridHashing(data, cellSize, getPosition);
   const result = _getGridLayerDataFromGridHash(gridHash, gridOffset);
-
+  console.log(result);
   return {
     gridHash,
     gridOffset,

@@ -40,6 +40,7 @@ const defaultProps = {
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
   upperPercentile: {type: 'number', value: 100, min: 0, max: 100},
+  colorScaleType: 'quantize',
   onSetColorDomain: nop,
 
   // elevation
@@ -51,6 +52,7 @@ const defaultProps = {
   elevationLowerPercentile: {type: 'number', value: 0, min: 0, max: 100},
   elevationUpperPercentile: {type: 'number', value: 100, min: 0, max: 100},
   elevationScale: {type: 'number', min: 0, value: 1},
+  elevationScaleType: 'linear',
   onSetElevationDomain: nop,
 
   radius: {type: 'number', value: 1000, min: 1},

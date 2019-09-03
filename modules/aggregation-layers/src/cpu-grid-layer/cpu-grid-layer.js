@@ -34,22 +34,24 @@ const defaultProps = {
   // color
   colorDomain: null,
   colorRange: defaultColorRange,
-  getColorValue: {type: 'accessor', value: null}, // default value is calcuated from `getColorWeight` and `colorAggregation`
+  getColorValue: {type: 'accessor', value: null}, // default value is calculated from `getColorWeight` and `colorAggregation`
   getColorWeight: {type: 'accessor', value: x => 1},
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
+  colorScaleType: 'quantize',
   onSetColorDomain: nop,
 
   // elevation
   elevationDomain: null,
   elevationRange: [0, 1000],
-  getElevationValue: {type: 'accessor', value: null}, // default value is calcuated from `getElevationWeight` and `elevationAggregation`
+  getElevationValue: {type: 'accessor', value: null}, // default value is calculated from `getElevationWeight` and `elevationAggregation`
   getElevationWeight: {type: 'accessor', value: x => 1},
   elevationAggregation: 'SUM',
   elevationLowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   elevationUpperPercentile: {type: 'number', min: 0, max: 100, value: 100},
   elevationScale: {type: 'number', min: 0, value: 1},
+  elevationScaleType: 'linear',
   onSetElevationDomain: nop,
 
   gridAggregator: pointToDensityGridDataCPU,
