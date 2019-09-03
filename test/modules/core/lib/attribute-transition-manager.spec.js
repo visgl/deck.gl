@@ -74,10 +74,10 @@ if (isWebGL2(gl)) {
     t.ok(manager.hasAttribute('instanceSizes'), 'added transition for instanceSizes');
     t.ok(manager.hasAttribute('instancePositions'), 'added transition for instancePositions');
 
-    const sizeTransition = manager.attributeTransitions.instanceSizes;
+    const sizeTransition = manager.transitions.instanceSizes;
     t.is(sizeTransition.buffer.getElementCount(), 1, 'buffer has correct size');
 
-    const positionTransition = manager.attributeTransitions.instancePositions;
+    const positionTransition = manager.transitions.instancePositions;
     t.ok(positionTransition.transform, 'transform is constructed for instancePositions');
     delete attributes.instancePositions;
 
