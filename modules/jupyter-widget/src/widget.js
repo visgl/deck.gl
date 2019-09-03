@@ -66,18 +66,18 @@ export class DeckGLView extends DOMWidgetView {
       this.el.appendChild(containerDiv);
 
       loadCss(MAPBOX_CSS_URL);
-      initDeck(
-        {
-          mapboxApiKey: this.model.get('mapbox_key'),
-          container: containerDiv,
-          jsonInput: JSON.parse(this.model.get('json_input'))
-        },
-        x => {
+      initDeck({
+        mapboxApiKey: this.model.get('mapbox_key'),
+        container: containerDiv,
+        jsonInput: JSON.parse(this.model.get('json_input')),
+        onComplete: x => {
           this.jsonDeck = x;
         },
-        this.handleClick.bind(this)
-      );
+        handleClick: this.handleClick.bind(this),
+        onViewStateChange: this.onViewStateChange.bind(this)
+      });
       this.model.set('initialized', true);
+      this.model.save_changes();
     }
   }
 
@@ -85,6 +85,37 @@ export class DeckGLView extends DOMWidgetView {
     updateDeck(JSON.parse(this.model.get('json_input')), this.jsonDeck);
     // Jupyter notebook displays an error that this suppresses
     hideMapboxCSSWarning();
+  }
+
+  onViewStateChange() {
+    // Saves viewport state out from the viewport set in the widget
+    // TODO need to determine when this is called -- autosave? Provide a button?
+    // Python function call?
+    const jsonConfig = JSON.parse(this.model.get('json_input'));
+    const viewport = this.jsonDeck.deckConfig.getViewports()[0];
+    const viewportConfig = this._extractViewport(viewport, jsonConfig);
+    jsonConfig.initialViewState = viewportConfig;
+    this.model.set('json_input', JSON.stringify(jsonConfig));
+    this.model.save_changes();
+  }
+
+  _extractViewport(viewport, currentJSONConfig) {
+    const viewportConfig = currentJSONConfig.initialViewState;
+    if (!viewportConfig) {
+      return {};
+    }
+    const newViewportConfig = {
+      zoom: viewport.zoom,
+      bearing: viewport.bearing,
+      pitch: viewport.pitch,
+      longitude: viewport.longitude,
+      latitude: viewport.latitude
+    };
+    if (viewportConfig) {
+      newViewportConfig.minZoom = viewportConfig.minZoom || 0;
+      newViewportConfig.maxZoom = viewportConfig.maxZoom || 22;
+    }
+    return newViewportConfig;
   }
 
   handleClick(e) {

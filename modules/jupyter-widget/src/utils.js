@@ -22,7 +22,14 @@ export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
   deckConfig.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handleClick) {
+export function initDeck({
+  mapboxApiKey,
+  container,
+  jsonInput,
+  onComplete,
+  handleClick,
+  onViewStateChange
+}) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl'], deckgl => {
       try {
@@ -45,6 +52,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
           longitude: 0,
           zoom: 1,
           onClick: handleClick,
+          onViewStateChange,
           container,
           onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
         });

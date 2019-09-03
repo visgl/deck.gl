@@ -1,3 +1,4 @@
+import json
 import os
 import warnings
 
@@ -95,7 +96,11 @@ class Deck(JSONMixin):
 
         Intended for use in a Jupyter notebook
         """
-        self.deck_widget.json_input = self.to_json()
+        current_config = json.loads(self.to_json())
+        if self.deck_widget.initialized:
+            # Prevent initial view state from getting reset
+            current_config['initialViewState'] = {}
+        self.deck_widget.json_input = json.dumps(current_config)
 
     def to_html(
             self,
