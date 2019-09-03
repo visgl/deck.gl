@@ -11,4 +11,4 @@ from pydeck import DeckGLWidget
 
 def test_example_creation_blank():
     w = DeckGLWidget()
-    assert w.json_input == ''
+    assert w.json_input == None
