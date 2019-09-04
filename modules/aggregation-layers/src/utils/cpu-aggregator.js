@@ -109,7 +109,7 @@ const defaultDimensions = [
   }
 ];
 const defaultGetCellSize = props => props.cellSize;
-export default class CPUAggregator{
+export default class CPUAggregator {
   constructor(opts) {
     this.state = {
       layerData: {},
@@ -463,5 +463,12 @@ export default class CPUAggregator{
       // override object with picked cell
       object
     });
+  }
+
+  getAccessor(dimensionKey) {
+    if (!this.dimensionUpdaters.hasOwnProperty(dimensionKey)) {
+      return nop;
+    }
+    return this.dimensionUpdaters[dimensionKey].attributeAccessor;
   }
 }

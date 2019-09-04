@@ -132,12 +132,12 @@ export default class HexagonLayer extends CompositeLayer {
 
   // create a method for testing
   _onGetSublayerColor(cell) {
-    return this.state.cpuAggregator.dimensionUpdaters.fillColor.attributeAccessor(cell);
+    return this.state.cpuAggregator.getAccessor('fillColor')(cell);
   }
 
   // create a method for testing
   _onGetSublayerElevation(cell) {
-    return this.state.cpuAggregator.dimensionUpdaters.elevation.attributeAccessor(cell);
+    return this.state.cpuAggregator.getAccessor('elevation')(cell);
   }
 
   _getSublayerUpdateTriggers() {
