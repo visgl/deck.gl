@@ -20,29 +20,6 @@ const DEFAULT_DIRECTIONAL_LIGHT_PROPS = [
 ];
 const DEFAULT_SHADOW_COLOR = [0, 0, 0, 200 / 255];
 
-const SHADOW_MODULE_INJECTIONS = [
-  {
-    hook: 'vs:DECKGL_FILTER_GL_POSITION',
-    injection: `
-  position = shadow_setVertexPosition(geometry.position);
-    `
-  },
-  {
-    hook: 'fs:DECKGL_FILTER_COLOR',
-    injection: `
-  color = shadow_filterShadowColor(color);
-    `
-  }
-];
-
-function addShadowModule(programManager) {
-  programManager.addDefaultModule(shadow);
-
-  for (const injection of SHADOW_MODULE_INJECTIONS) {
-    programManager.addModuleInjection(shadow.name, injection);
-  }
-}
-
 // Class to manage ambient, point and directional light sources in deck
 export default class LightingEffect extends Effect {
   constructor(props) {
@@ -93,7 +70,7 @@ export default class LightingEffect extends Effect {
       // TODO - support multiple contexts
       this.programManager = ProgramManager.getDefaultProgramManager(gl);
       if (shadow) {
-        addShadowModule(this.programManager);
+        this.programManager.addDefaultModule(shadow);
       }
     }
 
