@@ -19,20 +19,33 @@
 // THE SOFTWARE.
 
 export default `\
+#version 300 es
+
 #define SHADER_NAME solid-polygon-layer-fragment-shader
 
 precision highp float;
 
-varying vec4 vColor;
-varying float isValid;
+in vec4 vColor;
+in float isValid;
+
+layout(location=0) out vec4 accumColor;
+layout(location=1) out float accumAlpha;
+
+float weight(float z, float a) {
+  return clamp(pow(min(1.0, a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
+}
 
 void main(void) {
   if (isValid < 0.5) {
     discard;
   }
 
-  gl_FragColor = vColor;
+  vec4 color = vColor;
+  color.rgb *= color.a;
+  float w = weight(gl_FragCoord.z, color.a);
+  accumColor = vec4(color.rgb * w, color.a);
+  accumAlpha = color.a * w;
 
-  DECKGL_FILTER_COLOR(gl_FragColor, geometry);
+  DECKGL_FILTER_COLOR(color, geometry);
 }
 `;
