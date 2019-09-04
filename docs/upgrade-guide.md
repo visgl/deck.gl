@@ -73,6 +73,9 @@ The `project64` shader module is no longer registered by default. If you were pr
     return {vs, fs, modules: [project64]};
   }
   ```
+#### CPU Grid layer and Hexagon layer updateTriggers
+
+`getElevationValue`, `getElevationWeight` and `getColorValue`, `getColorWeight` are now compared using `updateTriggers` like other layer [accessors](https://github.com/uber/deck.gl/blob/master/docs/developer-guide/using-layers.md#accessors). Update them without passing updateTriggers will no longer trigger layer update.
 
 #### Deprecations
 
