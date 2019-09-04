@@ -156,8 +156,7 @@ export default class ScatterplotLayer extends Layer {
             positions: {size: 3, value: new Float32Array(positions)}
           }
         }),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
   }

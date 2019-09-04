@@ -286,7 +286,7 @@ const ColumnLayerExample = {
     data: dataSamples.worldGrid.data,
     extruded: true,
     pickable: true,
-    radius: 1000,
+    radius: 100,
     opacity: 1,
     getFillColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000

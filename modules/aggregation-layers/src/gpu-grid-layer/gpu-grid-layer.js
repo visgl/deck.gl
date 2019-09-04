@@ -65,8 +65,7 @@ export default class GPUGridLayer extends CompositeLayer {
       log.error('GPUGridLayer is not supported on this browser, use GridLayer instead')();
     }
     const options = {
-      id: `${this.id}-gpu-aggregator`,
-      shaderCache: this.context.shaderCache
+      id: `${this.id}-gpu-aggregator`
     };
     this.state = {
       gpuGridAggregator: new GPUGridAggregator(gl, options),

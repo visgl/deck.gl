@@ -1,9 +1,4 @@
-import {
-  AmbientLight,
-  Texture2D,
-  setDefaultShaderModules,
-  getDefaultShaderModules
-} from '@luma.gl/core';
+import {AmbientLight, Texture2D, ProgramManager} from '@luma.gl/core';
 import DirectionalLight from './directional-light';
 import Effect from '../../lib/effect';
 import {Matrix4, Vector3} from 'math.gl';
@@ -37,6 +32,7 @@ export default class LightingEffect extends Effect {
     this.shadowPasses = [];
     this.dummyShadowMap = null;
     this.shadow = false;
+    this.programManager = null;
 
     for (const key in props) {
       const lightSource = props[key];
@@ -58,10 +54,7 @@ export default class LightingEffect extends Effect {
     }
     this._applyDefaultLights();
 
-    if (this.directionalLights.some(light => light.shadow)) {
-      this.shadow = true;
-      this._addShadowModule();
-    }
+    this.shadow = this.directionalLights.some(light => light.shadow);
   }
 
   prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
@@ -72,6 +65,13 @@ export default class LightingEffect extends Effect {
 
     if (this.shadowPasses.length === 0) {
       this._createShadowPasses(gl, pixelRatio);
+    }
+    if (!this.programManager) {
+      // TODO - support multiple contexts
+      this.programManager = ProgramManager.getDefaultProgramManager(gl);
+      if (shadow) {
+        this.programManager.addDefaultModule(shadow);
+      }
     }
 
     if (!this.dummyShadowMap) {
@@ -127,8 +127,9 @@ export default class LightingEffect extends Effect {
       this.dummyShadowMap = null;
     }
 
-    if (this.shadow) {
-      this._removeShadowModule();
+    if (this.shadow && this.programManager) {
+      this.programManager.removeDefaultModule(shadow);
+      this.programManager = null;
     }
   }
 
@@ -147,32 +148,6 @@ export default class LightingEffect extends Effect {
   _createShadowPasses(gl, pixelRatio) {
     for (let i = 0; i < this.directionalLights.length; i++) {
       this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
-    }
-  }
-
-  _addShadowModule() {
-    const defaultShaderModules = getDefaultShaderModules();
-    let hasShadowModule = false;
-    for (const module of defaultShaderModules) {
-      if (module.name === `shadow`) {
-        hasShadowModule = true;
-        break;
-      }
-    }
-    if (!hasShadowModule) {
-      defaultShaderModules.push(shadow);
-      setDefaultShaderModules(defaultShaderModules);
-    }
-  }
-
-  _removeShadowModule() {
-    const defaultShaderModules = getDefaultShaderModules();
-    for (let i = 0; i < defaultShaderModules.length; i++) {
-      if (defaultShaderModules[i].name === `shadow`) {
-        defaultShaderModules.splice(i, 1);
-        setDefaultShaderModules(defaultShaderModules);
-        break;
-      }
     }
   }
 
