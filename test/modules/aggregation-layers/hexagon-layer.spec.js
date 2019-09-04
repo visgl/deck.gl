@@ -38,10 +38,7 @@ test('HexagonLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate({layer}) {
       if (layer.props.data && layer.props.data.length) {
-        t.ok(
-          layer.state.aggregationState.layerData.data.length > 0,
-          'should update state.hexagons'
-        );
+        t.ok(layer.state.aggregatorState.layerData.data.length > 0, 'should update state.hexagons');
       }
     }
   });
@@ -77,10 +74,10 @@ test('HexagonLayer#updateLayer', t => {
       }
 
       checkIfUpdated(
-        layer.state.aggregationState,
-        oldLayerState.aggregationState,
+        layer.state.aggregatorState,
+        oldLayerState.aggregatorState,
         shouldUpdate,
-        'aggregationState'
+        'aggregatorState'
       );
     };
   }
@@ -237,49 +234,49 @@ test('HexagonLayer#updateLayer', t => {
           const {
             layerData,
             dimensions: {fillColor, elevation}
-          } = layer.state.aggregationState;
+          } = layer.state.aggregatorState;
 
-          t.ok(layerData.data.length > 0, 'aggregationState.dimensions.layerDate calculated');
+          t.ok(layerData.data.length > 0, 'aggregatorState.dimensions.layerDate calculated');
           t.ok(
             fillColor.sortedBins,
-            'aggregationState.dimensions.fillColor.sortedColorBins calculated'
+            'aggregatorState.dimensions.fillColor.sortedColorBins calculated'
           );
           t.ok(
             elevation.sortedBins,
-            'aggregationState.dimensions.elevation.sortedColorBins calculated'
+            'aggregatorState.dimensions.elevation.sortedColorBins calculated'
           );
           t.ok(
             Array.isArray(fillColor.valueDomain),
-            'aggregationState.dimensions.fillColor.valueDomain calculated'
+            'aggregatorState.dimensions.fillColor.valueDomain calculated'
           );
           t.ok(
             Array.isArray(elevation.valueDomain),
-            'aggregationState.dimensions.elevation.valueDomain calculated'
+            'aggregatorState.dimensions.elevation.valueDomain calculated'
           );
           t.ok(
             typeof fillColor.getValue === 'function',
-            'aggregationState.dimensions.fillColor.getValue calculated'
+            'aggregatorState.dimensions.fillColor.getValue calculated'
           );
           t.ok(
             typeof elevation.getValue === 'function',
-            'aggregationState.dimension.elevation.getValue calculated'
+            'aggregatorState.dimension.elevation.getValue calculated'
           );
 
           t.ok(
             Array.isArray(fillColor.sortedBins.sortedBins),
-            'aggregationState.dimension.fillColor.sortedBins.sortedBins calculated'
+            'aggregatorState.dimension.fillColor.sortedBins.sortedBins calculated'
           );
           t.ok(
             Array.isArray(elevation.sortedBins.sortedBins),
-            'aggregationState.dimension.elevation.sortedBins.sortedBins calculated'
+            'aggregatorState.dimension.elevation.sortedBins.sortedBins calculated'
           );
           t.ok(
             Number.isFinite(fillColor.sortedBins.maxCount),
-            'aggregationState.dimension.fillColor.sortedBins.maxCount calculated'
+            'aggregatorState.dimension.fillColor.sortedBins.maxCount calculated'
           );
           t.ok(
             Number.isFinite(elevation.sortedBins.maxCount),
-            'aggregationState.dimension.elevation.sortedBins.maxCount calculated'
+            'aggregatorState.dimension.elevation.sortedBins.maxCount calculated'
           );
 
           const firstSortedBin = fillColor.sortedBins.sortedBins[0];
@@ -287,7 +284,7 @@ test('HexagonLayer#updateLayer', t => {
 
           t.ok(
             fillColor.sortedBins.binMap[binTocell.index] === firstSortedBin,
-            'Correct aggregationState.dimension.fillColor.sortedBins.binMap created'
+            'Correct aggregatorState.dimension.fillColor.sortedBins.binMap created'
           );
         }
       },

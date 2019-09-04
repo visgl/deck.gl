@@ -25,7 +25,7 @@ import {ColumnLayer} from '@deck.gl/layers';
 import {defaultColorRange} from '../utils/color-utils';
 
 import {pointToHexbin} from './hexagon-aggregator';
-import CPUAggregationManager from '../utils/cpu-aggregation-manager';
+import CPUAggregator from '../utils/cpu-aggregator';
 
 function nop() {}
 
@@ -66,30 +66,30 @@ const defaultProps = {
 
 export default class HexagonLayer extends CompositeLayer {
   initializeState() {
-    const cpuAggregationManager = new CPUAggregationManager({
+    const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.hexagonAggregator,
       getCellSize: props => props.radius
     });
 
     this.state = {
-      cpuAggregationManager,
-      aggregationState: cpuAggregationManager.state
+      cpuAggregator,
+      aggregatorState: cpuAggregator.state
     };
   }
 
   updateState({oldProps, props, changeFlags}) {
-    const {cpuAggregationManager} = this.state;
-    const oldLayerData = cpuAggregationManager.state.layerData;
+    const {cpuAggregator} = this.state;
+    const oldLayerData = cpuAggregator.state.layerData;
     this.setState({
-      // make a copy of the internal state of cpuAggregationManager for testing
-      aggregationState: cpuAggregationManager.updateState(
+      // make a copy of the internal state of cpuAggregator for testing
+      aggregatorState: cpuAggregator.updateState(
         {oldProps, props, changeFlags},
         this.context.viewport
       )
     });
 
-    if (oldLayerData !== cpuAggregationManager.state.layerData) {
-      const {hexagonVertices} = cpuAggregationManager.state.layerData;
+    if (oldLayerData !== cpuAggregator.state.layerData) {
+      const {hexagonVertices} = cpuAggregator.state.layerData;
       this.updateRadiusAngle(hexagonVertices);
     }
   }
@@ -127,26 +127,26 @@ export default class HexagonLayer extends CompositeLayer {
   }
 
   getPickingInfo({info}) {
-    return this.state.cpuAggregationManager.getPickingInfo({info});
+    return this.state.cpuAggregator.getPickingInfo({info});
   }
 
   // create a method for testing
   _onGetSublayerColor(cell) {
-    return this.state.cpuAggregationManager.dimensionUpdaters.fillColor.attributeAccessor(cell);
+    return this.state.cpuAggregator.dimensionUpdaters.fillColor.attributeAccessor(cell);
   }
 
   // create a method for testing
   _onGetSublayerElevation(cell) {
-    return this.state.cpuAggregationManager.dimensionUpdaters.elevation.attributeAccessor(cell);
+    return this.state.cpuAggregator.dimensionUpdaters.elevation.attributeAccessor(cell);
   }
 
   _getSublayerUpdateTriggers() {
-    return this.state.cpuAggregationManager.getUpdateTriggers(this.props);
+    return this.state.cpuAggregator.getUpdateTriggers(this.props);
   }
 
   renderLayers() {
     const {elevationScale, extruded, coverage, material, transitions} = this.props;
-    const {angle, radius, cpuAggregationManager} = this.state;
+    const {angle, radius, cpuAggregator} = this.state;
 
     const SubLayerClass = this.getSubLayerClass('hexagon-cell', ColumnLayer);
     const updateTriggers = this._getSublayerUpdateTriggers();
@@ -173,7 +173,7 @@ export default class HexagonLayer extends CompositeLayer {
         updateTriggers
       }),
       {
-        data: cpuAggregationManager.state.layerData.data
+        data: cpuAggregator.state.layerData.data
       }
     );
   }

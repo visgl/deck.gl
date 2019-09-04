@@ -109,7 +109,7 @@ const defaultDimensions = [
   }
 ];
 const defaultGetCellSize = props => props.cellSize;
-export default class CPUAggregationManager {
+export default class CPUAggregator{
   constructor(opts) {
     this.state = {
       layerData: {},

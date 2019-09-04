@@ -193,8 +193,6 @@ It takes an array of points inside each cell as arguments, returns a number. For
 You can pass in `getColorValue` to color the cells by avg/mean/max of a specific attributes of each point.
 By default `getColorValue` returns the length of the points array.
 
-`getColorValue` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental)
-
 ```js
  class MyGridLayer {
     renderLayers() {
@@ -214,8 +212,6 @@ By default `getColorValue` returns the length of the points array.
 * Default: `point => 1`
 
 `getColorWeight` is the accessor function to get the weight of a point used to calculate the color value for a cell.
-
-`getColorWeight` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
 
 ##### `colorAggregation` (String, optional)
 
@@ -291,14 +287,11 @@ Similar to `getColorValue`, `getElevationValue` is the accessor function to get 
 It takes an array of points inside each cell as arguments, returns a number.
 By default `getElevationValue` returns the length of the points array.
 
-`getElevationValue` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
-
 ##### `getElevationWeight` (Function, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `point => 1`
 
-`getElevationWeight` is the accessor function to get the weight of a point used to calcuate the elevation value for a cell.
-`getElevationWeight` is compared using [`updateTriggers`](https://deck.gl/#/documentation/deckgl-api-reference/layers/layer?section=_datadiff-function-optional-experimental).
+`getElevationWeight` is the accessor function to get the weight of a point used to calculate the elevation value for a cell.
 
 ##### `elevationAggregation` (String, optional)
 

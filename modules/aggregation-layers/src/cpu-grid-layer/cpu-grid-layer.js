@@ -24,7 +24,7 @@ import {GridCellLayer} from '@deck.gl/layers';
 
 import {defaultColorRange} from '../utils/color-utils';
 import {pointToDensityGridDataCPU} from './grid-aggregator';
-import CPUAggregationManager from '../utils/cpu-aggregation-manager';
+import CPUAggregator from '../utils/cpu-aggregator';
 
 function nop() {}
 
@@ -68,21 +68,21 @@ const defaultProps = {
 
 export default class CPUGridLayer extends CompositeLayer {
   initializeState() {
-    const cpuAggregationManager = new CPUAggregationManager({
+    const cpuAggregator = new CPUAggregator({
       getAggregator: props => props.gridAggregator,
       getCellSize: props => props.cellSize
     });
 
     this.state = {
-      cpuAggregationManager,
-      aggregationState: cpuAggregationManager.state
+      cpuAggregator,
+      aggregatorState: cpuAggregator.state
     };
   }
 
   updateState({oldProps, props, changeFlags}) {
     this.setState({
-      // make a copy of the internal state of cpuAggregationManager for testing
-      aggregationState: this.state.cpuAggregationManager.updateState(
+      // make a copy of the internal state of cpuAggregator for testing
+      aggregatorState: this.state.cpuAggregator.updateState(
         {oldProps, props, changeFlags},
         this.context.viewport
       )
@@ -90,26 +90,26 @@ export default class CPUGridLayer extends CompositeLayer {
   }
 
   getPickingInfo({info}) {
-    return this.state.cpuAggregationManager.getPickingInfo({info});
+    return this.state.cpuAggregator.getPickingInfo({info});
   }
 
   // create a method for testing
   _onGetSublayerColor(cell) {
-    return this.state.cpuAggregationManager.dimensionUpdaters.fillColor.attributeAccessor(cell);
+    return this.state.cpuAggregator.dimensionUpdaters.fillColor.attributeAccessor(cell);
   }
 
   // create a method for testing
   _onGetSublayerElevation(cell) {
-    return this.state.cpuAggregationManager.dimensionUpdaters.elevation.attributeAccessor(cell);
+    return this.state.cpuAggregator.dimensionUpdaters.elevation.attributeAccessor(cell);
   }
 
   _getSublayerUpdateTriggers() {
-    return this.state.cpuAggregationManager.getUpdateTriggers(this.props);
+    return this.state.cpuAggregator.getUpdateTriggers(this.props);
   }
 
   renderLayers() {
     const {elevationScale, extruded, cellSize, coverage, material, transitions} = this.props;
-    const {cpuAggregationManager} = this.state;
+    const {cpuAggregator} = this.state;
     const SubLayerClass = this.getSubLayerClass('grid-cell', GridCellLayer);
     const updateTriggers = this._getSublayerUpdateTriggers();
 
@@ -133,7 +133,7 @@ export default class CPUGridLayer extends CompositeLayer {
         updateTriggers
       }),
       {
-        data: cpuAggregationManager.state.layerData.data
+        data: cpuAggregator.state.layerData.data
       }
     );
   }
