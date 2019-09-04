@@ -1,3 +1,3 @@
-import {COORDINATE_SYSTEM} from 'deck.gl';
+import {Deck} from 'deck.gl';
 
-console.log(COORDINATE_SYSTEM); // eslint-disable-line
+console.log(Deck); // eslint-disable-line
