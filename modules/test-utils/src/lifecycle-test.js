@@ -169,8 +169,6 @@ function injectSpies(layer, spies) {
 
 /* eslint-disable max-params, no-loop-func */
 function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onError) {
-  let combinedProps = {};
-
   // Run successive update tests
   for (let i = 0; i < testCases.length; i++) {
     const testCase = testCases[i];
@@ -184,15 +182,6 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
 
     spies = testCase.spies || spies;
 
-    // Test case can reset the props on every iteration
-    if (props) {
-      combinedProps = Object.assign({}, props);
-    }
-    // Test case can override with new props on every iteration
-    if (updateProps) {
-      Object.assign(combinedProps, updateProps);
-    }
-
     // copy old state before update
     const oldState = Object.assign({}, layer.state);
 
@@ -200,7 +189,14 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
       onBeforeUpdate({layer, testCase});
     }
 
-    layer = layer.clone(combinedProps);
+    if (props) {
+      // Test case can reset the props on every iteration
+      layer = new layer.constructor(props);
+    } else if (updateProps) {
+      // Test case can override with new props on every iteration
+      layer = layer.clone(updateProps);
+    }
+
     // Create a map of spies that the test case can inspect
     const spyMap = injectSpies(layer, spies);
 

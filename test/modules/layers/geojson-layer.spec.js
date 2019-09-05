@@ -29,7 +29,7 @@ test('GeoJsonLayer#tests', t => {
   const testCases = generateLayerTests({
     Layer: GeoJsonLayer,
     sampleProps: {
-      data: FIXTURES.choropleths
+      data: FIXTURES.geojson
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
@@ -38,7 +38,7 @@ test('GeoJsonLayer#tests', t => {
       const hasData = layer.props && layer.props.data && Object.keys(layer.props.data).length;
       t.is(
         subLayers.length,
-        !hasData ? 0 : layer.props.stroked ? 2 : 1,
+        !hasData ? 0 : layer.props.stroked && !layer.props.extruded ? 4 : 3,
         'correct number of sublayers'
       );
     }

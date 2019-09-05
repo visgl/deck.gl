@@ -87,6 +87,9 @@ const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
   getColor: null
 });
 
+// not supported
+delete defaultProps.getLineDashArray;
+
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
  * rather than centroid lat/longs. The shape of each hexagon is determined
@@ -213,10 +216,8 @@ export default class H3HexagonLayer extends CompositeLayer {
       getLineColor,
       getLineWidth,
       updateTriggers: {
-        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
-        getElevation: updateTriggers.getElevation,
-        getLineColor: updateTriggers.getLineColor,
-        getLineWidth: updateTriggers.getLineWidth
+        ...updateTriggers,
+        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor
       }
     };
   }
