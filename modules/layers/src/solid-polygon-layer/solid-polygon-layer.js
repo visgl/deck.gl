@@ -28,7 +28,8 @@ import {
   PhongMaterial,
   Framebuffer,
   Texture2D,
-  withParameters
+  withParameters,
+  Buffer
 } from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
@@ -268,11 +269,14 @@ export default class SolidPolygonLayer extends Layer {
       elevationScale
     });
 
+    this.state.accumulationFramebuffer.clear({color: [0, 0, 0, 1], depth: 1});
+
     withParameters(
       gl,
       {
         blendFunc: [gl.ONE, gl.ONE, gl.ZERO, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
+        depthMask: false,
         framebuffer: this.state.accumulationFramebuffer
       },
       () => {
@@ -302,6 +306,7 @@ export default class SolidPolygonLayer extends Layer {
       {
         blendFunc: [gl.ONE, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
+        depthTest: false,
         framebuffer: null
       },
       () => {
@@ -420,7 +425,7 @@ export default class SolidPolygonLayer extends Layer {
       fs: oitBlendFs,
       drawMode: GL.TRIANGLE_STRIP,
       attributes: {
-        positions: [new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1]), {size: 2}]
+        positions: [new Buffer(gl, new Float32Array([-1, 1, -1, -1, 1, 1, 1, -1])), {size: 2}]
       },
       vertexCount: 4,
       uniforms: {

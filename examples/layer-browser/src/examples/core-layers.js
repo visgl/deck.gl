@@ -179,8 +179,8 @@ const PolygonLayerExample = {
     getLineDashArray: f => [20, 0],
     getLineWidth: f => 20,
     getElevation: f => Math.random() * 1000,
-    opacity: 0.8,
-    pickable: true,
+    opacity: 0.3,
+    pickable: false,
     lineDashJustified: true,
     elevationScale: 0.6,
     stroked: false

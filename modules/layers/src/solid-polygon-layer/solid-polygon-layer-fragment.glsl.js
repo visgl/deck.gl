@@ -41,11 +41,11 @@ void main(void) {
   }
 
   vec4 color = vColor;
+  DECKGL_FILTER_COLOR(color, geometry);
   color.rgb *= color.a;
-  float w = weight(gl_FragCoord.z, color.a);
+  float w = 1.0; //weight(gl_FragCoord.z, color.a);
   accumColor = vec4(color.rgb * w, color.a);
   accumAlpha = color.a * w;
 
-  DECKGL_FILTER_COLOR(color, geometry);
 }
 `;
