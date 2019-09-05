@@ -216,8 +216,10 @@ export default class H3HexagonLayer extends CompositeLayer {
       getLineColor,
       getLineWidth,
       updateTriggers: {
-        ...updateTriggers,
-        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor
+        getFillColor: updateTriggers.getColor || updateTriggers.getFillColor,
+        getElevation: updateTriggers.getElevation,
+        getLineColor: updateTriggers.getLineColor,
+        getLineWidth: updateTriggers.getLineWidth
       }
     };
   }

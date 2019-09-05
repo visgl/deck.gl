@@ -77,7 +77,7 @@ test('ScatterplotLayer', t => {
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({testCase, layer}) => {
+    onAfterUpdate: ({layer}) => {
       t.is(
         layer.state.model.getUniforms().radiusScale,
         layer.props.radiusScale,
