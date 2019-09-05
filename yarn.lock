@@ -1459,11 +1459,6 @@
     "@luma.gl/constants" "7.3.0-alpha.6"
     math.gl "^2.3.0"
 
-"@luma.gl/constants@7.3.0-alpha.5":
-  version "7.3.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.3.0-alpha.5.tgz#896970611c54c23022f1666d09c581a7e863debc"
-  integrity sha512-gLBSHQThrscQ7xbI/oYGbe79ekt0ofy8I5VSCUp+X00pIG2V8b8CC9DO8bN1dsVCjDqOu4BXHfAwlSio3DXHPQ==
-
 "@luma.gl/constants@7.3.0-alpha.6":
   version "7.3.0-alpha.6"
   resolved "https://registry.yarnpkg.com/@luma.gl/constants/-/constants-7.3.0-alpha.6.tgz#9540a7f78aa932d3694c7b2e9e458e5f92aa9856"
@@ -1489,12 +1484,12 @@
     probe.gl "^3.0.2"
     seer "^0.2.4"
 
-"@luma.gl/effects@^7.3.0-alpha.5":
-  version "7.3.0-alpha.5"
-  resolved "https://registry.yarnpkg.com/@luma.gl/effects/-/effects-7.3.0-alpha.5.tgz#0809f3b45f42682e2ad18ff8224a6faf31f09049"
-  integrity sha512-RD51mRlo7RMPacnxjHwRvm2LZ/6sYb6zmNW3ysmDkipuFMbqeYy4bLSEfENvS8DlpvrqOiMFDplIO1lsOWd0KA==
+"@luma.gl/effects@^7.3.0-alpha.6":
+  version "7.3.0-alpha.6"
+  resolved "https://registry.yarnpkg.com/@luma.gl/effects/-/effects-7.3.0-alpha.6.tgz#ac6c3e58cf221ba9a227a51711928041173dfb63"
+  integrity sha512-zHwnoxv7IITDdFkB6bziNd1nCJ4XBTDHfPI5NbAihpIOGTUSJ4mr1xmm585YxvTTp5w3n2DIAq1x+OGWDHyPdA==
   dependencies:
-    "@luma.gl/constants" "7.3.0-alpha.5"
+    "@luma.gl/constants" "7.3.0-alpha.6"
 
 "@luma.gl/shadertools@7.3.0-alpha.6":
   version "7.3.0-alpha.6"
