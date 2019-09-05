@@ -48,8 +48,8 @@ matrix:
           - g++-6
           - mesa-utils
           - xvfb
-          - libgl1-mesa-dri
           - libglapi-mesa
+          - libgl1-mesa-dri
           - libosmesa6
           - libxi-dev
       before_install:
