@@ -1,0 +1,86 @@
+// Copyright (c) 2015 - 2019 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
+/* global document */
+const defaultStyle = {
+  zIndex: 1001,
+  height: '100px',
+  position: 'absolute',
+  width: '100px',
+  pointerEvents: 'none',
+  fontSize: '11px',
+  maxWidth: '500px',
+  fontFamily: 'ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif',
+  lineHeight: 1.71429,
+  overflowX: 'auto',
+  color: 'rgb(160, 167, 180)',
+  backgroundColor: 'rgb(41, 50, 60)',
+  padding: '10px',
+  top: 0,
+  left: 0,
+  display: 'none'
+};
+
+export default class Tooltip {
+  constructor(canvas) {
+    const canvasParent = canvas.parentElement;
+
+    if (!this.el && canvasParent) {
+      this.el = document.createElement('div');
+      this.el.className = 'tooltip';
+      Object.assign(this.el.style, defaultStyle);
+      canvasParent.appendChild(this.el);
+    }
+  }
+
+  setTooltip(processTooltip, pickedInfo) {
+    const el = this.el;
+    if (pickedInfo && pickedInfo.picked) {
+      const displayInfo = processTooltip(pickedInfo.object);
+      while (el.firstChild) {
+        el.removeChild(el.firstChild);
+      }
+      el.appendChild(this.handleKeyValues(displayInfo));
+
+      el.style.display = 'block';
+      el.style.transform = `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`;
+    } else {
+      el.style.display = 'none';
+    }
+  }
+
+  handleKeyValues(json) {
+    const dataTable = document.createElement('div');
+    dataTable.className = 'dataTable';
+
+    for (const key in json) {
+      const header = document.createElement('div');
+      header.className = 'header';
+      header.innerHTML = key;
+      header.style.fontWeight = 500;
+      const value = document.createElement('div');
+      value.className = 'value';
+      value.innerHTML = json[key];
+      dataTable.appendChild(header);
+      dataTable.appendChild(value);
+    }
+    return dataTable;
+  }
+}

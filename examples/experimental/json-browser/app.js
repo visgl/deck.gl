@@ -215,6 +215,10 @@ export default class App extends Component {
                 id="json-deck"
                 {...jsonProps}
                 viewState={viewState}
+                pickingRadius={5}
+                getTooltip={object => {
+                  return {'Num points': object.elevationValue};
+                }}
                 onViewStateChange={this._onViewStateChange.bind(this)}
               />
             )}
