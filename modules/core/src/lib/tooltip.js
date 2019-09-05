@@ -21,9 +21,8 @@
 /* global document */
 const defaultStyle = {
   zIndex: 1001,
-  height: '100px',
+  maxHeight: '500px',
   position: 'absolute',
-  width: '100px',
   pointerEvents: 'none',
   fontSize: '11px',
   maxWidth: '500px',
@@ -53,34 +52,29 @@ export default class Tooltip {
   setTooltip(processTooltip, pickedInfo) {
     const el = this.el;
     if (pickedInfo && pickedInfo.picked) {
-      const displayInfo = processTooltip(pickedInfo.object);
       while (el.firstChild) {
         el.removeChild(el.firstChild);
       }
-      el.appendChild(this.handleKeyValues(displayInfo));
+      const displayInfo = processTooltip(pickedInfo.object);
 
-      el.style.display = 'block';
+      if (typeof displayInfo === 'string') {
+        el.innerText = displayInfo;
+      } else if (displayInfo === null) {
+        el.style.display = 'none';
+      } else {
+        if (displayInfo.text) {
+          el.innerText = displayInfo.text;
+        }
+        if (displayInfo.html) {
+          el.innerHTML = displayInfo.html;
+        }
+        el.className = displayInfo.className || this.el.className;
+        Object.assign(el.style, displayInfo.style);
+      }
+      el.style.display = 'inline-block';
       el.style.transform = `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`;
     } else {
       el.style.display = 'none';
     }
-  }
-
-  handleKeyValues(json) {
-    const dataTable = document.createElement('div');
-    dataTable.className = 'dataTable';
-
-    for (const key in json) {
-      const header = document.createElement('div');
-      header.className = 'header';
-      header.innerHTML = key;
-      header.style.fontWeight = 500;
-      const value = document.createElement('div');
-      value.className = 'value';
-      value.innerHTML = json[key];
-      dataTable.appendChild(header);
-      dataTable.appendChild(value);
-    }
-    return dataTable;
   }
 }

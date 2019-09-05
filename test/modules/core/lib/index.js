@@ -29,6 +29,7 @@ import './layer.spec';
 import './composite-layer.spec';
 import './layer-extension.spec';
 import './layer-manager.spec';
+import './tooltip.spec';
 import './transition-manager.spec';
 import './uniform-transition-manager.spec';
 import './seer-integration.spec';
