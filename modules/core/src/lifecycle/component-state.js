@@ -116,9 +116,11 @@ export default class ComponentState {
 
     // interpret value string as url and start a new load tracked by a promise
     if (typeof value === 'string') {
-      const {fetch} = this.layer.props;
+      const fetch = this.layer && this.layer.props.fetch;
       const url = value;
-      value = fetch(url, {propName, layer: this.layer});
+      if (fetch) {
+        value = fetch(url, {propName, layer: this.layer});
+      }
     }
 
     // interprets promise and track the "loading"
@@ -184,7 +186,7 @@ export default class ComponentState {
         data = this._postProcessValue(propName, data);
         this._setAsyncPropValue(propName, data, loadCount);
 
-        const {onDataLoad} = this.layer.props;
+        const onDataLoad = this.layer && this.layer.props.onDataLoad;
         if (propName === 'data' && onDataLoad) {
           onDataLoad(data, {propName, layer: this.layer});
         }
@@ -217,7 +219,7 @@ export default class ComponentState {
       this._setAsyncPropValue(propName, data, loadCount);
     }
 
-    const {onDataLoad} = this.layer.props;
+    const onDataLoad = this.layer && this.layer.props.onDataLoad;
     if (onDataLoad) {
       onDataLoad(data, {propName, layer: this.layer});
     }
