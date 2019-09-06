@@ -2,13 +2,12 @@
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {COORDINATE_SYSTEM, ScatterplotLayer, PolygonLayer, MapController} from 'deck.gl';
+import DeckGL, {COORDINATE_SYSTEM, OrthographicView, ScatterplotLayer, PolygonLayer} from 'deck.gl';
 
 import DataGenerator from './data-generator';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-const MAP_CENTER = [-122.45, 37.78];
 
 class Root extends Component {
   constructor(props) {
@@ -20,9 +19,8 @@ class Root extends Component {
       points: this._dataGenerator.points,
       polygons: this._dataGenerator.polygons,
       viewState: {
-        longitude: MAP_CENTER[0],
-        latitude: MAP_CENTER[1],
-        zoom: 10
+        target: [0, 0, 0],
+        zoom: 0
       }
     };
 
@@ -42,8 +40,7 @@ class Root extends Component {
 
     const layers = [
       new ScatterplotLayer({
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: MAP_CENTER,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data: points,
         getPosition: d => d.position,
         getFillColor: d => d.color,
@@ -51,12 +48,14 @@ class Root extends Component {
         transitions: {
           getPosition: 600,
           getRadius: 600,
-          getFillColor: 600
+          getFillColor: {
+            duration: 600,
+            enter: ([r, g, b]) => [r, g, b, 0]
+          }
         }
       }),
       new PolygonLayer({
-        coordinateSystem: COORDINATE_SYSTEM.METER_OFFSETS,
-        coordinateOrigin: MAP_CENTER,
+        coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
         data: polygons,
         stroked: true,
         filled: true,
@@ -66,8 +65,14 @@ class Root extends Component {
         getLineWidth: d => d.width,
         transitions: {
           getPolygon: 600,
-          getLineColor: 600,
-          getFillColor: 600,
+          getLineColor: {
+            duration: 600,
+            enter: ([r, g, b]) => [r, g, b, 0]
+          },
+          getFillColor: {
+            duration: 600,
+            enter: ([r, g, b]) => [r, g, b, 0]
+          },
           getLineWidth: 600
         }
       })
@@ -76,7 +81,8 @@ class Root extends Component {
     return (
       <div>
         <DeckGL
-          controller={MapController}
+          views={new OrthographicView()}
+          controller={true}
           viewState={viewState}
           onViewStateChange={evt => this.setState({viewState: evt.viewState})}
           layers={layers}

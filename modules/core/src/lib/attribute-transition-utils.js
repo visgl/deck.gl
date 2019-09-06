@@ -57,16 +57,13 @@ export function getShaders(transition) {
 }
 
 export function getBuffers(transition) {
-  const {fromState, toState, buffer} = transition;
-
   return {
     sourceBuffers: {
-      aFrom:
-        fromState instanceof Buffer ? [fromState, {divisor: 0, offset: toState.offset}] : fromState,
-      aTo: toState
+      aFrom: transition.fromState,
+      aTo: transition.toState
     },
     feedbackBuffers: {
-      vCurrent: {buffer, byteOffset: toState.offset}
+      vCurrent: transition.buffer
     }
   };
 }
@@ -78,6 +75,7 @@ export function padBuffer({
   toLength,
   fromBufferLayout,
   toBufferLayout,
+  size,
   offset,
   getData = x => x
 }) {
@@ -89,10 +87,15 @@ export function padBuffer({
   }
 
   const data = new Float32Array(toLength);
-  const fromData = fromState.getData({});
+  const fromData = fromState.getData({length: fromLength});
 
-  const {size, constant} = toState;
+  const {constant} = toState;
   const toData = constant ? toState.getValue() : toState.getBuffer().getData({});
+
+  if (toState.normalized) {
+    const getter = getData;
+    getData = (value, chunk) => toState._normalizeConstant(getter(value, chunk));
+  }
 
   const getMissingData = constant
     ? (i, chunk) => getData(toData, chunk)
@@ -104,7 +107,7 @@ export function padBuffer({
     sourceLayout: fromBufferLayout,
     targetLayout: toBufferLayout,
     offset,
-    size: toState.size,
+    size,
     getData: getMissingData
   });
 

@@ -14,11 +14,11 @@ function randomInt(min, max) {
 
 export default class DataGenerator {
   constructor({
-    maxDistance = 20000,
-    radiusRange = [1000, 3000],
+    maxDistance = 1000,
+    radiusRange = [100, 300],
     countRange = [1, 5],
     vertexRange = [3, 5],
-    sizeRange = [100, 200]
+    sizeRange = [10, 30]
   } = {}) {
     this.maxDistance = maxDistance;
     this.radiusRange = radiusRange;

@@ -120,7 +120,7 @@ export default class AttributeTransitionManager {
         name: attributeName,
         timeline: this.timeline,
         attribute,
-        attributeInTransition: new Attribute(this.gl, attribute),
+        attributeInTransition: new Attribute(this.gl, attribute.userData),
         bufferLayout: attribute.bufferLayout
       });
       this.transitions[attributeName] = transition;
@@ -173,27 +173,25 @@ export default class AttributeTransitionManager {
   // get current values of an attribute, clipped/padded to the size of the new buffer
   _getNextTransitionStates(transition, settings) {
     const {attribute} = transition;
-    const {size, offset, normalized} = attribute;
+    const {size, normalized} = attribute;
+    const multiplier = attribute.doublePrecision ? 2 : 1;
 
     let toState;
     if (attribute.constant) {
-      toState = new BaseAttribute(this.gl, {constant: true, value: attribute.value, size, offset});
+      toState = new BaseAttribute(this.gl, {constant: true, value: attribute.value, size});
     } else {
       toState = new BaseAttribute(this.gl, {
         constant: false,
         buffer: attribute.getBuffer(),
         divisor: 0,
         size,
-        offset,
-        normalized,
-        // attribute's `value` does not match the content of external buffer,
-        // will need to call buffer.getData if needed
-        value: attribute.externalBuffer || attribute.doublePrecision ? null : attribute.value
+        normalized
       });
     }
     const fromState = transition.buffer || toState;
-    const toLength = attribute.userData.noAlloc ? attribute.value.length : this.numInstances * size;
-    const fromLength = (fromState instanceof Buffer && fromState.getElementCount()) || toLength;
+    const toLength =
+      (attribute.userData.noAlloc ? attribute.value.length : this.numInstances * size) * multiplier;
+    const fromLength = transition.length || toLength;
 
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
@@ -213,16 +211,23 @@ export default class AttributeTransitionManager {
       });
     }
 
-    transition.attributeInTransition.update({buffer});
+    transition.length = toLength;
+    transition.attributeInTransition.update({
+      buffer,
+      // Hack: Float64Array is required for double-precision attributes
+      // to generate correct shader attributes
+      value: attribute.value
+    });
 
     padBuffer({
       fromState,
       toState,
       fromLength,
       toLength,
+      size: size * multiplier,
       fromBufferLayout: transition.bufferLayout,
       toBufferLayout: attribute.bufferLayout,
-      offset: attribute.elementOffset,
+      offset: attribute.elementOffset * multiplier,
       getData: settings.enter
     });
 
@@ -244,16 +249,17 @@ export default class AttributeTransitionManager {
       Object.assign({}, this._getNextTransitionStates(transition, settings), settings)
     );
     let transform = this.transforms[transition.name];
+    const elementCount = Math.floor(transition.length / transition.attribute.size);
 
     if (transform) {
       transform.update({
         ...getBuffers(transition),
-        elementCount: this.numInstances
+        elementCount
       });
     } else {
       // Buffers must be supplied to the transform constructor
       transform = new Transform(this.gl, {
-        elementCount: this.numInstances,
+        elementCount,
         ...getShaders(transition),
         ...getBuffers(transition)
       });
