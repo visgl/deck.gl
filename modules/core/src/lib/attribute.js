@@ -185,8 +185,8 @@ export default class Attribute extends BaseAttribute {
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
   getTransitionSetting(opts) {
-    const {transition, accessor} = this.userData;
-    if (!transition) {
+    const {accessor} = this.userData;
+    if (!this.supportsTransition()) {
       return null;
     }
     let settings = Array.isArray(accessor) ? opts[accessor.find(a => opts[a])] : opts[accessor];
@@ -195,7 +195,7 @@ export default class Attribute extends BaseAttribute {
     settings = normalizeTransitionSettings(settings);
 
     if (settings) {
-      return Object.assign({}, transition, settings);
+      return Object.assign({}, settings);
     }
 
     return null;
