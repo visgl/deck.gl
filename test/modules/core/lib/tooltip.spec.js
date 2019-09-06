@@ -79,3 +79,15 @@ test('Tooltip#setTooltipDefaults', t => {
   teardown();
   t.end();
 });
+
+test('Tooltip#remove', t => {
+  const tooltip = setup();
+  t.equals(document.getElementsByClassName('tooltip').length, 1, 'Tooltip element present');
+  tooltip.remove();
+  t.equals(
+    document.getElementsByClassName('tooltip').length,
+    0,
+    'Tooltip element successfully removed'
+  );
+  t.end();
+});
