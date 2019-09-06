@@ -1,5 +1,9 @@
 # pydeck: Beautiful maps with Python
 
+*Get started and see interactive examples by clicking Launch Binder badge*
+
+[![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples)
+
 ![demo](https://user-images.githubusercontent.com/2204757/58838976-1538f400-8615-11e9-84f6-a2fe42bb300b.gif)
 
 Note that pydeck is under active development and not yet officially released. At the moment use of this library is experimental.
