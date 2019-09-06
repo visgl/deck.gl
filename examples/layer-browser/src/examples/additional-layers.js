@@ -26,7 +26,9 @@ const GRID_LAYER_PROPS_OBJECT = {
   getPosition: d => d.COORDINATES
 };
 
-const GPU_GRID_LAYER_PROPS_OBJECT = Object.assign({}, GRID_LAYER_PROPS_OBJECT, {id: 'gpu-grid-layer'});
+const GPU_GRID_LAYER_PROPS_OBJECT = Object.assign({}, GRID_LAYER_PROPS_OBJECT, {
+  id: 'gpu-grid-layer'
+});
 
 const GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
