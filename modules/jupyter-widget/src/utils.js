@@ -23,9 +23,9 @@ export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
 }
 
 export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handleClick) {
-  try {
-    require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
-      require(['deck.gl'], deckgl => {
+  require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
+    require(['deck.gl'], deckgl => {
+      try {
         const layersDict = {};
         const layers = Object.keys(deckgl).filter(
           x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
@@ -51,12 +51,12 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
         if (onComplete) {
           onComplete({jsonConverter, deckConfig});
         }
-      });
+      } catch (err) {
+        // This will fail in node tests
+        // eslint-disable-next-line
+        console.error(err);
+      }
+      return {};
     });
-  } catch (err) {
-    // This will fail in node tests
-    // eslint-disable-next-line
-    console.error(err);
-  }
-  return {};
+  });
 }
