@@ -157,7 +157,7 @@ const TEST_CASES = [
             height: 100
           },
           results: {
-            count: 33
+            count: 34
           }
         },
         {
