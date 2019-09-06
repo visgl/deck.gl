@@ -17,16 +17,27 @@ import * as dataSamples from '../data-samples';
 
 registerLoaders([PLYLoader]);
 
+const GRID_LAYER_PROPS_OBJECT = {
+  id: 'grid-layer',
+  cellSize: 200,
+  opacity: 1,
+  extruded: true,
+  pickable: false,
+  getPosition: d => d.COORDINATES
+};
+
+const GPU_GRID_LAYER_PROPS_OBJECT = Object.assign({}, GRID_LAYER_PROPS_OBJECT, {
+  id: 'gpu-grid-layer'
+});
+
 const GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
-  props: {
-    id: 'gpu-grid-layer',
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: false,
-    getPosition: d => d.COORDINATES
-  }
+  props: GRID_LAYER_PROPS_OBJECT
+};
+
+const GPU_GRID_LAYER_PROPS = {
+  getData: () => dataSamples.points,
+  props: GPU_GRID_LAYER_PROPS_OBJECT
 };
 
 const HEAT_LAYER_PROPS = {
@@ -39,7 +50,7 @@ const HEAT_LAYER_PROPS = {
   }
 };
 
-const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GRID_LAYER_PROPS);
+const GPUGridLayerExample = Object.assign({}, {layer: GPUGridLayer}, GPU_GRID_LAYER_PROPS);
 const GridLayerExample = Object.assign({}, {layer: GridLayer}, GRID_LAYER_PROPS);
 const HeatmapLayerExample = Object.assign({}, {layer: HeatmapLayer}, HEAT_LAYER_PROPS);
 
