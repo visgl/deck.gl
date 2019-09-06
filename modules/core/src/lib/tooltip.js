@@ -26,7 +26,7 @@ const defaultStyle = {
   pointerEvents: 'none',
   fontSize: '11px',
   maxWidth: '500px',
-  fontFamily: 'ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif',
+  fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
   lineHeight: 1.71429,
   overflowX: 'auto',
   color: 'rgb(160, 167, 180)',
@@ -59,22 +59,29 @@ export default class Tooltip {
 
       if (typeof displayInfo === 'string') {
         el.innerText = displayInfo;
-      } else if (displayInfo === null) {
+      } else if (!displayInfo) {
         el.style.display = 'none';
       } else {
-        if (displayInfo.text) {
+        if (displayInfo.text !== undefined) {
           el.innerText = displayInfo.text;
         }
-        if (displayInfo.html) {
+        if (displayInfo.html !== undefined) {
           el.innerHTML = displayInfo.html;
         }
-        el.className = displayInfo.className || this.el.className;
+        el.className =
+          displayInfo.className !== undefined ? displayInfo.className : this.el.className;
         Object.assign(el.style, displayInfo.style);
       }
       el.style.display = 'inline-block';
       el.style.transform = `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`;
     } else {
       el.style.display = 'none';
+    }
+  }
+
+  remove() {
+    if (this.el) {
+      this.el.remove();
     }
   }
 }

@@ -223,6 +223,11 @@ export default class Deck {
       this.eventManager.destroy();
     }
 
+    if (this.tooltip) {
+      this.tooltip.remove();
+      this.tooltip = null;
+    }
+
     if (!this.props.canvas && !this.props.gl && this.canvas) {
       // remove internally created canvas
       this.canvas.parentElement.removeChild(this.canvas);
