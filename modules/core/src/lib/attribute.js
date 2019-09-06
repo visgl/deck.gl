@@ -47,13 +47,10 @@ export default class Attribute extends BaseAttribute {
   constructor(gl, opts = {}) {
     const logicalType = opts.type;
     const doublePrecision = logicalType === GL.DOUBLE;
-    if (doublePrecision) {
-      // DOUBLE is not a valid WebGL buffer type
-      // tell BaseAttribute to set the accessor type to FLOAT
-      opts = Object.assign({}, opts, {type: GL.FLOAT});
-    }
 
-    super(gl, opts);
+    // DOUBLE is not a valid WebGL buffer type
+    // tell BaseAttribute to set the accessor type to FLOAT
+    super(gl, doublePrecision ? {...opts, type: GL.FLOAT} : opts);
 
     const {
       // deck.gl fields
