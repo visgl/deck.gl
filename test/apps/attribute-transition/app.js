@@ -6,9 +6,6 @@ import DeckGL, {COORDINATE_SYSTEM, OrthographicView, ScatterplotLayer, PolygonLa
 
 import DataGenerator from './data-generator';
 
-// Set your mapbox token here
-const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-
 class Root extends Component {
   constructor(props) {
     super(props);

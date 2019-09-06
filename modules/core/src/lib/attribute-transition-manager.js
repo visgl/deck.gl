@@ -120,6 +120,8 @@ export default class AttributeTransitionManager {
         name: attributeName,
         timeline: this.timeline,
         attribute,
+        // `attribute.userData` is the original options passed when constructing the attribute.
+        // This ensures that we set the proper `doublePrecision` flag and shader attributes.
         attributeInTransition: new Attribute(this.gl, attribute.userData),
         bufferLayout: attribute.bufferLayout
       });
@@ -205,10 +207,8 @@ export default class AttributeTransitionManager {
         usage: GL.DYNAMIC_COPY
       });
     } else if (buffer.getElementCount() < toLength) {
-      // Pad buffers to be the same length
-      buffer.setData({
-        data: new Float32Array(toLength)
-      });
+      // Pad buffers to be the same length with 32-bit floats
+      buffer.reallocate(toLength * 4);
     }
 
     transition.length = toLength;

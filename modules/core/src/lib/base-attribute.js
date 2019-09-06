@@ -48,6 +48,10 @@ export default class BaseAttribute {
     if (buffer) {
       this.externalBuffer = buffer;
       this.constant = false;
+      // Hack: Float64Array value is required for double-precision attributes
+      // to generate correct shader attributes
+      // This is so that we can manually set value to indicate that the external
+      // buffer uses interleaved 64-bit values
       this.value = value || null;
 
       this.type = opts.type || buffer.accessor.type;
