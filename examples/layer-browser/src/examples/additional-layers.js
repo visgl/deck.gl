@@ -17,7 +17,7 @@ import * as dataSamples from '../data-samples';
 
 registerLoaders([PLYLoader]);
 
-const gridLayerProps = {
+const GRID_LAYER_PROPS_OBJECT = {
   id: 'grid-layer',
   cellSize: 200,
   opacity: 1,
@@ -26,16 +26,16 @@ const gridLayerProps = {
   getPosition: d => d.COORDINATES
 };
 
-const GPUGridLayerProps = Object.assign({}, gridLayerProps, {id: 'gpu-grid-layer'});
+const GPU_GRID_LAYER_PROPS_OBJECT = Object.assign({}, GRID_LAYER_PROPS_OBJECT, {id: 'gpu-grid-layer'});
 
 const GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
-  props: gridLayerProps
+  props: GRID_LAYER_PROPS_OBJECT
 };
 
 const GPU_GRID_LAYER_PROPS = {
   getData: () => dataSamples.points,
-  props: GPUGridLayerProps
+  props: GPU_GRID_LAYER_PROPS_OBJECT
 };
 
 const HEAT_LAYER_PROPS = {
