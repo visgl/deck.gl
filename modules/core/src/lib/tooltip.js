@@ -20,16 +20,12 @@
 
 /* global document */
 const defaultStyle = {
-  zIndex: 1001,
-  maxHeight: '500px',
+  zIndex: 1,
   position: 'absolute',
   pointerEvents: 'none',
-  fontSize: '11px',
-  maxWidth: '500px',
-  fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-  color: 'rgb(160, 167, 180)',
+  color: '#a0a7b4',
   textOverflow: 'ellipsis',
-  backgroundColor: 'rgb(41, 50, 60)',
+  backgroundColor: '#29323c',
   padding: '10px',
   top: 0,
   left: 0,
@@ -40,45 +36,39 @@ export default class Tooltip {
   constructor(canvas) {
     const canvasParent = canvas.parentElement;
 
-    if (!this.el && canvasParent) {
+    if (canvasParent) {
       this.el = document.createElement('div');
-      this.el.className = 'tooltip';
+      this.el.className = 'deck-tooltip';
       Object.assign(this.el.style, defaultStyle);
       canvasParent.appendChild(this.el);
     }
   }
 
-  setTooltip(processTooltip, pickedInfo) {
+  setTooltip(displayInfo, x, y) {
     const el = this.el;
-    if (pickedInfo && pickedInfo.picked) {
-      while (el.firstChild) {
-        el.removeChild(el.firstChild);
-      }
-      const displayInfo = processTooltip(pickedInfo.object);
-
-      if (typeof displayInfo === 'string') {
-        el.innerText = displayInfo;
-      } else if (!displayInfo) {
-        el.style.display = 'none';
-      } else {
-        if ('text' in displayInfo) {
-          el.innerText = displayInfo.text;
-        }
-        if ('html' in displayInfo) {
-          el.innerHTML = displayInfo.html;
-        }
-        if ('className' in displayInfo) {
-          el.className = displayInfo.className;
-        } else {
-          el.className = this.el.className;
-        }
-        Object.assign(el.style, displayInfo.style);
-      }
-      el.style.display = 'inline-block';
-      el.style.transform = `translate(${pickedInfo.x}px, ${pickedInfo.y}px)`;
-    } else {
-      el.style.display = 'none';
+    while (el.firstChild) {
+      el.removeChild(el.firstChild);
     }
+
+    if (typeof displayInfo === 'string') {
+      el.innerText = displayInfo;
+    } else if (!displayInfo) {
+      el.style.display = 'none';
+      return;
+    } else {
+      if ('text' in displayInfo) {
+        el.innerText = displayInfo.text;
+      }
+      if ('html' in displayInfo) {
+        el.innerHTML = displayInfo.html;
+      }
+      if ('className' in displayInfo) {
+        el.className = displayInfo.className;
+      }
+      Object.assign(el.style, displayInfo.style);
+    }
+    el.style.display = 'block';
+    el.style.transform = `translate(${x}px, ${y}px)`;
   }
 
   remove() {

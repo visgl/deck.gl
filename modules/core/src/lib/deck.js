@@ -566,12 +566,10 @@ export default class Deck {
         )
       );
       const shouldGenerateInfo = _pickRequest.callback || this.props.getTooltip;
-      let pickedInfo;
-      if (shouldGenerateInfo) {
-        pickedInfo = result.find(info => info.index >= 0) || emptyInfo;
-      }
+      const pickedInfo = shouldGenerateInfo && (result.find(info => info.index >= 0) || emptyInfo);
       if (this.props.getTooltip) {
-        this.tooltip.setTooltip(this.props.getTooltip, pickedInfo);
+        const displayInfo = this.props.getTooltip(pickedInfo);
+        this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
       }
       if (_pickRequest.callback) {
         _pickRequest.callback(pickedInfo, _pickRequest.event);

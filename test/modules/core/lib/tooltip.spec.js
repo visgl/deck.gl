@@ -12,7 +12,7 @@ if (typeof window === undefined || !window.document) {
 }
 
 const CANVAS_PARENT_CLASS_NAME = 'tooltip-canvas-parent';
-const pickedInfo = {object: {elevationValue: 10}, picked: true};
+const pickedInfo = {object: {elevationValue: 10}, x: 0, y: 0};
 
 function setup() {
   const canvas = document.createElement('canvas');
@@ -28,33 +28,33 @@ function teardown() {
   el.remove();
 }
 
-function getTooltipFunc(object) {
+function getTooltipFunc(pickedValue) {
   return {
     className: 'coolTooltip',
-    html: `<strong>Number of points:</strong> ${object.elevationValue}`,
+    html: `<strong>Number of points:</strong> ${pickedValue.object.elevationValue}`,
     style: {
       backgroundColor: 'lemonchiffon'
     }
   };
 }
 
-function getTooltipFuncDefault(object) {
+function getTooltipFuncDefault(pickedValue) {
   return {
-    text: `Number of points: ${object.elevationValue}`
+    text: `Number of points: ${pickedValue.object.elevationValue}`
   };
 }
 
 test('Tooltip#constructor', t => {
   const tooltip = setup(); // eslint-disable-line
-  t.ok(document.getElementsByClassName('tooltip'), 'Tooltip exists in document');
-  t.equals(document.getElementsByClassName('tooltip')[0].style.top, '0px');
+  t.ok(document.getElementsByClassName('deck-tooltip'), 'Tooltip exists in document');
+  t.equals(document.getElementsByClassName('deck-tooltip')[0].style.top, '0px');
   teardown();
   t.end();
 });
 
 test('Tooltip#setTooltip', t => {
   const tooltip = setup();
-  tooltip.setTooltip(getTooltipFunc, pickedInfo);
+  tooltip.setTooltip(getTooltipFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.style.backgroundColor, 'lemonchiffon');
   t.equals(tooltip.el.innerHTML, '<strong>Number of points:</strong> 10');
   t.equals(tooltip.el.className, 'coolTooltip');
@@ -64,28 +64,30 @@ test('Tooltip#setTooltip', t => {
 
 test('Tooltip#setTooltipWithString', t => {
   const tooltip = setup();
-  tooltip.setTooltip(object => `Number of points: ${object.elevationValue}`, pickedInfo);
+  const pickedInfoFunc = info => `Number of points: ${info.object.elevationValue}`;
+  tooltip.setTooltip(pickedInfoFunc(pickedInfo), pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
-  t.equals(tooltip.el.className, 'tooltip');
+  t.equals(tooltip.el.className, 'deck-tooltip');
   teardown();
   t.end();
 });
 
 test('Tooltip#setTooltipDefaults', t => {
   const tooltip = setup();
-  tooltip.setTooltip(getTooltipFuncDefault, pickedInfo);
+  const tooltipResult = getTooltipFuncDefault(pickedInfo);
+  tooltip.setTooltip(tooltipResult, pickedInfo.x, pickedInfo.y);
   t.equals(tooltip.el.innerText, 'Number of points: 10');
-  t.equals(tooltip.el.className, 'tooltip');
+  t.equals(tooltip.el.className, 'deck-tooltip');
   teardown();
   t.end();
 });
 
 test('Tooltip#remove', t => {
   const tooltip = setup();
-  t.equals(document.getElementsByClassName('tooltip').length, 1, 'Tooltip element present');
+  t.equals(document.getElementsByClassName('deck-tooltip').length, 1, 'Tooltip element present');
   tooltip.remove();
   t.equals(
-    document.getElementsByClassName('tooltip').length,
+    document.getElementsByClassName('deck-tooltip').length,
     0,
     'Tooltip element successfully removed'
   );
