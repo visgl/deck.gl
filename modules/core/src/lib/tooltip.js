@@ -27,9 +27,8 @@ const defaultStyle = {
   fontSize: '11px',
   maxWidth: '500px',
   fontFamily: '"Helvetica Neue", Helvetica, sans-serif',
-  lineHeight: 1.71429,
-  overflowX: 'auto',
   color: 'rgb(160, 167, 180)',
+  textOverflow: 'ellipsis',
   backgroundColor: 'rgb(41, 50, 60)',
   padding: '10px',
   top: 0,
@@ -62,14 +61,17 @@ export default class Tooltip {
       } else if (!displayInfo) {
         el.style.display = 'none';
       } else {
-        if (displayInfo.text !== undefined) {
+        if ('text' in displayInfo) {
           el.innerText = displayInfo.text;
         }
-        if (displayInfo.html !== undefined) {
+        if ('html' in displayInfo) {
           el.innerHTML = displayInfo.html;
         }
-        el.className =
-          displayInfo.className !== undefined ? displayInfo.className : this.el.className;
+        if ('className' in displayInfo) {
+          el.className = displayInfo.className;
+        } else {
+          el.className = this.el.className;
+        }
         Object.assign(el.style, displayInfo.style);
       }
       el.style.display = 'inline-block';

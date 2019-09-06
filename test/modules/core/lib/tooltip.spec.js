@@ -1,9 +1,15 @@
+/* global window */
 import Tooltip from '@deck.gl/core/lib/tooltip';
 import test from 'tape-catch';
 
-const {JSDOM} = require('jsdom');
-const dom = new JSDOM(`<!DOCTYPE html>`);
-const document = dom.window.document;
+let document;
+if (typeof window === undefined || !window.document) {
+  const {JSDOM} = require('jsdom');
+  const dom = new JSDOM(`<!DOCTYPE html>`);
+  document = dom.window.document;
+} else {
+  document = window.document;
+}
 
 const CANVAS_PARENT_CLASS_NAME = 'tooltip-canvas-parent';
 const pickedInfo = {object: {elevationValue: 10}, picked: true};
@@ -27,7 +33,7 @@ function getTooltipFunc(object) {
     className: 'coolTooltip',
     html: `<strong>Number of points:</strong> ${object.elevationValue}`,
     style: {
-      backgroundColor: 'LemonChiffon'
+      backgroundColor: 'lemonchiffon'
     }
   };
 }
@@ -49,7 +55,7 @@ test('Tooltip#constructor', t => {
 test('Tooltip#setTooltip', t => {
   const tooltip = setup();
   tooltip.setTooltip(getTooltipFunc, pickedInfo);
-  t.equals(tooltip.el.style.backgroundColor, 'LemonChiffon');
+  t.equals(tooltip.el.style.backgroundColor, 'lemonchiffon');
   t.equals(tooltip.el.innerHTML, '<strong>Number of points:</strong> 10');
   t.equals(tooltip.el.className, 'coolTooltip');
   teardown();
