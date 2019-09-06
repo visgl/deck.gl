@@ -41,9 +41,9 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@luma.gl/effects": "^7.3.0-alpha.6",
-    "@probe.gl/bench": "^3.0.2",
-    "@probe.gl/test-utils": "^3.1.0-alpha.8",
+    "@luma.gl/effects": "^7.3.0-alpha.7",
+    "@probe.gl/bench": "^3.1.0-beta.3",
+    "@probe.gl/test-utils": "^3.1.0-beta.3",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.1",
     "babel-plugin-remove-glsl-comments": "^0.1.0",

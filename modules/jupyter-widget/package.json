@@ -2,7 +2,7 @@
   "name": "@deck.gl/jupyter-widget",
   "description": "Jupyter widget for rendering deck.gl in a Jupyter notebook",
   "license": "MIT",
-  "version": "7.3.0-alpha.5",
+  "version": "7.3.0-alpha.6",
   "keywords": [
     "jupyter",
     "jupyterlab",
