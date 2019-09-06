@@ -16,7 +16,8 @@ for testing, development, and production builds.
 """
 import os
 import json
-import urllib 
+import urllib
+
 from jinja2 import Template
 
 def _is_open(url):
@@ -73,19 +74,19 @@ def create_standalone_render_requirejs(dependencies, base_path, setup_environmen
     # Creates the standalone HTML renderer dependency file base_path
     if setup_environment == 'development' and dev_server_url:
         # Supports standalone HTML renderer with hot reloading
-        dependencies['paths']['nbextensions/pydeck'] = dev_server_url
+        dependencies['paths']['nbextension/pydeck'] = dev_server_url
         dependencies['paths']['deck.gl'] = dev_server_url + '/deckgl.dev'
     # TODO verify this path
     elif setup_environment == 'production':
         # Standalone HTML renderer in production requires reading from CDN
         deckgl_version = get_deckgl_version()
         CDN_URL = 'https://unpkg.com/@deck.gl/jupyter-widget@{}/dist'.format(deckgl_version)
-        dependencies['paths']['nbextensions/pydeck'] = CDN_URL
+        dependencies['paths']['nbextension/pydeck'] = CDN_URL
         DECK_CDN_URL = 'https://unpkg.com/deck.gl@{}/dist.min'.format(deckgl_version)
         dependencies['paths']['deck.gl'] = DECK_CDN_URL
     elif setup_environment == 'development':
         # Standalone HTML renderer with static reloading requires a bundled JS file of the Jupyter widget module
-        dependencies['paths']['nbextensions/pydeck'] = WIDGET_PATH
+        dependencies['paths']['nbextension/pydeck'] = WIDGET_PATH
     else:
         raise Exception('Unrecognized setup environment')
     # Writes a file set near the standalone rendering code
