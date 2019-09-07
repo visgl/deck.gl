@@ -99,5 +99,6 @@ test('Tooltip#remove', t => {
     0,
     'Tooltip element successfully removed'
   );
+  teardown();
   t.end();
 });
