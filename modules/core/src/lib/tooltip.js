@@ -24,7 +24,6 @@ const defaultStyle = {
   position: 'absolute',
   pointerEvents: 'none',
   color: '#a0a7b4',
-  textOverflow: 'ellipsis',
   backgroundColor: '#29323c',
   padding: '10px',
   top: 0,
@@ -46,9 +45,6 @@ export default class Tooltip {
 
   setTooltip(displayInfo, x, y) {
     const el = this.el;
-    while (el.firstChild) {
-      el.removeChild(el.firstChild);
-    }
 
     if (typeof displayInfo === 'string') {
       el.innerText = displayInfo;
