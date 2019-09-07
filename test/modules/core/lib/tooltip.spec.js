@@ -82,6 +82,14 @@ test('Tooltip#setTooltipDefaults', t => {
   t.end();
 });
 
+test('Tooltip#setTooltipNullCase', t => {
+  const tooltip = setup();
+  tooltip.setTooltip(null, pickedInfo.x, pickedInfo.y);
+  t.equals(tooltip.el.style.display, 'none');
+  teardown();
+  t.end();
+});
+
 test('Tooltip#remove', t => {
   const tooltip = setup();
   t.equals(document.getElementsByClassName('deck-tooltip').length, 1, 'Tooltip element present');
