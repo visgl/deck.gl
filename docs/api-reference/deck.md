@@ -138,7 +138,7 @@ Canvas ID to allow style customization in CSS.
 
 ##### `style` (Object, optional)
 
-Css styles for the deckgl-canvas.
+CSS styles for the deckgl-canvas.
 
 ##### `touchAction` (String, optional)
 
@@ -151,6 +151,33 @@ By default, the deck canvas captures all touch interactions. This prop is useful
 ##### `pickingRadius` (Number, optional)
 
 Extra pixels around the pointer to include while picking. This is helpful when rendered objects are difficult to target, for example irregularly shaped icons, small moving circles or interaction by touch. Default `0`.
+
+#### `getTooltip` (Function, optional)
+
+Callback that takes a hovered-over point and renders a tooltip. If the prop is not specified, the tooltip is hidden.
+
+Callback arguments:
+
+* `info` - the [picking info](/docs/developer-guide/interactivity.md#the-picking-info-object) describing the object being hovered.
+
+If the callback returns `null`, the tooltip is hidden, with the CSS `display` property set to `none`.
+If the callback returns a string, that string is rendered in a tooltip with the default CSS styling described below.
+Otherwise, the callback can return an object with the following fields:
+
+* `text` (String, optional) - Specifies the `innerText` attribute of the tooltip.
+* `html` (String, optional) - Specifies the `innerHTML` attribute of the tooltip. Note that this will override the specified `innerText`.
+* `className` (String, optional) - Class name to attach to the tooltip element. The element has the default class name of `deck-tooltip`.
+* `style` (Object, optional) - An object of CSS styles to apply to the tooltip element, which can override the default styling.
+
+By default, the tooltip has the following CSS style:
+  
+```css
+z-index: 1;
+position: absolute;
+color: #a0a7b4;
+background-color: #29323c;
+padding: 10px;
+```
 
 ##### `useDevicePixels` (Boolean, optional)
 

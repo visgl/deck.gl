@@ -25,6 +25,7 @@ import EffectManager from './effect-manager';
 import Effect from './effect';
 import DeckRenderer from './deck-renderer';
 import DeckPicker from './deck-picker';
+import Tooltip from './tooltip';
 import log from '../utils/log';
 import deckGlobal from './init';
 
@@ -220,6 +221,11 @@ export default class Deck {
 
     if (this.eventManager) {
       this.eventManager.destroy();
+    }
+
+    if (this.tooltip) {
+      this.tooltip.remove();
+      this.tooltip = null;
     }
 
     if (!this.props.canvas && !this.props.gl && this.canvas) {
@@ -559,8 +565,13 @@ export default class Deck {
           _pickRequest
         )
       );
+      const shouldGenerateInfo = _pickRequest.callback || this.props.getTooltip;
+      const pickedInfo = shouldGenerateInfo && (result.find(info => info.index >= 0) || emptyInfo);
+      if (this.props.getTooltip) {
+        const displayInfo = this.props.getTooltip(pickedInfo);
+        this.tooltip.setTooltip(displayInfo, pickedInfo.x, pickedInfo.y);
+      }
       if (_pickRequest.callback) {
-        const pickedInfo = result.find(info => info.index >= 0) || emptyInfo;
         _pickRequest.callback(pickedInfo, _pickRequest.event);
       }
       _pickRequest.mode = null;
@@ -583,6 +594,8 @@ export default class Deck {
       this.canvas = gl.canvas;
       trackContextState(gl, {enable: true, copyState: true});
     }
+
+    this.tooltip = new Tooltip(this.canvas);
 
     setParameters(gl, {
       blend: true,
