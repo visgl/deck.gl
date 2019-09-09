@@ -87,6 +87,9 @@ const defaultProps = Object.assign({}, PolygonLayer.defaultProps, {
   getColor: null
 });
 
+// not supported
+delete defaultProps.getLineDashArray;
+
 /**
  * A subclass of HexagonLayer that uses H3 hexagonIds in data objects
  * rather than centroid lat/longs. The shape of each hexagon is determined

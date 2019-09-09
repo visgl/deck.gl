@@ -56,7 +56,7 @@ test('ScreenGridLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.deepEquals(
-        layer.state.model.program.uniforms.cellScale,
+        layer.state.model.getUniforms().cellScale,
         layer.state.cellScale,
         'should update cellScale'
       );
@@ -79,7 +79,7 @@ test('ScatterplotLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.radiusScale,
+        layer.state.model.getUniforms().radiusScale,
         layer.props.radiusScale,
         'should update radiusScale'
       );
@@ -161,7 +161,7 @@ test('PointCloudLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.pointSize,
+        layer.state.model.getUniforms().pointSize,
         layer.props.radiusPixels,
         'should update pointSize'
       );
@@ -263,7 +263,7 @@ test('PathLayer', t => {
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
     onAfterUpdate: ({layer}) => {
       t.is(
-        layer.state.model.program.uniforms.widthMinPixels,
+        layer.state.model.getUniforms().widthMinPixels,
         layer.props.widthMinPixels,
         'should update widthMinPixels'
       );
