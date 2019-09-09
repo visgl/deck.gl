@@ -197,6 +197,7 @@ if __name__ == "__main__":
         version=version_ns["__version__"],
         description="Widget for deck.gl maps",
         long_description="{}".format(read("README.md")),
+        long_description_content_type='text/markdown',
         license="MIT License",
         include_package_data=True,
         packages=find_packages(),
