@@ -43,12 +43,12 @@ export const ColumnLayerDemo = createLayerDemoClass({
     radius: 250,
     extruded: true,
     pickable: true,
-    elevationScale: 5000,
+    elevationScale: 100,
     getPosition: d => d.centroid,
     getFillColor: d => [48, 128, d.value * 255, 255],
     getLineColor: [0, 0, 0],
     getLineWidth: 20,
-    getElevation: d => d.value
+    getElevation: d => d.value * 50
   }
 });
 

@@ -56,7 +56,8 @@ export function getLayerParams(layer, propParameters = {}) {
     if (propParameters[key]) {
       paramsArray.push({name: key, ...propParameters[key]});
     } else {
-      const param = propToParam(key, layer.constructor._propTypes[key], layer.props[key]);
+      const LAYER_PROPTYPES = layer.constructor._propTypes[key];
+      const param = propToParam(key, LAYER_PROPTYPES, layer.props[key]);
       if (param) {
         paramsArray.push(param);
       }
