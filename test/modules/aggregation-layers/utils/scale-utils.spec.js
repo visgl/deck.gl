@@ -35,28 +35,28 @@ const QUANTILE_SCALE_TEST_CASES = [
     title: 'multi-value-domain',
     domain: [3, 6, 7, 8, 8, 10, 13, 15, 16, 20],
     range: [11, 22, 33, 44],
-    values: [3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20],
-    results: [11, 11, 11, 11, 11, 22, 22, 33, 33, 33, 33, 44, 44, 44, 44, 44]
+    values: [1, 3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20, 100],
+    results: [11, 11, 11, 11, 11, 11, 22, 22, 33, 33, 33, 33, 44, 44, 44, 44, 44, 44]
   },
   {
     title: 'unsorted-domain',
     domain: [8, 16, 15, 3, 6, 7, 8, 20, 10, 13],
     range: [11, 22, 33, 44],
-    values: [3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20],
-    results: [11, 11, 11, 11, 11, 22, 22, 33, 33, 33, 33, 44, 44, 44, 44, 44]
+    values: [1, 3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20, 100],
+    results: [11, 11, 11, 11, 11, 11, 22, 22, 33, 33, 33, 33, 44, 44, 44, 44, 44, 44]
   },
   {
     title: 'single-value-domain',
     domain: [8],
     range: [11, 22, 33, 44],
-    values: [3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20],
-    results: [11, 11, 11, 11, 11, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44]
+    values: [1, 3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20, 100],
+    results: [11, 11, 11, 11, 11, 11, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44, 44]
   },
   {
-    title: 'single-value-domain',
+    title: 'single-value-range',
     domain: [3, 6, 7, 8, 8, 10, 13, 15, 16, 20],
     range: [11],
-    values: [3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20],
+    values: [1, 3, 6, 6.9, 7, 7.1, 8, 8.9, 9, 9.1, 10, 13, 14.9, 15, 15.1, 16, 20, 44],
     result: 11
   }
 ];
@@ -84,6 +84,7 @@ const ORDINAL_SCALE_TEST_CASES = [
     results: [11, 22, 33, 11, 22, 33, 11]
   }
 ];
+
 test('scale-utils#import', t => {
   t.ok(quantizeScale, 'quantizeScale imported OK');
   t.end();
@@ -117,11 +118,7 @@ test('scale-utils#ordinalScale', t => {
     const ordinalScale = getOrdinalScale(tc.domain, tc.range);
     for (const i in tc.values) {
       const result = ordinalScale(tc.values[i]);
-      t.deepEqual(
-        result,
-        tc.results ? tc.results[i] : tc.result,
-        `quantileScale ${tc.title} returned expected value`
-      );
+      t.deepEqual(result, tc.result, `ordinalScale ${tc.title} returned expected value`);
     }
   }
   t.end();

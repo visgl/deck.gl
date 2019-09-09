@@ -50,6 +50,7 @@ export function getScale(domain, range, scaleFunction) {
 
   return scale;
 }
+
 // return a quantize scale function
 export function getQuantizeScale(domain, range) {
   return getScale(domain, range, quantizeScale);
@@ -67,15 +68,15 @@ function ascending(a, b) {
 }
 
 function threshold(domain, fraction) {
-  const n = domain.length;
-  if (fraction <= 0 || n < 2) {
+  const domainLength = domain.length;
+  if (fraction <= 0 || domainLength < 2) {
     return domain[0];
   }
   if (fraction >= 1) {
-    return domain[n - 1];
+    return domain[domainLength - 1];
   }
 
-  const domainFraction = (n - 1) * fraction;
+  const domainFraction = (domainLength - 1) * fraction;
   const lowIndex = Math.floor(domainFraction);
   const low = domain[lowIndex];
   const high = domain[lowIndex + 1];
