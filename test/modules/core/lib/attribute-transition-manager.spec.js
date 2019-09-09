@@ -77,7 +77,7 @@ if (isWebGL2(gl)) {
     const sizeTransition = manager.transitions.instanceSizes;
     t.is(sizeTransition.buffer.getElementCount(), 1, 'buffer has correct size');
 
-    const positionTransform = manager.transforms.instancePositions;
+    const positionTransform = manager.transitions.instancePositions.transform;
     t.ok(positionTransform, 'transform is constructed for instancePositions');
     delete attributes.instancePositions;
 
@@ -89,20 +89,29 @@ if (isWebGL2(gl)) {
 
     attributes.instanceSizes.update({value: new Float32Array(5).fill(1)});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 5});
-    t.deepEquals(sizeTransition.fromState.getData({}), [0, 0, 0, 0, 1], 'from buffer is extended');
-    t.is(sizeTransition.buffer.getElementCount(), 5, 'buffer has correct size');
+    manager.run();
+    let transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
+    t.deepEquals(
+      transitioningBuffer.getData(),
+      [0, 0, 0, 0, 1],
+      'buffer is extended with new data'
+    );
+    t.is(transitioningBuffer.getElementCount(), 5, 'buffer has correct size');
 
     attributes.instanceSizes.update({constant: true, value: [2]});
     manager.update({attributes, transitions: {getSize: 1000}, numInstances: 6});
+    manager.run();
+    transitioningBuffer = manager.getAttributes().instanceSizes.getBuffer();
     t.deepEquals(
-      sizeTransition.fromState.getData({}),
-      [0, 0, 0, 0, 0, 2],
-      'from buffer is extended'
+      transitioningBuffer.getData(),
+      [0, 0, 0, 0, 1, 2],
+      'buffer is extended with new data'
     );
-    t.is(sizeTransition.buffer.getElementCount(), 6, 'buffer has correct size');
+    t.is(transitioningBuffer.getElementCount(), 6, 'buffer has correct size');
 
     manager.finalize();
-    t.notOk(manager.transforms.instanceSizes, 'transform is deleted');
+    t.notOk(transitioningBuffer._handle, 'transform buffer is deleted');
+    t.notOk(manager.transitions.instanceSizes, 'transition is deleted');
 
     t.end();
   });
