@@ -118,7 +118,7 @@ test('scale-utils#ordinalScale', t => {
     const ordinalScale = getOrdinalScale(tc.domain, tc.range);
     for (const i in tc.values) {
       const result = ordinalScale(tc.values[i]);
-      t.deepEqual(result, tc.result, `ordinalScale ${tc.title} returned expected value`);
+      t.deepEqual(result, tc.results[i], `ordinalScale ${tc.title} returned expected value`);
     }
   }
   t.end();
