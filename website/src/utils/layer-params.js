@@ -57,9 +57,6 @@ export function getLayerParams(layer, propParameters = {}) {
       paramsArray.push({name: key, ...propParameters[key]});
     } else {
       const LAYER_PROPTYPES = layer.constructor._propTypes[key];
-      if (layer.constructor.name === 'ColumnLayer') {
-        LAYER_PROPTYPES.max = 5000;
-      }
       const param = propToParam(key, LAYER_PROPTYPES, layer.props[key]);
       if (param) {
         paramsArray.push(param);
