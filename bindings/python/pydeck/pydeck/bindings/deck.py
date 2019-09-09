@@ -88,7 +88,7 @@ class Deck(JSONMixin):
         return self.deck_widget
 
     def update(self):
-        """Updates a deck.gl map to reflect the current state of the configuration
+        """Updates a deck.gl map to reflect the current configuration
 
         For example, if you've modified data passed to Layer and rendered the map using `.show()`,
         you can call `update` to pass the new configuration to the map
