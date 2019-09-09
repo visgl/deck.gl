@@ -19,7 +19,7 @@ d.initial_view_state = v
 
 @pytest.mark.asyncio
 async def test_standalone_rendering(tmp_path):
-    filename = d.to_html(str(tmp_path) + '/', open_browser=False)
+    filename = d.to_html(str(tmp_path) + '/', open_browser=False, notebook_display=False)
     await go_to_page_and_screenshot('file://' + filename, filename, output_dir=tmp_path)
 
 
