@@ -27,6 +27,37 @@ const defaultProps = {
   onTileLoad: tileHeader => {}
 };
 
+function unpackTile(tileHeader, dracoLoader) {
+  const content = tileHeader.content;
+  if (content) {
+    switch (content.type) {
+      case 'pnts':
+        // Nothing to do;
+        break;
+      case 'i3dm':
+      case 'b3dm':
+        unpackGLTF(tileHeader, dracoLoader);
+        break;
+      default:
+        throw new Error(`Tile3DLayer: Error unpacking 3D tile ${content.type}`);
+    }
+  }
+}
+
+// TODO - move glTF + Draco parsing into the Tile3DLoader
+// DracoLoading is typically async on worker, better keep it in the top-level `parse` promise...
+function unpackGLTF(tileHeader, dracoLoader) {
+  if (tileHeader.content.gltfArrayBuffer) {
+    tileHeader.userData.gltf = parse(tileHeader.content.gltfArrayBuffer, {
+      DracoLoader: dracoLoader,
+      decompress: true
+    });
+  }
+  if (tileHeader.content.gltfUrl) {
+    tileHeader.userData.gltf = tileHeader.tileset.getTileUrl(tileHeader.content.gltfUrl);
+  }
+}
+
 export default class Tile3DLayer extends CompositeLayer {
   initializeState() {
     this.state = {
@@ -57,22 +88,20 @@ export default class Tile3DLayer extends CompositeLayer {
   async _loadTileset(tilesetUrl, fetchOptions, ionMetadata) {
     let tileset3d = null;
 
-    if (tilesetUrl) {
-      const response = await fetch(tilesetUrl, fetchOptions);
-      const tilesetJson = await response.json();
+    const response = await fetch(tilesetUrl, fetchOptions);
+    const tilesetJson = await response.json();
 
-      tileset3d = new Tileset3D(tilesetJson, tilesetUrl, {
-        throttleRequests: true,
-        onTileLoad: tileHeader => {
-          this.props.onTileLoad(tileHeader);
-          this._updateTileset(tileset3d);
-        },
-        // TODO: explicit passing should not be needed, registerLoaders should suffice
-        DracoLoader: this.props.DracoWorkerLoader || this.props.DracoLoader,
-        fetchOptions,
-        ...ionMetadata
-      });
-    }
+    tileset3d = new Tileset3D(tilesetJson, tilesetUrl, {
+      throttleRequests: true,
+      onTileLoad: tileHeader => {
+        this.props.onTileLoad(tileHeader);
+        this._updateTileset(tileset3d);
+      },
+      // TODO: explicit passing should not be needed, registerLoaders should suffice
+      DracoLoader: this.props.DracoWorkerLoader || this.props.DracoLoader,
+      fetchOptions,
+      ...ionMetadata
+    });
 
     this.setState({
       tileset3d,
@@ -81,8 +110,6 @@ export default class Tile3DLayer extends CompositeLayer {
     });
 
     if (tileset3d) {
-      // TODO: Remove these after sse traversal is working since this is just to prevent full load of tileset and loading of root
-      tileset3d.depthLimit = this.props.depthLimit;
       this.props.onTilesetLoad(tileset3d);
     }
   }
@@ -115,8 +142,7 @@ export default class Tile3DLayer extends CompositeLayer {
     for (const tile of tilesWithoutLayer) {
       // TODO - why do we call this here? Being "selected" should automatically add it to cache?
       tileset3d.addTileToCache(tile);
-
-      this._unpackTile(tile);
+      unpackTile(tile, this.props.DracoLoader);
 
       layerMap[tile.contentUri] = {
         layer: this._create3DTileLayer(tile),
@@ -153,37 +179,6 @@ export default class Tile3DLayer extends CompositeLayer {
     }
 
     this.setState({layers: selectedLayers});
-  }
-
-  _unpackTile(tileHeader) {
-    const content = tileHeader.content;
-    if (content) {
-      switch (content.type) {
-        case 'pnts':
-          // Nothing to do;
-          break;
-        case 'i3dm':
-        case 'b3dm':
-          this._unpackGLTF(tileHeader);
-          break;
-        default:
-          throw new Error(`Tile3DLayer: Error unpacking 3D tile ${content.type}`);
-      }
-    }
-  }
-
-  // TODO - move glTF + Draco parsing into the Tile3DLoader
-  // DracoLoading is typically async on worker, better keep it in the top-level `parse` promise...
-  _unpackGLTF(tileHeader) {
-    if (tileHeader.content.gltfArrayBuffer) {
-      tileHeader.userData.gltf = parse(tileHeader.content.gltfArrayBuffer, {
-        DracoLoader: this.props.DracoLoader,
-        decompress: true
-      });
-    }
-    if (tileHeader.content.gltfUrl) {
-      tileHeader.userData.gltf = tileHeader.tileset.getTileUrl(tileHeader.content.gltfUrl);
-    }
   }
 
   _create3DTileLayer(tileHeader) {

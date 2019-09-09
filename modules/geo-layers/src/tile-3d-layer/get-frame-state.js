@@ -73,10 +73,9 @@ function commonSpacePlanesToWGS84(viewport) {
   for (const dir in frustumPlanes) {
     const plane = frustumPlanes[dir];
     const distanceToCenter = plane.normal.dot(viewport.center);
-    const nLen = plane.normal.len();
     scratchPosition
       .copy(plane.normal)
-      .scale((plane.distance - distanceToCenter) / (nLen * nLen))
+      .scale(plane.distance - distanceToCenter)
       .add(viewport.center);
     const cartographicPos = viewport.unprojectPosition(scratchPosition);
 
