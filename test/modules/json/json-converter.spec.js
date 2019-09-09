@@ -45,7 +45,7 @@ export const JSON_DATA = {
       type: 'ScatterplotLayer',
       data: [{position: [-122.45, 37.8]}],
       getPosition: 'position',
-      getColor: [255, 0, 0, 255],
+      getFillColor: [255, 0, 0, 255],
       getRadius: 1000
     },
     {

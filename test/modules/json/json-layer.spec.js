@@ -73,10 +73,12 @@ test('JSONLayer#fetch', t => {
     data: [
       {
         type: 'TextLayer',
+        id: 'text-layer-1',
         data: 'data.json'
       },
       {
         type: 'TextLayer',
+        id: 'text-layer-2',
         data: 'data.csv',
         getPosition: d => [d.lon, d.lat],
         getText: d => d.text
