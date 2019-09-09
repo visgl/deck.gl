@@ -1,8 +1,8 @@
 import GL from '@luma.gl/constants';
 import {Buffer, Transform} from '@luma.gl/core';
-import {padArray} from '../utils/array-utils';
 import BaseAttribute from '../lib/base-attribute';
 import Attribute from '../lib/attribute';
+import {padBuffer} from '../lib/attribute-transition-utils';
 import Transition from './transition';
 import assert from '../utils/assert';
 
@@ -179,49 +179,4 @@ function getBuffers({fromState, toState, buffer}) {
       vCurrent: buffer
     }
   };
-}
-
-function padBuffer({
-  fromState,
-  toState,
-  fromLength,
-  toLength,
-  fromBufferLayout,
-  toBufferLayout,
-  size,
-  offset,
-  getData = x => x
-}) {
-  const hasBufferLayout = fromBufferLayout && toBufferLayout;
-
-  // check if buffer needs to be padded
-  if ((!hasBufferLayout && fromLength >= toLength) || !(fromState instanceof Buffer)) {
-    return;
-  }
-
-  const data = new Float32Array(toLength);
-  const fromData = fromState.getData({length: fromLength});
-
-  const toData = toState.constant ? toState.getValue() : toState.getBuffer().getData({});
-
-  if (toState.normalized) {
-    const getter = getData;
-    getData = (value, chunk) => toState._normalizeConstant(getter(value, chunk));
-  }
-
-  const getMissingData = toState.constant
-    ? (i, chunk) => getData(toData, chunk)
-    : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
-
-  padArray({
-    source: fromData,
-    target: data,
-    sourceLayout: fromBufferLayout,
-    targetLayout: toBufferLayout,
-    offset,
-    size,
-    getData: getMissingData
-  });
-
-  fromState.setData({data});
 }
