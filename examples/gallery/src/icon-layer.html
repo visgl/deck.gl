@@ -13,20 +13,12 @@
         background: #f7f7f7;
         overflow: hidden;
       }
-      #tooltip:empty {
-        display: none;
-      }
-      #tooltip {
+      .deck-tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        position: absolute;
-        padding: 4px;
+        padding: 6px !important;
         margin: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
         max-width: 300px;
         font-size: 10px;
-        z-index: 9;
-        pointer-events: none;
       }
     </style>
   </head>
@@ -42,21 +34,9 @@
     const deckgl =  new DeckGL({
       views: new OrthographicView(),
       viewState: { target: [0, 0, 0], zoom: 2 },
-      controller: true
+      controller: true,
+      getTooltip: ({object}) => object && `${object.login}\nContributions: ${object.contributions}`
     });
-
-    function updateTooltip({x, y, object}) {
-      const tooltip = document.getElementById('tooltip');
-      if (object) {
-        tooltip.style.top = `${y}px`;
-        tooltip.style.left = `${x}px`;
-        tooltip.innerHTML = `
-        <div><b>${object.login}</b></div>
-        <div>Contributions: ${object.contributions}</div>`;
-      } else {
-        tooltip.innerHTML = '';
-      }
-    }
 
     function renderLayers(data) {
       const ORIGIN = [0, 0];
@@ -73,8 +53,7 @@
         getSize : d => d.size,
         getPosition: d => d.position,
         sizeUnits: 'meters',
-        pickable: true,
-        onHover: updateTooltip
+        pickable: true
       });
 
       const lineLayer = new LineLayer({
