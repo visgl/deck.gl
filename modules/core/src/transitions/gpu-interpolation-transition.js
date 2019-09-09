@@ -4,6 +4,7 @@ import {padArray} from '../utils/array-utils';
 import BaseAttribute from '../lib/base-attribute';
 import Attribute from '../lib/attribute';
 import Transition from './transition';
+import assert from '../utils/assert';
 
 export default class GPUInterpolationTransition {
   constructor({gl, attribute, timeline}) {
@@ -33,6 +34,7 @@ export default class GPUInterpolationTransition {
   // Start a new transition using the current settings
   // Updates transition state and from/to buffer
   start(gl, settings, numInstances) {
+    assert(settings.duration > 0);
     const {fromState, toState, buffer} = this._setupBuffers(gl, settings, numInstances);
     this.buffer = buffer;
     const elementCount = Math.floor(this.curLength / this.attribute.size);

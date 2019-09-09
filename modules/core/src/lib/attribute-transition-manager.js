@@ -1,7 +1,6 @@
 import {Transform} from '@luma.gl/core';
 import GPUInterpolationTransition from '../transitions/gpu-interpolation-transition';
 import log from '../utils/log';
-import assert from '../utils/assert';
 
 export default class AttributeTransitionManager {
   constructor(gl, {id, timeline}) {
@@ -123,7 +122,6 @@ export default class AttributeTransitionManager {
     }
 
     if (isNew || attribute.needsRedraw()) {
-      assert(settings.duration > 0);
       this.needsRedraw = true;
       this.transitions[attributeName].start(this.gl, settings, this.numInstances);
     }

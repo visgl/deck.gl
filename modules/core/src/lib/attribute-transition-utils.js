@@ -5,18 +5,19 @@ const DEFAULT_TRANSITION_SETTINGS = {
   easing: t => t,
   onStart: noop,
   onEnd: noop,
-  onInterrupt: noop
+  onInterrupt: noop,
+  enter: x => x
 };
 
-export function normalizeTransitionSettings(settings) {
-  if (!settings) {
+export function normalizeTransitionSettings(userSettings, layerSettings = {}) {
+  if (!userSettings) {
     return null;
   }
-  if (Number.isFinite(settings)) {
-    settings = {duration: settings};
+  if (Number.isFinite(userSettings)) {
+    userSettings = {
+      type: 'interpolation',
+      duration: userSettings
+    };
   }
-  if (!settings.duration) {
-    return null;
-  }
-  return Object.assign({}, DEFAULT_TRANSITION_SETTINGS, settings);
+  return Object.assign({}, DEFAULT_TRANSITION_SETTINGS, layerSettings, userSettings);
 }
