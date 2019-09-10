@@ -1,4 +1,6 @@
 {
+  "description": "The deck.gl website hexagonlayer example in JSON format",
+  "websiteUrl": "https://deck.gl/#/examples/core-layers/hexagon-layer",
   "initialViewState": {
     "longitude": -1.4157267858730052,
     "latitude": 52.232395363869415,
@@ -8,11 +10,11 @@
     "pitch": 40.5,
     "bearing": -27.396674584323023
   },
-  "mapStyle": "mapbox://styles/mapbox/dark-v9",
   "views": [
     {
       "type": "MapView",
-      "controller": "true"
+      "controller": "true",
+      "mapStyle": "mapbox://styles/mapbox/dark-v9"
     }
   ],
   "layers": [
