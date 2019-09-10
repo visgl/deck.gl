@@ -1,7 +1,7 @@
 // This layer allows any deck.gl app to support user-defined JSON layers
 import {CompositeLayer} from '@deck.gl/core';
 // import DeckJSONConverter from '../deck-json-converter/deck-json-converter';
-import DeckJSONConfiguration from '../../../../examples/experimental/json-browser/deck-json-converter/deck-json-configuration';
+import DeckJSONConfiguration from '../../json-browser/deck-json-converter/deck-json-configuration';
 
 const defaultProps = {
   // Accepts JSON strings by parsing them to JSON, naturally

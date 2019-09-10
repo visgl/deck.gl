@@ -6,6 +6,11 @@
 
 - `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and will be removed in the next major release.
 
+#### Removals
+
+- `deck.gl/json`: The `JSONLayer` is no longer included in this module. The code for this layer has been moved to an example in `/examples/experimental/json-layer`, and would need to be copied into applications to be used.
+
+
 ## Upgrading from deck.gl v7.1 to v7.2
 
 #### Breaking Changes

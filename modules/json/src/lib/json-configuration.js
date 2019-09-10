@@ -9,14 +9,27 @@ const DEFAULT_CONFIGURATION = {
   reactComponents: {},
   enumerations: {},
   // TODO - this needs to be simpler, function conversion should be built in
-  convertFunction
+  convertFunction,
+
+  // DEPRECATED - these were deck.gl specific. Use `configuration.classes` instead.
+  layers: {},
+  views: {}
 };
 
 const isObject = value => value && typeof value === 'object';
 
 export default class JSONConfiguration {
   constructor(configuration) {
-    Object.assign(this, DEFAULT_CONFIGURATION, configuration);
+    // Merge configuration with default values
+    const config = Object.assign({}, DEFAULT_CONFIGURATION, configuration);
+
+    // DEPRECATED: For backwards compatibility, add views and layers to classes
+    config.classes = Object.assign(config.classes, configuration.layers, configuration.views);
+    delete config.layers;
+    delete config.views;
+
+    // Store configuration as root fields (this.classes, ...)
+    Object.assign(this, config);
   }
 
   validate(configuration) {

@@ -8,7 +8,6 @@ export default class JSONConverter {
   constructor(props) {
     this.configuration = {};
     this.onJSONChange = () => {};
-    this.setProps(props);
     this.json = null;
     this.convertedJson = null;
     this.setProps(props);
