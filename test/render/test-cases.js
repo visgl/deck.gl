@@ -12,7 +12,10 @@ import {
   OrbitView,
   OrthographicView,
   FirstPersonView,
-  PostProcessEffect
+  PostProcessEffect,
+  LightingEffect,
+  AmbientLight,
+  DirectionalLight
 } from '@deck.gl/core';
 import {noise, vignette} from '@luma.gl/effects';
 
@@ -27,6 +30,7 @@ import {
   ScatterplotLayer,
   BitmapLayer,
   PolygonLayer,
+  SolidPolygonLayer,
   PathLayer,
   ArcLayer,
   LineLayer,
@@ -864,6 +868,56 @@ export const TEST_CASES = [
       })
     ],
     goldenImage: './test/render/golden-images/column-lnglat.png'
+  },
+  {
+    name: 'column-shadow-lnglat',
+    effects: [
+      new LightingEffect({
+        ambientLight: new AmbientLight({
+          color: [255, 255, 255],
+          intensity: 1.0
+        }),
+        dirLight: new DirectionalLight({
+          color: [255, 255, 255],
+          intensity: 1.0,
+          direction: [-10, -2, -15],
+          _shadow: true
+        })
+      })
+    ],
+    viewState: {
+      latitude: 37.751537058389985,
+      longitude: -122.42694203247012,
+      zoom: 11.5,
+      pitch: 30,
+      bearing: 0,
+      orthographic: true
+    },
+    layers: [
+      new ColumnLayer({
+        id: 'column-lnglat',
+        data: dataSamples.hexagons,
+        radius: 250,
+        angle: Math.PI / 2,
+        coverage: 1,
+        extruded: true,
+        pickable: true,
+        opacity: 1,
+        getPosition: h => h.centroid,
+        getFillColor: h => [48, 128, h.value * 255, 255],
+        getElevation: h => h.value * 5000
+      }),
+      new SolidPolygonLayer({
+        id: 'polygon-lnglat',
+        data: dataSamples.polygons,
+        getPolygon: f => f,
+        getFillColor: [200, 0, 0],
+        opacity: 0.8,
+        pickable: true,
+        shadowEnabled: false
+      })
+    ],
+    goldenImage: './test/render/golden-images/column-shadow-lnglat.png'
   },
   {
     name: 'column-lnglat-stroke',
