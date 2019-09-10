@@ -70,6 +70,13 @@ const ORDINAL_SCALE_TEST_CASES = [
     results: [11, 22]
   },
   {
+    title: 'string-value-domain',
+    domain: ['0', '1'],
+    range: [11, 22],
+    values: [0, '0', 1, '1'],
+    results: [11, 11, 22, 22]
+  },
+  {
     title: 'extends-domain',
     domain: [0, 1],
     range: [11, 22, 33],
