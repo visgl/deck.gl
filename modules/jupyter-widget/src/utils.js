@@ -22,6 +22,23 @@ export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
   deckConfig.setProps(results);
 }
 
+function getTooltip(pickedInfo) {
+  if (!pickedInfo.picked) {
+    return null;
+  }
+  return {
+    html: tabularize(pickedInfo.object),
+    style: {
+      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+      display: 'flex',
+      flex: 'wrap',
+      maxWidth: '500px',
+      flexDirection: 'column',
+      zIndex: 2
+    }
+  };
+}
+
 export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handleClick) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl'], deckgl => {
@@ -45,6 +62,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
           longitude: 0,
           zoom: 1,
           onClick: handleClick,
+          getTooltip,
           container,
           onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
         });
@@ -59,4 +77,31 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
       return {};
     });
   });
+}
+
+function tabularize(json) {
+  const dataTable = document.createElement('div');
+  dataTable.className = 'dataTable';
+
+  for (const key in json) {
+    const row = document.createElement('div');
+    const header = document.createElement('div');
+    header.className = 'header';
+    header.innerHTML = key;
+    header.style.fontWeight = 500;
+    header.style.marginRight = '10px';
+    const value = document.createElement('div');
+    value.className = 'value';
+    value.innerHTML = JSON.stringify(json[key]);
+    value.style.float = 'right';
+    value.style.margin = 'header';
+    row.appendChild(header);
+    row.appendChild(value);
+    row.style.display = 'flex';
+    row.style.flexDirection = 'row';
+    row.style.justifyContent = 'space-between';
+    row.style.alignItems = 'stretch';
+    dataTable.appendChild(row);
+  }
+  return dataTable.innerHTML;
 }
