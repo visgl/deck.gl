@@ -32,7 +32,11 @@ export default class TransitionInterpolator {
    */
   arePropsEqual(currentProps, nextProps) {
     for (const key of this._propsToCompare || Object.keys(nextProps)) {
-      if (!equals(currentProps[key], nextProps[key])) {
+      if (
+        !(key in currentProps) ||
+        !(key in nextProps) ||
+        !equals(currentProps[key], nextProps[key])
+      ) {
         return false;
       }
     }

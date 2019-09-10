@@ -35,7 +35,7 @@
     "@luma.gl/addons": "^7.3.0-alpha.7",
     "@luma.gl/core": "^7.3.0-alpha.7",
     "gl-matrix": "^3.0.0",
-    "math.gl": "^2.3.0",
+    "math.gl": "^3.0.0-beta.3",
     "mjolnir.js": "^2.1.2",
     "probe.gl": "^3.1.0-beta.3",
     "seer": "^0.2.4",

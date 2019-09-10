@@ -149,7 +149,7 @@ test('shadow#getUniforms', t => {
   );
 
   for (const value of TEST_CASE1) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transformVector3(value.xyz);
+    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
     t.equal(
       insideClipSpace(result),
       value.result,
@@ -178,7 +178,7 @@ test('shadow#getUniforms', t => {
   );
 
   for (const value of TEST_CASE2) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transformVector3(value.xyz);
+    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
     const center = uniforms[`shadow_uProjectCenters[0]`];
     t.equal(
       insideClipSpace([
@@ -208,7 +208,7 @@ test('shadow#getUniforms', t => {
   );
 
   for (const value of TEST_CASE3) {
-    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transformVector3(value.xyz);
+    const result = uniforms[`shadow_uViewProjectionMatrices[0]`].transform(value.xyz);
     t.equal(
       insideClipSpace(result),
       value.result,
