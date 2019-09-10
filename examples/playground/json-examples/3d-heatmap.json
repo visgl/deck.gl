@@ -1,8 +1,7 @@
 {
-  "description": "The deck.gl website hexagonlayer example (with added minimap)",
+  "description": "The deck.gl website hexagonlayer example in JSON format",
   "websiteUrl": "https://deck.gl/#/examples/core-layers/hexagon-layer",
   "initialViewState": {
-    "id": "view-state",
     "longitude": -1.4157267858730052,
     "latitude": 52.232395363869415,
     "zoom": 6.6,
@@ -14,25 +13,8 @@
   "views": [
     {
       "type": "MapView",
-      "id": "main",
-      "mapStyle": "mapbox://styles/mapbox/dark-v9",
-      "controller": "true"
-    },
-    {
-      "type": "MapView",
-      "id": "minimap",
-      "mapStyle": "mapbox://styles/mapbox/light-v9",
-      "width": "40%",
-      "height": "40%",
-      "x": "55%",
-      "y": "5%",
-      "clear": true,
-      "viewState": {
-        "id": "view-state",
-        "pitch": 0,
-        "bearing": 0,
-        "zoom": 4
-      }
+      "controller": true,
+      "mapStyle": "mapbox://styles/mapbox/dark-v9"
     }
   ],
   "layers": [
@@ -41,6 +23,8 @@
       "id": "heatmap",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
       "coverage": 1,
+      "pickable": true,
+      "autoHighlight": true,
       "elevationRange": [0, 3000],
       "elevationScale": 50,
       "extruded": true,
