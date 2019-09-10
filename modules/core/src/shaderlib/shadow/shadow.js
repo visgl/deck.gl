@@ -128,7 +128,7 @@ function screenToCommonSpace(xyz, pixelUnprojectionMatrix) {
 }
 
 function getViewportCenterPosition({viewport, center}) {
-  return new Matrix4(viewport.viewProjectionMatrix).invert().transformVector4(center);
+  return new Matrix4(viewport.viewProjectionMatrix).invert().transform(center);
 }
 
 function getViewProjectionMatrices({viewport, shadowMatrices}) {
@@ -148,7 +148,7 @@ function getViewProjectionMatrices({viewport, shadowMatrices}) {
 
   for (const shadowMatrix of shadowMatrices) {
     const viewMatrix = shadowMatrix.clone().translate(new Vector3(viewport.center).negate());
-    const positions = corners.map(corner => viewMatrix.transformVector3(corner));
+    const positions = corners.map(corner => viewMatrix.transform(corner));
     const projectionMatrix = new Matrix4().ortho({
       left: Math.min(...positions.map(position => position[0])),
       right: Math.max(...positions.map(position => position[0])),
@@ -195,7 +195,7 @@ function createShadowUniforms(opts = {}, context = {}) {
       viewProjectionMatrices[i] = viewProjectionMatrix
         .clone()
         .multiplyRight(VECTOR_TO_POINT_MATRIX);
-      projectCenters[i] = viewProjectionMatrixCentered.transformVector4(center);
+      projectCenters[i] = viewProjectionMatrixCentered.transform(center);
     }
   }
 
