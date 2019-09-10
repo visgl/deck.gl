@@ -1,4 +1,6 @@
 {
+  "description": "The deck.gl website ScatterplotLayer example in JSON format",
+  "websiteUrl": "https://deck.gl/#/examples/core-layers/scattterplot-layer",
   "initialViewState": {
     "longitude": -74,
     "latitude": 40.7,
@@ -7,11 +9,11 @@
     "pitch": 0,
     "bearing": 0
   },
-  "mapStyle": "mapbox://styles/mapbox/light-v9",
   "views": [
     {
       "type": "MapView",
-      "controller": "true"
+      "controller": "true",
+      "mapStyle": "mapbox://styles/mapbox/light-v9"
     }
   ],
   "layers": [
