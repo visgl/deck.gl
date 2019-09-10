@@ -1,12 +1,18 @@
 # @deck.gl/json
 
-The deck.gl JSON module provides support for specifying deck.gl visualizations using [JSON formatted](https://www.json.org/) text files and strings.
+The deck.gl JSON module provides a `JSONConverter` class that converts textual JSON specifications into JavaScript objects, and functions.
 
-## Use Case
+Through a set of conventions, the JSON module allows the specification of _JavaScript class instances_, _React elements_, _enumerations_ and _functions_ (in addition to the basic types created during the JSON parsing process (i.e. arrays, objects, strings, numbers and booleans).
+
+The set of classes, React components and enumerations that should be available to the JSONConverter must be provided via an application-provided configuration object.
+
+## Use Cases
 
 Especially in the infovis space, there is a growing need to be able to generate powerful visualizations directly from the backend. Being able to describe a visualization in abstract terms and send it to the front-end for display without modifying JavaScript code can be valuable.
 
-deck.gl supports a highly polished declarative system for describing layers, which the JSON API reuses with very few exceptions.
+## deck.gl Integration
+
+deck.gl supports a declarative system for describing layers and their props, and this declarative API can be trivially exposed via the JSON API.
 
 <div align="center">
   <div>
@@ -16,6 +22,10 @@ deck.gl supports a highly polished declarative system for describing layers, whi
 </div>
 
 See our [live demo](https://deck.gl/json).
+
+
+The module was created to enable specifying deck.gl visualizations using [JSON formatted](https://www.json.org/) text files and strings, but is completely generic and
+
 
 
 ## Installation

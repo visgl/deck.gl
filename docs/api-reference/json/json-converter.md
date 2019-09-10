@@ -37,23 +37,13 @@ deck.setProps(jsonConverter.convertJSONToDeckProps(json));
 
 ##### `json` (Object|String)
 
-A JSON string or a parsed JSON structure. 
+A JSON string or a parsed JSON structure.
 All properties in this object are passed to `Deck`, after processing, which includes the following fields:
 
 - `views` (Array) - If supplied, used to create `View` instances from JSON descriptors. `{type: MapView, ...props}` will be instantiated to `MapView(...props)`
 - `layers` (Array) - Passes to an instance of [JSONLayer](/docs/api-reference/json/json-layer.md) as the top level layer.
 - `map` (Boolean) - If set to `true` display a base map. See remarks below.
 - `mapStyle` (String) - An optional mapbox-gl compatible style URL.
-
-##### `configuration` (Object)
-
-Object with the following fields. See more details in the `Configuration` section below.
-
-* `layers` - Allows the application to specify which layer types the JSONConverter can use. Expects a map from layer names to layer classes. No layers are supported by default.
-* `views` - Allows the application to specify which view types the JSONConverter can use. Expects a map from view names to view classes. Can be ommitted as the standard views in `@deck.gl/core` module are supported by default.
-* `enumerations` - a map of enumerations that should be made available to the JSON string resolver.
-* `classes` - a map of general classes that should be made available to the JSON class resolver.
-
 
 ## Configuration
 
@@ -63,7 +53,7 @@ The JSON framework inspects the "raw" parsed JSON data structure before supplyin
 
 ```js
 const configuration = {
-  layers: Object.assign({}, require('@deck.gl/layers'), require('@deck.gl/aggregation-layers'))
+  classes: Object.assign({}, require('@deck.gl/layers'), require('@deck.gl/aggregation-layers'))
 };
 ```
 
@@ -150,7 +140,3 @@ and used to resolve this JSON object:
   ]
 }
 ```
-
-## Remarks
-
-* Displaying a base map requires `mapboxgl` top level prop to be provided, a valid `mapboxApiAccessToken` in top level props or `props.json`, and the view state to have longitude, latitude, zoom fields.

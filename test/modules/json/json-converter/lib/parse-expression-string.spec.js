@@ -1,6 +1,6 @@
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-catch';
-import parseStringExpression from '@deck.gl/json/parsers/parse-string-expression';
+import parseExpressionString from './node_modules/@deck.gl/json/lib/helpers/parse-expression-stringpression-string';
 
 const row = Object.freeze({
   foo: {
@@ -102,33 +102,33 @@ const TEST_CASES = [
 
 const isAccessor = true;
 
-test('parseStringExpression', t => {
+test('parseExpressionString', t => {
   for (const testCase of TEST_CASES) {
     const isErrorCase = Boolean(testCase.errorRegex);
     if (isErrorCase) {
       t.throws(
-        () => parseStringExpression(testCase.expr, null, isAccessor),
+        () => parseExpressionString(testCase.expr, null, isAccessor),
         testCase.errorRegex,
         `throws on ${testCase.expr}`
       );
       /* eslint-disable-next-line no-continue */
       continue;
     }
-    const func = parseStringExpression(testCase.expr, null, isAccessor);
+    const func = parseExpressionString(testCase.expr, null, isAccessor);
 
-    t.ok(func, `parseStringExpression converted ${testCase.expr}`);
+    t.ok(func, `parseExpressionString converted ${testCase.expr}`);
     t.deepEquals(
       func(row),
       testCase.expected,
-      `parseStringExpression correctly evaluated ${testCase.expr} to ${testCase.expected}`
+      `parseExpressionString correctly evaluated ${testCase.expr} to ${testCase.expected}`
     );
   }
 
-  const func = parseStringExpression('-', null, isAccessor);
+  const func = parseExpressionString('-', null, isAccessor);
   t.deepEquals(
     func('identity'),
     'identity',
-    'parseStringExpression of - returns a cached identity function'
+    'parseExpressionString of - returns a cached identity function'
   );
 
   t.end();

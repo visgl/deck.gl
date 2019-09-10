@@ -1,20 +1,16 @@
-/* global window */
 import React, {Component} from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-
-import DeckGL from '@deck.gl/react';
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
-
+import DeckWithMaps from './deck-with-maps';
 import {StaticMap} from 'react-map-gl';
+
+import JSONConverter from './deck-json-converter/deck-json-converter';
 
 import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
 import JSON_CONFIGURATION from './config/configuration';
-import JSON_TEMPLATES from './config/templates';
-
-const INITIAL_JSON = Object.values(JSON_TEMPLATES)[0];
+import JSON_TEMPLATES, {INITIAL_TEMPLATE} from './config/templates';
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
@@ -23,7 +19,7 @@ const MAPBOX_STYLESHEET = `https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/map
 const STYLES = {
   CONTAINER: {
     width: '100%',
-    height: '100%',
+    height: '100vh',
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'stretch'
@@ -78,10 +74,7 @@ export default class App extends Component {
       // react-ace
       text: '',
       // deck.gl JSON Props
-      jsonProps: {},
-      // NOTE: viewState is re-initialized from jsonProps when those change,
-      // but can be updated independently by the user "panning".
-      viewState: null
+      jsonProps: {}
     };
 
     // TODO/ib - could use arrow functions
@@ -93,14 +86,22 @@ export default class App extends Component {
   }
 
   componentDidMount() {
-    this._setEditorText(INITIAL_JSON);
-    this._setJSON(INITIAL_JSON);
+    this._setTemplate(INITIAL_TEMPLATE);
   }
 
   // Updates deck.gl JSON props
   // Called on init, when template is changed, or user types
+  _setTemplate(value) {
+    const json = JSON_TEMPLATES[value];
+    if (json) {
+      // Triggers an editor change, which updates the JSON
+      this._setEditorText(json);
+      this._setJSON(json);
+    }
+  }
+
   _setJSON(json) {
-    const jsonProps = this.jsonConverter.convertJsonToDeckProps(json);
+    const jsonProps = this.jsonConverter.convertJson(json);
     this.setState({
       jsonProps,
       viewState: jsonProps.viewState
@@ -120,11 +121,7 @@ export default class App extends Component {
 
   _onTemplateChange(event) {
     const value = event && event.target && event.target.value;
-    const json = JSON_TEMPLATES[value];
-    if (json) {
-      // Triggers an editor change, which updates the JSON
-      this._setEditorText(json);
-    }
+    this._setTemplate(value);
   }
 
   _onEditorChange(text, event) {
@@ -137,11 +134,6 @@ export default class App extends Component {
     }
     this._setEditorText(text);
     this._setJSON(json);
-  }
-
-  _onViewStateChange({viewState}) {
-    // TODO - It would be cool to update the viewState here!
-    this.setState({viewState});
   }
 
   _renderJsonSelector() {
@@ -162,8 +154,6 @@ export default class App extends Component {
 
   render() {
     const {jsonProps} = this.state;
-    const viewState = this.state.viewState;
-
     return (
       <div style={STYLES.CONTAINER}>
         {/* Left Pane: Ace Editor and Template Selector */}
@@ -193,29 +183,13 @@ export default class App extends Component {
 
         {/* Right Pane: DeckGL */}
         <div id="right-pane" style={STYLES.RIGHT_PANE}>
-          {Boolean(jsonProps.map) && (
-            // TODO/ib/ib - can't get autosizer to work with react-map-gl
-            // upgrade to react-map-gl 4 which has built in autosizer
-            <StaticMap
-              reuseMap
-              {...jsonProps.map}
-              style={{}}
-              {...viewState}
-              viewState={viewState}
-              viewport={viewState}
-              width={window.innerWidth * 0.6}
-              height={window.innerHeight}
-              mapboxApiAccessToken={MAPBOX_TOKEN}
-            />
-          )}
-
           <AutoSizer>
             {() => (
-              <DeckGL
+              <DeckWithMaps
                 id="json-deck"
                 {...jsonProps}
-                viewState={viewState}
-                onViewStateChange={this._onViewStateChange.bind(this)}
+                StaticMap={StaticMap}
+                mapboxApiAccessToken={MAPBOX_TOKEN}
               />
             )}
           </AutoSizer>

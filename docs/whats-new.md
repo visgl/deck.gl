@@ -2,6 +2,15 @@
 
 This page contains highlights of each deck.gl release. Also check our [vis.gl blog](https://medium.com/vis-gl) for news about new releases and features in deck.gl.
 
+## deck.gl v7.3
+
+### @deck.gl/json
+
+The `JSONConverter` class has been generalized and can now be used independently of deck.gl to "hydrate" JavaScript from JSON text specifications. This supports its use a foundation technology for providing non-JavaScript bindings such as `pydeck`.
+
+This has caused some breaking changes to this experimental module. For details and work-arounds see the upgrade guide:
+- The `JSONLayer` is no longer exported from `@deck.gl/json`.
+
 ## deck.gl v7.2
 
 Release Date: Aug XX, 2019

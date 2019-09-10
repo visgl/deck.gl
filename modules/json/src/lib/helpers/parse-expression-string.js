@@ -1,4 +1,4 @@
-import {get} from '../utils/get';
+import {get} from '../../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
 import expressionEval from 'expression-eval';
@@ -10,7 +10,7 @@ const cachedExpressionMap = {
 // Calculates an accessor function from a JSON string
 // '-' : x => x
 // 'a.b.c': x => x.a.b.c
-export default function parseStringExpression(propValue, configuration, isAccessor) {
+export default function parseExpressionString(propValue, configuration, isAccessor) {
   // NOTE: Can be null which represents invalid function. Return null so that prop can be ommitted
   if (propValue in cachedExpressionMap) {
     return cachedExpressionMap[propValue];
