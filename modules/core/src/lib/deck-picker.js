@@ -137,7 +137,12 @@ export default class DeckPicker {
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
     const pixelRatio = this.pixelRatio;
-    const devicePixel = cssToDevicePixels(this.gl, [x, y], true);
+    const devicePixelRange = cssToDevicePixels(this.gl, [x, y], true);
+    const devicePixel = [
+      devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
+      devicePixelRange.y + Math.floor(devicePixelRange.height / 2)
+    ];
+
     const deviceRadius = Math.round(radius * pixelRatio);
     const {width, height} = this.pickingFBO;
     const deviceRect = this.getPickingRect({
@@ -224,14 +229,23 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
     const pixelRatio = this.pixelRatio;
-    const [deviceLeft, deviceBottom] = cssToDevicePixels(this.gl, [x, y], true);
-    const [deviceRight, deviceTop] = cssToDevicePixels(this.gl, [x + width, y + height], true);
+    const leftTop = cssToDevicePixels(this.gl, [x, y], true);
+
+    // take leftBottom from start location
+    const deviceLeft = leftTop.x;
+    const deviceTop = leftTop.y + leftTop.height;
+
+    // take rightTop from end location
+    const rightBottom = cssToDevicePixels(this.gl, [x + width, y + height], true);
+    const deviceRight = rightBottom.x + rightBottom.width;
+    const deviceBottom = rightBottom.y;
 
     const deviceRect = {
       x: deviceLeft,
-      y: deviceTop,
-      width: deviceRight - deviceLeft + 1,
-      height: deviceBottom - deviceTop + 1
+      y: deviceBottom,
+      // deviceTop and deviceRight represent the first pixel outside the desired rect
+      width: deviceRight - deviceLeft,
+      height: deviceTop - deviceBottom
     };
 
     const pickedColors = this.drawAndSamplePickingBuffer({
