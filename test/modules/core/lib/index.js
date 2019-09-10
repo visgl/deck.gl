@@ -22,7 +22,6 @@ import './base-attribute.spec';
 import './attribute.spec';
 import './attribute-manager.spec';
 import './attribute-transition-manager.spec';
-import './attribute-transition-utils.spec';
 import './deck.spec';
 import './deck-picker.spec';
 import './layer.spec';
