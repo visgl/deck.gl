@@ -1,4 +1,5 @@
 import os
+from os.path import relpath
 from pathlib import Path
 import tempfile
 import time
@@ -68,20 +69,11 @@ def deck_to_html(
         f.write(html)
     finally:
         if f is None:
-            raise Exception("deckgl did not write a file")
+            raise Exception("pydeck could not write a file")
         f.close()
     if open_browser:
         display_html(f.name)
-    if is_jupyter_notebook() is True and notebook_display is True:
-        display(IFrame('file://' + f.name, width=iframe_width, height=iframe_width))  # noqa
+    if notebook_display:
+        notebook_to_html_path = relpath(f.name)
+        display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_width))  # noqa
     return f.name
-
-
-def is_jupyter_notebook():
-    """Returns True if environment is a Jupyter notebook"""
-    try:
-        ip = get_ipython()  # noqa
-        if ip.has_trait('kernel'):
-            return True
-    finally:
-        return False
