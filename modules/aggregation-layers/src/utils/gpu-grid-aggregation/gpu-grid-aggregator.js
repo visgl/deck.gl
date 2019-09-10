@@ -591,7 +591,7 @@ export default class GPUGridAggregator {
   }
   /* eslint-disable max-statements */
 
-  updateCPUResultBuffer({gl, bufferName, id, data, result}) {
+  _uploadResultsToGPU({gl, bufferName, textureName, id, data, result}) {
     const {resources} = this.state;
     const resourceName = `cpu-result-${id}-${bufferName}`;
     result[bufferName] = result[bufferName] || resources[resourceName];
@@ -601,6 +601,11 @@ export default class GPUGridAggregator {
       // save resource for garbage collection
       resources[resourceName] = new Buffer(gl, data);
       result[bufferName] = resources[resourceName];
+    }
+
+    // Upload result to a texture if provided
+    if (textureName && result[textureName]) {
+      result[textureName].setImageData({data});
     }
   }
 
@@ -613,7 +618,7 @@ export default class GPUGridAggregator {
       const {aggregationData, minData, maxData, maxMinData} = results[id];
       const {needMin, needMax} = weights[id];
       const combineMaxMin = needMin && needMax && weights[id].combineMaxMin;
-      this.updateCPUResultBuffer({
+      this._uploadResultsToGPU({
         gl: this.gl,
         bufferName: 'aggregationBuffer',
         id,
@@ -621,27 +626,30 @@ export default class GPUGridAggregator {
         result: results[id]
       });
       if (combineMaxMin) {
-        this.updateCPUResultBuffer({
+        this._uploadResultsToGPU({
           gl: this.gl,
           bufferName: 'maxMinBuffer',
+          textureName: 'maxMinTexture',
           id,
           data: maxMinData,
           result: results[id]
         });
       } else {
         if (needMin) {
-          this.updateCPUResultBuffer({
+          this._uploadResultsToGPU({
             gl: this.gl,
             bufferName: 'minBuffer',
+            textureName: 'minTexture',
             id,
             data: minData,
             result: results[id]
           });
         }
         if (needMax) {
-          this.updateCPUResultBuffer({
+          this._uploadResultsToGPU({
             gl: this.gl,
             bufferName: 'maxBuffer',
+            textureName: 'maxTexture',
             id,
             data: maxData,
             result: results[id]
@@ -899,7 +907,6 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      resources,
       meanTextures,
       equations,
       weights
@@ -937,28 +944,25 @@ export default class GPUGridAggregator {
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {
           if (!maxMinFramebuffers[id]) {
-            resources[`${id}-maxMin`] = getFloatTexture(this.gl, {id: `${id}-maxMinTex`});
-            maxMinFramebuffers[id] = getFramebuffer(this.gl, {
-              id: `${id}-maxMinFb`,
-              texture: resources[`${id}-maxMin`]
-            });
+            texture = this._getMinMaxTexture('maxMinTexture', weights[id], id);
+            maxMinFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-maxMinFb`, texture});
           }
         } else {
           if (needMin) {
             if (!minFramebuffers[id]) {
-              resources[`${id}-min`] = getFloatTexture(this.gl, {id: `${id}-minTex`});
+              texture = this._getMinMaxTexture('minTexture', weights[id], id);
               minFramebuffers[id] = getFramebuffer(this.gl, {
                 id: `${id}-minFb`,
-                texture: resources[`${id}-min`]
+                texture
               });
             }
           }
           if (needMax) {
             if (!maxFramebuffers[id]) {
-              resources[`${id}-max`] = getFloatTexture(this.gl, {id: `${id}-maxTex`});
+              texture = this._getMinMaxTexture('maxTexture', weights[id], id);
               maxFramebuffers[id] = getFramebuffer(this.gl, {
                 id: `${id}-maxFb`,
-                texture: resources[`${id}-max`]
+                texture
               });
             }
           }
@@ -967,6 +971,16 @@ export default class GPUGridAggregator {
     }
   }
   /* eslint-enable complexity, max-depth */
+
+  _getMinMaxTexture(name, weights, id) {
+    if (weights[name]) {
+      return weights[name];
+    }
+    const resourceName = `${id}-name`;
+    const {resources} = this.state;
+    resources[resourceName] = getFloatTexture(this.gl, {id: `resourceName`});
+    return resources[resourceName];
+  }
 
   setupModels(fp64 = false) {
     if (this.gridAggregationModel) {
