@@ -233,9 +233,12 @@ if __name__ == "__main__":
             'ipython>=5.8.0;python_version<"3.4"',
             'ipywidgets>=7.0.0,<8',
             'traitlets>=4.3.2',
+            'jinja2>=2.10.1'
+        ],
+        setup_requires=[
+            'pytest-runner',
             'Jinja2>=2.10.1'
         ],
-        setup_requires=['pytest-runner'],
         tests_require=['pytest'],
         data_files=[
             (
