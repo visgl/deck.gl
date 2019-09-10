@@ -1,4 +1,3 @@
-/* global window */
 import React, {Component} from 'react';
 import DeckGL from '@deck.gl/react';
 import {View} from '@deck.gl/core';
