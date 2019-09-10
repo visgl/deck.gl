@@ -69,13 +69,8 @@ export default class HeatmapLayer extends CompositeLayer {
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
     this.state = {textureSize, supported: true};
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
-      const info = REQUIRED_FEATURES.reduce(
-        (acc, feature) =>
-          `${acc} ${feature}: ${hasFeatures(gl, feature) ? 'SUPPORTED' : 'NOT SUPPORTED'} `,
-        ''
-      );
-      log.error(`HeatmapLayer ${this.id} is not supported on this browser, ${info}`)();
       this.setState({supported: false});
+      log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
     this._setupAttributes();
