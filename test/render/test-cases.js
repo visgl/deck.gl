@@ -30,7 +30,6 @@ import {
   ScatterplotLayer,
   BitmapLayer,
   PolygonLayer,
-  SolidPolygonLayer,
   PathLayer,
   ArcLayer,
   LineLayer,
@@ -903,19 +902,18 @@ export const TEST_CASES = [
         extruded: true,
         pickable: true,
         opacity: 1,
+        shadowEnabled: false,
         getPosition: h => h.centroid,
         getFillColor: h => [48, 128, h.value * 255, 255],
         getElevation: h => h.value * 5000
       }),
-      new SolidPolygonLayer({
-        id: 'polygon-lnglat',
-        data: dataSamples.polygons,
-        getPolygon: f => f,
-        getFillColor: [200, 0, 0],
-        opacity: 0.8,
-        pickable: true,
-        shadowEnabled: false
-      })
+      new HexagonLayer(
+        Object.assign({}, HEXAGON_LAYER_INFO.props, {
+          id: 'hexagon-lnglat',
+          getColorValue,
+          getElevationValue
+        })
+      )
     ],
     goldenImage: './test/render/golden-images/column-shadow-lnglat.png'
   },
