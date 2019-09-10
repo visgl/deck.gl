@@ -1,5 +1,4 @@
 {
-  "description": "A deck.gl TextLayer example in JSON format",
   "initialViewState": {
     "latitude": 39.1,
     "longitude": -94.57,
@@ -8,11 +7,11 @@
     "pitch": 0,
     "bearing": 0
   },
+  "mapStyle": "https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json",
   "views": [
     {
       "type": "MapView",
-      "controller": "true",
-      "mapStyle": "https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json"
+      "controller": "true"
     }
   ],
   "layers": [

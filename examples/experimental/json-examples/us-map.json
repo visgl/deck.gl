@@ -1,5 +1,4 @@
 {
-  "description": "A deck.gl get-started GeoJsonLayer example in JSON format",
   "initialViewState": {
     "latitude": 40,
     "longitude": -100,

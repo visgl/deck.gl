@@ -1,6 +1,4 @@
 {
-  "description": "The deck.gl website ScreenGridLayer example in JSON format",
-  "websiteUrl": "https://deck.gl/#/examples/core-layers/screen-grid-layer",
   "initialViewState": {
     "longitude": -119.3,
     "latitude": 35.6,
@@ -13,8 +11,7 @@
   "views": [
     {
       "type": "MapView",
-      "controller": "true",
-      "mapStyle": "mapbox://styles/mapbox/light-v9"
+      "controller": "true"
     }
   ],
   "layers": [

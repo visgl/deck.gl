@@ -19,7 +19,7 @@ function setStyleSheet(url) {
 
 const defaultProps = {
   mapboxAccessToken: null,
-  mapboxStyleSheet: MAPBOX_STYLESHEET,
+  mapboxStyleSheet: MAPBOX_STYLESHEET
 };
 
 export default class DeckWithMaps extends Component {
@@ -35,8 +35,7 @@ export default class DeckWithMaps extends Component {
     };
   }
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   _onViewStateChange({viewState}) {
     // TODO - It would be cool to update the viewState here!
@@ -46,7 +45,7 @@ export default class DeckWithMaps extends Component {
   render() {
     const viewState = this.state.viewState || this.props.viewState || this.props.initialViewState;
 
-    const { views = [] } = this.props;
+    const {views = []} = this.props;
 
     const maps = [];
     for (const view of views) {
@@ -58,7 +57,7 @@ export default class DeckWithMaps extends Component {
               mapStyle={view.props.mapStyle}
               style={{}}
               mapboxApiAccessToken={view.props.mapToken || this.props.mapboxApiAccessToken}
-              />
+            />
           </View>
         );
       }

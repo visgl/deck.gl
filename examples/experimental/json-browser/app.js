@@ -5,7 +5,6 @@ import {StaticMap} from 'react-map-gl';
 
 import JSONConverter from './deck-json-converter/deck-json-converter';
 
-
 import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';

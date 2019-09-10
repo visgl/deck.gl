@@ -2,10 +2,7 @@ import test from 'tape-catch';
 import {_JSONLayer as JSONLayer} from '@deck.gl/json';
 import {testLayer, testInitializeLayer} from '@deck.gl/test-utils';
 
-import {
-  configuration,
-  JSON_DATA
-} from '../../../../test/modules/json/deck-json-converter.spec';
+import {configuration, JSON_DATA} from '../../../../test/modules/json/deck-json-converter.spec';
 
 test('JSONLayer#import', t => {
   t.ok(JSONLayer, 'JSONLayer imported');

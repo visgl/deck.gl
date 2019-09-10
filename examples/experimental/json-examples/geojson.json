@@ -1,6 +1,4 @@
 {
-  "description": "The deck.gl website GeoJsonLayer (polygons) example in JSON format",
-  "websiteUrl": "https://deck.gl/#/examples/core-layers/geojson-layer-polygons",
   "initialViewState": {
     "latitude": 49.254,
     "longitude": -123.13,
@@ -9,11 +7,11 @@
     "pitch": 45,
     "bearing": 0
   },
+  "mapStyle": "mapbox://styles/mapbox/light-v9",
   "views": [
     {
       "type": "MapView",
-      "controller": "true",
-      "mapStyle": "mapbox://styles/mapbox/light-v9"
+      "controller": "true"
     }
   ],
   "layers": [
