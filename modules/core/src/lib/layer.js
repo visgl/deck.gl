@@ -878,6 +878,9 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   setModuleParameters(moduleParameters) {
     for (const model of this.getModels()) {
+      // Hack - refresh program before updating settings
+      // Shader modules might have changed since the last draw call
+      model._checkProgram();
       model.updateModuleSettings(moduleParameters);
     }
   }
