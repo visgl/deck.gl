@@ -1,35 +1,46 @@
 // TODO - default parsing code should not be part of the configuration.
 import parseExpressionString from './helpers/parse-expression-string';
 import assert from '../utils/assert';
+
 const DEFAULT_TYPE_KEY = 'type';
-
-const DEFAULT_CONFIGURATION = {
-  typeKey: DEFAULT_TYPE_KEY,
-  classes: {},
-  reactComponents: {},
-  enumerations: {},
-  // TODO - this needs to be simpler, function conversion should be built in
-  convertFunction,
-
-  // DEPRECATED - these were deck.gl specific. Use `configuration.classes` instead.
-  layers: {},
-  views: {}
-};
 
 const isObject = value => value && typeof value === 'object';
 
 export default class JSONConfiguration {
-  constructor(configuration) {
-    // Merge configuration with default values
-    const config = Object.assign({}, DEFAULT_CONFIGURATION, configuration);
+  constructor(...configurations) {
+    // Initialize config with default values
+    this.typeKey = DEFAULT_TYPE_KEY;
+    this.classes = {};
+    this.reactComponents = {};
+    this.enumerations = {};
+    // TODO - this needs to be simpler, function conversion should be built in
+    this.convertFunction = null;
+    this.preProcessClassProps = props => props;
+    this.postProcessConvertedJson = json => json;
 
-    // DEPRECATED: For backwards compatibility, add views and layers to classes
-    config.classes = Object.assign(config.classes, configuration.layers, configuration.views);
-    delete config.layers;
-    delete config.views;
+    for (const configuration of configurations) {
+      this._merge(configuration);
+    }
 
-    // Store configuration as root fields (this.classes, ...)
-    Object.assign(this, config);
+    debugger
+  }
+
+  _merge(configuration) {
+    for (const key in configuration) {
+      switch (key) {
+        // DEPRECATED = For backwards compatibility, add views and layers to classe;
+        case 'layers':
+        case 'views':
+          this.classes = configuration[key];
+          break;
+        default:
+          // Store configuration as root fields (this.classes, ...)
+          if (key in this) {
+            const value = configuration[key];
+            this[key] = isObject(this[key]) ? Object.assign(this[key], value) : value;
+          }
+      }
+    }
   }
 
   validate(configuration) {

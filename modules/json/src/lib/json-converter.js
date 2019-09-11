@@ -40,18 +40,9 @@ export default class JSONConverter {
     // Convert the JSON
     let convertedJson = convertJSON(parsedJSON, this.configuration);
 
-    convertedJson = this.postProcessConvertedJson(convertedJson);
+    convertedJson = this.configuration.postProcessConvertedJson(convertedJson);
 
     this.convertedJson = convertedJson;
-    return convertedJson;
-  }
-
-  preProcessClassProps(props) {
-    return props;
-  }
-
-  // Let subclass post process
-  postProcessConvertedJson(convertedJson) {
     return convertedJson;
   }
 }

@@ -1,5 +1,6 @@
+// TODO - This file contains too much custom code, should just require a clean `JSONConfiguration`.
+
 // Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
-// TODO - Currently converts in place, might be clearer to convert to separate structure
 
 // Converts a JSON payload to a deck.gl props object
 // Lightly processes `json` props, transform string values, and extract `views` and `layers`
@@ -11,28 +12,23 @@
 // * Optionally, error checking could be applied, but ideally should leverage
 //   non-JSON specific mechanisms like prop types.
 
-import {_JSONConverter, _shallowEqualObjects, _parseExpressionString} from '@deck.gl/json';
+import {_shallowEqualObjects, _parseExpressionString} from '@deck.gl/json';
+import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
 import enhancedFetch from './enhanced-fetch';
 
-import DeckJSONConfiguration from './deck-json-configuration';
+// TODO - remove
+export const DEFAULT_MAP_PROPS = { style: 'mapbox://styles/mapbox/light-v9' };
 
-export const DEFAULT_MAP_PROPS = {style: 'mapbox://styles/mapbox/light-v9'};
-
-export default class DeckJSONConverter extends _JSONConverter {
-  constructor(props) {
-    super({
-      ...props,
-      // Inject default deck configuration
-      configuration: new DeckJSONConfiguration(props.configuration)
-    });
-    this.configuration.preProcessClassProps = this.preProcessClassProps.bind(this);
-  }
-
-  preProcessClassProps(Class, props) {
+export const DECK_JSON_CONVERTER_CONFIGURATION = {
+  // Support all `@deck.gl/core` Views by default
+  classes: { MapView, FirstPersonView, OrbitView, OrthographicView },
+  enumerations: { COORDINATE_SYSTEM, GL },
+  preProcessClassProps(Class, props, configuration) {
     props.fetch = props.fetch || enhancedFetch;
-    return getJSONLayerProps(Class, props, this.configuration);
-  }
-
+    return getJSONLayerProps(Class, props, configuration);
+  },
   postProcessConvertedJson(json) {
     // Handle `json.initialViewState`
     // If we receive new JSON we need to decide if we should update current view state
@@ -54,26 +50,12 @@ export default class DeckJSONConverter extends _JSONConverter {
 
     return json;
   }
-}
-
-/*
-// Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
-export function convertDeckJSON(json, configuration) {
-  const jsonProps = convertJSON(json, configuration);
-
-  // Normalize deck props
-  if ('initialViewState' in jsonProps) {
-    jsonProps.viewState = jsonProps.viewState || jsonProps.initialViewState;
-  }
-
-  normalizeMapProps(jsonProps, configuration);
-
-  return jsonProps;
-}
-*/
+};
 
 // Normalizes map/mapStyle etc props to a `map: {style}` object-valued prop
 function normalizeMapProps(jsonProps, configuration) {
+
+  // TODO - remove
   if (jsonProps.map || jsonProps.mapStyle) {
     jsonProps.map = Object.assign({}, DEFAULT_MAP_PROPS, jsonProps.map);
   }
@@ -93,20 +75,6 @@ function normalizeMapProps(jsonProps, configuration) {
     jsonProps.map.viewState = jsonProps.viewState;
   }
 }
-
-// LAYERS
-/*
-// Replaces accessor props
-export function getJSONLayers(jsonLayers = [], configuration) {
-  // assert(Array.isArray(jsonLayers));
-  const layerCatalog = configuration.layers || {};
-  return jsonLayers.map(jsonLayer => {
-    const Layer = layerCatalog[jsonLayer.type];
-    const props = getJSONLayerProps(Layer, jsonLayer, configuration);
-    return Layer && new Layer(props);
-  });
-}
-*/
 
 // TODO - we need to generalize string to function conversion
 // and move it upstream into the json-converter

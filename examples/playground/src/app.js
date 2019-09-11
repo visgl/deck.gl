@@ -1,15 +1,17 @@
 import React, {Component} from 'react';
 import AutoSizer from 'react-virtualized-auto-sizer';
-import DeckWithMaps from './deck-with-maps';
 import {StaticMap} from 'react-map-gl';
+import DeckWithMaps from './deck-with-maps';
 
-import JSONConverter from './deck-json-converter/deck-json-converter';
+import { JSONConverter, JSONConfiguration } from '@deck.gl/json';
+import { DECK_JSON_CONVERTER_CONFIGURATION } from './deck-json-converter';
 
 import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import JSON_CONFIGURATION from './configuration';
+import
+JSON_CONFIGURATION from './configuration';
 import JSON_TEMPLATES from '../json-examples';
 
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
@@ -84,7 +86,12 @@ export class App extends Component {
     this._onTemplateChange = this._onTemplateChange.bind(this);
     this._onEditorChange = this._onEditorChange.bind(this);
 
-    this.jsonConverter = new JSONConverter({configuration: JSON_CONFIGURATION});
+    // Configure and create the JSON converter instance
+    const configuration =  new JSONConfiguration(
+      DECK_JSON_CONVERTER_CONFIGURATION,
+      JSON_CONFIGURATION
+    );
+    this.jsonConverter = new JSONConverter({ configuration });
   }
 
   componentDidMount() {

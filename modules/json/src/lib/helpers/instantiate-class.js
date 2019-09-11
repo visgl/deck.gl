@@ -21,7 +21,7 @@ export function instantiateClass(type, props, configuration) {
 
 function instantiateJavaScriptClass(Class, props, configuration) {
   if (configuration.preProcessClassProps) {
-    props = configuration.preProcessClassProps(Class, props);
+    props = configuration.preProcessClassProps(Class, props, configuration);
   }
   return new Class(props);
 }
@@ -31,7 +31,7 @@ function instantiateReactComponent(Component, props, configuration) {
   const {children = []} = props;
   delete props.children;
   if (configuration.preProcessClassProps) {
-    props = configuration.preProcessClassProps(Component, props);
+    props = configuration.preProcessClassProps(Component, props, configuration);
   }
   return React.createElement(Component, props, children);
 }

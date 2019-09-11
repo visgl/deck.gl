@@ -1,7 +1,15 @@
 // This layer allows any deck.gl app to support user-defined JSON layers
 import {CompositeLayer} from '@deck.gl/core';
-// import DeckJSONConverter from '../deck-json-converter/deck-json-converter';
-import DeckJSONConfiguration from '../../json-browser/deck-json-converter/deck-json-configuration';
+import {JSONConverter, JSONConfiguration} from '@deck.gl/json';
+
+import { MapView, FirstPersonView, OrbitView, OrthographicView, COORDINATE_SYSTEM } from '@deck.gl/core';
+import * as layers from '@deck.gl/layers';
+import GL from '@luma.gl/constants';
+
+const DEFAULT_CONFIGURATION = {
+  classes: Object.assign({ MapView, FirstPersonView, OrbitView, OrthographicView }, layers),
+  enumerations: {COORDINATE_SYSTEM, GL}
+};
 
 const defaultProps = {
   // Accepts JSON strings by parsing them to JSON, naturally
@@ -12,22 +20,17 @@ const defaultProps = {
 export default class JSONLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      converter: null, // new DeckJSONConverter()
-      layers: [],
-      configuration: {}
+      converter: new JSONConverter({
+        configuration: new JSONConfiguration(DEFAULT_CONFIGURATION, this.props.configuration)
+      }),
+      layers: []
     };
   }
 
   updateState({props, oldProps, changeFlags}) {
-    if (props.configuration !== oldProps.configuration) {
-      this.setState({
-        configuration: new DeckJSONConfiguration(this.props.configuration)
-      });
-    }
-
     const layersChanged = changeFlags.dataChanged || props.configuration !== oldProps.configuration;
     if (layersChanged) {
-      this.state.layers = []; // getJSONLayers(props.data, this.state.configuration);
+      this.state.layers = this.state.converter.convertJson(props.data);
     }
   }
 
