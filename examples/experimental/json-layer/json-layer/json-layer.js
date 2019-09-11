@@ -2,12 +2,18 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration} from '@deck.gl/json';
 
-import { MapView, FirstPersonView, OrbitView, OrthographicView, COORDINATE_SYSTEM } from '@deck.gl/core';
+import {
+  MapView,
+  FirstPersonView,
+  OrbitView,
+  OrthographicView,
+  COORDINATE_SYSTEM
+} from '@deck.gl/core';
 import * as layers from '@deck.gl/layers';
 import GL from '@luma.gl/constants';
 
 const DEFAULT_CONFIGURATION = {
-  classes: Object.assign({ MapView, FirstPersonView, OrbitView, OrthographicView }, layers),
+  classes: Object.assign({MapView, FirstPersonView, OrbitView, OrthographicView}, layers),
   enumerations: {COORDINATE_SYSTEM, GL}
 };
 

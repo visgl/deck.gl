@@ -20,8 +20,8 @@ import enhancedFetch from './enhanced-fetch';
 
 export const DECK_JSON_CONVERTER_CONFIGURATION = {
   // Support all `@deck.gl/core` Views by default
-  classes: { MapView, FirstPersonView, OrbitView, OrthographicView },
-  enumerations: { COORDINATE_SYSTEM, GL },
+  classes: {MapView, FirstPersonView, OrbitView, OrthographicView},
+  enumerations: {COORDINATE_SYSTEM, GL},
   preProcessClassProps(Class, props, configuration) {
     props.fetch = props.fetch || enhancedFetch;
     return convertFunctions(Class, props, configuration);
