@@ -1,6 +1,7 @@
 export default {
   // WEBSITE EXAMPLES AS JSON PAYLOADS
   'website/3D Heatmap (HexagonLayer)': require('./3d-heatmap.json'),
+  'website/3D Heatmap (wth Minimap)': require('./3d-heatmap-minimap.json'),
   'website/GeoJSON (GeoJsonLayer)': require('./geojson.json'),
   'website/Line (LineLayer)': require('./line.json'),
   'website/Scatterplot (ScatterplotLayer)': require('./scatterplot.json'),
