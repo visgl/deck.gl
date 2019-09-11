@@ -3,7 +3,6 @@ import os
 from pydeck import Deck, Layer, ViewState
 
 from ..const import FIXTURE_STRING
-from .screenshot_utils import go_to_page_and_screenshot
 
 text_data = [{'text': 'Test', 'position': [0.0, 0.0]}]
 d = Deck(layers=[
@@ -17,6 +16,7 @@ v = ViewState(latitude=0, longitude=0, zoom=15)
 d.initial_view_state = v
 
 
+@pytest.mark.skipif(os.environ.get('TRAVIS') == 'true', 'Skipping this test on Travis CI.')
 @pytest.mark.asyncio
 async def test_standalone_rendering(tmp_path):
     filename = d.to_html(str(tmp_path) + '/', open_browser=False, notebook_display=False)
@@ -26,6 +26,7 @@ async def test_standalone_rendering(tmp_path):
 @pytest.mark.skip(reason='Not yet implemented')
 @pytest.mark.asyncio
 async def test_notebook_iframe_rendering():
+    from .screenshot_utils import go_to_page_and_screenshot  # noqa
     pass
 
 
