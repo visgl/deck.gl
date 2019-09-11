@@ -27,7 +27,7 @@ import {
   scaleToAspectRatio,
   getTextureCoordinates
 } from './heatmap-layer-utils';
-import {Buffer, Transform, getParameter, isWebGL2} from '@luma.gl/core';
+import {Buffer, Transform, getParameter, FEATURES, hasFeatures} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import {getFloatTexture} from '../utils/resource-utils';
@@ -55,14 +55,22 @@ const defaultProps = {
   threshold: {type: 'number', min: 0, max: 1, value: 0.05}
 };
 
+const REQUIRED_FEATURES = [
+  FEATURES.WEBGL2, // TODO: Remove after trannsform refactor
+  FEATURES.COLOR_ATTACHMENT_RGBA32F, // weight-map generation
+  FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
+  FEATURES.FLOAT_BLEND, // weight-map generation and max weight calculation
+  FEATURES.TEXTURE_FLOAT // weight-map as texture
+];
+
 export default class HeatmapLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
     this.state = {textureSize, supported: true};
-    if (!isWebGL2(gl)) {
-      log.error(`HeatmapLayer ${this.id} is not supported on this browser, requires WebGL2`)();
+    if (!hasFeatures(gl, REQUIRED_FEATURES)) {
       this.setState({supported: false});
+      log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
     this._setupAttributes();

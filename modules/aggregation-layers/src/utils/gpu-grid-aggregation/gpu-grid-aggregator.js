@@ -65,6 +65,14 @@ const ARRAY_BUFFER_MAP = {
   maxMinData: 'maxMinBuffer'
 };
 
+const REQUIRED_FEATURES = [
+  FEATURES.WEBGL2, // TODO: Remove after trannsform refactor
+  FEATURES.COLOR_ATTACHMENT_RGBA32F,
+  FEATURES.BLEND_EQUATION_MINMAX,
+  FEATURES.FLOAT_BLEND,
+  FEATURES.TEXTURE_FLOAT
+];
+
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
   static getAggregationData({aggregationData, maxData, minData, maxMinData, pixelIndex}) {
@@ -107,15 +115,7 @@ export default class GPUGridAggregator {
   }
 
   static isSupported(gl) {
-    return (
-      isWebGL2(gl) &&
-      hasFeatures(
-        gl,
-        FEATURES.BLEND_EQUATION_MINMAX,
-        FEATURES.COLOR_ATTACHMENT_RGBA32F,
-        FEATURES.TEXTURE_FLOAT
-      )
-    );
+    return hasFeatures(gl, REQUIRED_FEATURES);
   }
 
   // DEBUG ONLY
