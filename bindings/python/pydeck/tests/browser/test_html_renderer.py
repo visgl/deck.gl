@@ -19,6 +19,7 @@ d.initial_view_state = v
 @pytest.mark.skipif(os.environ.get('TRAVIS') == 'true', reason='Skipping this test on Travis CI.')
 @pytest.mark.asyncio
 async def test_standalone_rendering(tmp_path):
+    from .screenshot_utils import go_to_page_and_screenshot  # noqa
     filename = d.to_html(str(tmp_path) + '/', open_browser=False, notebook_display=False)
     await go_to_page_and_screenshot('file://' + filename, filename, output_dir=tmp_path)
 
@@ -26,7 +27,6 @@ async def test_standalone_rendering(tmp_path):
 @pytest.mark.skip(reason='Not yet implemented')
 @pytest.mark.asyncio
 async def test_notebook_iframe_rendering():
-    from .screenshot_utils import go_to_page_and_screenshot  # noqa
     pass
 
 
