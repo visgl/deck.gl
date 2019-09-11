@@ -159,6 +159,16 @@ export const examplePages = generatePath([
         }
       }
     ]
+  },
+  {
+    name: 'Declarative Layers',
+    expanded: true,
+    children: [
+      {
+        name: 'Playground',
+        external: 'http://deck.gl/json'
+      }
+    ]
   }
 ]);
 

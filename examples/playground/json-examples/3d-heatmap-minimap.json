@@ -16,7 +16,7 @@
       "type": "MapView",
       "id": "main",
       "mapStyle": "mapbox://styles/mapbox/dark-v9",
-      "controller": "true"
+      "controller": true
     },
     {
       "type": "MapView",

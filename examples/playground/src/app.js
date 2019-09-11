@@ -9,10 +9,9 @@ import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import JSON_CONFIGURATION from './config/configuration';
-import JSON_TEMPLATES from './config/templates';
+import JSON_CONFIGURATION from './configuration';
+import JSON_TEMPLATES from '../json-examples';
 
-// First template, to match the select dropdown
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
@@ -67,7 +66,7 @@ function setStyleSheet(url) {
   document.head.appendChild(styles);
 }
 
-export default class App extends Component {
+export class App extends Component {
   constructor(props) {
     super(props);
 

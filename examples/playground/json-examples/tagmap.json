@@ -11,7 +11,7 @@
   "views": [
     {
       "type": "MapView",
-      "controller": "true",
+      "controller": true,
       "mapStyle": "https://rivulet-zhang.github.io/dataRepo/mapbox/style/map-style-dark-v9-no-labels.json"
     }
   ],
