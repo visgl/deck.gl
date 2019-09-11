@@ -603,9 +603,11 @@ export default class GPUGridAggregator {
       result[bufferName] = resources[resourceName];
     }
 
-    // Upload result to a texture if provided
-    if (textureName && result[textureName]) {
-      result[textureName].setImageData({data});
+    // Upload result to a texture
+    if (textureName) {
+      const texture = this._getMinMaxTexture(`${id}-textureName`);
+      texture.setImageData({data});
+      result[textureName] = texture;
     }
   }
 
@@ -669,7 +671,8 @@ export default class GPUGridAggregator {
       maxMinFramebuffers,
       minFramebuffers,
       maxFramebuffers,
-      weights
+      weights,
+      resources
     } = this.state;
 
     for (const id in weights) {
@@ -685,18 +688,21 @@ export default class GPUGridAggregator {
           target: weights[id].maxMinBuffer, // update if a buffer is provided
           sourceType: GL.FLOAT
         });
+        results[id].maxMinTexture = resources[`${id}-maxMinTexture`];
       } else {
         if (needMin) {
           results[id].minBuffer = readPixelsToBuffer(minFramebuffers[id], {
             target: weights[id].minBuffer, // update if a buffer is provided
             sourceType: GL.FLOAT
           });
+          results[id].minTexture = resources[`${id}-minTexture`];
         }
         if (needMax) {
           results[id].maxBuffer = readPixelsToBuffer(maxFramebuffers[id], {
             target: weights[id].maxBuffer, // update if a buffer is provided
             sourceType: GL.FLOAT
           });
+          results[id].maxTexture = resources[`${id}-maxTexture`];
         }
       }
     }
@@ -944,13 +950,13 @@ export default class GPUGridAggregator {
       if (needMin || needMax) {
         if (needMin && needMax && combineMaxMin) {
           if (!maxMinFramebuffers[id]) {
-            texture = this._getMinMaxTexture('maxMinTexture', weights[id], id);
+            texture = this._getMinMaxTexture(`${id}-maxMinTexture`);
             maxMinFramebuffers[id] = getFramebuffer(this.gl, {id: `${id}-maxMinFb`, texture});
           }
         } else {
           if (needMin) {
             if (!minFramebuffers[id]) {
-              texture = this._getMinMaxTexture('minTexture', weights[id], id);
+              texture = this._getMinMaxTexture(`${id}-minTexture`);
               minFramebuffers[id] = getFramebuffer(this.gl, {
                 id: `${id}-minFb`,
                 texture
@@ -959,7 +965,7 @@ export default class GPUGridAggregator {
           }
           if (needMax) {
             if (!maxFramebuffers[id]) {
-              texture = this._getMinMaxTexture('maxTexture', weights[id], id);
+              texture = this._getMinMaxTexture(`${id}-maxTexture`);
               maxFramebuffers[id] = getFramebuffer(this.gl, {
                 id: `${id}-maxFb`,
                 texture
@@ -972,14 +978,12 @@ export default class GPUGridAggregator {
   }
   /* eslint-enable complexity, max-depth */
 
-  _getMinMaxTexture(name, weights, id) {
-    if (weights[name]) {
-      return weights[name];
-    }
-    const resourceName = `${id}-name`;
+  _getMinMaxTexture(name) {
     const {resources} = this.state;
-    resources[resourceName] = getFloatTexture(this.gl, {id: `resourceName`});
-    return resources[resourceName];
+    if (!resources[name]) {
+      resources[name] = getFloatTexture(this.gl, {id: `resourceName`});
+    }
+    return resources[name];
   }
 
   setupModels(fp64 = false) {

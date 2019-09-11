@@ -22,11 +22,10 @@ import {Layer, WebMercatorViewport, createIterable, log, experimental} from '@de
 const {count} = experimental;
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator';
-import {MAX_MIN_TEXTURE_OPTS} from '../utils/gpu-grid-aggregation/gpu-grid-aggregator-constants';
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Buffer, Texture2D, FEATURES, hasFeatures} from '@luma.gl/core';
+import {Model, Geometry, Buffer, FEATURES, hasFeatures} from '@luma.gl/core';
 
 import vs from './screen-grid-layer-vertex.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
@@ -78,20 +77,17 @@ export default class ScreenGridLayer extends Layer {
     const options = {
       id: `${this.id}-aggregator`
     };
-    const maxTexture = new Texture2D(gl, Object.assign({data: null}, MAX_MIN_TEXTURE_OPTS));
     const weights = {
       color: {
         size: 1,
         operation: AGGREGATION_OPERATION.SUM,
-        needMax: true,
-        maxTexture
+        needMax: true
       }
     };
     this.setState({
       supported: true,
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
-      maxTexture,
       weights
     });
   }
@@ -311,7 +307,7 @@ export default class ScreenGridLayer extends Layer {
       // Use pixelProjectionMatrix to transform points to viewport (screen) space.
       gridTransformMatrix = viewport.pixelProjectionMatrix;
     }
-    this.state.gpuGridAggregator.run({
+    const results = this.state.gpuGridAggregator.run({
       positions,
       weights,
       cellSize: [cellSizePixels, cellSizePixels],
@@ -323,6 +319,7 @@ export default class ScreenGridLayer extends Layer {
     });
 
     attributeManager.invalidate('instanceCounts');
+    this.setState({maxTexture: results.color.maxTexture});
   }
 
   _updateUniforms({oldProps, props, changeFlags}) {
