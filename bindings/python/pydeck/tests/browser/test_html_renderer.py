@@ -16,7 +16,7 @@ v = ViewState(latitude=0, longitude=0, zoom=15)
 d.initial_view_state = v
 
 
-@pytest.mark.skipif(os.environ.get('TRAVIS') == 'true', 'Skipping this test on Travis CI.')
+@pytest.mark.skipif(os.environ.get('TRAVIS') == 'true', reason='Skipping this test on Travis CI.')
 @pytest.mark.asyncio
 async def test_standalone_rendering(tmp_path):
     filename = d.to_html(str(tmp_path) + '/', open_browser=False, notebook_display=False)
