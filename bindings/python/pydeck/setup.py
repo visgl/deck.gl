@@ -246,6 +246,7 @@ if __name__ == "__main__":
                 [
                     "pydeck/nbextension/static/extensionRequires.js",
                     "pydeck/nbextension/static/index.js",
+                    "pydeck/io/templates/requirejs_dependencies.json",
                     "pydeck/nbextension/static/index.js.map",
                 ],
             ),
