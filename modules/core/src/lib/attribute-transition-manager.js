@@ -1,5 +1,6 @@
 import {Transform} from '@luma.gl/core';
 import GPUInterpolationTransition from '../transitions/gpu-interpolation-transition';
+import GPUSpringTransition from '../transitions/gpu-spring-transition';
 import log from '../utils/log';
 
 export default class AttributeTransitionManager {
@@ -106,11 +107,28 @@ export default class AttributeTransitionManager {
   // Returns a transition object if a new transition is triggered.
   _updateAttribute(attributeName, attribute, settings) {
     let isNew = false;
-    if (!this.transitions[attributeName]) {
+
+    const transition = this.transitions[attributeName];
+    // an attribute can change transition type when it updates
+    // let's remove the transition when that happens so we can create the new transition type
+    // TODO: when switching transition types, make sure to carry over the attribute's
+    // previous buffers, currentLength, bufferLayout, etc, to be used as the starting point
+    // for the next transition
+    if (!transition || transition.type !== settings.type) {
+      if (transition) {
+        this._removeTransition(attributeName);
+      }
+
       if (settings.type === 'interpolation') {
         this.transitions[attributeName] = new GPUInterpolationTransition({
           attribute,
           timeline: this.timeline,
+          gl: this.gl
+        });
+      } else if (settings.type === 'spring') {
+        this.transitions[attributeName] = new GPUSpringTransition({
+          attribute,
+          transitionSettings: settings,
           gl: this.gl
         });
       } else {

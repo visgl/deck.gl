@@ -13,6 +13,7 @@ class Root extends Component {
     this._dataGenerator = new DataGenerator();
 
     this.state = {
+      transitionType: 'interpolation',
       points: this._dataGenerator.points,
       polygons: this._dataGenerator.polygons,
       viewState: {
@@ -22,6 +23,7 @@ class Root extends Component {
     };
 
     this._randomize = this._randomize.bind(this);
+    this._onChangeTransitionType = this._onChangeTransitionType.bind(this);
   }
 
   _randomize() {
@@ -32,8 +34,63 @@ class Root extends Component {
     });
   }
 
+  _onChangeTransitionType({currentTarget}) {
+    this.setState({
+      transitionType: currentTarget.value
+    });
+  }
+
   render() {
     const {points, polygons, viewState} = this.state;
+
+    const springSettings = {
+      type: 'spring',
+      stiffness: 0.01,
+      damping: 0.15
+    };
+
+    const scatterplotTransitionsByType = {
+      interpolation: {
+        getPosition: {
+          duration: 600,
+          enter: () => [0, 0]
+        },
+        getRadius: {
+          duration: 600,
+          enter: () => [0]
+        },
+        getFillColor: {
+          duration: 600,
+          enter: ([r, g, b]) => [r, g, b, 0]
+        }
+      },
+      spring: {
+        getPosition: Object.assign({}, springSettings, {enter: () => [0, 0]}),
+        getRadius: Object.assign({}, springSettings, {enter: () => [0]}),
+        getFillColor: Object.assign({}, springSettings, {enter: ([r, g, b]) => [r, g, b, 0]})
+      }
+    };
+
+    const polygonTransitionsByType = {
+      interpolation: {
+        getPolygon: 600,
+        getLineColor: {
+          duration: 600,
+          enter: ([r, g, b]) => [r, g, b, 0]
+        },
+        getFillColor: {
+          duration: 600,
+          enter: ([r, g, b]) => [r, g, b, 0]
+        },
+        getLineWidth: 600
+      },
+      spring: {
+        getPolygon: springSettings,
+        getLineColor: Object.assign({}, springSettings, {enter: ([r, g, b]) => [r, g, b, 0]}),
+        getFillColor: Object.assign({}, springSettings, {enter: ([r, g, b]) => [r, g, b, 0]}),
+        getLineWidth: springSettings
+      }
+    };
 
     const layers = [
       new ScatterplotLayer({
@@ -42,14 +99,7 @@ class Root extends Component {
         getPosition: d => d.position,
         getFillColor: d => d.color,
         getRadius: d => d.radius,
-        transitions: {
-          getPosition: 600,
-          getRadius: 600,
-          getFillColor: {
-            duration: 600,
-            enter: ([r, g, b]) => [r, g, b, 0]
-          }
-        }
+        transitions: scatterplotTransitionsByType[this.state.transitionType]
       }),
       new PolygonLayer({
         coordinateSystem: COORDINATE_SYSTEM.IDENTITY,
@@ -60,18 +110,7 @@ class Root extends Component {
         getLineColor: d => d.color,
         getFillColor: d => [d.color[0], d.color[1], d.color[2], 128],
         getLineWidth: d => d.width,
-        transitions: {
-          getPolygon: 600,
-          getLineColor: {
-            duration: 600,
-            enter: ([r, g, b]) => [r, g, b, 0]
-          },
-          getFillColor: {
-            duration: 600,
-            enter: ([r, g, b]) => [r, g, b, 0]
-          },
-          getLineWidth: 600
-        }
+        transitions: polygonTransitionsByType[this.state.transitionType]
       })
     ];
 
@@ -86,6 +125,10 @@ class Root extends Component {
         />
         <div id="control-panel">
           <button onClick={this._randomize}>Randomize</button>
+          <select value={this.state.transitionType} onChange={this._onChangeTransitionType}>
+            <option value="interpolation">Interpolation Transition</option>
+            <option value="spring">Spring Transition</option>
+          </select>
         </div>
       </div>
     );

@@ -1,4 +1,4 @@
-import {Buffer} from '@luma.gl/core';
+import BaseAttribute from '../lib/base-attribute';
 import {padArray} from '../utils/array-utils';
 
 const noop = () => {};
@@ -9,6 +9,7 @@ const DEFAULT_TRANSITION_SETTINGS = {
   onStart: noop,
   onEnd: noop,
   onInterrupt: noop,
+  onUpdate: noop,
   enter: x => x
 };
 
@@ -25,6 +26,50 @@ export function normalizeTransitionSettings(userSettings, layerSettings = {}) {
   return Object.assign({}, DEFAULT_TRANSITION_SETTINGS, layerSettings, userSettings);
 }
 
+// NOTE: NOT COPYING OVER OFFSET OR STRIDE HERE BECAUSE:
+// (1) WE DON'T SUPPORT INTERLEAVED BUFFERS FOR TRANSITIONS
+// (2) BUFFERS WITH OFFSETS ALWAYS CONTAIN VALUES OF THE SAME SIZE
+// (3) THE OPERATIONS IN THE SHADER ARE PER-COMPONENT (addition and scaling)
+export function getSourceBufferAttribute(gl, attribute) {
+  const {size, value, normalized, constant} = attribute;
+  // The Attribute we pass to Transform as a sourceBuffer must have {divisor: 0}
+  // so we create a copy of the attribute (with divisor=0) to use when running
+  // transform feedback
+  if (constant) {
+    // don't pass normalized here because the `value` from a normalized attribute is
+    // already normalized
+    return new BaseAttribute(gl, {constant, value, size});
+  }
+  const buffer = attribute.getBuffer();
+  return new BaseAttribute(gl, {divisor: 0, constant, buffer, size, normalized});
+}
+
+export function getAttributeTypeFromSize(size) {
+  switch (size) {
+    case 1:
+      return 'float';
+    case 2:
+      return 'vec2';
+    case 3:
+      return 'vec3';
+    case 4:
+      return 'vec4';
+    default:
+      throw new Error(`No defined attribute type for size "${size}"`);
+  }
+}
+
+export function cycleBuffers(buffers) {
+  buffers.push(buffers.shift());
+  return buffers;
+}
+
+export function getAttributeBufferLength(attribute, numInstances) {
+  const {doublePrecision, userData, value, size} = attribute;
+  const multiplier = doublePrecision ? 2 : 1;
+  return (userData.noAlloc ? value.length : numInstances * size) * multiplier;
+}
+
 // This helper is used when transitioning attributes from a set of values in one buffer layout
 // to a set of values in a different buffer layout. (Buffer layouts are used when attribute values
 // within a buffer should be grouped for drawElements, like the Polygon layer.) For example, a
@@ -33,39 +78,41 @@ export function normalizeTransitionSettings(userSettings, layerSettings = {}) {
 // function, that looks like this: [A1, A2, A3, A4 (user `enter` fn), B1, B2, 0]. Note: the final
 // 0 in this buffer is because we never shrink buffers, only grow them, for performance reasons.
 export function padBuffer({
-  fromState,
-  toState,
+  buffer,
+  numInstances,
+  attribute,
   fromLength,
-  toLength,
   fromBufferLayout,
-  toBufferLayout,
-  size,
-  offset,
   getData = x => x
 }) {
+  // TODO: move the precisionMultiplier logic to the attribute when retrieving
+  // its `size` and `elementOffset`?
+  const precisionMultiplier = attribute.doublePrecision ? 2 : 1;
+  const size = attribute.size * precisionMultiplier;
+  const offset = attribute.elementOffset * precisionMultiplier;
+  const toBufferLayout = attribute.bufferLayout;
   const hasBufferLayout = fromBufferLayout && toBufferLayout;
+  const toLength = getAttributeBufferLength(attribute, numInstances);
 
   // check if buffer needs to be padded
-  if ((!hasBufferLayout && fromLength >= toLength) || !(fromState instanceof Buffer)) {
+  if (!hasBufferLayout && fromLength >= toLength) {
     return;
   }
 
-  const data = new Float32Array(toLength);
-  const fromData = fromState.getData({length: fromLength});
-
-  const toData = toState.constant ? toState.getValue() : toState.getBuffer().getData({});
-
-  if (toState.normalized) {
+  const toData = attribute.constant ? attribute.getValue() : attribute.getBuffer().getData({});
+  if (attribute.normalized) {
     const getter = getData;
-    getData = (value, chunk) => toState._normalizeConstant(getter(value, chunk));
+    getData = (value, chunk) => attribute._normalizeConstant(getter(value, chunk));
   }
 
-  const getMissingData = toState.constant
+  const getMissingData = attribute.constant
     ? (i, chunk) => getData(toData, chunk)
     : (i, chunk) => getData(toData.subarray(i, i + size), chunk);
 
+  const source = buffer.getData({length: fromLength});
+  const data = new Float32Array(toLength);
   padArray({
-    source: fromData,
+    source,
     target: data,
     sourceLayout: fromBufferLayout,
     targetLayout: toBufferLayout,
@@ -74,5 +121,5 @@ export function padBuffer({
     getData: getMissingData
   });
 
-  fromState.setData({data});
+  buffer.setData({data});
 }
