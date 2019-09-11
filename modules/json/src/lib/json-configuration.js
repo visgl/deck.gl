@@ -14,7 +14,7 @@ export default class JSONConfiguration {
     this.reactComponents = {};
     this.enumerations = {};
     // TODO - this needs to be simpler, function conversion should be built in
-    this.convertFunction = null;
+    this.convertFunction = convertFunction;
     this.preProcessClassProps = props => props;
     this.postProcessConvertedJson = json => json;
 
