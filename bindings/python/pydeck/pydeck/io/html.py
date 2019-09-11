@@ -1,6 +1,5 @@
 import os
 from os.path import relpath
-from pathlib import Path
 import tempfile
 import time
 import webbrowser
@@ -50,7 +49,10 @@ def make_directory_if_not_exists(path):
 
 
 def add_html_extension(fname):
-    return str(Path(fname).with_suffix('.html'))
+    SUFFIX = '.html'
+    if fname.endswith(SUFFIX):
+        return str(fname)
+    return str(fname + '.html')
 
 
 def deck_to_html(
