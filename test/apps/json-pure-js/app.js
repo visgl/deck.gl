@@ -7,7 +7,7 @@
 
 /* global window */
 import {Deck} from '@deck.gl/core';
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+import {JSONConverter} from '@deck.gl/json';
 // import positionChildrenUnderViews from './children';
 
 import JSON_TEMPLATES from '../json-common/templates';

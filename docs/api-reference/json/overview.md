@@ -40,7 +40,7 @@ The module was created to enable specifying deck.gl visualizations using [JSON f
 <script src="https://unpkg.com/@deck.gl/json@^7.0.0/dist.min.js"></script>
 <!-- usage -->
 <script type="text/javascript">
-  const {_JSONConverter} = deck;
+  const {JSONConverter} = deck;
 </script>
 ```
 

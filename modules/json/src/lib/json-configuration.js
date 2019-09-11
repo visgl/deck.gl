@@ -10,6 +10,7 @@ export default class JSONConfiguration {
   constructor(...configurations) {
     // Initialize config with default values
     this.typeKey = DEFAULT_TYPE_KEY;
+    this.log = console; // eslint-disable-line
     this.classes = {};
     this.reactComponents = {};
     this.enumerations = {};

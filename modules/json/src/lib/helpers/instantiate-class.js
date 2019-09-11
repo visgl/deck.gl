@@ -6,9 +6,11 @@ export function instantiateClass(type, props, configuration) {
 
   // Check that the class is in the configuration.
   if (!Class && !Component) {
-    const {log = console} = configuration; // eslint-disable-line
+    const {log} = configuration; // eslint-disable-line
     const stringProps = JSON.stringify(props, null, 0).slice(0, 40);
-    log.warn(`JSON converter: No registered class of type ${type}(${stringProps}...)  `);
+    if (log) {
+      log.warn(`JSON converter: No registered class of type ${type}(${stringProps}...)  `);
+    }
     return null;
   }
 

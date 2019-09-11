@@ -1,10 +1,11 @@
 import test from 'tape-catch';
 import {makeSpy} from '@probe.gl/test-utils';
-import {log} from '@deck.gl/core';
 
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+import {JSONConverter} from '@deck.gl/json';
 import {COORDINATE_SYSTEM, MapView, FirstPersonView} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
+
+const log = console; // eslint-disable-line
 
 export const configuration = {
   log,

@@ -3,9 +3,11 @@
 
 import parseJSON from './helpers/parse-json';
 import convertJSON from './convert-json';
+import JSONConfiguration from './json-configuration';
 
 export default class JSONConverter {
   constructor(props) {
+    this.log = console; // eslint-disable-line
     this.configuration = {};
     this.onJSONChange = () => {};
     this.json = null;
@@ -18,7 +20,11 @@ export default class JSONConverter {
   setProps(props) {
     // HANDLE CONFIGURATION PROPS
     if ('configuration' in props) {
-      this.configuration = props.configuration;
+      // Accept object or `JSONConfiguration`
+      this.configuration =
+        props.configuration instanceof JSONConfiguration
+          ? props.configuration
+          : new JSONConfiguration(props.configuration);
     }
 
     if ('onJSONChange' in props) {
