@@ -21,8 +21,6 @@ export default class JSONConfiguration {
     for (const configuration of configurations) {
       this._merge(configuration);
     }
-
-    debugger
   }
 
   _merge(configuration) {

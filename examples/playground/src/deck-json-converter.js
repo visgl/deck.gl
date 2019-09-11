@@ -18,16 +18,13 @@ import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import enhancedFetch from './enhanced-fetch';
 
-// TODO - remove
-export const DEFAULT_MAP_PROPS = { style: 'mapbox://styles/mapbox/light-v9' };
-
 export const DECK_JSON_CONVERTER_CONFIGURATION = {
   // Support all `@deck.gl/core` Views by default
   classes: { MapView, FirstPersonView, OrbitView, OrthographicView },
   enumerations: { COORDINATE_SYSTEM, GL },
   preProcessClassProps(Class, props, configuration) {
     props.fetch = props.fetch || enhancedFetch;
-    return getJSONLayerProps(Class, props, configuration);
+    return convertFunctions(Class, props, configuration);
   },
   postProcessConvertedJson(json) {
     // Handle `json.initialViewState`
@@ -46,40 +43,14 @@ export const DECK_JSON_CONVERTER_CONFIGURATION = {
       delete json.initialViewState;
     }
 
-    normalizeMapProps(json, this.configuration);
-
     return json;
   }
 };
 
-// Normalizes map/mapStyle etc props to a `map: {style}` object-valued prop
-function normalizeMapProps(jsonProps, configuration) {
-
-  // TODO - remove
-  if (jsonProps.map || jsonProps.mapStyle) {
-    jsonProps.map = Object.assign({}, DEFAULT_MAP_PROPS, jsonProps.map);
-  }
-
-  if (!jsonProps.map) {
-    return;
-  }
-
-  if ('mapStyle' in jsonProps) {
-    jsonProps.map.style = jsonProps.mapStyle;
-    jsonProps.map.mapStyle = jsonProps.mapStyle;
-    delete jsonProps.mapStyle;
-  }
-
-  // TODO - better map handling
-  if ('viewState' in jsonProps) {
-    jsonProps.map.viewState = jsonProps.viewState;
-  }
-}
-
 // TODO - we need to generalize string to function conversion
 // and move it upstream into the json-converter
 // eslint-disable-next-line complexity
-function getJSONLayerProps(Layer, jsonProps, configuration) {
+function convertFunctions(Layer, jsonProps, configuration) {
   let propTypes = Layer && Layer._propTypes && Layer._propTypes;
   // HACK: Trigger generation of propType
   if (!propTypes && Layer.defaultProps) {
