@@ -11,5 +11,3 @@ export default {
   'website/Screen Grid (ScreenGridLayer)': require('../../json-examples/screen-grid.json'),
   'website/TagMap (TextLayer)': require('../../json-examples/tagmap.json')
 };
-
-export const INITIAL_TEMPLATE = 'website/3D Heatmap (HexagonLayer)';

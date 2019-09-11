@@ -10,7 +10,10 @@ import 'brace/mode/json';
 import 'brace/theme/github';
 
 import JSON_CONFIGURATION from './config/configuration';
-import JSON_TEMPLATES, {INITIAL_TEMPLATE} from './config/templates';
+import JSON_TEMPLATES from './config/templates';
+
+// First template, to match the select dropdown
+const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line

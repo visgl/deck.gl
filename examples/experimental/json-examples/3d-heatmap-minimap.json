@@ -2,6 +2,7 @@
   "description": "The deck.gl website hexagonlayer example (with added minimap)",
   "websiteUrl": "https://deck.gl/#/examples/core-layers/hexagon-layer",
   "initialViewState": {
+    "id": "view-state",
     "longitude": -1.4157267858730052,
     "latitude": 52.232395363869415,
     "zoom": 6.6,
@@ -27,16 +28,10 @@
       "y": "5%",
       "clear": true,
       "viewState": {
-        "id": "dummy",
+        "id": "view-state",
         "pitch": 0,
         "bearing": 0,
         "zoom": 4
-      },
-      "controller": {
-        "maxZoom": 4,
-        "minZoom": 4,
-        "dragRotate": false,
-        "keyboard": false
       }
     }
   ],
