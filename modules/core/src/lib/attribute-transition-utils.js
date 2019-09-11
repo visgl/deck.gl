@@ -60,11 +60,7 @@ export function getAttributeTypeFromSize(size) {
 }
 
 export function cycleBuffers(buffers) {
-  const firstBuffer = buffers[0];
-  for (let i = 0; i < buffers.length - 1; i++) {
-    buffers[i] = buffers[i + 1];
-  }
-  buffers[buffers.length - 1] = firstBuffer;
+  buffers.push(buffers.shift());
   return buffers;
 }
 
