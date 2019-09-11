@@ -10,8 +10,6 @@ import urllib
 
 import asyncio
 
-from .screenshot_utils import go_to_page_and_screenshot
-
 
 here = os.path.dirname(os.path.abspath(__file__))
 notebook_directory = os.path.join(here, '../../examples/')
@@ -44,6 +42,8 @@ def list_notebooks():
 
 async def run_notebooks(output_dir='.'):
     """Run and screenshot all notebooks. Starts a notebook server."""
+    from .screenshot_utils import go_to_page_and_screenshot  # noqa
+
     nb_process = await start_notebook()
     try:
         file_names = list_notebooks()
