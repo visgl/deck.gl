@@ -17,31 +17,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-
+import '@loaders.gl/polyfills';
 import test from 'tape-catch';
 
-import {
-  GreatCircleLayer,
-  H3HexagonLayer,
-  H3ClusterLayer,
-  S2Layer,
-  TileLayer,
-  TripsLayer
-} from '@deck.gl/geo-layers';
+import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
+import {Tile3DLayer} from '@deck.gl/geo-layers';
 
-test('Top-level imports', t => {
-  t.ok(GreatCircleLayer, 'GreatCircleLayer symbol imported');
-  t.ok(S2Layer, 'S2Layer symbol imported');
-  t.ok(H3HexagonLayer, 'H3HexagonLayer symbol imported');
-  t.ok(H3ClusterLayer, 'H3ClusterLayer symbol imported');
-  t.ok(TileLayer, 'TileLayer symbol imported');
-  t.ok(TripsLayer, 'TripsLayer symbol imported');
+test('Tile3DLayer', t => {
+  const testCases = generateLayerTests({
+    Layer: Tile3DLayer,
+    assert: t.ok,
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+  });
+
+  testLayer({Layer: Tile3DLayer, testCases, onError: t.notOk});
+
   t.end();
 });
-
-import './tile-layer';
-import './s2-layer.spec';
-import './trips-layer.spec';
-import './great-circle-layer.spec';
-import './h3-layers.spec';
-import './tile-3d-layer';

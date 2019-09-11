@@ -3,7 +3,7 @@
 The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Category](docs/specifications/3d-tiles),
 which is supported by the [Tileset3DLoader](docs/api-reference/3d-tiles/tileset-3d-loader).
 
-Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/api-reference/point-cloud-layer.md) or [ScenegraphLayer](/docs/api-reference/scenegraph-layer.md) to render.
+Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
 
 References
 - [3D Tiles](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification).
@@ -30,11 +30,7 @@ export default class App extends Component {
              zoom
            }
         });
-      },
-      onTileLoad: (tile) => {
-        // force update rendering
-        this.forceUpdate();
-      },
+      }
     });
      
     return (<DeckGL {...viewport} layers={[layer]} />);
@@ -60,10 +56,10 @@ new Tile3DLayer({});
 To use pre-bundled scripts:
 
 ```html
-<script src="https://unpkg.com/deck.gl@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/deck.gl@~7.3.0/dist.min.js"></script>
 <!-- or -->
-<script src="https://unpkg.com/@deck.gl/core@~7.0.0/dist.min.js"></script>
-<script src="https://unpkg.com/@deck.gl/layers@~7.0.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/core@~7.3.0/dist.min.js"></script>
+<script src="https://unpkg.com/@deck.gl/layers@~7.3.0/dist.min.js"></script>
 ```
 
 ```js
@@ -84,14 +80,23 @@ Along with other options as below,
 
 - url to fetch tiles entry point [Tileset JSON](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) file.
 
-##### `ionAssetId` (Number|String, Optional)
-##### `ionAccessToken` (String, Optional)
+##### `_ionAssetId` (Number|String, Optional)
+##### `_ionAccessToken` (String, Optional)
 
-- `ionAssetId` and `ionAccessToken` are used to fetch ion dataset. 
+- `_ionAssetId` and `_ionAccessToken` are used to fetch ion dataset. They are experimental properties, may change in next releases. 
 
 [Set up Ion account](https://cesium.com/docs/tutorials/getting-started/#your-first-app);
 
-### Render Options
+##### `DracoLoader` (Object, Optional)
+##### `DracoWorkerLoader` (Object, Optional)
+
+One of `DracoLoader` or `DracoWorkerLoader` is required if the tileset contains any draco compressed tiles. [`@loaders.gl/draco`](https://github.com/uber-web/loaders.gl/tree/master/modules/draco) provides the draco decoding modules.
+
+```js
+import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
+```
+
+### Callbacks 
 
 ##### `onTilesetLoad` (Function, optional)
 `onTilesetLoad` is a function that is called when Tileset JSON file is loaded. [Tileset](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#tileset-json) object is passed in the callback.
@@ -117,6 +122,15 @@ Along with other options as below,
 - Default: `onTileLoadFail: (tileHeader, url, message) => {}`
   - `url`: the url of the failed tile.
   - `message`: the error message.
+
+## Sub Layers
+
+The Tile3DLayer renders the following sublayers based on tile [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction):
+
+* `scenegraph` - a [ScenegraphLayer](/docs/layers/scenegraph-layer.md) rendering all the tiles with Batched 3D Model format or Instanced 3D Model format.
+  - `_lighting` is default to `pbr`.
+* `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format.
+  - `pointSize` is default to `1.0`.
 
 ## Source
 
