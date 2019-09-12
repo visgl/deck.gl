@@ -2,6 +2,10 @@
 
 ## Upgrading from deck.gl v7.2 to v7.3
 
+- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
+
+## Upgrading from deck.gl v7.2 to v7.3
+
 #### Deprecations
 
 - `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and will be removed in the next major release.

@@ -610,20 +610,6 @@ Returns:
 
 * World coordinates in `[x, y]`.
 
-
-##### `screenToDevicePixels`
-
-Simply multiplies `pixels` parameter with `window.devicePixelRatio` if available. Useful to adjust e.g. line widths to get more consistent visuals between low and high resolution displays.
-
-Parameters:
-
-* `pixels` (Number) - The number in screen pixels.
-
-Returns:
-
-* A number in device pixels
-
-
 ### Layer Picking Methods
 
 For the usage of these methods, see [how picking works](/docs/developer-guide/custom-layers/picking.md).
