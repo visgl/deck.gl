@@ -1,0 +1,34 @@
+{
+  "description": "The deck.gl website GeoJsonLayer (polygons) example in JSON format",
+  "websiteUrl": "https://deck.gl/#/examples/core-layers/geojson-layer-polygons",
+  "initialViewState": {
+    "latitude": 49.254,
+    "longitude": -123.13,
+    "zoom": 11,
+    "maxZoom": 16,
+    "pitch": 45,
+    "bearing": 0
+  },
+  "views": [
+    {
+      "type": "MapView",
+      "controller": true,
+      "mapStyle": "mapbox://styles/mapbox/light-v9"
+    }
+  ],
+  "layers": [
+    {
+      "type": "GeoJsonLayer",
+      "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json",
+      "opacity": 0.8,
+      "stroked": false,
+      "filled": true,
+      "extruded": true,
+      "wireframe": true,
+      "elevationScale": 0.10,
+      "getElevation": "properties.valuePerSqm",
+      "getFillColor": [199, 233, 180],
+      "getLineColor": [255, 255, 255]
+    }
+  ]
+}

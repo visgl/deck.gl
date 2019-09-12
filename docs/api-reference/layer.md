@@ -643,7 +643,7 @@ Returns:
 
 Note:
 
-* The null picking color is returned when a pixel is picked that is not covered by the layer, or when they layer has selected to render a pixel using the null picking color to make it unpickable.
+* The null picking color is returned when a pixel is picked that is not covered by the layer, or when the layer has selected to render a pixel using the null picking color to make it unpickable.
 
 ##### `encodePickingColor`
 
@@ -668,7 +668,7 @@ Notes:
 
 Returns:
 
-* a "null" picking color which is equal the the color of pixels not covered by the layer. This color is guaranteed not to match any index value greater than or equal to zero.
+* a "null" picking color which is equal the color of pixels not covered by the layer. This color is guaranteed not to match any index value greater than or equal to zero.
 
 ## Source
 

@@ -6,6 +6,12 @@
 
 - `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and will be removed in the next major release.
 
+#### deck.gl/json
+
+- Changed: The `_JSONConverter` class has been remaned to `JSONConverter`.
+- Removed: The `JSONLayer` is no longer included in this module. The code for this layer has been moved to an example in `/test/apps/json-layer`, and would need to be copied into applications to be used.
+
+
 ## Upgrading from deck.gl v7.1 to v7.2
 
 #### Breaking Changes
@@ -73,6 +79,9 @@ The `project64` shader module is no longer registered by default. If you were pr
     return {vs, fs, modules: [project64]};
   }
   ```
+#### CPU Grid layer and Hexagon layer updateTriggers
+
+`getElevationValue`, `getElevationWeight` and `getColorValue`, `getColorWeight` are now compared using `updateTriggers` like other layer [accessors](https://github.com/uber/deck.gl/blob/master/docs/developer-guide/using-layers.md#accessors). Update them without passing updateTriggers will no longer trigger layer update.
 
 #### Deprecations
 

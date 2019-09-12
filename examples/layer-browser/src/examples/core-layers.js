@@ -286,7 +286,7 @@ const ColumnLayerExample = {
     data: dataSamples.worldGrid.data,
     extruded: true,
     pickable: true,
-    radius: 1000,
+    radius: 100,
     opacity: 1,
     getFillColor: d => [245, 166, d.value * 255, 255],
     getElevation: d => d.value * 5000
@@ -341,18 +341,6 @@ function getMax(pts, key) {
     : null;
 }
 
-// hexagon/grid layer compares whether getColorValue / getElevationValue has changed to
-// call out bin sorting. Here we pass in the function defined
-// outside props, so it doesn't create a new function on
-// every rendering pass
-function getColorValue(points) {
-  return getMean(points, 'SPACES');
-}
-
-function getElevationValue(points) {
-  return getMax(points, 'SPACES');
-}
-
 const CPUGridLayerExample = {
   layer: CPUGridLayer,
   props: {
@@ -363,8 +351,8 @@ const CPUGridLayerExample = {
     extruded: true,
     pickable: true,
     getPosition: d => d.COORDINATES,
-    getColorValue,
-    getElevationValue
+    getColorValue: points => getMean(points, 'SPACES'),
+    getElevationValue: points => getMax(points, 'SPACES')
   }
 };
 
@@ -400,8 +388,8 @@ const HexagonLayerExample = {
     elevationRange: [0, 3000],
     coverage: 1,
     getPosition: d => d.COORDINATES,
-    getColorValue,
-    getElevationValue
+    getColorValue: points => getMean(points, 'SPACES'),
+    getElevationValue: points => getMax(points, 'SPACES')
   }
 };
 

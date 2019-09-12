@@ -426,13 +426,16 @@ export default class Layer extends Component {
     this.updateAttributes(changedAttributes);
   }
 
-  // Update attribute and uniform transitions, returns props in transition
-  updateTransition() {
+  // Update attribute transitions. This is called in drawLayer, no model updates required.
+  _updateAttributeTransition() {
     const attributeManager = this.getAttributeManager();
     if (attributeManager) {
-      attributeManager.updateTransition(this.context.timeline.getTime());
+      attributeManager.updateTransition();
     }
+  }
 
+  // Update uniform (prop) transitions. This is called in updateState, may result in model updates.
+  _updateUniformTransition() {
     const {uniformTransitions} = this.internalState;
     if (uniformTransitions.active) {
       // clone props
@@ -647,7 +650,7 @@ export default class Layer extends Component {
   // Common code for _initialize and _update
   _updateState() {
     const currentProps = this.props;
-    const propsInTransition = this.updateTransition();
+    const propsInTransition = this._updateUniformTransition();
     this.internalState.propsInTransition = propsInTransition;
     // Overwrite this.props during update to use in-transition prop values
     this.props = propsInTransition;
@@ -707,6 +710,8 @@ export default class Layer extends Component {
 
   // Calculates uniforms
   drawLayer({moduleParameters = null, uniforms = {}, parameters = {}}) {
+    this._updateAttributeTransition();
+
     const currentProps = this.props;
     // Overwrite this.props during redraw to use in-transition prop values
     this.props = this.internalState.propsInTransition;
@@ -873,6 +878,9 @@ ${flags.viewportChanged ? 'viewport' : ''}\
 
   setModuleParameters(moduleParameters) {
     for (const model of this.getModels()) {
+      // Hack - refresh program before updating settings
+      // Shader modules might have changed since the last draw call
+      model._checkProgram();
       model.updateModuleSettings(moduleParameters);
     }
   }
@@ -912,7 +920,8 @@ ${flags.viewportChanged ? 'viewport' : ''}\
   _getAttributeManager() {
     return new AttributeManager(this.context.gl, {
       id: this.props.id,
-      stats: this.context.stats
+      stats: this.context.stats,
+      timeline: this.context.timeline
     });
   }
 

@@ -1,3 +1,23 @@
+// Copyright (c) 2015 - 2018 Uber Technologies, Inc.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+// THE SOFTWARE.
+
 import GL from '@luma.gl/constants';
 import {
   Buffer,
@@ -45,6 +65,14 @@ const ARRAY_BUFFER_MAP = {
   maxMinData: 'maxMinBuffer'
 };
 
+const REQUIRED_FEATURES = [
+  FEATURES.WEBGL2, // TODO: Remove after trannsform refactor
+  FEATURES.COLOR_ATTACHMENT_RGBA32F,
+  FEATURES.BLEND_EQUATION_MINMAX,
+  FEATURES.FLOAT_BLEND,
+  FEATURES.TEXTURE_FLOAT
+];
+
 export default class GPUGridAggregator {
   // Decode and return aggregation data of given pixel.
   static getAggregationData({aggregationData, maxData, minData, maxMinData, pixelIndex}) {
@@ -87,15 +115,7 @@ export default class GPUGridAggregator {
   }
 
   static isSupported(gl) {
-    return (
-      isWebGL2(gl) &&
-      hasFeatures(
-        gl,
-        FEATURES.BLEND_EQUATION_MINMAX,
-        FEATURES.COLOR_ATTACHMENT_RGBA32F,
-        FEATURES.TEXTURE_FLOAT
-      )
-    );
+    return hasFeatures(gl, REQUIRED_FEATURES);
   }
 
   // DEBUG ONLY
@@ -125,7 +145,6 @@ export default class GPUGridAggregator {
 
   constructor(gl, opts = {}) {
     this.id = opts.id || 'gpu-grid-aggregator';
-    this.shaderCache = opts.shaderCache || null;
     this.gl = gl;
     this.state = {
       // cache weights and position data to process when data is not changed
@@ -678,27 +697,25 @@ export default class GPUGridAggregator {
   }
 
   getAggregationModel(fp64 = false) {
-    const {gl, shaderCache} = this;
+    const {gl} = this;
     return new Model(gl, {
       id: 'Gird-Aggregation-Model',
       vs: fp64 ? AGGREGATE_TO_GRID_VS_FP64 : AGGREGATE_TO_GRID_VS,
       fs: AGGREGATE_TO_GRID_FS,
       modules: fp64 ? [project64] : ['project32'],
-      shaderCache,
       vertexCount: 0,
       drawMode: GL.POINTS
     });
   }
 
   getAllAggregationModel() {
-    const {gl, shaderCache} = this;
+    const {gl} = this;
     const {numCol, numRow} = this.state;
     return new Model(gl, {
       id: 'All-Aggregation-Model',
       vs: AGGREGATE_ALL_VS_FP64,
       fs: AGGREGATE_ALL_FS,
       modules: [fp64ShaderModule],
-      shaderCache,
       vertexCount: 1,
       drawMode: GL.POINTS,
       isInstanced: true,

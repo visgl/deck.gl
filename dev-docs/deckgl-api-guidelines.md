@@ -15,14 +15,14 @@ philosophy.
   If a layer has lots of options and primitives, it's not easy to further
   extend it.
 * **Avoid “Magic”** - deck.gl aims to have a set of transparent APIs that
-  makes the effects bring by them clear to the users.
+  makes the effects brought by them clear to the users.
   Users can choose to learn WebGL and shader programming through deck.gl.
   This aligns with luma.gl, which exposes one class for every WebGL
   type.
 * **Reactive first** - deck.gl is primarily designed to work in a
   [“Reactive architecture”](https://en.wikipedia.org/wiki/Reactive_programming)
   application. It can be used in other programming paradigms but its support
-  come secondary.
+  comes secondary.
 
 ## Design Guidelines
 
@@ -62,16 +62,16 @@ docs, or other places that are easy to track.
   is small. E.g. the line layer can add a z coordinate to its positions
   with very little complexity and performance impact.
 * **Lighting and effects**
-  Layers with extrusion support (2.5D) or 3D should repsond correctly to lights through
+  Layers with extrusion support (2.5D) or 3D should respond correctly to lights through
   the lighting packages provided by deck.gl. This includes providing necessary APIs for
   setting light parameters.
-* **Splitting Layers** - If the code is significantly different different variant of the
+* **Splitting Layers** - If the code is a significantly different variant of the
   same layer (such as 2D and 3D), splitting into two might be necessary - perhaps even
   into two layer groups. Some effort should be done to clean up code and check if code
   reuse is possible.
 * **Functional Variants of Layers**
   Functional variants of layers such are Brushed, Animated, Enhanced etc, will be provided
-  as examples rather than supported layers with the intention to help users implement similar
+  as examples rather than supported layers to help users implement similar
   functionality for themselves.
 
 ## Rules for Data Iteration and Access
@@ -137,7 +137,7 @@ attribute (e.g. as a multiplier, or additive element), to ensure that
 the semantics of the property is easily understood by the user.
 
 * **Naming** For some well-known modifier concepts, like `opacity`
-(which modifies the forth component of the value returned byt the `getColor` accessor),
+(which modifies the fourth component of the value returned by the `getColor` accessor),
 it is natural to stay with the well-accepted term.
 
 * **Naming** Otherwise it is recommended to use a composite noun that
@@ -172,7 +172,7 @@ and additive props to 0.
 
 ### Naming rules for groups of uniform-related props
 
-* If a set of uniforms belong to certain module, it's a common practice to have them
+* If a set of uniforms belong to a certain module, it's a common practice to have them
   come with a common prefix or suffix (e. g. `lightDirection`, `lightColorAmbient`,
   `lightColorDirectional`, …)
 * If a set of uniforms belong to the same module/effect, it could make sense to

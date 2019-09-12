@@ -14,11 +14,11 @@ function randomInt(min, max) {
 
 export default class DataGenerator {
   constructor({
-    maxDistance = 20000,
-    radiusRange = [1000, 3000],
+    maxDistance = 250,
+    radiusRange = [25, 75],
     countRange = [1, 5],
     vertexRange = [3, 5],
-    sizeRange = [100, 200]
+    sizeRange = [3, 8]
   } = {}) {
     this.maxDistance = maxDistance;
     this.radiusRange = radiusRange;
@@ -37,7 +37,7 @@ export default class DataGenerator {
     this.polygons = Array.from({length: count}, () => {
       const vertexCount = randomInt(this.vertexRange);
       const a = random(0, Math.PI * 2);
-      const d = random(0, this.maxDistance);
+      const d = Math.sqrt(random(0, 1)) * this.maxDistance;
       const center = [d * Math.cos(a), d * Math.sin(a)];
       const r = random(this.radiusRange);
       const color = [random(0, 255), random(0, 255), random(0, 255)];

@@ -276,8 +276,7 @@ export default class PathLayer extends Layer {
             positions: new Float32Array(SEGMENT_POSITIONS)
           }
         }),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
   }

@@ -1,5 +1,5 @@
 import os
-from pathlib import Path
+from os.path import relpath, realpath
 import tempfile
 import time
 import webbrowser
@@ -49,7 +49,10 @@ def make_directory_if_not_exists(path):
 
 
 def add_html_extension(fname):
-    return str(Path(fname).with_suffix('.html'))
+    SUFFIX = '.html'
+    if fname.endswith(SUFFIX):
+        return str(fname)
+    return str(fname + '.html')
 
 
 def deck_to_html(
@@ -68,20 +71,11 @@ def deck_to_html(
         f.write(html)
     finally:
         if f is None:
-            raise Exception("deckgl did not write a file")
+            raise Exception("pydeck could not write a file")
         f.close()
     if open_browser:
-        display_html(f.name)
-    if is_jupyter_notebook() is True and notebook_display is True:
-        display(IFrame('file://' + f.name, width=iframe_width, height=iframe_width))  # noqa
-    return f.name
-
-
-def is_jupyter_notebook():
-    """Returns True if environment is a Jupyter notebook"""
-    try:
-        ip = get_ipython()  # noqa
-        if ip.has_trait('kernel'):
-            return True
-    finally:
-        return False
+        display_html(realpath(f.name))
+    if notebook_display:
+        notebook_to_html_path = relpath(f.name)
+        display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_width))  # noqa
+    return realpath(f.name)

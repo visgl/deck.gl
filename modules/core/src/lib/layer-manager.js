@@ -19,7 +19,6 @@
 // THE SOFTWARE.
 
 import assert from '../utils/assert';
-import {_ShaderCache as ShaderCache} from '@luma.gl/core';
 import {Timeline} from '@luma.gl/addons';
 import seer from 'seer';
 import Layer from './layer';
@@ -29,6 +28,7 @@ import {flatten} from '../utils/flatten';
 import {Stats} from 'probe.gl';
 
 import Viewport from '../viewports/viewport';
+import {createProgramManager} from '../shaderlib';
 
 import {
   setPropOverrides,
@@ -57,7 +57,6 @@ const INITIAL_CONTEXT = Object.seal({
   shaderCache: null,
   pickingFBO: null, // Screen-size framebuffer that layers can reuse
 
-  animationProps: null,
   mousePosition: null,
 
   userData: {} // Place for any custom app `context`
@@ -85,7 +84,7 @@ export default class LayerManager {
       deck,
       gl,
       // Enabling luma.gl Program caching using private API (_cachePrograms)
-      shaderCache: gl && new ShaderCache({gl, _cachePrograms: true}),
+      programManager: gl && createProgramManager(gl),
       stats: stats || new Stats({id: 'deck.gl'}),
       // Make sure context.viewport is not empty on the first layer initialization
       viewport: viewport || new Viewport({id: 'DEFAULT-INITIAL-VIEWPORT'}), // Current viewport, exposed to layers for project* function
@@ -207,7 +206,7 @@ export default class LayerManager {
   }
 
   // Update layers from last cycle if `setNeedsUpdate()` has been called
-  updateLayers(animationProps = {}) {
+  updateLayers() {
     // NOTE: For now, even if only some layer has changed, we update all layers
     // to ensure that layer id maps etc remain consistent even if different
     // sublayers are rendered

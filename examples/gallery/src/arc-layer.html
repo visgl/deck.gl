@@ -12,27 +12,19 @@
         width: 100vw;
         height: 100vh;
         margin: 0;
+        overflow: hidden;
       }
-      #tooltip:empty {
-        display: none;
-      }
-      #tooltip {
+      .deck-tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        position: absolute;
-        padding: 4px;
+        padding: 6px !important;
         margin: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
         max-width: 300px;
         font-size: 10px;
-        z-index: 9;
-        pointer-events: none;
       }
     </style>
   </head>
 
   <body>
-    <div id="tooltip"></div>
   </body>
 
   <script type="text/javascript">
@@ -68,7 +60,8 @@
       maxZoom: 15,
       pitch: 30,
       bearing: 30,
-      layers: []
+      layers: [],
+      getTooltip: ({object}) => object && object.properties.name
     });
     
     function getArcLayer(data, selectedFeature) {
@@ -103,15 +96,6 @@
       });
     }
 
-    function updateTooltip({x, y, object}) {
-      const tooltip = document.getElementById('tooltip');
-      if (object) {
-        tooltip.style.top = `${y}px`;
-        tooltip.style.left = `${x}px`;
-        tooltip.innerText = object.properties.name;
-      } else tooltip.innerText = '';
-    }
-
     function renderLayers(data, selectedFeature) {
 
       selectedFeature = selectedFeature || data.features.find(f => f.properties.name === 'Los Angeles, CA');
@@ -124,8 +108,7 @@
         autoHighlight: true,
         pickable: true,
         getFillColor: () => [0, 0, 0, 0],
-        onClick: info => renderLayers(data, info.object),
-        onHover: updateTooltip,
+        onClick: info => renderLayers(data, info.object)
       });
 
       deckgl.setProps({ layers: [countyLayer, arcLayer] });

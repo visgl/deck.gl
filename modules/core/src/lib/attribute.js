@@ -47,13 +47,10 @@ export default class Attribute extends BaseAttribute {
   constructor(gl, opts = {}) {
     const logicalType = opts.type;
     const doublePrecision = logicalType === GL.DOUBLE;
-    if (doublePrecision) {
-      // DOUBLE is not a valid WebGL buffer type
-      // tell BaseAttribute to set the accessor type to FLOAT
-      opts = Object.assign({}, opts, {type: GL.FLOAT});
-    }
 
-    super(gl, opts);
+    // DOUBLE is not a valid WebGL buffer type
+    // tell BaseAttribute to set the accessor type to FLOAT
+    super(gl, doublePrecision ? {...opts, type: GL.FLOAT} : opts);
 
     const {
       // deck.gl fields
@@ -183,25 +180,26 @@ export default class Attribute extends BaseAttribute {
   }
 
   supportsTransition() {
-    return this.userData.transition;
+    return Boolean(this.userData.transition);
   }
 
   // Resolve transition settings object if transition is enabled, otherwise `null`
   getTransitionSetting(opts) {
-    const {transition, accessor} = this.userData;
-    if (!transition) {
+    const {accessor} = this.userData;
+    // `userData` is a bit of a misnomer here, these are the transition settings defined by
+    // the layer itself, not the layer's user
+    // TODO: have the layer resolve these transition settings itself?
+    const layerSettings = this.userData.transition;
+    if (!this.supportsTransition()) {
       return null;
     }
-    let settings = Array.isArray(accessor) ? opts[accessor.find(a => opts[a])] : opts[accessor];
+    // these are the transition settings passed in by the user
+    const userSettings = Array.isArray(accessor)
+      ? opts[accessor.find(a => opts[a])]
+      : opts[accessor];
 
     // Shorthand: use duration instead of parameter object
-    settings = normalizeTransitionSettings(settings);
-
-    if (settings) {
-      return Object.assign({}, transition, settings);
-    }
-
-    return null;
+    return normalizeTransitionSettings(userSettings, layerSettings);
   }
 
   setNeedsUpdate(reason = this.id, dataRange) {

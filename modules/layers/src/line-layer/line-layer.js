@@ -132,8 +132,7 @@ export default class LineLayer extends Layer {
             positions: new Float32Array(positions)
           }
         }),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
   }

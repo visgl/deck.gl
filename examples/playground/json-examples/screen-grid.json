@@ -1,0 +1,38 @@
+{
+  "description": "The deck.gl website ScreenGridLayer example in JSON format",
+  "websiteUrl": "https://deck.gl/#/examples/core-layers/screen-grid-layer",
+  "initialViewState": {
+    "longitude": -119.3,
+    "latitude": 35.6,
+    "zoom": 6,
+    "maxZoom": 20,
+    "pitch": 0,
+    "bearing": 0
+  },
+  "map": true,
+  "views": [
+    {
+      "type": "MapView",
+      "controller": true,
+      "mapStyle": "mapbox://styles/mapbox/light-v9"
+    }
+  ],
+  "layers": [
+  	{
+    	"type": "ScreenGridLayer",
+      "id": "grid",
+      "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/screen-grid/ca-transit-stops.json",
+      "cellSizePixels": 20,
+      "colorRange": [
+        [255, 255, 178, 25],
+        [254, 217, 118, 85],
+        [254, 178, 76, 127],
+        [253, 141, 60, 170],
+        [240, 59, 32, 212],
+        [189, 0, 38, 255]
+      ],
+      "getPosition": "-",
+      "gpuAggregation": true
+    }
+  ]
+}

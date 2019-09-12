@@ -10,21 +10,14 @@
         width: 100vw;
         height: 100vh;
         margin: 0;
+        overflow: hidden;
       }
-      #tooltip:empty {
-        display: none;
-      }
-      #tooltip {
+      .deck-tooltip {
         font-family: Helvetica, Arial, sans-serif;
-        position: absolute;
-        padding: 4px;
+        padding: 6px !important;
         margin: 8px;
-        background: rgba(0, 0, 0, 0.8);
-        color: #fff;
         max-width: 300px;
         font-size: 10px;
-        z-index: 9;
-        pointer-events: none;
       }
     </style>
   </head>
@@ -54,27 +47,16 @@
           getSourcePosition: d => d.start,
           getTargetPosition: d => d.end,
           getColor: d => getColor(d),
-          getWidth: 8,
-          onHover: updateTooltip,
+          getWidth: 8
         })
-      ]
+      ],
+      getTooltip: ({object}) => object && `Flight ${object.name}`
     });
 
     function getColor(d) {
       const z = d.start[2];
       const r = z / 10000;
       return [255 * (1 - r * 2), 128 * r, 255 * r, 255 * (1 - r)];
-    }
-
-    function updateTooltip({x, y, object}) {
-      const tooltip = document.getElementById('tooltip');
-      if (object) {
-        tooltip.style.top = `${y}px`;
-        tooltip.style.left = `${x}px`;
-        tooltip.innerHTML = `Flight ${object.name}`;
-      } else {
-        tooltip.innerHTML = '';
-      }
     }
     
   </script>

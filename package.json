@@ -41,9 +41,9 @@
     "jsdom": false
   },
   "devDependencies": {
-    "@luma.gl/effects": "^7.3.0-alpha.5",
-    "@probe.gl/bench": "^3.0.2",
-    "@probe.gl/test-utils": "^3.1.0-alpha.8",
+    "@luma.gl/effects": "^7.3.0-alpha.7",
+    "@probe.gl/bench": "^3.1.0-beta.3",
+    "@probe.gl/test-utils": "^3.1.0-beta.3",
     "babel-loader": "^8.0.0",
     "babel-plugin-inline-webgl-constants": "^1.0.1",
     "babel-plugin-remove-glsl-comments": "^0.1.0",
@@ -57,7 +57,7 @@
     "gl": "^4.3.3",
     "glsl-transpiler": "^1.8.3",
     "jsdom": "^15.0.0",
-    "ocular-dev-tools": "0.0.27",
+    "ocular-dev-tools": "0.0.29",
     "png.js": "^0.1.1",
     "pre-commit": "^1.2.2",
     "pre-push": "^0.1.1",

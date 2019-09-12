@@ -16,7 +16,8 @@ for testing, development, and production builds.
 """
 import os
 import json
-import urllib 
+import urllib
+
 from jinja2 import Template
 
 def _is_open(url):
@@ -47,12 +48,12 @@ def create_notebook_requirejs(dependencies, base_path, setup_environment='develo
     # Prepares JS dependencies for the notebook requirejs file
     if setup_environment == 'development' and dev_server_url:
         # Notebook with hot reloading development on http://localhost:8080
-        dependencies['paths']['nbextension/pydeck'] = dev_server_url
+        dependencies['paths']['nbextensions/pydeck'] = dev_server_url
         dependencies['paths']['deck.gl'] = dev_server_url + '/deckgl.dev'
     elif setup_environment in ('test', 'production', 'development'):
         # Notebook using the JS bundle built from webpack command in @deck.gl/jupyter-widget
-        # The notebook dependency manager will be written to ./pydeck/nbextension/static/extensionRequires.js
-        # If this changes, ./pydeck/nbextension/__init__.py must also change
+        # The notebook dependency manager will be written to ./pydeck/nbextensions/static/extensionRequires.js
+        # If this changes, ./pydeck/nbextensions/__init__.py must also change
         deckgl_version = get_deckgl_version()
         DECK_CDN_URL = 'https://unpkg.com/deck.gl@{}/dist.min'.format(deckgl_version)
         dependencies['paths']['deck.gl'] = DECK_CDN_URL
@@ -85,6 +86,7 @@ def create_standalone_render_requirejs(dependencies, base_path, setup_environmen
         dependencies['paths']['deck.gl'] = DECK_CDN_URL
     elif setup_environment == 'development':
         # Standalone HTML renderer with static reloading requires a bundled JS file of the Jupyter widget module
+        # Failover path so that this works in an iframe
         dependencies['paths']['nbextensions/pydeck'] = WIDGET_PATH
     else:
         raise Exception('Unrecognized setup environment')

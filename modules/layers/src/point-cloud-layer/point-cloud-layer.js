@@ -143,8 +143,7 @@ export default class PointCloudLayer extends Layer {
             positions: new Float32Array(positions)
           }
         }),
-        isInstanced: true,
-        shaderCache: this.context.shaderCache
+        isInstanced: true
       })
     );
   }

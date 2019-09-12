@@ -112,3 +112,16 @@
       </div>
   </div>
 </div>
+
+### Declarative Layers
+
+<div>
+  <div class="thumb">
+    <div data-title="Playground" data-name="Playground">
+      <a href="https://deck.gl/json">
+        <img src="images/playground-thumb.png" />
+      </a>
+    </div>
+  </div>
+</div>
+

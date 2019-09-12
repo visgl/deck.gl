@@ -33,6 +33,7 @@ export default class ViewManager {
     this.height = 100;
     this.viewState = {};
     this.controllers = {};
+    this.timeline = props.timeline;
 
     this._viewports = []; // Generated viewports
     this._viewportMap = {};
@@ -78,13 +79,11 @@ export default class ViewManager {
   }
 
   // Checks each viewport for transition updates
-  updateViewStates(animationProps = {}) {
-    if ('time' in animationProps) {
-      for (const viewId in this.controllers) {
-        const controller = this.controllers[viewId];
-        if (controller) {
-          controller.updateTransition(animationProps.time);
-        }
+  updateViewStates() {
+    for (const viewId in this.controllers) {
+      const controller = this.controllers[viewId];
+      if (controller) {
+        controller.updateTransition();
       }
     }
   }
@@ -254,6 +253,7 @@ export default class ViewManager {
     const controller = new Controller(
       Object.assign(
         {
+          timeline: this.timeline,
           eventManager: this._eventManager,
           // Set an internal callback that calls the prop callback if provided
           onViewStateChange: this._onViewStateChange.bind(this, props.id),

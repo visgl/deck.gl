@@ -197,6 +197,7 @@ if __name__ == "__main__":
         version=version_ns["__version__"],
         description="Widget for deck.gl maps",
         long_description="{}".format(read("README.md")),
+        long_description_content_type='text/markdown',
         license="MIT License",
         include_package_data=True,
         packages=find_packages(),
@@ -228,12 +229,16 @@ if __name__ == "__main__":
         ],
         extras_require={"testing": ["pytest"]},
         install_requires=[
-            'ipykernel>=5.1.2',
+            'ipykernel>=5.1.2;python_version>="3.4"',
+            'ipython>=5.8.0;python_version<"3.4"',
             'ipywidgets>=7.0.0,<8',
             'traitlets>=4.3.2',
+            'jinja2>=2.10.1'
+        ],
+        setup_requires=[
+            'pytest-runner',
             'Jinja2>=2.10.1'
         ],
-        setup_requires=['pytest-runner'],
         tests_require=['pytest'],
         data_files=[
             (
@@ -241,6 +246,7 @@ if __name__ == "__main__":
                 [
                     "pydeck/nbextension/static/extensionRequires.js",
                     "pydeck/nbextension/static/index.js",
+                    "pydeck/io/templates/requirejs_dependencies.json",
                     "pydeck/nbextension/static/index.js.map",
                 ],
             ),
