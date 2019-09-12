@@ -18,7 +18,7 @@ export function hideMapboxCSSWarning() {
 }
 
 export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
-  const results = jsonConverter.convertJsonToDeckProps(inputJSON);
+  const results = jsonConverter.convertJson(inputJSON);
   deckConfig.setProps(results);
 }
 
