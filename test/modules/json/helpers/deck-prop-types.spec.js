@@ -1,5 +1,5 @@
 import test from 'tape-catch';
-import {getPropTypes, isFunctionProp} from '@deck.gl/json/lib/helpers/deck-prop-types';
+import {getPropTypes, isFunctionProp} from '@deck.gl/json/helpers/deck-prop-types';
 
 import {ScatterplotLayer} from '@deck.gl/layers';
 

@@ -1,6 +1,6 @@
 // TODO - default parsing code should not be part of the configuration.
 import parseExpressionString from './helpers/parse-expression-string';
-import assert from '../utils/assert';
+import assert from './utils/assert';
 
 const DEFAULT_TYPE_KEY = 'type';
 

@@ -1,4 +1,4 @@
-import {get} from '../../utils/get';
+import {get} from '../utils/get';
 
 // expression-eval: Small jsep based expression parser that supports array and object indexing
 import expressionEval from 'expression-eval';

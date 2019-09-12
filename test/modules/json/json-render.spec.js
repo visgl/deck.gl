@@ -1,15 +1,14 @@
-/*
 import test from 'tape-catch';
 import {Deck} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
-./no-longer-supported/deck-json-converter.spec
-import {configuration, JSON_DATA} from './deck-json-converter.spec';
+import configuration from './json-configuration-for-deck';
+import JSON_DATA from './data/deck-props.json';
 
 test('JSONConverter#render', t => {
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
 
-  const deckProps = jsonConverter.convertJson(JSON_DATA);
+  const deckProps = jsonConverter.convert(JSON_DATA);
   t.ok(deckProps, 'JSONConverter converted correctly');
 
   const jsonDeck = new Deck(
@@ -25,4 +24,3 @@ test('JSONConverter#render', t => {
     )
   );
 });
-*/
