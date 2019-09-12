@@ -32,7 +32,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
         );
         layers.map(k => (layersDict[k] = deckgl[k]));
 
-        const jsonConverter = new deckgl.JSONConverter({
+        const jsonConverter = new deckgl._JSONConverter({
           configuration: {
             layers: layersDict
           }
