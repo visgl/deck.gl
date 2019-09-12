@@ -14,13 +14,13 @@
 
 import {_convertFunctions} from '@deck.gl/json';
 
-import { MapView, FirstPersonView, OrbitView, OrthographicView } from '@deck.gl/core';
+import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
 
-import { COORDINATE_SYSTEM } from '@deck.gl/core';
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
 export default {
