@@ -75,7 +75,7 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-test.only('convertFunctions#get...', t => {
+test('convertFunctions#get...', t => {
   const props = {};
   TEST_CASES.forEach((testCase, i) => {
     // Add a mix of function and value props
