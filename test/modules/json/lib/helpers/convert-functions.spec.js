@@ -1,23 +1,6 @@
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-catch';
-import {JSONConfiguration} from '@deck.gl/json';
 import convertFunctions from '@deck.gl/json/lib/helpers/convert-functions';
-
-const row = Object.freeze({
-  foo: {
-    bar: 'baz',
-    baz: 'wow',
-    addOne: x => x + 1
-  },
-  bool: true,
-  list: [1, 2, 3, 4],
-  one: 1,
-  two: 2,
-  three: 3,
-  number: 123,
-  string: 'string',
-  addOne: x => x + 1
-});
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
