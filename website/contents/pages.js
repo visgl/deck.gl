@@ -130,6 +130,13 @@ export const examplePages = generatePath([
           demo: 'TripsDemo',
           code: getCodeUrl('examples/website/trips')
         }
+      },
+      {
+        name: 'Tile3DLayer',
+        content: {
+          demo: 'Tiles3DDemo',
+          code: getCodeUrl('examples/website/3d-tiles')
+        }
       }
     ]
   },
