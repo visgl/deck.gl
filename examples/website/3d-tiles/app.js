@@ -33,7 +33,6 @@ export class App extends PureComponent {
     };
 
     this._onTilesetLoad = this._onTilesetLoad.bind(this);
-    this._onTilesetChange = this._onTilesetChange.bind(this);
   }
 
   // Called by Tile3DLayer when a new tileset is loaded
