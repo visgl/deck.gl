@@ -108,9 +108,8 @@ function tabularize(json) {
     const value = document.createElement('div');
     value.className = 'value';
 
-    if (key === 'points') {
-      value.innerText = JSON.stringify(json[key].length);
-      header.innerText = 'Number of points';
+    if (Array.isArray(json[key])) {
+      value.innerText = JSON.stringify(`Array<${json[key].length}>`);
     } else {
       value.innerText = JSON.stringify(json[key]);
     }
