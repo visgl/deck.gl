@@ -1,6 +1,5 @@
 import os
-from os.path import relpath
-from pathlib import Path
+from os.path import relpath, realpath
 import tempfile
 import time
 import webbrowser
@@ -50,7 +49,10 @@ def make_directory_if_not_exists(path):
 
 
 def add_html_extension(fname):
-    return str(Path(fname).with_suffix('.html'))
+    SUFFIX = '.html'
+    if fname.endswith(SUFFIX):
+        return str(fname)
+    return str(fname + '.html')
 
 
 def deck_to_html(
@@ -72,8 +74,8 @@ def deck_to_html(
             raise Exception("pydeck could not write a file")
         f.close()
     if open_browser:
-        display_html(f.name)
+        display_html(realpath(f.name))
     if notebook_display:
         notebook_to_html_path = relpath(f.name)
         display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_width))  # noqa
-    return f.name
+    return realpath(f.name)
