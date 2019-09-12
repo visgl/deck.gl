@@ -231,11 +231,11 @@ export default class DeckPicker {
     const pixelRatio = this.pixelRatio;
     const leftTop = cssToDevicePixels(this.gl, [x, y], true);
 
-    // take leftBottom from start location
+    // take left and top (y inverted in device pixels) from start location
     const deviceLeft = leftTop.x;
     const deviceTop = leftTop.y + leftTop.height;
 
-    // take rightTop from end location
+    // take right and bottom (y inverted in device pixels) from end location
     const rightBottom = cssToDevicePixels(this.gl, [x + width, y + height], true);
     const deviceRight = rightBottom.x + rightBottom.width;
     const deviceBottom = rightBottom.y;
