@@ -13,8 +13,8 @@ const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxN2NhMzkwYi0zNWM4LTRjNTYtYWE3Mi1jMDAxYzhlOGVmNTAiLCJpZCI6OTYxOSwic2NvcGVzIjpbImFzbCIsImFzciIsImFzdyIsImdjIl0sImlhdCI6MTU2MjE4MTMxM30.OkgVr6NaKYxabUMIGqPOYFe0V5JifXLVLfpae63x-tA';
 
 export const INITIAL_VIEW_STATE = {
-  latitude: 40.04248558075302,
-  longitude: -75.61213987669433,
+  latitude: 40,
+  longitude: -75,
   pitch: 45,
   maxPitch: 60,
   bearing: 0,
