@@ -26,15 +26,15 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl'], deckgl => {
       try {
-        const layersDict = {};
-        const layers = Object.keys(deckgl).filter(
-          x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
+        const classesDict = {};
+        const classes = Object.keys(deckgl).filter(
+          x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
         );
-        layers.map(k => (layersDict[k] = deckgl[k]));
+        classes.map(k => (classesDict[k] = deckgl[k]));
 
         const jsonConverter = new deckgl._JSONConverter({
           configuration: {
-            layers: layersDict
+            classes: classesDict
           }
         });
 
