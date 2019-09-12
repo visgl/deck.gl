@@ -5,6 +5,7 @@ import configuration from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 
 test('JSONConverter#render', t => {
+  const {gl} = require('@deck.gl/test-utils');
   const jsonConverter = new JSONConverter({configuration});
   t.ok(jsonConverter, 'JSONConverter created');
 
@@ -14,6 +15,7 @@ test('JSONConverter#render', t => {
   const jsonDeck = new Deck(
     Object.assign(
       {
+        gl,
         onAfterRender: () => {
           t.ok(jsonDeck, 'JSONConverter rendered');
           jsonDeck.finalize();
