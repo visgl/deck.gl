@@ -13,7 +13,7 @@ export default class GeoJsonDemo extends Component {
   }
 
   static get mapStyle() {
-    return MAPBOX_STYLES.LIGHT;
+    return MAPBOX_STYLES.DARK;
   }
 
   static renderInfo(meta) {
