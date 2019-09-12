@@ -62,11 +62,17 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
   });
 }
 
+let lastPickedObject;
+let lastTooltip;
+
 function getTooltip(pickedInfo) {
   if (!pickedInfo.picked) {
     return null;
   }
-  return {
+  if (pickedInfo.object === lastPickedObject) {
+    return lastTooltip;
+  }
+  const tooltip = {
     html: tabularize(pickedInfo.object),
     style: {
       fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
@@ -77,6 +83,9 @@ function getTooltip(pickedInfo) {
       zIndex: 2
     }
   };
+  lastTooltip = tooltip;
+  lastPickedObject = pickedInfo.object;
+  return tooltip;
 }
 
 function tabularize(json) {
