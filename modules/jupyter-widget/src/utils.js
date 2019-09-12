@@ -45,6 +45,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
           longitude: 0,
           zoom: 1,
           onClick: handleClick,
+          getTooltip,
           container,
           onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
         });
@@ -59,4 +60,64 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
       return {};
     });
   });
+}
+
+let lastPickedObject;
+let lastTooltip;
+
+function getTooltip(pickedInfo) {
+  if (!pickedInfo.picked) {
+    return null;
+  }
+  if (pickedInfo.object === lastPickedObject) {
+    return lastTooltip;
+  }
+  const tooltip = {
+    html: tabularize(pickedInfo.object),
+    style: {
+      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+      display: 'flex',
+      flex: 'wrap',
+      maxWidth: '500px',
+      flexDirection: 'column',
+      zIndex: 2
+    }
+  };
+  lastTooltip = tooltip;
+  lastPickedObject = pickedInfo.object;
+  return tooltip;
+}
+
+function tabularize(json) {
+  const dataTable = document.createElement('div');
+  dataTable.className = 'dataTable';
+
+  for (const key in json) {
+    const row = document.createElement('div');
+    const header = document.createElement('div');
+    header.className = 'header';
+    header.innerText = key;
+    Object.assign(header.style, {
+      fontWeight: 500,
+      marginRight: '10px'
+    });
+    const value = document.createElement('div');
+    value.className = 'value';
+    value.innerText = JSON.stringify(json[key]);
+    Object.assign(value.style, {
+      float: 'right',
+      margin: 'header'
+    });
+    value.style.margin = 'header';
+    row.appendChild(header);
+    row.appendChild(value);
+    Object.assign(row.style, {
+      display: 'flex',
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'stretch'
+    });
+    dataTable.appendChild(row);
+  }
+  return dataTable.innerHTML;
 }
