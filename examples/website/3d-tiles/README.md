@@ -26,5 +26,4 @@ npm start
 
 ### Data format
 
-Sample data is stored in [deck.gl Example Data](https://github.com/uber-common/deck.gl-data/tree/master/examples/3d-tiles). To use your own data, checkout
-the [documentation of Tile3DLayer](../../../docs/layers/tile-3d-layer.md)
+Sample data is stored in Cesium ion server. To use your own data, checkout the [documentation of Tile3DLayer](../../../docs/layers/tile-3d-layer.md)
