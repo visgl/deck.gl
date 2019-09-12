@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import BinSorter from './bin-sorter';
-import {getQuantizeScale, getLinearScale} from './scale-utils';
+import {getQuantizeScale, getLinearScale, getQuantileScale, getOrdinalScale} from './scale-utils';
 import {getValueFunc} from './aggregation-operation-utils';
 
 function nop() {}
@@ -360,6 +360,10 @@ export default class CPUAggregator {
         return getQuantizeScale;
       case 'linear':
         return getLinearScale;
+      case 'quantile':
+        return getQuantileScale;
+      case 'ordinal':
+        return getOrdinalScale;
 
       default:
         return getQuantizeScale;
