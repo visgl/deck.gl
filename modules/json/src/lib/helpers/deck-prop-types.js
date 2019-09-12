@@ -6,7 +6,7 @@
 export function getPropTypes(Class) {
   let propTypes = Class && Class._propTypes && Class._propTypes;
   // HACK: Trigger generation of propTypes
-  if (!propTypes && Class.defaultProps) {
+  if (!propTypes && Class && Class.defaultProps) {
     new Class({}); // eslint-disable-line no-new
     propTypes = Class && Class._propTypes && Class._propTypes;
   }

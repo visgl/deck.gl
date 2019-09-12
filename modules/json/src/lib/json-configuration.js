@@ -30,7 +30,7 @@ export default class JSONConfiguration {
         // DEPRECATED = For backwards compatibility, add views and layers to classe;
         case 'layers':
         case 'views':
-          this.classes = configuration[key];
+          Object.assign(this.classes, configuration[key]);
           break;
         default:
           // Store configuration as root fields (this.classes, ...)

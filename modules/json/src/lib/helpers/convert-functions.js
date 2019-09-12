@@ -5,15 +5,12 @@ import {getPropTypes, isFunctionProp} from './deck-prop-types';
 // and if so convert their string values to functions
 export default function convertFunctions(Class, props, configuration) {
   const propTypes = getPropTypes(Class);
-  if (!propTypes) {
-    return props;
-  }
 
   // Use deck.gl prop types if available.
-  return convertFunctionsUsingPropTypes(Class, props, propTypes, configuration);
+  return convertFunctionsUsingPropTypes(props, propTypes, configuration);
 }
 
-function convertFunctionsUsingPropTypes(Class, props, propTypes, configuration) {
+function convertFunctionsUsingPropTypes(props, propTypes, configuration) {
   const replacedProps = {};
   for (const propName in props) {
     let propValue = props[propName];
