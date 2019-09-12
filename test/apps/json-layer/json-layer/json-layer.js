@@ -26,7 +26,7 @@ const defaultProps = {
 export default class JSONLayer extends CompositeLayer {
   initializeState() {
     this.state = {
-      converter: new JSONConverter({
+      jsonConverter: new JSONConverter({
         configuration: new JSONConfiguration(DEFAULT_CONFIGURATION, this.props.configuration)
       }),
       layers: []
@@ -36,7 +36,7 @@ export default class JSONLayer extends CompositeLayer {
   updateState({props, oldProps, changeFlags}) {
     const layersChanged = changeFlags.dataChanged || props.configuration !== oldProps.configuration;
     if (layersChanged) {
-      this.state.layers = this.state.converter.convertJson(props.data);
+      this.state.layers = this.state.jsonConverter.convert(props.data);
     }
   }
 

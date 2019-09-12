@@ -8,7 +8,9 @@
 
 #### deck.gl/json
 
-- Changed: The `_JSONConverter` class has been remaned to `JSONConverter`.
+- Non-breaking Change: The `_JSONConverter` class has been renamed to `JSONConverter` (deprecated alias still available).
+- Non-breaking Change: The `_JSONConverter.convertJson()` method has been renamed to `JSONConverter.convert()`  (deprecated stub still available).
+- Breaking Change: The `_JSONConverter` no longer automatically injects deck.gl `View` classes and enumerations. If reqiured need to import and add these to your `JSONConfiguration`.
 - Removed: The `JSONLayer` is no longer included in this module. The code for this layer has been moved to an example in `/test/apps/json-layer`, and would need to be copied into applications to be used.
 
 

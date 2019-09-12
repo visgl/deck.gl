@@ -1,4 +1,4 @@
-// Converts a JSON payload to a deck.gl props object
+// Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
 // Lightly processes `json` props, transform string values, and extract `views` and `layers`
 // See: https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
 //
@@ -8,15 +8,67 @@
 // * Optionally, error checking could be applied, but ideally should leverage
 //   non-JSON specific mechanisms like prop types.
 
-import {instantiateClass} from './helpers/instantiate-class';
+import assert from './utils/assert';
 import JSONConfiguration from './json-configuration';
-import assert from '../utils/assert';
-
-// TODO - This can conflict with real props: Use non-valid JS key, e.g. `@type`?
+import {instantiateClass} from './helpers/instantiate-class';
+import parseJSON from './helpers/parse-json';
 
 const isObject = value => value && typeof value === 'object';
 
-export default function convertJSON(json, configuration) {
+export default class JSONConverter {
+  constructor(props) {
+    this.log = console; // eslint-disable-line
+    this.configuration = {};
+    this.onJSONChange = () => {};
+    this.json = null;
+    this.convertedJson = null;
+    this.setProps(props);
+  }
+
+  finalize() {}
+
+  setProps(props) {
+    // HANDLE CONFIGURATION PROPS
+    if ('configuration' in props) {
+      // Accept object or `JSONConfiguration`
+      this.configuration =
+        props.configuration instanceof JSONConfiguration
+          ? props.configuration
+          : new JSONConfiguration(props.configuration);
+    }
+
+    if ('onJSONChange' in props) {
+      this.onJSONChange = props.onJSONChange;
+    }
+  }
+
+  convert(json) {
+    // Use shallow equality to ensure we only convert same json once
+    if (!json || json === this.json) {
+      return this.convertedJson;
+    }
+    // Save json for shallow diffing
+    this.json = json;
+
+    // Accept JSON strings by parsing them
+    const parsedJSON = parseJSON(json);
+
+    // Convert the JSON
+    let convertedJson = convertJSON(parsedJSON, this.configuration);
+
+    convertedJson = this.configuration.postProcessConvertedJson(convertedJson);
+
+    this.convertedJson = convertedJson;
+    return convertedJson;
+  }
+
+  // DEPRECATED: Backwards compatibility
+  convertJson(json) {
+    return this.convert(json);
+  }
+}
+
+function convertJSON(json, configuration) {
   // Fixup configuration
   configuration = new JSONConfiguration(configuration);
   return convertJSONRecursively(json, '', configuration);

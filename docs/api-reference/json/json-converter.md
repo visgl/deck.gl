@@ -28,7 +28,7 @@ const deck = new Deck({
   json
 });
 
-deck.setProps(jsonConverter.convertJSON(json));
+deck.setProps(jsonConverter.convert(json));
 ```
 
 

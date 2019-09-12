@@ -109,7 +109,7 @@ export class App extends Component {
   }
 
   _setJSON(json) {
-    const jsonProps = this.jsonConverter.convertJson(json);
+    const jsonProps = this.jsonConverter.convert(json);
     this.setState({
       jsonProps,
       viewState: jsonProps.viewState

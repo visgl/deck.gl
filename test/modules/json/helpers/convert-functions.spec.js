@@ -1,22 +1,6 @@
 // Based on https://github.com/donmccurdy/expression-eval under MIT license
 import test from 'tape-catch';
-import parseExpressionString from '@deck.gl/json/lib/helpers/parse-expression-string';
-
-const row = Object.freeze({
-  foo: {
-    bar: 'baz',
-    baz: 'wow',
-    addOne: x => x + 1
-  },
-  bool: true,
-  list: [1, 2, 3, 4],
-  one: 1,
-  two: 2,
-  three: 3,
-  number: 123,
-  string: 'string',
-  addOne: x => x + 1
-});
+import convertFunctions from '@deck.gl/json/helpers/convert-functions';
 
 const TEST_CASES = [
   {expr: 'true', expected: true}, // boolean literal
@@ -80,15 +64,6 @@ const TEST_CASES = [
   {expr: 'foo["bar"]', expected: 'baz'},
   {expr: 'foo[foo.bar]', expected: 'wow'},
 
-  // call expressions -- should all fail
-  {expr: 'foo.addOne("bar")', expected: null, errorRegex: /not allowed/},
-  {expr: 'Math.sin(x)', expected: null, errorRegex: /not allowed/},
-  {expr: 'Array.isArray([1,2,3])', expected: null, errorRegex: /not allowed/},
-  {expr: 'addOne(5)', expected: null, errorRegex: /not allowed/},
-  {expr: 'addOne(1+2)', expected: null, errorRegex: /not allowed/},
-  {expr: 'true || new Error()', expected: null, errorRegex: /not allowed/},
-  {expr: 'false && Error()', expected: null, errorRegex: /not allowed/},
-
   // unary expression
   {expr: '-one', expected: -1},
   {expr: '+two', expected: 2},
@@ -100,36 +75,27 @@ const TEST_CASES = [
   {expr: 'this.three', expected: 3}
 ];
 
-const isAccessor = true;
-
-test('parseExpressionString', t => {
-  for (const testCase of TEST_CASES) {
-    const isErrorCase = Boolean(testCase.errorRegex);
-    if (isErrorCase) {
-      t.throws(
-        () => parseExpressionString(testCase.expr, null, isAccessor),
-        testCase.errorRegex,
-        `throws on ${testCase.expr}`
+test('convertFunctions#get...', t => {
+  const props = {};
+  TEST_CASES.forEach((testCase, i) => {
+    // Add a mix of function and value props
+    // TODO this is based on `get` heuristic, we have better ideas and will update tests when we address
+    const propName = i % 2 === 0 ? `get-${i}` : `value-${i}`;
+    props[propName] = testCase.expr;
+  });
+  const convertedProps = convertFunctions(null, props, {});
+  for (const key in convertedProps) {
+    if (key.startsWith('get')) {
+      t.ok(
+        typeof convertedProps[key] === 'function',
+        'convertFunctions converted prop to function'
       );
-      /* eslint-disable-next-line no-continue */
-      continue;
+    } else {
+      t.ok(
+        typeof convertedProps[key] !== 'function',
+        'convertFunctions did not converted string to function'
+      );
     }
-    const func = parseExpressionString(testCase.expr, null, isAccessor);
-
-    t.ok(func, `parseExpressionString converted ${testCase.expr}`);
-    t.deepEquals(
-      func(row),
-      testCase.expected,
-      `parseExpressionString correctly evaluated ${testCase.expr} to ${testCase.expected}`
-    );
   }
-
-  const func = parseExpressionString('-', null, isAccessor);
-  t.deepEquals(
-    func('identity'),
-    'identity',
-    'parseExpressionString of - returns a cached identity function'
-  );
-
   t.end();
 });
