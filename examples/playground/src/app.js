@@ -3,15 +3,20 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
 
-import {JSONConverter, JSONConfiguration} from '@deck.gl/json';
-import {DECK_JSON_CONVERTER_CONFIGURATION} from './deck-json-converter';
+import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
+import JSON_CONVERTER_CONFIGURATION from './configuration';
 
 import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import JSON_CONFIGURATION from './configuration';
 import JSON_TEMPLATES from '../json-examples';
+
+import { registerLoaders } from '@loaders.gl/core';
+import { CSVLoader } from '@loaders.gl/csv';
+
+// Note: deck already registers JSONLoader...
+registerLoaders([CSVLoader]);
 
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
@@ -86,10 +91,7 @@ export class App extends Component {
     this._onEditorChange = this._onEditorChange.bind(this);
 
     // Configure and create the JSON converter instance
-    const configuration = new JSONConfiguration(
-      DECK_JSON_CONVERTER_CONFIGURATION,
-      JSON_CONFIGURATION
-    );
+    const configuration = new JSONConfiguration(JSON_CONVERTER_CONFIGURATION);
     this.jsonConverter = new JSONConverter({configuration});
   }
 
@@ -109,11 +111,32 @@ export class App extends Component {
   }
 
   _setJSON(json) {
-    const jsonProps = this.jsonConverter.convert(json);
+    let jsonProps = this.jsonConverter.convert(json);
+    jsonProps = this._handleViewState(jsonProps);
+
     this.setState({
       jsonProps,
       viewState: jsonProps.viewState
     });
+  }
+
+  // Handle `json.initialViewState`
+  // If we receive new JSON we need to decide if we should update current view state
+  // Current heuristic is to compare with last `initialViewState` and only update if changed
+  _handleViewState(json) {
+    if ('initialViewState' in json) {
+      const updateViewState =
+        !this.initialViewState ||
+        !_shallowEqualObjects(json.initialViewState, this.initialViewState);
+
+      if (updateViewState) {
+        json.viewState = json.viewState || json.initialViewState;
+        this.initialViewState = json.initialViewState;
+      }
+
+      delete json.initialViewState;
+    }
+    return json;
   }
 
   // Updates pretty printed text in editor.

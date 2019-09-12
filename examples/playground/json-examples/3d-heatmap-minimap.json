@@ -40,6 +40,10 @@
       "type": "HexagonLayer",
       "id": "heatmap",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
+      "loadOptions": {
+        "header": false
+      },
+
       "coverage": 1,
       "elevationRange": [0, 3000],
       "elevationScale": 50,
