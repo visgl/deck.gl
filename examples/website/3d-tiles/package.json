@@ -17,10 +17,7 @@
     "@babel/cli": "^7.0.0",
     "@babel/core": "^7.4.0",
     "@babel/preset-react": "^7.0.0",
-    "argparse": "^1.0.10",
-    "babel-eslint": "^10.0.1",
     "babel-loader": "^8.0.5",
-    "eslint-plugin-react": "^7.10",
     "webpack": "^4.39.1",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.11"

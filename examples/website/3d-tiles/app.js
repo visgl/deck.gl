@@ -12,13 +12,9 @@ const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const ION_TOKEN =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxN2NhMzkwYi0zNWM4LTRjNTYtYWE3Mi1jMDAxYzhlOGVmNTAiLCJpZCI6OTYxOSwic2NvcGVzIjpbImFzbCIsImFzciIsImFzdyIsImdjIl0sImlhdCI6MTU2MjE4MTMxM30.OkgVr6NaKYxabUMIGqPOYFe0V5JifXLVLfpae63x-tA';
 
-const EXAMPLES_VIEWSTATE = {
-  latitude: 40.04248558075302,
-  longitude: -75.61213987669433
-};
-
 export const INITIAL_VIEW_STATE = {
-  ...EXAMPLES_VIEWSTATE,
+  latitude: 40.04248558075302,
+  longitude: -75.61213987669433,
   pitch: 45,
   maxPitch: 60,
   bearing: 0,
@@ -36,7 +32,6 @@ export class App extends PureComponent {
       attributions: []
     };
 
-    this._deckRef = null;
     this._onTilesetLoad = this._onTilesetLoad.bind(this);
     this._onTilesetChange = this._onTilesetChange.bind(this);
   }
@@ -64,11 +59,6 @@ export class App extends PureComponent {
     });
   }
 
-  // Called by Tile3DLayer whenever an individual tile in the current tileset is load or unload
-  _onTilesetChange(tileHeader) {
-    this.forceUpdate();
-  }
-
   // Called by DeckGL when user interacts with the map
   _onViewStateChange({viewState}) {
     this.setState({viewState});
@@ -81,10 +71,7 @@ export class App extends PureComponent {
       ionAccessToken: ION_TOKEN,
       DracoWorkerLoader,
       DracoLoader,
-      onTilesetLoad: this._onTilesetLoad,
-      onTileLoad: this._onTilesetChange,
-      onTileUnload: this._onTilesetChange,
-      onTileLoadFail: this._onTilesetChange
+      onTilesetLoad: this._onTilesetLoad
     });
   }
 
@@ -96,7 +83,6 @@ export class App extends PureComponent {
     return (
       <div>
         <DeckGL
-          ref={_ => (this._deckRef = _)}
           layers={[tile3DLayer]}
           initialViewState={INITIAL_VIEW_STATE}
           viewState={viewState}
