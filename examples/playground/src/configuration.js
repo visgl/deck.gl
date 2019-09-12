@@ -1,18 +1,4 @@
-// TODO - This file contains too much custom code, should just require a clean `JSONConfiguration`.
-
-// Converts JSON to props ("hydrating" classes, resolving enums and functions etc).
-
-// Converts a JSON payload to a deck.gl props object
-// Lightly processes `json` props, transform string values, and extract `views` and `layers`
-// See: https://github.com/uber/deck.gl/blob/master/dev-docs/RFCs/v6.1/json-layers-rfc.md
-//
-// NOTES:
-// * This is intended to provide minimal necessary processing required to support
-//   existing deck.gl props via JSON. This is not an implementation of alternate JSON schemas.
-// * Optionally, error checking could be applied, but ideally should leverage
-//   non-JSON specific mechanisms like prop types.
-
-import {_convertFunctions} from '@deck.gl/json';
+// This configuration object determines which deck.gl classes are accessible in Playground
 
 import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';
@@ -42,9 +28,5 @@ export default {
   enumerations: {
     COORDINATE_SYSTEM,
     GL
-  },
-
-  preProcessClassProps(Class, props, configuration) {
-    return _convertFunctions(Class, props, configuration);
   }
 };

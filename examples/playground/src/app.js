@@ -112,7 +112,7 @@ export class App extends Component {
 
   _setJSON(json) {
     let jsonProps = this.jsonConverter.convert(json);
-    jsonProps = this._handleViewState(jsonProps);
+    jsonProps = this._updateViewState(jsonProps);
 
     this.setState({
       jsonProps,
@@ -123,7 +123,7 @@ export class App extends Component {
   // Handle `json.initialViewState`
   // If we receive new JSON we need to decide if we should update current view state
   // Current heuristic is to compare with last `initialViewState` and only update if changed
-  _handleViewState(json) {
+  _updateViewState(json) {
     if ('initialViewState' in json) {
       const updateViewState =
         !this.initialViewState ||

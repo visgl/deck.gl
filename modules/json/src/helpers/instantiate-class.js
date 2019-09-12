@@ -1,3 +1,5 @@
+import convertFunctions from './convert-functions';
+
 // This attempts to instantate a class. Eiher as a class or as a react component
 export function instantiateClass(type, props, configuration) {
   // Find the class
@@ -25,6 +27,9 @@ function instantiateJavaScriptClass(Class, props, configuration) {
   if (configuration.preProcessClassProps) {
     props = configuration.preProcessClassProps(Class, props, configuration);
   }
+
+  props = convertFunctions(Class, props, configuration);
+
   return new Class(props);
 }
 
@@ -35,5 +40,8 @@ function instantiateReactComponent(Component, props, configuration) {
   if (configuration.preProcessClassProps) {
     props = configuration.preProcessClassProps(Component, props, configuration);
   }
+
+  props = convertFunctions(Component, props, configuration);
+
   return React.createElement(Component, props, children);
 }
