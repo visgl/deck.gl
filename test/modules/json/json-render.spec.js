@@ -1,7 +1,7 @@
 /*
 import test from 'tape-catch';
 import {Deck} from '@deck.gl/core';
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+import {JSONConverter} from '@deck.gl/json';
 ./no-longer-supported/deck-json-converter.spec
 import {configuration, JSON_DATA} from './deck-json-converter.spec';
 

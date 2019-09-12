@@ -13,7 +13,7 @@ Requirements on the JSON description:
 ## Usage
 
 ```js
-import {_JSONConverter as JSONConverter} from '@deck.gl/json';
+import {JSONConverter} from '@deck.gl/json';
 
 import json from './us-map.json';
 
@@ -28,7 +28,7 @@ const deck = new Deck({
   json
 });
 
-deck.setProps(jsonConverter.convertJSONToDeckProps(json));
+deck.setProps(jsonConverter.convertJSON(json));
 ```
 
 

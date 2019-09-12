@@ -3,9 +3,11 @@
 
 import parseJSON from './helpers/parse-json';
 import convertJSON from './convert-json';
+import JSONConfiguration from './json-configuration';
 
 export default class JSONConverter {
   constructor(props) {
+    this.log = console; // eslint-disable-line
     this.configuration = {};
     this.onJSONChange = () => {};
     this.json = null;
@@ -18,7 +20,11 @@ export default class JSONConverter {
   setProps(props) {
     // HANDLE CONFIGURATION PROPS
     if ('configuration' in props) {
-      this.configuration = props.configuration;
+      // Accept object or `JSONConfiguration`
+      this.configuration =
+        props.configuration instanceof JSONConfiguration
+          ? props.configuration
+          : new JSONConfiguration(props.configuration);
     }
 
     if ('onJSONChange' in props) {
@@ -40,18 +46,9 @@ export default class JSONConverter {
     // Convert the JSON
     let convertedJson = convertJSON(parsedJSON, this.configuration);
 
-    convertedJson = this.postProcessConvertedJson(convertedJson);
+    convertedJson = this.configuration.postProcessConvertedJson(convertedJson);
 
     this.convertedJson = convertedJson;
-    return convertedJson;
-  }
-
-  preProcessClassProps(props) {
-    return props;
-  }
-
-  // Let subclass post process
-  postProcessConvertedJson(convertedJson) {
     return convertedJson;
   }
 }
