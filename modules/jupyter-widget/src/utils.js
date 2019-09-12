@@ -93,20 +93,34 @@ function tabularize(json) {
   dataTable.className = 'dataTable';
 
   for (const key in json) {
+    if (['undefined', 'position', 'index'].includes(key)) {
+      continue; // eslint-disable-line
+    }
     const row = document.createElement('div');
     const header = document.createElement('div');
     header.className = 'header';
     header.innerText = key;
     Object.assign(header.style, {
-      fontWeight: 500,
-      marginRight: '10px'
+      fontWeight: 700,
+      marginRight: '10px',
+      flex: 1
     });
     const value = document.createElement('div');
     value.className = 'value';
-    value.innerText = JSON.stringify(json[key]);
+
+    if (key === 'points') {
+      value.innerText = JSON.stringify(json[key].length);
+      header.innerText = 'Number of points';
+    } else {
+      value.innerText = JSON.stringify(json[key]);
+    }
+
     Object.assign(value.style, {
-      float: 'right',
-      margin: 'header'
+      flex: 'none',
+      maxWidth: '250px',
+      overflow: 'hidden',
+      whiteSpace: 'nowrap',
+      textOverflow: 'ellipsis'
     });
     value.style.margin = 'header';
     row.appendChild(header);
