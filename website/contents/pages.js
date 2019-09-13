@@ -523,6 +523,10 @@ export const docPages = generatePath([
             content: getDocUrl('layers/tile-layer.md')
           },
           {
+            name: 'Tile3DLayer',
+            content: getDocUrl('layers/tile-3d-layer.md')
+          },
+          {
             name: 'TripsLayer',
             content: getDocUrl('layers/trips-layer.md')
           }

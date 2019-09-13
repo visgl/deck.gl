@@ -15,9 +15,8 @@ const cullingVolume = new CullingVolume([
 
 // Extracts a frame state appropriate for tile culling from a deck.gl viewport
 // TODO - this could likely be generalized and merged back into deck.gl for other culling scenarios
-export function getFrameState(viewport, timeline) {
+export function getFrameState(viewport, frameNumber) {
   // Traverse and and request. Update _selectedTiles so that we know what to render.
-  const tick = timeline.getTime();
   const {cameraDirection, cameraUp, height} = viewport;
   const {metersPerPixel} = viewport.distanceScales;
 
@@ -55,7 +54,7 @@ export function getFrameState(viewport, timeline) {
     },
     height,
     cullingVolume,
-    frameNumber: tick, // TODO: This can be the same between updates, what number is unique for between updates?
+    frameNumber, // TODO: This can be the same between updates, what number is unique for between updates?
     sseDenominator: 1.15 // Assumes fovy = 60 degrees
   };
 }

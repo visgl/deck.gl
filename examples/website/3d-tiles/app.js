@@ -66,8 +66,8 @@ export class App extends PureComponent {
   _renderTile3DLayer() {
     return new Tile3DLayer({
       id: 'tile-3d-layer',
-      ionAssetId: 33301,
-      ionAccessToken: ION_TOKEN,
+      _ionAssetId: 33301,
+      _ionAccessToken: ION_TOKEN,
       DracoWorkerLoader,
       DracoLoader,
       onTilesetLoad: this._onTilesetLoad
