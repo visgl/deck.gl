@@ -4,6 +4,8 @@
 
 - Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
 
+- `ScreenGridLayer` is now limited to browsers that support WebGL2 or `OES_texture_float` extension.
+
 ## Upgrading from deck.gl v7.2 to v7.3
 
 #### Deprecations
