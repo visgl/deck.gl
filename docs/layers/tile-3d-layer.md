@@ -1,7 +1,7 @@
 # Tile3DLayer (Experimental)
 
-The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Category](docs/specifications/3d-tiles),
-which is supported by the [Tileset3DLoader](docs/api-reference/3d-tiles/tileset-3d-loader).
+The `Tile3DLayer` renders tileset data formatted according to the [3D Tiles Category](https://loaders.gl/docs/api-reference/3d-tiles),
+which is supported by the [Tileset3DLoader](https://loaders.gl/docs/api-reference/3d-tiles/tileset-3d-loader).
 
 Tile3DLayer is a [CompositeLayer](/docs/api-reference/composite-layer.md). Base on each tile content [format](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification#introduction), it uses either a [PointCloudLayer](/docs/layers/point-cloud-layer.md) or [ScenegraphLayer](/docs/layers/scenegraph-layer.md) to render.
 
