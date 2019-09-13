@@ -1,3 +1,5 @@
+import getTooltip from './widget-tooltip';
+
 /* global document */
 export function loadCss(url) {
   const link = document.createElement('link');
@@ -60,79 +62,4 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
       return {};
     });
   });
-}
-
-let lastPickedObject;
-let lastTooltip;
-
-function getTooltip(pickedInfo) {
-  if (!pickedInfo.picked) {
-    return null;
-  }
-  if (pickedInfo.object === lastPickedObject) {
-    return lastTooltip;
-  }
-  const tooltip = {
-    html: tabularize(pickedInfo.object),
-    style: {
-      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-      display: 'flex',
-      flex: 'wrap',
-      maxWidth: '500px',
-      flexDirection: 'column',
-      zIndex: 2
-    }
-  };
-  lastTooltip = tooltip;
-  lastPickedObject = pickedInfo.object;
-  return tooltip;
-}
-
-function tabularize(json) {
-  // Turns a JSON object of picked info into HTML for a tooltip
-  const dataTable = document.createElement('div');
-  dataTable.className = 'dataTable';
-
-  // Creates rows of two columns for the tooltip
-  for (const key in json) {
-    if (['undefined', 'position', 'index'].includes(key)) {
-      continue; // eslint-disable-line
-    }
-    const row = document.createElement('div');
-    const header = document.createElement('div');
-    header.className = 'header';
-    header.innerText = key;
-    Object.assign(header.style, {
-      fontWeight: 700,
-      marginRight: '10px',
-      flex: 1
-    });
-    const value = document.createElement('div');
-    value.className = 'value';
-
-    if (Array.isArray(json[key])) {
-      value.innerText = JSON.stringify(`Array<${json[key].length}>`);
-    } else {
-      value.innerText = JSON.stringify(json[key]);
-    }
-
-    Object.assign(value.style, {
-      flex: 'none',
-      maxWidth: '250px',
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis'
-    });
-    value.style.margin = 'header';
-    row.appendChild(header);
-    row.appendChild(value);
-    Object.assign(row.style, {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'stretch'
-    });
-    dataTable.appendChild(row);
-  }
-  return dataTable.innerHTML;
 }
