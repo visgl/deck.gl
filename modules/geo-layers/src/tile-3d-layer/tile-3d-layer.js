@@ -11,6 +11,7 @@ import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 import {getFrameState} from './get-frame-state';
 
 const defaultProps = {
+  getColor: [255, 0, 0],
   _lighting: 'pbr',
   pointSize: 1.0,
   opacity: 1.0,
@@ -135,14 +136,14 @@ export default class Tile3DLayer extends CompositeLayer {
 
     // create layers for new tiles
     const {selectedTiles} = tileset3d;
-    const tilesWithoutLayer = selectedTiles.filter(tile => !layerMap[tile.contentUri]);
+    const tilesWithoutLayer = selectedTiles.filter(tile => !layerMap[tile.fullUri]);
 
     for (const tile of tilesWithoutLayer) {
       // TODO - why do we call this here? Being "selected" should automatically add it to cache?
       tileset3d.addTileToCache(tile);
       unpackTile(tile, this.props.DracoLoader);
 
-      layerMap[tile.contentUri] = {
+      layerMap[tile.fullUri] = {
         layer: this._create3DTileLayer(tile),
         tile
       };
@@ -165,15 +166,15 @@ export default class Tile3DLayer extends CompositeLayer {
         if (layer && layer.props && !layer.props.visible) {
           // Still has GPU resource but visibility is turned off so turn it back on so we can render it.
           layer = layer.clone({visible: true});
-          layerMap[tile.contentUri].layer = layer;
+          layerMap[tile.fullUri].layer = layer;
         }
       } else if (tile.contentUnloaded) {
         // Was cleaned up from tileset cache. We no longer need to track it.
-        delete layerMap[tile.contentUri];
+        delete layerMap[tile.fullUri];
       } else if (layer && layer.props && layer.props.visible) {
         // Still in tileset cache but doesn't need to render this frame. Keep the GPU resource bound but don't render it.
         layer = layer.clone({visible: false});
-        layerMap[tile.contentUri].layer = layer;
+        layerMap[tile.fullUri].layer = layer;
       }
     }
 
@@ -211,7 +212,7 @@ export default class Tile3DLayer extends CompositeLayer {
         id: 'scenegraph'
       }),
       {
-        id: `${this.id}-scenegraph-${tileHeader.contentUri}`,
+        id: `${this.id}-scenegraph-${tileHeader.fullUri}`,
         // Fix for ScenegraphLayer.modelMatrix, under flag in deck 7.3 to avoid breaking existing code
         data: instances || [{}],
         scenegraph: gltf,
@@ -251,7 +252,7 @@ export default class Tile3DLayer extends CompositeLayer {
         id: 'pointcloud'
       }),
       {
-        id: `${this.id}-pointcloud-${tileHeader.contentUri}`,
+        id: `${this.id}-pointcloud-${tileHeader.fullUri}`,
         data: {
           header: {
             vertexCount: pointCount
