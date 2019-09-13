@@ -15,6 +15,8 @@ Or set `MAPBOX_TOKEN` directly in `app.js`.
 
 Other options can be found at [using with Mapbox GL](../../../docs/get-started/using-with-mapbox-gl.md).
 
+To download the Cesium 3D tileset, you need a Cesium ion access token, and set it to `ION_TOKEN` in `app.js`.
+
 ```bash
 # install dependencies
 npm install
