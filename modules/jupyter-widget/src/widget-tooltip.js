@@ -25,7 +25,7 @@ export default function getTooltip(pickedInfo) {
   return tooltip;
 }
 
-const EXCLUDES = new Set(['undefined', 'position', 'index']);
+const EXCLUDES = new Set(['position', 'index']);
 
 function tabularize(json) {
   // Turns a JSON object of picked info into HTML for a tooltip
