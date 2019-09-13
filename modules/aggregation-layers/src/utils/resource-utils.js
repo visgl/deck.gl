@@ -1,5 +1,5 @@
 import GL from '@luma.gl/constants';
-import {Framebuffer, Texture2D} from '@luma.gl/core';
+import {Framebuffer, Texture2D, isWebGL2} from '@luma.gl/core';
 
 const DEFAULT_PARAMETERS = {
   [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
@@ -16,7 +16,7 @@ export function getFloatTexture(gl, opts = {}) {
   } = opts;
   const texture = new Texture2D(gl, {
     data,
-    format: GL.RGBA32F,
+    format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
     type: GL.FLOAT,
     border: 0,
     mipmaps: false,
