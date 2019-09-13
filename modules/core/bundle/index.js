@@ -13,5 +13,3 @@ Object.assign(_global.deck, deckGLCore, {DeckGL});
 Object.assign(_global.luma, LumaGL);
 
 module.exports = _global.deck;
-
-export {} from '@luma.gl/core';
