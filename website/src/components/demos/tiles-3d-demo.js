@@ -17,20 +17,19 @@ export default class GeoJsonDemo extends Component {
   }
 
   static renderInfo(meta) {
-
-    if(!meta.attributions) {
+    if (!meta.attributions) {
       return null;
     }
     const {attributions} = meta;
     return (
-        <div style={{marginTop: '0.5cm'}}>
-          <div style={{textAlign: 'center', borderStyle: 'groove'}}>
-            {Boolean(attributions.length) && <b>Tileset Credentials</b>}
-            {attributions.map(attribution => (
-                <div key={attribution.html} dangerouslySetInnerHTML={{__html: attribution.html}} />
-            ))}
-          </div>
+      <div style={{marginTop: '0.5cm'}}>
+        <div style={{textAlign: 'center', borderStyle: 'groove'}}>
+          {Boolean(attributions.length) && <b>Tileset Credentials</b>}
+          {attributions.map(attribution => (
+            <div key={attribution.html} dangerouslySetInnerHTML={{__html: attribution.html}} />
+          ))}
         </div>
+      </div>
     );
   }
 
@@ -40,7 +39,6 @@ export default class GeoJsonDemo extends Component {
   }
 
   render() {
-    return <App {...this.props}
-                updateAttributions={this._updateAttributions}/>;
+    return <App {...this.props} updateAttributions={this._updateAttributions} />;
   }
 }
