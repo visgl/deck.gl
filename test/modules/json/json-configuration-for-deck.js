@@ -3,8 +3,6 @@ import GL from '@luma.gl/constants';
 
 export const log = console; // eslint-disable-line
 
-export const SCATTER_PLOT_LAYER_ID = 'scatter-plot-layer-test';
-
 export default {
   log,
   // a map of all layers that should be exposes as JSONLayers

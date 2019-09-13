@@ -3,7 +3,7 @@ import {makeSpy} from '@probe.gl/test-utils';
 
 import {MapController} from '@deck.gl/core';
 import {JSONConverter} from '@deck.gl/json';
-import configuration, {log, SCATTER_PLOT_LAYER_ID} from './json-configuration-for-deck';
+import configuration, {log} from './json-configuration-for-deck';
 import JSON_DATA from './data/deck-props.json';
 
 test('JSONConverter#import', t => {

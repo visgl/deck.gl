@@ -4,6 +4,8 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
 
+import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
+
 import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
