@@ -6,7 +6,6 @@ export {
   Transform,
   ClipSpace,
   ProgramManager,
-
   // Context utilities
   isWebGL,
   isWebGL2,
@@ -19,7 +18,6 @@ export {
   setParameter,
   setParameters,
   withParameters,
-
   // WebGL1 classes
   Buffer,
   Shader,
@@ -30,7 +28,6 @@ export {
   Renderbuffer,
   Texture2D,
   TextureCube,
-
   // WebGL2 classes
   Query,
   Texture3D,
@@ -38,7 +35,6 @@ export {
   VertexArrayObject,
   VertexArray,
   UniformBufferLayout,
-
   // Geometries
   Geometry,
   ConeGeometry,
@@ -48,12 +44,10 @@ export {
   PlaneGeometry,
   SphereGeometry,
   TruncatedConeGeometry,
-
   // Materials
   Material,
   PhongMaterial,
   PBRMaterial,
-
   // Shader Modules
   fp32,
   fp64,

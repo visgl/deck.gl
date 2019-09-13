@@ -1,5 +1,5 @@
 // We use `require` here because luma and deck core must be imported before `global`
-const LumaGL = require('@luma.gl/core');
+const LumaGL = require('./lumagl');
 const deckGLCore = require('../src');
 
 const DeckGL = require('./deckgl').default;
@@ -14,6 +14,4 @@ Object.assign(_global.luma, LumaGL);
 
 module.exports = _global.deck;
 
-export {
-
-} from '@luma.gl/core';
+export {} from '@luma.gl/core';
