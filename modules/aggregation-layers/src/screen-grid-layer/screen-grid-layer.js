@@ -25,16 +25,13 @@ import GPUGridAggregator from '../utils/gpu-grid-aggregation/gpu-grid-aggregator
 import {AGGREGATION_OPERATION} from '../utils/aggregation-operation-utils';
 
 import GL from '@luma.gl/constants';
-import {Model, Geometry, Buffer, isWebGL2} from '@luma.gl/core';
+import {Model, Geometry, Buffer, FEATURES, hasFeatures} from '@luma.gl/core';
 
 import vs from './screen-grid-layer-vertex.glsl';
-import vs_WebGL1 from './screen-grid-layer-vertex-webgl1.glsl';
 import fs from './screen-grid-layer-fragment.glsl';
-import fs_WebGL1 from './screen-grid-layer-fragment-webgl1.glsl';
 
 const DEFAULT_MINCOLOR = [0, 0, 0, 0];
 const DEFAULT_MAXCOLOR = [0, 255, 0, 255];
-const AGGREGATION_DATA_UBO_INDEX = 0;
 const COLOR_PROPS = [`minColor`, `maxColor`, `colorRange`, `colorDomain`];
 
 const defaultProps = {
@@ -53,16 +50,19 @@ const defaultProps = {
 
 export default class ScreenGridLayer extends Layer {
   getShaders() {
-    const shaders = isWebGL2(this.context.gl) ? {vs, fs} : {vs: vs_WebGL1, fs: fs_WebGL1};
-    shaders.modules = ['picking'];
-    return super.getShaders(shaders);
+    return super.getShaders({vs, fs, modules: ['picking']});
   }
 
   initializeState() {
     const attributeManager = this.getAttributeManager();
     const {gl} = this.context;
+    if (!hasFeatures(gl, [FEATURES.TEXTURE_FLOAT])) {
+      // max aggregated value is sampled from a float texture
+      this.setState({supported: false});
+      log.error(`ScreenGridLayer: ${this.id} is not supported on this browser`)();
+      return;
+    }
 
-    /* eslint-disable max-len */
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
       instanceCounts: {
@@ -73,32 +73,27 @@ export default class ScreenGridLayer extends Layer {
         noAlloc: true
       }
     });
-    /* eslint-disable max-len */
 
     const options = {
       id: `${this.id}-aggregator`
     };
-    const maxBuffer = this._getMaxCountBuffer(gl);
     const weights = {
       color: {
         size: 1,
         operation: AGGREGATION_OPERATION.SUM,
-        needMax: true,
-        maxBuffer
+        needMax: true
       }
     };
     this.setState({
+      supported: true,
       model: this._getModel(gl),
       gpuGridAggregator: new GPUGridAggregator(gl, options),
-      maxBuffer,
       weights
     });
-
-    this._setupUniformBuffer();
   }
 
   shouldUpdateState({changeFlags}) {
-    return changeFlags.somethingChanged;
+    return this.state.supported && changeFlags.somethingChanged;
   }
 
   updateState(opts) {
@@ -126,7 +121,7 @@ export default class ScreenGridLayer extends Layer {
   finalizeState() {
     super.finalizeState();
 
-    const {aggregationBuffer, maxBuffer, gpuGridAggregator} = this.state;
+    const {aggregationBuffer, maxBuffer, gpuGridAggregator, maxTexture} = this.state;
     gpuGridAggregator.delete();
     if (aggregationBuffer) {
       aggregationBuffer.delete();
@@ -134,32 +129,33 @@ export default class ScreenGridLayer extends Layer {
     if (maxBuffer) {
       maxBuffer.delete();
     }
+    if (maxTexture) {
+      maxTexture.delete();
+    }
   }
 
   draw({uniforms}) {
-    const {gl} = this.context;
+    if (!this.state.supported) {
+      return;
+    }
     const {parameters = {}} = this.props;
     const minColor = this.props.minColor || DEFAULT_MINCOLOR;
     const maxColor = this.props.maxColor || DEFAULT_MAXCOLOR;
 
     // If colorDomain not specified we use default domain [1, maxCount]
-    // maxCount value will be deduced from aggregated buffer in the vertex shader.
+    // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model, maxBuffer, cellScale, shouldUseMinMax, colorRange, maxWeight} = this.state;
+    const {model, cellScale, shouldUseMinMax, colorRange, maxTexture} = this.state;
     const layerUniforms = {
       minColor,
       maxColor,
+      maxTexture,
       cellScale,
       colorRange,
       colorDomain,
       shouldUseMinMax
     };
 
-    if (isWebGL2(gl)) {
-      maxBuffer.bind({target: GL.UNIFORM_BUFFER});
-    } else {
-      layerUniforms.maxWeight = maxWeight;
-    }
     uniforms = Object.assign(layerUniforms, uniforms);
     model.draw({
       uniforms,
@@ -171,9 +167,6 @@ export default class ScreenGridLayer extends Layer {
         parameters
       )
     });
-    if (isWebGL2(gl)) {
-      maxBuffer.unbind();
-    }
   }
 
   calculateInstancePositions(attribute, {numInstances}) {
@@ -247,17 +240,6 @@ export default class ScreenGridLayer extends Layer {
     );
   }
 
-  // Creates and returns a Uniform Buffer object to hold maxCount value.
-  _getMaxCountBuffer(gl) {
-    return new Buffer(gl, {
-      byteLength: 4 * 4, // Four floats
-      index: AGGREGATION_DATA_UBO_INDEX,
-      accessor: {
-        size: 4
-      }
-    });
-  }
-
   // Process 'data' and build positions and weights Arrays.
   _processData() {
     const {data, getPosition, getWeight} = this.props;
@@ -287,20 +269,6 @@ export default class ScreenGridLayer extends Layer {
     }
     weights.color.values = colorWeights;
     this.setState({positions, pointCount});
-  }
-
-  // Set a binding point for the aggregation uniform block index
-  _setupUniformBuffer() {
-    const gl = this.context.gl;
-    // For WebGL1, uniform buffer is not used.
-    if (!isWebGL2(gl)) {
-      return;
-    }
-    const programHandle = this.state.model.program.handle;
-
-    // TODO: Replace with luma.gl api when ready.
-    const uniformBlockIndex = gl.getUniformBlockIndex(programHandle, 'AggregationData');
-    gl.uniformBlockBinding(programHandle, uniformBlockIndex, AGGREGATION_DATA_UBO_INDEX);
   }
 
   _shouldUseMinMax() {
@@ -350,16 +318,8 @@ export default class ScreenGridLayer extends Layer {
       gridTransformMatrix
     });
 
-    const maxWeight =
-      results.color.maxData && Number.isFinite(results.color.maxData[0])
-        ? results.color.maxData[0]
-        : 0;
-
-    this.setState({
-      maxWeight // uniform to use under WebGL1
-    });
-
     attributeManager.invalidate('instanceCounts');
+    this.setState({maxTexture: results.color.maxTexture});
   }
 
   _updateUniforms({oldProps, props, changeFlags}) {
