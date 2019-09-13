@@ -19,13 +19,6 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.2
 
-#### deck.gl [v7.2.4] - Sep 13, 2019
-
-- Bump loaders.gl to latest latest 1.2 prod (#3594)
-- add extensions to master bundle (#3592)
-- update website fonts (#3519)
-- produce more meaningful metrics (#3518)
-
 #### deck.gl [v7.2.3] - Aug 16, 2019
 
 - IconLayer: check texture width and height before drawing (#3481)
