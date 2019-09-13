@@ -1,17 +1,19 @@
-import {COORDINATE_SYSTEM, log} from '@deck.gl/core';
-import GL from '@luma.gl/constants';
+// This configuration object determines which deck.gl classes are accessible in Playground
 
+import {MapView, FirstPersonView, OrbitView, OrthographicView} from '@deck.gl/core';
 import * as Layers from '@deck.gl/layers';
 import * as AggregationLayers from '@deck.gl/aggregation-layers';
 import * as GeoLayers from '@deck.gl/geo-layers';
 import * as MeshLayers from '@deck.gl/mesh-layers';
 
-export default {
-  log,
+import {COORDINATE_SYSTEM} from '@deck.gl/core';
+import GL from '@luma.gl/constants';
 
+export default {
   // Classes that should be instantiatable by JSON converter
   classes: Object.assign(
-    {},
+    // Support `@deck.gl/core` Views
+    {MapView, FirstPersonView, OrbitView, OrthographicView},
     // a map of all layers that should be exposes as JSONLayers
     Layers,
     AggregationLayers,

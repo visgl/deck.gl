@@ -22,6 +22,9 @@
       "type": "HexagonLayer",
       "id": "heatmap",
       "data": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv",
+      "loadOptions": {
+        "header": false
+      },
       "coverage": 1,
       "pickable": true,
       "autoHighlight": true,

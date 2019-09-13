@@ -1,83 +1,40 @@
-import React, {Component} from 'react';
+import React, {Component, Fragment} from 'react';
+import {render} from 'react-dom';
 import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
 
-import {JSONConverter, JSONConfiguration} from '@deck.gl/json';
-import {DECK_JSON_CONVERTER_CONFIGURATION} from './deck-json-converter';
+import {FlyToInterpolator} from '@deck.gl/core';
+import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
+import JSON_CONVERTER_CONFIGURATION from './configuration';
 
 import AceEditor from 'react-ace';
 import 'brace/mode/json';
 import 'brace/theme/github';
 
-import JSON_CONFIGURATION from './configuration';
 import JSON_TEMPLATES from '../json-examples';
+
+import {registerLoaders} from '@loaders.gl/core';
+import {CSVLoader} from '@loaders.gl/csv';
+
+// Note: deck already registers JSONLoader...
+registerLoaders([CSVLoader]);
 
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
-const MAPBOX_STYLESHEET = `https://api.tiles.mapbox.com/mapbox-gl-js/v0.47.0/mapbox-gl.css`;
-
-const STYLES = {
-  CONTAINER: {
-    width: '100%',
-    height: '100vh',
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'stretch'
-  },
-
-  LEFT_PANE: {
-    flex: '0 1 40%',
-    margin: 0,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'stretch'
-  },
-
-  LEFT_PANE_SELECTOR: {
-    flex: '0 0 34px',
-
-    margin: 0,
-    padding: '5px 35px 5px 5px',
-    fontSize: 16,
-    border: '1px solid #ccc',
-    appearance: 'none'
-  },
-
-  LEFT_PANE_TEXT: {
-    flex: '0 1 100%'
-  },
-
-  RIGHT_PANE: {
-    flex: '0 1 60%',
-    margin: 0
-  }
-};
-
-// Helper function to set mapbox stylesheet (avoids need for index.html just to set styles)
-function setStyleSheet(url) {
-  /* global document */
-  document.body.style.margin = '0px';
-  const styles = document.createElement('link');
-  styles.type = 'text/css';
-  styles.rel = 'stylesheet';
-  styles.href = url;
-  document.head.appendChild(styles);
-}
 
 export class App extends Component {
   constructor(props) {
     super(props);
 
-    setStyleSheet(MAPBOX_STYLESHEET);
-
     this.state = {
       // react-ace
       text: '',
       // deck.gl JSON Props
-      jsonProps: {}
+      jsonProps: {},
+      initialViewState: null
     };
 
     // TODO/ib - could use arrow functions
@@ -86,10 +43,7 @@ export class App extends Component {
     this._onEditorChange = this._onEditorChange.bind(this);
 
     // Configure and create the JSON converter instance
-    const configuration = new JSONConfiguration(
-      DECK_JSON_CONVERTER_CONFIGURATION,
-      JSON_CONFIGURATION
-    );
+    const configuration = new JSONConfiguration(JSON_CONVERTER_CONFIGURATION);
     this.jsonConverter = new JSONConverter({configuration});
   }
 
@@ -110,10 +64,33 @@ export class App extends Component {
 
   _setJSON(json) {
     const jsonProps = this.jsonConverter.convert(json);
-    this.setState({
-      jsonProps,
-      viewState: jsonProps.viewState
-    });
+    this._updateViewState(jsonProps);
+
+    this.setState({jsonProps});
+  }
+
+  // Handle `json.initialViewState`
+  // If we receive new JSON we need to decide if we should update current view state
+  // Current heuristic is to compare with last `initialViewState` and only update if changed
+  _updateViewState(json) {
+    const initialViewState = json.initialViewState || json.viewState;
+    if (initialViewState) {
+      const updateViewState =
+        !this.state.initialViewState ||
+        !_shallowEqualObjects(initialViewState, this.state.initialViewState);
+
+      if (updateViewState) {
+        this.setState({
+          initialViewState: {
+            ...initialViewState,
+            // Tells deck.gl to animate the camera move to the new tileset
+            transitionDuration: 4000,
+            transitionInterpolator: new FlyToInterpolator()
+          }
+        });
+      }
+    }
+    return json;
   }
 
   // Updates pretty printed text in editor.
@@ -146,11 +123,7 @@ export class App extends Component {
 
   _renderJsonSelector() {
     return (
-      <select
-        name="JSON templates"
-        onChange={this._onTemplateChange}
-        style={STYLES.LEFT_PANE_SELECTOR}
-      >
+      <select name="JSON templates" onChange={this._onTemplateChange}>
         {Object.entries(JSON_TEMPLATES).map(([key]) => (
           <option key={key} value={key}>
             {key}
@@ -161,14 +134,14 @@ export class App extends Component {
   }
 
   render() {
-    const {jsonProps} = this.state;
+    const {jsonProps, initialViewState} = this.state;
     return (
-      <div style={STYLES.CONTAINER}>
+      <Fragment>
         {/* Left Pane: Ace Editor and Template Selector */}
-        <div id="left-pane" style={STYLES.LEFT_PANE}>
+        <div id="left-pane">
           {this._renderJsonSelector()}
 
-          <div style={STYLES.LEFT_PANE_TEXT}>
+          <div id="editor">
             <AutoSizer>
               {({width, height}) => (
                 <AceEditor
@@ -190,19 +163,20 @@ export class App extends Component {
         </div>
 
         {/* Right Pane: DeckGL */}
-        <div id="right-pane" style={STYLES.RIGHT_PANE}>
-          <AutoSizer>
-            {() => (
-              <DeckWithMaps
-                id="json-deck"
-                {...jsonProps}
-                StaticMap={StaticMap}
-                mapboxApiAccessToken={MAPBOX_TOKEN}
-              />
-            )}
-          </AutoSizer>
+        <div id="right-pane">
+          <DeckWithMaps
+            id="json-deck"
+            {...jsonProps}
+            initialViewState={initialViewState}
+            Map={StaticMap}
+            mapboxApiAccessToken={MAPBOX_TOKEN}
+          />
         </div>
-      </div>
+      </Fragment>
     );
   }
+}
+
+export function renderToDOM(container) {
+  render(<App />, container);
 }

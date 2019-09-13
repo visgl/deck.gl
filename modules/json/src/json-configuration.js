@@ -16,7 +16,7 @@ export default class JSONConfiguration {
     this.enumerations = {};
     // TODO - this needs to be simpler, function conversion should be built in
     this.convertFunction = convertFunction;
-    this.preProcessClassProps = props => props;
+    this.preProcessClassProps = (Class, props) => props;
     this.postProcessConvertedJson = json => json;
 
     for (const configuration of configurations) {
