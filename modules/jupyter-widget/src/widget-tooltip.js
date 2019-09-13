@@ -37,7 +37,6 @@ function tabularize(json) {
     if (EXCLUDES.has(key)) {
       continue; // eslint-disable-line
     }
-    const row = document.createElement('div');
     const header = document.createElement('div');
     header.className = 'header';
     header.innerText = key;
@@ -45,7 +44,8 @@ function tabularize(json) {
     valueElement.className = 'value';
 
     setInnerText(valueElement, json[key]);
-    // clip string length if too long
+
+    const row = document.createElement('div');
 
     setStyles(row, header, valueElement);
 
