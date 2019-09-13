@@ -94,6 +94,7 @@ function tabularize(json) {
   const dataTable = document.createElement('div');
   dataTable.className = 'dataTable';
 
+  // Creates rows of two columns for the tooltip
   for (const key in json) {
     if (['undefined', 'position', 'index'].includes(key)) {
       continue; // eslint-disable-line
