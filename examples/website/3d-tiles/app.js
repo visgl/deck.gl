@@ -39,6 +39,9 @@ export class App extends PureComponent {
   _onTilesetLoad(tileset) {
     this.setState({attributions: tileset.credits.attributions});
     this._centerViewOnTileset(tileset);
+    if (this.props.updateAttributions) {
+      this.props.updateAttributions(tileset.credits.attributions);
+    }
   }
 
   // Recenter view to cover the new tileset, with a fly-to transition

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import {readableInteger} from '../../utils/format-utils';
+import autobind from 'autobind-decorator';
 import {MAPBOX_STYLES} from '../../constants/defaults';
 import {App} from 'website-examples/3d-tiles/app';
 
@@ -17,10 +17,28 @@ export default class GeoJsonDemo extends Component {
   }
 
   static renderInfo(meta) {
-    return null;
+    if (!meta.attributions) {
+      return null;
+    }
+    const {attributions} = meta;
+    return (
+      <div style={{marginTop: '0.5cm'}}>
+        <div style={{textAlign: 'center', borderStyle: 'groove'}}>
+          {Boolean(attributions.length) && <b>Tileset Credentials</b>}
+          {attributions.map(attribution => (
+            <div key={attribution.html} dangerouslySetInnerHTML={{__html: attribution.html}} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  @autobind
+  _updateAttributions(attributions) {
+    this.props.onStateChange({attributions});
   }
 
   render() {
-    return <App {...this.props} />;
+    return <App {...this.props} updateAttributions={this._updateAttributions} />;
   }
 }
