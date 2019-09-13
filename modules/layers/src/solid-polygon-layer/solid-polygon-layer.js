@@ -90,7 +90,8 @@ void main() {
     vec4 accum = texelFetch(uAccumulate, fragCoord, 0);
     float a = 1.0 - accum.a;
     accum.a = texelFetch(uAccumulateAlpha, fragCoord, 0).r;
-    fragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 50000.0), a);
+    // fragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 100.0), a);
+    fragColor = vec4(accum.rgb, a);
 }
 `;
 export default class SolidPolygonLayer extends Layer {
@@ -246,7 +247,21 @@ export default class SolidPolygonLayer extends Layer {
       height: gl.drawingBufferHeight,
       attachments: {
         [GL.COLOR_ATTACHMENT0]: accumulationTexture,
-        [GL.COLOR_ATTACHMENT1]: revealageTexture
+        [GL.COLOR_ATTACHMENT1]: revealageTexture,
+        [GL.DEPTH_ATTACHMENT]: new Texture2D(gl, {
+          format: GL.DEPTH_COMPONENT32F,
+          type: GL.FLOAT,
+          dataFormat: GL.DEPTH_COMPONENT,
+          width: gl.drawingBufferWidth,
+          height: gl.drawingBufferHeight,
+          mipmaps: false,
+          parameters: {
+            [GL.TEXTURE_MIN_FILTER]: GL.NEAREST,
+            [GL.TEXTURE_MAG_FILTER]: GL.NEAREST,
+            [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+            [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+          }
+        })
       }
     });
 
@@ -277,6 +292,7 @@ export default class SolidPolygonLayer extends Layer {
         blendFunc: [gl.ONE, gl.ONE, gl.ZERO, gl.ONE_MINUS_SRC_ALPHA],
         blend: true,
         depthMask: false,
+        cull: false,
         framebuffer: this.state.accumulationFramebuffer
       },
       () => {

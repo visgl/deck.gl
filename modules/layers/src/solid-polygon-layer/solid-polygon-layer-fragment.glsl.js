@@ -31,8 +31,16 @@ in float isValid;
 layout(location=0) out vec4 accumColor;
 layout(location=1) out float accumAlpha;
 
-float weight(float z, float a) {
+float weight1(float z, float a) {
+  return a;
+}
+
+float weight2(float z, float a) {
   return clamp(pow(min(1.0, a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
+}
+
+float weight3(float z, float a) {
+  return a * (1.0 - z * 0.9) * 10.0;
 }
 
 void main(void) {
@@ -43,9 +51,8 @@ void main(void) {
   vec4 color = vColor;
   DECKGL_FILTER_COLOR(color, geometry);
   color.rgb *= color.a;
-  float w = 1.0; //weight(gl_FragCoord.z, color.a);
+  float w = weight3(gl_FragCoord.z, color.a);
   accumColor = vec4(color.rgb * w, color.a);
   accumAlpha = color.a * w;
-
 }
 `;

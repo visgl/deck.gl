@@ -183,7 +183,8 @@ const PolygonLayerExample = {
     pickable: false,
     lineDashJustified: true,
     elevationScale: 0.6,
-    stroked: false
+    stroked: false,
+    extruded: true
   }
 };
 
