@@ -92,39 +92,24 @@ function getTooltip(pickedInfo) {
 }
 
 function tabularize(json) {
-  // Turns a JSON object of picked info into HTML for a tooltip
   const dataTable = document.createElement('div');
   dataTable.className = 'dataTable';
 
-  // Creates rows of two columns for the tooltip
   for (const key in json) {
-    if (['undefined', 'position', 'index'].includes(key)) {
-      continue; // eslint-disable-line
-    }
     const row = document.createElement('div');
     const header = document.createElement('div');
     header.className = 'header';
     header.innerText = key;
     Object.assign(header.style, {
-      fontWeight: 700,
-      marginRight: '10px',
-      flex: 1
+      fontWeight: 500,
+      marginRight: '10px'
     });
     const value = document.createElement('div');
     value.className = 'value';
-
-    if (Array.isArray(json[key])) {
-      value.innerText = JSON.stringify(`Array<${json[key].length}>`);
-    } else {
-      value.innerText = JSON.stringify(json[key]);
-    }
-
+    value.innerText = JSON.stringify(json[key]);
     Object.assign(value.style, {
-      flex: 'none',
-      maxWidth: '250px',
-      overflow: 'hidden',
-      whiteSpace: 'nowrap',
-      textOverflow: 'ellipsis'
+      float: 'right',
+      margin: 'header'
     });
     value.style.margin = 'header';
     row.appendChild(header);
