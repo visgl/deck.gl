@@ -32,7 +32,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
         );
         classes.map(k => (classesDict[k] = deckgl[k]));
 
-        const jsonConverter = new deckgl._JSONConverter({
+        const jsonConverter = new deckgl.JSONConverter({
           configuration: {
             classes: classesDict
           }
@@ -89,6 +89,7 @@ function getTooltip(pickedInfo) {
 }
 
 function tabularize(json) {
+  // Turns a JSON object of picked info into HTML for a tooltip
   const dataTable = document.createElement('div');
   dataTable.className = 'dataTable';
 
