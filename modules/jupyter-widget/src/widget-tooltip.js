@@ -40,10 +40,8 @@ function tabularize(json) {
     const header = document.createElement('div');
     header.className = 'header';
     header.innerText = key;
-    const valueElement = document.createElement('div');
-    valueElement.className = 'value';
 
-    setInnerText(valueElement, json[key]);
+    const valueElement = toText(json[key]);
 
     const row = document.createElement('div');
 
@@ -80,7 +78,9 @@ function setStyles(row, header, value) {
   });
 }
 
-function setInnerText(element, jsonValue) {
+function toText(jsonValue) {
+  const element = document.createElement('div');
+  element.className = 'value';
   // Set contents of table value, trimming for certain types of data
   if (Array.isArray(jsonValue) && jsonValue.length > 4) {
     element.innerText = `Array<${jsonValue.length}>`;
@@ -88,12 +88,11 @@ function setInnerText(element, jsonValue) {
     try {
       element.innerText = JSON.stringify(jsonValue);
     } catch (err) {
-      // eslint-disable-next-line
-      console.error(err);
-      element.innerText = null;
+      element.innerText = '<Non-Serializable Object>';
     }
   }
-  if (element.innerText.length > 50) {
-    element.innerText = element.innerText.slice(0, 50);
+  const MAX_LENGTH = 50;
+  if (element.innerText.length > MAX_LENGTH) {
+    element.innerText = element.innerText.slice(0, MAX_LENGTH);
   }
 }
