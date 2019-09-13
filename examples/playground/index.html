@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>deck.gl Playground</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body {margin: 0; font-family: sans-serif; overflow: hidden;}
+    #app {width: 100vw; height: 100vh; display: flex; flex-direction: row; align-items: stretch;}
+    #left-pane {flex: 0 1 40%; display: flex; flex-direction: column; align-items: stretch;}
+    #left-pane select {flex: 0 0 34px; padding: 5px 35px 5px 5px; font-size: 16px; border: 1px solid #ccc; appearance: none;}
+    #editor {flex: 0 1 100%;}
+    #right-pane {flex: 0 1 60%; position: relative;}
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+</body>
+<script type="text/javascript" src="app.js"></script>
+<script type="text/javascript">
+  App.renderToDOM(document.getElementById('app'));
+</script>
+</html>

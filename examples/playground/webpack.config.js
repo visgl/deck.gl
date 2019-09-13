@@ -10,7 +10,11 @@ const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: resolve('./src/root.js')
+    app: resolve('./src/app.js')
+  },
+
+  output: {
+    library: 'App'
   },
 
   module: {
@@ -29,7 +33,6 @@ const CONFIG = {
   },
 
   plugins: [
-    new HtmlWebpackPlugin({title: 'Playground'}),
     // Optional: Enables reading mapbox token from environment variable
     new webpack.EnvironmentPlugin(['MapboxAccessToken'])
   ],
