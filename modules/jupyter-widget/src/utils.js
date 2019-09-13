@@ -18,7 +18,7 @@ export function hideMapboxCSSWarning() {
 }
 
 export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
-  const results = jsonConverter.convertJson(inputJSON);
+  const results = jsonConverter.convert(inputJSON);
   deckConfig.setProps(results);
 }
 
@@ -26,6 +26,7 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl'], deckgl => {
       try {
+        // Filter down to the deck.gl classes of interest
         const classesDict = {};
         const classes = Object.keys(deckgl).filter(
           x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
