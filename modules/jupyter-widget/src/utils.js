@@ -24,7 +24,7 @@ export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
 
 export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handleClick) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
-    require(['deck.gl'], deckgl => {
+    require(['deck.gl', 'loaders.gl/core', 'loaders.gl/csv'], (deckgl, loadersCore, loadersCsv) => {
       try {
         // Filter down to the deck.gl classes of interest
         const classesDict = {};
@@ -32,6 +32,8 @@ export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handl
           x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
         );
         classes.map(k => (classesDict[k] = deckgl[k]));
+
+        loadersCore.registerLoaders([loadersCsv.CSVLoader]);
 
         const jsonConverter = new deckgl.JSONConverter({
           configuration: {
