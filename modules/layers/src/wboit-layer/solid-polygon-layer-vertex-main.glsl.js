@@ -20,16 +20,16 @@
 
 export default `\
 
-attribute vec2 vertexPositions;
-attribute float vertexValid;
+in vec2 vertexPositions;
+in float vertexValid;
 
 uniform bool extruded;
 uniform bool isWireframe;
 uniform float elevationScale;
 uniform float opacity;
 
-varying vec4 vColor;
-varying float isValid;
+out vec4 vColor;
+out float isValid;
 
 struct PolygonProps {
   vec4 fillColors;
@@ -60,7 +60,6 @@ void calculatePosition(PolygonProps props) {
 
   geometry.worldPosition = props.positions;
   geometry.worldPositionAlt = props.nextPositions;
-  geometry.pickingColor = props.pickingColors;
 
 #ifdef IS_SIDE_VERTEX
   pos = mix(props.positions, props.nextPositions, vertexPositions.x);
@@ -74,7 +73,7 @@ void calculatePosition(PolygonProps props) {
 
   if (extruded) {
     pos.z += props.elevations * vertexPositions.y * elevationScale;
-    
+
 #ifdef IS_SIDE_VERTEX
     normal = vec3(props.positions.y - props.nextPositions.y, props.nextPositions.x - props.positions.x, 0.0);
     normal = project_offset_normal(normal);
@@ -94,5 +93,8 @@ void calculatePosition(PolygonProps props) {
     vColor = vec4(colors.rgb, colors.a * opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
+
+  // Set color to be rendered to picking fbo (also used to check for selection highlight).
+  picking_setPickingColor(props.pickingColors);
 }
 `;

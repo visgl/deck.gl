@@ -18,36 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import main from './solid-polygon-layer-vertex-main.glsl';
-
 export default `\
-#define SHADER_NAME solid-polygon-layer-vertex-shader-side
-#define IS_SIDE_VERTEX
+#version 300 es
 
+#define SHADER_NAME solid-polygon-layer-fragment-shader
 
-attribute vec3 instancePositions;
-attribute vec2 instancePositions64xyLow;
-attribute vec3 nextPositions;
-attribute vec2 nextPositions64xyLow;
-attribute float instanceElevations;
-attribute vec4 instanceFillColors;
-attribute vec4 instanceLineColors;
-attribute vec3 instancePickingColors;
+precision highp float;
 
-${main}
+in vec4 vColor;
+in float isValid;
+
+layout(location=0) out vec4 accumColor;
+layout(location=1) out float accumAlpha;
+
+float weight1(float z, float a) {
+  return a;
+}
+
+float weight2(float z, float a) {
+  return clamp(pow(min(1.0, a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
+}
+
+float weight3(float z, float a) {
+  return a * (1.0 - z * 0.9) * 10.0;
+}
 
 void main(void) {
-  PolygonProps props;
+  if (isValid < 0.5) {
+    discard;
+  }
 
-  props.positions = instancePositions;
-  props.positions64xyLow = instancePositions64xyLow;
-  props.elevations = instanceElevations;
-  props.fillColors = instanceFillColors;
-  props.lineColors = instanceLineColors;
-  props.pickingColors = instancePickingColors;
-  props.nextPositions = nextPositions;
-  props.nextPositions64xyLow = nextPositions64xyLow;
-
-  calculatePosition(props);
+  vec4 color = vColor;
+  DECKGL_FILTER_COLOR(color, geometry);
+  color.rgb *= color.a;
+  float w = weight3(gl_FragCoord.z, color.a);
+  accumColor = vec4(color.rgb * w, color.a);
+  accumAlpha = color.a * w;
 }
 `;
