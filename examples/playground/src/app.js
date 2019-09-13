@@ -4,6 +4,8 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
 
+import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
+
 import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
@@ -13,12 +15,6 @@ import 'brace/mode/json';
 import 'brace/theme/github';
 
 import JSON_TEMPLATES from '../json-examples';
-
-import {registerLoaders} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
-
-// Note: deck already registers JSONLoader...
-registerLoaders([CSVLoader]);
 
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
@@ -65,6 +61,23 @@ export class App extends Component {
   _setJSON(json) {
     const jsonProps = this.jsonConverter.convert(json);
     this._updateViewState(jsonProps);
+
+    jsonProps.layers = jsonProps.layers.map(layer => {
+      // TODO @deck.gl/json module support replacing non-instantiated class
+      const dracoProps = {};
+      if (layer.props.DracoLoader) {
+        dracoProps.DracoLoader = DracoLoader;
+      }
+      if (layer.props.DracoWorkerLoader) {
+        dracoProps.DracoWorkerLoader = DracoWorkerLoader;
+      }
+
+      if (Object.keys(dracoProps).length) {
+        layer = layer.clone(dracoProps);
+      }
+
+      return layer;
+    });
 
     this.setState({jsonProps});
   }
