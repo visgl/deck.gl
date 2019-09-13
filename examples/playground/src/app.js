@@ -4,6 +4,7 @@ import AutoSizer from 'react-virtualized-auto-sizer';
 import {StaticMap} from 'react-map-gl';
 import DeckWithMaps from './deck-with-maps';
 
+import {FlyToInterpolator} from '@deck.gl/core';
 import {JSONConverter, JSONConfiguration, _shallowEqualObjects} from '@deck.gl/json';
 import JSON_CONVERTER_CONFIGURATION from './configuration';
 
@@ -79,7 +80,14 @@ export class App extends Component {
         !_shallowEqualObjects(initialViewState, this.state.initialViewState);
 
       if (updateViewState) {
-        this.setState({initialViewState});
+        this.setState({
+          initialViewState: {
+            ...initialViewState,
+            // Tells deck.gl to animate the camera move to the new tileset
+            transitionDuration: 4000,
+            transitionInterpolator: new FlyToInterpolator()
+          }
+        });
       }
     }
     return json;
