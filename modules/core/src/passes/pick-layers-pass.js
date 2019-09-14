@@ -1,5 +1,5 @@
 import LayersPass from './layers-pass';
-import {withParameters} from '@luma.gl/core';
+import {withParameters, cssToDeviceRatio} from '@luma.gl/core';
 
 export default class PickLayersPass extends LayersPass {
   render(props) {
@@ -78,7 +78,7 @@ export default class PickLayersPass extends LayersPass {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
-      devicePixelRatio: this.props.pixelRatio
+      devicePixelRatio: cssToDeviceRatio(this.gl)
     });
 
     Object.assign(moduleParameters, effectProps);
