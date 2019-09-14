@@ -57,14 +57,14 @@ export default class LightingEffect extends Effect {
     this.shadow = this.directionalLights.some(light => light.shadow);
   }
 
-  prepare(gl, {layers, viewports, onViewportActive, views, pixelRatio}) {
+  prepare(gl, {layers, viewports, onViewportActive, views}) {
     if (!this.shadow) return {};
 
     // create light matrix every frame to make sure always updated from light source
     const shadowMatrices = this._createLightMatrix();
 
     if (this.shadowPasses.length === 0) {
-      this._createShadowPasses(gl, pixelRatio);
+      this._createShadowPasses(gl);
     }
     if (!this.programManager) {
       // TODO - support multiple contexts
@@ -145,9 +145,9 @@ export default class LightingEffect extends Effect {
     return lightMatrices;
   }
 
-  _createShadowPasses(gl, pixelRatio) {
+  _createShadowPasses(gl) {
     for (let i = 0; i < this.directionalLights.length; i++) {
-      this.shadowPasses.push(new ShadowPass(gl, {pixelRatio}));
+      this.shadowPasses.push(new ShadowPass(gl));
     }
   }
 
