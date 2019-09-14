@@ -5,7 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --progress --hot --open",
     "start-local": "webpack-dev-server --env.local --progress --hot --open",
-    "build": "NODE_ENV=production webpack --env.prod=true"
+    "build": "rm -rf dist && mkdir dist && cp index.html dist/ && webpack --env.production=true"
   },
   "dependencies": {
     "@deck.gl/core": "^7.3.0-alpha",
