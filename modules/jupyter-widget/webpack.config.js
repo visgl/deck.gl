@@ -43,15 +43,7 @@ const config = {
     ]
   },
   // Packages that shouldn't be bundled but loaded at runtime
-  externals: [
-    '@jupyter-widgets/base',
-    'deck.gl',
-    'mapbox-gl',
-    'h3',
-    'S2',
-    'loaders.gl/core',
-    'loaders.gl/csv'
-  ],
+  externals: ['@jupyter-widgets/base', 'deck.gl', 'mapbox-gl', 'h3', 'S2', 'loaders.gl/csv'],
   plugins: [
     // Uncomment for bundle size debug
     // new (require('webpack-bundle-analyzer')).BundleAnalyzerPlugin()
