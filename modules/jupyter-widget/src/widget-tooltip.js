@@ -1,4 +1,4 @@
-/* global document, console */
+/* global document */
 let lastPickedObject;
 let lastTooltip;
 
@@ -41,7 +41,10 @@ function tabularize(json) {
     header.className = 'header';
     header.innerText = key;
 
-    const valueElement = toText(json[key]);
+    const valueElement = document.createElement('div');
+    valueElement.className = 'value';
+
+    valueElement.innerText = toText(json[key]);
 
     const row = document.createElement('div');
 
@@ -79,20 +82,20 @@ function setStyles(row, header, value) {
 }
 
 function toText(jsonValue) {
-  const element = document.createElement('div');
-  element.className = 'value';
   // Set contents of table value, trimming for certain types of data
+  let text;
   if (Array.isArray(jsonValue) && jsonValue.length > 4) {
-    element.innerText = `Array<${jsonValue.length}>`;
+    text = `Array<${jsonValue.length}>`;
   } else {
     try {
-      element.innerText = JSON.stringify(jsonValue);
+      text = JSON.stringify(jsonValue);
     } catch (err) {
-      element.innerText = '<Non-Serializable Object>';
+      text = '<Non-Serializable Object>';
     }
   }
   const MAX_LENGTH = 50;
-  if (element.innerText.length > MAX_LENGTH) {
-    element.innerText = element.innerText.slice(0, MAX_LENGTH);
+  if (text.length > MAX_LENGTH) {
+    text = text.slice(0, MAX_LENGTH);
   }
+  return text;
 }
