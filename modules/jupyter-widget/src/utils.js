@@ -17,43 +17,42 @@ export function hideMapboxCSSWarning() {
   }
 }
 
-export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
+export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   const results = jsonConverter.convert(inputJSON);
-  deckConfig.setProps(results);
+  deckgl.setProps(results);
 }
 
 export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handleClick) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
-    require(['deck.gl', 'loaders.gl/core', 'loaders.gl/csv'], (deckgl, loadersCore, loadersCsv) => {
+    require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
         // Filter down to the deck.gl classes of interest
         const classesDict = {};
-        const classes = Object.keys(deckgl).filter(
+        const classes = Object.keys(deck).filter(
           x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
         );
-        classes.map(k => (classesDict[k] = deckgl[k]));
+        classes.map(k => (classesDict[k] = deck[k]));
 
-        loadersCore.registerLoaders([loadersCsv.CSVLoader]);
+        loaders.registerLoaders([loaders.CSVLoader]);
 
-        const jsonConverter = new deckgl.JSONConverter({
+        const jsonConverter = new deck.JSONConverter({
           configuration: {
             classes: classesDict
           }
         });
 
-        const deckConfig = new deckgl.DeckGL({
+        const props = jsonConverter.convert(jsonInput);
+
+        const deckgl = new deck.DeckGL({
+          ...props,
           map: mapboxgl,
           mapboxApiAccessToken: mapboxApiKey,
-          latitude: 0,
-          longitude: 0,
-          zoom: 1,
           onClick: handleClick,
           getTooltip,
-          container,
-          onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
+          container
         });
         if (onComplete) {
-          onComplete({jsonConverter, deckConfig});
+          onComplete({jsonConverter, deckgl});
         }
       } catch (err) {
         // This will fail in node tests
