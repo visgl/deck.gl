@@ -21,6 +21,123 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.2 Prereleases
 
+#### deck.gl [v7.3.0-alpha.7] - Sep 13, 2019
+
+- ScreenGridLayer: Replace UBO usage with Texture2D for max aggregation value (#3573)
+- Fix Tile3DLayer doc links (#3589)
+- Refactor Tile3DLayer and minimum test (#3578)
+- json: Playground simplifications (#3586)
+- Tests: use polyfilled gl for JSONConverter tests (#3587)
+- 3d tile example (#3582)
+- json: Test and code cleanup (#3585)
+- CSS to Device conversion: Replace custom code with luma.gl utilities methods (#3531)
+- bump luma.gl and loaders.gl
+- Update pydeck setup.py to include standalone require.js template (#3568)
+- Restore tests (#3581)
+- Add default tooltip to pydeck (#3562)
+- json: Simplify `JSONConfiguration` (#3577)
+- Add support for quantile and ordinal scale (#3546)
+- Add "Playground" (aka json-browser) to website (#3561)
+- Revert Python pyppeteer installation (#3575)
+- attribute spring transition (#3530)
+- json: minimap as pure json example (#3563)
+- ocular-dev-tools: 0.0.29 (modernize es6 dists) (#3569)
+- fix vricon tile stop rendering issue (#3570)
+- Provide additional support for Python 2.7 installations (#3565)
+- HeatmapLayer/GPUAggregator: fix WebGL feature checking (#3483)
+- add rendering test for shadow (#3564)
+- spring-based-transitions RFC draft (#3390)
+- Fix/Viewport Transitions FlyTo webpack config (#3556)
+- fix shadow module toggle bug (#3560)
+- json: Update JSON examples (#3558)
+- Generalized JSON converter (#3491)
+- bump math.gl version (#3553)
+- refactor interpolation transition (#3540)
+- Add Tile3DLayer doc (#3508)
+- Update the documentation and development file paths for pydeck (#3548)
+- [#3548 - Part I] Update pydeck README to include release URL and additional usage instructions (#3549)
+- use built-in tooltip API in examples (#3547)
+- Add Tile3DLayer to geo-layers module (#3523)
+- Fix ColumnLayer elevationScale example (#3542)
+- Support a default tooltip (#3529)
+- misc test warning fixes (#3539)
+- Add update trigger tests to generated tests (#3527)
+
+#### deck.gl [v7.3.0-alpha.6] - Sep 6, 2019
+
+- Fix double precision attribute transitions (#3532)
+- Add mybinder URL to pydeck README (#3538)
+- Revert pydeck path changes (#3537)
+- Fix GPUGridLayer crash when used with GridLayer (#3528)
+- Fix typos and broken links in the docs (#3524)
+
+#### deck.gl [v7.3.0-alpha.5] - Sep 5, 2019
+
+- [Feat] Hexagon/Grid, getColorValue, getElevationValue based on updateTriggers (#3473)
+- Integrate ProgramManager (#3504)
+- update website fonts (#3519)
+- produce more meaningful metrics (#3518)
+- Transition refactor (2/2): create one transform per attribute (#3498)
+- Transition system refactor (1/2): use timeline (#3496)
+- Support for live notebook updates and introduce 2-way notebook API communication (#3510)
+- Change dependency path spelling
+- Correct nbextension typo
+
+#### deck.gl [v7.3.0-alpha.4] - Aug 29, 2019
+
+- bump luma.gl to 7.3.0-alpha.5 (#3509)
+- Respect layer opacity in SimpleMeshLayer (#3488)
+- update the component-wrapping-rfc.md (#3507)
+- fix opacity issue in scene graph layer (#3506)
+- disable orbit controller rotation normalization (#3497)
+- Add markdown documentation for the pydeck library (#3423)
+- Add additional setup.py requirements (#3501)
+
+#### deck.gl [v7.3.0-alpha.3] - Aug 28, 2019
+
+- RFC: Component Wrapping System (#3503)
+
+#### deck.gl [v7.3.0-alpha.2] - Aug 28, 2019
+
+- fix dist test (#3502)
+- Disable model matrix for offset by default (#3500)
+- apply model matrix to offset in scene graph layer (#3499)
+- [jupyter-widget] update webpack configs (#3495)
+- Add development installation instructions (#3494)
+- Generic prop transition (#3443)
+- [jupyter-widget] use only one endpoint (#3493)
+- Simplify pydeck widget build (#3462)
+- [MapboxLayer] integrate mapbox-gl's near plane fix (#3490)
+- fix arc layer shaders (#3487)
+- IconLayer: check texture width and height before drawing (#3481)
+- Update deck.gl version to ^7.0.0 in docs (#3485)
+- Attribute: use `type: GL.DOUBLE` for double precision (#3477)
+
+#### deck.gl [v7.3.0-alpha.1] - Aug 21, 2019
+
+- update node requirement to 10.x (#3474)
+- Support double precision in Attribute class (#3468)
+- Relax restrictions for external buffers (#3472)
+- fix firefox invalid date (#3466)
+- Add interaction tests (#3461)
+- Update README.md
+- Add transform and enable options to attribute class (#3448)
+- Improve shadow for mesh layer (#3452)
+- update code sample in mapbox layer docs (#3459)
+- Support 360 rotation in OrbitController (#3454)
+- fix OrbitView bug when orbitAxis: Z (#3453)
+- Composite layer should rerender when state updates (#3434)
+- Fail gracefully in the event of a hexbin projection error (#3424)
+- Add warnings for invalid layer types in JSONConverter (#3444)
+- More unit test for SunLight class (#3442)
+- Use HTMLImageLoader for browser compatibility (#3440)
+- Support expression parsing for JSON API and pydeck (#3397)
+- Clean up gallery icon example (#3433)
+- Bump loaders dependencies in examples (#3430)
+- Bump luma.gl to 7.2.0 (#3429)
+- Website: Lock loaders.gl/las to 1.0.3 (#3428)
+- Website reference ES5 transpiled version of supercluster depend… (#3427)
+
 #### deck.gl [v7.2.0-beta.3] - Aug 8, 2019
 
 - improve Deck minification (#3402)
