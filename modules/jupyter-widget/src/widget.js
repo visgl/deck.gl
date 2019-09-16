@@ -21,7 +21,6 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: null,
-      initialized: false,
       width: 500,
       height: 500
     };
@@ -53,16 +52,27 @@ export class DeckGLModel extends DOMWidgetModel {
 }
 
 export class DeckGLView extends DOMWidgetView {
+  initialize() {
+    this.listenTo(this.model, 'destroy', this.remove);
+  }
+
+  remove() {
+    if (this.jsonDeck) {
+      this.jsonDeck.deckgl.finalize();
+      this.jsonDeck = null;
+    }
+  }
+
   render() {
     super.render();
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
-    const initialized = this.model.get('initialized');
 
     const containerDiv = document.createElement('div');
 
-    if (!initialized) {
+    if (!this.jsonDeck) {
       containerDiv.style.height = `${this.model.get('height')}px`;
       containerDiv.style.width = `${this.model.get('width')}px`;
+      containerDiv.style.position = 'relative';
       this.el.appendChild(containerDiv);
 
       loadCss(MAPBOX_CSS_URL);
@@ -77,7 +87,6 @@ export class DeckGLView extends DOMWidgetView {
         },
         this.handleClick.bind(this)
       );
-      this.model.set('initialized', true);
     }
   }
 
