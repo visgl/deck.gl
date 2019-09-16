@@ -4,6 +4,7 @@
     "latitude": 37.8,
     "zoom": 12
   },
+  "controller": "MapController",
   "mapStyle": {},
   "views": [
     {
@@ -20,7 +21,6 @@
   "layers": [
     {
       "type": "ScatterplotLayer",
-      "MapController": "MapController",
       "data": [{"position": [-122.45, 37.8]}],
       "getPosition": "position",
       "getFillColor": [255, 0, 0, 255],

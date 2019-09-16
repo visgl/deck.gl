@@ -25,7 +25,7 @@ test('JSONConverter#convert', t => {
   t.ok(deckProps, 'JSONConverter converted correctly');
 
   t.is(deckProps.views.length, 2, 'JSONConverter converted views');
-  t.is(deckProps.layers[0].props.MapController, MapController, 'Should evaluate constants.');
+  t.is(deckProps.controller, MapController, 'Should evaluate constants.');
 
   t.end();
 });
