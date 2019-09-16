@@ -25,7 +25,7 @@ precision highp float;
 
 uniform float opacity;
 uniform sampler2D iconsTexture;
-uniform float cutoff;
+uniform float alphaCutoff;
 
 varying float vColorMode;
 varying vec4 vColor;
@@ -43,7 +43,7 @@ void main(void) {
   // Take the global opacity and the alpha from vColor into account for the alpha component
   float a = texColor.a * opacity * vColor.a;
 
-  if (a < cutoff) {
+  if (a < alphaCutoff) {
     discard;
   }
 

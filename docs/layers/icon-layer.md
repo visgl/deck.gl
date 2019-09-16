@@ -208,11 +208,11 @@ The maximum size in pixels.
 
 If on, the icon always faces camera. Otherwise the icon faces up (z)
 
-##### `cutoff` (Number, optional)
+##### `alphaCutoff` (Number, optional)
 
 - Default: `0.05`
 
-Discard pixels whose opacity is below this threshold. This is useful for customizing which part of the icon is pickable, e.g. whether hovering over a hole in the shape should pick the object.
+Discard pixels whose opacity is below this threshold. A discarded pixel would create a "hole" in the icon that is not considered part of the object. This is useful for customizing picking behavior, e.g. setting `alphaCutoff: 0, autoHighlight` will highlight an object whenever the cursor moves into its bounding box, instead of over the visible pixels.
 
 
 ### Data Accessors

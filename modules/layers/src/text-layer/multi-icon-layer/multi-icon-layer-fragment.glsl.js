@@ -26,7 +26,7 @@ precision highp float;
 uniform sampler2D iconsTexture;
 uniform float buffer;
 uniform bool sdf;
-uniform float cutoff;
+uniform float alphaCutoff;
 
 varying vec4 vColor;
 varying vec2 vTextureCoords;
@@ -48,7 +48,7 @@ void main(void) {
   // Take the global opacity and the alpha from vColor into account for the alpha component
   float a = alpha * vColor.a;
 
-  if (a < cutoff) {
+  if (a < alphaCutoff) {
     discard;
   }
 
