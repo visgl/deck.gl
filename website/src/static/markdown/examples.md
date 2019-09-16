@@ -83,7 +83,14 @@
         <a href="#/examples/core-layers/trips-layer">
           <img src="images/demo-thumb-trip.jpg" />
         </a>
-        </div>
+      </div>
+    </div>
+    <div class="thumb">
+      <div class="bg-black" data-title="Melbourne Point Cloud" data-name="Tile3DLayer">
+        <a href="#/examples/core-layers/tile3-dlayer">
+          <img src="images/demo-thumb-3d-tiles.jpg" />
+        </a>
+      </div>
     </div>
 </div>
 
