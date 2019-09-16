@@ -25,13 +25,12 @@ precision highp float;
 
 uniform float opacity;
 uniform sampler2D iconsTexture;
+uniform float alphaCutoff;
 
 varying float vColorMode;
 varying vec4 vColor;
 varying vec2 vTextureCoords;
 varying vec2 uv;
-
-const float MIN_ALPHA = 0.05;
 
 void main(void) {
   geometry.uv = uv;
@@ -44,7 +43,7 @@ void main(void) {
   // Take the global opacity and the alpha from vColor into account for the alpha component
   float a = texColor.a * opacity * vColor.a;
 
-  if (a < MIN_ALPHA) {
+  if (a < alphaCutoff) {
     discard;
   }
 
