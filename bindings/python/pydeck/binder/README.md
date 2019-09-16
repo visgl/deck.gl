@@ -1,3 +1,7 @@
+# Updating the binder examples
+
+If you don't plan to develop or maintain pydeck, feel free to ignore this document and directory.
+
 This folder supports the interactive notebook examples on mybinder.org.
 
 These commands can serve to update those examples from the root of this repository
@@ -15,3 +19,7 @@ ln -s notebook_examples bindings/python/pydeck/examples
 ln -s .dockerignore bindings/python/pydeck/binder/dockerignore
 git push
 ```
+
+Alternately, you can rebase to `master` on the current `binder` branch and push those changes to `binder`.
+
+Finally, navigate to https://mybinder.org/v2/gh/uber/deck.gl/binder and verify that the examples function correctly.
