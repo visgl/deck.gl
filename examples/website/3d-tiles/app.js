@@ -80,7 +80,7 @@ export class App extends PureComponent {
   render() {
     const {viewState} = this.state;
     const tile3DLayer = this._renderTile3DLayer();
-    const {mapStyle = 'mapbox://styles/mapbox/dark-v9'} = this.props;
+    const {mapStyle = 'mapbox://styles/uberdata/cive485h000192imn6c6cc8fc'} = this.props;
 
     return (
       <div>
