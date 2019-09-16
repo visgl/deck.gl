@@ -1,7 +1,9 @@
-import {COORDINATE_SYSTEM, MapView, FirstPersonView} from '@deck.gl/core';
+import {COORDINATE_SYSTEM, MapView, FirstPersonView, MapController} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
 export const log = console; // eslint-disable-line
+
+export const SCATTER_PLOT_LAYER_ID = 'scatter-plot-layer-test';
 
 export default {
   log,
@@ -12,5 +14,8 @@ export default {
   enumerations: {
     COORDINATE_SYSTEM,
     GL
+  },
+  constants: {
+    MapController
   }
 };

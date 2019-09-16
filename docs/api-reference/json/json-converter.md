@@ -72,7 +72,7 @@ and used to resolve this JSON object:
 }
 ```
 
-will replace the layers discriptor with
+will replace the layers descriptor with
 
 ```js
 {
@@ -140,3 +140,44 @@ and used to resolve this JSON object:
   ]
 }
 ```
+
+### Constants Catalogs
+
+A map of constants that should be made available to the JSON string resolver. This is also helpful to evaluate a prop that does not need to be instantiated. For example, when this configuration is passed to `JSONConverter`:
+
+```js
+import {MapController} from '@deck.gl/core';
+
+const configuration = {
+  ...
+  constants: {
+    MapController
+  }
+};
+```
+
+and used to resolve in this JSON object:
+
+```json
+{
+  "layers": [
+    {
+      "type": "Tile3DLayer",
+      "controller": "MapController"
+    }
+  ]
+}
+```
+
+will replace the constants' value with the value provided in configuration declaration:
+
+```js
+{
+  controller: MapController, // MapController class from '@deck.gl/core' 
+  layers: [
+    new ScatterplotLayer({
+      ...
+    })
+  ]
+}
+``
