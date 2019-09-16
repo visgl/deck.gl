@@ -2,17 +2,30 @@
 
 ## Upgrading from deck.gl v7.2 to v7.3
 
-- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
-
-- `ScreenGridLayer` is now limited to browsers that support WebGL2 or `OES_texture_float` extension.
-
-## Upgrading from deck.gl v7.2 to v7.3
-
-#### Deprecations
+#### Core
 
 - `layer.setLayerNeedsUpdate` is renamed to `layer.setNeedsUpdate()` and will be removed in the next major release.
+- Previously deprecated `Layer` class method, `screenToDevicePixels`, is removed. Use luma.gl [utility methods](https://luma.gl/#/documentation/api-reference/webgl-2-classes/device-pixels) instead.
 
-#### deck.gl/json
+#### Layers
+
+- `ScreenGridLayer`: support is now limited to browsers that implement either WebGL2 or the `OES_texture_float` extension. [coverage stats](https://webglstats.com/webgl/extension/OES_texture_float)
+- Some shader attributes are renamed for consistency:
+
+| Layer | Old | New |
+| ----- | --- | --- |
+| `LineLayer` | `instanceSourceTargetPositions64xyLow.xy` | `instanceSourcePositions64xyLow` |
+| | `instanceSourceTargetPositions64xyLow.zw` | `instanceTargetPositions64xyLow` |
+| `PathLayer` | `instanceLeftStartPositions64xyLow.xy` | `instanceLeftPositions64xyLow`  |
+| | `instanceLeftStartPositions64xyLow.zw` | `instanceStartPositions64xyLow` |
+| | `instanceEndRightPositions64xyLow.xy`  | `instanceEndPositions64xyLow`   |
+| | `instanceEndRightPositions64xyLow.zw`  | `instanceRightPositions64xyLow` |
+| `ArcLayer` | `instancePositions64Low` | `instancePositions64xyLow`  |
+| `ScenegraphLayer` | `instancePositions64xy` | `instancePositions64xyLow`  |
+| `SimpleMeshLayer` | `instancePositions64xy` | `instancePositions64xyLow`  |
+
+
+#### @deck.gl/json
 
 - Non-breaking Change: The `_JSONConverter` class has been renamed to `JSONConverter` (deprecated alias still available).
 - Non-breaking Change: The `_JSONConverter.convertJson()` method has been renamed to `JSONConverter.convert()`  (deprecated stub still available).

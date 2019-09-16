@@ -6,26 +6,40 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 Release Date: Sep xx, 2019
 
-> TODO: GIF/screenshot - Spring transition, 3d tiles, Jupyter widget
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/.gif" />
+        <p><i>Tile3DLayer</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/.jpg" />
+        <p><i>Jupyter Widget</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/.jpg" />
+        <p><i>Spring Transition</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+### Tile3DLayer
+
+deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the OGC [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to dynamically load and render infinitely large datasets into the browser.
+
+In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo]() for yourself.
+
+### Python Binding and Jupyter Widget
+
+We have released a python module [pydeck]() for Python developers to interact with deck.gl via a native API. A Jupyter Notebook widget is also available to visualize your data right in your notebook. See [documentation]() and our release [blog post]() for details.
 
 ### Transitions
 
 - Generic prop transition: the layer `transitions` prop now supports many more props than just accessors! Any prop of type `number` or `array` can now also use the built-in transition system.
 - New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/layer.md#transitions-object-optional) for details.
-
-### Tile3DLayer
-
-deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to dynamically load and render infinitely large datasets into the browser.
-
-In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo]() for yourself.
-
-### Built-in Tooltip
-
-A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class (and inheritly the `DeckGL` react component). By supplying this callback, an app may specify the content and styling of a built-in tooltip. This takes away the hassle of creating and maintaining your own DOM element.
-
-### Python Binding and Jupyter Widget
-
-We have released a python module `pydeck` for Python developers to interact with deck.gl via a native API. A Jupyter Notebook widget is also available to visualize your data right in your notebook. See [documentation]() and our release [blog post]() for details.
 
 ### @deck.gl/json
 
@@ -42,8 +56,10 @@ For custom layer authors: the attribute system is simplified. One may now use `t
 ### Minor Improvements and Bug Fixes
 
 - `OrbitController` now supports 360 degree rotation on both axis. Relax `minRotationX` and `maxRotationX` to use this feature.
+- Built-in tooltip: A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
+- Customizable device pixel ratio: `Deck`'s `useDevicePixels` prop now accepts a number as well as boolean values.
 - `SimpleMeshLayer` and `ScenegraphLayer` now respect the `opacity` prop.
-- `HexagonLayer` no longer crashes on invalid input.
+- `IconLayer` has added a new prop `alphaCutoff` for customizing picking behavior.
 
 
 ### HeatmapLayer
