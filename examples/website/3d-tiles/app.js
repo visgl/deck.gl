@@ -10,7 +10,7 @@ import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const ION_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIxN2NhMzkwYi0zNWM4LTRjNTYtYWE3Mi1jMDAxYzhlOGVmNTAiLCJpZCI6OTYxOSwic2NvcGVzIjpbImFzbCIsImFzciIsImFzdyIsImdjIl0sImlhdCI6MTU2MjE4MTMxM30.OkgVr6NaKYxabUMIGqPOYFe0V5JifXLVLfpae63x-tA';
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjYTExNWEwZC00MWFmLTRmNWUtOTA1Zi00OGUzMzlkMDVlNWQiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJhc3NldHMiOlsyODk1N10sImlhdCI6MTU2ODM5OTgxNn0.Bqe4IWmT6etdZYqm12WcgdW52wDLzdbKM4Xx_8lRZmk';
 
 const INITIAL_VIEW_STATE = {
   latitude: 40,
@@ -54,7 +54,7 @@ export class App extends PureComponent {
         // Update deck.gl viewState, moving the camera to the new tileset
         longitude: cartographicCenter[0],
         latitude: cartographicCenter[1],
-        zoom: zoom + 1.5, // TODO - remove adjustment when Tileset3D calculates correct zoom
+        zoom,
         bearing: INITIAL_VIEW_STATE.bearing,
         pitch: INITIAL_VIEW_STATE.pitch
       }
@@ -69,7 +69,7 @@ export class App extends PureComponent {
   _renderTile3DLayer() {
     return new Tile3DLayer({
       id: 'tile-3d-layer',
-      _ionAssetId: 33301,
+      _ionAssetId: 28957,
       _ionAccessToken: ION_TOKEN,
       DracoWorkerLoader,
       DracoLoader,
