@@ -4,11 +4,45 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v7.3
 
+> TODO: GIF/screenshot - Spring transition, 3d tiles, Jupyter widget
+
+### Transitions
+
+- Generic prop transition: the layer `transitions` prop now supports many more props than just accessors! Any prop of type `number` or `array` can now also use the built-in transition system.
+- New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/layer.md#transitions-object-optional) for details.
+
+### Tile3DLayer
+
+deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to dynamically load and render infinitely large datasets into the browser.
+
+In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo]() for yourself.
+
+### Built-in Tooltip
+
+A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class (and inheritly the `DeckGL` react component). By supplying this callback, an app may specify the content and styling of a built-in tooltip. This takes away the hassle of creating and maintaining your own DOM element.
+
+### Python Binding and Jupyter Widget
+
+We have released a python module `pydeck` for Python developers to interact with deck.gl via a native API. A Jupyter Notebook widget is also available to visualize your data right in your notebook. See [documentation]() and our release [blog post]() for details.
+
 ### @deck.gl/json
 
-The `JSONConverter` class has been generalized and can now be used independently of deck.gl to "hydrate" JavaScript from JSON text specifications. This supports its use a foundation technology for providing non-JavaScript bindings such as `pydeck`.
+The `JSONConverter` class has been generalized and can now be used independently of deck.gl to "hydrate" JavaScript from JSON text specifications. This supports its use a foundation technology for providing non-JavaScript bindings such as `pydeck`. This has caused some breaking changes to this experimental module. For details and work-arounds see the upgrade guide.
 
-This has caused some breaking changes to this experimental module. For details and work-arounds see the upgrade guide.
+### Under the Hood
+
+We have introduced a new resource management system to luma.gl and deck.gl core. This significantly reduces the initial loading time if an app uses multiple layers of the same type.
+
+It is now easier to supply external buffers to layer attributes as deck.gl no longer requires them to match the default buffer type.
+
+For custom layer authors: the attribute system is simplified. One may now use `type: GL.DOUBLE` when adding an attribute to the `AttributeManager`. the attribute will automatically be mapped to two 32-bit shader attributes `<attrbName>` and `<attrbName>64xyLow`.
+
+### Minor Improvements and Bug Fixes
+
+- `OrbitController` now supports 360 degree rotation on both axis. Relax `minRotationX` and `maxRotationX` to use this feature.
+- `SimpleMeshLayer` and `ScenegraphLayer` now respect the `opacity` prop.
+- `HexagonLayer` no longer crashes on invalid input.
+
 
 ### HeatmapLayer
 
