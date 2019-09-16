@@ -39,7 +39,7 @@ const defaultProps = {
   colorAggregation: 'SUM',
   lowerPercentile: {type: 'number', min: 0, max: 100, value: 0},
   upperPercentile: {type: 'number', min: 0, max: 100, value: 100},
-  colorScaleType: 'quantile',
+  colorScaleType: 'quantize',
   onSetColorDomain: nop,
 
   // elevation
