@@ -18,6 +18,8 @@ class Deck(JSONMixin):
         map_style='mapbox://styles/mapbox/dark-v9',
         mapbox_key=None,
         initial_view_state=ViewState(),
+        width=500,
+        height=500,
     ):
         """Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
 
@@ -37,6 +39,11 @@ class Deck(JSONMixin):
         mapbox_key : str, default None
             Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
+        height : int, default 500
+            Height of visualization, in pixels
+        width : int, default 500
+            Width of visualization, in pixels
+
 
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
@@ -53,6 +60,9 @@ class Deck(JSONMixin):
         self.deck_widget = DeckGLWidget()
         self.mapbox_key = mapbox_key or os.getenv('MAPBOX_API_KEY')
         self.deck_widget.mapbox_key = self.mapbox_key
+        self.deck_widget.height = height
+        self.deck_widget.width = width
+        self.selected_data = self.deck_widget.selected_data
         if not self.mapbox_key:
             warnings.warn(
                 'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
@@ -102,8 +112,8 @@ class Deck(JSONMixin):
             filename=None,
             open_browser=False,
             notebook_display=True,
-            iframe_width=500,
-            iframe_height=500):
+            iframe_width=None,
+            iframe_height=None):
         """Writes a file and loads it to an iframe, if in a Jupyter notebook
         Otherwise writes a file and optionally opens it in a web browser
 
@@ -120,10 +130,12 @@ class Deck(JSONMixin):
             Whether a browser window will open or not after write
         notebook_display : bool, default True
             Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
-        iframe_width : int, default 500
+        iframe_width : int, default None
             Height of Jupyter notebook iframe in pixels, if rendered
-        iframe_height : int, default 500
+            Set to `self.deck_widget.width` if set on initialization
+        iframe_height : int, default None
             Width of Jupyter notebook iframe in pixels, if rendered
+            Set to `self.deck_widget.height` if set on initialization
 
         Returns
         -------
@@ -136,6 +148,6 @@ class Deck(JSONMixin):
             filename,
             open_browser=open_browser,
             notebook_display=notebook_display,
-            iframe_height=iframe_height,
-            iframe_width=iframe_width)
+            iframe_height=iframe_height or self.deck_widget.height,
+            iframe_width=iframe_width or self.deck_widget.width)
         return f

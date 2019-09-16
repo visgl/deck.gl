@@ -19,40 +19,42 @@ export function hideMapboxCSSWarning() {
   }
 }
 
-export function updateDeck(inputJSON, {jsonConverter, deckConfig}) {
-  const results = jsonConverter.convertJsonToDeckProps(inputJSON);
-  deckConfig.setProps(results);
+export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
+  const results = jsonConverter.convert(inputJSON);
+  deckgl.setProps(results);
 }
 
 export function initDeck({mapboxApiKey, container, jsonInput}, onComplete, handleClick) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
-    require(['deck.gl'], deckgl => {
+    require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
-        const layersDict = {};
-        const layers = Object.keys(deckgl).filter(
-          x => x.indexOf('Layer') > 0 && x.indexOf('_') !== 0
+        // Filter down to the deck.gl classes of interest
+        const classesDict = {};
+        const classes = Object.keys(deck).filter(
+          x => (x.indexOf('Layer') > 0 || x.indexOf('View') > 0) && x.indexOf('_') !== 0
         );
-        layers.map(k => (layersDict[k] = deckgl[k]));
+        classes.map(k => (classesDict[k] = deck[k]));
 
-        const jsonConverter = new deckgl.JSONConverter({
+        loaders.registerLoaders([loaders.CSVLoader]);
+
+        const jsonConverter = new deck.JSONConverter({
           configuration: {
-            layers: layersDict
+            classes: classesDict
           }
         });
 
-        const deckConfig = new deckgl.DeckGL({
+        const props = jsonConverter.convert(jsonInput);
+
+        const deckgl = new deck.DeckGL({
+          ...props,
           map: mapboxgl,
           mapboxApiAccessToken: mapboxApiKey,
-          latitude: 0,
-          longitude: 0,
-          zoom: 1,
           onClick: handleClick,
           getTooltip,
-          container,
-          onLoad: () => updateDeck(jsonInput, {jsonConverter, deckConfig})
+          container
         });
         if (onComplete) {
-          onComplete({jsonConverter, deckConfig});
+          onComplete({jsonConverter, deckgl});
         }
       } catch (err) {
         // This will fail in node tests
