@@ -420,7 +420,7 @@ export default class CPUAggregator {
   getSubLayerDimensionAttribute(key, nullValue) {
     return cell => {
       const {sortedBins, scaleFunc} = this.state.dimensions[key];
-      // console.log(scaleFunc);
+
       const cv = sortedBins.binMap[cell.index] && sortedBins.binMap[cell.index].value;
       const domain = scaleFunc.domain();
 
