@@ -208,6 +208,13 @@ The maximum size in pixels.
 
 If on, the icon always faces camera. Otherwise the icon faces up (z)
 
+##### `cutoff` (Number, optional)
+
+- Default: `0.05`
+
+Discard pixels whose opacity is below this threshold. This is useful for customizing which part of the icon is pickable, e.g. whether hovering over a hole in the shape should pick the object.
+
+
 ### Data Accessors
 
 ##### `getIcon` ([Function](/docs/developer-guide/using-layers.md#accessors), optional)

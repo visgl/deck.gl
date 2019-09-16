@@ -57,6 +57,7 @@ const defaultProps = {
   sizeUnits: 'pixels',
   sizeMinPixels: {type: 'number', min: 0, value: 0}, //  min point radius in pixels
   sizeMaxPixels: {type: 'number', min: 0, value: Number.MAX_SAFE_INTEGER}, // max point radius in pixels
+  cutoff: {type: 'number', value: 0.05, min: 0, max: 1},
 
   getPosition: {type: 'accessor', value: x => x.position},
   getIcon: {type: 'accessor', value: x => x.icon},
@@ -175,7 +176,7 @@ export default class IconLayer extends Layer {
   }
 
   draw({uniforms}) {
-    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard} = this.props;
+    const {sizeScale, sizeMinPixels, sizeMaxPixels, sizeUnits, billboard, cutoff} = this.props;
     const {iconManager} = this.state;
     const {viewport} = this.context;
 
@@ -190,7 +191,8 @@ export default class IconLayer extends Layer {
               sizeScale * (sizeUnits === 'pixels' ? viewport.distanceScales.metersPerPixel[2] : 1),
             sizeMinPixels,
             sizeMaxPixels,
-            billboard
+            billboard,
+            cutoff
           })
         )
         .draw();
