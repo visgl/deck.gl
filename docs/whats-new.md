@@ -4,6 +4,8 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v7.3
 
+Release Date: Sep xx, 2019
+
 > TODO: GIF/screenshot - Spring transition, 3d tiles, Jupyter widget
 
 ### Transitions
@@ -51,7 +53,7 @@ For custom layer authors: the attribute system is simplified. One may now use `t
 
 ## deck.gl v7.2
 
-Release Date: Aug XX, 2019
+Release Date: Aug 10, 2019
 
 ### Layer Extensions
 
