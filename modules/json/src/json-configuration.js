@@ -14,6 +14,7 @@ export default class JSONConfiguration {
     this.classes = {};
     this.reactComponents = {};
     this.enumerations = {};
+    this.constants = {};
     // TODO - this needs to be simpler, function conversion should be built in
     this.convertFunction = convertFunction;
     this.preProcessClassProps = (Class, props) => props;
@@ -27,7 +28,7 @@ export default class JSONConfiguration {
   _merge(configuration) {
     for (const key in configuration) {
       switch (key) {
-        // DEPRECATED = For backwards compatibility, add views and layers to classe;
+        // DEPRECATED = For backwards compatibility, add views and layers to classes;
         case 'layers':
         case 'views':
           Object.assign(this.classes, configuration[key]);
