@@ -160,10 +160,12 @@ and used to resolve in this JSON object:
 
 ```json
 {
+  "controller": "MapController",
   "layers": [
     {
-      "type": "Tile3DLayer",
-      "controller": "MapController"
+      "type": "ScatterplotLayer",
+      "data": ...,
+      ...
     }
   ]
 }
@@ -176,6 +178,7 @@ will replace the constants' value with the value provided in configuration decla
   controller: MapController, // MapController class from '@deck.gl/core' 
   layers: [
     new ScatterplotLayer({
+      data: ...,
       ...
     })
   ]
