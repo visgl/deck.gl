@@ -20,6 +20,7 @@
   "layers": [
     {
       "type": "ScatterplotLayer",
+      "id": "SCATTER_PLOT_LAYER_ID",
       "data": [{"position": [-122.45, 37.8]}],
       "getPosition": "position",
       "getFillColor": [255, 0, 0, 255],

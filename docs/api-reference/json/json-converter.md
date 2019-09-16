@@ -72,7 +72,7 @@ and used to resolve this JSON object:
 }
 ```
 
-will replace the layers discriptor with
+will replace the layers descriptor with
 
 ```js
 {
@@ -140,3 +140,44 @@ and used to resolve this JSON object:
   ]
 }
 ```
+
+### Constants Catalogs
+
+A map of constants that should be made available to the JSON string resolver. For example, when this configuration is passed to `JSONConverter`:
+
+```js
+import {DracoLoader} from '@loaders.gl/draco';
+
+const configuration = {
+  ...
+  constants: {
+    DracoLoader
+  }
+};
+```
+
+and used to resolve in this JSON object:
+
+```json
+{
+  "layers": [
+    {
+      "type": "Tile3DLayer",
+      "DracoLoader": "DracoLoader"
+    }
+  ]
+}
+```
+
+will replace the constants' value with the value provided in configuration declaration:
+
+```js
+{
+  layers: [
+    new Tile3DLayer({
+      ...,
+     DracoLoader, // DracoLoader is from '@loaders.gl/draco'
+    })
+  ]
+}
+``

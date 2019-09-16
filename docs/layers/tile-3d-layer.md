@@ -131,7 +131,7 @@ The Tile3DLayer renders the following sublayers based on tile [format](https://g
   - `_lighting` is default to `pbr`.
 * `pointcloud` - a [PointCloudLayer](/docs/layers/point-cloud-layer.md) rendering all the tiles with Point Cloud format.
   - `pointSize` is default to `1.0`.
-  - `getColor` is default to `[255, 0, 0]`
+  - `getColor` is default to `[255, 0, 0]`. This value is only applied when no [color properties](https://github.com/AnalyticalGraphicsInc/3d-tiles/blob/master/specification/TileFormats/PointCloud/README.md#point-colors) are defined in point cloud tile file. 
 
 ## Source
 

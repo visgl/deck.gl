@@ -140,6 +140,9 @@ function convertPlainObject(json, configuration) {
 // TODO - We could also support string syntax for hydrating other types, like regexps...
 // But no current use case
 function convertString(json, key, configuration) {
+  if (configuration.constants[json]) {
+    return configuration.constants[json];
+  }
   if (configuration.enumerations[json]) {
     // TODO - look up
     return json;
