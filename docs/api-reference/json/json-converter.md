@@ -143,15 +143,15 @@ and used to resolve this JSON object:
 
 ### Constants Catalogs
 
-A map of constants that should be made available to the JSON string resolver. For example, when this configuration is passed to `JSONConverter`:
+A map of constants that should be made available to the JSON string resolver. This is also helpful to evaluate a prop that does not need to be instantiated. For example, when this configuration is passed to `JSONConverter`:
 
 ```js
-import {DracoLoader} from '@loaders.gl/draco';
+import {MapController} from '@deck.gl/core';
 
 const configuration = {
   ...
   constants: {
-    DracoLoader
+    MapController
   }
 };
 ```
@@ -160,10 +160,12 @@ and used to resolve in this JSON object:
 
 ```json
 {
+  "controller": "MapController",
   "layers": [
     {
-      "type": "Tile3DLayer",
-      "DracoLoader": "DracoLoader"
+      "type": "ScatterplotLayer",
+      "data": ...,
+      ...
     }
   ]
 }
@@ -173,10 +175,11 @@ will replace the constants' value with the value provided in configuration decla
 
 ```js
 {
+  controller: MapController, // MapController class from '@deck.gl/core' 
   layers: [
-    new Tile3DLayer({
-      ...,
-     DracoLoader, // DracoLoader is from '@loaders.gl/draco'
+    new ScatterplotLayer({
+      data: ...,
+      ...
     })
   ]
 }
