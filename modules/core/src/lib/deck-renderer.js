@@ -2,13 +2,14 @@ import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
 import PostProcessEffect from '../effects/post-process-effect';
-import {Framebuffer} from '@luma.gl/core';
+import {Framebuffer, cssToDeviceRatio} from '@luma.gl/core';
 
 const LOG_PRIORITY_DRAW = 2;
 
 export default class DeckRenderer {
   constructor(gl) {
     this.gl = gl;
+    this.pixelRatio = cssToDeviceRatio(gl);
     this.layerFilter = null;
     this.drawPickingColors = false;
     this.drawLayersPass = new DrawLayersPass(gl);
@@ -35,12 +36,14 @@ export default class DeckRenderer {
       }
     }
 
-    const {layerFilter} = this;
+    const {pixelRatio, layerFilter} = this;
 
     this.drawLayersPass.setProps({
+      pixelRatio,
       layerFilter
     });
     this.pickLayersPass.setProps({
+      pixelRatio,
       layerFilter
     });
   }
@@ -62,7 +65,8 @@ export default class DeckRenderer {
       viewports,
       onViewportActive: activateViewport,
       views,
-      effects
+      effects,
+      pixelRatio: this.pixelRatio
     });
     const outputBuffer = this.lastPostProcessEffect
       ? this.screenBuffer

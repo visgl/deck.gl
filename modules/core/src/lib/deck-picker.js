@@ -29,6 +29,7 @@ export default class DeckPicker {
     this.gl = gl;
     this.pickingFBO = null;
     this.pickLayersPass = new PickLayersPass(gl);
+    this.pixelRatio = cssToDeviceRatio(gl);
     this.layerFilter = null;
     this.pickingEvent = null;
     this.lastPickedInfo = {
@@ -44,6 +45,7 @@ export default class DeckPicker {
       this.layerFilter = props.layerFilter;
     }
     this.pickLayersPass.setProps({
+      pixelRatio: this.pixelRatio,
       layerFilter: this.layerFilter
     });
   }
@@ -134,7 +136,7 @@ export default class DeckPicker {
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
     // And compensate for pixelRatio
-    const pixelRatio = cssToDeviceRatio(this.gl);
+    const pixelRatio = this.pixelRatio;
     const devicePixelRange = cssToDevicePixels(this.gl, [x, y], true);
     const devicePixel = [
       devicePixelRange.x + Math.floor(devicePixelRange.width / 2),
@@ -226,7 +228,7 @@ export default class DeckPicker {
     this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // And compensate for pixelRatio
-    const pixelRatio = cssToDeviceRatio(this.gl);
+    const pixelRatio = this.pixelRatio;
     const leftTop = cssToDevicePixels(this.gl, [x, y], true);
 
     // take left and top (y inverted in device pixels) from start location
