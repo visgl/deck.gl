@@ -22,7 +22,7 @@ class Layer(JSONMixin):
         type,
         data,
         id=None,
-        get_position='-',
+        get_position='[lng,lat]',
         color_range=None,
         opacity=None,
         radius=None,

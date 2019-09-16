@@ -9,7 +9,7 @@ class pydeck.Layer(
     type,
     data,
     id=None,
-    get_position='-',
+    get_position='[lng,lat]',
     **kwargs)
 ```
 
@@ -23,11 +23,11 @@ Note that this is Javascript documentation and parameters in pydeck usually will
 `type` : `str`
     Type of layer to render, e.g., `HexagonLayer`. See the layer catalog above.
 `data` : `str` or `list` of `dict` or `pandas.DataFrame`
-    A URL of data to load in, a list of dictionaries, 
+    A URL of data to load in, a list of dictionaries,
 `id` : `str`, default `None`
     Unique name for the layer. Will autopopulate with a UUID if no ID is provided.
-`get_position` : `str`, default `'-'`
-    Name of position field. If `'-'` is provided, the position field will be assumed to be the common case where a flat file has separate columns `lat` and `lng`.
+`get_position` : `str`, default `'[lng,lat]'`
+    Name of position field, with some expression parsing, e.g., `'[lng,lat]'` is provided, the position field will be assumed to be the common case where a flat file has separate columns `lat` and `lng`.
 `**kwargs` : `int` or `str` or `float` or `bool` or `list`
     Various other keyword arguments can be provided as well, provided they exist in the layer documentation.
     For examples, `extruded=True` will extrude the underlying layer if this is a property it can have.
