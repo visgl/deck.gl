@@ -132,10 +132,10 @@ class Deck(JSONMixin):
             Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
         iframe_width : int, default None
             Height of Jupyter notebook iframe in pixels, if rendered
-            Set to `self.width` if set on initialization
+            Set to `self.deck_widget.width` if set on initialization
         iframe_height : int, default None
             Width of Jupyter notebook iframe in pixels, if rendered
-            Set to `self.height` if set on initialization
+            Set to `self.deck_widget.height` if set on initialization
 
         Returns
         -------
@@ -148,6 +148,6 @@ class Deck(JSONMixin):
             filename,
             open_browser=open_browser,
             notebook_display=notebook_display,
-            iframe_height=iframe_height or self.height,
-            iframe_width=iframe_width or self.width)
+            iframe_height=iframe_height or self.deck_widget.height,
+            iframe_width=iframe_width or self.deck_widget.width)
         return f
