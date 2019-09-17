@@ -2,14 +2,14 @@
   "description": "The deck.gl website tile-3d-layer example",
   "websiteUrl": "https://deck.gl/#/examples/geo-layers/tile-3d-layer",
   "initialViewState": {
-    "latitude": 29.99456364445551,
-    "longitude": 31.131612169432408,
+    "latitude": 40.73380895124223,
+    "longitude": -73.99557610230511,
     "pitch": 45,
     "maxPitch": 60,
     "bearing": 0,
     "minZoom": 2,
     "maxZoom": 30,
-    "zoom": 12.8
+    "zoom": 10.766728129551447
   },
   "views": [
     {
@@ -21,10 +21,10 @@
   "layers": [
     {
       "type": "Tile3DLayer",
-      "id": "tiles-cairo-vricon",
+      "id": "tiles-new-york",
       "DracoLoader": "DracoLoader",
-      "_ionAssetId": 29328,
-      "_ionAccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlNGZmZjBjMS04ZGYwLTRhYjAtOWIzYy0wZWJmNzI4OWZhNGEiLCJpZCI6MTYyMywic2NvcGVzIjpbImFzciIsImdjIl0sImFzc2V0cyI6WzI5MzI4LDI5MzMxLDI5MzMyLDI5MzMzLDI5MzM0LDI5MzM1LDEsMiwzLDQsMzk1NF0sImlhdCI6MTU2MDQ0ODA2Nn0.zZPuc5WzTsrKNviCY2jyhmDwJITXzhbRTnJS025_uBw"
+      "_ionAssetId": 7162,
+      "_ionAccessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIzMGY4ODczYy1mNTk4LTRiMDUtYmIxYy0xZWYwOWZmMGY4NjQiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJhc3NldHMiOlsxLDIsMyw0LDYxOTMsNjI3Myw3MTYyLDczNTMsNzE0Ml0sImlhdCI6MTU0MTYxODM0NX0.lWnGs9ySXO4QK3HagcMsDpZ8L01DpmUDQm38-2QAQuE"
     }
   ]
 }
