@@ -179,19 +179,21 @@ background-color: #29323c;
 padding: 10px;
 ```
 
-##### `useDevicePixels` (Boolean or Number, optional)
+##### `useDevicePixels` (Boolean|Number, optional)
 
-When `true` (default), it will use device's full retina/HD resolution for rendering, when `false`, it will use the same resolution as the screen window (CSS window).
+Controls the resolution of drawing buffer used for rendering.
 
-As an experimental API, a custom ratio (Number) can be set to be used instead of actual device pixel ratio. This allows using lower or higher resolution than CSS window for rendering.   
+* `true`: `Device (physical) pixels` resolution is used for rendering, this resolution is defined by `window.devicePixelRatio`. On Retina/HD systems this resolution is usually twice as big as `CSS pixels` resolution.
+* `false`: `CSS pixels` resolution (equal to the canvas size) is used for rendering.
+* `Number` (Experimental): Specified Number is used as a custom ratio (drawing buffer resolution to `CSS pixel` resolution) to determine drawing buffer size, a value less than `one` uses resolution smaller than `CSS pixels`, gives better performance but produces blurry images, a value greater than `one` uses resolution bigger than CSS pixels resolution (canvas size), produces sharp images but at a lower performance.
 
 Default value is `true`.
 
 Note:
 
-* Consider setting to `false` unless you require high resolution, as it affects rendering performance.
+* Consider setting to `false` or to a Number less than `one` if better rendering performance is needed.
 
-* When it is set to a high value (like, 4 or more), it is possible to hit the system limit for allocating rendering buffer, such cases will log a warning and fallback to system allowed resolution.
+* When it is set to a high Number (like, 4 or more), it is possible to hit the system limit for allocating drawing buffer, such cases will log a warning and fallback to system allowed resolution.
 
 ##### `gl` (Object, optional)
 
