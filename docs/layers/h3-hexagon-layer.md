@@ -101,7 +101,7 @@ However, there are 12 pentagons world wide at each resolution. The hexagons at a
 * if `false`, the layer chooses the mode automatically. High-precision rendering is only used if resolution is at or below `5`, or if a pentagon is found in the data.
 * if `true`, always use high-precision rendering.
 
-##### `coverage` (Number, optional)
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 

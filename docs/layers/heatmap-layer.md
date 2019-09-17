@@ -71,7 +71,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 ### Render Options
 
-##### `radiusPixels` (Number, optional)
+##### `radiusPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `30`
 
@@ -84,13 +84,13 @@ Radius of the circle in pixels, to which the weight of an object is distributed.
 Specified as an array of colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing Red, Green, Blue and Alpha channels.  Each channel is a value between 0 and 255. When Alpha is not provided, a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `intensity` (Number, optional)
+##### `intensity` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
 Value that is multiplied with the total weight at a pixel to obtain the final weight. A value larger than `1` biases the output color towards the higher end of the spectrum, and a value less than `1` biases the output color towards the lower end of the spectrum.
 
-##### `threshold` (Number, optional)
+##### `threshold` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0.05`
 

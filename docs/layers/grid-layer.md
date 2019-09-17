@@ -105,7 +105,7 @@ Color scale domain, default is set to the range of point counts in each cell.
 Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `coverage` (Number, optional)
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -125,7 +125,7 @@ Elevation scale input domain, default is set to the extent of point counts in ea
 
 Elevation scale output range
 
-##### `elevationScale` (Number, optional)
+##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -139,28 +139,28 @@ Cell elevation multiplier. The elevation of cell is calculated by
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cell will be flat.
 
-##### `upperPercentile` (Number, optional)
+##### `upperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter cells and re-calculate color by `upperPercentile`. Cells with value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (Number, optional)
+##### `lowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
 Filter cells and re-calculate color by `lowerPercentile`. Cells with value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (Number, optional)
+##### `elevationUpperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter cells and re-calculate elevation by `elevationUpperPercentile`. Cells with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (Number, optional)
+##### `elevationLowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 

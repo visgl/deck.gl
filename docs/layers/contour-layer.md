@@ -76,7 +76,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) properties.
 
 ### Render Options
 
-##### `cellSize` (Number, optional)
+##### `cellSize` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 

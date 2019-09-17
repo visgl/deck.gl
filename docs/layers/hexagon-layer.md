@@ -83,7 +83,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 ### Render Options
 
-##### `radius` (Number, optional)
+##### `radius` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1000`
 
@@ -120,7 +120,7 @@ to number of counts by passing in an arbitrary color domain. This property is ex
 Specified as an array of 6 colors [color1, color2, ... color6]. Each color is an array of 3 or 4 values [R, G, B] or [R, G, B, A], representing intensities of Red, Green, Blue and Alpha channels.  Each intensity is a value between 0 and 255. When Alpha not provided a value of 255 is used. By default `colorRange` is set to
 [colorbrewer](http://colorbrewer2.org/#type=sequential&scheme=YlOrRd&n=6) `6-class YlOrRd`.
 
-##### `coverage` (Number, optional)
+##### `coverage` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -144,7 +144,7 @@ with the same elevation scale for comparison.
 
 Elevation scale output range
 
-##### `elevationScale` (Number, optional)
+##### `elevationScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `1`
 
@@ -158,28 +158,28 @@ all hexagons without updating the data.
 
 Whether to enable cell elevation. Cell elevation scale by count of points in each cell. If set to false, all cells will be flat.
 
-##### `upperPercentile` (Number, optional)
+##### `upperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter bins and re-calculate color by `upperPercentile`. Hexagons with color value
 larger than the upperPercentile will be hidden.
 
-##### `lowerPercentile` (Number, optional)
+##### `lowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
 Filter bins and re-calculate color by `lowerPercentile`. Hexagons with color value
 smaller than the lowerPercentile will be hidden.
 
-##### `elevationUpperPercentile` (Number, optional)
+##### `elevationUpperPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
 Filter bins and re-calculate elevation by `elevationUpperPercentile`. Hexagons with elevation value
 larger than the elevationUpperPercentile will be hidden.
 
-##### `elevationLowerPercentile` (Number, optional)
+##### `elevationLowerPercentile` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `100`
 
