@@ -133,7 +133,6 @@ export default class CPUAggregator {
 
     this._getCellSize = opts.getCellSize || defaultGetCellSize;
     this._getAggregator = opts.getAggregator;
-
     this._addDimension(opts.dimensions || defaultDimensions);
   }
 
@@ -246,10 +245,11 @@ export default class CPUAggregator {
     });
   }
 
-  getDimensionUpdaters({key, accessor, getBins, getDomain, getScaleFunc, nullValue}) {
+  getDimensionUpdaters({key, accessor, pickingInfo, getBins, getDomain, getScaleFunc, nullValue}) {
     return {
       key,
       accessor,
+      pickingInfo,
       getBins: Object.assign({updater: this.getDimensionSortedBins}, getBins),
       getDomain: Object.assign({updater: this.getDimensionValueDomain}, getDomain),
       getScaleFunc: Object.assign({updater: this.getDimensionScale}, getScaleFunc),
