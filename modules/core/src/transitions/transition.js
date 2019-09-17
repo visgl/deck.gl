@@ -19,8 +19,6 @@ export default class Transition {
     this._handle = null;
 
     // Defaults
-    this.duration = Infinity;
-    this.easing = t => t;
     this.onStart = noop;
     this.onUpdate = noop;
     this.onInterrupt = noop;
@@ -76,8 +74,11 @@ export default class Transition {
     const {timeline, duration, easing} = this;
     const handle = this._handle;
 
-    const time = timeline.getTime(handle);
-    this.time = easing(time / duration);
+    let time = timeline.getTime(handle);
+    if (Number.isFinite(duration)) {
+      time = easing ? easing(time / duration) : time / duration;
+    }
+    this.time = time;
     this.onUpdate(this);
 
     if (timeline.isFinished(handle)) {

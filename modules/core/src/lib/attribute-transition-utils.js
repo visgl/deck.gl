@@ -1,33 +1,31 @@
 import BaseAttribute from '../lib/base-attribute';
 import {padArray} from '../utils/array-utils';
 
-const noop = () => {};
 const DEFAULT_TRANSITION_SETTINGS = {
-  type: 'interpolation',
-  onStart: noop,
-  onEnd: noop,
-  onInterrupt: noop,
-  onUpdate: noop,
-  enter: x => x,
-  // interpolation
-  duration: 0,
-  easing: t => t,
-  // spring
-  stiffness: 0.05,
-  damping: 0.5
+  interpolation: {
+    duration: 0,
+    easing: t => t
+  },
+  spring: {
+    stiffness: 0.05,
+    damping: 0.5
+  }
 };
 
-export function normalizeTransitionSettings(userSettings, layerSettings = {}) {
+export function normalizeTransitionSettings(userSettings, layerSettings) {
   if (!userSettings) {
     return null;
   }
   if (Number.isFinite(userSettings)) {
-    userSettings = {
-      type: 'interpolation',
-      duration: userSettings
-    };
+    userSettings = {duration: userSettings};
   }
-  return Object.assign({}, DEFAULT_TRANSITION_SETTINGS, layerSettings, userSettings);
+  userSettings.type = userSettings.type || 'interpolation';
+  return Object.assign(
+    {},
+    DEFAULT_TRANSITION_SETTINGS[userSettings.type],
+    layerSettings,
+    userSettings
+  );
 }
 
 // NOTE: NOT COPYING OVER OFFSET OR STRIDE HERE BECAUSE:
