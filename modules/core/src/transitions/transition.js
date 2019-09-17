@@ -46,6 +46,7 @@ export default class Transition {
     }
     Object.assign(this, props);
     this._inProgress = true;
+    this.onStart(this);
   }
 
   /**
@@ -76,7 +77,6 @@ export default class Transition {
         duration
       });
       this._handle = handle;
-      this.onStart(this);
     }
 
     const time = timeline.getTime(handle);

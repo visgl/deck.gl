@@ -27,9 +27,6 @@ test('Transition#start', t => {
   transition.start({customAttribute: 'custom value'});
   t.ok(transition.inProgress, 'Transition is in progress');
   t.is(transition.customAttribute, 'custom value', 'Transition has customAttribute');
-  t.is(onStartCallCount, 0, 'onStart is not called');
-
-  transition.update();
   t.is(onStartCallCount, 1, 'onStart is called once');
 
   t.end();

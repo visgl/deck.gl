@@ -4,13 +4,17 @@ import {padArray} from '../utils/array-utils';
 const noop = () => {};
 const DEFAULT_TRANSITION_SETTINGS = {
   type: 'interpolation',
-  duration: 0,
-  easing: t => t,
   onStart: noop,
   onEnd: noop,
   onInterrupt: noop,
   onUpdate: noop,
-  enter: x => x
+  enter: x => x,
+  // interpolation
+  duration: 0,
+  easing: t => t,
+  // spring
+  stiffness: 0.1,
+  damping: 0.5
 };
 
 export function normalizeTransitionSettings(userSettings, layerSettings = {}) {
