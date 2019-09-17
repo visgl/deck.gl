@@ -2,8 +2,8 @@
   "description": "The deck.gl website tile-3d-layer example",
   "websiteUrl": "https://deck.gl/#/examples/geo-layers/tile-3d-layer",
   "initialViewState": {
-    "latitude": 29.99456364445551,
-    "longitude": 31.131612169432408,
+    "latitude": 29.99,
+    "longitude": 31.13,
     "pitch": 45,
     "maxPitch": 60,
     "bearing": 0,

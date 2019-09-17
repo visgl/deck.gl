@@ -3,7 +3,7 @@
   "websiteUrl": "https://deck.gl/#/examples/geo-layers/tile-3d-layer",
   "initialViewState": {
     "latitude": 46.26,
-    "longitude": -122,
+    "longitude": -122.12,
     "pitch": 45,
     "maxPitch": 60,
     "bearing": 0,
