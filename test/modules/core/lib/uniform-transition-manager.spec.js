@@ -43,10 +43,10 @@ test('UniformTransitionManager#interpolation#update', t => {
   t.ok(manager1.active, 'manager1 has transitions');
   t.notOk(manager2.active, 'manager2 does not have transitions');
 
+  timeline.setTime(500);
   manager2.add('A', 1, 2, 500);
   manager2.add('B', [4, 4], [12, 12], {duration: 1000, easing: r => r * r});
 
-  timeline.setTime(500);
   values = manager1.update();
   t.deepEquals(values, {A: 0.5}, 'returned values in transition');
   values = manager2.update();
@@ -61,8 +61,8 @@ test('UniformTransitionManager#interpolation#update', t => {
   t.notOk(manager1.active, 'manager1 does not have transitions');
   t.ok(manager2.active, 'manager2 has transitions');
 
-  manager2.add('B', [12, 12], [8, 8], 1000);
   timeline.setTime(1250);
+  manager2.add('B', [12, 12], [8, 8], 1000);
   values = manager2.update();
   t.deepEquals(values, {B: [6, 6]}, 'interrupted transition should start from last value');
 

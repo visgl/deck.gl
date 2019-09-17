@@ -13,7 +13,7 @@ const DEFAULT_TRANSITION_SETTINGS = {
   duration: 0,
   easing: t => t,
   // spring
-  stiffness: 0.1,
+  stiffness: 0.05,
   damping: 0.5
 };
 

@@ -26,6 +26,7 @@ test('Transition#start', t => {
 
   transition.start({customAttribute: 'custom value'});
   t.ok(transition.inProgress, 'Transition is in progress');
+  t.ok(transition._handle, 'Sub-timeline is created');
   t.is(transition.customAttribute, 'custom value', 'Transition has customAttribute');
   t.is(onStartCallCount, 1, 'onStart is called once');
 

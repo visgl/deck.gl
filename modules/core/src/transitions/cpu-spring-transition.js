@@ -62,6 +62,11 @@ export default class CPUSpringTransition extends Transition {
       return false;
     }
 
+    // TODO - use timeline
+    // const {timeline} = this;
+    // const handle = this._handle;
+    // const time = timeline.getTime(handle);
+
     const {fromValue, toValue, damping, stiffness} = this;
     const {_prevValue = fromValue, _currValue = fromValue} = this;
     let nextValue = updateSpring(_prevValue, _currValue, toValue, damping, stiffness);
