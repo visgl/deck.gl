@@ -11,14 +11,15 @@ import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 import {getFrameState} from './get-frame-state';
 
 const defaultProps = {
-  getColor: [255, 0, 0],
-  _lighting: 'pbr',
+  getPointColor: [255, 0, 0],
   pointSize: 1.0,
   opacity: 1.0,
 
-  tilesetUrl: null,
+  data: null,
   _ionAssetId: null,
   _ionAccessToken: null,
+  _loadOptions: {throttleRequests: true},
+
   onTilesetLoad: tileset3d => {},
   onTileLoad: tileHeader => {},
   onTileUnload: tileHeader => {},
@@ -69,8 +70,8 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   async updateState({props, oldProps}) {
-    if (props.tilesetUrl && props.tilesetUrl !== oldProps.tilesetUrl) {
-      await this._loadTileset(props.tilesetUrl);
+    if (props.data && props.data !== oldProps.data) {
+      await this._loadTileset(props.data);
     } else if (
       (props._ionAccessToken || props._ionAssetId) &&
       (props._ionAccessToken !== oldProps._ionAccessToken ||
@@ -87,8 +88,9 @@ export default class Tile3DLayer extends CompositeLayer {
     const response = await fetch(tilesetUrl, fetchOptions);
     const tilesetJson = await response.json();
 
+    const loadOptions = this.getLoadOptions();
+
     const tileset3d = new Tileset3D(tilesetJson, tilesetUrl, {
-      throttleRequests: true,
       onTileLoad: tileHeader => {
         this.props.onTileLoad(tileHeader);
         this._updateTileset(tileset3d);
@@ -99,7 +101,8 @@ export default class Tile3DLayer extends CompositeLayer {
       // TODO: explicit passing should not be needed, registerLoaders should suffice
       DracoLoader: this._getDracoLoader(),
       fetchOptions,
-      ...ionMetadata
+      ...ionMetadata,
+      ...loadOptions
     });
 
     this.setState({
@@ -116,6 +119,10 @@ export default class Tile3DLayer extends CompositeLayer {
     const ionMetadata = await _getIonTilesetMetadata(ionAccessToken, ionAssetId);
     const {url, headers} = ionMetadata;
     return await this._loadTileset(url, {headers}, ionMetadata);
+  }
+
+  getLoadOptions() {
+    return this.props._loadOptions;
   }
 
   _updateTileset(tileset3d) {
@@ -207,10 +214,9 @@ export default class Tile3DLayer extends CompositeLayer {
 
     const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
 
-    const {_lighting} = this.props;
     return new SubLayerClass(
       {
-        _lighting
+        _lighting: 'pbr'
       },
       this.getSubLayerProps({
         id: 'scenegraph'
@@ -245,13 +251,10 @@ export default class Tile3DLayer extends CompositeLayer {
       return null;
     }
 
-    const {getColor, pointSize} = this.props;
+    const {getPointColor} = this.props;
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
 
     return new SubLayerClass(
-      {
-        pointSize
-      },
       this.getSubLayerProps({
         id: 'pointcloud'
       }),
@@ -271,7 +274,7 @@ export default class Tile3DLayer extends CompositeLayer {
         coordinateOrigin: cartographicOrigin,
         modelMatrix,
 
-        getColor: constantRGBA || getColor
+        getColor: constantRGBA || getPointColor
       }
     );
   }

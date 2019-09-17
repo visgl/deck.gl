@@ -27,10 +27,15 @@ test('Tile3DLayer', t => {
   const testCases = generateLayerTests({
     Layer: Tile3DLayer,
     assert: t.ok,
-    onBeforeUpdate: ({testCase}) => t.comment(testCase.title)
+    onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
+    runDefaultAsserts: false
   });
 
-  testLayer({Layer: Tile3DLayer, testCases, onError: t.notOk});
+  testLayer({
+    Layer: Tile3DLayer,
+    testCases,
+    onError: t.notOk
+  });
 
   t.end();
 });
