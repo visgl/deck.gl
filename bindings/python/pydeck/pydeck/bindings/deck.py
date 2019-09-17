@@ -18,6 +18,7 @@ class Deck(JSONMixin):
         map_style='mapbox://styles/mapbox/dark-v9',
         mapbox_key=None,
         initial_view_state=ViewState(),
+        tooltip=True,
         width=500,
         height=500,
     ):
@@ -39,6 +40,9 @@ class Deck(JSONMixin):
         mapbox_key : str, default None
             Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
+        tooltip : bool, default True
+            Boolean indicating whether or not a tooltip should be generated when hovering over a data layer
+            Individual layers must have `pickable` set to `True` to be displayed in the tooltip.
         height : int, default 500
             Height of visualization, in pixels
         width : int, default 500
@@ -62,6 +66,7 @@ class Deck(JSONMixin):
         self.deck_widget.mapbox_key = self.mapbox_key
         self.deck_widget.height = height
         self.deck_widget.width = width
+        self.deck_widget.tooltip = tooltip
         self.selected_data = self.deck_widget.selected_data
         if not self.mapbox_key:
             warnings.warn(
@@ -149,5 +154,6 @@ class Deck(JSONMixin):
             open_browser=open_browser,
             notebook_display=notebook_display,
             iframe_height=iframe_height or self.deck_widget.height,
-            iframe_width=iframe_width or self.deck_widget.width)
+            iframe_width=iframe_width or self.deck_widget.width,
+            use_tooltip=self.deck_widget.tooltip)
         return f

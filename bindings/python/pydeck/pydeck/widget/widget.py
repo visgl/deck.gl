@@ -4,7 +4,7 @@
 from __future__ import unicode_literals
 
 import ipywidgets as widgets
-from traitlets import Int, Any, Unicode
+from traitlets import Int, Any, Unicode, Bool
 
 from ._frontend import module_name, module_version
 
@@ -39,3 +39,4 @@ class DeckGLWidget(widgets.DOMWidget):
     height = Int(500).tag(sync=True)
     width = Int(500).tag(sync=True)
     selected_data = Any().tag(sync=True)
+    tooltip = Bool().tag(sync=True)

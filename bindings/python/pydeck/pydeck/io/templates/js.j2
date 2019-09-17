@@ -1,6 +1,7 @@
 const DEPENDENCIES = {% include 'requirejs_dependencies.json' %};
 const jsonInput = {{json_input}};
 const MAPBOX_API_KEY = '{{mapbox_key}}';
+const useTooltip = {{use_tooltip}};
 
 define('@jupyter-widgets/base', function() {
   return {
@@ -18,5 +19,5 @@ requirejs(['@deck.gl/jupyter-widget'], (root) => {
     width: '100%',
     height: '100%',
     jsonInput
-  });
+  }, useTooltip);
 })

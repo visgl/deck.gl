@@ -21,6 +21,7 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: null,
+      tooltip: null,
       width: 500,
       height: 500
     };
@@ -82,6 +83,7 @@ export class DeckGLView extends DOMWidgetView {
           container: containerDiv,
           jsonInput: JSON.parse(this.model.get('json_input'))
         },
+        this.model.get('tooltip'),
         x => {
           this.jsonDeck = x;
         },
