@@ -106,15 +106,14 @@ export default class AttributeTransitionManager {
   // Check an attributes for updates
   // Returns a transition object if a new transition is triggered.
   _updateAttribute(attributeName, attribute, settings) {
-    let isNew = false;
-
     const transition = this.transitions[attributeName];
     // an attribute can change transition type when it updates
     // let's remove the transition when that happens so we can create the new transition type
     // TODO: when switching transition types, make sure to carry over the attribute's
     // previous buffers, currentLength, bufferLayout, etc, to be used as the starting point
     // for the next transition
-    if (!transition || transition.type !== settings.type) {
+    let isNew = !transition || transition.type !== settings.type;
+    if (isNew) {
       if (transition) {
         this._removeTransition(attributeName);
       }
@@ -132,11 +131,9 @@ export default class AttributeTransitionManager {
           gl: this.gl
         });
       } else {
-        throw new Error(
-          `AttributeTransitionManager: unsupported transition type '${settings.type}'`
-        );
+        log.error(`unsupported transition type '${settings.type}'`)();
+        isNew = false;
       }
-      isNew = true;
     }
 
     if (isNew || attribute.needsRedraw()) {
