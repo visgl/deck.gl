@@ -18,7 +18,7 @@ const defaultProps = {
   data: null,
   _ionAssetId: null,
   _ionAccessToken: null,
-  _loadOptions: {throttleRequests: true},
+  loadOptions: {throttleRequests: true},
 
   onTilesetLoad: tileset3d => {},
   onTileLoad: tileHeader => {},
@@ -122,7 +122,7 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   getLoadOptions() {
-    return this.props._loadOptions;
+    return this.props.loadOptions;
   }
 
   _updateTileset(tileset3d) {
