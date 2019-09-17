@@ -47,9 +47,6 @@ const INITIAL_CONTEXT = Object.seal({
   deck: null,
   gl: null,
 
-  // Settings
-  useDevicePixels: true, // Exposed in case custom layers need to adjust sizes
-
   // General resources
   stats: null, // for tracking lifecycle performance
 
@@ -149,12 +146,7 @@ export default class LayerManager {
       : this.layers;
   }
 
-  /**
-   * Set props needed for layer rendering and picking.
-   * Parameters are to be passed as a single object, with the following values:
-   * @param {Boolean} useDevicePixels
-   */
-  /* eslint-disable complexity, max-statements */
+  // Set props needed for layer rendering and picking.
   setProps(props) {
     if ('debug' in props) {
       this._debug = props.debug;
@@ -165,16 +157,11 @@ export default class LayerManager {
       this.context.userData = props.userData;
     }
 
-    if ('useDevicePixels' in props) {
-      this.context.useDevicePixels = props.useDevicePixels;
-    }
-
     // TODO - For now we set layers before viewports to preserve changeFlags
     if ('layers' in props) {
       this.setLayers(props.layers);
     }
   }
-  /* eslint-enable complexity, max-statements */
 
   // Supply a new layer list, initiating sublayer generation and layer matching
   setLayers(newLayers, forceUpdate = false) {

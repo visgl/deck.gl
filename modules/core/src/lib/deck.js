@@ -69,7 +69,7 @@ function getPropTypes(PropTypes) {
     glOptions: PropTypes.object,
     parameters: PropTypes.object,
     pickingRadius: PropTypes.number,
-    useDevicePixels: PropTypes.bool,
+    useDevicePixels: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
     touchAction: PropTypes.string,
 
     // Callbacks

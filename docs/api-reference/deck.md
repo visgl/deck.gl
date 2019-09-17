@@ -170,7 +170,7 @@ Otherwise, the callback can return an object with the following fields:
 * `style` (Object, optional) - An object of CSS styles to apply to the tooltip element, which can override the default styling.
 
 By default, the tooltip has the following CSS style:
-  
+
 ```css
 z-index: 1;
 position: absolute;
@@ -179,15 +179,19 @@ background-color: #29323c;
 padding: 10px;
 ```
 
-##### `useDevicePixels` (Boolean, optional)
+##### `useDevicePixels` (Boolean or Number, optional)
 
-When true, device's full resolution will be used for rendering, this value can change per frame, like when moving windows between screens or when changing zoom level of the browser.
+When `true` (default), it will use device's full retina/HD resolution for rendering, when `false`, it will use the same resolution as the screen window (CSS window).
+
+As an experimental API, a custom ratio (Number) can be set to be used instead of actual device pixel ratio. This allows using lower or higher resolution than CSS window for rendering.   
 
 Default value is `true`.
 
 Note:
 
 * Consider setting to `false` unless you require high resolution, as it affects rendering performance.
+
+* When it is set to a high value (like, 4 or more), it is possible to hit the system limit for allocating rendering buffer, such cases will log a warning and fallback to system allowed resolution.
 
 ##### `gl` (Object, optional)
 
