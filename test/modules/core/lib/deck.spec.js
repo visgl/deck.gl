@@ -55,7 +55,7 @@ test('Deck#constructor', t => {
   t.pass('Deck constructor did not throw');
 });
 
-test('Deck#rendering, picking, logging', t => {
+test.only('Deck#rendering, picking, logging', t => {
   // Test logging functionalities
   log.priority = 4;
 
