@@ -30,7 +30,7 @@ test('UniformTransitionManager#add, remove, clear', t => {
   t.end();
 });
 
-test('UniformTransitionManager#update', t => {
+test('UniformTransitionManager#interpolation#update', t => {
   const timeline = new Timeline();
   const manager1 = new UniformTransitionManager(timeline);
   const manager2 = new UniformTransitionManager(timeline);
@@ -43,10 +43,10 @@ test('UniformTransitionManager#update', t => {
   t.ok(manager1.active, 'manager1 has transitions');
   t.notOk(manager2.active, 'manager2 does not have transitions');
 
+  timeline.setTime(500);
   manager2.add('A', 1, 2, 500);
   manager2.add('B', [4, 4], [12, 12], {duration: 1000, easing: r => r * r});
 
-  timeline.setTime(500);
   values = manager1.update();
   t.deepEquals(values, {A: 0.5}, 'returned values in transition');
   values = manager2.update();
@@ -61,15 +61,15 @@ test('UniformTransitionManager#update', t => {
   t.notOk(manager1.active, 'manager1 does not have transitions');
   t.ok(manager2.active, 'manager2 has transitions');
 
-  manager2.add('B', [12, 12], [8, 8], 1000);
   timeline.setTime(1250);
+  manager2.add('B', [12, 12], [8, 8], 1000);
   values = manager2.update();
   t.deepEquals(values, {B: [6, 6]}, 'interrupted transition should start from last value');
 
   t.end();
 });
 
-test('UniformTransitionManager#callbacks', t => {
+test('UniformTransitionManager#interpolation#callbacks', t => {
   const timeline = new Timeline();
   const manager = new UniformTransitionManager(timeline);
 
@@ -100,6 +100,64 @@ test('UniformTransitionManager#callbacks', t => {
 
   timeline.setTime(1100);
   manager.update();
+  t.is(onEndCalled, 1, 'onEnd is called');
+
+  t.end();
+});
+
+test('UniformTransitionManager#spring#update', t => {
+  const timeline = new Timeline();
+  const manager = new UniformTransitionManager(timeline);
+
+  timeline.setTime(0);
+  manager.add('A', 1, 2, {type: 'spring', stiffness: 0.5});
+  manager.add('B', [4, 4], [12, 12], {type: 'spring', stiffness: 0.25, damping: 0.5});
+
+  timeline.setTime(100);
+  let values = manager.update();
+  t.deepEquals(values, {A: 1.5, B: [6, 6]}, 'returned values in transition');
+
+  timeline.setTime(200);
+  values = manager.update();
+  t.deepEquals(values, {A: 2, B: [8.5, 8.5]}, 'returned values in transition');
+
+  timeline.setTime(300);
+  values = manager.update();
+  t.deepEquals(values, {A: 2.25, B: [10.625, 10.625]}, 'returned values in transition');
+
+  t.end();
+});
+
+test('UniformTransitionManager#spring#callbacks', t => {
+  const timeline = new Timeline();
+  const manager = new UniformTransitionManager(timeline);
+
+  let onStartCalled = 0;
+  let onEndCalled = 0;
+  let onInterruptCalled = 0;
+
+  const settings = {
+    type: 'spring',
+    stiffness: 0.5,
+    damping: 0.5,
+    onStart: () => onStartCalled++,
+    onEnd: () => onEndCalled++,
+    onInterrupt: () => onInterruptCalled++
+  };
+
+  manager.add('A', 0, 1, settings);
+
+  manager.update();
+  t.is(onStartCalled, 1, 'onStart is called');
+
+  manager.add('A', 1, 2, settings);
+  t.is(onInterruptCalled, 1, 'onInterrupt is called');
+  t.is(onStartCalled, 2, 'onStart is called');
+
+  // TODO - use timeline
+  for (let i = 0; i < 40; i++) {
+    manager.update();
+  }
   t.is(onEndCalled, 1, 'onEnd is called');
 
   t.end();

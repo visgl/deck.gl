@@ -142,21 +142,21 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.update({value: new Float32Array(4).fill(1)});
     attributes.instanceSizes.setNeedsRedraw('initial');
 
+    timeline.setTime(0);
     manager.update({attributes, transitions, numInstances: 4});
     manager.run();
     t.is(startCounter, 1, 'transition starts');
 
+    timeline.setTime(500);
     attributes.instanceSizes.needsRedraw({clearChangedFlags: true});
     manager.update({attributes, transitions, numInstances: 4});
-    timeline.setTime(500);
     manager.run();
     t.is(startCounter, 1, 'no new transition is triggered');
 
+    timeline.setTime(1000);
     attributes.instanceSizes.update({value: new Float32Array(4).fill(3)});
     attributes.instanceSizes.setNeedsRedraw('update');
-
     manager.update({attributes, transitions, numInstances: 4});
-    timeline.setTime(1000);
     manager.run();
     t.is(interruptCounter, 1, 'transition is interrupted');
     t.is(startCounter, 2, 'new transition is triggered');
@@ -176,7 +176,6 @@ if (isWebGL2(gl)) {
     attributes.instanceSizes.setNeedsRedraw('update');
 
     manager.update({attributes, transitions, numInstances: 4});
-    timeline.setTime(1500);
     manager.run();
     t.is(interruptCounter, 2, 'transition is interrupted');
     t.is(startCounter, 3, 'new transition is triggered');

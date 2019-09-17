@@ -19,8 +19,6 @@ export default class Transition {
     this._handle = null;
 
     // Defaults
-    this.duration = 1;
-    this.easing = t => t;
     this.onStart = noop;
     this.onUpdate = noop;
     this.onInterrupt = noop;
@@ -46,6 +44,12 @@ export default class Transition {
     }
     Object.assign(this, props);
     this._inProgress = true;
+
+    this._handle = this.timeline.addChannel({
+      delay: this.timeline.getTime(),
+      duration: this.duration
+    });
+    this.onStart(this);
   }
 
   /**
@@ -68,19 +72,13 @@ export default class Transition {
       return false;
     }
     const {timeline, duration, easing} = this;
-    let handle = this._handle;
+    const handle = this._handle;
 
-    if (handle === null) {
-      handle = timeline.addChannel({
-        delay: timeline.getTime(),
-        duration
-      });
-      this._handle = handle;
-      this.onStart(this);
+    let time = timeline.getTime(handle);
+    if (Number.isFinite(duration)) {
+      time = easing ? easing(time / duration) : time / duration;
     }
-
-    const time = timeline.getTime(handle);
-    this.time = easing(time / duration);
+    this.time = time;
     this.onUpdate(this);
 
     if (timeline.isFinished(handle)) {

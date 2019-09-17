@@ -1,11 +1,12 @@
-import {lerp} from 'math.gl';
 import {normalizeTransitionSettings} from './attribute-transition-utils';
-import Transition from '../transitions/transition';
+import CPUInterpolationTransition from '../transitions/cpu-interpolation-transition';
+import CPUSpringTransition from '../transitions/cpu-spring-transition';
+import log from '../utils/log';
 
-function getCurrentValue(transition) {
-  const {fromValue, toValue, time} = transition;
-  return lerp(fromValue, toValue, time);
-}
+const TRANSITION_TYPES = {
+  interpolation: CPUInterpolationTransition,
+  spring: CPUSpringTransition
+};
 
 export default class UniformTransitionManager {
   constructor(timeline) {
@@ -22,7 +23,7 @@ export default class UniformTransitionManager {
     if (transitions.has(key)) {
       const transition = transitions.get(key);
       // start from interrupted position
-      fromValue = getCurrentValue(transition);
+      fromValue = transition.value;
       this.remove(key);
     }
 
@@ -30,9 +31,13 @@ export default class UniformTransitionManager {
     if (!settings) {
       return;
     }
-    const transition = new Transition({
-      timeline: this.timeline
-    });
+
+    const TransitionType = TRANSITION_TYPES[settings.type];
+    if (!TransitionType) {
+      log.error(`unsupported transition type '${settings.type}'`)();
+      return;
+    }
+    const transition = new TransitionType({timeline: this.timeline});
     transition.start({
       ...settings,
       fromValue,
@@ -54,7 +59,7 @@ export default class UniformTransitionManager {
 
     for (const [key, transition] of this.transitions) {
       transition.update();
-      propsInTransition[key] = getCurrentValue(transition);
+      propsInTransition[key] = transition.value;
       if (!transition.inProgress) {
         // transition ended
         this.remove(key);
