@@ -97,7 +97,7 @@ export default class Tile3DLayer extends CompositeLayer {
       onTileUnload: this.props.onTileUnload,
       onTileLoadFail: this.props.onTileLoadFail,
       // TODO: explicit passing should not be needed, registerLoaders should suffice
-      DracoLoader: this.props.DracoWorkerLoader || this.props.DracoLoader,
+      DracoLoader: this._getDracoLoader(),
       fetchOptions,
       ...ionMetadata
     });
@@ -141,7 +141,7 @@ export default class Tile3DLayer extends CompositeLayer {
     for (const tile of tilesWithoutLayer) {
       // TODO - why do we call this here? Being "selected" should automatically add it to cache?
       tileset3d.addTileToCache(tile);
-      unpackTile(tile, this.props.DracoLoader);
+      unpackTile(tile, this._getDracoLoader());
 
       layerMap[tile.fullUri] = {
         layer: this._create3DTileLayer(tile),
@@ -151,6 +151,10 @@ export default class Tile3DLayer extends CompositeLayer {
 
     // update layer visibility
     this._selectLayers(frameNumber);
+  }
+
+  _getDracoLoader() {
+    return this.props.DracoWorkerLoader || this.props.DracoLoader;
   }
 
   // Grab only those layers who were selected this frame.

@@ -1,0 +1,29 @@
+{
+  "description": "The deck.gl website tile-3d-layer example",
+  "websiteUrl": "https://deck.gl/#/examples/geo-layers/tile-3d-layer",
+  "initialViewState": {
+    "latitude": -37.8058,
+    "longitude": 144.9713,
+    "pitch": 45,
+    "maxPitch": 60,
+    "bearing": 0,
+    "minZoom": 2,
+    "maxZoom": 20,
+    "zoom": 17.36
+  },
+  "views": [
+    {
+      "type": "MapView",
+      "mapStyle": "mapbox://styles/mapbox/light-v9",
+      "controller": true
+    }
+  ],
+  "layers": [
+    {
+      "type": "Tile3DLayer",
+      "id": "tiles-royal",
+      "DracoWorkerLoader": "DracoWorkerLoader",
+      "tilesetUrl": "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/3d-tiles/RoyalExhibitionBuilding/tileset.json"
+    }
+  ]
+}

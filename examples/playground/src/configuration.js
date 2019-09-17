@@ -9,6 +9,13 @@ import * as MeshLayers from '@deck.gl/mesh-layers';
 import {COORDINATE_SYSTEM} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 
+import {registerLoaders} from '@loaders.gl/core';
+import {CSVLoader} from '@loaders.gl/csv';
+import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
+
+// Note: deck already registers JSONLoader...
+registerLoaders([CSVLoader]);
+
 export default {
   // Classes that should be instantiatable by JSON converter
   classes: Object.assign(
@@ -28,5 +35,11 @@ export default {
   enumerations: {
     COORDINATE_SYSTEM,
     GL
+  },
+
+  // Constants that should be resolved with the provided values by JSON converter
+  constants: {
+    DracoLoader,
+    DracoWorkerLoader
   }
 };

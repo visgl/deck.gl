@@ -14,12 +14,6 @@ import 'brace/theme/github';
 
 import JSON_TEMPLATES from '../json-examples';
 
-import {registerLoaders} from '@loaders.gl/core';
-import {CSVLoader} from '@loaders.gl/csv';
-
-// Note: deck already registers JSONLoader...
-registerLoaders([CSVLoader]);
-
 const INITIAL_TEMPLATE = Object.keys(JSON_TEMPLATES)[0];
 
 // Set your mapbox token here
@@ -65,7 +59,6 @@ export class App extends Component {
   _setJSON(json) {
     const jsonProps = this.jsonConverter.convert(json);
     this._updateViewState(jsonProps);
-
     this.setState({jsonProps});
   }
 
