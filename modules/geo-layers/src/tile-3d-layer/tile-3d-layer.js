@@ -121,10 +121,6 @@ export default class Tile3DLayer extends CompositeLayer {
     return await this._loadTileset(url, {headers}, ionMetadata);
   }
 
-  getLoadOptions() {
-    return this.props.loadOptions;
-  }
-
   _updateTileset(tileset3d) {
     const {timeline, viewport} = this.context;
     if (!timeline || !viewport || !tileset3d) {
