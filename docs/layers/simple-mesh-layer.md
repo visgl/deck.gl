@@ -102,7 +102,7 @@ If `texture` is supplied, texture is used to render the geometries. Otherwise, o
 
 ### Render Options
 
-##### `sizeScale` (Number, optional)
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 - Default `1`.
 

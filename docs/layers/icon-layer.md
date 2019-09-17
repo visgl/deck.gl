@@ -178,7 +178,7 @@ If you choose to use auto packing, then `iconAtlas` and `iconMapping` should not
 otherwise it causes error since `IconLayer` will attempt to retrieve icons from 
 given pre-packed `iconAtlas`.
 
-##### `sizeScale` (Number, optional)
+##### `sizeScale` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 - Default: `1`
 
@@ -190,13 +190,13 @@ Icon size multiplier.
 
 The units of the size specified by `getSize`, one of `'meters'`, `'pixels'`. When zooming in and out, meter sizes scale with the base map, and pixel sizes remain the same on screen.
 
-##### `sizeMinPixels` (Number, optional)
+##### `sizeMinPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `0`
 
 The minimum size in pixels.
 
-##### `sizeMaxPixels` (Number, optional)
+##### `sizeMaxPixels` (Number, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
 * Default: `Number.MAX_SAFE_INTEGER`
 
