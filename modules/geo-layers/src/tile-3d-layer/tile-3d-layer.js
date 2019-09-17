@@ -11,7 +11,7 @@ import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 import {getFrameState} from './get-frame-state';
 
 const defaultProps = {
-  getPointColor: [255, 0, 0],
+  getPointColor: [0, 0, 0],
   pointSize: 1.0,
   opacity: 1.0,
 
@@ -251,10 +251,13 @@ export default class Tile3DLayer extends CompositeLayer {
       return null;
     }
 
-    const {getPointColor} = this.props;
+    const {pointSize, getPointColor} = this.props;
     const SubLayerClass = this.getSubLayerClass('pointcloud', PointCloudLayer);
 
     return new SubLayerClass(
+      {
+        pointSize
+      },
       this.getSubLayerProps({
         id: 'pointcloud'
       }),
