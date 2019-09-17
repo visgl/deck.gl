@@ -1,6 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, setParameters, withParameters} from '@luma.gl/core';
+import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(params) {
@@ -160,7 +160,7 @@ export default class LayersPass extends Pass {
       viewport: layer.context.viewport,
       mousePosition: layer.context.mousePosition,
       pickingActive: 0,
-      devicePixelRatio: this.props.pixelRatio
+      devicePixelRatio: cssToDeviceRatio(this.gl)
     });
     return moduleParameters;
   }
@@ -183,7 +183,7 @@ export default class LayersPass extends Pass {
     const height = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
     // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
     const dimensions = viewport;
-    const pixelRatio = this.props.pixelRatio;
+    const pixelRatio = cssToDeviceRatio(this.gl);
     return [
       dimensions.x * pixelRatio,
       (height - dimensions.y - dimensions.height) * pixelRatio,
