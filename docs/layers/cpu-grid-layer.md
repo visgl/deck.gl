@@ -172,7 +172,7 @@ smaller than the elevationLowerPercentile will be hidden.
 
 * Default: 'quantize'
 
-Color scale type, default is set to 'quantize'. Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
+Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
 
 ##### `material` (Object, optional)
 
