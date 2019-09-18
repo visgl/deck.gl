@@ -6,10 +6,11 @@ Get started and see interactive examples by clicking the badge below:
 
 ![demo](https://user-images.githubusercontent.com/2204757/58838976-1538f400-8615-11e9-84f6-a2fe42bb300b.gif)
 
-Note that pydeck is under active development and not yet officially released. At the moment use of this library is experimental.
+Note that pydeck is under active development. At the moment use of this library is experimental.
 
-pydeck is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
+The pydeck library is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
 optimized for a Jupyter Notebook environment.
+
 
 ## Installation
 
@@ -24,6 +25,56 @@ To do this, run:
 jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
 jupyter nbextension enable --sys-prefix --py pydeck
 ```
+
+## Getting started
+
+The following code renders a visualization similar to the one above in a Jupyter notebook:
+
+```python
+import pydeck as pdk
+
+# 2014 location of car accidents in the UK
+UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
+
+# Define a layer to display on a map
+layer = pdk.Layer(
+    'HexagonLayer',
+    UK_ACCIDENTS_DATA,
+    get_position='[lng,lat]',
+    auto_highlight=True,
+    elevation_scale=50,
+    pickable=True,
+    elevation_range=[0, 3000],
+    extruded=True,                 
+    coverage=1)
+
+# Set the viewport location
+view_state = pdk.ViewState(
+    longitude=-1.415,
+    latitude=52.2323,
+    zoom=6,
+    min_zoom=5,
+    max_zoom=15,
+    pitch=40.5,
+    bearing=-27.36)
+
+# Render
+r = pdk.Deck(layers=[layer], initial_view_state=view_state)
+r.show()
+```
+
+If you're outside of a Jupyter notebook, you can alternately run:
+```python
+r.to_html()
+```
+
+### Debugging note
+
+Because pydeck uses Python renders Javascript, some errors will appear only in the Javascript console.
+If you encounter an error, open the Javascript console in your browser. This will be updated in future versions of pydeck.
+If you encounter an issue, file it under the [deck.gl issues page](https://github.com/uber/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
+and include console output.
+
 
 ### Installation from source
 
