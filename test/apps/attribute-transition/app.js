@@ -1,4 +1,4 @@
-/* global document */
+/* global document console */
 /* eslint-disable no-console */
 import React, {Component} from 'react';
 import {render} from 'react-dom';
@@ -13,7 +13,7 @@ class Root extends Component {
     this._dataGenerator = new DataGenerator();
 
     this.state = {
-      transitionType: 'interpolation',
+      transitionType: 'spring',
       points: this._dataGenerator.points,
       polygons: this._dataGenerator.polygons,
       viewState: {
@@ -43,26 +43,39 @@ class Root extends Component {
   render() {
     const {points, polygons, viewState} = this.state;
 
+    const interpolationSettings = {
+      duration: 600,
+      onStart: () => {
+        console.log('onStart');
+      },
+      onEnd: () => {
+        console.log('onEnd');
+      },
+      onInterrupt: () => {
+        console.log('onInterrupt');
+      }
+    };
+
     const springSettings = {
       type: 'spring',
       stiffness: 0.01,
-      damping: 0.15
+      damping: 0.15,
+      onStart: () => {
+        console.log('onStart');
+      },
+      onEnd: () => {
+        console.log('onEnd');
+      },
+      onInterrupt: () => {
+        console.log('onInterrupt');
+      }
     };
 
     const scatterplotTransitionsByType = {
       interpolation: {
-        getPosition: {
-          duration: 600,
-          enter: () => [0, 0]
-        },
-        getRadius: {
-          duration: 600,
-          enter: () => [0]
-        },
-        getFillColor: {
-          duration: 600,
-          enter: ([r, g, b]) => [r, g, b, 0]
-        }
+        getPosition: Object.assign({}, interpolationSettings, {enter: () => [0, 0]}),
+        getRadius: Object.assign({}, interpolationSettings, {enter: () => [0]}),
+        getFillColor: Object.assign({}, interpolationSettings, {enter: ([r, g, b]) => [r, g, b, 0]})
       },
       spring: {
         getPosition: Object.assign({}, springSettings, {enter: () => [0, 0]}),
@@ -74,14 +87,12 @@ class Root extends Component {
     const polygonTransitionsByType = {
       interpolation: {
         getPolygon: 600,
-        getLineColor: {
-          duration: 600,
+        getLineColor: Object.assign({}, interpolationSettings, {
           enter: ([r, g, b]) => [r, g, b, 0]
-        },
-        getFillColor: {
-          duration: 600,
+        }),
+        getFillColor: Object.assign({}, interpolationSettings, {
           enter: ([r, g, b]) => [r, g, b, 0]
-        },
+        }),
         getLineWidth: 600
       },
       spring: {
