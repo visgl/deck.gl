@@ -24,12 +24,14 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck(
-  {mapboxApiKey, container, jsonInput},
+export function initDeck({
+  mapboxApiKey,
+  container,
+  jsonInput,
   useTooltip,
   onComplete,
   handleClick
-) {
+}) {
   require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {

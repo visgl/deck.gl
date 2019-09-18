@@ -16,8 +16,7 @@ requirejs(['@deck.gl/jupyter-widget'], (root) => {
   const deck = root.initDeck({
     mapboxApiKey: MAPBOX_API_KEY, 
     container: document.getElementById('deck-container'),
-    width: '100%',
-    height: '100%',
-    jsonInput
-  }, useTooltip);
+    jsonInput,
+    useTooltip
+  });
 })
