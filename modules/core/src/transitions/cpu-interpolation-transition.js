@@ -6,13 +6,12 @@ export default class CPUInterpolationTransition extends Transition {
     return this._value;
   }
 
-  update() {
-    const updated = super.update();
-
-    if (updated) {
-      const {fromValue, toValue, time} = this;
-      this._value = lerp(fromValue, toValue, time);
-    }
-    return updated;
+  _onUpdate() {
+    const {
+      time,
+      settings: {fromValue, toValue, duration, easing}
+    } = this;
+    const t = easing(time / duration);
+    this._value = lerp(fromValue, toValue, t);
   }
 }

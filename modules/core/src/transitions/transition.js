@@ -1,30 +1,23 @@
 function noop() {}
 
+const DEFAULT_SETTINGS = {
+  onStart: noop,
+  onUpdate: noop,
+  onInterrupt: noop,
+  onEnd: noop
+};
+
 export default class Transition {
   /**
-   * @params props {object} - properties of the transition.
-   *
-   * @params props.timeline {Timeline}
-   * @params props.duration {number} - total time to complete the transition
-   * @params props.easing {func} - easing function
-   * @params props.onStart {func} - callback when transition starts
-   * @params props.onUpdate {func} - callback when transition updates
-   * @params props.onInterrupt {func} - callback when transition is interrupted
-   * @params props.onEnd {func} - callback when transition ends
-   *
-   * Any additional properties are also saved on the instance but have no effect.
+   * @params timeline {Timeline}
    */
-  constructor(props) {
+  constructor(timeline) {
     this._inProgress = false;
     this._handle = null;
+    this.timeline = timeline;
 
     // Defaults
-    this.onStart = noop;
-    this.onUpdate = noop;
-    this.onInterrupt = noop;
-    this.onEnd = noop;
-
-    Object.assign(this, props);
+    this.settings = {};
   }
 
   /* Public API */
@@ -37,19 +30,28 @@ export default class Transition {
    * @params props {object} - optional overriding props. see constructor
    */
   start(props) {
-    if (this._inProgress) {
-      this.onInterrupt(this);
-      this.timeline.removeChannel(this._handle);
-      this._handle = null;
-    }
-    Object.assign(this, props);
+    this.cancel();
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, props);
     this._inProgress = true;
 
-    this._handle = this.timeline.addChannel({
-      delay: this.timeline.getTime(),
-      duration: this.duration
+    const {timeline, settings} = this;
+    this._handle = timeline.addChannel({
+      delay: timeline.getTime(),
+      duration: settings.duration
     });
-    this.onStart(this);
+    settings.onStart(this);
+  }
+
+  /**
+   * end this transition if it is in progress.
+   */
+  end() {
+    if (this._inProgress) {
+      this.timeline.removeChannel(this._handle);
+      this._handle = null;
+      this._inProgress = false;
+      this.settings.onEnd(this);
+    }
   }
 
   /**
@@ -57,7 +59,7 @@ export default class Transition {
    */
   cancel() {
     if (this._inProgress) {
-      this.onInterrupt(this);
+      this.settings.onInterrupt(this);
       this.timeline.removeChannel(this._handle);
       this._handle = null;
       this._inProgress = false;
@@ -65,28 +67,30 @@ export default class Transition {
   }
 
   /**
-   * update this transition.
+   * update this transition. Returns `true` if updated.
    */
   update() {
     if (!this._inProgress) {
       return false;
     }
-    const {timeline, duration, easing} = this;
-    const handle = this._handle;
 
-    let time = timeline.getTime(handle);
-    if (Number.isFinite(duration)) {
-      time = easing ? easing(time / duration) : time / duration;
-    }
-    this.time = time;
-    this.onUpdate(this);
+    this.time = this.timeline.getTime(this._handle);
+    // Call subclass method
+    this._onUpdate();
+    // Call user callback
+    this.settings.onUpdate(this);
 
-    if (timeline.isFinished(handle)) {
-      timeline.removeChannel(handle);
-      this._handle = null;
-      this._inProgress = false;
-      this.onEnd(this);
+    // This only works if `settings.duration` is set
+    // Spring transition must call `end` manually
+    if (this.timeline.isFinished(this._handle)) {
+      this.end();
     }
     return true;
+  }
+
+  /* Private API */
+
+  _onUpdate() {
+    // for subclass override
   }
 }
