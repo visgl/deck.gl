@@ -33,6 +33,6 @@
     "@deck.gl/core": "^7.0.0"
   },
   "dependencies": {
-    "@luma.gl/addons": "^7.3.0-alpha.9"
+    "@luma.gl/addons": "^7.3.0-beta.2"
   }
 }

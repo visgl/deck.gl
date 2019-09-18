@@ -33,8 +33,8 @@
     "@loaders.gl/3d-tiles": "^1.3.0",
     "@loaders.gl/core": "^1.3.0",
     "@loaders.gl/gltf": "^1.3.0",
-    "@math.gl/culling": "^3.0.0-beta.3",
-    "@math.gl/geospatial": "^3.0.0-beta.3",
+    "@math.gl/culling": "^3.0.0",
+    "@math.gl/geospatial": "^3.0.0",
     "h3-js": "^3.4.3",
     "long": "^3.2.0",
     "s2-geometry": "^1.2.10"
