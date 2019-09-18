@@ -28,7 +28,7 @@ Requires a Mapbox API token to display a basemap, see notes below.
 `map_style` : `str`, default `"mapbox://styles/mapbox/dark-v9"`
     URI for Mapbox basemap style
 
-`mapbox_key` : `str`, default None
+`mapbox_key` : `str`, default `None`
     Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
     If not using a basemap, you can set this value to `None`.
     See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
@@ -36,6 +36,12 @@ Requires a Mapbox API token to display a basemap, see notes below.
 `initial_view_state` : `pydeck.ViewState`, default `pydeck.ViewState()`
     Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map with 0 pitch and bearing
     To compute a viewport from data, see `pydeck.data\_utils.compute\_viewport`
+
+`height` : int, default `500`
+    Height of visualization, in pixels
+
+`width` : int, default `750`
+    Width of visualization, in pixels
 
 ## pydeck.Deck.show
 
@@ -88,11 +94,13 @@ not render.
 `notebook_display` : `bool`, default `True`
     Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
 
-`iframe_width` : `int`, default `500`
+`iframe_width` : `int`, default `None`
     Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
 
-`iframe_height` : `int`, default `500`
+`iframe_height` : `int`, default `None`
     Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
+
+
 
 #### Returns
     `str` : A string path to the HTML file
