@@ -98,8 +98,10 @@ function bisectRight(a, x) {
 }
 
 // return a quantize scale function
-function quantileScale(thresholds, range, value) {
-  return range[bisectRight(thresholds, value)];
+function quantileScale(thresholds) {
+  return (domain, range, value) => {
+    return range[bisectRight(thresholds, value)];
+  };
 }
 
 export function getQuantileScale(domain, range) {
@@ -110,24 +112,23 @@ export function getQuantileScale(domain, range) {
   while (++i < n) {
     thresholds[i - 1] = threshold(sortedDomain, i / n);
   }
-  function scale(value) {
-    return quantileScale(thresholds, range, value);
-  }
-  scale.domain = () => sortedDomain;
+  const quantileScaleThresholds = () => quantileScale(thresholds);
 
-  return scale;
+  return getScale(sortedDomain, range, quantileScaleThresholds());
 }
 
 // ordinal
-function ordinalScale(domain, domainMap, range, value) {
-  const key = `${value}`;
-  let d = domainMap.get(key);
-  if (d === undefined) {
-    // update the domain
-    d = domain.push(value);
-    domainMap.set(key, d);
-  }
-  return range[(d - 1) % range.length];
+function ordinalScale(domainMap) {
+  return (domain, range, value) => {
+    const key = `${value}`;
+    let d = domainMap.get(key);
+    if (d === undefined) {
+      // update the domain
+      d = domain.push(value);
+      domainMap.set(key, d);
+    }
+    return range[(d - 1) % range.length];
+  };
 }
 
 export function getOrdinalScale(domain, range) {
@@ -139,11 +140,7 @@ export function getOrdinalScale(domain, range) {
       domainMap.set(key, uniqueDomain.push(d));
     }
   }
-  function scale(value) {
-    return ordinalScale(uniqueDomain, domainMap, range, value);
-  }
+  const ordinalScaleDomainMap = () => ordinalScale(domainMap);
 
-  scale.domain = () => uniqueDomain;
-
-  return scale;
+  return getScale(uniqueDomain, range, ordinalScaleDomainMap());
 }
