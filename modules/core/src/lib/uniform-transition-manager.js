@@ -37,7 +37,7 @@ export default class UniformTransitionManager {
       log.error(`unsupported transition type '${settings.type}'`)();
       return;
     }
-    const transition = new TransitionType({timeline: this.timeline});
+    const transition = new TransitionType(this.timeline);
     transition.start({
       ...settings,
       fromValue,

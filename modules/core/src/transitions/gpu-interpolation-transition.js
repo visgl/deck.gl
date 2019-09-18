@@ -13,8 +13,9 @@ import assert from '../utils/assert';
 
 export default class GPUInterpolationTransition {
   constructor({gl, attribute, timeline}) {
+    this.gl = gl;
     this.type = 'interpolation';
-    this.transition = new Transition({timeline});
+    this.transition = new Transition(timeline);
     this.attribute = attribute;
     // this is the attribute we return during the transition - note: if it is a constant
     // attribute, it will be converted and returned as a regular attribute
@@ -48,7 +49,7 @@ export default class GPUInterpolationTransition {
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
   // bufferLayout
-  start(gl, transitionSettings, numInstances) {
+  start(transitionSettings, numInstances) {
     assert(
       transitionSettings.duration > 0,
       'transition setting must have a duration greater than 0'
@@ -81,12 +82,12 @@ export default class GPUInterpolationTransition {
 
     this.transition.start(transitionSettings);
 
-    this.transform = this.transform || new Transform(gl, getShaders(this.attribute.size));
+    this.transform = this.transform || new Transform(this.gl, getShaders(this.attribute.size));
     this.transform.update({
       elementCount: Math.floor(this.currentLength / this.attribute.size),
       sourceBuffers: {
         aFrom: this.buffers[0],
-        aTo: getSourceBufferAttribute(gl, this.attribute)
+        aTo: getSourceBufferAttribute(this.gl, this.attribute)
       },
       feedbackBuffers: {
         vCurrent: this.buffers[1]
@@ -97,8 +98,13 @@ export default class GPUInterpolationTransition {
   update() {
     const updated = this.transition.update();
     if (updated) {
+      const {
+        time,
+        settings: {duration, easing}
+      } = this.transition;
+      const t = easing(time / duration);
       this.transform.run({
-        uniforms: {time: this.transition.time}
+        uniforms: {time: t}
       });
     }
     return updated;

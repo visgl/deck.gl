@@ -3,6 +3,11 @@ import GPUInterpolationTransition from '../transitions/gpu-interpolation-transit
 import GPUSpringTransition from '../transitions/gpu-spring-transition';
 import log from '../utils/log';
 
+const TRANSITION_TYPES = {
+  interpolation: GPUInterpolationTransition,
+  spring: GPUSpringTransition
+};
+
 export default class AttributeTransitionManager {
   constructor(gl, {id, timeline}) {
     this.id = id;
@@ -118,16 +123,11 @@ export default class AttributeTransitionManager {
         this._removeTransition(attributeName);
       }
 
-      if (settings.type === 'interpolation') {
-        this.transitions[attributeName] = new GPUInterpolationTransition({
+      const TransitionType = TRANSITION_TYPES[settings.type];
+      if (TransitionType) {
+        this.transitions[attributeName] = new TransitionType({
           attribute,
           timeline: this.timeline,
-          gl: this.gl
-        });
-      } else if (settings.type === 'spring') {
-        this.transitions[attributeName] = new GPUSpringTransition({
-          attribute,
-          transitionSettings: settings,
           gl: this.gl
         });
       } else {
@@ -138,7 +138,7 @@ export default class AttributeTransitionManager {
 
     if (isNew || attribute.needsRedraw()) {
       this.needsRedraw = true;
-      this.transitions[attributeName].start(this.gl, settings, this.numInstances);
+      this.transitions[attributeName].start(settings, this.numInstances);
     }
   }
 }

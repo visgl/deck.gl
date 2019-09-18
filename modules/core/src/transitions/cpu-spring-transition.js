@@ -57,27 +57,22 @@ export default class CPUSpringTransition extends Transition {
     return this._currValue;
   }
 
-  update() {
-    const updated = super.update();
-    if (updated) {
-      // TODO - use timeline
-      // const {time} = this;
+  _onUpdate() {
+    // TODO - use timeline
+    // const {time} = this;
 
-      const {fromValue, toValue, damping, stiffness} = this;
-      const {_prevValue = fromValue, _currValue = fromValue} = this;
-      let nextValue = updateSpring(_prevValue, _currValue, toValue, damping, stiffness);
-      const delta = distance(nextValue, toValue);
-      const velocity = distance(nextValue, _currValue);
+    const {fromValue, toValue, damping, stiffness} = this.settings;
+    const {_prevValue = fromValue, _currValue = fromValue} = this;
+    let nextValue = updateSpring(_prevValue, _currValue, toValue, damping, stiffness);
+    const delta = distance(nextValue, toValue);
+    const velocity = distance(nextValue, _currValue);
 
-      if (delta < EPSILON && velocity < EPSILON) {
-        nextValue = toValue;
-        this._inProgress = false;
-        this.onEnd(this);
-      }
-
-      this._prevValue = _currValue;
-      this._currValue = nextValue;
+    if (delta < EPSILON && velocity < EPSILON) {
+      nextValue = toValue;
+      this.end(this);
     }
-    return updated;
+
+    this._prevValue = _currValue;
+    this._currValue = nextValue;
   }
 }

@@ -26,7 +26,7 @@ export default class TransitionManager {
     this.ControllerState = ControllerState;
     this.props = Object.assign({}, DEFAULT_PROPS, props);
     this.propsInTransition = null;
-    this.transition = new Transition({timeline: props.timeline});
+    this.transition = new Transition(props.timeline);
 
     this.onViewStateChange = props.onViewStateChange;
 
@@ -57,11 +57,12 @@ export default class TransitionManager {
     }
 
     if (this._isTransitionEnabled(nextProps)) {
+      const {interruption, endProps} = this.transition.settings;
       const startProps = Object.assign(
         {},
         currentProps,
-        this.transition.interruption === TRANSITION_EVENTS.SNAP_TO_END
-          ? this.transition.endProps
+        interruption === TRANSITION_EVENTS.SNAP_TO_END
+          ? endProps
           : this.propsInTransition || currentProps
       );
 
@@ -87,7 +88,7 @@ export default class TransitionManager {
 
   _isUpdateDueToCurrentTransition(props) {
     if (this.transition.inProgress) {
-      return this.transition.interpolator.arePropsEqual(props, this.propsInTransition);
+      return this.transition.settings.interpolator.arePropsEqual(props, this.propsInTransition);
     }
     return false;
   }
@@ -96,7 +97,7 @@ export default class TransitionManager {
     if (this.transition.inProgress) {
       // Ignore update if it is requested to be ignored
       return (
-        this.transition.interruption === TRANSITION_EVENTS.IGNORE ||
+        this.transition.settings.interruption === TRANSITION_EVENTS.IGNORE ||
         // Ignore update if it is due to current active transition.
         this._isUpdateDueToCurrentTransition(nextProps)
       );
@@ -145,9 +146,12 @@ export default class TransitionManager {
 
   _onTransitionUpdate(transition) {
     // NOTE: Be cautious re-ordering statements in this function.
-    const {interpolator, startProps, endProps, time} = transition;
-
-    const viewport = interpolator.interpolateProps(startProps, endProps, time);
+    const {
+      time,
+      settings: {interpolator, startProps, endProps, duration, easing}
+    } = transition;
+    const t = easing(time / duration);
+    const viewport = interpolator.interpolateProps(startProps, endProps, t);
 
     // This gurantees all props (e.g. bearing, longitude) are normalized
     // So when viewports are compared they are in same range.

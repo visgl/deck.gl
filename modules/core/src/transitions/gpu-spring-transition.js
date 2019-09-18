@@ -9,11 +9,13 @@ import {
   cycleBuffers
 } from '../lib/attribute-transition-utils';
 import Attribute from '../lib/attribute';
+import Transition from './transition';
 
 export default class GPUSpringTransition {
-  constructor({gl, attribute, transitionSettings}) {
+  constructor({gl, attribute, timeline}) {
+    this.gl = gl;
     this.type = 'spring';
-    this.transitionSettings = transitionSettings;
+    this.transition = new Transition(timeline);
     this.attribute = attribute;
     // this is the attribute we return during the transition - note: if it is a constant
     // attribute, it will be converted and returned as a regular attribute
@@ -51,7 +53,7 @@ export default class GPUSpringTransition {
   // this also correctly resizes / pads the transform's buffers
   // in case the attribute's buffer has changed in length or in
   // bufferLayout
-  start(gl, transitionSettings, numInstances) {
+  start(transitionSettings, numInstances) {
     const padBufferOpts = {
       numInstances,
       attribute: this.attribute,
@@ -76,22 +78,20 @@ export default class GPUSpringTransition {
     // when an attribute changes values, a new transition is started. These
     // are properties that we have to store on this instance but can change
     // when new transitions are started, so we have to keep them up-to-date. :(
-    this.transitionSettings = transitionSettings;
-    if (this.isTransitioning()) {
-      this.transitionSettings.onInterrupt();
-    }
+    this.transition.start(transitionSettings);
 
-    this.transform = this.transform || new Transform(gl, getShaders(this.attribute.size));
+    this.transform = this.transform || new Transform(this.gl, getShaders(this.attribute.size));
     this.transform.update({
       elementCount: Math.floor(this.currentLength / this.attribute.size),
       sourceBuffers: {
-        aTo: getSourceBufferAttribute(gl, this.attribute)
+        aTo: getSourceBufferAttribute(this.gl, this.attribute)
       }
     });
   }
 
   update() {
-    if (!this.isTransitioning()) {
+    const updated = this.transition.update();
+    if (!updated) {
       return false;
     }
 
@@ -108,22 +108,21 @@ export default class GPUSpringTransition {
     });
     this.transform.run({
       uniforms: {
-        stiffness: this.transitionSettings.stiffness,
-        damping: this.transitionSettings.damping
+        stiffness: this.transition.settings.stiffness,
+        damping: this.transition.settings.damping
       }
     });
-    this.buffers = cycleBuffers(this.buffers);
+    cycleBuffers(this.buffers);
     this.attributeInTransition.update({buffer: this.buffers[1]});
 
-    this.transitionSettings.onUpdate();
-
-    // TODO: fire an onEnd() event here if the transition has just ended
+    // TODO: fire the event here if the transition has just ended
+    // transition.end();
 
     return true;
   }
 
   cancel() {
-    this.transitionSettings.onInterrupt();
+    this.transition.cancel();
     this.transform.delete();
     while (this.buffers.length) {
       this.buffers.pop().delete();

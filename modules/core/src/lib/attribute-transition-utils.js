@@ -63,7 +63,6 @@ export function getAttributeTypeFromSize(size) {
 
 export function cycleBuffers(buffers) {
   buffers.push(buffers.shift());
-  return buffers;
 }
 
 export function getAttributeBufferLength(attribute, numInstances) {
