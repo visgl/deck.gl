@@ -17,9 +17,27 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
-## deck.gl v7.2
+## deck.gl v7.3
 
-### deck.gl v7.2 Prereleases
+### deck.gl v7.3 Prereleases
+
+#### deck.gl [v7.3.0-beta.1] - Sep 17, 2019
+
+- Bump dependency versions (#3623)
+- Fix bug that makes undefined key appear in aggregate layer pickingInfo (#3624)
+- Fix pixel ratio calculation, update docs (#3615)
+- Support spring transition in UniformTransitionManager (#3621)
+- Tileset3DLayer API audit (#3620)
+- _enableOffsetModelMatrix to _composeModelMatrix for API audit (#3614)
+- Update jupyter-widget module for new deck.gl/json API (#3584)
+- Add alphaCutoff prop to IconLayer (#3607)
+- Support constants and non instantiate prop in json module (#3606)
+- Update pydeck tooltip style and modularize the Jupyter widget tooltip (#3590)
+- remove module settings hack (#3603)
+- Adopt most recent change from loaders.gl and bump loaders.gl (#3597)
+- Expose loaders.gl endpoints from the core bundle (#3598)
+- Bundle optimization (#3593)
+- add extensions to master bundle (#3592)
 
 #### deck.gl [v7.3.0-alpha.7] - Sep 13, 2019
 
@@ -137,6 +155,37 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Bump luma.gl to 7.2.0 (#3429)
 - Website: Lock loaders.gl/las to 1.0.3 (#3428)
 - Website reference ES5 transpiled version of supercluster depend… (#3427)
+
+## deck.gl v7.2
+
+#### deck.gl [v7.2.4] - Sep 13, 2019
+
+- Bump loaders.gl to latest latest 1.2 prod (#3594)
+- add extensions to master bundle (#3592)
+
+#### deck.gl [v7.2.3] - Aug 16, 2019
+
+- IconLayer: check texture width and height before drawing (#3481)
+- integrate mapbox-gl's near plane fix (#3490)
+
+#### deck.gl [v7.2.2] - Aug 16, 2019
+
+- fix OrbitView bug when orbitAxis: Z (#3453)
+- Fail gracefully in the event of a hexbin projection error (#3424)
+- Improve shadow for mesh layer (#3452)
+
+#### deck.gl [v7.2.1] - Aug 13, 2019
+
+- Use HTMLImageLoader for browser compatibility (#3440)
+
+#### deck.gl [v7.2.0] - Aug 9, 2019
+
+- Bump luma.gl to 7.2.0 (#3429)
+- Website: Lock loaders.gl/las to 1.0.3 (#3428)
+- Website reference ES5 transpiled version of supercluster depend… (#3427)
+- Update links to point to 7.2 branch (#3426)
+
+### deck.gl v7.2 Prereleases
 
 #### deck.gl [v7.2.0-beta.3] - Aug 8, 2019
 
@@ -282,6 +331,68 @@ Ref: http://keepachangelog.com/en/0.3.0/
 - Fix ArcLayer bug when using non-iterable data with pre-allocated target array (#3170)
 
 ## deck.gl v7.1
+
+#### deck.gl [v7.1.11] - Aug 6 2019
+
+- Remove side effects from core module (#3395)
+
+#### deck.gl [v7.1.10] - July 12 2019
+
+- Fix controller event propagation (#3345)
+
+#### deck.gl [v7.1.9] - July 10 2019
+
+- add NON_INSTANCED_MODEL define (#3333)
+
+#### deck.gl [v7.1.8] - July 10 2019
+
+- Fix missing pickingRadius for onClick handlers (#3321) (#3327)
+- Relax geometry validation in GeoJsonLayer (#3325)
+
+#### deck.gl [v7.1.7] - June 24 2019
+
+- fix missing viewport id (#3275)
+- Prevent publishing jupyter-widget module for now (#3273)
+
+#### deck.gl [v7.1.6] - June 21 2019
+
+- S2Layer bug fix (#3270)
+
+#### deck.gl [v7.1.5] - June 20 2019
+
+- update bundle configs (#3264)
+- json module bug fixes (#3253)
+- Fix fullscreen bug in GoogleMapsOverlay (#3255)
+- Fix missing brace on link in viewport doc
+- [Bug] Fix H3HexagonLayer state update (#3246)
+
+#### deck.gl [v7.1.4] - June 13 2019
+
+- CompositeLayer: add ability to override sublayer updateTriggers (#3234)
+- Add touchAction prop to Deck (#3231)
+
+#### deck.gl [v7.1.3] - June 10 2019
+
+- H3Hexagon: add support for coverage. (#3210)
+- fix react method binding (#3219)
+- Fix unpkg links in layer documentations (#3216)
+
+#### deck.gl [v7.1.2] - June 7 2019
+
+- Fix tree shaking in pre-bundled version (#3214)
+
+#### deck.gl [v7.1.1] - June 6 2019
+
+- Support 3D paths with TripsLayer (#3192)
+- fix path layer vertex shader (#3206)
+- Attribute buffer handling bug fixes (#3207)
+- Add sideEffects field to core package.json (#3202)
+
+#### deck.gl [v7.1.0] - June 5 2019
+
+- Fix ArcLayer bug when using non-iterable data with pre-allocated target array (#3170)
+- Fix BitmapLayer (#3181)
+- GPUGridLayer: make it exclusive for WebGL2 (#3195)
 
 ### deck.gl v7.1 Prereleases
 
