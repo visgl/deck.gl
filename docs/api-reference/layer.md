@@ -402,6 +402,12 @@ new Layer({
       duration: 300,
       easing: d3.easeCubicInOut,
       enter: value => [value[0], value[1], value[2], 0] // fade in
+    },
+    getRadius: {
+      type: 'spring',
+      stiffness: 0.01,
+      damping: 0.15,
+      enter: value => [0] // grow from size 0
     }
   }
 });
@@ -409,16 +415,19 @@ new Layer({
 
 | Parameter     | Type       | Default     | Description |
 | ---------     | --------   | ----------- | ----------- |
-| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
-| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/)  |
-| `enter`      | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
+| `type`        | `String`   | `interpolation` | Type of the transition (either `interpolation` or `spring`) |
+| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds (only for `interpolation` transition `type`) |
+| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) (only for `interpolation` transition `type`)  |
+| `stiffness`   | `Number`   | `0.05`      | "Tension" factor for the spring (only for `spring` transition `type`) |
+| `damping`    | `Number`   | `0.5`        | "Friction" factor that counteracts the spring's acceleration (only for `spring` transition `type`) |
+| `enter`       | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
 | `onStart`     | `Function` | `null`      | Callback when the transition is started |
 | `onEnd`       | `Function` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |
 
 Notes:
 
-* As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter.
+* As a shorthand, if an accessor key maps to a number rather than an object, then the number is assigned to the `duration` parameter, and an `interpolation` transition is used.
 * Attribute transition is performed between the values at the same index. If the new data is larger, `enter` callback is called for each new vertex to backfill the values to transition from.
 * `enter` should return the value to transition from. for the current vertex. It receives two arguments:
   - `toValue` (TypedArray) - the new value to transition to, for the current vertex
