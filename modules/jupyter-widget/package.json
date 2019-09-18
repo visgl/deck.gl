@@ -29,5 +29,8 @@
   },
   "dependencies": {
     "@jupyter-widgets/base": "^1.1.10"
+  },
+  "jupyterlab": {
+    "extension": "src/plugin"
   }
 }
