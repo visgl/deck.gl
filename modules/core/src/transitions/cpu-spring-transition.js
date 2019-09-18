@@ -69,7 +69,7 @@ export default class CPUSpringTransition extends Transition {
 
     if (delta < EPSILON && velocity < EPSILON) {
       nextValue = toValue;
-      this.end(this);
+      this.end();
     }
 
     this._prevValue = _currValue;
