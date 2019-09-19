@@ -539,10 +539,13 @@ export default class Layer extends Component {
     return new Uint8ClampedArray(colors.value);
   }
 
-  restorePickingColors(value) {
+  restorePickingColors(oldValue) {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
 
+    const {value} = colors;
+    // Make sure the attribute's allocated buffer contains the correct value
+    value.set(oldValue);
     colors.update({value});
   }
 
