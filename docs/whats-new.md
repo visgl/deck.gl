@@ -10,15 +10,15 @@ Release Date: Sep xx, 2019
   <tbody>
     <tr>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/.gif" />
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-3d-layer.gif" />
         <p><i>Tile3DLayer</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jupyter-integration.gif" />
         <p><i>Jupyter Widget</i></p>
       </td>
       <td>
-        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/.jpg" />
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/spring-transition.gif" />
         <p><i>Spring Transition</i></p>
       </td>
     </tr>
@@ -130,6 +130,7 @@ It is now easier to build attributes as typed arrays outside of a layer, e.g. in
 - [BitmapLayer](/docs/layers/bitmap-layer.md)'s `image` prop now accepts a `HTMLVideoElement`.
 - [TextLayer](/docs/layers/text-layer.md) now supports line breaks in the text string. A new prop `lineHeight` is added.
 - Layer matching performance is improved. This affects applications with a large number of layers.
+- [HeatmapLayer](/docs/layers/heatmap-layer.md) now supports WebGL1.
 
 
 ## deck.gl v7.1
