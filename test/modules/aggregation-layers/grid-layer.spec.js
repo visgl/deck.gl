@@ -149,7 +149,7 @@ test('GridLayer#updates', t => {
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(
             layer.state.useGPUAggregation === true,
-            'Should use GPU Aggregation (gpuAggregation: true)'
+            "Should use GPU Aggregation (colorScaleType: 'linear')"
           );
         }
       },
@@ -160,7 +160,7 @@ test('GridLayer#updates', t => {
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(
             layer.state.useGPUAggregation === true,
-            'Should use GPU Aggregation (gpuAggregation: true)'
+            "Should use GPU Aggregation (colorScaleType: 'linear')"
           );
         }
       },
@@ -170,8 +170,8 @@ test('GridLayer#updates', t => {
         },
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(
-            layer.state.useGPUAggregation === false,
-            'Should use CPU Aggregation (gpuAggregation: false)'
+            layer.state.useGPUAggregation === true,
+            "Should use CPU Aggregation (colorScaleType: 'quantile')"
           );
         }
       },
@@ -181,8 +181,8 @@ test('GridLayer#updates', t => {
         },
         onAfterUpdate({layer, subLayers, spies}) {
           t.ok(
-            layer.state.useGPUAggregation === false,
-            'Should use CPU Aggregation (gpuAggregation: false)'
+            layer.state.useGPUAggregation === true,
+            "Should use CPU Aggregation (colorScaleType: 'ordinal')"
           );
         }
       }
