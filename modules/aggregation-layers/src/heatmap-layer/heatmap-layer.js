@@ -56,11 +56,11 @@ const defaultProps = {
 };
 
 const REQUIRED_FEATURES = [
-  FEATURES.WEBGL2, // TODO: Remove after trannsform refactor
-  FEATURES.COLOR_ATTACHMENT_RGBA32F, // weight-map generation
   FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
-  FEATURES.FLOAT_BLEND, // weight-map generation and max weight calculation
   FEATURES.TEXTURE_FLOAT // weight-map as texture
+  // As per WebGL Spec, following two feature are implictly supported when TEXTURE_FLOAT is supported
+  // FEATURES.COLOR_ATTACHMENT_RGBA32F, // weight-map generation
+  // FEATURES.FLOAT_BLEND, // weight-map generation and max weight calculation
 ];
 
 export default class HeatmapLayer extends CompositeLayer {
