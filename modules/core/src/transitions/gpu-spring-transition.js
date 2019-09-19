@@ -41,12 +41,8 @@ export default class GPUSpringTransition {
     ];
   }
 
-  isTransitioning() {
+  get inProgress() {
     return this.transition.inProgress;
-  }
-
-  getAttribute() { 
-    return this.isTransitioning() ? this.attributeInTransition : this.attribute;
   }
 
   // this is called when an attribute's values have changed and
