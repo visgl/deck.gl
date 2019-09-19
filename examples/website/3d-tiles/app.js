@@ -10,7 +10,7 @@ import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const ION_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJjYTExNWEwZC00MWFmLTRmNWUtOTA1Zi00OGUzMzlkMDVlNWQiLCJpZCI6NDQsInNjb3BlcyI6WyJhc3IiLCJnYyJdLCJhc3NldHMiOlsyODk1N10sImlhdCI6MTU2ODM5OTgxNn0.Bqe4IWmT6etdZYqm12WcgdW52wDLzdbKM4Xx_8lRZmk';
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiJlYWMxMzcyYy0zZjJkLTQwODctODNlNi01MDRkZmMzMjIxOWIiLCJpZCI6OTYyMCwic2NvcGVzIjpbImFzbCIsImFzciIsImdjIl0sImlhdCI6MTU2Mjg2NjI3M30.1FNiClUyk00YH_nWfSGpiQAjR5V2OvREDq1PJ5QMjWQ'
 
 const INITIAL_VIEW_STATE = {
   latitude: 40,
@@ -69,7 +69,7 @@ export class App extends PureComponent {
   _renderTile3DLayer() {
     return new Tile3DLayer({
       id: 'tile-3d-layer',
-      _ionAssetId: 28957,
+      _ionAssetId: 43978,
       _ionAccessToken: ION_TOKEN,
       pointSize: 2,
       DracoWorkerLoader,
