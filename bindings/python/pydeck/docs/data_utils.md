@@ -14,16 +14,25 @@ Computes a view state (zoom level and bounding box)
 for the points passed in.
 
 #### Parameters
-`points` : `list` of `list` of `float` or `pandas.core.frame`
-    A list of points
-`view_propotion` : `float`
-    Proportion of the data that will be viewable on the screen.
-    Useful for filtering outlying points from a visualization.
-`viewport_type` : `pydeck.ViewState`
-    Class constructor for a viewport
+
+- `points` : `list` of `list` of `float` or `pandas.DataFrame`
+
+A list of geospatial points to fit to
+
+- `view_propotion` : `float`, default `1`
+
+Proportion of the data that will be viewable on the screen.
+Useful for filtering outlying points from a visualization.
+
+For example, suppose you have 100 points, most of which are centered around London and ten of which are distributed a few 100 kilometers away from it. If you set `view_proportion=0.9`, pydeck will attempt to fit to the middle 90% of the data, aiming to exclude the points furthest from the core of the visualization.
+
+- `viewport_type` : `pydeck.ViewState`
+
+Class constructor for a viewport. This will in the future enable zooming to data in non-Mercator projections.
 
 #### Returns
-    `pydeck.Viewport` : Viewport fitted to the data
+
+`pydeck.Viewport` : Viewport fitted to the data
 
 
 ## pydeck.data\_utils.assign\_random\_colors
