@@ -1,9 +1,6 @@
-/* global document */
-/* eslint-disable no-console */
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import {isWebGL2} from '@luma.gl/core';
 import DeckGL from 'deck.gl';
 import {HeatmapLayer} from '@deck.gl/aggregation-layers';
 
@@ -21,16 +18,7 @@ const INITIAL_VIEW_STATE = {
   bearing: 0
 };
 
-const MAP_STYLE = 'mapbox://styles/mapbox/dark-v9';
-
-class Root extends PureComponent {
-  constructor(props) {
-    super(props);
-    this.state = {
-      webGL2Supported: true
-    };
-  }
-
+export class App extends PureComponent {
   _renderLayers() {
     const {data = DATA_URL, intensity = 1, threshold = 0.03} = this.props;
 
@@ -48,38 +36,19 @@ class Root extends PureComponent {
     ];
   }
 
-  _onWebGLInitialized(gl) {
-    const webGL2Supported = isWebGL2(gl);
-    this.setState({webGL2Supported});
-  }
-
   render() {
-    const {webGL2Supported} = this.state;
-    if (!webGL2Supported) {
-      return (
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh'
-          }}
-        >
-          <h2> {'HeatmapLayer is not supported on this browser, requires WebGL2'} </h2>
-        </div>
-      );
-    }
+    const {mapStyle = 'mapbox://styles/mapbox/light-v9'} = this.props;
+
     return (
       <div>
         <DeckGL
           initialViewState={INITIAL_VIEW_STATE}
           controller={true}
           layers={this._renderLayers()}
-          onWebGLInitialized={this._onWebGLInitialized.bind(this)}
         >
           <StaticMap
             reuseMaps
-            mapStyle={MAP_STYLE}
+            mapStyle={mapStyle}
             preventStyleDiffing={true}
             mapboxApiAccessToken={MAPBOX_TOKEN}
           />
@@ -89,4 +58,6 @@ class Root extends PureComponent {
   }
 }
 
-render(<Root />, document.body.appendChild(document.createElement('div')));
+export function renderToDOM(container) {
+  render(<App />, container);
+}
