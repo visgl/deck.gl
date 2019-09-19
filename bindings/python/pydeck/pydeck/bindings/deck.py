@@ -18,7 +18,7 @@ class Deck(JSONMixin):
         map_style='mapbox://styles/mapbox/dark-v9',
         mapbox_key=None,
         initial_view_state=ViewState(),
-        width=750,
+        width="100%",
         height=500,
     ):
         """Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
@@ -41,7 +41,7 @@ class Deck(JSONMixin):
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
         height : int, default 500
             Height of visualization, in pixels
-        width : int, default 750
+        width : int, default "100%"
             Width of visualization, in pixels
 
 

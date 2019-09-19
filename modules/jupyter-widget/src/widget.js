@@ -21,7 +21,7 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: null,
-      width: 500,
+      width: '100%',
       height: 500
     };
   }
@@ -71,7 +71,9 @@ export class DeckGLView extends DOMWidgetView {
 
     if (!this.jsonDeck) {
       containerDiv.style.height = `${this.model.get('height')}px`;
-      containerDiv.style.width = `${this.model.get('width')}px`;
+      containerDiv.style.width = Number.isFinite(this.model.get('width'))
+        ? `${this.model.get('width')}px`
+        : this.model.get('width');
       containerDiv.style.position = 'relative';
       this.el.appendChild(containerDiv);
 

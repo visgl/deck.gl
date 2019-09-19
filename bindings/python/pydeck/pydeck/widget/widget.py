@@ -23,8 +23,8 @@ class DeckGLWidget(widgets.DOMWidget):
         API key for Mapbox map tiles
     height : int
         Height of Jupyter notebook cell, in pixels
-    width : int
-        Width of Jupyter notebook cell, in pixels
+    width : int or str, default "100%"
+        Width of Jupyter notebook cell, in pixels, or CSS width
     selected_data : :obj:`list` of :obj:`int`
         Data passed from Jupyter widget frontend back to Python backend
     """
@@ -37,5 +37,5 @@ class DeckGLWidget(widgets.DOMWidget):
     mapbox_key = Unicode('', allow_none=True).tag(sync=True)
     json_input = Unicode('').tag(sync=True)
     height = Int(500).tag(sync=True)
-    width = Int(500).tag(sync=True)
+    width = Any('100%').tag(sync=True)
     selected_data = Any().tag(sync=True)
