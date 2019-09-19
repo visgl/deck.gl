@@ -28,15 +28,21 @@ Release Date: Sep xx, 2019
 
 ### Tile3DLayer
 
-deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the OGC [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to dynamically load and render infinitely large datasets into the browser.
+deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the OGC [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to to render city-scale (billions of points/features) and country-scale (trillions of features) datasets in the browser.
 
 In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo]() for yourself.
 
-### Python Binding and Jupyter Widget
+### pydeck: deck.gl for Python and Jupyter Notebooks
 
-We have released a python module [pydeck]() for Python developers to interact with deck.gl via a native API. A Jupyter Notebook widget is also available to visualize your data right in your notebook. See [documentation]() and our release [blog post]() for details.
+We have released a python module `pydeck` for Python developers to interact with deck.gl via a native Python API:
 
-### Transitions
+```bash
+pip install pydeck
+```
+
+`pydeck` is also integrated with Jupyter Notebook, enabling you to interactively create deck.gl visualizations right in your notebooks. See [documentation]() and our release [blog post]() for details.
+
+### Transition System Improvements
 
 - Generic prop transition: the layer `transitions` prop now supports many more props than just accessors! Any prop of type `number` or `array` can now also use the built-in transition system.
 - New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/layer.md#transitions-object-optional) for details.
@@ -53,13 +59,16 @@ It is now easier to supply external buffers to layer attributes as deck.gl no lo
 
 For custom layer authors: the attribute system is simplified. One may now use `type: GL.DOUBLE` when adding an attribute to the `AttributeManager`. the attribute will automatically be mapped to two 32-bit shader attributes `<attrbName>` and `<attrbName>64xyLow`.
 
-### Minor Improvements and Bug Fixes
+### Auto Tooltip
 
-- `OrbitController` now supports 360 degree rotation on both axis. Relax `minRotationX` and `maxRotationX` to use this feature.
-- Built-in tooltip: A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
-- Customizable device pixel ratio: `Deck`'s `useDevicePixels` prop now accepts a number as well as boolean values.
-- `SimpleMeshLayer` and `ScenegraphLayer` now respect the `opacity` prop.
-- `IconLayer` has added a new prop `alphaCutoff` for customizing picking behavior.
+A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
+
+### Other Features/Improvements
+
+- **OrbitController** now supports 360 degree rotation on both axis. Relax `minRotationX` and `maxRotationX` to use this feature.
+- **Customizable device pixel ratio**: `Deck`'s `useDevicePixels` prop now accepts a number as well as boolean values.
+- **SimpleMeshLayer** and **ScenegraphLayer** now respect the `opacity` prop.
+- **IconLayer** has added a new prop `alphaCutoff` for customizing picking behavior.
 
 
 ### HeatmapLayer
