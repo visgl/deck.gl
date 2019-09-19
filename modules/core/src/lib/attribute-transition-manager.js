@@ -55,7 +55,7 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in this.transitions) {
       const attribute = attributes[attributeName];
-      if (!attribute || !attribute.supportsTransition()) {
+      if (!attribute || !attribute.getTransitionSetting(transitions)) {
         // Animated attribute has been removed
         this._removeTransition(attributeName);
       }
