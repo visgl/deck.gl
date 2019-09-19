@@ -200,14 +200,14 @@ export default class IconLayer extends Layer {
   }
 
   _getModel(gl) {
-    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, -1, 0];
+    const positions = [-1, -1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, -1, -1, 1, -1, -1, 1];
 
     return new Model(
       gl,
       Object.assign({}, this.getShaders(), {
         id: this.props.id,
         geometry: new Geometry({
-          drawMode: GL.TRIANGLE_FAN,
+          drawMode: GL.TRIANGLES,
           attributes: {
             positions: new Float32Array(positions)
           }
