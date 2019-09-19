@@ -26,7 +26,7 @@ export default class GPUInterpolationTransition {
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
     this.currentLength = 0;
-    this.transform = null;
+    this.transform = getTransform(gl, attribute);
     const bufferOpts = {
       byteLength: 0,
       usage: GL.DYNAMIC_COPY
@@ -81,7 +81,6 @@ export default class GPUInterpolationTransition {
 
     this.transition.start(transitionSettings);
 
-    this.transform = this.transform || new Transform(gl, getShaders(attribute.size));
     this.transform.update({
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
@@ -132,13 +131,13 @@ void main(void) {
 }
 `;
 
-function getShaders(attributeSize) {
-  const attributeType = getAttributeTypeFromSize(attributeSize);
-  return {
+function getTransform(gl, attribute) {
+  const attributeType = getAttributeTypeFromSize(attribute.size);
+  return new Transform(gl, {
     vs,
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },
     varyings: ['vCurrent']
-  };
+  });
 }

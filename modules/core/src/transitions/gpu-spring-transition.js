@@ -27,9 +27,9 @@ export default class GPUSpringTransition {
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
     this.currentLength = 0;
-    this.transform = null;
     this.texture = getTexture(gl);
     this.framebuffer = getFramebuffer(gl, this.texture);
+    this.transform = getTransform(gl, attribute, this.framebuffer);
     const bufferOpts = {
       byteLength: 0,
       usage: GL.DYNAMIC_COPY
@@ -79,7 +79,6 @@ export default class GPUSpringTransition {
     // this.transition.start() takes the latest settings and updates them.
     this.transition.start(transitionSettings);
 
-    this.transform = this.transform || getTransform(gl, attribute, this.framebuffer);
     this.transform.update({
       elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
