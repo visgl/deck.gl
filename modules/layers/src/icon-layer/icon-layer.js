@@ -200,7 +200,7 @@ export default class IconLayer extends Layer {
   }
 
   _getModel(gl) {
-    const positions = [-1, -1, 1, -1, 1, 0, 1, 1, 0, 1, -1, 1, -1, -1, 1, -1, -1, 1];
+    const positions = [-1, -1, 0, -1, 1, 0, 1, 1, 0, 1, 1, 0, 1, -1, 0, -1, -1, 0];
 
     return new Model(
       gl,
