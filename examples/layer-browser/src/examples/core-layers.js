@@ -21,6 +21,8 @@ import {
   ScreenGridLayer
 } from '@deck.gl/aggregation-layers';
 
+import EnhancedCPUGridLayer from './enhanced-cpu-grid-layer';
+
 const {flattenVertices} = experimental;
 
 // Demonstrate immutable support
@@ -346,6 +348,22 @@ const CPUGridLayerExample = {
   props: {
     id: 'gridLayer',
     data: dataSamples.points,
+    colorScaleType: 'ordinal',
+    cellSize: 200,
+    opacity: 1,
+    extruded: true,
+    pickable: true,
+    getPosition: d => d.COORDINATES,
+    getColorValue: points => getMean(points, 'SPACES'),
+    getElevationValue: points => getMax(points, 'SPACES')
+  }
+};
+
+const EnhancedCPUGridLayerExample = {
+  layer: EnhancedCPUGridLayer,
+  props: {
+    id: 'EnhancedCPUGridLayer',
+    data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
     extruded: true,
@@ -510,6 +528,7 @@ export default {
     BitmapLayer: BitmapLayerExample,
     ColumnLayer: ColumnLayerExample,
     CPUGridLayer: CPUGridLayerExample,
+    EnhancedCPUGridLayer: EnhancedCPUGridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonLayer: HexagonLayerExample,
     ContourLayer: ContourLayerExample,
