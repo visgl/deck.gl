@@ -413,17 +413,29 @@ new Layer({
 });
 ```
 
-| Parameter     | Type       | Default     | Description |
-| ---------     | --------   | ----------- | ----------- |
-| `type`        | `String`   | `interpolation` | Type of the transition (either `interpolation` or `spring`) |
-| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds (only for `interpolation` transition `type`) |
-| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) (only for `interpolation` transition `type`)  |
-| `stiffness`   | `Number`   | `0.05`      | "Tension" factor for the spring (only for `spring` transition `type`) |
-| `damping`    | `Number`   | `0.5`        | "Friction" factor that counteracts the spring's acceleration (only for `spring` transition `type`) |
+Each accessor name is mapped to an object that is the transition setting. The object may contain the following fields:
+
+| Key           | Type       | Default     | Description |
+| ------------- | --------   | ----------- | ----------- |
+| `type`        | `String`   | `'interpolation'` | Type of the transition (either `'interpolation'` or `'spring'`) |
 | `enter`       | `Function` | APPEARANCE (`value => value`) | Callback to get the value that the entering vertices are transitioning from. See notes below |
 | `onStart`     | `Function` | `null`      | Callback when the transition is started |
 | `onEnd`       | `Function` | `null`      | Callback when the transition is done |
 | `onInterrupt` | `Function` | `null`      | Callback when the transition is interrupted |
+
+Additional fields for `type: 'interpolation'`:
+
+| Key           | Type       | Default     | Description |
+| ------------- | --------   | ----------- | ----------- |
+| `duration`    | `Number`   | `0`         | Duration of the transition animation, in milliseconds |
+| `easing`      | `Function` | LINEAR (`t => t`) | Easing function that maps a value from [0, 1] to [0, 1], see [http://easings.net/](http://easings.net/) |
+
+Additional fields for `type: 'spring'`:
+
+| Key           | Type       | Default     | Description |
+| ------------- | --------   | ----------- | ----------- |
+| `stiffness`   | `Number`   | `0.05`      | "Tension" factor for the spring |
+| `damping`     | `Number`   | `0.5`       | "Friction" factor that counteracts the spring's acceleration |
 
 Notes:
 
