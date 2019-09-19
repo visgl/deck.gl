@@ -86,16 +86,48 @@ export default class TileLayer extends CompositeLayer {
   renderLayers() {
     const {renderSubLayers, visible} = this.props;
     const z = this.getLayerZoomLevel();
-    return this.state.tiles.map(tile => {
+    return this.aggregateByZoomLevel(this.state.tiles).map(aggregatedTile => {
       return renderSubLayers(
         Object.assign({}, this.props, {
-          id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
-          data: tile.data,
-          visible: visible && (!this.state.isLoaded || tile.z === z),
-          tile
+          id: `${this.id}-${aggregatedTile.z}`,
+          data: aggregatedTile.data.length
+            ? aggregatedTile.data.flat()
+            : aggregatedTile.dataPromiseWrapped,
+          visible: visible && (!this.state.isLoaded || aggregatedTile.z === z)
         })
       );
     });
+  }
+
+  aggregateByZoomLevel(tiles) {
+    const aggregation = tiles.reduce((tilesByZoomLevel, currentTile) => {
+      const tileExists = tilesByZoomLevel.hasOwnProperty(currentTile.z);
+
+      if (!tileExists) {
+        tilesByZoomLevel[currentTile.z] = {
+          data: [],
+          pendingData: [],
+          dataPromiseWrapped: null,
+          z: currentTile.z,
+          tileSet: new Map()
+        };
+      }
+
+      if (currentTile._isLoaded) {
+        tilesByZoomLevel[currentTile.z].data.push(currentTile.data);
+      } else {
+        tilesByZoomLevel[currentTile.z].pendingData.push(currentTile.data);
+        tilesByZoomLevel[currentTile.z].dataPromiseWrapped = Promise.all(
+          tilesByZoomLevel[currentTile.z].pendingData
+        ).then(allData => allData.flat());
+      }
+
+      tilesByZoomLevel[currentTile.z].tileSet.set(currentTile.id, currentTile);
+
+      return tilesByZoomLevel;
+    }, {});
+
+    return Object.values(aggregation);
   }
 }
 
