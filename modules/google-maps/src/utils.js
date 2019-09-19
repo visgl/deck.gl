@@ -106,8 +106,14 @@ export function getViewState(map, overlay) {
   const nw = projection.fromContainerPixelToLatLng(nwContainerPx);
   const nwDivPx = projection.fromLatLngToDivPixel(nw);
 
+  // checking the number of maps visible on container
+  var mapCount = width / projection.getWorldWidth()
+  if (mapCount >= 1) {
+    nwDivPx.x = nwDivPx.x - projection.getWorldWidth()
+  }
+
   // Compute fractional zoom.
-  const scale = (topRight.x - bottomLeft.x) / width;
+  var scale = (bottomLeft.y - topRight.y) / height;
   const zoom = Math.log2(scale) + map.getZoom() - 1;
 
   // Compute fractional center.
