@@ -9,7 +9,6 @@ import {
   cycleBuffers
 } from '../lib/attribute-transition-utils';
 import Transition from './transition';
-import assert from '../utils/assert';
 
 export default class GPUInterpolationTransition {
   constructor({gl, attribute, timeline}) {
@@ -28,20 +27,22 @@ export default class GPUInterpolationTransition {
     // due to performance costs
     this.currentLength = 0;
     this.transform = null;
-    const usage = GL.DYNAMIC_COPY;
-    const byteLength = 0;
+    const bufferOpts = {
+      byteLength: 0,
+      usage: GL.DYNAMIC_COPY
+    };
     this.buffers = [
-      new Buffer(gl, {byteLength, usage}), // from
-      new Buffer(gl, {byteLength, usage}) // current
+      new Buffer(gl, bufferOpts), // from
+      new Buffer(gl, bufferOpts) // current
     ];
   }
 
   isTransitioning() {
-    return Boolean(this.buffers.length);
+    return this.transition.inProgress;
   }
 
-  getTransitioningAttribute() {
-    return this.attributeInTransition;
+  getAttribute() { 
+    return this.isTransitioning() ? this.attributeInTransition : this.attribute;
   }
 
   // this is called when an attribute's values have changed and
@@ -50,47 +51,49 @@ export default class GPUInterpolationTransition {
   // in case the attribute's buffer has changed in length or in
   // bufferLayout
   start(transitionSettings, numInstances) {
-    assert(
-      transitionSettings.duration > 0,
-      'transition setting must have a duration greater than 0'
-    );
+    if (transitionSettings.duration <= 0) {
+      this.transition.cancel();
+      return;
+    }
+
+    const {gl, buffers, attribute} = this;
     // Alternate between two buffers when new transitions start.
     // Last destination buffer is used as an attribute (from state),
     // And the other buffer is now the current buffer.
-    cycleBuffers(this.buffers);
+    cycleBuffers(buffers);
 
     const padBufferOpts = {
       numInstances,
-      attribute: this.attribute,
+      attribute,
       fromLength: this.currentLength,
       fromBufferLayout: this.currentBufferLayout,
       getData: transitionSettings.enter
     };
 
-    for (const buffer of this.buffers) {
+    for (const buffer of buffers) {
       padBuffer({buffer, ...padBufferOpts});
     }
 
-    this.currentBufferLayout = this.attribute.bufferLayout;
-    this.currentLength = getAttributeBufferLength(this.attribute, numInstances);
+    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.update({
-      buffer: this.buffers[1],
+      buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: this.attribute.value
+      value: attribute.value
     });
 
     this.transition.start(transitionSettings);
 
-    this.transform = this.transform || new Transform(this.gl, getShaders(this.attribute.size));
+    this.transform = this.transform || new Transform(gl, getShaders(attribute.size));
     this.transform.update({
-      elementCount: Math.floor(this.currentLength / this.attribute.size),
+      elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
-        aFrom: this.buffers[0],
-        aTo: getSourceBufferAttribute(this.gl, this.attribute)
+        aFrom: buffers[0],
+        aTo: getSourceBufferAttribute(gl, attribute)
       },
       feedbackBuffers: {
-        vCurrent: this.buffers[1]
+        vCurrent: buffers[1]
       }
     });
   }

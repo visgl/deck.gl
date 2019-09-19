@@ -74,7 +74,7 @@ export default class AttributeTransitionManager {
     for (const attributeName in this.transitions) {
       const transition = this.transitions[attributeName];
       if (transition.isTransitioning()) {
-        animatedAttributes[attributeName] = transition.getTransitioningAttribute();
+        animatedAttributes[attributeName] = transition.getAttribute();
       }
     }
 

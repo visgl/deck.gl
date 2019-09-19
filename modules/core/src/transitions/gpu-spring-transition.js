@@ -16,7 +16,6 @@ export default class GPUSpringTransition {
     this.gl = gl;
     this.type = 'spring';
     this.transition = new Transition(timeline);
-    this._isTransitioning = false;
     this.attribute = attribute;
     // this is the attribute we return during the transition - note: if it is a constant
     // attribute, it will be converted and returned as a regular attribute
@@ -31,22 +30,23 @@ export default class GPUSpringTransition {
     this.transform = null;
     this.texture = getTexture(gl);
     this.framebuffer = getFramebuffer(gl, this.texture);
-    const usage = GL.DYNAMIC_COPY;
-    const byteLength = 0;
+    const bufferOpts = {
+      byteLength: 0,
+      usage: GL.DYNAMIC_COPY
+    };
     this.buffers = [
-      new Buffer(gl, {byteLength, usage}), // previous
-      new Buffer(gl, {byteLength, usage}), // current
-      new Buffer(gl, {byteLength, usage}) // next
+      new Buffer(gl, bufferOpts), // previous
+      new Buffer(gl, bufferOpts), // current
+      new Buffer(gl, bufferOpts) // next
     ];
   }
 
   isTransitioning() {
-    return this._isTransitioning;
+    return this.transition.inProgress;
   }
 
-  // this will never return a constant attribute, no matter what attribute was passed in
-  getTransitioningAttribute() {
-    return this.attributeInTransition;
+  getAttribute() { 
+    return this.isTransitioning() ? this.attributeInTransition : this.attribute;
   }
 
   // this is called when an attribute's values have changed and
@@ -55,25 +55,26 @@ export default class GPUSpringTransition {
   // in case the attribute's buffer has changed in length or in
   // bufferLayout
   start(transitionSettings, numInstances) {
+    const {gl, buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
-      attribute: this.attribute,
+      attribute,
       fromLength: this.currentLength,
       fromBufferLayout: this.currentBufferLayout,
       getData: transitionSettings.enter
     };
 
-    for (const buffer of this.buffers) {
+    for (const buffer of buffers) {
       padBuffer({buffer, ...padBufferOpts});
     }
 
-    this.currentBufferLayout = this.attribute.bufferLayout;
-    this.currentLength = getAttributeBufferLength(this.attribute, numInstances);
+    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.update({
-      buffer: this.buffers[1],
+      buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: this.attribute.value
+      value: attribute.value
     });
 
     // when an attribute changes values, a new transition is started. These
@@ -82,38 +83,38 @@ export default class GPUSpringTransition {
     // this.transition.start() takes the latest settings and updates them.
     this.transition.start(transitionSettings);
 
-    this.transform = this.transform || getTransform(this.gl, this.attribute, this.framebuffer);
+    this.transform = this.transform || getTransform(gl, attribute, this.framebuffer);
     this.transform.update({
-      elementCount: Math.floor(this.currentLength / this.attribute.size),
+      elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
-        aTo: getSourceBufferAttribute(this.gl, this.attribute)
+        aTo: getSourceBufferAttribute(gl, attribute)
       }
     });
-    this._isTransitioning = true;
   }
 
   update() {
-    const updated = this.transition.update();
+    const {buffers, transform, framebuffer, transition} = this;
+    const updated = transition.update();
     if (!updated) {
       return false;
     }
 
-    this.transform.update({
+    transform.update({
       sourceBuffers: {
-        aPrev: this.buffers[0],
-        aCur: this.buffers[1]
+        aPrev: buffers[0],
+        aCur: buffers[1]
       },
       feedbackBuffers: {
-        vNext: this.buffers[2]
+        vNext: buffers[2]
       }
     });
-    this.transform.run({
-      framebuffer: this.framebuffer,
+    transform.run({
+      framebuffer,
       discard: false,
       clearRenderTarget: true,
       uniforms: {
-        stiffness: this.transition.settings.stiffness,
-        damping: this.transition.settings.damping
+        stiffness: transition.settings.stiffness,
+        damping: transition.settings.damping
       },
       parameters: {
         depthTest: false,
@@ -124,13 +125,13 @@ export default class GPUSpringTransition {
       }
     });
 
-    cycleBuffers(this.buffers);
-    this.attributeInTransition.update({buffer: this.buffers[1]});
+    cycleBuffers(buffers);
+    this.attributeInTransition.update({buffer: buffers[1]});
 
-    this._isTransitioning = readPixelsToArray(this.framebuffer)[0] > 0;
+    const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;
 
-    if (!this.isTransitioning()) {
-      this.transition.end();
+    if (!isTransitioning) {
+      transition.end();
     }
 
     return true;
