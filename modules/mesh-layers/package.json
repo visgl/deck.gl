@@ -2,7 +2,7 @@
   "name": "@deck.gl/mesh-layers",
   "description": "deck.gl layers that loads 3D meshes or scene graphs",
   "license": "MIT",
-  "version": "7.2.4",
+  "version": "7.2.5",
   "publishConfig": {
     "access": "public"
   },
@@ -34,5 +34,6 @@
   },
   "dependencies": {
     "@luma.gl/addons": "^7.2.0"
-  }
+  },
+  "gitHead": "6a1b3b44390b77ff9e8e051e5267398ca4c9092f"
 }

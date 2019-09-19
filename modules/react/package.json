@@ -2,7 +2,7 @@
   "name": "@deck.gl/react",
   "description": "React Components for deck.gl",
   "license": "MIT",
-  "version": "7.2.4",
+  "version": "7.2.5",
   "publishConfig": {
     "access": "public"
   },
@@ -32,5 +32,6 @@
     "@deck.gl/core": "^7.0.0",
     "react": "0.14.x - 16.x",
     "react-dom": "0.14.x - 16.x"
-  }
+  },
+  "gitHead": "6a1b3b44390b77ff9e8e051e5267398ca4c9092f"
 }

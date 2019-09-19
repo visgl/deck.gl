@@ -2,7 +2,7 @@
   "name": "@deck.gl/layers",
   "description": "deck.gl core layers",
   "license": "MIT",
-  "version": "7.2.4",
+  "version": "7.2.5",
   "publishConfig": {
     "access": "public"
   },
@@ -35,5 +35,6 @@
   },
   "peerDependencies": {
     "@deck.gl/core": "^7.0.0"
-  }
+  },
+  "gitHead": "6a1b3b44390b77ff9e8e051e5267398ca4c9092f"
 }
