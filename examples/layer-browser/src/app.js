@@ -123,7 +123,7 @@ export default class App extends PureComponent {
     this.mapRef.current.pickObjects({x: 0, y: 0, width, height});
   }
 
-  _multiDepthPick(x, y) {
+  _multiDepthPick({x, y}) {
     this.mapRef.current.pickMultipleObjects({x, y});
   }
 
@@ -252,6 +252,7 @@ export default class App extends PureComponent {
         <Map
           ref={this.mapRef}
           layers={this._renderExamples()}
+          onClick={this.state.enableDepthPickOnClick && this._multiDepthPick}
           views={this._getViews()}
           effects={this._getEffects()}
           settings={settings}
