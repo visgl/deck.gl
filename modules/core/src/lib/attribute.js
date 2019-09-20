@@ -291,11 +291,9 @@ export default class Attribute extends BaseAttribute {
         this.value = attributeValue;
       } else {
         for (const [startRow, endRow] of updateRanges) {
-          const startOffset = Number.isFinite(startRow)
-            ? this._getVertexOffset(startRow, this.bufferLayout)
-            : 0;
+          const startOffset = Number.isFinite(startRow) ? this.getVertexOffset(startRow) : 0;
           const endOffset = Number.isFinite(endRow)
-            ? this._getVertexOffset(endRow, this.bufferLayout)
+            ? this.getVertexOffset(endRow)
             : noAlloc || !Number.isFinite(numInstances)
               ? this.value.length
               : numInstances * this.size;
@@ -429,7 +427,7 @@ export default class Attribute extends BaseAttribute {
     }
   }
 
-  _getVertexOffset(row, bufferLayout) {
+  getVertexOffset(row, bufferLayout = this.bufferLayout) {
     let offset = this.elementOffset;
     if (bufferLayout) {
       let index = 0;
@@ -487,7 +485,7 @@ export default class Attribute extends BaseAttribute {
 
     assert(typeof accessorFunc === 'function', `accessor "${accessor}" is not a function`);
 
-    let i = attribute._getVertexOffset(startRow, bufferLayout);
+    let i = attribute.getVertexOffset(startRow, bufferLayout);
     const {iterable, objectInfo} = createIterable(data, startRow, endRow);
     for (const object of iterable) {
       objectInfo.index++;

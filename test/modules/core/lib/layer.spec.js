@@ -451,9 +451,8 @@ test('Layer#calculateInstancePickingColors', t => {
         data: new Array(3).fill(0)
       },
       onBeforeUpdate: ({layer}) => {
-        const colors = layer.copyPickingColors();
         layer.clearPickingColor(new Uint8Array([2, 0, 0]));
-        layer.restorePickingColors(colors);
+        layer.restorePickingColors();
       },
       onAfterUpdate: ({layer}) => {
         const {instancePickingColors} = layer.getAttributeManager().getAttributes();
