@@ -21,6 +21,7 @@ export class DeckGLModel extends DOMWidgetModel {
       json_input: null,
       mapbox_key: null,
       selected_data: null,
+      tooltip: null,
       width: '100%',
       height: 500
     };
@@ -67,28 +68,33 @@ export class DeckGLView extends DOMWidgetView {
     super.render();
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
 
-    const containerDiv = document.createElement('div');
+    const container = document.createElement('div');
 
     if (!this.jsonDeck) {
-      containerDiv.style.height = `${this.model.get('height')}px`;
-      containerDiv.style.width = Number.isFinite(this.model.get('width'))
+      const height = `${this.model.get('height')}px`;
+      const width = Number.isFinite(this.model.get('width'))
         ? `${this.model.get('width')}px`
         : this.model.get('width');
-      containerDiv.style.position = 'relative';
-      this.el.appendChild(containerDiv);
+      const mapboxApiKey = this.model.get('mapbox_key');
+      const jsonInput = JSON.parse(this.model.get('json_input'));
+      const useTooltip = this.model.get('tooltip');
+
+      container.style.height = `${height}px`;
+      container.style.width = `${width}px`;
+      container.style.position = 'relative';
+      this.el.appendChild(container);
 
       loadCss(MAPBOX_CSS_URL);
-      initDeck(
-        {
-          mapboxApiKey: this.model.get('mapbox_key'),
-          container: containerDiv,
-          jsonInput: JSON.parse(this.model.get('json_input'))
+      initDeck({
+        mapboxApiKey,
+        container,
+        jsonInput,
+        useTooltip,
+        onComplete: ({jsonConverter, deckgl}) => {
+          this.jsonDeck = {jsonConverter, deckgl};
         },
-        x => {
-          this.jsonDeck = x;
-        },
-        this.handleClick.bind(this)
-      );
+        handleClick: this.handleClick.bind(this)
+      });
     }
   }
 

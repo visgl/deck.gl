@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.3 Prereleases
 
+#### deck.gl [v7.3.0-beta.2] - Sep 19, 2019
+
+- Fix GPUSpringTransition (#3627)
+- Implement isTransitioning check for attribute spring-transitions (#3618)
+
 #### deck.gl [v7.3.0-beta.1] - Sep 17, 2019
 
 - Bump dependency versions (#3623)

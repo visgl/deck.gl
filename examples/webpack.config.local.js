@@ -87,7 +87,7 @@ function makeLocalDevConfig(EXAMPLE_DIR = LIB_DIR, linkToLuma) {
           options: {
             presets: ['@babel/env']
           },
-          include: [`${ROOT_DIR}/modules`, `${ROOT_DIR}/../luma.gl/modules`]
+          include: [resolve(ROOT_DIR, 'modules'), resolve(ROOT_DIR, '../luma.gl/modules')]
         }
       ]
     }

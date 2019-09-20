@@ -55,7 +55,7 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in this.transitions) {
       const attribute = attributes[attributeName];
-      if (!attribute || !attribute.supportsTransition()) {
+      if (!attribute || !attribute.getTransitionSetting(transitions)) {
         // Animated attribute has been removed
         this._removeTransition(attributeName);
       }
@@ -64,7 +64,8 @@ export default class AttributeTransitionManager {
 
   // Returns `true` if attribute is transition-enabled
   hasAttribute(attributeName) {
-    return attributeName in this.transitions;
+    const transition = this.transitions[attributeName];
+    return transition && transition.inProgress;
   }
 
   // Get all the animated attributes
@@ -73,8 +74,8 @@ export default class AttributeTransitionManager {
 
     for (const attributeName in this.transitions) {
       const transition = this.transitions[attributeName];
-      if (transition.isTransitioning()) {
-        animatedAttributes[attributeName] = transition.getTransitioningAttribute();
+      if (transition.inProgress) {
+        animatedAttributes[attributeName] = transition.attributeInTransition;
       }
     }
 

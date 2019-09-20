@@ -10,6 +10,11 @@ The `JSONConverter` class has been generalized and can now be used independently
 
 This has caused some breaking changes to this experimental module. For details and work-arounds see the upgrade guide.
 
+### HeatmapLayer
+
+`HeatmapLayer` is upgraded to support `WebGL1` context, hence can be now used with `WebGL1` only browsers like Safari.
+
+
 ## deck.gl v7.2
 
 Release Date: Aug XX, 2019

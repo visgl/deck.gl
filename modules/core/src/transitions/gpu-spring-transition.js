@@ -1,6 +1,6 @@
 /* eslint-disable complexity, max-statements, max-params */
 import GL from '@luma.gl/constants';
-import {Buffer, Transform} from '@luma.gl/core';
+import {Buffer, Transform, Framebuffer, Texture2D, readPixelsToArray} from '@luma.gl/core';
 import {
   padBuffer,
   getAttributeTypeFromSize,
@@ -27,25 +27,22 @@ export default class GPUSpringTransition {
     // this is because we only reallocate buffers when they grow, not when they shrink,
     // due to performance costs
     this.currentLength = 0;
-    this.transform = null;
-    const usage = GL.DYNAMIC_COPY;
-    const byteLength = 0;
+    this.texture = getTexture(gl);
+    this.framebuffer = getFramebuffer(gl, this.texture);
+    this.transform = getTransform(gl, attribute, this.framebuffer);
+    const bufferOpts = {
+      byteLength: 0,
+      usage: GL.DYNAMIC_COPY
+    };
     this.buffers = [
-      new Buffer(gl, {byteLength, usage}), // previous
-      new Buffer(gl, {byteLength, usage}), // current
-      new Buffer(gl, {byteLength, usage}) // next
+      new Buffer(gl, bufferOpts), // previous
+      new Buffer(gl, bufferOpts), // current
+      new Buffer(gl, bufferOpts) // next
     ];
   }
 
-  // TODO: implement a check where each vertex renders an `isStillTransitioning` boolean to
-  // a 1x1 framebuffer
-  isTransitioning() {
-    return true;
-  }
-
-  // this will never return a constant attribute, no matter what attribute was passed in
-  getTransitioningAttribute() {
-    return this.attributeInTransition;
+  get inProgress() {
+    return this.transition.inProgress;
   }
 
   // this is called when an attribute's values have changed and
@@ -54,69 +51,83 @@ export default class GPUSpringTransition {
   // in case the attribute's buffer has changed in length or in
   // bufferLayout
   start(transitionSettings, numInstances) {
+    const {gl, buffers, attribute} = this;
     const padBufferOpts = {
       numInstances,
-      attribute: this.attribute,
+      attribute,
       fromLength: this.currentLength,
       fromBufferLayout: this.currentBufferLayout,
       getData: transitionSettings.enter
     };
 
-    for (const buffer of this.buffers) {
+    for (const buffer of buffers) {
       padBuffer({buffer, ...padBufferOpts});
     }
 
-    this.currentBufferLayout = this.attribute.bufferLayout;
-    this.currentLength = getAttributeBufferLength(this.attribute, numInstances);
+    this.currentBufferLayout = attribute.bufferLayout;
+    this.currentLength = getAttributeBufferLength(attribute, numInstances);
     this.attributeInTransition.update({
-      buffer: this.buffers[1],
+      buffer: buffers[1],
       // Hack: Float64Array is required for double-precision attributes
       // to generate correct shader attributes
-      value: this.attribute.value
+      value: attribute.value
     });
 
     // when an attribute changes values, a new transition is started. These
-    // are properties that we have to store on this instance but can change
-    // when new transitions are started, so we have to keep them up-to-date. :(
+    // are properties that we have to store on this.transition but can change
+    // when new transitions are started, so we have to keep them up-to-date.
+    // this.transition.start() takes the latest settings and updates them.
     this.transition.start(transitionSettings);
 
-    this.transform = this.transform || new Transform(this.gl, getShaders(this.attribute.size));
     this.transform.update({
-      elementCount: Math.floor(this.currentLength / this.attribute.size),
+      elementCount: Math.floor(this.currentLength / attribute.size),
       sourceBuffers: {
-        aTo: getSourceBufferAttribute(this.gl, this.attribute)
+        aTo: getSourceBufferAttribute(gl, attribute)
       }
     });
   }
 
   update() {
-    const updated = this.transition.update();
+    const {buffers, transform, framebuffer, transition} = this;
+    const updated = transition.update();
     if (!updated) {
       return false;
     }
 
-    // TODO: fire an onStart() event here if the transition has just started
-
-    this.transform.update({
+    transform.update({
       sourceBuffers: {
-        aPrev: this.buffers[0],
-        aCur: this.buffers[1]
+        aPrev: buffers[0],
+        aCur: buffers[1]
       },
       feedbackBuffers: {
-        vNext: this.buffers[2]
+        vNext: buffers[2]
       }
     });
-    this.transform.run({
+    transform.run({
+      framebuffer,
+      discard: false,
+      clearRenderTarget: true,
       uniforms: {
-        stiffness: this.transition.settings.stiffness,
-        damping: this.transition.settings.damping
+        stiffness: transition.settings.stiffness,
+        damping: transition.settings.damping
+      },
+      parameters: {
+        depthTest: false,
+        blend: true,
+        viewport: [0, 0, 1, 1],
+        blendFunc: [GL.ONE, GL.ONE],
+        blendEquation: [GL.MAX, GL.MAX]
       }
     });
-    cycleBuffers(this.buffers);
-    this.attributeInTransition.update({buffer: this.buffers[1]});
 
-    // TODO: fire the event here if the transition has just ended
-    // transition.end();
+    cycleBuffers(buffers);
+    this.attributeInTransition.update({buffer: buffers[1]});
+
+    const isTransitioning = readPixelsToArray(framebuffer)[0] > 0;
+
+    if (!isTransitioning) {
+      transition.end();
+    }
 
     return true;
   }
@@ -127,11 +138,21 @@ export default class GPUSpringTransition {
     while (this.buffers.length) {
       this.buffers.pop().delete();
     }
+    this.texture.delete();
+    this.texture = null;
+    this.framebuffer.delete();
+    this.framebuffer = null;
   }
 }
 
-const vs = `
+function getTransform(gl, attribute, framebuffer) {
+  const attributeType = getAttributeTypeFromSize(attribute.size);
+  return new Transform(gl, {
+    framebuffer,
+    vs: `
 #define SHADER_NAME spring-transition-vertex-shader
+
+#define EPSILON 0.00001
 
 uniform float stiffness;
 uniform float damping;
@@ -139,6 +160,7 @@ attribute ATTRIBUTE_TYPE aPrev;
 attribute ATTRIBUTE_TYPE aCur;
 attribute ATTRIBUTE_TYPE aTo;
 varying ATTRIBUTE_TYPE vNext;
+varying float vIsTransitioningFlag;
 
 ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_TYPE dest) {
   ATTRIBUTE_TYPE velocity = cur - prev;
@@ -149,18 +171,52 @@ ATTRIBUTE_TYPE getNextValue(ATTRIBUTE_TYPE cur, ATTRIBUTE_TYPE prev, ATTRIBUTE_T
 }
 
 void main(void) {
-  vNext = getNextValue(aCur, aPrev, aTo);
-  gl_Position = vec4(0.0);
-}
-`;
+  bool isTransitioning = length(aCur - aPrev) > EPSILON || length(aTo - aCur) > EPSILON;
+  vIsTransitioningFlag = isTransitioning ? 1.0 : 0.0;
 
-function getShaders(attributeSize) {
-  const attributeType = getAttributeTypeFromSize(attributeSize);
-  return {
-    vs,
+  vNext = getNextValue(aCur, aPrev, aTo);
+  gl_Position = vec4(0, 0, 0, 1);
+  gl_PointSize = 100.0;
+}
+`,
+    fs: `
+#define SHADER_NAME spring-transition-is-transitioning-fragment-shader
+
+varying float vIsTransitioningFlag;
+
+void main(void) {
+  if (vIsTransitioningFlag == 0.0) {
+    discard;
+  }
+  gl_FragColor = vec4(1.0);
+}`,
     defines: {
       ATTRIBUTE_TYPE: attributeType
     },
     varyings: ['vNext']
-  };
+  });
+}
+
+function getTexture(gl) {
+  return new Texture2D(gl, {
+    data: new Uint8Array(4),
+    format: GL.RGBA,
+    type: GL.UNSIGNED_BYTE,
+    border: 0,
+    mipmaps: false,
+    dataFormat: GL.RGBA,
+    width: 1,
+    height: 1
+  });
+}
+
+function getFramebuffer(gl, texture) {
+  return new Framebuffer(gl, {
+    id: 'spring-transition-is-transitioning-framebuffer',
+    width: 1,
+    height: 1,
+    attachments: {
+      [GL.COLOR_ATTACHMENT0]: texture
+    }
+  });
 }
