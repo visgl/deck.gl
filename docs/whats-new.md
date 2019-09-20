@@ -4,20 +4,76 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v7.3
 
+Release Date: Sep xx, 2019
+
+<table style="border: 0;" align="center">
+  <tbody>
+    <tr>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/tile-3d-layer.gif" />
+        <p><i>Tile3DLayer</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/jupyter-integration.gif" />
+        <p><i>Jupyter Widget</i></p>
+      </td>
+      <td>
+        <img style="max-height:200px" src="https://raw.github.com/uber-common/deck.gl-data/master/images/whats-new/spring-transition.gif" />
+        <p><i>Spring Transition</i></p>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+### Tile3DLayer
+
+deck.gl has partnered with [Cesium](https://cesium.com/) to implement support for the OGC [3D Tiles specification](https://github.com/AnalyticalGraphicsInc/3d-tiles/tree/master/specification). This makes it possible to to render city-scale (billions of points/features) and country-scale (trillions of features) datasets in the browser.
+
+In this initial release, the layer has full support for point clouds and experimental support for glTF tiles. Try the [demo]() for yourself.
+
+### pydeck: deck.gl for Python and Jupyter Notebooks
+
+We have released a python module `pydeck` for Python developers to interact with deck.gl via a native Python API:
+
+```bash
+pip install pydeck
+```
+
+`pydeck` is also integrated with Jupyter Notebook, enabling you to interactively create deck.gl visualizations right in your notebooks. See [documentation](https://github.com/uber/deck.gl/blob/master/bindings/python/pydeck/README.md) for details.
+
+### Transition System Improvements
+
+- Generic prop transition: the layer `transitions` prop now supports many more props than just accessors! Any prop of type `number` or `array` can now also use the built-in transition system.
+- New transition type: spring-based transition support is added to the transition settings. See [documentation](/docs/api-reference/layer.md#transitions-object-optional) for details.
+
 ### @deck.gl/json
 
-The `JSONConverter` class has been generalized and can now be used independently of deck.gl to "hydrate" JavaScript from JSON text specifications. This supports its use a foundation technology for providing non-JavaScript bindings such as `pydeck`.
+The `JSONConverter` class has been generalized and can now be used independently of deck.gl to "hydrate" JavaScript from JSON text specifications. This supports its use a foundation technology for providing non-JavaScript bindings such as `pydeck`. This has caused some breaking changes to this experimental module. For details and work-arounds see the upgrade guide.
 
-This has caused some breaking changes to this experimental module. For details and work-arounds see the upgrade guide.
+### Under the Hood
 
-### HeatmapLayer
+We have introduced a new resource management system to luma.gl and deck.gl core. This significantly reduces the initial loading time if an app uses multiple layers of the same type.
 
-`HeatmapLayer` is upgraded to support `WebGL1` context, hence can be now used with `WebGL1` only browsers like Safari.
+It is now easier to supply external buffers to layer attributes as deck.gl no longer requires them to match the default buffer type.
+
+For custom layer authors: the attribute system is simplified. One may now use `type: GL.DOUBLE` when adding an attribute to the `AttributeManager`. the attribute will automatically be mapped to two 32-bit shader attributes `<attrbName>` and `<attrbName>64xyLow`.
+
+### Auto Tooltip
+
+A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional) is added to the `Deck` class. By supplying this callback, an app may specify the content and styling of a built-in tooltip.
+
+### Other Features/Improvements
+
+- **OrbitController** now supports 360 degree rotation on both axis. Relax `minRotationX` and `maxRotationX` to use this feature.
+- **Customizable device pixel ratio**: `Deck`'s `useDevicePixels` prop now accepts a number as well as boolean values.
+- **SimpleMeshLayer** and **ScenegraphLayer** now respect the `opacity` prop.
+- **IconLayer** has added a new prop `alphaCutoff` for customizing picking behavior.
 
 
 ## deck.gl v7.2
 
-Release Date: Aug XX, 2019
+Release Date: Aug 10, 2019
 
 ### Layer Extensions
 
@@ -78,6 +134,7 @@ It is now easier to build attributes as typed arrays outside of a layer, e.g. in
 - [BitmapLayer](/docs/layers/bitmap-layer.md)'s `image` prop now accepts a `HTMLVideoElement`.
 - [TextLayer](/docs/layers/text-layer.md) now supports line breaks in the text string. A new prop `lineHeight` is added.
 - Layer matching performance is improved. This affects applications with a large number of layers.
+- [HeatmapLayer](/docs/layers/heatmap-layer.md) now supports WebGL1.
 
 
 ## deck.gl v7.1
