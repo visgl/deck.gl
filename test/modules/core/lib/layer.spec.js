@@ -417,3 +417,56 @@ test('Layer#uniformTransitions', t => {
 
   t.end();
 });
+
+test('Layer#calculateInstancePickingColors', t => {
+  const testCases = [
+    {
+      props: {
+        data: new Array(2).fill(0)
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.deepEquals(
+          instancePickingColors.value.subarray(0, 6),
+          [1, 0, 0, 2, 0, 0],
+          'instancePickingColors is populated'
+        );
+      }
+    },
+    {
+      updateProps: {
+        data: new Array(3).fill(0)
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.deepEquals(
+          instancePickingColors.value.subarray(0, 9),
+          [1, 0, 0, 2, 0, 0, 3, 0, 0],
+          'instancePickingColors is populated'
+        );
+      }
+    },
+    {
+      updateProps: {
+        data: new Array(3).fill(0)
+      },
+      onBeforeUpdate: ({layer}) => {
+        const colors = layer.copyPickingColors();
+        layer.clearPickingColor(new Uint8Array([2, 0, 0]));
+        layer.restorePickingColors(colors);
+      },
+      onAfterUpdate: ({layer}) => {
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.deepEquals(
+          instancePickingColors.value.subarray(0, 9),
+          [1, 0, 0, 2, 0, 0, 3, 0, 0],
+          'instancePickingColors is populated'
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: SubLayer2, testCases, onError: t.notOk});
+
+  t.end();
+});
