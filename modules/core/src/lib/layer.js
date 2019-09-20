@@ -444,13 +444,6 @@ export default class Layer extends Component {
   calculateInstancePickingColors(attribute, {numInstances}) {
     const {value, size} = attribute;
 
-    if (value[0] === 1) {
-      // This can happen when data has changed, but the attribute value typed array
-      // has sufficient size and does not need to be re-allocated.
-      // This attribute is already populated, we do not have to recalculate it
-      return;
-    }
-
     // calculateInstancePickingColors always generates the same sequence.
     // pickingColorCache saves the largest generated sequence for reuse
     const cacheSize = pickingColorCache.length / size;
