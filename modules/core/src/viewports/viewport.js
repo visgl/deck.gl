@@ -43,8 +43,6 @@ const ZERO_VECTOR = [0, 0, 0];
 
 const DEFAULT_ZOOM = 0;
 
-const ERR_ARGUMENT = 'Illegal argument to Viewport';
-
 export default class Viewport {
   /**
    * @classdesc
@@ -287,24 +285,6 @@ export default class Viewport {
   }
 
   // INTERNAL METHODS
-
-  // TODO - these are duplicating WebMercator methods
-  _addMetersToLngLat(lngLatZ, xyz) {
-    const [lng, lat, Z = 0] = lngLatZ;
-    const [deltaLng, deltaLat, deltaZ = 0] = this._metersToLngLatDelta(xyz);
-    return lngLatZ.length === 2
-      ? [lng + deltaLng, lat + deltaLat]
-      : [lng + deltaLng, lat + deltaLat, Z + deltaZ];
-  }
-
-  _metersToLngLatDelta(xyz) {
-    const [x, y, z = 0] = xyz;
-    assert(Number.isFinite(x) && Number.isFinite(y) && Number.isFinite(z), ERR_ARGUMENT);
-    const {pixelsPerMeter, degreesPerPixel} = this.distanceScales;
-    const deltaLng = x * pixelsPerMeter[0] * degreesPerPixel[0];
-    const deltaLat = y * pixelsPerMeter[1] * degreesPerPixel[1];
-    return xyz.length === 2 ? [deltaLng, deltaLat] : [deltaLng, deltaLat, z];
-  }
 
   _createProjectionMatrix({orthographic, fovyRadians, aspect, focalDistance, near, far}) {
     assert(Number.isFinite(fovyRadians));
