@@ -21,6 +21,31 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.3 Prereleases
 
+#### deck.gl [v7.3.0-beta.3] - Sep 20, 2019
+
+- Improve multi-picking performance (#3668)
+- Website: update build script to install dependencies (#3666)
+- Pass DracoLoader to Tile3DLayer from app (#3635)
+- More picking bug fix (#3667)
+- 7.3 What's New (#3605)
+- Update pydeck setup.py to enable a production build (#3637)
+- Update pydeck docs: view_state.md (#3654)
+- Update pydeck documentation landing page (#3659)
+- Fix GPUGridLayer unhandled cellsize (#3535)
+- Update README.md (#3663)
+- Add HeatmapLayer example to the website (#3661)
+- Update README.md (#3662)
+- Update whats-new doc (#3660)
+- HeatmpaLayer: update required features for WebGL1 support. (#3656)
+- Update token and id for Melbourne 3d tiles (#3648)
+- Clean up transition classes, avoid crash with `duration:0` (#3649)
+- Update deck.md (#3653)
+- remove transitions that have null settings (#3647)
+- Allow pydeck users to hide tooltip (#3626)
+- Fix multi-picking bug (#3652)
+- restore multi depth pick in layer browser (#3650)
+- fix running with local luma packages (#3641)
+
 #### deck.gl [v7.3.0-beta.2] - Sep 19, 2019
 
 - Fix GPUSpringTransition (#3627)
