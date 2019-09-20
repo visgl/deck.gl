@@ -441,7 +441,7 @@ export default class Layer extends Component {
     return this.props;
   }
 
-  calculateInstancePickingColors(attribute, {numInstances}) {
+  calculateInstancePickingColors(attribute, {numInstances, startRow, endRow}) {
     const {value, size} = attribute;
 
     // calculateInstancePickingColors always generates the same sequence.
@@ -465,11 +465,8 @@ export default class Layer extends Component {
     }
 
     // Copy the last calculated picking color sequence into the attribute
-    value.set(
-      numInstances < cacheSize
-        ? pickingColorCache.subarray(0, numInstances * size)
-        : pickingColorCache
-    );
+    endRow = Math.min(endRow, numInstances);
+    value.set(pickingColorCache.subarray(startRow * size, endRow * size));
   }
 
   _setModelAttributes(model, changedAttributes) {
