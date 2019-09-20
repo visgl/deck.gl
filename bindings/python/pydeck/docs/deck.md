@@ -4,7 +4,7 @@ pydeck.Deck API Documentation
 ## pydeck.Deck
 
 ```python
-class pydeck.*Deck*(
+class pydeck.Deck(
     layers=[],
     views=[pydeck.View()],
     map_style="mapbox://styles/mapbox/dark-v9",
@@ -124,4 +124,5 @@ Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
 
 #### Examples
 
-To add
+[See hosted mybinder.org examples linked here](https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples
+).
