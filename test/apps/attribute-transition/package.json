@@ -4,7 +4,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --port 3000 --open"
   },
   "dependencies": {
-    "deck.gl": "^7.1.0",
+    "deck.gl": "^7.3.0-beta",
     "react": "^16.0.0",
     "react-dom": "^16.0.0"
   },

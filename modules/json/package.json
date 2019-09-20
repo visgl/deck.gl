@@ -34,6 +34,6 @@
     "expression-eval": "^2.0.0"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0"
+    "@deck.gl/core": "^7.3.0-beta"
   }
 }

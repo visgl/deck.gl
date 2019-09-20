@@ -40,8 +40,8 @@
     "s2-geometry": "^1.2.10"
   },
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0",
-    "@deck.gl/layers": "^7.0.0",
-    "@deck.gl/mesh-layers": "^7.0.0"
+    "@deck.gl/core": "^7.3.0-beta",
+    "@deck.gl/layers": "^7.3.0-beta",
+    "@deck.gl/mesh-layers": "^7.3.0-beta"
   }
 }

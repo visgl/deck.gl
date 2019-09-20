@@ -24,7 +24,7 @@
     "src"
   ],
   "peerDependencies": {
-    "@deck.gl/core": "^7.0.0",
+    "@deck.gl/core": "^7.3.0-beta",
     "@probe.gl/test-utils": "^3.1.0"
   },
   "scripts": {}
