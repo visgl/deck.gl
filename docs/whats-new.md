@@ -40,7 +40,7 @@ We have released a python module `pydeck` for Python developers to interact with
 pip install pydeck
 ```
 
-`pydeck` is also integrated with Jupyter Notebook, enabling you to interactively create deck.gl visualizations right in your notebooks. See [documentation]() and our release [blog post]() for details.
+`pydeck` is also integrated with Jupyter Notebook, enabling you to interactively create deck.gl visualizations right in your notebooks. See [documentation](https://github.com/uber/deck.gl/blob/master/bindings/python/pydeck/README.md) for details.
 
 ### Transition System Improvements
 
@@ -69,11 +69,6 @@ A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional
 - **Customizable device pixel ratio**: `Deck`'s `useDevicePixels` prop now accepts a number as well as boolean values.
 - **SimpleMeshLayer** and **ScenegraphLayer** now respect the `opacity` prop.
 - **IconLayer** has added a new prop `alphaCutoff` for customizing picking behavior.
-
-
-### HeatmapLayer
-
-`HeatmapLayer` is upgraded to support `WebGL1` context, hence can be now used with `WebGL1` only browsers like Safari.
 
 
 ## deck.gl v7.2
