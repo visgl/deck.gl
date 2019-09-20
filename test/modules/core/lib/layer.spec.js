@@ -425,8 +425,12 @@ test('Layer#calculateInstancePickingColors', t => {
         data: new Array(2).fill(0)
       },
       onAfterUpdate: ({layer}) => {
-        const {instancePickingColors} = layer.getAttributeManager().getAttributes()
-        t.deepEquals(instancePickingColors.value.subarray(0, 6), [1, 0, 0, 2, 0, 0], 'instancePickingColors is populated');
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.deepEquals(
+          instancePickingColors.value.subarray(0, 6),
+          [1, 0, 0, 2, 0, 0],
+          'instancePickingColors is populated'
+        );
       }
     },
     {
@@ -434,8 +438,12 @@ test('Layer#calculateInstancePickingColors', t => {
         data: new Array(3).fill(0)
       },
       onAfterUpdate: ({layer}) => {
-        const {instancePickingColors} = layer.getAttributeManager().getAttributes()
-        t.deepEquals(instancePickingColors.value.subarray(0, 9), [1, 0, 0, 2, 0, 0, 3, 0, 0], 'instancePickingColors is populated');
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.deepEquals(
+          instancePickingColors.value.subarray(0, 9),
+          [1, 0, 0, 2, 0, 0, 3, 0, 0],
+          'instancePickingColors is populated'
+        );
       }
     },
     {
@@ -448,8 +456,12 @@ test('Layer#calculateInstancePickingColors', t => {
         layer.restorePickingColors(colors);
       },
       onAfterUpdate: ({layer}) => {
-        const {instancePickingColors} = layer.getAttributeManager().getAttributes()
-        t.deepEquals(instancePickingColors.value.subarray(0, 9), [1, 0, 0, 2, 0, 0, 3, 0, 0], 'instancePickingColors is populated');
+        const {instancePickingColors} = layer.getAttributeManager().getAttributes();
+        t.deepEquals(
+          instancePickingColors.value.subarray(0, 9),
+          [1, 0, 0, 2, 0, 0, 3, 0, 0],
+          'instancePickingColors is populated'
+        );
       }
     }
   ];
