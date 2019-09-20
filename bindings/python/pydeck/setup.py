@@ -45,9 +45,12 @@ npm_path = os.pathsep.join(
 )
 
 
-# build_all is read from the command line and  `yarn bootstrap`
+# build_all is read from the command line and uses `yarn bootstrap`
 # for a frontend build instead of using `npm run build` within @deck.gl/jupyter-widget
 build_all = False
+# prod_build is read from the command line and uses the latest CDN-hosted version of the deck.gl libraries
+# rather than a local build
+prod_build = False
 
 
 def update_package_data(distribution):
@@ -151,8 +154,9 @@ class FrontendBuild(Command):
         self.clean_frontend_build()
         self.copy_frontend_build()
         log.info('Creating RequireJS configs.')
-        create_notebook_requirejs(load_requirejs_dependencies(), here, setup_environment='development')
-        create_standalone_render_requirejs(load_requirejs_dependencies(), here, setup_environment='development')
+        setup_environment = 'production' if prod_build else 'development'
+        create_notebook_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
+        create_standalone_render_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
 
         for t in self.target_files:
             if not os.path.exists(t):
@@ -191,6 +195,10 @@ if __name__ == "__main__":
     if "--build_all" in sys.argv:
         build_all = True
         sys.argv.remove("--build_all")
+
+    if "--prod_build" in sys.argv:
+        prod_build = True
+        sys.argv.remove("--prod_build")
 
     setup(
         name="pydeck",
