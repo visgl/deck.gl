@@ -19,7 +19,7 @@ for the points passed in.
 
 A list of geospatial points to fit to
 
-- `view_propotion` : `float`, default `1`
+- `view_proportion` : `float`, default `1`
 
 Proportion of the data that will be viewable on the screen.
 Useful for filtering outlying points from a visualization.
