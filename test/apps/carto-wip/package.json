@@ -4,7 +4,7 @@
     "start-local": "webpack-dev-server --env.local --progress --hot --open"
   },
   "dependencies": {
-    "deck.gl": "^5.0.0"
+    "deck.gl": "^7.3.0-beta"
   },
   "devDependencies": {
     "buble-loader": "^0.4.0",
