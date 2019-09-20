@@ -19,7 +19,7 @@ A catalog of available layers is viewable [here](https://github.com/uber/deck.gl
 
 Note that this is Javascript documentation and parameters in pydeck usually will be snake-cased according to Python convention.
 
-
+**Also note that parameters change by layer**. Not all layers have all parameters. `get_position`, for instance, is on `ScatterplotLayer` but not `ArcLayer`. Be sure to refer to the deck.gl layer catalog.
 
 #### Parameters
 
@@ -38,6 +38,8 @@ Unique name for the layer. Will autopopulate with a UUID if no ID is provided.
 `get_position` : `str`, default `'[lng, lat]'`
 
 Name of position field expressed as a coordinate pair, with some expression parsing, e.g., if `'[lng, lat]'` is provided, the position field will be assumed to be the common case where a flat file has separate columns `lat` and `lng`.
+
+Note that this parameter does not work on all layers but will have some variant. See the [ArcLayer](https://deck.gl/#/examples/core-layers/arc-layer), which would not have a `get_position` in its constructor.
 
 #### `get_position` Examples
 
