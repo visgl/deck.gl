@@ -8,9 +8,9 @@ class ViewState(
     self,
     longitude=0.0,
     latitude=0.0,
-    zoom=10,
-    min_zoom=1,
-    max_zoom=21,
+    zoom=1,
+    min_zoom=0,
+    max_zoom=20,
     pitch=0,
     bearing=0,
     **kwargs)
@@ -30,15 +30,15 @@ x-coordinate of focus
 
 y-coordinate of focus
 
-`zoom` : `float`, default `10`
+`zoom` : `float`, default `1`
 
-Magnification level of the map, usually between 0 (representing the whole world) and 21 (close to individual buildings)
+Magnification level of the map, usually between 0 (representing the whole world) and 24 (close to individual buildings)
 
-`min_zoom` : `float`, default `1`
+`min_zoom` : `float`, default `0`
 
 Least magnified zoom level the user can navigate to
 
-`max_zoom` : `float`, default `21`
+`max_zoom` : `float`, default `20`
 
 Most magnified zoom level the user can navigate to
 
