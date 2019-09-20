@@ -11,6 +11,7 @@ Note that pydeck is under active development. At the moment use of this library 
 The pydeck library is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
 optimized for a Jupyter Notebook environment.
 
+[See further documentation here.](https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck/docs)
 
 ## Installation
 
