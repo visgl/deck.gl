@@ -43,10 +43,10 @@ class Deck(JSONMixin):
         tooltip : bool, default True
             Boolean indicating whether or not a tooltip should be generated when hovering over a data layer
             Individual layers must have `pickable` set to `True` to be displayed in the tooltip.
-        height : int, default 500
-            Height of visualization, in pixels
-        width : int, default "100%"
-            Width of visualization, in pixels
+        height : :obj:`int` or :obj:`string`, default 500
+            Height of visualization, in pixels if an integer is passed or as a CSS value if a string
+        width : :obj:`int` or :obj:`string`, default "100%"
+            Width of visualization, in pixels if an integer is passed or as a CSS value if a string
 
 
         .. _Deck:
