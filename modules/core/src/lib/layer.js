@@ -466,7 +466,7 @@ export default class Layer extends Component {
 
     // Copy the last calculated picking color sequence into the attribute
     endRow = Math.min(endRow, numInstances);
-    value.set(pickingColorCache.subarray(startRow * size, endRow * size));
+    value.set(pickingColorCache.subarray(startRow * size, endRow * size), startRow * size);
   }
 
   _setModelAttributes(model, changedAttributes) {
@@ -482,61 +482,25 @@ export default class Layer extends Component {
   }
 
   // Sets the specified instanced picking color to null picking color. Used for multi picking.
-  _clearInstancePickingColor(color) {
-    const {instancePickingColors} = this.getAttributeManager().attributes;
-    const {value, size} = instancePickingColors;
+  clearPickingColor(color) {
+    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
+    const colors = pickingColors || instancePickingColors;
 
     const i = this.decodePickingColor(color);
-    value[i * size + 0] = 0;
-    value[i * size + 1] = 0;
-    value[i * size + 2] = 0;
+    const start = colors.getVertexOffset(i);
+    const end = colors.getVertexOffset(i + 1);
 
-    // TODO: Optimize this to use sub-buffer update!
-    instancePickingColors.update({value});
+    // Fill the sub buffer with 0s
+    colors.buffer.subData({
+      data: new Uint8Array(end - start),
+      offset: start // 1 byte per element
+    });
   }
 
-  // Sets all occurrences of the specified picking color to null picking color. Used for multi picking.
-  _clearPickingColor(color) {
-    const {pickingColors} = this.getAttributeManager().attributes;
-    const {value} = pickingColors;
-
-    for (let i = 0; i < value.length; i += 3) {
-      if (value[i + 0] === color[0] && value[i + 1] === color[1] && value[i + 2] === color[2]) {
-        value[i + 0] = 0;
-        value[i + 1] = 0;
-        value[i + 2] = 0;
-      }
-    }
-
-    // TODO: Optimize this to use sub-buffer update!
-    pickingColors.update({value});
-  }
-
-  // This method figures out if we use instance colors or not
-  // and calls _clearInstancePickingColor or _clearPickingColor
-  clearPickingColor(color) {
-    if (this.getAttributeManager().attributes.pickingColors) {
-      this._clearPickingColor(color);
-    } else {
-      this._clearInstancePickingColor(color);
-    }
-  }
-
-  copyPickingColors() {
+  restorePickingColors() {
     const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
     const colors = pickingColors || instancePickingColors;
-
-    return new Uint8ClampedArray(colors.value);
-  }
-
-  restorePickingColors(oldValue) {
-    const {pickingColors, instancePickingColors} = this.getAttributeManager().attributes;
-    const colors = pickingColors || instancePickingColors;
-
-    const {value} = colors;
-    // Make sure the attribute's allocated buffer contains the correct value
-    value.set(oldValue);
-    colors.update({value});
+    colors.update({value: colors.value});
   }
 
   // Deduces numer of instances. Intention is to support:
