@@ -18,7 +18,9 @@ const BABEL_CONFIG = {
   presets: [['@babel/preset-env', {useBuiltIns: 'usage'}], '@babel/preset-react'],
   plugins: [
     ['@babel/plugin-proposal-decorators', {legacy: true}],
-    ['@babel/plugin-proposal-class-properties', {loose: true}]
+    ['@babel/plugin-proposal-class-properties', {loose: true}],
+    'inline-webgl-constants',
+    ['remove-glsl-comments', {patterns: ['**/*.glsl.js']}]
   ]
 };
 
@@ -32,10 +34,6 @@ const COMMON_CONFIG = {
   output: {
     path: resolve(__dirname, './dist'),
     filename: 'bundle.js'
-  },
-
-  externals: {
-    'highlight.js': 'hljs'
   },
 
   module: {
@@ -127,9 +125,37 @@ const addProdConfig = config => {
     })
   );
 
+  config.externals = {
+    'highlight.js': 'hljs',
+    'h3-js': 'h3',
+    'deck.gl': 'deck',
+    '@deck.gl/aggregation-layers': 'deck',
+    '@deck.gl/core': 'deck',
+    '@deck.gl/extensions': 'deck',
+    '@deck.gl/geo-layers': 'deck',
+    '@deck.gl/layers': 'deck',
+    '@deck.gl/mesh-layers': 'deck',
+    '@loaders.gl/core': 'loaders',
+    '@luma.gl/core': 'luma',
+    'mapbox-gl': 'mapboxgl'
+  };
+
   return Object.assign(config, {
     mode: 'production'
   });
+};
+
+// s2-geometry cannot be directly included in a script tag
+const S2_CONFIG = {
+  mode: 'production',
+
+  entry: './src/s2-geometry',
+
+  output: {
+    libraryTarget: 'umd',
+    path: resolve(__dirname, './dist'),
+    filename: 's2-geometry.js'
+  }
 };
 
 module.exports = env => {
@@ -148,5 +174,5 @@ module.exports = env => {
   // Enable to debug config
   // console.warn(JSON.stringify(config, null, 2));
 
-  return config;
+  return [config, S2_CONFIG];
 };
