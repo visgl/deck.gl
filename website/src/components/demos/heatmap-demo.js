@@ -13,6 +13,7 @@ export default class HeatmapDemo extends Component {
 
   static get parameters() {
     return {
+      radius: {displayName: 'Radius', type: 'range', value: 30, step: 1, min: 1, max: 100},
       intensity: {displayName: 'Intensity', type: 'range', value: 1, step: 0.1, min: 0, max: 5},
       threshold: {displayName: 'Threshold', type: 'range', value: 0.03, step: 0.01, min: 0, max: 1}
     };
@@ -50,9 +51,18 @@ export default class HeatmapDemo extends Component {
 
   render() {
     const {params, data} = this.props;
+    const radiusPixels = params.radius.value;
     const intensity = params.intensity.value;
     const threshold = params.threshold.value;
 
-    return <App {...this.props} data={data} intensity={intensity} threshold={threshold} />;
+    return (
+      <App
+        {...this.props}
+        data={data}
+        intensity={intensity}
+        threshold={threshold}
+        radiusPixels={radiusPixels}
+      />
+    );
   }
 }

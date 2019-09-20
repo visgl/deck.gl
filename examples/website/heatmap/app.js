@@ -20,7 +20,7 @@ const INITIAL_VIEW_STATE = {
 
 export class App extends PureComponent {
   _renderLayers() {
-    const {data = DATA_URL, intensity = 1, threshold = 0.03} = this.props;
+    const {data = DATA_URL, intensity = 1, threshold = 0.03, radiusPixels = 30} = this.props;
 
     return [
       new HeatmapLayer({
@@ -30,6 +30,7 @@ export class App extends PureComponent {
         pickable: false,
         getPosition: d => [d[0], d[1]],
         getWeight: d => d[2],
+        radiusPixels,
         intensity,
         threshold
       })
