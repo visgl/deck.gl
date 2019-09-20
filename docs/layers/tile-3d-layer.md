@@ -121,15 +121,6 @@ const layer = new Tile3DLayer({
 })
 ```
 
-##### `DracoLoader` (Object, Optional)
-##### `DracoWorkerLoader` (Object, Optional)
-
-Either `DracoLoader` or `DracoWorkerLoader` is required if the tileset contains any draco compressed tiles. [`@loaders.gl/draco`](https://github.com/uber-web/loaders.gl/tree/master/modules/draco) provides the draco decoding modules.
-
-```js
-import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
-```
-
 ### Data Accessors
 
 ##### `getPointColor` (Function|Array, Optional)

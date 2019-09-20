@@ -4,9 +4,11 @@ import {StaticMap} from 'react-map-gl';
 import DeckGL from '@deck.gl/react';
 import {Tile3DLayer} from '@deck.gl/geo-layers';
 
+import {registerLoaders} from '@loaders.gl/core';
 // To manage dependencies and bundle size, the app must decide which supporting loaders to bring in
-import {DracoLoader, DracoWorkerLoader} from '@loaders.gl/draco';
+import {DracoWorkerLoader} from '@loaders.gl/draco';
 
+registerLoaders([DracoWorkerLoader]);
 // Set your mapbox token here
 const MAPBOX_TOKEN = process.env.MapboxAccessToken; // eslint-disable-line
 const ION_TOKEN =
@@ -72,8 +74,6 @@ export class App extends PureComponent {
       _ionAssetId: 43978,
       _ionAccessToken: ION_TOKEN,
       pointSize: 2,
-      DracoWorkerLoader,
-      DracoLoader,
       onTilesetLoad: this._onTilesetLoad
     });
   }
