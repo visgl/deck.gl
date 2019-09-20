@@ -26,13 +26,13 @@ Useful for filtering outlying points from a visualization.
 
 For example, suppose you have 100 points, most of which are centered around London and ten of which are distributed a few 100 kilometers away from it. If you set `view_proportion=0.9`, pydeck will attempt to fit to the middle 90% of the data, aiming to exclude the points furthest from the core of the visualization.
 
-- `viewport_type` : `pydeck.ViewState`
+- `viewport_type` : `function`, default `pydeck.ViewState`
 
-Class constructor for a viewport. This will in the future enable zooming to data in non-Mercator projections.
+Class constructor for a pydeck viewport
 
 #### Returns
 
-`pydeck.Viewport` : Viewport fitted to the data
+`pydeck.ViewState` : Viewport fitted to the data
 
 
 ## pydeck.data\_utils.assign\_random\_colors
