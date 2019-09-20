@@ -1565,10 +1565,10 @@
     "@loaders.gl/images" "1.3.1"
     math.gl "^3.0.0-beta.3"
 
-"@loaders.gl/polyfills@1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-1.3.0.tgz#002ef8466a94edf123ebb7603fe415368e40e2e8"
-  integrity sha512-y32PpswIOkaq5Yl/5RiyGeox6rRxZypjdCrCzHuraSmJhw2GhAYuaceubxQpAzsWmXpnGERlRqu4JZlW5BJEEA==
+"@loaders.gl/polyfills@1.3.1":
+  version "1.3.1"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-1.3.1.tgz#143f35a1d605f648b688a25a6fc3fa00cd1f4bc8"
+  integrity sha512-p6sxvEjT3zz295iUg4/G87DYyH0Mj3NUe078yx86ihwVk6zEKAXvm7Lr32QpE4K7+WEq0WlK2TBqClsc4z6mTw==
   dependencies:
     get-pixels "^3.3.2"
     ndarray "^1.0.18"
