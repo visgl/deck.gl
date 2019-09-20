@@ -1,15 +1,16 @@
-# pydeck: Beautiful maps with Python
-
-Get started and see interactive examples by clicking the badge below:
-
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples)
+
+# pydeck: Beautiful maps with Python
 
 ![demo](https://user-images.githubusercontent.com/2204757/58838976-1538f400-8615-11e9-84f6-a2fe42bb300b.gif)
 
-Note that pydeck is under active development. At the moment use of this library is experimental.
-
 The pydeck library is a set of Python bindings for making spatial visualizations with [deck.gl](https://deck.gl),
 optimized for a Jupyter Notebook environment.
+
+For __interactive demos__, click the binder logo below:
+
+[![Binder](https://mybinder.org/static/logo.svg?v=f9f0d927b67cc9dc99d788c822ca21c0)](https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples)
+
 
 [See further documentation here.](https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck/docs)
 
@@ -68,6 +69,8 @@ If you're outside of a Jupyter notebook, you can alternately run:
 ```python
 r.to_html()
 ```
+
+For more, check out the docs and Binder examples above.
 
 ### Debugging note
 
