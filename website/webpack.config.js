@@ -145,19 +145,6 @@ const addProdConfig = config => {
   });
 };
 
-// s2-geometry cannot be directly included in a script tag
-const S2_CONFIG = {
-  mode: 'production',
-
-  entry: './src/s2-geometry',
-
-  output: {
-    libraryTarget: 'umd',
-    path: resolve(__dirname, './dist'),
-    filename: 's2-geometry.js'
-  }
-};
-
 module.exports = env => {
   env = env || {};
 
@@ -174,5 +161,5 @@ module.exports = env => {
   // Enable to debug config
   // console.warn(JSON.stringify(config, null, 2));
 
-  return [config, S2_CONFIG];
+  return config;
 };
