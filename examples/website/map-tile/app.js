@@ -1,7 +1,9 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
 
-import DeckGL, {TileLayer, BitmapLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {TileLayer} from '@deck.gl/geo-layers';
+import {BitmapLayer} from '@deck.gl/layers';
 import {load} from '@loaders.gl/core';
 
 const INITIAL_VIEW_STATE = {

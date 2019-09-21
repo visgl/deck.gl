@@ -4,7 +4,7 @@
 The tagmap layer generates and visualizes [an occlusion-free label layout on map](https://github.com/rivulet-zhang/tagmap.js).
 
 ```js
-import DeckGL from 'deck.gl';
+import DeckGL from '@deck.gl/react';
 import TagmapLayer from './tagmap-layer';
 
 const App = ({data, viewport}) => {

@@ -1,14 +1,15 @@
 import React, {PureComponent} from 'react';
 import {render} from 'react-dom';
-import DeckGL, {
+import DeckGL from '@deck.gl/react';
+import {
   COORDINATE_SYSTEM,
-  SimpleMeshLayer,
   OrbitView,
-  SolidPolygonLayer,
   DirectionalLight,
   LightingEffect,
   AmbientLight
-} from 'deck.gl';
+} from '@deck.gl/core';
+import {SolidPolygonLayer} from 'deck.gl/layers';
+import {SimpleMeshLayer} from '@deck.gl/mesh-layers';
 
 import {OBJLoader} from '@loaders.gl/obj';
 import {registerLoaders} from '@loaders.gl/core';
