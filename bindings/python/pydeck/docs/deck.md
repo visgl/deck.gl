@@ -58,8 +58,6 @@ Width of visualization, in pixels (if a number) or as a CSS value string
 Boolean indicating whether or not a tooltip should be generated when hovering over a data layer
 Individual layers must have `pickable` set to `True` to be displayed in the tooltip.
 
-
-
 ## pydeck.Deck.show
 
 ```python
@@ -110,13 +108,11 @@ Whether to open the visualization in a browser after execution.
 
 Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
 
-`iframe_width` : `int`, default `500`
+`iframe_width` : `int`, default `None`
+    Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
 
-Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
-
-`iframe_height` : `int`, default `500`
-
-Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
+`iframe_height` : `int`, default `None`
+    Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter notebook.
 
 #### Returns
 

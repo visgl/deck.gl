@@ -22,7 +22,7 @@ export class DeckGLModel extends DOMWidgetModel {
       mapbox_key: null,
       selected_data: null,
       tooltip: null,
-      width: 500,
+      width: '100%',
       height: 500
     };
   }
@@ -71,8 +71,10 @@ export class DeckGLView extends DOMWidgetView {
     const container = document.createElement('div');
 
     if (!this.jsonDeck) {
-      const height = this.model.get('height');
-      const width = this.model.get('width');
+      const height = `${this.model.get('height')}px`;
+      const width = Number.isFinite(this.model.get('width'))
+        ? `${this.model.get('width')}px`
+        : this.model.get('width');
       const mapboxApiKey = this.model.get('mapbox_key');
       const jsonInput = JSON.parse(this.model.get('json_input'));
       const useTooltip = this.model.get('tooltip');
