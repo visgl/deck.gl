@@ -18,7 +18,7 @@ function getExternals(packageInfo) {
   let externals = {
     // Hard coded externals
     'h3-js': 'h3',
-    's2-geometry': 'S2'
+    's2-geometry': 's2Geometry'
   };
   const {peerDependencies = {}} = packageInfo;
 
