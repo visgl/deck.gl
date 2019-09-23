@@ -1,6 +1,7 @@
 import {CompositeLayer} from '@deck.gl/core';
 import {GeoJsonLayer} from '@deck.gl/layers';
 import TileCache from './utils/tile-cache';
+import CompositeTile from './utils/composite-tile';
 
 const defaultProps = {
   renderSubLayers: {type: 'function', value: props => new GeoJsonLayer(props)},
@@ -52,7 +53,14 @@ export default class TileLayer extends CompositeLayer {
         this.state.tileCache.update(viewport, tiles => {
           const currTiles = tiles.filter(tile => tile.z === z);
           const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
-          this.setState({tiles, isLoaded: allCurrTilesLoaded});
+
+          const compositeTile = new CompositeTile({
+            tileset: currTiles,
+            zoomLevel: z
+          });
+
+          this.setState({tiles: compositeTile, isLoaded: allCurrTilesLoaded});
+
           if (!allCurrTilesLoaded) {
             Promise.all(currTiles.map(tile => tile.data)).then(() => {
               this.setState({isLoaded: true});
@@ -86,17 +94,15 @@ export default class TileLayer extends CompositeLayer {
   renderLayers() {
     const {renderSubLayers, visible} = this.props;
     const z = this.getLayerZoomLevel();
-    return this.aggregateByZoomLevel(this.state.tiles).map(aggregatedTile => {
-      return renderSubLayers(
-        Object.assign({}, this.props, {
-          id: `${this.id}-${aggregatedTile.z}`,
-          data: aggregatedTile.data.length
-            ? aggregatedTile.data.flat()
-            : aggregatedTile.dataPromiseWrapped,
-          visible: visible && (!this.state.isLoaded || aggregatedTile.z === z)
-        })
-      );
-    });
+    const data = this.state.tiles.getData();
+
+    return renderSubLayers(
+      Object.assign({}, this.props, {
+        id: `${this.id}-${this.state.tiles.zoomLevel}`,
+        data,
+        visible: visible && (!this.state.isLoaded || this.state.tiles.zoomLevel === z)
+      })
+    );
   }
 
   aggregateByZoomLevel(tiles) {
