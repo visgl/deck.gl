@@ -13,11 +13,13 @@ export default class CompositeTile {
   }
 
   getData() {
-    const pendingData = Promise.all(this.tileset.map(tile => tile.data)).then(allData =>
+    if (this.data.length) {
+      return this.data.flat();
+    }
+
+    return Promise.all(this.tileset.map(tile => tile.data)).then(allData =>
       allData.flat()
     );
-
-    return this.data.length ? this.data.flat() : pendingData;
   }
 
   waitForDataInTiles(pendingTiles) {
