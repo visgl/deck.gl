@@ -39,6 +39,6 @@
     "mjolnir.js": "^2.1.2",
     "probe.gl": "^3.1.0",
     "seer": "^0.2.4",
-    "viewport-mercator-project": "^6.1.0"
+    "viewport-mercator-project": "^6.2.1"
   }
 }
