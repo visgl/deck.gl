@@ -4,26 +4,35 @@ pydeck.data\_utils
 ## pydeck.data\_utils.compute\_viewport
 
 ```python
-def compute_viewport(
+def compute_view(
     points,
     view_proportion=1,
-    viewport_type=pydeck.ViewState)
+    view_type=pydeck.ViewState)
 ```
 
 Computes a view state (zoom level and bounding box)
 for the points passed in.
 
 #### Parameters
-`points` : `list` of `list` of `float` or `pandas.core.frame`
-    A list of points
-`view_propotion` : `float`
-    Proportion of the data that will be viewable on the screen.
-    Useful for filtering outlying points from a visualization.
-`viewport_type` : `pydeck.ViewState`
-    Class constructor for a viewport
+
+- `points` : `list` of `list` of `float` or `pandas.DataFrame`
+
+A list of geospatial points to fit to
+
+- `view_proportion` : `float`, default `1`
+
+Proportion of the data that will be viewable on the screen.
+Useful for filtering outlying points from a visualization.
+
+For example, suppose you have 100 points, most of which are centered around London and ten of which are distributed a few 100 kilometers away from it. If you set `view_proportion=0.9`, pydeck will attempt to fit to the middle 90% of the data, aiming to exclude the points furthest from the core of the visualization.
+
+- `view_type` : `function`, default `pydeck.ViewState`
+
+Class constructor for a pydeck map view
 
 #### Returns
-    `pydeck.Viewport` : Viewport fitted to the data
+
+`pydeck.ViewState` : Map view fitted to the data
 
 
 ## pydeck.data\_utils.assign\_random\_colors
@@ -51,54 +60,54 @@ See the PointCloudLayer notebook example, which uses many classes.
 As an illustration below, with a smaller data set of only two classes and three rows:
 
 ```python
-    import pandas
-    data = pandas.DataFrame([
-    	{
-	    'site': 'Big Ben',
-	    'attraction_type': 'Clock Tower',
-	    'lat': 51.5006958,
-	    'lng': -0.1266639
-	},
+import pandas
+data = pandas.DataFrame([
 	{
-	    'site': 'Kensington Palace',
-	    'attraction_type': 'Palace':
-	    'lat': 51.5046188,
-	    'lng': -0.1839472
-	},
-    	{
-	    'attraction_type': 'Palace',
-	    'site': 'Buckingham Palace',
-	    'lat': 51.501364,
-	    'lng': -0.14189
-	}
-    ])
-    color_lookup = assign_random_colors(data['attraction_type'])
-    # Assign a color based on attraction_type
-    data['color'] = data.apply(lambda row: color_lookup.get(row['attraction_type']), axis=1)
+        'site': 'Big Ben',
+        'attraction_type': 'Clock Tower',
+        'lat': 51.5006958,
+        'lng': -0.1266639
+    },
+    {
+        'site': 'Kensington Palace',
+        'attraction_type': 'Palace':
+        'lat': 51.5046188,
+        'lng': -0.1839472
+    },
+	{
+        'attraction_type': 'Palace',
+        'site': 'Buckingham Palace',
+        'lat': 51.501364,
+        'lng': -0.14189
+    }
+])
+color_lookup = assign_random_colors(data['attraction_type'])
+# Assign a color based on attraction_type
+data['color'] = data.apply(lambda row: color_lookup.get(row['attraction_type']), axis=1)
 
-    # Data now has a color by attraction type:
-    #
-    # [
-    # 	{
-    #         'site': 'Big Ben',
-    #         'attraction_type': 'Clock Tower',
-    #         'lat': 51.5006958,
-    #         'lng': -0.1266639,
-    #         'color': [0, 10, 35]
-    #     },
-    #     {
-    #         'site': 'Kensington Palace',
-    #         'attraction_type': 'Palace':
-    #         'lat': 51.5046188,
-    #         'lng': -0.1839472,
-    #         'color': [53, 243, 130]
-    #     },
-    # 	{
-    #         'attraction_type': 'Palace',
-    #         'site': 'Buckingham Palace',
-    #         'lat': 51.501364,
-    #         'lng': -0.14189,
-    #         'color': [53, 243, 130]
-    #     }
-    # ]
+# Data now has a color by attraction type:
+#
+# [
+# 	{
+#         'site': 'Big Ben',
+#         'attraction_type': 'Clock Tower',
+#         'lat': 51.5006958,
+#         'lng': -0.1266639,
+#         'color': [0, 10, 35]
+#     },
+#     {
+#         'site': 'Kensington Palace',
+#         'attraction_type': 'Palace':
+#         'lat': 51.5046188,
+#         'lng': -0.1839472,
+#         'color': [53, 243, 130]
+#     },
+# 	{
+#         'attraction_type': 'Palace',
+#         'site': 'Buckingham Palace',
+#         'lat': 51.501364,
+#         'lng': -0.14189,
+#         'color': [53, 243, 130]
+#     }
+# ]
 ```
