@@ -29,6 +29,29 @@ export function getFloatTexture(gl, opts = {}) {
   return texture;
 }
 
+export function getUByteTexture(gl, opts = {}) {
+  const {
+    width = 1,
+    height = 1,
+    data = null,
+    unpackFlipY = true,
+    parameters = DEFAULT_PARAMETERS
+  } = opts;
+  const texture = new Texture2D(gl, {
+    data,
+    format: GL.RGBA, // isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+    type: GL.UNSIGNED_BYTE, // GL.FLOAT,
+    border: 0,
+    mipmaps: false,
+    parameters,
+    dataFormat: GL.RGBA,
+    width,
+    height,
+    unpackFlipY
+  });
+  return texture;
+}
+
 export function getFramebuffer(gl, opts) {
   const {id, width = 1, height = 1, texture} = opts;
   const fb = new Framebuffer(gl, {

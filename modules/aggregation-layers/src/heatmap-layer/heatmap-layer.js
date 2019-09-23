@@ -30,7 +30,7 @@ import {
 import {Buffer, Transform, getParameter, FEATURES, hasFeatures} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import {getFloatTexture} from '../utils/resource-utils';
+import {getFloatTexture, getUByteTexture} from '../utils/resource-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
@@ -224,12 +224,12 @@ export default class HeatmapLayer extends CompositeLayer {
   _setupResources() {
     const {gl} = this.context;
     const {textureSize} = this.state;
-    const weightsTexture = getFloatTexture(gl, {
+    const weightsTexture = getUByteTexture(gl, {
       width: textureSize,
       height: textureSize,
       parameters: TEXTURE_PARAMETERS
     });
-    const maxWeightsTexture = getFloatTexture(gl); // 1 X 1 texture
+    const maxWeightsTexture = getUByteTexture(gl); // 1 X 1 texture
     const weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
       vs: weights_vs,
@@ -387,7 +387,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateWeightmap() {
     const {radiusPixels} = this.props;
-    const {weightsTransform, worldBounds, textureSize} = this.state;
+    const {weightsTransform, worldBounds, textureSize, weightsTexture} = this.state;
 
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
     this._updateAttributes(this.props);
@@ -408,7 +408,8 @@ export default class HeatmapLayer extends CompositeLayer {
     const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
       radiusPixels,
       commonBounds,
-      textureWidth: textureSize
+      textureWidth: textureSize,
+      weightsScale: 1 / 255
     });
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
