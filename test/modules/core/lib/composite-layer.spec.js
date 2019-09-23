@@ -20,7 +20,7 @@
 
 import test from 'tape-catch';
 import {LayerManager, CompositeLayer, Layer, COORDINATE_SYSTEM} from 'deck.gl';
-import {gl} from '@deck.gl/test-utils';
+import {gl, testLayer} from '@deck.gl/test-utils';
 
 const SUB_LAYER_ID = 'sub-layer-id';
 const BASE_LAYER_ID = 'composite-layer-id';
@@ -169,12 +169,9 @@ test('CompositeLayer#getSubLayerProps(override)', t => {
   for (const tc of TEST_CASES) {
     const {name, sublayerProps, baseLayerProps, overrideProps, expected} = tc;
     const layer = new TestCompositeLayer(
-      Object.assign(
-        {id: BASE_LAYER_ID},
-        Object.assign({}, baseLayerProps, {
-          _subLayerProps: {[SUB_LAYER_ID]: overrideProps}
-        })
-      )
+      Object.assign({id: BASE_LAYER_ID}, baseLayerProps, {
+        _subLayerProps: {[SUB_LAYER_ID]: overrideProps}
+      })
     );
     const combinedSublayerProps = layer.getSubLayerProps(
       sublayerProps && Object.assign({id: SUB_LAYER_ID}, sublayerProps)
@@ -187,6 +184,100 @@ test('CompositeLayer#getSubLayerProps(override)', t => {
       );
     }
   }
+
+  t.end();
+});
+
+test('CompositeLayer#getSubLayerProps(accessor)', t => {
+  class TestWrapperLayer extends CompositeLayer {
+    initializeState() {}
+
+    updateState({props}) {
+      this.setState({
+        data: props.data.map((d, i) => this.getSubLayerRow({position: [0, 0]}, d, i))
+      });
+    }
+
+    renderLayers() {
+      return [
+        new TestLayer(
+          {
+            getColor: this.getSubLayerAccessor(this.props.getColor)
+          },
+          this.getSubLayerProps({id: 'wrapped'}),
+          {
+            data: this.state.data
+          }
+        ),
+        new TestLayer(
+          {
+            getColor: this.props.getColor
+          },
+          this.getSubLayerProps({id: 'pass-through'}),
+          {
+            data: this.props.data
+          }
+        )
+      ];
+    }
+  }
+
+  TestWrapperLayer.layerName = 'TestWrapperLayer';
+  TestWrapperLayer.defaultProps = {
+    getColor: {type: 'accessor', value: [0, 0, 0]}
+  };
+
+  const testCases = [
+    {
+      props: {
+        id: 'wrapper-layer',
+        data: [{color: [255, 0, 0]}],
+        getColor: d => d.color
+      },
+      onAfterUpdate: ({subLayers}) => {
+        let props = subLayers[0].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[0].id} getColor returns correct result`
+        );
+        props = subLayers[1].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[1].id} getColor returns correct result`
+        );
+      }
+    },
+    {
+      updateProps: {
+        _subLayerProps: {
+          wrapped: {
+            getColor: d => d.color
+          },
+          'pass-through': {
+            getColor: d => d.color
+          }
+        }
+      },
+      onAfterUpdate: ({subLayers}) => {
+        let props = subLayers[0].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[0].id} getColor returns correct result`
+        );
+        props = subLayers[1].props;
+        t.deepEqual(
+          props.getColor(props.data[0]),
+          [255, 0, 0],
+          `sublayer ${subLayers[1].id} getColor returns correct result`
+        );
+      }
+    }
+  ];
+
+  testLayer({Layer: TestWrapperLayer, testCases, onError: t.notOk});
 
   t.end();
 });

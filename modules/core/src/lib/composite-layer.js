@@ -157,6 +157,18 @@ export default class CompositeLayer extends Layer {
       const overridingSublayerProps = overridingProps && overridingProps[sublayerProps.id];
       const overridingSublayerTriggers =
         overridingSublayerProps && overridingSublayerProps.updateTriggers;
+
+      if (overridingSublayerProps) {
+        const propTypes = this.constructor._propTypes;
+        for (const key in overridingSublayerProps) {
+          const propType = propTypes[key];
+          // eslint-disable-next-line
+          if (propType && propType.type === 'accessor') {
+            overridingSublayerProps[key] = this.getSubLayerAccessor(overridingSublayerProps[key]);
+          }
+        }
+      }
+
       Object.assign(
         newProps,
         sublayerProps,
