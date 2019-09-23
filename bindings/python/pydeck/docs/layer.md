@@ -9,30 +9,171 @@ class pydeck.Layer(
     type,
     data,
     id=None,
-    get_position='[lng,lat]',
     **kwargs)
 ```
 
-Constructs a geospatial layer for plotting.
+This class represents a kind of data visualization, like a scatterplot or a hexbin chart. The full deck.gl layer catalog is accessible via pydeck.
 
-A catalog of available layers is viewable [here](https://github.com/uber/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview).
-Note that this is Javascript documentation and parameters in pydeck usually will be snake-cased according to Python convention.
+## Understand keyword arguments in pydeck layers
 
-#### Parameters
+Keyword arguments vary by layer. A catalog of available layers in deck.gl is viewable [here](https://github.com/uber/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview).
 
-`type` : `str`
-    Type of layer to render, e.g., `HexagonLayer`. See the layer catalog above.
-`data` : `str` or `list` of `dict` or `pandas.DataFrame`
-    A URL of data to load in, a list of dictionaries,
-`id` : `str`, default `None`
-    Unique name for the layer. Will autopopulate with a UUID if no ID is provided.
-`get_position` : `str`, default `'[lng,lat]'`
-    Name of position field, with some expression parsing, e.g., `'[lng,lat]'` is provided, the position field will be assumed to be the common case where a flat file has separate columns `lat` and `lng`.
-`**kwargs` : `int` or `str` or `float` or `bool` or `list`
-    Various other keyword arguments can be provided as well, provided they exist in the layer documentation.
-    For examples, `extruded=True` will extrude the underlying layer if this is a property it can have.
-    Fill color can be specified with `get_fill_color` as of RGBA values, e.g., `get_fill_color=[0, 0, 0]` for an all-black fill,
-    or as the name of a field of color values in the data, e.g., `get_fill_color='fill_color'`.
+A few important observations:
 
-#### Returns
-    `pdk.Layer` : Layer object
+- Not all layers have all parameters. For instance, `get_position` is available for a `ScatterplotLayer` but not `ArcLayer`. Be sure to refer to the deck.gl layer catalog.
+- Styling conventions differ between deck.gl and pydeck. The deck.gl layer catalog documentation adheres to Javascript documentation standards; in pydeck, functions and class names follow Python conventions:
+    - Parameters are `snake_case` (e.g., `getPosition` in deck.gl is `get_position` in pydeck)
+    - Class names in deck.gl are treated as class names in pydeck, (e.g., `HexagonLayer` remains `HexagonLayer` in both libraries)
+    
+Currently in its beta version pydeck will not raise an error on incorrect or omitted layer positional arguments–if nothing renders in your viewport after changing the arguments, check your browser's developer console or review the layer catalog.
+
+## The `type` positional argument
+
+In the `pydeck.Layer` object, `type` is a required argument and where you pass the desired layer's deck.gl class name–that is, you should set it to the deck.gl layer you wish to plot. For example, notice how `type` below gives you a [deck.gl HexagonLayer](https://deck.gl/#/examples/core-layers/hexagon-layer):
+
+```python
+import pydeck as pdk
+
+UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
+
+layer = pdk.Layer(
+    'HexagonLayer',  # `type` positional argument is here
+    UK_ACCIDENTS_DATA,
+    get_position='[lng, lat]',
+    auto_highlight=True,
+    elevation_scale=50,
+    pickable=True,
+    elevation_range=[0, 3000],
+    extruded=True,                 
+    coverage=1)
+
+# Set the viewport location
+view_state = pdk.ViewState(
+    longitude=-1.415,
+    latitude=52.2323,
+    zoom=6,
+    min_zoom=5,
+    max_zoom=15,
+    pitch=40.5,
+    bearing=-27.36)
+
+# Combined all of it and render a viewport
+r = pdk.Deck(layers=[layer], initial_view_state=view_state)
+r.to_html('hexagon-example.html')
+```
+<img src="https://i.imgur.com/kPYIKUl.png" alt="pydeck HexagonLayer" height=500></img>
+
+Try changing `type` above to `ScatterplotLayer` and add some `ScatterplotLayer` attributes, `get_fill_color` and `radius`:
+
+```python
+layer = pdk.Layer(
+    'ScatterplotLayer',                 # Change the `type` positional argument here
+    UK_ACCIDENTS_DATA,
+    get_position='[lng, lat]',
+    auto_highlight=True,
+    radius=1000,                        # Radius is given in meters
+    get_fill_color=[180, 0, 200, 140],  # Set an RGBA value for fill
+    pickable=True)
+```
+<img src="https://i.imgur.com/54a7buL.png" alt="pydeck ScatterplotLayer" height=500></img>
+
+## Expression parsers in pydeck layer arguments
+
+One particularly powerful feature of pydeck is an in-built Javascript expression parser that can process a limited subset of Javascript–no functions are allowed, but data accessors, boolean conditions, inline logical statements, arithmetic operations, and arrays are available.
+
+To demonstrate the expression parser, change the color input in `get_fill_color` to a string:
+
+```python
+layer = pdk.Layer(
+    'ScatterplotLayer',
+    UK_ACCIDENTS_DATA,
+    get_position='[lng, lat]',
+    auto_highlight=True,
+    radius=1000,
+    get_fill_color='[180, 0, 200, 140]',
+    pickable=True)
+```
+
+The result of the render will be the same as the last image. The expression parser in deck.gl processes the `get_fill_color` argument of `'[180, 0, 200, 140]'` and converts it to a list of constants.
+
+The expression parser has access to the variables in your data, so these operations can be combined:
+
+```python
+layer = pdk.Layer(
+    'ScatterplotLayer',
+    UK_ACCIDENTS_DATA,
+    get_position='[lng, lat]',
+    auto_highlight=True,
+    radius=1000,
+    get_fill_color='[255, lng > 0 ? 200 * lng : -200 * lng, lng, 140]',
+    pickable=True)
+```
+
+In particular, `get_position` takes `[lng, lat]` in many of these examples. This is deck.gl's expression parser reading the data passed to pydeck and extracting longitude and latitude as a coordinate pair.
+
+Suppose you have a CSV as follows, where the location in the first field in the CSV (here, "coordinates")–
+
+```csv
+coordinates,classification
+"[0.0, 0.0]",A
+"[0.0, 0.0]",A
+"[0.0, 1.0]",B
+"[0.0, 1.0]",C
+```
+
+`get_position` here should be specified as `get_position='coordinates'`
+
+If your coordinates are flattened, you will specify your position as `get_position='[lng,lat]'`
+
+```csv
+lng,lat,classification
+0.0,0.0,A
+0.0,0.0,A
+0.0,1.0,B
+0.0,1.0,C
+```
+
+# Example: Vancouver property values
+
+```python
+import pydeck
+
+DATA_URL = "https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/geojson/vancouver-blocks.json"
+LAND_COVER = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]]
+
+INITIAL_VIEW_STATE = pydeck.ViewState(
+  latitude=49.254,
+  longitude=-123.13,
+  zoom=11,
+  max_zoom=16,
+  pitch=45,
+  bearing=0
+)
+
+polygon = pydeck.Layer(  
+    'PolygonLayer',
+    LAND_COVER,
+    stroked=False,
+    get_polygon='-',  # processes the data as a flat longitude-latitude pair
+    get_fill_color=[0, 0, 0, 0]
+)
+geojson = pydeck.Layer(
+    'GeoJsonLayer',
+    DATA_URL,
+    opacity=0.8,
+    stroked=False,
+    filled=True,
+    extruded=True,
+    wireframe=True,
+    get_elevation="properties.valuePerSqm / 20",
+    get_fill_color="[255, 255, properties.growth * 255]",
+    get_line_color=[255, 255, 255],
+    pickable=True
+)
+
+r = pydeck.Deck(
+    layers=[polygon, geojson],
+    initial_view_state=INITIAL_VIEW_STATE)
+r.to_html()
+```
+<img src="https://i.imgur.com/M3toZK8.png" alt="pydeck Vancouver visualization" height=500></img>
