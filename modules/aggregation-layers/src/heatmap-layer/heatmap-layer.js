@@ -239,22 +239,23 @@ export default class HeatmapLayer extends CompositeLayer {
       _targetTexture: weightsTexture,
       _targetTextureVarying: 'weightsTexture'
     });
+    const maxWeightTransform =  new Transform(gl, {
+      id: `${this.id}-max-weights-transform`,
+      _sourceTextures: {
+        inTexture: weightsTexture
+      },
+      _targetTexture: maxWeightsTexture,
+      _targetTextureVarying: 'outTexture',
+      vs: vs_max,
+      elementCount: textureSize * textureSize
+    });
 
     this.setState({
       weightsTexture,
       maxWeightsTexture,
       weightsTransform,
       model: weightsTransform.model,
-      maxWeightTransform: new Transform(gl, {
-        id: `${this.id}-max-weights-transform`,
-        _sourceTextures: {
-          inTexture: weightsTexture
-        },
-        _targetTexture: maxWeightsTexture,
-        _targetTextureVarying: 'outTexture',
-        vs: vs_max,
-        elementCount: textureSize * textureSize
-      }),
+      maxWeightTransform,
       zoom: null,
       triPositionBuffer: new Buffer(gl, {
         byteLength: 48,
@@ -277,6 +278,9 @@ export default class HeatmapLayer extends CompositeLayer {
         blendEquation: GL.MAX
       }
     });
+
+    // DEBUG
+    console.log(`Max weight: ${maxWeightTransform.getData()}`);
   }
 
   // Computes world bounds area that needs to be processed for generate heatmap
@@ -422,6 +426,12 @@ export default class HeatmapLayer extends CompositeLayer {
       clearRenderTarget: true
     });
     this._updateMaxWeightValue();
+
+    // reset filtering parameters
+    weightsTexture.setParameters({
+      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+    });
 
     this.setState({lastUpdate: Date.now()});
   }
