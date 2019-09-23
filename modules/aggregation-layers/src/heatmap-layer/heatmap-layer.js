@@ -27,7 +27,7 @@ import {
   scaleToAspectRatio,
   getTextureCoordinates
 } from './heatmap-layer-utils';
-import {Buffer, Transform, getParameter, FEATURES, hasFeatures} from '@luma.gl/core';
+import {Buffer, Transform, getParameter, FEATURES, hasFeatures, Framebuffer} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import {getFloatTexture, getUByteTexture} from '../utils/resource-utils';
@@ -67,7 +67,9 @@ export default class HeatmapLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
-    this.state = {textureSize, supported: true};
+    const floatTargetSupport = isFloatTargetSupported(gl, this.id);
+
+    this.state = {textureSize, supported: true, floatTargetSupport};
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
@@ -198,6 +200,23 @@ export default class HeatmapLayer extends CompositeLayer {
     return changeFlags;
   }
 
+  _getTextures() {
+    const {gl} = this.context;
+    const {floatTargetSupport, textureSize} = this.state;
+    const textureFunciton = floatTargetSupport ? getFloatTexture : getUByteTexture;
+    const weightsScale = floatTargetSupport ? 1 : 1/255;
+
+    return {
+      weightsTexture: textureFunciton(gl, {
+        width: textureSize,
+        height: textureSize,
+        parameters: TEXTURE_PARAMETERS
+      }),
+      maxWeightsTexture: textureFunciton(gl), // 1 X 1 texture,
+      weightsScale // scaling factor for weights texture
+    }
+  }
+
   _isDataChanged({changeFlags}) {
     if (changeFlags.dataChanged) {
       return true;
@@ -224,12 +243,7 @@ export default class HeatmapLayer extends CompositeLayer {
   _setupResources() {
     const {gl} = this.context;
     const {textureSize} = this.state;
-    const weightsTexture = getUByteTexture(gl, {
-      width: textureSize,
-      height: textureSize,
-      parameters: TEXTURE_PARAMETERS
-    });
-    const maxWeightsTexture = getUByteTexture(gl); // 1 X 1 texture
+    const {weightsTexture, maxWeightsTexture, weightsScale} = this._getTextures();
     const weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
       vs: weights_vs,
@@ -253,6 +267,7 @@ export default class HeatmapLayer extends CompositeLayer {
     this.setState({
       weightsTexture,
       maxWeightsTexture,
+      weightsScale,
       weightsTransform,
       model: weightsTransform.model,
       maxWeightTransform,
@@ -278,9 +293,6 @@ export default class HeatmapLayer extends CompositeLayer {
         blendEquation: GL.MAX
       }
     });
-
-    // DEBUG
-    console.log(`Max weight: ${maxWeightTransform.getData()}`);
   }
 
   // Computes world bounds area that needs to be processed for generate heatmap
@@ -387,7 +399,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateWeightmap() {
     const {radiusPixels} = this.props;
-    const {weightsTransform, worldBounds, textureSize, weightsTexture} = this.state;
+    const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
 
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
     this._updateAttributes(this.props);
@@ -409,7 +421,7 @@ export default class HeatmapLayer extends CompositeLayer {
       radiusPixels,
       commonBounds,
       textureWidth: textureSize,
-      weightsScale: 1 / 255
+      weightsScale
     });
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
@@ -500,6 +512,26 @@ export default class HeatmapLayer extends CompositeLayer {
 
     return topLeftWorld.slice(0, 2).concat(bottomRightWorld.slice(0, 2));
   }
+}
+
+function isFloatTargetSupported(gl, id) {
+  const testTexture = getFloatTexture(gl);
+  const testFb = new Framebuffer(gl, {
+    id: `test-framebuffer`,
+    check: false,
+    attachments: {
+      [GL.COLOR_ATTACHMENT0]: testTexture
+    }
+  });
+  const prevHandle = gl.bindFramebuffer(GL.FRAMEBUFFER, testFb.handle);
+  const status = gl.checkFramebufferStatus(GL.FRAMEBUFFER);
+  gl.bindFramebuffer(GL.FRAMEBUFFER, prevHandle || null);
+
+  if ( status !== GL.FRAMEBUFFER_COMPLETE) {
+    log.warn(`HeatmapLayer: ${id} rendering to float texture not supported, fallback to low precession format`)();
+    return false;
+  }
+  return true;
 }
 
 HeatmapLayer.layerName = 'HeatmapLayer';
