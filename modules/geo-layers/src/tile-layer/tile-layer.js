@@ -104,37 +104,6 @@ export default class TileLayer extends CompositeLayer {
       })
     );
   }
-
-  aggregateByZoomLevel(tiles) {
-    const aggregation = tiles.reduce((tilesByZoomLevel, currentTile) => {
-      const tileExists = tilesByZoomLevel.hasOwnProperty(currentTile.z);
-
-      if (!tileExists) {
-        tilesByZoomLevel[currentTile.z] = {
-          data: [],
-          pendingData: [],
-          dataPromiseWrapped: null,
-          z: currentTile.z,
-          tileSet: new Map()
-        };
-      }
-
-      if (currentTile._isLoaded) {
-        tilesByZoomLevel[currentTile.z].data.push(currentTile.data);
-      } else {
-        tilesByZoomLevel[currentTile.z].pendingData.push(currentTile.data);
-        tilesByZoomLevel[currentTile.z].dataPromiseWrapped = Promise.all(
-          tilesByZoomLevel[currentTile.z].pendingData
-        ).then(allData => allData.flat());
-      }
-
-      tilesByZoomLevel[currentTile.z].tileSet.set(currentTile.id, currentTile);
-
-      return tilesByZoomLevel;
-    }, {});
-
-    return Object.values(aggregation);
-  }
 }
 
 TileLayer.layerName = 'TileLayer';
