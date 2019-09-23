@@ -48,7 +48,7 @@ def test_is_pandas_df():
     assert is_pandas_df(pd.DataFrame())
 
 
-    def test_compute_view():
+def test_compute_view():
     actual = compute_view(POINTS, 0.95, ViewState)
     actual_pandas = compute_view(pd.DataFrame(POINTS), 0.95, ViewState)
     EXPECTED = '{"bearing": 0, "latitude": 20.0, "longitude": 20.0, "maxZoom": 21, "minZoom": 1, "pitch": 0, "zoom": 7}'
