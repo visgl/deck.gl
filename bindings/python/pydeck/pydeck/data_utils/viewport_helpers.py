@@ -1,6 +1,6 @@
 """
 Functions that make it easier to provide a default centering
-for the Viewport, rather than having to toggle parameters
+for a view state
 """
 import math
 from ..bindings.view_state import ViewState
@@ -143,16 +143,16 @@ def bbox_to_zoom_level(bbox):
     return zoom_level
 
 
-def compute_viewport(points, view_proportion=1, viewport_type=ViewState):
+def compute_view(points, view_proportion=1, view_type=ViewState):
     """Automatically computes a zoom level for the points passed in.
 
     Parameters
     ----------
     points : :obj:`list` of :obj:`list` of :obj:`float` or :obj:`pandas.core.frame`
         A list of points
-    view_propotion : float
+    view_propotion : float, default 1
         Proportion of the data that is meaningful to plot
-    viewport_type : pydeck.ViewState
+    view_type : pydeck.ViewState, default `pydeck.ViewState`
         Class constructor for a viewport
 
     Returns
@@ -164,5 +164,5 @@ def compute_viewport(points, view_proportion=1, viewport_type=ViewState):
     bbox = get_bbox(get_n_pct(points, view_proportion))
     zoom = bbox_to_zoom_level(bbox)
     center = geometric_mean(points)
-    instance = viewport_type(latitude=center[1], longitude=center[0], zoom=zoom)
+    instance = view_type(latitude=center[1], longitude=center[0], zoom=zoom)
     return instance
