@@ -57,7 +57,7 @@ export const examplePages = generatePath([
       {
         name: 'HexagonLayer',
         content: {
-          demo: 'HeatmapDemo',
+          demo: 'HexagonDemo',
           code: getCodeUrl('examples/website/3d-heatmap')
         }
       },
@@ -129,6 +129,13 @@ export const examplePages = generatePath([
         content: {
           demo: 'TripsDemo',
           code: getCodeUrl('examples/website/trips')
+        }
+      },
+      {
+        name: 'HeatmapLayer',
+        content: {
+          demo: 'HeatmapDemo',
+          code: getCodeUrl('examples/website/heatmap')
         }
       },
       {

@@ -1,5 +1,5 @@
 import React, {Component} from 'react';
-import DeckGL from 'deck.gl';
+import DeckGL from '@deck.gl/react';
 import {StaticMap} from 'react-map-gl';
 
 import {MAPBOX_STYLES} from '../../constants/defaults';

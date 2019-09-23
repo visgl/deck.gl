@@ -16,6 +16,7 @@ webpack -p --env.prod
 # build gallery (scripting) examples
 (
   cd ../examples/gallery
+  yarn
   yarn build
 )
 mkdir dist/gallery
@@ -24,6 +25,7 @@ cp -r ../examples/gallery/dist/* dist/gallery/
 # build playground (json) examples
 (
   cd ../examples/playground
+  yarn
   yarn build
 )
 mkdir dist/playground

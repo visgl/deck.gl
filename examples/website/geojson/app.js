@@ -1,7 +1,8 @@
 import React, {Component} from 'react';
 import {render} from 'react-dom';
 import {StaticMap} from 'react-map-gl';
-import DeckGL, {GeoJsonLayer, PolygonLayer} from 'deck.gl';
+import DeckGL from '@deck.gl/react';
+import {GeoJsonLayer, PolygonLayer} from '@deck.gl/layers';
 import {LightingEffect, AmbientLight, _SunLight as SunLight} from '@deck.gl/core';
 import {scaleThreshold} from 'd3-scale';
 

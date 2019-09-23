@@ -8,9 +8,9 @@
     "build": "NODE_ENV=production webpack --env.prod"
   },
   "dependencies": {
-    "@deck.gl/core": "^7.0.0-alpha",
-    "@deck.gl/json": "^7.0.0-alpha",
-    "@deck.gl/layers": "^7.0.0-alpha"
+    "@deck.gl/core": "^7.3.0-beta",
+    "@deck.gl/json": "^7.3.0-beta",
+    "@deck.gl/layers": "^7.3.0-beta"
   },
   "devDependencies": {
     "buble": "^0.19.3",

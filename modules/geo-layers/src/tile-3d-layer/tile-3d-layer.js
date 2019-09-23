@@ -4,8 +4,6 @@ import {COORDINATE_SYSTEM, CompositeLayer} from '@deck.gl/core';
 import {PointCloudLayer} from '@deck.gl/layers';
 import {ScenegraphLayer} from '@deck.gl/mesh-layers';
 
-import {parse} from '@loaders.gl/core';
-import {GLTFLoader} from '@loaders.gl/gltf';
 import {Tileset3D, _getIonTilesetMetadata} from '@loaders.gl/3d-tiles';
 
 import {getFrameState} from './get-frame-state';
@@ -25,37 +23,6 @@ const defaultProps = {
   onTileUnload: tileHeader => {},
   onTileLoadFail: (tile, message, url) => {}
 };
-
-function unpackTile(tileHeader, dracoLoader) {
-  const content = tileHeader.content;
-  if (content) {
-    switch (content.type) {
-      case 'pnts':
-        // Nothing to do;
-        break;
-      case 'i3dm':
-      case 'b3dm':
-        unpackGLTF(tileHeader, dracoLoader);
-        break;
-      default:
-        throw new Error(`Tile3DLayer: Error unpacking 3D tile ${content.type}`);
-    }
-  }
-}
-
-// TODO - move glTF + Draco parsing into the Tile3DLoader
-// DracoLoading is typically async on worker, better keep it in the top-level `parse` promise...
-function unpackGLTF(tileHeader, dracoLoader) {
-  if (tileHeader.content.gltfArrayBuffer) {
-    tileHeader.userData.gltf = parse(tileHeader.content.gltfArrayBuffer, [GLTFLoader], {
-      DracoLoader: dracoLoader,
-      decompress: true
-    });
-  }
-  if (tileHeader.content.gltfUrl) {
-    tileHeader.userData.gltf = tileHeader.tileset.getTileUrl(tileHeader.content.gltfUrl);
-  }
-}
 
 export default class Tile3DLayer extends CompositeLayer {
   initializeState() {
@@ -99,7 +66,6 @@ export default class Tile3DLayer extends CompositeLayer {
       onTileUnload: this.props.onTileUnload,
       onTileLoadFail: this.props.onTileLoadFail,
       // TODO: explicit passing should not be needed, registerLoaders should suffice
-      DracoLoader: this._getDracoLoader(),
       fetchOptions,
       ...ionMetadata,
       ...loadOptions
@@ -144,7 +110,6 @@ export default class Tile3DLayer extends CompositeLayer {
     for (const tile of tilesWithoutLayer) {
       // TODO - why do we call this here? Being "selected" should automatically add it to cache?
       tileset3d.addTileToCache(tile);
-      unpackTile(tile, this._getDracoLoader());
 
       layerMap[tile.fullUri] = {
         layer: this._create3DTileLayer(tile),
@@ -154,10 +119,6 @@ export default class Tile3DLayer extends CompositeLayer {
 
     // update layer visibility
     this._selectLayers(frameNumber);
-  }
-
-  _getDracoLoader() {
-    return this.props.DracoWorkerLoader || this.props.DracoLoader;
   }
 
   // Grab only those layers who were selected this frame.
@@ -205,8 +166,7 @@ export default class Tile3DLayer extends CompositeLayer {
   }
 
   _create3DModelTileLayer(tileHeader) {
-    const {gltf} = tileHeader.userData;
-    const {instances, cartographicOrigin, modelMatrix} = tileHeader.content;
+    const {gltf, instances, cartographicOrigin, modelMatrix} = tileHeader.content;
 
     const SubLayerClass = this.getSubLayerClass('scenegraph', ScenegraphLayer);
 

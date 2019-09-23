@@ -1,4 +1,5 @@
-import {CompositeLayer, IconLayer} from 'deck.gl';
+import {CompositeLayer} from '@deck.gl/core';
+import {IconLayer} from '@deck.gl/layers';
 import Supercluster from 'supercluster';
 
 function getIconName(size) {

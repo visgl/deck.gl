@@ -7,6 +7,7 @@ export {default as GeoJsonDemo} from './geojson-demo';
 export {default as TripsDemo} from './trips-demo';
 export {default as HomeDemo} from './home-demo';
 export {default as PlotDemo} from './plot-demo';
+export {default as HexagonDemo} from './hexagon-demo';
 export {default as HeatmapDemo} from './heatmap-demo';
 export {default as LineDemo} from './line-demo';
 export {default as IconDemo} from './icon-demo';

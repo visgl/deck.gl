@@ -180,4 +180,4 @@ The luma.gl/deck.gl shader modules provide javascript functions to set their uni
 
 ## Remarks
 
-* **Use With Other GLSL Code Assemblers** - Your shader code can be run through another GLSL code assembler like [glslify](https://github.com/stackgl/glslify) before you pass it to `assembleShaders`. This means that you are not forced to work with onlyy luma.gl shader modules, you can use multiple techniques to organize your shader code to fit your project needs.
+* **Use With Other GLSL Code Assemblers** - Your shader code can be run through another GLSL code assembler like [glslify](https://github.com/stackgl/glslify) before you pass it to `assembleShaders`. This means that you are not forced to work with only luma.gl shader modules, you can use multiple techniques to organize your shader code to fit your project needs.

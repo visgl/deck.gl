@@ -94,7 +94,7 @@ Inherits from all [Base Layer](/docs/api-reference/layer.md) and [CompositeLayer
 
 * Default: `1000`
 
-Size of each cell in meters
+Size of each cell in meters. Must be greater than `0`.
 
 ##### `colorRange` (Array, optional)
 

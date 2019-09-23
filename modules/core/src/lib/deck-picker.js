@@ -180,10 +180,7 @@ export default class DeckPicker {
       // we have not exhausted the requested depth.
       if (pickInfo.pickedColor && i + 1 < depth) {
         const layerId = pickInfo.pickedColor[3] - 1;
-        if (!affectedLayers[layerId]) {
-          // backup original colors
-          affectedLayers[layerId] = layers[layerId].copyPickingColors();
-        }
+        affectedLayers[layerId] = true;
         layers[layerId].clearPickingColor(pickInfo.pickedColor);
       }
 
@@ -214,9 +211,9 @@ export default class DeckPicker {
     }
 
     // reset only affected buffers
-    Object.keys(affectedLayers).forEach(layerId =>
-      layers[layerId].restorePickingColors(affectedLayers[layerId])
-    );
+    for (const layerId in affectedLayers) {
+      layers[layerId].restorePickingColors();
+    }
 
     return {result, emptyInfo: infos && infos.get(null)};
   }

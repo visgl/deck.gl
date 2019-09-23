@@ -123,7 +123,6 @@ export default class WebMercatorViewport extends Viewport {
     // Bind methods
     this.metersToLngLatDelta = this.metersToLngLatDelta.bind(this);
     this.lngLatDeltaToMeters = this.lngLatDeltaToMeters.bind(this);
-    this.addMetersToLngLat = this.addMetersToLngLat.bind(this);
 
     Object.freeze(this);
   }

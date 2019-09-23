@@ -1,4 +1,4 @@
-import {CompositeLayer, COORDINATE_SYSTEM} from 'deck.gl';
+import {CompositeLayer, COORDINATE_SYSTEM} from '@deck.gl/core';
 import {scaleLinear} from 'd3-scale';
 
 import AxesLayer from './axes-layer';
