@@ -32,7 +32,7 @@ export function initDeck({
   onComplete,
   handleClick
 }) {
-  require(['mapbox-gl', 'h3', 'S2'], mapboxgl => {
+  require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
         // Filter down to the deck.gl classes of interest
