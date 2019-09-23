@@ -55,6 +55,34 @@ export class DeckGLModel extends DOMWidgetModel {
 export class DeckGLView extends DOMWidgetView {
   initialize() {
     this.listenTo(this.model, 'destroy', this.remove);
+
+    const container = document.createElement('div');
+
+    this.el.appendChild(container);
+
+    const height = `${this.model.get('height')}px`;
+    const width = Number.isFinite(this.model.get('width'))
+      ? `${this.model.get('width')}px`
+      : this.model.get('width');
+    container.style.width = width;
+    container.style.height = height;
+    container.style.position = 'relative';
+
+    const mapboxApiKey = this.model.get('mapbox_key');
+    const jsonInput = JSON.parse(this.model.get('json_input'));
+    const useTooltip = this.model.get('tooltip');
+
+    loadCss(MAPBOX_CSS_URL);
+    initDeck({
+      mapboxApiKey,
+      container,
+      jsonInput,
+      useTooltip,
+      onComplete: ({jsonConverter, deckgl}) => {
+        this.jsonDeck = {jsonConverter, deckgl};
+      },
+      handleClick: this.handleClick.bind(this)
+    });
   }
 
   remove() {
@@ -67,35 +95,6 @@ export class DeckGLView extends DOMWidgetView {
   render() {
     super.render();
     this.model.on('change:json_input', this.valueChanged.bind(this), this);
-
-    const container = document.createElement('div');
-
-    if (!this.jsonDeck) {
-      const height = `${this.model.get('height')}px`;
-      const width = Number.isFinite(this.model.get('width'))
-        ? `${this.model.get('width')}px`
-        : this.model.get('width');
-      const mapboxApiKey = this.model.get('mapbox_key');
-      const jsonInput = JSON.parse(this.model.get('json_input'));
-      const useTooltip = this.model.get('tooltip');
-
-      container.style.height = `${height}px`;
-      container.style.width = `${width}px`;
-      container.style.position = 'relative';
-      this.el.appendChild(container);
-
-      loadCss(MAPBOX_CSS_URL);
-      initDeck({
-        mapboxApiKey,
-        container,
-        jsonInput,
-        useTooltip,
-        onComplete: ({jsonConverter, deckgl}) => {
-          this.jsonDeck = {jsonConverter, deckgl};
-        },
-        handleClick: this.handleClick.bind(this)
-      });
-    }
   }
 
   valueChanged() {
