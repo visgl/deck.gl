@@ -56,7 +56,7 @@
   ```
   npmrc public
   git add .
-  npm run publish-beta
+  npm run publish beta
   ```
   Double check the version numbers before confirming to publish.
 
