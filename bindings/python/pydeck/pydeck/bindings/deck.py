@@ -117,8 +117,8 @@ class Deck(JSONMixin):
             filename=None,
             open_browser=False,
             notebook_display=True,
-            iframe_width=None,
-            iframe_height=None):
+            iframe_width=700,
+            iframe_height=500):
         """Writes a file and loads it to an iframe, if in a Jupyter notebook
         Otherwise writes a file and optionally opens it in a web browser
 

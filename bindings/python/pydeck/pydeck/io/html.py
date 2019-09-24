@@ -80,5 +80,5 @@ def deck_to_html(
         display_html(realpath(f.name))
     if notebook_display:
         notebook_to_html_path = relpath(f.name)
-        display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_width))  # noqa
+        display(IFrame(os.path.join('./', notebook_to_html_path), width=iframe_width, height=iframe_height))  # noqa
     return realpath(f.name)
