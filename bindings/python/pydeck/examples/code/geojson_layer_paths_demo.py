@@ -30,8 +30,12 @@ geojson_layer = pydeck.Layer(
     stroked=False,
     filled=True,
     extruded=True,
+    auto_highlight=True,
+    pickable=True,
     line_width_min_pixels=2,
     line_width_max_pixels=3,
+    picking_radius=5,
+    highlight_color=[255, 255, 0],
     get_line_color=[160, 160, 180, 10],
 )
 
@@ -44,7 +48,7 @@ scatterplot = pydeck.Layer(
     extruded=True,
     pickable=True,
     auto_highlight=True,
-    radius_min_pixels=3,
+    radius_min_pixels=2,
     picking_radius=5,
     radius=1000,
     get_fill_color='color')
@@ -54,4 +58,4 @@ r = pydeck.Deck(
     initial_view_state=viewport,
     height=1000)
 
-r.to_html('whales.html')
+r.to_html('geojson-layer-paths-demo.html')
