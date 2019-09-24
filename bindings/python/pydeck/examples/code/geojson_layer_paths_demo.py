@@ -6,7 +6,7 @@ https://deck.gl/#/examples/core-layers/geojson-layer-paths
 The demo relies on integration with d3.js scales,
 which aren't used in pydeck, and interactivity
 
-Instead, this example uses data for blue whale migratory habits and
+Instead, this example uses data for blue whale migratory habits.
 is viewable here: https://github.com/ajduberstein/migration_data
 
 Note that this is not meant to be a scientific analysis but rather
