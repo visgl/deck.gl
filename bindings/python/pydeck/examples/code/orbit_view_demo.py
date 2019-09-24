@@ -9,7 +9,7 @@ The data set is provided by NASA here: https://data.nasa.gov/resource/2vr3-k9wn.
 TODO finish
 """
 
-DATA_URL = 'ttps://data.nasa.gov/resource/2vr3-k9wn.json'
+DATA_URL = 'https://data.nasa.gov/resource/2vr3-k9wn.json'
 
 
 point_cloud = pydeck.Layer(
