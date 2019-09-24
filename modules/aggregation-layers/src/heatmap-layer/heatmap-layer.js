@@ -210,7 +210,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _getTextures() {
     const {gl} = this.context;
-    const {textureSize, format, type, weightsScale} = this.state;
+    const {textureSize, format, type} = this.state;
 
     return {
       weightsTexture: new Texture2D(gl, {
@@ -220,8 +220,7 @@ export default class HeatmapLayer extends CompositeLayer {
         type,
         ...TEXTURE_OPTIONS
       }),
-      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}), // 1 X 1 texture,
-      weightsScale // scaling factor for weights texture
+      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
     };
   }
 
@@ -267,7 +266,7 @@ export default class HeatmapLayer extends CompositeLayer {
   _setupResources() {
     const {gl} = this.context;
     const {textureSize} = this.state;
-    const {weightsTexture, maxWeightsTexture, weightsScale} = this._getTextures();
+    const {weightsTexture, maxWeightsTexture} = this._getTextures();
     const weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
       vs: weights_vs,
@@ -291,7 +290,6 @@ export default class HeatmapLayer extends CompositeLayer {
     this.setState({
       weightsTexture,
       maxWeightsTexture,
-      weightsScale,
       weightsTransform,
       model: weightsTransform.model,
       maxWeightTransform,
