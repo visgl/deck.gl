@@ -11,6 +11,9 @@ registerLoaders([GLTFLoader]);
 const GLTF_BASE_URL =
   'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/luma.gl/examples/gltf/';
 
+const CUBE_1x1x1 =
+  'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/layer-browser/cube_1x1x1.glb';
+
 const CUBE_FACE_TO_DIRECTION = {
   [GL.TEXTURE_CUBE_MAP_POSITIVE_X]: 'right',
   [GL.TEXTURE_CUBE_MAP_NEGATIVE_X]: 'left',
@@ -110,12 +113,31 @@ const ScenegraphLayerPbrIblExample = {
   }
 };
 
+const ScenegraphLayerMinMaxExample = {
+  layer: ScenegraphLayer,
+  props: {
+    id: 'scenegraph-layer-minmax',
+    data: dataSamples.points,
+    pickable: true,
+    sizeScale: 80,
+    scenegraph: CUBE_1x1x1,
+    getPosition: d => d.COORDINATES,
+    getOrientation: [0, 0, 0],
+    getTranslation: [0, 0, 0],
+    getScale: [1, 1, 1],
+    _lighting: 'pbr',
+    sizeMinPixels: 5,
+    sizeMaxPixels: 50
+  }
+};
+
 /* eslint-disable quote-props */
 export default {
   'Mesh Layers': {
     SimpleMeshLayer: SimpleMeshLayerExample,
     ScenegraphLayer: ScenegraphLayerExample,
     'ScenegraphLayer (PBR)': ScenegraphLayerPbrExample,
-    'ScenegraphLayer (PBR+IBL)': ScenegraphLayerPbrIblExample
+    'ScenegraphLayer (PBR+IBL)': ScenegraphLayerPbrIblExample,
+    'ScenegraphLayer Min/Max Pixels': ScenegraphLayerMinMaxExample
   }
 };
