@@ -446,7 +446,7 @@ export default class HeatmapLayer extends CompositeLayer {
     });
     this._updateMaxWeightValue();
 
-    // reset filtering parameters
+    // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
     weightsTexture.setParameters({
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
       [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
