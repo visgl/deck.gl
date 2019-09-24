@@ -25,12 +25,20 @@ import {
   boundsContain,
   packVertices,
   scaleToAspectRatio,
-  getTextureCoordinates
+  getTextureCoordinates,
+  getTextureParams
 } from './heatmap-layer-utils';
-import {Buffer, Transform, getParameter, FEATURES, hasFeatures} from '@luma.gl/core';
+import {
+  Buffer,
+  Texture2D,
+  Transform,
+  getParameter,
+  FEATURES,
+  hasFeatures,
+  isWebGL2
+} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import {getFloatTexture, getUByteTexture} from '../utils/resource-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
@@ -39,11 +47,15 @@ import vs_max from './max-vs.glsl';
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
 const ZOOM_DEBOUNCE = 500; // milliseconds
-const TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+const TEXTURE_OPTIONS = {
+  mipmaps: false,
+  parameters: {
+    [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+    [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+    [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+    [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+  },
+  dataFormat: GL.RGBA
 };
 
 const defaultProps = {
@@ -58,29 +70,19 @@ const defaultProps = {
 const REQUIRED_FEATURES = [
   FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
   FEATURES.TEXTURE_FLOAT // weight-map as texture
-  // As per WebGL Spec, following two feature are implictly supported when TEXTURE_FLOAT is supported
-  // FEATURES.COLOR_ATTACHMENT_RGBA32F, // weight-map generation
-  // FEATURES.FLOAT_BLEND, // weight-map generation and max weight calculation
+  // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
 export default class HeatmapLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
-    this.setState({textureSize, supported: true, floatTargetSupport});
-    if (!floatTargetSupport) {
-      log.warn(
-        `HeatmapLayer: ${
-          this.id
-        } rendering to float texture not supported, fallingback to low precession format`
-      )();
-    }
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
+    this.setState({supported: true});
+    this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
   }
@@ -208,17 +210,17 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _getTextures() {
     const {gl} = this.context;
-    const {floatTargetSupport, textureSize} = this.state;
-    const textureFunciton = floatTargetSupport ? getFloatTexture : getUByteTexture;
-    const weightsScale = floatTargetSupport ? 1 : 1 / 255;
+    const {textureSize, format, type, weightsScale} = this.state;
 
     return {
-      weightsTexture: textureFunciton(gl, {
+      weightsTexture: new Texture2D(gl, {
         width: textureSize,
         height: textureSize,
-        parameters: TEXTURE_PARAMETERS
+        format,
+        type,
+        ...TEXTURE_OPTIONS
       }),
-      maxWeightsTexture: textureFunciton(gl), // 1 X 1 texture,
+      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}), // 1 X 1 texture,
       weightsScale // scaling factor for weights texture
     };
   }
@@ -244,6 +246,22 @@ export default class HeatmapLayer extends CompositeLayer {
       positions: {size: 3, accessor: 'getPosition'},
       weights: {size: 1, accessor: 'getWeight'}
     });
+  }
+
+  _setupTextureParams() {
+    const {gl} = this.context;
+    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
+    const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
+    const {format, type} = getTextureParams({gl, floatTargetSupport});
+    const weightsScale = floatTargetSupport ? 1 : 1 / 255;
+    this.setState({textureSize, format, type, weightsScale});
+    if (!floatTargetSupport) {
+      log.warn(
+        `HeatmapLayer: ${
+          this.id
+        } rendering to float texture not supported, fallingback to low precession format`
+      )();
+    }
   }
 
   _setupResources() {
@@ -394,10 +412,13 @@ export default class HeatmapLayer extends CompositeLayer {
         width: colorRange.length
       });
     } else {
-      colorTexture = getFloatTexture(this.context.gl, {
+      colorTexture = new Texture2D(this.context.gl, {
         data: colors,
         width: colorRange.length,
-        parameters: TEXTURE_PARAMETERS
+        height: 1,
+        format: isWebGL2(this.context.gl) ? GL.RGBA32F : GL.RGBA,
+        type: GL.FLOAT,
+        ...TEXTURE_OPTIONS
       });
     }
     this.setState({colorTexture});
