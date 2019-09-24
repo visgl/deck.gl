@@ -70,14 +70,14 @@ export class DeckGLView extends DOMWidgetView {
 
     const mapboxApiKey = this.model.get('mapbox_key');
     const jsonInput = JSON.parse(this.model.get('json_input'));
-    const useTooltip = this.model.get('tooltip');
+    const tooltip = this.model.get('tooltip');
 
     loadCss(MAPBOX_CSS_URL);
     initDeck({
       mapboxApiKey,
       container,
       jsonInput,
-      useTooltip,
+      tooltip,
       onComplete: ({jsonConverter, deckgl}) => {
         this.jsonDeck = {jsonConverter, deckgl};
       },

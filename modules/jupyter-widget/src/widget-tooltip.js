@@ -2,7 +2,16 @@
 let lastPickedObject;
 let lastTooltip;
 
-export default function getTooltip(pickedInfo) {
+const DEFAULT_STYLE = {
+  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+  display: 'flex',
+  flex: 'wrap',
+  maxWidth: '500px',
+  flexDirection: 'column',
+  zIndex: 2
+};
+
+function getTooltipDefault(pickedInfo) {
   if (!pickedInfo.picked) {
     return null;
   }
@@ -11,18 +20,26 @@ export default function getTooltip(pickedInfo) {
   }
   const tooltip = {
     html: tabularize(pickedInfo.object),
-    style: {
-      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-      display: 'flex',
-      flex: 'wrap',
-      maxWidth: '500px',
-      flexDirection: 'column',
-      zIndex: 2
-    }
+    style: DEFAULT_STYLE
   };
   lastTooltip = tooltip;
   lastPickedObject = pickedInfo.object;
   return tooltip;
+}
+
+export default function setTooltip(tooltip) {
+  if (!tooltip) {
+    return null;
+  }
+  if (tooltip.html || tooltip.text) {
+    if (!tooltip.style) {
+      tooltip.style = DEFAULT_STYLE;
+    }
+    return pickedInfo => {
+      pickedInfo;
+    };
+  }
+  return getTooltipDefault;
 }
 
 const EXCLUDES = new Set(['position', 'index']);
@@ -86,6 +103,10 @@ function toText(jsonValue) {
   let text;
   if (Array.isArray(jsonValue) && jsonValue.length > 4) {
     text = `Array<${jsonValue.length}>`;
+  } else if (typeof jsonValue === 'string') {
+    text = jsonValue;
+  } else if (typeof jsonValue === 'number') {
+    text = String(jsonValue);
   } else {
     try {
       text = JSON.stringify(jsonValue);
