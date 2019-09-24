@@ -105,9 +105,8 @@ export default class App extends Component {
           sizeScale: 250,
           scenegraph: MODEL_URL,
           _animations: ANIMATIONS,
-          sizeMinPixels: 10,
-          sizeMaxPixels: 100,
-          sizePixelsDimension: 64,
+          sizeMinPixels: 0.1,
+          sizeMaxPixels: 1.5,
           getPosition: d => [
             d[DATA_INDEX.LONGITUDE] || 0,
             d[DATA_INDEX.LATITUDE] || 0,
