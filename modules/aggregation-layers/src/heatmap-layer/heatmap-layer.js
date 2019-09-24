@@ -27,7 +27,7 @@ import {
   scaleToAspectRatio,
   getTextureCoordinates
 } from './heatmap-layer-utils';
-import {Buffer, Transform, getParameter, FEATURES, hasFeatures, Framebuffer} from '@luma.gl/core';
+import {Buffer, Transform, getParameter, FEATURES, hasFeatures} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
 import {getFloatTexture, getUByteTexture} from '../utils/resource-utils';
@@ -67,9 +67,15 @@ export default class HeatmapLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
-    const floatTargetSupport = isFloatTargetSupported(gl, this.id);
-
+    const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
     this.state = {textureSize, supported: true, floatTargetSupport};
+    if (!floatTargetSupport) {
+      log.warn(
+        `HeatmapLayer: ${
+          this.id
+        } rendering to float texture not supported, fallingback to low precession format`
+      )();
+    }
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
@@ -204,7 +210,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const {gl} = this.context;
     const {floatTargetSupport, textureSize} = this.state;
     const textureFunciton = floatTargetSupport ? getFloatTexture : getUByteTexture;
-    const weightsScale = floatTargetSupport ? 1 : 1/255;
+    const weightsScale = floatTargetSupport ? 1 : 1 / 255;
 
     return {
       weightsTexture: textureFunciton(gl, {
@@ -214,7 +220,7 @@ export default class HeatmapLayer extends CompositeLayer {
       }),
       maxWeightsTexture: textureFunciton(gl), // 1 X 1 texture,
       weightsScale // scaling factor for weights texture
-    }
+    };
   }
 
   _isDataChanged({changeFlags}) {
@@ -253,7 +259,7 @@ export default class HeatmapLayer extends CompositeLayer {
       _targetTexture: weightsTexture,
       _targetTextureVarying: 'weightsTexture'
     });
-    const maxWeightTransform =  new Transform(gl, {
+    const maxWeightTransform = new Transform(gl, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
         inTexture: weightsTexture
@@ -443,7 +449,7 @@ export default class HeatmapLayer extends CompositeLayer {
     // reset filtering parameters
     weightsTexture.setParameters({
       [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
     });
 
     this.setState({lastUpdate: Date.now()});
@@ -512,26 +518,6 @@ export default class HeatmapLayer extends CompositeLayer {
 
     return topLeftWorld.slice(0, 2).concat(bottomRightWorld.slice(0, 2));
   }
-}
-
-function isFloatTargetSupported(gl, id) {
-  const testTexture = getFloatTexture(gl);
-  const testFb = new Framebuffer(gl, {
-    id: `test-framebuffer`,
-    check: false,
-    attachments: {
-      [GL.COLOR_ATTACHMENT0]: testTexture
-    }
-  });
-  const prevHandle = gl.bindFramebuffer(GL.FRAMEBUFFER, testFb.handle);
-  const status = gl.checkFramebufferStatus(GL.FRAMEBUFFER);
-  gl.bindFramebuffer(GL.FRAMEBUFFER, prevHandle || null);
-
-  if ( status !== GL.FRAMEBUFFER_COMPLETE) {
-    log.warn(`HeatmapLayer: ${id} rendering to float texture not supported, fallback to low precession format`)();
-    return false;
-  }
-  return true;
 }
 
 HeatmapLayer.layerName = 'HeatmapLayer';
