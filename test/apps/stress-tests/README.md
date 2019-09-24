@@ -2,9 +2,9 @@
    <img width="150" heigth="150" src="https://webpack.js.org/assets/icon-square-big.svg" />
 </div>
 
-## Example: Frustum Cull
+## Stress Test App
 
-Demonstrate frustum plane extraction and tests.
+Render a large data set and measure performance.
 
 Uses [Webpack](https://github.com/webpack/webpack) to bundle files and serves it
 with [webpack-dev-server](https://webpack.js.org/guides/development/#webpack-dev-server).
