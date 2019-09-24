@@ -17,9 +17,7 @@ export default class CompositeTile {
       return this.data.flat();
     }
 
-    return Promise.all(this.tileset.map(tile => tile.data)).then(allData =>
-      allData.flat()
-    );
+    return Promise.all(this.tileset.map(tile => tile.data)).then(allData => allData.flat());
   }
 
   waitForDataInTiles(pendingTiles) {
