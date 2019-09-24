@@ -68,7 +68,7 @@ export default class HeatmapLayer extends CompositeLayer {
     const {gl} = this.context;
     const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
     const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
-    this.state = {textureSize, supported: true, floatTargetSupport};
+    this.setState({textureSize, supported: true, floatTargetSupport});
     if (!floatTargetSupport) {
       log.warn(
         `HeatmapLayer: ${
