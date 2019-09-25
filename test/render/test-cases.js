@@ -47,7 +47,6 @@ import {
   HexagonLayer,
   HeatmapLayer
 } from '@deck.gl/aggregation-layers';
-import EnhancedCPUGridLayer from '../../examples/layer-browser/src/examples/enhanced-cpu-grid-layer';
 import {H3HexagonLayer, H3ClusterLayer, S2Layer, TripsLayer} from '@deck.gl/geo-layers';
 
 import * as h3 from 'h3-js';
@@ -738,34 +737,34 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/gridcell-lnglat.png'
   },
   {
-    name: 'enhanced-cpu-grid-layer:quantile',
+    name: 'cpu-grid-layer:quantile',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new EnhancedCPUGridLayer(
+      new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'enhanced-cpu-grid-layer:quantile',
+          id: 'cpu-grid-layer:quantile',
           getColorValue,
           getElevationValue,
           colorScaleType: 'quantile'
         })
       )
     ],
-    goldenImage: './test/render/golden-images/enhanced-cpu-layer-quantile.png'
+    goldenImage: './test/render/golden-images/cpu-layer-quantile.png'
   },
   {
-    name: 'enhanced-cpu-grid-layer:ordinal',
+    name: 'cpu-grid-layer:ordinal',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
-      new EnhancedCPUGridLayer(
+      new CPUGridLayer(
         Object.assign({}, GRID_LAYER_INFO.props, {
-          id: 'enhanced-cpu-grid-layer:ordinal',
+          id: 'cpu-grid-layer:ordinal',
           getColorValue,
           getElevationValue,
           colorScaleType: 'ordinal'
         })
       )
     ],
-    goldenImage: './test/render/golden-images/enhanced-cpu-layer-ordinal.png'
+    goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
   },
   {
     name: 'grid-lnglat',
