@@ -22,21 +22,22 @@ class Deck(JSONMixin):
         height=500,
         tooltip=True,
     ):
-        """Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
+        """
+        Constructor for a Deck object, similar to the `Deck`_ class from deck.gl
 
         Requires a Mapbox API token to display a basemap, see notes below.
 
         Parameters
         ----------
-        layers : :obj:`pydeck.Layer` or :obj:`list` of :obj:`pydeck.Layer`, default []
-            List of pydeck.Layer objects to render
-        views : :obj:`list` of :obj:`pydeck.View`, default [pydeck.View()]
-            List of `pydeck.View` objects to render
+        layers : pydeck.Layer or list of pydeck.Layer, default []
+            List of :class:`pydeck.Layer` layers to render.
+        views : list of pydeck.View, default [pydeck.View()]
+            List of :class:`pydeck.View` objects to render.
         map_style : str, default "mapbox://styles/mapbox/dark-v9"
-            URI for Mapbox basemap style
+            URI for Mapbox basemap style. See Mapbox's gallery_ for examples.
         initial_view_state : pydeck.ViewState, default pydeck.ViewState()
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
-            To compute a viewport from data, see `pydeck.data_utils.compute_view`
+            To compute a viewport from data, see :func:`pydeck.data_utils.compute_view`
         mapbox_key : str, default None
             Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
@@ -52,9 +53,12 @@ class Deck(JSONMixin):
         width : :obj:`int` or :obj:`string`, default "100%"
             Width of visualization, in pixels if an integer is passed or as a CSS value if a string
 
-
         .. _Deck:
             https://deck.gl/#/documentation/deckgl-api-reference/deck
+        .. _gallery:
+            https://www.mapbox.com/gallery/
+        .. _dashboard:
+            https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
         """
         self.layers = []
         if isinstance(layers, Layer):
@@ -71,23 +75,22 @@ class Deck(JSONMixin):
         self.deck_widget.height = height
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
-        self.selected_data = self.deck_widget.selected_data
         if not self.mapbox_key:
             warnings.warn(
                 'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
 
     def show(self):
-        """Displays current Deck object for a Jupyter notebook"""
+        """Display current Deck object for a Jupyter notebook"""
         self.update()
         return self.deck_widget
 
     def update(self):
-        """Updates a deck.gl map to reflect the current configuration
+        """Update a deck.gl map to reflect the current configuration
 
         For example, if you've modified data passed to Layer and rendered the map using `.show()`,
-        you can call `update` to pass the new configuration to the map
+        you can call `update` to change the data on the map.
 
-        Intended for use in a Jupyter notebook
+        Intended for use in a Jupyter environment.
         """
         self.deck_widget.json_input = self.to_json()
 
@@ -113,17 +116,15 @@ class Deck(JSONMixin):
         open_browser : bool, default False
             Whether a browser window will open or not after write
         notebook_display : bool, default True
-            Attempts to display the HTML output in an iframe if True. Only works in a Jupyter notebook.
-        iframe_width : int, default None
-            Height of Jupyter notebook iframe in pixels, if rendered
-            Set to `self.deck_widget.width` if set on initialization
-        iframe_height : int, default None
-            Width of Jupyter notebook iframe in pixels, if rendered
-            Set to `self.deck_widget.height` if set on initialization
+            Attempts to display the HTML output in an iframe if True. Only works in a Jupyter environment.
+        iframe_width : int, default 700
+            Height of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
+        iframe_height : int, default 700
+            Width of Jupyter notebook iframe in pixels, if rendered in a Jupyter environment.
 
         Returns
         -------
-            file : Returns a closed file object for the HTML file
+            str : Returns absolute path of the file
         """
         json_blob = self.to_json()
         f = deck_to_html(
@@ -132,7 +133,7 @@ class Deck(JSONMixin):
             filename,
             open_browser=open_browser,
             notebook_display=notebook_display,
-            iframe_height=iframe_height or self.deck_widget.height,
-            iframe_width=iframe_width or self.deck_widget.width,
-            tooltip=self.deck_widget.tooltip)
+            iframe_height=iframe_height,
+            iframe_width=iframe_width,
+            use_tooltip=self.deck_widget.tooltip)
         return f
