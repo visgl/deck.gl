@@ -18,32 +18,41 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import main from './solid-polygon-layer-vertex-main.glsl';
-
 export default `\
 #version 300 es
 
-#define SHADER_NAME solid-polygon-layer-vertex-shader
+#define SHADER_NAME wboit-layer-fragment-shader
 
-in vec3 positions;
-in vec2 positions64xyLow;
-in float elevations;
-in vec4 fillColors;
-in vec4 lineColors;
-in vec3 pickingColors;
+precision highp float;
 
-${main}
+in vec4 vColor;
+in float isValid;
+
+layout(location=0) out vec4 accumColor;
+layout(location=1) out float accumAlpha;
+
+float weight1(float z, float a) {
+  return a;
+}
+
+float weight2(float z, float a) {
+  return clamp(pow(min(1.0, a * 10.0) + 0.01, 3.0) * 1e8 * pow(1.0 - z * 0.9, 3.0), 1e-2, 3e3);
+}
+
+float weight3(float z, float a) {
+  return a * (1.0 - z * 0.9) * 10.0;
+}
 
 void main(void) {
-  PolygonProps props;
+  if (isValid < 0.5) {
+    discard;
+  }
 
-  props.positions = positions;
-  props.positions64xyLow = positions64xyLow;
-  props.elevations = elevations;
-  props.fillColors = fillColors;
-  props.lineColors = lineColors;
-  props.pickingColors = pickingColors;
-
-  calculatePosition(props);
+  vec4 color = vColor;
+  DECKGL_FILTER_COLOR(color, geometry);
+  color.rgb *= color.a;
+  float w = weight3(gl_FragCoord.z, color.a);
+  accumColor = vec4(color.rgb * w, color.a);
+  accumAlpha = color.a * w;
 }
 `;

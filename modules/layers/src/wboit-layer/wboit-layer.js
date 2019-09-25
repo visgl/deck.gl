@@ -18,13 +18,10 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Layer} from '@deck.gl/core';
 import GL from '@luma.gl/constants';
 import {
   Model,
   Geometry,
-  hasFeature,
-  FEATURES,
   PhongMaterial,
   Framebuffer,
   Texture2D,
@@ -33,11 +30,11 @@ import {
 } from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
-import PolygonTesselator from './polygon-tesselator';
+import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
 
-import vsTop from './solid-polygon-layer-vertex-top.glsl';
-import vsSide from './solid-polygon-layer-vertex-side.glsl';
-import fs from './solid-polygon-layer-fragment.glsl';
+import vsTop from './wboit-layer-vertex-top.glsl';
+import vsSide from './wboit-layer-vertex-side.glsl';
+import fs from './wboit-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultMaterial = new PhongMaterial();
@@ -64,12 +61,6 @@ const defaultProps = {
   material: defaultMaterial
 };
 
-const ATTRIBUTE_TRANSITION = {
-  enter: (value, chunk) => {
-    return chunk.length ? chunk.subarray(chunk.length - value.length) : value;
-  }
-};
-
 const oitBlendVs = `\
 #version 300 es
 in vec4 positions;
@@ -94,124 +85,15 @@ void main() {
     fragColor = vec4(accum.rgb, a);
 }
 `;
-export default class SolidPolygonLayer extends Layer {
+export default class WBOITLayer extends SolidPolygonLayer {
   getShaders(vs) {
-    return super.getShaders({
-      vs,
-      fs,
-      defines: {},
-      modules: ['project32', 'gouraud-lighting', 'picking']
-    });
+    return super.getShaders(vs, fs);
   }
 
   initializeState() {
+    super.initializeState();
+
     const {gl} = this.context;
-    this.setState({
-      numInstances: 0,
-      polygonTesselator: new PolygonTesselator({
-        fp64: this.use64bitPositions(),
-        IndexType: !gl || hasFeature(gl, FEATURES.ELEMENT_INDEX_UINT32) ? Uint32Array : Uint16Array
-      })
-    });
-
-    const attributeManager = this.getAttributeManager();
-    const noAlloc = true;
-
-    attributeManager.remove(['instancePickingColors']);
-
-    /* eslint-disable max-len */
-    attributeManager.add({
-      indices: {size: 1, isIndexed: true, update: this.calculateIndices, noAlloc},
-      positions: {
-        size: 3,
-        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getPolygon',
-        update: this.calculatePositions,
-        noAlloc,
-        shaderAttributes: {
-          positions: {
-            offset: 0,
-            divisor: 0
-          },
-          instancePositions: {
-            offset: 0,
-            divisor: 1
-          },
-          nextPositions: {
-            offset: 12,
-            divisor: 1
-          }
-        }
-      },
-      vertexValid: {
-        size: 1,
-        divisor: 1,
-        type: GL.UNSIGNED_BYTE,
-        update: this.calculateVertexValid,
-        noAlloc
-      },
-      elevations: {
-        size: 1,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getElevation',
-        shaderAttributes: {
-          elevations: {
-            divisor: 0
-          },
-          instanceElevations: {
-            divisor: 1
-          }
-        }
-      },
-      fillColors: {
-        alias: 'colors',
-        size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getFillColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          fillColors: {
-            divisor: 0
-          },
-          instanceFillColors: {
-            divisor: 1
-          }
-        }
-      },
-      lineColors: {
-        alias: 'colors',
-        size: this.props.colorFormat.length,
-        type: GL.UNSIGNED_BYTE,
-        normalized: true,
-        transition: ATTRIBUTE_TRANSITION,
-        accessor: 'getLineColor',
-        defaultValue: DEFAULT_COLOR,
-        shaderAttributes: {
-          lineColors: {
-            divisor: 0
-          },
-          instanceLineColors: {
-            divisor: 1
-          }
-        }
-      },
-      pickingColors: {
-        size: 3,
-        type: GL.UNSIGNED_BYTE,
-        accessor: (object, {index, target: value}) => this.encodePickingColor(index, value),
-        shaderAttributes: {
-          pickingColors: {
-            divisor: 0
-          },
-          instancePickingColors: {
-            divisor: 1
-          }
-        }
-      }
-    });
 
     const accumulationTexture = new Texture2D(gl, {
       type: gl.FLOAT,
@@ -330,60 +212,6 @@ export default class SolidPolygonLayer extends Layer {
     );
   }
 
-  updateState(updateParams) {
-    super.updateState(updateParams);
-
-    this.updateGeometry(updateParams);
-
-    const {props, oldProps, changeFlags} = updateParams;
-    const attributeManager = this.getAttributeManager();
-
-    const regenerateModels =
-      changeFlags.extensionsChanged ||
-      props.filled !== oldProps.filled ||
-      props.extruded !== oldProps.extruded;
-
-    if (regenerateModels) {
-      if (this.state.models) {
-        this.state.models.forEach(model => model.delete());
-      }
-
-      this.setState(this._getModels(this.context.gl));
-      attributeManager.invalidateAll();
-    }
-  }
-
-  updateGeometry({props, oldProps, changeFlags}) {
-    const geometryConfigChanged =
-      changeFlags.dataChanged ||
-      (changeFlags.updateTriggersChanged &&
-        (changeFlags.updateTriggersChanged.all || changeFlags.updateTriggersChanged.getPolygon));
-
-    // When the geometry config  or the data is changed,
-    // tessellator needs to be invoked
-    if (geometryConfigChanged) {
-      const {polygonTesselator} = this.state;
-      polygonTesselator.updateGeometry({
-        data: props.data,
-        getGeometry: props.getPolygon,
-        positionFormat: props.positionFormat,
-        fp64: this.use64bitPositions(),
-        dataChanged: changeFlags.dataChanged
-      });
-
-      this.setState({
-        numInstances: polygonTesselator.instanceCount,
-        bufferLayout: polygonTesselator.bufferLayout
-      });
-
-      if (!changeFlags.dataChanged) {
-        // Base `layer.updateState` only invalidates all attributes on data change
-        // Cover the rest of the scenarios here
-        this.getAttributeManager().invalidateAll();
-      }
-    }
-  }
-
   _getModels(gl) {
     const {id, filled, extruded} = this.props;
 
@@ -459,41 +287,7 @@ export default class SolidPolygonLayer extends Layer {
       sideModel
     };
   }
-
-  calculateIndices(attribute) {
-    const {polygonTesselator} = this.state;
-    attribute.bufferLayout = polygonTesselator.indexLayout;
-    attribute.value = polygonTesselator.get('indices');
-  }
-
-  calculatePositions(attribute) {
-    const {polygonTesselator} = this.state;
-    attribute.bufferLayout = polygonTesselator.bufferLayout;
-    attribute.value = polygonTesselator.get('positions');
-  }
-
-  calculateVertexValid(attribute) {
-    attribute.value = this.state.polygonTesselator.get('vertexValid');
-  }
-
-  clearPickingColor(color) {
-    const pickedPolygonIndex = this.decodePickingColor(color);
-    const {bufferLayout} = this.state.polygonTesselator;
-    const numVertices = bufferLayout[pickedPolygonIndex];
-
-    let startInstanceIndex = 0;
-    for (let polygonIndex = 0; polygonIndex < pickedPolygonIndex; polygonIndex++) {
-      startInstanceIndex += bufferLayout[polygonIndex];
-    }
-
-    const {pickingColors} = this.getAttributeManager().attributes;
-
-    const {value} = pickingColors;
-    const endInstanceIndex = startInstanceIndex + numVertices;
-    value.fill(0, startInstanceIndex * 3, endInstanceIndex * 3);
-    pickingColors.update({value});
-  }
 }
 
-SolidPolygonLayer.layerName = 'SolidPolygonLayer';
-SolidPolygonLayer.defaultProps = defaultProps;
+WBOITLayer.layerName = 'WBOITLayer';
+WBOITLayer.defaultProps = defaultProps;
