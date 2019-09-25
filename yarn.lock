@@ -1515,6 +1515,21 @@
   dependencies:
     "@babel/runtime" "^7.3.1"
 
+"@loaders.gl/csv@^1.3.1":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/csv/-/csv-1.3.2.tgz#57f0378121fad8d3a8b4e2338065459ab2951568"
+  integrity sha512-5IVM14fAaesSOB1wEyU6+rKiHqVZniSm88QLH0Ifyz90oNEV51oK/4gBQgqcDxtU1iq/XiYk0SPwNW9Y6sTVVw==
+  dependencies:
+    "@loaders.gl/core" "1.3.2"
+    "@loaders.gl/experimental" "1.3.2"
+
+"@loaders.gl/experimental@1.3.2":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/experimental/-/experimental-1.3.2.tgz#8f6eb0810f4c8c5c50bb41f7451ba673b56a833e"
+  integrity sha512-nqXYwefBJRzrA2srsbpVgG/KgvhcAIyEevl8ETSo43/PracDx0VkU4ocfGCsUgXaHm11JlxRmtOY6nGBuldv4g==
+  dependencies:
+    "@loaders.gl/core" "1.3.2"
+
 "@loaders.gl/gltf@1.3.2", "@loaders.gl/gltf@^1.3.2":
   version "1.3.2"
   resolved "https://registry.yarnpkg.com/@loaders.gl/gltf/-/gltf-1.3.2.tgz#6d189acf7081657ca9031c7c5649f3de5d58c98f"
@@ -1565,10 +1580,10 @@
     "@loaders.gl/images" "1.3.2"
     math.gl "^3.0.0-beta.3"
 
-"@loaders.gl/polyfills@1.3.1":
-  version "1.3.1"
-  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-1.3.1.tgz#143f35a1d605f648b688a25a6fc3fa00cd1f4bc8"
-  integrity sha512-p6sxvEjT3zz295iUg4/G87DYyH0Mj3NUe078yx86ihwVk6zEKAXvm7Lr32QpE4K7+WEq0WlK2TBqClsc4z6mTw==
+"@loaders.gl/polyfills@^1.3.1":
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/@loaders.gl/polyfills/-/polyfills-1.3.2.tgz#82cba4dc638ac316ea7831e84ac67c1467760598"
+  integrity sha512-Z1NA94l1lTu1CwvzO8UZ92V2IKd5xO9hxgSfRkYRPvrjRvSABTxwNoTp86nts2Uw4iEjBrS+oOXqa285hovuhQ==
   dependencies:
     get-pixels "^3.3.2"
     ndarray "^1.0.18"
