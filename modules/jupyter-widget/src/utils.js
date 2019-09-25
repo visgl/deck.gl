@@ -1,4 +1,4 @@
-import defaultGetTooltip from './widget-tooltip';
+import makeTooltip from './widget-tooltip';
 
 /* global document */
 export function loadCss(url) {
@@ -45,7 +45,7 @@ export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplet
 
         const props = jsonConverter.convert(jsonInput);
 
-        const getTooltip = setTooltip(tooltip);
+        const getTooltip = makeTooltip(tooltip);
 
         const deckgl = new deck.DeckGL({
           ...props,

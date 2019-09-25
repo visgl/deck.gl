@@ -40,9 +40,13 @@ class Deck(JSONMixin):
         mapbox_key : str, default None
             Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
             See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
-        tooltip : bool, default True
+        tooltip : :obj:`bool` or :obj:`dict`, default True
             Boolean indicating whether or not a tooltip should be generated when hovering over a data layer
-            Individual layers must have `pickable` set to `True` to be displayed in the tooltip.
+            Alternatively, you can pass a dictionary with the optional keywords `html`, `text`, and `style`.
+            `html` is a string that sets the innerHTML value of the tooltip,
+            text will set the raw text value of the element,
+            and style is a dictionary allowing CSS customization.
+            Individual layers must have `pickable` set to `True` to get a tooltip.
         height : :obj:`int` or :obj:`string`, default 500
             Height of visualization, in pixels if an integer is passed or as a CSS value if a string
         width : :obj:`int` or :obj:`string`, default "100%"
@@ -155,5 +159,5 @@ class Deck(JSONMixin):
             notebook_display=notebook_display,
             iframe_height=iframe_height or self.deck_widget.height,
             iframe_width=iframe_width or self.deck_widget.width,
-            use_tooltip=self.deck_widget.tooltip)
+            tooltip=self.deck_widget.tooltip)
         return f

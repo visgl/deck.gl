@@ -12,13 +12,15 @@ TEMPLATES_PATH = os.path.join(os.path.dirname(__file__), './templates/')
 j2_env = jinja2.Environment(loader=jinja2.FileSystemLoader(TEMPLATES_PATH),
                             trim_blocks=True)
 
-def render_json_to_html(json_input, mapbox_key=None, use_tooltip=True):
+def render_json_to_html(json_input, mapbox_key=None, tooltip=True):
     js = j2_env.get_template('index.j2')
+    if type(tooltip) == bool:
+        tooltip = 'true' if tooltip else 'false'
     html_str = js.render(
         mapbox_key=mapbox_key,
         json_input=json_input,
         mapbox_gl_version='1.2.1',
-        use_tooltip='true' if use_tooltip else 'false',
+        tooltip=tooltip
     )
     return html_str
 
@@ -65,9 +67,9 @@ def deck_to_html(
         notebook_display=False,
         iframe_height=500,
         iframe_width=500,
-        use_tooltip=True):
+        tooltip=True):
     """Converts deck.gl format JSON to an HTML page"""
-    html = render_json_to_html(deck_json, mapbox_key=mapbox_key, use_tooltip=use_tooltip)
+    html = render_json_to_html(deck_json, mapbox_key=mapbox_key, tooltip=tooltip)
     f = None
     try:
         f = open_named_or_temporary_file(filename)
