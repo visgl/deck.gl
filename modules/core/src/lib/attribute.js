@@ -73,6 +73,10 @@ export default class Attribute extends BaseAttribute {
     this.hasShaderAttributes = false;
     this.doublePrecision = doublePrecision;
 
+    if (doublePrecision && opts.fp64 === false) {
+      this.defaultType = GL.FLOAT;
+    }
+
     let shaderAttributes = opts.shaderAttributes || (doublePrecision && {[this.id]: {}});
 
     if (shaderAttributes) {
