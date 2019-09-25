@@ -343,10 +343,10 @@ function getMax(pts, key) {
     : null;
 }
 
-const CPUGridLayerExample = {
+const CPUGridLayerExampleOrdinal = {
   layer: CPUGridLayer,
   props: {
-    id: 'gridLayer',
+    id: 'CPUGridLayerOrdinal',
     data: dataSamples.points,
     colorScaleType: 'ordinal',
     cellSize: 200,
@@ -359,10 +359,43 @@ const CPUGridLayerExample = {
   }
 };
 
-const EnhancedCPUGridLayerExample = {
+const CPUGridLayerExampleQuantile = {
+  layer: CPUGridLayer,
+  props: {
+    id: 'CPUGridLayerQuantile',
+    data: dataSamples.points,
+    colorScaleType: 'quantile',
+    cellSize: 200,
+    opacity: 1,
+    extruded: true,
+    pickable: true,
+    getPosition: d => d.COORDINATES,
+    getColorValue: points => getMean(points, 'SPACES'),
+    getElevationValue: points => getMax(points, 'SPACES')
+  }
+};
+
+const EnhancedCPUGridLayerExampleOrdinal = {
   layer: EnhancedCPUGridLayer,
   props: {
-    id: 'EnhancedCPUGridLayer',
+    id: 'EnhancedCPUGridLayerOrdinal',
+    colorScale: 'ordinal',
+    data: dataSamples.points,
+    cellSize: 200,
+    opacity: 1,
+    extruded: true,
+    pickable: true,
+    getPosition: d => d.COORDINATES,
+    getColorValue: points => getMean(points, 'SPACES'),
+    getElevationValue: points => getMax(points, 'SPACES')
+  }
+};
+
+const EnhancedCPUGridLayerExampleQuantile = {
+  layer: EnhancedCPUGridLayer,
+  props: {
+    id: 'EnhancedCPUGridLayerQuantile',
+    colorScale: 'quantile',
     data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
@@ -527,8 +560,10 @@ export default {
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
     ColumnLayer: ColumnLayerExample,
-    CPUGridLayer: CPUGridLayerExample,
-    EnhancedCPUGridLayer: EnhancedCPUGridLayerExample,
+    CPUGridLayerOrdinal: CPUGridLayerExampleOrdinal,
+    EnhancedCPUGridLayerOrdinal: EnhancedCPUGridLayerExampleOrdinal,
+    CPUGridLayerQuantile: CPUGridLayerExampleQuantile,
+    EnhancedCPUGridLayerQuantile: EnhancedCPUGridLayerExampleQuantile,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonLayer: HexagonLayerExample,
     ContourLayer: ContourLayerExample,
