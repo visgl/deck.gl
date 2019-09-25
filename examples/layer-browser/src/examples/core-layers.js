@@ -379,7 +379,7 @@ const EnhancedCPUGridLayerExampleOrdinal = {
   layer: EnhancedCPUGridLayer,
   props: {
     id: 'EnhancedCPUGridLayerOrdinal',
-    colorScale: 'ordinal',
+    colorScaleType: 'ordinal',
     data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
@@ -395,7 +395,7 @@ const EnhancedCPUGridLayerExampleQuantile = {
   layer: EnhancedCPUGridLayer,
   props: {
     id: 'EnhancedCPUGridLayerQuantile',
-    colorScale: 'quantile',
+    colorScaleType: 'quantile',
     data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
