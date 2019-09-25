@@ -42,7 +42,7 @@ UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/
 layer = pdk.Layer(
     'HexagonLayer',
     UK_ACCIDENTS_DATA,
-    get_position='[lng,lat]',
+    get_position='[lng, lat]',
     auto_highlight=True,
     elevation_scale=50,
     pickable=True,

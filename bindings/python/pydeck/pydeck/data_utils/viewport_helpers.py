@@ -15,9 +15,9 @@ def euclidean(y, y1):
 
     Parameters
     ----------
-    y : `tuple` of `float`
+    y : tuple of float
         A point in n-dimensions
-    y1 : `tuple` of `float`
+    y1 : tuple of float
         A point in n-dimensions
 
     Examples
@@ -36,7 +36,7 @@ def geometric_mean(points):
 
     Parameters
     ----------
-    points : :obj:`list` of :obj:`list` of :obj:`float`
+    points : list of list of float
         List of (x, y) coordinates
 
     Returns
@@ -53,7 +53,7 @@ def get_bbox(points):
 
     Parameters
     ----------
-    points : :obj:`list` of :obj:`list` of :obj:`float`
+    points : list of list of float
         List of (x, y) coordinates
 
     Returns
@@ -74,9 +74,9 @@ def k_nearest_neighbors(points, center, k):
 
     Parameters
     ----------
-    points : :obj:`list` of :obj:`list` of :obj:`float`
+    points : list of list of float
         List of (x, y) coordinates
-    center : :obj:`list` of :obj:`list` of :obj:`float`
+    center : list of list of float
         Center point
     k : int
         Number of points
@@ -99,7 +99,7 @@ def get_n_pct(points, proportion=1):
 
     Parameters
     ----------
-    points : :obj:`list` of :obj:`list` of :obj:`float`
+    points : list of list of float
         List of (x, y) coordinates
     proportion : float, default 1
         Value between 0 and 1 representing the minimum proportion of data to be captured
@@ -122,7 +122,7 @@ def bbox_to_zoom_level(bbox):
 
     Parameters
     ----------
-    bbox : :obj:`list` of :obj:`list` of `:obj:`float`
+    bbox : list of list of float
         Northwest and southeast corners of a bounding box, given as two points in a list
 
     Returns
@@ -148,16 +148,17 @@ def compute_view(points, view_proportion=1, view_type=ViewState):
 
     Parameters
     ----------
-    points : :obj:`list` of :obj:`list` of :obj:`float` or :obj:`pandas.core.frame`
+    points : list of list of float or pandas.DataFrame
         A list of points
     view_propotion : float, default 1
         Proportion of the data that is meaningful to plot
-    view_type : pydeck.ViewState, default `pydeck.ViewState`
-        Class constructor for a viewport
+    view_type : class constructor for pydeck.ViewState, default :class:`pydeck.bindings.view_state.ViewState`
+        Class constructor for a viewport. In the current version of pydeck,
+        users most likely do not have to modify this attribute.
 
     Returns
     -------
-        pydeck.Viewport: Viewport fitted to the data
+        pydeck.Viewport : Viewport fitted to the data
     """
     if is_pandas_df(points):
         points = points.to_records(index=False)

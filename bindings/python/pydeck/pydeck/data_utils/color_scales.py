@@ -7,7 +7,7 @@ def get_random_rgb():
 
     Returns
     -------
-        :obj:`list` of :obj:`float`: Random RGB array
+        list of float : Random RGB array
     """
     return [round(random.random()*255) for _ in range(0, 3)]
 
