@@ -121,6 +121,7 @@
   max-height: 96%;
   overflow-x: hidden;
   overflow-y: auto;
+  overflow-y: overlay;
   outline: none;
 
   hr {
@@ -140,6 +141,10 @@
     position: relative;
     width: 100%;
 
+    &:last-child {
+      margin-bottom: 20px;
+    }
+
     >* {
       vertical-align: middle;
       white-space: nowrap;
@@ -149,15 +154,29 @@
       width: 40%;
       margin-right: 10%;
       color: $black-40;
-      margin-bottom: 4px;
+      margin-top: 2px;
+      margin-bottom: 2px;
     }
-    input, a {
+    input, a, button {
+      background: #fff;
       font-size: 0.9em;
+      text-transform: none;
+      text-overflow: ellipsis;
+      overflow: hidden;
       display: inline-block;
       padding: 0 4px;
       width: 50%;
       height: 20px;
       line-height: 1.833;
+      text-align: left;
+    }
+    button {
+      color: initial;
+    }
+    button:disabled {
+      color: #aaa;
+      cursor: default;
+      background: #eee;
     }
     input {
       border: solid 1px #ccc;
@@ -267,9 +286,7 @@ code {
       transition: margin-top 300ms;
     }
     .options-panel {
-      .input, hr {
-        display: none;
-      }
+      overflow-y: hidden;
     }
   }
 }
@@ -329,6 +346,11 @@ code {
   }
   .markdown-body {
     padding: 40px 12px 96px;
+  }
+  .markdown .demo:not(:hover) .options-panel {
+    .input, hr {
+      display: none;
+    }
   }
 }
 
