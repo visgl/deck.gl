@@ -122,16 +122,16 @@ export default class Map extends PureComponent {
   }
 
   _onHover(info) {
-    // this.setState({hoveredItem: info});
+    this.setState({hoveredItem: info});
   }
 
   _onClick(info) {
-    // if (this.state.enableDepthPickOnClick && info) {
-    //   this._multiDepthPick(info.x, info.y);
-    // } else {
-    //   console.log('onClick', info); // eslint-disable-line
-    //   this.setState({clickedItem: info});
-    // }
+    if (this.state.enableDepthPickOnClick && info) {
+      this._multiDepthPick(info.x, info.y);
+    } else {
+      console.log('onClick', info); // eslint-disable-line
+      this.setState({clickedItem: info});
+    }
   }
 
   // Only show infovis layers in infovis mode and vice versa

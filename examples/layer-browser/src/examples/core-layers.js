@@ -10,7 +10,6 @@ import {
   ColumnLayer,
   GeoJsonLayer,
   PolygonLayer,
-  WBOITLayer,
   PathLayer,
   TextLayer
 } from '@deck.gl/layers';
@@ -198,35 +197,6 @@ const PolygonLayerBinaryExample = {
     ...PolygonLayerExample.props,
     getPolygon: d => d,
     positionFormat: 'XY'
-  }
-};
-
-const WBOITLayerExample = {
-  layer: WBOITLayer,
-  getData: () => dataSamples.polygons,
-  propTypes: {
-    getLineDashArray: {type: 'compound', elements: ['lineDashSizeLine']},
-    lineDashSizeLine: {
-      type: 'number',
-      max: 20,
-      onUpdate: (newValue, newSettings, change) => {
-        change('getLineDashArray', [newValue, 20 - newValue]);
-      }
-    }
-  },
-  props: {
-    getPolygon: f => f,
-    getFillColor: f => [200 + Math.random() * 55, 0, 0],
-    getLineColor: f => [0, 0, 0, 255],
-    getLineDashArray: f => [20, 0],
-    getLineWidth: f => 20,
-    getElevation: f => Math.random() * 1000,
-    opacity: 0.3,
-    pickable: false,
-    lineDashJustified: true,
-    elevationScale: 0.6,
-    stroked: false,
-    extruded: true
   }
 };
 
@@ -529,7 +499,6 @@ export default {
     'GeoJsonLayer (Extruded)': GeoJsonLayerExtrudedExample,
     PolygonLayer: PolygonLayerExample,
     'PolygonLayer (Flat)': PolygonLayerBinaryExample,
-    WBOITLayer: WBOITLayerExample,
     PathLayer: PathLayerExample,
     'PathLayer (Flat)': PathLayerBinaryExample,
     ScatterplotLayer: ScatterplotLayerExample,
