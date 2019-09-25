@@ -13,7 +13,7 @@ export default class HeatmapDemo extends Component {
 
   static get parameters() {
     return {
-      radius: {displayName: 'Radius', type: 'range', value: 30, step: 1, min: 1, max: 100},
+      radius: {displayName: 'Radius', type: 'range', value: 5, step: 1, min: 1, max: 50},
       intensity: {displayName: 'Intensity', type: 'range', value: 1, step: 0.1, min: 0, max: 5},
       threshold: {displayName: 'Threshold', type: 'range', value: 0.03, step: 0.01, min: 0, max: 1}
     };
