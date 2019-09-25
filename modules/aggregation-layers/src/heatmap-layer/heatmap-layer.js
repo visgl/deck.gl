@@ -25,12 +25,20 @@ import {
   boundsContain,
   packVertices,
   scaleToAspectRatio,
-  getTextureCoordinates
+  getTextureCoordinates,
+  getTextureParams
 } from './heatmap-layer-utils';
-import {Buffer, Transform, getParameter, FEATURES, hasFeatures} from '@luma.gl/core';
+import {
+  Buffer,
+  Texture2D,
+  Transform,
+  getParameter,
+  FEATURES,
+  hasFeatures,
+  isWebGL2
+} from '@luma.gl/core';
 import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
-import {getFloatTexture} from '../utils/resource-utils';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
@@ -39,11 +47,15 @@ import vs_max from './max-vs.glsl';
 const RESOLUTION = 2; // (number of common space pixels) / (number texels)
 const SIZE_2K = 2048;
 const ZOOM_DEBOUNCE = 500; // milliseconds
-const TEXTURE_PARAMETERS = {
-  [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
-  [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
-  [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+const TEXTURE_OPTIONS = {
+  mipmaps: false,
+  parameters: {
+    [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+    [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+    [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+    [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+  },
+  dataFormat: GL.RGBA
 };
 
 const defaultProps = {
@@ -58,21 +70,19 @@ const defaultProps = {
 const REQUIRED_FEATURES = [
   FEATURES.BLEND_EQUATION_MINMAX, // max weight calculation
   FEATURES.TEXTURE_FLOAT // weight-map as texture
-  // As per WebGL Spec, following two feature are implictly supported when TEXTURE_FLOAT is supported
-  // FEATURES.COLOR_ATTACHMENT_RGBA32F, // weight-map generation
-  // FEATURES.FLOAT_BLEND, // weight-map generation and max weight calculation
+  // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
 export default class HeatmapLayer extends CompositeLayer {
   initializeState() {
     const {gl} = this.context;
-    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
-    this.state = {textureSize, supported: true};
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
       this.setState({supported: false});
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
+    this.setState({supported: true});
+    this._setupTextureParams();
     this._setupAttributes();
     this._setupResources();
   }
@@ -198,6 +208,22 @@ export default class HeatmapLayer extends CompositeLayer {
     return changeFlags;
   }
 
+  _getTextures() {
+    const {gl} = this.context;
+    const {textureSize, format, type} = this.state;
+
+    return {
+      weightsTexture: new Texture2D(gl, {
+        width: textureSize,
+        height: textureSize,
+        format,
+        type,
+        ...TEXTURE_OPTIONS
+      }),
+      maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
+    };
+  }
+
   _isDataChanged({changeFlags}) {
     if (changeFlags.dataChanged) {
       return true;
@@ -221,15 +247,26 @@ export default class HeatmapLayer extends CompositeLayer {
     });
   }
 
+  _setupTextureParams() {
+    const {gl} = this.context;
+    const textureSize = Math.min(SIZE_2K, getParameter(gl, gl.MAX_TEXTURE_SIZE));
+    const floatTargetSupport = hasFeatures(gl, FEATURES.COLOR_ATTACHMENT_RGBA32F);
+    const {format, type} = getTextureParams({gl, floatTargetSupport});
+    const weightsScale = floatTargetSupport ? 1 : 1 / 255;
+    this.setState({textureSize, format, type, weightsScale});
+    if (!floatTargetSupport) {
+      log.warn(
+        `HeatmapLayer: ${
+          this.id
+        } rendering to float texture not supported, fallingback to low precession format`
+      )();
+    }
+  }
+
   _setupResources() {
     const {gl} = this.context;
     const {textureSize} = this.state;
-    const weightsTexture = getFloatTexture(gl, {
-      width: textureSize,
-      height: textureSize,
-      parameters: TEXTURE_PARAMETERS
-    });
-    const maxWeightsTexture = getFloatTexture(gl); // 1 X 1 texture
+    const {weightsTexture, maxWeightsTexture} = this._getTextures();
     const weightsTransform = new Transform(gl, {
       id: `${this.id}-weights-transform`,
       vs: weights_vs,
@@ -239,22 +276,23 @@ export default class HeatmapLayer extends CompositeLayer {
       _targetTexture: weightsTexture,
       _targetTextureVarying: 'weightsTexture'
     });
+    const maxWeightTransform = new Transform(gl, {
+      id: `${this.id}-max-weights-transform`,
+      _sourceTextures: {
+        inTexture: weightsTexture
+      },
+      _targetTexture: maxWeightsTexture,
+      _targetTextureVarying: 'outTexture',
+      vs: vs_max,
+      elementCount: textureSize * textureSize
+    });
 
     this.setState({
       weightsTexture,
       maxWeightsTexture,
       weightsTransform,
       model: weightsTransform.model,
-      maxWeightTransform: new Transform(gl, {
-        id: `${this.id}-max-weights-transform`,
-        _sourceTextures: {
-          inTexture: weightsTexture
-        },
-        _targetTexture: maxWeightsTexture,
-        _targetTextureVarying: 'outTexture',
-        vs: vs_max,
-        elementCount: textureSize * textureSize
-      }),
+      maxWeightTransform,
       zoom: null,
       triPositionBuffer: new Buffer(gl, {
         byteLength: 48,
@@ -372,10 +410,13 @@ export default class HeatmapLayer extends CompositeLayer {
         width: colorRange.length
       });
     } else {
-      colorTexture = getFloatTexture(this.context.gl, {
+      colorTexture = new Texture2D(this.context.gl, {
         data: colors,
         width: colorRange.length,
-        parameters: TEXTURE_PARAMETERS
+        height: 1,
+        format: isWebGL2(this.context.gl) ? GL.RGBA32F : GL.RGBA,
+        type: GL.FLOAT,
+        ...TEXTURE_OPTIONS
       });
     }
     this.setState({colorTexture});
@@ -383,7 +424,7 @@ export default class HeatmapLayer extends CompositeLayer {
 
   _updateWeightmap() {
     const {radiusPixels} = this.props;
-    const {weightsTransform, worldBounds, textureSize} = this.state;
+    const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
 
     // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
     this._updateAttributes(this.props);
@@ -404,7 +445,8 @@ export default class HeatmapLayer extends CompositeLayer {
     const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
       radiusPixels,
       commonBounds,
-      textureWidth: textureSize
+      textureWidth: textureSize,
+      weightsScale
     });
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
@@ -422,6 +464,12 @@ export default class HeatmapLayer extends CompositeLayer {
       clearRenderTarget: true
     });
     this._updateMaxWeightValue();
+
+    // reset filtering parameters (TODO: remove once luma issue#1193 is fixed)
+    weightsTexture.setParameters({
+      [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+      [GL.TEXTURE_MIN_FILTER]: GL.LINEAR
+    });
 
     this.setState({lastUpdate: Date.now()});
   }
