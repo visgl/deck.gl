@@ -154,3 +154,4 @@ $RECYCLE.BIN/
 **/pydeck/nbextension/static/index.js.map
 **/pydeck/nbextension/static/extensionRequires.js
 **/pydeck/io/templates/requirejs_dependencies.json
+**/_build
