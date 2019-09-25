@@ -6,6 +6,7 @@ mkdir dist
 
 # copy static assets
 cp -r ./src/static/* dist
+mv dist/index-dist.html dist/index.html
 
 # transpile workers
 BABEL_ENV=es5 babel --config-file ../babel.config.js ./src/static/workers --out-dir dist/workers
