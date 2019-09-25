@@ -73,6 +73,10 @@ export default class Attribute extends BaseAttribute {
     this.hasShaderAttributes = false;
     this.doublePrecision = doublePrecision;
 
+    // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
+    // by default when using auto-packing. This is more efficient in use cases where
+    // high precision is unnecessary, but the `64xyLow` attribute is still required
+    // by the shader.
     if (doublePrecision && opts.fp64 === false) {
       this.defaultType = GL.FLOAT;
     }
