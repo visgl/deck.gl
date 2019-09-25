@@ -1,5 +1,5 @@
 {
-  "name": "frustum-cull",
+  "name": "pure-js-mapbox",
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
@@ -8,15 +8,9 @@
     "build": "webpack -p"
   },
   "dependencies": {
-    "react": "^16.3.0",
-    "react-dom": "^16.3.0",
-    "react-map-gl": "^4.1.2"
+    "mapbox-gl": "^1.0.0"
   },
   "devDependencies": {
-    "@babel/core": "^7.0.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-loader": "^8.0.5",
-    "html-webpack-plugin": "^3.0.7",
     "webpack": "^4.20.2",
     "webpack-cli": "^3.1.2",
     "webpack-dev-server": "^3.1.1"

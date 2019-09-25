@@ -1,15 +1,20 @@
-/* global window */
-
-import React, {Component} from 'react';
-import {render} from 'react-dom';
-import DeckGL, {ScatterplotLayer} from 'deck.gl';
-import {StaticMap} from 'react-map-gl';
-import {RenderMetrics} from './render-metrics';
+/* global window, document, requestAnimationFrame */
+import {Deck} from '@deck.gl/core';
+import {ScatterplotLayer} from '@deck.gl/layers';
+import mapboxgl from 'mapbox-gl';
 
 const NUM_LAYERS = 1000;
 const POINTS_PER_LAYER = 100;
 const SF_MIN = [-122.511289, 37.709481];
 const SF_MAX = [-122.37646761, 37.806013];
+
+const INITIAL_VIEW_STATE = {
+  latitude: 37.752,
+  longitude: -122.427,
+  zoom: 11.5,
+  pitch: 0,
+  bearing: 0
+};
 
 function sfRandomPoints(numPoints, maxVal) {
   const points = new Array(numPoints);
@@ -29,99 +34,81 @@ function sfRandomPoints(numPoints, maxVal) {
   return points;
 }
 
-class Root extends Component {
-  constructor(props) {
-    super(props);
-    this.deckRef = React.createRef();
+window.onload = () => {
+  const numPointsElement = document.getElementById('num-points');
+  const numLayersElement = document.getElementById('num-layers');
+  const fpsElement = document.getElementById('fps');
+  const cpuElement = document.getElementById('cpu');
+  const gpuElement = document.getElementById('gpu');
 
-    this.state = {
-      mapViewState: {
-        latitude: 37.752,
-        longitude: -122.427,
-        zoom: 11.5,
-        pitch: 0,
-        bearing: 0
-      },
-      metrics: null
-    };
+  numPointsElement.innerHTML = NUM_LAYERS * POINTS_PER_LAYER;
+  numLayersElement.innerHTML = NUM_LAYERS;
 
-    this.layers = new Array(NUM_LAYERS);
+  const layers = new Array(NUM_LAYERS);
 
-    this.cameraShakeHandle = null;
-    this._cameraShake = this._cameraShake.bind(this);
-    this._onMetrics = this._onMetrics.bind(this);
-
-    this._initializeLayers();
+  for (let i = 0; i < NUM_LAYERS; ++i) {
+    const r = Math.random() * 256;
+    const g = Math.random() * 256;
+    const b = Math.random() * 256;
+    layers[i] = new ScatterplotLayer({
+      data: sfRandomPoints(POINTS_PER_LAYER, 10),
+      id: `scatterplotLayer${i}`,
+      getPosition: d => d.position,
+      getFillColor: [r, g, b],
+      getRadius: d => d.value,
+      opacity: 1,
+      pickable: true,
+      radiusScale: 30,
+      radiusMinPixels: 1,
+      radiusMaxPixels: 30
+    });
   }
 
-  componentDidMount() {
-    this.cameraShakeHandle = window.requestAnimationFrame(this._cameraShake);
-  }
+  // Set your mapbox token here
+  mapboxgl.accessToken = process.env.MapboxAccessToken; // eslint-disable-line
 
-  componentWillUnmount() {
-    window.cancelAnimationFrame(this.cameraShakeHandle);
-  }
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/light-v9',
+    // Note: deck.gl will be in charge of interaction and event handling
+    interactive: false,
+    center: [INITIAL_VIEW_STATE.longitude, INITIAL_VIEW_STATE.latitude],
+    zoom: INITIAL_VIEW_STATE.zoom,
+    bearing: INITIAL_VIEW_STATE.bearing,
+    pitch: INITIAL_VIEW_STATE.pitch
+  });
 
-  _initializeLayers() {
-    for (let i = 0; i < NUM_LAYERS; ++i) {
-      const r = Math.random() * 256;
-      const g = Math.random() * 256;
-      const b = Math.random() * 256;
-      this.layers[i] = new ScatterplotLayer({
-        data: sfRandomPoints(POINTS_PER_LAYER, 10),
-        id: `scatterplotLayer${i}`,
-        getPosition: d => d.position,
-        getFillColor: [r, g, b],
-        getRadius: d => d.value,
-        opacity: 1,
-        pickable: true,
-        radiusScale: 30,
-        radiusMinPixels: 1,
-        radiusMaxPixels: 30
+  const deck = new Deck({
+    canvas: 'deck-canvas',
+    width: '100%',
+    height: '100%',
+    initialViewState: INITIAL_VIEW_STATE,
+    controller: true,
+    onViewStateChange: ({viewState}) => {
+      map.jumpTo({
+        center: [viewState.longitude, viewState.latitude],
+        zoom: viewState.zoom,
+        bearing: viewState.bearing,
+        pitch: viewState.pitch
       });
-    }
-  }
+    },
+    _onMetrics(metrics) {
+      fpsElement.innerHTML = `FPS: ${Math.round(metrics.fps)}`;
+      cpuElement.innerHTML = `CPU Frame Time: ${metrics.cpuTimePerFrame.toFixed(2)}`;
+      gpuElement.innerHTML = `GPU Frame Time: ${metrics.gpuTimePerFrame.toFixed(2)}`;
+    },
+    layers
+  });
 
-  _cameraShake() {
-    this.cameraShakeHandle = window.requestAnimationFrame(this._cameraShake);
-    if (this.deckRef.current) {
-      const deck = this.deckRef.current.deck;
-      const viewState = deck.viewManager.getViewState();
-      deck.setProps({
-        viewState: Object.assign({}, viewState, {
-          latitude: viewState.latitude + (Math.random() * 0.00002 - 0.00001),
-          longitude: viewState.longitude + (Math.random() * 0.00002 - 0.00001)
-        })
-      });
-    }
-  }
+  requestAnimationFrame(function shake() {
+    requestAnimationFrame(shake);
 
-  _onMetrics(metrics) {
-    this.setState({metrics: Object.assign({}, metrics)});
-  }
-
-  render() {
-    return (
-      <div>
-        <div style={{position: 'absolute', top: '10px', left: '100px', zIndex: 999}}>
-          <div>
-            Rendering {NUM_LAYERS * POINTS_PER_LAYER} points in {NUM_LAYERS} layers.
-          </div>
-          <RenderMetrics metrics={this.state.metrics} />
-        </div>
-        <DeckGL
-          controller={true}
-          viewState={this.state.mapViewState}
-          ref={this.deckRef}
-          layers={this.layers}
-          _onMetrics={this._onMetrics}
-        >
-          <StaticMap key="map" mapStyle="mapbox://styles/mapbox/light-v9" />
-        </DeckGL>
-      </div>
-    );
-  }
-}
-
-/* global document */
-render(<Root />, document.body.appendChild(document.createElement('div')));
+    const viewState = deck.viewManager.getViewState();
+    deck.setProps({
+      viewState: Object.assign({}, viewState, {
+        latitude: viewState.latitude + (Math.random() * 0.00002 - 0.00001),
+        longitude: viewState.longitude + (Math.random() * 0.00002 - 0.00001)
+      })
+    });
+  });
+};
