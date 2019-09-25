@@ -19,18 +19,10 @@
 // THE SOFTWARE.
 
 import GL from '@luma.gl/constants';
-import {
-  Model,
-  Geometry,
-  PhongMaterial,
-  Framebuffer,
-  Texture2D,
-  withParameters,
-  Buffer
-} from '@luma.gl/core';
+import {Model, Framebuffer, Texture2D, withParameters, Buffer} from '@luma.gl/core';
 
 // Polygon geometry generation is managed by the polygon tesselator
-import SolidPolygonLayer from '../solid-polygon-layer/solid-polygon-layer';
+import {SolidPolygonLayer} from '@deck.gl/layers';
 
 import vsTop from './wboit-layer-vertex-top.glsl';
 import vsSide from './wboit-layer-vertex-side.glsl';

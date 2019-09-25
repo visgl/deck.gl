@@ -129,7 +129,6 @@ export {
   ColumnLayer,
   PathLayer,
   PolygonLayer,
-  WBOITLayer,
   SolidPolygonLayer,
   GeoJsonLayer,
   TextLayer
