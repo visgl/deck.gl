@@ -34,6 +34,10 @@ export default function createLayerDemoClass(settings) {
     if (params) {
       Object.keys(params).forEach(key => {
         props[key] = params[key].value;
+        if (key.startsWith('get')) {
+          props.updateTriggers = props.updateTriggers || {};
+          props.updateTriggers[key] = props[key];
+        }
       });
     }
 

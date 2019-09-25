@@ -14,8 +14,13 @@ export const normalizeParam = p => {
       displayValue = displayValue.replace(/^function (\w+)?(\(.*?\))/, '$2 =>');
       // convert `d => {return 1}` to `d => 1`
       displayValue = displayValue.replace(/\{\s*return\s*(.*?);?\s*\}$/, '$1');
+      return {...p, displayValue};
     }
-    return {...p, displayValue};
+    if (p.altType) {
+      p.type = p.altType;
+    } else {
+      return {...p, displayValue};
+    }
   }
   if (p.type === 'json') {
     return {...p, displayValue: JSON.stringify(p.value)};
