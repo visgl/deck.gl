@@ -127,6 +127,7 @@ export default class TransitionManager {
     );
 
     this.propsInTransition = {};
+    this.duration = duration;
     this.transition.start({
       duration,
       easing: endProps.transitionEasing,

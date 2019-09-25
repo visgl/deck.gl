@@ -1,7 +1,7 @@
 import TransitionInterpolator from './transition-interpolator';
 import {lerp} from 'math.gl';
 
-import {flyToViewport, getFlyToDuration} from '../../node_modules/viewport-mercator-project';
+import {flyToViewport, getFlyToDuration} from 'viewport-mercator-project';
 
 const LINEARLY_INTERPOLATED_PROPS = ['bearing', 'pitch'];
 const DEFAULT_OPTS = {
