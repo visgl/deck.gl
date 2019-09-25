@@ -72,31 +72,6 @@ class Deck(JSONMixin):
             warnings.warn(
                 'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
 
-    def __add__(self, obj):
-        """
-        Override of the addition operator to add attributes to the Deck object
-
-        Parameters
-        ----------
-        obj : object
-            pydeck.Layer, pydeck.View, or pydeck.ViewState
-
-        Examples
-        --------
-        >>> pydeck.Deck() + pydeck.View(controller=False)
-        >>> pydeck.Deck()
-        {"initialViewState": {"bearing": 0, ... , "views": [{"controller": false, "type": "MapView"}}... }
-        """
-        if isinstance(obj, Layer):
-            self.layers.append(obj)
-        elif isinstance(obj, View):
-            self.views = [obj]
-        elif isinstance(obj, ViewState):
-            self.initial_view_state = obj
-        else:
-            obj_type = type(obj).__name__
-            raise TypeError("Cannot join object of type", obj_type)
-
     def show(self):
         """Displays current Deck object for a Jupyter notebook"""
         self.update()
