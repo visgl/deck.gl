@@ -1,6 +1,6 @@
 .. _pydeckdeck-api-documentation:
 
-pydeck.Deck API Documentation
+Deck API Documentation
 =============================
 
 .. _pydeckdeck:
