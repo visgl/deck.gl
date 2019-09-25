@@ -20,7 +20,7 @@
 # -- Project information -----------------------------------------------------
 
 project = u'pydeck'
-copyright = u'2019, Andrew Duberstein'
+copyright = u'2019, Uber Technologies, Inc.'
 author = u'Andrew Duberstein'
 
 # The short X.Y version
