@@ -70,7 +70,8 @@ export default class ScenegraphLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 3,
-        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         accessor: 'getPosition',
         transition: true
       },

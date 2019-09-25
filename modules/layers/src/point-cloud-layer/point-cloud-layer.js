@@ -73,7 +73,8 @@ export default class PointCloudLayer extends Layer {
     this.getAttributeManager().addInstanced({
       instancePositions: {
         size: 3,
-        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         transition: true,
         accessor: 'getPosition'
       },

@@ -578,15 +578,8 @@ test('Attribute#setExternalBuffer', t => {
   t.end();
 });
 
-test('Attribute#doublePrecision', t => {
-  const attribute = new Attribute(gl, {
-    id: 'positions',
-    type: GL.DOUBLE,
-    size: 3,
-    accessor: 'getPosition'
-  });
-
-  const validateShaderAttributes = is64Bit => {
+test('Attribute#doublePrecision', t0 => {
+  const validateShaderAttributes = (t, attribute, is64Bit) => {
     const shaderAttributes = attribute.getShaderAttributes();
     t.deepEqual(
       Object.keys(shaderAttributes),
@@ -633,38 +626,110 @@ test('Attribute#doublePrecision', t => {
     }
   };
 
-  attribute.allocate(2);
-  attribute.updateBuffer({
-    numInstances: 2,
-    data: [0, 1],
-    props: {
-      getPosition: d => [d, 1, 2]
-    }
+  test('Attribute#doublePrecision#fp64:true', t => {
+    const attribute = new Attribute(gl, {
+      id: 'positions',
+      type: GL.DOUBLE,
+      size: 3,
+      accessor: 'getPosition'
+    });
+
+    attribute.allocate(2);
+    attribute.updateBuffer({
+      numInstances: 2,
+      data: [0, 1],
+      props: {
+        getPosition: d => [d, 1, 2]
+      }
+    });
+    t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
+    t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
+    validateShaderAttributes(t, attribute, true);
+
+    attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
+    t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
+    t.deepEqual(
+      attribute.buffer.debugData.slice(0, 6),
+      [3, 4, 5, 4, 4, 5],
+      'Attribute value is set'
+    );
+    validateShaderAttributes(t, attribute, false);
+
+    t.throws(
+      () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
+      'should throw on invalid buffer'
+    );
+
+    attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
+    t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
+    t.deepEqual(
+      attribute.buffer.debugData.slice(0, 6),
+      [3, 4, 5, 0, 0, 0],
+      'Attribute value is set'
+    );
+    validateShaderAttributes(t, attribute, true);
+
+    const buffer = new Buffer(gl, 12);
+    attribute.setExternalBuffer(buffer);
+    validateShaderAttributes(t, attribute, false);
+
+    buffer.delete();
+    attribute.delete();
+    t.end();
   });
-  t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-  t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
-  validateShaderAttributes(true);
 
-  attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
-  t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
-  t.deepEqual(attribute.buffer.debugData.slice(0, 6), [3, 4, 5, 4, 4, 5], 'Attribute value is set');
-  validateShaderAttributes(false);
+  test('Attribute#doublePrecision#fp64:false', t => {
+    const attribute = new Attribute(gl, {
+      id: 'positions',
+      type: GL.DOUBLE,
+      fp64: false,
+      size: 3,
+      accessor: 'getPosition'
+    });
 
-  t.throws(
-    () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
-    'should throw on invalid buffer'
-  );
+    attribute.allocate(2);
+    attribute.updateBuffer({
+      numInstances: 2,
+      data: [0, 1],
+      props: {
+        getPosition: d => [d, 1, 2]
+      }
+    });
+    t.ok(attribute.value instanceof Float32Array, 'Attribute is Float32Array');
+    t.deepEqual(attribute.value.slice(0, 6), [0, 1, 2, 1, 1, 2], 'Attribute value is populated');
+    validateShaderAttributes(t, attribute, false);
 
-  attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
-  t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
-  t.deepEqual(attribute.buffer.debugData.slice(0, 6), [3, 4, 5, 0, 0, 0], 'Attribute value is set');
-  validateShaderAttributes(true);
+    attribute.setExternalBuffer(new Uint32Array([3, 4, 5, 4, 4, 5]));
+    t.ok(attribute.value instanceof Uint32Array, 'Attribute is Uint32Array');
+    t.deepEqual(
+      attribute.buffer.debugData.slice(0, 6),
+      [3, 4, 5, 4, 4, 5],
+      'Attribute value is set'
+    );
+    validateShaderAttributes(t, attribute, false);
 
-  const buffer = new Buffer(gl, 12);
-  attribute.setExternalBuffer(buffer);
-  validateShaderAttributes(false);
+    t.throws(
+      () => attribute.setExternalBuffer(new Uint8Array([3, 4, 5, 4, 4, 5])),
+      'should throw on invalid buffer'
+    );
 
-  buffer.delete();
-  attribute.delete();
-  t.end();
+    attribute.setExternalBuffer(new Float64Array([3, 4, 5, 4, 4, 5]));
+    t.ok(attribute.value instanceof Float64Array, 'Attribute is Float64Array');
+    t.deepEqual(
+      attribute.buffer.debugData.slice(0, 6),
+      [3, 4, 5, 0, 0, 0],
+      'Attribute value is set'
+    );
+    validateShaderAttributes(t, attribute, true);
+
+    const buffer = new Buffer(gl, 12);
+    attribute.setExternalBuffer(buffer);
+    validateShaderAttributes(t, attribute, false);
+
+    buffer.delete();
+    attribute.delete();
+    t.end();
+  });
+
+  t0.end();
 });

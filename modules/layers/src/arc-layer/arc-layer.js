@@ -58,7 +58,8 @@ export default class ArcLayer extends Layer {
     attributeManager.addInstanced({
       instancePositions: {
         size: 4,
-        type: this.use64bitPositions() ? GL.DOUBLE : GL.FLOAT,
+        type: GL.DOUBLE,
+        fp64: this.use64bitPositions(),
         transition: true,
         accessor: ['getSourcePosition', 'getTargetPosition'],
         update: this.calculateInstancePositions

@@ -73,6 +73,14 @@ export default class Attribute extends BaseAttribute {
     this.hasShaderAttributes = false;
     this.doublePrecision = doublePrecision;
 
+    // `fp64: false` tells a double-precision attribute to allocate Float32Arrays
+    // by default when using auto-packing. This is more efficient in use cases where
+    // high precision is unnecessary, but the `64xyLow` attribute is still required
+    // by the shader.
+    if (doublePrecision && opts.fp64 === false) {
+      this.defaultType = GL.FLOAT;
+    }
+
     let shaderAttributes = opts.shaderAttributes || (doublePrecision && {[this.id]: {}});
 
     if (shaderAttributes) {
@@ -278,13 +286,12 @@ export default class Attribute extends BaseAttribute {
       for (const [startRow, endRow] of updateRanges) {
         update.call(context, this, {data, startRow, endRow, props, numInstances, bufferLayout});
       }
+      const doublePrecision = this.doublePrecision && this.value instanceof Float64Array;
       if (this.constant || !this.buffer || this.buffer.byteLength < this.value.byteLength) {
         const attributeValue = this.value;
         // call base clas `update` method to upload value to GPU
         this.update({
-          value: this.doublePrecision
-            ? toDoublePrecisionArray(attributeValue, this)
-            : attributeValue,
+          value: doublePrecision ? toDoublePrecisionArray(attributeValue, this) : attributeValue,
           constant: this.constant
         });
         // Save the 64-bit version
@@ -300,7 +307,7 @@ export default class Attribute extends BaseAttribute {
 
           // Only update the changed part of the attribute
           this.buffer.subData({
-            data: this.doublePrecision
+            data: doublePrecision
               ? toDoublePrecisionArray(this.value, {
                   size: this.size,
                   startIndex: startOffset,
