@@ -32,8 +32,10 @@ import oitBlendFs from './oit-blend-fragment.glsl';
 
 export default class WBOITLayer extends SolidPolygonLayer {
   getShaders(vs) {
-    vs = vs.indexOf('SHADER_NAME solid-polygon-layer-vertex-shader-side') > 0 ? vsSide : vsTop;
-    return super.getShaders(vs, fs);
+    const shaders = super.getShaders(vs);
+    shaders.vs = vs.indexOf('SHADER_NAME solid-polygon-layer-vertex-shader-side') > 0 ? vsSide : vsTop;
+    shaders.fs = fs;
+    return shaders;
   }
 
   initializeState() {

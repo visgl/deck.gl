@@ -126,8 +126,8 @@ export default class Map extends PureComponent {
   }
 
   _onClick(info) {
-    if (this.state.enableDepthPickOnClick && info) {
-      this._multiDepthPick(info.x, info.y);
+    if (this.props.onClick) {
+      this.props.onClick(info);
     } else {
       console.log('onClick', info); // eslint-disable-line
       this.setState({clickedItem: info});

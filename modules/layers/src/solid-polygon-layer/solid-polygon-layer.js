@@ -27,7 +27,7 @@ import PolygonTesselator from './polygon-tesselator';
 
 import vsTop from './solid-polygon-layer-vertex-top.glsl';
 import vsSide from './solid-polygon-layer-vertex-side.glsl';
-import fragment from './solid-polygon-layer-fragment.glsl';
+import fs from './solid-polygon-layer-fragment.glsl';
 
 const DEFAULT_COLOR = [0, 0, 0, 255];
 const defaultMaterial = new PhongMaterial();
@@ -61,7 +61,7 @@ const ATTRIBUTE_TRANSITION = {
 };
 
 export default class SolidPolygonLayer extends Layer {
-  getShaders(vs, fs = fragment) {
+  getShaders(vs) {
     return super.getShaders({
       vs,
       fs,
