@@ -6,10 +6,6 @@
 
 Render a massive data set in multiple layers and measure performance.
 
-
-```bash
-yarn
-```
-
 Commands:
+* `yarn` install dependencies.
 * `yarn start-local` is the development target, to serves the app and hot reload.
