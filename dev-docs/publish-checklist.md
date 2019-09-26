@@ -33,7 +33,7 @@
   ```
   npmrc public
   git add .
-  npm run publish-prod
+  npm run publish prod
   ```
   Double check the version numbers before confirming to publish.
 
@@ -105,7 +105,7 @@
   ```
   npmrc public
   git add .
-  npm run publish-prod
+  npm run publish prod
   ```
   Double check the version numbers before confirming to publish.
 
