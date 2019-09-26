@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.3 Prereleases
 
+#### deck.gl [v7.3.0-beta.8] - Sep 26 2019
+
+- Allow pydeck user to modify tooltip text (#3690)
+- Bump dependencies (#3706)
+
 #### deck.gl [v7.3.0-beta.7] - Sep 25, 2019
 
 - Always generate 64xyLow attributes for positions (#3696)
