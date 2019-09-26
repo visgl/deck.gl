@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PicoMercator Scatterplot</title>
+    <meta charset="utf-8">
+    <script src="./lib/pico-mercator.min.js"></script>
+    <script src="./lib/picogl.min.js"></script>
+    <script src="./lib/mapbox-gl.js"></script>
+    <script src="./lib/utils.js"></script>
+    <link href="./lib/mapbox-gl.css" rel="stylesheet" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            overflow-y: hidden;
+            background-color: black;
+        }
+
+        #mapbox {
+            position: absolute;
+        }
+
+        #gl-canvas {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        #info {
+            position: absolute;
+            color: white;
+            top: 50px;
+            left: 10px;
+        }
+    </style>
+</head>
+<!--
+  The MIT License (MIT)
+
+  Copyright (c) 2017 Tarek Sherif
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the "Software"), to deal in
+  the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+-->
+<!--
+    Port of ScatterPlotLayer example from deck.gl
+    https://github.com/uber/deck.gl/tree/master/examples/layer-browser
+ -->
+<body>
+    <div id="mapbox"></div>
+    <canvas id="gl-canvas"></canvas>
+    <div id="info">
+        Rendering <span id="num-points"></span> points in <span id="num-draws"></span> draw calls
+    </div>
+    <script type="shader/vs" id="vs">
+        #version 300 es
+
+        layout(location=0) in vec2 positions;
+        layout(location=1) in vec2 precisionBits;
+        layout(location=2) in float radius;
+        layout(location=3) in vec3 shapePosition;
+
+        uniform float pixelsPerMeter;
+        uniform float radiusScale;
+        uniform vec2 radiusLimits;
+
+        out vec3 vShapePosition;
+
+        void main() {
+            vShapePosition = shapePosition;
+            vec4 worldPosition = pico_mercator_lngLatToWorld(positions, precisionBits);
+            float r = clamp(radius * pixelsPerMeter * radiusScale, radiusLimits.x, radiusLimits.y);
+            vec3 offset = shapePosition * r;
+            worldPosition.xyz += offset;
+            gl_Position = pico_mercator_worldToClip(worldPosition);
+        }
+    </script>
+    <script type="shader/fs" id="fs">
+        #version 300 es
+        precision highp float;
+
+        uniform vec3 color;
+
+        in vec3 vShapePosition;
+
+        out vec4 fragColor;
+        void main() {
+            if (dot(vShapePosition, vShapePosition) > 1.0) {
+                discard;
+            }
+
+            fragColor = vec4(color, 1.0);
+        }
+    </script>
+    <script>
+
+        const {
+            pico_mercator_injectGLSLProjection,
+            pico_mercator_highPrecisionMat4,
+            pico_mercator_highPrecisionLngLat,
+            pico_mercator_mapboxViewProjectionMatrix,
+            pico_mercator_pixelsPerMeter,
+            pico_mercator_uniforms
+        } = PicoMercator;
+
+        const NUM_DRAWS = 1000;
+        const POINT_PER_DRAW = 100;
+
+        document.getElementById("num-points").innerHTML = NUM_DRAWS * POINT_PER_DRAW;
+        document.getElementById("num-draws").innerHTML = NUM_DRAWS;
+
+        const INITIAL_ZOOM = 11.5;
+        const INITIAL_CENTER = [-122.427, 37.752];
+
+        let mapboxContainer = document.getElementById("mapbox");
+        let canvas = document.getElementById("gl-canvas");
+
+        mapboxContainer.style.width = `${window.innerWidth}px`;
+        mapboxContainer.style.height = `${window.innerHeight}px`;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        mapboxgl.accessToken = 'INSERT_MAPBOX_TOKEN';
+        let map = new mapboxgl.Map({
+            container: mapboxContainer,
+            style: "mapbox://styles/mapbox/streets-v9",
+            center: INITIAL_CENTER,
+            zoom: INITIAL_ZOOM,
+            maxZoom: 20
+        });
+
+        let app = PicoGL.createApp(canvas, { alpha: true })
+        .clearColor(0.0, 0.0, 0.0, 0.0)
+        .depthTest();
+
+        let timer = app.createTimer();
+
+        window.onresize = function() {
+            app.resize(window.innerWidth, window.innerHeight);
+            mapboxContainer.style.width = `${app.width}px`;
+            mapboxContainer.style.height = `${app.height}px`;
+            map.resize();
+        }
+
+        utils.addTimerElement();
+
+        // PROGRAM
+        let vsSource =  pico_mercator_injectGLSLProjection(document.getElementById("vs").text.trim());
+        let fsSource =  document.getElementById("fs").text.trim();
+
+
+        app.createPrograms([vsSource, fsSource]).then(([program]) => {
+
+            let layers = [];
+
+            for (let l = 0; l < NUM_DRAWS; ++l) {
+                data = utils.sfRandomPoints(POINT_PER_DRAW, 10);
+
+                let positionData = new Float32Array(data.length * 2);
+                let radiusData = new Float32Array(data.length);
+
+                for (let i = 0; i < data.length; ++i) {
+                    let pi = i * 2;
+                    let coords = data[i].position;
+
+                    positionData[pi]     = coords[0];
+                    positionData[pi + 1] = coords[1];
+                    radiusData[i] = data[i].value;
+                }
+
+                let precisionData = pico_mercator_highPrecisionLngLat(positionData);
+
+                let positions = app.createVertexBuffer(PicoGL.FLOAT, 2, positionData);
+                let precision = app.createVertexBuffer(PicoGL.FLOAT, 2, precisionData);
+                let radius = app.createVertexBuffer(PicoGL.FLOAT, 1, radiusData);
+                let shapePositions = app.createVertexBuffer(PicoGL.FLOAT, 2, new Float32Array([
+                    -1, 1,
+                    -1, -1,
+                    1, 1,
+                    1, -1
+                ]));
+
+
+                // COMBINE VERTEX BUFFERS INTO VERTEX ARRAY
+                let vertexArray = app.createVertexArray()
+                .instanceAttributeBuffer(0, positions)
+                .instanceAttributeBuffer(1, precision)
+                .instanceAttributeBuffer(2, radius)
+                .vertexAttributeBuffer(3, shapePositions);
+
+                // CREATE DRAW CALL FROM PROGRAM AND VERTEX ARRAY
+                let drawCall = app.createDrawCall(program, vertexArray)
+                .primitive(PicoGL.TRIANGLE_STRIP)
+                .uniform("color", new Float32Array([Math.random(), Math.random(), Math.random()]));
+
+                layers.push(drawCall);
+            }
+
+
+
+            let viewProjMat = pico_mercator_highPrecisionMat4();
+            let radiusLimits = new Float32Array([1, 30]);
+
+            map.on("render", (e) => {
+
+            });
+
+            requestAnimationFrame(function move() {
+                requestAnimationFrame(move);
+
+                let center = Object.assign({}, map.getCenter());
+                center.lat += Math.random() * 0.00002 - 0.00001;
+                center.lng += Math.random() * 0.00002 - 0.00001;
+
+                map.setCenter(center);
+
+                if (timer.ready()) {
+                    utils.updateTimerElement(timer.cpuTime, timer.gpuTime);
+                }
+                timer.start();
+
+                center = [center.lng, center.lat];
+                let zoom = map.getZoom();
+                let pitch = map.getPitch();
+                let bearing = map.getBearing();
+
+                pico_mercator_mapboxViewProjectionMatrix(viewProjMat, center, zoom, pitch, bearing, app.width, app.height);
+
+
+                app.clear();
+
+                pico_mercator_uniforms(center, zoom, viewProjMat, (uniforms) => {
+                    layers.forEach((drawCall) => {
+                        drawCall.uniform("pixelsPerMeter", pico_mercator_pixelsPerMeter(center[1], zoom))
+                        .uniform("radiusScale", 30)
+                        .uniform("radiusLimits", radiusLimits);
+
+                        for (let name in uniforms) {
+                            drawCall.uniform(name, uniforms[name]);
+                        }
+
+                        drawCall.draw();
+                    });
+                });
+
+                timer.end();
+            });
+        });
+
+
+    </script>
+</body>
+</html>
