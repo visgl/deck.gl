@@ -111,6 +111,7 @@ function substituteIn(template, json) {
   for (const key in json) {
     output = output.replace(`{${key}}`, json[key]);
   }
+
   return output;
 }
 
@@ -126,34 +127,23 @@ export default function makeTooltip(tooltip) {
   }
 
   if (tooltip.html || tooltip.text) {
-    if (!tooltip.style) {
-      tooltip.style = DEFAULT_STYLE;
-    }
+    return pickedInfo => {
+      if (!pickedInfo.picked) {
+        return null;
+      }
 
-    if (tooltip.text) {
-      return pickedInfo => {
-        if (!pickedInfo.picked) {
-          return null;
-        }
-        return {
-          text: substituteIn(tooltip.text, pickedInfo.object),
-          style: tooltip.style
-        };
+      const formattedTooltip = {
+        style: tooltip.style || DEFAULT_STYLE
       };
-    }
 
-    if (tooltip.html) {
-      return pickedInfo => {
-        if (!pickedInfo.picked) {
-          return null;
-        }
+      if (tooltip.html) {
+        formattedTooltip.html = substituteIn(tooltip.html, pickedInfo.object);
+      } else {
+        formattedTooltip.text = substituteIn(tooltip.text, pickedInfo.object);
+      }
 
-        return {
-          html: pickedInfo.picked ? substituteIn(tooltip.html, pickedInfo.object) : null,
-          style: tooltip.style
-        };
-      };
-    }
+      return formattedTooltip;
+    };
   }
 
   return getTooltipDefault;
