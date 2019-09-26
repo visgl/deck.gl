@@ -71,7 +71,7 @@ For more, check out the docs and Binder examples above.
 
 Currently, some errors in pydeck will only appear in your browser's developer console.
 If a visualization fails to render, open the developer console.
-Error handling will be expanded in future handling of pydeck.
+Error handling will be expanded in future versions of pydeck.
 
 ### Issues
 
@@ -108,7 +108,7 @@ cd modules/jupyter-widget
 yarn watch
 ```
 
-To specifiy a non-default URL for the webpack dev server, you can set a URL in the `PYDECK_DEV_SERVER` environment variable,
+If running a non-default URL for webpack's dev server, change the URL in the `PYDECK_DEV_SERVER` environment variable,
 e.g., `export PYDECK_DEV_SERVER=http://localhost:8081`.
 
 Elsewhere, run:
@@ -128,7 +128,7 @@ pip install -e .
 
 ### Tests
 
-Tests are handled by pytest. In this folder, you can type:
+Tests are handled by pytest. In the top-level pydeck directory, you can type:
 
 ```bash
 pytest
