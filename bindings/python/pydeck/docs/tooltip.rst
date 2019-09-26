@@ -56,7 +56,6 @@ Setting the tooltip's HTML value and CSS:
    }
 
 .. image:: https://i.imgur.com/5tcpgYN.png
-   :height: 500px
 
 Just setting the text:
 
@@ -67,11 +66,12 @@ Just setting the text:
    }
 
 .. image:: https://i.imgur.com/FSkiBVW.png
-   :height: 500px
    
 A full demo is below:
 
 .. code-block:: python
+
+    import pydeck as pdk
 
     layer = pdk.Layer(
         'HexagonLayer',
