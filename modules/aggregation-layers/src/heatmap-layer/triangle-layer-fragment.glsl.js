@@ -28,6 +28,7 @@ uniform sampler2D texture;
 varying vec2 vTexCoords;
 uniform sampler2D colorTexture;
 uniform float threshold;
+uniform vec2 weightDomain;
 
 varying float vIntensity;
 
@@ -39,8 +40,8 @@ vec4 getLinearColor(float value) {
 }
 
 void main(void) {
-  float weight = texture2D(texture, vTexCoords).r;
-  if (weight == 0.) {
+  float weight = texture2D(texture, vTexCoords).r - weightDomain[0];
+  if (weight <= 0.) {
      discard;
   }
   vec4 linearColor = getLinearColor(weight * vIntensity);

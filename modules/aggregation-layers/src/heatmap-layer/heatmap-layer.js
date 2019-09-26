@@ -57,6 +57,7 @@ const TEXTURE_OPTIONS = {
   },
   dataFormat: GL.RGBA
 };
+const DEFAULT_WEIGHT_DOMAIN = [0, 0];
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -64,7 +65,8 @@ const defaultProps = {
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
-  threshold: {type: 'number', min: 0, max: 1, value: 0.05}
+  threshold: {type: 'number', min: 0, max: 1, value: 0.05},
+  weightDomain: DEFAULT_WEIGHT_DOMAIN
 };
 
 const REQUIRED_FEATURES = [
@@ -132,7 +134,7 @@ export default class HeatmapLayer extends CompositeLayer {
       maxWeightsTexture,
       colorTexture
     } = this.state;
-    const {updateTriggers, intensity, threshold} = this.props;
+    const {updateTriggers, intensity, threshold, weightDomain} = this.props;
 
     return new TriangleLayer(
       this.getSubLayerProps({
@@ -152,7 +154,8 @@ export default class HeatmapLayer extends CompositeLayer {
         colorTexture,
         texture: weightsTexture,
         intensity,
-        threshold
+        threshold,
+        weightDomain
       }
     );
   }

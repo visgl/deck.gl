@@ -25,6 +25,7 @@ export default `\
 
 uniform sampler2D maxTexture;
 uniform float intensity;
+uniform vec2 weightDomain;
 
 attribute vec3 positions;
 attribute vec2 texCoords;
@@ -36,6 +37,10 @@ void main(void) {
   gl_Position = project_position_to_clipspace(positions, vec2(0.0), vec3(0.0));
   vTexCoords = texCoords;
   float maxValue = texture2D(maxTexture, vec2(0.5)).r;
+  if (weightDomain[1] > 0.) {
+    // custom domain is specified, overwrite maxValue
+    maxValue = weightDomain[1];
+  }
   vIntensity = intensity / maxValue;
 }
 `;
