@@ -54,7 +54,7 @@ Setting the tooltip's HTML value and CSS:
            "color": "white"
       }
    }
-   
+
 .. image:: https://i.imgur.com/5tcpgYN.png
    :height: 500px
 
@@ -65,7 +65,7 @@ Just setting the text:
    tooltip = {
        "text": "Elevation: {elevationValue}"
    }
-   
+
 .. image:: https://i.imgur.com/FSkiBVW.png
    :height: 500px
    
@@ -81,9 +81,9 @@ A full demo is below:
         elevation_scale=50,
         pickable=True,
         elevation_range=[0, 3000],
-        extruded=True,                 
+        extruded=True,
         coverage=1)
-    
+
     # Set the viewport location
     view_state = pdk.ViewState(
         longitude=-1.415,
@@ -93,7 +93,7 @@ A full demo is below:
         max_zoom=15,
         pitch=40.5,
         bearing=-27.36)
-    
+
     # Combined all of it and render a viewport
     r = pdk.Deck(
         layers=[layer],
@@ -106,7 +106,7 @@ A full demo is below:
         }
     )
     r.to_html()
-    
+
 .. _pickingInfo.object:
     https://github.com/uber/deck.gl/blob/master/docs/developer-guide/interactivity.md#the-picking-info-object
 .. _innerHTML:
