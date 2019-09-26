@@ -67,10 +67,13 @@ class Deck(JSONMixin):
         self.deck_widget.height = height
         self.deck_widget.width = width
         self.deck_widget.tooltip = tooltip
-        self.selected_data = self.deck_widget.selected_data
-        if not self.mapbox_key:
+        if self.mapbox_key is None:
             warnings.warn(
                 'Mapbox API key is not set. This may impact available features of pydeck.', UserWarning)
+
+    @property
+    def selected_data(self):
+        return self.deck_widget.selected_data
 
     def show(self):
         """Displays current Deck object for a Jupyter notebook"""
