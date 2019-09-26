@@ -62,22 +62,21 @@ view_state = pdk.ViewState(
 
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
-r.show()
-```
-
-If you're outside of a Jupyter notebook, you can alternately run:
-```python
-r.to_html()
+r.to_html('demo.html')
 ```
 
 For more, check out the docs and Binder examples above.
 
 ### Debugging note
 
-Because pydeck uses Python renders Javascript, some errors will appear only in the Javascript console.
-If you encounter an error, open the Javascript console in your browser. This will be updated in future versions of pydeck.
-If you encounter an issue, file it under the [deck.gl issues page](https://github.com/uber/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
-and include console output.
+Currently, some errors in pydeck will only appear in your browser's developer console.
+If a visualization fails to render, open the developer console.
+Error handling will be expanded in future handling of pydeck.
+
+### Issues
+
+If you encounter an issue, file it in the [deck.gl issues page](https://github.com/uber/deck.gl/issues/new?assignees=&labels=question&template=question.md&title=)
+and include your console output, if any.
 
 
 ### Installation from source
@@ -98,7 +97,7 @@ python3 setup.py install
 
 ## Development
 
-```
+```bash
 git clone https://github.com/uber/deck.gl/
 cd deck.gl
 # Build the entire deck.gl project
@@ -106,7 +105,7 @@ yarn bootstrap
 
 # Optional but recommended: Run a hot reloading development server
 cd modules/jupyter-widget
-export PYDECK_DEV_SERVER=http://localhost:8080 && yarn watch
+yarn watch
 ```
 
 To specifiy a non-default URL for the webpack dev server, you can set a URL in the `PYDECK_DEV_SERVER` environment variable,
