@@ -84,7 +84,7 @@ HexagonLayer <https://deck.gl/#/examples/core-layers/hexagon-layer>`__:
   :alt: Hexagon layer
 
 Try changing ``type`` above to ``ScatterplotLayer`` and add some
-``ScatterplotLayer`` attributes, like ``get_fill_color`` and ``radius``:
+``ScatterplotLayer`` attributes, like ``get_fill_color`` and ``get_radius``:
 
 .. code:: python
 
@@ -93,7 +93,7 @@ Try changing ``type`` above to ``ScatterplotLayer`` and add some
        UK_ACCIDENTS_DATA,
        get_position='[lng, lat]',
        auto_highlight=True,
-       radius=1000,          # Radius is given in meters
+       get_radius=1000,          # Radius is given in meters
        get_fill_color=[180, 0, 200, 140],  # Set an RGBA value for fill
        pickable=True)
 
@@ -121,7 +121,7 @@ To demonstrate the expression parser, change the color input in
        UK_ACCIDENTS_DATA,
        get_position='[lng, lat]',
        auto_highlight=True,
-       radius=1000,
+       get_radius=1000,
        get_fill_color='[180, 0, 200, 140]',
        pickable=True)
 
@@ -145,7 +145,7 @@ variables in your data, so you can pass them from Python for use in deck.gl:
        UK_ACCIDENTS_DATA,
        get_position='[lng, lat]',
        auto_highlight=True,
-       radius=1000,
+       get_radius=1000,
        get_fill_color='[255, lng > 0 ? 200 * lng : -200 * lng, lng, 140]',
        pickable=True)
 

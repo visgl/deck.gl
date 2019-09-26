@@ -15,7 +15,7 @@ d = Deck(layers=[
    Layer(
         'ScatterplotLayer',
         data=scatterplot_data,
-        radius=100,
+        get_radius=100,
         picking_radius=5,
         pickable=True,
         get_color='rgb',
