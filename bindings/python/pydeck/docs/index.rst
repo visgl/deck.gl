@@ -13,6 +13,7 @@ Welcome to pydeck's documentation!
    view
    light_settings
 
+.. image:: https://i.imgur.com/qenLNEf.gif
 
 `Layers <layer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
