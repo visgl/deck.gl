@@ -65,6 +65,12 @@ r = pdk.Deck(layers=[layer], initial_view_state=view_state)
 r.to_html('demo.html')
 ```
 
+If you're doing this outside a Jupyter environment, you can run:
+
+```python
+r.to_html('demo.html', notebook_display=False)
+```
+
 For more, check out the docs and Binder examples above.
 
 ### Debugging note
