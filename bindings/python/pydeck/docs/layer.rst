@@ -4,7 +4,7 @@ pydeck Layer Overview and Examples
 :class:`pydeck.bindings.layer.Layer` represents a kind of data visualization, like a scatterplot
 or a hexbin chart.
 The full `deck.gl layer catalog <https://github.com/uber/deck.gl/tree/master/docs/layers#deckgl-layer-catalog-overview>`__ is accessible via pydeck.
-The page will provide more examples of how to utilize the deck.gl catalog in Python via pydeck.
+This page will provide more examples of how to utilize the deck.gl catalog in Python via pydeck.
 
 .. warning:: Currently, in its beta version **pydeck will NOT raise an error on
              incorrect or omitted layer arguments**. If nothing renders in
@@ -26,7 +26,7 @@ A few important observations:
 
 -  Not all layers have all parameters. For instance, ``get_position`` is
    available for a ``ScatterplotLayer`` but not ``ArcLayer``. Be sure to
-   refer to the deck.gl layer catalog.
+   refer to the deck.gl layer catalog to know the arguments a particular layer can be passed.
 -  Styling conventions differ between deck.gl and pydeck. While you can 
    pass pydeck camelCased parameters, many prefer to adhere to the more common
    "snake_cased" standard. The deck.gl layer catalog documentation adheres to Javascript documentation
@@ -37,7 +37,7 @@ A few important observations:
       ``get_position`` in pydeck)
    -  Layer class names in deck.gl are the same in pydeck
       (e.g., ``HexagonLayer`` remains ``HexagonLayer`` in both
-      libraries) but are usually passed in the `type` argument
+      libraries) and are passed via the `type` argument
 
 The ``type`` positional argument
 --------------------------------
@@ -84,7 +84,7 @@ HexagonLayer <https://deck.gl/#/examples/core-layers/hexagon-layer>`__:
   :alt: Hexagon layer
 
 Try changing ``type`` above to ``ScatterplotLayer`` and add some
-``ScatterplotLayer`` attributes, ``get_fill_color`` and ``radius``:
+``ScatterplotLayer`` attributes, like ``get_fill_color`` and ``radius``:
 
 .. code:: python
 
@@ -108,7 +108,7 @@ Expression parsers in pydeck layer arguments
 
 One particularly powerful feature of pydeck is an in-built Javascript
 expression parser that can process a limited subset of Javascript–no
-functions are allowed, but data accessors, boolean conditions, inline
+functions are allowed, but data accessors, Boolean conditions, inline
 logical statements, arithmetic operations, and arrays are available.
 
 To demonstrate the expression parser, change the color input in
@@ -128,15 +128,15 @@ To demonstrate the expression parser, change the color input in
 
 .. image:: https://i.imgur.com/54a7buL.png
   :width: 500
-  :alt: New layer and color
+  :alt: Passing a string instead of an array
 
 
-The result of the render will be the same as the last image. The
+You will notice nothing has changed. The
 expression parser in deck.gl processes the ``get_fill_color`` argument
 of ``'[180, 0, 200, 140]'`` and converts it to a list of constants.
 
-The expression parser has access to the variables in your data, so these
-operations can be combined:
+Importantly, the expression parser has access to the
+variables in your data, so you can pass them from Python for use in deck.gl:
 
 .. code:: python
 
@@ -219,7 +219,7 @@ Below, an example combining the expression parser with multiple layers, based on
        stroked=False,
        # processes the data as a flat longitude-latitude pair
        get_polygon='-',
-       get_fill_color=[0, 0, 0, 0]
+       get_fill_color=[0, 0, 0, 20]
    )
 
    geojson = pydeck.Layer(
