@@ -3,7 +3,7 @@ from .json_tools import JSONMixin
 class ViewState(JSONMixin):
     """An object that represents where the state of a viewport, essentially where the screen is focused.
 
-    If you have two dimensional data and you don't want to set this manually, see `pydeck.data_utils.compute_viewport`.
+    If you have two dimensional data and you don't want to set this manually, see :func:`pydeck.data_utils.viewport_helpers.compute_view`.
 
 
     Parameters
