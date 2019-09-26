@@ -1,4 +1,5 @@
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples)
+[![Documentation Status](https://readthedocs.org/projects/deckgl/badge/?version=latest)](https://deckgl.readthedocs.io/en/latest/?badge=latest)
 
 # pydeck: Large-scale interactive data visualization in Python
 
@@ -12,7 +13,7 @@ For __interactive demos__, click the binder logo below:
 [![Binder](https://mybinder.org/static/logo.svg?v=f9f0d927b67cc9dc99d788c822ca21c0)](https://mybinder.org/v2/gh/uber/deck.gl/binder?filepath=examples)
 
 
-[See further documentation here.](https://github.com/uber/deck.gl/tree/master/bindings/python/pydeck/docs)
+[See further documentation here.](https://deckgl.readthedocs.io/en/latest/)
 
 ## Installation
 
