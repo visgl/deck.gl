@@ -34,31 +34,23 @@ class Deck(JSONMixin):
             List of :class:`pydeck.bindings.view.View` objects to render.
         map_style : str, default 'mapbox://styles/mapbox/dark-v9'
             URI for Mapbox basemap style. See Mapbox's `gallery <https://www.mapbox.com/gallery/>`_ for examples.
-            If not using a basemap, you can set this value to `''`.
+            If not using a basemap, you can set this value to to an empty string, `''`.
         initial_view_state : pydeck.ViewState, default pydeck.ViewState()
             Initial camera angle relative to the map, defaults to a fully zoomed out 0, 0-centered map
             To compute a viewport from data, see :func:`pydeck.data_utils.viewport_helpers.compute_view`
         mapbox_key : str, default None
             Read on initialization from the MAPBOX_API_KEY environment variable. Defaults to None if not set.
-            See https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard
             See your Mapbox
             `dashboard <https://docs.mapbox.com/help/how-mapbox-works/access-tokens/#mapbox-account-dashboard>`_
             to get an API token.
             If not using a basemap, you can set this value to `''`.
-        tooltip : :obj:`bool` or :obj:`dict`, default True
-            Boolean indicating whether or not a tooltip should be generated when hovering over a data layer
-            Alternatively, you can pass a dictionary with the optional keywords `html`, `text`, and `style`.
-            `html` is a string that sets the innerHTML value of the tooltip,
-            text will set the raw text value of the element,
-            and style is a dictionary allowing CSS customization.
-            Individual layers must have `pickable` set to `True` to get a tooltip.
         height : int, default 500
-            Height of Jupyter notebook cell, in pixels
+            Height of Jupyter notebook cell, in pixels.
         width : int` or string, default '100%'
-            Width of visualization, in pixels (if a number) or as a CSS value string
+            Width of visualization, in pixels (if a number) or as a CSS value string.
         tooltip : bool or dict of {str: str}, default True
-            If True/False, toggles a default tooltip on visualization hover.
-            Layers must have `pickable=True` set in order to display a tooltip.
+            If ``True``/``False``, toggles a default tooltip on visualization hover.
+            Layers must have ``pickable=True`` set in order to display a tooltip.
             For more advanced usage, the user can pass a dict to configure more custom tooltip features.
             Documentation on this is available `in the hosted pydeck documentation <tooltip.html>`_.
 
