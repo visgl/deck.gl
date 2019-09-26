@@ -132,11 +132,17 @@ export default function makeTooltip(tooltip) {
         return null;
       }
 
-      return {
-        html: tooltip.html && substituteIn(tooltip.html, pickedInfo.object),
-        text: tooltip.text && substituteIn(tooltip.text, pickedInfo.object),
+      const formattedTooltip = {
         style: tooltip.style || DEFAULT_STYLE
       };
+
+      if (tooltip.html) {
+        formattedTooltip.html = substituteIn(tooltip.html, pickedInfo.object);
+      } else {
+        formattedTooltip.text = substituteIn(tooltip.text, pickedInfo.object);
+      }
+
+      return formattedTooltip;
     };
   }
 
