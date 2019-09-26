@@ -52,10 +52,10 @@ export default class Tooltip {
       el.style.display = 'none';
       return;
     } else {
-      if ('text' in displayInfo && displayInfo.text !== undefined) {
+      if ('text' in displayInfo) {
         el.innerText = displayInfo.text;
       }
-      if ('html' in displayInfo && displayInfo.html !== undefined) {
+      if ('html' in displayInfo) {
         el.innerHTML = displayInfo.html;
       }
       if ('className' in displayInfo) {
