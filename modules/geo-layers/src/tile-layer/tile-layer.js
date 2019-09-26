@@ -45,23 +45,23 @@ export default class TileLayer extends CompositeLayer {
         })
       });
     }
-    if (changeFlags.viewportChanged) {
-      const {viewport} = context;
+    const {viewport} = context;
+    if (changeFlags.viewportChanged && viewport.id !== 'DEFAULT-INITIAL-VIEWPORT') {
+      const {tileCache} = this.state;
       const z = this.getLayerZoomLevel();
-      if (viewport.id !== 'DEFAULT-INITIAL-VIEWPORT') {
-        this.state.tileCache.update(viewport, tiles => {
-          const currTiles = tiles.filter(tile => tile.z === z);
-          const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
-          this.setState({tiles, isLoaded: allCurrTilesLoaded});
-          if (!allCurrTilesLoaded) {
-            Promise.all(currTiles.map(tile => tile.data)).then(() => {
-              this.setState({isLoaded: true});
-              onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
-            });
-          } else {
-            onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
-          }
+      tileCache.update(viewport);
+      // The tiles should be displayed at this zoom level
+      const currTiles = tileCache.tiles.filter(tile => tile.z === z);
+      const allCurrTilesLoaded = currTiles.every(tile => tile.isLoaded);
+      this.setState({isLoaded: allCurrTilesLoaded});
+
+      if (!allCurrTilesLoaded) {
+        Promise.all(currTiles.map(tile => tile.data)).then(() => {
+          this.setState({isLoaded: true});
+          onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
         });
+      } else {
+        onViewportLoaded(currTiles.filter(tile => tile._data).map(tile => tile._data));
       }
     }
   }
@@ -86,15 +86,22 @@ export default class TileLayer extends CompositeLayer {
   renderLayers() {
     const {renderSubLayers, visible} = this.props;
     const z = this.getLayerZoomLevel();
-    return this.state.tiles.map(tile => {
-      return renderSubLayers(
-        Object.assign({}, this.props, {
-          id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
-          data: tile.data,
-          visible: visible && (!this.state.isLoaded || tile.z === z),
-          tile
-        })
-      );
+    return this.state.tileCache.tiles.map(tile => {
+      const isVisible = visible && tile.isVisible && (!this.state.isLoaded || tile.z === z);
+      if (tile.layer && tile.layer.props.visible !== isVisible) {
+        tile.layer = tile.layer.clone({visible: isVisible});
+      }
+      if (!tile.layer) {
+        tile.layer = renderSubLayers(
+          Object.assign({}, this.props, {
+            id: `${this.id}-${tile.x}-${tile.y}-${tile.z}`,
+            data: tile.data,
+            visible: isVisible,
+            tile
+          })
+        );
+      }
+      return tile.layer;
     });
   }
 }
