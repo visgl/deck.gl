@@ -28,7 +28,7 @@ class Layer(JSONMixin):
             Type of layer to render, e.g., `HexagonLayer`
         id : str
             Unique name for layer
-        data : str or list of dict of {str: Any}
+        data : str or list of dict of {str: Any} or pandas.DataFrame
             Either a URL of data to load in or an array of data
         get_position : str, default '[lng, lat]'
             Name of position field, as a string. If the position field is given by two values,
