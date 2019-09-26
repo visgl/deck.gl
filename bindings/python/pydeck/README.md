@@ -28,6 +28,12 @@ jupyter nbextension install --sys-prefix --symlink --overwrite --py pydeck
 jupyter nbextension enable --sys-prefix --py pydeck
 ```
 
+### Mapbox API token
+
+Like deck.gl, the pydeck library takes its basemap tiles from [Mapbox](http://mapbox.com/). Register with Mapbox, and you can [find your Mapbox access token here](https://account.mapbox.com/access-tokens/). The service is free until a certain level of traffic is exceeded.
+
+You will need to inform pydeck about your key by setting an environment variable. In your terminal, run `export MAPBOX_API_KEY=<mapbox-key-here>`, which pydeck will read to use Mapbox basemaps. You can also refer to the pydeck docs to see how to pass the key as a variable.
+
 ## Getting started
 
 The following code renders a visualization similar to the one above in a Jupyter notebook:
@@ -63,6 +69,12 @@ view_state = pdk.ViewState(
 # Render
 r = pdk.Deck(layers=[layer], initial_view_state=view_state)
 r.to_html('demo.html')
+```
+
+If you're doing this outside a Jupyter environment, you can run:
+
+```python
+r.to_html('demo.html', notebook_display=False)
 ```
 
 For more, check out the docs and Binder examples above.
