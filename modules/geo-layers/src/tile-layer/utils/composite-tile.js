@@ -4,12 +4,8 @@ export default class CompositeTile {
     this.zoomLevel = zoomLevel;
 
     this.data = [];
-    this.combinedData = [];
 
-    // Remember to refresh aggregation when any tile loads its data
     this.waitForDataInTiles(this.tileset);
-    // Perform aggregation
-    // this.combineTiles();
   }
 
   getData() {
