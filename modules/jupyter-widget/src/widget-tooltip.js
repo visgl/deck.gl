@@ -2,7 +2,16 @@
 let lastPickedObject;
 let lastTooltip;
 
-export default function getTooltip(pickedInfo) {
+const DEFAULT_STYLE = {
+  fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+  display: 'flex',
+  flex: 'wrap',
+  maxWidth: '500px',
+  flexDirection: 'column',
+  zIndex: 2
+};
+
+function getTooltipDefault(pickedInfo) {
   if (!pickedInfo.picked) {
     return null;
   }
@@ -11,14 +20,7 @@ export default function getTooltip(pickedInfo) {
   }
   const tooltip = {
     html: tabularize(pickedInfo.object),
-    style: {
-      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
-      display: 'flex',
-      flex: 'wrap',
-      maxWidth: '500px',
-      flexDirection: 'column',
-      zIndex: 2
-    }
+    style: DEFAULT_STYLE
   };
   lastTooltip = tooltip;
   lastPickedObject = pickedInfo.object;
@@ -86,6 +88,10 @@ function toText(jsonValue) {
   let text;
   if (Array.isArray(jsonValue) && jsonValue.length > 4) {
     text = `Array<${jsonValue.length}>`;
+  } else if (typeof jsonValue === 'string') {
+    text = jsonValue;
+  } else if (typeof jsonValue === 'number') {
+    text = String(jsonValue);
   } else {
     try {
       text = JSON.stringify(jsonValue);
@@ -98,4 +104,57 @@ function toText(jsonValue) {
     text = text.slice(0, MAX_LENGTH);
   }
   return text;
+}
+
+function substituteIn(template, json) {
+  let output = template;
+  for (const key in json) {
+    output = output.replace(`{${key}}`, json[key]);
+  }
+  return output;
+}
+
+export default function makeTooltip(tooltip) {
+  /*
+   * If explictly no tooltip passed by user, return null
+   * If a JSON object passed, return a tooltip based on that object
+   *   We expect the user has passed a string template that will take pickedInfo keywords
+   * If a boolean passed, return the default tooltip
+   */
+  if (!tooltip) {
+    return null;
+  }
+
+  if (tooltip.html || tooltip.text) {
+    if (!tooltip.style) {
+      tooltip.style = DEFAULT_STYLE;
+    }
+
+    if (tooltip.text) {
+      return pickedInfo => {
+        if (!pickedInfo.picked) {
+          return null;
+        }
+        return {
+          text: substituteIn(tooltip.text, pickedInfo.object),
+          style: tooltip.style
+        };
+      };
+    }
+
+    if (tooltip.html) {
+      return pickedInfo => {
+        if (!pickedInfo.picked) {
+          return null;
+        }
+
+        return {
+          html: pickedInfo.picked ? substituteIn(tooltip.html, pickedInfo.object) : null,
+          style: tooltip.style
+        };
+      };
+    }
+  }
+
+  return getTooltipDefault;
 }

@@ -1,4 +1,4 @@
-import getTooltip from './widget-tooltip';
+import makeTooltip from './widget-tooltip';
 
 /* global document */
 export function loadCss(url) {
@@ -24,14 +24,7 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck({
-  mapboxApiKey,
-  container,
-  jsonInput,
-  useTooltip,
-  onComplete,
-  handleClick
-}) {
+export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick}) {
   require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
@@ -52,12 +45,14 @@ export function initDeck({
 
         const props = jsonConverter.convert(jsonInput);
 
+        const getTooltip = makeTooltip(tooltip);
+
         const deckgl = new deck.DeckGL({
           ...props,
           map: mapboxgl,
           mapboxApiAccessToken: mapboxApiKey,
           onClick: handleClick,
-          getTooltip: useTooltip ? getTooltip : null,
+          getTooltip,
           container
         });
         if (onComplete) {
