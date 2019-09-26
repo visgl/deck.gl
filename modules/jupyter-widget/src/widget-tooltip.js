@@ -111,6 +111,7 @@ function substituteIn(template, json) {
   for (const key in json) {
     output = output.replace(`{${key}}`, json[key]);
   }
+
   return output;
 }
 
@@ -126,34 +127,17 @@ export default function makeTooltip(tooltip) {
   }
 
   if (tooltip.html || tooltip.text) {
-    if (!tooltip.style) {
-      tooltip.style = DEFAULT_STYLE;
-    }
+    return pickedInfo => {
+      if (!pickedInfo.picked) {
+        return null;
+      }
 
-    if (tooltip.text) {
-      return pickedInfo => {
-        if (!pickedInfo.picked) {
-          return null;
-        }
-        return {
-          text: substituteIn(tooltip.text, pickedInfo.object),
-          style: tooltip.style
-        };
+      return {
+        html: tooltip.html && substituteIn(tooltip.html, pickedInfo.object),
+        text: tooltip.text && substituteIn(tooltip.text, pickedInfo.object),
+        style: tooltip.style || DEFAULT_STYLE
       };
-    }
-
-    if (tooltip.html) {
-      return pickedInfo => {
-        if (!pickedInfo.picked) {
-          return null;
-        }
-
-        return {
-          html: pickedInfo.picked ? substituteIn(tooltip.html, pickedInfo.object) : null,
-          style: tooltip.style
-        };
-      };
-    }
+    };
   }
 
   return getTooltipDefault;
