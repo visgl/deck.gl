@@ -13,7 +13,9 @@ Welcome to pydeck's documentation!
    view
    light_settings
 
-.. image:: https://i.imgur.com/qenLNEf.gif
+.. figure:: https://i.imgur.com/qenLNEf.gif
+   
+   Conway's Game of Life in pydeck
 
 `Layers <layer.html>`__
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
