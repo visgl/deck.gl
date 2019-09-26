@@ -63,7 +63,7 @@ Just setting the text:
 .. code-block:: python
 
    tooltip = {
-       "text": "Elevation Value: {elevationValue}"
+       "text": "Elevation: {elevationValue}"
    }
    
 .. image:: https://i.imgur.com/FSkiBVW.png
