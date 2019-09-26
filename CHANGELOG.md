@@ -200,6 +200,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.2
 
+#### deck.gl [v7.2.6] - Sep 20, 2019
+
+- More picking bug fix (#3667)
+
+#### deck.gl [v7.2.5] - Sep 19, 2019
+
+- Fix multi-picking bug (#3652)
+
 #### deck.gl [v7.2.4] - Sep 13, 2019
 
 - Bump loaders.gl to latest latest 1.2 prod (#3594)

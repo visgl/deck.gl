@@ -169,4 +169,4 @@ Follow [CompositeLayer](/docs/layers/composite-layer.md#_subLayerProp) and examp
 
 ## Source
 
-[modules/tile-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/master/modules/geo-layers/src/tile-3d-layer)
+[modules/tile-layers/src/tile-3d-layer](https://github.com/uber/deck.gl/tree/7.3-release/modules/geo-layers/src/tile-3d-layer)

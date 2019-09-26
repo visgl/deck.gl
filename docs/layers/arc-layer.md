@@ -168,4 +168,4 @@ In degrees, can be positive or negative (`-90 to +90`).
 
 ## Source
 
-[modules/layers/src/arc-layer](https://github.com/uber/deck.gl/tree/master/modules/layers/src/arc-layer)
+[modules/layers/src/arc-layer](https://github.com/uber/deck.gl/tree/7.3-release/modules/layers/src/arc-layer)
