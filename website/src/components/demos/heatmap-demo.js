@@ -15,7 +15,9 @@ export default class HeatmapDemo extends Component {
     return {
       radius: {displayName: 'Radius', type: 'range', value: 5, step: 1, min: 1, max: 50},
       intensity: {displayName: 'Intensity', type: 'range', value: 1, step: 0.1, min: 0, max: 5},
-      threshold: {displayName: 'Threshold', type: 'range', value: 0.03, step: 0.01, min: 0, max: 1}
+      threshold: {displayName: 'Threshold', type: 'range', value: 0.03, step: 0.01, min: 0, max: 1},
+      minWeight: {displayName: 'Minimum Weight', type: 'range', value: 0, step: 10, min: 0, max: 50000},
+      maxWeight: {displayName: 'Maximum Weight', type: 'range', value: 0, step: 10, min: 0, max: 50000}
     };
   }
 
@@ -54,6 +56,7 @@ export default class HeatmapDemo extends Component {
     const radiusPixels = params.radius.value;
     const intensity = params.intensity.value;
     const threshold = params.threshold.value;
+    const weightDomain = [params.minWeight.value, params.maxWeight.value];
 
     return (
       <App
@@ -62,6 +65,7 @@ export default class HeatmapDemo extends Component {
         intensity={intensity}
         threshold={threshold}
         radiusPixels={radiusPixels}
+        weightDomain={weightDomain}
       />
     );
   }
