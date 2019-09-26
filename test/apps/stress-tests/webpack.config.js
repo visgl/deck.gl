@@ -1,7 +1,6 @@
 // NOTE: To use this example standalone (e.g. outside of deck.gl repo)
 // delete the local development overrides at the bottom of this file
 
-const {resolve} = require('path');
 const webpack = require('webpack');
 
 const CONFIG = {
@@ -9,13 +8,6 @@ const CONFIG = {
 
   entry: {
     app: './app.js'
-  },
-
-  resolve: {
-    alias: {
-      // From mapbox-gl-js README. Required for non-browserify bundlers (e.g. webpack):
-      'mapbox-gl$': resolve('./node_modules/mapbox-gl/dist/mapbox-gl.js')
-    }
   },
 
   // Optional: Enables reading mapbox token from environment variable
