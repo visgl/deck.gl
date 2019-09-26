@@ -476,6 +476,17 @@ The state object allows a layer to store persistent information cross rendering 
 
 ### General Methods
 
+##### `clone`
+
+```js
+const updatedLayer = layer.clone(overrideProps);
+```
+
+Create a copy of this layer, optionally change some prop values.
+
+Arguments:
+- `overrideProps` (Object, optional) - layer props to update.
+
 ##### `setState`
 
 Used to update the layers [`state`](/docs/api-reference/layer.md#-state-object-) object. Calling this method will also cause the layer to rerender.
