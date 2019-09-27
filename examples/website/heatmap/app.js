@@ -17,7 +17,6 @@ const INITIAL_VIEW_STATE = {
   pitch: 0,
   bearing: 0
 };
-const COLOR_DOMAIN = [0, 0];
 
 export class App extends PureComponent {
   _renderLayers() {
@@ -26,7 +25,7 @@ export class App extends PureComponent {
       intensity = 1,
       threshold = 0.03,
       radiusPixels = 30,
-      colorDomain = COLOR_DOMAIN
+      colorDomain
     } = this.props;
 
     return [

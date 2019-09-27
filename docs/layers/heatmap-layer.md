@@ -102,7 +102,7 @@ The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight 
 
 * Default: `null`
 
-Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. When `colorDomain` is specified, all pixels weights are clamped to this range before mapping a color to each pixel.
+Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. When `colorDomain` is specified, all pixels with weight with in specified `colorDomain` will get mapped to `colorRange`, pixels with weight less than `colorDomain[0]` will fade out (reduced alpha) and pixels with weight more than `colorDomain[1]` will mapped highest color in `colorRange`.
 
 When not specified, `maximum weight` is auto calculated and domain will be set to [`0`, `maximum weight`].
 
