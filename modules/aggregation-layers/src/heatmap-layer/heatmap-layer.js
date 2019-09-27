@@ -66,7 +66,7 @@ const defaultProps = {
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
-  colorDomain: DEFAULT_COLOR_DOMAIN
+  colorDomain: {type: 'array', value: null}
 };
 
 const REQUIRED_FEATURES = [
@@ -125,7 +125,9 @@ export default class HeatmapLayer extends CompositeLayer {
     if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
       const {viewport} = this.context;
       const domainScale = viewport ? 1024 / viewport.scale : 1;
-      newState.colorDomain = props.colorDomain.map(x => x * domainScale);
+      newState.colorDomain = props.colorDomain
+        ? props.colorDomain.map(x => x * domainScale)
+        : DEFAULT_COLOR_DOMAIN;
     }
 
     this.setState({zoom: opts.context.viewport.zoom, ...newState});
