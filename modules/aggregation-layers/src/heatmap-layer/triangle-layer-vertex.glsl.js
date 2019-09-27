@@ -39,7 +39,8 @@ void main(void) {
   float maxValue = texture2D(maxTexture, vec2(0.5)).r;
   if (weightDomain[1] > 0.) {
     // custom domain is specified, overwrite maxValue
-    maxValue = weightDomain[1];
+    // weightDomain[0] is subtracted from each pixel weight, adjust the maxValue
+    maxValue = weightDomain[1] - weightDomain[0];
   }
   vIntensity = intensity / maxValue;
 }

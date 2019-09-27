@@ -100,7 +100,7 @@ The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight 
 
 * Default: `[0, 0]`
 
-Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. Using `weightDomain`, any pixels that are out of the specified range are not rendered. When `weightDomain[1]` is `0`, `HeatmapLayer` automatically calculates the maximum weight, which is the default behavior.
+Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. Using `weightDomain`, any pixel with weight below `weightDomain[0] ` is discarded and pixel weights that are more than `weightDomain[1]` are clamped to `weightDomain[1]`. When `weightDomain[1]` is `0`, `HeatmapLayer` automatically calculates the maximum weight, which is the default behavior.
 
 NOTES:
 - It is recommend to use default value for regular use cases.
