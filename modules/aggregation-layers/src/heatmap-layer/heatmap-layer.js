@@ -66,7 +66,7 @@ const defaultProps = {
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
-  colorDomain: {type: 'array', value: null}
+  colorDomain: {type: 'array', value: null, optional: true}
 };
 
 const REQUIRED_FEATURES = [
