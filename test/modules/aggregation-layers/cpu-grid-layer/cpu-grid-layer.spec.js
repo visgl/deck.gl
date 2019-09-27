@@ -248,6 +248,54 @@ test('CPUGridLayer#updates', t => {
     return assertStateUpdate(shouldUpdate, `${dimension}${prop}`);
   }
 
+  function getChecksForColorScaleTypeQuantize(scaleType) {
+    const shouldUpdate = {
+      dimensions: {
+        colorScaleType: 'quantize'
+      }
+    };
+    t.ok(
+      shouldUpdate.dimensions.colorScaleType === scaleType,
+      `update aggregatorState.dimension.colorScaleType to ${scaleType}`
+    );
+  }
+
+  function getChecksForColorScaleTypeLinear(scaleType) {
+    const shouldUpdate = {
+      dimensions: {
+        colorScaleType: 'linear'
+      }
+    };
+    t.ok(
+      shouldUpdate.dimensions.colorScaleType === scaleType,
+      `update aggregatorState.dimension.colorScaleType to ${scaleType}`
+    );
+  }
+
+  function getChecksForColorScaleTypeQuantile(scaleType) {
+    const shouldUpdate = {
+      dimensions: {
+        colorScaleType: 'quantile'
+      }
+    };
+    t.ok(
+      shouldUpdate.dimensions.colorScaleType === scaleType,
+      `update aggregatorState.dimension.colorScaleType to ${scaleType}`
+    );
+  }
+
+  function getChecksForColorScaleTypeOrdinal(scaleType) {
+    const shouldUpdate = {
+      dimensions: {
+        colorScaleType: 'ordinal'
+      }
+    };
+    return t.ok(
+      shouldUpdate.dimensions.colorScaleType === scaleType,
+      `update aggregatorState.dimension.colorScaleType to ${scaleType}`
+    );
+  }
+
   testLayer({
     Layer: CPUGridLayer,
     onError: t.notOk,
@@ -462,6 +510,30 @@ test('CPUGridLayer#updates', t => {
           elevationDomain: [0, 10]
         },
         onAfterUpdate: getChecksForDomainOrRangeUpdate('Domain', 'elevation')
+      },
+      {
+        updateProps: {
+          colorScaleType: 'quantize'
+        },
+        onAfterUpdate: getChecksForColorScaleTypeQuantize('quantize')
+      },
+      {
+        updateProps: {
+          colorScaleType: 'linear'
+        },
+        onAfterUpdate: getChecksForColorScaleTypeLinear('linear')
+      },
+      {
+        updateProps: {
+          colorScaleType: 'quantile'
+        },
+        onAfterUpdate: getChecksForColorScaleTypeQuantile('quantile')
+      },
+      {
+        updateProps: {
+          colorScaleType: 'ordinal'
+        },
+        onAfterUpdate: getChecksForColorScaleTypeOrdinal('ordinal')
       }
     ]
   });
