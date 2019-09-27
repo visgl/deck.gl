@@ -57,6 +57,7 @@ const TEXTURE_OPTIONS = {
   },
   dataFormat: GL.RGBA
 };
+const DEFAULT_COLOR_DOMAIN = [0, 0];
 
 const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
@@ -64,7 +65,8 @@ const defaultProps = {
   intensity: {type: 'number', min: 0, value: 1},
   radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
   colorRange: defaultColorRange,
-  threshold: {type: 'number', min: 0, max: 1, value: 0.05}
+  threshold: {type: 'number', min: 0, max: 1, value: 0.05},
+  colorDomain: {type: 'array', value: null, optional: true}
 };
 
 const REQUIRED_FEATURES = [
@@ -92,6 +94,7 @@ export default class HeatmapLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
+  /* eslint-disable complexity */
   updateState(opts) {
     if (!this.state.supported) {
       return;
@@ -118,8 +121,18 @@ export default class HeatmapLayer extends CompositeLayer {
       this._updateTextureRenderingBounds();
     }
 
+    if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
+      const {viewport} = this.context;
+      const domainScale = viewport ? 1024 / viewport.scale : 1;
+      const colorDomain = props.colorDomain
+        ? props.colorDomain.map(x => x * domainScale)
+        : DEFAULT_COLOR_DOMAIN;
+      this.setState({colorDomain});
+    }
+
     this.setState({zoom: opts.context.viewport.zoom});
   }
+  /* eslint-enable complexity */
 
   renderLayers() {
     if (!this.state.supported) {
@@ -130,7 +143,8 @@ export default class HeatmapLayer extends CompositeLayer {
       triPositionBuffer,
       triTexCoordBuffer,
       maxWeightsTexture,
-      colorTexture
+      colorTexture,
+      colorDomain
     } = this.state;
     const {updateTriggers, intensity, threshold} = this.props;
 
@@ -152,7 +166,8 @@ export default class HeatmapLayer extends CompositeLayer {
         colorTexture,
         texture: weightsTexture,
         intensity,
-        threshold
+        threshold,
+        colorDomain
       }
     );
   }

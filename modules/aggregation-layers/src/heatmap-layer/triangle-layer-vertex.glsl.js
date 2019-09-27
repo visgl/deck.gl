@@ -25,17 +25,27 @@ export default `\
 
 uniform sampler2D maxTexture;
 uniform float intensity;
+uniform vec2 colorDomain;
+uniform float threshold;
 
 attribute vec3 positions;
 attribute vec2 texCoords;
 
 varying vec2 vTexCoords;
-varying float vIntensity;
+varying float vIntensityMin;
+varying float vIntensityMax;
 
 void main(void) {
   gl_Position = project_position_to_clipspace(positions, vec2(0.0), vec3(0.0));
   vTexCoords = texCoords;
   float maxValue = texture2D(maxTexture, vec2(0.5)).r;
-  vIntensity = intensity / maxValue;
+  float minValue = maxValue * threshold;
+  if (colorDomain[1] > 0.) {
+    // if user specified custom domain use it.
+    maxValue = colorDomain[1];
+    minValue = colorDomain[0];
+  }
+  vIntensityMax = intensity / maxValue;
+  vIntensityMin = intensity / minValue;
 }
 `;

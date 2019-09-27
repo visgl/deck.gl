@@ -27,23 +27,25 @@ uniform float opacity;
 uniform sampler2D texture;
 varying vec2 vTexCoords;
 uniform sampler2D colorTexture;
-uniform float threshold;
 
-varying float vIntensity;
+varying float vIntensityMin;
+varying float vIntensityMax;
 
 vec4 getLinearColor(float value) {
-  float factor = clamp(value, 0., 1.);
+  float factor = clamp(value * vIntensityMax, 0., 1.);
   vec4 color = texture2D(colorTexture, vec2(factor, 0.5));
-  color.a *= min(value / threshold, 1.0);
+  color.a *= min(value * vIntensityMin, 1.0);
   return color;
 }
 
 void main(void) {
   float weight = texture2D(texture, vTexCoords).r;
-  if (weight == 0.) {
+  // discard pixels with 0 weight.
+  if (weight <= 0.) {
      discard;
   }
-  vec4 linearColor = getLinearColor(weight * vIntensity);
+
+  vec4 linearColor = getLinearColor(weight);
   linearColor.a *= opacity;
   gl_FragColor =linearColor;
 }
