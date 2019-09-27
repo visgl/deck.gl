@@ -8705,16 +8705,16 @@ react-is@^16.8.1:
   integrity sha512-tJBzzzIgnnRfEm046qRcURvwQnZVXmuCbscxUO5RWrGTXpon2d4c8mI0D8WE6ydVIm29JiLB6+RslkIvym9Rjw==
 
 react-map-gl@^4.1.2:
-  version "4.1.13"
-  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-4.1.13.tgz#44efb0dbb29f071e5ed32579488def970da7d46e"
-  integrity sha512-IczjaRVL2CuR+lBLsTOa0UIuYEcWg8vFy4a3SzmtHl8G0OVcTl00IlvTU7r6Ol+k3p23dxq8eAdFZh8VTBdOwg==
+  version "4.1.15"
+  resolved "https://registry.yarnpkg.com/react-map-gl/-/react-map-gl-4.1.15.tgz#c7b15fc9f05f85f6cedb75b7bd330d6d585a8226"
+  integrity sha512-1uJrPJt6JDHCiPIvMrhlU0XaZmhE4SIufq6xvt6GcVhx3O91DaVpiP3joeNg4gRUx6/4f2UQCjOyxdxPSrV44w==
   dependencies:
     "@babel/runtime" "^7.0.0"
     mapbox-gl "~0.54.0"
     mjolnir.js "^2.2.0"
     prop-types "^15.7.2"
     react-virtualized-auto-sizer "^1.0.2"
-    viewport-mercator-project "^6.1.0"
+    viewport-mercator-project "^6.2.1"
 
 react-virtualized-auto-sizer@^1.0.2:
   version "1.0.2"
@@ -10566,10 +10566,10 @@ verror@1.10.0:
     core-util-is "1.0.2"
     extsprintf "^1.2.0"
 
-viewport-mercator-project@^6.1.0:
-  version "6.2.1"
-  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-6.2.1.tgz#4d4cf376bdcf027467d0417615a0257a6316e63c"
-  integrity sha512-Ns0KExngwGkX/QZCAzYbqh3TTI8LKeO8pOphZN4mZmp/+wO/HqDacbztwXMdrTLy57ToolT4XrAH2NhuK7Nyfw==
+viewport-mercator-project@^6.2.1:
+  version "6.2.2"
+  resolved "https://registry.yarnpkg.com/viewport-mercator-project/-/viewport-mercator-project-6.2.2.tgz#f524819ad53fcc009b46136a59f73461bfcf1604"
+  integrity sha512-vs9pjDZxDwoiEqr+GgdpRAUogEQRoZ9D9COVLSr4+h/WdcUWhYN36SQr3n5jaTKrl/wlfdRj+TYU8wTk05grbg==
   dependencies:
     "@babel/runtime" "^7.0.0"
     gl-matrix "^3.0.0"

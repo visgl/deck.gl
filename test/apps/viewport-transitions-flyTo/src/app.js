@@ -72,8 +72,8 @@ export default class App extends Component {
         zoom: 11,
         pitch: 0,
         bearing: 0,
-        transitionDuration: 8000,
-        transitionInterpolator: new FlyToInterpolator(),
+        transitionDuration: 'auto',
+        transitionInterpolator: new FlyToInterpolator({speed: 2}),
         transitionInterruption: this._interruptionStyle
       }
     });
