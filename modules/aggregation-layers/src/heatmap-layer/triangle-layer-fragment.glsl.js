@@ -40,10 +40,13 @@ vec4 getLinearColor(float value) {
 }
 
 void main(void) {
-  float weight = texture2D(texture, vTexCoords).r - weightDomain[0];
+  float weight = texture2D(texture, vTexCoords).r;
+  // discard pixels with 0 weight.
   if (weight <= 0.) {
      discard;
   }
+  // bring weight to custom range, pixel below domain, will fall into least color range.
+  weight = max(weight - weightDomain[0], 0.);
   vec4 linearColor = getLinearColor(weight * vIntensity);
   linearColor.a *= opacity;
   gl_FragColor =linearColor;

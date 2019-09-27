@@ -72,7 +72,8 @@ export default class TriangleLayer extends Layer {
         colorTexture,
         intensity,
         threshold,
-        weightDomain
+        weightDomain,
+        opacity: 1.0
       })
       .draw();
   }
