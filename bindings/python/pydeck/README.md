@@ -42,8 +42,9 @@ The following code renders a visualization similar to the one above in a Jupyter
 ```python
 import pydeck as pdk
 
-# 2014 location of car accidents in the UK
-UK_ACCIDENTS_DATA = 'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv'
+# 2014 locations of car accidents in the UK
+UK_ACCIDENTS_DATA = ('https://raw.githubusercontent.com/uber-common/'
+                     'deck.gl-data/master/examples/3d-heatmap/heatmap-data.csv')
 
 # Define a layer to display on a map
 layer = pdk.Layer(
