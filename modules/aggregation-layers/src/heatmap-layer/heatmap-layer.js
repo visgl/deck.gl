@@ -94,7 +94,9 @@ export default class HeatmapLayer extends CompositeLayer {
     return changeFlags.somethingChanged;
   }
 
+  /* eslint-disable complexity */
   updateState(opts) {
+    const newState = {};
     if (!this.state.supported) {
       return;
     }
@@ -120,8 +122,15 @@ export default class HeatmapLayer extends CompositeLayer {
       this._updateTextureRenderingBounds();
     }
 
-    this.setState({zoom: opts.context.viewport.zoom});
+    if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
+      const {viewport} = this.context;
+      const domainScale = viewport ? 1024 / viewport.scale : 1;
+      newState.colorDomain = props.colorDomain.map(x => x * domainScale);
+    }
+
+    this.setState({zoom: opts.context.viewport.zoom, ...newState});
   }
+  /* eslint-enable complexity */
 
   renderLayers() {
     if (!this.state.supported) {
@@ -132,9 +141,10 @@ export default class HeatmapLayer extends CompositeLayer {
       triPositionBuffer,
       triTexCoordBuffer,
       maxWeightsTexture,
-      colorTexture
+      colorTexture,
+      colorDomain
     } = this.state;
-    const {updateTriggers, intensity, threshold, colorDomain} = this.props;
+    const {updateTriggers, intensity, threshold} = this.props;
 
     return new TriangleLayer(
       this.getSubLayerProps({
