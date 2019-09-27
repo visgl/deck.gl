@@ -96,7 +96,6 @@ export default class HeatmapLayer extends CompositeLayer {
 
   /* eslint-disable complexity */
   updateState(opts) {
-    const newState = {};
     if (!this.state.supported) {
       return;
     }
@@ -125,12 +124,13 @@ export default class HeatmapLayer extends CompositeLayer {
     if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
       const {viewport} = this.context;
       const domainScale = viewport ? 1024 / viewport.scale : 1;
-      newState.colorDomain = props.colorDomain
+      const colorDomain = props.colorDomain
         ? props.colorDomain.map(x => x * domainScale)
         : DEFAULT_COLOR_DOMAIN;
+      this.setState({colorDomain});
     }
 
-    this.setState({zoom: opts.context.viewport.zoom, ...newState});
+    this.setState({zoom: opts.context.viewport.zoom});
   }
   /* eslint-enable complexity */
 
