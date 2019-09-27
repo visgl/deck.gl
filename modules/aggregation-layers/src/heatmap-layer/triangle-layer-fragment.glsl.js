@@ -27,7 +27,6 @@ uniform float opacity;
 uniform sampler2D texture;
 varying vec2 vTexCoords;
 uniform sampler2D colorTexture;
-uniform vec2 weightDomain;
 
 varying float vIntensityMin;
 varying float vIntensityMax;

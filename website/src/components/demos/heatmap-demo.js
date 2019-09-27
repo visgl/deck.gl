@@ -56,7 +56,7 @@ export default class HeatmapDemo extends Component {
     const radiusPixels = params.radius.value;
     const intensity = params.intensity.value;
     const threshold = params.threshold.value;
-    const weightDomain = [params.minWeight.value, params.maxWeight.value];
+    const colorDomain = [params.minWeight.value, params.maxWeight.value];
 
     return (
       <App
@@ -65,7 +65,7 @@ export default class HeatmapDemo extends Component {
         intensity={intensity}
         threshold={threshold}
         radiusPixels={radiusPixels}
-        weightDomain={weightDomain}
+        colorDomain={colorDomain}
       />
     );
   }

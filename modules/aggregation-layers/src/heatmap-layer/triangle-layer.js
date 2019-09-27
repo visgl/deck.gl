@@ -67,7 +67,7 @@ export default class TriangleLayer extends Layer {
     const domainScale = viewport ? 1024 / viewport.scale : 1;
 
     const {texture, maxTexture, colorTexture, intensity, threshold} = this.props;
-    const weightDomain = this.props.weightDomain.map(x => x * domainScale);
+    const colorDomain = this.props.colorDomain.map(x => x * domainScale);
     model
       .setUniforms({
         ...uniforms,
@@ -76,7 +76,7 @@ export default class TriangleLayer extends Layer {
         colorTexture,
         intensity,
         threshold,
-        weightDomain,
+        colorDomain,
         domainScale
       })
       .draw();

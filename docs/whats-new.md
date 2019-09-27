@@ -69,7 +69,7 @@ A new prop [getTooltip](/docs/api-reference/deck.md#gettooltip-function-optional
 - **Customizable device pixel ratio**: `Deck`'s `useDevicePixels` prop now accepts a number as well as boolean values.
 - **SimpleMeshLayer** and **ScenegraphLayer** now respect the `opacity` prop.
 - **IconLayer** has added a new prop `alphaCutoff` for customizing picking behavior.
-- **HeatmapLayer** is out of `Experimental` phase and can now be rendered using `WebGL1` context. A new prop `weightDomain` added for custom domain specification.
+- **HeatmapLayer** is out of `Experimental` phase and can now be rendered using `WebGL1` context. A new prop `colorDomain` added for custom domain specification.
 
 
 ## deck.gl v7.2

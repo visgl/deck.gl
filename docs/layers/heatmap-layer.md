@@ -96,16 +96,19 @@ The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight 
 
 `threshold` is defined as the ratio of the fading weight to the max weight, between `0` and `1`. For example, `0.1` affects all pixels with weight under 10% of the max.
 
-##### `weightDomain` (Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+`threshold` is ignored when `colorDomain` is specified.
 
-* Default: `[0, 0]`
+##### `colorDomain` (Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
 
-Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. Using `weightDomain`, any pixel with weight below `weightDomain[0] ` is discarded and pixel weights that are more than `weightDomain[1]` are clamped to `weightDomain[1]`. When `weightDomain[1]` is `0`, `HeatmapLayer` automatically calculates the maximum weight, which is the default behavior.
+* Default: `null`
+
+Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. When `colorDomain` is specified, all pixels weights are clamped to this range before mapping a color to each pixel.
+
+When not specified, `maximum weight` is auto calculated and domain will be set to [`0`, `maximum weight`].
 
 NOTES:
 - It is recommend to use default value for regular use cases.
-- Pixel weights change based on the zoom level, so to keep the rendering same, this range should be increased (when zoomed out) and decreased (when zoomed in) when zoom is changed.
-- On `Windows` browsers due to an ANGLE [issue](https://github.com/uber/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `weightDomain` should be used with a non zero maximum value.
+- On `Windows` browsers due to an ANGLE [issue](https://github.com/uber/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `colorDomain` should be used with a non zero maximum value.
 
 ### Data Accessors
 
