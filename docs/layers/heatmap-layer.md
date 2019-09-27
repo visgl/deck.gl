@@ -5,7 +5,7 @@
 </p>
 
 
-# HeatmapLayer **Experimental**
+# HeatmapLayer
 
 `HeatmapLayer` can be used to visualize spatial distribution of data. It internally implements [Gaussian Kernel Density Estimation](https://en.wikipedia.org/wiki/Kernel_(statistics%29#Kernel_functions_in_common_use) to render heatmaps.
 
@@ -97,6 +97,17 @@ Value that is multiplied with the total weight at a pixel to obtain the final we
 The `HeatmapLayer` reduces the opacity of the pixels with relatively low weight to create a fading effect at the edge. A larger `threshold` smoothens the boundaries of color blobs, while making pixels with low relative weight harder to spot (due to low alpha value).
 
 `threshold` is defined as the ratio of the fading weight to the max weight, between `0` and `1`. For example, `0.1` affects all pixels with weight under 10% of the max.
+
+##### `weightDomain` (Array, optional) ![transition-enabled](https://img.shields.io/badge/transition-enabled-green.svg?style=flat-square")
+
+* Default: `[0, 0]`
+
+Weight of each data object is distributed to to all the pixels in a circle centered at the object position, weight a pixel receives is inversely proportional to its distance from the center. Pixels that fall into multiple circles will have sum of all weights. And the weight of the pixel determines its color. Using `weightDomain`, any pixels that are out of the specified range are not rendered. When `weightDomain[1]` is `0`, `HeatmapLayer` automatically calculates the maximum weight, which is the default behavior.
+
+NOTES:
+- It is recommend to use default value for regular use cases.
+- Pixel weights change based on the zoom level, so to keep the rendering same, this range should be increased (when zoomed out) and decreased (when zoomed in) when zoom is changed.
+- On `Windows` browsers due to an ANGLE [issue](https://github.com/uber/deck.gl/issues/3554), auto calculation of maximum weight doesn't work, hence on `Windows`, `weightDomain` should be used with a non zero maximum value.
 
 ### Data Accessors
 
