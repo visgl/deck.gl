@@ -55,6 +55,7 @@ vec2 rotate_by_angle(vec2 vertex, float angle) {
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = positions;
+  geometry.pickingColor = instancePickingColors;
   uv = positions;
 
   vec2 iconSize = instanceIconFrames.zw;
@@ -99,8 +100,5 @@ void main(void) {
   DECKGL_FILTER_COLOR(vColor, geometry);
 
   vColorMode = instanceColorModes;
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;

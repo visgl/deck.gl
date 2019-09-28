@@ -11,12 +11,11 @@ varying vec2 vTexCoord;
 void main(void) {
   geometry.worldPosition = positions;
   geometry.uv = texCoords;
+  geometry.pickingColor = instancePickingColors;
 
   gl_Position = project_position_to_clipspace(positions, positions64xyLow, vec3(0.0), geometry.position);
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   vTexCoord = texCoords;
-
-  picking_setPickingColor(instancePickingColors);
 }
 `;

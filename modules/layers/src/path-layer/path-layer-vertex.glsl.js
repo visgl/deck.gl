@@ -215,11 +215,9 @@ void clipLine(inout vec4 position, vec4 refPosition) {
 void main() {
   geometry.worldPosition = instanceStartPositions;
   geometry.worldPositionAlt = instanceEndPositions;
+  geometry.pickingColor = instancePickingColors;
 
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 
   float isEnd = positions.x;
 

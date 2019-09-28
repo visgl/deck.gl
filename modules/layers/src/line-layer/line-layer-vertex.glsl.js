@@ -71,6 +71,7 @@ void main(void) {
   geometry.position = mix(source_commonspace, target_commonspace, segmentIndex);
   uv = positions.xy;
   geometry.uv = uv;
+  geometry.pickingColor = instancePickingColors;
 
   // extrude
   vec3 offset = vec3(
@@ -83,8 +84,5 @@ void main(void) {
   // Color
   vColor = vec4(instanceColors.rgb, instanceColors.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;
