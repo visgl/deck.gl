@@ -57,6 +57,7 @@ export default class DeckPicker {
     layers,
     viewports,
     activateViewport,
+    unproject3D,
     depth = 1,
     event = null
   }) {
@@ -70,6 +71,7 @@ export default class DeckPicker {
       layers,
       mode,
       depth,
+      unproject3D,
       // Injected params
       viewports,
       onViewportActive: activateViewport
@@ -129,7 +131,17 @@ export default class DeckPicker {
 
   // Pick the closest object at the given (x,y) coordinate
   // eslint-disable-next-line max-statements
-  pickClosestObject({layers, viewports, x, y, radius, depth = 1, mode, onViewportActive}) {
+  pickClosestObject({
+    layers,
+    viewports,
+    x,
+    y,
+    radius,
+    depth = 1,
+    mode,
+    unproject3D,
+    onViewportActive
+  }) {
     this.updatePickingBuffer();
     // Convert from canvas top-left to WebGL bottom-left coordinates
     // Top-left coordinates [x, y] to bottom-left coordinates [deviceX, deviceY]
@@ -175,6 +187,21 @@ export default class DeckPicker {
         deviceRect
       });
 
+      let z = 0;
+      if (pickInfo.pickedLayer && unproject3D) {
+        const zValues = this.drawAndSamplePickingBuffer({
+          layers: [pickInfo.pickedLayer],
+          viewports,
+          onViewportActive,
+          deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
+          redrawReason: 'pick-z',
+          drawZ: true
+        });
+
+        z = zValues[0] * 255 + zValues[1] + zValues[2] / 255;
+        z *= viewports[0].distanceScales.metersPerPixel[2];
+      }
+
       // Only exclude if we need to run picking again.
       // We need to run picking again if an object is detected AND
       // we have not exhausted the requested depth.
@@ -193,8 +220,7 @@ export default class DeckPicker {
         viewports,
         x,
         y,
-        deviceX: devicePixel[0],
-        deviceY: devicePixel[1],
+        z,
         pixelRatio
       });
 
@@ -279,7 +305,14 @@ export default class DeckPicker {
   }
 
   // returns pickedColor or null if no pickable layers found.
-  drawAndSamplePickingBuffer({layers, viewports, onViewportActive, deviceRect, redrawReason}) {
+  drawAndSamplePickingBuffer({
+    layers,
+    viewports,
+    onViewportActive,
+    deviceRect,
+    redrawReason,
+    drawZ
+  }) {
     assert(deviceRect);
     assert(Number.isFinite(deviceRect.width) && deviceRect.width > 0, '`width` must be > 0');
     assert(Number.isFinite(deviceRect.height) && deviceRect.height > 0, '`height` must be > 0');
@@ -301,7 +334,8 @@ export default class DeckPicker {
       pickingFBO,
       deviceRect,
       redrawReason,
-      effectProps
+      effectProps,
+      drawZ
     });
 
     // Read from an already rendered picking buffer
@@ -315,6 +349,7 @@ export default class DeckPicker {
       sourceHeight: height,
       target: pickedColors
     });
+
     return pickedColors;
   }
 

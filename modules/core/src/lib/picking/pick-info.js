@@ -29,8 +29,7 @@ export function processPickInfo({
   viewports,
   x,
   y,
-  deviceX,
-  deviceY,
+  z,
   pixelRatio
 }) {
   const {pickedColor, pickedLayer, pickedObjectIndex} = pickInfo;
@@ -64,7 +63,7 @@ export function processPickInfo({
   }
 
   const viewport = getViewportFromCoordinates({viewports}); // TODO - add coords
-  const coordinate = viewport && viewport.unproject([x, y]);
+  const coordinate = viewport && viewport.unproject([x, y], {targetZ: z});
 
   const baseInfo = {
     color: null,
@@ -77,7 +76,7 @@ export function processPickInfo({
     coordinate,
     // TODO remove the lngLat prop after compatibility check
     lngLat: coordinate,
-    devicePixel: [deviceX, deviceY],
+    devicePixel: [pickInfo.pickedX, pickInfo.pickedY],
     pixelRatio
   };
 
