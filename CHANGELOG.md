@@ -21,6 +21,11 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ### deck.gl v7.3 Prereleases
 
+#### deck.gl [v7.3.0-beta.9] - Sep 27 2019
+
+- HeatmapLayer: Add 'colorDomain' prop (#3714)
+- Bump luma to prod version (#3712)
+
 #### deck.gl [v7.3.0-beta.8] - Sep 26 2019
 
 - Allow pydeck user to modify tooltip text (#3690)
