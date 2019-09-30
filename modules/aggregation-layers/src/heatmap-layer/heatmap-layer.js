@@ -123,10 +123,18 @@ export default class HeatmapLayer extends CompositeLayer {
 
     if (oldProps.colorDomain !== props.colorDomain || changeFlags.viewportChanged) {
       const {viewport} = this.context;
-      const domainScale = viewport ? 1024 / viewport.scale : 1;
+      const {weightsScale} = this.state;
+      const domainScale = (viewport ? 1024 / viewport.scale : 1) * weightsScale;
       const colorDomain = props.colorDomain
         ? props.colorDomain.map(x => x * domainScale)
         : DEFAULT_COLOR_DOMAIN;
+      if (colorDomain[1] > 0 && weightsScale < 1) {
+        // Hack - when low precision texture is used, aggregated weights are in the [0, 1]
+        // range. Scale colorDomain to fit.
+        const max = Math.min(colorDomain[1], 1);
+        colorDomain[0] *= max / colorDomain[1];
+        colorDomain[1] = max;
+      }
       this.setState({colorDomain});
     }
 
