@@ -79,7 +79,10 @@ export default class BaseAttribute {
 
       // Create buffer if needed
       if (!constant && this.gl) {
-        this.buffer = this.buffer || this._createBuffer();
+        this.buffer = this.buffer || new Buffer(this.gl, {
+          id: this.id,
+          target: this.target
+        });
         this.buffer.setData({data: value});
         this.type = this.buffer.accessor.type;
       }
@@ -108,13 +111,6 @@ export default class BaseAttribute {
       return [buffer, this];
     }
     return null;
-  }
-
-  _createBuffer() {
-    return new Buffer(this.gl, {
-      id: this.id,
-      target: this.target
-    });
   }
 
   // Sets all accessor props except type
