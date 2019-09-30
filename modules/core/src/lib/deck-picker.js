@@ -187,7 +187,7 @@ export default class DeckPicker {
         deviceRect
       });
 
-      let z = 0;
+      let z;
       if (pickInfo.pickedLayer && unproject3D) {
         const zValues = this.drawAndSamplePickingBuffer({
           layers: [pickInfo.pickedLayer],
@@ -198,7 +198,7 @@ export default class DeckPicker {
           drawZ: true
         });
 
-        z = zValues[0] * 255 + zValues[1] + zValues[2] / 255;
+        z = (zValues[0] / 256 + zValues[1] + zValues[2] * 256) / 16;
         z *= viewports[0].distanceScales.metersPerPixel[2];
       }
 

@@ -29,7 +29,6 @@ createModuleInjection('picking', {
 
 export default {
   ...picking,
-  dependencies: ['project'],
   getUniforms: opts => {
     const uniforms = picking.getUniforms(opts);
     if (opts && opts.pickingActive !== undefined) {
@@ -38,15 +37,18 @@ export default {
     return uniforms;
   },
   vs: `\
-const vec3 bitPackShift = vec3(1.0 / 65025.0, 1.0 / 255.0, 1.0);
+// z is in common space (pixels). This packing supports up to 4096p viewport @resolution 1/256/16 (0.02%)
+const vec3 bitPackShift = vec3(16.0, 1.0 / 16.0, 1.0 / 4096.0);
+const float packUpscale = 256.0 / 255.0;
+const float shiftRight = 1. / 256.;
 
 uniform bool picking_uDrawZ;
 ${picking.vs}
 
 void picking_setZ(float z, vec3 pickingColor) {
   vec3 rgbZ = fract(z * bitPackShift);
-  rgbZ.rg -= rgbZ.gb / 255.0;
-  picking_vRGBcolor_Aselected.rgb = rgbZ;
+  rgbZ.gb -= rgbZ.rg * shiftRight;
+  picking_vRGBcolor_Aselected.rgb = rgbZ * packUpscale;
   // Use alpha as the validity flag. If pickingColor is [0, 0, 0] fragment is non-pickable
   picking_vRGBcolor_Aselected.a = step(0.5, length(pickingColor));
 }
