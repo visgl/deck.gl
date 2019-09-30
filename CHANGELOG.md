@@ -19,6 +19,8 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.0] - Sep 30 2019
+
 ### deck.gl v7.3 Prereleases
 
 #### deck.gl [v7.3.0-beta.9] - Sep 27 2019
