@@ -19,6 +19,10 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.1] - Sep 30 2019
+
+- Clamp HeatmapLayer colorDomain on iOS (#3723)
+
 #### deck.gl [v7.3.0] - Sep 30 2019
 
 ### deck.gl v7.3 Prereleases

@@ -4,7 +4,7 @@ This page contains highlights of each deck.gl release. Also check our [vis.gl bl
 
 ## deck.gl v7.3
 
-Release Date: Sep xx, 2019
+Release Date: Sep 30, 2019
 
 <table style="border: 0;" align="center">
   <tbody>
