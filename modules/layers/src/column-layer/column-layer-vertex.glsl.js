@@ -53,7 +53,7 @@ varying vec4 vColor;
 
 void main(void) {
   geometry.worldPosition = instancePositions;
-  
+
   vec4 color = isStroke ? instanceLineColors : instanceFillColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
@@ -77,6 +77,7 @@ void main(void) {
   float dotRadius = radius * coverage * shouldRender;
 
   geometry.normal = project_normal(vec3(rotationMatrix * normals.xy, normals.z));
+  geometry.pickingColor = instancePickingColors;
 
   // project center of column
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
@@ -95,8 +96,5 @@ void main(void) {
     vColor = vec4(color.rgb, color.a * opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;

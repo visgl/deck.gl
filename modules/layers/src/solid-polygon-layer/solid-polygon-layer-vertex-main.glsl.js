@@ -60,6 +60,7 @@ void calculatePosition(PolygonProps props) {
 
   geometry.worldPosition = props.positions;
   geometry.worldPositionAlt = props.nextPositions;
+  geometry.pickingColor = props.pickingColors;
 
 #ifdef IS_SIDE_VERTEX
   pos = mix(props.positions, props.nextPositions, vertexPositions.x);
@@ -93,8 +94,5 @@ void calculatePosition(PolygonProps props) {
     vColor = vec4(colors.rgb, colors.a * opacity);
   }
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(props.pickingColors);
 }
 `;

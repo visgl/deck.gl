@@ -27,6 +27,7 @@ varying vec4 vColor;
 void main(void) {
   geometry.worldPosition = instancePositions;
   geometry.uv = texCoords;
+  geometry.pickingColor = instancePickingColors;
 
   vTexCoord = texCoords;
   cameraPosition = project_uCameraPosition;
@@ -43,7 +44,5 @@ void main(void) {
   DECKGL_FILTER_GL_POSITION(gl_Position, geometry);
 
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  picking_setPickingColor(instancePickingColors);
 }
 `;

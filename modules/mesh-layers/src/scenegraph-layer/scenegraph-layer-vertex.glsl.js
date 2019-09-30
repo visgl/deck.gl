@@ -51,6 +51,7 @@ void main(void) {
   #endif
 
   geometry.worldPosition = instancePositions;
+  geometry.pickingColor = instancePickingColors;
 
   #ifdef MODULE_PBR
     // set PBR data
@@ -87,7 +88,5 @@ void main(void) {
 
   vColor = instanceColors;
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  picking_setPickingColor(instancePickingColors);
 }
 `;

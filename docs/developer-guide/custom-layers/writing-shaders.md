@@ -138,6 +138,7 @@ Arguments:
 - `vec3 normal` - The normal at the current vertex in common space. Only populated for 3D layers.
 - `vec2 uv` - The uv position at the current vertex.
 - `vec4 position` - The position of the current vertex in common space. Populated during projection.
+- `vec3 pickingColor` - The picking color of the current vertex.
 
 ### FragmentGeometry struct
 

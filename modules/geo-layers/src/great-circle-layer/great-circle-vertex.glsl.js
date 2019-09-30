@@ -91,6 +91,7 @@ void main(void) {
   float segmentRatio = getSegmentRatio(segmentIndex);
   uv = vec2(segmentRatio, positions.y);
   geometry.uv = uv;
+  geometry.pickingColor = instancePickingColors;
   
   // if it's the first point, use next - current as direction
   // otherwise use current - prev
@@ -129,8 +130,5 @@ void main(void) {
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
   vColor = vec4(color.rgb, color.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;

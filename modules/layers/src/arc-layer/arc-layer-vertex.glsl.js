@@ -99,6 +99,7 @@ void main(void) {
   geometry.position = vec4(currPos, 1.0);
   uv = vec2(segmentRatio, positions.y);
   geometry.uv = uv;
+  geometry.pickingColor = instancePickingColors;
 
   // Multiply out width and clamp to limits
   // mercator pixels are interpreted as screen pixels
@@ -118,8 +119,5 @@ void main(void) {
   vec4 color = mix(instanceSourceColors, instanceTargetColors, segmentRatio);
   vColor = vec4(color.rgb, color.a * opacity);
   DECKGL_FILTER_COLOR(vColor, geometry);
-
-  // Set color to be rendered to picking fbo (also used to check for selection highlight).
-  picking_setPickingColor(instancePickingColors);
 }
 `;
