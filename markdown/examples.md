@@ -18,7 +18,7 @@
   <div class="thumb">
     <div class="bg-black" data-title="Road Safety in UK" data-name="HexagonLayer">
       <a href="#/examples/core-layers/hexagon-layer">
-        <img src="images/demo-thumb-heatmap.jpg" />
+        <img src="images/demo-thumb-hexagon.jpg" />
       </a>
       </div>
   </div>
@@ -83,7 +83,21 @@
         <a href="#/examples/core-layers/trips-layer">
           <img src="images/demo-thumb-trip.jpg" />
         </a>
-        </div>
+      </div>
+    </div>
+    <div class="thumb">
+      <div class="bg-black" data-title="Uber Pickup Locations" data-name="HeatmapLayer">
+        <a href="#/examples/core-layers/heatmap-layer">
+          <img src="images/demo-thumb-heatmap.jpg" />
+        </a>
+      </div>
+    </div>
+    <div class="thumb">
+      <div class="bg-black" data-title="Melbourne Point Cloud" data-name="Tile3DLayer">
+        <a href="#/examples/core-layers/tile3-dlayer">
+          <img src="images/demo-thumb-3d-tiles.jpg" />
+        </a>
+      </div>
     </div>
 </div>
 
@@ -112,3 +126,16 @@
       </div>
   </div>
 </div>
+
+### Declarative Layers
+
+<div>
+  <div class="thumb">
+    <div data-title="Playground" data-name="@deck.gl/json">
+      <a href="https://deck.gl/json">
+        <img src="images/demo-thumb-playground.jpg" />
+      </a>
+    </div>
+  </div>
+</div>
+

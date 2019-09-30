@@ -24,7 +24,7 @@ onmessage = function onmessage(e) {
 
     result.push({
       name: parts[0],
-      class: parts[1],
+      "class": parts[1],
       coordinates: coordinates[decodeNumber(parts[2], 90, 32)],
       mass: decodeNumber(parts[3], 90, 32),
       year: decodeNumber(parts[4], 90, 32)

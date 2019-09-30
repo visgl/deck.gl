@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+    <title>deck.gl ColumnLayer Example | WebGL visualization</title>
+    <link rel="stylesheet" id="font-link" href="https://d1a3f4spazzrp4.cloudfront.net/uber-fonts/3.1.0/refresh.css">
+
+    <meta name="description" content="WebGL-based visualization examples using deck.gl">
+
+    <link rel="icon" type="img/ico" href="https://uber.github.io/deck.gl/favicon.ico">
+
+    <!-— facebook open graph tags -->
+    <meta property="og:url" content="https://uber.github.io/deck.gl/showcases/gallery" />
+    <meta property="og:title" content="deck.gl ColumnLayer Example | WebGL visualization" />
+    <meta property="og:description" content="WebGL-based visualization examples using deck.gl" />
+    <meta property="og:site_name" content="deck.gl" />
+    <meta property="og:image" content="https://uber.github.io/deck.gl/showcases/gallery/images/column-layer.png" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="800" />
+    <meta property="og:image:height" content="480" />
+    
+    <!-— twitter card tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@uber">
+    <meta name="twitter:creator" content="@uber">
+    <meta name="twitter:title" content="deck.gl ColumnLayer Example | WebGL visualization">
+    <meta name="twitter:description" content="WebGL-based visualization examples using deck.gl">
+    <meta name="twitter:image" content="https://uber.github.io/deck.gl/showcases/gallery/images/column-layer.png" />
+
+    <style>
+      body {font-family: ff-clan-web-pro, "Helvetica Neue", Helvetica, sans-serif !important; font-size: 12px;}
+      #container {width: 100%; max-width: 960px; padding: 40px 12px; margin: auto;}
+      #source {margin: 12px 0; border: solid 1px #ccc; padding: 24px}
+      #links {margin: 12px 0;}
+      #links a {text-decoration: none; color: #444;}
+      #links a:hover {color: #08f;}
+    </style>
+
+    <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-7157694-83', 'auto');
+  ga('send', 'pageview');
+</script>
+  </head>
+  <body>
+    <div id="container">
+      <h1>deck.gl ColumnLayer Example</h1>
+      <div id="links">
+        <a href="./">↩ Back to Gallery</a>
+      </div>
+      <h2>Demo</h2>
+      <iframe width="100%" height="450" frameborder="0" ></iframe>
+      <h2>Source</h2>
+      <div id="source">
+        <code class="prettyprint">&lt;html&gt;<br/>&nbsp;&nbsp;&lt;head&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;title&gt;deck.gl ColumnLayer Example&lt;/title&gt;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;script src="https://unpkg.com/deck.gl@^7.0.0/dist.min.js"&gt;&lt;/script&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;script src="https://api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js"&gt;&lt;/script&gt;<br/><br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;style type="text/css"&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;body {<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;width: 100vw;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;height: 100vh;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;margin: 0;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br/>&nbsp;&nbsp;&nbsp;&nbsp;&lt;/style&gt;<br/>&nbsp;&nbsp;&lt;/head&gt;<br/><br/>&nbsp;&nbsp;&lt;body&gt;&lt;/body&gt;<br/><br/>&nbsp;&nbsp;&lt;script type="text/javascript"&gt;<br/>&nbsp;&nbsp;&nbsp;&nbsp;const {DeckGL, ColumnLayer} = deck;<br/>&nbsp;&nbsp;&nbsp;&nbsp;new DeckGL({<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mapboxApiAccessToken: '&lt;mapbox-access-token&gt;',<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mapStyle: 'mapbox://styles/mapbox/dark-v9',<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;longitude: -122.4,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;latitude: 37.74,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zoom: 10,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;maxZoom: 15,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pitch: 30,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;layers: [<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;new ColumnLayer({<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;id: 'column',<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;data:<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'https://raw.githubusercontent.com/uber-common/deck.gl-data/master/website/hexagons.json',<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;diskResolution: 12,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;radius: 250,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;elevationScale: 5000,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getPosition: d =&gt; d.centroid,<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getFillColor: d =&gt; [48, 128, d.value * 255, 255],<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getElevation: d =&gt; d.value<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;})<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br/>&nbsp;&nbsp;&nbsp;&nbsp;});<br/>&nbsp;&nbsp;&lt;/script&gt;<br/>&lt;/html&gt;<br/></code>
+      </div>
+    </div>
+    <script>var src = unescape('%3Chtml%3E%0A%20%20%3Chead%3E%0A%20%20%20%20%3Ctitle%3Edeck.gl%20ColumnLayer%20Example%3C/title%3E%0A%0A%20%20%20%20%3Cscript%20src%3D%22https%3A//unpkg.com/deck.gl@%5E7.0.0/dist.min.js%22%3E%3C/script%3E%0A%20%20%20%20%3Cscript%20src%3D%22https%3A//api.tiles.mapbox.com/mapbox-gl-js/v0.50.0/mapbox-gl.js%22%3E%3C/script%3E%0A%0A%20%20%20%20%3Cstyle%20type%3D%22text/css%22%3E%0A%20%20%20%20%20%20body%20%7B%0A%20%20%20%20%20%20%20%20width%3A%20100vw%3B%0A%20%20%20%20%20%20%20%20height%3A%20100vh%3B%0A%20%20%20%20%20%20%20%20margin%3A%200%3B%0A%20%20%20%20%20%20%7D%0A%20%20%20%20%3C/style%3E%0A%20%20%3C/head%3E%0A%0A%20%20%3Cbody%3E%3C/body%3E%0A%0A%20%20%3Cscript%20type%3D%22text/javascript%22%3E%0A%20%20%20%20const%20%7BDeckGL%2C%20ColumnLayer%7D%20%3D%20deck%3B%0A%20%20%20%20new%20DeckGL%28%7B%0A%20%20%20%20%20%20mapboxApiAccessToken%3A%20%27pk.eyJ1IjoidWJlcmRhdGEiLCJhIjoiY2pwY3owbGFxMDVwNTNxcXdwMms2OWtzbiJ9.1PPVl0VLUQgqrosrI2nUhg%27%2C%0A%20%20%20%20%20%20mapStyle%3A%20%27mapbox%3A//styles/mapbox/dark-v9%27%2C%0A%20%20%20%20%20%20longitude%3A%20-122.4%2C%0A%20%20%20%20%20%20latitude%3A%2037.74%2C%0A%20%20%20%20%20%20zoom%3A%2010%2C%0A%20%20%20%20%20%20maxZoom%3A%2015%2C%0A%20%20%20%20%20%20pitch%3A%2030%2C%0A%20%20%20%20%20%20layers%3A%20%5B%0A%20%20%20%20%20%20%20%20new%20ColumnLayer%28%7B%0A%20%20%20%20%20%20%20%20%20%20id%3A%20%27column%27%2C%0A%20%20%20%20%20%20%20%20%20%20data%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%27https%3A//raw.githubusercontent.com/uber-common/deck.gl-data/master/website/hexagons.json%27%2C%0A%20%20%20%20%20%20%20%20%20%20diskResolution%3A%2012%2C%0A%20%20%20%20%20%20%20%20%20%20radius%3A%20250%2C%0A%20%20%20%20%20%20%20%20%20%20elevationScale%3A%205000%2C%0A%20%20%20%20%20%20%20%20%20%20getPosition%3A%20d%20%3D%3E%20d.centroid%2C%0A%20%20%20%20%20%20%20%20%20%20getFillColor%3A%20d%20%3D%3E%20%5B48%2C%20128%2C%20d.value%20*%20255%2C%20255%5D%2C%0A%20%20%20%20%20%20%20%20%20%20getElevation%3A%20d%20%3D%3E%20d.value%0A%20%20%20%20%20%20%20%20%7D%29%0A%20%20%20%20%20%20%5D%0A%20%20%20%20%7D%29%3B%0A%20%20%3C/script%3E%0A%3C/html%3E%0A');</script>
+    <script type="text/javascript">
+      var blob = new Blob([src], {type: 'text/html'});
+      document.querySelector('iframe').src = URL.createObjectURL(blob);
+    </script>
+  </body>
+</html>

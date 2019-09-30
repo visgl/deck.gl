@@ -30,30 +30,30 @@ function decodePolyline(str, precision) {
       coordinates = [],
       shift = 0,
       result = 0,
-      byte = null,
+      _byte = null,
       latitude_change,
       longitude_change,
       factor = Math.pow(10, precision || 5);
 
   while (index < str.length) {
-    byte = null;
+    _byte = null;
     shift = 0;
     result = 0;
 
     do {
-      byte = str.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
+      _byte = str.charCodeAt(index++) - 63;
+      result |= (_byte & 0x1f) << shift;
       shift += 5;
-    } while (byte >= 0x20);
+    } while (_byte >= 0x20);
 
     latitude_change = result & 1 ? ~(result >> 1) : result >> 1;
     shift = result = 0;
 
     do {
-      byte = str.charCodeAt(index++) - 63;
-      result |= (byte & 0x1f) << shift;
+      _byte = str.charCodeAt(index++) - 63;
+      result |= (_byte & 0x1f) << shift;
       shift += 5;
-    } while (byte >= 0x20);
+    } while (_byte >= 0x20);
 
     longitude_change = result & 1 ? ~(result >> 1) : result >> 1;
     lat += latitude_change;
