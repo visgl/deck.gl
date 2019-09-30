@@ -51,7 +51,9 @@ uniform float widthMaxPixels;
 // Result
 varying vec4 vColor;
 
-void main(void) {  
+void main(void) {
+  geometry.worldPosition = instancePositions;
+
   vec4 color = isStroke ? instanceLineColors : instanceFillColors;
   // rotate primitive position and normal
   mat2 rotationMatrix = mat2(cos(angle), sin(angle), -sin(angle), cos(angle));
@@ -81,7 +83,6 @@ void main(void) {
   vec3 centroidPosition = vec3(instancePositions.xy, instancePositions.z + elevation);
   vec2 centroidPosition64xyLow = instancePositions64xyLow;
   vec3 pos = vec3(project_size(rotationMatrix * positions.xy * strokeOffsetRatio + offset) * dotRadius, 0.);
-  geometry.worldPosition = centroidPosition;
   DECKGL_FILTER_SIZE(pos, geometry);
 
   gl_Position = project_position_to_clipspace(centroidPosition, centroidPosition64xyLow, pos, geometry.position);

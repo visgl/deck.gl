@@ -73,10 +73,7 @@ void calculatePosition(PolygonProps props) {
 #endif
 
   if (extruded) {
-    float elevation = props.elevations * vertexPositions.y * elevationScale;
-    pos.z += elevation;
-    geometry.worldPosition.z += elevation;
-    geometry.worldPositionAlt.z += elevation;
+    pos.z += props.elevations * vertexPositions.y * elevationScale;
     
 #ifdef IS_SIDE_VERTEX
     normal = vec3(props.positions.y - props.nextPositions.y, props.nextPositions.x - props.positions.x, 0.0);
