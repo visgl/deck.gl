@@ -195,10 +195,10 @@ export default class DeckPicker {
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
           redrawReason: 'pick-z',
-          drawZ: true
+          pickZ: true
         });
 
-        z = (zValues[0] / 256 + zValues[1] + zValues[2] * 256) / 16;
+        z = (zValues[0] / 65536 + zValues[1] / 256 + zValues[2]) / 256 * viewports[0].height * pixelRatio;
         z *= viewports[0].distanceScales.metersPerPixel[2];
       }
 
@@ -311,7 +311,7 @@ export default class DeckPicker {
     onViewportActive,
     deviceRect,
     redrawReason,
-    drawZ
+    pickZ
   }) {
     assert(deviceRect);
     assert(Number.isFinite(deviceRect.width) && deviceRect.width > 0, '`width` must be > 0');
@@ -335,7 +335,7 @@ export default class DeckPicker {
       deviceRect,
       redrawReason,
       effectProps,
-      drawZ
+      pickZ
     });
 
     // Read from an already rendered picking buffer

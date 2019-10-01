@@ -21,9 +21,9 @@ export default class PickLayersPass extends LayersPass {
     effectProps,
     deviceRect: {x, y, width, height},
     redrawReason = '',
-    drawZ
+    pickZ
   }) {
-    effectProps.drawZ = drawZ;
+    effectProps.pickZ = pickZ;
 
     const gl = this.gl;
     // Make sure we clear scissor test and fbo bindings in case of exceptions
@@ -54,7 +54,7 @@ export default class PickLayersPass extends LayersPass {
           colorMask: [true, true, true, true]
         };
 
-        if (drawZ) {
+        if (pickZ) {
           parameters.blend = false;
         }
 
@@ -86,7 +86,7 @@ export default class PickLayersPass extends LayersPass {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
-      pickingDrawZ: effectProps.drawZ,
+      pickingAttribute: effectProps.pickZ,
       devicePixelRatio: cssToDeviceRatio(this.gl)
     });
 
