@@ -35,7 +35,7 @@ test('DeckPicker#getPickingRect', t => {
 
   for (const testCase of DEVICE_RECT_TEST_CASES) {
     t.deepEqual(
-      deckPicker.getPickingRect(testCase.input),
+      deckPicker._getPickingRect(testCase.input),
       testCase.output,
       `${testCase.title}: returns correct result`
     );
