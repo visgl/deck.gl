@@ -3,13 +3,9 @@ import {picking, createModuleInjection} from '@luma.gl/core';
 createModuleInjection('picking', {
   hook: 'vs:DECKGL_FILTER_COLOR',
   injection: `
-  if (picking_uAttribute) {
-    // z is in common space (pixels). Normalize it by viewport height
-    float z = geometry.position.z / project_uViewportSize.y;
-    picking_setPickingAttribute(geometry.pickingColor, z);
-  } else {
     picking_setPickingColor(geometry.pickingColor);
-  }
+    // for picking depth values
+    picking_setPickingAttribute(geometry.position.z);
 `
 });
 

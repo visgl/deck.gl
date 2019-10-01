@@ -219,6 +219,11 @@ export default class Deck {
       this.deckRenderer = null;
     }
 
+    if (this.deckPicker) {
+      this.deckPicker.finalize();
+      this.deckPicker = null;
+    }
+
     if (this.eventManager) {
       this.eventManager.destroy();
     }

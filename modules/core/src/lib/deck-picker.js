@@ -18,7 +18,15 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import {Framebuffer, readPixelsToArray, cssToDeviceRatio, cssToDevicePixels} from '@luma.gl/core';
+import {
+  Framebuffer,
+  Texture2D,
+  isWebGL2,
+  readPixelsToArray,
+  cssToDeviceRatio,
+  cssToDevicePixels
+} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
 import assert from '../utils/assert';
 import PickLayersPass from '../passes/pick-layers-pass';
 import {getClosestObject, getUniqueObjects} from './picking/query-object';
@@ -46,6 +54,16 @@ export default class DeckPicker {
     this.pickLayersPass.setProps({
       layerFilter: this.layerFilter
     });
+  }
+
+  finalize() {
+    if (this.pickingFBO) {
+      this.pickingFBO.delete();
+    }
+    if (this.depthFBO) {
+      this.depthFBO.color.delete();
+      this.depthFBO.delete();
+    }
   }
 
   // Pick the closest info at given coordinate
@@ -123,14 +141,24 @@ export default class DeckPicker {
     // Create a frame buffer if not already available
     if (!this.pickingFBO) {
       this.pickingFBO = new Framebuffer(gl);
+      if (Framebuffer.isSupported(gl, {colorBufferFloat: true})) {
+        this.depthFBO = new Framebuffer(gl);
+        this.depthFBO.attach({
+          [GL.COLOR_ATTACHMENT0]: new Texture2D(gl, {
+            format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+            type: GL.FLOAT
+          })
+        });
+      }
     }
     // Resize it to current canvas size (this is a noop if size hasn't changed)
     this.pickingFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
+    this.depthFBO.resize({width: gl.canvas.width, height: gl.canvas.height});
     return this.pickingFBO;
   }
 
   // Pick the closest object at the given (x,y) coordinate
-  // eslint-disable-next-line max-statements
+  // eslint-disable-next-line max-statements,complexity
   pickClosestObject({
     layers,
     viewports,
@@ -188,7 +216,7 @@ export default class DeckPicker {
       });
 
       let z;
-      if (pickInfo.pickedLayer && unproject3D) {
+      if (pickInfo.pickedLayer && unproject3D && this.depthFBO) {
         const zValues = this.drawAndSamplePickingBuffer({
           layers: [pickInfo.pickedLayer],
           viewports,
@@ -197,9 +225,8 @@ export default class DeckPicker {
           redrawReason: 'pick-z',
           pickZ: true
         });
-
-        z = (zValues[0] / 65536 + zValues[1] / 256 + zValues[2]) / 256 * viewports[0].height * pixelRatio;
-        z *= viewports[0].distanceScales.metersPerPixel[2];
+        // picked value is in common space (pixels)
+        z = zValues[0] * viewports[0].distanceScales.metersPerPixel[2];
       }
 
       // Only exclude if we need to run picking again.
@@ -322,7 +349,7 @@ export default class DeckPicker {
       return null;
     }
 
-    const pickingFBO = this.pickingFBO;
+    const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
     // turn off lighting by adding empty light source object
     // lights shader module relies on the `lightSources` to turn on/off lighting
     const effectProps = {lightSources: {}};
@@ -341,7 +368,7 @@ export default class DeckPicker {
     // Read from an already rendered picking buffer
     // Returns an Uint8ClampedArray of picked pixels
     const {x, y, width, height} = deviceRect;
-    const pickedColors = new Uint8Array(width * height * 4);
+    const pickedColors = new (pickZ ? Float32Array : Uint8Array)(width * height * 4);
     readPixelsToArray(pickingFBO, {
       sourceX: x,
       sourceY: y,
