@@ -4,6 +4,8 @@ createModuleInjection('picking', {
   hook: 'vs:DECKGL_FILTER_COLOR',
   injection: `
     picking_setPickingColor(geometry.pickingColor);
+    // for picking depth values
+    picking_setPickingAttribute(geometry.position.z);
 `
 });
 
@@ -16,7 +18,7 @@ createModuleInjection('picking', {
 
     // use picking color if rendering to picking FBO.
     color = picking_filterPickingColor(color);
-  `
+`
 });
 
 export default picking;

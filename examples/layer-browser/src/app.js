@@ -124,7 +124,7 @@ export default class App extends PureComponent {
   }
 
   _multiDepthPick({x, y}) {
-    this.mapRef.current.pickMultipleObjects({x, y});
+    this.mapRef.current.pickMultipleObjects({x, y, unproject3D: true});
   }
 
   _renderExampleLayer(example, settings, index) {

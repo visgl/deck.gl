@@ -80,7 +80,9 @@ export function getClosestObject({
       const pickedLayer = layers[pickedLayerIndex];
       if (pickedLayer) {
         const pickedObjectIndex = pickedLayer.decodePickingColor(pickedColor);
-        return {pickedColor, pickedLayer, pickedObjectIndex};
+        const dy = Math.floor(closestPixelIndex / 4 / width);
+        const dx = closestPixelIndex / 4 - dy * width;
+        return {pickedColor, pickedLayer, pickedObjectIndex, pickedX: x + dx, pickedY: y + dy};
       }
       log.error('Picked non-existent layer. Is picking buffer corrupt?')();
     }

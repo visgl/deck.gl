@@ -219,6 +219,11 @@ export default class Deck {
       this.deckRenderer = null;
     }
 
+    if (this.deckPicker) {
+      this.deckPicker.finalize();
+      this.deckPicker = null;
+    }
+
     if (this.eventManager) {
       this.eventManager.destroy();
     }
@@ -351,7 +356,7 @@ export default class Deck {
     return this.viewManager.getViewports(rect);
   }
 
-  pickObject({x, y, radius = 0, layerIds = null}) {
+  pickObject({x, y, radius = 0, layerIds = null, unproject3D}) {
     this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickObject Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
@@ -360,6 +365,7 @@ export default class Deck {
       x,
       y,
       radius,
+      unproject3D,
       layers,
       viewports: this.getViewports({x, y}),
       activateViewport,
@@ -370,7 +376,7 @@ export default class Deck {
     return selectedInfos.length ? selectedInfos[0] : null;
   }
 
-  pickMultipleObjects({x, y, radius = 0, layerIds = null, depth = 10}) {
+  pickMultipleObjects({x, y, radius = 0, layerIds = null, unproject3D, depth = 10}) {
     this.stats.get('Pick Count').incrementCount();
     this.stats.get('pickMultipleObjects Time').timeStart();
     const layers = this.layerManager.getLayers({layerIds});
@@ -379,6 +385,7 @@ export default class Deck {
       x,
       y,
       radius,
+      unproject3D,
       layers,
       viewports: this.getViewports({x, y}),
       activateViewport,

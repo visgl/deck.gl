@@ -20,8 +20,11 @@ export default class PickLayersPass extends LayersPass {
     pickingFBO,
     effectProps,
     deviceRect: {x, y, width, height},
-    redrawReason = ''
+    redrawReason = '',
+    pickZ
   }) {
+    effectProps.pickZ = pickZ;
+
     const gl = this.gl;
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
@@ -37,6 +40,24 @@ export default class PickLayersPass extends LayersPass {
         clearColor: [0, 0, 0, 0]
       },
       () => {
+        const parameters = {
+          blend: true,
+          blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
+          blendEquation: gl.FUNC_ADD,
+          blendColor: [0, 0, 0, 0],
+          // When used as Mapbox custom layer, the context state may be dirty
+          // TODO - Remove when mapbox fixes this issue
+          // https://github.com/mapbox/mapbox-gl-js/issues/7801
+          depthMask: true,
+          depthTest: true,
+          depthRange: [0, 1],
+          colorMask: [true, true, true, true]
+        };
+
+        if (pickZ) {
+          parameters.blend = false;
+        }
+
         this.drawLayers({
           layers,
           viewports,
@@ -44,20 +65,7 @@ export default class PickLayersPass extends LayersPass {
           pass: 'picking',
           redrawReason,
           effectProps,
-          parameters: {
-            blend: true,
-            blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-            blendEquation: gl.FUNC_ADD,
-            blendColor: [0, 0, 0, 0],
-
-            // When used as Mapbox custom layer, the context state may be dirty
-            // TODO - Remove when mapbox fixes this issue
-            // https://github.com/mapbox/mapbox-gl-js/issues/7801
-            depthMask: true,
-            depthTest: true,
-            depthRange: [0, 1],
-            colorMask: [true, true, true, true]
-          }
+          parameters
         });
       }
     );
@@ -78,6 +86,7 @@ export default class PickLayersPass extends LayersPass {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       pickingActive: 1,
+      pickingAttribute: effectProps.pickZ,
       devicePixelRatio: cssToDeviceRatio(this.gl)
     });
 
