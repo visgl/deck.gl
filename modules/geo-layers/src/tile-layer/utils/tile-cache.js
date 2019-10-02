@@ -25,7 +25,7 @@ export default class TileCache {
     if (Number.isFinite(maxZoom)) {
       this._maxZoom = Math.floor(maxZoom);
     }
-    if (Number.isFinite(maxZoom)) {
+    if (Number.isFinite(minZoom)) {
       this._minZoom = Math.ceil(minZoom);
     }
   }
