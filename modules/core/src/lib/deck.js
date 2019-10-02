@@ -356,65 +356,46 @@ export default class Deck {
     return this.viewManager.getViewports(rect);
   }
 
-  pickObject({x, y, radius = 0, layerIds = null, unproject3D}) {
-    this.stats.get('Pick Count').incrementCount();
-    this.stats.get('pickObject Time').timeStart();
-    const layers = this.layerManager.getLayers({layerIds});
-    const activateViewport = this.layerManager.activateViewport;
-    const selectedInfos = this.deckPicker.pickObject({
-      x,
-      y,
-      radius,
-      unproject3D,
-      layers,
-      viewports: this.getViewports({x, y}),
-      activateViewport,
-      mode: 'query',
-      depth: 1
-    }).result;
-    this.stats.get('pickObject Time').timeEnd();
-    return selectedInfos.length ? selectedInfos[0] : null;
+  /* {x, y, radius = 0, layerIds = null, unproject3D} */
+  pickObject(opts) {
+    const infos = this._pick('pickObject', 'pickObject Time', opts).result;
+    return infos.length ? infos[0] : null;
   }
 
-  pickMultipleObjects({x, y, radius = 0, layerIds = null, unproject3D, depth = 10}) {
-    this.stats.get('Pick Count').incrementCount();
-    this.stats.get('pickMultipleObjects Time').timeStart();
-    const layers = this.layerManager.getLayers({layerIds});
-    const activateViewport = this.layerManager.activateViewport;
-    const selectedInfos = this.deckPicker.pickObject({
-      x,
-      y,
-      radius,
-      unproject3D,
-      layers,
-      viewports: this.getViewports({x, y}),
-      activateViewport,
-      mode: 'query',
-      depth
-    }).result;
-    this.stats.get('pickMultipleObjects Time').timeEnd();
-    return selectedInfos;
+  /* {x, y, radius = 0, layerIds = null, unproject3D, depth = 10} */
+  pickMultipleObjects(opts) {
+    opts.depth = opts.depth || 10;
+    return this._pick('pickObject', 'pickMultipleObjects Time', opts).result;
   }
 
-  pickObjects({x, y, width = 1, height = 1, layerIds = null}) {
-    this.stats.get('Pick Count').incrementCount();
-    this.stats.get('pickObjects Time').timeStart();
-    const layers = this.layerManager.getLayers({layerIds});
-    const activateViewport = this.layerManager.activateViewport;
-    const infos = this.deckPicker.pickObjects({
-      x,
-      y,
-      width,
-      height,
-      layers,
-      viewports: this.getViewports({x, y, width, height}),
-      activateViewport
-    });
-    this.stats.get('pickObjects Time').timeEnd();
-    return infos;
+  /* {x, y, width = 1, height = 1, layerIds = null} */
+  pickObjects(opts) {
+    return this._pick('pickObjects', 'pickObjects Time', opts);
   }
 
   // Private Methods
+
+  _pick(method, statKey, opts) {
+    const {stats} = this;
+
+    stats.get('Pick Count').incrementCount();
+    stats.get(statKey).timeStart();
+
+    const infos = this.deckPicker[method](
+      Object.assign(
+        {
+          layers: this.layerManager.getLayers(opts),
+          viewports: this.getViewports(opts),
+          onViewportActive: this.layerManager.activateViewport
+        },
+        opts
+      )
+    );
+
+    stats.get(statKey).timeEnd();
+
+    return infos;
+  }
 
   // canvas, either string, canvas or `null`
   _createCanvas(props) {
@@ -561,17 +542,7 @@ export default class Deck {
 
     if (_pickRequest.mode) {
       // perform picking
-      const {result, emptyInfo} = this.deckPicker.pickObject(
-        Object.assign(
-          {
-            layers: this.layerManager.getLayers(),
-            viewports: this.getViewports(_pickRequest),
-            activateViewport: this.layerManager.activateViewport,
-            depth: 1
-          },
-          _pickRequest
-        )
-      );
+      const {result, emptyInfo} = this._pick('pickObject', 'pickObject Time', _pickRequest);
       const shouldGenerateInfo = _pickRequest.callback || this.props.getTooltip;
       const pickedInfo = shouldGenerateInfo && (result.find(info => info.index >= 0) || emptyInfo);
       if (this.props.getTooltip) {
