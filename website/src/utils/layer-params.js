@@ -26,7 +26,7 @@ export function propToParam(key, propType, value) {
       return {...param, type: 'range', step: param.max === 100 ? 1 : 0.01};
     case 'accessor': {
       const result = {...param, type: 'function'};
-      let altValue = propType.value;
+      const altValue = propType.value;
       let altType = typeof altValue;
       if (Array.isArray(altValue) && key.endsWith('Color')) {
         altType = 'color';
@@ -50,7 +50,7 @@ export function propToParam(key, propType, value) {
       if (/mapping|domain|range/i.test(key)) {
         return {...param, type: 'json'};
       }
-      if (propType.async) {
+      if (propType && propType.async) {
         return {...param, type: 'link'};
       }
       break;
