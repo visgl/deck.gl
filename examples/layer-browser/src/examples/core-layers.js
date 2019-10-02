@@ -21,8 +21,6 @@ import {
   ScreenGridLayer
 } from '@deck.gl/aggregation-layers';
 
-import EnhancedCPUGridLayer from './enhanced-cpu-grid-layer';
-
 const {flattenVertices} = experimental;
 
 // Demonstrate immutable support
@@ -343,59 +341,10 @@ function getMax(pts, key) {
     : null;
 }
 
-const CPUGridLayerExampleOrdinal = {
+const CPUGridLayerExample = {
   layer: CPUGridLayer,
   props: {
-    id: 'CPUGridLayerOrdinal',
-    data: dataSamples.points,
-    colorScaleType: 'ordinal',
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: true,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
-
-const CPUGridLayerExampleQuantile = {
-  layer: CPUGridLayer,
-  props: {
-    id: 'CPUGridLayerQuantile',
-    data: dataSamples.points,
-    colorScaleType: 'quantile',
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: true,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
-
-const EnhancedCPUGridLayerExampleOrdinal = {
-  layer: EnhancedCPUGridLayer,
-  props: {
-    id: 'EnhancedCPUGridLayerOrdinal',
-    colorScaleType: 'ordinal',
-    data: dataSamples.points,
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: true,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
-
-const EnhancedCPUGridLayerExampleQuantile = {
-  layer: EnhancedCPUGridLayer,
-  props: {
-    id: 'EnhancedCPUGridLayerQuantile',
-    colorScaleType: 'quantile',
+    id: 'gridLayer',
     data: dataSamples.points,
     cellSize: 200,
     opacity: 1,
@@ -560,10 +509,7 @@ export default {
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
     ColumnLayer: ColumnLayerExample,
-    CPUGridLayerOrdinal: CPUGridLayerExampleOrdinal,
-    EnhancedCPUGridLayerOrdinal: EnhancedCPUGridLayerExampleOrdinal,
-    CPUGridLayerQuantile: CPUGridLayerExampleQuantile,
-    EnhancedCPUGridLayerQuantile: EnhancedCPUGridLayerExampleQuantile,
+    CPUGridLayer: CPUGridLayerExample,
     ScreenGridLayer: ScreenGridLayerExample,
     HexagonLayer: HexagonLayerExample,
     ContourLayer: ContourLayerExample,
