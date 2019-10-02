@@ -168,6 +168,11 @@ larger than the elevationUpperPercentile will be hidden.
 Filter cells and re-calculate elevation by `elevationLowerPercentile`. Cells with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
+##### `colorScaleType` (String, optional)
+
+* Default: 'quantize'
+
+Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
 
 ##### `material` (Object, optional)
 

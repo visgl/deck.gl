@@ -141,6 +141,28 @@ test('GridLayer#updates', t => {
             'Should use CPU Aggregation (getElevationValue)'
           );
         }
+      },
+      {
+        updateProps: {
+          colorScaleType: 'quantile'
+        },
+        onAfterUpdate({layer, subLayers, spies}) {
+          t.ok(
+            layer.state.useGPUAggregation === false,
+            "Should use CPU Aggregation (colorScaleType: 'quantile')"
+          );
+        }
+      },
+      {
+        updateProps: {
+          colorScaleType: 'ordinal'
+        },
+        onAfterUpdate({layer, subLayers, spies}) {
+          t.ok(
+            layer.state.useGPUAggregation === false,
+            "Should use CPU Aggregation (colorScaleType: 'ordinal')"
+          );
+        }
       }
     ]
   });

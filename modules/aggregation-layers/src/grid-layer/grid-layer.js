@@ -46,7 +46,8 @@ export default class GridLayer extends CompositeLayer {
       lowerPercentile,
       upperPercentile,
       getColorValue,
-      getElevationValue
+      getElevationValue,
+      colorScaleType
     } = props;
     if (!gpuAggregation) {
       // cpu aggregation is requested
@@ -61,6 +62,10 @@ export default class GridLayer extends CompositeLayer {
     }
     if (getColorValue !== null || getElevationValue !== null) {
       // accessor for custom color or elevation calculation is specified
+      return false;
+    }
+    if (colorScaleType === 'quantile' || colorScaleType === 'ordinal') {
+      // quantile and ordinal scales are not supported on GPU
       return false;
     }
     return true;

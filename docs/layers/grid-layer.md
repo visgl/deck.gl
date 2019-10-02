@@ -167,6 +167,11 @@ larger than the elevationUpperPercentile will be hidden.
 Filter cells and re-calculate elevation by `elevationLowerPercentile`. Cells with elevation value
 smaller than the elevationLowerPercentile will be hidden.
 
+##### `colorScaleType` (String, optional)
+
+* Default: 'quantize'
+
+Scaling function used to determine the color of the grid cell, default value is 'quantize'. Supported Values are 'quantize', 'linear', 'quantile' and 'ordinal'.
 
 ##### `fp64` (Boolean, optional)
 
@@ -448,7 +453,13 @@ When following percentile props are set, it requires sorting of aggregated value
 
 #### Color and Elevation Props
 
-When `getColorValue` and `getElevationValue` are set to a custom value other than their default values, aggregation will fallback to CPU. For GPU Aggregation, use `getColorWeight`, `colorAggregation`, `getElevationWeight` and `elevationAggregation`.
+When `colorScaleType` props is set to a 'quantile' or 'ordinal', aggregation will fallback to CPU. For GPU Aggregation, use 'quantize', 'linear'.
+
+#### Color Scale Type Props
+
+When following percentile props are set, it requires sorting of aggregated values, which cannot be supported when aggregating on GPU.
+
+* `lowerPercentile`, `upperPercentile`, `elevationLowerPercentile` and `elevationUpperPercentile`.
 
 ### Domain setting callbacks
 

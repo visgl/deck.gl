@@ -737,6 +737,36 @@ export const TEST_CASES = [
     goldenImage: './test/render/golden-images/gridcell-lnglat.png'
   },
   {
+    name: 'cpu-grid-layer:quantile',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new CPUGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'cpu-grid-layer:quantile',
+          getColorValue,
+          getElevationValue,
+          colorScaleType: 'quantile'
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/cpu-layer-quantile.png'
+  },
+  {
+    name: 'cpu-grid-layer:ordinal',
+    viewState: GRID_LAYER_INFO.viewState,
+    layers: [
+      new CPUGridLayer(
+        Object.assign({}, GRID_LAYER_INFO.props, {
+          id: 'cpu-grid-layer:ordinal',
+          getColorValue,
+          getElevationValue,
+          colorScaleType: 'ordinal'
+        })
+      )
+    ],
+    goldenImage: './test/render/golden-images/cpu-layer-ordinal.png'
+  },
+  {
     name: 'grid-lnglat',
     viewState: GRID_LAYER_INFO.viewState,
     layers: [
