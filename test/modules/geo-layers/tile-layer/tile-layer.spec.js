@@ -22,7 +22,7 @@ import test from 'tape-catch';
 import {generateLayerTests, testLayer} from '@deck.gl/test-utils';
 import {TileLayer} from '@deck.gl/geo-layers';
 
-test('TileLayer#constructor', t => {
+test('TileLayer', t => {
   const testCases = generateLayerTests({
     Layer: TileLayer,
     assert: t.ok,
