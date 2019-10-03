@@ -19,6 +19,14 @@ Ref: http://keepachangelog.com/en/0.3.0/
 
 ## deck.gl v7.3
 
+#### deck.gl [v7.3.2] - Oct 3 2019
+
+- GridLayer: enforce point size to workaround ANGLE bug (#3738)
+- Bump luma.gl to 7.3.1
+- HeatmapLayer: set point size to address ANGLE bug (#3732)
+- TileLayer: cache rendered sub layers (#3730)
+- Bump pydeck to 0.1.dev5 (#3715
+
 #### deck.gl [v7.3.1] - Sep 30 2019
 
 - Clamp HeatmapLayer colorDomain on iOS (#3723)
