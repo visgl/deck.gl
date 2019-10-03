@@ -20,12 +20,7 @@ const INITIAL_VIEW_STATE = {
 
 export class App extends PureComponent {
   _renderLayers() {
-    const {
-      data = DATA_URL,
-      intensity = 1,
-      threshold = 0.03,
-      radiusPixels = 30
-    } = this.props;
+    const {data = DATA_URL, intensity = 1, threshold = 0.03, radiusPixels = 30} = this.props;
 
     return [
       new HeatmapLayer({
