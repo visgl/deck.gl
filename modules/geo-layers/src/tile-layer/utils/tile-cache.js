@@ -11,21 +11,27 @@ export default class TileCache {
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
    * Cache size defaults to 5 * number of tiles in the current viewport
    */
-  constructor({getTileData, maxSize, maxZoom, minZoom, onTileError}) {
+  constructor({getTileData, maxSize, maxZoom, minZoom, onTileLoad, onTileError}) {
     // TODO: Instead of hardcode size, we should calculate how much memory left
     this._getTileData = getTileData;
     this._maxSize = maxSize;
     this.onTileError = onTileError;
+    this.onTileLoad = onTileLoad;
 
     // Maps tile id in string {z}-{x}-{y} to a Tile object
     this._cache = new Map();
+    this._tiles = [];
 
-    if (maxZoom && parseInt(maxZoom, 10) === maxZoom) {
-      this._maxZoom = maxZoom;
+    if (Number.isFinite(maxZoom)) {
+      this._maxZoom = Math.floor(maxZoom);
     }
-    if (minZoom && parseInt(minZoom, 10) === minZoom) {
-      this._minZoom = minZoom;
+    if (Number.isFinite(minZoom)) {
+      this._minZoom = Math.ceil(minZoom);
     }
+  }
+
+  get tiles() {
+    return this._tiles;
   }
 
   /**
@@ -40,21 +46,20 @@ export default class TileCache {
    * @param {*} viewport
    * @param {*} onUpdate
    */
-  update(viewport, onUpdate) {
+  update(viewport) {
     const {_cache, _getTileData, _maxSize, _maxZoom, _minZoom} = this;
     this._markOldTiles();
     const tileIndices = getTileIndices(viewport, _maxZoom, _minZoom);
     if (!tileIndices || tileIndices.length === 0) {
-      onUpdate(tileIndices);
       return;
     }
-    const viewportTiles = new Set();
     _cache.forEach(cachedTile => {
       if (tileIndices.some(tile => cachedTile.isOverlapped(tile))) {
         cachedTile.isVisible = true;
-        viewportTiles.add(cachedTile);
       }
     });
+
+    let changed = false;
 
     for (let i = 0; i < tileIndices.length; i++) {
       const tileIndex = tileIndices[i];
@@ -67,20 +72,24 @@ export default class TileCache {
           x,
           y,
           z,
+          onTileLoad: this.onTileLoad,
           onTileError: this.onTileError
         });
+        tile.isVisible = true;
+        changed = true;
       }
       const tileId = this._getTileId(x, y, z);
       _cache.set(tileId, tile);
-      viewportTiles.add(tile);
     }
 
-    // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
-    const commonZoomRange = 5;
-    this._resizeCache(_maxSize || commonZoomRange * tileIndices.length);
-    // sort by zoom level so parents tiles don't show up when children tiles are rendered
-    const viewportTilesArray = Array.from(viewportTiles).sort((t1, t2) => t1.z - t2.z);
-    onUpdate(viewportTilesArray);
+    if (changed) {
+      // cache size is either the user defined maxSize or 5 * number of current tiles in the viewport.
+      const commonZoomRange = 5;
+      this._resizeCache(_maxSize || commonZoomRange * tileIndices.length);
+      this._tiles = Array.from(this._cache.values())
+        // sort by zoom level so parents tiles don't show up when children tiles are rendered
+        .sort((t1, t2) => t1.z - t2.z);
+    }
   }
 
   /**

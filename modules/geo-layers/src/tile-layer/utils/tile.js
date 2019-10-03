@@ -13,7 +13,7 @@ export function tile2boundingBox(x, y, z) {
 }
 
 export default class Tile {
-  constructor({getTileData, x, y, z, onTileError}) {
+  constructor({getTileData, x, y, z, onTileLoad, onTileError}) {
     this.x = x;
     this.y = y;
     this.z = z;
@@ -23,6 +23,7 @@ export default class Tile {
     this._data = null;
     this._isLoaded = false;
     this._loader = this._loadData();
+    this.onTileLoad = onTileLoad;
     this.onTileError = onTileError;
   }
 
@@ -44,6 +45,7 @@ export default class Tile {
       .then(buffers => {
         this._data = buffers;
         this._isLoaded = true;
+        this.onTileLoad(this);
         return buffers;
       })
       .catch(err => {
