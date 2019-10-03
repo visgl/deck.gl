@@ -118,7 +118,12 @@ export default class LayersPass extends Pass {
     let shouldDrawLayer = this.shouldDrawLayer(layer) && !layer.isComposite && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: false, renderPass: pass});
+      shouldDrawLayer = layerFilter({
+        layer,
+        viewport,
+        isPicking: pass.startsWith('picking'),
+        renderPass: pass
+      });
     }
     return shouldDrawLayer;
   }

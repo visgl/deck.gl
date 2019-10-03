@@ -25,7 +25,6 @@ export default class PickLayersPass extends LayersPass {
     viewports,
     onViewportActive,
     pickingFBO,
-    effectProps,
     deviceRect: {x, y, width, height},
     pass = 'picking',
     redrawReason,
@@ -64,8 +63,7 @@ export default class PickLayersPass extends LayersPass {
           viewports,
           onViewportActive,
           pass,
-          redrawReason,
-          effectProps
+          redrawReason
         });
       }
     );
@@ -79,7 +77,10 @@ export default class PickLayersPass extends LayersPass {
   getModuleParameters() {
     return {
       pickingActive: 1,
-      pickingAttribute: this.pickZ
+      pickingAttribute: this.pickZ,
+      // turn off lighting by adding empty light source object
+      // lights shader module relies on the `lightSources` to turn on/off lighting
+      lightSources: {}
     };
   }
 
