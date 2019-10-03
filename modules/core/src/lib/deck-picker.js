@@ -162,6 +162,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect,
+          pass: `picking:${mode}`,
           redrawReason: mode
         });
 
@@ -181,6 +182,7 @@ export default class DeckPicker {
           viewports,
           onViewportActive,
           deviceRect: {x: pickInfo.pickedX, y: pickInfo.pickedY, width: 1, height: 1},
+          pass: `picking:${mode}`,
           redrawReason: 'pick-z',
           pickZ: true
         });
@@ -269,6 +271,7 @@ export default class DeckPicker {
       viewports,
       onViewportActive,
       deviceRect,
+      pass: `picking:${mode}`,
       redrawReason: mode
     });
 
@@ -300,7 +303,7 @@ export default class DeckPicker {
   }
 
   // returns pickedColor or null if no pickable layers found.
-  _drawAndSample({layers, viewports, onViewportActive, deviceRect, redrawReason, pickZ}) {
+  _drawAndSample({layers, viewports, onViewportActive, deviceRect, pass, redrawReason, pickZ}) {
     assert(deviceRect);
     assert(Number.isFinite(deviceRect.width) && deviceRect.width > 0, '`width` must be > 0');
     assert(Number.isFinite(deviceRect.height) && deviceRect.height > 0, '`height` must be > 0');
@@ -322,6 +325,7 @@ export default class DeckPicker {
       onViewportActive,
       pickingFBO,
       deviceRect,
+      pass,
       redrawReason,
       effectProps,
       pickZ

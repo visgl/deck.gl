@@ -46,6 +46,7 @@ export default class DeckRenderer {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
     const effectProps = this._prepareEffects({
       layers,
+      layerFilter: this.layerFilter,
       viewports,
       onViewportActive,
       views,
@@ -61,6 +62,7 @@ export default class DeckRenderer {
       viewports,
       views,
       onViewportActive,
+      pass,
       redrawReason,
       clearCanvas,
       effects,

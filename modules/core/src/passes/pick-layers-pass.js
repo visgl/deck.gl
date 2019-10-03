@@ -21,6 +21,7 @@ export default class PickLayersPass extends LayersPass {
     pickingFBO,
     effectProps,
     deviceRect: {x, y, width, height},
+    pass = 'picking',
     redrawReason,
     pickZ
   }) {
@@ -64,7 +65,7 @@ export default class PickLayersPass extends LayersPass {
           layerFilter,
           viewports,
           onViewportActive,
-          pass: 'picking',
+          pass,
           redrawReason,
           effectProps,
           parameters
@@ -74,13 +75,8 @@ export default class PickLayersPass extends LayersPass {
   }
 
   // PRIVATE
-  shouldDrawLayer(layer, viewport, layerFilter) {
-    let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
-
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: true});
-    }
-    return shouldDrawLayer;
+  shouldDrawLayer(layer) {
+    return layer.props.pickable;
   }
 
   getModuleParameters(layer, effects, effectProps) {

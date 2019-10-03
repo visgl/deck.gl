@@ -61,9 +61,13 @@ export default class ShadowPass extends LayersPass {
           target.resize({width, height});
         }
 
-        super.render(Object.assign(params, {outputBuffer: target}));
+        super.render(Object.assign(params, {outputBuffer: target, pass: 'shadow'}));
       }
     );
+  }
+
+  shouldDrawLayer(layer) {
+    return layer.props.shadowEnabled !== false;
   }
 
   getModuleParameters(layer, effects, effectProps) {

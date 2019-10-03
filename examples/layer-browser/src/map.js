@@ -135,7 +135,7 @@ export default class Map extends PureComponent {
   }
 
   // Only show infovis layers in infovis mode and vice versa
-  _layerFilter({layer}) {
+  _layerFilter({layer, renderPass}) {
     const {settings} = this.props;
     const isIdentity = layer.props.coordinateSystem === COORDINATE_SYSTEM.IDENTITY;
     return settings.infovis ? isIdentity : !isIdentity;

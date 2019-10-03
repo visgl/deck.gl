@@ -49,7 +49,42 @@ The array of deck.gl layers to be rendered. This array is expected to be an arra
 
 ##### `layerFilter` (Function)
 
-Optionally takes a function `({layer, viewport, isPicking}) => Boolean` that is called before a layer is rendered. Gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering. All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
+Default: `null`
+
+If supplied, will be called before a layer is drawn to determine whether it should be rendered. This gives the application an opportunity to filter out layers from the layer list during either rendering or picking. Filtering can be done per viewport or per layer or both. This enables techniques like adding helper layers that work as masks during picking but do not show up during rendering.
+
+```js
+new Deck({
+  // ...
+  layerFilter: ({layer, viewport}) => {
+    if (viewport.id !== 'minimap' && layer.id === 'geofence') {
+      // only display geofence in the minimap
+      return false;
+    }
+    return true;
+  }
+}
+```
+
+Notes:
+
+- `layerFilter` does not override the visibility defined by the layer's `visible` and `pickable` props.
+- All the lifecycle methods are still triggered even a if a layer is filtered out using this prop.
+
+Arguments:
+
+- `layer` (Layer) - the layer to be drawn
+- `viewport` (Viewport) - the current viewport
+- `isPicking` (Boolean) - whether this is a picking pass
+- `renderPass` (String) - the name of the current render pass. Some standard passes are:
+  + `'screen'` - drawing to screen
+  + `'picking:hover'` - drawing to offscreen picking buffer due to pointer move
+  + `'picking:query'` - drawing to offscreen picking buffer due to user-initiated query, e.g. calling `deck.pickObject`.
+  + `'shadow'` - drawing to shadow map
+
+Returns:
+
+`true` if the layer should be drawn.
 
 ##### `getCursor` (Function)
 
