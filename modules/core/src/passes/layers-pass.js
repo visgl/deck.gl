@@ -44,7 +44,7 @@ export default class LayersPass extends Pass {
   // intersect with the picking rect
   drawLayersInViewport(
     gl,
-    {layers, layerFilter, viewport, view, parameters, pass = 'draw', effects, effectProps}
+    {layers, layerFilter, viewport, view, parameters, pass = 'unknown', effects, effectProps}
   ) {
     const glViewport = getGLViewport(gl, {viewport});
 
@@ -73,7 +73,7 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
       // Check if we should draw layer
-      const shouldDrawLayer = this.shouldDrawLayer(layer, viewport, layerFilter, pass);
+      const shouldDrawLayer = this._shouldDrawLayer(layer, viewport, pass, layerFilter);
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -102,13 +102,18 @@ export default class LayersPass extends Pass {
     return renderStatus;
   }
 
-  shouldDrawLayer(layer, viewport, layerFilter, pass) {
-    let shouldDrawLayer = !layer.isComposite && layer.props.visible;
+  _shouldDrawLayer(layer, viewport, pass, layerFilter) {
+    let shouldDrawLayer = this.shouldDrawLayer(layer) && !layer.isComposite && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
       shouldDrawLayer = layerFilter({layer, viewport, isPicking: false, renderPass: pass});
     }
     return shouldDrawLayer;
+  }
+
+  /* Methods for subclass overrides */
+  shouldDrawLayer(layer) {
+    return true;
   }
 
   getModuleParameters(layer) {

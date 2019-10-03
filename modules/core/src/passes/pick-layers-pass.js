@@ -21,6 +21,7 @@ export default class PickLayersPass extends LayersPass {
     pickingFBO,
     effectProps,
     deviceRect: {x, y, width, height},
+    pass = 'picking',
     redrawReason,
     pickZ
   }) {
@@ -64,7 +65,7 @@ export default class PickLayersPass extends LayersPass {
           layerFilter,
           viewports,
           onViewportActive,
-          pass: `picking:${redrawReason}`,
+          pass,
           redrawReason,
           effectProps,
           parameters
@@ -74,8 +75,8 @@ export default class PickLayersPass extends LayersPass {
   }
 
   // PRIVATE
-  shouldDrawLayer(layer, viewport, layerFilter, pass) {
-    return layer.props.pickable && super.shouldDrawLayer(layer, viewport, layerFilter, pass);
+  shouldDrawLayer(layer) {
+    return layer.props.pickable;
   }
 
   getModuleParameters(layer, effects, effectProps) {

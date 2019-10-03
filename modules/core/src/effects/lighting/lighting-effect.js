@@ -57,7 +57,7 @@ export default class LightingEffect extends Effect {
     this.shadow = this.directionalLights.some(light => light.shadow);
   }
 
-  prepare(gl, {layers, viewports, onViewportActive, views}) {
+  prepare(gl, {layers, layerFilter, viewports, onViewportActive, views}) {
     if (!this.shadow) return {};
 
     // create light matrix every frame to make sure always updated from light source
@@ -86,7 +86,8 @@ export default class LightingEffect extends Effect {
     for (let i = 0; i < this.shadowPasses.length; i++) {
       const shadowPass = this.shadowPasses[i];
       shadowPass.render({
-        layers: layers.filter(layer => layer.props.shadowEnabled !== false),
+        layers,
+        layerFilter,
         viewports,
         onViewportActive,
         views,
