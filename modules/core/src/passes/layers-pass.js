@@ -6,12 +6,12 @@ export default class LayersPass extends Pass {
   render(props) {
     const gl = this.gl;
 
-    return withParameters(gl, {framebuffer: props.outputBuffer}, () => this.drawLayers(props));
+    return withParameters(gl, {framebuffer: props.target}, () => this._drawLayers(props));
   }
 
   // PRIVATE
   // Draw a list of layers in a list of viewports
-  drawLayers(props) {
+  _drawLayers(props) {
     const {viewports, views, onViewportActive, clearCanvas = true} = props;
 
     const gl = this.gl;
@@ -33,7 +33,7 @@ export default class LayersPass extends Pass {
       props.view = view;
 
       // render this viewport
-      const stats = this.drawLayersInViewport(gl, props);
+      const stats = this._drawLayersInViewport(gl, props);
       renderStats.push(stats);
     });
     return renderStats;
@@ -42,7 +42,7 @@ export default class LayersPass extends Pass {
   // Draws a list of layers in one viewport
   // TODO - when picking we could completely skip rendering viewports that dont
   // intersect with the picking rect
-  drawLayersInViewport(
+  _drawLayersInViewport(
     gl,
     {layers, layerFilter, viewport, view, pass = 'unknown', effects, moduleParameters}
   ) {

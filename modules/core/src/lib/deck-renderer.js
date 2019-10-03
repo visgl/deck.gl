@@ -31,6 +31,7 @@ export default class DeckRenderer {
   }
 
   /*
+    target,
     layers,
     viewports,
     onViewportActive,
@@ -46,16 +47,16 @@ export default class DeckRenderer {
 
     opts.layerFilter = this.layerFilter;
     opts.effects = opts.effects || [];
+    opts.target = opts.target || Framebuffer.getDefaultFramebuffer(this.gl);
 
     this._preRender(opts.effects, opts);
 
-    opts.outputBuffer = this.lastPostProcessEffect
+    const outputBuffer = this.lastPostProcessEffect
       ? this.renderBuffers[0]
-      : Framebuffer.getDefaultFramebuffer(this.gl);
+      : opts.target;
+    const renderStats = layerPass.render({...opts, target: outputBuffer});
 
-    const renderStats = layerPass.render(opts);
-
-    this._postRender(opts.effects);
+    this._postRender(opts.effects, opts);
 
     this.renderCount++;
 
@@ -83,11 +84,11 @@ export default class DeckRenderer {
   }
 
   // Private
-  _preRender(effects, params) {
+  _preRender(effects, opts) {
     let lastPostProcessEffect = null;
 
     for (const effect of effects) {
-      effect.preRender(this.gl, params);
+      effect.preRender(this.gl, opts);
       if (effect.postRender) {
         lastPostProcessEffect = effect;
       }
@@ -109,7 +110,7 @@ export default class DeckRenderer {
     }
   }
 
-  _postRender(effects) {
+  _postRender(effects, opts) {
     const {renderBuffers} = this;
     const params = {
       inputBuffer: renderBuffers[0],
@@ -119,7 +120,7 @@ export default class DeckRenderer {
     for (const effect of effects) {
       if (effect.postRender) {
         if (effect === this.lastPostProcessEffect) {
-          params.target = Framebuffer.getDefaultFramebuffer(this.gl);
+          params.target = opts.target;
           effect.postRender(this.gl, params);
           break;
         }

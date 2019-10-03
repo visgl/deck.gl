@@ -61,7 +61,7 @@ export default class ShadowPass extends LayersPass {
           target.resize({width, height});
         }
 
-        super.render(Object.assign(params, {outputBuffer: target, pass: 'shadow'}));
+        super.render({...params, target, pass: 'shadow'});
       }
     );
   }
