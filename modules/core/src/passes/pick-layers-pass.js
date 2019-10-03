@@ -41,7 +41,6 @@ export default class PickLayersPass extends LayersPass {
     return withParameters(
       gl,
       {
-        framebuffer: pickingFBO,
         scissorTest: true,
         scissor: [x, y, width, height],
         clearColor: [0, 0, 0, 0],
