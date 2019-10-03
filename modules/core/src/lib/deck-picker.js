@@ -50,9 +50,6 @@ export default class DeckPicker {
     if ('layerFilter' in props) {
       this.layerFilter = props.layerFilter;
     }
-    this.pickLayersPass.setProps({
-      layerFilter: this.layerFilter
-    });
   }
 
   finalize() {
@@ -320,6 +317,7 @@ export default class DeckPicker {
 
     this.pickLayersPass.render({
       layers,
+      layerFilter: this.layerFilter,
       viewports,
       onViewportActive,
       pickingFBO,

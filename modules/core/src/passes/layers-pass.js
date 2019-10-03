@@ -3,53 +3,37 @@ import Pass from './pass';
 import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
-  render(params) {
+  render(props) {
     const gl = this.gl;
 
-    return withParameters(gl, {framebuffer: params.outputBuffer}, () => this.drawLayers(params));
+    return withParameters(gl, {framebuffer: props.outputBuffer}, () => this.drawLayers(props));
   }
 
   // PRIVATE
   // Draw a list of layers in a list of viewports
-  drawLayers({
-    layers,
-    viewports,
-    views,
-    onViewportActive,
-    deviceRect = null,
-    parameters = {},
-    pass = 'draw',
-    redrawReason = '',
-    clearCanvas = true,
-    effects,
-    effectProps
-  }) {
+  drawLayers(props) {
+    const {viewports, views, onViewportActive, clearCanvas = true} = props;
+
     const gl = this.gl;
     if (clearCanvas) {
-      this.clearCanvas(gl);
+      clearGLCanvas(gl);
     }
 
     const renderStats = [];
 
     viewports.forEach((viewportOrDescriptor, i) => {
-      const viewport = this.getViewportFromDescriptor(viewportOrDescriptor);
+      // Get a viewport from a viewport descriptor (which can be a plain viewport)
+      const viewport = viewportOrDescriptor.viewport || viewportOrDescriptor;
       const view = views && views[viewport.id];
 
       // Update context to point to this viewport
       onViewportActive(viewport);
 
+      props.viewport = viewport;
+      props.view = view;
+
       // render this viewport
-      const stats = this.drawLayersInViewport(gl, {
-        layers,
-        viewport,
-        view,
-        deviceRect,
-        parameters,
-        pass,
-        redrawReason,
-        effects,
-        effectProps
-      });
+      const stats = this.drawLayersInViewport(gl, props);
       renderStats.push(stats);
     });
     return renderStats;
@@ -60,19 +44,9 @@ export default class LayersPass extends Pass {
   // intersect with the picking rect
   drawLayersInViewport(
     gl,
-    {
-      layers,
-      viewport,
-      view,
-      deviceRect = null,
-      parameters = {},
-      pass = 'draw',
-      redrawReason = '',
-      effects,
-      effectProps
-    }
+    {layers, layerFilter, viewport, view, parameters, pass = 'draw', effects, effectProps}
   ) {
-    const glViewport = this.getGLViewport(gl, {viewport});
+    const glViewport = getGLViewport(gl, {viewport});
 
     if (view && view.props.clear) {
       const clearOpts = view.props.clear === true ? {color: true, depth: true} : view.props.clear;
@@ -99,7 +73,7 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
       // Check if we should draw layer
-      const shouldDrawLayer = this.shouldDrawLayer(layer, viewport);
+      const shouldDrawLayer = this.shouldDrawLayer(layer, viewport, layerFilter);
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -113,14 +87,14 @@ export default class LayersPass extends Pass {
       if (shouldDrawLayer) {
         renderStatus.visibleCount++;
 
-        this.drawLayerInViewport({
-          gl,
-          layer,
-          layerIndex,
-          glViewport,
-          parameters,
-          effects,
-          effectProps
+        const moduleParameters = this.getModuleParameters(layer, effects, effectProps);
+        const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
+        const layerParameters = this.getLayerParameters(layer, layerIndex, glViewport, parameters);
+
+        layer.drawLayer({
+          moduleParameters,
+          uniforms,
+          parameters: layerParameters
         });
       }
     });
@@ -128,25 +102,7 @@ export default class LayersPass extends Pass {
     return renderStatus;
   }
 
-  drawLayerInViewport({gl, layer, layerIndex, glViewport, parameters, effects, effectProps}) {
-    const moduleParameters = this.getModuleParameters(layer, effects, effectProps);
-    const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
-    const layerParameters = this.getLayerParameters(layer, layerIndex, glViewport, parameters);
-
-    layer.drawLayer({
-      moduleParameters,
-      uniforms,
-      parameters: layerParameters
-    });
-  }
-
-  // Get a viewport from a viewport descriptor (which can be a plain viewport)
-  getViewportFromDescriptor(viewportOrDescriptor) {
-    return viewportOrDescriptor.viewport ? viewportOrDescriptor.viewport : viewportOrDescriptor;
-  }
-
-  shouldDrawLayer(layer, viewport) {
-    const layerFilter = this.props.layerFilter;
+  shouldDrawLayer(layer, viewport, layerFilter) {
     let shouldDrawLayer = !layer.isComposite && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
@@ -175,29 +131,29 @@ export default class LayersPass extends Pass {
     });
     return layerParameters;
   }
+}
 
+// Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
+function getGLViewport(gl, {viewport}) {
+  // TODO - dummy default for node
+  // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
+  const height = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
   // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-  getGLViewport(gl, {viewport}) {
-    // TODO - dummy default for node
-    // Fallback to width/height when clientWidth/clientHeight are 0 or undefined.
-    const height = gl.canvas ? gl.canvas.clientHeight || gl.canvas.height : 100;
-    // Convert viewport top-left CSS coordinates to bottom up WebGL coordinates
-    const dimensions = viewport;
-    const pixelRatio = cssToDeviceRatio(this.gl);
-    return [
-      dimensions.x * pixelRatio,
-      (height - dimensions.y - dimensions.height) * pixelRatio,
-      dimensions.width * pixelRatio,
-      dimensions.height * pixelRatio
-    ];
-  }
+  const dimensions = viewport;
+  const pixelRatio = cssToDeviceRatio(gl);
+  return [
+    dimensions.x * pixelRatio,
+    (height - dimensions.y - dimensions.height) * pixelRatio,
+    dimensions.width * pixelRatio,
+    dimensions.height * pixelRatio
+  ];
+}
 
-  clearCanvas(gl) {
-    const width = gl.drawingBufferWidth;
-    const height = gl.drawingBufferHeight;
-    // clear depth and color buffers, restoring transparency
-    withParameters(gl, {viewport: [0, 0, width, height]}, () => {
-      gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
-    });
-  }
+function clearGLCanvas(gl) {
+  const width = gl.drawingBufferWidth;
+  const height = gl.drawingBufferHeight;
+  // clear depth and color buffers, restoring transparency
+  withParameters(gl, {viewport: [0, 0, width, height]}, () => {
+    gl.clear(GL.COLOR_BUFFER_BIT | GL.DEPTH_BUFFER_BIT);
+  });
 }

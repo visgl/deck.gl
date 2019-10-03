@@ -90,7 +90,7 @@ export function testDrawLayer({
       deckRenderer.renderLayers({
         viewports: [viewport],
         layers: layerManager.getLayers(),
-        activateViewport: layerManager.activateViewport
+        onViewportActive: layerManager.activateViewport
       });
     },
     onError
@@ -209,7 +209,7 @@ function runLayerTests(layerManager, deckRenderer, layer, testCases, spies, onEr
         deckRenderer.renderLayers({
           viewports: [viewport],
           layers: layerManager.getLayers(),
-          activateViewport: layerManager.activateViewport
+          onViewportActive: layerManager.activateViewport
         }),
       onError
     );
