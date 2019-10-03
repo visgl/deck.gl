@@ -24,8 +24,7 @@ export class App extends PureComponent {
       data = DATA_URL,
       intensity = 1,
       threshold = 0.03,
-      radiusPixels = 30,
-      colorDomain
+      radiusPixels = 30
     } = this.props;
 
     return [
@@ -38,8 +37,7 @@ export class App extends PureComponent {
         getWeight: d => d[2],
         radiusPixels,
         intensity,
-        threshold,
-        colorDomain
+        threshold
       })
     ];
   }
