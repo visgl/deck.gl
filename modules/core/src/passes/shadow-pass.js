@@ -70,10 +70,10 @@ export default class ShadowPass extends LayersPass {
     return layer.props.shadowEnabled !== false;
   }
 
-  getModuleParameters(layer, effects, effectProps) {
-    const moduleParameters = super.getModuleParameters(layer, effects, effectProps);
-    moduleParameters.drawToShadowMap = true;
-    return moduleParameters;
+  getModuleParameters() {
+    return {
+      drawToShadowMap: true
+    };
   }
 
   delete() {
