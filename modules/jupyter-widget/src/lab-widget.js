@@ -33,7 +33,7 @@ for (const r of REQUIREMENTS) {
 function createDeckWithImport(...args) {
   const {deck, loaders, mapboxgl} = window;
   const dependencies = {deck, loaders, mapboxgl};
-  createDeckFromDependencies({dependencies, ...args[0]});
+  createDeckFromDependencies(dependencies, ...args);
 }
 
 DeckGLView.deckInitFunction = createDeckWithImport;
