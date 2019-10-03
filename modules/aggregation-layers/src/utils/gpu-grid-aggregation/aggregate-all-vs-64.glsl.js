@@ -48,5 +48,7 @@ void main(void) {
   vec2 texCoordYFP64 = div_fp64(xIndexFP64, gridSizeXFP64);
 
   vTextureCoord = vec2(texCoordYFP64.x, texCoordXFP64.x);
+  // Enforce default value for ANGLE issue (https://bugs.chromium.org/p/angleproject/issues/detail?id=3941)
+  gl_PointSize = 1.0;
 }
 `;
