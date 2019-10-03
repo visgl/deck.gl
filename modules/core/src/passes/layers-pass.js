@@ -73,7 +73,7 @@ export default class LayersPass extends Pass {
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
       // Check if we should draw layer
-      const shouldDrawLayer = this.shouldDrawLayer(layer, viewport, layerFilter);
+      const shouldDrawLayer = this.shouldDrawLayer(layer, viewport, layerFilter, pass);
 
       // Calculate stats
       if (shouldDrawLayer && layer.props.pickable) {
@@ -102,11 +102,11 @@ export default class LayersPass extends Pass {
     return renderStatus;
   }
 
-  shouldDrawLayer(layer, viewport, layerFilter) {
+  shouldDrawLayer(layer, viewport, layerFilter, pass) {
     let shouldDrawLayer = !layer.isComposite && layer.props.visible;
 
     if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: false});
+      shouldDrawLayer = layerFilter({layer, viewport, isPicking: false, pass});
     }
     return shouldDrawLayer;
   }

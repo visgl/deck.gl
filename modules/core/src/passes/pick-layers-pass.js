@@ -64,7 +64,7 @@ export default class PickLayersPass extends LayersPass {
           layerFilter,
           viewports,
           onViewportActive,
-          pass: 'picking',
+          pass: `picking:${redrawReason}`,
           redrawReason,
           effectProps,
           parameters
@@ -74,11 +74,11 @@ export default class PickLayersPass extends LayersPass {
   }
 
   // PRIVATE
-  shouldDrawLayer(layer, viewport, layerFilter) {
+  shouldDrawLayer(layer, viewport, layerFilter, pass) {
     let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
 
     if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: true});
+      shouldDrawLayer = layerFilter({layer, viewport, isPicking: true, pass});
     }
     return shouldDrawLayer;
   }
