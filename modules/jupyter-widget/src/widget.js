@@ -3,7 +3,7 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
+import {loadCss, hideMapboxCSSWarning, updateDeck} from './notebook-utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
 
@@ -54,6 +54,9 @@ export class DeckGLModel extends DOMWidgetModel {
 
 export class DeckGLView extends DOMWidgetView {
   initialize() {
+    if (!DeckGLView.deckInitFunction) {
+      throw new Error('Class needs a deckInitFunction');
+    }
     this.listenTo(this.model, 'destroy', this.remove);
 
     const container = document.createElement('div');
@@ -73,7 +76,7 @@ export class DeckGLView extends DOMWidgetView {
     const tooltip = this.model.get('tooltip');
 
     loadCss(MAPBOX_CSS_URL);
-    initDeck({
+    DeckGLView.deckInitFunction({
       mapboxApiKey,
       container,
       jsonInput,
