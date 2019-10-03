@@ -40,8 +40,7 @@
     "styletron-engine-atomic": "^1.4.0",
     "styletron-react": "^5.2.0",
     "supercluster": "^6.0.1",
-    "tagmap.js": "^1.1.1",
-    "bowser": "^2.6.1"
+    "tagmap.js": "^1.1.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.0.0",

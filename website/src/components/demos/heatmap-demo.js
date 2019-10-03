@@ -1,6 +1,4 @@
-/* global window */
 import React, {Component} from 'react';
-import Bowser from 'bowser';
 import {readableInteger} from '../../utils/format-utils';
 import {MAPBOX_STYLES, DATA_URI} from '../../constants/defaults';
 import {App} from 'website-examples/heatmap/app';
@@ -51,23 +49,11 @@ export default class HeatmapDemo extends Component {
     );
   }
 
-  constructor(props) {
-    super(props);
-    if (shouldEnableColorDomain()) {
-      this.maxDomain = 30000;
-    }
-  }
-
   render() {
     const {params, data} = this.props;
     const radiusPixels = params.radius.value;
     const intensity = params.intensity.value;
     const threshold = params.threshold.value;
-    const {maxDomain} = this;
-    let colorDomain;
-    if (maxDomain) {
-      colorDomain = [maxDomain * threshold, maxDomain];
-    }
 
     return (
       <App
@@ -76,16 +62,7 @@ export default class HeatmapDemo extends Component {
         intensity={intensity}
         threshold={threshold}
         radiusPixels={radiusPixels}
-        colorDomain={colorDomain}
       />
     );
   }
-}
-
-// HELPER
-function shouldEnableColorDomain() {
-  const OS_NAMES_TO_DETECT = ['windows', 'ios'];
-  const parser = Bowser.getParser(window.navigator.userAgent);
-  const currentOS = parser.getOSName(true);
-  return OS_NAMES_TO_DETECT.includes(currentOS);
 }
