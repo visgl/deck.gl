@@ -1,52 +1,49 @@
 import {default as LayersPass} from './layers-pass';
 import {
+  isWebGL2,
   Framebuffer,
   Texture2D,
-  Renderbuffer,
   withParameters,
   cssToDeviceRatio
 } from '@luma.gl/core';
+import GL from '@luma.gl/constants';
 
 export default class ShadowPass extends LayersPass {
   constructor(gl, props) {
     super(gl, props);
 
-    // The shadowMap texture
-    this.shadowMap = new Texture2D(gl, {
-      width: 1,
-      height: 1,
-      parameters: {
-        [gl.TEXTURE_MIN_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_MAG_FILTER]: gl.LINEAR,
-        [gl.TEXTURE_WRAP_S]: gl.CLAMP_TO_EDGE,
-        [gl.TEXTURE_WRAP_T]: gl.CLAMP_TO_EDGE
-      }
-    });
+    if (Framebuffer.isSupported(gl, {colorBufferFloat: true})) {
+      // The shadowMap texture
+      this.shadowMap = new Texture2D(gl, {
+        format: isWebGL2(gl) ? GL.RGBA32F : GL.RGBA,
+        type: GL.FLOAT,
+        width: 1,
+        height: 1,
+        parameters: {
+          [GL.TEXTURE_MIN_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_MAG_FILTER]: GL.LINEAR,
+          [GL.TEXTURE_WRAP_S]: GL.CLAMP_TO_EDGE,
+          [GL.TEXTURE_WRAP_T]: GL.CLAMP_TO_EDGE
+        }
+      });
 
-    this.depthBuffer = new Renderbuffer(gl, {
-      format: gl.DEPTH_COMPONENT16,
-      width: 1,
-      height: 1
-    });
-
-    this.fbo = new Framebuffer(gl, {
-      id: 'shadowmap',
-      width: 1,
-      height: 1,
-      attachments: {
-        [gl.COLOR_ATTACHMENT0]: this.shadowMap,
-        // Depth attachment has to be specified for depth test to work
-        [gl.DEPTH_ATTACHMENT]: this.depthBuffer
-      }
-    });
+      this.fbo = new Framebuffer(gl, {id: 'shadowmap'});
+      this.fbo.attach({
+        [GL.COLOR_ATTACHMENT0]: this.shadowMap
+      });
+    }
   }
 
   render(params) {
     const target = this.fbo;
+    if (!target) {
+      return;
+    }
 
     withParameters(
       this.gl,
       {
+        framebuffer: target,
         depthRange: [0, 1],
         depthTest: true,
         blend: false,
@@ -61,7 +58,7 @@ export default class ShadowPass extends LayersPass {
           target.resize({width, height});
         }
 
-        super.render(Object.assign(params, {outputBuffer: target}));
+        this.drawLayers(params);
       }
     );
   }
@@ -87,11 +84,6 @@ export default class ShadowPass extends LayersPass {
     if (this.shadowMap) {
       this.shadowMap.delete();
       this.shadowMap = null;
-    }
-
-    if (this.depthBuffer) {
-      this.depthBuffer.delete();
-      this.depthBuffer = null;
     }
   }
 }

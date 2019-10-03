@@ -61,22 +61,15 @@ uniform float shadow_uLightCount;
 
 varying vec3 shadow_vPosition[max_lights];
 
-const vec4 bitPackShift = vec4(1.0, 255.0, 65025.0, 16581375.0);
-const vec4 bitUnpackShift = 1.0 / bitPackShift;
-const vec4 bitMask = vec4(1.0 / 255.0, 1.0 / 255.0, 1.0 / 255.0,  0.0);
-
 float shadow_getShadowWeight(vec3 position, sampler2D shadowMap) {
-  vec4 rgbaDepth = texture2D(shadowMap, position.xy);
+  float z = texture2D(shadowMap, position.xy).r;
 
-  float z = dot(rgbaDepth, bitUnpackShift);
   return smoothstep(0.001, 0.01, position.z - z);
 }
 
 vec4 shadow_filterShadowColor(vec4 color) {
   if (shadow_uDrawShadowMap) {
-    vec4 rgbaDepth = fract(gl_FragCoord.z * bitPackShift);
-    rgbaDepth -= rgbaDepth.gbaa * bitMask;
-    return rgbaDepth;
+    return vec4(gl_FragCoord.z, 0.0, 0.0, 1.0);
   }
   if (shadow_uUseShadowMap) {
     float shadowAlpha = 0.0;
