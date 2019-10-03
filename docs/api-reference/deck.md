@@ -75,8 +75,12 @@ Arguments:
 
 - `layer` (Layer) - the layer to be drawn
 - `viewport` (Viewport) - the current viewport
-- `isPicking` (Boolean) - whether this is a picking pass (drawing to offscreen picking buffer)
-- `pass` (String) - the name of the current render pass
+- `isPicking` (Boolean) - whether this is a picking pass
+- `renderPass` (String) - the name of the current render pass. Some standard passes are:
+  + `'screen'` - drawing to screen
+  + `'picking:hover'` - drawing to offscreen picking buffer due to pointer move
+  + `'picking:query'` - drawing to offscreen picking buffer due to user-initiated query, e.g. calling `deck.pickObject`.
+  + `'shadow'` - drawing to shadow map
 
 Returns:
 

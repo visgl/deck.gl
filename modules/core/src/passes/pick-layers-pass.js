@@ -75,12 +75,7 @@ export default class PickLayersPass extends LayersPass {
 
   // PRIVATE
   shouldDrawLayer(layer, viewport, layerFilter, pass) {
-    let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
-
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: true, pass});
-    }
-    return shouldDrawLayer;
+    return layer.props.pickable && super.shouldDrawLayer(layer, viewport, layerFilter, pass);
   }
 
   getModuleParameters(layer, effects, effectProps) {
