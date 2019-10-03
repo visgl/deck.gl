@@ -1,5 +1,5 @@
 import LayersPass from './layers-pass';
-import {withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/core';
 
 export default class PickLayersPass extends LayersPass {
   render(props) {
@@ -25,7 +25,7 @@ export default class PickLayersPass extends LayersPass {
     redrawReason,
     pickZ
   }) {
-    effectProps.pickZ = pickZ;
+    effectProps.pickingAttribute = pickZ;
 
     const gl = this.gl;
     // Make sure we clear scissor test and fbo bindings in case of exceptions
@@ -80,14 +80,8 @@ export default class PickLayersPass extends LayersPass {
   }
 
   getModuleParameters(layer, effects, effectProps) {
-    const moduleParameters = Object.assign(Object.create(layer.props), {
-      viewport: layer.context.viewport,
-      pickingActive: 1,
-      pickingAttribute: effectProps.pickZ,
-      devicePixelRatio: cssToDeviceRatio(this.gl)
-    });
-
-    Object.assign(moduleParameters, effectProps);
+    const moduleParameters = super.getModuleParameters(layer, effects, effectProps);
+    moduleParameters.pickingActive = 1;
     return moduleParameters;
   }
 

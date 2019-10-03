@@ -311,6 +311,7 @@ export default class Layer extends Component {
 
   // Default implementation, all attributes will be invalidated and updated
   // when data changes
+  /* eslint-disable-next-line complexity */
   updateState({oldProps, props, context, changeFlags}) {
     const attributeManager = this.getAttributeManager();
     if (changeFlags.dataChanged && attributeManager) {
@@ -323,6 +324,30 @@ export default class Layer extends Component {
       } else {
         attributeManager.invalidateAll();
       }
+    }
+
+    // Picking module parameters
+    const {autoHighlight, highlightedObjectIndex, highlightColor} = props;
+    if (
+      oldProps.autoHighlight !== autoHighlight ||
+      oldProps.highlightedObjectIndex !== highlightedObjectIndex ||
+      oldProps.highlightColor !== highlightColor
+    ) {
+      const parameters = {};
+      if (!autoHighlight) {
+        parameters.pickingSelectedColor = null;
+      }
+      // TODO - fix in luma?
+      highlightColor[3] = highlightColor[3] || 255;
+      parameters.pickingHighlightColor = highlightColor;
+
+      // highlightedObjectIndex will overwrite any settings from auto highlighting.
+      if (Number.isInteger(highlightedObjectIndex)) {
+        parameters.pickingSelectedColor =
+          highlightedObjectIndex >= 0 ? this.encodePickingColor(highlightedObjectIndex) : null;
+      }
+
+      this.setModuleParameters(parameters);
     }
   }
 

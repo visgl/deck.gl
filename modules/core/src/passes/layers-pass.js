@@ -116,14 +116,14 @@ export default class LayersPass extends Pass {
     return true;
   }
 
-  getModuleParameters(layer) {
+  getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       mousePosition: layer.context.mousePosition,
       pickingActive: 0,
       devicePixelRatio: cssToDeviceRatio(this.gl)
     });
-    return moduleParameters;
+    return Object.assign(moduleParameters, effectProps);
   }
 
   getLayerParameters(layer, layerIndex, glViewport, parameters) {
