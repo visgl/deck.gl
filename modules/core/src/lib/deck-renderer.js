@@ -21,46 +21,33 @@ export default class DeckRenderer {
   }
 
   setProps(props) {
-    if ('layerFilter' in props) {
-      if (this.layerFilter !== props.layerFilter) {
-        this.layerFilter = props.layerFilter;
-        this._needsRedraw = 'layerFilter changed';
-      }
+    if ('layerFilter' in props && this.layerFilter !== props.layerFilter) {
+      this.layerFilter = props.layerFilter;
+      this._needsRedraw = 'layerFilter changed';
     }
 
-    if ('drawPickingColors' in props) {
-      if (this.drawPickingColors !== props.drawPickingColors) {
-        this.drawPickingColors = props.drawPickingColors;
-        this._needsRedraw = 'drawPickingColors changed';
-      }
+    if ('drawPickingColors' in props && this.drawPickingColors !== props.drawPickingColors) {
+      this.drawPickingColors = props.drawPickingColors;
+      this._needsRedraw = 'drawPickingColors changed';
     }
-
-    const {layerFilter} = this;
-
-    this.drawLayersPass.setProps({
-      layerFilter
-    });
-    this.pickLayersPass.setProps({
-      layerFilter
-    });
   }
 
   renderLayers({
     layers,
     viewports,
-    activateViewport,
+    onViewportActive,
     views,
-    redrawReason = 'unknown reason',
-    clearCanvas = true,
+    redrawReason,
+    clearCanvas,
     effects = [],
     pass,
     stats
   }) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
-    const effectProps = this.prepareEffects({
+    const effectProps = this._prepareEffects({
       layers,
       viewports,
-      onViewportActive: activateViewport,
+      onViewportActive,
       views,
       effects
     });
@@ -70,9 +57,10 @@ export default class DeckRenderer {
 
     const renderStats = layerPass.render({
       layers,
+      layerFilter: this.layerFilter,
       viewports,
       views,
-      onViewportActive: activateViewport,
+      onViewportActive,
       redrawReason,
       clearCanvas,
       effects,
@@ -80,13 +68,13 @@ export default class DeckRenderer {
       outputBuffer
     });
 
-    this.postRender(effects);
+    this._postRender(effects);
 
     this.renderCount++;
 
     if (log.priority >= LOG_PRIORITY_DRAW) {
       renderStats.forEach(status => {
-        this.logRenderStats({status, pass, redrawReason, stats, renderStats});
+        this._logRenderStats({status, pass, redrawReason, stats, renderStats});
       });
     }
   }
@@ -111,7 +99,7 @@ export default class DeckRenderer {
   }
 
   // Private
-  prepareEffects(params) {
+  _prepareEffects(params) {
     const {effects} = params;
     const effectProps = {};
     this.lastPostProcessEffect = null;
@@ -124,13 +112,13 @@ export default class DeckRenderer {
     }
 
     if (this.lastPostProcessEffect) {
-      this.prepareRenderBuffers();
+      this._prepareRenderBuffers();
     }
 
     return effectProps;
   }
 
-  prepareRenderBuffers() {
+  _prepareRenderBuffers() {
     if (!this.screenBuffer) {
       this.screenBuffer = new Framebuffer(this.gl);
     }
@@ -142,7 +130,7 @@ export default class DeckRenderer {
     this.offscreenBuffer.resize();
   }
 
-  postRender(effects) {
+  _postRender(effects) {
     let params = {inputBuffer: this.screenBuffer, outputBuffer: this.offscreenBuffer, target: null};
     for (const effect of effects) {
       if (effect instanceof PostProcessEffect) {
@@ -156,7 +144,7 @@ export default class DeckRenderer {
     }
   }
 
-  logRenderStats({renderStats, pass, redrawReason, stats}) {
+  _logRenderStats({renderStats, pass, redrawReason, stats}) {
     const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
     const primitiveCount = totalCount - compositeCount;
     const hiddenCount = primitiveCount - visibleCount;

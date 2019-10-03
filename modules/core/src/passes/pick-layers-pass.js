@@ -15,12 +15,13 @@ export default class PickLayersPass extends LayersPass {
   // Note: does not sample the buffer, that has to be done by the caller
   drawPickingBuffer({
     layers,
+    layerFilter,
     viewports,
     onViewportActive,
     pickingFBO,
     effectProps,
     deviceRect: {x, y, width, height},
-    redrawReason = '',
+    redrawReason,
     pickZ
   }) {
     effectProps.pickZ = pickZ;
@@ -37,21 +38,21 @@ export default class PickLayersPass extends LayersPass {
         framebuffer: pickingFBO,
         scissorTest: true,
         scissor: [x, y, width, height],
-        clearColor: [0, 0, 0, 0]
+        clearColor: [0, 0, 0, 0],
+        // When used as Mapbox custom layer, the context state may be dirty
+        // TODO - Remove when mapbox fixes this issue
+        // https://github.com/mapbox/mapbox-gl-js/issues/7801
+        depthMask: true,
+        depthTest: true,
+        depthRange: [0, 1],
+        colorMask: [true, true, true, true]
       },
       () => {
         const parameters = {
           blend: true,
           blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
           blendEquation: gl.FUNC_ADD,
-          blendColor: [0, 0, 0, 0],
-          // When used as Mapbox custom layer, the context state may be dirty
-          // TODO - Remove when mapbox fixes this issue
-          // https://github.com/mapbox/mapbox-gl-js/issues/7801
-          depthMask: true,
-          depthTest: true,
-          depthRange: [0, 1],
-          colorMask: [true, true, true, true]
+          blendColor: [0, 0, 0, 0]
         };
 
         if (pickZ) {
@@ -60,6 +61,7 @@ export default class PickLayersPass extends LayersPass {
 
         this.drawLayers({
           layers,
+          layerFilter,
           viewports,
           onViewportActive,
           pass: 'picking',
@@ -72,8 +74,7 @@ export default class PickLayersPass extends LayersPass {
   }
 
   // PRIVATE
-  shouldDrawLayer(layer, viewport) {
-    const layerFilter = this.props.layerFilter;
+  shouldDrawLayer(layer, viewport, layerFilter) {
     let shouldDrawLayer = !layer.isComposite && layer.props.visible && layer.props.pickable;
 
     if (shouldDrawLayer && layerFilter) {

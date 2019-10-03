@@ -645,15 +645,12 @@ export default class Deck {
 
     this.props.onBeforeRender({gl});
 
-    const layers = this.layerManager.getLayers();
-    const activateViewport = this.layerManager.activateViewport;
-
     this.deckRenderer.renderLayers(
       Object.assign(
         {
-          layers,
+          layers: this.layerManager.getLayers(),
           viewports: this.viewManager.getViewports(),
-          activateViewport,
+          onViewportActive: this.layerManager.activateViewport,
           views: this.viewManager.getViews(),
           pass: 'screen',
           redrawReason,
