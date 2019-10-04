@@ -60,7 +60,8 @@ export default class ScreenGridLayer extends CompositeLayer {
     this.setState({
       supported: true,
       gpuGridAggregator: new GPUGridAggregator(gl, {id: `${this.id}-aggregator`}),
-      weights
+      weights,
+      subLayerData: {attributes: {}}
     });
   }
 
@@ -92,7 +93,7 @@ export default class ScreenGridLayer extends CompositeLayer {
     if (!this.state.supported) {
       return [];
     }
-    const {weights, maxTexture, numRow, numCol, numInstances} = this.state;
+    const {maxTexture, numInstances, subLayerData} = this.state;
     const {updateTriggers} = this.props;
 
     return new ScreenGridCellLayer(
@@ -102,14 +103,8 @@ export default class ScreenGridLayer extends CompositeLayer {
         updateTriggers
       }),
       {
-        data: {
-          attributes: {
-            instanceCounts: weights.color.aggregationBuffer
-          }
-        },
+        data: subLayerData,
         maxTexture,
-        numRow,
-        numCol,
         numInstances
       }
     );
@@ -251,9 +246,8 @@ export default class ScreenGridLayer extends CompositeLayer {
       }
     });
     this.state.weights.color.aggregationBuffer = aggregationBuffer;
+    this.state.subLayerData.attributes.instanceCounts = aggregationBuffer;
     this.setState({
-      numCol,
-      numRow,
       numInstances,
       aggregationBuffer
     });

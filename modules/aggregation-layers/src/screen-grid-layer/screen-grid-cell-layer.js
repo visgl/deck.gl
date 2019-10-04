@@ -61,31 +61,28 @@ export default class ScreenGridCellLayer extends Layer {
   updateState({oldProps, props, changeFlags}) {
     super.updateState({oldProps, props, changeFlags});
 
-    if (oldProps.cellSize !== props.cellSize || changeFlags.viewportChanged) {
+    if (oldProps.cellSizePixels !== props.cellSizePixels || changeFlags.viewportChanged) {
       const attributeManager = this.getAttributeManager();
       attributeManager.invalidateAll();
     }
 
-    this._updateUniforms({oldProps, props, changeFlags});
+    this._updateUniforms(oldProps, props, changeFlags);
   }
 
   draw({uniforms}) {
-    const {parameters = {}, maxTexture} = this.props;
+    const {parameters, maxTexture} = this.props;
     const minColor = this.props.minColor || DEFAULT_MINCOLOR;
     const maxColor = this.props.maxColor || DEFAULT_MAXCOLOR;
 
     // If colorDomain not specified we use default domain [1, maxCount]
     // maxCount value will be sampled form maxTexture in vertex shader.
     const colorDomain = this.props.colorDomain || [1, 0];
-    const {model, cellScale, shouldUseMinMax, colorRange} = this.state;
+    const {model} = this.state;
     const layerUniforms = {
       minColor,
       maxColor,
       maxTexture,
-      cellScale,
-      colorRange,
-      colorDomain,
-      shouldUseMinMax
+      colorDomain
     };
 
     uniforms = Object.assign(layerUniforms, uniforms);
@@ -103,7 +100,9 @@ export default class ScreenGridCellLayer extends Layer {
 
   calculateInstancePositions(attribute, {numInstances}) {
     const {width, height} = this.context.viewport;
-    const {cellSizePixels, numCol} = this.props;
+    const {cellSizePixels} = this.props;
+    const numCol = Math.ceil(width / cellSizePixels);
+
     const {value, size} = attribute;
 
     for (let i = 0; i < numInstances; i++) {
@@ -148,14 +147,14 @@ export default class ScreenGridCellLayer extends Layer {
     return true;
   }
 
-  _updateUniforms({oldProps, props, changeFlags}) {
-    const newState = {};
+  _updateUniforms(oldProps, props, changeFlags) {
+    const {model} = this.state;
     if (COLOR_PROPS.some(key => oldProps[key] !== props[key])) {
-      newState.shouldUseMinMax = this._shouldUseMinMax();
+      model.setUniforms({shouldUseMinMax: this._shouldUseMinMax()});
     }
 
     if (oldProps.colorRange !== props.colorRange) {
-      newState.colorRange = colorRangeToFlatArray(props.colorRange);
+      model.setUniforms({colorRange: colorRangeToFlatArray(props.colorRange)});
     }
 
     if (
@@ -167,13 +166,13 @@ export default class ScreenGridCellLayer extends Layer {
       const {cellSizePixels, cellMarginPixels} = this.props;
       const margin = cellSizePixels > cellMarginPixels ? cellMarginPixels : 0;
 
-      newState.cellScale = new Float32Array([
+      const cellScale = new Float32Array([
         ((cellSizePixels - margin) / width) * 2,
         (-(cellSizePixels - margin) / height) * 2,
         1
       ]);
+      model.setUniforms({cellScale});
     }
-    this.setState(newState);
   }
 }
 
