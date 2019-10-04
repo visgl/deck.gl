@@ -51,9 +51,7 @@ export default class DeckRenderer {
 
     this._preRender(opts.effects, opts);
 
-    const outputBuffer = this.lastPostProcessEffect
-      ? this.renderBuffers[0]
-      : opts.target;
+    const outputBuffer = this.lastPostProcessEffect ? this.renderBuffers[0] : opts.target;
     const renderStats = layerPass.render({...opts, target: outputBuffer});
 
     this._postRender(opts.effects, opts);
