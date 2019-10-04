@@ -282,8 +282,7 @@ if __name__ == "__main__":
                     "pydeck/io/templates/requirejs_dependencies.json",
                     "pydeck/nbextension/static/index.js.map",
                 ]),
-            ('share/jupyter/lab/extensions', ['pydeck/labextension/*']),
-
+            ("share/jupyter/lab/extensions/pydeck", ["pydeck/labextension/*.tgz"]),
             ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
         ],
         zip_safe=False,
