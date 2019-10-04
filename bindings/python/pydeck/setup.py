@@ -10,6 +10,7 @@ from setuptools.command.develop import develop
 
 import atexit
 from distutils import log
+import glob
 import json
 import os
 from shutil import copy
@@ -83,6 +84,7 @@ class FrontendBuild(Command):
     target_files = [
         os.path.join(here, "pydeck", "nbextension", "static", "index.js"),
         os.path.join(here, "pydeck", "nbextension", "static", "index.js.map"),
+        os.path.join(here, "pydeck", "labextension/"),
     ]
 
     user_options = []
@@ -103,9 +105,8 @@ class FrontendBuild(Command):
 
     def has_build_utilities(self):
         try:
-            check_call(["npm", "--version"], stdout=sys.stdout)
-            check_call(["yarn", "--version"], stdout=sys.stdout)
-            check_call(["node", "--version"], stdout=sys.stdout)
+            check_call(["npm", "--version"], stdout=open(os.devnull, "wb"))
+            check_call(["yarn", "--version"], stdout=open(os.devnull, "wb"))
             return True
         except Exception:
             return False
@@ -114,14 +115,26 @@ class FrontendBuild(Command):
         """Copy JS bundle from top-level JS module to pydeck widget's `static/` folder.
            Overwrites destination files"""
         js_dist_dir = os.path.join(widget_dir, "dist")
+        nbextension_folder = os.path.join(here, "pydeck", "nbextension", "static")
+        labextension_folder = os.path.join(here, "pydeck", "labextension")
+        labextension_tgz = glob.glob(os.path.join(widget_dir, "deck.gl-jupyter-widget-*.tgz"))[0]
         js_files = [
-            os.path.join(js_dist_dir, "index.js"),
-            os.path.join(js_dist_dir, "index.js.map"),
+            {
+                "source": os.path.join(js_dist_dir, "index.js"),
+                "destination": nbextension_folder,
+            },
+            {
+                "source": os.path.join(js_dist_dir, "index.js.map"),
+                "destination": nbextension_folder,
+            },
+            {
+                "source": labextension_tgz,
+                "destination": labextension_folder
+            },
         ]
-        static_folder = os.path.join(here, "pydeck", "nbextension", "static")
         for js_file in js_files:
-            log.debug("Copying %s to %s" % (js_file, static_folder))
-            copy(js_file, static_folder)
+            log.debug("Copying %s to %s" % (js_file["source"], js_file["destination"]))
+            copy(js_file["source"], js_file["destination"])
 
     def run(self):
         has_build_utilities = self.has_build_utilities()
@@ -134,10 +147,20 @@ class FrontendBuild(Command):
         env["PATH"] = npm_path
 
         if build_all:
-            log.info("Installing build dependencies with yarn. This may take a while...")
+            log.info(
+                "Installing build dependencies with yarn. This may take a while..."
+            )
             check_call(
                 ["yarn", "bootstrap"],
                 cwd=yarn_root,
+                stdout=sys.stdout,
+                stderr=sys.stderr,
+                env=env,
+            )
+            log.info("Creating lab extension .tgz with `npm pack`.")
+            check_call(
+                ["npm", "run", "build:labextension"],
+                cwd=widget_dir,
                 stdout=sys.stdout,
                 stderr=sys.stderr,
                 env=env,
@@ -154,10 +177,14 @@ class FrontendBuild(Command):
 
         self.clean_frontend_build()
         self.copy_frontend_build()
-        log.info('Creating RequireJS configs.')
-        setup_environment = 'production' if prod_build else 'development'
-        create_notebook_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
-        create_standalone_render_requirejs(load_requirejs_dependencies(), here, setup_environment=setup_environment)
+        log.info("Creating RequireJS configs for notebook and standalone environments.")
+        setup_environment = "production" if prod_build else "development"
+        create_notebook_requirejs(
+            load_requirejs_dependencies(), here, setup_environment=setup_environment
+        )
+        create_standalone_render_requirejs(
+            load_requirejs_dependencies(), here, setup_environment=setup_environment
+        )
 
         for t in self.target_files:
             if not os.path.exists(t):
@@ -184,7 +211,7 @@ def js_prerelease(command, strict=False):
 
 
 def load_requirejs_dependencies():
-    return json.loads(read('requirejs_dependencies.json'))
+    return json.loads(read("requirejs_dependencies.json"))
 
 
 version_ns = {}
@@ -206,7 +233,7 @@ if __name__ == "__main__":
         version=version_ns["__version__"],
         description="Widget for deck.gl maps",
         long_description="{}".format(read("README.md")),
-        long_description_content_type='text/markdown',
+        long_description_content_type="text/markdown",
         license="MIT License",
         include_package_data=True,
         packages=find_packages(),
@@ -240,15 +267,12 @@ if __name__ == "__main__":
         install_requires=[
             'ipykernel>=5.1.2;python_version>="3.4"',
             'ipython>=5.8.0;python_version<"3.4"',
-            'ipywidgets>=7.0.0,<8',
-            'traitlets>=4.3.2',
-            'jinja2>=2.10.1'
+            "ipywidgets>=7.0.0,<8",
+            "traitlets>=4.3.2",
+            "jinja2>=2.10.1",
         ],
-        setup_requires=[
-            'pytest-runner',
-            'Jinja2>=2.10.1'
-        ],
-        tests_require=['pytest'],
+        setup_requires=["pytest-runner", "Jinja2>=2.10.1"],
+        tests_require=["pytest"],
         data_files=[
             (
                 "share/jupyter/nbextensions/pydeck",
@@ -257,8 +281,9 @@ if __name__ == "__main__":
                     "pydeck/nbextension/static/index.js",
                     "pydeck/io/templates/requirejs_dependencies.json",
                     "pydeck/nbextension/static/index.js.map",
-                ],
-            ),
+                ]),
+            ('share/jupyter/lab/extensions', ['pydeck/labextension/*']),
+
             ("etc/jupyter/nbconfig/notebook.d", ["pydeck.json"]),
         ],
         zip_safe=False,
