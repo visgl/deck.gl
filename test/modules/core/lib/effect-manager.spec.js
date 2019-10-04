@@ -78,7 +78,7 @@ test('EffectManager#cleanup resource', t => {
   const effectManager = new EffectManager({gl, layerManager});
   effectManager.setEffects([effect]);
   const resBegin = getResourceCounts();
-  effect.prepare(gl);
+  effect.preRender(gl);
   effectManager.setEffects([]);
   const resEnd = getResourceCounts();
 
@@ -91,7 +91,7 @@ test('EffectManager#finalize', t => {
   const effectManager = new EffectManager({gl, layerManager});
   effectManager.setEffects([effect]);
   const resBegin = getResourceCounts();
-  effect.prepare(gl);
+  effect.preRender(gl);
   effectManager.finalize();
   const resEnd = getResourceCounts();
 

@@ -20,37 +20,10 @@ test('LightingEffect#constructor', t => {
   t.end();
 });
 
-test('LightingEffect#CameraLight', t => {
+test('LightingEffect#getModuleParameters', t => {
   const cameraLight = new CameraLight();
-  const lightEffect = new LightingEffect({cameraLight});
-
-  const layer = new PolygonLayer({
-    data: FIXTURES.polygons.slice(0, 3),
-    getPolygon: f => f,
-    getFillColor: (f, {index}) => [index, 0, 0]
-  });
-
-  layer.context = {viewport: testViewport};
-
-  const projectedLights = lightEffect._getProjectedPointLights(layer);
-  t.ok(projectedLights[0], 'Camera light is ok');
-  t.deepEqual(projectedLights[0].position, [0, 0, 150], 'Camera light projection is ok');
-
-  const parameters = lightEffect.getParameters(layer);
-  t.ok(parameters, 'Lighting effect getParameters is ok');
-  t.equal(parameters.lightSources.ambientLight, null, 'Lighting effect getParameters is ok');
-  t.deepEqual(parameters.lightSources.directionalLights, [], 'Lighting effect getParameters is ok');
-  t.deepEqual(
-    parameters.lightSources.pointLights[0].position,
-    [0, 0, 150],
-    'Lighting effect getParameters is ok'
-  );
-  t.end();
-});
-
-test('LightingEffect#PointLight', t => {
   const pointLight = new PointLight();
-  const lightEffect = new LightingEffect({pointLight});
+  const lightingEffect = new LightingEffect({cameraLight, pointLight});
 
   const layer = new PolygonLayer({
     data: FIXTURES.polygons.slice(0, 3),
@@ -62,14 +35,29 @@ test('LightingEffect#PointLight', t => {
   pointLight.intensity = 2.0;
   pointLight.color = [255, 0, 0];
 
-  const projectedLights = lightEffect._getProjectedPointLights(layer);
-  t.ok(projectedLights[0], 'point light is ok');
-  t.equal(projectedLights[0].intensity, 2.0, 'point light intensity is ok');
-  t.deepEqual(projectedLights[0].color, [255, 0, 0], 'point light color is ok');
+  const layerManager = new LayerManager(gl, {viewport: testViewport});
+  layerManager.setLayers([layer]);
+
+  lightingEffect.preRender(gl, {
+    layers: layerManager.getLayers(),
+    onViewportActive: layerManager.activateViewport,
+    viewports: [testViewport],
+    pixelRatio: 1
+  });
+
+  const {lightSources} = lightingEffect.getModuleParameters(layer);
+  t.is(lightSources.pointLights.length, 2, 'Lights are exported');
+  t.deepEqual(lightSources.pointLights[0].position, [0, 0, 150], 'Camera light projection is ok');
+  t.deepEqual(lightSources.pointLights[1].color, [255, 0, 0], 'point light color is ok');
+
+  t.equal(lightSources.ambientLight, null, 'Lighting effect getParameters is ok');
+  t.deepEqual(lightSources.directionalLights, [], 'Lighting effect getParameters is ok');
+
+  lightingEffect.cleanup();
   t.end();
 });
 
-test('LightingEffect#prepare and cleanup', t => {
+test('LightingEffect#preRender, cleanup', t => {
   const dirLight0 = new DirectionalLight({
     color: [255, 255, 255],
     intensity: 1.0,
@@ -97,18 +85,18 @@ test('LightingEffect#prepare and cleanup', t => {
   const layerManager = new LayerManager(gl, {viewport: testViewport});
   layerManager.setLayers([layer]);
 
-  lightingEffect.prepare(gl, {
+  lightingEffect.preRender(gl, {
     layers: layerManager.getLayers(),
     onViewportActive: layerManager.activateViewport,
     viewports: [testViewport],
     pixelRatio: 1
   });
 
-  t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect prepares shadow passes');
-  t.ok(lightingEffect.dummyShadowMap, 'LightingEffect prepares dummy shadow map');
+  t.equal(lightingEffect.shadowPasses.length, 2, 'LightingEffect creates shadow passes');
+  t.ok(lightingEffect.dummyShadowMap, 'LightingEffect creates dummy shadow map');
 
   lightingEffect.cleanup();
-  t.equal(lightingEffect.shadowPasses.length, 0, 'LightingEffect prepares shadow passes');
+  t.equal(lightingEffect.shadowPasses.length, 0, 'LightingEffect creates shadow passes');
   t.notOk(lightingEffect.dummyShadowMap, 'LightingEffect cleans up dummy shadow map');
   t.end();
 });
@@ -123,7 +111,7 @@ test('LightingEffect#shadow module', t => {
 
   const lightingEffect = new LightingEffect({dirLight});
   const programManager = ProgramManager.getDefaultProgramManager(gl);
-  lightingEffect.prepare(gl, {
+  lightingEffect.preRender(gl, {
     layers: [],
     viewports: [testViewport],
     onViewportActive: () => {},

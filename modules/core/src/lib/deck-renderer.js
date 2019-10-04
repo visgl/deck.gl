@@ -1,7 +1,6 @@
 import log from '../utils/log';
 import DrawLayersPass from '../passes/draw-layers-pass';
 import PickLayersPass from '../passes/pick-layers-pass';
-import PostProcessEffect from '../effects/post-process-effect';
 import {Framebuffer} from '@luma.gl/core';
 
 const LOG_PRIORITY_DRAW = 2;
@@ -15,8 +14,7 @@ export default class DeckRenderer {
     this.pickLayersPass = new PickLayersPass(gl);
     this.renderCount = 0;
     this._needsRedraw = 'Initial render';
-    this.screenBuffer = null;
-    this.offscreenBuffer = null;
+    this.renderBuffers = [];
     this.lastPostProcessEffect = null;
   }
 
@@ -32,51 +30,38 @@ export default class DeckRenderer {
     }
   }
 
-  renderLayers({
+  /*
     layers,
     viewports,
     onViewportActive,
     views,
     redrawReason,
     clearCanvas,
-    effects = [],
+    effects,
     pass,
     stats
-  }) {
+  */
+  renderLayers(opts) {
     const layerPass = this.drawPickingColors ? this.pickLayersPass : this.drawLayersPass;
-    const effectProps = this._prepareEffects({
-      layers,
-      layerFilter: this.layerFilter,
-      viewports,
-      onViewportActive,
-      views,
-      effects
-    });
-    const outputBuffer = this.lastPostProcessEffect
-      ? this.screenBuffer
+
+    opts.layerFilter = this.layerFilter;
+    opts.effects = opts.effects || [];
+
+    this._preRender(opts.effects, opts);
+
+    opts.outputBuffer = this.lastPostProcessEffect
+      ? this.renderBuffers[0]
       : Framebuffer.getDefaultFramebuffer(this.gl);
 
-    const renderStats = layerPass.render({
-      layers,
-      layerFilter: this.layerFilter,
-      viewports,
-      views,
-      onViewportActive,
-      pass,
-      redrawReason,
-      clearCanvas,
-      effects,
-      effectProps,
-      outputBuffer
-    });
+    const renderStats = layerPass.render(opts);
 
-    this._postRender(effects);
+    this._postRender(opts.effects);
 
     this.renderCount++;
 
     if (log.priority >= LOG_PRIORITY_DRAW) {
       renderStats.forEach(status => {
-        this._logRenderStats({status, pass, redrawReason, stats, renderStats});
+        this._logRenderStats(status, opts.pass, opts.redrawReason, opts.stats, renderStats);
       });
     }
   }
@@ -90,63 +75,62 @@ export default class DeckRenderer {
   }
 
   finalize() {
-    if (this.screenBuffer) {
-      this.screenBuffer.delete();
-      this.screenBuffer = null;
+    const {renderBuffers} = this;
+    for (const buffer of renderBuffers) {
+      buffer.delete();
     }
-    if (this.offscreenBuffer) {
-      this.offscreenBuffer.delete();
-      this.offscreenBuffer = null;
-    }
+    renderBuffers.length = 0;
   }
 
   // Private
-  _prepareEffects(params) {
-    const {effects} = params;
-    const effectProps = {};
-    this.lastPostProcessEffect = null;
+  _preRender(effects, params) {
+    let lastPostProcessEffect = null;
 
     for (const effect of effects) {
-      Object.assign(effectProps, effect.prepare(this.gl, params));
-      if (effect instanceof PostProcessEffect) {
-        this.lastPostProcessEffect = effect;
+      effect.preRender(this.gl, params);
+      if (effect.postRender) {
+        lastPostProcessEffect = effect;
       }
     }
 
-    if (this.lastPostProcessEffect) {
-      this._prepareRenderBuffers();
+    if (lastPostProcessEffect) {
+      this._resizeRenderBuffers();
     }
-
-    return effectProps;
+    this.lastPostProcessEffect = lastPostProcessEffect;
   }
 
-  _prepareRenderBuffers() {
-    if (!this.screenBuffer) {
-      this.screenBuffer = new Framebuffer(this.gl);
+  _resizeRenderBuffers() {
+    const {renderBuffers} = this;
+    if (renderBuffers.length === 0) {
+      renderBuffers.push(new Framebuffer(this.gl), new Framebuffer(this.gl));
     }
-    this.screenBuffer.resize();
-
-    if (!this.offscreenBuffer) {
-      this.offscreenBuffer = new Framebuffer(this.gl);
+    for (const buffer of renderBuffers) {
+      buffer.resize();
     }
-    this.offscreenBuffer.resize();
   }
 
   _postRender(effects) {
-    let params = {inputBuffer: this.screenBuffer, outputBuffer: this.offscreenBuffer, target: null};
+    const {renderBuffers} = this;
+    const params = {
+      inputBuffer: renderBuffers[0],
+      swapBuffer: renderBuffers[1],
+      target: null
+    };
     for (const effect of effects) {
-      if (effect instanceof PostProcessEffect) {
+      if (effect.postRender) {
         if (effect === this.lastPostProcessEffect) {
-          Object.assign(params, {target: Framebuffer.getDefaultFramebuffer(this.gl)});
-          params = effect.render(params);
+          params.target = Framebuffer.getDefaultFramebuffer(this.gl);
+          effect.postRender(this.gl, params);
           break;
         }
-        params = effect.render(params);
+        const buffer = effect.postRender(this.gl, params);
+        params.inputBuffer = buffer;
+        params.swapBuffer = buffer === renderBuffers[0] ? renderBuffers[1] : renderBuffers[0];
       }
     }
   }
 
-  _logRenderStats({renderStats, pass, redrawReason, stats}) {
+  _logRenderStats(status, pass, redrawReason, stats, renderStats) {
     const {totalCount, visibleCount, compositeCount, pickableCount} = renderStats;
     const primitiveCount = totalCount - compositeCount;
     const hiddenCount = primitiveCount - visibleCount;
