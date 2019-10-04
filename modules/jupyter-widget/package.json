@@ -25,6 +25,7 @@
   "scripts": {
     "watch": "(cd ../main && npm run build-bundle -- --env.dev) && ln -f ../main/dist/dist.dev.js ./dist/deckgl.dev.js && webpack-dev-server --env.dev --port 8080",
     "build": "webpack",
+    "build:labextension": "npm pack",
     "prepublishOnly": "webpack"
   },
   "dependencies": {
