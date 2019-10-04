@@ -73,7 +73,7 @@ const defaultProps = {
 
   // auto wrapping options
   wordBreak: 'word-break',
-  maxWidth: {type: 'number', value: null},
+  maxWidth: {type: 'number', value: -1},
 
   getText: {type: 'accessor', value: x => x.text},
   getPosition: {type: 'accessor', value: x => x.position},

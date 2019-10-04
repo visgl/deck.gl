@@ -255,7 +255,8 @@ export function transformParagraph(
     return;
   }
 
-  const autoWrappingEnabled = wordBreak && maxWidth;
+  const autoWrappingEnabled =
+    (wordBreak === 'break-word' || wordBreak === 'break-all') && isFinite(maxWidth) && maxWidth > 0;
 
   // maxWidth and height of the paragraph
   const size = [0, 0];
@@ -266,8 +267,7 @@ export function transformParagraph(
   for (const line of lines) {
     let rows = [line];
     if (autoWrappingEnabled) {
-      const wrapped = autoWrapping(line, wordBreak, maxWidth, iconMapping);
-      rows = wrapped.rows;
+      rows = autoWrapping(line, wordBreak, maxWidth, iconMapping).rows;
     }
 
     for (const row of rows) {
