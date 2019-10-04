@@ -44,7 +44,7 @@ export default class LayersPass extends Pass {
   // intersect with the picking rect
   drawLayersInViewport(
     gl,
-    {layers, layerFilter, viewport, view, pass = 'unknown', effects, effectProps}
+    {layers, layerFilter, viewport, view, pass = 'unknown', effects, moduleParameters}
   ) {
     const glViewport = getGLViewport(gl, {viewport});
 
@@ -85,12 +85,12 @@ export default class LayersPass extends Pass {
       if (shouldDrawLayer) {
         renderStatus.visibleCount++;
 
-        const moduleParameters = this._getModuleParameters(layer, effects, effectProps);
+        const _moduleParameters = this._getModuleParameters(layer, effects, pass, moduleParameters);
         const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
         const layerParameters = this._getLayerParameters(layer, layerIndex, glViewport);
 
         layer.drawLayer({
-          moduleParameters,
+          moduleParameters: _moduleParameters,
           uniforms,
           parameters: layerParameters
         });
@@ -128,14 +128,21 @@ export default class LayersPass extends Pass {
     return shouldDrawLayer;
   }
 
-  _getModuleParameters(layer, effects, effectProps) {
+  _getModuleParameters(layer, effects, pass, overrides) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       mousePosition: layer.context.mousePosition,
       pickingActive: 0,
       devicePixelRatio: cssToDeviceRatio(this.gl)
     });
-    return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), effectProps);
+
+    if (effects) {
+      for (const effect of effects) {
+        Object.assign(moduleParameters, effect.getModuleParameters(layer));
+      }
+    }
+
+    return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), overrides);
   }
 
   _getLayerParameters(layer, layerIndex, glViewport) {

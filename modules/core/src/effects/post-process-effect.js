@@ -11,28 +11,25 @@ export default class PostProcessEffect extends Effect {
     this.module = module;
   }
 
-  prepare(gl) {
+  postRender(gl, params) {
     if (!this.passes) {
       this.passes = createPasses(gl, this.module, this.id, this.props);
     }
-  }
 
-  render(params) {
-    const {target = null} = params;
-    let switchBuffer = false;
+    const {target} = params;
+    let inputBuffer = params.inputBuffer;
+    let outputBuffer = params.swapBuffer;
+
     for (let index = 0; index < this.passes.length; index++) {
-      const inputBuffer = switchBuffer ? params.outputBuffer : params.inputBuffer;
-      let outputBuffer = switchBuffer ? params.inputBuffer : params.outputBuffer;
       if (target && index === this.passes.length - 1) {
         outputBuffer = target;
       }
       this.passes[index].render({inputBuffer, outputBuffer});
-      switchBuffer = !switchBuffer;
+      const switchBuffer = outputBuffer;
+      outputBuffer = inputBuffer;
+      inputBuffer = switchBuffer;
     }
-    return {
-      inputBuffer: switchBuffer ? params.outputBuffer : params.inputBuffer,
-      outputBuffer: switchBuffer ? params.inputBuffer : params.outputBuffer
-    };
+    return inputBuffer;
   }
 
   cleanup() {
