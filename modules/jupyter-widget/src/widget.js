@@ -3,9 +3,30 @@ import {DOMWidgetModel, DOMWidgetView} from '@jupyter-widgets/base';
 
 import {MODULE_NAME, MODULE_VERSION} from './version';
 
-import {loadCss, hideMapboxCSSWarning, updateDeck} from './notebook-utils';
-
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
+
+/**
+ * Hides a warning in the mapbox-gl.js library from surfacing in the notebook as text.
+ */
+function hideMapboxCSSWarning() {
+  const missingCssWarning = document.getElementsByClassName('mapboxgl-missing-css')[0];
+  if (missingCssWarning) {
+    missingCssWarning.style.display = 'none';
+  }
+}
+
+function loadCss(url) {
+  const link = document.createElement('link');
+  link.type = 'text/css';
+  link.rel = 'stylesheet';
+  link.href = url;
+  document.getElementsByTagName('head')[0].appendChild(link);
+}
+
+function updateDeck(inputJSON, {jsonConverter, deckgl}) {
+  const results = jsonConverter.convert(inputJSON);
+  deckgl.setProps(results);
+}
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
