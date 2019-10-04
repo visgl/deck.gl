@@ -187,7 +187,7 @@ export default class DeckPicker {
           pickZ: true
         });
         // picked value is in common space (pixels)
-        z = zValues[0] * viewports[0].distanceScales.metersPerPixel[2];
+        z = zValues[0] * viewports[0].distanceScales.metersPerPixel[2] + viewports[0].position[2];
       }
 
       // Only exclude if we need to run picking again.
