@@ -1,6 +1,6 @@
 import GL from '@luma.gl/constants';
 import Pass from './pass';
-import {clear, setParameters, withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {clear, withParameters, cssToDeviceRatio} from '@luma.gl/core';
 
 export default class LayersPass extends Pass {
   render(props) {
@@ -44,7 +44,7 @@ export default class LayersPass extends Pass {
   // intersect with the picking rect
   drawLayersInViewport(
     gl,
-    {layers, layerFilter, viewport, view, parameters, pass = 'unknown', effects, effectProps}
+    {layers, layerFilter, viewport, view, pass = 'unknown', effects, effectProps}
   ) {
     const glViewport = getGLViewport(gl, {viewport});
 
@@ -68,8 +68,6 @@ export default class LayersPass extends Pass {
       pickableCount: 0
     };
 
-    setParameters(gl, parameters || {});
-
     // render layers in normal colors
     layers.forEach((layer, layerIndex) => {
       // Check if we should draw layer
@@ -87,9 +85,9 @@ export default class LayersPass extends Pass {
       if (shouldDrawLayer) {
         renderStatus.visibleCount++;
 
-        const moduleParameters = this.getModuleParameters(layer, effects, effectProps);
+        const moduleParameters = this._getModuleParameters(layer, effects, effectProps);
         const uniforms = Object.assign({}, layer.context.uniforms, {layerIndex});
-        const layerParameters = this.getLayerParameters(layer, layerIndex, glViewport, parameters);
+        const layerParameters = this._getLayerParameters(layer, layerIndex, glViewport);
 
         layer.drawLayer({
           moduleParameters,
@@ -102,39 +100,50 @@ export default class LayersPass extends Pass {
     return renderStatus;
   }
 
-  _shouldDrawLayer(layer, viewport, pass, layerFilter) {
-    let shouldDrawLayer = this.shouldDrawLayer(layer) && !layer.isComposite && layer.props.visible;
-
-    if (shouldDrawLayer && layerFilter) {
-      shouldDrawLayer = layerFilter({layer, viewport, isPicking: false, renderPass: pass});
-    }
-    return shouldDrawLayer;
-  }
-
   /* Methods for subclass overrides */
   shouldDrawLayer(layer) {
     return true;
   }
 
-  getModuleParameters(layer) {
+  getModuleParameters(layer, effects) {
+    return null;
+  }
+
+  getLayerParameters(layer, layerIndex) {
+    return null;
+  }
+
+  /* Private */
+  _shouldDrawLayer(layer, viewport, pass, layerFilter) {
+    let shouldDrawLayer = this.shouldDrawLayer(layer) && !layer.isComposite && layer.props.visible;
+
+    if (shouldDrawLayer && layerFilter) {
+      shouldDrawLayer = layerFilter({
+        layer,
+        viewport,
+        isPicking: pass.startsWith('picking'),
+        renderPass: pass
+      });
+    }
+    return shouldDrawLayer;
+  }
+
+  _getModuleParameters(layer, effects, effectProps) {
     const moduleParameters = Object.assign(Object.create(layer.props), {
       viewport: layer.context.viewport,
       mousePosition: layer.context.mousePosition,
       pickingActive: 0,
       devicePixelRatio: cssToDeviceRatio(this.gl)
     });
-    return moduleParameters;
+    return Object.assign(moduleParameters, this.getModuleParameters(layer, effects), effectProps);
   }
 
-  getLayerParameters(layer, layerIndex, glViewport, parameters) {
+  _getLayerParameters(layer, layerIndex, glViewport) {
     // All parameter resolving is done here instead of the layer
-    // Blend parameters must not be overridden
-    const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
-
-    Object.assign(layerParameters, {
+    // Blend parameters must not be overridden during picking
+    return Object.assign({}, layer.props.parameters, this.getLayerParameters(layer, layerIndex), {
       viewport: glViewport
     });
-    return layerParameters;
   }
 }
 

@@ -314,9 +314,6 @@ export default class DeckPicker {
     }
 
     const pickingFBO = pickZ ? this.depthFBO : this.pickingFBO;
-    // turn off lighting by adding empty light source object
-    // lights shader module relies on the `lightSources` to turn on/off lighting
-    const effectProps = {lightSources: {}};
 
     this.pickLayersPass.render({
       layers,
@@ -327,7 +324,6 @@ export default class DeckPicker {
       deviceRect,
       pass,
       redrawReason,
-      effectProps,
       pickZ
     });
 

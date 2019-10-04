@@ -110,14 +110,11 @@ export function processPickInfo({
       infos.set(info.layer.id, info);
     }
 
-    if (mode === 'hover') {
-      const pickingSelectedColor =
-        layer.props.autoHighlight && pickedLayer === layer ? pickedColor : null;
-
+    if (mode === 'hover' && layer.props.autoHighlight) {
       layer.setModuleParameters({
-        pickingSelectedColor
+        pickingSelectedColor: pickedLayer === layer ? pickedColor : null
       });
-      // TODO this needsRedraw logic should be fixed in layer
+      // setModuleParameters does not trigger redraw
       layer.setNeedsRedraw();
     }
   });

@@ -1,5 +1,11 @@
 import LayersPass from './layers-pass';
-import {withParameters, cssToDeviceRatio} from '@luma.gl/core';
+import {withParameters} from '@luma.gl/core';
+import GL from '@luma.gl/constants';
+
+const PICKING_PARAMETERS = {
+  blendFunc: [GL.ONE, GL.ZERO, GL.CONSTANT_ALPHA, GL.ZERO],
+  blendEquation: GL.FUNC_ADD
+};
 
 export default class PickLayersPass extends LayersPass {
   render(props) {
@@ -19,15 +25,14 @@ export default class PickLayersPass extends LayersPass {
     viewports,
     onViewportActive,
     pickingFBO,
-    effectProps,
     deviceRect: {x, y, width, height},
     pass = 'picking',
     redrawReason,
     pickZ
   }) {
-    effectProps.pickZ = pickZ;
-
     const gl = this.gl;
+    this.pickZ = pickZ;
+
     // Make sure we clear scissor test and fbo bindings in case of exceptions
     // We are only interested in one pixel, no need to render anything else
     // Note that the callback here is called synchronously.
@@ -46,29 +51,19 @@ export default class PickLayersPass extends LayersPass {
         depthMask: true,
         depthTest: true,
         depthRange: [0, 1],
-        colorMask: [true, true, true, true]
+        colorMask: [true, true, true, true],
+        // Blending
+        ...PICKING_PARAMETERS,
+        blend: !pickZ
       },
       () => {
-        const parameters = {
-          blend: true,
-          blendFunc: [gl.ONE, gl.ZERO, gl.CONSTANT_ALPHA, gl.ZERO],
-          blendEquation: gl.FUNC_ADD,
-          blendColor: [0, 0, 0, 0]
-        };
-
-        if (pickZ) {
-          parameters.blend = false;
-        }
-
         this.drawLayers({
           layers,
           layerFilter,
           viewports,
           onViewportActive,
           pass,
-          redrawReason,
-          effectProps,
-          parameters
+          redrawReason
         });
       }
     );
@@ -79,28 +74,20 @@ export default class PickLayersPass extends LayersPass {
     return layer.props.pickable;
   }
 
-  getModuleParameters(layer, effects, effectProps) {
-    const moduleParameters = Object.assign(Object.create(layer.props), {
-      viewport: layer.context.viewport,
+  getModuleParameters() {
+    return {
       pickingActive: 1,
-      pickingAttribute: effectProps.pickZ,
-      devicePixelRatio: cssToDeviceRatio(this.gl)
-    });
-
-    Object.assign(moduleParameters, effectProps);
-    return moduleParameters;
+      pickingAttribute: this.pickZ,
+      // turn off lighting by adding empty light source object
+      // lights shader module relies on the `lightSources` to turn on/off lighting
+      lightSources: {}
+    };
   }
 
-  getLayerParameters(layer, layerIndex, glViewport, parameters) {
-    // All parameter resolving is done here instead of the layer
-    // Blend parameters must not be overridden
-    const layerParameters = Object.assign({}, layer.props.parameters || {}, parameters);
-
-    Object.assign(layerParameters, {
-      viewport: glViewport,
-      blendColor: [0, 0, 0, (layerIndex + 1) / 255]
-    });
-
-    return layerParameters;
+  getLayerParameters(layer, layerIndex) {
+    // These will override any layer parameters
+    return this.pickZ
+      ? {blend: false}
+      : {...PICKING_PARAMETERS, blend: true, blendColor: [0, 0, 0, (layerIndex + 1) / 255]};
   }
 }
