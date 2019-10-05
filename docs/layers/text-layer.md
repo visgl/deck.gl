@@ -153,11 +153,11 @@ Options:
 
 * Default: `break-word`
 
-Available options are `break-all` and `break-word`. `maxWidth` has to be provided to use `wordBreak`.
+Available options are `break-all` and `break-word`. A valid `maxWidth` has to be provided to use `wordBreak`.
 
 ##### `maxWidth` (Number, optional)
 
-* Default: `null`
+* Default: `-1`
 
 `maxWidth` is used together with `break-word` for wrapping text. The value of `maxWidth` specifies the width limit to break the text into multiple lines.
  
