@@ -17,6 +17,32 @@ Each version should:
 Ref: http://keepachangelog.com/en/0.3.0/
 -->
 
+## deck.gl v7.4
+
+### deck.gl v7.4 Prereleases
+
+#### deck.gl [v7.4.0-alpha.2] - Oct 4 2019
+
+- TileLayer cache rendered sub layers (#3730)
+- HeatmapLyaer: set point size to address ANGLE bug (#3732)
+- clean up render passes (#3733)
+- GPUGridAggregator: enforce point size to workaround ANGLE bug (#3738)
+- Add `pass` parameter to layerFilter (#3739)
+- Improve auto-highlight related perf (#3740)
+- Effects system clean up (#3743)
+- Fix 3d picking projection with camera offset (#3749)
+- Support rendering to custom framebuffer (#3742)
+
+#### deck.gl [v7.4.0-alpha.1] - Oct 2 2019
+
+- delete deprecated buffer props (#3651)
+- Consolidate picking injection (#3720)
+- Picking 3D point (#3721)
+- Add domain method to scales (#3631) 
+- Integrate Quantile and Ordinal scaling (#3609)
+- Clean up picking code (#3724)
+
+
 ## deck.gl v7.3
 
 ### deck.gl v7.3 Prereleases
