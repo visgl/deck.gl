@@ -238,6 +238,10 @@ gl context, will be autocreated if not supplied.
 
 Additional options used when creating the WebGLContext. See [WebGL context attributes](https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/getContext).
 
+##### `_framebuffer` (Object, optional)
+
+(Experimental) Render to a custom frame buffer other than to screen.
+
 ##### `parameters` (Object, optional)
 
 Expects an object with WebGL settings. This object will be passed to luma.gl's `setParameters` function to configure the WebGL context, e.g. to disable depth testing, change blending modes etc.

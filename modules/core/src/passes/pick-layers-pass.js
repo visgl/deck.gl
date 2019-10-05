@@ -10,7 +10,7 @@ const PICKING_PARAMETERS = {
 export default class PickLayersPass extends LayersPass {
   render(props) {
     if (props.pickingFBO) {
-      this.drawPickingBuffer(props);
+      this._drawPickingBuffer(props);
     } else {
       super.render(props);
     }
@@ -19,7 +19,7 @@ export default class PickLayersPass extends LayersPass {
   // Private
   // Draws list of layers and viewports into the picking buffer
   // Note: does not sample the buffer, that has to be done by the caller
-  drawPickingBuffer({
+  _drawPickingBuffer({
     layers,
     layerFilter,
     viewports,
@@ -41,7 +41,6 @@ export default class PickLayersPass extends LayersPass {
     return withParameters(
       gl,
       {
-        framebuffer: pickingFBO,
         scissorTest: true,
         scissor: [x, y, width, height],
         clearColor: [0, 0, 0, 0],
@@ -57,7 +56,8 @@ export default class PickLayersPass extends LayersPass {
         blend: !pickZ
       },
       () => {
-        this.drawLayers({
+        super.render({
+          target: pickingFBO,
           layers,
           layerFilter,
           viewports,

@@ -85,7 +85,7 @@ function getPropTypes(PropTypes) {
     drawPickingColors: PropTypes.bool,
 
     // Experimental props
-
+    _framebuffer: PropTypes.object,
     // Forces a redraw every animation frame
     _animate: PropTypes.bool
   };
@@ -106,6 +106,7 @@ const defaultProps = {
   controller: null, // Rely on external controller, e.g. react-map-gl
   useDevicePixels: true,
   touchAction: 'none',
+  _framebuffer: null,
   _animate: false,
 
   onWebGLInitialized: noop,
@@ -648,6 +649,7 @@ export default class Deck {
     this.deckRenderer.renderLayers(
       Object.assign(
         {
+          target: this.props._framebuffer,
           layers: this.layerManager.getLayers(),
           viewports: this.viewManager.getViewports(),
           onViewportActive: this.layerManager.activateViewport,
