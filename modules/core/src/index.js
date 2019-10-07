@@ -97,6 +97,9 @@ export {AmbientLight} from '@luma.gl/core';
 
 export {LayerExtension} from './lib/layer-extension';
 
+// props
+import {compareProps} from './lifecycle/props';
+
 // Exports for layers
 // Experimental Features may change in minor version bumps, use at your own risk)
 export const experimental = {
@@ -104,5 +107,6 @@ export const experimental = {
   flattenVertices,
   fillArray,
   count,
-  memoize
+  memoize,
+  compareProps
 };

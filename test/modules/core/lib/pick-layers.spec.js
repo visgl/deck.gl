@@ -472,8 +472,8 @@ const TEST_CASES = [
           pickable: true,
           cellSize: 200,
           gpuAggregation: true,
-          extruded: true,
-          fp64: true
+          extruded: true
+          // fp64: true // TODO: enable after integrating with FP64 extension
         })
       ]
     },

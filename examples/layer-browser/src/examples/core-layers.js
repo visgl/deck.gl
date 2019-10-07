@@ -14,13 +14,6 @@ import {
   TextLayer
 } from '@deck.gl/layers';
 
-import {
-  CPUGridLayer,
-  HexagonLayer,
-  ContourLayer,
-  ScreenGridLayer
-} from '@deck.gl/aggregation-layers';
-
 const {flattenVertices} = experimental;
 
 // Demonstrate immutable support
@@ -239,17 +232,6 @@ const PathLayerBinaryExample = {
   }
 };
 
-const ScreenGridLayerExample = {
-  layer: ScreenGridLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'screenGridLayer',
-    getPosition: d => d.COORDINATES,
-    cellSizePixels: 40,
-    pickable: false
-  }
-};
-
 const LineLayerExample = {
   layer: LineLayer,
   getData: () => dataSamples.routes,
@@ -293,69 +275,6 @@ const ColumnLayerExample = {
   }
 };
 
-const ContourLayerExample = {
-  layer: ContourLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'contourLayer',
-    cellSize: 200,
-    getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
-    contours: [
-      {threshold: 1, color: [255, 0, 0], strokeWidth: 4},
-      {threshold: 5, color: [0, 255, 0], strokeWidth: 2},
-      {threshold: 15, color: [0, 0, 255]}
-    ]
-  }
-};
-
-const ContourLayerBandsExample = {
-  layer: ContourLayer,
-  getData: () => dataSamples.points,
-  props: {
-    id: 'contourLayer',
-    cellSize: 200,
-    getPosition: d => d.COORDINATES,
-    gpuAggregation: true,
-    contours: [
-      {threshold: [1, 5], color: [255, 0, 0]},
-      {threshold: [5, 15], color: [0, 255, 0]},
-      {threshold: [15, 1000], color: [0, 0, 255]}
-    ]
-  }
-};
-
-function getMean(pts, key) {
-  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
-
-  return filtered.length
-    ? filtered.reduce((accu, curr) => accu + curr[key], 0) / filtered.length
-    : null;
-}
-
-function getMax(pts, key) {
-  const filtered = pts.filter(pt => Number.isFinite(pt[key]));
-
-  return filtered.length
-    ? filtered.reduce((accu, curr) => (curr[key] > accu ? curr[key] : accu), -Infinity)
-    : null;
-}
-
-const CPUGridLayerExample = {
-  layer: CPUGridLayer,
-  props: {
-    id: 'gridLayer',
-    data: dataSamples.points,
-    cellSize: 200,
-    opacity: 1,
-    extruded: true,
-    pickable: true,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
-
 /*
 const ColumnLayerExample = {
   layer: ColumnLayer,
@@ -374,24 +293,6 @@ const ColumnLayerExample = {
   }
 };
 */
-
-const HexagonLayerExample = {
-  layer: HexagonLayer,
-  props: {
-    id: 'HexagonLayer',
-    data: dataSamples.points,
-    extruded: true,
-    pickable: true,
-    radius: 1000,
-    opacity: 1,
-    elevationScale: 1,
-    elevationRange: [0, 3000],
-    coverage: 1,
-    getPosition: d => d.COORDINATES,
-    getColorValue: points => getMean(points, 'SPACES'),
-    getElevationValue: points => getMax(points, 'SPACES')
-  }
-};
 
 const TextLayerExample = {
   layer: TextLayer,
@@ -520,11 +421,6 @@ export default {
     'IconLayer (auto packing)': IconLayerAutoPackingExample,
     TextLayer: TextLayerExample,
     BitmapLayer: BitmapLayerExample,
-    ColumnLayer: ColumnLayerExample,
-    CPUGridLayer: CPUGridLayerExample,
-    ScreenGridLayer: ScreenGridLayerExample,
-    HexagonLayer: HexagonLayerExample,
-    ContourLayer: ContourLayerExample,
-    'ContourLayer (Bands)': ContourLayerBandsExample
+    ColumnLayer: ColumnLayerExample
   }
 };

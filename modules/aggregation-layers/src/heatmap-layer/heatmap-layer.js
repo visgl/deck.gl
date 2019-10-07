@@ -37,8 +37,9 @@ import {
   hasFeatures,
   isWebGL2
 } from '@luma.gl/core';
-import {CompositeLayer, AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
+import {AttributeManager, COORDINATE_SYSTEM, log} from '@deck.gl/core';
 import TriangleLayer from './triangle-layer';
+import AggregationLayer from '../aggregation-layer';
 import {defaultColorRange, colorRangeToFlatArray} from '../utils/color-utils';
 import weights_vs from './weights-vs.glsl';
 import weights_fs from './weights-fs.glsl';
@@ -63,7 +64,7 @@ const defaultProps = {
   getPosition: {type: 'accessor', value: x => x.position},
   getWeight: {type: 'accessor', value: 1},
   intensity: {type: 'number', min: 0, value: 1},
-  radiusPixels: {type: 'number', min: 1, max: 100, value: 30},
+  radiusPixels: {type: 'number', min: 1, max: 100, value: 50},
   colorRange: defaultColorRange,
   threshold: {type: 'number', min: 0, max: 1, value: 0.05},
   colorDomain: {type: 'array', value: null, optional: true}
@@ -75,7 +76,7 @@ const REQUIRED_FEATURES = [
   // FEATURES.FLOAT_BLEND, // implictly supported when TEXTURE_FLOAT is supported
 ];
 
-export default class HeatmapLayer extends CompositeLayer {
+export default class HeatmapLayer extends AggregationLayer {
   initializeState() {
     const {gl} = this.context;
     if (!hasFeatures(gl, REQUIRED_FEATURES)) {
@@ -83,6 +84,7 @@ export default class HeatmapLayer extends CompositeLayer {
       log.error(`HeatmapLayer: ${this.id} is not supported on this browser`)();
       return;
     }
+    super.initializeState({needsAggregator: false});
     this.setState({supported: true});
     this._setupTextureParams();
     this._setupAttributes();
@@ -203,6 +205,9 @@ export default class HeatmapLayer extends CompositeLayer {
 
   // PRIVATE
 
+  _getAggregationModel() {
+    return this.state.weightsTransform.model;
+  }
   // override Composite layer private method to create AttributeManager instance
   _getAttributeManager() {
     return new AttributeManager(this.context.gl, {
@@ -217,7 +222,7 @@ export default class HeatmapLayer extends CompositeLayer {
     if (this._isDataChanged(opts)) {
       changeFlags.dataChanged = true;
     }
-    if (oldProps.radiusPixels !== props.radiusPixels) {
+    if (oldProps.radiusPixels !== props.radiusPixels || this._getUniformsChangeFlag(opts)) {
       changeFlags.uniformsChanged = true;
     }
     changeFlags.viewportChanged = opts.changeFlags.viewportChanged;
@@ -230,11 +235,11 @@ export default class HeatmapLayer extends CompositeLayer {
     return changeFlags;
   }
 
-  _getTextures() {
+  _createTextures() {
     const {gl} = this.context;
     const {textureSize, format, type} = this.state;
 
-    return {
+    this.setState({
       weightsTexture: new Texture2D(gl, {
         width: textureSize,
         height: textureSize,
@@ -243,13 +248,10 @@ export default class HeatmapLayer extends CompositeLayer {
         ...TEXTURE_OPTIONS
       }),
       maxWeightsTexture: new Texture2D(gl, {format, type, ...TEXTURE_OPTIONS}) // 1 X 1 texture,
-    };
+    });
   }
 
   _isDataChanged({changeFlags}) {
-    if (changeFlags.dataChanged) {
-      return true;
-    }
     if (
       changeFlags.updateTriggersChanged &&
       (changeFlags.updateTriggersChanged.all ||
@@ -285,19 +287,38 @@ export default class HeatmapLayer extends CompositeLayer {
     }
   }
 
-  _setupResources() {
+  _createWeightsTransform(shaderOptions = {}) {
     const {gl} = this.context;
-    const {textureSize} = this.state;
-    const {weightsTexture, maxWeightsTexture} = this._getTextures();
-    const weightsTransform = new Transform(gl, {
-      id: `${this.id}-weights-transform`,
+    let {weightsTransform} = this.state;
+    const {weightsTexture} = this.state;
+    if (weightsTransform) {
+      weightsTransform.delete();
+    }
+    const shaders = {};
+    Object.assign(shaders, shaderOptions, {
       vs: weights_vs,
-      _fs: weights_fs,
-      modules: ['project32'],
+      _fs: weights_fs
+    });
+    const modules = ['project32'];
+    shaders.modules = modules.concat(shaders.modules || []);
+    weightsTransform = new Transform(gl, {
+      id: `${this.id}-weights-transform`,
       elementCount: 1,
       _targetTexture: weightsTexture,
-      _targetTextureVarying: 'weightsTexture'
+      _targetTextureVarying: 'weightsTexture',
+      ...shaders
     });
+    this.setState({
+      weightsTransform
+      // model: weightsTransform.model
+    });
+  }
+
+  _setupResources() {
+    const {gl} = this.context;
+    this._createTextures();
+    const {textureSize, weightsTexture, maxWeightsTexture} = this.state;
+    this._createWeightsTransform();
     const maxWeightTransform = new Transform(gl, {
       id: `${this.id}-max-weights-transform`,
       _sourceTextures: {
@@ -312,8 +333,6 @@ export default class HeatmapLayer extends CompositeLayer {
     this.setState({
       weightsTexture,
       maxWeightsTexture,
-      weightsTransform,
-      model: weightsTransform.model,
       maxWeightTransform,
       zoom: null,
       triPositionBuffer: new Buffer(gl, {
@@ -325,6 +344,12 @@ export default class HeatmapLayer extends CompositeLayer {
         accessor: {size: 2}
       })
     });
+  }
+
+  // overwrite super class method to update transform model
+  _updateShaders(shaderOptions) {
+    // sahder params (modules, injects) changed, update model object
+    this._createWeightsTransform(shaderOptions);
   }
 
   _updateMaxWeightValue() {
@@ -448,14 +473,6 @@ export default class HeatmapLayer extends CompositeLayer {
     const {radiusPixels} = this.props;
     const {weightsTransform, worldBounds, textureSize, weightsTexture, weightsScale} = this.state;
 
-    // base Layer class doesn't update attributes for composite layers, hence manually trigger it.
-    this._updateAttributes(this.props);
-
-    const moduleParameters = Object.assign(Object.create(this.props), {
-      viewport: this.context.viewport,
-      pickingActive: 0
-    });
-
     // #5: convert world bounds to common using Layer's coordiante system and origin
     const commonBounds = this._worldToCommonBounds(worldBounds, {
       useLayerCoordinateSystem: true,
@@ -464,12 +481,15 @@ export default class HeatmapLayer extends CompositeLayer {
       height: textureSize * RESOLUTION
     });
 
-    const uniforms = Object.assign({}, weightsTransform.model.getModuleUniforms(moduleParameters), {
-      radiusPixels,
-      commonBounds,
-      textureWidth: textureSize,
-      weightsScale
-    });
+    const uniforms = Object.assign(
+      {},
+      {
+        radiusPixels,
+        commonBounds,
+        textureWidth: textureSize,
+        weightsScale
+      }
+    );
     // Attribute manager sets data array count as instaceCount on model
     // we need to set that as elementCount on 'weightsTransform'
     weightsTransform.update({
@@ -483,7 +503,9 @@ export default class HeatmapLayer extends CompositeLayer {
         blendFunc: [GL.ONE, GL.ONE],
         blendEquation: GL.FUNC_ADD
       },
-      clearRenderTarget: true
+      clearRenderTarget: true,
+      attributes: this.getAttributes(),
+      moduleSettings: this.getModuleSettings()
     });
     this._updateMaxWeightValue();
 

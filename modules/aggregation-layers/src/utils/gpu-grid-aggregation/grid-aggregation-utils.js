@@ -1,8 +1,5 @@
 import {Matrix4} from 'math.gl';
-import {fp64 as fp64Utils} from '@luma.gl/core';
-import {COORDINATE_SYSTEM, log, createIterable, experimental} from '@deck.gl/core';
-const {count} = experimental;
-const {fp64LowPart} = fp64Utils;
+import {COORDINATE_SYSTEM, log} from '@deck.gl/core';
 
 const R_EARTH = 6378000;
 
@@ -12,8 +9,6 @@ function toFinite(n) {
 
 // Takes data and aggregation params and returns aggregated data.
 export function pointToDensityGridData({
-  data,
-  getPosition,
   cellSizeMeters,
   gpuGridAggregator,
   gpuAggregation,
@@ -22,12 +17,13 @@ export function pointToDensityGridData({
   fp64 = false,
   coordinateSystem = COORDINATE_SYSTEM.LNGLAT,
   viewport = null,
-  boundingBox = null
+  boundingBox = null,
+  vertexCount,
+  attributes,
+  moduleSettings = {}
 }) {
-  let gridData = {};
   if (aggregationFlags.dataChanged) {
-    gridData = parseGridData(data, getPosition, weightParams);
-    boundingBox = gridData.boundingBox;
+    boundingBox = getBoundingBox(attributes, vertexCount);
   }
   log.assert(cellSizeMeters > 0);
   let cellSize = [cellSizeMeters, cellSizeMeters];
@@ -55,16 +51,17 @@ export function pointToDensityGridData({
   const opts = getGPUAggregationParams({boundingBox, cellSize, worldOrigin});
 
   const aggregatedData = gpuGridAggregator.run({
-    positions: gridData.positions,
-    positions64xyLow: gridData.positions64xyLow,
-    weights: gridData.weights,
+    weights: weightParams,
     cellSize,
     width: opts.width,
     height: opts.height,
     gridTransformMatrix: opts.gridTransformMatrix,
     useGPU: gpuAggregation,
     changeFlags: aggregationFlags,
-    fp64
+    fp64,
+    vertexCount,
+    attributes,
+    moduleSettings
   });
 
   return {
@@ -78,13 +75,8 @@ export function pointToDensityGridData({
 
 // Parse input data to build positions, wights and bounding box.
 /* eslint-disable max-statements */
-function parseGridData(data, getPosition, weightParams) {
-  const pointCount = count(data);
-
-  // For CPU Aggregation this needs to have full 64 bit precession, hence don't use FLoat32Array
-  // For GPU Aggregation this will be converted into Float32Array
-  const positions = new Float64Array(pointCount * 2);
-  const positions64xyLow = new Float32Array(pointCount * 2);
+function getBoundingBox(attributes, vertexCount) {
+  const positions = attributes.positions.value;
 
   let yMin = Infinity;
   let yMax = -Infinity;
@@ -93,47 +85,13 @@ function parseGridData(data, getPosition, weightParams) {
   let y;
   let x;
 
-  const weights = {};
-  for (const name in weightParams) {
-    weights[name] = Object.assign({}, weightParams[name], {
-      values: new Float32Array(pointCount * 3)
-    });
-  }
-
-  const {iterable, objectInfo} = createIterable(data);
-  for (const object of iterable) {
-    objectInfo.index++;
-    const position = getPosition(object, objectInfo);
-    const {index} = objectInfo;
-    x = position[0];
-    y = position[1];
-    positions[index * 2] = x;
-    positions[index * 2 + 1] = y;
-
-    positions64xyLow[index * 2] = fp64LowPart(x);
-    positions64xyLow[index * 2 + 1] = fp64LowPart(y);
-
-    for (const name in weightParams) {
-      const weight = weightParams[name].getWeight(object);
-
-      // Aggregator expects each weight is an array of size 3
-      if (Array.isArray(weight)) {
-        weights[name].values[index * 3] = weight[0];
-        weights[name].values[index * 3 + 1] = weight[1];
-        weights[name].values[index * 3 + 2] = weight[2];
-      } else {
-        // backward compitability
-        weights[name].values[index * 3] = weight;
-      }
-    }
-
-    if (Number.isFinite(y) && Number.isFinite(x)) {
-      yMin = y < yMin ? y : yMin;
-      yMax = y > yMax ? y : yMax;
-
-      xMin = x < xMin ? x : xMin;
-      xMax = x > xMax ? x : xMax;
-    }
+  for (let i = 0; i < vertexCount; i++) {
+    x = positions[i * 3];
+    y = positions[i * 3 + 1];
+    yMin = y < yMin ? y : yMin;
+    yMax = y > yMax ? y : yMax;
+    xMin = x < xMin ? x : xMin;
+    xMax = x > xMax ? x : xMax;
   }
 
   const boundingBox = {
@@ -142,12 +100,8 @@ function parseGridData(data, getPosition, weightParams) {
     yMin: toFinite(yMin),
     yMax: toFinite(yMax)
   };
-  return {
-    positions,
-    positions64xyLow,
-    weights,
-    boundingBox
-  };
+
+  return boundingBox;
 }
 /* eslint-enable max-statements */
 

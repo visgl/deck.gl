@@ -21,7 +21,7 @@
 export default `\
 #define SHADER_NAME gpu-aggregation-to-grid-vs-64
 
-attribute vec2 positions;
+attribute vec3 positions;
 attribute vec2 positions64xyLow;
 attribute vec3 weights;
 uniform vec2 windowSize;
@@ -51,7 +51,7 @@ void main(void) {
 
   vWeights = weights;
 
-  vec2 windowPos = positions;
+  vec2 windowPos = positions.xy;
   vec2 windowPos64xyLow = positions64xyLow;
   if (projectPoints) {
     vec2 projectedXY[2];
