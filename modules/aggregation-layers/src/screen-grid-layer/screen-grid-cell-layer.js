@@ -51,19 +51,26 @@ export default class ScreenGridCellLayer extends Layer {
     const attributeManager = this.getAttributeManager();
     attributeManager.addInstanced({
       instancePositions: {size: 3, update: this.calculateInstancePositions},
-      instanceCounts: {size: 4, instanced: true, noAlloc: true}
+      instanceCounts: {size: 4, noAlloc: true}
     });
     this.setState({
       model: this._getModel(gl)
     });
   }
 
+  shouldUpdateState({changeFlags}) {
+    // 'instanceCounts' buffer contetns change on viewport change.
+    return changeFlags.somethingChanged;
+  }
+
   updateState({oldProps, props, changeFlags}) {
     super.updateState({oldProps, props, changeFlags});
 
-    if (oldProps.cellSizePixels !== props.cellSizePixels || changeFlags.viewportChanged) {
-      const attributeManager = this.getAttributeManager();
+    const attributeManager = this.getAttributeManager();
+    if (props.numInstances !== oldProps.numInstances) {
       attributeManager.invalidateAll();
+    } else if (oldProps.cellSizePixels !== props.cellSizePixels) {
+      attributeManager.invalidate('instancePositions');
     }
 
     this._updateUniforms(oldProps, props, changeFlags);
