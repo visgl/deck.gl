@@ -54,13 +54,7 @@ test('ScreenGridLayer', t => {
     },
     assert: t.ok,
     onBeforeUpdate: ({testCase}) => t.comment(testCase.title),
-    onAfterUpdate: ({layer}) => {
-      t.deepEquals(
-        layer.state.model.getUniforms().cellScale,
-        layer.state.cellScale,
-        'should update cellScale'
-      );
-    }
+    onAfterUpdate: ({testCase}) => t.comment(testCase.title)
   });
 
   testLayer({Layer: ScreenGridLayer, testCases, onError: t.notOk});
