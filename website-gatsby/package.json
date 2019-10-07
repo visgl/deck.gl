@@ -8,7 +8,7 @@
   "scripts": {
     "start": "yarn clean-examples && yarn clean && yarn develop",
     "clean": "rm -rf ./.cache ./public",
-    "clean-examples": "find ../examples -name node_modules -exec rm -r {} \\;",
+    "clean-examples": "find ../examples -name node_modules -exec rm -rf {} \\;",
     "develop": "gatsby develop --port=8001",
     "build": "yarn clean-examples && gatsby build",
     "serve": "gatsby serve",
@@ -32,7 +32,7 @@
     "gatsby": "^2.3.0",
     "gatsby-plugin-styletron": "^3.0.5",
     "gh-pages": "^2.0.1",
-    "ocular-gatsby": "1.0.0-alpha.25",
+    "ocular-gatsby": "1.0.4",
     "sharp": "0.22.1"
   }
 }
