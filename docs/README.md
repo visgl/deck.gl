@@ -1,3 +1,5 @@
+# Introduction
+
 <p align="center">
   These docs are for
   <a href="https://github.com/uber/deck.gl/blob/7.2-release/docs/README.md">
@@ -21,8 +23,6 @@
     <img src="https://img.shields.io/badge/v-3.0-green.svg?style=flat-square" />
   </a>
 </p>
-
-# Introduction
 
 deck.gl is designed to make visualization of large data sets simple. It enables users to quickly get impressive visual results with limited effort through composition of existing layers, while offering a complete architecture for packaging advanced WebGL based visualizations as reusable JavaScript layers.
 

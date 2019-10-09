@@ -61,7 +61,7 @@ const colorRange = [
 const elevationScale = {min: 1, max: 50};
 
 /* eslint-disable react/no-deprecated */
-export class App extends Component {
+export default class App extends Component {
   static get defaultColorRange() {
     return colorRange;
   }

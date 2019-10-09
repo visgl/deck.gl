@@ -55,7 +55,7 @@ const dirLight = new SunLight({
 
 const landCover = [[[-123.0, 49.196], [-123.0, 49.324], [-123.306, 49.324], [-123.306, 49.196]]];
 
-export class App extends Component {
+export default class App extends Component {
   constructor(props) {
     super(props);
 
