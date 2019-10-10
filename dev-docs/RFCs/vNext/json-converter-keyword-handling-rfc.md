@@ -14,7 +14,7 @@ between the keyword `type` and a string named `type`.
 ## Motivation
 
 The keyword `type` occurs as a field name in many data sets, and is also of course a Javascript keyword.
-Users may want "type" to be interpreted as one or the other but currently can't specify which.
+Users may want `type` to be interpreted as one or the other but currently can't specify which.
 
 The GeoJSON standard includes type in the top-level JSON, so most GeoJSON data sets break when ingested by the deck.gl/json API.
 
@@ -24,5 +24,4 @@ Suggestions from @ibgreen–
 
 Use `__type` to indicate the Javascript `type` keyword.
 
-Additionally, add a syntax for expressions, e.g, @= prefix: @=[lng, lat], so that we didn't need to know any information about
-prop types to deduce which strings to parse as expressions.
+Additionally, add a syntax for expressions, e.g, `@=` prefix: `@=[lng, lat]`, so that we didn't need to know any information about prop types to deduce which strings to parse as expressions.
