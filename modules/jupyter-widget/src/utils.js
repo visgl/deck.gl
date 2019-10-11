@@ -24,18 +24,15 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck(
-  {mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick, handleError} = {
-    mapboxApiKey: null,
-    container: null,
-    jsonInput: null,
-    tooltip: null,
-    onComplete: null,
-    handleClick: null,
-    // eslint-disable-next-line
-    handleError: console.error
-  }
-) {
+export function initDeck({
+  mapboxApiKey,
+  container,
+  jsonInput,
+  tooltip,
+  onComplete,
+  handleClick,
+  handleWarning
+}) {
   require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
@@ -66,15 +63,24 @@ export function initDeck(
           getTooltip,
           container
         });
+        const warn = deck.log.warn;
+        deck.log.warn = wrapWarn(warn, handleWarning);
         if (onComplete) {
           onComplete({jsonConverter, deckgl});
         }
       } catch (err) {
         // This will fail in node tests
         // eslint-disable-next-line
-        handleError(err);
+        console.error(err);
       }
       return {};
     });
   });
+}
+
+function wrapWarn(warnFunction, messageHandler) {
+  return (message, err) => {
+    messageHandler(message);
+    return warnFunction(message, err);
+  };
 }

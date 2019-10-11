@@ -24,7 +24,7 @@ export class DeckGLModel extends DOMWidgetModel {
       tooltip: null,
       width: '100%',
       height: 500,
-      js_error: null
+      js_warning: null
     };
   }
 
@@ -83,7 +83,7 @@ export class DeckGLView extends DOMWidgetView {
         this.jsonDeck = {jsonConverter, deckgl};
       },
       handleClick: this.handleClick.bind(this),
-      handleError: this.handleError
+      handleWarning: this.handleWarning.bind(this)
     });
   }
 
@@ -117,11 +117,11 @@ export class DeckGLView extends DOMWidgetView {
     this.model.save_changes();
   }
 
-  handleError(err) {
-    if (!err) {
+  handleWarning(warningMessage) {
+    if (!warningMessage) {
       return;
     }
-    this.model.set('js_error', err);
+    this.model.set('js_warning', warningMessage);
     this.model.save_changes();
   }
 }
