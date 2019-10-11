@@ -8,6 +8,7 @@ from traitlets import Any, Int, Unicode
 
 from ._frontend import module_name, module_version
 
+@widgets.register
 class DeckGLWidget(widgets.DOMWidget):
     """
     Jupyter environment widget that takes JSON and
