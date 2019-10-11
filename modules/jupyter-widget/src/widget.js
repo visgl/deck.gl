@@ -6,6 +6,7 @@ import {MODULE_NAME, MODULE_VERSION} from './version';
 import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
+const ERROR_BOX_CLASSNAME = 'error-box';
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
@@ -24,7 +25,7 @@ export class DeckGLModel extends DOMWidgetModel {
       tooltip: null,
       width: '100%',
       height: 500,
-      js_warning: null
+      js_warning: false
     };
   }
 
@@ -69,6 +70,9 @@ export class DeckGLView extends DOMWidgetView {
     container.style.height = height;
     container.style.position = 'relative';
 
+    const errorBox = addErrorBox();
+    container.append(errorBox);
+
     const mapboxApiKey = this.model.get('mapbox_key');
     const jsonInput = JSON.parse(this.model.get('json_input'));
     const tooltip = this.model.get('tooltip');
@@ -109,19 +113,47 @@ export class DeckGLView extends DOMWidgetView {
     if (!e) {
       return;
     }
-    if (e.object && e.object.points) {
-      this.model.set('selected_data', e.object.points);
+    const multiselectEnabled = e.metaKey || e.altKey;
+    const aggregateLayer = e.object && e.object.points;
+    let data;
+    if (multiselectEnabled) {
+      data = Array.isArray(this.model.get('selected_data'))
+        ? this.model.get('selected_data')
+        : [this.model.get('selected_data')];
+      if (aggregateLayer) {
+        data.push(e.object.points);
+      } else {
+        data.push(e.object);
+      }
     } else {
-      this.model.set('selected_data', e.object);
+      // Single selection
+      data = e.object.points ? aggregateLayer : e.object;
     }
+    this.model.set('selected_data', data);
     this.model.save_changes();
   }
 
   handleWarning(warningMessage) {
-    if (!warningMessage) {
-      return;
+    const errorBox = this.el.getElementsByClassName(ERROR_BOX_CLASSNAME)[0];
+    if (this.model.get('js_warning')) {
+      errorBox.innerText = warningMessage;
     }
-    this.model.set('js_warning', warningMessage);
-    this.model.save_changes();
   }
+}
+
+function addErrorBox() {
+  const errorBox = document.createElement('div');
+  errorBox.className = ERROR_BOX_CLASSNAME;
+  Object.assign(errorBox.style, {
+    width: '100%',
+    height: '20px',
+    position: 'absolute',
+    zIndex: '1000',
+    backgroundColor: 'lemonchiffon',
+    cursor: 'pointer'
+  });
+  errorBox.onclick = e => {
+    errorBox.style.display = 'none';
+  };
+  return errorBox;
 }
