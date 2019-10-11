@@ -2,12 +2,13 @@
 // delete the local development overrides at the bottom of this file
 const {resolve} = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 const CONFIG = {
   mode: 'development',
 
   entry: {
-    app: './app.js'
+    app: '.'
   },
 
   resolve: {
@@ -16,8 +17,24 @@ const CONFIG = {
     }
   },
 
-  plugins: [new HtmlWebpackPlugin({title: 'deck.gl example'})]
+  module: {
+    rules: [
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        exclude: [/node_modules/],
+        options: {
+          presets: ['@babel/preset-react']
+        }
+      }
+    ]
+  },
+
+  plugins: [
+    new HtmlWebpackPlugin({title: 'deck.gl example'}),
+    new webpack.EnvironmentPlugin(['MapboxAccessToken'])
+  ]
 };
 
 // This line enables bundling against src in this repo rather than installed module
-module.exports = env => (env ? require('../../webpack.config.local')(CONFIG)(env) : CONFIG);
+module.exports = env => (env ? require('../webpack.config.local')(CONFIG)(env) : CONFIG);

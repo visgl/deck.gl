@@ -89,8 +89,6 @@ export default class WBOITLayer extends SolidPolygonLayer {
       revealageTexture,
       accumulationFramebuffer
     });
-
-    /* eslint-enable max-len */
   }
 
   finalizeState() {
@@ -121,7 +119,17 @@ export default class WBOITLayer extends SolidPolygonLayer {
         cull: false,
         framebuffer: this.state.accumulationFramebuffer
       },
-      () => super.draw(opts)
+      () => {
+        // Draws sides and top
+        super.draw(opts);
+
+        // Draw bottom if needed
+        const {topModel} = this.state;
+        const {extruded, filled} = this.props;
+        if (topModel && extruded && filled) {
+          topModel.setUniforms({elevationScale: 0}).draw();
+        }
+      }
     );
 
     withParameters(
@@ -134,6 +142,25 @@ export default class WBOITLayer extends SolidPolygonLayer {
       },
       () => {
         this.state.oitModel.draw();
+      }
+    );
+
+    withParameters(
+      gl,
+      {
+        blend: false,
+        depthTest: false,
+        framebuffer: null
+      },
+      () => {
+        // Draw wireframe on top
+        // TODO: Update super.draw() to not draw wireframe
+        const {sideModel} = this.state;
+        const {wireframe} = this.props;
+        if (sideModel && wireframe) {
+          sideModel.setDrawMode(GL.LINE_STRIP);
+          sideModel.setUniforms({isWireframe: true}).draw();
+        }
       }
     );
   }
