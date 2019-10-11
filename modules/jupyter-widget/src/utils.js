@@ -24,7 +24,18 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick}) {
+export function initDeck(
+  {mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick, handleError} = {
+    mapboxApiKey: null,
+    container: null,
+    jsonInput: null,
+    tooltip: null,
+    onComplete: null,
+    handleClick: null,
+    // eslint-disable-next-line
+    handleError: console.error
+  }
+) {
   require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
@@ -61,7 +72,7 @@ export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplet
       } catch (err) {
         // This will fail in node tests
         // eslint-disable-next-line
-        console.error(err);
+        handleError(err);
       }
       return {};
     });

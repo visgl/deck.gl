@@ -23,7 +23,8 @@ export class DeckGLModel extends DOMWidgetModel {
       selected_data: null,
       tooltip: null,
       width: '100%',
-      height: 500
+      height: 500,
+      js_error: null
     };
   }
 
@@ -81,7 +82,8 @@ export class DeckGLView extends DOMWidgetView {
       onComplete: ({jsonConverter, deckgl}) => {
         this.jsonDeck = {jsonConverter, deckgl};
       },
-      handleClick: this.handleClick.bind(this)
+      handleClick: this.handleClick.bind(this),
+      handleError: this.handleError
     });
   }
 
@@ -112,6 +114,14 @@ export class DeckGLView extends DOMWidgetView {
     } else {
       this.model.set('selected_data', e.object);
     }
+    this.model.save_changes();
+  }
+
+  handleError(err) {
+    if (!err) {
+      return;
+    }
+    this.model.set('js_error', err);
     this.model.save_changes();
   }
 }
