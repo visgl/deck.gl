@@ -1,5 +1,5 @@
 /* eslint-disable max-statements */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {Timeline} from '@luma.gl/addons';
 import UniformTransitionManager from '@deck.gl/core/lib/uniform-transition-manager';
 

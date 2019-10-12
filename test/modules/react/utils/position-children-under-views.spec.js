@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import React, {createElement} from 'react';
 import positionChildrenUnderViews from '@deck.gl/react/utils/position-children-under-views';
 import {MapView, OrthographicView, View} from '@deck.gl/core';

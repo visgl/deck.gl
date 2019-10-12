@@ -1,5 +1,5 @@
 /* global window,document */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 const WIDTH = 800;
 const HEIGHT = 450;

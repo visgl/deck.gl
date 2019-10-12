@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {MapView, OrbitView} from 'deck.gl';
 import {shadow} from '@deck.gl/core/shaderlib';

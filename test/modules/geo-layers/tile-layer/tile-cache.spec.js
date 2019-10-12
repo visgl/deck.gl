@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import TileCache from '@deck.gl/geo-layers/tile-layer/utils/tile-cache';
 import Tile from '@deck.gl/geo-layers/tile-layer/utils/tile';
 import {WebMercatorViewport} from '@deck.gl/core';

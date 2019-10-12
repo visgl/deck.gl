@@ -2,12 +2,20 @@
 module.exports = {
   plugins: ['react'],
   extends: ['uber-jsx', 'uber-es2015', 'prettier', 'prettier/react', 'plugin:import/errors'],
-  overrides: {
-    files: ['*.spec.js', 'webpack.config.js', '**/bundle/*.js'],
-    rules: {
-      'import/no-extraneous-dependencies': 0
+  overrides: [
+    {
+      files: ['*.spec.js', 'webpack.config.js', '**/bundle/*.js'],
+      rules: {
+        'import/no-extraneous-dependencies': 0
+      }
+    },
+    {
+      files: ['**/test/**/*.js'],
+      rules: {
+        'import/no-unresolved': 0
+      }
     }
-  },
+  ],
   settings: {
     'import/core-modules': [
       '@luma.gl/core',

@@ -22,7 +22,7 @@
 import Attribute from '@deck.gl/core/lib/attribute';
 import GL from '@luma.gl/constants';
 import {Buffer} from '@luma.gl/core';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {gl} from '@deck.gl/test-utils';
 import {makeSpy} from '@probe.gl/test-utils';
 

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {createProps} from '@deck.gl/core/lifecycle/create-props';
 import {compareProps} from '@deck.gl/core/lifecycle/props';
 import {Vector2} from 'math.gl';

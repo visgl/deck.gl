@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {getTileIndices} from '@deck.gl/geo-layers/tile-layer/utils/viewport-util';
 import {WebMercatorViewport} from '@deck.gl/core';
 

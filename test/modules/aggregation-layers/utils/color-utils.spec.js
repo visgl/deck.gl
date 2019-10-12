@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {colorRangeToFlatArray} from '@deck.gl/aggregation-layers/utils/color-utils';
 
 test('color-utils#colorRangeToFlatArray', t => {

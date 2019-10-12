@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {padArray} from '@deck.gl/core/utils/array-utils';
 
 const PAD_ARRAY_TEST_CASES = [

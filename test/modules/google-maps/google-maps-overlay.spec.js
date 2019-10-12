@@ -1,5 +1,5 @@
 /* eslint-disable max-statements */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {GoogleMapsOverlay} from '@deck.gl/google-maps';
 import {ScatterplotLayer} from '@deck.gl/layers';

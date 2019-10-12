@@ -21,6 +21,8 @@
 import './imports-spec';
 import './core';
 
+import '../../modules/gpu-table/test';
+
 import './layers';
 import './aggregation-layers';
 import './geo-layers';

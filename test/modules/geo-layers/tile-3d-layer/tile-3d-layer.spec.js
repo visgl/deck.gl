@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 import '@loaders.gl/polyfills';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {testLayer, generateLayerTests} from '@deck.gl/test-utils';
 import {Tile3DLayer} from '@deck.gl/geo-layers';

@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import EffectManager from '@deck.gl/core/lib/effect-manager';
 import Effect from '@deck.gl/core/lib/effect';
 import LayerManager from '@deck.gl/core/lib/layer-manager';

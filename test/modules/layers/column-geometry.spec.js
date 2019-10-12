@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {equals} from 'math.gl';
 
 import ColumnGeometry from '@deck.gl/layers/column-layer/column-geometry';

@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import LRUCache from '@deck.gl/layers/text-layer/lru-cache';
 

@@ -1,6 +1,6 @@
 /* global window */
 import Tooltip from '@deck.gl/core/lib/tooltip';
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 let document;
 if (typeof window === undefined || !window.document) {

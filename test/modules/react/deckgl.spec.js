@@ -19,7 +19,7 @@
 // THE SOFTWARE.
 
 /* eslint-disable no-unused-vars */
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {createElement} from 'react';
 import ReactDOM from 'react-dom';
 import ReactTestUtils from 'react-dom/test-utils';

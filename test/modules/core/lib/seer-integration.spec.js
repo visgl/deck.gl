@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import {window} from '@deck.gl/core/utils/globals';
 import {setPropOverrides, applyPropOverrides} from '@deck.gl/core/lib/seer-integration';

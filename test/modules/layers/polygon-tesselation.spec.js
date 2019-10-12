@@ -18,7 +18,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 import * as Polygon from '@deck.gl/layers/solid-polygon-layer/polygon';
 import PolygonTesselator from '@deck.gl/layers/solid-polygon-layer/polygon-tesselator';

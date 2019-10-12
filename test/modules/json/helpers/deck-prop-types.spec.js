@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {getPropTypes, isFunctionProp} from '@deck.gl/json/helpers/deck-prop-types';
 
 import {ScatterplotLayer} from '@deck.gl/layers';

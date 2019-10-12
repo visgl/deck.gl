@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import DeckPicker from '@deck.gl/core/lib/deck-picker';
 import {gl} from '@deck.gl/test-utils';
 

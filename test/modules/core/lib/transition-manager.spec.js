@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import TransitionManager from '@deck.gl/core/controllers/transition-manager';
 import FlyToInterpolator from '@deck.gl/core/transitions/viewport-fly-to-interpolator.js';
 import {testExports} from '@deck.gl/core/controllers/map-controller';

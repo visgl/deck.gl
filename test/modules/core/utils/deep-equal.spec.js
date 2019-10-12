@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import {deepEqual} from '@deck.gl/core/utils/deep-equal';
 
 const TEST_CASES = [

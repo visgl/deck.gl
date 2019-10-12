@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import memoize from '@deck.gl/core/utils/memoize';
 import {makeSpy} from '@probe.gl/test-utils';
 

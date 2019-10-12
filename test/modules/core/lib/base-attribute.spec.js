@@ -1,4 +1,4 @@
-import test from 'tape-catch'; // Avoid warnings on `gl` parameters
+import test from 'tape-promise/tape'; // Avoid warnings on `gl` parameters
 /* eslint-disable no-shadow */ import {gl} from '@deck.gl/test-utils';
 
 import GL from '@luma.gl/constants';

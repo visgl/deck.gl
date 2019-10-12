@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 import ViewManager from '@deck.gl/core/lib/view-manager';
 import {MapView, Viewport} from 'deck.gl';
 

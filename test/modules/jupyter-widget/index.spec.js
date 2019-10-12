@@ -1,4 +1,4 @@
-import test from 'tape-catch';
+import test from 'tape-promise/tape';
 
 function getDeckModel(state) {
   // Require at runtime, after the environment is polyfilled
