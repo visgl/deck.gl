@@ -21,7 +21,7 @@ export class DeckGLModel extends DOMWidgetModel {
       _view_module_version: DeckGLModel.view_module_version,
       json_input: null,
       mapbox_key: null,
-      selected_data: null,
+      selected_data: [],
       tooltip: null,
       width: '100%',
       height: 500,
@@ -111,14 +111,24 @@ export class DeckGLView extends DOMWidgetView {
     hideMapboxCSSWarning();
   }
 
-  handleClick(e) {
-    if (!e) {
+  handleClick(datum, e) {
+    if (!datum || !datum.object) {
+      this.model.set('selected_data', JSON.stringify(''));
+      this.model.save_changes();
       return;
     }
-    if (e.object && e.object.points) {
-      this.model.set('selected_data', e.object.points);
+    const multiselectEnabled = e.srcEvent.metaKey || e.srcEvent.metaKey;
+    const dataPayload = datum.object && datum.object.points ? datum.object.points : datum.object;
+    if (multiselectEnabled) {
+      let selectedData = JSON.parse(this.model.get('selected_data'));
+      if (!Array.isArray(selectedData)) {
+        selectedData = [];
+      }
+      selectedData.push(dataPayload);
+      this.model.set('selected_data', JSON.stringify(selectedData));
     } else {
-      this.model.set('selected_data', e.object);
+      // Single selection
+      this.model.set('selected_data', JSON.stringify(dataPayload));
     }
     this.model.save_changes();
   }
