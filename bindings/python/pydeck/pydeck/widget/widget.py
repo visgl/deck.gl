@@ -3,10 +3,11 @@
 from __future__ import unicode_literals
 
 import ipywidgets as widgets
-from traitlets import Any, Int, Unicode
+from traitlets import Any, Bool, Int, Unicode
 
 from ._frontend import module_name, module_version
 
+@widgets.register
 class DeckGLWidget(widgets.DOMWidget):
     """
     Jupyter environment widget that takes JSON and
@@ -30,8 +31,8 @@ class DeckGLWidget(widgets.DOMWidget):
             Data passed from Jupyter widget frontend back to Python backend
         tooltip : bool or dict of {str: str}, default True
             See the ``Deck`` constructor.
-
-
+        js_warning : bool, default False
+            Whether the string message from deck.gl should be rendered, defaults to False
     """
     _model_name = Unicode('DeckGLModel').tag(sync=True)
     _model_module = Unicode(module_name).tag(sync=True)
@@ -45,3 +46,4 @@ class DeckGLWidget(widgets.DOMWidget):
     width = Any('100%').tag(sync=True)
     selected_data = Any().tag(sync=True)
     tooltip = Any(True).tag(sync=True)
+    js_warning = Bool(False).tag(sync=True)
