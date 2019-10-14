@@ -1,6 +1,6 @@
+/* global document */
 import makeTooltip from './widget-tooltip';
 
-/* global document */
 export function loadCss(url) {
   const link = document.createElement('link');
   link.type = 'text/css';
@@ -24,7 +24,15 @@ export function updateDeck(inputJSON, {jsonConverter, deckgl}) {
   deckgl.setProps(results);
 }
 
-export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplete, handleClick}) {
+export function initDeck({
+  mapboxApiKey,
+  container,
+  jsonInput,
+  tooltip,
+  onComplete,
+  handleClick,
+  handleWarning
+}) {
   require(['mapbox-gl', 'h3', 's2Geometry'], mapboxgl => {
     require(['deck.gl', 'loaders.gl/csv'], (deck, loaders) => {
       try {
@@ -55,6 +63,8 @@ export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplet
           getTooltip,
           container
         });
+        const warn = deck.log.warn;
+        deck.log.warn = wrapWarn(warn, handleWarning);
         if (onComplete) {
           onComplete({jsonConverter, deckgl});
         }
@@ -66,4 +76,11 @@ export function initDeck({mapboxApiKey, container, jsonInput, tooltip, onComplet
       return {};
     });
   });
+}
+
+function wrapWarn(warnFunction, messageHandler) {
+  return (message, err) => {
+    messageHandler(message);
+    return warnFunction(message, err);
+  };
 }

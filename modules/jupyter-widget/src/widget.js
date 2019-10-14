@@ -6,6 +6,7 @@ import {MODULE_NAME, MODULE_VERSION} from './version';
 import {loadCss, hideMapboxCSSWarning, initDeck, updateDeck} from './utils';
 
 const MAPBOX_CSS_URL = 'https://api.tiles.mapbox.com/mapbox-gl-js/v1.2.1/mapbox-gl.css';
+const ERROR_BOX_CLASSNAME = 'error-box';
 
 // Note: Variables shared explictly between Python and JavaScript use snake_case
 export class DeckGLModel extends DOMWidgetModel {
@@ -23,7 +24,8 @@ export class DeckGLModel extends DOMWidgetModel {
       selected_data: null,
       tooltip: null,
       width: '100%',
-      height: 500
+      height: 500,
+      js_warning: false
     };
   }
 
@@ -68,6 +70,11 @@ export class DeckGLView extends DOMWidgetView {
     container.style.height = height;
     container.style.position = 'relative';
 
+    if (this.model.get('js_warning')) {
+      const errorBox = addErrorBox();
+      container.append(errorBox);
+    }
+
     const mapboxApiKey = this.model.get('mapbox_key');
     const jsonInput = JSON.parse(this.model.get('json_input'));
     const tooltip = this.model.get('tooltip');
@@ -81,7 +88,8 @@ export class DeckGLView extends DOMWidgetView {
       onComplete: ({jsonConverter, deckgl}) => {
         this.jsonDeck = {jsonConverter, deckgl};
       },
-      handleClick: this.handleClick.bind(this)
+      handleClick: this.handleClick.bind(this),
+      handleWarning: this.handleWarning.bind(this)
     });
   }
 
@@ -114,4 +122,28 @@ export class DeckGLView extends DOMWidgetView {
     }
     this.model.save_changes();
   }
+
+  handleWarning(warningMessage) {
+    const errorBox = this.el.getElementsByClassName(ERROR_BOX_CLASSNAME)[0];
+    if (this.model.get('js_warning')) {
+      errorBox.innerText = warningMessage;
+    }
+  }
+}
+
+function addErrorBox() {
+  const errorBox = document.createElement('div');
+  errorBox.className = ERROR_BOX_CLASSNAME;
+  Object.assign(errorBox.style, {
+    width: '100%',
+    height: '20px',
+    position: 'absolute',
+    zIndex: '1000',
+    backgroundColor: 'lemonchiffon',
+    cursor: 'pointer'
+  });
+  errorBox.onclick = e => {
+    errorBox.style.display = 'none';
+  };
+  return errorBox;
 }
