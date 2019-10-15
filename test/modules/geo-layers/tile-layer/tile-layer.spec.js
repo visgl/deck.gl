@@ -31,3 +31,8 @@ test('TileLayer', t => {
   testLayer({Layer: TileLayer, testCases, onError: t.notOk});
   t.end();
 });
+
+test('TileLayer#updateTriggers', t => {
+
+  t.end();
+});
