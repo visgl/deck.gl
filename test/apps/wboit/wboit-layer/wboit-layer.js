@@ -67,25 +67,26 @@ export default class WBOITLayer extends SolidPolygonLayer {
       format: gl.R32F
     });
 
-    const accumulationDepthTexture = new Texture2D(gl, {
-      ...textureOpts,
-      format: GL.DEPTH_COMPONENT32F,
-      dataFormat: GL.DEPTH_COMPONENT
-    });
+    // This is the depthTexture from solid objects!
+    // const accumulationDepthTexture = new Texture2D(gl, {
+    //   ...textureOpts,
+    //   format: GL.DEPTH_COMPONENT32F,
+    //   dataFormat: GL.DEPTH_COMPONENT
+    // });
 
     const accumulationFramebuffer = new Framebuffer(gl, {
       width: gl.drawingBufferWidth,
       height: gl.drawingBufferHeight,
       attachments: {
         [GL.COLOR_ATTACHMENT0]: accumulationTexture,
-        [GL.COLOR_ATTACHMENT1]: revealageTexture,
-        [GL.DEPTH_ATTACHMENT]: accumulationDepthTexture
+        [GL.COLOR_ATTACHMENT1]: revealageTexture
+        // [GL.DEPTH_ATTACHMENT]: accumulationDepthTexture
       }
     });
 
     this.setState({
       accumulationTexture,
-      accumulationDepthTexture,
+      // accumulationDepthTexture,
       revealageTexture,
       accumulationFramebuffer
     });
@@ -94,14 +95,14 @@ export default class WBOITLayer extends SolidPolygonLayer {
   finalizeState() {
     const {
       accumulationTexture,
-      accumulationDepthTexture,
+      // accumulationDepthTexture,
       revealageTexture,
       accumulationFramebuffer
     } = this.state;
 
     accumulationFramebuffer.delete();
     accumulationTexture.delete();
-    accumulationDepthTexture.delete();
+    // accumulationDepthTexture.delete();
     revealageTexture.delete();
   }
 
