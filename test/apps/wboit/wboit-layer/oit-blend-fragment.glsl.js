@@ -12,7 +12,7 @@ void main() {
   vec4 accum = texelFetch(uAccumulate, fragCoord, 0);
   float a = 1.0 - accum.a;
   accum.a = texelFetch(uAccumulateAlpha, fragCoord, 0).r;
-  // fragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 100.0), a);
-  fragColor = vec4(accum.rgb, a);
+
+  fragColor = vec4(a * accum.rgb / clamp(accum.a, 0.001, 100.0), a);
 }
 `;
