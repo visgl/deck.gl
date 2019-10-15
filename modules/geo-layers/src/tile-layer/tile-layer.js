@@ -28,9 +28,7 @@ export default class TileLayer extends CompositeLayer {
 
   updateState({props, oldProps, context, changeFlags}) {
     let {tileCache} = this.state;
-    if (
-      !tileCache || changeFlags.updateTriggersChanged
-    ) {
+    if (!tileCache || changeFlags.updateTriggersChanged) {
       const {getTileData, maxZoom, minZoom, maxCacheSize} = props;
       if (tileCache) {
         tileCache.finalize();
