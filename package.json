@@ -37,6 +37,9 @@
     "update-release-branch": "scripts/update-release-branch.sh",
     "bindings-precommit-tests": "scripts/bindings-precommit-hook.sh"
   },
+  "resolutions": {
+    "puppeteer": "1.20.0"
+  },
   "browser": {
     "jsdom": false
   },
